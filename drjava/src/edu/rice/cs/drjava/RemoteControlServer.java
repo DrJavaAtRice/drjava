@@ -127,7 +127,7 @@ public final class RemoteControlServer {
             request = request.substring(QUERY_PREFIX.length());
             
             // check if a file was specified
-            if ((request.length()>0) && (request.charAt(0)==' ')) {
+            if ((request.length() > 0) && (request.charAt(0) == ' ')) {
               request = request.substring(1);
               
               // check if the request contained a line number

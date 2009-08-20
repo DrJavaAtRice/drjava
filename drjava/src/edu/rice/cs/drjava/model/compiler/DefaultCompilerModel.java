@@ -424,11 +424,11 @@ public class DefaultCompilerModel implements CompilerModel {
 //                                                       "These .java files need to be closed for proper compiling. \n \n \n" +
 //                                                       filesToBeClosed.toString().replace(", ","\n"),true).show();
       ScrollableListDialog<File> dialog = new ScrollableListDialog.Builder<File>()
-        .setTitle("Java File"+(filesToBeClosed.size()==1?"":"s")+" Need to Be Closed")
-        .setText("The following .java "+(filesToBeClosed.size()==1?
+        .setTitle("Java File"+(filesToBeClosed.size() == 1?"":"s")+" Need to Be Closed")
+        .setText("The following .java "+(filesToBeClosed.size() == 1?
                                            "file has a matching .dj? file":
                                            "files have matching .dj? files")+" open.\n"+
-                 (filesToBeClosed.size()==1?
+                 (filesToBeClosed.size() == 1?
                     "This .java file needs":
                     "These .java files need")+" to be closed for proper compiling.")
         .setItems(filesToBeClosed)
@@ -495,7 +495,7 @@ public class DefaultCompilerModel implements CompilerModel {
           ScrollableListDialog<File> dialog = new ScrollableListDialog.Builder<File>()
             .setTitle("Delete Class Files")
             .setText("We suggest that you delete all class files in the directories with language\n"+
-                     "level files. Do you want to delete the class files in the following director"+(dirsWithLLFiles.size()==1?"y":"ies")+"?")
+                     "level files. Do you want to delete the class files in the following director"+(dirsWithLLFiles.size() == 1?"y":"ies")+"?")
             .setItems(new ArrayList<File>(dirsWithLLFiles))
             .setMessageType(JOptionPane.QUESTION_MESSAGE)
             .setFitToScreen(true)

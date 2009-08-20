@@ -60,7 +60,7 @@ public class RemoteControlClient {
    * @return true if running
    */
   public static synchronized boolean isServerRunning() {
-    if (_serverRunning==null) {
+    if (_serverRunning == null) {
       try {
         openFile(null);
       }
@@ -86,7 +86,7 @@ public class RemoteControlClient {
       
       // send request
       String dString = RemoteControlServer.QUERY_PREFIX;
-      if (f!=null) {
+      if (f != null) {
         dString = dString+" "+f.getAbsolutePath();
       }
       byte[] buf = dString.getBytes();
@@ -123,7 +123,7 @@ public class RemoteControlClient {
   /** Main method for test purposes.
    */
   public static void main(String[] args) {
-    for (int i=0; i<args.length; ++i) {
+    for (int i = 0; i < args.length; ++i) {
       try {
         boolean ret = openFile(new File(args[i]));
         System.out.println("openFile returned "+ret);

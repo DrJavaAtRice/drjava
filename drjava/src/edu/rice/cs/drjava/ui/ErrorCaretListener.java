@@ -69,13 +69,15 @@ public class ErrorCaretListener implements CaretListener {
    *  if the compiler output tab is showing.  Only runs in the event thread.
    */
   public void caretUpdate(final CaretEvent evt) {
+         
+    assert EventQueue.isDispatchThread();
     // Now we can assume at least one error.
-    Utilities.invokeLater(new Runnable() {
-      public void run() {
+//    Utilities.invokeLater(new Runnable() {
+//      public void run() {
         if (_frame.getSelectedErrorPanel() == null) return;
         updateHighlight(evt.getDot());
-      }
-    });
+//      }
+//    });
   }
   
   /** Update the highlight appropriately. */
@@ -131,7 +133,7 @@ public class ErrorCaretListener implements CaretListener {
     
     //Add 1 if not the first line of the file, so that the highlight range
     // will match the range chosen for the highlight manager.
-    if (prevNewline>0) prevNewline++;      
+    if (prevNewline > 0) prevNewline++;      
     
     if (prevNewline <= nextNewline) {
       _definitionsPane.addErrorHighlight(prevNewline, nextNewline);

@@ -25,7 +25,7 @@ public class CheckBoxJList extends JList implements ListSelectionListener {
   protected void init(Vector<?> listData, Vector<?> selData) {
     setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     CheckBoxListCellRenderer r = new CheckBoxListCellRenderer();
-    if (selData!=null) {
+    if (selData != null) {
       int i = 0;
       for(Object t: listData) {
         boolean sel = false;
@@ -38,7 +38,7 @@ public class CheckBoxJList extends JList implements ListSelectionListener {
                                        listData.get(i),
                                        i,
                                        sel,
-                                       (i==0));
+                                       (i == 0));
         ++i;
       }
     }    
@@ -60,7 +60,7 @@ public class CheckBoxJList extends JList implements ListSelectionListener {
   public CheckBoxJList(ListModel lm) {
     super(lm);
     Vector listData = new Vector();
-    for(int i=0; i<lm.getSize(); ++i) listData.add(lm.getElementAt(i));
+    for(int i = 0; i < lm.getSize(); ++i) listData.add(lm.getElementAt(i));
     init(listData, new Vector());
   }
   
@@ -72,7 +72,7 @@ public class CheckBoxJList extends JList implements ListSelectionListener {
       // remember everything selected as a result of this action
       HashSet<Integer> newSelections = new HashSet<Integer>();
       int size = getModel().getSize();
-      for (int i=0; i<size; i++) {
+      for (int i = 0; i < size; i++) {
         if (getSelectionModel().isSelectedIndex(i)) {
           newSelections.add(i);
         }
@@ -99,7 +99,7 @@ public class CheckBoxJList extends JList implements ListSelectionListener {
       
       // save selections for next time
       selectionCache.clear();
-      for (int i=0; i<size; i++) {
+      for (int i = 0; i < size; i++) {
         if (getSelectionModel().isSelectedIndex(i)) {
           selectionCache.add(i);
         }
@@ -128,7 +128,7 @@ public class CheckBoxJList extends JList implements ListSelectionListener {
                                                 isSelected, cellHasFocus);
       checkbox.setSelected(isSelected);
       Component[] comps = getComponents();
-      for (int i=0; i<comps.length; ++i) {
+      for (int i = 0; i < comps.length; ++i) {
         comps[i].setForeground(listForeground);
         comps[i].setBackground(listBackground);
       }

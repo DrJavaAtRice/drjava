@@ -79,12 +79,12 @@ public class GeneralProcessCreator extends ProcessCreator {
   /** Reconstructs the command line for a simple process. */
   protected static String getProcessCmdLine(List<String> cmds) {
     StringBuilder sb = new StringBuilder();
-    for (int i=0; i<cmds.size(); ++i) {
+    for (int i = 0; i < cmds.size(); ++i) {
       sb.append(" ");
       sb.append(StringOps.unescapeFileName(cmds.get(i)));
     }
     String s = sb.toString();
-    if (s.length()>0) {
+    if (s.length() > 0) {
       s = s.substring(1);
     }
     return s;
@@ -94,12 +94,12 @@ public class GeneralProcessCreator extends ProcessCreator {
   protected static String getProcessChainCmdLine(List<List<String>> pipe) {
     StringBuilder sb = new StringBuilder();
     final String sep = " "+ProcessChain.PIPE_SEPARATOR+" ";
-    for (int i=0; i<pipe.size(); ++i) {
+    for (int i = 0; i < pipe.size(); ++i) {
       sb.append(sep);
       sb.append(getProcessCmdLine(pipe.get(i)));
     }
     String s = sb.toString();
-    if (s.length()>0) {
+    if (s.length() > 0) {
       s = s.substring(sep.length());
     }
     return s;
@@ -109,12 +109,12 @@ public class GeneralProcessCreator extends ProcessCreator {
   protected static String getProcessSequenceCmdLine(List<List<List<String>>> seqs) {
     StringBuilder sb = new StringBuilder();
     final String sep = " "+ProcessChain.PROCESS_SEPARATOR+" ";
-    for (int i=0; i<seqs.size(); ++i) {
+    for (int i = 0; i < seqs.size(); ++i) {
       sb.append(sep);
       sb.append(getProcessChainCmdLine(seqs.get(i)));
     }
     String s = sb.toString();
-    if (s.length()>0) {
+    if (s.length() > 0) {
       s = s.substring(sep.length());
     }
     return s;
@@ -124,12 +124,12 @@ public class GeneralProcessCreator extends ProcessCreator {
     * @return command line
     */
   public String cmdline() {
-    if (_cmdline==null) {
-      if (_cachedCmdLine==null) {
-        if (_seqs.size()==1) {
+    if (_cmdline == null) {
+      if (_cachedCmdLine == null) {
+        if (_seqs.size() == 1) {
           // only one piping chain, creating a process sequence is not necessary
           List<List<String>> pipe = _seqs.get(0);
-          if (pipe.size()==1) {
+          if (pipe.size() == 1) {
             // only one process, creating a piping chain is not necessary
             List<String> cmds = pipe.get(0);
             _cachedCmdLine = getProcessCmdLine(cmds);
@@ -177,7 +177,7 @@ public class GeneralProcessCreator extends ProcessCreator {
 
     // set up environment
     String[] env = null;
-    if ((_env!=null) && (_env.size()>0)) {
+    if ((_env != null) && (_env.size() > 0)) {
       env = new String[_env.size()];
       int i = 0;
       for(String key: _env.keySet()) {
@@ -187,22 +187,22 @@ public class GeneralProcessCreator extends ProcessCreator {
     }
 
     // set up command line
-    if (_cmdline!=null) {
+    if (_cmdline != null) {
       _evaluatedCmdLine = StringOps.replaceVariables(_cmdline, _props, PropertyMaps.GET_CURRENT);
       _seqs = StringOps.commandLineToLists(_evaluatedCmdLine);
     }
     LOG.log("\t"+edu.rice.cs.plt.iter.IterUtil.toString(_seqs));
     if (_seqs.size()<1) { throw new IOException("No process to start."); }
-    if (_seqs.size()==1) {
+    if (_seqs.size() == 1) {
       // only one piping chain, creating a process sequence is not necessary
       List<List<String>> pipe = _seqs.get(0);
       if (pipe.size()<1) { throw new IOException("No process to start."); }
-      if (pipe.size()==1) {
+      if (pipe.size() == 1) {
         // only one process, creating a piping chain is not necessary
         List<String> cmds = pipe.get(0);
         if (cmds.size()<1) { throw new IOException("No process to start."); }
         String[] cmdarray = new String[cmds.size()];
-        for (int i=0; i<cmds.size(); ++i) {
+        for (int i = 0; i < cmds.size(); ++i) {
           cmdarray[i] = StringOps.unescapeFileName(cmds.get(i));
         }
         // creating a simple process
@@ -210,7 +210,7 @@ public class GeneralProcessCreator extends ProcessCreator {
       }
       // more than one process, create a process chain
       ProcessCreator[] creators = new ProcessCreator[pipe.size()];
-      for (int i=0; i<pipe.size(); ++i) {
+      for (int i = 0; i < pipe.size(); ++i) {
         List<String> cmds = pipe.get(i);
         if (cmds.size()<1) { throw new IOException("No process to start."); }
         String[] cmdarray = new String[cmds.size()];
@@ -223,7 +223,7 @@ public class GeneralProcessCreator extends ProcessCreator {
     }
     // more than one piping chain, create a process sequence
     ProcessCreator[] creators = new ProcessCreator[_seqs.size()];
-    for (int i=0; i<_seqs.size(); ++i) {
+    for (int i = 0; i < _seqs.size(); ++i) {
       List<List<List<String>>> l = new ArrayList<List<List<String>>>();
       l.add(_seqs.get(i));
       creators[i] = new GeneralProcessCreator(l, _workdir, _props);

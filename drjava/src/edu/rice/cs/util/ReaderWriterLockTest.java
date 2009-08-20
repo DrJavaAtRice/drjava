@@ -308,7 +308,7 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
     }
     /** Prints the message to the buffer. */
     public void print() {
-      for (int i=0; i < _numIterations; i++) {
+      for (int i = 0; i < _numIterations; i++) {
         _buf.append(_msg);
         try { Thread.sleep(_waitMillis); }
         catch (InterruptedException e) { _buf.append(e); }

@@ -73,18 +73,22 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
   /** Setup method for each JUnit test case. */
   public void setUp() throws Exception {
     super.setUp();
-    _adapter = new InteractionsDJDocument();
-    _model = new TestInteractionsModel(_adapter);
-    _doc = _model.getDocument();
-    _pane = new InteractionsPane(_adapter) {
-      public int getPromptPos() { return _model.getDocument().getPromptPos(); }
-    };
-    // Make tests silent
-    _pane.setBeep(new TestBeep());
-    _controller = new InteractionsController(_model, _adapter, _pane, new Runnable() { public void run() { } });
-//    _controller.setCachedCaretPos(_pane.getCaretPosition());
-//    _controller.setCachedPromptPos(_doc.getPromptPos());
-//    System.err.println("_controller = " + _controller);
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        _adapter = new InteractionsDJDocument();
+        _model = new TestInteractionsModel(_adapter);
+        _doc = _model.getDocument();
+        _pane = new InteractionsPane(_adapter) {
+          public int getPromptPos() { return _model.getDocument().getPromptPos(); }
+        };
+        // Make tests silent
+        _pane.setBeep(new TestBeep());
+        _controller = new InteractionsController(_model, _adapter, _pane, new Runnable() { public void run() { } });
+//        _controller.setCachedCaretPos(_pane.getCaretPosition());
+//        _controller.setCachedPromptPos(_doc.getPromptPos());
+//        System.err.println("_controller = " + _controller);
+      }
+    });
   }
   
   public void tearDown() throws Exception {
@@ -214,8 +218,11 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
   
   /** Tests that the InteractionsPane cannot be edited before the prompt. */
   public void testCannotEditBeforePrompt() throws EditDocumentException {
+    Utilities.clearEventQueue(); // wait until pending event queue tranactions have completed.
     int origLength = _doc.getLength();
-    _doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { _doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE); }
+    });
     assertEquals("Document should not have changed.", origLength, _doc.getLength());
   }
   
@@ -283,11 +290,12 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     
     // Move caret after prompt and insert more text
     final int newPos = _doc.getPromptPos();
-    // simulate a keystroke by putting caret just *after* pos of insert
-    _pane.setCaretPosition(newPos + 1);
-//    _controller.setCachedCaretPos(newPos + 1);
+
     Utilities.invokeAndWait(new Runnable() { 
-      public void run() { 
+      public void run() {
+        // simulate a keystroke by putting caret just *after* pos of insert
+        _pane.setCaretPosition(newPos + 1);
+//        _controller.setCachedCaretPos(newPos + 1);
         // Type 'D'
         _pane.processKeyEvent(new KeyEvent(_pane, PRESSED, (new Date()).getTime(), SHIFT, KeyEvent.VK_D, UNDEFINED));
         _pane.processKeyEvent(new KeyEvent(_pane, TYPED, (new Date()).getTime(), 0, VK_UNDEF, 'D'));

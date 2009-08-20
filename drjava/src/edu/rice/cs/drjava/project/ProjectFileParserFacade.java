@@ -58,7 +58,7 @@ public class ProjectFileParserFacade {
       // empty project file, throw exception
       throw new MalformedProjectFileException("Empty project file.");
     }
-    if (((char)read)!=';') {
+    if (((char)read) != ';') {
       // does not start with a ';', can't be an old S-expression format project file
       // try new XML format parser
       fr.close();
@@ -69,7 +69,7 @@ public class ProjectFileParserFacade {
       // project file just contained ";", throw exception
       throw new MalformedProjectFileException("Incomplete project file.");
     }
-    if (((char)read)!=';') {
+    if (((char)read) != ';') {
       // does not start with ";;", can't be an old S-expression format project file
       // try new XML format parser
       fr.close();

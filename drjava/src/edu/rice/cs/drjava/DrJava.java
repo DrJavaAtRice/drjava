@@ -152,12 +152,12 @@ public class DrJava {
       // try to open them in an existing instance
       if (!_forceNewInstance &&
           DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED) &&
-          (_filesToOpen.size()>0)) {
+          (_filesToOpen.size() > 0)) {
         try {
           RemoteControlClient.openFile(null);
           if (RemoteControlClient.isServerRunning()) {
             // existing instance is running and responding
-            for (int i=0; i<_filesToOpen.size(); ++i) {
+            for (int i = 0; i < _filesToOpen.size(); ++i) {
               RemoteControlClient.openFile(new File(_filesToOpen.get(i)));
             }
             // files opened in existing instance, quit
@@ -470,7 +470,7 @@ public class DrJava {
       BufferedReader br = new BufferedReader(new InputStreamReader(psProc.getInputStream()));
       boolean compiz = false;
       String line = null;
-      while((line=br.readLine())!=null) {
+      while((line=br.readLine()) != null) {
         // find the PID of JUnitTestRunner, i.e. the PID of the current process
         if ((line.endsWith("compiz")) ||
             (line.endsWith("compiz.real"))) {

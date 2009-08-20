@@ -254,7 +254,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     if (val.length == 0) { return null; }
     else {
       Object o = val[0];
-      for(int i=0; i<indices.length; ++i) {
+      for(int i = 0; i < indices.length; ++i) {
         if (!o.getClass().isArray()) { return "<error: value is not an array>"; }
         o = Array.get(o, indices[i]);
       }
@@ -274,7 +274,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     if (lv == null) { return null; }
     else {
       Type t = lv.type();
-      for(int i=0; i<indices.length; ++i) {
+      for(int i = 0; i < indices.length; ++i) {
         if (!_interpreterOptions.typeSystem().isArray(t)) { return "<error: value is not an array>"; }
         t = _interpreterOptions.typeSystem().arrayElementType(t);
       }

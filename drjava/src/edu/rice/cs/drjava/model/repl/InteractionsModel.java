@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import javax.swing.text.BadLocationException;
+import java.awt.EventQueue;
 
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.drjava.ui.InteractionsPane;
@@ -139,9 +140,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     * @param historySize Number of lines to store in the history
     * @param writeDelay Number of milliseconds to wait after each println
     */
-  public InteractionsModel(ConsoleDocumentInterface cDoc, File wd, int historySize, int writeDelay) {
+  public InteractionsModel(ConsoleDocumentInterface cDoc, final File wd, int historySize, int writeDelay) {
     _document = new InteractionsDocument(cDoc, historySize);
-    _document.setBanner(generateBanner(wd));
     _cDoc = cDoc;
     _writeDelay = writeDelay;
     _waitingForFirstInterpreter = true;
@@ -150,6 +150,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _debugPort = -1;
     _debugPortSet = false;
     _inputListener = NoInputListener.ONLY;
+    EventQueue.invokeLater(new Runnable() {
+      public void run() { _document.setBanner(generateBanner(wd));}
+    });
   }
   
   /** Sets the _pane field and initializes the caret position in the pane.  Called in the InteractionsController. */
@@ -214,8 +217,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
             int endPos = 0;
             while((endPos<substr.length()) &&
                   ((Character.isJavaIdentifierPart(substr.charAt(endPos))) ||
-                   (substr.charAt(endPos)=='.') ||
-                   (substr.charAt(endPos)=='*'))) ++endPos;
+                   (substr.charAt(endPos) == '.') ||
+                   (substr.charAt(endPos) == '*'))) ++endPos;
             substr = substr.substring(0,endPos);
             _autoImportSet.add(substr);
             
@@ -245,7 +248,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     
     for(String s: classes) {
       String name = s.trim();
-      if (s.length()>0) {
+      if (s.length() > 0) {
         sb.append("import ");
         sb.append(s.trim());
         sb.append("; ");
@@ -259,7 +262,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       }
     }
 
-    if (sb.length()>0) {
+    if (sb.length() > 0) {
       interpret(sb.toString());
       _document.insertBeforeLastPrompt("Auto-import: "+sb.toString() + "\n", InteractionsDocument.DEBUGGER_STYLE);
     }
@@ -843,13 +846,13 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     
     for(String s: classes) {
       String name = s.trim();
-      if (s.length()>0) {
+      if (s.length() > 0) {
         sb.append("import ");
         sb.append(s.trim());
         sb.append("; ");
       }
     }
-    if (sb.length()>0) {
+    if (sb.length() > 0) {
       interpret(sb.toString());
       _document.insertBeforeLastPrompt("Default imports: "+sb.toString() + "\n", InteractionsDocument.DEBUGGER_STYLE);
     }

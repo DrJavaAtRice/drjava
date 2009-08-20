@@ -218,13 +218,11 @@ public class DrJavaSurveyPopup extends JDialog {
         }
       }
       finally { // close open input stream
-        try { if (br!=null) br.close(); }
+        try { if (br != null) br.close(); }
         catch(IOException e) { /* ignore */ }
       }
     }
-    finally {
-      noAction();
-    }
+    finally { noAction(); }
   }
   
   /** Lambda that calls noAction. */
@@ -232,7 +230,6 @@ public class DrJavaSurveyPopup extends JDialog {
     public void run(WindowEvent e) { noAction(); }
   };
 
- 
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
   public void setVisible(boolean vis) {
     assert EventQueue.isDispatchThread();

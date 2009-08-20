@@ -568,8 +568,11 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
   private volatile int _finalPaneCt;
   private volatile int _finalDocCt;
   
-  public void testDocumentPaneMemoryLeak()  throws InterruptedException, IOException {
-    
+  /* Isolates the creation and destruction of the simulated DrJava session from the code that monitors
+   * leaks.  Any cached references created for this stack frame are flushed on exit.  We don't know that
+   * such references potentially exist but we could not rule it out given occasional failures of this
+   * the leak test. */
+  private void runIsolatedDrJavaSession() throws InterruptedException, IOException {
     DocChangeListener listener = new DocChangeListener();
     
     _finalPaneCt = 0;
@@ -673,8 +676,10 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     // print identity hash codes into a StringBuilder in case we need them later;
     // this does not create any references
 //    StringBuilder sbIdHashCodes = new StringBuilder();
-//    sbIdHashCodes.append("_frame = "+_frame.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(_frame))+"\n");
-//    sbIdHashCodes.append("_model = "+_model.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(_frame))+"\n");
+//    sbIdHashCodes.append("_frame = 
+//      "+_frame.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(_frame))+"\n");
+//    sbIdHashCodes.append("_model = 
+//      "+_model.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(_frame))+"\n");
 //    sbIdHashCodes.append("p1     = "+p1.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p1))+"\n");
 //    sbIdHashCodes.append("p2     = "+p2.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p2))+"\n");
 //    sbIdHashCodes.append("p3     = "+p3.getClass().getName()+"@0x"+Integer.toHexString(System.identityHashCode(p3))+"\n");
@@ -698,6 +703,17 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     Utilities.clearEventQueue();
     
     assertEquals("All files closed", 7, listener.getClosedCt());  // 7 includes for initial open file
+    // The following is probably overkill because it presumably only closes the scratch document created by
+    // when all open files were closed.  But we were getting occasional test failures with one or9ginal document
+    // remaining uncollected.
+    Utilities.invokeAndWait(new Runnable() { public void run() { _model.closeAllFiles(); } });
+    Utilities.clearEventQueue();
+  }
+    
+  
+  public void testDocumentPaneMemoryLeak() throws InterruptedException, IOException {
+    // _model has been setUp
+    runIsolatedDrJavaSession();
     
     int ct = 0;
     do {  
@@ -710,35 +726,34 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
       System.gc();
       ct++; 
     }
-    while (ct < 10 && (_finalDocCt != 6 && _finalPaneCt != 6));
+    while (ct < 10 && (_finalDocCt < 6 || _finalPaneCt < 6));
 
-    if (ct == 10) {
-      // if we fail with a garbage collection problem, dump heap
-      LOG.setEnabled(true);
-//      LOG.log(sbIdHashCodes.toString());
-      try { LOG.log("heap dump in "+dumpHeap()); }
-      catch(Exception e) {
-        System.err.println("Could not dump heap.");
-        e.printStackTrace(System.err);
-      }
-      
-      fail("Failed to reclaim all documents; panes left = " + (6 - _finalPaneCt) + "; docs left = " + 
-           (6 - _finalDocCt));
-    }
+//    if (ct == 10) {
+//      // if we fail with a garbage collection problem, dump heap
+//      LOG.setEnabled(true);
+////      LOG.log(sbIdHashCodes.toString());
+//      try { LOG.log("heap dump in "+dumpHeap()); }
+//      catch(Exception e) {
+//        System.err.println("Could not dump heap.");
+//        e.printStackTrace(System.err);
+//      }
+//      
+//      fail("Failed to reclaim all documents; panes left = " + (6 - _finalPaneCt) + "; docs left = " + 
+//           (6 - _finalDocCt));
+//    }
 
     if (ct > 1) System.out.println("testDocumentPaneMemoryLeak required " + ct + " iterations");
 
     assertEquals("all the defdocs should have been garbage collected", 6, _finalDocCt);
-//    assertEquals("all the panes should have been garbage collected", 6, _finalPaneCt);
-    System.out.println("_finalPaneCt = " + _finalPaneCt);
+    assertEquals("all the defpanes should have been garbage collected", 6,  _finalPaneCt);
     
     _log.log("testDocumentPaneMemoryLeak completed");
   }
   
-  // This testcase checks that we do no longer discard Alt keys that would be used to make the {,},[,] chars that the french keyboards has.
-  // Using the Locale did not work, and checking if the key was consumed by the document would only pass on the specific keyboards.
-  // It was therefore unavoidable to add a few lines of code in the original code that is only used for this test case.
-  // These lines were added to the DefinitionsPane.java file.
+  /** This testcase checks that we do no longer discard Alt keys that would be used to make the {,},[,] chars that the 
+    * French keyboards has.  Using the Locale did not work, and checking if the key was consumed by the document would
+    * only pass on the specific keyboards.  It was therefore unavoidable to add a few lines of code in the original code
+    * that is only used for this test case. These lines were added to the DefinitionsPane.java file. */
   public void testFrenchKeyStrokes() throws IOException, InterruptedException {
     
     final DefinitionsPane pane = _frame.getCurrentDefPane(); // pane is NOT null.
@@ -753,7 +768,8 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     });
     Utilities.clearEventQueue();
     
-    assertFalse("The KeyEvent for pressing \"T\" should not involve an Alt Key if this fails we are in trouble!", pane.checkAltKey());
+    assertFalse("The KeyEvent for pressing \"T\" should not involve an Alt Key if this fails we are in trouble!", 
+                pane.checkAltKey());
     
     final KeyEvent ke2 = new KeyEvent(pane, TYPED, 0, ALT, VK_UNDEF, '{'); 
     Utilities.invokeAndWait(new Runnable() { 
@@ -952,14 +968,14 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     BufferedReader br = new BufferedReader(new InputStreamReader(jpsProc.getInputStream()));
     Integer pid = null;
     String line = null;
-    while((pid==null) && (line=br.readLine())!=null) {
+    while((pid == null) && (line=br.readLine()) != null) {
       LOG.log(line);
       // find the PID of JUnitTestRunner, i.e. the PID of the current process
       if (line.indexOf("JUnitTestRunner")>=0) {
         pid = new Integer(line.substring(0,line.indexOf(' ')));
       }
     }
-    if (pid==null) throw new FileNotFoundException("Could not detect PID");
+    if (pid == null) throw new FileNotFoundException("Could not detect PID");
     LOG.log("PID is "+pid);
     
     // try jmap first
@@ -978,7 +994,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     
     // read the output of jmap
     br = new BufferedReader(new InputStreamReader(jmapProc.getInputStream()));
-    while((line=br.readLine())!=null) {
+    while((line=br.readLine()) != null) {
       LOG.log(line);
     }
     

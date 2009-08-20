@@ -80,7 +80,7 @@ public class ConfigOptionListeners implements OptionConstants {
                                           final OptionListener<String> l) {
     int pos = value.indexOf("-Xmx");
     if (((pos>1) && (Character.isWhitespace(value.charAt(pos-1)))) ||
-        (pos==0)) {
+        (pos == 0)) {
       int endpos = pos+("-Xmx".length());
       while(endpos<value.length() && (! Character.isWhitespace(value.charAt(endpos)))) {
         ++endpos;
@@ -167,7 +167,7 @@ public class ConfigOptionListeners implements OptionConstants {
           }
         });
         DrJava.getConfig().setSetting(SLAVE_JVM_ARGS, newValue);
-        if (result==0) {
+        if (result == 0) {
           // copy
           DrJava.getConfig().setSetting(SLAVE_JVM_XMX, newSetting);
         }
@@ -213,7 +213,7 @@ public class ConfigOptionListeners implements OptionConstants {
                            null,
                            options,
                            options[0]);
-        if (result==0) {
+        if (result == 0) {
           // clean up
           DrJava.getConfig().setSetting(SLAVE_JVM_XMX, OptionConstants.heapSizeChoices.get(0));
         }
@@ -224,7 +224,7 @@ public class ConfigOptionListeners implements OptionConstants {
   /** Return the next bigger heap size setting. */
   static String getNextBiggerHeapSize(long heapSizeMB) {
     String newSetting = OptionConstants.heapSizeChoices.get(0);
-    for(int i=1; i<OptionConstants.heapSizeChoices.size(); ++i) {
+    for(int i=1; i < OptionConstants.heapSizeChoices.size(); ++i) {
       try {
         newSetting = OptionConstants.heapSizeChoices.get(i);
         float choice = new Float(newSetting);
@@ -384,7 +384,7 @@ public class ConfigOptionListeners implements OptionConstants {
                            null,
                            options,
                            options[0]);
-        if (result==0) {
+        if (result == 0) {
           // clean up
           DrJava.getConfig().setSetting(MASTER_JVM_XMX, OptionConstants.heapSizeChoices.get(0));
         }
@@ -430,7 +430,7 @@ public class ConfigOptionListeners implements OptionConstants {
                          options,
                          options[0]);
       if (result!=2) {
-        if (result==0) {
+        if (result == 0) {
           // copy
           if (containsPublic) { DrJava.getConfig().setSetting(JAVADOC_ACCESS_LEVEL, "public"); }
           else if (containsProtected) { DrJava.getConfig().setSetting(JAVADOC_ACCESS_LEVEL, "protected"); }
@@ -440,7 +440,7 @@ public class ConfigOptionListeners implements OptionConstants {
         // clean up
         String[] params = value.split("(-private|-protected|-package|-public)");
         sb = new StringBuilder();
-        for(int i=0;i<params.length;i++){
+        for(int i = 0;i < params.length;i++){
           if(!params[i].trim().equals("")) { sb.append(params[i].trim()); sb.append(' '); }
         }
         DrJava.getConfig().setSetting(JAVADOC_CUSTOM_PARAMS, sb.toString().trim());

@@ -75,7 +75,7 @@ public class PropertyMaps implements Cloneable {
     * @throws IllegalArgumentException if category is not known. */
   public DrJavaProperty getProperty(String category, String name) {
     Map<String,DrJavaProperty> m = _props.get(category);
-    if (m==null) { throw new IllegalArgumentException("DrJavaProperty category unknown."); }
+    if (m == null) { throw new IllegalArgumentException("DrJavaProperty category unknown."); }
     return m.get(name);
   }
   
@@ -85,7 +85,7 @@ public class PropertyMaps implements Cloneable {
   public DrJavaProperty getProperty(String key) {
     for(String category: _props.keySet()) {
       DrJavaProperty p = getProperty(category, key);
-      if (p!=null) { return p; }
+      if (p != null) { return p; }
     }
     return null;
   }
@@ -101,7 +101,7 @@ public class PropertyMaps implements Cloneable {
   /** Add a property. */
   public DrJavaProperty setProperty(String category, DrJavaProperty p) {
     Map<String,DrJavaProperty> m = _props.get(category);
-    if (m==null) { m = new HashMap<String,DrJavaProperty>(); _props.put(category,m); }
+    if (m == null) { m = new HashMap<String,DrJavaProperty>(); _props.put(category,m); }
     m.put(p.getName(), p);
     return p;
   }
@@ -118,7 +118,7 @@ public class PropertyMaps implements Cloneable {
     * @throws IllegalArgumentException if category is not known. */
   public Map<String, DrJavaProperty> getProperties(String category) {
     Map<String,DrJavaProperty> m = _props.get(category);
-    if (m==null) { throw new IllegalArgumentException("DrJavaProperty category unknown."); }
+    if (m == null) { throw new IllegalArgumentException("DrJavaProperty category unknown."); }
     return m;
   }
   
@@ -149,7 +149,7 @@ public class PropertyMaps implements Cloneable {
   public void addVariable(String name, String value) {
     for(String category: _props.keySet()) {
       if (category.equals(VARIABLES_CATEGORY)) continue;
-      if (getProperty(category, name)!=null) {
+      if (getProperty(category, name) != null) {
         throw new IllegalArgumentException("Variable "+name+" already used for a built-in property");
       }
     }
@@ -157,7 +157,7 @@ public class PropertyMaps implements Cloneable {
     VariableProperty p = new VariableProperty(name, value);
     setProperty(VARIABLES_CATEGORY, p);
     Stack<VariableProperty> varStack = _variables.get(name);
-    if (varStack==null) { varStack = new Stack<VariableProperty>(); _variables.put(name,varStack); }
+    if (varStack == null) { varStack = new Stack<VariableProperty>(); _variables.put(name,varStack); }
     varStack.push(p);
   }
   
@@ -167,7 +167,7 @@ public class PropertyMaps implements Cloneable {
     * @throws IllegalArgumentException if a variable with name does not exist */
   public void setVariable(String name, String value) {
     Stack<VariableProperty> varStack = _variables.get(name);
-    if ((varStack==null) ||
+    if ((varStack == null) ||
         (varStack.empty())) { throw new IllegalArgumentException("Variable "+name+" does not exist."); }
     VariableProperty p = varStack.peek();
     p.setValue(value);
@@ -178,7 +178,7 @@ public class PropertyMaps implements Cloneable {
     * @throws IllegalArgumentException if no variable with that name exists */
   public void removeVariable(String name) {
     Stack<VariableProperty> varStack = _variables.get(name);
-    if ((varStack==null) ||
+    if ((varStack == null) ||
         (varStack.empty())) { throw new IllegalArgumentException("Variable "+name+" does not exist."); }
     VariableProperty p = varStack.pop();
     if (varStack.empty()) {

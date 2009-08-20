@@ -257,7 +257,7 @@ public abstract class StringOps {
       StackTraceElement[] stes = e.getStackTrace();
       int skip = 1;
       for(StackTraceElement ste: stes) {
-        if (skip>0) { --skip; } else { pw.print("at "); pw.println(ste); }
+        if (skip > 0) { --skip; } else { pw.print("at "); pw.println(ste); }
       }
       return sw.toString();
     }
@@ -600,26 +600,26 @@ public abstract class StringOps {
     * @return encoded string */
   public static String escapeFileName(String s) {
     StringBuilder sb = new StringBuilder();
-    for (int i=0; i<s.length(); ++i) {
-      if (s.charAt(i)=='\u001b') {
+    for (int i = 0; i < s.length(); ++i) {
+      if (s.charAt(i) == '\u001b') {
         sb.append("\u001b\u001b");
       }
-      else if (s.charAt(i)==' ') {
+      else if (s.charAt(i) == ' ') {
         sb.append("\u001b ");
       }
-      else if (s.charAt(i)==java.io.File.pathSeparatorChar) {
+      else if (s.charAt(i) == java.io.File.pathSeparatorChar) {
         sb.append('\u001b');
         sb.append(java.io.File.pathSeparatorChar);
       }
-      else if (s.charAt(i)==ProcessChain.PROCESS_SEPARATOR_CHAR) {
+      else if (s.charAt(i) == ProcessChain.PROCESS_SEPARATOR_CHAR) {
         sb.append('\u001b');
         sb.append(ProcessChain.PROCESS_SEPARATOR_CHAR);
       }
-      else if (s.charAt(i)==ProcessChain.PIPE_SEPARATOR_CHAR) {
+      else if (s.charAt(i) == ProcessChain.PIPE_SEPARATOR_CHAR) {
         sb.append('\u001b');
         sb.append(ProcessChain.PIPE_SEPARATOR_CHAR);
       }
-      else if (s.charAt(i)==':') {
+      else if (s.charAt(i) == ':') {
         sb.append("\u001b:"); // for Windows, escape the : in drive letters
         // on Unix, this case is irrelevant, since pathSeparatorChar==':'
       }
@@ -636,8 +636,8 @@ public abstract class StringOps {
     * @return encoded string */
   public static String unescapeFileName(String s) {
     StringBuilder sb = new StringBuilder();
-    for (int i=0; i<s.length(); ++i) {
-      if (s.charAt(i)=='\u001b') {
+    for (int i = 0; i < s.length(); ++i) {
+      if (s.charAt(i) == '\u001b') {
         if (i+1<s.length()) {
           char next = s.charAt(i+1);
           if (next=='\u001b') { sb.append("\u001b"); ++i; }
@@ -721,13 +721,13 @@ public abstract class StringOps {
     List<List<String>> ll = new ArrayList<List<String>>();
     List<String> l = new ArrayList<String>();
     try {
-      while((n=tok.getNextToken())!=null) {
-        if (tok.token()==BalancingStreamTokenizer.Token.KEYWORD) {
+      while((n=tok.getNextToken()) != null) {
+        if (tok.token() == BalancingStreamTokenizer.Token.KEYWORD) {
           if (n.equals(ProcessChain.PROCESS_SEPARATOR)) {
             // add the current string to the argument list and start a new argument
             String arg = sb.toString();
             sb.setLength(0);
-            if (arg.length()>0) { l.add(arg); }
+            if (arg.length() > 0) { l.add(arg); }
             
             // add the current list of arguments to the list of list and start a new
             // argument list
@@ -743,7 +743,7 @@ public abstract class StringOps {
             // add the current string to the argument list and start a new argument
             String arg = sb.toString();
             sb.setLength(0);
-            if (arg.length()>0) { l.add(arg); }
+            if (arg.length() > 0) { l.add(arg); }
             
             // add the current list of arguments to the list of list and start a new
             // argument list
@@ -763,7 +763,7 @@ public abstract class StringOps {
             // add the current string to the argument list and start a new argument
             String arg = sb.toString();
             sb.setLength(0);
-            if (arg.length()>0) { l.add(arg); }
+            if (arg.length() > 0) { l.add(arg); }
           }
         }
         else {
@@ -776,7 +776,7 @@ public abstract class StringOps {
     // add the current string to the argument list and start a new argument
     String arg = sb.toString();
     sb.setLength(0);
-    if (arg.length()>0) { l.add(arg); }
+    if (arg.length() > 0) { l.add(arg); }
     
     // add the current list of arguments to the list of list and start a new
     // argument list
@@ -812,9 +812,9 @@ public abstract class StringOps {
     StringBuilder sb = new StringBuilder();
     String next = null;
     try {
-      while((next=tok.getNextToken())!=null) {
+      while((next=tok.getNextToken()) != null) {
         // LOG.log("Token: "+next);
-        if ((tok.token()==BalancingStreamTokenizer.Token.QUOTED) &&
+        if ((tok.token() == BalancingStreamTokenizer.Token.QUOTED) &&
             (next.startsWith("${")) &&
             (next.endsWith("}"))) {
           // LOG.log("Found property: "+next);
@@ -822,7 +822,7 @@ public abstract class StringOps {
           String attrList = "";
           int firstCurly = next.indexOf('}');
           int firstSemi = next.indexOf(';');
-          if (firstSemi<0) {
+          if (firstSemi < 0) {
             // format: ${property.name}
             // for key, cut off ${ and }
             key = next.substring(2,firstCurly);
@@ -837,13 +837,13 @@ public abstract class StringOps {
           // LOG.log("\tKey      = '"+key+"'");
           // LOG.log("\tAttrList = '"+attrList+"'");
           DrJavaProperty p = props.getProperty(key);
-          if (p!=null) {
+          if (p != null) {
             // found property name
             p.resetAttributes();
             
             // if we have a list of attributes
             try {
-              if (attrList.length()>0) {
+              if (attrList.length() > 0) {
                 BalancingStreamTokenizer atok = new BalancingStreamTokenizer(new StringReader(attrList), '$');
                 atok.wordRange(0,255);
                 atok.whitespaceRange(0,32); 
@@ -854,20 +854,20 @@ public abstract class StringOps {
                 // LOG.log("\tProcessing AttrList");
                 String n = null;
                 HashMap<String,String> attrs = new HashMap<String,String>();
-                while((n=atok.getNextToken())!=null) {
-                  if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.NORMAL) ||
+                while((n=atok.getNextToken()) != null) {
+                  if ((n == null) || (atok.token() != BalancingStreamTokenizer.Token.NORMAL) ||
                       n.equals(";") || n.equals("=") || n.startsWith("\"")) {
                     throw new IllegalArgumentException("Unknown attribute list format for property "+key+"; expected name, but was "+n);
                   }
                   String name = n;
                   // LOG.log("\t\tname = '"+name+"'");
                   n = atok.getNextToken();
-                  if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.KEYWORD) || (!n.equals("="))) {
+                  if ((n == null) || (atok.token() != BalancingStreamTokenizer.Token.KEYWORD) || (!n.equals("="))) {
                     throw new IllegalArgumentException("Unknown attribute list format for property "+key+"; expected =, but was "+n);
                   }
                   // LOG.log("\t\tread '='");
                   n = atok.getNextToken();
-                  if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.QUOTED) || (!n.startsWith("\""))) {
+                  if ((n == null) || (atok.token() != BalancingStreamTokenizer.Token.QUOTED) || (!n.startsWith("\""))) {
                     throw new IllegalArgumentException("Unknown attribute list format for property "+key+"; expected \", but was "+n);
                   }
                   String value = "";
@@ -876,8 +876,8 @@ public abstract class StringOps {
                     // LOG.log("\t\tvalue = '"+value+"'");
                   }
                   n = atok.getNextToken();
-                  if (((n!=null) && ((atok.token()!=BalancingStreamTokenizer.Token.KEYWORD) || (!n.equals(";")))) ||
-                      ((n==null) && (atok.token()!=BalancingStreamTokenizer.Token.END))) {
+                  if (((n != null) && ((atok.token() != BalancingStreamTokenizer.Token.KEYWORD) || (!n.equals(";")))) ||
+                      ((n == null) && (atok.token() != BalancingStreamTokenizer.Token.END))) {
                     throw new IllegalArgumentException("Unknown attribute list format for property "+key);
                   }
                   // LOG.log("\t\tread ';' or EOF");
@@ -888,7 +888,7 @@ public abstract class StringOps {
                   attrs.put(name,value);
                   // p.setAttribute(name, replacedValue);
                   
-                  if (n==null) { break; }
+                  if (n == null) { break; }
                 }
                 p.setAttributes(attrs, new Lambda<String,String>() {
                   public String value(String param) {
@@ -939,7 +939,7 @@ public abstract class StringOps {
                                                    String wordSepChars) {
     StringBuilder sb = new StringBuilder();
     // remove word separators at the beginning of the string
-    while(s.length()>0) {
+    while(s.length() > 0) {
       if (wordSepChars.indexOf(String.valueOf(s.charAt(0)))>=0) {
 //        System.out.println("Removing leading separator...");
         s = s.substring(1);
@@ -947,7 +947,7 @@ public abstract class StringOps {
       else { break; /* first character that is not a separator */ }
     }
     // remove word separators at the end of the string
-    while(s.length()>0) {
+    while(s.length() > 0) {
       if (wordSepChars.indexOf(String.valueOf(s.charAt(s.length()-1)))>=0) {
 //        System.out.println("Removing trailing separator...");
         s = s.substring(0, s.length()-1);
@@ -980,7 +980,7 @@ public abstract class StringOps {
       else { sbl.append(" "); }
     }
 //    System.out.println("No more tokens. Last line: "+sbl.toString());
-    if (sbl.length()>0) { sb.append(sbl.toString()); }
+    if (sbl.length() > 0) { sb.append(sbl.toString()); }
 
 //    System.out.println("Final entire buffer: "+sb.toString());
     return sb.toString();
@@ -994,7 +994,7 @@ public abstract class StringOps {
     StringWriter sw = new StringWriter();
     PrintWriter pw = new PrintWriter(sw);
     StringBuilder sb = new StringBuilder();
-    for(int i=0; i<s.length(); ++i) {
+    for(int i = 0; i < s.length(); ++i) {
       char ch = s.charAt(i);
       pw.printf("%02x ",(int)ch);
       if (ch<32) ch = ' ';
@@ -1007,8 +1007,8 @@ public abstract class StringOps {
         sb.setLength(0);
       }
     }
-    if (s.length()%16>0) {
-      for(int i=0;i<16-(s.length()%16);++i) {
+    if (s.length()%16 > 0) {
+      for(int i = 0;i < 16-(s.length()%16);++i) {
         pw.printf("   ");
         sb.append(' ');
         if ((s.length()+i)%16==7) {

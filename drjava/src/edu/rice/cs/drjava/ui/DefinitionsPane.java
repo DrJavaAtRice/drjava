@@ -388,8 +388,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     public void actionPerformed(ActionEvent e) {
       // this is a hack to get braces {} to work on Icelandic keyboard (bug 2813140)
       // I don't understand why {} are not entered using the default action
-      if ((e!=null) &&
-          (e.getActionCommand()!=null) &&
+      if ((e != null) &&
+          (e.getActionCommand() != null) &&
           (e.getActionCommand().equals("{") || e.getActionCommand().equals("}"))) {
         ActionEvent e2 = new ActionEvent(e.getSource(),
                                          e.getID(),
@@ -533,7 +533,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     _colorOptionListeners.add(pair);
     DrJava.getConfig().addOptionListener(OptionConstants.BOOKMARK_COLOR, temp);
 
-    for (int i=0; i<FIND_RESULTS_COLORS.length; ++i) {
+    for (int i = 0; i < FIND_RESULTS_COLORS.length; ++i) {
       temp = new FindResultsColorOptionListener(i);
       pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.FIND_RESULTS_COLORS[i], temp);
       _colorOptionListeners.add(pair);

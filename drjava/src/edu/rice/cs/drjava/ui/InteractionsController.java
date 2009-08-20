@@ -319,7 +319,7 @@ public class InteractionsController extends AbstractConsoleController {
   /** Sets the end of stream flag. */
   public void setEndOfStream(boolean tf) {
     _endOfStream = tf;
-    if (_box!=null) { _box.setEndOfStream(tf); }
+    if (_box != null) { _box.setEndOfStream(tf); }
     if (tf) { _disableCloseSystemInMenuItemCommand.run(); }
   }
   

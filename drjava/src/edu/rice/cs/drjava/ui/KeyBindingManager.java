@@ -92,7 +92,7 @@ public class KeyBindingManager {
       }
     }
     DrJava.getConfig().addOptionListener(vkso, new VectorKeyStrokeOptionListener(jmi, a, retained));
-    if (retained.size()!=keys.size()) {
+    if (retained.size() != keys.size()) {
       // not all keys were added
       DrJava.getConfig().setSetting(vkso,retained);
     }
@@ -187,7 +187,7 @@ public class KeyBindingManager {
     // Check associated Menu Item. If jmi is null, this keystroke maps to an action that isn't in the menu
     if (jmi != null) {
       Vector<KeyStroke> keys = data.getKeyStrokes();
-      if (keys.size()>0) {
+      if (keys.size() > 0) {
         // Since we can have multiple keys mapped to the same action, we use the first key as menu item accelerator
         jmi.setAccelerator(keys.get(0));
       }

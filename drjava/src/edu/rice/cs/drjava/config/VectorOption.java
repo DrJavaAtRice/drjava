@@ -182,7 +182,7 @@ public class VectorOption<T> extends Option<Vector<T>> {
     * @return A String representing "v". 
     */
   public String format(Vector<T> v) {
-    if (v.size()==0) { return ""; }
+    if (v.size() == 0) { return ""; }
     
 //    String d = String.valueOf(delim);
     final StringBuilder res = new StringBuilder(header);

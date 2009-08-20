@@ -132,7 +132,7 @@ public class ProcessChain extends Process {
     catch(IOException e) { /* ignore, no output if this goes wrong */ }
 
     // _deathThreads = new Thread[_creators.length];
-    for(int i=0; i<_processes.length; ++i) {
+    for(int i = 0; i < _processes.length; ++i) {
 //      final int index = i;
       try {
         _processes[i] = _creators[i].start();
@@ -162,7 +162,7 @@ public class ProcessChain extends Process {
       }
     }
     
-    for(int i=0; i<_processes.length-1; ++i) {
+    for(int i = 0; i < _processes.length-1; ++i) {
       // _processes.length-1 because we're processing the gaps between the processes:
       // (P0 P1 P2) has two gaps: P0-P1 and P1-P2. There's always one less gap than processes.
       StreamRedirectThread r = new StreamRedirectThread("stdout Redirector "+i,
@@ -295,7 +295,7 @@ public class ProcessChain extends Process {
   public int waitFor() throws InterruptedException {
     if (_aborted) { return -1; }
     int exitCode = 0;
-    for(int i=0; i<_processes.length; ++i) {
+    for(int i = 0; i < _processes.length; ++i) {
       exitCode = _processes[i].waitFor();
 //      if (i<_processes.length-1) {
 //        _stdOutRedirectors.get(i).setStopFlag();
@@ -319,7 +319,7 @@ public class ProcessChain extends Process {
    *
    * @return  the exit value of the subprocess represented by this 
    *          <code>Process</code> object. by convention, the value 
-   *          <code>0</code> indicates normal termination.
+   *          <code > 0</code> indicates normal termination.
    * @exception  IllegalThreadStateException  if the subprocess represented 
    *             by this <code>Process</code> object has not yet terminated.
    */
@@ -330,7 +330,7 @@ public class ProcessChain extends Process {
     // is thrown when at least one thread has not terminated yet.
     // just returning the exit value of the last process is not sufficient:
     // the last process could have terminated while other processes have not.
-    for(int i=0; i<_processes.length; ++i) {
+    for(int i = 0; i < _processes.length; ++i) {
       exitCode = _processes[i].exitValue();
     }
     return exitCode;
@@ -342,7 +342,7 @@ public class ProcessChain extends Process {
    */
   public void destroy() {
     _aborted = true;
-    for(int i=0; i<_processes.length; ++i) {
+    for(int i = 0; i < _processes.length; ++i) {
       _processes[i].destroy();
     }
     stopAllRedirectors();

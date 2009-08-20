@@ -62,7 +62,7 @@ public class ClassAndInterfaceFinder {
     }
     finally {
       try {
-        if (r!=null) r.close();
+        if (r != null) r.close();
       }
       catch(IOException ioe) { /* ignore exception on close */ }
     }

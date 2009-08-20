@@ -268,7 +268,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
 //    Runnable doCommand = new Runnable() {
 //      public void run() {
 //        edu.rice.cs.drjava.model.AbstractGlobalModel.log.log("RegionsListPanel.addRegion: in list were...");
-//        for(int i=0;i<_listModel.getSize();++i) { edu.rice.cs.drjava.model.AbstractGlobalModel.log.log("\t"+_listModel.elementAt(i)); }
+//        for(int i = 0;i < _listModel.getSize();++i) { edu.rice.cs.drjava.model.AbstractGlobalModel.log.log("\t"+_listModel.elementAt(i)); }
         
 //        String name = "";
 //        try { name = r.getDocument().getQualifiedClassName(); }
@@ -364,8 +364,8 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
 //      if ((other == null) || ! (other instanceof RegionListUserObj)) { return false; }
 //      @SuppressWarnings("unchecked") RegionListUserObj<R> o = (RegionListUserObj<R>)other;
 //      return (o.region().getDocument().equals(region().getDocument())) &&
-//        (o.region().getStartOffset()==region().getStartOffset()) &&
-//        (o.region().getEndOffset()==region().getEndOffset());
+//        (o.region().getStartOffset() == region().getStartOffset()) &&
+//        (o.region().getEndOffset() == region().getEndOffset());
 //    }
 //    public int hashCode() { return (_region != null ? _region.hashCode() : 0); }
   }

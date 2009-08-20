@@ -707,14 +707,14 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   }
   
   /** @return true if at least one document is selected.  Only runs in event thread. */
-  public boolean isDocumentSelected() { return getDocumentSelectedCount()!=0; }
+  public boolean isDocumentSelected() { return getDocumentSelectedCount() != 0; }
   
   /** @return the number of documents selected. Only runs in event thread. */
   public int getDocumentSelectedCount() {
     assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     int count = 0;
     TreePath[] ps = getSelectionPaths();
-    if (ps==null) { return 0; }
+    if (ps == null) { return 0; }
     for(TreePath p: ps) {
       TreeNode n = (TreeNode) p.getLastPathComponent();
       if (n instanceof LeafNode<?>) {
@@ -729,7 +729,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     ArrayList<ItemT> l = new ArrayList<ItemT>();
     TreePath[] ps = getSelectionPaths();
-    if (ps==null) { return l; }
+    if (ps == null) { return l; }
     for(TreePath p: ps) {
       TreeNode n = (TreeNode) p.getLastPathComponent();
       if (n instanceof LeafNode) {
@@ -743,7 +743,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   public boolean isTopLevelGroupSelected() {
     assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     TreePath[] ps = getSelectionPaths();
-    if (ps==null) { return false; }
+    if (ps == null) { return false; }
     for(TreePath p: ps) {
       TreeNode n = (TreeNode) p.getLastPathComponent();
       if (n instanceof GroupNode<?>) { return true; }
@@ -755,7 +755,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   public boolean isRootSelected() {
     assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     TreePath[] ps = getSelectionPaths();
-    if (ps==null) { return false; }
+    if (ps == null) { return false; }
     for(TreePath p: ps) {
       TreeNode n = (TreeNode) p.getLastPathComponent();
       if (n == _model.getRoot()) { return true; }
@@ -771,7 +771,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     LinkedList<GroupNode<ItemT>> roots = new LinkedList<GroupNode<ItemT>>(_roots);
     
     TreePath[] ps = getSelectionPaths();
-    if (ps!=null) {
+    if (ps != null) {
       for(TreePath p: ps) {
         if (p.getLastPathComponent() instanceof DefaultMutableTreeNode) {
           DefaultMutableTreeNode n = (DefaultMutableTreeNode) p.getLastPathComponent();
@@ -822,7 +822,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     
     TreePath[] ps = getSelectionPaths();
-    if (ps==null) { return false; }
+    if (ps == null) { return false; }
     for(TreePath p: ps) {
       TreeNode n = (TreeNode) p.getLastPathComponent();
       TreeNode l = _doc2node.get(i);

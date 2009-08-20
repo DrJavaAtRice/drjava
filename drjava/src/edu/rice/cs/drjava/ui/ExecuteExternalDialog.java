@@ -313,15 +313,16 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     _cancelCommandButton = new JButton(cancelAction);
     
     // set up "Command Line" panel
-    _commandPanel = makeCommandPane();
     
-    super.getContentPane().add(_commandPanel);
-    super.setResizable(false);
-    
-    setSize(FRAME_WIDTH, FRAME_HEIGHT);
-    Utilities.setPopupLoc(this, _mainFrame);
     EventQueue.invokeLater(new Runnable() {
       public void run() {
+        _commandPanel = makeCommandPane(); 
+        
+        getContentPane().add(_commandPanel);
+        setResizable(false);
+        
+        setSize(FRAME_WIDTH, FRAME_HEIGHT);
+        Utilities.setPopupLoc(ExecuteExternalDialog.this, _mainFrame);
         _commandLine.requestFocus();
       }
     });
@@ -578,6 +579,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     // update the preview of the actual command line post substitution
     _documentListener = new DocumentListener() {
       public void update(DocumentEvent e) {
+        assert EventQueue.isDispatchThread();
         try {
           // preview
           _commandLineDoc.remove(0,_commandLineDoc.getLength());
@@ -606,6 +608,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     // update the preview of the actual work directory post substitution
     _workDirDocumentListener = new DocumentListener() {
       public void update(DocumentEvent e) {
+        assert EventQueue.isDispatchThread();
         try {
           // preview
           _commandWorkDirLineDoc.remove(0,_commandWorkDirLineDoc.getLength());
@@ -633,6 +636,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     // update the preview of the actual enclosing .djapp file post substitution
     _enclosingFileDocumentListener = new DocumentListener() {
       public void update(DocumentEvent e) {
+        assert EventQueue.isDispatchThread();
         try {
           // preview
           _commandEnclosingFileLineDoc.remove(0,_commandEnclosingFileLineDoc.getLength());
@@ -711,14 +715,14 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
         doc.setCharacterAttributes(0,str.length(),normal,true);
         String next = null;
         try {
-          while((next=tok.getNextToken())!=null) {
-            if ((tok.token()==BalancingStreamTokenizer.Token.QUOTED) && (next.startsWith("${"))) {
+          while((next=tok.getNextToken()) != null) {
+            if ((tok.token() == BalancingStreamTokenizer.Token.QUOTED) && (next.startsWith("${"))) {
               if (next.endsWith("}")) {
                 String key;
                 String attrList = "";
                 int firstCurly = next.indexOf('}');
                 int firstSemi = next.indexOf(';');
-                if (firstSemi<0) {
+                if (firstSemi < 0) {
                   key = next.substring(2,firstCurly);
                 }
                 else {
@@ -728,13 +732,13 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
                 boolean found = false;
                 for(String category: props.getCategories()) {
                   DrJavaProperty p = props.getProperty(category, key);
-                  if (p!=null) {
+                  if (p != null) {
                     found = true;
                     doc.setCharacterAttributes(pos,pos+next.length(),variable,true);
                     
                     // found property name
                     // if we have a list of attributes
-                    if (attrList.length()>0) {
+                    if (attrList.length() > 0) {
                       // +2 for "${", +1 for ";"
                       int subpos = pos + 2 + key.length() + 1;
                       int added = 0;
@@ -746,8 +750,8 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
                       atok.addKeyword("=");
                       // LOG.log("\tProcessing AttrList");
                       String n = null;
-                      while((n=atok.getNextToken())!=null) {
-                        if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.NORMAL) ||
+                      while((n=atok.getNextToken()) != null) {
+                        if ((n == null) || (atok.token() != BalancingStreamTokenizer.Token.NORMAL) ||
                             n.trim().equals(";") || n.trim().equals("=") || n.trim().startsWith("\"")) {
                           doc.setCharacterAttributes(subpos,pos+next.length(),error,true);
                           break;
@@ -755,26 +759,26 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
                         added += n.length();
                         String name = n.trim();
                         n = atok.getNextToken();
-                        if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.KEYWORD) || 
+                        if ((n == null) || (atok.token() != BalancingStreamTokenizer.Token.KEYWORD) || 
                             (!n.trim().equals("="))) {
                           doc.setCharacterAttributes(subpos,pos+next.length(),error,true);
                           break;
                         }
                         added += n.length();
                         n = atok.getNextToken();
-                        if ((n==null) || (atok.token()!=BalancingStreamTokenizer.Token.QUOTED) || 
+                        if ((n == null) || (atok.token() != BalancingStreamTokenizer.Token.QUOTED) || 
                             (!n.trim().startsWith("\""))) {
                           doc.setCharacterAttributes(subpos,pos+next.length(),error,true);
                           break;
                         }
                         added += n.length();
                         n = atok.getNextToken();
-                        if ((n != null && (atok.token()!=BalancingStreamTokenizer.Token.KEYWORD || ! n.equals(";"))) ||
-                            (n == null && atok.token()!=BalancingStreamTokenizer.Token.END)) {
+                        if ((n != null && (atok.token() != BalancingStreamTokenizer.Token.KEYWORD || ! n.equals(";"))) ||
+                            (n == null && atok.token() != BalancingStreamTokenizer.Token.END)) {
                           doc.setCharacterAttributes(subpos,pos+next.length(),error,true);
                           break;
                         }
-                        if (n!=null) { added += n.length(); }
+                        if (n != null) { added += n.length(); }
                         try { p.getAttribute(name); }
                         catch(IllegalArgumentException e) { 
                           doc.setCharacterAttributes(subpos, subpos + added, error, true); 
@@ -803,7 +807,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
   private void _cancel() {
     _lastState = new FrameState(this);
     this.setVisible(false);
-    if (_cm!=null) { _cm.signal(); }
+    if (_cm != null) { _cm.signal(); }
   }
   
   // public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("process.txt", false);
@@ -818,7 +822,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     */
   public ExternalProcessPanel runCommand(String name, String cmdline, String workdir,
                                          String enclosingFile, PropertyMaps pm) {
-    ((MutableFileProperty)pm.getProperty("enclosing.djapp.file")).setFile(enclosingFile.length()>0?
+    ((MutableFileProperty)pm.getProperty("enclosing.djapp.file")).setFile(enclosingFile.length() > 0?
                                                                             new File(enclosingFile):null);
     ProcessCreator pc = new GeneralProcessCreator(cmdline, workdir.trim(), pm);
     String label = "External";
@@ -855,7 +859,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     // Always apply and save settings
     _saveSettings();
     this.setVisible(false);
-    if (_cm!=null) { _cm.signal(); }    
+    if (_cm != null) { _cm.signal(); }    
   }
 
   /** Save the command line to the menu. */
@@ -865,11 +869,11 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
       _mainFrame.removeModalWindowAdapter(this);
       String name = JOptionPane.showInputDialog(this, "Name for saved process:", names.get(_editIndex));
       _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
-      if (name==null) {
+      if (name == null) {
         // Always apply and save settings
         _saveSettings();
         this.setVisible(false);
-        if (_cm!=null) { _cm.signal(); }
+        if (_cm != null) { _cm.signal(); }
         return;
       }
       editInMenu(_editIndex, name, _commandLine.getText(), _commandWorkDirLine.getText(), 
@@ -880,11 +884,11 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
       _mainFrame.removeModalWindowAdapter(this);
       String name = JOptionPane.showInputDialog(this, "Name for saved process:", "External Java "+(count+1));
       _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
-      if (name==null) {
+      if (name == null) {
         // Always apply and save settings
         _saveSettings();
         this.setVisible(false);
-        if (_cm!=null) { _cm.signal(); }
+        if (_cm != null) { _cm.signal(); }
         return;
       }
       addToMenu(name, _commandLine.getText(), _commandWorkDirLine.getText(), _commandEnclosingFileLine.getText());
@@ -893,7 +897,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     // Always apply and save settings
     _saveSettings();
     this.setVisible(false);
-    if (_cm!=null) { _cm.signal(); }
+    if (_cm != null) { _cm.signal(); }
   }  
 
   /** Add new process to menu.
@@ -999,7 +1003,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
             _mainFrame.installModalWindowAdapter(ExecuteExternalDialog.this, LambdaUtil.NO_OP, CANCEL);
 
             edu.rice.cs.plt.tuple.Pair<String,DrJavaProperty> selected = _insertVarDialog.getSelected();
-            if (selected!=null) {
+            if (selected != null) {
               String text = _lastCommandFocus.getText();
               Caret caret = _lastCommandFocus.getCaret();
               int min = Math.min(caret.getDot(), caret.getMark());

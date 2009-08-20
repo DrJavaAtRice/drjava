@@ -89,8 +89,10 @@ public abstract class AbstractDJPane extends JTextPane
       * @param ce the event fired by the caret position change
       */
     public void caretUpdate(final CaretEvent ce) { 
-      Utilities.invokeLater(new Runnable() { 
-        public void run() {
+           
+      assert EventQueue.isDispatchThread();
+//      Utilities.invokeLater(new Runnable() { 
+//        public void run() {
           _removePreviousHighlight();
           
           int offset = ce.getDot();
@@ -103,8 +105,8 @@ public abstract class AbstractDJPane extends JTextPane
             
           }
           catch(BadLocationException e) { DrJavaErrorHandler.record(e); }
-        }
-      });
+//        }
+//      });
     }
     
   };

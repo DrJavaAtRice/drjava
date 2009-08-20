@@ -118,7 +118,7 @@ public class XMLConfig {
    * @param node the node in the parent configuration where this part starts
    */
   public XMLConfig(XMLConfig parent, Node node) {
-    if ((parent==null) || (node==null)) { throw new XMLConfigException("Error in ctor: parent or node is null"); }
+    if ((parent == null) || (node == null)) { throw new XMLConfigException("Error in ctor: parent or node is null"); }
     _parent = parent;
     _startNode = node;
     _document = null;
@@ -165,7 +165,7 @@ public class XMLConfig {
     }
   }
   
-  public boolean isDelegated() { return (_parent!=null); }
+  public boolean isDelegated() { return (_parent != null); }
   
   /** Saves configuration to an output stream
    * @param os output stream
@@ -215,7 +215,7 @@ public class XMLConfig {
     }
     finally {
       try {
-        if (fos!=null) fos.close();
+        if (fos != null) fos.close();
       }
       catch(IOException ioe) { /* ignore exception when closing */ }
     }
@@ -236,7 +236,7 @@ public class XMLConfig {
    */
   public String get(String path) {
     List<String> r = getMultiple(path);
-    if (r.size()!=1) throw new XMLConfigException("Number of results != 1");
+    if (r.size() != 1) throw new XMLConfigException("Number of results != 1");
     return r.get(0);
   }
 
@@ -247,7 +247,7 @@ public class XMLConfig {
    */
   public String get(String path, Node root) {
     List<String> r = getMultiple(path, root);
-    if (r.size()!=1) throw new XMLConfigException("Number of results != 1");
+    if (r.size() != 1) throw new XMLConfigException("Number of results != 1");
     return r.get(0);
   }
   
@@ -289,7 +289,7 @@ public class XMLConfig {
    */
   public int getInt(String path) {
     List<String> r = getMultiple(path);
-    if (r.size()!=1) throw new XMLConfigException("Number of results != 1");
+    if (r.size() != 1) throw new XMLConfigException("Number of results != 1");
     try {
       return Integer.valueOf(r.get(0));
     }
@@ -304,7 +304,7 @@ public class XMLConfig {
    */
   public int getInt(String path, Node root) {
     List<String> r = getMultiple(path, root);
-    if (r.size()!=1) throw new XMLConfigException("Number of results != 1");
+    if (r.size() != 1) throw new XMLConfigException("Number of results != 1");
     try {
       return Integer.valueOf(r.get(0));
     }
@@ -351,7 +351,7 @@ public class XMLConfig {
    */
   public boolean getBool(String path) {
     List<String> r = getMultiple(path);
-    if (r.size()!=1) throw new XMLConfigException("Number of results != 1");
+    if (r.size() != 1) throw new XMLConfigException("Number of results != 1");
     String s = r.get(0).toLowerCase().trim();
     if ((s.equals("true")) ||
         (s.equals("yes")) ||
@@ -370,7 +370,7 @@ public class XMLConfig {
    */
   public boolean getBool(String path, Node root) {
     List<String> r = getMultiple(path, root);
-    if (r.size()!=1) throw new XMLConfigException("Number of results != 1");
+    if (r.size() != 1) throw new XMLConfigException("Number of results != 1");
     String s = r.get(0).toLowerCase().trim();
     if ((s.equals("true")) ||
         (s.equals("yes")) ||
@@ -441,7 +441,7 @@ public class XMLConfig {
         Node child;
         String acc = "";
         child = n.getFirstChild();
-        while(child!=null) {
+        while(child != null) {
           if (child.getNodeName().equals("#text")) {
             acc += " " + child.getNodeValue();
           }
@@ -488,8 +488,8 @@ public class XMLConfig {
    */
   private void getMultipleHelper(String path, Node n, List<Node> accum, boolean dotRead) {
     int dotPos = path.indexOf('.');
-    boolean initialDot = (dotPos==0);
-    if ((path.length()>0) && (dotPos == -1) && (!path.endsWith("/"))) {
+    boolean initialDot = (dotPos == 0);
+    if ((path.length() > 0) && (dotPos == -1) && (!path.endsWith("/"))) {
       path = path + "/";
     }
     int slashPos = path.indexOf('/');
@@ -523,7 +523,7 @@ public class XMLConfig {
       }
       Node child = n.getFirstChild();
       if (nodeName.equals("*")) {
-        while(child!=null) {
+        while(child != null) {
           if (!child.getNodeName().equals("#text") && !child.getNodeName().equals("#comment")) {
             if (dotRead) {
               getMultipleAddAttributesHelper(path, child, accum);
@@ -537,7 +537,7 @@ public class XMLConfig {
         return;
       }
       else {
-        while(child!=null) {
+        while(child != null) {
           if (child.getNodeName().equals(nodeName)) {
             // found
             if (dotRead) {
@@ -563,14 +563,14 @@ public class XMLConfig {
     }
     NamedNodeMap attrMap = n.getAttributes();
     if (path.equals("*")) {
-      for(int i=0; i<attrMap.getLength(); ++i) {
+      for(int i = 0; i < attrMap.getLength(); ++i) {
         Node attr = attrMap.item(i);
         accum.add(attr);
       }
     }
     else {
       Node attr = attrMap.getNamedItem(path);
-      if (attr!=null) {
+      if (attr != null) {
         accum.add(attr);
       }
     }
@@ -612,7 +612,7 @@ public class XMLConfig {
     
     int dotPos = path.lastIndexOf('.');
     Node node;
-    if (dotPos==0) {
+    if (dotPos == 0) {
       node = n;
     }
     else {
@@ -656,13 +656,13 @@ public class XMLConfig {
   public Node createNode(String path, Node n, boolean overwrite) {
     if (isDelegated()) { return _parent.createNode(path, n, overwrite); }
 
-    if (n==null) { n = _document; }
+    if (n == null) { n = _document; }
     while(path.indexOf('/') > -1) {
       Node child = null;
       String nodeName = path.substring(0, path.indexOf('/'));
       path = path.substring(path.indexOf('/')+1);
       child = n.getFirstChild();
-      while(child!=null) {
+      while(child != null) {
         if (child.getNodeName().equals(nodeName)) {
           // found
           n = child;
@@ -670,7 +670,7 @@ public class XMLConfig {
         }
         child = child.getNextSibling();
       }
-      if (child==null) {
+      if (child == null) {
         // not found
         child = _document.createElement(nodeName);
         n.appendChild(child);
@@ -683,16 +683,16 @@ public class XMLConfig {
       nodeName = path.substring(0, path.indexOf('.'));
     }
     else {
-      if (path.length()==0) {
+      if (path.length() == 0) {
         throw new XMLConfigException("Cannot set node with empty name");
       }
       nodeName = path;
     }
     Node child = null;
-    if (nodeName.length()>0) {
+    if (nodeName.length() > 0) {
       if (overwrite) {
         child = n.getFirstChild();
-        while(child!=null) {
+        while(child != null) {
           if (child.getNodeName().equals(nodeName)) {
             // found
             n = child;
@@ -700,7 +700,7 @@ public class XMLConfig {
           }
           child = child.getNextSibling();
         }
-        if (child==null) {
+        if (child == null) {
           child = _document.createElement(nodeName);
           n.appendChild(child);
           n = child;
@@ -723,7 +723,7 @@ public class XMLConfig {
       if (overwrite) {
         child = n.getFirstChild();
         // remove all children
-        while(child!=null) {
+        while(child != null) {
           Node temp = child.getNextSibling();
           n.removeChild(child);
           child = temp;
@@ -751,9 +751,9 @@ public class XMLConfig {
    * @return path
    */
   public static String getNodePath(Node n) {
-    if (n==null) { return ""; }
+    if (n == null) { return ""; }
     String path = "";
-    while(n.getParentNode()!=null) {
+    while(n.getParentNode() != null) {
       path = n.getNodeName()+"/"+path;
       n = n.getParentNode();
     }

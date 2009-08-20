@@ -111,15 +111,17 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   /** Listens for changes to the cursor position in order to reset the start position */
   private CaretListener _caretListener = new CaretListener() {
     public void caretUpdate(CaretEvent e) {
-      Utilities.invokeLater(new Runnable() {
-        public void run() {
+           
+      assert EventQueue.isDispatchThread();
+//      Utilities.invokeLater(new Runnable() {
+//        public void run() {
           _replaceAction.setEnabled(false);
           _replaceFindNextAction.setEnabled(false);
           _replaceFindPreviousAction.setEnabled(false);
           _machine.positionChanged();
           _caretChanged = true;
-        }
-      });
+//        }
+//      });
     }
   };
   
@@ -521,6 +523,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       public void removeUpdate(DocumentEvent e) { _updateHelper(); }
       
       private void _updateHelper() {
+        assert EventQueue.isDispatchThread();
 //            _machine.makeCurrentOffsetStart();
         updateFirstDocInSearch();
         _replaceAction.setEnabled(false);
@@ -665,7 +668,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
           
       if (searchSelectionOnly) {
         EventQueue.invokeLater(new Runnable() { public void run() { 
-          if (_defPane!=null) {
+          if (_defPane != null) {
             _defPane.requestFocusInWindow();
             _defPane.setSelectionStart(region.getStartOffset());
             _defPane.setSelectionEnd(region.getEndOffset());
@@ -909,7 +912,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
                 // moves focus to DefinitionsPane
                 _frame.toFront();
                 EventQueue.invokeLater(new Runnable() { public void run() { 
-                  if (_defPane!=null) {
+                  if (_defPane != null) {
                     _defPane.requestFocusInWindow();
                   }
                 } });

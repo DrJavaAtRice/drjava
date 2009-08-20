@@ -454,7 +454,14 @@ public class ProjectPropertiesFrame extends SwingFrame {
       public void insertUpdate(DocumentEvent e) { setEnabled(); }
       public void removeUpdate(DocumentEvent e) { setEnabled(); }
       public void changedUpdate(DocumentEvent e) { setEnabled(); }
-      private void setEnabled() { Utilities.invokeLater(new Runnable() { public void run() { _applyButton.setEnabled(true); } }); }
+      private void setEnabled() { 
+        assert EventQueue.isDispatchThread();
+//        Utilities.invokeLater(new Runnable() { 
+//          public void run() { 
+            _applyButton.setEnabled(true); 
+//          } 
+//        }); 
+      }
    };
 
   public JPanel _projRootPanel() {
@@ -564,7 +571,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
         return null;
       }
     });
-    if (_model.getProjectRoot()!=null) {
+    if (_model.getProjectRoot() != null) {
       _excludedFilesList.setBaseDir(_model.getProjectRoot());
     }
     return _excludedFilesList.getComponent();

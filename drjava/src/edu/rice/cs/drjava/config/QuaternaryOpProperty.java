@@ -123,7 +123,7 @@ public class QuaternaryOpProperty<N,O,P,Q,R> extends EagerProperty {
     * @param pm PropertyMaps used for substitution when replacing variables */
   public void update(PropertyMaps pm) {
     N op1;
-    if (_attributes.get(_op1Name)==null) {
+    if (_attributes.get(_op1Name) == null) {
       _value = "("+_name+" Error...)";
       return;
     }
@@ -137,7 +137,7 @@ public class QuaternaryOpProperty<N,O,P,Q,R> extends EagerProperty {
       }
     }
     O op2;
-    if (_attributes.get(_op2Name)==null) {
+    if (_attributes.get(_op2Name) == null) {
       _value = "("+_name+" Error...)";
       return;
     }
@@ -151,7 +151,7 @@ public class QuaternaryOpProperty<N,O,P,Q,R> extends EagerProperty {
       }
     }
     P op3;
-    if (_attributes.get(_op3Name)==null) {
+    if (_attributes.get(_op3Name) == null) {
       _value = "("+_name+" Error...)";
       return;
     }
@@ -165,7 +165,7 @@ public class QuaternaryOpProperty<N,O,P,Q,R> extends EagerProperty {
       }
     }
     Q op4;
-    if (_attributes.get(_op4Name)==null) {
+    if (_attributes.get(_op4Name) == null) {
       _value = "("+_name+" Error...)";
       return;
     }

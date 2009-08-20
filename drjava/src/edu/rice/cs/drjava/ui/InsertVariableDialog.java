@@ -269,22 +269,22 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
   protected void updatePanes() {
     Pair<String,DrJavaProperty> sel = getSelected();
     String selCategory = null;
-    if (sel!=null) {
+    if (sel != null) {
       selCategory = _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex());
     }
     _tabbedPane.removeAll();
     for (String category: PropertyMaps.TEMPLATE.getCategories()) {
       _tabbedPane.addTab(category, createPane(category, PropertyMaps.TEMPLATE.getProperties(category)));
     }
-    if (sel!=null) {
-      if (selCategory==null) { sel = null; } else {
+    if (sel != null) {
+      if (selCategory == null) { sel = null; } else {
         int i;
-        for (i=0; i<_tabbedPane.getTabCount(); ++i) {
+        for (i = 0; i < _tabbedPane.getTabCount(); ++i) {
           if (_tabbedPane.getTitleAt(i).equals(selCategory)) { _tabbedPane.setSelectedIndex(i); break; }
         }
-        if (i==_tabbedPane.getTabCount()) { sel = null; } else {
+        if (i == _tabbedPane.getTabCount()) { sel = null; } else {
           DefaultTableModel tm = _varTableModel.get(selCategory);
-          for (i=0; i<tm.getRowCount(); ++i) {
+          for (i = 0; i < tm.getRowCount(); ++i) {
             String key = tm.getValueAt(i,0).toString();
             if (key.equals(sel.second().getName())) {
               _varTable.get(selCategory).getSelectionModel().setSelectionInterval(i,i);
@@ -302,7 +302,7 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
         }
       }
     }
-    if (sel==null) {
+    if (sel == null) {
       _tabbedPane.setSelectedIndex(0);
       String category = _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex());
       Map<String, DrJavaProperty> properties = PropertyMaps.TEMPLATE.getProperties(category);

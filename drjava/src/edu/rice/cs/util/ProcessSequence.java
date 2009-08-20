@@ -102,7 +102,7 @@ public class ProcessSequence extends Process {
   public ProcessSequence(ProcessCreator[] pcs) {
     _creators = pcs;
     _processes = new Process[_creators.length];
-    for(int i=0; i<_processes.length; ++i) { _processes[i] = null; }
+    for(int i = 0; i < _processes.length; ++i) { _processes[i] = null; }
     _combinedInputStream = new PipedInputStream();
     try {
       _combinedStdOutStream = new PipedOutputStream(_combinedInputStream);
@@ -248,8 +248,8 @@ public class ProcessSequence extends Process {
   public int waitFor() throws InterruptedException {
     if (_aborted) { return -1; }
     int exitCode = 0;
-    for(int i=0; i<_processes.length; ++i) {
-      while((!_aborted) && (_processes[i]==null)) {
+    for(int i = 0; i < _processes.length; ++i) {
+      while((!_aborted) && (_processes[i] == null)) {
         try {
           // next process has not been assigned and started yet, sleep a bit
           Thread.sleep(100);
@@ -268,13 +268,13 @@ public class ProcessSequence extends Process {
    *
    * @return  the exit value of the subprocess represented by this 
    *          <code>Process</code> object. by convention, the value 
-   *          <code>0</code> indicates normal termination.
+   *          <code > 0</code> indicates normal termination.
    * @exception  IllegalThreadStateException  if the subprocess represented 
    *             by this <code>Process</code> object has not yet terminated.
    */
   public int exitValue() {
     if (_aborted) { return -1; }
-    if ((_index<_processes.length-1) || (_processes[_processes.length-1]==null)) {
+    if ((_index<_processes.length-1) || (_processes[_processes.length-1] == null)) {
       throw new IllegalThreadStateException("Process sequence has not terminated yet, exit value not available.");
     }
     // just returning the exit value of the last process is sufficient:
@@ -288,8 +288,8 @@ public class ProcessSequence extends Process {
    */
   public void destroy() {
     _aborted = true;
-    for(int i=0; i<_processes.length; ++i) {
-      if (_processes[i]!=null) { _processes[i].destroy(); }
+    for(int i = 0; i < _processes.length; ++i) {
+      if (_processes[i] != null) { _processes[i].destroy(); }
     }
     stopAllRedirectors();
   }
@@ -305,7 +305,7 @@ public class ProcessSequence extends Process {
     // redirect all stdout from all the processes into a combined output stream
     // that pipes all the data into a combined input stream that serves as this
     // process sequence's input stream
-    if (_stdOutRedirector==null) {
+    if (_stdOutRedirector == null) {
       _stdOutRedirector = new StreamRedirectThread("stdout Redirector "+_index,
                                                    p.getInputStream(),
                                                    _combinedStdOutStream,
@@ -317,7 +317,7 @@ public class ProcessSequence extends Process {
     else {
       _stdOutRedirector.setInputStream(p.getInputStream());
     }
-    if (_stdErrRedirector==null) {
+    if (_stdErrRedirector == null) {
       _stdErrRedirector = new StreamRedirectThread("stderr Redirector "+_index,
                                                    p.getErrorStream(),
                                                    _combinedStdErrStream,

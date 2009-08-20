@@ -53,7 +53,7 @@ public class LayeredIcon implements Icon {
       throw new IllegalArgumentException("Array lengths don't match");
     }
     _w = 0; _h = 0;
-    for (int i=0; i < layers.length; i++) {
+    for (int i = 0; i < layers.length; i++) {
       if (layers[i] != null) {
         _w = Math.max(_w, layers[i].getIconWidth() + x[i]);
         _h = Math.max(_h, layers[i].getIconHeight() + x[i]);
@@ -67,7 +67,7 @@ public class LayeredIcon implements Icon {
     return _w;
   }
   public void paintIcon(Component c, Graphics g, int x, int y){
-    for (int i=0; i < _layers.length; i++) {
+    for (int i = 0; i < _layers.length; i++) {
       Icon ico = _layers[i];
       if (ico != null) _layers[i].paintIcon(c,g, x+_xoffs[i], y+_yoffs[i]);
     }

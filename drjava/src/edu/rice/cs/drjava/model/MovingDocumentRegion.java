@@ -62,7 +62,7 @@ public class MovingDocumentRegion extends DocumentRegion {
   /** Update _lineStartPos and _lineEndPos after line has been edited. */
   public void update() {
     try {  // _doc is inherited from DocumentRegion
-      _lineStartPos =_doc.createPosition(_doc._getLineStartPos(getStartOffset()));
+      _lineStartPos = _doc.createPosition(_doc._getLineStartPos(getStartOffset()));
       _lineEndPos = _doc.createPosition(_doc._getLineEndPos(getEndOffset()));
     }
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }  // should never happen

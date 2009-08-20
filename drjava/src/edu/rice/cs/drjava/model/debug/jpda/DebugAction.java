@@ -110,7 +110,7 @@ public abstract class DebugAction<T extends EventRequest> {
     * @param requests the EventRequests to prepare
     */
   protected void _prepareRequests(Vector<T> requests) {
-    for (int i=0; i < requests.size(); i++) {
+    for (int i = 0; i < requests.size(); i++) {
       _prepareRequest(requests.get(i));
     }
   }

@@ -82,8 +82,8 @@ public abstract class RunnableEST implements Runnable {
       StackTraceElement[] ts = t.getStackTrace();
       StackTraceElement[] cs = super.getStackTrace();
       java.util.ArrayList<StackTraceElement> list = new java.util.ArrayList<StackTraceElement>();
-      for(int i=0; i<ts.length-9; ++i) list.add(ts[i]);
-      for(int i=2; i<cs.length; ++i) list.add(cs[i]);
+      for(int i = 0; i < ts.length-9; ++i) list.add(ts[i]);
+      for(int i=2; i < cs.length; ++i) list.add(cs[i]);
       setStackTrace(list.toArray(new StackTraceElement[list.size()]));
       return this;
     }

@@ -226,7 +226,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _lastIndex = smallestIndex;
     ++DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex];
     _colorBox = new JComboBox();    
-    for (int i=0; i < OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
+    for (int i = 0; i < OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
       _colorBox.addItem(DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[i]));
     }
     _colorBox.addItem("None");

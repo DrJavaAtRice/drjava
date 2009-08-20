@@ -279,8 +279,7 @@ public interface GlobalModel extends ILoadDocuments {
     */
   public DocumentIterator getDocumentIterator();
   
-  /** Re-runs the global listeners on the active document.
-   */
+  /** Re-runs the global listeners on the active document. */
   public void refreshActiveDocument();
   
   /*---------------------------------- I/O ----------------------------------*/

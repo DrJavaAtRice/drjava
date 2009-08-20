@@ -69,7 +69,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
 
     final BrowserDocumentRegion current = getCurrentRegion();
-    if ((current!=null) && (similarRegions(current, r))) {
+    if ((current != null) && (similarRegions(current, r))) {
       // the region to be added is similar to the current region
       // just update the current region
 //      edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("Updating instead of adding: "+current+" --> "+r);
@@ -100,14 +100,14 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
 
     final BrowserDocumentRegion current = getCurrentRegion();
-    if ((current!=null) && (similarRegions(current, r))) {
+    if ((current != null) && (similarRegions(current, r))) {
       // the region to be added is similar to the current region
       // just update the current region
 //      edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("Updating instead of adding: "+current+" --> "+r);
       current.update(r);
     }
     else {
-      if (_pastRegions.size()==0) {
+      if (_pastRegions.size() == 0) {
         _pastRegions.push(r);
       }
       else {
@@ -169,7 +169,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   
   /** Tells the manager to remove all regions. */
   public /* synchronized */ void clearBrowserRegions() {
-    while(_pastRegions.size()+_futureRegions.size()>0) {
+    while(_pastRegions.size()+_futureRegions.size() > 0) {
       remove(((_pastRegions.size()>_futureRegions.size())?_pastRegions:_futureRegions).get(0));
     }
   }

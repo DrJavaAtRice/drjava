@@ -77,15 +77,15 @@ public abstract class FileListProperty extends DrJavaProperty {
   public void update(PropertyMaps pm) {
     String quot = "";
     String q = _attributes.get("squote");
-    if (q!=null) {
+    if (q != null) {
       if (q.toLowerCase().equals("true")) { quot = "'"; }
     }
     q = _attributes.get("dquote");
-    if (q!=null) {
+    if (q != null) {
       if (q.toLowerCase().equals("true")) { quot = "\"" + quot; }
     }
     List<File> l = getList(pm);
-    if (l.size()==0) { _value = ""; return; }
+    if (l.size() == 0) { _value = ""; return; }
     StringBuilder sb = new StringBuilder();
     for(File fil: l) {
       sb.append(StringOps.replaceVariables(_attributes.get("sep"), pm, PropertyMaps.GET_CURRENT));

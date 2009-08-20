@@ -92,7 +92,7 @@ public class LessPanel extends AbortablePanel {
         _totalRead = 0;
         _updateThread = new Thread(new Runnable() {
           public void run() {
-            while(_fr!=null) {
+            while(_fr != null) {
               try {
                 Thread.sleep(edu.rice.cs.drjava.DrJava.getConfig().
                                getSetting(edu.rice.cs.drjava.config.OptionConstants.FOLLOW_FILE_DELAY));
@@ -121,7 +121,7 @@ public class LessPanel extends AbortablePanel {
 
   /** Abort action was performed. Must be overridden to return the component on the left side. */
   protected void abortActionPerformed(ActionEvent e) {
-    if (_fr!=null) {
+    if (_fr != null) {
       try {
         _fr.close();
       }
@@ -133,9 +133,9 @@ public class LessPanel extends AbortablePanel {
   
   /** Update button state and text. Should be overridden if additional buttons are added besides "Go To", "Remove" and "Remove All". */
   protected void updateButtons() {
-    _abortButton.setEnabled(_fr!=null);
-    _updateNowButton.setEnabled(_fr!=null);
-    _restartButton.setEnabled(_fr==null);
+    _abortButton.setEnabled(_fr != null);
+    _updateNowButton.setEnabled(_fr != null);
+    _restartButton.setEnabled(_fr == null);
   }  
 
   /** Creates the buttons for controlling the regions. Should be overridden. */
@@ -166,7 +166,7 @@ public class LessPanel extends AbortablePanel {
     Utilities.invokeLater(new Runnable() {
       public void run() {
         // MainFrame.LOG.log("updateText");
-        if ((_fr!=null) &&
+        if ((_fr != null) &&
             (_updateNowButton.isEnabled())) {
           _updateNowButton.setEnabled(false);
           int changeCount = 0;
@@ -192,7 +192,7 @@ public class LessPanel extends AbortablePanel {
                 sb.append(new String(_buf, 0, _red));
                 ++changeCount;
               }
-              if ((_red>0) && (changeCount<BUFFER_READS_PER_TIMER)) {
+              if ((_red > 0) && (changeCount<BUFFER_READS_PER_TIMER)) {
                 _totalRead += _red;
                 sb.append(new String(_buf, 0, _red));
                 ++changeCount;
@@ -206,12 +206,12 @@ public class LessPanel extends AbortablePanel {
               abortActionPerformed(null);
             }
             finally {
-              if (changeCount>0) {
+              if (changeCount > 0) {
                 // MainFrame.LOG.log("\tsetting text");
                 _textArea.setText(sb.toString());
                 int maxLines = edu.rice.cs.drjava.DrJava.getConfig().
                   getSetting(edu.rice.cs.drjava.config.OptionConstants.FOLLOW_FILE_LINES);
-                if (maxLines>0) { // if maxLines is 0, buffer is unlimited
+                if (maxLines > 0) { // if maxLines is 0, buffer is unlimited
                   try {
                     int start = 0;
                     int len = _textArea.getText().length();

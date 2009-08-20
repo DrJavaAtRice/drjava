@@ -97,7 +97,7 @@ public class ExternalProcessPanel extends AbortablePanel {
     _textArea.addMouseListener(new MouseListener() {
       public void mouseClicked(MouseEvent e) {
         if ((SwingUtilities.isLeftMouseButton(e)) &&
-            (e.getClickCount()==2)) {
+            (e.getClickCount() == 2)) {
           doubleClicked(e);
         }
       }
@@ -119,14 +119,14 @@ public class ExternalProcessPanel extends AbortablePanel {
       _pc.getPropertyMaps().clearVariables();
       _readThread = new Thread(new Runnable() {
         public void run() {
-          while((_is!=null) || (_erris!=null)) {
+          while((_is != null) || (_erris != null)) {
             readText(false);
           }
         }
       },"External Process Read Thread");
       _updateThread = new Thread(new Runnable() {
         public void run() {
-          while((_is!=null) || (_erris!=null)) {
+          while((_is != null) || (_erris != null)) {
             try {
               Thread.sleep(edu.rice.cs.drjava.DrJava.getConfig().
                              getSetting(edu.rice.cs.drjava.config.OptionConstants.FOLLOW_FILE_DELAY));
@@ -201,7 +201,7 @@ public class ExternalProcessPanel extends AbortablePanel {
     // spin this off in a separate thread so the event thread is free
     new Thread(new Runnable() {
       public void run() {
-        if (_is!=null) {
+        if (_is != null) {
           try {
             // cannot close() an InputStreamReader from thread A while thread B is blocked in read()
             // close() will block as well, so we close the InputStream of the process first
@@ -212,7 +212,7 @@ public class ExternalProcessPanel extends AbortablePanel {
           _is = null;
           Utilities.invokeLater(new Runnable() { public void run() { updateButtons(); } });          
         }
-        if (_erris!=null) {
+        if (_erris != null) {
           try {
             // cannot close() an InputStreamReader from thread A while thread B is blocked in read()
             // close() will block as well, so we close the InputStream of the process first
@@ -223,7 +223,7 @@ public class ExternalProcessPanel extends AbortablePanel {
           _erris = null;
           Utilities.invokeLater(new Runnable() { public void run() { updateButtons(); } });
         }
-        if (_p!=null) {
+        if (_p != null) {
           _p.destroy();
           _p = null;
         }
@@ -267,8 +267,8 @@ public class ExternalProcessPanel extends AbortablePanel {
     int caret = _textArea.getCaretPosition();
     int start = caret;
     int end = start;
-    while((start-1>0) && (t.charAt(start-1)!='\n')) { --start; }
-    while((end>=0) && (end<t.length()) && (t.charAt(end)!='\n')) { ++end; }
+    while((start-1 > 0) && (t.charAt(start-1) != '\n')) { --start; }
+    while((end>=0) && (end<t.length()) && (t.charAt(end) != '\n')) { ++end; }
     // LOG.log("\tstart="+start+"\n\tend="+end);
     if ((start<0) || (end<0) || (start>=t.length()) || (end>=t.length())) return;
     final String line = t.substring(start,end);
@@ -328,17 +328,17 @@ public class ExternalProcessPanel extends AbortablePanel {
     
     GoToFileListEntry uniqueMatch = null;
     String name, oldName = null, simpleName = null;
-    while(start>0) {
+    while(start > 0) {
       ch = line.charAt(start);
-      while(start>0) {
+      while(start > 0) {
         ch = line.charAt(start);
         if ((ch==':') || (ch=='.') || (Character.isJavaIdentifierPart(ch))) { --start; } else { break; }
       }
       // LOG.log("\tstart="+start+"\n\tend="+end);
       if ((start>=0) && (end>=start) && (start<line.length()) && (end<line.length())) {
         name = line.substring(start,end).replace(File.separatorChar,'.');
-        if ((name.length()>0) && (!Character.isJavaIdentifierPart(name.charAt(0)))) { name = name.substring(1); }
-        if (simpleName==null) { simpleName = name; }
+        if ((name.length() > 0) && (!Character.isJavaIdentifierPart(name.charAt(0)))) { name = name.substring(1); }
+        if (simpleName == null) { simpleName = name; }
         if (name.equals(oldName)) { break; }
         if ((name.indexOf(".java")>=0) ||
             (name.indexOf(".j")>=0) ||
@@ -347,7 +347,7 @@ public class ExternalProcessPanel extends AbortablePanel {
             (name.indexOf(".dj2")>=0)) {
           // LOG.log("\t--> '"+name+"'");
           uniqueMatch = getUniqueMatch(name, pim);
-          if (uniqueMatch!=null) {
+          if (uniqueMatch != null) {
             // unique match found, go there
             // LOG.log("\t     ^^^^^^^^^^ unique match found");
             final OpenDefinitionsDocument newDoc = pim.getCurrentItem().doc;
@@ -390,7 +390,7 @@ public class ExternalProcessPanel extends AbortablePanel {
       }
       if (ch==File.separatorChar) { --start; } // file separator ('/' or '\'), include preceding directory 
     }
-    if (uniqueMatch==null) {
+    if (uniqueMatch == null) {
       // couldn't find a unique match, even after gradually including the fully qualified name
       _frame.gotoFileMatchingMask(simpleName);
     }
@@ -413,7 +413,7 @@ public class ExternalProcessPanel extends AbortablePanel {
   /** Update button state and text. Should be overridden if additional buttons are added besides "Go To", "Remove" and "Remove All". */
   protected void updateButtons() {
     boolean ended = true;
-    if (_p!=null) {
+    if (_p != null) {
       try {
         // try to get exitValue() to see if process has terminated; exit value is not otherwise important
         _p.exitValue();
@@ -425,9 +425,9 @@ public class ExternalProcessPanel extends AbortablePanel {
         ended = false;
       }
     }
-    _abortButton.setEnabled((_is!=null) && (_erris!=null) && (!ended));
-    _updateNowButton.setEnabled((_is!=null) && (_erris!=null) && (!ended));
-    _runAgainButton.setEnabled((_is==null) || (_erris==null) || (ended));
+    _abortButton.setEnabled((_is != null) && (_erris != null) && (!ended));
+    _updateNowButton.setEnabled((_is != null) && (_erris != null) && (!ended));
+    _runAgainButton.setEnabled((_is == null) || (_erris == null) || (ended));
   }  
 
   /** Creates the buttons for controlling the regions. Should be overridden. */
@@ -450,38 +450,38 @@ public class ExternalProcessPanel extends AbortablePanel {
     * @param finish whether to read the entire rest */
   protected void readText(final boolean finish) {
     // MainFrame.LOG.log("readText");
-    if (((_is!=null) || (_erris!=null))) {
+    if (((_is != null) || (_erris != null))) {
       _changeCount = 0;
       // MainFrame.LOG.log("\tgot text");
       try {
         // MainFrame.LOG.log("\treading...");
         // abort after reading 5 blocks (50 kB), read more later
         // don't block the event thread any longer
-        while((_is!=null) &&
-              (_erris!=null) &&
+        while((_is != null) &&
+              (_erris != null) &&
               (_changeCount<=BUFFER_READS_PER_TIMER) &&
-              (_erris!=null) &&
+              (_erris != null) &&
               ((_red = _is.read(_buf))>=0)) {
           // MainFrame.LOG.log("\tread "+_red+" bytes");
           _sb.append(new String(_buf, 0, _red));
           if (finish) { _changeCount = 1; } else { ++_changeCount; }
         }
         while((_changeCount<=BUFFER_READS_PER_TIMER) &&
-              (_erris!=null) &&
+              (_erris != null) &&
               ((_errred = _erris.read(_errbuf))>=0)) {
           // MainFrame.LOG.log("\tread "+_red+" bytes");
           _sb.append(new String(_errbuf, 0, _errred));
           if (finish) { _changeCount = 1; } else { ++_changeCount; }
         }
-        if ((_red>0) && (_changeCount<BUFFER_READS_PER_TIMER)) {
+        if ((_red > 0) && (_changeCount<BUFFER_READS_PER_TIMER)) {
           _sb.append(new String(_buf, 0, _red));
           if (finish) { _changeCount = 1; } else { ++_changeCount; }
         }
-        if ((_errred>0) && (_changeCount<BUFFER_READS_PER_TIMER)) {
+        if ((_errred > 0) && (_changeCount<BUFFER_READS_PER_TIMER)) {
           _sb.append(new String(_errbuf, 0, _errred));
           if (finish) { _changeCount = 1; } else { ++_changeCount; }
         }
-        if ((_p!=null) && (_is==null)) {
+        if ((_p != null) && (_is == null)) {
           try {
             // try to get exitValue() to see if process has terminated; exit value is not otherwise important
             _p.exitValue();
@@ -492,7 +492,7 @@ public class ExternalProcessPanel extends AbortablePanel {
             _sb.append("\nInput stream suddenly became null.");
           }
         }
-        if ((_p!=null) && (_erris==null)) { 
+        if ((_p != null) && (_erris == null)) { 
           try {
             // try to get exitValue() to see if process has terminated; exit value is not otherwise important
             _p.exitValue();
@@ -507,7 +507,7 @@ public class ExternalProcessPanel extends AbortablePanel {
       catch(IOException ioe) {
         // MainFrame.LOG.log("\taborted");
         // stop polling
-        if (_p!=null) {
+        if (_p != null) {
           try {
             _p.exitValue();
             // if we get here, process has finished, and we don't display the I/O exception
@@ -530,9 +530,9 @@ public class ExternalProcessPanel extends AbortablePanel {
     // MainFrame.LOG.log("updateText");
     if (_updateNowButton.isEnabled()) {
 //      try {
-//        if ((_is!=null) && (_p!=null) &&
+//        if ((_is != null) && (_p != null) &&
 //            (_is.ready()) &&
-//            (_p.getInputStream().available()>0)) { readText(false); }
+//            (_p.getInputStream().available() > 0)) { readText(false); }
 //      }
 //      catch(IOException ioe) {
 //        try {
@@ -546,7 +546,7 @@ public class ExternalProcessPanel extends AbortablePanel {
 //        abortActionPerformed(null);
 //        ++_changeCount;
 //      }
-      if (_changeCount>0) {
+      if (_changeCount > 0) {
         _changeCount = 0;
         EventQueue.invokeLater(new Runnable() {
           public void run() {
@@ -554,7 +554,7 @@ public class ExternalProcessPanel extends AbortablePanel {
             _textArea.setText(_sb.toString());
             int maxLines = edu.rice.cs.drjava.DrJava.getConfig().
               getSetting(edu.rice.cs.drjava.config.OptionConstants.FOLLOW_FILE_LINES);
-            if (maxLines>0) { // if maxLines is 0, buffer is unlimited
+            if (maxLines > 0) { // if maxLines is 0, buffer is unlimited
               try {
                 int start = 0;
                 int len = _textArea.getText().length();

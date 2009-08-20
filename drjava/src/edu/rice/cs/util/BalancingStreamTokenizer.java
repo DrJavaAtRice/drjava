@@ -234,7 +234,7 @@ public class BalancingStreamTokenizer {
   public void wordRange(int lo, int hi) {
     ArrayList<String> kwToRemove = new ArrayList<String>();
     ArrayList<String> qpToRemove = new ArrayList<String>();
-    for(int i=lo; i<=hi; ++i) {
+    for(int i = lo; i <= hi; ++i) {
       // now remove all whitespace in that range
       if (_state.whitespace.contains(i)) {
         _state.whitespace.remove(i);
@@ -244,14 +244,14 @@ public class BalancingStreamTokenizer {
       Iterator<String> kit = _state.keywords.iterator();
       while(kit.hasNext()) {
         String s = kit.next();
-        if (s.charAt(0)==i) { kwToRemove.add(s); }
+        if (s.charAt(0) == i) { kwToRemove.add(s); }
       }
 
       // now accumulate all quotes that begin with that character
       Iterator<String> qit = _state.quotes.iterator();
       while(qit.hasNext()) {
         String s = qit.next();
-        if (s.charAt(0)==i) { qpToRemove.add(s); }
+        if (s.charAt(0) == i) { qpToRemove.add(s); }
       }
     }
     // remove all accumulated keywords and quotes
@@ -279,14 +279,14 @@ public class BalancingStreamTokenizer {
       Iterator<String> kit = _state.keywords.iterator();
       while(kit.hasNext()) {
         String s = kit.next();
-        if (s.charAt(0)==i) { kwToRemove.add(s); }
+        if (s.charAt(0) == i) { kwToRemove.add(s); }
       }
       
       // now accumulate all quotes that begin with that character
       Iterator<String> qit = _state.quotes.iterator();
       while(qit.hasNext()) {
         String s = qit.next();
-        if (s.charAt(0)==i) { qpToRemove.add(s); }
+        if (s.charAt(0) == i) { qpToRemove.add(s); }
       }
     }
     // remove all accumulated keywords and quotes
@@ -305,8 +305,8 @@ public class BalancingStreamTokenizer {
   public void whitespaceRange(int lo, int hi) {
     ArrayList<String> kwToRemove = new ArrayList<String>();
     ArrayList<String> qpToRemove = new ArrayList<String>();
-    for(int i=lo; i<=hi; ++i) {
-      if ((_escape!=null) && (i==_escape)) { continue; }
+    for(int i = lo; i <= hi; ++i) {
+      if ((_escape != null) && (i == _escape)) { continue; }
 
       // set whitespace
       _state.whitespace.add(i);
@@ -315,14 +315,14 @@ public class BalancingStreamTokenizer {
       Iterator<String> kit = _state.keywords.iterator();
       while(kit.hasNext()) {
         String s = kit.next();
-        if (s.charAt(0)==i) { kwToRemove.add(s); }
+        if (s.charAt(0) == i) { kwToRemove.add(s); }
       }
 
       // now accumulate all quotes that begin with that character
       Iterator<String> qit = _state.quotes.iterator();
       while(qit.hasNext()) {
         String s = qit.next();
-        if (s.charAt(0)==i) { qpToRemove.add(s); }
+        if (s.charAt(0) == i) { qpToRemove.add(s); }
       }
     }
     // remove all accumulated keywords and quotes
@@ -341,7 +341,7 @@ public class BalancingStreamTokenizer {
     ArrayList<String> kwToRemove = new ArrayList<String>();
     ArrayList<String> qpToRemove = new ArrayList<String>();
     for(int i: c) {
-      if ((_escape!=null) && (i==_escape)) { continue; }
+      if ((_escape != null) && (i == _escape)) { continue; }
       
       // set whitespace
       _state.whitespace.add(i);
@@ -350,14 +350,14 @@ public class BalancingStreamTokenizer {
       Iterator<String> kit = _state.keywords.iterator();
       while(kit.hasNext()) {
         String s = kit.next();
-        if (s.charAt(0)==i) { kwToRemove.add(s); }
+        if (s.charAt(0) == i) { kwToRemove.add(s); }
       }
       
       // now accumulate all quotes that begin with that character
       Iterator<String> qit = _state.quotes.iterator();
       while(qit.hasNext()) {
         String s = qit.next();
-        if (s.charAt(0)==i) { qpToRemove.add(s); }
+        if (s.charAt(0) == i) { qpToRemove.add(s); }
       }
     }
     // remove all accumulated keywords and quotes
@@ -381,7 +381,7 @@ public class BalancingStreamTokenizer {
     Iterator<Integer> wit = _state.whitespace.iterator();
     while(wit.hasNext()) {
       int c = wit.next();
-      if (begin.charAt(0)==c) {
+      if (begin.charAt(0) == c) {
         throw new QuoteStartsWithWhitespaceException("Cannot add quote pair '"+
                                                      begin+"'-'"+end+"' because the first character of the beginning has "+
                                                      "already been marked as whitespace");
@@ -404,7 +404,7 @@ public class BalancingStreamTokenizer {
       b = qit.next();
       if (b.equals(begin)) { break; }
     }
-    if ((b!=null)&&(qit.hasNext())) {
+    if ((b != null) && (qit.hasNext())) {
       _state.quotes.remove(b);
       _state.quoteEnds.remove(_state.quotePairs.get(b));
       _state.quotePairs.remove(b);
@@ -434,7 +434,7 @@ public class BalancingStreamTokenizer {
     Iterator<Integer> wit = _state.whitespace.iterator();
     while(wit.hasNext()) {
       int c = wit.next();
-      if (kw.charAt(0)==c) {
+      if (kw.charAt(0) == c) {
         throw new KeywordStartsWithWhitespaceException("Cannot add keyword '"+
                                                        kw+"' because the first character of the beginning has "+
                                                        "already been marked as whitespace");
@@ -463,7 +463,7 @@ public class BalancingStreamTokenizer {
     StringBuilder buf = new StringBuilder();
     int c = nextToken();
     while (c!=-1) {
-      _isEscape = ((_escape!=null) && (((char)c)==_escape));
+      _isEscape = ((_escape != null) && (((char)c) == _escape));
       
       // see if this is whitespace
       if (_state.whitespace.contains(c)) {
@@ -473,7 +473,7 @@ public class BalancingStreamTokenizer {
           _wasEscape = false;
         }
         else {
-          if (buf.length()>0) {
+          if (buf.length() > 0) {
             _token = Token.NORMAL;
             return buf.toString();
           }
@@ -489,15 +489,15 @@ public class BalancingStreamTokenizer {
           public String value(String in) {
             // we didn't find a match
             // push the tokens back, all except for the last one
-            for(int i=in.length()-1; i>0; --i) {
+            for(int i=in.length()-1; i > 0; --i) {
               pushToken(in.charAt(i));
             }
             return null;
           }
         });
-        if (temp!=null) {
+        if (temp != null) {
           // we found the beginning of a quote
-          if (buf.length()>0) {
+          if (buf.length() > 0) {
             // but we still have regular text to output
             // so we need to push all tokens back
             for(int i=temp.length()-1; i>=0; --i) {
@@ -525,9 +525,9 @@ public class BalancingStreamTokenizer {
           _state.quoteEnds.clear();
           _state.quotePairs.clear();
           
-          while(quoteStack.size()>0) {
+          while(quoteStack.size() > 0) {
             String s = getNextToken();
-            if (s==null) { break; }
+            if (s == null) { break; }
             if (_stateStack.peek().quoteEnds.contains(s)) {
               // ending quote
               String top = quoteStack.peek();
@@ -574,15 +574,15 @@ public class BalancingStreamTokenizer {
           public String value(String in) {
             // we didn't find a match
             // push the tokens back, all except for the last one
-            for(int i=in.length()-1; i>0; --i) {
+            for(int i=in.length()-1; i > 0; --i) {
               pushToken(in.charAt(i));
             }
             return null;
           }
         });
-        if (temp!=null) {
+        if (temp != null) {
           // we found a keyword
-          if (buf.length()>0) {
+          if (buf.length() > 0) {
             // but we still have regular text to output
             // so we need to push all tokens back
             for(int i=temp.length()-1; i>=0; --i) {
@@ -614,15 +614,15 @@ public class BalancingStreamTokenizer {
             String temp = findMatch(cnext, _state.quotes, new Lambda<String,String>() {
               public String value(String in) { 
                 // push the tokens back
-                for(int i=in.length()-1; i>0; --i) {
+                for(int i=in.length()-1; i > 0; --i) {
                   pushToken(in.charAt(i));
                 }
                 return null;
               }
             });
-            if (temp!=null) {
+            if (temp != null) {
               // push the tokens back
-              for(int i=temp.length()-1; i>0; --i) {
+              for(int i=temp.length()-1; i > 0; --i) {
                 pushToken(temp.charAt(i));
               }
               // System.err.println("It looks like a quote");
@@ -633,15 +633,15 @@ public class BalancingStreamTokenizer {
               temp = findMatch(cnext, _state.keywords, new Lambda<String,String>() {
                 public String value(String in) {
                   // push the tokens back
-                  for(int i=in.length()-1; i>0; --i) {
+                  for(int i=in.length()-1; i > 0; --i) {
                     pushToken(in.charAt(i));
                   }
                   return null;
                 }
               });
-              if (temp!=null) {
+              if (temp != null) {
                 // push the tokens back
-                for(int i=temp.length()-1; i>0; --i) {
+                for(int i=temp.length()-1; i > 0; --i) {
                   pushToken(temp.charAt(i));
                 }
                 // System.err.println("It looks like a keyword");
@@ -670,7 +670,7 @@ public class BalancingStreamTokenizer {
       buf.append(String.valueOf(_escape));
     }
     // end of stream, return remaining buffer as last token
-    if (buf.length()>0) {
+    if (buf.length() > 0) {
       _token = Token.NORMAL;
       return buf.toString();
     }
@@ -710,7 +710,7 @@ public class BalancingStreamTokenizer {
       }
     }
     if ((c!=-1) && 
-        (prefixSet.size()==1) && 
+        (prefixSet.size() == 1) && 
         (choices.contains(prefixSet.first()))) {
       // there is only one match
       String match = prefixSet.first();
@@ -733,12 +733,12 @@ public class BalancingStreamTokenizer {
   
   
   protected String escape(String s) {
-    if (_escape==null) { return s; }
+    if (_escape == null) { return s; }
     StringBuilder sb = new StringBuilder();
-    for(int i=0; i<s.length(); ++i) {
-      if (i==0) { sb.append(s.charAt(0)); }
+    for(int i = 0; i < s.length(); ++i) {
+      if (i == 0) { sb.append(s.charAt(0)); }
       else {
-      if (s.charAt(i)==_escape) { sb.append(_escape); }
+      if (s.charAt(i) == _escape) { sb.append(_escape); }
       sb.append(s.charAt(i));
     }
     }
@@ -746,13 +746,13 @@ public class BalancingStreamTokenizer {
   }
   
   protected String unescape(String s) {
-    if (_escape==null) { return s; }
+    if (_escape == null) { return s; }
     StringBuilder sb = new StringBuilder();
-    for(int i=0; i<s.length(); ++i) {
-      if (i==0) { sb.append(s.charAt(0)); }
+    for(int i = 0; i < s.length(); ++i) {
+      if (i == 0) { sb.append(s.charAt(0)); }
       else {
-      if (s.charAt(i)==_escape) {
-        if ((i+1<s.length()) && (s.charAt(i+1)==_escape)) { ++i; }
+      if (s.charAt(i) == _escape) {
+        if ((i+1<s.length()) && (s.charAt(i+1) == _escape)) { ++i; }
       }
       sb.append(s.charAt(i));
     }

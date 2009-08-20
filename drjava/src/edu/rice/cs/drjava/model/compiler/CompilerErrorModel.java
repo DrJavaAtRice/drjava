@@ -179,7 +179,7 @@ public class CompilerErrorModel {
   public String toString() {
     final StringBuilder buf = new StringBuilder();
     buf.append(this.getClass().toString() + ":\n  ");
-    for (int i=0; i < _numErrors; i++) {
+    for (int i = 0; i < _numErrors; i++) {
       buf.append(_errors[i].toString());
       buf.append("\n  ");
     }

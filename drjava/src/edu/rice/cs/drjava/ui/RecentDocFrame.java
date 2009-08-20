@@ -240,7 +240,7 @@ public class RecentDocFrame extends JWindow {
       start += endl.length();
     /* get the ending point 2 lines down */
     int index;
-    for (int i=0;i<4;i++) {
+    for (int i = 0;i < 4;i++) {
       if (end < doc.getLength()) {
         index = text.indexOf(endl, end + endl.length());
         if (index != -1) end = index;

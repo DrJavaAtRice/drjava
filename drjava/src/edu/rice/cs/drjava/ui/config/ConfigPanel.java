@@ -92,7 +92,7 @@ public class ConfigPanel extends JPanel {
     c.fill = GridBagConstraints.HORIZONTAL;
     Insets labelInsets = new Insets(0, 10, 0, 10);
     Insets compInsets  = new Insets(0, 0, 0, 0);
-    for (int i=0; i<_components.size(); i++) {
+    for (int i = 0; i < _components.size(); i++) {
       OptionComponent<?> comp = _components.get(i);
 
       if (!comp.useEntireColumn()) {
@@ -154,7 +154,7 @@ public class ConfigPanel extends JPanel {
 
   /** Tells each component to reset its display field to the current value. */
   public void resetToCurrent() {
-    for (int i=0; i < _components.size(); i++){
+    for (int i = 0; i < _components.size(); i++){
       _components.get(i).resetToCurrent();
       if (_components.get(i) instanceof VectorOptionComponent<?>)
         ((VectorOptionComponent<?>)_components.get(i)).resizeTable();

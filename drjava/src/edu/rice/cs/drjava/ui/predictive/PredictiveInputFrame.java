@@ -404,7 +404,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     for (final CloseAction<T> a: _actions) {
       _buttons[i] = new JButton(a.getName());
       final String tooltip = a.getToolTipText();
-      if (tooltip!=null) { _buttons[i].setToolTipText(tooltip); }
+      if (tooltip != null) { _buttons[i].setToolTipText(tooltip); }
       _buttons[i].addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) { buttonPressed(a); }
       });
@@ -443,7 +443,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     Keymap ourMap = JTextComponent.addKeymap("PredictiveInputFrame._textField", _textField.getKeymap());
     for (final CloseAction<T> a: _actions) {
       KeyStroke ks = a.getKeyStroke();
-      if (ks!=null) {
+      if (ks != null) {
         ourMap.addActionForKeyStroke(ks, new AbstractAction() {
           public void actionPerformed(ActionEvent e) {
             buttonPressed(a);
@@ -481,7 +481,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
 //        System.out.println("down!");
-        if (_matchList.getModel().getSize()>0) {
+        if (_matchList.getModel().getSize() > 0) {
           removeListener();
           int i = _matchList.getSelectedIndex();
           if (i < _matchList.getModel().getSize() - 1) {
@@ -513,7 +513,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0), new AbstractAction() {
       public void actionPerformed(ActionEvent e) {
 //        System.out.println("page down!");
-        if (_matchList.getModel().getSize()>0) {
+        if (_matchList.getModel().getSize() > 0) {
           removeListener();
           int page = _matchList.getLastVisibleIndex() - _matchList.getFirstVisibleIndex() + 1;
           int i = _matchList.getSelectedIndex() + page;
@@ -600,7 +600,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     contentPane.add(_textField, c);
     
     _optionalComponents = makeOptions();
-    if (_optionalComponents.length>0) {
+    if (_optionalComponents.length > 0) {
       _optionsPanel = new JPanel(new BorderLayout());
       _setupOptionsPanel(_optionalComponents);
       contentPane.add(_optionsPanel, c);
@@ -729,7 +729,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   /** Update the extension label based on the model. */
   private void updateExtensionLabel() {
     _sharedExtLabel.setText(_pim.getSharedMaskExtension()+" ");
-    _tabCompletesLabel.setVisible(_pim.getSharedMaskExtension().length()>0);
+    _tabCompletesLabel.setVisible(_pim.getSharedMaskExtension().length() > 0);
   }
 
   /** Update the match list based on the model. */
@@ -739,8 +739,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     updateExtensionLabel();
     updateInfo();
     if (_force) {
-      for(int i=0; i<_buttons.length-1; ++i) {
-        _buttons[i].setEnabled(_matchList.getModel().getSize()>0);
+      for(int i = 0; i < _buttons.length-1; ++i) {
+        _buttons[i].setEnabled(_matchList.getModel().getSize() > 0);
       }
     }
   }
@@ -748,7 +748,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   /** Update the information. */
   private void updateInfo() {
     if (_info == null) return;
-    if (_matchList.getModel().getSize()>0) {
+    if (_matchList.getModel().getSize() > 0) {
       @SuppressWarnings("unchecked") 
       T item = (T)_matchList.getSelectedValue();
       _infoLabel.setText("Path:   " + _info.value(item));
@@ -784,42 +784,45 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   /** Listener for several events. */
   private class PredictiveInputListener implements CaretListener, DocumentListener {
     public void insertUpdate(DocumentEvent e) {
+      assert EventQueue.isDispatchThread();
 //      System.out.println("insertUpdate fired!");
-      Utilities.invokeLater(new Runnable() {
-        public void run() { 
+//      Utilities.invokeLater(new Runnable() {
+//        public void run() { 
           removeListener();
           _pim.setMask(_textField.getText());
           updateExtensionLabel();
           updateList();
           addListener();
-        }
-      });
+//        }
+//      });
     }
 
     public void removeUpdate(DocumentEvent e) {
+      assert EventQueue.isDispatchThread();
 //      System.err.println("removeUpdate fired!");
-      Utilities.invokeLater(new Runnable() {
-        public void run() { 
+//      Utilities.invokeLater(new Runnable() {
+//        public void run() { 
           removeListener();
           _pim.setMask(_textField.getText());
           updateExtensionLabel();
           updateList();
           addListener();
-        }
-      });
+//        }
+//      });
     }
 
     public void changedUpdate(DocumentEvent e) {
+      assert EventQueue.isDispatchThread();
 //      System.err.println("changedUpdate fired!");
-      Utilities.invokeLater(new Runnable() {
-        public void run() {
+//      Utilities.invokeLater(new Runnable() {
+//        public void run() {
           removeListener();
           _pim.setMask(_textField.getText());
           updateExtensionLabel();
           updateList();
           addListener();
-        }
-      });
+//        }
+//      });
     }
 
     public void caretUpdate(CaretEvent e) { }

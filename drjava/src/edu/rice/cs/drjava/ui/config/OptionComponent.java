@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.ui.config;
 
 import javax.swing.*;
+import java.awt.*;
 
 import java.io.Serializable;
 import java.util.Vector;
@@ -45,6 +46,7 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.util.swing.SwingFrame;
+import edu.rice.cs.util.swing.Utilities;
 
 /** The graphical form of an Option. Provides a way to see the values of Option while running DrJava and perform live 
   * updating of Options.
@@ -152,7 +154,7 @@ public abstract class OptionComponent<T> implements Serializable {
   
   /** Notify all change listeners of a change. Notification performed in the event thread. */
   protected void notifyChangeListeners() {
-//    assert _parent.duringInit() || EventQueue.isDispatchThread();
+    assert _parent.duringInit() || Utilities.TEST_MODE || EventQueue.isDispatchThread();
 //    Utilities.invokeLater(new Runnable() {
 //      public void run() { 
       // Make a copy of _changeListeners to prevent potential ConcurrentModificationException

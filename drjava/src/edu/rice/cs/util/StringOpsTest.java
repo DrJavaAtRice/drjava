@@ -1183,7 +1183,7 @@ public class StringOpsTest extends DrJavaTestCase {
         _attributes.put("attr", null);
       }
       public String getCurrent(PropertyMaps pm) {
-        if (_attributes.get("attr")==null) fail("Attribute attr for property var should be set.");
+        if (_attributes.get("attr") == null) fail("Attribute attr for property var should be set.");
         return super.getCurrent(pm);
       }
     });
@@ -1194,8 +1194,8 @@ public class StringOpsTest extends DrJavaTestCase {
         _attributes.put("attr2", null);
       }
       public String getCurrent(PropertyMaps pm) {
-        if (_attributes.get("attr1")==null) fail("Attribute attr1 for property xxx should be set.");
-        if (_attributes.get("attr2")==null) fail("Attribute attr2 for property xxx should be set.");
+        if (_attributes.get("attr1") == null) fail("Attribute attr1 for property xxx should be set.");
+        if (_attributes.get("attr2") == null) fail("Attribute attr2 for property xxx should be set.");
         return super.getCurrent(pm);
       }
     });

@@ -231,9 +231,9 @@ public class ClipboardHistoryFrame extends SwingFrame {
     _historyList.addFocusListener(new FocusAdapter() {
 
       public void focusLost(FocusEvent e) {
-        if ((e.getOppositeComponent()!=_previewArea) && 
-            (e.getOppositeComponent()!=_okButton) && 
-            (e.getOppositeComponent()!=_cancelButton)) {
+        if ((e.getOppositeComponent() != _previewArea) && 
+            (e.getOppositeComponent() != _okButton) && 
+            (e.getOppositeComponent() != _cancelButton)) {
           _historyList.requestFocus();
         }
       }
@@ -341,9 +341,9 @@ public class ClipboardHistoryFrame extends SwingFrame {
   private void updateView() {
     List<String> strs = _chm.getStrings();
     ListItem[] arr = new ListItem[strs.size()];
-    for(int i=0; i<strs.size(); ++i) arr[strs.size()-i-1] = new ListItem(strs.get(i));
+    for(int i = 0; i < strs.size(); ++i) arr[strs.size()-i-1] = new ListItem(strs.get(i));
     _historyList.setListData(arr);
-    if (_historyList.getModel().getSize()>0) {
+    if (_historyList.getModel().getSize() > 0) {
       _historyList.setSelectedIndex(0);
       getRootPane().setDefaultButton(_okButton);
       _okButton.setEnabled(true);
@@ -358,7 +358,7 @@ public class ClipboardHistoryFrame extends SwingFrame {
   /** Update the preview area based on the model. */
   private void updatePreview() {
     String text = "";
-    if (_historyList.getModel().getSize()>0) {
+    if (_historyList.getModel().getSize() > 0) {
       int index = _historyList.getSelectedIndex();
       if (index != -1) {
         text = ((ListItem)_historyList.getModel().getElementAt(_historyList.getSelectedIndex())).getFull();
@@ -373,7 +373,7 @@ public class ClipboardHistoryFrame extends SwingFrame {
   private void okButtonPressed() {
     _lastState = new FrameState(ClipboardHistoryFrame.this);
     setVisible(false);
-    if (_historyList.getModel().getSize()>0) {
+    if (_historyList.getModel().getSize() > 0) {
       _buttonPressed = JOptionPane.OK_OPTION;
       String s = ((ListItem)_historyList.getModel().getElementAt(_historyList.getSelectedIndex())).getFull();
       _chm.put(s);

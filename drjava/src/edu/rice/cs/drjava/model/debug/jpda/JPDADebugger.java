@@ -433,7 +433,7 @@ public class JPDADebugger implements Debugger {
   public /* synchronized */ void removeWatch(String field) throws DebugException {
     // _ensureReady();
     assert EventQueue.isDispatchThread();
-    for (int i=0; i < _watches.size(); i++) {
+    for (int i = 0; i < _watches.size(); i++) {
       final DebugWatchData watch = _watches.get(i);
       if (watch.getName().equals(field)) {
         _watches.remove(i);
@@ -588,7 +588,7 @@ public class JPDADebugger implements Debugger {
       if (requests.size() > 0 && _eventManager != null) {
         // Remove all event requests for this breakpoint
         try {
-          for (int i=0; i < requests.size(); i++) {
+          for (int i = 0; i < requests.size(); i++) {
             _eventManager.deleteEventRequest(requests.get(i));
           }
         }
@@ -732,12 +732,12 @@ public class JPDADebugger implements Debugger {
             break;
           }
         }
-        if (fileName==null) {
+        if (fileName == null) {
           fileName = className + ".java";
         }
       }
       
-      if (fileName!=null) {
+      if (fileName != null) {
         // Check source root set (open files)
         File f = _model.getSourceFile(fileName);
         if (f != null) {
@@ -821,7 +821,7 @@ public class JPDADebugger implements Debugger {
     assert EventQueue.isDispatchThread();
     for (int i = 0; i < _model.getBreakpointManager().getRegions().size(); i++) {
       Breakpoint bp = _model.getBreakpointManager().getRegions().get(i);
-      if ((LLBreakpointLineNum(bp)== line) && (bp.getClassName().equals(className))) {
+      if ((LLBreakpointLineNum(bp) ==  line) && (bp.getClassName().equals(className))) {
         return bp;
       }
     }
@@ -966,7 +966,7 @@ public class JPDADebugger implements Debugger {
     // Return each valid reference type
     Vector<ReferenceType> refTypes = new Vector<ReferenceType>();
     ReferenceType ref;
-    for (int i=0; i < classes.size(); i++) {
+    for (int i = 0; i < classes.size(); i++) {
       ref = classes.get(i);
       
       if (lineNumber != DebugAction.ANY_LINE) {
@@ -1115,7 +1115,7 @@ public class JPDADebugger implements Debugger {
     catch(DebugException e) { throw new UnexpectedException(e); }
     
     // Must resume the correct number of times
-    for (int i = suspendCount; i>0; i--) thread.resume();
+    for (int i = suspendCount; i > 0; i--) thread.resume();
     
     // Notify listeners of a resume
     
@@ -1306,12 +1306,12 @@ public class JPDADebugger implements Debugger {
       String type = "";
       ArrayList<Integer> arr_index = new ArrayList<Integer>();
       
-      if(name.indexOf("[")!=-1 && name.indexOf("]")!=-1) {
+      if(name.indexOf("[") != -1 && name.indexOf("]") != -1) {
         name = name.substring(0, name.indexOf("["));
         arr_index.add(Integer.parseInt(w.getName().substring(w.getName().indexOf("[")+1, w.getName().indexOf("]"))));      
         if(w.getName().indexOf("]")<(w.getName().length()-1)) {
           String iter = w.getName().substring(w.getName().indexOf("]")+1, w.getName().length());
-          while(iter.indexOf("[")!=-1 && iter.indexOf("]")!=-1) {
+          while(iter.indexOf("[") != -1 && iter.indexOf("]") != -1) {
             arr_index.add(Integer.parseInt(iter.substring(iter.indexOf("[")+1, iter.indexOf("]"))));      
             if(iter.indexOf("]")<(iter.length()-1))
               iter = iter.substring(iter.indexOf("]")+1, iter.length());
@@ -1581,7 +1581,7 @@ public class JPDADebugger implements Debugger {
     _notifier.currThreadSet(new JPDAThreadData(currThread));
 
     boolean usedBreakpointLine = false;
-    if (request!=null) {
+    if (request != null) {
       // we have breakpoint information, use it
       Object property = request.getProperty("debugAction");
       if (property != null && (property instanceof JPDABreakpoint)) {
@@ -1625,14 +1625,14 @@ public class JPDADebugger implements Debugger {
         ArrayReference wrappedVal =
           (ArrayReference) _invokeMethod(_runningThread, _interpreterJVM, "getVariable",
                                          GET_VARIABLE_SIG, name);
-        if ((wrappedVal!=null) && (wrappedVal.length() == 1)) { // if it can't be found (length is 0), just ignore it
+        if ((wrappedVal != null) && (wrappedVal.length() == 1)) { // if it can't be found (length is 0), just ignore it
           try {
             Value val = wrappedVal.getValue(0);
             if (var.type() instanceof PrimitiveType) {
               try { val = _unbox((ObjectReference) val, _runningThread); }
               catch (DebugException e) { error.log("Can't unbox variable", e); }
             }
-            if ((oldVal==null) || (!oldVal.equals(val))) {
+            if ((oldVal == null) || (!oldVal.equals(val))) {
               try { _runningThread.frame(0).setValue(var, val); }
               catch (InvalidTypeException e) { error.log("Can't set variable", e); }
               catch (ClassNotLoadedException e) { error.log("Can't set variable", e); }
@@ -1929,11 +1929,11 @@ public class JPDADebugger implements Debugger {
     public String sourceName() { return _sourceName; }
     public String sourceName(String stratum) { return _sourceName; /* Is this right? */ }
     public String sourcePath() throws AbsentInformationException {
-      if (_sourcePath!=null) return _sourcePath;
+      if (_sourcePath != null) return _sourcePath;
       else return _delegee.sourcePath();
     }
     public String sourcePath(String stratum) throws AbsentInformationException {
-      if (_sourcePath!=null) return _sourcePath;
+      if (_sourcePath != null) return _sourcePath;
       else return _delegee.sourcePath(); /* Is this right? */
     }
     public String toString() { return _delegee.toString(); }

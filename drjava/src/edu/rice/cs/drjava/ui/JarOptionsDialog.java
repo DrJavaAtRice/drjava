@@ -547,7 +547,7 @@ public class JarOptionsDialog extends SwingFrame {
     _mainClassField = new FileSelectorStringComponent(this, chooser, 20, 12f) {
       protected void _chooseFile() {
         _mainFrame.removeModalWindowAdapter(JarOptionsDialog.this);
-        if (getText().length()==0) {
+        if (getText().length() == 0) {
           LOG.log("getFileChooser().setCurrentDirectory(_rootFile);");
           getFileChooser().setRoot(_rootFile);
           getFileChooser().setCurrentDirectory(_rootFile);
@@ -594,7 +594,14 @@ public class JarOptionsDialog extends SwingFrame {
       public void insertUpdate(DocumentEvent e) { setEnabled(); }
       public void removeUpdate(DocumentEvent e) { setEnabled(); }
       public void changedUpdate(DocumentEvent e) { setEnabled(); }
-      private void setEnabled() { Utilities.invokeLater(new Runnable() { public void run() { _okButton.setEnabled(true); } }); }
+      private void setEnabled() { 
+//        Utilities.invokeLater(new Runnable() { 
+//          public void run() { 
+            assert EventQueue.isDispatchThread();
+            _okButton.setEnabled(true); 
+//          } 
+//        }); 
+      }
     });
     JPanel p = new JPanel();
     p.setLayout(new BorderLayout());
@@ -910,7 +917,7 @@ public class JarOptionsDialog extends SwingFrame {
         _processingFrame.dispose();
         JarOptionsDialog.this.setEnabled(true);
         if (_success) {
-          if (_exceptions.size()>0) {
+          if (_exceptions.size() > 0) {
             ScrollableListDialog<String> dialog = new ScrollableListDialog.Builder<String>()
               .setOwner(JarOptionsDialog.this)
               .setTitle("Problems Creating Jar")
@@ -969,7 +976,7 @@ public class JarOptionsDialog extends SwingFrame {
           Manifest m = mw.getManifest();
           
           if(m != null){
-            if (_exceptions.size()>0) {
+            if (_exceptions.size() > 0) {
               ScrollableListDialog<String> dialog = new ScrollableListDialog.Builder<String>()
                 .setOwner(JarOptionsDialog.this)
                 .setTitle("Error Creating Jar")
@@ -991,7 +998,7 @@ public class JarOptionsDialog extends SwingFrame {
             }
           }
           else {
-            if (_exceptions.size()>0) {
+            if (_exceptions.size() > 0) {
               ScrollableListDialog<String> dialog = new ScrollableListDialog.Builder<String>()
                 .setOwner(JarOptionsDialog.this)
                 .setTitle("Error Creating Jar")
@@ -1031,7 +1038,7 @@ public class JarOptionsDialog extends SwingFrame {
     if (_makeExecutable.isSelected()) f |= MAKE_EXECUTABLE;
     if (_customManifest.isSelected()) f |= CUSTOM_MANIFEST;
     
-    if (f!=_model.getCreateJarFlags()) {
+    if (f != _model.getCreateJarFlags()) {
       _model.setCreateJarFlags(f);
     }
     

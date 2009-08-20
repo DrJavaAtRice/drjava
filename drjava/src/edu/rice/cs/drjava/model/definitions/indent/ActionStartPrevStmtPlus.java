@@ -61,7 +61,8 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
   }
 
   /** Properly indents the line that the caret is currently on. Replaces all whitespace characters at the beginning of
-    * the line with the appropriate spacing or characters.  Assumes reduced lock is alread held.
+    * the line with the appropriate spacing or characters.  Assumes reduced lock is alread held [Archaic].  Only
+    * runs in the event thread.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is taking place
     * @return true if the caller should update the current location itself, false if the indenter has already handled it
@@ -85,7 +86,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     
     try {
       char delim = doc.getText(prevDelimiterPos, 1).charAt(0);    // get delimiter char
-      char[] ws = {' ', '\t', '\n', ';'};
+      char[] ws = {' ', '\t', '\n', ';'};  // Why is ';' a delimiter?
       if (delim == ';') {
         int testPos = doc._findPrevCharPos(prevDelimiterPos, ws);  // find char preceding ';' delimiter
         char testDelim = doc.getText(testPos,1).charAt(0);
@@ -108,7 +109,12 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
         
         assert doc.getCurrentLocation() == here;
         doc.setCurrentLocation(prevDelimiterPos + 1);   // move cursor to right of '}' or ')' delim
-        prevDelimiterPos -= doc.balanceBackward() - 1;  // use matching '{' or '(' as delim
+        int delta = doc.balanceBackward(); // Number of chars backward to matching '{' or '('
+        if (delta < 0) { // no matching delimiter!
+          throw new UnexpectedException("No matching '{' or '(' preceding '" + delim + "' at offset " + here + " in "
+                                       + doc);
+        }
+        prevDelimiterPos -= delta - 1;  // Position just to right of matching '{' or '('
         doc.setCurrentLocation(here);
         
         assert doc.getText(prevDelimiterPos, 1).charAt(0) == '{' || 

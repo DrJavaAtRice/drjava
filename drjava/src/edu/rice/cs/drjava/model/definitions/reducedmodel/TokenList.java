@@ -183,7 +183,7 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
     /** Helper function that moves cursor ([iterator pos, count]) forward by count chars.  Assumes that count > 0 and
       * is in range.  Returns the new count.
       * <ol>
-      * <li> at head && count>0:  next
+      * <li> at head && count > 0:  next
       * <li> LOOP:<BR>
       * if atEnd and count == 0, stop<BR>
       * if atEnd and count > 0, throw boundary exception<BR>
@@ -220,7 +220,7 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
     /** Helper function that moves cursor ([iterator pos, count]) backward by count chars.  Assumes that count > 0 and
       * is in range.  Returns the new count.
       * <ol>
-      * <li> atEnd && count>0:  prev
+      * <li> atEnd && count > 0:  prev
       * <li> LOOP:<BR>
       * if atStart and count == 0, stop<BR>
       * if atStart and count > 0, throw boundary exception<BR>

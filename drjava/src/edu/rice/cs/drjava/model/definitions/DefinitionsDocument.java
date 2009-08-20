@@ -84,12 +84,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   // begin debug code
   
-//  private boolean _closed = false;
-//  
-//  protected void throwErrorHuh() {
-//    if (_closed) throw new RuntimeException("Definitions Document is closed, yet is being used");
-//  }
-  
   /** Closes this DefinitionsDocument (but not the enclosing OpenDefinitionsDocument).  Called when this is kicked out
     * of the document cache so that this can be GC'd. */
   public void close() {
@@ -723,7 +717,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     
     if (qual) {
       String pn = getPackageName();
-      if ((pn.length()>0) && (name.length()>0)) {
+      if ((pn.length() > 0) && (name.length() > 0)) {
         name = getPackageName() + "." + name;
       }
     }
@@ -780,7 +774,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
             // might be a generic class
             int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>');
             if (closePointyBracket != -1) {
-              if (text.charAt(closePointyBracket)=='>') {
+              if (text.charAt(closePointyBracket) == '>') {
                 parenStart = getFirstNonWSCharPos(closePointyBracket+1);
               }
             }
@@ -881,7 +875,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       int origParenStart = parenStart;
       
 //      if (oldLog) System.err.println("\tfirst non-whitespace after class = "+parenStart+" `"+text.charAt(parenStart)+"`");
-      if (text.charAt(origParenStart)=='<') {
+      if (text.charAt(origParenStart) == '<') {
         parenStart = -1;
         // might be a generic class
         int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>');

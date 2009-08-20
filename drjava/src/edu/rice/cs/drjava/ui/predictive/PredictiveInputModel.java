@@ -359,7 +359,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
         allMatching = true;
         for (X i: items) {
           String a = (pim._ignoreCase)?(i.toString().toLowerCase()):(i.toString());
-          if (a.charAt(len)!=ch) {
+          if (a.charAt(len) != ch) {
             allMatching = false;
             break;
           }
@@ -664,7 +664,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
       if (_strategy.isMatch(s, this)) _matchingItems.add(s);
     }
     if (_items.size() > 0) {
-      for(int i=0; i<_items.size(); ++i) {
+      for(int i = 0; i < _items.size(); ++i) {
         if (_strategy.isPerfectMatch(_items.get(i), this)) {
           _index = i;
           break;
@@ -699,7 +699,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
       pickClosestMatch(item);
     }
     else {
-      for (int i=index; i<_items.size(); ++i) {
+      for (int i=index; i < _items.size(); ++i) {
         if (0 <= indexOf(_matchingItems, _items.get(i))) {
           _index = i;
           found = true;

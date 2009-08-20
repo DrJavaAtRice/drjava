@@ -110,7 +110,7 @@ public class TernaryOpProperty<O,P,Q,R> extends EagerProperty {
     * @param pm PropertyMaps used for substitution when replacing variables */
   public void update(PropertyMaps pm) {
     O op1;
-    if (_attributes.get(_op1Name)==null) {
+    if (_attributes.get(_op1Name) == null) {
       _value = "("+_name+" Error...)";
       return;
     }
@@ -124,7 +124,7 @@ public class TernaryOpProperty<O,P,Q,R> extends EagerProperty {
       }
     }
     P op2;
-    if (_attributes.get(_op2Name)==null) {
+    if (_attributes.get(_op2Name) == null) {
       _value = "("+_name+" Error...)";
       return;
     }
@@ -138,7 +138,7 @@ public class TernaryOpProperty<O,P,Q,R> extends EagerProperty {
       }
     }
     Q op3;
-    if (_attributes.get(_op3Name)==null) {
+    if (_attributes.get(_op3Name) == null) {
       _value = "("+_name+" Error...)";
       return;
     }

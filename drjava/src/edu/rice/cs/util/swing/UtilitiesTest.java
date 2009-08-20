@@ -69,7 +69,7 @@ public class UtilitiesTest extends TestCase {
         });          
       }
     });
-    for(int i=1; i<N; ++i) {
+    for(int i=1; i < N; ++i) {
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           System.out.println("Runnable 1");

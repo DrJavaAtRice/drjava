@@ -129,7 +129,7 @@ public class LineEnumRule extends JComponent {
 //    final int endOffset = odd.getEndPosition().getOffset()-1;
 //    int lastLine = odd.getDefaultRootElement().getElementIndex(endOffset);
 //    
-//    if (odd.getLineStartPos(endOffset)!=odd.getLineEndPos(endOffset)) { ++lastLine; }
+//    if (odd.getLineStartPos(endOffset) != odd.getLineEndPos(endOffset)) { ++lastLine; }
     for (int i = start; i < end; i += _increment) {
 //      final int lineNo = i/_increment +1;
 //      if (lineNo>lastLine) break;

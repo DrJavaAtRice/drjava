@@ -93,7 +93,7 @@ public abstract class InterpretResult implements Serializable {
       }
     }
     public <T> T apply(Visitor<T> v) {
-      if (_stackTrace!=null) 
+      if (_stackTrace != null) 
         return v.forEvalException(_msg, _stackTrace);
       else
         return v.forException(_msg);

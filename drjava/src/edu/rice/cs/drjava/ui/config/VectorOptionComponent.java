@@ -191,7 +191,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     _buttonTable.getTableHeader().setReorderingAllowed(false);
 
     // add button editors/renderers to the button table
-    for(int i=0; i<_buttonTable.getColumnCount(); ++i) {      
+    for(int i = 0; i < _buttonTable.getColumnCount(); ++i) {      
       buttonEditor = new ButtonEditor(buttons.get(i));
       _buttonTable.getColumnModel().getColumn(i).setCellEditor(buttonEditor);
     }
@@ -224,7 +224,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
 
     resetToCurrent();
 
-    if (_columnNames.length==0) {
+    if (_columnNames.length == 0) {
       _table.setTableHeader(null);
       _tableScrollPane.setColumnHeaderView(null);
     }
@@ -285,7 +285,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   /** Returns the table model. Can be overridden by subclasses. */
   protected AbstractTableModel _makeTableModel() {
     return new AbstractTableModel() {
-      public String getColumnName(int col) { return (_columnNames.length==0)?super.getColumnName(col):_columnNames[col]; }
+      public String getColumnName(int col) { return (_columnNames.length == 0)?super.getColumnName(col):_columnNames[col]; }
       public int getRowCount() { return _data.size(); }
       public int getColumnCount() { return 1; }
       public Object getValueAt(int row, int column) { return _data.get(row); }      
@@ -408,15 +408,15 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   /** Remove selected rows. */
   protected void _removeAction() {
     int[] rows = _table.getSelectedRows();
-    if (rows.length>0) {
+    if (rows.length > 0) {
       // remove starting from the back so the indices don't have to be adjusted
       for(int i=rows.length-1; i>=0; --i) {
         if (rows[i]>=_data.size()) continue;
         _removeIndex(rows[i]);
       }
       int last = rows[rows.length-1];
-      if (last==_data.size()) { // we removed the last element
-        if (last>0) { // and there's more than one element in the list
+      if (last == _data.size()) { // we removed the last element
+        if (last > 0) { // and there's more than one element in the list
           _table.getSelectionModel().setSelectionInterval(last-1,last-1);
         }
       }
@@ -430,11 +430,11 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   /** Move selected rows up by one row. */
   protected void _moveUpAction() {
     int[] rows = _table.getSelectedRows();
-    if (rows.length>0) {
+    if (rows.length > 0) {
       _table.getSelectionModel().clearSelection();
-      for(int i=0; i<rows.length; ++i) {
+      for(int i = 0; i < rows.length; ++i) {
         if (rows[i]>=_data.size()) continue;
-        if (rows[i]>0) {
+        if (rows[i] > 0) {
           T el = _data.remove(rows[i]);
           _data.insertElementAt(el, rows[i]-1);
           _table.getSelectionModel().addSelectionInterval(rows[i]-1,rows[i]-1);
@@ -448,9 +448,9 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   /** Move selected rows down by one row. */
   protected void _moveDownAction() {
     int[] rows = _table.getSelectedRows();
-    if (rows.length>0) {
+    if (rows.length > 0) {
       _table.getSelectionModel().clearSelection();
-      for(int i=0; i<rows.length; ++i) {
+      for(int i = 0; i < rows.length; ++i) {
         if (rows[i]>=_data.size()) continue;
         if (rows[i]<_data.size()-1) {
           T el = _data.remove(rows[i]);
@@ -494,7 +494,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   protected void updateButtons() {
     if (_moveButtonEnabled) {
       int[] rows = _table.getSelectedRows();
-      boolean enable = (rows.length>0) && (_data.size()>1);
+      boolean enable = (rows.length > 0) && (_data.size()>1);
       _moveUpButton.setEnabled(enable);
       _moveDownButton.setEnabled(enable);
       _buttonTableModel.setValueAt(null, 0, 1);
@@ -556,10 +556,10 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     else {
       pixelsPerRow = _table.getPreferredSize().height/rows;
     }
-    if (_maxRows>0) {
+    if (_maxRows > 0) {
         rows = Math.min(rows, _maxRows);
     }
-    if (_minRows>0) {
+    if (_minRows > 0) {
         rows = Math.max(rows, _minRows);
     }
 //    FontMetrics fm = _table.getFontMetrics(_table.getFont());

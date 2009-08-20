@@ -82,7 +82,7 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
     StepRequest request = _manager.getEventRequestManager().
       createStepRequest(_thread, _size, _depth);
     if (!stepJava) {
-      for (int i=0; i < _javaExcludes.length; i++) {
+      for (int i = 0; i < _javaExcludes.length; i++) {
         request.addClassExclusionFilter(_javaExcludes[i]);
       }
     }

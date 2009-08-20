@@ -110,10 +110,10 @@ public class PendingRequestManager {
   private boolean recursiveFindLineNumber(int lineNumber, ReferenceType rt) {
     try {
       for(Location l: rt.allLineLocations()) {
-        if (l.lineNumber()==lineNumber) { return true; }
+        if (l.lineNumber() == lineNumber) { return true; }
       }
       for(ReferenceType nested: rt.nestedTypes()) {
-        if (recursiveFindLineNumber(lineNumber, nested)==true) { return true; }
+        if (recursiveFindLineNumber(lineNumber, nested) == true) { return true; }
       }
     }
     catch (AbsentInformationException aie) { /* fall through and return false */ }

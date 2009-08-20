@@ -578,7 +578,7 @@ public class ConfigFrame extends SwingFrame {
                                                 "The color for compiler error highlights in the Definitions Pane.", true));
     addOptionComponent(panel, new ColorOptionComponent(OptionConstants.BOOKMARK_COLOR, "Bookmark Color", this,
                                                 "The color for bookmarks in the Definitions Pane.", true));
-    for (int i=0; i<OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
+    for (int i = 0; i < OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
       addOptionComponent(panel, new ColorOptionComponent(OptionConstants.FIND_RESULTS_COLORS[i], "Find Results Color "+(i+1), this,
                                                          "A color for highlighting find results in the Definitions Pane.", true));
     }
@@ -904,9 +904,9 @@ public class ConfigFrame extends SwingFrame {
             if (line == null) { result = false; }
           }
           finally {
-            if (br!=null) { br.close(); }
-            if (is!=null) { is.close(); }
-            if (urls!=null) { urls.close(); }
+            if (br != null) { br.close(); }
+            if (is != null) { is.close(); }
+            if (urls != null) { urls.close(); }
           }
         }
         catch(java.io.IOException ioe) { result = false; }
@@ -1381,7 +1381,7 @@ public class ConfigFrame extends SwingFrame {
       protected boolean verify(String s) {
         boolean result = true;
         // verify that the string contains only Java identifier characters, dots and stars
-        for(int i=0; i<s.length(); ++i) {
+        for(int i = 0; i < s.length(); ++i) {
           char ch = s.charAt(i);
           if ((ch!='.') && (ch!='*') && (!Character.isJavaIdentifierPart(ch))) {
             result = false;

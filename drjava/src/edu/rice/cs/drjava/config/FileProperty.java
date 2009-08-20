@@ -80,11 +80,11 @@ public class FileProperty extends DrJavaProperty {
   public void update(PropertyMaps pm) {
     String quot = "";
     String q = _attributes.get("squote");
-    if (q!=null) {
+    if (q != null) {
       if (q.toLowerCase().equals("true")) { quot = "'"; }
     }
     q = _attributes.get("dquote");
-    if (q!=null) {
+    if (q != null) {
       if (q.toLowerCase().equals("true")) { quot = "\"" + quot; }
     }
     try {

@@ -104,7 +104,7 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
       }
     }
     else {
-      if (_baseDir!=null) { _jfc.setCurrentDirectory(_baseDir); }
+      if (_baseDir != null) { _jfc.setCurrentDirectory(_baseDir); }
     }
 
     _jfc.setFileFilter(_fileFilter);

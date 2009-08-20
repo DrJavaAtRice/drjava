@@ -688,7 +688,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       try {
         if (_workDir == null || _workDir == FileOps.NULL_FILE) {
           File parentDir = _projectFile.getParentFile();
-          if (parentDir!=null) {
+          if (parentDir != null) {
             return parentDir.getCanonicalFile(); // default is project root
           }
           else return new File(System.getProperty("user.dir"));
@@ -733,7 +733,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public void removeExcludedFile(File f) {
       synchronized(_exclFiles) {
-        for(int i = 0;i<_exclFiles.size();i++) {
+        for(int i = 0;i < _exclFiles.size();i++) {
           try {
             if(_exclFiles.get(i).getCanonicalPath().equals(f.getCanonicalPath())) {
               _exclFiles.remove(i);
@@ -1299,7 +1299,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _completeOpenFile(d); // contains view-related calls
     }
     //        SHOW_GETDOC = false;
-    if (filesNotFound.size()>0)
+    if (filesNotFound.size() > 0)
       _notifier.filesNotFound( filesNotFound.toArray( new File[filesNotFound.size()] ) );
     
     if (! alreadyOpenDocuments.isEmpty()) {
@@ -1423,14 +1423,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     boolean isProjActive = isProjectActive();
     
     List<OpenDefinitionsDocument> docsToWrite = getOpenDefinitionsDocuments();
-    while(docsToWrite.size()>0) {
+    while(docsToWrite.size() > 0) {
       ArrayList<OpenDefinitionsDocument> readOnlyDocs = new ArrayList<OpenDefinitionsDocument>();
       for (final OpenDefinitionsDocument doc: docsToWrite) {  // getOpen... makes a copy
         // do not force Untitled document to be saved if projectActive() or unmodified
         if (doc.isUntitled() && (isProjActive || ! doc.isModifiedSinceSave())) continue;
         try {
           final File docFile = doc.getFile();
-          if (docFile==null || !docFile.exists() || docFile.canWrite()) {
+          if (docFile == null || !docFile.exists() || docFile.canWrite()) {
             // file is writable, save
             aboutToSaveFromSaveAll(doc);
             doc.saveFile(com);
@@ -1447,7 +1447,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         }
       }
       docsToWrite.clear();
-      if (readOnlyDocs.size()>0) {
+      if (readOnlyDocs.size() > 0) {
         ArrayList<File> files = new ArrayList<File>();
         for(OpenDefinitionsDocument odd: readOnlyDocs) {
           try { 
@@ -1604,7 +1604,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       for(File roFile: res) {
         FileOps.makeWritable(roFile);
       }
-      if (res.length==0) { return; /* read-only, do not overwrite */ }
+      if (res.length == 0) { return; /* read-only, do not overwrite */ }
     }
     
     ProjectProfile builder = _makeProjectProfile(file, info);
@@ -2181,9 +2181,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public List<OpenDefinitionsDocument> getSortedOpenDefinitionsDocuments() { return getOpenDefinitionsDocuments(); }
 
   /** @return true if all open documents are in sync with their primary class files. */
-  public boolean hasOutOfSyncDocuments() { return getOutOfSyncDocuments().size()>0; }
+  public boolean hasOutOfSyncDocuments() { return getOutOfSyncDocuments().size() > 0; }
   
-  public boolean hasOutOfSyncDocuments(List<OpenDefinitionsDocument> lod) { return getOutOfSyncDocuments().size()>0; }
+  public boolean hasOutOfSyncDocuments(List<OpenDefinitionsDocument> lod) { return getOutOfSyncDocuments().size() > 0; }
   
   /** @return true if all open documents are in sync with their primary class files. */
   public List<OpenDefinitionsDocument> getOutOfSyncDocuments() { return getOutOfSyncDocuments(getOpenDefinitionsDocuments()); }
@@ -3353,7 +3353,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         _notifier.fileReverted(doc);
       }
       catch (BadLocationException e) { throw new UnexpectedException(e); }
-      finally { if (reader!=null) reader.close(); /* win32 needs readers closed explicitly! */ }
+      finally { if (reader != null) reader.close(); /* win32 needs readers closed explicitly! */ }
     }
     
     /** Asks the listeners if the GlobalModel can abandon the current document.  Fires the canAbandonFile(File)
@@ -3955,7 +3955,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     */
   public void setActiveDocument(final OpenDefinitionsDocument doc) {
     /* The _activeDoc field is set by _gainVisitor when the DocumentNavigator changes the active document.
-     * TODO: This operation should not required invokeAndWait.  Document switching is initiated only by events EXCEPT in 
+     * TODO: This operation should not require invokeAndWait.  Document switching is initiated only by events EXCEPT in 
      * unit esting.  We need to clean up unit testing and eliminate the invokeAndWait overhead.
      */
     

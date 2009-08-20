@@ -389,7 +389,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         }
         if (end-begin>1) {
           // string is not empty
-          if (x.charAt(0)=='0') { // skip leading '0' of octal or hexadecimal literal
+          if (x.charAt(0) == '0') { // skip leading '0' of octal or hexadecimal literal
             ++begin;
             radix = 8;
             if (end-begin>1) {
@@ -1709,6 +1709,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @see edu.rice.cs.drjava.model.definitions.DefinitionsDocument.CommandUndoableEdit
     */
   protected void insertUpdate(AbstractDocument.DefaultDocumentEvent chng, AttributeSet attr) {
+   
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     super.insertUpdate(chng, attr);
     
@@ -1742,6 +1744,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   protected void removeUpdate(AbstractDocument.DefaultDocumentEvent chng) {
     
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    
     try {
       final int offset = chng.getOffset();
       final int length = chng.getLength();
@@ -1761,8 +1765,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
-  
-  
   
   /** Returns the byte image (as written to a file) of this document. */
   public byte[] getBytes() { return getText().getBytes(); }

@@ -150,7 +150,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
     _goToButton.setEnabled(regs.size() == 1);
     _removeButton.setEnabled(regs.size() > 0);
     _removeAllButton.setEnabled(_rootNode != null && _rootNode.getDepth() > 0);
-    _enableDisableButton.setEnabled(regs.size()>0);
+    _enableDisableButton.setEnabled(regs.size() > 0);
     if (regs.size() > 0) {
       if (regs.get(0).isEnabled()) _enableDisableButton.setText("Disable");
       else _enableDisableButton.setText("Enable");

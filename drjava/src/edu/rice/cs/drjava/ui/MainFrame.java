@@ -157,9 +157,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final InteractionsPane _consolePane;
   private final JScrollPane _consoleScroll;  // redirects focus to embedded _consolePane
   private final ConsoleController _consoleController;  // move to controller
-  private final InteractionsPane _interactionsPane;
-  private final JPanel _interactionsContainer;  // redirects focus to embedded _interactionsPane
-  private final InteractionsController _interactionsController;  // move to controller
   private final JUnitPanel _junitErrorPanel;
   private final JavadocErrorPanel _javadocErrorPanel;
   private final FindReplacePanel _findReplace;
@@ -167,6 +164,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   final BookmarksPanel _bookmarksPanel;
   private final LinkedList<Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>>> 
     _findResults = new LinkedList<Pair<FindResultsPanel, Map<MovingDocumentRegion, HighlightManager.HighlightInfo>>>();
+  
+  // The following three fields are conceptually final, but were downgraded to volatile to allow initialization in
+  // the event thread;
+  private volatile InteractionsPane _interactionsPane;
+  private volatile JPanel _interactionsContainer;  // redirects focus to embedded _interactionsPane
+  private volatile InteractionsController _interactionsController;  // move to controller
   
   private volatile boolean _showDebugger;  // whether the supporting context is debugger capable
   
@@ -475,7 +478,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Initializes the "Debugger" frame. */
   private void initDebugFrame() {
-    if (_debugFrame==null) return; // debugger isn't used
+    if (_debugFrame == null) return; // debugger isn't used
     if (DrJava.getConfig().getSetting(DIALOG_DEBUGFRAME_STORE_POSITION).booleanValue()) {
       _debugFrame.setFrameState(DrJava.getConfig().getSetting(DIALOG_DEBUGFRAME_STATE));  
     }
@@ -483,7 +486,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Reset the position of the "Debugger" dialog. */
   public void resetDebugFrame() {
-    if (_debugFrame==null) return; // debugger isn't used
+    if (_debugFrame == null) return; // debugger isn't used
     _debugFrame.setFrameState("default");
     if (DrJava.getConfig().getSetting(DIALOG_DEBUGFRAME_STORE_POSITION).booleanValue()) {
       DrJava.getConfig().setSetting(DIALOG_DEBUGFRAME_STATE, "default");
@@ -493,7 +496,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Action that detaches the debugger pane.  Only runs in the event thread. */
   private final Action _detachDebugFrameAction = new AbstractAction("Detach Debugger") {
     public void actionPerformed(ActionEvent ae) { 
-      if (_debugFrame==null) return; // debugger isn't used
+      if (_debugFrame == null) return; // debugger isn't used
       JMenuItem m = (JMenuItem)ae.getSource();
       boolean b = m.isSelected();
       DrJava.getConfig().setSetting(DETACH_DEBUGGER, b);
@@ -513,7 +516,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                     JOptionPane.QUESTION_MESSAGE);
       if (testName != null) {
         String ext;
-        for(int i=0; i < DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS.length; i++) {
+        for(int i = 0; i < DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS.length; i++) {
           ext = "." + DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[i];
           if (testName.endsWith(ext)) testName = testName.substring(0, testName.length() - ext.length());
         }
@@ -652,7 +655,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private void packHelp() { super.pack(); }
   
   /** Supports MainFrameTest.*/
-  public boolean saveEnabledHuh() { return _saveAction.isEnabled(); }
+  public boolean isSaveEnabled() { return _saveAction.isEnabled(); }
   
   /** Asks the user for a file name and saves the active document (in the definitions pane) to that file. */
   private final Action _saveAsAction = new AbstractAction("Save As...") {
@@ -945,7 +948,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         try {
           String result = (String)contents.getTransferData(DataFlavor.stringFlavor);
           StringBuilder sb = new StringBuilder();
-          for(int i=0; i<result.length(); ++i) {
+          for(int i = 0; i < result.length(); ++i) {
             char ch = result.charAt(i);
             if ((ch<32) && (ch!='\n')) sb.append(' ');
             else sb.append(ch);
@@ -1186,7 +1189,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public String getFullPackage() {
       if (fullPackage != null) { return fullPackage; }
       fullPackage = "";
-      if (doc!=null) {
+      if (doc != null) {
         try {
           fullPackage = doc.getPackageName();
           if (fullPackage.length() > 0) { fullPackage += '.'; }
@@ -1366,7 +1369,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     String s = odd.getText();
     // find start
     int start = loc;
-    while(start>0) {
+    while(start > 0) {
       if (! Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
       --start;
     }
@@ -1437,10 +1440,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         if (pim.getMatchingItems().size() == 0) {
           // if there are no matches, shorten the mask until there is at least one
           mask = pim.getMask();
-          while (mask.length()>0) {
+          while (mask.length() > 0) {
             mask = mask.substring(0, mask.length() - 1);
             pim.setMask(mask);
-            if (pim.getMatchingItems().size()>0) { break; }
+            if (pim.getMatchingItems().size() > 0) { break; }
           }
         }       
         initGotoFileDialog();
@@ -1599,9 +1602,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       }
       finally {
-        if (br!=null) { br.close(); }
-        if (is!=null) { is.close(); }
-        if (urls!=null) { urls.close(); }
+        if (br != null) { br.close(); }
+        if (is != null) { is.close(); }
+        if (urls != null) { urls.close(); }
       }
     }
     catch(IOException ioe) { /* ignore, we'll just have an incomplete list */ }
@@ -1687,7 +1690,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
       }
       
-      if (_javaAPISet.size()==0) { _javaAPISet = null; }
+      if (_javaAPISet.size() == 0) { _javaAPISet = null; }
     }
   }
   
@@ -1722,7 +1725,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     String s = odd.getText();
     // find start
     int start = loc;
-    while(start>0) {
+    while(start > 0) {
       if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
       --start;
     }
@@ -1764,7 +1767,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         if (pim.getMatchingItems().size() == 0) {
           // if there are no matches, shorten the mask until there is at least one
           mask = pim.getMask();
-          while(mask.length()>0) {
+          while(mask.length() > 0) {
             mask = mask.substring(0, mask.length() - 1);
             pim.setMask(mask);
             if (pim.getMatchingItems().size() > 0) { break; }
@@ -1833,7 +1836,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             // unselected, remove Java API classes from list
             Set<ClassNameAndPackageEntry> s = new HashSet<ClassNameAndPackageEntry>(_completeWordDialog.getItems());
             generateJavaAPISet();
-            if (_javaAPISet==null) {
+            if (_javaAPISet == null) {
               DrJava.getConfig().setSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI, Boolean.FALSE);
               _completeJavaAPICheckbox.setSelected(false);
               _completeJavaAPICheckbox.setEnabled(false);
@@ -1881,7 +1884,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               
               // find start
               int start = loc;
-              while(start>0) {
+              while(start > 0) {
                 if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
                 --start;
               }
@@ -1920,7 +1923,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               
               // find start
               int start = loc;
-              while(start>0) {
+              while(start > 0) {
                 if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
                 --start;
               }
@@ -1992,7 +1995,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   void addJavaAPIToSet(Set<ClassNameAndPackageEntry> s) {
     generateJavaAPISet();
-    if (_javaAPISet==null) {
+    if (_javaAPISet == null) {
       DrJava.getConfig().setSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI, Boolean.FALSE);
       _completeJavaAPICheckbox.setSelected(false);
       _completeJavaAPICheckbox.setEnabled(false);
@@ -2018,7 +2021,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     ClassNameAndPackageEntry currentEntry = null;
     HashSet<ClassNameAndPackageEntry> set;
     if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) &&
-        (_completeClassSet.size()>0)) {
+        (_completeClassSet.size() > 0)) {
       set = new HashSet<ClassNameAndPackageEntry>(_completeClassSet);
     }
     else {
@@ -2432,7 +2435,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private JMenuItem _automaticTraceMenuItem;
   
   public void setAutomaticTraceMenuItemStatus() {
-      if (_automaticTraceMenuItem!=null)
+      if (_automaticTraceMenuItem != null)
           _automaticTraceMenuItem.setSelected(_model.getDebugger().isAutomaticTraceEnabled());
   }
   
@@ -2768,7 +2771,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           File c = getChosenFile(_interactionsHistoryChooser, rc);
           //Moved from history itself to here to account for bug #989232, non-existant default
           //history file found
-          if ((c!=null) && (c.getName().indexOf('.') == -1)) {
+          if ((c != null) && (c.getName().indexOf('.') == -1)) {
             c = new File(c.getAbsolutePath() + "." + InteractionsHistoryFilter.HIST_EXTENSION);
           }
           _interactionsHistoryChooser.setSelectedFile(c);
@@ -3018,19 +3021,23 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       } 
     };
     
-    _interactionsController =
-      new InteractionsController(_model.getInteractionsModel(),
-                                 _model.getSwingInteractionsDocument(),
-                                 new Runnable() {
+    // setUp interactions pane
+    Utilities.invokeLater(new Runnable() {
       public void run() {
-        _closeSystemInAction.setEnabled(false);
+        Runnable command = new Runnable() {
+          public void run() {
+            _closeSystemInAction.setEnabled(false);
+          }
+        };
+        _interactionsController =
+          new InteractionsController(_model.getInteractionsModel(), _model.getSwingInteractionsDocument(), command);
+        
+        _interactionsPane = _interactionsController.getPane();
+    
+        _interactionsContainer = new JPanel(new BorderLayout());
+        _lastFocusOwner = _interactionsContainer;
       }
     });
-    
-    _interactionsPane = _interactionsController.getPane();
-    
-    _interactionsContainer = new JPanel(new BorderLayout());
-    _lastFocusOwner = _interactionsContainer;
     
     _junitErrorPanel = new JUnitPanel(_model, this);
     _javadocErrorPanel = new JavadocErrorPanel(_model, this);
@@ -3076,7 +3083,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //        if (oce.value) {
 //          _model.getParsingControl().addListener(new LightWeightParsingListener() {
 //            public void enclosingClassNameUpdated(OpenDefinitionsDocument doc, String old, String updated) {
-//              if (doc==_model.getActiveDocument()) { updateStatusField(); }
+//              if (doc == _model.getActiveDocument()) { updateStatusField(); }
 //            }
 //          });
 //        }
@@ -3246,7 +3253,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpToolBar();
     
     // Create detachable debug frame
-    if (_debugPanel!=null) { // using debugger
+    if (_debugPanel != null) { // using debugger
       _debugFrame = new DetachedFrame("Debugger", MainFrame.this, new Runnable1<DetachedFrame>() {
         public void run(DetachedFrame frame) {
           frame.getContentPane().add(_debugPanel);
@@ -3260,7 +3267,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       });
       _debugFrame.addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent we) {
-          if (_debugFrame==null) return; // debugger not used
+          if (_debugFrame == null) return; // debugger not used
           _detachDebugFrameMenuItem.setSelected(false);
           DrJava.getConfig().setSetting(DETACH_DEBUGGER, false);
         }
@@ -3489,7 +3496,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         boolean discardEvent = false;
         
         if ((e.getID() == KeyEvent.KEY_TYPED) &&
-            (e.getKeyChar()=='`') &&
+            (e.getKeyChar() == '`') &&
             (((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == InputEvent.CTRL_DOWN_MASK) ||
              ((e.getModifiersEx() & (InputEvent.CTRL_DOWN_MASK|InputEvent.SHIFT_DOWN_MASK))
                 == (InputEvent.CTRL_DOWN_MASK|InputEvent.SHIFT_DOWN_MASK))) &&
@@ -3514,7 +3521,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         if (!Utilities.TEST_MODE && !System.getProperty("user.name").equals(RemoteControlClient.getServerUser())) {
           Object[] options = {"Disable","Ignore"};
           String msg = "<html>Could not start DrJava's remote control server";
-          if (RemoteControlClient.getServerUser()!=null) {
+          if (RemoteControlClient.getServerUser() != null) {
             msg += "<br>because user "+RemoteControlClient.getServerUser()+" is already using the same port";
           }
           msg += ".<br>Please select an unused port in the Preferences dialog.<br>"+
@@ -3567,7 +3574,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             
             rc = JOptionPane.showOptionDialog(MainFrame.this, text, "Set File Associations?", JOptionPane.YES_NO_OPTION,
                                               JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-            if ((rc==0) || (rc==2)) { // Yes or Always
+            if ((rc == 0) || (rc==2)) { // Yes or Always
               PlatformFactory.ONLY.registerDrJavaFileExtensions();
               PlatformFactory.ONLY.registerJavaFileExtension();
             }
@@ -4024,7 +4031,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           };
           open(fs);
           int lineNo = -1;
-          if (_attributes.get("line")!=null) {
+          if (_attributes.get("line") != null) {
             try { lineNo = Integer.valueOf(_attributes.get("line")); }
             catch(NumberFormatException nfe) { lineNo = -1; }
           }
@@ -4371,11 +4378,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     d.addDocumentListener(new DocumentUIListener() {
       public void changedUpdate(DocumentEvent e) {  }
       public void insertUpdate(DocumentEvent e) {
+        assert EventQueue.isDispatchThread();
         _saveAction.setEnabled(true);
         if (isDebuggerEnabled() && _debugPanel.getStatusText().equals(""))
           _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
       }
       public void removeUpdate(DocumentEvent e) {
+        assert EventQueue.isDispatchThread();
         _saveAction.setEnabled(true);
         if (isDebuggerEnabled() && _debugPanel.getStatusText().equals(""))
           _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
@@ -4770,7 +4779,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       int rc;
       String fileName = null;
       Object[] options = {"Yes", "No"};
-      if (l.size()==1) {
+      if (l.size() == 1) {
         OpenDefinitionsDocument doc = l.get(0);
         try {
           if (doc.isUntitled()) fileName = "File";
@@ -5055,7 +5064,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {
       File file = _saveChooser.getSelectedFile();
-      if ((file!=null) && (! file.exists() || _verifyOverwrite())) { 
+      if ((file != null) && (! file.exists() || _verifyOverwrite())) { 
         _model.setProjectFile(file);
         _currentProjFile = file;
       }
@@ -5082,7 +5091,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           rc = JOptionPane.showOptionDialog(MainFrame.this, text, "Append Extension?", JOptionPane.YES_NO_OPTION,
                                             JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
         }
-        if (rc==0) {
+        if (rc == 0) {
           int lastDot = fileName.lastIndexOf('.');
           if (lastDot == -1) {
             file = new File(fileName + PROJECT_FILE_EXTENSION);
@@ -5434,7 +5443,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         File buildDir = _model.getBuildDirectory();
         HashSet<GoToFileListEntry> hs = new HashSet<GoToFileListEntry>();
         HashSet<JavaAPIListEntry> hs2 = new HashSet<JavaAPIListEntry>();
-        if (buildDir!=null) {
+        if (buildDir != null) {
           List<File> classFiles = _model.getClassFiles();
           DummyOpenDefDoc dummyDoc = new DummyOpenDefDoc();
           for(File f: classFiles) {
@@ -5755,7 +5764,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       else {
         _model.getDebugger().setAutomaticTraceEnabled(false);
         _debugPanel.setAutomaticTraceButtonText();
-        if (_automaticTraceTimer!=null) _automaticTraceTimer.stop();
+        if (_automaticTraceTimer != null) _automaticTraceTimer.stop();
       }
     }    
   }
@@ -6305,7 +6314,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // Also check that the keystroke isn't the NULL_KEYSTROKE, which
     //  can strangely be triggered by certain keys in Windows.
     KeyBindingManager.ONLY.put(opt, a, item, item.getText());
-    if ((keys.size()>0) && KeyBindingManager.ONLY.get(keys.get(0)) == a) {
+    if ((keys.size() > 0) && KeyBindingManager.ONLY.get(keys.get(0)) == a) {
       item.setAccelerator(keys.get(0));
     }
   }
@@ -6524,7 +6533,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             }
           },i+2);
         }
-        if (oce.value>0) { extMenu.addSeparator(); }
+        if (oce.value > 0) { extMenu.addSeparator(); }
         extMenu.add(_editExternalProcessesAction);
         _editExternalProcessesAction.setEnabled(true); // always keep enabled, because it allows import
       }
@@ -6872,7 +6881,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     boolean iconsEnabled = DrJava.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
     boolean textEnabled = DrJava.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
     
-    for (int i = 0; i< buttons.length; i++) {
+    for (int i = 0; i < buttons.length; i++) {
       
       if (buttons[i] instanceof JButton) {
         
@@ -6924,7 +6933,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     // First, find the maximum height of all the buttons.
     int max = 0;
-    for (int i = 0; i< buttons.length; i++) {
+    for (int i = 0; i < buttons.length; i++) {
       // We only care about the JButtons.
       if (buttons[i] instanceof JButton) {
         JButton b = (JButton) buttons[i];
@@ -6942,7 +6951,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     // Now set all button heights to the max.
-    for (int i = 0; i< buttons.length; i++) {
+    for (int i = 0; i < buttons.length; i++) {
       // We only care about the JButtons.
       if (buttons[i] instanceof JButton) {
         JButton b = (JButton) buttons[i];
@@ -7010,14 +7019,18 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     private int _line;
     private int _col;
     
-    // The following method does not necessarity run in the event thread.  Yuck!
+    // The following method should always run in the event thread, because we only access and update documents (and 
+    // other text fields) from the event thread.  We formerly used the AbstractDocument locking protocol to access and
+    // update documents from other threads.
     public void caretUpdate(final CaretEvent ce) {
-      
-      Utilities.invokeLater(new Runnable() { 
-        public void run() {
+     
+      assert EventQueue.isDispatchThread();
+      // invokeLater was required when document updating was done outside the event thread.
+//      Utilities.invokeLater(new Runnable() { 
+//        public void run() {
 
           int offset = ce.getDot();
-          try { 
+          try {
             if (offset == _offset + 1 && _currentDefDoc.getText(_offset, 1).charAt(0) != '\n') {
               _col += 1;
               _offset += 1;
@@ -7034,8 +7047,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             _offset = offset;
             updateLocation(_line, _col);
           }
-        }
-      });
+//        }
+//      });
     }
     
     // This method appears safe outside the event thread
@@ -7326,7 +7339,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           try {
             java.util.Set<String> groupNames = _model.getDocumentNavigator().getNamesOfSelectedTopLevelGroup();
             
-            if (docSelectedCount>0) {
+            if (docSelectedCount > 0) {
               // when documents are selected, ignore all other options and only deal with documents
               rootSelected = false;
               if (groupNames.contains(_model.getSourceBinTitle())) {
@@ -7344,7 +7357,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             }
             else {
               // no document selected, check other options
-              if (groupSelectedCount>0) {
+              if (groupSelectedCount > 0) {
                 // at least one folder is selected
                 if (!_model.getDocumentNavigator().isTopLevelGroupSelected()) {
                   // it is really a folder and not a top level bin, e.g. "[ Source Files ]"
@@ -7393,8 +7406,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           }
           
           final JPopupMenu m = new JPopupMenu();
-          if (docSelectedCount==0) { docSelected = externalSelected = auxiliarySelected = false; }
-          if (groupSelectedCount==0) { folderSelected = false; }
+          if (docSelectedCount == 0) { docSelected = externalSelected = auxiliarySelected = false; }
+          if (groupSelectedCount == 0) { folderSelected = false; }
           
           if (rootSelected) {
             // root selected
@@ -7407,7 +7420,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           }
           if (folderSelected) {
             // folder selected
-            if (m.getComponentCount()>0) { m.addSeparator(); }
+            if (m.getComponentCount() > 0) { m.addSeparator(); }
             if (groupSelectedCount==1) {
               // "New File in Folder" and "Open File in Folder" only work if exactly
               // one folder is selected
@@ -7438,7 +7451,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           }
           if (docSelected || externalSelected || auxiliarySelected) {
             // some kind of document selected
-            if (m.getComponentCount()>0) { m.addSeparator(); }
+            if (m.getComponentCount() > 0) { m.addSeparator(); }
             if (docSelectedCount==1) {
               m.add(Utilities.createDelegateAction("Save File", _saveAction));
               m.add(Utilities.createDelegateAction("Save File As...", _saveAsAction));
@@ -7463,7 +7476,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           }
           if (externalSelected && !docSelected && !auxiliarySelected) {
             // external document selected, but no regular or auxiliary documents
-            if (m.getComponentCount()>0) { m.addSeparator(); }
+            if (m.getComponentCount() > 0) { m.addSeparator(); }
             if (docSelectedCount==1) {
               m.add(Utilities.createDelegateAction("Include File With Project",
                                                    _moveToAuxiliaryAction));
@@ -7475,7 +7488,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           }
           if (auxiliarySelected && !docSelected && !externalSelected) {
             // auxiliary document selected, but no regular or external documents
-            if (m.getComponentCount()>0) { m.addSeparator(); }
+            if (m.getComponentCount() > 0) { m.addSeparator(); }
             if (docSelectedCount==1) {
               m.add(Utilities.createDelegateAction("Do Not Include File With Project",
                                                    _removeAuxiliaryAction));
@@ -7487,7 +7500,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           }
           if (!folderSelected && (externalBinSelected || auxiliaryBinSelected)) {
             // external or auxiliary bin selected, but no regular folder
-            if (m.getComponentCount()>0) { m.addSeparator(); }
+            if (m.getComponentCount() > 0) { m.addSeparator(); }
             m.add(Utilities.createDelegateAction("Close All Files", _closeFolderAction));
             m.add(Utilities.createDelegateAction("Compile All Files", _compileFolderAction));
             m.add(Utilities.createDelegateAction("Test All Files", _junitFolderAction));
@@ -7659,6 +7672,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     doc.addDocumentListener(new DocumentUIListener() {
       /** Updates panel displayed in interactions subwindow. */
       private void updateUI(OpenDefinitionsDocument doc, int offset) {
+        assert EventQueue.isDispatchThread();
 //        System.err.println("updateUI(" + doc + ", " + offset + ")");
         
         Component c = _tabbedPane.getSelectedComponent();
@@ -8125,7 +8139,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //  public void revalidateLineNums() {
 //    if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
 //      JScrollPane sp = _defScrollPanes.get(_model.getActiveDocument());
-//      if (sp!=null) {
+//      if (sp != null) {
 //        LineEnumRule ler = (LineEnumRule)sp.getRowHeader().getView();
 //        ler.revalidate();
 //        _repaintLineNums();
@@ -8388,7 +8402,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _model.getInteractionsModel().autoImport();               
       if(_model.getDebugger().isAutomaticTraceEnabled()) {
         //System.out.println("new _automaticTraceTimer AUTO_STEP_RATE="+AUTO_STEP_RATE+", "+System.identityHashCode(_automaticTraceTimer));                                
-        if((_automaticTraceTimer!=null) && (!_automaticTraceTimer.isRunning()))
+        if((_automaticTraceTimer != null) && (!_automaticTraceTimer.isRunning()))
           _automaticTraceTimer.start();
       }
     }
@@ -8414,7 +8428,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
       _disableStepTimer();
       _model.getDebugger().setAutomaticTraceEnabled(false);
-      if (_automaticTraceTimer!=null) _automaticTraceTimer.stop();
+      if (_automaticTraceTimer != null) _automaticTraceTimer.stop();
       if (isDebuggerReady()) {
         try {        
           if (!_model.getDebugger().hasSuspendedThreads()) {
@@ -9441,7 +9455,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void updateCurrentLocationInDoc() {
 //      MFLOG.log("updateCurrentLocationInDoc in MainFrame");
-      if (_currentDefPane!=null) { _currentDefPane.updateCurrentLocationInDoc(); }
+      if (_currentDefPane != null) { _currentDefPane.updateCurrentLocationInDoc(); }
     }
   } // End of ModelListener class
   
@@ -9759,7 +9773,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     try {
       Transferable tr = dropTargetDropEvent.getTransferable();
       if (tr.isDataFlavorSupported(DataFlavor.javaFileListFlavor) ||
-          ((uriListFlavor!=null) && (tr.isDataFlavorSupported(uriListFlavor)))) {
+          ((uriListFlavor != null) && (tr.isDataFlavorSupported(uriListFlavor)))) {
         dropTargetDropEvent.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
         List<File> fileList;
         if (tr.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
@@ -10156,7 +10170,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             toFrontAction.run(we);
             // then we remove the window that trumped w from the set of trump windows
             Window o = we.getOppositeWindow();
-            if (o!=null) {
+            if (o != null) {
               trumpedBy.remove(o);
               // and we remove this listener
               o.removeWindowListener(this);
@@ -10180,7 +10194,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         };
         public void toFront(WindowEvent we) {
           Window opposite = we.getOppositeWindow();
-          if (opposite==null) {
+          if (opposite == null) {
             // Probably a native application window, not DrJava.
             // When the user switches back to DrJava, the user may select
             // a different window to be on top, but we want w to be on top

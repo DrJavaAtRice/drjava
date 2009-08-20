@@ -117,7 +117,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
     */
   protected void _createRequests(Vector<ReferenceType> refTypes) throws DebugException {
     try {
-      for (int i=0; i < refTypes.size(); i++) {
+      for (int i = 0; i < refTypes.size(); i++) {
         ReferenceType rt = refTypes.get(i);
         
         if (!rt.isPrepared()) {

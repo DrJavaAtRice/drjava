@@ -59,7 +59,7 @@ import edu.rice.cs.drjava.model.repl.*;
 public abstract class InteractionsPane extends AbstractDJPane implements OptionConstants, ClipboardOwner {
   
   /** The custom keymap for the interactions pane. */
-  final protected Keymap _keymap;
+  protected final Keymap _keymap;
   
   /** Whether to draw text as antialiased. */
   private boolean _antiAliasText = false;
@@ -84,7 +84,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   /** Returns a runnable object that beeps to the user. */
   public Runnable getBeep() { return _beep; }
   
-  private InteractionsDJDocument _doc;
+  private final InteractionsDJDocument _doc;
   
 //  private List<Integer> _listOfPrompt = new Vector<Integer>(); // Vector used because it is synchronized. // NOT USED
   
@@ -105,6 +105,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     _keymap = addKeymap(keymapName, getKeymap());
     
     setCaretPosition(doc.getLength());
+    
     setHighlighter(new ReverseHighlighter());
     _highlightManager = new HighlightManager(this);
     

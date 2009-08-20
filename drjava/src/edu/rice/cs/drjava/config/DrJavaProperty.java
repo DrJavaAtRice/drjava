@@ -75,8 +75,8 @@ public abstract class DrJavaProperty implements Cloneable {
   /** Create a property. */
   public DrJavaProperty(String name, String value, String help) {
     this(name, help);
-    if (value==null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
-    if (help!=null) { _help = help; } 
+    if (value == null) { throw new IllegalArgumentException("DrJavaProperty value is null"); }
+    if (help != null) { _help = help; } 
     _value = value;
     _isCurrent = true;
   }

@@ -83,7 +83,7 @@ public class UnaryOpProperty<P,R> extends EagerProperty {
     * @param pm PropertyMaps used for substitution when replacing variables */
   public void update(PropertyMaps pm) {
     P op;
-    if (_attributes.get(_op1Name)==null) {
+    if (_attributes.get(_op1Name) == null) {
       _value = "("+_name+" Error...)";
       return;
     }

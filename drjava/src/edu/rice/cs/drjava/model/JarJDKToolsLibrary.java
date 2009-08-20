@@ -213,7 +213,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         jf = new JarFile(f);
         Manifest mf = jf.getManifest();
         String v = mf.getMainAttributes().getValue("Created-By");
-        if (v!=null) {
+        if (v != null) {
           int space = v.indexOf(' ');
           if (space>=0) v = v.substring(0,space);
           result = JavaVersion.parseFullVersion(v);
@@ -222,7 +222,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       catch(IOException ioe) { result = null; }
       finally {
         try {
-          if (jf!=null) jf.close();
+          if (jf != null) jf.close();
         }
         catch(IOException ioe) { /* ignore, just trying to close the file */ }
       }

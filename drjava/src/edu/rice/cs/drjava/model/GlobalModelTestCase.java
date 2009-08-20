@@ -106,31 +106,38 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    */
   public void setUp() throws Exception {
     super.setUp();  // declared to throw Exception
-    debug.logStart();
-    _log.log("Setting up " + this);
-    super.setUp();  // declared to throw Exception
-    _model = new TestGlobalModel();
-    // ensure that the JVM is ready to run; the GlobalModelJUnitTest test cases sometimes received a
-    // late _junitModel.junitJVMReady() notification after the unit tests had already been started, and
-    // that was interpreted as trying to start JUnit tests while tests were already running.
-    _model.ensureJVMStarterFinished();
-    // create an interactions pane which is essential to the function of the interactions model; 
-    _interactionsController =  // InteractionsController constructor creates an interactions pane
-      new InteractionsController(_model.getInteractionsModel(), _model.getSwingInteractionsDocument(),
-                                 new Runnable() { public void run() { } });
-    _log.log("Global model created for " + this);
-    DrJava.getConfig().resetToDefaults();
-    String user = System.getProperty("user.name");
-    
-    _tempDir = /* IOUtil.createAndMarkTempDirectory */ FileOps.createTempDirectory("DrJava-test-" + user /*, ""*/);
-//    System.err.println("Temp Directory is " + _tempDir.getAbsolutePath());
-    
-    _model.setResetAfterCompile(false);
-    _log.log("Completed (GlobalModelTestCase) set up of " + this);
-    debug.logEnd();
-    
-//    _model.getOpenDefinitionsDocuments().get(0).saveFile(new FileSelector(new File(_tempDir, "blank document")));
-//    super.setUp();
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        try {
+          debug.logStart();
+          _log.log("Setting up " + this);
+          _model = new TestGlobalModel();
+          // ensure that the JVM is ready to run; the GlobalModelJUnitTest test cases sometimes received a
+          // late _junitModel.junitJVMReady() notification after the unit tests had already been started, and
+          // that was interpreted as trying to start JUnit tests while tests were already running.
+          _model.ensureJVMStarterFinished();
+          // create an interactions pane which is essential to the function of the interactions model; 
+          _interactionsController =  // InteractionsController constructor creates an interactions pane
+            new InteractionsController(_model.getInteractionsModel(), _model.getSwingInteractionsDocument(),
+                                       new Runnable() { public void run() { } });
+          _log.log("Global model created for " + this);
+          DrJava.getConfig().resetToDefaults();
+          String user = System.getProperty("user.name");
+          
+          _tempDir = /* IOUtil.createAndMarkTempDirectory */ FileOps.createTempDirectory("DrJava-test-" + user /*, ""*/);
+//          System.err.println("Temp Directory is " + _tempDir.getAbsolutePath());
+          
+          _model.setResetAfterCompile(false);
+          _log.log("Completed (GlobalModelTestCase) set up of " + this);
+          debug.logEnd();
+          
+//          _model.getOpenDefinitionsDocuments().get(0).saveFile(new FileSelector(new File(_tempDir, "blank document")));
+        }
+        catch(IOException e) {
+          fail("IOException thrown with traceback: \n" + e);
+        }
+      }
+    });
   }
 
   /** Teardown for each test case, which recursively deletes the temporary directory created in setUp. */

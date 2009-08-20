@@ -62,7 +62,7 @@ public class DrJavaRestart {
 
   }
   public static boolean delete(File f) {
-    for(int i=0; i<ATTEMPTS; ++i) {
+    for(int i = 0; i < ATTEMPTS; ++i) {
       if (f.delete()) return true;
       LOG.log("Failed to delete "+f+", trying again");
       try {
@@ -73,7 +73,7 @@ public class DrJavaRestart {
     return false;
   }
   public static boolean deleteRecursively(File f) {
-    for(int i=0; i<ATTEMPTS; ++i) {
+    for(int i = 0; i < ATTEMPTS; ++i) {
       if (edu.rice.cs.plt.io.IOUtil.deleteRecursively(f)) return true;
       LOG.log("Failed to recursively delete "+f+", trying again");
       try {
@@ -84,7 +84,7 @@ public class DrJavaRestart {
     return false;
   }
   public static boolean rename(File from, File to) {
-    for(int i=0; i<ATTEMPTS; ++i) {
+    for(int i = 0; i < ATTEMPTS; ++i) {
       if (from.renameTo(to)) return true;
       LOG.log("Failed to rename "+from+" to "+to+", trying again");
       try {

@@ -119,7 +119,7 @@ public class LanguageLevelStackTraceMapper {
    */
   public StackTraceElement replaceStackTraceElement(StackTraceElement s,
                                                     List</**OpenDefinitionsDocument*/ File> ds) {
-    for(int i=0;i<ds.size();i++) {
+    for(int i = 0;i < ds.size();i++) {
       s = replaceStackTraceElement(s,ds.get(i)); 
     }
     return s;
@@ -136,7 +136,7 @@ public class LanguageLevelStackTraceMapper {
    */
   public StackTraceElement[] replaceStackTrace(StackTraceElement[] ss,
                                                List</**OpenDefinitionsDocument*/ File> ds){
-    for(int i=0;i<ss.length;i++){
+    for(int i = 0;i < ss.length;i++){
       ss[i]=replaceStackTraceElement(ss[i],ds);
     }
     return ss;
@@ -160,7 +160,7 @@ public class LanguageLevelStackTraceMapper {
    */
   private boolean matches(File f, StackTraceElement s) {
     LOG.log("matches("+f+", "+s+")");
-    if (s.getFileName()==null) return false;
+    if (s.getFileName() == null) return false;
     OpenDefinitionsDocument d;      
     try{
       d = AGmodel.getDocumentForFile(f);}
@@ -178,8 +178,8 @@ public class LanguageLevelStackTraceMapper {
 // make sure packages match
     String dp = d.getPackageName();
     int dotPos = s.getClassName().lastIndexOf('.');
-    if ((dp.length()==0) && (dotPos>=0)) return false; // d in default package, s not
-    if ((dp.length()>0) && (dotPos<0)) return false; // s in default package, d not
+    if ((dp.length() == 0) && (dotPos>=0)) return false; // d in default package, s not
+    if ((dp.length() > 0) && (dotPos<0)) return false; // s in default package, d not
     String sp = "";
     if (dotPos>=0) {
       sp = s.getClassName().substring(0, dotPos);
@@ -211,7 +211,7 @@ public class LanguageLevelStackTraceMapper {
     
     try{  ReadLine = BReader.readLine();  }  catch(java.io.IOException e){}
     
-    if(ReadLine.indexOf("//")!=0) MapSize=0;  //Kills the for loop if read line is not of correct format
+    if(ReadLine.indexOf("//") != 0) MapSize=0;  //Kills the for loop if read line is not of correct format
     
     
     String temp = "";
@@ -224,9 +224,9 @@ public class LanguageLevelStackTraceMapper {
     Integer djNum;
     Integer javaNum;
     
-    for(int i=0; i<MapSize; i++){
+    for(int i = 0; i < MapSize; i++){
       if(temp.length()<2)  temp = ReadLanguageLevelLineBlockHelper(BReader);
-      if(temp==null) break;
+      if(temp == null) break;
       
       numRnum = temp.substring(0,temp.indexOf(" "));
       
@@ -260,7 +260,7 @@ public class LanguageLevelStackTraceMapper {
     
     try{  ReadLine = BReader.readLine();  }  catch(java.io.IOException e){}
     
-    if(ReadLine.indexOf("//")!=0) MapSize=0;  //Kills the for loop if read line is not of correct format
+    if(ReadLine.indexOf("//") != 0) MapSize=0;  //Kills the for loop if read line is not of correct format
     
     
     String temp = "";
@@ -273,9 +273,9 @@ public class LanguageLevelStackTraceMapper {
     Integer djNum;
     Integer javaNum;
     
-    for(int i=0; i<MapSize; i++){
+    for(int i = 0; i < MapSize; i++){
       if(temp.length()<2)  temp = ReadLanguageLevelLineBlockHelper(BReader);
-      if(temp==null) break;
+      if(temp == null) break;
       
       numRnum = temp.substring(0,temp.indexOf(" "));
       
@@ -297,7 +297,7 @@ public class LanguageLevelStackTraceMapper {
     String line = "";
     try{  line = BR.readLine(); } catch(java.io.IOException e){}
     
-    if(line.indexOf("//")!=0) return null;
+    if(line.indexOf("//") != 0) return null;
     line = line.substring(2).trim();
     return line;
   }

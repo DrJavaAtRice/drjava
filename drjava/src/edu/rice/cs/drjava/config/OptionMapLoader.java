@@ -106,6 +106,6 @@ public class OptionMapLoader implements OptionConstants {
         map.setString(option, DEFAULT.prop.getProperty(option.name));
       }
     }
-    if (es.size()>0) throw new OptionParseException(es.toArray(new OptionParseException[0]));
+    if (es.size() > 0) throw new OptionParseException(es.toArray(new OptionParseException[0]));
   }
 }

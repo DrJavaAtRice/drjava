@@ -69,8 +69,7 @@ import java.util.List;
  * @version $Id$
  */
 public interface SingleDisplayModel extends GlobalModel {
-  /** @return the currently active document.
-   */
+  /** @return the currently active document. */
   public OpenDefinitionsDocument getActiveDocument();
 
   /** Sets the currently active document by updating the selection model.

@@ -303,10 +303,10 @@ public class AboutDialog extends JDialog implements ActionListener {
     _tabs.addChangeListener(new ChangeListener() {
       // This method is called whenever the selected tab changes
       public void stateChanged(ChangeEvent evt) {
-        _copyButton.setVisible(_tabs.getSelectedIndex()==_propertiesTabIndex);
+        _copyButton.setVisible(_tabs.getSelectedIndex() == _propertiesTabIndex);
       }
     });
-    _copyButton.setVisible(_tabs.getSelectedIndex()==_propertiesTabIndex);
+    _copyButton.setVisible(_tabs.getSelectedIndex() == _propertiesTabIndex);
     _okButton.addActionListener(this);
     buttonPanel.add(_copyButton);
     buttonPanel.add(_okButton);

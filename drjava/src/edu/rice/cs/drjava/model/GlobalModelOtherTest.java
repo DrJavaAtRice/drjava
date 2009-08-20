@@ -119,11 +119,10 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   /** Checks that System.exit is handled appropriately from interactions pane. */
   public void testExitInteractions() throws EditDocumentException, InterruptedException {
     debug.logStart();
-    InteractionListener listener = new InteractionListener() {
+    final InteractionListener listener = new InteractionListener(); /*{
       
-//      public void consoleReset() { consoleResetCount++; }
-    };
-    
+      public void consoleReset() { consoleResetCount++; }
+    }; */
     _model.addListener(listener);
     
     listener.logInteractionStart();

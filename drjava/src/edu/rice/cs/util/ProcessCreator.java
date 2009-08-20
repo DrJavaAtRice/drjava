@@ -90,15 +90,15 @@ public class ProcessCreator {
     * @return command line
     */
   public String cmdline() {
-    if (_cmdline==null) {
-      if (_cachedCmdLine==null) {
+    if (_cmdline == null) {
+      if (_cachedCmdLine == null) {
         StringBuilder sb = new StringBuilder();
-        for (int i=0; i<_cmdarray.length; ++i) {
+        for (int i = 0; i < _cmdarray.length; ++i) {
           sb.append(" ");
           sb.append(StringOps.unescapeFileName(_cmdarray[i]));
         }
         _cachedCmdLine = sb.toString();
-        if (_cachedCmdLine.length()>0) {
+        if (_cachedCmdLine.length() > 0) {
           _cachedCmdLine = _cachedCmdLine.substring(1);
         }
       }
@@ -147,7 +147,7 @@ public class ProcessCreator {
     
     // set up environment
     String[] env = null;
-    if ((_env!=null) && (_env.size()>0)) {
+    if ((_env != null) && (_env.size() > 0)) {
       env = new String[_env.size()];
       int i = 0;
       for(String key: _env.keySet()) {
@@ -157,15 +157,15 @@ public class ProcessCreator {
     }
     
     // set up command line, if necessary
-    if (_cmdline!=null) {
+    if (_cmdline != null) {
       _evaluatedCmdLine = StringOps.replaceVariables(_cmdline, _props, PropertyMaps.GET_CURRENT);
       List<List<List<String>>> seqs = StringOps.commandLineToLists(_evaluatedCmdLine);
-      if (seqs.size()!=1) { throw new IllegalArgumentException("ProcessCreator needs a command line with just one process."); }
+      if (seqs.size() != 1) { throw new IllegalArgumentException("ProcessCreator needs a command line with just one process."); }
       List<List<String>> pipe = seqs.get(0);
       if (pipe.size()<1) { throw new IllegalArgumentException("ProcessCreator needs a command line with just one process."); }
       List<String> cmds = pipe.get(0);
       _cmdarray = new String[cmds.size()];
-      for (int i=0; i<cmds.size(); ++i) {
+      for (int i = 0; i < cmds.size(); ++i) {
         _cmdarray[i] = StringOps.unescapeFileName(cmds.get(i));
       }
     }

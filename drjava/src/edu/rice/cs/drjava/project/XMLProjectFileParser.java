@@ -268,7 +268,7 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       /* added to check if file path name refers to absolute. Intended to eliminate project errors over network paths */
       Boolean absName = (new File(name)).isAbsolute();   
       
-      DocFile docF = new DocFile(((rootPath.length()>0 && !absName)?new File(rootPath,name):new File(name)).getAbsoluteFile(),
+      DocFile docF = new DocFile(((rootPath.length() > 0 && !absName)?new File(rootPath,name):new File(name)).getAbsoluteFile(),
                                  new Pair<Integer,Integer>(selectFrom,selectTo),
                                  new Pair<Integer,Integer>(scrollCol,scrollCol),
                                  active,
@@ -294,7 +294,7 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       /* added to check if file path name refers to absolute. Intended to eliminate project errors over network paths */
       abs |= (new File(name)).isAbsolute();   
       
-      AbsRelFile f = new AbsRelFile(((rootPath.length()>0 && !abs)?
+      AbsRelFile f = new AbsRelFile(((rootPath.length() > 0 && !abs)?
                                        new File(rootPath,name):
                                        new File(name)).getAbsoluteFile(),abs);
       fList.add(f);
@@ -321,7 +321,7 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       final int lnr = _xc.getInt(".line", n);
       final boolean enabled = _xc.getBool(".enabled", n);
       DebugBreakpointData dbd;
-      if ((_srcFileBase==null) || (new File(name).isAbsolute())) {
+      if ((_srcFileBase == null) || (new File(name).isAbsolute())) {
         final File f = new File(name);
         dbd = new DebugBreakpointData() {
           public File getFile() { return f; }
@@ -361,7 +361,7 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       final int from = _xc.getInt(".from", n);
       final int to = _xc.getInt(".to", n);
       File f;
-      if ((_srcFileBase==null) || (new File(name).isAbsolute())) { f = new File(name); }
+      if ((_srcFileBase == null) || (new File(name).isAbsolute())) { f = new File(name); }
       else { f = new File(_srcFileBase, name); }
       rList.add(new DummyDocumentRegion(f, from, to));
     }

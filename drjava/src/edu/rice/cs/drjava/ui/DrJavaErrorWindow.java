@@ -171,14 +171,14 @@ public class DrJavaErrorWindow extends JDialog {
     }
     public void windowClosing(WindowEvent we) {
       DrJavaErrorWindow.this.dispose();
-      if (DrJavaErrorHandler.getButton()==null) { System.exit(1); }
+      if (DrJavaErrorHandler.getButton() == null) { System.exit(1); }
     }
   };
   
   /** Lambda that calls _cancel. */
   protected final Runnable1<WindowEvent> CANCEL = new Runnable1<WindowEvent>() {
     public void run(WindowEvent e) {
-      if (DrJavaErrorHandler.getButton()==null) { System.exit(1); }
+      if (DrJavaErrorHandler.getButton() == null) { System.exit(1); }
     }
   };
 
@@ -190,13 +190,13 @@ public class DrJavaErrorWindow extends JDialog {
     validate();
     if (vis) {
       init();
-      if (_parentFrame!=null) {
+      if (_parentFrame != null) {
         edu.rice.cs.drjava.DrJavaRoot.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
       }
       toFront();
     }
     else {
-      if (_parentFrame!=null) {
+      if (_parentFrame != null) {
         edu.rice.cs.drjava.DrJavaRoot.removeModalWindowAdapter(this);
         _parentFrame.toFront();
       }
@@ -207,7 +207,7 @@ public class DrJavaErrorWindow extends JDialog {
   /** Initialize the dialog. */
   private void init() {
     _errorCount = DrJavaErrorHandler.getErrorCount();
-    if (_errorCount>0) {
+    if (_errorCount > 0) {
       _error = DrJavaErrorHandler.getError(0);
       _errorIndex = 0;
     }
@@ -217,8 +217,8 @@ public class DrJavaErrorWindow extends JDialog {
     }
     _prevAction.setEnabled(false);
     _nextAction.setEnabled(_errorCount>1);
-    _dismissAction.setEnabled(_errorCount>0);
-    _copyAction.setEnabled(_errorCount>0);
+    _dismissAction.setEnabled(_errorCount > 0);
+    _copyAction.setEnabled(_errorCount > 0);
     updateErrorInfo();
   }
 
@@ -315,7 +315,7 @@ public class DrJavaErrorWindow extends JDialog {
       if (entry.getKey().equals("line.separator")) {
         b.append("\"");
         String ls = (String)entry.getValue();
-        for(int i=0; i<ls.length(); ++i) {
+        for(int i = 0; i < ls.length(); ++i) {
           int ch = ls.charAt(i);
           b.append("\\u");
           String hexString = "0000" + Integer.toHexString(ch);
@@ -372,17 +372,17 @@ public class DrJavaErrorWindow extends JDialog {
   private final Action _okAction = new AbstractAction("OK") {
     public void actionPerformed(ActionEvent e) {
       DrJavaErrorWindow.this.dispose();
-      if (DrJavaErrorHandler.getButton()==null) { System.exit(1); }
+      if (DrJavaErrorHandler.getButton() == null) { System.exit(1); }
     }
   };
   
   /* Go to the previous error. */
   private final Action _prevAction = new AbstractAction("Previous") {
     public void actionPerformed(ActionEvent e) {
-      if (_errorIndex>0) {
+      if (_errorIndex > 0) {
         --_errorIndex;
         _error = DrJavaErrorHandler.getError(_errorIndex);
-        if (_errorIndex==0) { setEnabled(false); }
+        if (_errorIndex == 0) { setEnabled(false); }
         if (_errorCount>1) { _nextAction.setEnabled(true); }
         updateErrorInfo();
       }
@@ -405,7 +405,7 @@ public class DrJavaErrorWindow extends JDialog {
       if (_errorIndex<_errorCount-1) {
         ++_errorIndex;
         _error = DrJavaErrorHandler.getError(_errorIndex);
-        if (_errorIndex==_errorCount-1) { setEnabled(false); }
+        if (_errorIndex == _errorCount-1) { setEnabled(false); }
         if (_errorCount>1) { _prevAction.setEnabled(true); }
         updateErrorInfo();
       }

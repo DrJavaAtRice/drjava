@@ -132,7 +132,7 @@ public class NewVersionPopup extends JDialog {
   }
   
   private void updateText() {
-    if (_msg!=null) {
+    if (_msg != null) {
       _versionPanel = new JOptionPane(_msg,JOptionPane.INFORMATION_MESSAGE,
                                       JOptionPane.DEFAULT_OPTION,null,
                                       new Object[0]);   
@@ -232,7 +232,7 @@ public class NewVersionPopup extends JDialog {
           // if it's not a jar file, an exception will already have been thrown
           // so we know it is a jar file
           // now let's check if it contains DrJava
-          if (jf.getJarEntry(edu.rice.cs.drjava.DrJava.class.getName().replace('.', '/')+".class")!=null) {
+          if (jf.getJarEntry(edu.rice.cs.drjava.DrJava.class.getName().replace('.', '/')+".class") != null) {
             found = f;
             break;
           }
@@ -245,7 +245,7 @@ public class NewVersionPopup extends JDialog {
   
   protected File getTargetFile() {
     File found = getDrJavaFile();
-    if (found!=null) {
+    if (found != null) {
       // fix for Mac applications
       String s = found.getAbsolutePath();
       if (s.endsWith(".app/Contents/Resources/Java/drjava.jar")) {
@@ -272,7 +272,7 @@ public class NewVersionPopup extends JDialog {
     if (close) closeAction();
     StringBuilder sb = new StringBuilder();
     sb.append("Could not update DrJava automatically");
-    if (message.length()>0) {
+    if (message.length() > 0) {
       sb.append(":\n");
       sb.append(message);
     }
@@ -307,7 +307,7 @@ public class NewVersionPopup extends JDialog {
           
           final File targetFile = getTargetFile();
           LOG.log("\ttargetFile = "+targetFile);
-          if ((targetFile==null) || (targetFile.getParentFile()==null)) {
+          if ((targetFile == null) || (targetFile.getParentFile() == null)) {
             abortUpdate("Could not determine where DrJava is located on this computer.", true);
             return;
           }
@@ -401,7 +401,7 @@ public class NewVersionPopup extends JDialog {
               }
               catch(InterruptedException ie) { abortUpdate("Installation was interrupted."); return; }
             } while(waiting);
-            if (p.exitValue()!=0) { abortUpdate("Unpacking with tar failed."); return; }
+            if (p.exitValue() != 0) { abortUpdate("Unpacking with tar failed."); return; }
             // delete tar.gz file
             destFile.delete();
             destFile = new File(macTempDir, "DrJava.app");
@@ -473,7 +473,7 @@ public class NewVersionPopup extends JDialog {
   
   /** Return the automatic download URL. */
   protected String getAutomaticDownloadURL() {
-    if (_newestVersionString.indexOf("weekly")>0) {
+    if (_newestVersionString.indexOf("weekly") > 0) {
       return "http://www.cs.rice.edu/~javaplt/drjavarice/weekly/files/";
     }
     else {
@@ -483,7 +483,7 @@ public class NewVersionPopup extends JDialog {
   
   /** Return the manual download URL. */
   protected String getManualDownloadURL() {
-    if (_newestVersionString.indexOf("weekly")>0) {
+    if (_newestVersionString.indexOf("weekly") > 0) {
       return "http://www.cs.rice.edu/~javaplt/drjavarice/weekly/";
     }
     final String DRJAVA_FILES_PAGE = "http://sourceforge.net/project/showfiles.php?group_id=44253";
@@ -514,7 +514,7 @@ public class NewVersionPopup extends JDialog {
     }
     catch(IOException e) { return DRJAVA_FILES_PAGE; }
     finally { // close open input stream
-      try { if (br!=null) br.close(); }
+      try { if (br != null) br.close(); }
       catch(IOException e) { /* ignore */ }
     }
     return DRJAVA_FILES_PAGE;
@@ -545,7 +545,7 @@ public class NewVersionPopup extends JDialog {
     Box<Date> weeklyTime = new SimpleBox<Date>(new Date(0));
     boolean newVersion = false;
     _newestVersionString = "";
-    if (availableRef!=null) { availableRef.set(false); }
+    if (availableRef != null) { availableRef.set(false); }
     switch(_modeBox.getSelectedIndex()) {
       case 3: if (getTargetFile().toString().endsWith(".jar")) { // only consider weekly builds if using *.jar file
         newVersion |= checkNewWeeklyVersion(weeklyString,weeklyTime); // fall-through required, not a mistake
@@ -559,7 +559,7 @@ public class NewVersionPopup extends JDialog {
         _updateButton.setEnabled(newVersion);
         _downloadButton.setEnabled(newVersion);
         DrJava.getConfig().setSetting(OptionConstants.LAST_NEW_VERSION_NOTIFICATION, new Date().getTime());
-        if (availableRef!=null) { availableRef.set(newVersion); }
+        if (availableRef != null) { availableRef.set(newVersion); }
         if (newVersion) {
           TreeMap<Date,String[]> versionSorter = new TreeMap<Date,String[]>();
           versionSorter.put(stableTime.value(),new String[] {"stable release",      stableString.value() });
@@ -575,7 +575,7 @@ public class NewVersionPopup extends JDialog {
               "Do you want to download this new version?"};
         }
         else {
-          if (availableRef!=null) { availableRef.set(false); }
+          if (availableRef != null) { availableRef.set(false); }
           return new String[] {
             "No new version of DrJava has been found.", "You are using the newest version that matches your criterion."};
         }
@@ -594,8 +594,8 @@ public class NewVersionPopup extends JDialog {
                                               Box<Date> buildTimeRef) {
     try {
       Date newestTime = getBuildTime(new URL("http://www.drjava.org/LATEST_VERSION.TXT"), versionStringRef);
-      if (newestTime==null) { return false; }
-      if (buildTimeRef!=null) { buildTimeRef.set(newestTime); }
+      if (newestTime == null) { return false; }
+      if (buildTimeRef != null) { buildTimeRef.set(newestTime); }
       return BUILD_TIME.before(newestTime);
     }
     catch(MalformedURLException e) { return false; }
@@ -608,8 +608,8 @@ public class NewVersionPopup extends JDialog {
                                             Box<Date> buildTimeRef) {
     try {
       Date newestTime = getBuildTime(new URL("http://www.drjava.org/LATEST_BETA_VERSION.TXT"), versionStringRef);
-      if (newestTime==null) { return false; }
-      if (buildTimeRef!=null) { buildTimeRef.set(newestTime); }
+      if (newestTime == null) { return false; }
+      if (buildTimeRef != null) { buildTimeRef.set(newestTime); }
       return BUILD_TIME.before(newestTime);
     }
     catch(MalformedURLException e) { return false; }
@@ -622,8 +622,8 @@ public class NewVersionPopup extends JDialog {
                                            Box<Date> buildTimeRef) {
     try {
       Date newestTime = getBuildTime(new URL("http://www.drjava.org/LATEST_DEV_VERSION.TXT"), versionStringRef);
-      if (newestTime==null) { return false; }
-      if (buildTimeRef!=null) { buildTimeRef.set(newestTime); }
+      if (newestTime == null) { return false; }
+      if (buildTimeRef != null) { buildTimeRef.set(newestTime); }
       return BUILD_TIME.before(newestTime);
     }
     catch(MalformedURLException e) { return false; }
@@ -637,8 +637,8 @@ public class NewVersionPopup extends JDialog {
                                               Box<Date> buildTimeRef) {
     try {
       Date newestTime = getBuildTime(new URL("http://www.cs.rice.edu/~javaplt/drjavarice/weekly/LATEST_WEEKLY_VERSION.TXT"), versionStringRef);
-      if (newestTime==null) { return false; }
-      if (buildTimeRef!=null) { buildTimeRef.set(newestTime); }
+      if (newestTime == null) { return false; }
+      if (buildTimeRef != null) { buildTimeRef.set(newestTime); }
       return BUILD_TIME.before(newestTime);
     }
     catch(MalformedURLException e) { return false; }
@@ -661,7 +661,7 @@ public class NewVersionPopup extends JDialog {
       is = new InputStreamReader(urls);
       br = new BufferedReader(is);
       String line = br.readLine();
-      if (versionStringRef!=null) { versionStringRef.set(line); }
+      if (versionStringRef != null) { versionStringRef.set(line); }
       br.close();
       
       // remove "drjava-" prefix

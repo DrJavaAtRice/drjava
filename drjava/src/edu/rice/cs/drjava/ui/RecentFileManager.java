@@ -191,7 +191,7 @@ public class RecentFileManager implements OptionConstants {
       delPos = _recentMenuItems.size();
     }
     JMenuItem currItem;
-    for (int i=0; i< _recentMenuItems.size(); i++ ) {
+    for (int i = 0; i < _recentMenuItems.size(); i++ ) {
       currItem = _recentMenuItems.get(i);
       currItem.setText((i+1) + ". " + _recentFiles.get(i).getName());
     }

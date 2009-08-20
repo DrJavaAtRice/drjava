@@ -317,7 +317,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   
   /** Tests that undoing/redoing a multi-line indent will restore the caret position. */
   public void testMultilineIndentAfterScroll() throws BadLocationException, InterruptedException {
-    String text =
+    final String text =
       "public class stuff {\n" +
       "private int _int;\n" +
       "private Bar _bar;\n" +
@@ -326,7 +326,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       "}\n" +
       "}\n";
     
-    String indented =
+    final String indented =
       "public class stuff {\n" +
       "  private int _int;\n" +
       "  private Bar _bar;\n" +
@@ -341,9 +341,10 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     final OpenDefinitionsDocument doc = pane.getOpenDefDocument();
     
     setConfigSetting(OptionConstants.INDENT_LEVEL, Integer.valueOf(2));
-    doc.append(text, null);
+
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
+        doc.append(text, null);
         pane.setCaretPosition(0);
         pane.endCompoundEdit(); 
       } 
@@ -352,7 +353,9 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     Utilities.clearEventQueue();
     assertEquals("Should have inserted correctly.", text, doc.getText());
     
-    doc.indentLines(0, doc.getLength()); 
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { doc.indentLines(0, doc.getLength()); }
+    });
     
     assertEquals("Should have indented.", indented, doc.getText());
     
@@ -510,7 +513,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     }); 
     Utilities.clearEventQueue();
     
-    assertTrue("the save button should not be enabled after opening a document", !_frame.saveEnabledHuh());
+    assertTrue("the save button should not be enabled after opening a document", !_frame.isSaveEnabled());
     _log.log("testSaveButtonEnabled completed");
   }
   

@@ -400,7 +400,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         if (getSelectedText() != null) {
           super.actionPerformed(e);
           String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(ErrorListPane.this);
-          if ((s != null) && (s.length()!=0)){ ClipboardHistoryModel.singleton().put(s); }
+          if ((s != null) && (s.length() != 0)){ ClipboardHistoryModel.singleton().put(s); }
         }
       }
     };
@@ -741,7 +741,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         try {          
           boolean open = false;
           for(OpenDefinitionsDocument doc : model.getOpenDefinitionsDocuments()) {
-            if((doc.getFile()!=null) && (doc.getFile().equals(error.file()))) {
+            if((doc.getFile() != null) && (doc.getFile().equals(error.file()))) {
               open = true;
               break;
             }

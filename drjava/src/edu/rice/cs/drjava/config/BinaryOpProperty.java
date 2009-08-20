@@ -97,7 +97,7 @@ public class BinaryOpProperty<P,Q,R> extends EagerProperty {
     * @param pm PropertyMaps used for substitution when replacing variables */
   public void update(PropertyMaps pm) {
     P op1;
-    if (_attributes.get(_op1Name)==null) {
+    if (_attributes.get(_op1Name) == null) {
       _value = "("+_name+" Error...)";
       return;
     }
@@ -111,7 +111,7 @@ public class BinaryOpProperty<P,Q,R> extends EagerProperty {
       }
     }
     Q op2;
-    if (_attributes.get(_op2Name)==null) {
+    if (_attributes.get(_op2Name) == null) {
       _value = "("+_name+" Error...)";
       return;
     }

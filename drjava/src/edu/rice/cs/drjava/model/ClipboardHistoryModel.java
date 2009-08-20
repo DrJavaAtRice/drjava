@@ -83,7 +83,7 @@ public class ClipboardHistoryModel {
   
   /** Return the most recent string, or null if nothing is in the history. */
   public synchronized String getMostRecent() {
-    if (_history.size()==0) { return null; }
+    if (_history.size() == 0) { return null; }
     else { return _history.getLast(); }
   }
 }

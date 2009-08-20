@@ -93,7 +93,7 @@ public class PagePrinter implements Printable {
     float y = 0;
 
     // loop over the TextLayouts, printing out each one and the line number
-    for (int i=0; i<_textLayouts.size(); i++) {
+    for (int i = 0; i < _textLayouts.size(); i++) {
       TextLayout layout = _textLayouts.get(i);
       TextLayout lineNumber = _lineNumbers.get(i);
 

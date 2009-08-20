@@ -110,8 +110,8 @@ public class BookmarksPanel extends RegionsTreePanel<MovingDocumentRegion> {
   /** Update button state and text. */
   protected void _updateButtons() {
     ArrayList<MovingDocumentRegion> regs = getSelectedRegions();
-    _goToButton.setEnabled(regs.size()==1);
-    _removeButton.setEnabled(regs.size()>0);
+    _goToButton.setEnabled(regs.size() == 1);
+    _removeButton.setEnabled(regs.size() > 0);
     _removeAllButton.setEnabled(_rootNode != null && _rootNode.getDepth() > 0);
   }
   

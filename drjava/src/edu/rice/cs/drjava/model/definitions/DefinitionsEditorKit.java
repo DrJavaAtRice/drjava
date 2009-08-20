@@ -59,7 +59,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     _notifier = notifier;
     Action[] supActions = super.getActions();
     _actions = new Action[supActions.length];
-    for(int i=0; i<_actions.length; ++i) {
+    for(int i = 0; i < _actions.length; ++i) {
       Action a = supActions[i];
       Object name = a.getValue("Name");
       if (name.equals(beginWordAction)) {
@@ -143,13 +143,13 @@ public class DefinitionsEditorKit extends StyledEditorKit {
         try {
           int offs = target.getCaretPosition();
           final String text = target.getDocument().getText(0,offs);
-          while(offs>0) {
+          while(offs > 0) {
             char chPrev = text.charAt(offs - 1);
             if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || (Character.isWhitespace(chPrev))) {
               break;
             }
             --offs;
-            if (offs==0) break; // otherwise offs-1 below generates an index out of bounds
+            if (offs == 0) break; // otherwise offs-1 below generates an index out of bounds
             char ch = text.charAt(offs);
             chPrev = text.charAt(offs - 1);
             if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || Character.isWhitespace(ch) || Character.isWhitespace(chPrev)) {
@@ -222,7 +222,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
         try {
           int offs = target.getCaretPosition();
           final String text = target.getDocument().getText(0,offs);
-          while(offs>0) {
+          while(offs > 0) {
             --offs;
             if (offs == 0)
               break;

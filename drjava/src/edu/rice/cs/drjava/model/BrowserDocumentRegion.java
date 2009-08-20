@@ -100,7 +100,7 @@ public class BrowserDocumentRegion implements IDocumentRegion, Comparable<Browse
 //  public Position getEndPosition() { return _endPosition; }
 
   public void update(BrowserDocumentRegion other) {
-    if (other.getDocument()!=_doc) throw new IllegalArgumentException("Regions must have the same document.");
+    if (other.getDocument() != _doc) throw new IllegalArgumentException("Regions must have the same document.");
     _startPosition = other._startPosition;
     _endPosition = other._endPosition;
   }

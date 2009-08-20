@@ -56,7 +56,6 @@ import java.util.List;
 import static edu.rice.cs.util.XMLConfig.XMLConfigException;
 
 /** Class setting up the variables for external processes.
-  *
   *  @version $Id$
   */
 public class DrJavaPropertySetup implements OptionConstants {
@@ -64,12 +63,12 @@ public class DrJavaPropertySetup implements OptionConstants {
     final String DEF_DIR = "${drjava.working.dir}";
     
     // fake "Config" properties
-    PropertyMaps.TEMPLATE.setProperty("Config", new EagerProperty("config.master.jvm.args.combined",
-                                                                  "This property contains all the JVM arguments passed "+
-                                                                  "to DrJava's master JVM, i.e. the JVM the user is editing "+
-                                                                  "programs in. The arguments from the \"JVM Args for "+
-                                                                  "Main JVM\" and the special -X arguments from \"Maximum "+
-                                                                  "Heap Size for Main JVM\" are combined.") {
+    String msg1 = 
+      "This property contains all the JVM arguments passed to DrJava's master JVM, i.e. the JVM the user is editing " +
+      "programs in. The arguments from the \"JVM Args for Main JVM\" and the special -X arguments from " +
+      "\"Maximum  Heap Size for Main JVM\" are combined.";
+    
+    EagerProperty prop1 = new EagerProperty("config.master.jvm.args.combined", msg1) {
       public void update(PropertyMaps pm) {
         StringBuilder sb = new StringBuilder();
         if (!DrJava.getConfig().getSetting(MASTER_JVM_XMX).equals("default") &&
@@ -85,15 +84,18 @@ public class DrJavaPropertySetup implements OptionConstants {
       public void resetAttributes() {
         _attributes.clear();
       }
-    }).listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("Config", "config.master.jvm.args"))
-      .listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("Config", "config.master.jvm.xmx"));
+    };
     
-    PropertyMaps.TEMPLATE.setProperty("Config", new EagerProperty("config.slave.jvm.args.combined",
-                                                                  "This property contains all the JVM arguments passed "+
-                                                                  "to DrJava's master JVM, i.e. the JVM the user is editing "+
-                                                                  "programs in. The arguments from the \"JVM Args for "+
-                                                                  "Slave JVM\" and the special -X arguments from \"Maximum "+
-                                                                  "Heap Size for Main JVM\" are combined.") {
+    PropertyMaps.TEMPLATE.setProperty("Config", prop1).
+      listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("Config", "config.master.jvm.args")).
+      listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("Config", "config.master.jvm.xmx"));
+    
+    String msg2 =  
+      "This property contains all the JVM arguments passed to DrJava's master JVM, i.e. the JVM the user is editing " +
+      "programs in. The arguments from the \"JVM Args for Slave JVM\" and the special -X arguments from " +
+      "\"Maximum Heap Size for Main JVM\" are combined.";
+    
+    EagerProperty prop2 = new EagerProperty("config.slave.jvm.args.combined", msg2) {
       public void update(PropertyMaps pm) {
         StringBuilder sb = new StringBuilder();
         if (!DrJava.getConfig().getSetting(SLAVE_JVM_XMX).equals("default") &&
@@ -109,23 +111,28 @@ public class DrJavaPropertySetup implements OptionConstants {
       public void resetAttributes() {
         _attributes.clear();
       }
-    }).listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("Config", "config.slave.jvm.args"))
-      .listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("Config", "config.slave.jvm.xmx"));
+    };
     
-    // Misc
-    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("tmpfile",
-                                                                 "Creates a temporary file and returns the name of it.\n"+
-                                                                 "Optional attributes:\n"+
-                                                                 "\tname=\"<name for temp file>\"\n"+
-                                                                 "\tdir=\"<dir for temp file>\"\n"+
-                                                                 "\tkeep=\"<true if the file should not be erased>\"\n"+
-                                                                 "\tcontent=\"<text to go into the file>\"") {
+    PropertyMaps.TEMPLATE.setProperty("Config", prop2).
+      listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("Config", "config.slave.jvm.args")).
+      listenToInvalidatesOf(PropertyMaps.TEMPLATE.getProperty("Config", "config.slave.jvm.xmx"));
+    
+    String msg3 = 
+      "Creates a temporary file and returns the name of it.\n" + 
+      "Optional attributes:\n" +
+      "\tname=\"<name for temp file>\"\n" +
+      "\tdir=\"<dir for temp file>\"\n" +
+      "\tkeep=\"<true if the file should not be erased>\"\n" +
+      "\tcontent=\"<text to go into the file>\"";
+    
+    DrJavaProperty prop3 = new DrJavaProperty("tmpfile", msg3) {
       java.util.Random _r = new java.util.Random();
       public void update(PropertyMaps pm) {
         try {
           String name = _attributes.get("name");
           String dir = _attributes.get("dir");
-          if (name.equals("")) name = "DrJava-Execute-" + System.currentTimeMillis() + "-" + (_r.nextInt() & 0xffff) + ".tmp";
+          if (name.equals("")) 
+            name = "DrJava-Execute-" + System.currentTimeMillis() + "-" + (_r.nextInt() & 0xffff) + ".tmp";
           if (dir.equals("")) dir = System.getProperty("java.io.tmpdir");
           else {
             dir = StringOps.unescapeFileName(dir);
@@ -162,31 +169,40 @@ public class DrJavaPropertySetup implements OptionConstants {
         _attributes.put("keep", "");
         _attributes.put("content", "");
       }
-    });
+    };
     
-    PropertyMaps.TEMPLATE.setProperty("File", new RecursiveFileListProperty("file.find", File.pathSeparator, DEF_DIR, DEF_DIR,
-                                                                            "Return a list of files found in the starting dir.\n"+
-                                                                            "Optional attributes:\n"+
-                                                                            "\tsep=\"<separator between files>\"\n"+
-                                                                            "\tdir=\"<dir where to start>\"\n"+
-                                                                            "\trel=\"<dir to which the files are relative>\"\n"+
-                                                                            "\tfilter=\"<filter, like *.txt, for files to list>\"\n"+
-                                                                            "\tdirfilter=\"<filter for which dirs to recurse>\"\n"+
-                                                                            "\tsquote=\"<true to enclose file in single quotes>\"\n"+
-                                                                            "\tdquote=\"<true to enclose file in double quotes>\""));
+    // Misc
+    PropertyMaps.TEMPLATE.setProperty("Misc", prop3);
     
-    PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.isdir",
-                                                                 "Return true if the specified file is a directory, false "+
-                                                                 "otherwise.\n"+
-                                                                 "Required attributes:\n"+
-                                                                 "\tfile=\"<file to test>\"\n"+
-                                                                 "Multiple files can be specified, separated by ${path.separator}, "+
-                                                                 "which is "+File.pathSeparator+" on this machine. If multiple "+
-                                                                 "files are specified, then a list of values, each "+
-                                                                 "separated by ${path.separator}, is returned.") {
+    String msg4 = 
+      "Return a list of files found in the starting dir.\n" +
+      "Optional attributes:\n" +
+      "\tsep=\"<separator between files>\"\n" +
+      "\tdir=\"<dir where to start>\"\n" +
+      "\trel=\"<dir to which the files are relative>\"\n" +
+      "\tfilter=\"<filter, like *.txt, for files to list>\"\n" +
+      "\tdirfilter=\"<filter for which dirs to recurse>\"\n" +
+      "\tsquote=\"<true to enclose file in single quotes>\"\n" +
+      "\tdquote=\"<true to enclose file in double quotes>\"";
+
+    DrJavaProperty prop4 = new RecursiveFileListProperty("file.find", File.pathSeparator, DEF_DIR, DEF_DIR, msg4);
+    
+    PropertyMaps.TEMPLATE.setProperty("File", prop4);
+    
+    String msg5 = 
+      "Return true if the specified file is a directory, false " +
+      "otherwise.\n" +
+      "Required attributes:\n" +
+      "\tfile=\"<file to test>\"\n" +
+      "Multiple files can be specified, separated by ${path.separator}, " +
+      "which is " + File.pathSeparator + " on this machine. If multiple " +
+      "files are specified, then a list of values, each " +
+      "separated by ${path.separator}, is returned.";
+    
+    DrJavaProperty prop5 = new DrJavaProperty("file.isdir", msg5) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("file");
-        if (s==null) {
+        if (s == null) {
           _value = "(file.isdir Error...)";
           return;
         }
@@ -209,20 +225,24 @@ public class DrJavaPropertySetup implements OptionConstants {
         _attributes.clear();
         _attributes.put("file", null);
       }
-    });
+    };
     
-    PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.isfile",
-                                                                 "Return true if the specified file is a file, not a "+
-                                                                 "directory.\n"+
-                                                                 "Required attributes:\n"+
-                                                                 "\tfile=\"<file to test>\"\n"+
-                                                                 "Multiple files can be specified, separated by ${path.separator}, "+
-                                                                 "which is "+File.pathSeparator+" on this machine. If multiple "+
-                                                                 "files are specified, then a list of values, each "+
-                                                                 "separated by ${path.separator}, is returned.") {
+    PropertyMaps.TEMPLATE.setProperty("File", prop5);
+    
+    String msg6 = 
+      "Return true if the specified file is a file, not a " +
+      "directory.\n" +
+      "Required attributes:\n" +
+      "\tfile=\"<file to test>\"\n" +
+      "Multiple files can be specified, separated by ${path.separator}, " +
+      "which is " +File.pathSeparator+" on this machine. If multiple " +
+      "files are specified, then a list of values, each " +
+      "separated by ${path.separator}, is returned.";
+    
+    DrJavaProperty prop6 = new DrJavaProperty("file.isfile", msg6) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("file");
-        if (s==null) {
+        if (s == null) {
           _value = "(file.isfile Error...)";
           return;
         }
@@ -246,19 +266,23 @@ public class DrJavaPropertySetup implements OptionConstants {
         _attributes.clear();
         _attributes.put("file", null);
       }
-    });
+    };
     
-    PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.exists",
-                                                                 "Return true if the specified file exists.\n"+
-                                                                 "Required attributes:\n"+
-                                                                 "\tfile=\"<file to test>\"\n"+
-                                                                 "Multiple files can be specified, separated by ${path.separator}, "+
-                                                                 "which is "+File.pathSeparator+" on this machine. If multiple "+
-                                                                 "files are specified, then a list of values, each "+
-                                                                 "separated by ${path.separator}, is returned.") {
+    PropertyMaps.TEMPLATE.setProperty("File", prop6);
+    
+    String msg7 = 
+      "Return true if the specified file exists.\n" +
+      "Required attributes:\n" +
+      "\tfile=\"<file to test>\"\n" +
+      "Multiple files can be specified, separated by ${path.separator}, " +
+      "which is " +File.pathSeparator+" on this machine. If multiple " +
+      "files are specified, then a list of values, each " +
+      "separated by ${path.separator}, is returned.";
+    
+    DrJavaProperty prop7 = new DrJavaProperty("file.exists", msg7) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("file");
-        if (s==null) {
+        if (s == null) {
           _value = "(file.exists Error... )";
           return;
         }
@@ -282,20 +306,22 @@ public class DrJavaPropertySetup implements OptionConstants {
         _attributes.clear();
         _attributes.put("file", null);
       }
-    });
+    };
+      
+    PropertyMaps.TEMPLATE.setProperty("File", prop7);
     
-    PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.parent",
-                                                                 "Return the path of the parent, or and empty string \"\" if "+
-                                                                 "no parent exists.\n"+
-                                                                 "Required attributes:\n"+
-                                                                 "\tfile=\"<file for which to return the parent>\"\n"+
-                                                                 "Multiple files can be specified, separated by ${path.separator}, "+
-                                                                 "which is "+File.pathSeparator+" on this machine. If multiple "+
-                                                                 "files are specified, then a list of values, each "+
-                                                                 "separated by ${path.separator}, is returned.") {
+    String msg8 = 
+      "Return the path of the parent, or and empty string \"\" if no parent exists.\n" +
+      "Required attributes:\n" +
+      "\tfile=\"<file for which to return the parent>\"\n" +
+      "Multiple files can be specified, separated by ${path.separator}, which is " + File.pathSeparator + 
+      " on this machine. If multiple files are specified, then a list of values, each " +
+      "separated by ${path.separator}, is returned.";
+    
+    DrJavaProperty prop8 = new DrJavaProperty("file.parent", msg8) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("file");
-        if (s==null) {
+        if (s == null) {
           _value = "(file.parent Error...)";
           return;
         }
@@ -305,7 +331,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           File f = new File(fs);
           String p = StringOps.escapeFileName(f.getParent());
           sb.append(File.pathSeparator);
-          sb.append((p!=null)?p:"");
+          sb.append((p != null)?p:"");
         }
         s = sb.toString();
         if (s.startsWith(File.pathSeparator)) {
@@ -320,28 +346,32 @@ public class DrJavaPropertySetup implements OptionConstants {
         _attributes.clear();
         _attributes.put("file", null);
       }
-    });
+    };
     
-    PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.abs",
-                                                                 "Return the absolute path of the file which has been "+
-                                                                 "relative to another file.\n"+
-                                                                 "Required attributes:\n"+
-                                                                 "\tfile=\"<file for which to return the absolute path>\"\n"+
-                                                                 "\tbase=\"<other file which serves as base path>\"\n"+
-                                                                 "Multiple files can be specified for the file attribute, each "+
-                                                                 "separated by ${path.separator}, which is "+File.pathSeparator+
-                                                                 " on this machine. If multiple files are specified, then a list "+
-                                                                 "of values, each separated by ${path.separator}, is returned.") {
+    PropertyMaps.TEMPLATE.setProperty("File", prop8);
+    
+    String msg9 = 
+      "Return the absolute path of the file which has been " +
+      "relative to another file.\n" +
+      "Required attributes:\n" +
+      "\tfile=\"<file for which to return the absolute path>\"\n" +
+      "\tbase=\"<other file which serves as base path>\"\n" +
+      "Multiple files can be specified for the file attribute, each " +
+      "separated by ${path.separator}, which is " + File.pathSeparator +
+      " on this machine. If multiple files are specified, then a list " +
+      "of values, each separated by ${path.separator}, is returned.";
+    
+    PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.abs", msg9) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("base");
-        if (s==null) {
+        if (s == null) {
           _value = "(file.abs Error: base missing...)";
           return;
         }
         s = StringOps.unescapeFileName(s);
         File base = new File(s);
         s = _attributes.get("file");
-        if (s==null) {
+        if (s == null) {
           _value = "(file.abs Error: file missing...)";
           return;
         }
@@ -368,25 +398,27 @@ public class DrJavaPropertySetup implements OptionConstants {
       }
     });
     
-    PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.rel",
-                                                                 "Return the path of the file, relative to another file.\n"+
-                                                                 "Required attributes:\n"+
-                                                                 "\tfile=\"<file for which to return the relative path>\"\n"+
-                                                                 "\tbase=\"<other file which serves as base path>\"\n"+
-                                                                 "Multiple files can be specified for the file attribute, each "+
-                                                                 "separated by ${path.separator}, which is "+File.pathSeparator+
-                                                                 " on this machine. If multiple files are specified, then a list "+
-                                                                 "of values, each separated by ${path.separator}, is returned.") {
+    String msg10 = 
+      "Return the path of the file, relative to another file.\n" +
+      "Required attributes:\n" +
+      "\tfile=\"<file for which to return the relative path>\"\n" +
+      "\tbase=\"<other file which serves as base path>\"\n" +
+      "Multiple files can be specified for the file attribute, each " +
+      "separated by ${path.separator}, which is " +File.pathSeparator+
+      " on this machine. If multiple files are specified, then a list " +
+      "of values, each separated by ${path.separator}, is returned.";
+    
+    PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.rel", msg10) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("base");
-        if (s==null) {
+        if (s == null) {
           _value = "(file.rel Error: base missing...)";
           return;
         }
         s = StringOps.unescapeFileName(s);
         File b = new File(s);
         s = _attributes.get("file");
-        if (s==null) {
+        if (s == null) {
           _value = "(file.rel Error: file missing...)";
           return;
         }
@@ -399,7 +431,7 @@ public class DrJavaPropertySetup implements OptionConstants {
             if (s.endsWith(File.separator)) {
               // path ends with "/", check if we can remove the "/"
               File[] roots = File.listRoots();
-              if (roots!=null) {
+              if (roots != null) {
                 boolean equalsRoot = false;
                 for(File r: roots) {
                   if (s.equals(r.toString())) {
@@ -414,7 +446,7 @@ public class DrJavaPropertySetup implements OptionConstants {
                 }
               }
             }
-            if (s.length()==0) { s = "."; }
+            if (s.length() == 0) { s = "."; }
             sb.append(File.pathSeparator);
             sb.append(StringOps.escapeFileName(s));
           }
@@ -439,18 +471,18 @@ public class DrJavaPropertySetup implements OptionConstants {
       }
     });
     
-    PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.mkdir",
-                                                                 "Make the directory with the provided file name. "+
-                                                                 "Evaluates to the empty string \"\" if successful.\n"+
-                                                                 "Required attributes:\n"+
-                                                                 "\tfile=\"<directory to create>\"\n"+
-                                                                 "Multiple files can be specified for the file attribute, each "+
-                                                                 "separated by ${path.separator}, which is "+File.pathSeparator+
-                                                                 " on this machine. If multiple files are specified, then DrJava "+
-                                                                 "will attempt to make all those directories.") {
+    String msg11 = 
+      "Make the directory with the provided file name. Evaluates to the empty string \"\" if successful.\n" +
+      "Required attributes:\n" +
+      "\tfile=\"<directory to create>\"\n" +
+      "Multiple files can be specified for the file attribute, each separated by ${path.separator}, which is " +
+      File.pathSeparator + " on this machine. If multiple files are specified, then DrJava " +
+      "will attempt to make all those directories.";
+      
+    PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.mkdir", msg11) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("file");
-        if (s==null) {
+        if (s == null) {
           _value = "(file.mkdir Error: file missing...)";
           return;
         }
@@ -471,23 +503,23 @@ public class DrJavaPropertySetup implements OptionConstants {
       }
     });
     
-    PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.rm",
-                                                                 "Remove the specified file or directory, recursively if desired. "+
-                                                                 "Evaluates to the empty string \"\" if successful.\n"+
-                                                                 "Required attributes:\n"+
-                                                                 "\tfile=\"<file or directory to remove>\""+
-                                                                 "Optional attributes:\n"+
-                                                                 "\trec=\"<true for recursive removal>\"\n"+
-                                                                 "(if not specified, false is used and removal is not recursive)\n"+
-                                                                 "Multiple files can be specified for the file attribute, each "+
-                                                                 "separated by ${path.separator}, which is "+File.pathSeparator+
-                                                                 " on this machine. If multiple files are specified, then DrJava "+
-                                                                 "will attempt to remove all those files.") {
+    String msg12 = 
+      "Remove the specified file or directory, recursively if desired. Evaluates to the empty string \"\" if successful.\n" +
+      "Required attributes:\n" +
+      "\tfile=\"<file or directory to remove>\"\n" +
+      "Optional attributes:\n" +
+      "\trec=\"<true for recursive removal>\"\n" +
+      "(if not specified, false is used and removal is not recursive)\n" +
+      "Multiple files can be specified for the file attribute, each separated by ${path.separator}, which is " +
+      File.pathSeparator + " on this machine. If multiple files are specified, then DrJava " +
+      "will attempt to remove all those files.";
+    
+    PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.rm", msg12) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("rec");
         boolean rec = new Boolean(s).booleanValue();
         s = _attributes.get("file");
-        if (s==null) {
+        if (s == null) {
           _value = "(file.rm Error...)";
           return;
         }
@@ -521,27 +553,27 @@ public class DrJavaPropertySetup implements OptionConstants {
       }
     });
     
-    PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.mv",
-                                                                 "Move the specified file or directory to a new location. "+
-                                                                 "Evaluates to the empty string \"\" if successful.\n"+
-                                                                 "Required attributes:\n"+
-                                                                 "\tfile=\"<file or directory to move>\""+
-                                                                 "\tnew=\"<new location>\"") {
+    String msg13 =
+      "Move the specified file or directory to a new location. Evaluates to the empty string \"\" if successful.\n" +
+      "Required attributes:\n" +
+      "\tfile=\"<file or directory to move>\"\tnew=\"<new location>\"";
+    
+    PropertyMaps.TEMPLATE.setProperty("File", new DrJavaProperty("file.mv", msg13) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("file");
-        if (s==null) {
+        if (s == null) {
           _value = "(file.mv Error: file missing...)";
           return;
         }
         File f = new File(s);
         s = _attributes.get("new");
-        if (s==null) {
+        if (s == null) {
           _value = "(file.mv Error: new missing...)";
           return;
         }
         File n = new File(s);
         boolean res = false;
-        if ((f.getParent()!=null) && (f.getParent().equals(n.getParent()))) {
+        if ((f.getParent() != null) && (f.getParent().equals(n.getParent()))) {
           // just renaming a file or directory
           res = edu.rice.cs.plt.io.IOUtil.attemptRenameTo(f,n);
         }
@@ -571,11 +603,12 @@ public class DrJavaPropertySetup implements OptionConstants {
       }
     });
     
-    PropertyMaps.TEMPLATE.setProperty("DrJava", new DrJavaProperty("drjava.current.time.millis",
-                                                                   "Returns the current time in milliseconds since 01/01/1970, "+
-                                                                   "unless other format is specified by the fmt attribute.\n"+
-                                                                   "Optional attributes:\n"+
-                                                                   "\tfmt=\"full\" or \"long\" or \"medium\" or \"short\"") {
+    String msg14 = 
+      "Returns the current time in milliseconds since 01/01/1970, unless other format is specified by the fmt attribute.\n" +
+      "Optional attributes:\n" +
+      "\tfmt=\"full\" or \"long\" or \"medium\" or \"short\"";
+    
+    PropertyMaps.TEMPLATE.setProperty("DrJava", new DrJavaProperty("drjava.current.time.millis", msg14) {
       public void update(PropertyMaps pm) {
         long millis = System.currentTimeMillis();
         String f = _attributes.get("fmt").toLowerCase();
@@ -602,17 +635,17 @@ public class DrJavaPropertySetup implements OptionConstants {
       }
     });
     
-    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("ignore",
-                                                                 "Evaluates the string specified in the command attribute, "+
-                                                                 "but ignore the result of the evaluation. Only side effects "+
-                                                                 "of the evaluation are apparent. This property always "+
-                                                                 "evaluates to the empty string \"\" (unless the command "+
-                                                                 "attribute is missing).\n"+
-                                                                 "Required attributes:\n"+
-                                                                 "\tcmd=\"<command to evaluate>\"") {
+    String msg15 = 
+      "Evaluates the string specified in the command attribute, but ignore the result of the evaluation. Only side " +
+      "effects of the evaluation are apparent. This property always evaluates to the empty string \"\" (unless the " +
+      "command attribute is missing).\n" +
+      "Required attributes:\n" +
+      "\tcmd=\"<command to evaluate>\"";
+      
+    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("ignore", msg15) {
       public void update(PropertyMaps pm) {
         String s = _attributes.get("cmd");
-        if (s==null) {
+        if (s == null) {
           _value = "(ignore Error...)";
           return;
         }
@@ -624,17 +657,18 @@ public class DrJavaPropertySetup implements OptionConstants {
       }
     });
     
-    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("if",
-                                                                 "If the cond attribute evaluates to true, returns "+
-                                                                 "the evaluation of the then attribute, otherwise "+
-                                                                 "the evaluation of the else attribute.\n"+
-                                                                 "Required attribute:\n"+
-                                                                 "\tcond=\"<string evaluating to true of false>\"\n"+
-                                                                 "Optional attributes:\n"+
-                                                                 "\tthen=\"<evaluated if true>\"\n"+
-                                                                 "\telse=\"<evaluated if false>\"") {
+    String msg16 = 
+      "If the cond attribute evaluates to true, returns the evaluation of the then attribute, otherwise " +
+      "the evaluation of the else attribute.\n" +
+      "Required attribute:\n" +
+      "\tcond=\"<string evaluating to true of false>\"\n" +
+      "Optional attributes:\n" +
+      "\tthen=\"<evaluated if true>\"\n" +
+      "\telse=\"<evaluated if false>\"";
+    
+    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("if", msg16) {
       public void update(PropertyMaps pm) {
-        if (_attributes.get("cond")==null) {
+        if (_attributes.get("cond") == null) {
           _value = "(if Error...)";
           return;
         }
@@ -662,193 +696,258 @@ public class DrJavaPropertySetup implements OptionConstants {
       }
     });
 
-    PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
-                                        <Double,Double,Boolean>("gt",
-                                                                "If the op1 is greater than op2, returns true,"+
-                                                                "false otherwise.\n"+
-                                                                "Required attributes:\n"+
-                                                                "\top1=\"<string evaluating to a number>\"\n"+
-                                                                "\top2=\"<string evaluating to a number>\"",
-                                                                new Lambda2<Double,Double,Boolean>() {
+    String msg17 = 
+      "If the op1 is greater than op2, returns true," +
+      "false otherwise.\n" +
+      "Required attributes:\n" +
+      "\top1=\"<string evaluating to a number>\"\n" +
+      "\top2=\"<string evaluating to a number>\"";
+    
+    Lambda2<Double,Double,Boolean> lam17 = new Lambda2<Double,Double,Boolean>() {
       public Boolean value(Double op1, Double op2) { return (op1>op2); }
-    },
-                                                                UnaryOpProperty.PARSE_DOUBLE,
-                                                                UnaryOpProperty.PARSE_DOUBLE,
-                                                                UnaryOpProperty.FORMAT_BOOL));
-    PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
-                                        <Double,Double,Boolean>("lt",
-                                                                "If the op1 is less than op2, returns true,"+
-                                                                "false otherwise.\n"+
-                                                                "Required attributes:\n"+
-                                                                "\top1=\"<string evaluating to a number>\"\n"+
-                                                                "\top2=\"<string evaluating to a number>\"",
-                                                                new Lambda2<Double,Double,Boolean>() {
+    };
+    
+    BinaryOpProperty prop17 = 
+      new BinaryOpProperty<Double,Double,Boolean>("gt", 
+                                                  msg17, 
+                                                  lam17,
+                                                  UnaryOpProperty.PARSE_DOUBLE,
+                                                  UnaryOpProperty.PARSE_DOUBLE,
+                                                  UnaryOpProperty.FORMAT_BOOL);
+    
+    PropertyMaps.TEMPLATE.setProperty("Misc", prop17);
+    
+    String msg18 = 
+      "If the op1 is less than op2, returns true,false otherwise.\n" +
+      "Required attributes:\n" +
+      "\top1=\"<string evaluating to a number>\"\n" +
+      "\top2=\"<string evaluating to a number>\"";
+    
+    Lambda2<Double,Double,Boolean> lam18 = new Lambda2<Double,Double,Boolean>() {
       public Boolean value(Double op1, Double op2) { return (op1<op2); }
-    },
-                                                                UnaryOpProperty.PARSE_DOUBLE,
-                                                                UnaryOpProperty.PARSE_DOUBLE,
-                                                                UnaryOpProperty.FORMAT_BOOL));
-    PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
-                                        <Double,Double,Boolean>("gte",
-                                                                "If the op1 is greater than or equal to op2, returns true,"+
-                                                                "false otherwise.\n"+
-                                                                "Required attributes:\n"+
-                                                                "\top1=\"<string evaluating to a number>\"\n"+
-                                                                "\top2=\"<string evaluating to a number>\"",
-                                                                new Lambda2<Double,Double,Boolean>() {
+    };
+    
+    BinaryOpProperty prop18 =  
+      new BinaryOpProperty<Double,Double,Boolean>("lt",
+                                                  msg18,
+                                                  lam18,
+                                                  UnaryOpProperty.PARSE_DOUBLE,
+                                                  UnaryOpProperty.PARSE_DOUBLE,
+                                                  UnaryOpProperty.FORMAT_BOOL);
+    
+    PropertyMaps.TEMPLATE.setProperty("Misc",prop18);
+    
+    String msg19 = 
+      "If the op1 is greater than or equal to op2, returns true,false otherwise.\n" +
+      "Required attributes:\n" +
+      "\top1=\"<string evaluating to a number>\"\n" +
+      "\top2=\"<string evaluating to a number>\"";
+    
+    Lambda2<Double,Double,Boolean> lam19 = new Lambda2<Double,Double,Boolean>() {
       public Boolean value(Double op1, Double op2) { return (op1>=op2); }
-    },
-                                                                UnaryOpProperty.PARSE_DOUBLE,
-                                                                UnaryOpProperty.PARSE_DOUBLE,
-                                                                UnaryOpProperty.FORMAT_BOOL));
-    PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
-                                        <Double,Double,Boolean>("lte",
-                                                                "If the op1 is less than or equal to op2, returns true,"+
-                                                                "false otherwise.\n"+
-                                                                "Required attributes:\n"+
-                                                                "\top1=\"<string evaluating to a number>\"\n"+
-                                                                "\top2=\"<string evaluating to a number>\"",
-                                                                new Lambda2<Double,Double,Boolean>() {
+    };
+    
+    BinaryOpProperty<Double,Double,Boolean> prop19 = 
+      new BinaryOpProperty<Double,Double,Boolean>("gte",
+                                                  msg19,
+                                                  lam19,
+                                                  UnaryOpProperty.PARSE_DOUBLE,
+                                                  UnaryOpProperty.PARSE_DOUBLE,
+                                                  UnaryOpProperty.FORMAT_BOOL);
+    
+    PropertyMaps.TEMPLATE.setProperty("Misc", prop19);
+    
+    String msg20 = 
+      "If the op1 is less than or equal to op2, returns true,false otherwise.\n" +
+      "Required attributes:\n" +
+      "\top1=\"<string evaluating to a number>\"\n" +
+      "\top2=\"<string evaluating to a number>\"";
+    
+    Lambda2<Double,Double,Boolean> lam20 = new Lambda2<Double,Double,Boolean>() {
       public Boolean value(Double op1, Double op2) { return (op1<=op2); }
-    },
-                                                                UnaryOpProperty.PARSE_DOUBLE,
-                                                                UnaryOpProperty.PARSE_DOUBLE,
-                                                                UnaryOpProperty.FORMAT_BOOL));
+    };
+    
+    BinaryOpProperty<Double,Double,Boolean> prop20 = 
+      new BinaryOpProperty<Double,Double,Boolean>("lte",
+                                                  msg20,
+                                                  lam20,
+                                                  UnaryOpProperty.PARSE_DOUBLE,
+                                                  UnaryOpProperty.PARSE_DOUBLE,
+                                                  UnaryOpProperty.FORMAT_BOOL);
+
+    PropertyMaps.TEMPLATE.setProperty("Misc", prop20);
+    
+    String msg21 = "If the op1 is equal to op2, returns true,false otherwise.\n" +
+      "Required attributes:\n" +
+      "\top1=\"<string>\"\n" +
+      "\top2=\"<string>\"";
+    
+    Lambda2<String,String,Boolean> lam21 = new Lambda2<String,String,Boolean>() {
+      public Boolean value(String op1, String op2) { return op1.equals(op2); }
+    };
+    
     PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
                                         <String,String,Boolean>("eq",
-                                                                "If the op1 is equal to op2, returns true,"+
-                                                                "false otherwise.\n"+
-                                                                "Required attributes:\n"+
-                                                                "\top1=\"<string>\"\n"+
-                                                                "\top2=\"<string>\"",
-                                                                new Lambda2<String,String,Boolean>() {
-      public Boolean value(String op1, String op2) { return op1.equals(op2); }
-    },
+                                                                msg21,
+                                                                lam21,
                                                                 UnaryOpProperty.PARSE_STRING,
                                                                 UnaryOpProperty.PARSE_STRING,
                                                                 UnaryOpProperty.FORMAT_BOOL));
-    PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
-                                        <String,String,Boolean>("neq",
-                                                                "If the op1 is not equal to op2, returns true,"+
-                                                                "false otherwise.\n"+
-                                                                "Required attributes:\n"+
-                                                                "\top1=\"<string>\"\n"+
-                                                                "\top2=\"<string>\"",
-                                                                new Lambda2<String,String,Boolean>() {
+    String msg22 = 
+      "If the op1 is not equal to op2, returns true,false otherwise.\n" +
+      "Required attributes:\n" +
+      "\top1=\"<string>\"\n" +
+      "\top2=\"<string>\"";
+    
+     Lambda2<String,String,Boolean> lam22 = new Lambda2<String,String,Boolean>() {
       public Boolean value(String op1, String op2) { return !op1.equals(op2); }
-    },
-                                                                UnaryOpProperty.PARSE_STRING,
-                                                                UnaryOpProperty.PARSE_STRING,
-                                                                UnaryOpProperty.FORMAT_BOOL));
+    };
+     
+     PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
+                                         <String,String,Boolean>("neq",
+                                                                 msg22,
+                                                                 lam22,
+                                                                 UnaryOpProperty.PARSE_STRING,
+                                                                 UnaryOpProperty.PARSE_STRING,
+                                                                 UnaryOpProperty.FORMAT_BOOL));
+    String msg23 =  
+      "If op1 and op2 are true, returns true,false otherwise.\n" +
+      "Required attributes:\n" +
+      "\top1=\"<boolean>\"\n" +
+      "\top2=\"<boolean>\"";
+      
+    Lambda2<Boolean,Boolean,Boolean> lam23 = new Lambda2<Boolean,Boolean,Boolean>() {
+      public Boolean value(Boolean op1, Boolean op2) { return op1 && op2; }
+    };
+
     PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
                                         <Boolean,Boolean,Boolean>("and",
-                                                                  "If op1 and op2 are true, returns true,"+
-                                                                  "false otherwise.\n"+
-                                                                  "Required attributes:\n"+
-                                                                  "\top1=\"<boolean>\"\n"+
-                                                                  "\top2=\"<boolean>\"",
-                                                                new Lambda2<Boolean,Boolean,Boolean>() {
-      public Boolean value(Boolean op1, Boolean op2) { return op1 && op2; }
-    },
-                                                                UnaryOpProperty.PARSE_BOOL,
-                                                                UnaryOpProperty.PARSE_BOOL,
-                                                                UnaryOpProperty.FORMAT_BOOL));
+                                                                  msg23,
+                                                                  lam23,
+                                                                  UnaryOpProperty.PARSE_BOOL,
+                                                                  UnaryOpProperty.PARSE_BOOL,
+                                                                  UnaryOpProperty.FORMAT_BOOL));
+    
+    String msg24 = 
+      "If at least one of op1, op2 is true, returns true,false otherwise.\n" +
+      "Required attributes:\n" +
+      "\top1=\"<boolean>\"\n" +
+      "\top2=\"<boolean>\"";
+     
+    Lambda2<Boolean,Boolean,Boolean> lam24 = new Lambda2<Boolean,Boolean,Boolean>() {
+      public Boolean value(Boolean op1, Boolean op2) { return op1 || op2; }
+    };
+      
     PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
                                         <Boolean,Boolean,Boolean>("or",
-                                                                  "If at least one of op1, op2 is true, returns true,"+
-                                                                  "false otherwise.\n"+
-                                                                  "Required attributes:\n"+
-                                                                  "\top1=\"<boolean>\"\n"+
-                                                                  "\top2=\"<boolean>\"",
-                                                                new Lambda2<Boolean,Boolean,Boolean>() {
-      public Boolean value(Boolean op1, Boolean op2) { return op1 || op2; }
-    },
-                                                                UnaryOpProperty.PARSE_BOOL,
-                                                                UnaryOpProperty.PARSE_BOOL,
-                                                                UnaryOpProperty.FORMAT_BOOL));
+                                                                  msg24,
+                                                                  lam24,
+                                                                  UnaryOpProperty.PARSE_BOOL,
+                                                                  UnaryOpProperty.PARSE_BOOL,
+                                                                  UnaryOpProperty.FORMAT_BOOL));
+    
+    Lambda<Boolean,Boolean> lam25 = new Lambda<Boolean,Boolean>() {
+      public Boolean value(Boolean op) { return !op; }
+    };
+    
     PropertyMaps.TEMPLATE.setProperty("Misc", new UnaryOpProperty
                                         <Boolean,Boolean>("not",
-                                                          "If op is true, returns false,"+
-                                                          "true otherwise.\n"+
-                                                          "Required attributes:\n"+
+                                                          "If op is true, returns false," +
+                                                          "true otherwise.\n" +
+                                                          "Required attributes:\n" +
                                                           "\top=\"<boolean>\"",
-                                                          new Lambda<Boolean,Boolean>() {
-      public Boolean value(Boolean op) { return !op; }
-    },
+                                                          lam25,
                                                           UnaryOpProperty.PARSE_BOOL,
                                                           UnaryOpProperty.FORMAT_BOOL));
+    
+    Lambda2<Double,Double,Double> lam26 = new Lambda2<Double,Double,Double>() {
+      public Double value(Double op1, Double op2) { return op1 + op2; }
+    };
+    
     PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
                                         <Double,Double,Double>("add",
-                                                               "Returns the sum of the two operands (op1+op2).\n"+
-                                                               "Required attributes:\n"+
-                                                               "\top1=\"<string evaluating to a number>\"\n"+
+                                                               "Returns the sum of the two operands (op1+op2).\n" +
+                                                               "Required attributes:\n" +
+                                                               "\top1=\"<string evaluating to a number>\"\n" +
                                                                "\top2=\"<string evaluating to a number>\"",
-                                                               new Lambda2<Double,Double,Double>() {
-      public Double value(Double op1, Double op2) { return op1 + op2; }
-    },
+                                                               lam26,
                                                                UnaryOpProperty.PARSE_DOUBLE,
                                                                UnaryOpProperty.PARSE_DOUBLE,
                                                                UnaryOpProperty.FORMAT_DOUBLE));
+    
+    Lambda2<Double,Double,Double> lam27 = new Lambda2<Double,Double,Double>() {
+      public Double value(Double op1, Double op2) { return op1 - op2; }
+    };
+       
     PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
                                         <Double,Double,Double>("sub",
-                                                               "Returns the difference between the two operands (op1-op2).\n"+
-                                                               "Required attributes:\n"+
-                                                               "\top1=\"<string evaluating to a number>\"\n"+
+                                                               "Returns the difference between the two operands (op1-op2).\n" +
+                                                               "Required attributes:\n" +
+                                                               "\top1=\"<string evaluating to a number>\"\n" +
                                                                "\top2=\"<string evaluating to a number>\"",
-                                                               new Lambda2<Double,Double,Double>() {
-      public Double value(Double op1, Double op2) { return op1 - op2; }
-    },
+                                                               lam27,
                                                                UnaryOpProperty.PARSE_DOUBLE,
                                                                UnaryOpProperty.PARSE_DOUBLE,
                                                                UnaryOpProperty.FORMAT_DOUBLE));
+    
+    Lambda2<Double,Double,Double> lam28 =  new Lambda2<Double,Double,Double>() {
+      public Double value(Double op1, Double op2) { return op1 * op2; }
+    };
+    
     PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
                                         <Double,Double,Double>("mul",
-                                                               "Returns the product of the two operands (op1*op2).\n"+
-                                                               "Required attributes:\n"+
-                                                               "\top1=\"<string evaluating to a number>\"\n"+
+                                                               "Returns the product of the two operands (op1*op2).\n" +
+                                                               "Required attributes:\n" +
+                                                               "\top1=\"<string evaluating to a number>\"\n" +
                                                                "\top2=\"<string evaluating to a number>\"",
-                                                               new Lambda2<Double,Double,Double>() {
-      public Double value(Double op1, Double op2) { return op1 * op2; }
-    },
+                                                              lam28,
                                                                UnaryOpProperty.PARSE_DOUBLE,
                                                                UnaryOpProperty.PARSE_DOUBLE,
                                                                UnaryOpProperty.FORMAT_DOUBLE));
+    Lambda2<Double,Double,Double> lam29 = new Lambda2<Double,Double,Double>() {
+      public Double value(Double op1, Double op2) { return op1 / op2; }
+    };
+    
     PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
                                         <Double,Double,Double>("div",
-                                                               "Returns the quotient of the two operands (op1/op2).\n"+
-                                                               "Required attributes:\n"+
-                                                               "\top1=\"<string evaluating to a number>\"\n"+
+                                                               "Returns the quotient of the two operands (op1/op2).\n" +
+                                                               "Required attributes:\n" +
+                                                               "\top1=\"<string evaluating to a number>\"\n" +
                                                                "\top2=\"<string evaluating to a number>\"",
-                                                               new Lambda2<Double,Double,Double>() {
-      public Double value(Double op1, Double op2) { return op1 / op2; }
-    },
+                                                               lam29,
                                                                UnaryOpProperty.PARSE_DOUBLE,
                                                                UnaryOpProperty.PARSE_DOUBLE,
                                                                UnaryOpProperty.FORMAT_DOUBLE));
+    
+    Lambda<String,Double> lam30 = new Lambda<String,Double>() {
+      public Double value(String s) { return ((double)s.length()); }
+    };
+    
     PropertyMaps.TEMPLATE.setProperty("Misc", new UnaryOpProperty
                                         <String,Double>("strlen",
-                                                        "Returns the length of the operand in characters.\n"+
-                                                        "Required attributes:\n"+
+                                                        "Returns the length of the operand in characters.\n" +
+                                                        "Required attributes:\n" +
                                                         "\top=\"<string>\"",
-                                                        new Lambda<String,Double>() {
-      public Double value(String s) { return ((double)s.length()); }
-    },
+                                                        lam30,
                                                         UnaryOpProperty.PARSE_STRING,
                                                         UnaryOpProperty.FORMAT_DOUBLE));
-    PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
-                                        <String,String,Double>("count",
-                                                               "Counts the number of elements in the list.\n"+
-                                                               "Required attributes:\n"+
-                                                               "\tlist=\"<list string>\"\n"+
-                                                               "Optional attributes:\n"+
-                                                               "\tsep=\"<separator string>\"\n"+
-                                                               "(if none specified, ${path.separator} will be used)",
-                                                               new Lambda2<String,String,Double>() {
+    
+    Lambda2<String,String,Double> lam31 = new Lambda2<String,String,Double>() {
       public Double value(String s, String sep) {
-        if (s.length()==0) return 0.0;
+        if (s.length() == 0) return 0.0;
         return ((double)s.split(TextUtil.regexEscape(sep),-1).length);
       }
-    },
+    };
+      
+    PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
+                                        <String,String,Double>("count",
+                                                               "Counts the number of elements in the list.\n" +
+                                                               "Required attributes:\n" +
+                                                               "\tlist=\"<list string>\"\n" +
+                                                               "Optional attributes:\n" +
+                                                               "\tsep=\"<separator string>\"\n" +
+                                                               "(if none specified, ${path.separator} will be used)",
+                                                               lam31,
                                                                "list",
                                                                null,
                                                                UnaryOpProperty.PARSE_STRING,
@@ -856,21 +955,22 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                System.getProperty("path.separator"),
                                                                UnaryOpProperty.PARSE_STRING,
                                                                UnaryOpProperty.FORMAT_DOUBLE));
-    PropertyMaps.TEMPLATE.setProperty("Misc", new QuaternaryOpProperty
-                                        <String,Double,Double,String,String>("sublist",
-                                                                             "Extracts a sublist of elements from a list, beginning at "+
-                                                                             "a specified index, and including a specified number of elements."+
-                                                                             "Required attributes:\n"+
-                                                                             "\tlist=\"<list string>\"\n"+
-                                                                             "\tindex=\"<index in list, starting with 0>\"\n"+
-                                                                             "Optional attributes:\n"+
-                                                                             "\tcount=\"<number of items>\"\n"+
-                                                                             "(if not specified, 1 will be used)\n"+
-                                                                             "\tsep=\"<separator string>\"\n"+
-                                                                             "(if none specified, ${path.separator} will be used)",
-                                                                             new Lambda4<String,Double,Double,String,String>() {
+    
+    String msg32 =
+      "Extracts a sublist of elements from a list, beginning at a specified index, and including a specified number " +
+      "of elements.\n" +
+      "Required attributes:\n" +
+      "\tlist=\"<list string>\"\n" +
+      "\tindex=\"<index in list, starting with 0>\"\n" +
+      "Optional attributes:\n" +
+      "\tcount=\"<number of items>\"\n" +
+      "(if not specified, 1 will be used)\n" +
+      "\tsep=\"<separator string>\"\n" +
+      "(if none specified, ${path.separator} will be used)";
+    
+    Lambda4<String,Double,Double,String,String> lam32 = new Lambda4<String,Double,Double,String,String>() {
       public String value(String s, Double index, Double count, String sep) {
-        if (s.length()==0) return "";
+        if (s.length() == 0) return "";
         int i = index.intValue();
         int c = count.intValue();
         StringBuilder sb = new StringBuilder();
@@ -888,7 +988,12 @@ public class DrJavaPropertySetup implements OptionConstants {
           return "";
         }
       }
-    },
+    };
+    
+    PropertyMaps.TEMPLATE.setProperty("Misc", new QuaternaryOpProperty
+                                        <String,Double,Double,String,String>("sublist",
+                                                                             msg32,
+                                                                             lam32,
                                                                              "list",
                                                                              null,
                                                                              UnaryOpProperty.PARSE_STRING,
@@ -902,16 +1007,10 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                              System.getProperty("path.separator"),
                                                                              UnaryOpProperty.PARSE_STRING,
                                                                              UnaryOpProperty.FORMAT_STRING));
-    PropertyMaps.TEMPLATE.setProperty("Misc", new TernaryOpProperty
-                                        <String,String,String,String>("change.sep",
-                                                                      "Changes the separator used in a list of values."+
-                                                                      "Required attributes:\n"+
-                                                                      "\tlist=\"<list string>\"\n"+
-                                                                      "\told=\"<old separator>\"\n"+
-                                                                      "\tnew=\"<new separator>\"",
-                                                                      new Lambda3<String,String,String,String>() {
+    
+    Lambda3<String,String,String,String> lam33 = new Lambda3<String,String,String,String>() {
       public String value(String s, String oldSep, String newSep) {
-        if (s.length()==0) return "";
+        if (s.length() == 0) return "";
         StringBuilder sb = new StringBuilder();
         for(String el: s.split(TextUtil.regexEscape(oldSep),-1)) {
           sb.append(newSep);
@@ -923,7 +1022,16 @@ public class DrJavaPropertySetup implements OptionConstants {
         }
         return s;
       }
-    },
+    };
+    
+    PropertyMaps.TEMPLATE.setProperty("Misc", new TernaryOpProperty
+                                        <String,String,String,String>("change.sep",
+                                                                      "Changes the separator used in a list of values." +
+                                                                      "Required attributes:\n" +
+                                                                      "\tlist=\"<list string>\"\n" +
+                                                                      "\told=\"<old separator>\"\n" +
+                                                                      "\tnew=\"<new separator>\"",
+                                                                      lam33,
                                                                       "list",
                                                                       null,
                                                                       UnaryOpProperty.PARSE_STRING,
@@ -935,19 +1043,21 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                       UnaryOpProperty.PARSE_STRING,
                                                                       UnaryOpProperty.FORMAT_STRING));
 
-    PropertyMaps.TEMPLATE.setProperty("Misc", new TernaryOpProperty
-                                        <String,String,String,String>("replace.string",
-                                                                      "Replaces each occurrence in a string."+
-                                                                      "Required attributes:\n"+
-                                                                      "\ttext=\"<text in which to replace>\"\n"+
-                                                                      "\told=\"<old string>\"\n"+
-                                                                      "\tnew=\"<new string>\"",
-                                                                      new Lambda3<String,String,String,String>() {
+    Lambda3<String,String,String,String> lam34 = new Lambda3<String,String,String,String>() {
       public String value(String s, String oldStr, String newStr) {
-        if (s.length()==0) return "";
+        if (s.length() == 0) return "";
         return s.replaceAll(TextUtil.regexEscape(oldStr), newStr);
       }
-    },
+    };
+    
+    PropertyMaps.TEMPLATE.setProperty("Misc", new TernaryOpProperty
+                                        <String,String,String,String>("replace.string",
+                                                                      "Replaces each occurrence in a string." +
+                                                                      "Required attributes:\n" +
+                                                                      "\ttext=\"<text in which to replace>\"\n" +
+                                                                      "\told=\"<old string>\"\n" +
+                                                                      "\tnew=\"<new string>\"",
+                                                                      lam34,
                                                                       "text",
                                                                       null,
                                                                       UnaryOpProperty.PARSE_STRING,
@@ -960,14 +1070,16 @@ public class DrJavaPropertySetup implements OptionConstants {
                                                                       UnaryOpProperty.FORMAT_STRING));
     
     // XML properties, correspond to XMLConfig
-    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("xml.in", "(XML Input...)",
-                                                                 "Read data from an XML file.\n"+
-                                                                 "Required attributes:\n"+
-                                                                 "\tfile=\"<file with the XML>\"\n"+
-                                                                 "\tpath=\"<path into the XML tree>\"\n"+
-                                                                 "\tdefault=\"<default value if not found>\"\n"+
-                                                                 "\tmulti=\"<true if multiple values are allowed>\"\n"+
-                                                                 "\tsep=\"<separator between results>\"") {
+    String msg35 = 
+      "Read data from an XML file.\n" +
+      "Required attributes:\n" +
+      "\tfile=\"<file with the XML>\"\n" +
+      "\tpath=\"<path into the XML tree>\"\n" +
+      "\tdefault=\"<default value if not found>\"\n" +
+      "\tmulti=\"<true if multiple values are allowed>\"\n" +
+      "\tsep=\"<separator between results>\"";
+
+    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("xml.in", "(XML Input...)",msg35) {
       public String toString() {
         return "(XML Input...)";
       }
@@ -977,9 +1089,9 @@ public class DrJavaPropertySetup implements OptionConstants {
         String defval = _attributes.get("default");
         String multi = _attributes.get("multi");
         String sep = _attributes.get("sep");
-        if ((xmlfile==null) ||
-            (xmlpath==null) ||
-            (defval==null)) {
+        if ((xmlfile == null) ||
+            (xmlpath == null) ||
+            (defval == null)) {
           _value = "(XML Input Error...)";
           return;
         }
@@ -992,7 +1104,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           XMLConfig xc = new XMLConfig(f);
           List<String> values = xc.getMultiple(xmlpath);
           if (!"true".equals(multi.toLowerCase())) {
-            if (values.size()!=1) {
+            if (values.size() != 1) {
               _value = defval;
               return;
             }
@@ -1024,15 +1136,16 @@ public class DrJavaPropertySetup implements OptionConstants {
       }
     });
     
-    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("xml.out.action", "(XML Output...)",
-                                                                 "Write data to an XML file. Since this is an "+
-                                                                 "action, it will not produce any output, but it will "+
-                                                                 "write to the XML file.\n"+
-                                                                 "Required attributes:\n"+
-                                                                 "\tfile=\"<file with the XML>\"\n"+
-                                                                 "\tpath=\"<path into the XML tree>\"\n"+
-                                                                 "\tcontent=\"<value to write into the XML>\"\n"+
-                                                                 "\tappend=\"<true to append, false to overwrite existing>\"") {
+    String msg36 = 
+      "Write data to an XML file. Since this is an action, it will not produce any output, but it will " +
+      "write to the XML file.\n" +
+      "Required attributes:\n" +
+      "\tfile=\"<file with the XML>\"\n" +
+      "\tpath=\"<path into the XML tree>\"\n" +
+      "\tcontent=\"<value to write into the XML>\"\n" +
+      "\tappend=\"<true to append, false to overwrite existing>\"";
+      
+    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("xml.out.action", "(XML Output...)", msg36) {
       public String toString() {
         return "(XML Output...)";
       }
@@ -1041,8 +1154,8 @@ public class DrJavaPropertySetup implements OptionConstants {
         String xmlpath = _attributes.get("path");
         String content = _attributes.get("content");
         String append = _attributes.get("append");
-        if ((xmlfile==null) ||
-            (xmlpath==null)) {
+        if ((xmlfile == null) ||
+            (xmlpath == null)) {
           _value = "(XML Output Error...)";
         }
         try {
@@ -1072,27 +1185,29 @@ public class DrJavaPropertySetup implements OptionConstants {
     });
     
     // Variables
-    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("var",
-                                                                 "Create a new scope and define a variable with the "+
-                                                                 "specified name and value; then evaluate the command "+
-                                                                 "with the new variable in the environment.\n"+
-                                                                 "Required attributes:\n"+
-                                                                 "\tname=\"<name of the variable>\"\n"+
-                                                                 "\tval=\"<value of the variable>\"\n"+
-                                                                 "\tcmd=\"<command to evaluate>\"") {
+    String msg37 = 
+      "Create a new scope and define a variable with the " +
+      "specified name and value; then evaluate the command " +
+      "with the new variable in the environment.\n" +
+      "Required attributes:\n" +
+      "\tname=\"<name of the variable>\"\n" +
+      "\tval=\"<value of the variable>\"\n" +
+      "\tcmd=\"<command to evaluate>\"";
+    
+    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("var", msg37) {
       public void update(PropertyMaps pm) {
         String name = _attributes.get("name");
         String val = _attributes.get("val");
         String cmd = _attributes.get("cmd");
-        if (name==null) {
+        if (name == null) {
           _value = "(var Error: name missing...)";
           return;
         }
-        if (val==null) {
+        if (val == null) {
           _value = "(var Error: val missing...)";
           return;
         }
-        if (cmd==null) {
+        if (cmd == null) {
           _value = "(var Error: cmd missing...)";
           return;
         }
@@ -1102,7 +1217,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           PropertyMaps.TEMPLATE.removeVariable(name);
         }
         catch(IllegalArgumentException e) {
-          _value = "(var Error: "+e.getMessage()+"...)";
+          _value = "(var Error: " +e.getMessage()+"...)";
         }
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
@@ -1127,20 +1242,21 @@ public class DrJavaPropertySetup implements OptionConstants {
       }
     });
     
-    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("var.set",
-                                                                 "Mutate the value of the variable with the "+
-                                                                 "specified name and value.\n"+
-                                                                 "Required attributes:\n"+
-                                                                 "\tname=\"<name of the variable>\"\n"+
-                                                                 "\tval=\"<value of the variable>\"") {
+    String msg38 = 
+      "Mutate the value of the variable with the specified name and value.\n" +
+      "Required attributes:\n" +
+      "\tname=\"<name of the variable>\"\n" +
+      "\tval=\"<value of the variable>\"";
+    
+    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("var.set", msg38) {
       public void update(PropertyMaps pm) {
         String name = _attributes.get("name");
         String val = _attributes.get("val");
-        if (name==null) {
+        if (name == null) {
           _value = "(var.set Error: name missing...)";
           return;
         }
-        if (val==null) {
+        if (val == null) {
           _value = "(var.set Error: val missing...)";
           return;
         }
@@ -1148,7 +1264,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           pm.setVariable(name,val);
         }
         catch(IllegalArgumentException e) {
-          _value = "(var.set Error: "+e.getMessage()+"...)";
+          _value = "(var.set Error: " +e.getMessage()+"...)";
           return;
         }
         _value = "";
@@ -1163,37 +1279,36 @@ public class DrJavaPropertySetup implements OptionConstants {
       public String toString() { return ""; }
     });
     
-    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("for",
-                                                                 "Create a new scope and define a variable with the "+
-                                                                 "specified name. Then process the given list in smaller "+
-                                                                 "pieces, assigning them to the variable.\n"+
-                                                                 "Required attributes:\n"+
-                                                                 "\tlist=\"<list string>\"\n"+
-                                                                 "\tvar=\"<name of the variable>\"\n"+
-                                                                 "\tcmd=\"<command to evaluate for each piece>\"\n"+
-                                                                 "Optional attributes:\n"+
-                                                                 "\tsep=\"<separator between elements>\"\n"+
-                                                                 "(if not defined, ${path.separator}, which is "+File.pathSeparator+
-                                                                 " on this machine)\n"+
-                                                                 "\toutsep=\"<separator between elements in the output>\"\n"+
-                                                                 "(if not defined, ${process.separator}, which is "+
-                                                                 edu.rice.cs.util.ProcessChain.PROCESS_SEPARATOR+
-                                                                 " on this machine, will be used)\n"+
-                                                                 "\teach=\"<number of elements to process as one piece>\"\n"+
-                                                                 "(if not defined, 1 is used)") {
+    String msg39 = 
+      "Create a new scope and define a variable with the specified name. Then process the given list in smaller " +
+      "pieces, assigning them to the variable.\n" +
+      "Required attributes:\n" +
+      "\tlist=\"<list string>\"\n" +
+      "\tvar=\"<name of the variable>\"\n" +
+      "\tcmd=\"<command to evaluate for each piece>\"\n" +
+      "Optional attributes:\n" +
+      "\tsep=\"<separator between elements>\"\n" +
+      "(if not defined, ${path.separator}, which is " + File.pathSeparator + " on this machine)\n" +
+      "\toutsep=\"<separator between elements in the output>\"\n" +
+      "(if not defined, ${process.separator}, which is " + edu.rice.cs.util.ProcessChain.PROCESS_SEPARATOR +
+      " on this machine, will be used)\n" +
+      "\teach=\"<number of elements to process as one piece>\"\n" +
+      "(if not defined, 1 is used)";
+    
+    PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("for", msg39) {
       public void update(PropertyMaps pm) {
         String list = _attributes.get("list");
         String var = _attributes.get("var");
         String cmd = _attributes.get("cmd");
-        if (list==null) {
+        if (list == null) {
           _value = "(for Error: list missing...)";
           return;
         }
-        if (var==null) {
+        if (var == null) {
           _value = "(for Error: var missing...)";
           return;
         }
-        if (cmd==null) {
+        if (cmd == null) {
           _value = "(for Error: cmd missing...)";
           return;
         }
@@ -1217,7 +1332,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           int start = 0;
           while(start<els.length) {
             sbVar.setLength(0);
-            for(int i=start; i<start+each; ++i) {
+            for(int i=start; i < start+each; ++i) {
               if (i>=els.length) break;
               sbVar.append(sep);
               sbVar.append(els[i]);
@@ -1233,7 +1348,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           }
         }
         catch(IllegalArgumentException e) {
-          _value = "(for Error: "+e.getMessage()+"...)";
+          _value = "(for Error: " +e.getMessage()+"...)";
         }
         pm.removeVariable(var);
         val = sb.toString();
@@ -1266,19 +1381,21 @@ public class DrJavaPropertySetup implements OptionConstants {
       }
     });
     
-    PropertyMaps.TEMPLATE.setProperty("Config", new ConstantProperty("process.separator",
-                                                                     edu.rice.cs.util.ProcessChain.PROCESS_SEPARATOR,
-                                                                     "This property contains the separator used between "+
-                                                                     "processes."));
+    ConstantProperty prop40 = new ConstantProperty("process.separator",
+                                                   edu.rice.cs.util.ProcessChain.PROCESS_SEPARATOR,
+                                                   "This property contains the separator used between processes.");
+    PropertyMaps.TEMPLATE.setProperty("Config", prop40);
     
-    PropertyMaps.TEMPLATE.setProperty("Misc", new MutableFileProperty("enclosing.djapp.file", null,
-                                                                      "If the command line was enclosed in a .djapp file that "+
-                                                                      "was a JAR file, then this property contains the file. "+
-                                                                      "Otherwise, it is empty.\n"+
-                                                                      "Optional attributes:\n"+
-                                                                      "\trel=\"<dir to which the files are relative>\"\n"+
-                                                                      "\tsquote=\"<true to enclose file in single quotes>\"\n"+
-                                                                      "\tdquote=\"<true to enclose file in double quotes>\""));
+    String msg41 = 
+      "If the command line was enclosed in a .djapp file that was a JAR file, then this property contains the file. " +
+      "Otherwise, it is empty.\n" +
+      "Optional attributes:\n" +
+      "\trel=\"<dir to which the files are relative>\"\n" +
+      "\tsquote=\"<true to enclose file in single quotes>\"\n" +
+      "\tdquote=\"<true to enclose file in double quotes>\"";
+  
+    PropertyMaps.TEMPLATE.setProperty("Misc", new MutableFileProperty("enclosing.djapp.file", null, msg41));
+    
     String[] cps = System.getProperty("java.class.path").split(TextUtil.regexEscape(File.pathSeparator),-1);
     File found = null;
     for(String cp: cps) {
@@ -1299,7 +1416,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           // if it's not a jar file, an exception will already have been thrown
           // so we know it is a jar file
           // now let's check if it contains DrJava
-          if (jf.getJarEntry(edu.rice.cs.drjava.DrJava.class.getName().replace('.', '/')+".class")!=null) {
+          if (jf.getJarEntry(edu.rice.cs.drjava.DrJava.class.getName().replace('.', '/')+".class") != null) {
             found = f;
             break;
           }
@@ -1307,39 +1424,51 @@ public class DrJavaPropertySetup implements OptionConstants {
       }
       catch(IOException e) { /* ignore, we'll continue with the next classpath item */ }
     }
+    
     final File drjavaFile = found;
-    PropertyMaps.TEMPLATE.setProperty("Misc", new FileProperty("drjava.file", new Thunk<File>() {
-      public File value() {
-        return drjavaFile; 
-      }
-    }, 
-                                                               "Returns the executable file of DrJava that is currently "+
-                                                               "running.\n"+
-                                                               "Optional attributes:\n"+
-                                                               "\trel=\"<dir to which the output should be relative\"\n"+
-                                                               "\tsquote=\"<true to enclose file in single quotes>\"\n"+
-                                                               "\tdquote=\"<true to enclose file in double quotes>\"") {
-                                                                 public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
-                                                               });
-    PropertyMaps.TEMPLATE.setProperty("Misc", new FileProperty("java.file", new Thunk<File>() {
+    
+    String msg42 = 
+      "Returns the executable file of DrJava that is currently running.\n" +
+      "Optional attributes:\n" +
+      "\trel=\"<dir to which the output should be relative\"\n" +
+      "\tsquote=\"<true to enclose file in single quotes>\"\n" +
+      "\tdquote=\"<true to enclose file in double quotes>\"";
+    
+    Thunk<File> thunk42 = new Thunk<File>() {
+      public File value() { return drjavaFile; }
+    };
+    
+    FileProperty prop42 = new FileProperty("drjava.file", thunk42, msg42) {
+      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+    };
+    
+    PropertyMaps.TEMPLATE.setProperty("Misc", prop42);
+                                          
+    String msg43 =  
+      "Returns the Java interpreter executable file.\n" +
+      "Optional attributes:\n" +
+      "\trel=\"<dir to which the output should be relative\"\n" +
+      "\tsquote=\"<true to enclose file in single quotes>\"\n" +
+      "\tdquote=\"<true to enclose file in double quotes>\"";
+    
+    FileProperty prop43 = new FileProperty("java.file", 
+                                      new Thunk<File>() {
       public File value() {
         return new File(JVMBuilder.DEFAULT.javaCommand()); 
       }
-    }, 
-                                                               "Returns the Java interpreter executable file.\n"+
-                                                               "Optional attributes:\n"+
-                                                               "\trel=\"<dir to which the output should be relative\"\n"+
-                                                               "\tsquote=\"<true to enclose file in single quotes>\"\n"+
-                                                               "\tdquote=\"<true to enclose file in double quotes>\"") {
-                                                                 public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
-                                                               });
+    }, msg43) {
+      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+    };
+    
+    PropertyMaps.TEMPLATE.setProperty("Misc", prop43);
+    
     PropertyMaps.TEMPLATE.setProperty("Misc", new DrJavaProperty("echo",
-                                                                 "Echo text to the console.\n"+
-                                                                 "Required attributes:\n"+
+                                                                 "Echo text to the console.\n" +
+                                                                 "Required attributes:\n" +
                                                                  "\ttext=\"<text to echo>\"") {
       public void update(PropertyMaps pm) {
         String text = _attributes.get("text");
-        if (text==null) {
+        if (text == null) {
           _value = "(echo Error: text missing...)";
           return;
         }
@@ -1352,10 +1481,10 @@ public class DrJavaPropertySetup implements OptionConstants {
             // System.getenv is deprecated under 1.3 and 1.4, and may throw a java.lang.Error (!),
             // which we'd rather not have to catch
             String var = System.getenv("ComSpec");
-            if (var!=null) { sb.append(var); }
+            if (var != null) { sb.append(var); }
             else {
               var = System.getenv("WinDir");
-              if (var!=null) {
+              if (var != null) {
                 sb.append(var);
                 sb.append("\\System32\\");
               }

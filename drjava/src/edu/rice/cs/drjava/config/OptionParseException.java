@@ -66,7 +66,7 @@ public class OptionParseException extends IllegalArgumentException {
   /** Format a nice message for the user. */
   public String toString() {
     OptionParseException ope = this;
-    if (causes!=null) {
+    if (causes != null) {
       if (causes.length!=1) return "Could not parse configuration options.";
       ope = causes[0];
     }

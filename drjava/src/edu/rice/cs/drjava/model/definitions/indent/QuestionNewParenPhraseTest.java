@@ -68,11 +68,10 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     assertTrue("third line", !rule.testApplyRule(_doc, 9, Indenter.IndentReason.OTHER));
   }
   
-  /** Tests having delimiter on prev line, with text preceding
-   */
+  /** Tests having delimiter on prev line, with text preceding. */
   public void testParenDelimsWithText() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
-        
+    
     // Lines ending in delimiter, each with preceding text
     _setDocText("new Foo(\nx,\ny;\na[\nbar])\n{");
     assertTrue("line after paren", rule.testApplyRule(_doc, 9, Indenter.IndentReason.OTHER));
@@ -82,8 +81,7 @@ public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     assertTrue("line after close paren", !rule.testApplyRule(_doc, 24, Indenter.IndentReason.OTHER));
   }
   
-  /** Tests having delimiter on prev line, with no text preceding
-   */
+  /** Tests having delimiter on prev line, with no text preceding. */
   public void testParenDelimsNoText() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionNewParenPhrase(null, null);
     

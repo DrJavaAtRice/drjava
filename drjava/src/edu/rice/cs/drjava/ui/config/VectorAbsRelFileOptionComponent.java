@@ -97,7 +97,7 @@ public class VectorAbsRelFileOptionComponent extends VectorOptionComponent<AbsRe
   /** Returns the table model. Can be overridden by subclasses. */
   protected AbstractTableModel _makeTableModel() {
     return new AbstractTableModel() {
-      public String getColumnName(int col) { return (_columnNames.length==0)?super.getColumnName(col):_columnNames[col]; }
+      public String getColumnName(int col) { return (_columnNames.length == 0)?super.getColumnName(col):_columnNames[col]; }
       public int getRowCount() { return _data.size(); }
       public int getColumnCount() { return 2; }
       public Object getValueAt(int row, int col) {
@@ -156,7 +156,7 @@ public class VectorAbsRelFileOptionComponent extends VectorOptionComponent<AbsRe
       }
     }
     else {
-      if (_baseDir!=null) { _jfc.setCurrentDirectory(_baseDir); }
+      if (_baseDir != null) { _jfc.setCurrentDirectory(_baseDir); }
     }
 
     _jfc.setFileFilter(_fileFilter);

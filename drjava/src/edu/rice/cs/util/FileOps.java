@@ -151,7 +151,7 @@ public abstract class FileOps {
     ancestor = ancestor.getAbsoluteFile();
     f = f.getAbsoluteFile();
     _log.log("ancestor = " +ancestor + "     f = " + f);
-    while ((!ancestor.equals(f)) && (f!=null)) {
+    while ((!ancestor.equals(f)) && (f != null)) {
       f = f.getParentFile();
     }
     return (ancestor.equals(f));
@@ -204,11 +204,11 @@ public abstract class FileOps {
       for(File r: roots) {
         if (isAncestorOf(r, f)) { fRoot = r; }
         if (isAncestorOf(r, b)) { bRoot = r; }
-        if ((fRoot!=null) && (bRoot!=null)) { break; }
+        if ((fRoot != null) && (bRoot != null)) { break; }
       }
       
       //Makes exception for //server/folder
-      if (((fRoot==null) || (!fRoot.equals(bRoot))) && (!f.getAbsoluteFile().getCanonicalFile().toString().startsWith(File.separator + File.separator))) {
+      if (((fRoot == null) || (!fRoot.equals(bRoot))) && (!f.getAbsoluteFile().getCanonicalFile().toString().startsWith(File.separator + File.separator))) {
         
         return f.getAbsoluteFile().getCanonicalFile().toString();
       }
@@ -401,7 +401,7 @@ public abstract class FileOps {
       }
       return buf.toString();
     }
-    finally { if (reader!=null) reader.close(); }
+    finally { if (reader != null) reader.close(); }
   }
   
   /** Reads the entire contents of a file and return them as a String.
@@ -419,7 +419,7 @@ public abstract class FileOps {
       }
       return buf.toString();
     }
-    finally { if (reader!=null) reader.close(); }
+    finally { if (reader != null) reader.close(); }
   }
   
   /** Copies the text of one file into another.
@@ -470,7 +470,7 @@ public abstract class FileOps {
       writer = new FileWriter(file, append);
       writer.write(text);
     }
-    finally { if (writer!=null) writer.close(); }
+    finally { if (writer != null) writer.close(); }
   }
   
   /** Writes text to the given file returning true if it succeeded and false if not.  This is a simple wrapper for
@@ -863,7 +863,7 @@ public abstract class FileOps {
     
     // if the reconstructed path is non-empty, then it will have an extra
     // path separator at the end; take it off
-    if (reconstructedPath.length()!=0) {
+    if (reconstructedPath.length() != 0) {
       reconstructedPath = reconstructedPath.substring(0, reconstructedPath.length() - 1);
     }
     

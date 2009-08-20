@@ -1102,6 +1102,6 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
     Set<edu.rice.cs.drjava.ui.MainFrame.JavaAPIListEntry> l = edu.rice.cs.drjava.ui.MainFrame._generateJavaAPISet(base,
                                                                                                                   stripPrefix,
                                                                                                                   suffix);
-    assertTrue(l.size()>0);
+    assertTrue(l.size() > 0);
   }
 }
