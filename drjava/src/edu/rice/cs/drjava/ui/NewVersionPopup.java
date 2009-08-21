@@ -371,7 +371,7 @@ public class NewVersionPopup extends JDialog {
           pm.setMaximum(length);
           pm.setMillisToDecideToPopup(0);
           pm.setMillisToPopup(0);
-          closeAction();
+          EventQueue.invokeLater(new Runnable() { public void run() { closeAction(); } });
           
           BufferedInputStream bin = new BufferedInputStream(pin);
           BufferedOutputStream bout = new BufferedOutputStream(new FileOutputStream(destFile));
