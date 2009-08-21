@@ -703,12 +703,12 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     @Override public void started(InterpreterJVMRemoteI i) {
       if (_state.compareAndSet(this, new FreshRunningState(i))) {
         boolean enforceAllAccess = DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
-          .equals(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL_CHOICES.get(2)); // "all"
+          .equals(OptionConstants.DynamicJavaAccessControlChoices.PRIVATE_AND_PACKAGE); // "all"
         try { i.setEnforceAllAccess(enforceAllAccess); }
         catch (RemoteException re) { _handleRemoteException(re); }
         
         boolean enforcePrivateAccess = !DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
-          .equals(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL_CHOICES.get(0)); // not "none"
+          .equals(OptionConstants.DynamicJavaAccessControlChoices.DISABLED); // not "none"
         try { i.setEnforcePrivateAccess(enforcePrivateAccess); }
         catch (RemoteException re) { _handleRemoteException(re); }
         

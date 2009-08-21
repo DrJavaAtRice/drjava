@@ -3556,7 +3556,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         PlatformFactory.ONLY.registerJavaFileExtension();
       }
       else if (DrJava.getConfig().getSetting(OptionConstants.FILE_EXT_REGISTRATION)
-                 .equals(OptionConstants.FILE_EXT_REGISTRATION_CHOICES.get(1)) && // Ask me
+                 .equals(OptionConstants.FileExtRegistrationChoices.ASK_ME) && // Ask me
                !edu.rice.cs.util.swing.Utilities.TEST_MODE &&
                ((!PlatformFactory.ONLY.areDrJavaFileExtensionsRegistered()) ||
                 (!PlatformFactory.ONLY.isJavaFileExtensionRegistered()))) {
@@ -3592,9 +3592,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (!alreadyShowedDialog) {
       // check for new version if desired by user
       // but only if we haven't just asked if the user wants to download a new version
-      // two dialogs on program start is too much clutter    
+      // two dialogs on program start is too much clutter
       if (!DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
-            .equals(OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.get(3)) &&
+            .equals(OptionConstants.VersionNotificationChoices.DISABLED) &&
           !edu.rice.cs.util.swing.Utilities.TEST_MODE) {
         int days = DrJava.getConfig().getSetting(NEW_VERSION_NOTIFICATION_DAYS);
         java.util.Date nextCheck = 

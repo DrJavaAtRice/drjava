@@ -2286,11 +2286,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     DrJava.getConfig().addOptionListener(DYNAMICJAVA_ACCESS_CONTROL, new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oce) {
         boolean enforceAllAccess = DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
-          .equals(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL_CHOICES.get(2)); // "all"
+          .equals(OptionConstants.DynamicJavaAccessControlChoices.PRIVATE_AND_PACKAGE); // "all"
         getInteractionsModel().setEnforceAllAccess(enforceAllAccess);
         
         boolean enforcePrivateAccess = !DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
-          .equals(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL_CHOICES.get(0)); // not "none"
+          .equals(OptionConstants.DynamicJavaAccessControlChoices.DISABLED); // not "none"
         getInteractionsModel().setEnforcePrivateAccess(enforcePrivateAccess);
       }
     });

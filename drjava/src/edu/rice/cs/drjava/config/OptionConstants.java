@@ -888,20 +888,24 @@ public interface OptionConstants {
   /** Possible options for Javadoc access levels. */
   static final ArrayList<String> accessLevelChoices =
     AccessLevelChoices.evaluate();
-  static class AccessLevelChoices {
+  public static class AccessLevelChoices {
+    public static final String PUBLIC = "public";
+    public static final String PROTECTED = "protected";
+    public static final String PACKAGE = "package";
+    public static final String PRIVATE = "private";
     public static ArrayList<String> evaluate() {
       ArrayList<String> aList = new ArrayList<String>(4);
-      aList.add("public");
-      aList.add("protected");
-      aList.add("package");
-      aList.add("private");
+      aList.add(PUBLIC);
+      aList.add(PROTECTED);
+      aList.add(PACKAGE);
+      aList.add(PRIVATE);
       return aList;
     }
   }
   
   /** The lowest access level of classes and members to include in the javadoc. */
   public static final ForcedChoiceOption JAVADOC_ACCESS_LEVEL =
-    new ForcedChoiceOption("javadoc.access.level", "package", accessLevelChoices);
+    new ForcedChoiceOption("javadoc.access.level", AccessLevelChoices.PACKAGE, accessLevelChoices);
   
   /** Possible options for Javadoc system class documentation links. */
   static final String JAVADOC_NONE_TEXT = "none";
@@ -1171,22 +1175,25 @@ public interface OptionConstants {
   /** Dynamic Java access control. */
   public static final ArrayList<String> DYNAMICJAVA_ACCESS_CONTROL_CHOICES =
     DynamicJavaAccessControlChoices.evaluate();
-  static class DynamicJavaAccessControlChoices {
+  public static class DynamicJavaAccessControlChoices {
+    public static final String DISABLED = "disabled";
+    public static final String PRIVATE = "private only";
+    public static final String PRIVATE_AND_PACKAGE = "private and package only";
     public static ArrayList<String> evaluate() {
       ArrayList<String> aList = new ArrayList<String>(4);
-      aList.add("disabled");
-      aList.add("private only");
+      aList.add(DISABLED);
+      aList.add(PRIVATE);
 
       // NOTE: this sets the enforceAllAccess option in InteractionsPaneOptions, but since that is not fully
       // implemented, this description is better.
-      aList.add("private and package only"); 
+      aList.add(PRIVATE_AND_PACKAGE); 
       return aList;
     }
   }
   
   /** File extension registration. */
   public static final ForcedChoiceOption DYNAMICJAVA_ACCESS_CONTROL =
-    new ForcedChoiceOption("dynamicjava.access.control", DYNAMICJAVA_ACCESS_CONTROL_CHOICES.get(0),
+    new ForcedChoiceOption("dynamicjava.access.control", DynamicJavaAccessControlChoices.DISABLED,
                            DYNAMICJAVA_ACCESS_CONTROL_CHOICES);
 
   /** The command-line arguments to be passed to the Master JVM. */
@@ -1400,21 +1407,26 @@ public interface OptionConstants {
   /** Notification of new versions. */
   public static final ArrayList<String> NEW_VERSION_NOTIFICATION_CHOICES =
     VersionNotificationChoices.evaluate();
-  static class VersionNotificationChoices {
+  public static class VersionNotificationChoices {
+    public static final String STABLE = "stable versions only";
+    public static final String BETA = "stable and beta versions only";
+    public static final String ALL_RELEASES = "all release versions";
+    public static final String EXPERIMENTAL = "weekly experimental builds";
+    public static final String DISABLED = "none (disabled)";
     public static ArrayList<String> evaluate() {
       ArrayList<String> aList = new ArrayList<String>(4);
-      aList.add("stable versions only");
-      aList.add("stable and beta versions only");
-      aList.add("all release versions");
-      aList.add("weekly experimental builds");
-      aList.add("none (disabled)");
+      aList.add(STABLE);
+      aList.add(BETA);
+      aList.add(ALL_RELEASES);
+      aList.add(EXPERIMENTAL);
+      aList.add(DISABLED);
       return aList;
     }
   }
   
   /** The lowest access level of classes and members to include in the javadoc. */
   public static final ForcedChoiceOption NEW_VERSION_NOTIFICATION =
-    new ForcedChoiceOption("new.version.notification", NEW_VERSION_NOTIFICATION_CHOICES.get(1), NEW_VERSION_NOTIFICATION_CHOICES);
+    new ForcedChoiceOption("new.version.notification", VersionNotificationChoices.BETA, NEW_VERSION_NOTIFICATION_CHOICES);
 
   /** The last time we checked for a new version. */
   public static final LongOption LAST_NEW_VERSION_NOTIFICATION = new LongOption("new.version.notification.last", (long)0);  
@@ -1436,35 +1448,41 @@ public interface OptionConstants {
   /** Delete class files for language-level classes. */
   public static final ArrayList<String> DELETE_LL_CLASS_FILES_CHOICES =
     DeleteLLClassFileChoices.evaluate();
-  static class DeleteLLClassFileChoices {
+  public static class DeleteLLClassFileChoices {
+    public static final String NEVER = "never";
+    public static final String ASK_ME = "ask me at startup";
+    public static final String ALWAYS = "always";
     public static ArrayList<String> evaluate() {
       ArrayList<String> aList = new ArrayList<String>(3);
-      aList.add("never");
-      aList.add("ask me");
-      aList.add("always");
+      aList.add(NEVER);
+      aList.add(ASK_ME);
+      aList.add(ALWAYS);
       return aList;
     }
   }
   
   /** Whether to delete language level class files. */
   public static final ForcedChoiceOption DELETE_LL_CLASS_FILES =
-    new ForcedChoiceOption("delete.ll.class.files", DELETE_LL_CLASS_FILES_CHOICES.get(2), DELETE_LL_CLASS_FILES_CHOICES);
+    new ForcedChoiceOption("delete.ll.class.files", DeleteLLClassFileChoices.ALWAYS, DELETE_LL_CLASS_FILES_CHOICES);
   
   /** File extension registration choices. */
   public static final ArrayList<String> FILE_EXT_REGISTRATION_CHOICES =
     FileExtRegistrationChoices.evaluate();
-  static class FileExtRegistrationChoices{
+  public static class FileExtRegistrationChoices {
+    public static final String NEVER = "never";
+    public static final String ASK_ME = "ask me at startup";
+    public static final String ALWAYS = "always";
     public static ArrayList<String> evaluate() {
       ArrayList<String> aList = new ArrayList<String>(4);
-      aList.add("never");
-      aList.add("ask me at startup");
-      aList.add("always");
+      aList.add(NEVER);
+      aList.add(ASK_ME);
+      aList.add(ALWAYS);
       return aList;
     }
   }
   
   /** File extension registration. */
   public static final ForcedChoiceOption FILE_EXT_REGISTRATION =
-    new ForcedChoiceOption("file.ext.registration", FILE_EXT_REGISTRATION_CHOICES .get(1),
+    new ForcedChoiceOption("file.ext.registration", FileExtRegistrationChoices.ASK_ME,
                            FILE_EXT_REGISTRATION_CHOICES);
 }
