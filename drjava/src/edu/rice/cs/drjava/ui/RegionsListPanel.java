@@ -268,7 +268,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
 //    Runnable doCommand = new Runnable() {
 //      public void run() {
 //        edu.rice.cs.drjava.model.AbstractGlobalModel.log.log("RegionsListPanel.addRegion: in list were...");
-//        for(int i = 0;i < _listModel.getSize();++i) { edu.rice.cs.drjava.model.AbstractGlobalModel.log.log("\t"+_listModel.elementAt(i)); }
+//        for(int i = 0; i < _listModel.getSize();++i) { edu.rice.cs.drjava.model.AbstractGlobalModel.log.log("\t"+_listModel.elementAt(i)); }
         
 //        String name = "";
 //        try { name = r.getDocument().getQualifiedClassName(); }

@@ -100,7 +100,8 @@ class ActionStartPrevLinePlusMultilinePreserve extends IndentRuleAction {
       // forward the rest of the work to the other rule
       ActionStartPrevLinePlusMultiline a;
       //for(int i = 0; i < _suffices.length; i++)
-      //  javax.swing.JOptionPane.showMessageDialog(null, "\""+suffices[i]+"\"", "suffices["+i+"]",javax.swing.JOptionPane.PLAIN_MESSAGE);;
+      //  javax.swing.JOptionPane.showMessageDialog(null, "\"" + suffices[i] + "\"", "suffices[" + i + "]", 
+      //    javax.swing.JOptionPane.PLAIN_MESSAGE);
       a = new ActionStartPrevLinePlusMultiline(suffices, _cursorLine, _cursorPos);
       return a.indentLine(doc, reason);
     }

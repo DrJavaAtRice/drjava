@@ -236,7 +236,7 @@ public class DrJavaRoot {
       // separated by File.pathSeparator
       int lineNo = -1;
       int pathSepIndex = currFileName.indexOf(File.pathSeparatorChar);
-      if (pathSepIndex>=0) {
+      if (pathSepIndex >= 0) {
         try {
           lineNo = Integer.valueOf(currFileName.substring(pathSepIndex+1));
           anyLineNumbersSpecified = true;

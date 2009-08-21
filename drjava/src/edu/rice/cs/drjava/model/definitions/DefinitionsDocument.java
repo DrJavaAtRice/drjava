@@ -1406,9 +1406,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       // Walk forward from specificed position
       i = text.indexOf("class", reducedPos);
       j = text.indexOf("interface", reducedPos);
-      if (i==-1) i = j; else if (j>=0) i = Math.min(i,j);
+      if (i==-1) i = j; else if (j >= 0) i = Math.min(i,j);
       j = text.indexOf("enum", reducedPos);
-      if (i==-1) i = j; else if (j>=0) i = Math.min(i,j);
+      if (i==-1) i = j; else if (j >= 0) i = Math.min(i,j);
       while (i > - 1) {
         // Move reduced model to walker's location
         _reduced.move(i - reducedPos);  // reduced model points to i
@@ -1419,9 +1419,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         if (!state.equals(FREE) || _isStartOfComment(text, i) || ((i > 0) && _isStartOfComment(text, i - 1))) {
           i = text.indexOf("class", reducedPos+1);
           j = text.indexOf("interface", reducedPos+1);
-          if (i==-1) i = j; else if (j>=0) i = Math.min(i,j);
+          if (i==-1) i = j; else if (j >= 0) i = Math.min(i,j);
           j = text.indexOf("enum", reducedPos+1);
-          if (i==-1) i = j; else if (j>=0) i = Math.min(i,j);
+          if (i==-1) i = j; else if (j >= 0) i = Math.min(i,j);
           continue;  // ignore match
         }
         else {

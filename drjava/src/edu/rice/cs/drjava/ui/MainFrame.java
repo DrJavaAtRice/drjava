@@ -1382,7 +1382,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (! Character.isJavaIdentifierPart(s.charAt(end+1))) { break; }
       ++end;
     }
-    if ((start>=0) && (end<s.length())) {
+    if ((start >= 0) && (end<s.length())) {
       mask = s.substring(start, end + 1);
     }
     gotoFileMatchingMask(mask);
@@ -1480,7 +1480,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public String getClassName() { return str; }
     public String getFullPackage() {
       int pos = fullStr.lastIndexOf('.');
-      if (pos>=0) { return fullStr.substring(0,pos+1); }
+      if (pos >= 0) { return fullStr.substring(0,pos+1); }
       return "";
     }
   }  
@@ -1586,12 +1586,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           final String aText = "<a href=\"";
           int aPos = line.toLowerCase().indexOf(aText);
           int aEndPos = line.toLowerCase().indexOf(".html\" ",aPos);
-          if ((aPos>=0) && (aEndPos>=0)) {
+          if ((aPos >= 0) && (aEndPos >= 0)) {
             String link = line.substring(aPos+aText.length(), aEndPos);
             String fullClassName = link.substring(stripPrefix.length()).replace('/', '.');
             String simpleClassName = fullClassName;
             int lastDot = fullClassName.lastIndexOf('.');
-            if (lastDot>=0) { simpleClassName = fullClassName.substring(lastDot + 1); }
+            if (lastDot >= 0) { simpleClassName = fullClassName.substring(lastDot + 1); }
             try {
               URL pageURL = new URL(base + link + ".html");
               s.add(new JavaAPIListEntry(simpleClassName, fullClassName, pageURL));
@@ -1738,7 +1738,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (!Character.isJavaIdentifierPart(s.charAt(end+1))) { break; }
       ++end;
     }
-    if ((start>=0) && (end<s.length())) {
+    if ((start >= 0) && (end<s.length())) {
       mask = s.substring(start, end + 1);
       pim.setMask(mask);
     }
@@ -2029,7 +2029,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       for(OpenDefinitionsDocument d: docs) {
         if (d.isUntitled()) continue;
         String str = d.toString();
-        if (str.lastIndexOf('.')>=0) {
+        if (str.lastIndexOf('.') >= 0) {
           str = str.substring(0, str.lastIndexOf('.'));
         }
         GoToFileListEntry entry = new GoToFileListEntry(d, str);
@@ -2067,7 +2067,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       int end = loc-1;
       
-      if ((start>=0) && (end < s.length())) {
+      if ((start >= 0) && (end < s.length())) {
         mask = s.substring(start, end + 1);
         pim.setMask(mask);
       }
@@ -2536,14 +2536,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param doc weak reference to document in which search occurred (or started, if all documents were searched)
     * @param findReplace the FindReplacePanel that created this FindResultsPanel
     */
-  public FindResultsPanel createFindResultsPanel(final RegionManager<MovingDocumentRegion> rm, MovingDocumentRegion region, String title,
+  public FindResultsPanel createFindResultsPanel(final RegionManager<MovingDocumentRegion> rm,
+                                                 MovingDocumentRegion region, String title,
                                                  String searchString, boolean searchAll, boolean searchSelectionOnly, 
                                                  boolean matchCase, boolean wholeWord, boolean noComments, 
                                                  boolean noTestCases, WeakReference<OpenDefinitionsDocument> doc,
                                                  FindReplacePanel findReplace) {
     
-    final FindResultsPanel panel = new FindResultsPanel(this, rm, region, title, searchString, searchAll, searchSelectionOnly, matchCase,
-                                                        wholeWord, noComments, noTestCases, doc, findReplace);
+    final FindResultsPanel panel = new FindResultsPanel(this, rm, region, title, searchString, searchAll, 
+                                                        searchSelectionOnly, matchCase, wholeWord, noComments, 
+                                                        noTestCases, doc, findReplace);
     
     final AbstractMap<MovingDocumentRegion, HighlightManager.HighlightInfo> highlights =
       new IdentityHashMap<MovingDocumentRegion, HighlightManager.HighlightInfo>();
@@ -3462,7 +3464,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     initExecuteExternalProcessDialog();
 //    _projectPropertiesFrame = null;
     
-    config.addOptionListener(DISPLAY_ALL_COMPILER_VERSIONS, new ConfigOptionListeners.DisplayAllCompilerVersionsListener(_configFrame));
+    config.addOptionListener(DISPLAY_ALL_COMPILER_VERSIONS, 
+                             new ConfigOptionListeners.DisplayAllCompilerVersionsListener(_configFrame));
     config.addOptionListener(LOOK_AND_FEEL, new ConfigOptionListeners.LookAndFeelListener(_configFrame));
     config.addOptionListener(PLASTIC_THEMES, new ConfigOptionListeners.PlasticThemeListener(_configFrame));
     OptionListener<String> slaveJVMArgsListener = new ConfigOptionListeners.SlaveJVMArgsListener(_configFrame);
@@ -3556,7 +3559,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         PlatformFactory.ONLY.registerJavaFileExtension();
       }
       else if (DrJava.getConfig().getSetting(OptionConstants.FILE_EXT_REGISTRATION)
-                 .equals(OptionConstants.FileExtRegistrationChoices.ASK_ME) && // Ask me
+                 .equals(OptionConstants.FILE_EXT_REGISTRATION_CHOICES.get(1)) && // Ask me
                !edu.rice.cs.util.swing.Utilities.TEST_MODE &&
                ((!PlatformFactory.ONLY.areDrJavaFileExtensionsRegistered()) ||
                 (!PlatformFactory.ONLY.isJavaFileExtensionRegistered()))) {
@@ -3579,10 +3582,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               PlatformFactory.ONLY.registerJavaFileExtension();
             }
             if (rc==2) { // Always
-              DrJava.getConfig().setSetting(OptionConstants.FILE_EXT_REGISTRATION, OptionConstants.FILE_EXT_REGISTRATION_CHOICES.get(2));
+              DrJava.getConfig().setSetting(OptionConstants.FILE_EXT_REGISTRATION, 
+                                            OptionConstants.FILE_EXT_REGISTRATION_CHOICES.get(2));
             }
             if (rc==3) { // Never
-              DrJava.getConfig().setSetting(OptionConstants.FILE_EXT_REGISTRATION, OptionConstants.FILE_EXT_REGISTRATION_CHOICES.get(0));
+              DrJava.getConfig().setSetting(OptionConstants.FILE_EXT_REGISTRATION, 
+                                            OptionConstants.FILE_EXT_REGISTRATION_CHOICES.get(0));
             }
           }
         });
@@ -3592,9 +3597,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (!alreadyShowedDialog) {
       // check for new version if desired by user
       // but only if we haven't just asked if the user wants to download a new version
-      // two dialogs on program start is too much clutter
+      // two dialogs on program start is too much clutter    
       if (!DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
-            .equals(OptionConstants.VersionNotificationChoices.DISABLED) &&
+            .equals(OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.get(3)) &&
           !edu.rice.cs.util.swing.Utilities.TEST_MODE) {
         int days = DrJava.getConfig().getSetting(NEW_VERSION_NOTIFICATION_DAYS);
         java.util.Date nextCheck = 
@@ -5025,8 +5030,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       // ensure that saved file has extension ".drjava"
       if (! fileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION)) {
         int lastIndex = fileName.lastIndexOf(".");
-        if (lastIndex == -1) projectFile = new File (projectFile.getAbsolutePath() + OptionConstants.PROJECT_FILE_EXTENSION);
-        else projectFile = new File(projectFile.getParentFile(), fileName.substring(0, lastIndex) + OptionConstants.PROJECT_FILE_EXTENSION);
+        if (lastIndex == -1) projectFile = new File (projectFile.getAbsolutePath() + 
+                                                     OptionConstants.PROJECT_FILE_EXTENSION);
+        else projectFile = new File(projectFile.getParentFile(), fileName.substring(0, lastIndex) + 
+                                    OptionConstants.PROJECT_FILE_EXTENSION);
       }
       if (projectFile == null ||
           projectFile.getParentFile() == null ||
@@ -7140,7 +7147,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           // Use EventQueue because this action must execute AFTER all pending events in the event queue
 //        System.err.println("Interactions Container Selected");
           _interactionsContainer.setVisible(true);  // kluge to overcome subtle focus bug
-          EventQueue.invokeLater(new Runnable() {  public void run() { _interactionsContainer.requestFocusInWindow(); }  });
+          EventQueue.invokeLater(new Runnable() {  
+            public void run() { _interactionsContainer.requestFocusInWindow(); }  
+          });
         }
         else if (_tabbedPane.getSelectedIndex() == CONSOLE_TAB) {
           // Use EventQueue because this action must execute AFTER all pending events in the event queue
@@ -8401,8 +8410,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _setThreadDependentDebugMenuItems(true);
       _model.getInteractionsModel().autoImport();               
       if(_model.getDebugger().isAutomaticTraceEnabled()) {
-        //System.out.println("new _automaticTraceTimer AUTO_STEP_RATE="+AUTO_STEP_RATE+", "+System.identityHashCode(_automaticTraceTimer));                                
-        if((_automaticTraceTimer != null) && (!_automaticTraceTimer.isRunning()))
+        //System.out.println("new _automaticTraceTimer AUTO_STEP_RATE="+AUTO_STEP_RATE+", " + 
+        System.identityHashCode(_automaticTraceTimer);                                
+        if ((_automaticTraceTimer != null) && (!_automaticTraceTimer.isRunning()))
           _automaticTraceTimer.start();
       }
     }
@@ -9419,7 +9429,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     public void projectRunnableChanged() {
-      if (_model.getMainClass() != null && _model.getMainClassContainingFile() != null && _model.getMainClassContainingFile().exists()) {
+      if (_model.getMainClass() != null && _model.getMainClassContainingFile() != null && 
+          _model.getMainClassContainingFile().exists()) {
         _runProjectAction.setEnabled(_model.isProjectActive());
         _runButton = _updateToolbarButton(_runButton, _runProjectAction);
       }
@@ -9615,28 +9626,35 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     final KeyBindingManager kbm = KeyBindingManager.ONLY;
     
     kbm.put(KEY_BACKWARD, actionMap.get(DefaultEditorKit.backwardAction), null, "Cursor Backward");
-    kbm.put(KEY_BACKWARD_SELECT, actionMap.get(DefaultEditorKit.selectionBackwardAction), null, "Cursor Backward (Select)");
+    kbm.put(KEY_BACKWARD_SELECT, actionMap.get(DefaultEditorKit.selectionBackwardAction), null, 
+            "Cursor Backward (Select)");
     
     kbm.put(KEY_BEGIN_DOCUMENT, actionMap.get(DefaultEditorKit.beginAction), null, "Cursor Begin Document");
-    kbm.put(KEY_BEGIN_DOCUMENT_SELECT, actionMap.get(DefaultEditorKit.selectionBeginAction), null, "Cursor Begin Document (Select)");
+    kbm.put(KEY_BEGIN_DOCUMENT_SELECT, actionMap.get(DefaultEditorKit.selectionBeginAction), null, 
+            "Cursor Begin Document (Select)");
     
     kbm.put(KEY_BEGIN_LINE, _beginLineAction, null, "Cursor Begin Line");
     kbm.put(KEY_BEGIN_LINE_SELECT, _selectionBeginLineAction, null, "Cursor Begin Line (Select)");
     
-    kbm.put(KEY_PREVIOUS_WORD, actionMap.get(_currentDefDoc.getEditor().previousWordAction), null, "Cursor Previous Word");
-    kbm.put(KEY_PREVIOUS_WORD_SELECT, actionMap.get(_currentDefDoc.getEditor().selectionPreviousWordAction), null, "Cursor Previous Word (Select)");
+    kbm.put(KEY_PREVIOUS_WORD, actionMap.get(_currentDefDoc.getEditor().previousWordAction), null, 
+            "Cursor Previous Word");
+    kbm.put(KEY_PREVIOUS_WORD_SELECT, actionMap.get(_currentDefDoc.getEditor().selectionPreviousWordAction), null, 
+            "Cursor Previous Word (Select)");
     
     kbm.put(KEY_DOWN, actionMap.get(DefaultEditorKit.downAction), null, "Cursor Down");
     kbm.put(KEY_DOWN_SELECT, actionMap.get(DefaultEditorKit.selectionDownAction), null, "Cursor Down (Select)");
     
     kbm.put(KEY_END_DOCUMENT, actionMap.get(DefaultEditorKit.endAction), null, "Cursor End Document");
-    kbm.put(KEY_END_DOCUMENT_SELECT, actionMap.get(DefaultEditorKit.selectionEndAction), null, "Cursor End Document (Select)");
+    kbm.put(KEY_END_DOCUMENT_SELECT, actionMap.get(DefaultEditorKit.selectionEndAction), null, 
+            "Cursor End Document (Select)");
     
     kbm.put(KEY_END_LINE, actionMap.get(DefaultEditorKit.endLineAction), null, "Cursor End Line");
-    kbm.put(KEY_END_LINE_SELECT, actionMap.get(DefaultEditorKit.selectionEndLineAction), null, "Cursor End Line (Select)");
+    kbm.put(KEY_END_LINE_SELECT, actionMap.get(DefaultEditorKit.selectionEndLineAction), null, 
+            "Cursor End Line (Select)");
     
     kbm.put(KEY_NEXT_WORD, actionMap.get(_currentDefDoc.getEditor().nextWordAction), null, "Cursor Next Word");
-    kbm.put(KEY_NEXT_WORD_SELECT, actionMap.get(_currentDefDoc.getEditor().selectionNextWordAction), null, "Cursor Next Word (Select)");
+    kbm.put(KEY_NEXT_WORD_SELECT, actionMap.get(_currentDefDoc.getEditor().selectionNextWordAction), null, 
+            "Cursor Next Word (Select)");
     
     kbm.put(KEY_FORWARD, actionMap.get(DefaultEditorKit.forwardAction), null, "Cursor Forward");
     kbm.put(KEY_FORWARD_SELECT, actionMap.get(DefaultEditorKit.selectionForwardAction), null, "Cursor Forward (Select)");
@@ -9902,7 +9920,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       else {
         open(openSelector);
-        if (lineNo>=0) {
+        if (lineNo >= 0) {
           final int l = lineNo;
           Utilities.invokeLater(new Runnable() { 
             public void run() { _jumpToLine(l); }

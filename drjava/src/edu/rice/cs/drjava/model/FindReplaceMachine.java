@@ -117,8 +117,8 @@ public class FindReplaceMachine {
   
   public void setSearchBackwards(boolean searchBackwards) {
     if (_isForward == searchBackwards) {
-      // If we switch from searching forward to searching backwards or vice versa, isOnMatch is true, and _findword is the
-      // same as the _lastFindWord, we know the user just found _findWord, so skip over this match.
+      // If we switch from searching forward to searching backwards or vice versa, isOnMatch is true, and _findword is
+      // the same as the _lastFindWord, we know the user just found _findWord, so skip over this match.
       if (onMatch() && _findWord.equals(_lastFindWord)) _skipText = true;
       else _skipText = false;
     }
@@ -231,7 +231,8 @@ public class FindReplaceMachine {
       if (_isForward) offset -= _findWord.length();  // position is now on left edge of match
 //      assert _findWord.equals(_doc.getText(offset, _findWord.length()));
       
-//      Utilities.show("ReplaceCurrent called. _doc = " + _doc.getText() + " offset = " + offset + " _findWord = " + _findWord);
+//      Utilities.show("ReplaceCurrent called. _doc = " + _doc.getText() + " offset = " + offset + " _findWord = " +
+//        _findWord);
       
       _doc.remove(offset, _findWord.length());
       
@@ -317,12 +318,13 @@ public class FindReplaceMachine {
     FindResult fr = findNext(false);  // find next match in current doc   
     //  Utilities.show(fr + " returned by call on findNext()");
     
-    while (!fr.getWrapped() && fr.getFoundOffset()<=_selectionRegion.getEndOffset()) {
+    while (!fr.getWrapped() && fr.getFoundOffset() <= _selectionRegion.getEndOffset()) {
       replaceCurrent();
       count++;
       //  Utilities.show("Found " + count + " occurrences. Calling findNext() inside loop");
       fr = findNext(false);           // find next match in current doc
-      //  Utilities.show("Call on findNext() returned " + fr.toString() + "in doc '" + _doc.getText().substring(0,fr.getFoundOffset())+"[|]"+_doc.getText().substring(fr.getFoundOffset()) + "'");
+      //  Utilities.show("Call on findNext() returned " + fr.toString() + "in doc '" + 
+      //    _doc.getText().substring(0,fr.getFoundOffset())+"[|]"+_doc.getText().substring(fr.getFoundOffset()) + "'");
     }
     return count;
   }
@@ -392,7 +394,7 @@ public class FindReplaceMachine {
     int count = 0;
     FindResult fr = findNext(false);  // find next match in current doc   
     
-    while (! fr.getWrapped() && fr.getFoundOffset()<=_selectionRegion.getEndOffset()) {
+    while (! fr.getWrapped() && fr.getFoundOffset() <= _selectionRegion.getEndOffset()) {
       findAction.run(fr);
       count++;
       fr = findNext(false);           // find next match in current doc
@@ -429,7 +431,8 @@ public class FindReplaceMachine {
       positionChanged();
     }
     
-//    System.err.println("findNext(" + searchAll + ") called with _doc = [" + _doc.getText() + "] and offset = " + _current.getOffset());
+//    System.err.println("findNext(" + searchAll + ") called with _doc = [" + _doc.getText() + "] and offset = " +
+//      _current.getOffset());
     
     int offset = getCurrentOffset();
 //    System.err.println("findNext(" + searchAll + ") called; initial offset is " + offset);
@@ -525,7 +528,8 @@ public class FindReplaceMachine {
     */
   private FindResult _findNextInDocSegment(final OpenDefinitionsDocument doc, final int start, int len, 
                                            final boolean wrapped, final boolean allWrapped) {  
-//    Utilities.show("called _findNextInDocSegment(" + doc.getText() + ",\n" + start + ", " + len + ", " + wrapped + " ...)");
+//    Utilities.show("called _findNextInDocSegment(" + doc.getText() + ",\n" + start + ", " + len + ", " + wrapped +
+//      " ...)");
     boolean inTestCase = (doc.getFileName().endsWith("Test.java"));
     
     if (!_ignoreTestCases || ! inTestCase) {
@@ -553,7 +557,8 @@ public class FindReplaceMachine {
           findWord = _findWord.toLowerCase();  // does not affect wordLen
         }
         else findWord = _findWord;
-//       if (wrapped && allWrapped) Utilities.show("Executing loop with findWord = " + findWord + "; text = " + text + "; len = " + len);     
+//       if (wrapped && allWrapped) Utilities.show("Executing loop with findWord = " + findWord + "; text = " + text +
+//          "; len = " + len);     
         
         // loop to find first valid (not ignored) occurrence of findWord
         // loop carried variables are rem, foundOffset; 
@@ -563,7 +568,8 @@ public class FindReplaceMachine {
         // if match is returned, _current has been updated to match location
         int foundOffset = _isForward? 0 : len;
         int rem = len;
-//      _log.log("Starting search loop; text = '" + text + "' findWord = '" + findWord + "' forward? = " + _isForward + " rem = " + rem + " foundOffset = " + foundOffset);
+//      _log.log("Starting search loop; text = '" + text + "' findWord = '" + findWord + "' forward? = " + _isForward +
+//         " rem = " + rem + " foundOffset = " + foundOffset);
         while (rem >= wordLen) {
           
           // Find next match in text

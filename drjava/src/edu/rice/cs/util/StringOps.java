@@ -940,7 +940,7 @@ public abstract class StringOps {
     StringBuilder sb = new StringBuilder();
     // remove word separators at the beginning of the string
     while(s.length() > 0) {
-      if (wordSepChars.indexOf(String.valueOf(s.charAt(0)))>=0) {
+      if (wordSepChars.indexOf(String.valueOf(s.charAt(0))) >= 0) {
 //        System.out.println("Removing leading separator...");
         s = s.substring(1);
       }
@@ -948,7 +948,7 @@ public abstract class StringOps {
     }
     // remove word separators at the end of the string
     while(s.length() > 0) {
-      if (wordSepChars.indexOf(String.valueOf(s.charAt(s.length()-1)))>=0) {
+      if (wordSepChars.indexOf(String.valueOf(s.charAt(s.length()-1))) >= 0) {
 //        System.out.println("Removing trailing separator...");
         s = s.substring(0, s.length()-1);
       }
@@ -965,7 +965,7 @@ public abstract class StringOps {
 //      System.out.println("\ttoken: "+token);
       sbl.append(token);
 //      System.out.println("\tline (length="+sbl.length()+"): "+sbl.toString());
-      if (sbl.length()>=widthInChars) {
+      if (sbl.length() >= widthInChars) {
 //        System.out.println("\tnewline");
 //        System.out.println("\t\thasMoreElements? "+tok.hasMoreElements());
         if (tok.hasMoreElements()) {
@@ -1008,7 +1008,7 @@ public abstract class StringOps {
       }
     }
     if (s.length()%16 > 0) {
-      for(int i = 0;i < 16-(s.length()%16);++i) {
+      for(int i = 0; i < 16-(s.length()%16);++i) {
         pw.printf("   ");
         sb.append(' ');
         if ((s.length()+i)%16==7) {

@@ -410,8 +410,8 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     int[] rows = _table.getSelectedRows();
     if (rows.length > 0) {
       // remove starting from the back so the indices don't have to be adjusted
-      for(int i=rows.length-1; i>=0; --i) {
-        if (rows[i]>=_data.size()) continue;
+      for(int i=rows.length-1; i >= 0; --i) {
+        if (rows[i] >= _data.size()) continue;
         _removeIndex(rows[i]);
       }
       int last = rows[rows.length-1];
@@ -433,7 +433,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     if (rows.length > 0) {
       _table.getSelectionModel().clearSelection();
       for(int i = 0; i < rows.length; ++i) {
-        if (rows[i]>=_data.size()) continue;
+        if (rows[i] >= _data.size()) continue;
         if (rows[i] > 0) {
           T el = _data.remove(rows[i]);
           _data.insertElementAt(el, rows[i]-1);
@@ -451,8 +451,8 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     if (rows.length > 0) {
       _table.getSelectionModel().clearSelection();
       for(int i = 0; i < rows.length; ++i) {
-        if (rows[i]>=_data.size()) continue;
-        if (rows[i]<_data.size()-1) {
+        if (rows[i] >= _data.size()) continue;
+        if (rows[i] < _data.size()-1) {
           T el = _data.remove(rows[i]);
           _data.insertElementAt(el, rows[i]+1);
           _table.getSelectionModel().addSelectionInterval(rows[i]+1,rows[i]+1);

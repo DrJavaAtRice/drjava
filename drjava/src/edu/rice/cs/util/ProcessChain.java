@@ -297,14 +297,14 @@ public class ProcessChain extends Process {
     int exitCode = 0;
     for(int i = 0; i < _processes.length; ++i) {
       exitCode = _processes[i].waitFor();
-//      if (i<_processes.length-1) {
+//      if (i < _processes.length-1) {
 //        _stdOutRedirectors.get(i).setStopFlag();
 //        _stdErrRedirectors.get(i).setStopFlag();
 //      }
 //      try {
 //        _processes[i].getInputStream().close();
 //        _processes[i].getErrorStream().close();
-//        if (i<_processes.length-1) {
+//        if (i < _processes.length-1) {
 //          _processes[i+1].getOutputStream().close();
 //        }
 //      }

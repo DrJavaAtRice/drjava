@@ -246,7 +246,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
       setSize(_lastState.getDimension());
       setLocation(_lastState.getLocation());
       int index = _lastState.getCurrentStrategyIndex();
-      if ((index>=0) && (index<_strategies.size())) {
+      if ((index >= 0) && (index < _strategies.size())) {
         _currentStrategy = _strategies.get(index);
         _strategyBox.setSelectedIndex(index);
       }
@@ -265,7 +265,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
       setSize(_lastState.getDimension());
       setLocation(_lastState.getLocation());
       int index = _lastState.getCurrentStrategyIndex();
-      if ((index>=0) && (index<_strategies.size())) {
+      if ((index >= 0) && (index < _strategies.size())) {
         _currentStrategy = _strategies.get(index);
         _strategyBox.setSelectedIndex(index);
       }

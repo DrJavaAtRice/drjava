@@ -145,14 +145,14 @@ public class DefinitionsEditorKit extends StyledEditorKit {
           final String text = target.getDocument().getText(0,offs);
           while(offs > 0) {
             char chPrev = text.charAt(offs - 1);
-            if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || (Character.isWhitespace(chPrev))) {
+            if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev) >= 0) || (Character.isWhitespace(chPrev))) {
               break;
             }
             --offs;
             if (offs == 0) break; // otherwise offs-1 below generates an index out of bounds
             char ch = text.charAt(offs);
             chPrev = text.charAt(offs - 1);
-            if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || Character.isWhitespace(ch) || Character.isWhitespace(chPrev)) {
+            if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch) >= 0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev) >= 0) || Character.isWhitespace(ch) || Character.isWhitespace(chPrev)) {
               break;
             }
           }
@@ -188,7 +188,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
           while((offs-iOffs)<text.length()-1) {
             ++offs;
             char ch = text.charAt(offs-iOffs);
-            if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) || Character.isWhitespace(ch)) {
+            if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch) >= 0) || Character.isWhitespace(ch)) {
               break;
             }
           }
@@ -231,7 +231,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
             if (Character.isWhitespace(ch) && Character.isWhitespace(chPrev)){
               continue;
             }
-            else if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) || 
+            else if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch) >= 0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev) >= 0) || 
                      ((offs>=2) && Character.isWhitespace(chPrev) && !Character.isWhitespace(text.charAt(offs - 2)))) {
               break;
             }
@@ -278,12 +278,12 @@ public class DefinitionsEditorKit extends StyledEditorKit {
               break;
             char ch = text.charAt(offs-iOffs);
             char chPrev = text.charAt(offs-iOffs - 1);
-            if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch)>=0) ||
-                ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0) ||
+            if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch) >= 0) ||
+                ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev) >= 0) ||
                 Character.isWhitespace(chPrev) ||
                 ch == '\n') {
               while((offs-iOffs<len) && Character.isWhitespace(ch) && ch != '\n'){
-                if ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev)>=0)
+                if ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev) >= 0)
                   break;
                 ++offs;
                 ch = text.charAt(offs-iOffs);

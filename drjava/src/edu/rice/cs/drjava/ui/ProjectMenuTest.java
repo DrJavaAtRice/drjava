@@ -117,6 +117,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
           _frame.pack();
           _model = _frame.getModel();
           _model.ensureJVMStarterFinished();
+          superSetUp();
         }
         // Exception e is either an IOException from a file operation or an Exception thrown by superSetUp(). 
         catch(Exception e) { throw new UnexpectedException(e); }

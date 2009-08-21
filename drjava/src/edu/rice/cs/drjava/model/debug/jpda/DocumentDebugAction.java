@@ -146,7 +146,8 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
         List<ReferenceType> referenceTypes = _manager.getVM().classesByName(_exactClassName);
         if (referenceTypes.size() > 0) {
           // class has been loaded, but couldn't find this line number
-          throw new LineNotExecutableException("Cannot set breakpoint, line "+getLineNumber()+" is not an executable line.\nYou may have to recompile.");
+          throw new LineNotExecutableException("Cannot set breakpoint, line " + getLineNumber() + 
+                                               " is not an executable line.\nYou may have to recompile.");
         }
       }
     }

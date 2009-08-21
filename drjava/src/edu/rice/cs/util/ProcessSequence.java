@@ -131,7 +131,7 @@ public class ProcessSequence extends Process {
         GeneralProcessCreator.LOG.log("ProcessSequence._deathThread running");
         boolean interrupted = false;
         // wait for the completion of each of the subprocesses
-        while(_index<_processes.length) {
+        while(_index < _processes.length) {
           GeneralProcessCreator.LOG.log("Waiting for process "+_index);
           do {
             interrupted = false;
@@ -142,7 +142,7 @@ public class ProcessSequence extends Process {
           } while(interrupted);
           GeneralProcessCreator.LOG.log("Process "+_index+" terminated");
           // a process has just terminated
-          if (_index<_processes.length-1) {
+          if (_index < _processes.length-1) {
             // increase index;
             ++_index;
             try {
@@ -274,7 +274,7 @@ public class ProcessSequence extends Process {
    */
   public int exitValue() {
     if (_aborted) { return -1; }
-    if ((_index<_processes.length-1) || (_processes[_processes.length-1] == null)) {
+    if ((_index < _processes.length-1) || (_processes[_processes.length-1] == null)) {
       throw new IllegalThreadStateException("Process sequence has not terminated yet, exit value not available.");
     }
     // just returning the exit value of the last process is sufficient:

@@ -215,7 +215,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         String v = mf.getMainAttributes().getValue("Created-By");
         if (v != null) {
           int space = v.indexOf(' ');
-          if (space>=0) v = v.substring(0,space);
+          if (space >= 0) v = v.substring(0,space);
           result = JavaVersion.parseFullVersion(v);
         }
       }

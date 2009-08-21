@@ -500,7 +500,7 @@ public class BalancingStreamTokenizer {
           if (buf.length() > 0) {
             // but we still have regular text to output
             // so we need to push all tokens back
-            for(int i=temp.length()-1; i>=0; --i) {
+            for(int i=temp.length()-1; i >= 0; --i) {
               pushToken(temp.charAt(i));
             }
             _token = Token.NORMAL;
@@ -585,7 +585,7 @@ public class BalancingStreamTokenizer {
           if (buf.length() > 0) {
             // but we still have regular text to output
             // so we need to push all tokens back
-            for(int i=temp.length()-1; i>=0; --i) {
+            for(int i=temp.length()-1; i >= 0; --i) {
               pushToken(temp.charAt(i));
             }
             _token = Token.NORMAL;

@@ -133,7 +133,7 @@ public final class RemoteControlServer {
               // check if the request contained a line number
               int lineNo = -1;
               int pathSepIndex = request.indexOf(File.pathSeparatorChar);
-              if (pathSepIndex>=0) {
+              if (pathSepIndex >= 0) {
                 try {
                   lineNo = Integer.valueOf(request.substring(pathSepIndex+1));
                 }

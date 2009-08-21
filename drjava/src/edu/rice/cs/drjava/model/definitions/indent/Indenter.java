@@ -100,12 +100,15 @@ public class Indenter {
       rule26 = new QuestionLineContains(':', rule27, rule30),
       rule25 = new QuestionStartingNewStmt(rule26, rule31),  // Is this line the start of a new statement?
       rule24 = new QuestionPrevLineStartsWith("@", rule60, rule25),  // Does this line follow an annotation?  ??
-      rule22 = new QuestionHasCharPrecedingOpenBrace(new char[] {'=',',','{'}, rule36, rule24),  // Is this line an element of an array initializer?
+      // Is this line an element of an array initializer?
+      rule22 = new QuestionHasCharPrecedingOpenBrace(new char[] {'=',',','{'}, rule36, rule24),  
       rule20 = new QuestionStartAfterOpenBrace(rule36, rule22),  // Does the preceding line contain an open curly brace?
       rule19 = new ActionStartStmtOfBracePlus(0),  // indents the line to match whitespace preceding the line enclosing brace
       // ANONYMOUS inner class formatting breaks here?
-      rule18 = new QuestionCurrLineStartsWithSkipComments("}", rule19, rule20),  // Does current line begin with '}' ignoring comment text, WS
-      rule17 = new QuestionBraceIsCurly(rule18, rule24),  // is brace enclosing this line '{' (as opposed to quotes, etc.); '(', '[' already excluded
+      // Does current line begin with '}' ignoring comment text, WS
+      rule18 = new QuestionCurrLineStartsWithSkipComments("}", rule19, rule20),
+      // Is brace enclosing this line '{' (as opposed to quotes, etc.); '(', '[' already excluded  
+      rule17 = new QuestionBraceIsCurly(rule18, rule24),  
       rule16 = new ActionBracePlus(1 + indentLevel),
       rule15 = new ActionBracePlus(1),
       

@@ -115,7 +115,7 @@ public class ConfigOptionListeners implements OptionConstants {
       // find the next bigger of the choices
       String newSetting = getNextBiggerHeapSize(heapSizeMB);
       int result;
-      if (heapSize>=0) {
+      if (heapSize >= 0) {
         String[] options = new String[] { "Copy to \"Maximum Heap\" Setting", "Clean \"Slave JVM Args\"", "Ignore" };
         result = JOptionPane.
           showOptionDialog(parent,
@@ -296,7 +296,7 @@ public class ConfigOptionListeners implements OptionConstants {
       // find the next bigger of the choices
       String newSetting = getNextBiggerHeapSize(heapSizeMB);
       int result;
-      if (heapSize>=0) {
+      if (heapSize >= 0) {
         String[] options = new String[] { "Copy to \"Maximum Heap\" Setting", "Clean \"Master JVM Args\"", "Ignore" };
         result = JOptionPane.
           showOptionDialog(parent,
@@ -402,10 +402,10 @@ public class ConfigOptionListeners implements OptionConstants {
   
   public static void sanitizeJavadocCustomParams(JFrame parent,
                                                  String value) {
-    boolean containsPrivate = (value.indexOf("-private")>=0);
-    boolean containsProtected = (value.indexOf("-protected")>=0);
-    boolean containsPublic = (value.indexOf("-public")>=0);
-    boolean containsPackage = (value.indexOf("-package")>=0);
+    boolean containsPrivate = (value.indexOf("-private") >= 0);
+    boolean containsProtected = (value.indexOf("-protected") >= 0);
+    boolean containsPublic = (value.indexOf("-public") >= 0);
+    boolean containsPackage = (value.indexOf("-package") >= 0);
 
     if (containsPrivate || containsProtected || containsPublic || containsPackage) {
       StringBuilder sb = new StringBuilder();
@@ -440,7 +440,7 @@ public class ConfigOptionListeners implements OptionConstants {
         // clean up
         String[] params = value.split("(-private|-protected|-package|-public)");
         sb = new StringBuilder();
-        for(int i = 0;i < params.length;i++){
+        for(int i = 0; i < params.length; i++){
           if(!params[i].trim().equals("")) { sb.append(params[i].trim()); sb.append(' '); }
         }
         DrJava.getConfig().setSetting(JAVADOC_CUSTOM_PARAMS, sb.toString().trim());

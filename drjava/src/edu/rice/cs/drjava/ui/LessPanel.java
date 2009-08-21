@@ -186,7 +186,7 @@ public class LessPanel extends AbortablePanel {
               // MainFrame.LOG.log("\treading... skipped to "+_totalRead);
               // abort after reading 5 blocks (50 kB), read more later
               // don't block the event thread any longer
-              while((changeCount<=BUFFER_READS_PER_TIMER) && ((_red = _fr.read(_buf))>=0)) {
+              while((changeCount<=BUFFER_READS_PER_TIMER) && ((_red = _fr.read(_buf)) >= 0)) {
                 // MainFrame.LOG.log("\tread "+_red+" bytes");
                 _totalRead += _red;
                 sb.append(new String(_buf, 0, _red));

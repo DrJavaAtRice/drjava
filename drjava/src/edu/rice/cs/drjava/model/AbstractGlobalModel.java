@@ -733,7 +733,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public void removeExcludedFile(File f) {
       synchronized(_exclFiles) {
-        for(int i = 0;i < _exclFiles.size();i++) {
+        for(int i = 0; i < _exclFiles.size(); i++) {
           try {
             if(_exclFiles.get(i).getCanonicalPath().equals(f.getCanonicalPath())) {
               _exclFiles.remove(i);
@@ -2286,11 +2286,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     DrJava.getConfig().addOptionListener(DYNAMICJAVA_ACCESS_CONTROL, new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oce) {
         boolean enforceAllAccess = DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
-          .equals(OptionConstants.DynamicJavaAccessControlChoices.PRIVATE_AND_PACKAGE); // "all"
+          .equals(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL_CHOICES.get(2)); // "all"
         getInteractionsModel().setEnforceAllAccess(enforceAllAccess);
         
         boolean enforcePrivateAccess = !DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
-          .equals(OptionConstants.DynamicJavaAccessControlChoices.DISABLED); // not "none"
+          .equals(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL_CHOICES.get(0)); // not "none"
         getInteractionsModel().setEnforcePrivateAccess(enforcePrivateAccess);
       }
     });

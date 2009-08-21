@@ -618,7 +618,7 @@ public class XMLConfig {
     else {
       node = createNode(path, n, overwrite);
     }
-    if (dotPos>=0) {
+    if (dotPos >= 0) {
       Element e = (Element)node;
       e.setAttribute(path.substring(dotPos+1),value);
     }

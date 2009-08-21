@@ -213,7 +213,7 @@ public class ConfigFrame extends SwingFrame {
 
     // Make sure each row is expanded
     int row = 0;
-    while(row<_tree.getRowCount()) {
+    while(row < _tree.getRowCount()) {
       _tree.expandRow(row);
       ++row;
     }

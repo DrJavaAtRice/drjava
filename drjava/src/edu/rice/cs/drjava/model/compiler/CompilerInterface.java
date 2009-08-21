@@ -57,10 +57,11 @@ public interface CompilerInterface {
     * @param classPath  Support jars or directories that should be on the classpath.  If @code{null}, the default is used.
     * @param sourcePath  Location of additional sources to be compiled on-demand.  If @code{null}, the default is used.
     * @param destination  Location (directory) for compiled classes.  If @code{null}, the default in-place location is used.
-    * @param bootClassPath  The bootclasspath (contains Java API jars or directories); should be consistent with @code{sourceVersion} 
+    * @param bootClassPath  The bootclasspath (contains Java API jars or directories); should be consistent with
+    * @code{sourceVersion} 
     *                       If @code{null}, the default is used.
-    * @param sourceVersion  The language version of the sources.  Should be consistent with @code{bootClassPath}.  If @code{null},
-    *                       the default is used.
+    * @param sourceVersion  The language version of the sources.  Should be consistent with @code{bootClassPath}.  
+    * If @code{null}, the default is used.
     * @param showWarnings  Whether compiler warnings should be shown or ignored.
     * @return Errors that occurred. If no errors, should be zero length (not null).
     */

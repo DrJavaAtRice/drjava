@@ -178,7 +178,8 @@ public class DefaultCompilerModel implements CompilerModel {
     * This method formerly only compiled documents which were out of sync with their class file, as a performance 
     * optimization.  However, bug #634386 pointed out that unmodified files could depend on modified files, in which 
     * case this command would not recompile a file in some situations when it should.  Since we value correctness over
-    * performance, we now always compile all open documents.</p>                                                                                                                              @throws IOException if a filesystem-related problem prevents compilation
+    * performance, we now always compile all open documents.</p>
+    * @throws IOException if a filesystem-related problem prevents compilation
     */
   public void compile(List<OpenDefinitionsDocument> defDocs) throws IOException {
     if (_prepareForCompile()) { _doCompile(defDocs); }
@@ -329,7 +330,8 @@ public class DefaultCompilerModel implements CompilerModel {
             errors.addAll(compiler.compile(files, classPath, null, buildDir, bootClassPath, null, true));
           }
           else {
-            /** If compiling a language level file, do not show warnings, as these are not caught by the language level parser */
+            /** If compiling a language level file, do not show warnings, as these are not caught by the language level 
+              * parser */
             errors.addAll(compiler.compile(preprocessedFiles, classPath, null, buildDir, bootClassPath, null, false));
           }
         }
@@ -365,7 +367,8 @@ public class DefaultCompilerModel implements CompilerModel {
      */
     HashSet<File> javaFileSet = new HashSet<File>();
     LinkedList<File> newFiles = new LinkedList<File>();  // Used to record the LL files that must be converted
-    final LinkedList<File> filesToBeClosed = new LinkedList<File>(); // Used to record .java files that are open at the same time as their .dj? files.
+    final LinkedList<File> filesToBeClosed = new LinkedList<File>();  // Used to record .java files that are open at 
+                                                                      // the same time as their .dj? files.
     boolean containsLanguageLevels = false;
     for (File f : files) {
       File canonicalFile = IOUtil.attemptCanonicalFile(f);
@@ -421,8 +424,8 @@ public class DefaultCompilerModel implements CompilerModel {
       });
 //      new edu.rice.cs.drjava.ui.DrJavaScrollableDialog(null, "Warning: Files need to be closed",
 //                                                       "The following files have matching .dj? files open.", 
-//                                                       "These .java files need to be closed for proper compiling. \n \n \n" +
-//                                                       filesToBeClosed.toString().replace(", ","\n"),true).show();
+//                                                       "These .java files need to be closed for proper compiling. \n \n \n"
+//                                                       + filesToBeClosed.toString().replace(", ","\n"),true).show();
       ScrollableListDialog<File> dialog = new ScrollableListDialog.Builder<File>()
         .setTitle("Java File"+(filesToBeClosed.size() == 1?"":"s")+" Need to Be Closed")
         .setText("The following .java "+(filesToBeClosed.size() == 1?
@@ -494,8 +497,9 @@ public class DefaultCompilerModel implements CompilerModel {
           });
           ScrollableListDialog<File> dialog = new ScrollableListDialog.Builder<File>()
             .setTitle("Delete Class Files")
-            .setText("We suggest that you delete all class files in the directories with language\n"+
-                     "level files. Do you want to delete the class files in the following director"+(dirsWithLLFiles.size() == 1?"y":"ies")+"?")
+            .setText("We suggest that you delete all class files in the directories with language\n" +
+                     "level files. Do you want to delete the class files in the following director" +
+                     (dirsWithLLFiles.size() == 1?"y":"ies")+"?")
             .setItems(new ArrayList<File>(dirsWithLLFiles))
             .setMessageType(JOptionPane.QUESTION_MESSAGE)
             .setFitToScreen(true)

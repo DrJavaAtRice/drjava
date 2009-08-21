@@ -981,7 +981,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           sb.append(els[i+j]);
         }
         s = sb.toString();
-        if (s.length()>=sep.length()) {
+        if (s.length() >= sep.length()) {
           return s.substring(sep.length());
         }
         else {
@@ -1474,9 +1474,9 @@ public class DrJavaPropertySetup implements OptionConstants {
         }
         StringBuilder sb = new StringBuilder();
         final String osName = System.getProperty("os.name");
-        if ((osName.indexOf("Windows")>=0)) {
+        if ((osName.indexOf("Windows") >= 0)) {
           String exe = "cmd";
-          if ((osName.indexOf("95")>=0) || (osName.indexOf("98")>=0)) { exe = "command"; }
+          if ((osName.indexOf("95") >= 0) || (osName.indexOf("98") >= 0)) { exe = "command"; }
           if (JavaVersion.CURRENT.supports(JavaVersion.JAVA_5)) {
             // System.getenv is deprecated under 1.3 and 1.4, and may throw a java.lang.Error (!),
             // which we'd rather not have to catch

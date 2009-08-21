@@ -392,7 +392,7 @@ public class DrJavaErrorWindow extends JDialog {
   /** Replaces all occurrences of orig in text with repl. */
   private static String replaceString(String text, String orig, String repl) {
     int pos = 0;
-    while((pos=text.indexOf(orig,pos))>=0) {
+    while((pos=text.indexOf(orig,pos)) >= 0) {
       // found occurrence at pos
       text = text.substring(0,pos) + repl + text.substring(pos+orig.length(), text.length());
     }
@@ -402,7 +402,7 @@ public class DrJavaErrorWindow extends JDialog {
   /** Go to the next error. */
   private final Action _nextAction = new AbstractAction("Next") {
     public void actionPerformed(ActionEvent e) {
-      if (_errorIndex<_errorCount-1) {
+      if (_errorIndex < _errorCount-1) {
         ++_errorIndex;
         _error = DrJavaErrorHandler.getError(_errorIndex);
         if (_errorIndex == _errorCount-1) { setEnabled(false); }

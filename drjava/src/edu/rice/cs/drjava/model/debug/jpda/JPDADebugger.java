@@ -1217,7 +1217,8 @@ public class JPDADebugger implements Debugger {
   /** Scroll to the location specified by location.  Assumes lock on this is already held. */
   private void scrollToSource(Location location, boolean shouldHighlight) {
     // try {
-    //   System.out.println("scrollToSource Location: "+location.lineNumber()+" "+location.sourceName()+" "+location.sourcePath());
+    //   System.out.println("scrollToSource Location: " + location.lineNumber() + " " + location.sourceName() + " " +
+    //     location.sourcePath());
     // } catch(AbsentInformationException aie) { }
     assert EventQueue.isDispatchThread();
     OpenDefinitionsDocument doc = preloadDocument(location);
@@ -1231,7 +1232,8 @@ public class JPDADebugger implements Debugger {
     */
   private void openAndScroll(OpenDefinitionsDocument doc, Location location, boolean shouldHighlight) {
     // try {
-    //   System.out.println("scrollToSource Location: "+location.lineNumber()+" "+location.sourceName()+" "+location.sourcePath()+" "+doc);
+    //   System.out.println("scrollToSource Location: " + location.lineNumber() + " " + location.sourceName() + " " +
+    //     location.sourcePath()+" "+doc);
     // } catch(AbsentInformationException aie) { }
     openAndScroll(doc, location.lineNumber(), location.declaringType().name(), shouldHighlight);
   }
@@ -1253,7 +1255,11 @@ public class JPDADebugger implements Debugger {
       }
       final int llLine = line;
       // change UI if in sync in MainFrame listener
-      EventQueue.invokeLater(new Runnable() { public void run() { _notifier.threadLocationUpdated(doc, llLine, shouldHighlight); } });
+      EventQueue.invokeLater(new Runnable() {
+        public void run() { 
+          _notifier.threadLocationUpdated(doc, llLine, shouldHighlight); 
+        } 
+      });
     }
     else printMessage("  (Source for " + className + " not found.)");
   }
@@ -1562,7 +1568,9 @@ public class JPDADebugger implements Debugger {
   private void _switchToSuspendedThread() throws DebugException { _switchToSuspendedThread(null, true); }
 
   /** Calls the real switchToSuspendedThread, telling it to updateWatches. This is what is usually called. */
-  private void _switchToSuspendedThread(BreakpointRequest request) throws DebugException { _switchToSuspendedThread(request, true); }
+  private void _switchToSuspendedThread(BreakpointRequest request) throws DebugException { 
+    _switchToSuspendedThread(request, true); 
+  }
   
   /** Performs the bookkeeping to switch to the suspened thread on the top of the _suspendedThreads stack.
     * @param request The BreakPointRequest reached by the debugger, or null if not a breakpoint
@@ -1900,7 +1908,7 @@ public class JPDADebugger implements Debugger {
       try {
         _sourcePath = delegee.sourcePath();
         int pos = _sourcePath.lastIndexOf(File.separator);
-        if (pos>=0) {
+        if (pos >= 0) {
           _sourcePath = _sourcePath.substring(0, pos) + File.separator +_sourceName;
         }
         else {

@@ -971,7 +971,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     while((pid == null) && (line=br.readLine()) != null) {
       LOG.log(line);
       // find the PID of JUnitTestRunner, i.e. the PID of the current process
-      if (line.indexOf("JUnitTestRunner")>=0) {
+      if (line.indexOf("JUnitTestRunner") >= 0) {
         pid = new Integer(line.substring(0,line.indexOf(' ')));
       }
     }

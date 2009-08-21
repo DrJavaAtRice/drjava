@@ -268,16 +268,17 @@ public class ExternalProcessPanel extends AbortablePanel {
     int start = caret;
     int end = start;
     while((start-1 > 0) && (t.charAt(start-1) != '\n')) { --start; }
-    while((end>=0) && (end<t.length()) && (t.charAt(end) != '\n')) { ++end; }
+    while((end >= 0) && (end < t.length()) && (t.charAt(end) != '\n')) { ++end; }
+
     // LOG.log("\tstart="+start+"\n\tend="+end);
-    if ((start<0) || (end<0) || (start>=t.length()) || (end>=t.length())) return;
+    if ((start < 0) || (end < 0) || (start >= t.length()) || (end >= t.length())) return;
     final String line = t.substring(start,end);
     // LOG.log("\t'"+line+"'");
     caret -= start; // calculate caret position within the line
     if (caret>=line.length()) { caret = line.length()-1; }
     start = end = caret;
     char ch;
-    while((end>=0) && (end<line.length())) {
+    while((end >= 0) && (end<line.length())) {
       ch = line.charAt(end);
       if (ch==':') {
         if ((end+1<line.length()) && (Character.isDigit(line.charAt(end+1)))) {
@@ -335,16 +336,16 @@ public class ExternalProcessPanel extends AbortablePanel {
         if ((ch==':') || (ch=='.') || (Character.isJavaIdentifierPart(ch))) { --start; } else { break; }
       }
       // LOG.log("\tstart="+start+"\n\tend="+end);
-      if ((start>=0) && (end>=start) && (start<line.length()) && (end<line.length())) {
+      if ((start >= 0) && (end>=start) && (start<line.length()) && (end<line.length())) {
         name = line.substring(start,end).replace(File.separatorChar,'.');
         if ((name.length() > 0) && (!Character.isJavaIdentifierPart(name.charAt(0)))) { name = name.substring(1); }
         if (simpleName == null) { simpleName = name; }
         if (name.equals(oldName)) { break; }
-        if ((name.indexOf(".java")>=0) ||
-            (name.indexOf(".j")>=0) ||
-            (name.indexOf(".dj0")>=0) ||
-            (name.indexOf(".dj1")>=0) ||
-            (name.indexOf(".dj2")>=0)) {
+        if ((name.indexOf(".java") >= 0) ||
+            (name.indexOf(".j") >= 0) ||
+            (name.indexOf(".dj0") >= 0) ||
+            (name.indexOf(".dj1") >= 0) ||
+            (name.indexOf(".dj2") >= 0)) {
           // LOG.log("\t--> '"+name+"'");
           uniqueMatch = getUniqueMatch(name, pim);
           if (uniqueMatch != null) {
@@ -459,21 +460,22 @@ public class ExternalProcessPanel extends AbortablePanel {
         // don't block the event thread any longer
         while((_is != null) &&
               (_erris != null) &&
-              (_changeCount<=BUFFER_READS_PER_TIMER) &&
+              (_changeCount <= BUFFER_READS_PER_TIMER) &&
               (_erris != null) &&
-              ((_red = _is.read(_buf))>=0)) {
+              ((_red = _is.read(_buf)) >= 0)) {
+
           // MainFrame.LOG.log("\tread "+_red+" bytes");
           _sb.append(new String(_buf, 0, _red));
           if (finish) { _changeCount = 1; } else { ++_changeCount; }
         }
-        while((_changeCount<=BUFFER_READS_PER_TIMER) &&
+        while((_changeCount <= BUFFER_READS_PER_TIMER) &&
               (_erris != null) &&
-              ((_errred = _erris.read(_errbuf))>=0)) {
+              ((_errred = _erris.read(_errbuf)) >= 0)) {
           // MainFrame.LOG.log("\tread "+_red+" bytes");
           _sb.append(new String(_errbuf, 0, _errred));
           if (finish) { _changeCount = 1; } else { ++_changeCount; }
         }
-        if ((_red > 0) && (_changeCount<BUFFER_READS_PER_TIMER)) {
+        if ((_red > 0) && (_changeCount < BUFFER_READS_PER_TIMER)) {
           _sb.append(new String(_buf, 0, _red));
           if (finish) { _changeCount = 1; } else { ++_changeCount; }
         }

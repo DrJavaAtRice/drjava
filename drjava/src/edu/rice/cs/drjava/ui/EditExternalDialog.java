@@ -274,8 +274,8 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
       public void valueChanged(ListSelectionEvent e) {
         _upButton.setEnabled(_list.getSelectedIndex() > 0);
         _upAction.setEnabled(_list.getSelectedIndex() > 0);
-        _downButton.setEnabled(_list.getSelectedIndex()<_list.getModel().getSize());
-        _downAction.setEnabled(_list.getSelectedIndex()<_list.getModel().getSize());
+        _downButton.setEnabled(_list.getSelectedIndex() < _list.getModel().getSize());
+        _downAction.setEnabled(_list.getSelectedIndex() < _list.getModel().getSize());
       }
     });
     JScrollPane sp = new JScrollPane(_list);
@@ -536,9 +536,9 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
     _upAction.setEnabled((_list.getModel().getSize() > 0) &&
                          (_list.getSelectedIndex() > 0));
     _downButton.setEnabled((_list.getModel().getSize() > 0) &&
-                           (_list.getSelectedIndex()<_list.getModel().getSize()-1));
+                           (_list.getSelectedIndex() < _list.getModel().getSize()-1));
     _downAction.setEnabled((_list.getModel().getSize() > 0) &&
-                           (_list.getSelectedIndex()<_list.getModel().getSize()-1));
+                           (_list.getSelectedIndex() < _list.getModel().getSize()-1));
     _exportButton.setEnabled(names.size() > 0);
     _exportAction.setEnabled(names.size() > 0);
   }

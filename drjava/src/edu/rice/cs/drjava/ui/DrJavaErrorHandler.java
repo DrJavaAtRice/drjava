@@ -82,7 +82,7 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
   
   /** Returns the error with the given index. */
   public static Throwable getError(int index) {
-    if ((index>=0) && (index<_errors.size())) {
+    if ((index >= 0) && (index < _errors.size())) {
       return _errors.get(index);
     }
     else {
