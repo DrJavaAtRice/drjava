@@ -151,7 +151,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 //  }
     
   /** Tests that the errors array contains all encountered failures and error in the right order. */
-  public void testErrorsArrayInOrder() throws Exception {
+  public void testErrorsArrayInOrder_NOJOIN() throws Exception {
     debug.logStart();
     _m = new JUnitErrorModel(new JUnitError[0], _model, false);
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
@@ -169,6 +169,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
     
     listener.runJUnit(doc);
+    // runJUnit waits until the thread started in DefaultJUnitModel._rawJUnitOpenDefDocs has called notify
     
     listener.assertJUnitStartCount(1);
     // Clear document so we can make sure it's written to after startJUnit
@@ -196,7 +197,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
    * the error is not reported correctly, because the JUnitTestManager will
    * blow up in the other JVM and never notify us that it's finished.
    */
-  public void testVerifyErrorHandledCorrectly() throws Exception {
+  public void testVerifyErrorHandledCorrectly_NOJOIN() throws Exception {
     OpenDefinitionsDocument doc = setupDocument(ABC_CLASS_ONE);
     final File file = new File(_tempDir, "ABC1.java");
     saveFile(doc, new FileSelector(file));
@@ -286,7 +287,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 //  }
   
   /** Test errors that occur in superclass. */
-  public void testErrorInSuperClass() throws Exception {
+  public void testErrorInSuperClass_NOJOIN() throws Exception {
     debug.logStart();
     OpenDefinitionsDocument doc1 = setupDocument(TEST_ONE);
     OpenDefinitionsDocument doc2 = setupDocument(TEST_TWO);
@@ -325,6 +326,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     listener.resetJUnitCounts();
     
     listener.runJUnit(doc2);
+    // runJUnit waits until the thread started in DefaultJUnitModel._rawJUnitOpenDefDocs has called notify
     _log.log("Second document testing should be complete");
     
     Utilities.clearEventQueue();

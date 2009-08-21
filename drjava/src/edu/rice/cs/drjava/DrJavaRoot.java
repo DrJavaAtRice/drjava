@@ -56,6 +56,7 @@ import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.drjava.ui.DrJavaErrorWindow;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.drjava.ui.SimpleInteractionsWindow;
+import edu.rice.cs.drjava.ui.SplashScreen;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.config.*;
@@ -110,6 +111,9 @@ public class DrJavaRoot {
     if (!DrJava.handleCommandLineArgs(args)) {
       System.exit(0);
     }
+    
+    DrJava.warnIfLinuxWithCompiz();
+    new SplashScreen().flash();
     
     final String[] filesToOpen = DrJava.getFilesToOpen();
     final int numFiles = filesToOpen.length;

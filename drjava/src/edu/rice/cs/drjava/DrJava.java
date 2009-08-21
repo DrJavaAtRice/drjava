@@ -49,7 +49,6 @@ import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
-import edu.rice.cs.drjava.ui.SplashScreen;
 import edu.rice.cs.plt.concurrent.DelayedInterrupter;
 import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.util.ArgumentTokenizer;
@@ -125,21 +124,6 @@ public class DrJava {
     if (handleCommandLineArgs(args)) {
       // Platform-specific UI setup.
       PlatformFactory.ONLY.beforeUISetup();
-
-      warnIfLinuxWithCompiz();
-      
-      if (!_forceNewInstance &&
-          DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED) &&
-          (_filesToOpen.size() > 0)) {
-        if (!RemoteControlClient.isServerRunning()) {
-          // server not running, display splash screen
-          new SplashScreen().flash();
-        }
-      }
-      else {
-        // either forcing new instance or no files specified, display splash screen
-        new SplashScreen().flash();
-      }
       
 //    Utilities.showDebug("Calling configureAndLoadDrJavaRoot with args = " + args);
       configureAndLoadDrJavaRoot(args); 

@@ -451,7 +451,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     /** Run the junit test suite that has already been set up on the slave JVM */
     _testInProgress = true;
     // System.err.println("Spawning test thread");
-    new Thread(new Runnable() {
+    new Thread(new Runnable() { // this thread is not joined, but the wait/notify scheme guarantees that it ends
       public void run() { 
         // TODO: should we disable compile commands while testing?  Should we use protected flag instead of lock?
         // Utilities.show("Preparing to synchronize");

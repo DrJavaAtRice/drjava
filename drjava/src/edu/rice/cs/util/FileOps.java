@@ -62,7 +62,7 @@ public abstract class FileOps {
     * This class is used for all NullFile.ONLY references while the other is used for distinct untitled documents.
     * Both appear to define the same notion of equality. 
     */
-  static public class NullFile extends File {
+  public static class NullFile extends File {
     
     public static final NullFile ONLY = new NullFile();
     

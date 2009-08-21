@@ -306,7 +306,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     assertEquals("caret should be one char after the inserted D", newPos + 2, _pane.getCaretPosition());
   }
   
-  public void testSystemIn() {
+  public void testSystemIn_NOJOIN() {
     final Object bufLock = new Object();
     final StringBuilder buf = new StringBuilder();
     
@@ -322,6 +322,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
       }
     });
     
+    // TODO: can we somehow interrupt this thread to allow us to join with it?
     new Thread("Testing System.in") {
       public void run() {
         synchronized(bufLock) {

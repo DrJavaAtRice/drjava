@@ -304,7 +304,7 @@ public class CompilerErrorModel {
       while ((curError < _numErrors)) {
         // find the next error with a line number (skipping others)
         curError = nextErrorWithLine(curError);
-        if (curError >= _numErrors) {break;} 
+        if (curError >= _numErrors) {break;}
         
         //Now find the file and document we are working on
         File file = _errors[curError].file();
@@ -312,15 +312,17 @@ public class CompilerErrorModel {
         try { document = _model.getDocumentForFile(file); }
         catch (Exception e) {
           // This is intended to catch IOException or OperationCanceledException
+          // skip positions for these errors if the document couldn't be loaded
           if ((e instanceof IOException) || (e instanceof OperationCanceledException)) {
-            // skip positions for these errors if the document couldn't be loaded
-            do { curError++;} 
-            while ((curError < _numErrors) && (_errors[curError].file().equals(file)));
-            
-            //If the document couldn't be loaded, start the loop over at the top
-            continue;
+            document = null;
           }
           else throw new UnexpectedException(e);
+        }
+        if (document==null) {
+          do { curError++;}
+          while ((curError < _numErrors) && (_errors[curError].file().equals(file)));
+          //If the document couldn't be loaded, start the loop over at the top
+          continue;
         }
         if (curError >= _numErrors) break;
         
@@ -336,7 +338,7 @@ public class CompilerErrorModel {
         while ((curError < _numErrors) && // we still have errors to find
                file.equals(_errors[curError].file()) &&  // the next error is in this file
                (offset <= defsLength)) { // we haven't gone past the end of the file
-          // create new positions for all errors on this line          
+          // create new positions for all errors on this line
           boolean didNotAdvance = false;
           if (_errors[curError].lineNumber() != curLine) {
             // if this happens, then we will not advance to the next error in the loop below.
@@ -353,7 +355,7 @@ public class CompilerErrorModel {
               curError++;
             }
           }
-          
+
           // At this point, offset is the starting index of the previous error's line.
           // Update offset to be appropriate for the current error.
           // ... but don't bother looking if it isn't in this file.
@@ -387,7 +389,6 @@ public class CompilerErrorModel {
             }
           }
         }
-        
         //Remember the indexes in the _errors and _positions arrays that
         // are for the errors in this file
         int fileEndIndex = curError;

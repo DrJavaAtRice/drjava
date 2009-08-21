@@ -59,7 +59,7 @@
   <!-- fornum task, used for test-repeat -->
   <taskdef name="fornum" classname="edu.rice.cs.plt.ant.ForNumTask" classpath="lib/buildlib/plt-ant.jar" onerror="report" />
   
-  <extendclasspath path="lib/buildlib/junit.jar" />
+<!--  <extendclasspath path="lib/buildlib/junit.jar" /> -->
 
   <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
   
@@ -142,6 +142,7 @@
     <echo message="                runs (default: 1)" />
     <echo message="drjava.test.config: Location of the DrJava configuration file to use" />
     <echo message="                    in tests (default: testFiles/drjava.basic.config)" />
+    <echo message="use-concjunit: Set to true to test using ConcJUnit instead of JUnit." />
   </target>
   
   
@@ -392,13 +393,14 @@
   </target>
   
   
-  <target name="do-test" depends="resolve-jvm-args">
-    <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}'" />
+  <target name="do-test" depends="resolve-jvm-args, resolve-junit-jar">
+    <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}', java=${test-jvm}" />
+    <extendclasspath path="${junit-jar}" />
     <junit haltonfailure="${test-halt}" failureproperty="test-failed"
            fork="yes" forkmode="perTest" maxmemory="800M" jvm="${test-jvm}" dir="${basedir}">
       <classpath>
         <pathelement location="${test-tools}" />
-        <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="${junit-jar}" />
         <pathelement location="lib/buildlib/plt-ant.jar" /> <!-- required for custom formatter -->
         <pathelement location="${clover-jar}" />
         <pathelement location="classes/test" />
@@ -413,7 +415,7 @@
         <propertyref prefix="drjava." />
         <!-- Add any properties that should be passed on -->
       </syspropertyset>
-      <jvmarg line="${jvm-args}" />
+      <jvmarg line="${jvm-args} ${concjunit-bootclasspath}" />
       <formatter classname="${test-formatter-class}" usefile="${test-output-to-file}" />
       <batchtest>
         <fileset dir="classes/test">
@@ -777,7 +779,7 @@
        Clean Targets
        ************* -->
        
-  <target name="clean" depends="clean-intermediate, clean-products"
+  <target name="clean" depends="clean-intermediate, clean-products, clean-concjunit"
           description="Remove all build products; the result should match the intended Subversion contents">
   </target>
 
@@ -831,7 +833,13 @@
 	
   </target>
   
-  
+  <target name="clean-concjunit" unless="skip-clean">
+    <echo message="Deleting ConcJUnit artifacts" />
+    
+    <delete file="instr.concjunit.txt" failonerror="${clean-can-fail}" />
+    <delete file="rt.concjunit.jar" failonerror="${clean-can-fail}" />	
+  </target>
+    
 
   <!-- ******************
        Subversion Targets 
@@ -1101,10 +1109,10 @@
          are immutable and so java6-runtime will only be set the *first* time. -->
 
     <property name="java6-runtime-1" location="${java6-home}/lib/rt.jar" />
-    <available property="java5-runtime" value="${java6-runtime-1}" file="${java6-runtime-1}" />
+    <available property="java6-runtime" value="${java6-runtime-1}" file="${java6-runtime-1}" />
 
     <property name="java6-runtime-2" location="${java6-home}/jre/lib/rt.jar" />
-    <available property="java5-runtime" value="${java6-runtime-2}" file="${java6-runtime-2}" />
+    <available property="java6-runtime" value="${java6-runtime-2}" file="${java6-runtime-2}" />
 
     <property name="java6-runtime-3" location="${java6-home}/../Classes/classes.jar" />
     <available property="java6-runtime" value="${java6-runtime-3}" file="${java6-runtime-3}" />
@@ -1348,5 +1356,49 @@
     <available file="${generate-dir}" property="already-generated" />
   </target>
 
+
+  
+  <!-- *****************
+       ConcJUnit Targets
+       ***************** -->
+  <target name="resolve-junit-jar">
+    <if>
+      <istrue value="${use-concjunit}" />
+      <then>
+        <property name="junit-jar-1" location="lib/buildlib/concutest-junit-3.8.2.jar" />
+        <available property="junit-jar" value="${junit-jar-1}" file="${junit-jar-1}" />
+
+        <fail message="Can't find concutest-junit-3.8.2.jar in the lib/buildlib directory" unless="junit-jar" />
+
+        <property name="concjunit-rt-jar-1" location="lib/buildlib/concjunitrt.jar" />
+        <available property="concjunit-rt-jar" value="${concjunit-rt-jar-1}" file="${concjunit-rt-jar-1}" />
+
+        <fail message="Can't find concjunitrt.jar in the lib/buildlib directory" unless="concjunit-rt-jar" />
+
+        <property name="rt-concjunit-jar-1" location="rt.concjunit.jar" />
+
+        <if>
+          <not>
+            <available file="${rt-concjunit-jar-1}" />
+          </not>
+          <then>
+            <echo message="Instrumenting Java runtime (no changes made to original), java=${test-jvm}" />
+            <java jar="${concjunit-rt-jar}" jvm="${test-jvm}" fork="yes" inputstring="Y"/>
+          </then>
+          <else>
+            <echo message="${rt-concjunit-jar-1} already exists, not instrumenting." />
+          </else>
+        </if>
+        <available property="concjunit-bootclasspath" value="-Xbootclasspath/p:${rt-concjunit-jar-1}" file="${rt-concjunit-jar-1}" />
+        <echo message="boot classpath: ${concjunit-bootclasspath}" />
+      </then>
+      <else>
+        <property name="junit-jar-1" location="lib/buildlib/junit.jar" />
+        <available property="junit-jar" value="${junit-jar-1}" file="${junit-jar-1}" />
+        <available property="concjunit-bootclasspath" value="" file="${junit-jar-1}" />
+        <fail message="Can't find junit.jar in the lib/buildlib directory" unless="junit-jar" />
+      </else>
+    </if>
+  </target>
 
 </project>

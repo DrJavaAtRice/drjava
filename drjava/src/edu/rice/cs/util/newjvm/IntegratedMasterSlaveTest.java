@@ -60,14 +60,16 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
     super.tearDown();
   }
   
-  public void testItAll() throws Exception {
+  // this test uses thread pools and starts a THRAD_EXECUTOR-n thread that we cannot join
+  public void testItAll_NOJOIN() throws Exception {
     // run a couple of times. each one forks its own jvm so not
     // too many! we run multiple times to prove that the master
     // can invoke multiple slaves (only one active at a time though)
     for (int i = 0; i < 2; i++) _testMaster.runTestSequence();
   }
   
-  public void testImmediateQuit() throws Exception {
+  // this test uses thread pools and starts a THRAD_EXECUTOR-n thread that we cannot join
+  public void testImmediateQuit_NOJOIN() throws Exception {
     for (int i = 0; i < 5; i++)  _testMaster.runImmediateQuitTest();
   }
   

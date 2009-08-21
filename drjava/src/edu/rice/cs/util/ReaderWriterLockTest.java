@@ -95,6 +95,9 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
     }
 //    String output = buf.toString();
 //    System.out.println(output);
+    r1.join();
+    r2.join();
+    r3.join();
   }
 
   /** Tests that multiple writers run in mutually exclusive intervals without causing deadlock. */
@@ -123,6 +126,10 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
     assertTrue("w1 writes should happen in order", output.indexOf("w1 w1 w1 ") != -1);
     assertTrue("w2 writes should happen in order", output.indexOf("w2 w2 w2 ") != -1);
     assertTrue("w1 writes should happen in order", output.indexOf("w3 w3 w3 ") != -1);
+    
+    w1.join();
+    w2.join();
+    w3.join();
   }
 
   /** Ensure that a single thread can perform multiple reads. */
@@ -153,6 +160,8 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
     _lock.startRead();
     _lock.endRead();
     _lock.endRead();
+    
+    w.join();
   }
 
   /** Ensure that a reading thread cannot perform a write. */
@@ -252,6 +261,15 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
     assertTrue("w1 writes should happen in order", output.indexOf("w1 w1 w1 ") != -1);
     assertTrue("w2 writes should happen in order",  output.indexOf("w2 w2 w2 ") != -1);
     assertTrue("w1 writes should happen in order", output.indexOf("w3 w3 w3 ") != -1);
+    
+    w1.join();
+    w2.join();
+    w3.join();
+    r1.join();
+    r2.join();
+    r3.join();
+    r4.join();
+    r5.join();
   }
 
 
