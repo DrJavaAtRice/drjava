@@ -150,7 +150,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _debugPort = -1;
     _debugPortSet = false;
     _inputListener = NoInputListener.ONLY;
-    EventQueue.invokeLater(new Runnable() {
+    Utilities.invokeLater(new Runnable() {
       public void run() { _document.setBanner(generateBanner(wd));}
     });
   }
