@@ -67,7 +67,7 @@ public class ArrayData extends SymbolData {
     
     // Arrays only have one field called length, and it is automatically given a value
     addVar(new VariableData("length", 
-                            new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, 
+                            new ModifiersAndVisibility(SourceInfo.NO_INFO, 
                                                        new String[] {"public", "final"}),
                             SymbolData.INT_TYPE, true, this));
     
@@ -89,7 +89,7 @@ public class ArrayData extends SymbolData {
     
     //And, since they implement Cloneable, all arrays overwrite the clone method so that it does not throw exceptions
     addMethod(new MethodData("clone", 
-                             new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"}), 
+                             new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}), 
                              new TypeParameter[0],
                              object,
                              new VariableData[0],
@@ -122,7 +122,7 @@ public class ArrayData extends SymbolData {
       for (int i = 0; i < elementMavs.length; i++) { newMavs[i] = elementMavs[i]; }
       newMavs[elementMavs.length] = "final";
       
-      return new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, newMavs);
+      return new ModifiersAndVisibility(SourceInfo.NO_INFO, newMavs);
     }
   }
   
@@ -160,23 +160,17 @@ public class ArrayData extends SymbolData {
     
     //For 2 array datas to be equal, all their symbolData fields must be equal, and their element types must be equal
     return super.equals(obj) && getElementType().equals(ad.getElementType());
-    
-    
   }
   
-  /**
-   * Provide a hashcode method that distinguishes between array datas based on name
-   */
-  public int hashCode() {
-    return getName().hashCode();
-  }
+  /** Provide a hashcode method that distinguishes between array datas based on name */
+  public int hashCode() { return getName().hashCode(); }
   
-  /**
-   *      Returns true only under the following conditions: 
-   *      -if assignTo is a class, assignTo must be java.lang.Object.
-   *      -if assignTo is an interferface, then it must be Serializable or Clonable.
-   *      -if assignTo is an array, then if this's element type is a primitive assignTo must have the same primitive element type and
-   *          if this's element type is a reference type, this's reference type must be assignable to assignTo's element type.
+  /** Returns true only under the following conditions: 
+   *  if assignTo is a class, assignTo must be java.lang.Object.
+   *  if assignTo is an interferface, then it must be Serializable or Clonable.
+   *  if assignTo is an array, then if this's element type is a primitive assignTo must have the same primitive element
+   *    type and
+   *  if this's element type is a reference type, this's reference type must be assignable to assignTo's element type.
    */
   public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
     if (assignTo instanceof ArrayData) {
@@ -195,12 +189,12 @@ public class ArrayData extends SymbolData {
     }
   }
   
-  /**
-   * Return true iff
-   *      - castTo is a class type and is Object
-   *      - castTo is an interface type that is Serializable or Clonable
-   *      - castTo is an array type then this and castTo must have element types that are either the same primitive type or (both reference types and this's element type must be castable to castTo's element type)
-   */
+  /** Return true iff
+    * castTo is a class type and is Object
+    * castTo is an interface type that is Serializable or Clonable
+    * castTo is an array type then this and castTo must have element types that are either the same primitive type or
+    *   (both reference types and this's element type must be castable to castTo's element type)
+    */
   public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
     if (castTo instanceof ArrayData) {
       if (this.getElementType().isPrimitiveType()) {
@@ -242,14 +236,21 @@ public class ArrayData extends SymbolData {
     
     private ArrayData _ad;
     
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final"});
-    private ModifiersAndVisibility _publicFinalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[]{"public", "final"});
-    private ModifiersAndVisibility _privateFinalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"private", "final"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    private ModifiersAndVisibility _abstractMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _publicFinalMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[]{"public", "final"});
+    private ModifiersAndVisibility _privateFinalMav =
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private", "final"});
     
     private LanguageLevelVisitor llv;
     private SourceInfo si;
@@ -267,7 +268,7 @@ public class ArrayData extends SymbolData {
                                                           new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       
       LanguageLevelConverter.symbolTable = llv.symbolTable = new Symboltable();
-      si = JExprParser.NO_SOURCE_INFO;
+      si = SourceInfo.NO_INFO;
       SymbolData e = new SymbolData("elementType");
       e.setIsContinuation(false);
       _ad = new ArrayData(e, llv, si);

@@ -1672,15 +1672,15 @@ public class ExpressionTypeChecker extends Bob {
     private SymbolData _sd4;
     private SymbolData _sd5;
     private SymbolData _sd6;
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final"});
-    private ModifiersAndVisibility _finalPublicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final", "public"});
-    private ModifiersAndVisibility _publicAbstractMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public", "abstract"});
-    private ModifiersAndVisibility _publicStaticMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public", "static"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _finalPublicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final", "public"});
+    private ModifiersAndVisibility _publicAbstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public", "abstract"});
+    private ModifiersAndVisibility _publicStaticMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public", "static"});
     
     
     public ExpressionTypeCheckerTest() {
@@ -1707,9 +1707,9 @@ public class ExpressionTypeChecker extends Bob {
     
 
     public void testForCastExpression() {
-      CastExpression ce = new CastExpression(JExprParser.NO_SOURCE_INFO, 
-                                             new PrimitiveType(JExprParser.NO_SOURCE_INFO, "dan"), 
-                                             new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      CastExpression ce = new CastExpression(SourceInfo.NO_INFO, 
+                                             new PrimitiveType(SourceInfo.NO_INFO, "dan"), 
+                                             new NullLiteral(SourceInfo.NO_INFO));
       
       // if cast type is not a valid type, casting should not be allowed
       assertEquals("Should return null", null, ce.visit(_etc));
@@ -1717,17 +1717,17 @@ public class ExpressionTypeChecker extends Bob {
       assertEquals("Error message should be correct", "dan cannot appear as the type of a cast expression because it is not a valid type", errors.getLast().getFirst());
       
       //if cast expression cannot be resolved, return cast type instance to allow type checking to continue
-      CastExpression ce2 = new CastExpression(JExprParser.NO_SOURCE_INFO,
-                                             new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"),
-                                             new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "notReal")));
+      CastExpression ce2 = new CastExpression(SourceInfo.NO_INFO,
+                                             new PrimitiveType(SourceInfo.NO_INFO, "int"),
+                                             new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "notReal")));
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), ce2.visit(_etc));
       assertEquals("There should be 2 errors", 2, errors.size());
       assertEquals("Error message should be correct", "Could not resolve symbol notReal", errors.getLast().getFirst());
 
       //now, try one that should work
-      CastExpression ce3 = new CastExpression(JExprParser.NO_SOURCE_INFO,
-                                             new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"),
-                                             new DoubleLiteral(JExprParser.NO_SOURCE_INFO, 5));
+      CastExpression ce3 = new CastExpression(SourceInfo.NO_INFO,
+                                             new PrimitiveType(SourceInfo.NO_INFO, "int"),
+                                             new DoubleLiteral(SourceInfo.NO_INFO, 5));
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), ce3.visit(_etc));
       assertEquals("There should still be 2 errors", 2, errors.size());
       
@@ -1740,9 +1740,9 @@ public class ExpressionTypeChecker extends Bob {
       SymbolData sd2 = SymbolData.BOOLEAN_TYPE;
       SymbolData sd3 = SymbolData.INT_TYPE;
       
-      CastExpression cd = new CastExpression(JExprParser.NO_SOURCE_INFO, 
+      CastExpression cd = new CastExpression(SourceInfo.NO_INFO, 
                                              JExprParser.NO_TYPE, 
-                                             new NullLiteral(JExprParser.NO_SOURCE_INFO));
+                                             new NullLiteral(SourceInfo.NO_INFO));
 
       assertEquals("When value_result is subtype of type_result, return type_result.", sd1.getInstanceData(), _etc.forCastExpressionOnly(cd, sd1, sd3.getInstanceData()));
       assertEquals("Should not throw an error.", 0, errors.size());
@@ -1760,7 +1760,7 @@ public class ExpressionTypeChecker extends Bob {
     }
  
     public void testForEmptyExpressionOnly() {
-     EmptyExpression ee = new EmptyExpression(JExprParser.NO_SOURCE_INFO);
+     EmptyExpression ee = new EmptyExpression(SourceInfo.NO_INFO);
      try {
        _etc.forEmptyExpressionOnly(ee);
        fail("Should have thrown exception");
@@ -1797,12 +1797,12 @@ public class ExpressionTypeChecker extends Bob {
     //for expressions we want to check, but don't fit neatly into a category
     public void testRandomExpressions() {
       //a string of + and - before a number
-      PositiveExpression pe = new PositiveExpression(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
-      PositiveExpression pe2 = new PositiveExpression(JExprParser.NO_SOURCE_INFO, pe);
-      NegativeExpression pe3 = new NegativeExpression(JExprParser.NO_SOURCE_INFO, pe2);
-      PositiveExpression pe4 = new PositiveExpression(JExprParser.NO_SOURCE_INFO, pe3);
-      PositiveExpression pe5 = new PositiveExpression(JExprParser.NO_SOURCE_INFO, pe4);
-      NegativeExpression pe6 = new NegativeExpression(JExprParser.NO_SOURCE_INFO, pe5);
+      PositiveExpression pe = new PositiveExpression(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5));
+      PositiveExpression pe2 = new PositiveExpression(SourceInfo.NO_INFO, pe);
+      NegativeExpression pe3 = new NegativeExpression(SourceInfo.NO_INFO, pe2);
+      PositiveExpression pe4 = new PositiveExpression(SourceInfo.NO_INFO, pe3);
+      PositiveExpression pe5 = new PositiveExpression(SourceInfo.NO_INFO, pe4);
+      NegativeExpression pe6 = new NegativeExpression(SourceInfo.NO_INFO, pe5);
       
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), pe6.visit(_etc));
       assertEquals("Should be no errors", 0, errors.size());
@@ -1814,7 +1814,7 @@ public class ExpressionTypeChecker extends Bob {
                                                           new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       LanguageLevelConverter.symbolTable = llv.symbolTable = _etc.symbolTable;
       
-      SourceInfo si = JExprParser.NO_SOURCE_INFO;
+      SourceInfo si = SourceInfo.NO_INFO;
       
       ArrayData intArray = new ArrayData(SymbolData.INT_TYPE, llv, si);
       intArray.setIsContinuation(false);
@@ -1887,9 +1887,9 @@ public class ExpressionTypeChecker extends Bob {
 
     
     public void testForComplexUninitializedArrayInstantiation() {
-      ComplexUninitializedArrayInstantiation ca1 = new ComplexUninitializedArrayInstantiation(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "my")),
-                                                                                              new ArrayType(JExprParser.NO_SOURCE_INFO, "type[][][]", new ArrayType(JExprParser.NO_SOURCE_INFO, "type[][]", new ArrayType(JExprParser.NO_SOURCE_INFO, "type[]", new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "type", new Type[0])))), 
-                                                                                            new DimensionExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]));
+      ComplexUninitializedArrayInstantiation ca1 = new ComplexUninitializedArrayInstantiation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "my")),
+                                                                                              new ArrayType(SourceInfo.NO_INFO, "type[][][]", new ArrayType(SourceInfo.NO_INFO, "type[][]", new ArrayType(SourceInfo.NO_INFO, "type[]", new ClassOrInterfaceType(SourceInfo.NO_INFO, "type", new Type[0])))), 
+                                                                                            new DimensionExpressionList(SourceInfo.NO_INFO, new Expression[0]));
       //This should always give a runtime exception
       try {
         ca1.visit(_etc);
@@ -1906,7 +1906,7 @@ public class ExpressionTypeChecker extends Bob {
                                                           new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       LanguageLevelConverter.symbolTable = llv.symbolTable = _etc.symbolTable;
       
-      SourceInfo si = JExprParser.NO_SOURCE_INFO;
+      SourceInfo si = SourceInfo.NO_INFO;
       
       ArrayData intArray = new ArrayData(SymbolData.INT_TYPE, llv, si);
       intArray.setIsContinuation(false);
@@ -1946,7 +1946,7 @@ public class ExpressionTypeChecker extends Bob {
     }
     
     public void testForArrayInitializer() {
-      ArrayInitializer ai = new ArrayInitializer(JExprParser.NO_SOURCE_INFO, new VariableInitializerI[] {new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 2)});
+      ArrayInitializer ai = new ArrayInitializer(SourceInfo.NO_INFO, new VariableInitializerI[] {new IntegerLiteral(SourceInfo.NO_INFO, 2)});
       try {
         ai.visit(_etc);
         fail("Should have throw runtime exception");
@@ -1958,63 +1958,63 @@ public class ExpressionTypeChecker extends Bob {
     }
     
     public void testForSimpleInitializedArrayInstantiation() {
-      IntegerLiteral e1 = new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5);
-      IntegerLiteral e2 = new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 7);
-      SimpleNameReference e3 = new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "int"));
-      BooleanLiteral e4 = new BooleanLiteral(JExprParser.NO_SOURCE_INFO, true);
-      DoubleLiteral e5 = new DoubleLiteral(JExprParser.NO_SOURCE_INFO, 4.2);
-      CharLiteral e6 = new CharLiteral(JExprParser.NO_SOURCE_INFO, 'e');
-      SimpleNameReference e7 = new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "int"));
+      IntegerLiteral e1 = new IntegerLiteral(SourceInfo.NO_INFO, 5);
+      IntegerLiteral e2 = new IntegerLiteral(SourceInfo.NO_INFO, 7);
+      SimpleNameReference e3 = new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "int"));
+      BooleanLiteral e4 = new BooleanLiteral(SourceInfo.NO_INFO, true);
+      DoubleLiteral e5 = new DoubleLiteral(SourceInfo.NO_INFO, 4.2);
+      CharLiteral e6 = new CharLiteral(SourceInfo.NO_INFO, 'e');
+      SimpleNameReference e7 = new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "int"));
       
-      ArrayType intArrayType = new ArrayType(JExprParser.NO_SOURCE_INFO, "int[]", new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"));
+      ArrayType intArrayType = new ArrayType(SourceInfo.NO_INFO, "int[]", new PrimitiveType(SourceInfo.NO_INFO, "int"));
 
       LanguageLevelVisitor llv = new LanguageLevelVisitor(_etc._file, _etc._package, _etc._importedFiles, 
                                                           _etc._importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
                                                           new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       
       
-      ArrayData intArray = new ArrayData(SymbolData.INT_TYPE, llv, JExprParser.NO_SOURCE_INFO);
+      ArrayData intArray = new ArrayData(SymbolData.INT_TYPE, llv, SourceInfo.NO_INFO);
       intArray.setIsContinuation(false);
       symbolTable.remove("int[]");
       symbolTable.put("int[]", intArray);
 
       //try one that should work:
-      InitializedArrayInstantiation good = new SimpleInitializedArrayInstantiation(JExprParser.NO_SOURCE_INFO, intArrayType, new ArrayInitializer(JExprParser.NO_SOURCE_INFO, new VariableInitializerI[] {e1, e2}));
+      InitializedArrayInstantiation good = new SimpleInitializedArrayInstantiation(SourceInfo.NO_INFO, intArrayType, new ArrayInitializer(SourceInfo.NO_INFO, new VariableInitializerI[] {e1, e2}));
       assertEquals("Should return int array instance", intArray.getInstanceData(), good.visit(_etc));
       assertEquals("Should be no errors", 0, errors.size());
       
       //char is a subtype of int, so it can be used here
-      good = new SimpleInitializedArrayInstantiation(JExprParser.NO_SOURCE_INFO, intArrayType, new ArrayInitializer(JExprParser.NO_SOURCE_INFO, new VariableInitializerI[] {e1, e2, e6}));
+      good = new SimpleInitializedArrayInstantiation(SourceInfo.NO_INFO, intArrayType, new ArrayInitializer(SourceInfo.NO_INFO, new VariableInitializerI[] {e1, e2, e6}));
       assertEquals("Should return int array instance", intArray.getInstanceData(), good.visit(_etc));
       assertEquals("Should be no errors", 0, errors.size());
       
       //lhs is not an array type
-      InitializedArrayInstantiation bad = new SimpleInitializedArrayInstantiation(JExprParser.NO_SOURCE_INFO, new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), new ArrayInitializer(JExprParser.NO_SOURCE_INFO, new VariableInitializerI[] {e1, e2}));
+      InitializedArrayInstantiation bad = new SimpleInitializedArrayInstantiation(SourceInfo.NO_INFO, new PrimitiveType(SourceInfo.NO_INFO, "int"), new ArrayInitializer(SourceInfo.NO_INFO, new VariableInitializerI[] {e1, e2}));
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), bad.visit(_etc));
       assertEquals("Should be 1 error", 1, errors.size());
       assertEquals("Error message should be correct", "You cannot initialize the non-array type int with an array initializer", errors.getLast().getFirst());
       
       //one of the elements is the wrong type
       //boolean
-      bad = new SimpleInitializedArrayInstantiation(JExprParser.NO_SOURCE_INFO, intArrayType, new ArrayInitializer(JExprParser.NO_SOURCE_INFO, new VariableInitializerI[] {e1, e4, e2, e6}));
+      bad = new SimpleInitializedArrayInstantiation(SourceInfo.NO_INFO, intArrayType, new ArrayInitializer(SourceInfo.NO_INFO, new VariableInitializerI[] {e1, e4, e2, e6}));
       assertEquals("Should return int array instance", intArray.getInstanceData(), bad.visit(_etc));
       assertEquals("Should be 2 errors", 2, errors.size());
       assertEquals("Error message should be correct", "The elements of this initializer should have type int but element 1 has type boolean", errors.getLast().getFirst());
       
       //double
-      bad = new SimpleInitializedArrayInstantiation(JExprParser.NO_SOURCE_INFO, intArrayType, new ArrayInitializer(JExprParser.NO_SOURCE_INFO, new VariableInitializerI[] {e1, e5, e2, e6}));
+      bad = new SimpleInitializedArrayInstantiation(SourceInfo.NO_INFO, intArrayType, new ArrayInitializer(SourceInfo.NO_INFO, new VariableInitializerI[] {e1, e5, e2, e6}));
       assertEquals("Should return int array instance", intArray.getInstanceData(), bad.visit(_etc));
       assertEquals("Should be 3 errors", 3, errors.size());
       assertEquals("Error message should be correct", "The elements of this initializer should have type int but element 1 has type double", errors.getLast().getFirst());
 
       //cannot resolve lhs
-      bad = new SimpleInitializedArrayInstantiation(JExprParser.NO_SOURCE_INFO, new PrimitiveType(JExprParser.NO_SOURCE_INFO, "ej"), new ArrayInitializer(JExprParser.NO_SOURCE_INFO, new VariableInitializerI[] {e1, e2}));
+      bad = new SimpleInitializedArrayInstantiation(SourceInfo.NO_INFO, new PrimitiveType(SourceInfo.NO_INFO, "ej"), new ArrayInitializer(SourceInfo.NO_INFO, new VariableInitializerI[] {e1, e2}));
       assertEquals("Should return null", null, bad.visit(_etc));
       assertEquals("Should be 4 error", 4, errors.size());
       assertEquals("Error message should be correct", "Class or variable ej not found.", errors.getLast().getFirst());
       
       //one of the things in the initializer is a type name!
-      bad = new SimpleInitializedArrayInstantiation(JExprParser.NO_SOURCE_INFO, intArrayType, new ArrayInitializer(JExprParser.NO_SOURCE_INFO, new VariableInitializerI[] {e1, e7}));
+      bad = new SimpleInitializedArrayInstantiation(SourceInfo.NO_INFO, intArrayType, new ArrayInitializer(SourceInfo.NO_INFO, new VariableInitializerI[] {e1, e7}));
       assertEquals("Should return instance of int[]", intArray.getInstanceData(), bad.visit(_etc));
       assertEquals("Should now be 5 error messages", 5, errors.size());
       assertEquals("Error message should be correct", "The elements of this initializer should all be instances, but you have specified the type name int.  Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
@@ -2026,7 +2026,7 @@ public class ExpressionTypeChecker extends Bob {
     
     
     public void testForSimpleAssignmentExpressionOnly() {
-      SimpleAssignmentExpression sae = new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
+      SimpleAssignmentExpression sae = new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 5));
 
       //if lhs is assignable to rhs, and both instances, do not give any errors
       assertEquals("Should return double instance", SymbolData.DOUBLE_TYPE.getInstanceData(), _etc.forSimpleAssignmentExpressionOnly(sae, SymbolData.DOUBLE_TYPE.getInstanceData(), SymbolData.INT_TYPE.getInstanceData()));
@@ -2067,7 +2067,7 @@ public class ExpressionTypeChecker extends Bob {
 
     
     public void testForPlusAssignmentExpressionOnly() {
-      PlusAssignmentExpression pae = new PlusAssignmentExpression(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 6));
+      PlusAssignmentExpression pae = new PlusAssignmentExpression(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5), new IntegerLiteral(SourceInfo.NO_INFO, 6));
       
       //if lhs is a string, and lhs and rhs both instances, no errors
       SymbolData string = new SymbolData("java.lang.String");
@@ -2135,7 +2135,7 @@ public class ExpressionTypeChecker extends Bob {
     
 
     public void testForNumericAssignmentExpressionOnly() {
-      NumericAssignmentExpression nae = new MinusAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
+      NumericAssignmentExpression nae = new MinusAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 5));
 
       //if both lhs and rhs are instances of numbers, and lhs is assignable to rhs, should be no errors
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), _etc.forNumericAssignmentExpressionOnly(nae, SymbolData.INT_TYPE.getInstanceData(), SymbolData.CHAR_TYPE.getInstanceData()));
@@ -2189,7 +2189,7 @@ public class ExpressionTypeChecker extends Bob {
     
 
     public void testForShiftAssignmentExpressionOnly() {
-      ShiftAssignmentExpression sae = new LeftShiftAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 2));
+      ShiftAssignmentExpression sae = new LeftShiftAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")), new IntegerLiteral(SourceInfo.NO_INFO, 2));
       try {
         _etc.forShiftAssignmentExpressionOnly(sae, _sd1, _sd2);
         fail("forShiftAssignmentExpressionOnly should have thrown a runtime exception");
@@ -2200,7 +2200,7 @@ public class ExpressionTypeChecker extends Bob {
     }
 
     public void testForBitwiseAssignmentExpressionOnly() {
-      BitwiseAssignmentExpression bae = new BitwiseXorAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 2));
+      BitwiseAssignmentExpression bae = new BitwiseXorAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")), new IntegerLiteral(SourceInfo.NO_INFO, 2));
       try {
         _etc.forBitwiseAssignmentExpressionOnly(bae, _sd1, _sd2);
         fail("forBitwiseAssignmentExpressionOnly should have thrown a runtime exception");
@@ -2212,7 +2212,7 @@ public class ExpressionTypeChecker extends Bob {
 
 
     public void testForBooleanExpressionOnly() {
-      BooleanExpression be = new OrExpression(JExprParser.NO_SOURCE_INFO, new BooleanLiteral(JExprParser.NO_SOURCE_INFO, true), new BooleanLiteral(JExprParser.NO_SOURCE_INFO, false));
+      BooleanExpression be = new OrExpression(SourceInfo.NO_INFO, new BooleanLiteral(SourceInfo.NO_INFO, true), new BooleanLiteral(SourceInfo.NO_INFO, false));
       
       //if both left and right are boolean instance types, everything is good
       
@@ -2242,7 +2242,7 @@ public class ExpressionTypeChecker extends Bob {
     }
 
     public void testForBitwiseBinaryExpressionOnly() {
-      BitwiseBinaryExpression bbe = new BitwiseAndExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 2));
+      BitwiseBinaryExpression bbe = new BitwiseAndExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")), new IntegerLiteral(SourceInfo.NO_INFO, 2));
       try {
         _etc.forBitwiseBinaryExpressionOnly(bbe, _sd2, _sd3);
         fail("forBitwiseBinaryExpressionOnly should have thrown a runtime exception");
@@ -2254,8 +2254,8 @@ public class ExpressionTypeChecker extends Bob {
 
 
     public void testForEqualityExpressionOnly() {
-      EqualityExpression ee = new EqualsExpression(JExprParser.NO_SOURCE_INFO, new NullLiteral(JExprParser.NO_SOURCE_INFO), 
-                                                   new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      EqualityExpression ee = new EqualsExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), 
+                                                   new NullLiteral(SourceInfo.NO_INFO));
       
       //left and right are both primitive and both boolean type--should work
       assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), 
@@ -2325,7 +2325,7 @@ public class ExpressionTypeChecker extends Bob {
 
 
     public void testForComparisonExpressionOnly() {
-      ComparisonExpression ce = new LessThanExpression(JExprParser.NO_SOURCE_INFO, new NullLiteral(JExprParser.NO_SOURCE_INFO), new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      ComparisonExpression ce = new LessThanExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), new NullLiteral(SourceInfo.NO_INFO));
       
       //does not throw an error if both expressions are numbers and instance types
       assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), _etc.forComparisonExpressionOnly(ce, SymbolData.DOUBLE_TYPE.getInstanceData(), SymbolData.INT_TYPE.getInstanceData()));
@@ -2355,7 +2355,7 @@ public class ExpressionTypeChecker extends Bob {
 
 
     public void testForShiftBinaryExpressionOnly() {
-      ShiftBinaryExpression sbe = new LeftShiftExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 42));
+      ShiftBinaryExpression sbe = new LeftShiftExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")), new IntegerLiteral(SourceInfo.NO_INFO, 42));
       try {
         _etc.forShiftBinaryExpressionOnly(sbe, _sd2, _sd3);
         fail("forShiftBinaryExpressionOnly should have thrown a runtime exception");
@@ -2367,7 +2367,7 @@ public class ExpressionTypeChecker extends Bob {
 
   
     public void testForPlusExpressionOnly() {
-      PlusExpression pe = new PlusExpression(JExprParser.NO_SOURCE_INFO, new NullLiteral(JExprParser.NO_SOURCE_INFO), new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      PlusExpression pe = new PlusExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), new NullLiteral(SourceInfo.NO_INFO));
       SymbolData string = new SymbolData("java.lang.String");
       string.setPackage("java.lang");
       string.setIsContinuation(false);
@@ -2420,7 +2420,7 @@ public class ExpressionTypeChecker extends Bob {
 
 
     public void testForNumericBinaryExpressionOnly() {
-      NumericBinaryExpression nbe = new ModExpression(JExprParser.NO_SOURCE_INFO, new NullLiteral(JExprParser.NO_SOURCE_INFO), new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      NumericBinaryExpression nbe = new ModExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), new NullLiteral(SourceInfo.NO_INFO));
       
       //two number instance expressions work--returns least restrictive type
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), _etc.forNumericBinaryExpressionOnly(nbe, SymbolData.INT_TYPE.getInstanceData(), SymbolData.INT_TYPE.getInstanceData()));
@@ -2458,7 +2458,7 @@ public class ExpressionTypeChecker extends Bob {
     }
     
     public void testForNoOpExpressionOnly() {
-      NoOpExpression noe = new NoOpExpression(JExprParser.NO_SOURCE_INFO, new NullLiteral(JExprParser.NO_SOURCE_INFO), new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      NoOpExpression noe = new NoOpExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), new NullLiteral(SourceInfo.NO_INFO));
       try {
         _etc.forNoOpExpressionOnly(noe, null, null);
         fail("Should have thrown runtime exception");
@@ -2469,7 +2469,7 @@ public class ExpressionTypeChecker extends Bob {
     }
 
     public void testForIncrementExpressionOnly() {
-      IncrementExpression ie = new PositivePrefixIncrementExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")));
+      IncrementExpression ie = new PositivePrefixIncrementExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")));
 
       //if value result is a number instance, should work fine
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), _etc.forIncrementExpressionOnly(ie, SymbolData.INT_TYPE.getInstanceData()));
@@ -2500,7 +2500,7 @@ public class ExpressionTypeChecker extends Bob {
     
 
     public void testForNumericUnaryExpressionOnly() {
-      NumericUnaryExpression nue = new PositiveExpression(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
+      NumericUnaryExpression nue = new PositiveExpression(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5));
       //number types like char and byte should be widened to int
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), _etc.forNumericUnaryExpressionOnly(nue, SymbolData.CHAR_TYPE.getInstanceData()));
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), _etc.forNumericUnaryExpressionOnly(nue, SymbolData.BYTE_TYPE.getInstanceData()));
@@ -2523,7 +2523,7 @@ public class ExpressionTypeChecker extends Bob {
 
 
     public void testForBitwiseNotExpressionOnly() {
-      BitwiseNotExpression bne = new BitwiseNotExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "t")));
+      BitwiseNotExpression bne = new BitwiseNotExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "t")));
       try {
         _etc.forBitwiseNotExpressionOnly(bne, _sd3);
         fail("forBitwiseNotExpressionOnly should have thrown a runtime exception");
@@ -2535,7 +2535,7 @@ public class ExpressionTypeChecker extends Bob {
 
   
     public void testForNotExpressionOnly() {
-      NotExpression ne = new NotExpression(JExprParser.NO_SOURCE_INFO, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      NotExpression ne = new NotExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO));
       
       //should work with a boolean instance
       assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), _etc.forNotExpressionOnly(ne, SymbolData.BOOLEAN_TYPE.getInstanceData()));
@@ -2557,10 +2557,10 @@ public class ExpressionTypeChecker extends Bob {
       SymbolData sd1 = SymbolData.DOUBLE_TYPE;
       SymbolData sd2 = SymbolData.BOOLEAN_TYPE;
       SymbolData sd3 = SymbolData.INT_TYPE;
-      ConditionalExpression cd = new ConditionalExpression(JExprParser.NO_SOURCE_INFO, 
-                                                           new BooleanLiteral(JExprParser.NO_SOURCE_INFO, true),
-                                                           new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5),
-                                                           new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 79));
+      ConditionalExpression cd = new ConditionalExpression(SourceInfo.NO_INFO, 
+                                                           new BooleanLiteral(SourceInfo.NO_INFO, true),
+                                                           new IntegerLiteral(SourceInfo.NO_INFO, 5),
+                                                           new IntegerLiteral(SourceInfo.NO_INFO, 79));
       
       try {
         _etc.forConditionalExpressionOnly(cd, _sd3, _sd2, _sd1);
@@ -2574,9 +2574,9 @@ public class ExpressionTypeChecker extends Bob {
 
 
     public void testForInstanceOfExpressionOnly() {
-      InstanceofExpression ioe = new InstanceofExpression(JExprParser.NO_SOURCE_INFO, 
-                                                           new BooleanLiteral(JExprParser.NO_SOURCE_INFO, true),
-                                                          new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"));
+      InstanceofExpression ioe = new InstanceofExpression(SourceInfo.NO_INFO, 
+                                                           new BooleanLiteral(SourceInfo.NO_INFO, true),
+                                                          new PrimitiveType(SourceInfo.NO_INFO, "int"));
       try {
         _etc.forInstanceofExpressionOnly(ioe, SymbolData.BOOLEAN_TYPE.getInstanceData(), SymbolData.INT_TYPE.getInstanceData());
         fail("Should have thrown an exception.");
@@ -2590,17 +2590,17 @@ public class ExpressionTypeChecker extends Bob {
     
     
     public void testClassInstantiationHelper() {
-     ClassInstantiation simpleCI = new SimpleNamedClassInstantiation(JExprParser.NO_SOURCE_INFO, 
-                                                                     new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "testClass", new Type[0]),
-                                                                     new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]));
-     ClassInstantiation complexCI = new ComplexNamedClassInstantiation(JExprParser.NO_SOURCE_INFO,
-                                                                      new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "Outer")),
-                                                                      new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "Inner", new Type[0]),
-                                                                       new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]));
+     ClassInstantiation simpleCI = new SimpleNamedClassInstantiation(SourceInfo.NO_INFO, 
+                                                                     new ClassOrInterfaceType(SourceInfo.NO_INFO, "testClass", new Type[0]),
+                                                                     new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
+     ClassInstantiation complexCI = new ComplexNamedClassInstantiation(SourceInfo.NO_INFO,
+                                                                      new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "Outer")),
+                                                                      new ClassOrInterfaceType(SourceInfo.NO_INFO, "Inner", new Type[0]),
+                                                                       new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
      
-     ClassInstantiation badArgs = new SimpleNamedClassInstantiation(JExprParser.NO_SOURCE_INFO,
-                                                                     new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "anotherClass", new Type[0]),
-                                                                    new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] {new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "int"))}));
+     ClassInstantiation badArgs = new SimpleNamedClassInstantiation(SourceInfo.NO_INFO,
+                                                                     new ClassOrInterfaceType(SourceInfo.NO_INFO, "anotherClass", new Type[0]),
+                                                                    new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "int"))}));
      
      SymbolData testClass = new SymbolData("testClass");
      SymbolData outer = new SymbolData("Outer");
@@ -2641,11 +2641,11 @@ public class ExpressionTypeChecker extends Bob {
     
     
     public void testForSimpleNamedClassInstantiation() { 
-      SimpleNamedClassInstantiation ci1 = new SimpleNamedClassInstantiation(JExprParser.NO_SOURCE_INFO, new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "simpleClass", new Type[0]), 
-                                                                            new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] {new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5)}));
+      SimpleNamedClassInstantiation ci1 = new SimpleNamedClassInstantiation(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "simpleClass", new Type[0]), 
+                                                                            new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new IntegerLiteral(SourceInfo.NO_INFO, 5)}));
 
-      SimpleNamedClassInstantiation ci3 = new SimpleNamedClassInstantiation(JExprParser.NO_SOURCE_INFO, new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "simpleClass", new Type[0]), 
-                                                                            new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]));
+      SimpleNamedClassInstantiation ci3 = new SimpleNamedClassInstantiation(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "simpleClass", new Type[0]), 
+                                                                            new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
 
      //if the type is not in the symbolTable, an error should be added on lookup, and null should be returned:
      assertEquals("Should return null, since simpleClass is not in symbol table", null, ci1.visit(_etc));
@@ -2668,7 +2668,7 @@ public class ExpressionTypeChecker extends Bob {
      assertEquals("Error message should be correct", "The class or interface simpleClass is package protected because there is no access specifier and cannot be accessed from i.like.monkey", errors.getLast().getFirst());
 
      //if class is in symbol table and visible, but there is not a matching constructor, should give an error but still return instance of type
-     simpleClass.setMav(new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"}));
+     simpleClass.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
      
      assertEquals("Should return simpleClass even though it could not find constructor", simpleClass.getInstanceData(), ci1.visit(_etc));
      assertEquals("Should be 3 errors", 3, errors.size());
@@ -2693,8 +2693,8 @@ public class ExpressionTypeChecker extends Bob {
     
     
     //now, what if we are dealing with an inner class?
-    SimpleNamedClassInstantiation ci2 = new SimpleNamedClassInstantiation(JExprParser.NO_SOURCE_INFO, new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "A.B", new Type[0]), 
-                                                                            new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]));
+    SimpleNamedClassInstantiation ci2 = new SimpleNamedClassInstantiation(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "A.B", new Type[0]), 
+                                                                            new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
      
     
     SymbolData a = new SymbolData("A");
@@ -2710,8 +2710,8 @@ public class ExpressionTypeChecker extends Bob {
                                        null);
     b.addMethod(consb);
     symbolTable.put("A", a);
-    a.setMav(new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"}));
-    b.setMav(new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"}));
+    a.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
+    b.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
     
     
 
@@ -2728,11 +2728,11 @@ public class ExpressionTypeChecker extends Bob {
     
     
     public void testForComplexNamedClassInstantiation() {
-      ComplexNamedClassInstantiation ci1 = new ComplexNamedClassInstantiation(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "o")), new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "innerClass", new Type[0]), 
-                                                                            new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] {new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5)}));
+      ComplexNamedClassInstantiation ci1 = new ComplexNamedClassInstantiation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "o")), new ClassOrInterfaceType(SourceInfo.NO_INFO, "innerClass", new Type[0]), 
+                                                                            new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new IntegerLiteral(SourceInfo.NO_INFO, 5)}));
 
-      ComplexNamedClassInstantiation ci2 = new ComplexNamedClassInstantiation(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "o")), new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "innerClass", new Type[0]), 
-                                                                            new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]));
+      ComplexNamedClassInstantiation ci2 = new ComplexNamedClassInstantiation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "o")), new ClassOrInterfaceType(SourceInfo.NO_INFO, "innerClass", new Type[0]), 
+                                                                            new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
       
       //if outer type is not in vars list, give appropriate error
       assertEquals("Should return null", null, ci1.visit(_etc));
@@ -2754,8 +2754,8 @@ public class ExpressionTypeChecker extends Bob {
      innerClass.addMethod(cons1);
      symbolTable.put("outer", outerClass);
      _etc._vars.addLast(new VariableData("o", _publicMav, outerClass, true, _etc._data));
-     outerClass.setMav(new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"}));
-     innerClass.setMav(new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"}));
+     outerClass.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
+     innerClass.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
      
      assertEquals("Should return innerClass even though it could not find constructor", innerClass.getInstanceData(), ci1.visit(_etc));
      assertEquals("Should be 2 errors", 2, errors.size());
@@ -2781,12 +2781,12 @@ public class ExpressionTypeChecker extends Bob {
                    
                    
     //if enclosingType is not an instance, and result is not static, give error
-    ComplexNamedClassInstantiation ci3 = new ComplexNamedClassInstantiation(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "outer")), new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "innerClass", new Type[0]), 
-                                                                            new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]));
+    ComplexNamedClassInstantiation ci3 = new ComplexNamedClassInstantiation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "outer")), new ClassOrInterfaceType(SourceInfo.NO_INFO, "innerClass", new Type[0]), 
+                                                                            new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
     
                    
-    outerClass.setMav(new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"}));
-    innerClass.setMav(new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"}));
+    outerClass.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
+    innerClass.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
     assertEquals("Should return innerClass even though the syntax was wrong", innerClass.getInstanceData(), ci3.visit(_etc));
     assertEquals("Should be 4 errors", 4, errors.size());
     assertEquals("Error message should be correct", 
@@ -2807,8 +2807,8 @@ public class ExpressionTypeChecker extends Bob {
 
     //if inner class of that name does not exist, give an error
     innerClass.setMav(_publicMav);
-    ComplexNamedClassInstantiation ci4 = new ComplexNamedClassInstantiation(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "o")), new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "notInnerClass", new Type[0]), 
-                                                                            new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] {new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5)}));
+    ComplexNamedClassInstantiation ci4 = new ComplexNamedClassInstantiation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "o")), new ClassOrInterfaceType(SourceInfo.NO_INFO, "notInnerClass", new Type[0]), 
+                                                                            new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new IntegerLiteral(SourceInfo.NO_INFO, 5)}));
     assertEquals("Should return null", null, ci4.visit(_etc));
     assertEquals("Should be 6 errors", 6, errors.size());
     assertEquals("Error message should be correct", "Class or variable notInnerClass not found.", errors.getLast().getFirst());
@@ -2833,7 +2833,7 @@ public class ExpressionTypeChecker extends Bob {
   
     public void testForSimpleThisConstructorInvocation() {
       //this should always add an error:
-      SimpleThisConstructorInvocation stci = new SimpleThisConstructorInvocation(JExprParser.NO_SOURCE_INFO, new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]));
+      SimpleThisConstructorInvocation stci = new SimpleThisConstructorInvocation(SourceInfo.NO_INFO, new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
       assertEquals("Should return null", null, stci.visit(_etc));
       assertEquals("Should be 1 error", 1, errors.size());
       assertEquals("Error message should be correct", "This constructor invocations are only allowed as the first statement of a constructor body", errors.getLast().getFirst());
@@ -2842,7 +2842,7 @@ public class ExpressionTypeChecker extends Bob {
 
     public void testForComplexThisConstructorInvocation() {
       //this should always add an error
-      ComplexThisConstructorInvocation ctci = new ComplexThisConstructorInvocation(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "something")), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]));
+      ComplexThisConstructorInvocation ctci = new ComplexThisConstructorInvocation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "something")), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
       assertEquals("Should return null", null, ctci.visit(_etc));
       assertEquals("Should be 1 error", 1, errors.size());
       assertEquals("Error message should be correct", "Constructor invocations of this form are never allowed", errors.getLast().getFirst());
@@ -2855,7 +2855,7 @@ public class ExpressionTypeChecker extends Bob {
 
     public void testForSimpleNameReference() {
       //first, consider the case where what we have is a variable reference:
-      SimpleNameReference var = new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "variable1"));
+      SimpleNameReference var = new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "variable1"));
       VariableData varData = new VariableData("variable1", _publicMav, SymbolData.INT_TYPE, false, _etc._data);
       _etc._vars.add(varData);
       
@@ -2870,7 +2870,7 @@ public class ExpressionTypeChecker extends Bob {
       assertEquals("Should still be 1 error", 1, errors.size());
       
       //if variable is non-static, but you are in static context, cannot reference it. Should give error
-      MethodData newContext = new MethodData("method", _publicStaticMav, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[0], new String[0], _sd1, new NullLiteral(JExprParser.NO_SOURCE_INFO)); 
+      MethodData newContext = new MethodData("method", _publicStaticMav, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[0], new String[0], _sd1, new NullLiteral(SourceInfo.NO_INFO)); 
       _etc._data = newContext;
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), var.visit(_etc));
       assertEquals("Should be 2 errors", 2, errors.size());
@@ -2889,7 +2889,7 @@ public class ExpressionTypeChecker extends Bob {
       
 
       //now, consider the case where what we have is a class reference:
-      SimpleNameReference className = new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "Frog"));
+      SimpleNameReference className = new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "Frog"));
       SymbolData frog = new SymbolData("Frog");
       frog.setIsContinuation(false);
       symbolTable.put("Frog", frog);
@@ -2906,13 +2906,13 @@ public class ExpressionTypeChecker extends Bob {
       assertEquals("Should still be 2 errors", 2, errors.size());
       
       //Finally, if the name cannot be resolved, simply return a packageData.
-      SimpleNameReference fake = new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "notRealReference"));
+      SimpleNameReference fake = new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "notRealReference"));
       assertEquals("Should return package data", "notRealReference", (fake.visit(_etc)).getName());
       assertEquals("Should still be just 2 errors", 2, errors.size());
       
       
       //if the reference is ambiguous (matches both an interface and a class) give an error
-      SimpleNameReference ambigRef = new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "ambigThing"));
+      SimpleNameReference ambigRef = new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "ambigThing"));
 
       SymbolData interfaceD = new SymbolData("interface");
       interfaceD.setIsContinuation(false);
@@ -2954,12 +2954,12 @@ public class ExpressionTypeChecker extends Bob {
       //if lhs is a package data, we want to keep building it:
       
       //if whole reference is just package reference, return package data
-      ComplexNameReference ref1 = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "java")), new Word(JExprParser.NO_SOURCE_INFO, "lang"));
+      ComplexNameReference ref1 = new ComplexNameReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "java")), new Word(SourceInfo.NO_INFO, "lang"));
       assertEquals("Should return correct package data", "java.lang", ref1.visit(_etc).getName());
       assertEquals("Should be no errors", 0, errors.size());
       
       //if reference builds to a class in the symbol table, return that class
-      ComplexNameReference ref2 = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, ref1, new Word(JExprParser.NO_SOURCE_INFO, "String"));
+      ComplexNameReference ref2 = new ComplexNameReference(SourceInfo.NO_INFO, ref1, new Word(SourceInfo.NO_INFO, "String"));
       SymbolData string = new SymbolData("java.lang.String");
       string.setPackage("java.lang");
       string.setMav(_publicMav);
@@ -2976,7 +2976,7 @@ public class ExpressionTypeChecker extends Bob {
       //we're referencing a variable inside of symbol data lhs:
       VariableData myVar = new VariableData("myVar", _publicStaticMav, SymbolData.DOUBLE_TYPE, true, string);
       string.addVar(myVar);
-      ComplexNameReference varRef1 = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, ref2, new Word(JExprParser.NO_SOURCE_INFO, "myVar"));
+      ComplexNameReference varRef1 = new ComplexNameReference(SourceInfo.NO_INFO, ref2, new Word(SourceInfo.NO_INFO, "myVar"));
       
       //static var from static context
       assertEquals("Should return Double_Type instance", SymbolData.DOUBLE_TYPE.getInstanceData(), varRef1.visit(_etc));
@@ -2999,7 +2999,7 @@ public class ExpressionTypeChecker extends Bob {
       //non-static context, okay to reference non-static var
       VariableData stringVar = new VariableData("s", _publicMav, string, true, _etc._data);
       _etc._vars.add(stringVar);
-      ComplexNameReference varRef2 = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "s")), new Word(JExprParser.NO_SOURCE_INFO, "myVar"));
+      ComplexNameReference varRef2 = new ComplexNameReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "s")), new Word(SourceInfo.NO_INFO, "myVar"));
       assertEquals("Should return double instance", SymbolData.DOUBLE_TYPE.getInstanceData(), varRef2.visit(_etc));
       assertEquals("Should still just be 2 errors", 2, errors.size());
 
@@ -3018,9 +3018,9 @@ public class ExpressionTypeChecker extends Bob {
       _sd2.addVar(vd2);
       _sd1.addVar(vd1);
       
-      ComplexNameReference varRef3 = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "Snowball1")),
-                                                        new Word(JExprParser.NO_SOURCE_INFO, "Santa's Little Helper"));
-      ComplexNameReference varRef4 = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, varRef3, new Word(JExprParser.NO_SOURCE_INFO, "Mojo"));
+      ComplexNameReference varRef3 = new ComplexNameReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "Snowball1")),
+                                                        new Word(SourceInfo.NO_INFO, "Santa's Little Helper"));
+      ComplexNameReference varRef4 = new ComplexNameReference(SourceInfo.NO_INFO, varRef3, new Word(SourceInfo.NO_INFO, "Mojo"));
       
       Data oldData = _etc._data;
       _etc._data = _sd3;
@@ -3045,7 +3045,7 @@ public class ExpressionTypeChecker extends Bob {
       string.addInnerClass(inner);
 
       //if inner is not visible, throw error
-      ComplexNameReference innerRef0 = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "s")), new Word(JExprParser.NO_SOURCE_INFO, "Inner"));
+      ComplexNameReference innerRef0 = new ComplexNameReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "s")), new Word(SourceInfo.NO_INFO, "Inner"));
       assertEquals("Should return null", null, innerRef0.visit(_etc));
       assertEquals("Should be 3 errors", 3, errors.size());
       assertEquals("Error message should be correct", "The class or interface java.lang.String.Inner is package protected because there is no access specifier and cannot be accessed from i.like.monkey", errors.getLast().getFirst());
@@ -3054,13 +3054,13 @@ public class ExpressionTypeChecker extends Bob {
       
       
       //if inner is not static, give error:
-      ComplexNameReference innerRef1 = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, ref2, new Word(JExprParser.NO_SOURCE_INFO, "Inner"));
+      ComplexNameReference innerRef1 = new ComplexNameReference(SourceInfo.NO_INFO, ref2, new Word(SourceInfo.NO_INFO, "Inner"));
       assertEquals("Should return inner", inner, innerRef1.visit(_etc));
       assertEquals("Should be 4 errors", 4, errors.size());
       assertEquals("Error message should be correct", "Non-static inner class java.lang.String.Inner cannot be accessed from this context.  Perhaps you meant to instantiate it", errors.getLast().getFirst());
   
       //if inner is not static and outer is not static, it's okay...
-      ComplexNameReference innerRef2 = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "s")), new Word(JExprParser.NO_SOURCE_INFO, "Inner"));
+      ComplexNameReference innerRef2 = new ComplexNameReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "s")), new Word(SourceInfo.NO_INFO, "Inner"));
       assertEquals("Should return inner", inner, innerRef2.visit(_etc));
       assertEquals("Should still be 5 errors", 5, errors.size());
       assertEquals("Error message should be correct", "Non-static inner class java.lang.String.Inner cannot be accessed from this context.  Perhaps you meant to instantiate it", errors.getLast().getFirst());
@@ -3073,13 +3073,13 @@ public class ExpressionTypeChecker extends Bob {
       
       
       //if the symbol could not be matched, give an error and return null
-      ComplexNameReference noSense = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, ref2, new Word(JExprParser.NO_SOURCE_INFO, "nonsense"));
+      ComplexNameReference noSense = new ComplexNameReference(SourceInfo.NO_INFO, ref2, new Word(SourceInfo.NO_INFO, "nonsense"));
       assertEquals("Should return null", null, noSense.visit(_etc));
       assertEquals("Should be 7 errors", 7, errors.size());
       assertEquals("Error message should be correct", "Could not resolve nonsense from the context of java.lang.String", errors.getLast().getFirst());
       
       //if the reference is ambiguous (matches both an interface and a class) give an error
-      ComplexNameReference ambigRef = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "cebu")), new Word(JExprParser.NO_SOURCE_INFO, "ambigThing"));
+      ComplexNameReference ambigRef = new ComplexNameReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "cebu")), new Word(SourceInfo.NO_INFO, "ambigThing"));
 
       SymbolData interfaceD = new SymbolData("interface");
       interfaceD.setIsContinuation(false);
@@ -3127,7 +3127,7 @@ public class ExpressionTypeChecker extends Bob {
     
 
     public void testForSimpleThisReference() {
-      SimpleThisReference str = new SimpleThisReference(JExprParser.NO_SOURCE_INFO);
+      SimpleThisReference str = new SimpleThisReference(SourceInfo.NO_INFO);
       
       //as long as we are not in a static method, this should be fine.
       assertEquals("Should return i.like.monkey instance", _etc._data.getSymbolData().getInstanceData(), str.visit(_etc));
@@ -3146,7 +3146,7 @@ public class ExpressionTypeChecker extends Bob {
     
 
     public void testForComplexThisReferenceOnly() {
-     ComplexThisReference ctr = new ComplexThisReference(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "context")));
+     ComplexThisReference ctr = new ComplexThisReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "context")));
 
      //if enclosing_result is null, return null
      assertEquals("Should return null", null, _etc.forComplexThisReferenceOnly(ctr, null));
@@ -3204,7 +3204,7 @@ public class ExpressionTypeChecker extends Bob {
     }
     
     public void testForSimpleSuperReference() {
-      SimpleSuperReference ssr = new SimpleSuperReference(JExprParser.NO_SOURCE_INFO);
+      SimpleSuperReference ssr = new SimpleSuperReference(SourceInfo.NO_INFO);
       _sd1.setSuperClass(_sd2);
       
       //normally, should work
@@ -3224,7 +3224,7 @@ public class ExpressionTypeChecker extends Bob {
     
 
     public void testForComplexSuperReference() {
-      ComplexSuperReference csr = new ComplexSuperReference(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "context")));
+      ComplexSuperReference csr = new ComplexSuperReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "context")));
       
      //if enclosing_result is null, return null
      assertEquals("Should return null", null, _etc.forComplexSuperReferenceOnly(csr, null));
@@ -3282,12 +3282,12 @@ public class ExpressionTypeChecker extends Bob {
     }
 
     public void testForArrayAccessOnly() {
-      ArrayAccess aa = new ArrayAccess(JExprParser.NO_SOURCE_INFO, new NullLiteral(JExprParser.NO_SOURCE_INFO), new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      ArrayAccess aa = new ArrayAccess(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), new NullLiteral(SourceInfo.NO_INFO));
 
       //if lhs is an array, and index is an int instance, no errors
       ArrayData ad = new ArrayData(SymbolData.INT_TYPE, 
                                    new LanguageLevelVisitor(_etc._file, _etc._package, _etc._importedFiles, _etc._importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>()),
-                                   JExprParser.NO_SOURCE_INFO);
+                                   SourceInfo.NO_INFO);
 
       assertEquals("should return int", SymbolData.INT_TYPE.getInstanceData(), _etc.forArrayAccessOnly(aa, ad.getInstanceData(), SymbolData.INT_TYPE.getInstanceData()));
       assertEquals("should return int", SymbolData.INT_TYPE.getInstanceData(), _etc.forArrayAccessOnly(aa, ad.getInstanceData(), SymbolData.CHAR_TYPE.getInstanceData()));
@@ -3337,15 +3337,15 @@ public class ExpressionTypeChecker extends Bob {
     
     
     public void testLiterals() {
-      StringLiteral sl = new StringLiteral(JExprParser.NO_SOURCE_INFO, "string literal!");
-      IntegerLiteral il = new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 4);
-      LongLiteral ll = new LongLiteral(JExprParser.NO_SOURCE_INFO, 5);
-      FloatLiteral fl = new FloatLiteral(JExprParser.NO_SOURCE_INFO, 1.2f);
-      DoubleLiteral dl = new DoubleLiteral(JExprParser.NO_SOURCE_INFO, 4.2);
-      CharLiteral cl = new CharLiteral(JExprParser.NO_SOURCE_INFO, 'c');
-      BooleanLiteral bl = new BooleanLiteral(JExprParser.NO_SOURCE_INFO, true);
-      NullLiteral nl = new NullLiteral(JExprParser.NO_SOURCE_INFO);
-      ClassLiteral csl = new ClassLiteral(JExprParser.NO_SOURCE_INFO, new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "monkey", new Type[0]));
+      StringLiteral sl = new StringLiteral(SourceInfo.NO_INFO, "string literal!");
+      IntegerLiteral il = new IntegerLiteral(SourceInfo.NO_INFO, 4);
+      LongLiteral ll = new LongLiteral(SourceInfo.NO_INFO, 5);
+      FloatLiteral fl = new FloatLiteral(SourceInfo.NO_INFO, 1.2f);
+      DoubleLiteral dl = new DoubleLiteral(SourceInfo.NO_INFO, 4.2);
+      CharLiteral cl = new CharLiteral(SourceInfo.NO_INFO, 'c');
+      BooleanLiteral bl = new BooleanLiteral(SourceInfo.NO_INFO, true);
+      NullLiteral nl = new NullLiteral(SourceInfo.NO_INFO);
+      ClassLiteral csl = new ClassLiteral(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "monkey", new Type[0]));
       
       SymbolData string = new SymbolData("java.lang.String");
       string.setIsContinuation(false);
@@ -3375,7 +3375,7 @@ public class ExpressionTypeChecker extends Bob {
 
     
     public void testForParenthesizedOnly() {
-      Parenthesized p = new Parenthesized(JExprParser.NO_SOURCE_INFO, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      Parenthesized p = new Parenthesized(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO));
 
       //if value_result is an intance data, no problems
       assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), _etc.forParenthesizedOnly(p, SymbolData.BOOLEAN_TYPE.getInstanceData()));
@@ -3401,13 +3401,13 @@ public class ExpressionTypeChecker extends Bob {
     
 
     public void testMethodInvocationHelper() {
-      MethodInvocation noArgs = new SimpleMethodInvocation(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "myName"), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]));
-      MethodInvocation typeArg = new SimpleMethodInvocation(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "myName"), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[]{new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "int"))}));
-      MethodInvocation oneIntArg = new SimpleMethodInvocation(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "myName"), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[]{new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5)}));
-      MethodInvocation oneDoubleArg = new SimpleMethodInvocation(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "myName"), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[]{new DoubleLiteral(JExprParser.NO_SOURCE_INFO, 4.2)}));
+      MethodInvocation noArgs = new SimpleMethodInvocation(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "myName"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
+      MethodInvocation typeArg = new SimpleMethodInvocation(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "myName"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[]{new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "int"))}));
+      MethodInvocation oneIntArg = new SimpleMethodInvocation(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "myName"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[]{new IntegerLiteral(SourceInfo.NO_INFO, 5)}));
+      MethodInvocation oneDoubleArg = new SimpleMethodInvocation(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "myName"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[]{new DoubleLiteral(SourceInfo.NO_INFO, 4.2)}));
 
       //should be able to match no args correctly
-      MethodData noArgsM = new MethodData("myName", _publicMav, new TypeParameter[0], SymbolData.BOOLEAN_TYPE, new VariableData[0], new String[0], _sd2, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      MethodData noArgsM = new MethodData("myName", _publicMav, new TypeParameter[0], SymbolData.BOOLEAN_TYPE, new VariableData[0], new String[0], _sd2, new NullLiteral(SourceInfo.NO_INFO));
       _sd2.addMethod(noArgsM);
       assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), _etc.methodInvocationHelper(noArgs, _sd2.getInstanceData()));
       assertEquals("Should be no errors", 0, errors.size());
@@ -3418,7 +3418,7 @@ public class ExpressionTypeChecker extends Bob {
       assertEquals("Error message should be correct", "No method found in class " + _sd2.getName() + " with signature: myName(int).", errors.getLast().getFirst());
       
       //if matching method, but arg is not instance type, give error
-      MethodData intArg = new MethodData("myName", _publicMav, new TypeParameter[0], SymbolData.LONG_TYPE, new VariableData[] {new VariableData(SymbolData.INT_TYPE)}, new String[0], _sd2, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      MethodData intArg = new MethodData("myName", _publicMav, new TypeParameter[0], SymbolData.LONG_TYPE, new VariableData[] {new VariableData(SymbolData.INT_TYPE)}, new String[0], _sd2, new NullLiteral(SourceInfo.NO_INFO));
       _sd2.addMethod(intArg);
       assertEquals("Should return long instance", SymbolData.LONG_TYPE.getInstanceData(), _etc.methodInvocationHelper(typeArg, _sd2.getInstanceData()));
       assertEquals("Should be 2 errors", 2, errors.size());
@@ -3436,7 +3436,7 @@ public class ExpressionTypeChecker extends Bob {
 
       
       //static method from static context is okay
-      MethodData doubleArg = new MethodData("myName", _publicStaticMav, new TypeParameter[0], SymbolData.CHAR_TYPE, new VariableData[] {new VariableData(SymbolData.DOUBLE_TYPE)}, new String[0], _sd2, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      MethodData doubleArg = new MethodData("myName", _publicStaticMav, new TypeParameter[0], SymbolData.CHAR_TYPE, new VariableData[] {new VariableData(SymbolData.DOUBLE_TYPE)}, new String[0], _sd2, new NullLiteral(SourceInfo.NO_INFO));
       _sd2.addMethod(doubleArg);
       assertEquals("Should return char instance", SymbolData.CHAR_TYPE.getInstanceData(), _etc.methodInvocationHelper(oneDoubleArg, _sd2));
       assertEquals("Should still be 3 errors", 3, errors.size());
@@ -3445,9 +3445,9 @@ public class ExpressionTypeChecker extends Bob {
     
    
     public void testForSimpleMethodInvocation() {
-      MethodInvocation noArgs = new SimpleMethodInvocation(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "myName"), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]));
-      MethodInvocation oneIntArg = new SimpleMethodInvocation(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "myName"), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[]{new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5)}));
-      MethodInvocation oneDoubleArg = new SimpleMethodInvocation(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "myName"), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[]{new DoubleLiteral(JExprParser.NO_SOURCE_INFO, 4.2)}));
+      MethodInvocation noArgs = new SimpleMethodInvocation(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "myName"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
+      MethodInvocation oneIntArg = new SimpleMethodInvocation(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "myName"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[]{new IntegerLiteral(SourceInfo.NO_INFO, 5)}));
+      MethodInvocation oneDoubleArg = new SimpleMethodInvocation(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "myName"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[]{new DoubleLiteral(SourceInfo.NO_INFO, 4.2)}));
 
       //if method not in class, give error
       assertEquals("Should return null", null, noArgs.visit(_etc));
@@ -3455,13 +3455,13 @@ public class ExpressionTypeChecker extends Bob {
       assertEquals("Error message should be correct", "No method found in class i.like.monkey with signature: myName().", errors.getLast().getFirst());
             
       //if method is in class, should work fine!
-      MethodData noArgsM = new MethodData("myName", _publicMav, new TypeParameter[0], SymbolData.BOOLEAN_TYPE, new VariableData[0], new String[0], _sd1, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      MethodData noArgsM = new MethodData("myName", _publicMav, new TypeParameter[0], SymbolData.BOOLEAN_TYPE, new VariableData[0], new String[0], _sd1, new NullLiteral(SourceInfo.NO_INFO));
       _sd1.addMethod(noArgsM);
       assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), noArgs.visit(_etc));
       assertEquals("Should still just be 1 error", 1, errors.size());
       
       //should be able to reference a static method from instance context
-      MethodData doubleArg = new MethodData("myName", _publicStaticMav, new TypeParameter[0], SymbolData.CHAR_TYPE, new VariableData[] {new VariableData(SymbolData.DOUBLE_TYPE)}, new String[0], _sd1, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      MethodData doubleArg = new MethodData("myName", _publicStaticMav, new TypeParameter[0], SymbolData.CHAR_TYPE, new VariableData[] {new VariableData(SymbolData.DOUBLE_TYPE)}, new String[0], _sd1, new NullLiteral(SourceInfo.NO_INFO));
       _sd1.addMethod(doubleArg);
       
       assertEquals("Should return char instance", SymbolData.CHAR_TYPE.getInstanceData(), oneDoubleArg.visit(_etc));
@@ -3473,7 +3473,7 @@ public class ExpressionTypeChecker extends Bob {
       assertEquals("Should still be just 1 error", 1, errors.size());
       
       //if in context of static method, should not be able to reference non-static method
-      MethodData intArg = new MethodData("myName", _publicMav, new TypeParameter[0], SymbolData.LONG_TYPE, new VariableData[] {new VariableData(SymbolData.INT_TYPE)}, new String[0], _sd1, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      MethodData intArg = new MethodData("myName", _publicMav, new TypeParameter[0], SymbolData.LONG_TYPE, new VariableData[] {new VariableData(SymbolData.INT_TYPE)}, new String[0], _sd1, new NullLiteral(SourceInfo.NO_INFO));
       _sd1.addMethod(intArg);
       assertEquals("Should return long instance", SymbolData.LONG_TYPE.getInstanceData().getName(), oneIntArg.visit(_etc).getName());
       assertEquals("Should be 2 errors", 2, errors.size());
@@ -3483,11 +3483,11 @@ public class ExpressionTypeChecker extends Bob {
     
   
     public void testForComplexMethodInvocation() {
-      MethodInvocation staticNoArgs = new ComplexMethodInvocation(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "giraffe")), new Word(JExprParser.NO_SOURCE_INFO, "myName"), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]));
-      MethodInvocation noArgs = new ComplexMethodInvocation(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "g")), new Word(JExprParser.NO_SOURCE_INFO, "myName"), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]));
-      MethodInvocation oneIntArg = new ComplexMethodInvocation(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "g")), new Word(JExprParser.NO_SOURCE_INFO, "myName"), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[]{new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5)}));
-      MethodInvocation staticOneDoubleArg = new ComplexMethodInvocation(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "giraffe")), new Word(JExprParser.NO_SOURCE_INFO, "myName"), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[]{new DoubleLiteral(JExprParser.NO_SOURCE_INFO, 4.2)}));
-      MethodInvocation oneDoubleArg = new ComplexMethodInvocation(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "g")), new Word(JExprParser.NO_SOURCE_INFO, "myName"), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[]{new DoubleLiteral(JExprParser.NO_SOURCE_INFO, 4.2)}));
+      MethodInvocation staticNoArgs = new ComplexMethodInvocation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "giraffe")), new Word(SourceInfo.NO_INFO, "myName"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
+      MethodInvocation noArgs = new ComplexMethodInvocation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "g")), new Word(SourceInfo.NO_INFO, "myName"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
+      MethodInvocation oneIntArg = new ComplexMethodInvocation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "g")), new Word(SourceInfo.NO_INFO, "myName"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[]{new IntegerLiteral(SourceInfo.NO_INFO, 5)}));
+      MethodInvocation staticOneDoubleArg = new ComplexMethodInvocation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "giraffe")), new Word(SourceInfo.NO_INFO, "myName"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[]{new DoubleLiteral(SourceInfo.NO_INFO, 4.2)}));
+      MethodInvocation oneDoubleArg = new ComplexMethodInvocation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "g")), new Word(SourceInfo.NO_INFO, "myName"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[]{new DoubleLiteral(SourceInfo.NO_INFO, 4.2)}));
 
       SymbolData g = new SymbolData("giraffe");
       g.setIsContinuation(false);
@@ -3504,13 +3504,13 @@ public class ExpressionTypeChecker extends Bob {
       assertEquals("Error message should be correct", "No method found in class giraffe with signature: myName().", errors.getLast().getFirst());
             
       //if method is in class, should work fine!
-      MethodData noArgsM = new MethodData("myName", _publicMav, new TypeParameter[0], SymbolData.BOOLEAN_TYPE, new VariableData[0], new String[0], g, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      MethodData noArgsM = new MethodData("myName", _publicMav, new TypeParameter[0], SymbolData.BOOLEAN_TYPE, new VariableData[0], new String[0], g, new NullLiteral(SourceInfo.NO_INFO));
       g.addMethod(noArgsM);
       assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), noArgs.visit(_etc));
       assertEquals("Should still just be 1 error", 1, errors.size());
       
       //should be able to reference a static method from instance context
-      MethodData doubleArg = new MethodData("myName", _publicStaticMav, new TypeParameter[0], SymbolData.CHAR_TYPE, new VariableData[] {new VariableData(SymbolData.DOUBLE_TYPE)}, new String[0], g, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      MethodData doubleArg = new MethodData("myName", _publicStaticMav, new TypeParameter[0], SymbolData.CHAR_TYPE, new VariableData[] {new VariableData(SymbolData.DOUBLE_TYPE)}, new String[0], g, new NullLiteral(SourceInfo.NO_INFO));
       g.addMethod(doubleArg);
       
       assertEquals("Should return char instance", SymbolData.CHAR_TYPE.getInstanceData(), oneDoubleArg.visit(_etc));
@@ -3533,7 +3533,7 @@ public class ExpressionTypeChecker extends Bob {
       assertEquals("Should still be just 2 errors", 2, errors.size());
       
       //if in context of static method, should not be able to reference non-static method
-      MethodData intArg = new MethodData("myName", _publicMav, new TypeParameter[0], SymbolData.LONG_TYPE, new VariableData[] {new VariableData(SymbolData.INT_TYPE)}, new String[0], g, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      MethodData intArg = new MethodData("myName", _publicMav, new TypeParameter[0], SymbolData.LONG_TYPE, new VariableData[] {new VariableData(SymbolData.INT_TYPE)}, new String[0], g, new NullLiteral(SourceInfo.NO_INFO));
       g.addMethod(intArg);
       assertEquals("Should return long instance", SymbolData.LONG_TYPE.getInstanceData().getName(), oneIntArg.visit(_etc).getName());
       assertEquals("Should be 3 errors", 3, errors.size());
@@ -3573,8 +3573,8 @@ public class ExpressionTypeChecker extends Bob {
       _etc._vars.add(vd5);
       _etc._data = _sd5;
       
-      ComplexNameReference nf = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "Ned")), new Word(JExprParser.NO_SOURCE_INFO, "Flanders"));
-      SimpleAssignmentExpression sa = new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, nf, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
+      ComplexNameReference nf = new ComplexNameReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "Ned")), new Word(SourceInfo.NO_INFO, "Flanders"));
+      SimpleAssignmentExpression sa = new SimpleAssignmentExpression(SourceInfo.NO_INFO, nf, new IntegerLiteral(SourceInfo.NO_INFO, 5));
 
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), sa.visit(_etc));
       assertEquals("Should be 0 errors", 0, errors.size());
@@ -3589,7 +3589,7 @@ public class ExpressionTypeChecker extends Bob {
 
       // Test that an initialized value can be assigned to itself
       vd4.setMav(_publicMav);
-      SimpleAssignmentExpression sa2 = new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, nf, nf);
+      SimpleAssignmentExpression sa2 = new SimpleAssignmentExpression(SourceInfo.NO_INFO, nf, nf);
       _sd4.setMav(_publicMav);
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), sa2.visit(_etc));
       assertEquals("There should be 1 error", 1, errors.size());
@@ -3601,13 +3601,13 @@ public class ExpressionTypeChecker extends Bob {
       assertEquals("The error message should be correct", "You cannot use Flanders here, because it may not have been given a value", errors.getLast().getFirst());
       
       //Test that a value cannot be assigned to a type
-      SimpleAssignmentExpression sa3 = new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "int")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
+      SimpleAssignmentExpression sa3 = new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "int")), new IntegerLiteral(SourceInfo.NO_INFO, 5));
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), sa3.visit(_etc));
       assertEquals("Should be 3 errors", 3, errors.size());
       assertEquals("Error message should be correct", "You cannot assign a value to the type int.  Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
       
       //Test that a type cannot be used on the rhs of an assignment
-      SimpleAssignmentExpression sa4 = new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, nf, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "int")));
+      SimpleAssignmentExpression sa4 = new SimpleAssignmentExpression(SourceInfo.NO_INFO, nf, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "int")));
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), sa4.visit(_etc));
       assertEquals("Should be 4 errors", 4, errors.size());
       assertEquals("Error message should be correct", "You cannot use the type name int on the right hand side of an assignment.  Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
@@ -3617,14 +3617,14 @@ public class ExpressionTypeChecker extends Bob {
                                                           _etc._importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
                                                           new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       LanguageLevelConverter.symbolTable = llv.symbolTable = _etc.symbolTable;
-      ArrayData boolArray = new ArrayData(SymbolData.BOOLEAN_TYPE, llv, JExprParser.NO_SOURCE_INFO);
+      ArrayData boolArray = new ArrayData(SymbolData.BOOLEAN_TYPE, llv, SourceInfo.NO_INFO);
       boolArray.setIsContinuation(false);
       symbolTable.remove("boolean[]");
       symbolTable.put("boolean[]", boolArray);
       VariableData myArrayVD = new VariableData("myArray", _publicMav, boolArray, true, _etc._data);
       _etc._vars.addLast(myArrayVD);
       
-      SimpleAssignmentExpression sa5 = new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new ArrayAccess(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "myArray")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5)), new BooleanLiteral(JExprParser.NO_SOURCE_INFO, true));
+      SimpleAssignmentExpression sa5 = new SimpleAssignmentExpression(SourceInfo.NO_INFO, new ArrayAccess(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "myArray")), new IntegerLiteral(SourceInfo.NO_INFO, 5)), new BooleanLiteral(SourceInfo.NO_INFO, true));
       assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), sa5.visit(_etc));
       assertEquals("Should still be 4 errors", 4, errors.size());
       
@@ -3642,8 +3642,8 @@ public class ExpressionTypeChecker extends Bob {
 
       //Plus Assignment with numbers:
       // test that other assignment operators work correctly
-      ComplexNameReference nf = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "Ned")), new Word(JExprParser.NO_SOURCE_INFO, "Flanders"));
-      PlusAssignmentExpression pa = new PlusAssignmentExpression(JExprParser.NO_SOURCE_INFO, nf, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
+      ComplexNameReference nf = new ComplexNameReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "Ned")), new Word(SourceInfo.NO_INFO, "Flanders"));
+      PlusAssignmentExpression pa = new PlusAssignmentExpression(SourceInfo.NO_INFO, nf, new IntegerLiteral(SourceInfo.NO_INFO, 5));
 
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), pa.visit(_etc));
       assertEquals("Should be 0 errors", 0, errors.size());
@@ -3666,7 +3666,7 @@ public class ExpressionTypeChecker extends Bob {
       // Test that an initialized value can be assigned to itself
       vd4.setMav(_publicMav);
       _sd4.setMav(_publicMav);
-      PlusAssignmentExpression pa2 = new PlusAssignmentExpression(JExprParser.NO_SOURCE_INFO, nf, nf);
+      PlusAssignmentExpression pa2 = new PlusAssignmentExpression(SourceInfo.NO_INFO, nf, nf);
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), pa2.visit(_etc));
       assertEquals("There should be 2 errors", 2, errors.size());
 
@@ -3689,21 +3689,21 @@ public class ExpressionTypeChecker extends Bob {
       VariableData s = new VariableData("s", _publicMav, stringSD, true, _etc._data);
       _etc._vars.add(s);
       
-      SimpleNameReference sRef = new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "s"));
+      SimpleNameReference sRef = new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "s"));
       //test string concatenation, where the string is first.
-      PlusAssignmentExpression pa3 = new PlusAssignmentExpression(JExprParser.NO_SOURCE_INFO, sRef, new BooleanLiteral(JExprParser.NO_SOURCE_INFO, true));
+      PlusAssignmentExpression pa3 = new PlusAssignmentExpression(SourceInfo.NO_INFO, sRef, new BooleanLiteral(SourceInfo.NO_INFO, true));
       TypeData result =  pa3.visit(_etc);
       assertEquals("string concatenation with string at the front.  Should return String type", stringSD.getInstanceData(), pa3.visit(_etc));
       assertEquals("Should be 4 errors", 4, errors.size());
       
       //when both sides are strings
-      PlusAssignmentExpression pa4 = new PlusAssignmentExpression(JExprParser.NO_SOURCE_INFO, sRef, new StringLiteral(JExprParser.NO_SOURCE_INFO, "cat"));
+      PlusAssignmentExpression pa4 = new PlusAssignmentExpression(SourceInfo.NO_INFO, sRef, new StringLiteral(SourceInfo.NO_INFO, "cat"));
       assertEquals("string concatenation with string on both sides.  Should return String type", stringSD.getInstanceData(), pa4.visit(_etc));
       assertEquals("Should be 4 errors", 4, errors.size());
       
       //when string is second
       vd4.gotValue();
-      PlusAssignmentExpression pa5 = new PlusAssignmentExpression(JExprParser.NO_SOURCE_INFO, nf, new StringLiteral(JExprParser.NO_SOURCE_INFO, "house "));
+      PlusAssignmentExpression pa5 = new PlusAssignmentExpression(SourceInfo.NO_INFO, nf, new StringLiteral(SourceInfo.NO_INFO, "house "));
       assertEquals("string + concatenation with string at back.  Should give error", stringSD.getInstanceData(), pa5.visit(_etc));
       assertEquals("Should be 5 errors", 5, errors.size());
       assertEquals("Error message should be correct", "The arguments to the Plus Assignment Operator (+=) must either include an instance of a String or both be numbers.  You have specified arguments of type int and java.lang.String", errors.getLast().getFirst());
@@ -3721,8 +3721,8 @@ public class ExpressionTypeChecker extends Bob {
       _etc._data = _sd5;
 
       // test that numeric assignment with good values on left and right works correctly
-      ComplexNameReference nf = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "Ned")), new Word(JExprParser.NO_SOURCE_INFO, "Flanders"));
-      NumericAssignmentExpression na = new MinusAssignmentExpression(JExprParser.NO_SOURCE_INFO, nf, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
+      ComplexNameReference nf = new ComplexNameReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "Ned")), new Word(SourceInfo.NO_INFO, "Flanders"));
+      NumericAssignmentExpression na = new MinusAssignmentExpression(SourceInfo.NO_INFO, nf, new IntegerLiteral(SourceInfo.NO_INFO, 5));
 
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), na.visit(_etc));
       assertEquals("Should be 0 errors", 0, errors.size());
@@ -3745,7 +3745,7 @@ public class ExpressionTypeChecker extends Bob {
       // Test that an initialized value can be assigned to itself
       vd4.setMav(_publicMav);
       _sd4.setMav(_publicMav);
-      NumericAssignmentExpression na2 = new ModAssignmentExpression(JExprParser.NO_SOURCE_INFO, nf, nf);
+      NumericAssignmentExpression na2 = new ModAssignmentExpression(SourceInfo.NO_INFO, nf, nf);
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), na2.visit(_etc));
       assertEquals("There should be 2 errors", 2, errors.size());
 
@@ -3768,8 +3768,8 @@ public class ExpressionTypeChecker extends Bob {
       _etc._data = _sd5;
       
       //test that words with a pre-increment operator before only work if they already have a value and aren't final.
-      ComplexNameReference nf = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "Ned")), new Word(JExprParser.NO_SOURCE_INFO, "Flanders"));
-      PositivePrefixIncrementExpression ppi = new PositivePrefixIncrementExpression(JExprParser.NO_SOURCE_INFO, nf);
+      ComplexNameReference nf = new ComplexNameReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "Ned")), new Word(SourceInfo.NO_INFO, "Flanders"));
+      PositivePrefixIncrementExpression ppi = new PositivePrefixIncrementExpression(SourceInfo.NO_INFO, nf);
       
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), ppi.visit(_etc));
       assertEquals("Should still be 0 errors", 0, errors.size());
@@ -3790,14 +3790,14 @@ public class ExpressionTypeChecker extends Bob {
                    errors.getLast().getFirst());
       
       // Check that ++int doesn't work
-      PositivePrefixIncrementExpression ppi2 = new PositivePrefixIncrementExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "int")));
+      PositivePrefixIncrementExpression ppi2 = new PositivePrefixIncrementExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "int")));
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), ppi2.visit(_etc));
       assertEquals("There should be 3 errors", 3, errors.size());
       assertEquals("The error message should be correct", "You cannot increment or decrement int, because it is a class name not an instance.  Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
 
 
       // Check that ++(int) doesn't work
-      PositivePrefixIncrementExpression ppi3 = new PositivePrefixIncrementExpression(JExprParser.NO_SOURCE_INFO, new Parenthesized(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "int"))));
+      PositivePrefixIncrementExpression ppi3 = new PositivePrefixIncrementExpression(SourceInfo.NO_INFO, new Parenthesized(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "int"))));
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), ppi3.visit(_etc));
       assertEquals("There should be 4 errors", 4, errors.size());
       assertEquals("The error message should be correct", "You cannot increment or decrement int, because it is a class name not an instance.  Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
@@ -3805,7 +3805,7 @@ public class ExpressionTypeChecker extends Bob {
       
       //test that words with a post-decrement operator afterwards only work if they already have a value and aren't final.
       vd4.setMav(_publicMav);
-      NegativePostfixIncrementExpression npi = new NegativePostfixIncrementExpression(JExprParser.NO_SOURCE_INFO, nf);
+      NegativePostfixIncrementExpression npi = new NegativePostfixIncrementExpression(SourceInfo.NO_INFO, nf);
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), npi.visit(_etc));
       assertEquals("Should still be 4 errors", 4, errors.size());
       
@@ -3826,13 +3826,13 @@ public class ExpressionTypeChecker extends Bob {
       
 
       // Check that int-- doesn't work
-      NegativePostfixIncrementExpression npi2 = new NegativePostfixIncrementExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "int")));
+      NegativePostfixIncrementExpression npi2 = new NegativePostfixIncrementExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "int")));
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), npi2.visit(_etc));
       assertEquals("There should be 7 errors", 7, errors.size());
       assertEquals("The error message should be correct", "You cannot increment or decrement int, because it is a class name not an instance.  Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
       
       // Check that (int)-- doesn't work
-      NegativePostfixIncrementExpression npi3 = new NegativePostfixIncrementExpression(JExprParser.NO_SOURCE_INFO, new Parenthesized(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "int"))));
+      NegativePostfixIncrementExpression npi3 = new NegativePostfixIncrementExpression(SourceInfo.NO_INFO, new Parenthesized(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "int"))));
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), npi3.visit(_etc));
       assertEquals("There should be 8 errors", 8, errors.size());
       assertEquals("The error message should be correct", "You cannot increment or decrement int, because it is a class name not an instance.  Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
@@ -3840,7 +3840,7 @@ public class ExpressionTypeChecker extends Bob {
       
       //should break: double increment/decrement ++(--Ned.Flanders)
       vd4.setMav(_publicMav);
-      PositivePrefixIncrementExpression ppi4 = new PositivePrefixIncrementExpression(JExprParser.NO_SOURCE_INFO, new Parenthesized(JExprParser.NO_SOURCE_INFO, new NegativePrefixIncrementExpression(JExprParser.NO_SOURCE_INFO, nf)));
+      PositivePrefixIncrementExpression ppi4 = new PositivePrefixIncrementExpression(SourceInfo.NO_INFO, new Parenthesized(SourceInfo.NO_INFO, new NegativePrefixIncrementExpression(SourceInfo.NO_INFO, nf)));
       assertEquals("Should return null", null, ppi4.visit(_etc));
       assertEquals("Should have added 1 error", 9, errors.size());
       assertEquals("Should have correct error message","You cannot assign a value to an increment expression", errors.getLast().getFirst());
@@ -3848,13 +3848,13 @@ public class ExpressionTypeChecker extends Bob {
 //      //should break: non number being incremented
       VariableData s = new VariableData("s", _publicMav, SymbolData.BOOLEAN_TYPE, true, _etc._data);
       _etc._vars.addLast(s);
-      PositivePrefixIncrementExpression ppi5 = new PositivePrefixIncrementExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "s")));
+      PositivePrefixIncrementExpression ppi5 = new PositivePrefixIncrementExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "s")));
       assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), ppi5.visit(_etc));
       assertEquals("Should have added 1 error", 10, errors.size());
       assertEquals("Should have correct error message", "You cannot increment or decrement something that is not a number type.  You have specified something of type boolean", errors.getLast().getFirst());
       
       //nested parentheses...should work
-      PositivePrefixIncrementExpression ppi6 = new PositivePrefixIncrementExpression(JExprParser.NO_SOURCE_INFO, new Parenthesized(JExprParser.NO_SOURCE_INFO, new Parenthesized(JExprParser.NO_SOURCE_INFO, nf)));
+      PositivePrefixIncrementExpression ppi6 = new PositivePrefixIncrementExpression(SourceInfo.NO_INFO, new Parenthesized(SourceInfo.NO_INFO, new Parenthesized(SourceInfo.NO_INFO, nf)));
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), ppi6.visit(_etc));
       assertEquals("Should still be 10 errors", 10, errors.size());
       
@@ -3863,15 +3863,15 @@ public class ExpressionTypeChecker extends Bob {
 
 
     public void testForSimpleAnonymousClassInstantiation() {
-     AnonymousClassInstantiation basic = new SimpleAnonymousClassInstantiation(JExprParser.NO_SOURCE_INFO, new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "Object", new Type[0]), 
-                                                                        new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]),
-                                                                        new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+     AnonymousClassInstantiation basic = new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), 
+                                                                        new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
+                                                                        new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
     
      
      SymbolData object = new SymbolData("java.lang.Object");
      object.setIsContinuation(false);
      object.setPackage("java.lang");
-     object.setMav(new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"}));
+     object.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
      MethodData cdObj = new MethodData("Object", _publicMav, new TypeParameter[0], object, new VariableData[0], new String[0], object, basic);
      object.addMethod(cdObj);
 
@@ -3902,29 +3902,29 @@ public class ExpressionTypeChecker extends Bob {
      assertEquals("Should be no errors", 0, errors.size());
      
      
-     VariableDeclaration vdecl = new VariableDeclaration(JExprParser.NO_SOURCE_INFO,
+     VariableDeclaration vdecl = new VariableDeclaration(SourceInfo.NO_INFO,
                                                           _packageMav,
                                                           new VariableDeclarator[] {
-       new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                            new PrimitiveType(JExprParser.NO_SOURCE_INFO, "double"), 
-                                            new Word (JExprParser.NO_SOURCE_INFO, "field1")),
-         new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                              new PrimitiveType(JExprParser.NO_SOURCE_INFO, "boolean"), 
-                                              new Word (JExprParser.NO_SOURCE_INFO, "field2"))});      
+       new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                            new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                                            new Word (SourceInfo.NO_INFO, "field1")),
+         new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                              new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
+                                              new Word (SourceInfo.NO_INFO, "field2"))});      
            
-      PrimitiveType intt = new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int");
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "i"));
-      FormalParameter param = new FormalParameter(JExprParser.NO_SOURCE_INFO, new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "j")), false);
-      BracedBody bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new VariableDeclaration(JExprParser.NO_SOURCE_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5))});
+      PrimitiveType intt = new PrimitiveType(SourceInfo.NO_INFO, "int");
+      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "i"));
+      FormalParameter param = new FormalParameter(SourceInfo.NO_INFO, new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "j")), false);
+      BracedBody bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), new ValueReturnStatement(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5))});
       
-      ConcreteMethodDef cmd1 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], 
-                                                     intt, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new FormalParameter[] {param}, 
+      ConcreteMethodDef cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
+                                                     intt, new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[] {param}, 
                                                      new ReferenceType[0], bb);
-      BracedBody classBb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] { vdecl, cmd1 });
+      BracedBody classBb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { vdecl, cmd1 });
       
-      SimpleAnonymousClassInstantiation  complicated = new SimpleAnonymousClassInstantiation(JExprParser.NO_SOURCE_INFO, 
-                                                                                             new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "name", new Type[0]), 
-                                                                                             new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]), 
+      SimpleAnonymousClassInstantiation  complicated = new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, 
+                                                                                             new ClassOrInterfaceType(SourceInfo.NO_INFO, "name", new Type[0]), 
+                                                                                             new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]), 
                                                                                              classBb);
       SymbolData sd = new SymbolData("name");
       sd.setIsContinuation(false);
@@ -3958,20 +3958,20 @@ public class ExpressionTypeChecker extends Bob {
       // Test that I can assign the anonymous inner class to a variable of the right type.
       _sd1.setAnonymousInnerClassNum(1);
       symbolTable.put("int", SymbolData.INT_TYPE);
-      VariableDeclaration vd = new VariableDeclaration(JExprParser.NO_SOURCE_INFO, _publicMav, new VariableDeclarator[] { new InitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "name", new Type[0]), new Word(JExprParser.NO_SOURCE_INFO, "myAnon"), complicated)});
+      VariableDeclaration vd = new VariableDeclaration(SourceInfo.NO_INFO, _publicMav, new VariableDeclarator[] { new InitializedVariableDeclarator(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "name", new Type[0]), new Word(SourceInfo.NO_INFO, "myAnon"), complicated)});
       vd.visit(_etc);
       assertEquals("There should still be no errors", 0, errors.size());
       
       //Test that a method invoked from an anonymous inner class does its thing correctly
       _sd1.setAnonymousInnerClassNum(1);
-      MethodInvocation mie = new ComplexMethodInvocation(JExprParser.NO_SOURCE_INFO, complicated, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] { new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5)}));
+      MethodInvocation mie = new ComplexMethodInvocation(SourceInfo.NO_INFO, complicated, new Word(SourceInfo.NO_INFO, "myMethod"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] { new IntegerLiteral(SourceInfo.NO_INFO, 5)}));
       assertEquals("Should return int", SymbolData.INT_TYPE.getInstanceData(), mie.visit(_etc));
       assertEquals("There should still be no errors", 0, errors.size());
       
 //      //Test that we can get a field from an anonymous inner class
       _sd1.setAnonymousInnerClassNum(1);
       
-      Expression nr = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, complicated, new Word(JExprParser.NO_SOURCE_INFO, "field1"));
+      Expression nr = new ComplexNameReference(SourceInfo.NO_INFO, complicated, new Word(SourceInfo.NO_INFO, "field1"));
       assertEquals("Should return double", SymbolData.DOUBLE_TYPE.getInstanceData(), nr.visit(_etc));
       assertEquals("There should be no errors...still!", 0, errors.size());
       
@@ -3985,8 +3985,8 @@ public class ExpressionTypeChecker extends Bob {
       assertEquals("The error message should be correct", "This anonymous inner class must override the abstract method: yeah() in name", errors.get(0).getFirst());
       
       //cannot use syntax new A.B() if B is not static.  Make sure appropriate error is thrown.
-     SimpleAnonymousClassInstantiation nestedNonStatic = new SimpleAnonymousClassInstantiation(JExprParser.NO_SOURCE_INFO, new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "A.B", new Type[0]), 
-                                                                            new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]), new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+     SimpleAnonymousClassInstantiation nestedNonStatic = new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "A.B", new Type[0]), 
+                                                                            new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]), new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
      
      SymbolData a = new SymbolData("A");
      a.setIsContinuation(false);
@@ -4001,8 +4001,8 @@ public class ExpressionTypeChecker extends Bob {
                                        null);
      b.addMethod(consb);
     symbolTable.put("A", a);
-    a.setMav(new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"}));
-    b.setMav(new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"}));
+    a.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
+    b.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
     
     SymbolData anon3 = new SymbolData("i.like.monkey$3");
     anon3.setIsContinuation(false);
@@ -4026,11 +4026,11 @@ public class ExpressionTypeChecker extends Bob {
     
     
     public void testForComplexAnonymousClassInstantiation() {
-     AnonymousClassInstantiation basic = new ComplexAnonymousClassInstantiation(JExprParser.NO_SOURCE_INFO, 
-                                                                                new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "bob")),
-                                                                                new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "Object", new Type[0]), 
-                                                                        new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]),
-                                                                        new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+     AnonymousClassInstantiation basic = new ComplexAnonymousClassInstantiation(SourceInfo.NO_INFO, 
+                                                                                new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "bob")),
+                                                                                new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), 
+                                                                        new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
+                                                                        new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
      
      VariableData bob = new VariableData("bob", _publicMav, _sd2, true, _sd1);
      _etc._vars.add(bob);
@@ -4038,7 +4038,7 @@ public class ExpressionTypeChecker extends Bob {
      SymbolData object = new SymbolData("java.lang.Object");
      object.setIsContinuation(false);
      object.setPackage("java.lang");
-     object.setMav(new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"}));
+     object.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
      MethodData cdObj = new MethodData("Object", _publicMav, new TypeParameter[0], object, new VariableData[0], new String[0], object, basic);
      object.addMethod(cdObj);
 
@@ -4069,30 +4069,30 @@ public class ExpressionTypeChecker extends Bob {
      assertEquals("Should be no errors", 0, errors.size());
      
      
-     VariableDeclaration vdecl = new VariableDeclaration(JExprParser.NO_SOURCE_INFO,
+     VariableDeclaration vdecl = new VariableDeclaration(SourceInfo.NO_INFO,
                                                           _packageMav,
                                                           new VariableDeclarator[] {
-       new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                            new PrimitiveType(JExprParser.NO_SOURCE_INFO, "double"), 
-                                            new Word (JExprParser.NO_SOURCE_INFO, "field1")),
-         new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                              new PrimitiveType(JExprParser.NO_SOURCE_INFO, "boolean"), 
-                                              new Word (JExprParser.NO_SOURCE_INFO, "field2"))});      
+       new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                            new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                                            new Word (SourceInfo.NO_INFO, "field1")),
+         new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                              new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
+                                              new Word (SourceInfo.NO_INFO, "field2"))});      
            
-      PrimitiveType intt = new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int");
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "i"));
-      FormalParameter param = new FormalParameter(JExprParser.NO_SOURCE_INFO, new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "j")), false);
-      BracedBody bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new VariableDeclaration(JExprParser.NO_SOURCE_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5))});
+      PrimitiveType intt = new PrimitiveType(SourceInfo.NO_INFO, "int");
+      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "i"));
+      FormalParameter param = new FormalParameter(SourceInfo.NO_INFO, new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "j")), false);
+      BracedBody bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), new ValueReturnStatement(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5))});
       
-      ConcreteMethodDef cmd1 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], 
-                                                     intt, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new FormalParameter[] {param}, 
+      ConcreteMethodDef cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
+                                                     intt, new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[] {param}, 
                                                      new ReferenceType[0], bb);
-      BracedBody classBb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] { vdecl, cmd1 });
+      BracedBody classBb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { vdecl, cmd1 });
       
-      ComplexAnonymousClassInstantiation  complicated = new ComplexAnonymousClassInstantiation(JExprParser.NO_SOURCE_INFO, 
-                                                                                               new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "bob")),
-                                                                                               new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "name", new Type[0]), 
-                                                                                               new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]), 
+      ComplexAnonymousClassInstantiation  complicated = new ComplexAnonymousClassInstantiation(SourceInfo.NO_INFO, 
+                                                                                               new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "bob")),
+                                                                                               new ClassOrInterfaceType(SourceInfo.NO_INFO, "name", new Type[0]), 
+                                                                                               new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]), 
                                                                                                classBb);
       SymbolData sd = new SymbolData("name");
       sd.setIsContinuation(false);
@@ -4126,20 +4126,20 @@ public class ExpressionTypeChecker extends Bob {
       // Test that I can assign the anonymous inner class to a variable of the right type.
       _sd1.setAnonymousInnerClassNum(1);
       symbolTable.put("int", SymbolData.INT_TYPE);
-      VariableDeclaration vd = new VariableDeclaration(JExprParser.NO_SOURCE_INFO, _publicMav, new VariableDeclarator[] { new InitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "name", new Type[0]), new Word(JExprParser.NO_SOURCE_INFO, "myAnon"), complicated)});
+      VariableDeclaration vd = new VariableDeclaration(SourceInfo.NO_INFO, _publicMav, new VariableDeclarator[] { new InitializedVariableDeclarator(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "name", new Type[0]), new Word(SourceInfo.NO_INFO, "myAnon"), complicated)});
       vd.visit(_etc);
       assertEquals("There should still be no errors", 0, errors.size());
       
       //Test that a method invoked from an anonymous inner class does its thing correctly
       _sd1.setAnonymousInnerClassNum(1);
-      MethodInvocation mie = new ComplexMethodInvocation(JExprParser.NO_SOURCE_INFO, complicated, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] { new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5)}));
+      MethodInvocation mie = new ComplexMethodInvocation(SourceInfo.NO_INFO, complicated, new Word(SourceInfo.NO_INFO, "myMethod"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] { new IntegerLiteral(SourceInfo.NO_INFO, 5)}));
       assertEquals("Should return int", SymbolData.INT_TYPE.getInstanceData(), mie.visit(_etc));
       assertEquals("There should still be no errors", 0, errors.size());
       
 //      //Test that we can get a field from an anonymous inner class
       _sd1.setAnonymousInnerClassNum(1);
       
-      Expression nr = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, complicated, new Word(JExprParser.NO_SOURCE_INFO, "field1"));
+      Expression nr = new ComplexNameReference(SourceInfo.NO_INFO, complicated, new Word(SourceInfo.NO_INFO, "field1"));
       assertEquals("Should return double", SymbolData.DOUBLE_TYPE.getInstanceData(), nr.visit(_etc));
       assertEquals("There should be no errors...still!", 0, errors.size());
       
@@ -4153,9 +4153,9 @@ public class ExpressionTypeChecker extends Bob {
       assertEquals("The error message should be correct", "This anonymous inner class must override the abstract method: yeah() in name", errors.get(0).getFirst());
       
 //      //cannot use syntax a.new B() if B is static.  Make sure appropriate error is thrown.
-     ComplexAnonymousClassInstantiation nestedNonStatic = new ComplexAnonymousClassInstantiation(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "a")),
-                                                                                                 new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "B", new Type[0]), 
-                                                                            new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]), new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+     ComplexAnonymousClassInstantiation nestedNonStatic = new ComplexAnonymousClassInstantiation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "a")),
+                                                                                                 new ClassOrInterfaceType(SourceInfo.NO_INFO, "B", new Type[0]), 
+                                                                            new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]), new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
      
      SymbolData a = new SymbolData("A");
      a.setIsContinuation(false);
@@ -4170,8 +4170,8 @@ public class ExpressionTypeChecker extends Bob {
                                        null);
      b.addMethod(consb);
     symbolTable.put("A", a);
-    a.setMav(new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"}));
-    b.setMav(new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"}));
+    a.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
+    b.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
     
     SymbolData anon3 = new SymbolData("i.like.monkey$3");
     anon3.setIsContinuation(false);
@@ -4201,9 +4201,9 @@ public class ExpressionTypeChecker extends Bob {
     assertEquals("Error message should be correct", "You cannot instantiate a static inner class or interface with this syntax.  Instead, try new A.B()", errors.getLast().getFirst());
 
     //if inner part is not static, but outer part is type name, give error
-    ComplexAnonymousClassInstantiation nested = new ComplexAnonymousClassInstantiation(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "A")),
-                                                                                                new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "B", new Type[0]), 
-                                                                                                new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]), new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+    ComplexAnonymousClassInstantiation nested = new ComplexAnonymousClassInstantiation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "A")),
+                                                                                                new ClassOrInterfaceType(SourceInfo.NO_INFO, "B", new Type[0]), 
+                                                                                                new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]), new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
 
     _sd1.setAnonymousInnerClassNum(2);
     b.setMav(_publicMav);

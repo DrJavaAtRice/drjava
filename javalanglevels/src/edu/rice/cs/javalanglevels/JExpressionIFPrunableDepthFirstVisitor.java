@@ -125,10 +125,16 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forUnlabeledBreakStatementOnly(UnlabeledBreakStatement that) { return forBreakStatementOnly(that); }
   public Void forContinueStatementDoFirst(ContinueStatement that) { return forStatementDoFirst(that); }
   public Void forContinueStatementOnly(ContinueStatement that) { return forStatementOnly(that); }
-  public Void forLabeledContinueStatementDoFirst(LabeledContinueStatement that) { return forContinueStatementDoFirst(that); }
+  public Void forLabeledContinueStatementDoFirst(LabeledContinueStatement that) { 
+    return forContinueStatementDoFirst(that); 
+  }
   public Void forLabeledContinueStatementOnly(LabeledContinueStatement that) { return forContinueStatementOnly(that); }
-  public Void forUnlabeledContinueStatementDoFirst(UnlabeledContinueStatement that) { return forContinueStatementDoFirst(that); }
-  public Void forUnlabeledContinueStatementOnly(UnlabeledContinueStatement that) { return forContinueStatementOnly(that); }
+  public Void forUnlabeledContinueStatementDoFirst(UnlabeledContinueStatement that) { 
+    return forContinueStatementDoFirst(that); 
+  }
+  public Void forUnlabeledContinueStatementOnly(UnlabeledContinueStatement that) { 
+    return forContinueStatementOnly(that); 
+  }
   public Void forReturnStatementDoFirst(ReturnStatement that) { return forStatementDoFirst(that); }
   public Void forReturnStatementOnly(ReturnStatement that) { return forStatementOnly(that); }
   public Void forVoidReturnStatementDoFirst(VoidReturnStatement that) { return forReturnStatementDoFirst(that); }
@@ -141,9 +147,13 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forSynchronizedStatementOnly(SynchronizedStatement that) { return forStatementOnly(that); }
   public Void forTryCatchStatementDoFirst(TryCatchStatement that) { return forStatementDoFirst(that); }
   public Void forTryCatchStatementOnly(TryCatchStatement that) { return forStatementOnly(that); }
-  public Void forTryCatchFinallyStatementDoFirst(TryCatchFinallyStatement that) { return forTryCatchStatementDoFirst(that); }
+  public Void forTryCatchFinallyStatementDoFirst(TryCatchFinallyStatement that) { 
+    return forTryCatchStatementDoFirst(that); 
+  }
   public Void forTryCatchFinallyStatementOnly(TryCatchFinallyStatement that) { return forTryCatchStatementOnly(that); }
-  public Void forNormalTryCatchStatementDoFirst(NormalTryCatchStatement that) { return forTryCatchStatementDoFirst(that); }
+  public Void forNormalTryCatchStatementDoFirst(NormalTryCatchStatement that) { 
+    return forTryCatchStatementDoFirst(that);
+  }
   public Void forNormalTryCatchStatementOnly(NormalTryCatchStatement that) { return forTryCatchStatementOnly(that); }
   public Void forEmptyStatementDoFirst(EmptyStatement that) { return forStatementDoFirst(that); }
   public Void forEmptyStatementOnly(EmptyStatement that) { return forStatementOnly(that); }
@@ -159,10 +169,18 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forVariableDeclarationOnly(VariableDeclaration that) { return forJExpressionOnly(that); }
   public Void forVariableDeclaratorDoFirst(VariableDeclarator that) { return forJExpressionDoFirst(that); }
   public Void forVariableDeclaratorOnly(VariableDeclarator that) { return forJExpressionOnly(that); }
-  public Void forUninitializedVariableDeclaratorDoFirst(UninitializedVariableDeclarator that) { return forVariableDeclaratorDoFirst(that); }
-  public Void forUninitializedVariableDeclaratorOnly(UninitializedVariableDeclarator that) { return forVariableDeclaratorOnly(that); }
-  public Void forInitializedVariableDeclaratorDoFirst(InitializedVariableDeclarator that) { return forVariableDeclaratorDoFirst(that); }
-  public Void forInitializedVariableDeclaratorOnly(InitializedVariableDeclarator that) { return forVariableDeclaratorOnly(that); }
+  public Void forUninitializedVariableDeclaratorDoFirst(UninitializedVariableDeclarator that) { 
+    return forVariableDeclaratorDoFirst(that); 
+  }
+  public Void forUninitializedVariableDeclaratorOnly(UninitializedVariableDeclarator that) { 
+    return forVariableDeclaratorOnly(that); 
+  }
+  public Void forInitializedVariableDeclaratorDoFirst(InitializedVariableDeclarator that) { 
+    return forVariableDeclaratorDoFirst(that); 
+  }
+  public Void forInitializedVariableDeclaratorOnly(InitializedVariableDeclarator that) { 
+    return forVariableDeclaratorOnly(that); 
+  }
   public Void forTypeParameterDoFirst(TypeParameter that) { return forJExpressionDoFirst(that); }
   public Void forTypeParameterOnly(TypeParameter that) { return forJExpressionOnly(that); }
   public Void forArrayInitializerDoFirst(ArrayInitializer that) { return forJExpressionDoFirst(that); }
@@ -195,36 +213,96 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forExpressionOnly(Expression that) { return forJExpressionOnly(that); }
   public Void forAssignmentExpressionDoFirst(AssignmentExpression that) { return forExpressionDoFirst(that); }
   public Void forAssignmentExpressionOnly(AssignmentExpression that) { return forExpressionOnly(that); }
-  public Void forSimpleAssignmentExpressionDoFirst(SimpleAssignmentExpression that) { return forAssignmentExpressionDoFirst(that); }
-  public Void forSimpleAssignmentExpressionOnly(SimpleAssignmentExpression that) { return forAssignmentExpressionOnly(that); }
-  public Void forPlusAssignmentExpressionDoFirst(PlusAssignmentExpression that) { return forAssignmentExpressionDoFirst(that); }
-  public Void forPlusAssignmentExpressionOnly(PlusAssignmentExpression that) { return forAssignmentExpressionOnly(that); }
-  public Void forNumericAssignmentExpressionDoFirst(NumericAssignmentExpression that) { return forAssignmentExpressionDoFirst(that); }
-  public Void forNumericAssignmentExpressionOnly(NumericAssignmentExpression that) { return forAssignmentExpressionOnly(that); }
-  public Void forMinusAssignmentExpressionDoFirst(MinusAssignmentExpression that) { return forNumericAssignmentExpressionDoFirst(that); }
-  public Void forMinusAssignmentExpressionOnly(MinusAssignmentExpression that) { return forNumericAssignmentExpressionOnly(that); }
-  public Void forMultiplyAssignmentExpressionDoFirst(MultiplyAssignmentExpression that) { return forNumericAssignmentExpressionDoFirst(that); }
-  public Void forMultiplyAssignmentExpressionOnly(MultiplyAssignmentExpression that) { return forNumericAssignmentExpressionOnly(that); }
-  public Void forDivideAssignmentExpressionDoFirst(DivideAssignmentExpression that) { return forNumericAssignmentExpressionDoFirst(that); }
-  public Void forDivideAssignmentExpressionOnly(DivideAssignmentExpression that) { return forNumericAssignmentExpressionOnly(that); }
-  public Void forModAssignmentExpressionDoFirst(ModAssignmentExpression that) { return forNumericAssignmentExpressionDoFirst(that); }
-  public Void forModAssignmentExpressionOnly(ModAssignmentExpression that) { return forNumericAssignmentExpressionOnly(that); }
-  public Void forShiftAssignmentExpressionDoFirst(ShiftAssignmentExpression that) { return forAssignmentExpressionDoFirst(that); }
-  public Void forShiftAssignmentExpressionOnly(ShiftAssignmentExpression that) { return forAssignmentExpressionOnly(that); }
-  public Void forLeftShiftAssignmentExpressionDoFirst(LeftShiftAssignmentExpression that) { return forShiftAssignmentExpressionDoFirst(that); }
-  public Void forLeftShiftAssignmentExpressionOnly(LeftShiftAssignmentExpression that) { return forShiftAssignmentExpressionOnly(that); }
-  public Void forRightSignedShiftAssignmentExpressionDoFirst(RightSignedShiftAssignmentExpression that) { return forShiftAssignmentExpressionDoFirst(that); }
-  public Void forRightSignedShiftAssignmentExpressionOnly(RightSignedShiftAssignmentExpression that) { return forShiftAssignmentExpressionOnly(that); }
-  public Void forRightUnsignedShiftAssignmentExpressionDoFirst(RightUnsignedShiftAssignmentExpression that) { return forShiftAssignmentExpressionDoFirst(that); }
-  public Void forRightUnsignedShiftAssignmentExpressionOnly(RightUnsignedShiftAssignmentExpression that) { return forShiftAssignmentExpressionOnly(that); }
-  public Void forBitwiseAssignmentExpressionDoFirst(BitwiseAssignmentExpression that) { return forAssignmentExpressionDoFirst(that); }
-  public Void forBitwiseAssignmentExpressionOnly(BitwiseAssignmentExpression that) { return forAssignmentExpressionOnly(that); }
-  public Void forBitwiseAndAssignmentExpressionDoFirst(BitwiseAndAssignmentExpression that) { return forBitwiseAssignmentExpressionDoFirst(that); }
-  public Void forBitwiseAndAssignmentExpressionOnly(BitwiseAndAssignmentExpression that) { return forBitwiseAssignmentExpressionOnly(that); }
-  public Void forBitwiseOrAssignmentExpressionDoFirst(BitwiseOrAssignmentExpression that) { return forBitwiseAssignmentExpressionDoFirst(that); }
-  public Void forBitwiseOrAssignmentExpressionOnly(BitwiseOrAssignmentExpression that) { return forBitwiseAssignmentExpressionOnly(that); }
-  public Void forBitwiseXorAssignmentExpressionDoFirst(BitwiseXorAssignmentExpression that) { return forBitwiseAssignmentExpressionDoFirst(that); }
-  public Void forBitwiseXorAssignmentExpressionOnly(BitwiseXorAssignmentExpression that) { return forBitwiseAssignmentExpressionOnly(that); }
+  public Void forSimpleAssignmentExpressionDoFirst(SimpleAssignmentExpression that) { 
+    return forAssignmentExpressionDoFirst(that); 
+  }
+  public Void forSimpleAssignmentExpressionOnly(SimpleAssignmentExpression that) { 
+    return forAssignmentExpressionOnly(that); 
+  }
+  public Void forPlusAssignmentExpressionDoFirst(PlusAssignmentExpression that) { 
+    return forAssignmentExpressionDoFirst(that); 
+  }
+  public Void forPlusAssignmentExpressionOnly(PlusAssignmentExpression that) { 
+    return forAssignmentExpressionOnly(that); 
+  }
+  public Void forNumericAssignmentExpressionDoFirst(NumericAssignmentExpression that) { 
+    return forAssignmentExpressionDoFirst(that); 
+  }
+  public Void forNumericAssignmentExpressionOnly(NumericAssignmentExpression that) { 
+    return forAssignmentExpressionOnly(that); 
+  }
+  public Void forMinusAssignmentExpressionDoFirst(MinusAssignmentExpression that) { 
+    return forNumericAssignmentExpressionDoFirst(that); 
+  }
+  public Void forMinusAssignmentExpressionOnly(MinusAssignmentExpression that) { 
+    return forNumericAssignmentExpressionOnly(that); 
+  }
+  public Void forMultiplyAssignmentExpressionDoFirst(MultiplyAssignmentExpression that) {
+    return forNumericAssignmentExpressionDoFirst(that); 
+  }
+  public Void forMultiplyAssignmentExpressionOnly(MultiplyAssignmentExpression that) { 
+    return forNumericAssignmentExpressionOnly(that); 
+  }
+  public Void forDivideAssignmentExpressionDoFirst(DivideAssignmentExpression that) { 
+    return forNumericAssignmentExpressionDoFirst(that); 
+  }
+  public Void forDivideAssignmentExpressionOnly(DivideAssignmentExpression that) { 
+    return forNumericAssignmentExpressionOnly(that); 
+  }
+  public Void forModAssignmentExpressionDoFirst(ModAssignmentExpression that) { 
+    return forNumericAssignmentExpressionDoFirst(that); 
+  }
+  public Void forModAssignmentExpressionOnly(ModAssignmentExpression that) { 
+    return forNumericAssignmentExpressionOnly(that);
+  }
+  public Void forShiftAssignmentExpressionDoFirst(ShiftAssignmentExpression that) { 
+    return forAssignmentExpressionDoFirst(that);
+  }
+  public Void forShiftAssignmentExpressionOnly(ShiftAssignmentExpression that) {
+    return forAssignmentExpressionOnly(that);
+  }
+  public Void forLeftShiftAssignmentExpressionDoFirst(LeftShiftAssignmentExpression that) { 
+    return forShiftAssignmentExpressionDoFirst(that);
+  }
+  public Void forLeftShiftAssignmentExpressionOnly(LeftShiftAssignmentExpression that) { 
+    return forShiftAssignmentExpressionOnly(that); 
+  }
+  public Void forRightSignedShiftAssignmentExpressionDoFirst(RightSignedShiftAssignmentExpression that) { 
+    return forShiftAssignmentExpressionDoFirst(that); 
+  }
+  public Void forRightSignedShiftAssignmentExpressionOnly(RightSignedShiftAssignmentExpression that) { 
+    return forShiftAssignmentExpressionOnly(that); 
+  }
+  public Void forRightUnsignedShiftAssignmentExpressionDoFirst(RightUnsignedShiftAssignmentExpression that) { 
+    return forShiftAssignmentExpressionDoFirst(that); 
+  }
+  public Void forRightUnsignedShiftAssignmentExpressionOnly(RightUnsignedShiftAssignmentExpression that) { 
+    return forShiftAssignmentExpressionOnly(that); 
+  }
+  public Void forBitwiseAssignmentExpressionDoFirst(BitwiseAssignmentExpression that) { 
+    return forAssignmentExpressionDoFirst(that);
+  }
+  public Void forBitwiseAssignmentExpressionOnly(BitwiseAssignmentExpression that) { 
+    return forAssignmentExpressionOnly(that);
+  }
+  public Void forBitwiseAndAssignmentExpressionDoFirst(BitwiseAndAssignmentExpression that) { 
+    return forBitwiseAssignmentExpressionDoFirst(that); 
+  }
+  public Void forBitwiseAndAssignmentExpressionOnly(BitwiseAndAssignmentExpression that) { 
+    return forBitwiseAssignmentExpressionOnly(that);
+  }
+  public Void forBitwiseOrAssignmentExpressionDoFirst(BitwiseOrAssignmentExpression that) { 
+    return forBitwiseAssignmentExpressionDoFirst(that);
+  }
+  public Void forBitwiseOrAssignmentExpressionOnly(BitwiseOrAssignmentExpression that) {
+    return forBitwiseAssignmentExpressionOnly(that); 
+  }
+  public Void forBitwiseXorAssignmentExpressionDoFirst(BitwiseXorAssignmentExpression that) { 
+    return forBitwiseAssignmentExpressionDoFirst(that);
+  }
+  public Void forBitwiseXorAssignmentExpressionOnly(BitwiseXorAssignmentExpression that) {
+    return forBitwiseAssignmentExpressionOnly(that);
+  }
   public Void forBinaryExpressionDoFirst(BinaryExpression that) { return forExpressionDoFirst(that); }
   public Void forBinaryExpressionOnly(BinaryExpression that) { return forExpressionOnly(that); }
   public Void forBooleanExpressionDoFirst(BooleanExpression that) { return forBinaryExpressionDoFirst(that); }
@@ -233,13 +311,21 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forOrExpressionOnly(OrExpression that) { return forBooleanExpressionOnly(that); }
   public Void forAndExpressionDoFirst(AndExpression that) { return forBooleanExpressionDoFirst(that); }
   public Void forAndExpressionOnly(AndExpression that) { return forBooleanExpressionOnly(that); }
-  public Void forBitwiseBinaryExpressionDoFirst(BitwiseBinaryExpression that) { return forBinaryExpressionDoFirst(that); }
+  public Void forBitwiseBinaryExpressionDoFirst(BitwiseBinaryExpression that) { 
+    return forBinaryExpressionDoFirst(that); 
+  }
   public Void forBitwiseBinaryExpressionOnly(BitwiseBinaryExpression that) { return forBinaryExpressionOnly(that); }
-  public Void forBitwiseOrExpressionDoFirst(BitwiseOrExpression that) { return forBitwiseBinaryExpressionDoFirst(that); }
+  public Void forBitwiseOrExpressionDoFirst(BitwiseOrExpression that) { 
+    return forBitwiseBinaryExpressionDoFirst(that); 
+  }
   public Void forBitwiseOrExpressionOnly(BitwiseOrExpression that) { return forBitwiseBinaryExpressionOnly(that); }
-  public Void forBitwiseXorExpressionDoFirst(BitwiseXorExpression that) { return forBitwiseBinaryExpressionDoFirst(that); }
+  public Void forBitwiseXorExpressionDoFirst(BitwiseXorExpression that) { 
+    return forBitwiseBinaryExpressionDoFirst(that); 
+  }
   public Void forBitwiseXorExpressionOnly(BitwiseXorExpression that) { return forBitwiseBinaryExpressionOnly(that); }
-  public Void forBitwiseAndExpressionDoFirst(BitwiseAndExpression that) { return forBitwiseBinaryExpressionDoFirst(that); }
+  public Void forBitwiseAndExpressionDoFirst(BitwiseAndExpression that) { 
+    return forBitwiseBinaryExpressionDoFirst(that); 
+  }
   public Void forBitwiseAndExpressionOnly(BitwiseAndExpression that) { return forBitwiseBinaryExpressionOnly(that); }
   public Void forEqualityExpressionDoFirst(EqualityExpression that) { return forBinaryExpressionDoFirst(that); }
   public Void forEqualityExpressionOnly(EqualityExpression that) { return forBinaryExpressionOnly(that); }
@@ -251,23 +337,41 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forComparisonExpressionOnly(ComparisonExpression that) { return forBinaryExpressionOnly(that); }
   public Void forLessThanExpressionDoFirst(LessThanExpression that) { return forComparisonExpressionDoFirst(that); }
   public Void forLessThanExpressionOnly(LessThanExpression that) { return forComparisonExpressionOnly(that); }
-  public Void forLessThanOrEqualExpressionDoFirst(LessThanOrEqualExpression that) { return forComparisonExpressionDoFirst(that); }
-  public Void forLessThanOrEqualExpressionOnly(LessThanOrEqualExpression that) { return forComparisonExpressionOnly(that); }
+  public Void forLessThanOrEqualExpressionDoFirst(LessThanOrEqualExpression that) {
+    return forComparisonExpressionDoFirst(that);
+  }
+  public Void forLessThanOrEqualExpressionOnly(LessThanOrEqualExpression that) {
+    return forComparisonExpressionOnly(that); 
+  }
   public Void forGreaterThanExpressionDoFirst(GreaterThanExpression that) { return forComparisonExpressionDoFirst(that); }
   public Void forGreaterThanExpressionOnly(GreaterThanExpression that) { return forComparisonExpressionOnly(that); }
-  public Void forGreaterThanOrEqualExpressionDoFirst(GreaterThanOrEqualExpression that) { return forComparisonExpressionDoFirst(that); }
-  public Void forGreaterThanOrEqualExpressionOnly(GreaterThanOrEqualExpression that) { return forComparisonExpressionOnly(that); }
+  public Void forGreaterThanOrEqualExpressionDoFirst(GreaterThanOrEqualExpression that) { 
+    return forComparisonExpressionDoFirst(that); 
+  }
+  public Void forGreaterThanOrEqualExpressionOnly(GreaterThanOrEqualExpression that) {
+    return forComparisonExpressionOnly(that);
+  }
   public Void forShiftBinaryExpressionDoFirst(ShiftBinaryExpression that) { return forBinaryExpressionDoFirst(that); }
   public Void forShiftBinaryExpressionOnly(ShiftBinaryExpression that) { return forBinaryExpressionOnly(that); }
   public Void forLeftShiftExpressionDoFirst(LeftShiftExpression that) { return forShiftBinaryExpressionDoFirst(that); }
   public Void forLeftShiftExpressionOnly(LeftShiftExpression that) { return forShiftBinaryExpressionOnly(that); }
-  public Void forRightSignedShiftExpressionDoFirst(RightSignedShiftExpression that) { return forShiftBinaryExpressionDoFirst(that); }
-  public Void forRightSignedShiftExpressionOnly(RightSignedShiftExpression that) { return forShiftBinaryExpressionOnly(that); }
-  public Void forRightUnsignedShiftExpressionDoFirst(RightUnsignedShiftExpression that) { return forShiftBinaryExpressionDoFirst(that); }
-  public Void forRightUnsignedShiftExpressionOnly(RightUnsignedShiftExpression that) { return forShiftBinaryExpressionOnly(that); }
+  public Void forRightSignedShiftExpressionDoFirst(RightSignedShiftExpression that) { 
+    return forShiftBinaryExpressionDoFirst(that); 
+  }
+  public Void forRightSignedShiftExpressionOnly(RightSignedShiftExpression that) { 
+    return forShiftBinaryExpressionOnly(that); 
+  }
+  public Void forRightUnsignedShiftExpressionDoFirst(RightUnsignedShiftExpression that) {
+    return forShiftBinaryExpressionDoFirst(that);
+  }
+  public Void forRightUnsignedShiftExpressionOnly(RightUnsignedShiftExpression that) { 
+    return forShiftBinaryExpressionOnly(that);
+  }
   public Void forPlusExpressionDoFirst(PlusExpression that) { return forBinaryExpressionDoFirst(that); }
   public Void forPlusExpressionOnly(PlusExpression that) { return forBinaryExpressionOnly(that); }
-  public Void forNumericBinaryExpressionDoFirst(NumericBinaryExpression that) { return forBinaryExpressionDoFirst(that); }
+  public Void forNumericBinaryExpressionDoFirst(NumericBinaryExpression that) { 
+    return forBinaryExpressionDoFirst(that);
+  }
   public Void forNumericBinaryExpressionOnly(NumericBinaryExpression that) { return forBinaryExpressionOnly(that); }
   public Void forMinusExpressionDoFirst(MinusExpression that) { return forNumericBinaryExpressionDoFirst(that); }
   public Void forMinusExpressionOnly(MinusExpression that) { return forNumericBinaryExpressionOnly(that); }
@@ -283,18 +387,42 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forUnaryExpressionOnly(UnaryExpression that) { return forExpressionOnly(that); }
   public Void forIncrementExpressionDoFirst(IncrementExpression that) { return forUnaryExpressionDoFirst(that); }
   public Void forIncrementExpressionOnly(IncrementExpression that) { return forUnaryExpressionOnly(that); }
-  public Void forPrefixIncrementExpressionDoFirst(PrefixIncrementExpression that) { return forIncrementExpressionDoFirst(that); }
-  public Void forPrefixIncrementExpressionOnly(PrefixIncrementExpression that) { return forIncrementExpressionOnly(that); }
-  public Void forPositivePrefixIncrementExpressionDoFirst(PositivePrefixIncrementExpression that) { return forPrefixIncrementExpressionDoFirst(that); }
-  public Void forPositivePrefixIncrementExpressionOnly(PositivePrefixIncrementExpression that) { return forPrefixIncrementExpressionOnly(that); }
-  public Void forNegativePrefixIncrementExpressionDoFirst(NegativePrefixIncrementExpression that) { return forPrefixIncrementExpressionDoFirst(that); }
-  public Void forNegativePrefixIncrementExpressionOnly(NegativePrefixIncrementExpression that) { return forPrefixIncrementExpressionOnly(that); }
-  public Void forPostfixIncrementExpressionDoFirst(PostfixIncrementExpression that) { return forIncrementExpressionDoFirst(that); }
-  public Void forPostfixIncrementExpressionOnly(PostfixIncrementExpression that) { return forIncrementExpressionOnly(that); }
-  public Void forPositivePostfixIncrementExpressionDoFirst(PositivePostfixIncrementExpression that) { return forPostfixIncrementExpressionDoFirst(that); }
-  public Void forPositivePostfixIncrementExpressionOnly(PositivePostfixIncrementExpression that) { return forPostfixIncrementExpressionOnly(that); }
-  public Void forNegativePostfixIncrementExpressionDoFirst(NegativePostfixIncrementExpression that) { return forPostfixIncrementExpressionDoFirst(that); }
-  public Void forNegativePostfixIncrementExpressionOnly(NegativePostfixIncrementExpression that) { return forPostfixIncrementExpressionOnly(that); }
+  public Void forPrefixIncrementExpressionDoFirst(PrefixIncrementExpression that) { 
+    return forIncrementExpressionDoFirst(that);
+  }
+  public Void forPrefixIncrementExpressionOnly(PrefixIncrementExpression that) { 
+    return forIncrementExpressionOnly(that);
+  }
+  public Void forPositivePrefixIncrementExpressionDoFirst(PositivePrefixIncrementExpression that) { 
+    return forPrefixIncrementExpressionDoFirst(that);
+  }
+  public Void forPositivePrefixIncrementExpressionOnly(PositivePrefixIncrementExpression that) {
+    return forPrefixIncrementExpressionOnly(that); 
+  }
+  public Void forNegativePrefixIncrementExpressionDoFirst(NegativePrefixIncrementExpression that) { 
+    return forPrefixIncrementExpressionDoFirst(that);
+  }
+  public Void forNegativePrefixIncrementExpressionOnly(NegativePrefixIncrementExpression that) { 
+    return forPrefixIncrementExpressionOnly(that); 
+  }
+  public Void forPostfixIncrementExpressionDoFirst(PostfixIncrementExpression that) { 
+    return forIncrementExpressionDoFirst(that);
+  }
+  public Void forPostfixIncrementExpressionOnly(PostfixIncrementExpression that) { 
+    return forIncrementExpressionOnly(that);
+  }
+  public Void forPositivePostfixIncrementExpressionDoFirst(PositivePostfixIncrementExpression that) { 
+    return forPostfixIncrementExpressionDoFirst(that); 
+  }
+  public Void forPositivePostfixIncrementExpressionOnly(PositivePostfixIncrementExpression that) {
+    return forPostfixIncrementExpressionOnly(that);
+  }
+  public Void forNegativePostfixIncrementExpressionDoFirst(NegativePostfixIncrementExpression that) {
+    return forPostfixIncrementExpressionDoFirst(that); 
+  }
+  public Void forNegativePostfixIncrementExpressionOnly(NegativePostfixIncrementExpression that) { 
+    return forPostfixIncrementExpressionOnly(that); 
+  }
   public Void forNumericUnaryExpressionDoFirst(NumericUnaryExpression that) { return forUnaryExpressionDoFirst(that); }
   public Void forNumericUnaryExpressionOnly(NumericUnaryExpression that) { return forUnaryExpressionOnly(that); }
   public Void forPositiveExpressionDoFirst(PositiveExpression that) { return forNumericUnaryExpressionDoFirst(that); }
@@ -335,32 +463,80 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forInstantiationOnly(Instantiation that) { return forPrimaryOnly(that); }
   public Void forClassInstantiationDoFirst(ClassInstantiation that) { return forInstantiationDoFirst(that); }
   public Void forClassInstantiationOnly(ClassInstantiation that) { return forInstantiationOnly(that); }
-  public Void forNamedClassInstantiationDoFirst(NamedClassInstantiation that) { return forClassInstantiationDoFirst(that); }
-  public Void forNamedClassInstantiationOnly(NamedClassInstantiation that) { return forClassInstantiationOnly(that); }
-  public Void forSimpleNamedClassInstantiationDoFirst(SimpleNamedClassInstantiation that) { return forNamedClassInstantiationDoFirst(that); }
-  public Void forSimpleNamedClassInstantiationOnly(SimpleNamedClassInstantiation that) { return forNamedClassInstantiationOnly(that); }
-  public Void forComplexNamedClassInstantiationDoFirst(ComplexNamedClassInstantiation that) { return forNamedClassInstantiationDoFirst(that); }
-  public Void forComplexNamedClassInstantiationOnly(ComplexNamedClassInstantiation that) { return forNamedClassInstantiationOnly(that); }
-  public Void forAnonymousClassInstantiationDoFirst(AnonymousClassInstantiation that) { return forClassInstantiationDoFirst(that); }
-  public Void forAnonymousClassInstantiationOnly(AnonymousClassInstantiation that) { return forClassInstantiationOnly(that); }
-  public Void forSimpleAnonymousClassInstantiationDoFirst(SimpleAnonymousClassInstantiation that) { return forAnonymousClassInstantiationDoFirst(that); }
-  public Void forSimpleAnonymousClassInstantiationOnly(SimpleAnonymousClassInstantiation that) { return forAnonymousClassInstantiationOnly(that); }
-  public Void forComplexAnonymousClassInstantiationDoFirst(ComplexAnonymousClassInstantiation that) { return forAnonymousClassInstantiationDoFirst(that); }
-  public Void forComplexAnonymousClassInstantiationOnly(ComplexAnonymousClassInstantiation that) { return forAnonymousClassInstantiationOnly(that); }
+  public Void forNamedClassInstantiationDoFirst(NamedClassInstantiation that) {
+    return forClassInstantiationDoFirst(that); 
+  }
+  public Void forNamedClassInstantiationOnly(NamedClassInstantiation that) {
+    return forClassInstantiationOnly(that); 
+  }
+  public Void forSimpleNamedClassInstantiationDoFirst(SimpleNamedClassInstantiation that) { 
+    return forNamedClassInstantiationDoFirst(that); 
+  }
+  public Void forSimpleNamedClassInstantiationOnly(SimpleNamedClassInstantiation that) { 
+    return forNamedClassInstantiationOnly(that);
+  }
+  public Void forComplexNamedClassInstantiationDoFirst(ComplexNamedClassInstantiation that) { 
+    return forNamedClassInstantiationDoFirst(that); 
+  }
+  public Void forComplexNamedClassInstantiationOnly(ComplexNamedClassInstantiation that) { 
+    return forNamedClassInstantiationOnly(that); 
+  }
+  public Void forAnonymousClassInstantiationDoFirst(AnonymousClassInstantiation that) { 
+    return forClassInstantiationDoFirst(that); 
+  }
+  public Void forAnonymousClassInstantiationOnly(AnonymousClassInstantiation that) { 
+    return forClassInstantiationOnly(that); 
+  }
+  public Void forSimpleAnonymousClassInstantiationDoFirst(SimpleAnonymousClassInstantiation that) { 
+    return forAnonymousClassInstantiationDoFirst(that); 
+  }
+  public Void forSimpleAnonymousClassInstantiationOnly(SimpleAnonymousClassInstantiation that) { 
+    return forAnonymousClassInstantiationOnly(that); 
+  }
+  public Void forComplexAnonymousClassInstantiationDoFirst(ComplexAnonymousClassInstantiation that) { 
+    return forAnonymousClassInstantiationDoFirst(that);
+  }
+  public Void forComplexAnonymousClassInstantiationOnly(ComplexAnonymousClassInstantiation that) { 
+    return forAnonymousClassInstantiationOnly(that); 
+  }
   public Void forArrayInstantiationDoFirst(ArrayInstantiation that) { return forInstantiationDoFirst(that); }
   public Void forArrayInstantiationOnly(ArrayInstantiation that) { return forInstantiationOnly(that); }
-  public Void forUninitializedArrayInstantiationDoFirst(UninitializedArrayInstantiation that) { return forArrayInstantiationDoFirst(that); }
-  public Void forUninitializedArrayInstantiationOnly(UninitializedArrayInstantiation that) { return forArrayInstantiationOnly(that); }
-  public Void forSimpleUninitializedArrayInstantiationDoFirst(SimpleUninitializedArrayInstantiation that) { return forUninitializedArrayInstantiationDoFirst(that); }
-  public Void forSimpleUninitializedArrayInstantiationOnly(SimpleUninitializedArrayInstantiation that) { return forUninitializedArrayInstantiationOnly(that); }
-  public Void forComplexUninitializedArrayInstantiationDoFirst(ComplexUninitializedArrayInstantiation that) { return forUninitializedArrayInstantiationDoFirst(that); }
-  public Void forComplexUninitializedArrayInstantiationOnly(ComplexUninitializedArrayInstantiation that) { return forUninitializedArrayInstantiationOnly(that); }
-  public Void forInitializedArrayInstantiationDoFirst(InitializedArrayInstantiation that) { return forArrayInstantiationDoFirst(that); }
-  public Void forInitializedArrayInstantiationOnly(InitializedArrayInstantiation that) { return forArrayInstantiationOnly(that); }
-  public Void forSimpleInitializedArrayInstantiationDoFirst(SimpleInitializedArrayInstantiation that) { return forInitializedArrayInstantiationDoFirst(that); }
-  public Void forSimpleInitializedArrayInstantiationOnly(SimpleInitializedArrayInstantiation that) { return forInitializedArrayInstantiationOnly(that); }
-  public Void forComplexInitializedArrayInstantiationDoFirst(ComplexInitializedArrayInstantiation that) { return forInitializedArrayInstantiationDoFirst(that); }
-  public Void forComplexInitializedArrayInstantiationOnly(ComplexInitializedArrayInstantiation that) { return forInitializedArrayInstantiationOnly(that); }
+  public Void forUninitializedArrayInstantiationDoFirst(UninitializedArrayInstantiation that) { 
+    return forArrayInstantiationDoFirst(that); 
+  }
+  public Void forUninitializedArrayInstantiationOnly(UninitializedArrayInstantiation that) { 
+    return forArrayInstantiationOnly(that); 
+  }
+  public Void forSimpleUninitializedArrayInstantiationDoFirst(SimpleUninitializedArrayInstantiation that) { 
+    return forUninitializedArrayInstantiationDoFirst(that);
+  }
+  public Void forSimpleUninitializedArrayInstantiationOnly(SimpleUninitializedArrayInstantiation that) { 
+    return forUninitializedArrayInstantiationOnly(that);
+  }
+  public Void forComplexUninitializedArrayInstantiationDoFirst(ComplexUninitializedArrayInstantiation that) {
+    return forUninitializedArrayInstantiationDoFirst(that);
+  }
+  public Void forComplexUninitializedArrayInstantiationOnly(ComplexUninitializedArrayInstantiation that) {
+    return forUninitializedArrayInstantiationOnly(that); 
+  }
+  public Void forInitializedArrayInstantiationDoFirst(InitializedArrayInstantiation that) {
+    return forArrayInstantiationDoFirst(that); 
+  }
+  public Void forInitializedArrayInstantiationOnly(InitializedArrayInstantiation that) {
+    return forArrayInstantiationOnly(that);
+  }
+  public Void forSimpleInitializedArrayInstantiationDoFirst(SimpleInitializedArrayInstantiation that) { 
+    return forInitializedArrayInstantiationDoFirst(that);
+  }
+  public Void forSimpleInitializedArrayInstantiationOnly(SimpleInitializedArrayInstantiation that) { 
+    return forInitializedArrayInstantiationOnly(that);
+  }
+  public Void forComplexInitializedArrayInstantiationDoFirst(ComplexInitializedArrayInstantiation that) { 
+    return forInitializedArrayInstantiationDoFirst(that);
+  }
+  public Void forComplexInitializedArrayInstantiationOnly(ComplexInitializedArrayInstantiation that) { 
+    return forInitializedArrayInstantiationOnly(that);
+  }
   public Void forVariableReferenceDoFirst(VariableReference that) { return forPrimaryDoFirst(that); }
   public Void forVariableReferenceOnly(VariableReference that) { return forPrimaryOnly(that); }
   public Void forNameReferenceDoFirst(NameReference that) { return forVariableReferenceDoFirst(that); }
@@ -387,20 +563,46 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forMethodInvocationOnly(MethodInvocation that) { return forFunctionInvocationOnly(that); }
   public Void forSimpleMethodInvocationDoFirst(SimpleMethodInvocation that) { return forMethodInvocationDoFirst(that); }
   public Void forSimpleMethodInvocationOnly(SimpleMethodInvocation that) { return forMethodInvocationOnly(that); }
-  public Void forComplexMethodInvocationDoFirst(ComplexMethodInvocation that) { return forMethodInvocationDoFirst(that); }
+  public Void forComplexMethodInvocationDoFirst(ComplexMethodInvocation that) { 
+    return forMethodInvocationDoFirst(that); 
+  }
   public Void forComplexMethodInvocationOnly(ComplexMethodInvocation that) { return forMethodInvocationOnly(that); }
-  public Void forThisConstructorInvocationDoFirst(ThisConstructorInvocation that) { return forFunctionInvocationDoFirst(that); }
-  public Void forThisConstructorInvocationOnly(ThisConstructorInvocation that) { return forFunctionInvocationOnly(that); }
-  public Void forSimpleThisConstructorInvocationDoFirst(SimpleThisConstructorInvocation that) { return forThisConstructorInvocationDoFirst(that); }
-  public Void forSimpleThisConstructorInvocationOnly(SimpleThisConstructorInvocation that) { return forThisConstructorInvocationOnly(that); }
-  public Void forComplexThisConstructorInvocationDoFirst(ComplexThisConstructorInvocation that) { return forThisConstructorInvocationDoFirst(that); }
-  public Void forComplexThisConstructorInvocationOnly(ComplexThisConstructorInvocation that) { return forThisConstructorInvocationOnly(that); }
-  public Void forSuperConstructorInvocationDoFirst(SuperConstructorInvocation that) { return forFunctionInvocationDoFirst(that); }
-  public Void forSuperConstructorInvocationOnly(SuperConstructorInvocation that) { return forFunctionInvocationOnly(that); }
-  public Void forSimpleSuperConstructorInvocationDoFirst(SimpleSuperConstructorInvocation that) { return forSuperConstructorInvocationDoFirst(that); }
-  public Void forSimpleSuperConstructorInvocationOnly(SimpleSuperConstructorInvocation that) { return forSuperConstructorInvocationOnly(that); }
-  public Void forComplexSuperConstructorInvocationDoFirst(ComplexSuperConstructorInvocation that) { return forSuperConstructorInvocationDoFirst(that); }
-  public Void forComplexSuperConstructorInvocationOnly(ComplexSuperConstructorInvocation that) { return forSuperConstructorInvocationOnly(that); }
+  public Void forThisConstructorInvocationDoFirst(ThisConstructorInvocation that) { 
+    return forFunctionInvocationDoFirst(that); 
+  }
+  public Void forThisConstructorInvocationOnly(ThisConstructorInvocation that) { 
+    return forFunctionInvocationOnly(that);
+  }
+  public Void forSimpleThisConstructorInvocationDoFirst(SimpleThisConstructorInvocation that) { 
+    return forThisConstructorInvocationDoFirst(that); 
+  }
+  public Void forSimpleThisConstructorInvocationOnly(SimpleThisConstructorInvocation that) {
+    return forThisConstructorInvocationOnly(that); 
+  }
+  public Void forComplexThisConstructorInvocationDoFirst(ComplexThisConstructorInvocation that) { 
+    return forThisConstructorInvocationDoFirst(that); 
+  }
+  public Void forComplexThisConstructorInvocationOnly(ComplexThisConstructorInvocation that) {
+    return forThisConstructorInvocationOnly(that); 
+  }
+  public Void forSuperConstructorInvocationDoFirst(SuperConstructorInvocation that) { 
+    return forFunctionInvocationDoFirst(that); 
+  }
+  public Void forSuperConstructorInvocationOnly(SuperConstructorInvocation that) { 
+    return forFunctionInvocationOnly(that); 
+  }
+  public Void forSimpleSuperConstructorInvocationDoFirst(SimpleSuperConstructorInvocation that) { 
+    return forSuperConstructorInvocationDoFirst(that);
+  }
+  public Void forSimpleSuperConstructorInvocationOnly(SimpleSuperConstructorInvocation that) { 
+    return forSuperConstructorInvocationOnly(that);
+  }
+  public Void forComplexSuperConstructorInvocationDoFirst(ComplexSuperConstructorInvocation that) { 
+    return forSuperConstructorInvocationDoFirst(that); 
+  }
+  public Void forComplexSuperConstructorInvocationOnly(ComplexSuperConstructorInvocation that) { 
+    return forSuperConstructorInvocationOnly(that); 
+  }
   public Void forClassLiteralDoFirst(ClassLiteral that) { return forPrimaryDoFirst(that); }
   public Void forClassLiteralOnly(ClassLiteral that) { return forPrimaryOnly(that); }
   public Void forArrayAccessDoFirst(ArrayAccess that) { return forPrimaryDoFirst(that); }
@@ -425,10 +627,18 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forUnbracedBodyOnly(UnbracedBody that) { return forBodyOnly(that); }
   public Void forExpressionListDoFirst(ExpressionList that) { return forJExpressionDoFirst(that); }
   public Void forExpressionListOnly(ExpressionList that) { return forJExpressionOnly(that); }
-  public Void forParenthesizedExpressionListDoFirst(ParenthesizedExpressionList that) { return forExpressionListDoFirst(that); }
-  public Void forParenthesizedExpressionListOnly(ParenthesizedExpressionList that) { return forExpressionListOnly(that); }
-  public Void forUnparenthesizedExpressionListDoFirst(UnparenthesizedExpressionList that) { return forExpressionListDoFirst(that); }
-  public Void forUnparenthesizedExpressionListOnly(UnparenthesizedExpressionList that) { return forExpressionListOnly(that); }
+  public Void forParenthesizedExpressionListDoFirst(ParenthesizedExpressionList that) { 
+    return forExpressionListDoFirst(that); 
+  }
+  public Void forParenthesizedExpressionListOnly(ParenthesizedExpressionList that) { 
+    return forExpressionListOnly(that); 
+  }
+  public Void forUnparenthesizedExpressionListDoFirst(UnparenthesizedExpressionList that) {
+    return forExpressionListDoFirst(that);
+  }
+  public Void forUnparenthesizedExpressionListOnly(UnparenthesizedExpressionList that) { 
+    return forExpressionListOnly(that);
+  }
   public Void forDimensionExpressionListDoFirst(DimensionExpressionList that) { return forExpressionListDoFirst(that); }
   public Void forDimensionExpressionListOnly(DimensionExpressionList that) { return forExpressionListOnly(that); }
   public Void forEmptyForConditionDoFirst(EmptyForCondition that) { return forJExpressionDoFirst(that); }
@@ -543,7 +753,8 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
       forSwitchStatementDoFirst(that);
       if (prune(that)) return null;
       that.getTest().visit(this);
-      for (int i = 0; i < that.getCases().length; i++) that.getCases()[i].visit(this); return forSwitchStatementOnly(that);
+      for (int i = 0; i < that.getCases().length; i++) that.getCases()[i].visit(this); 
+      return forSwitchStatementOnly(that);
     }
     public Void forIfThenStatement(IfThenStatement that) {
       forIfThenStatementDoFirst(that);
@@ -627,7 +838,8 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
       forNormalTryCatchStatementDoFirst(that);
       if (prune(that)) return null;
       that.getTryBlock().visit(this);
-      for (int i = 0; i < that.getCatchBlocks().length; i++) that.getCatchBlocks()[i].visit(this); return forNormalTryCatchStatementOnly(that);
+      for (int i = 0; i < that.getCatchBlocks().length; i++) that.getCatchBlocks()[i].visit(this); 
+      return forNormalTryCatchStatementOnly(that);
     }
     public Void forEmptyStatement(EmptyStatement that) {
       forEmptyStatementDoFirst(that);
@@ -650,7 +862,8 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
       for (int i = 0; i < that.getTypeParams().length; i++) that.getTypeParams()[i].visit(this);
       that.getResult().visit(this);
       for (int i = 0; i < that.getParams().length; i++) that.getParams()[i].visit(this);
-      for (int i = 0; i < that.getThrows().length; i++) that.getThrows()[i].visit(this); return forAbstractMethodDefOnly(that);
+      for (int i = 0; i < that.getThrows().length; i++) that.getThrows()[i].visit(this); 
+      return forAbstractMethodDefOnly(that);
     }
     public Void forFormalParameter(FormalParameter that) {
       forFormalParameterDoFirst(that);
@@ -661,7 +874,8 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
       forVariableDeclarationDoFirst(that);
       if (prune(that)) return null;
       that.getMav().visit(this);
-      for (int i = 0; i < that.getDeclarators().length; i++) that.getDeclarators()[i].visit(this); return forVariableDeclarationOnly(that);
+      for (int i = 0; i < that.getDeclarators().length; i++) that.getDeclarators()[i].visit(this);
+      return forVariableDeclarationOnly(that);
     }
     public Void forUninitializedVariableDeclarator(UninitializedVariableDeclarator that) {
       forUninitializedVariableDeclaratorDoFirst(that);
@@ -683,7 +897,8 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
     public Void forArrayInitializer(ArrayInitializer that) {
       forArrayInitializerDoFirst(that);
       if (prune(that)) return null;
-      for (int i = 0; i < that.getItems().length; i++) that.getItems()[i].visit(this); return forArrayInitializerOnly(that);
+      for (int i = 0; i < that.getItems().length; i++) that.getItems()[i].visit(this); 
+      return forArrayInitializerOnly(that);
     }
     public Void forPrimitiveType(PrimitiveType that) {
       forPrimitiveTypeDoFirst(that);
@@ -703,7 +918,8 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
     public Void forClassOrInterfaceType(ClassOrInterfaceType that) {
       forClassOrInterfaceTypeDoFirst(that);
       if (prune(that)) return null;
-      for (int i = 0; i < that.getTypeArguments().length; i++) that.getTypeArguments()[i].visit(this); return forClassOrInterfaceTypeOnly(that);
+      for (int i = 0; i < that.getTypeArguments().length; i++) that.getTypeArguments()[i].visit(this); 
+      return forClassOrInterfaceTypeOnly(that);
     }
     public Void forTypeVariable(TypeVariable that) {
       forTypeVariableDoFirst(that);
@@ -1160,27 +1376,32 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
     public Void forBracedBody(BracedBody that) {
       forBracedBodyDoFirst(that);
       if (prune(that)) return null;
-      for (int i = 0; i < that.getStatements().length; i++) that.getStatements()[i].visit(this); return forBracedBodyOnly(that);
+      for (int i = 0; i < that.getStatements().length; i++) that.getStatements()[i].visit(this); 
+      return forBracedBodyOnly(that);
     }
     public Void forUnbracedBody(UnbracedBody that) {
       forUnbracedBodyDoFirst(that);
       if (prune(that)) return null;
-      for (int i = 0; i < that.getStatements().length; i++) that.getStatements()[i].visit(this); return forUnbracedBodyOnly(that);
+      for (int i = 0; i < that.getStatements().length; i++) that.getStatements()[i].visit(this); 
+      return forUnbracedBodyOnly(that);
     }
     public Void forParenthesizedExpressionList(ParenthesizedExpressionList that) {
       forParenthesizedExpressionListDoFirst(that);
       if (prune(that)) return null;
-      for (int i = 0; i < that.getExpressions().length; i++) that.getExpressions()[i].visit(this); return forParenthesizedExpressionListOnly(that);
+      for (int i = 0; i < that.getExpressions().length; i++) that.getExpressions()[i].visit(this);
+      return forParenthesizedExpressionListOnly(that);
     }
     public Void forUnparenthesizedExpressionList(UnparenthesizedExpressionList that) {
       forUnparenthesizedExpressionListDoFirst(that);
       if (prune(that)) return null;
-      for (int i = 0; i < that.getExpressions().length; i++) that.getExpressions()[i].visit(this); return forUnparenthesizedExpressionListOnly(that);
+      for (int i = 0; i < that.getExpressions().length; i++) that.getExpressions()[i].visit(this); 
+      return forUnparenthesizedExpressionListOnly(that);
     }
     public Void forDimensionExpressionList(DimensionExpressionList that) {
       forDimensionExpressionListDoFirst(that);
       if (prune(that)) return null;
-      for (int i = 0; i < that.getExpressions().length; i++) that.getExpressions()[i].visit(this); return forDimensionExpressionListOnly(that); }  
+      for (int i = 0; i < that.getExpressions().length; i++) that.getExpressions()[i].visit(this); 
+      return forDimensionExpressionListOnly(that); }  
     public Void forEmptyForCondition(EmptyForCondition that) {
       forEmptyForConditionDoFirst(that);
       if (prune(that)) return null; return forEmptyForConditionOnly(that);

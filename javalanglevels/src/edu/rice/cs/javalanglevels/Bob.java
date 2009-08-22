@@ -45,13 +45,11 @@ import edu.rice.cs.plt.iter.IterUtil;
 
 import junit.framework.TestCase;
 
-/**
- * We felt that this class should be named Bob because "Bob" was found to be very memorable.  
- * It is a TypeChecker for all code segments that rely
- * on some enclosing Data and other context information.
- * Basically, Bob sits between the TypeChecker and all other more specific type checkers (such as BodyTypeChecker, ClassBodyTypeChecker, etc)
- * where Bob maintains the context.
- */
+/** We felt that this class should be named Bob because "Bob" was found to be very memorable.  It is a TypeChecker 
+  * for all code segments that rely on some enclosing Data and other context information.  Basically, Bob sits between
+  * the TypeChecker and all other more specific type checkers (such as BodyTypeChecker, ClassBodyTypeChecker, etc)
+  * where Bob maintains the context.
+  */
 
 public class Bob extends TypeChecker {
   /** An incremental list of fields used because forward references among fields are not allowed.*/
@@ -77,7 +75,9 @@ public class Bob extends TypeChecker {
    * @param vars  The list of fields that have been assigned up to the point where Bob is called.
    * @param thrown  The list of exceptions that the context is declared to throw
    */
-  public Bob(Data data, File file, String packageName, LinkedList<String> importedFiles, LinkedList<String> importedPackages, LinkedList<VariableData> vars, LinkedList<Pair<SymbolData, JExpression>> thrown) {
+  public Bob(Data data, File file, String packageName, LinkedList<String> importedFiles, 
+             LinkedList<String> importedPackages, LinkedList<VariableData> vars, 
+             LinkedList<Pair<SymbolData, JExpression>> thrown) {
     super(file, packageName, importedFiles, importedPackages);
     _data = data;
     _vars = vars;
@@ -87,13 +87,9 @@ public class Bob extends TypeChecker {
   }
   
   /*@return the enclosing data*/
-  protected Data _getData() {
-    return _data;
-  }
+  protected Data _getData() { return _data; }
   
-  /**
-   * @return true iff the first enclosing MethodData or SymbolData is a static method
-   */
+  /** @return true iff the first enclosing MethodData or SymbolData is a static method. */
   protected boolean inStaticMethod() {
     for (Data d = _data; d != null; d = d.getOuterData()) {
       if (d instanceof MethodData) { return d.hasModifier("static"); }
@@ -102,26 +98,30 @@ public class Bob extends TypeChecker {
     return false;
   }
   
-  /**
-   * Return the symbol data corresponding to the lhs and the namePiece, if possible.
-   * Otherwise, return null.
-   * @param lhs  The left hand side of this complex reference, or null if this is a simple reference
-   * @param namePiece  The String right hand side of this reference
-   * @param jexpr  The JExpression corresponding to this class reference
-   */
+  /** Return the symbol data corresponding to the lhs and the namePiece, if possible.
+    * Otherwise, return null.
+    * @param lhs  The left hand side of this complex reference, or null if this is a simple reference
+    * @param namePiece  The String right hand side of this reference
+    * @param jexpr  The JExpression corresponding to this class reference
+    */
   protected SymbolData findClassReference(TypeData lhs, String namePiece, JExpression jexpr) {
     SymbolData result;
     if (lhs == null) {
-      result = getSymbolData(true, namePiece, _getData(), jexpr, false); //do not give an error if the SymbolData could not be found.  This is done later.
+      // Do not give an error if the SymbolData could not be found.  This is done later.
+      result = getSymbolData(true, namePiece, _getData(), jexpr, false); 
+
     }
     
     else if (lhs instanceof PackageData) {
-      result = getSymbolData(lhs.getName() + "." + namePiece, _getData(), jexpr, false);  //do not give an error if the SymbolData could not be found.
+      // Do not give an error if the SymbolData could not be found
+      result = getSymbolData(lhs.getName() + "." + namePiece, _getData(), jexpr, false); 
     }
 
     else {
-      result = getSymbolData(true, namePiece, lhs.getSymbolData(), jexpr, false); //do not give error if it could not be found, but do give an error if the reference is ambiguous.
-      //don't check for visibility here--check for it wherever this was called from.
+      // Do not give error if it could not be found, but do give an error if the reference is ambiguous.
+      result = getSymbolData(true, namePiece, lhs.getSymbolData(), jexpr, false); 
+
+      // Don't check for visibility here--check for it wherever this was called from.
     }
     
      return result;
@@ -154,14 +154,16 @@ public class Bob extends TypeChecker {
     Expression[] exprs = pel.getExpressions();
     InstanceData[] newArgs = new InstanceData[exprs.length];
     TypeData[] args = new TypeData[exprs.length];
-    ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, _vars, _thrown);
+    ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages,
+                                                          _vars, _thrown);
     for (int i = 0; i < exprs.length; i++) {
       args[i] = exprs[i].visit(etc);
       if (args[i] == null || !assertFound(args[i], exprs[i])) {
         return null;
       }
       if (!args[i].isInstanceType()) {
-        _addError("Cannot pass a class or interface name as a constructor argument.  Perhaps you meant to create an instance or use " + args[i].getName() + ".class", exprs[i]);
+        _addError("Cannot pass a class or interface name as a constructor argument.  " + 
+                  "Perhaps you meant to create an instance or use " + args[i].getName() + ".class", exprs[i]);
       }
       newArgs[i]=args[i].getInstanceData(); // getInstanceData() is used in place of a cast
     }
@@ -179,21 +181,26 @@ public class Bob extends TypeChecker {
  * @param name_result  Not used.
  * @param initializer_result  The type of what we are initializing the varaible with
  */
-  public TypeData forInitializedVariableDeclaratorOnly(InitializedVariableDeclarator that, TypeData type_result, TypeData name_result, TypeData initializer_result) {
+  public TypeData forInitializedVariableDeclaratorOnly(InitializedVariableDeclarator that, TypeData type_result, 
+                                                       TypeData name_result, TypeData initializer_result) {
     if (initializer_result != null && assertFound(initializer_result, that.getInitializer())) {
       if (!initializer_result.isInstanceType()) {
-        _addError("Field or variable " + that.getName().getText() + " cannot be initialized with the class or interface name " + initializer_result.getName() + ".  Perhaps you meant to create an instance or use " + initializer_result.getName() + ".class", that);
+        _addError("Field or variable " + that.getName().getText() + 
+                  " cannot be initialized with the class or interface name " + initializer_result.getName() + 
+                  ".  Perhaps you meant to create an instance or use " + initializer_result.getName() + ".class", that);
       }
       //we know type_result is always a SymbolData.
       else if (!_isAssignableFrom(type_result.getSymbolData(), initializer_result.getSymbolData())) {
-        _addError("Type: \"" + type_result.getName() + "\" expected, instead found type: \"" + initializer_result.getName() + "\".", that);
+        _addError("Type: \"" + type_result.getName() + "\" expected, instead found type: \"" + 
+                  initializer_result.getName() + "\".", that);
       }
     }
     Word name = that.getName();
     String text = that.getName().getText();
     VariableData vd = _data.getVar(text);
     if (vd == null) {
-      throw new RuntimeException("Internal Program Error: The field or variable " + text + " was not found in this block.  Please report this bug.");
+      throw new RuntimeException("Internal Program Error: The field or variable " + text + 
+                                 " was not found in this block.  Please report this bug.");
     }
     _vars.addLast(vd);
     return null;
@@ -201,17 +208,20 @@ public class Bob extends TypeChecker {
   
   /*This is not supported at any Language Level.  It should have been caught during the first pass.*/  
   public TypeData forInstanceInitializer(InstanceInitializer that) {
-    throw new RuntimeException("Internal Program Error: Instance Initializers are not supported.  This should have been caught before the Type Checker Pass.  Please report this bug.");
+    throw new RuntimeException("Internal Program Error: Instance Initializers are not supported." + 
+                               "  This should have been caught before the Type Checker Pass.  Please report this bug.");
   }
 
   /*This is not supported at any Language Level.  It should have been caught during the first pass.*/  
   public TypeData forStaticInitializer(StaticInitializer that) {
-    throw new RuntimeException("Internal Program Error: Static Initializers are not supported.  This should have been caught before the Type Checker Pass.  Please report this bug.");
+    throw new RuntimeException("Internal Program Error: Static Initializers are not supported." +
+                               "  This should have been caught before the Type Checker Pass.  Please report this bug.");
   }
   
   /*This is not supported at any Language Level.  It should have been caught during the first pass.*/  
   public TypeData forLabeledStatement(LabeledStatement that) {
-    throw new RuntimeException("Internal Program Error: Labeled Statements are not supported.  This should have been caught before the Type Checker Pass.  Please report this bug.");
+    throw new RuntimeException("Internal Program Error: Labeled Statements are not supported." + 
+                               "  This should have been caught before the Type Checker Pass.  Please report this bug.");
   }
   
   /*
@@ -221,7 +231,8 @@ public class Bob extends TypeChecker {
    * @return  The result of visiting the expression with the ExpressionTypeChecker.
    */
   public TypeData forExpressionStatement(ExpressionStatement that) {
-    ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, _vars, _thrown);
+    ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages,
+                                                          _vars, _thrown);
     final TypeData expression_result = that.getExpression().visit(etc);
 
     //do this so that we can keep track of anything that got assigned
@@ -235,7 +246,8 @@ public class Bob extends TypeChecker {
    * Add the corresponding SymbolData to _thrown.
    */
   public TypeData forThrowStatement(ThrowStatement that) {
-    ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, _vars, _thrown);
+    ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages,
+                                                          _vars, _thrown);
     final TypeData thrown_result = that.getThrown().visit(etc);
     thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned);
 
@@ -244,13 +256,12 @@ public class Bob extends TypeChecker {
   }
 
 
-  /*
-   * Make sure that what is being thrown is an instantiation of a class, not a class name, and that
-   * it extends Throwable.  Otherwise, give an error.
-   * @param that  The throw statement we are visiting
-   * @param thrown_result  The TypeData result of visiting the throw statement.  It should be an InstanceData, 
-   *                       unless there is an error in the student's code.
-   */
+  /** Make sure that what is being thrown is an instantiation of a class, not a class name, and that
+    * it extends Throwable.  Otherwise, give an error.
+    * @param that  The throw statement we are visiting
+    * @param thrown_result  The TypeData result of visiting the throw statement.  It should be an InstanceData, 
+    *                       unless there is an error in the student's code.
+    */
   public TypeData forThrowStatementOnly(ThrowStatement that, TypeData thrown_result) {
     if (thrown_result == null || !assertFound(thrown_result, that.getThrown())) return null;
   
@@ -268,7 +279,8 @@ public class Bob extends TypeChecker {
 //                       getSymbolData("java.lang.Throwable", that, false, true));
     //make sure what is being thrown extends java.lang.Throwable.
     if (!_isAssignableFrom(getSymbolData("java.lang.Throwable", that, false, true), thrown_result.getSymbolData())) {
-      _addError("You are attempting to throw " + thrown_result.getSymbolData().getName() + ", which does not implement the Throwable interface", that);
+      _addError("You are attempting to throw " + thrown_result.getSymbolData().getName() + 
+                ", which does not implement the Throwable interface", that);
     }
     return thrown_result;
   }
@@ -288,10 +300,9 @@ public class Bob extends TypeChecker {
     return declarator_result;
   }
 
-  /*
-   * Visit each of the declarators of this declaration.
-   * @param that  The VariableDeclaration we are visiting.
-   */
+  /** Visit each of the declarators of this declaration.
+    * @param that  The VariableDeclaration we are visiting.
+    */
   public TypeData forVariableDeclaration(VariableDeclaration that) {
     final TypeData mav_result = that.getMav().visit(this);
     final TypeData[] declarators_result = makeArrayOfRetType(that.getDeclarators().length);
@@ -301,24 +312,22 @@ public class Bob extends TypeChecker {
     return null;
   }
 
-  /*
-   * If this VariableDeclarator is uninitialized, make sure its type can be resolved and visit
-   * its name.
-   * @param that  The UninitializedVariableDeclarator we are visiting.
-   */
+  /** If this VariableDeclarator is uninitialized, make sure its type can be resolved and visit
+    * its name.
+    * @param that  The UninitializedVariableDeclarator we are visiting.
+    */
   public TypeData forUninitializedVariableDeclarator(UninitializedVariableDeclarator that) {
     final TypeData type_result = getSymbolData(that.getType().getName(), _data, that.getType());
     final TypeData name_result = that.getName().visit(this);
     return forUninitializedVariableDeclaratorOnly(that, type_result, name_result);
   }
   
-  /*
-   * If the VariableDeclarator is initialized, things get a little bit more complicated.
-   * Resolve the type and visit the name, like we do for the uninitilized case.
-   * Then, check to see if the initializer is an array initializer.  If so, delegate.
-   * Otherwise, just visit it with an ExpressionTypeChecker.
-   * @param that  The InitializedVariableDeclarator we are visiting.
-   */
+  /** If the VariableDeclarator is initialized, things get a little bit more complicated.
+    * Resolve the type and visit the name, like we do for the uninitilized case.
+    * Then, check to see if the initializer is an array initializer.  If so, delegate.
+    * Otherwise, just visit it with an ExpressionTypeChecker.
+    * @param that  The InitializedVariableDeclarator we are visiting.
+    */
   public TypeData forInitializedVariableDeclarator(InitializedVariableDeclarator that) {
     final SymbolData type_result = getSymbolData(that.getType().getName(), _data, that.getType());
     final TypeData name_result = that.getName().visit(this); //we think this is always null
@@ -328,31 +337,29 @@ public class Bob extends TypeChecker {
       initializer_result = forArrayInitializerHelper((ArrayInitializer) that.getInitializer(), type_result);
     }
     else {
-      ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, _vars, _thrown);
+      ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages,
+                                                            _vars, _thrown);
       initializer_result = that.getInitializer().visit(etc);
       thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned); //incorporate this list here
     }
     return forInitializedVariableDeclaratorOnly(that, type_result, name_result, initializer_result);
   }
 
-  /*
-   * A variable data can be assigned to if it is not final or if it does not have a value.
-   * (i.e. final variables that already have a value cannot be assigned to.  Everything else can be).
-   */
+  /** A variable data can be assigned to if it is not final or if it does not have a value.
+    * (i.e. final variables that already have a value cannot be assigned to.  Everything else can be).
+    */
   protected boolean canBeAssigned(VariableData vd) {
     return !vd.isFinal() || !vd.hasValue();
   }
   
-
-
-   /**
-   * Makes sure that the specified type is an array type, and then
-   * examines the elements in the array initializer and makes sure each has a type assignable to
-   * the elementType of the specified array type.  Returns an instance data corresponding to the type of the array.
-   */
+  /** Makes sure that the specified type is an array type, and then
+    * examines the elements in the array initializer and makes sure each has a type assignable to
+    * the elementType of the specified array type.  Returns an instance data corresponding to the type of the array.
+    */
   public TypeData forArrayInitializerHelper(ArrayInitializer that, SymbolData type) {
     if (type == null) {return null;}
-    if (!(type instanceof ArrayData)) {_addError("You cannot initialize the non-array type " + type.getName() + " with an array initializer", that); return type.getInstanceData();}
+    if (!(type instanceof ArrayData)) {_addError("You cannot initialize the non-array type " + type.getName() + 
+                                                 " with an array initializer", that); return type.getInstanceData();}
     
     SymbolData elementType = ((ArrayData) type).getElementType();
     VariableInitializerI[] elements = that.getItems();
@@ -363,40 +370,44 @@ public class Bob extends TypeChecker {
           result[i] = forArrayInitializerHelper((ArrayInitializer) elements[i], elementType);
       }
       else {
-        ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, _vars, _thrown);
+        ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages,
+                                                              _vars, _thrown);
         result[i] = elements[i].visit(etc);
-        thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned); //incorporate the things that were assigned in the expression here
+        
+        // Incorporate the things that were assigned in the expression here
+        thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned); 
+
         if (result[i] != null) {
           if (assertFound(result[i], (JExpression) that.getItems()[i])) {
             if (!result[i].getSymbolData().isAssignableTo(elementType, LanguageLevelConverter.OPT.javaVersion())) {
-              _addError("The elements of this initializer should have type " + elementType.getName() + " but element " + i + " has type " + result[i].getSymbolData().getName(), (JExpression) that.getItems()[i]);
+              _addError("The elements of this initializer should have type " + elementType.getName() + " but element "
+                          + i + " has type " + result[i].getSymbolData().getName(), (JExpression) that.getItems()[i]);
             }
             else {
-              assertInstanceType(result[i], "The elements of this initializer should all be instances, but you have specified the type name " + result[i].getName(), (JExpression) that.getItems()[i]);
+              assertInstanceType(result[i], "The elements of this initializer should all be instances," + 
+                                 " but you have specified the type name " + result[i].getName(), 
+                                 (JExpression) that.getItems()[i]);
             }
           }
         }
       }
     }
-    
-    
     return type.getInstanceData();
   }
   
   
-  /*
-   * Look up the SymbolData for this InnerClass within the enclosing data, check for cyclic inheritance,
-   * and then visit everything inside the inner class.
-   * @param that  The InnerClassDef we're visiting
-   */
+  /** Look up the SymbolData for this InnerClass within the enclosing data, check for cyclic inheritance,
+    * and then visit everything inside the inner class.
+    * @param that  The InnerClassDef we're visiting
+    */
   public TypeData forInnerClassDef(InnerClassDef that) {
     String className = that.getName().getText();
-    SymbolData sd = _data.getInnerClassOrInterface(className); // This works because className will never be a qualified name
+    
+    // This works because className will never be a qualified name
+    SymbolData sd = _data.getInnerClassOrInterface(className);
 
     // Check for cyclic inheritance
-    if (checkForCyclicInheritance(sd, new LinkedList<SymbolData>(), that)) {
-      return null;
-    }
+    if (checkForCyclicInheritance(sd, new LinkedList<SymbolData>(), that)) { return null; }
     final TypeData mav_result = that.getMav().visit(this);
     final TypeData name_result = that.getName().visit(this);
     final TypeData[] typeParameters_result = makeArrayOfRetType(that.getTypeParameters().length);
@@ -408,7 +419,9 @@ public class Bob extends TypeChecker {
     for (int i = 0; i < that.getInterfaces().length; i++) {
       interfaces_result[i] = that.getInterfaces()[i].visit(this);
     }
-    final TypeData body_result = that.getBody().visit(new ClassBodyTypeChecker(sd, _file, _package, _importedFiles, _importedPackages, _vars, _thrown));
+    final TypeData body_result = 
+      that.getBody().visit(new ClassBodyTypeChecker(sd, _file, _package, _importedFiles, _importedPackages, _vars, 
+                                                    _thrown));
     return null;
   }
   
@@ -436,7 +449,9 @@ public class Bob extends TypeChecker {
       interfaces_result[i] = that.getInterfaces()[i].visit(this);
     }
 
-    final TypeData body_result = that.getBody().visit(new InterfaceBodyTypeChecker(sd, _file, _package, _importedFiles, _importedPackages, _vars, _thrown));
+    final TypeData body_result = 
+      that.getBody().visit(new InterfaceBodyTypeChecker(sd, _file, _package, _importedFiles, _importedPackages, _vars, 
+                                                        _thrown));
     return null;
 
   }
@@ -457,20 +472,18 @@ public class Bob extends TypeChecker {
     }
   }
   
-  /**
-   * Compare a list of variable datas and a list of list of variable datas.
-   * If a variable data is in the list and in each list of the lists of lists, mark it as having been
-   * assigned.
-   * @param tryBlock  The list of variable datas.
-   * @param catchBlocks  The list of list of variable datas.
-   */
+  /** Compare a list of variable datas and a list of list of variable datas.
+    * If a variable data is in the list and in each list of the lists of lists, mark it as having been
+    * assigned.
+    * @param tryBlock  The list of variable datas.
+    * @param catchBlocks  The list of list of variable datas.
+    */
   void reassignLotsaVariableDatas(LinkedList<VariableData> tryBlock, LinkedList<LinkedList<VariableData>> catchBlocks) {
     for (int i = 0; i<tryBlock.size(); i++) {
       boolean seenIt = true;
       for (int j = 0; j<catchBlocks.size(); i++) {
         if (!catchBlocks.get(j).contains(tryBlock.get(i))) {seenIt = false;}
       }
-    
       if (seenIt) {        //find the variable data in vars and give it a value!
         tryBlock.get(i).gotValue();
       }
@@ -478,50 +491,57 @@ public class Bob extends TypeChecker {
   }
   
 
-  /**If an exception is thrown but not caught, throw the appropriate error, based on the JExpression.*/
+  /** If an exception is thrown but not caught, throw the appropriate error, based on the JExpression.*/
   public void handleUncheckedException(SymbolData sd, JExpression j) {
     if (j instanceof MethodInvocation) {
-      _addError("The method " + ((MethodInvocation)j).getName().getText() + " is declared to throw the exception " + sd.getName() + " which needs to be caught or declared to be thrown", j);
+      _addError("The method " + ((MethodInvocation)j).getName().getText() + " is declared to throw the exception " + 
+                sd.getName() + " which needs to be caught or declared to be thrown", j);
       }
       else if (j instanceof ThrowStatement) {
-        _addError("This statement throws the exception " + sd.getName() + " which needs to be caught or declared to be thrown", j);
+        _addError("This statement throws the exception " + sd.getName() + 
+                  " which needs to be caught or declared to be thrown", j);
       }
       else if (j instanceof ClassInstantiation) {
-        _addError("The constructor for the class " + ((ClassInstantiation)j).getType().getName() + " is declared to throw the exception " + sd.getName() + " which needs to be caught or declared to be thrown.", j);
+        _addError("The constructor for the class " + ((ClassInstantiation)j).getType().getName() + 
+                  " is declared to throw the exception " + sd.getName() +
+                  " which needs to be caught or declared to be thrown.", j);
       }
       else if (j instanceof SuperConstructorInvocation) {
-        _addError("The constructor of this class's super class could throw the exception " + sd.getName() + ", so the enclosing constructor needs to be declared to throw it", j);
+        _addError("The constructor of this class's super class could throw the exception " + sd.getName() + 
+                  ", so the enclosing constructor needs to be declared to throw it", j);
       }
       else if (j instanceof ThisConstructorInvocation) {
-        _addError("This constructor could throw the exception " + sd.getName() + ", so this enclosing constructor needs to be declared to throw it", j);
+        _addError("This constructor could throw the exception " + sd.getName() + 
+                  ", so this enclosing constructor needs to be declared to throw it", j);
       }
       
       else if (j instanceof BracedBody) { //then this is because of an implicit super constructor reference.
-        _addError("There is an implicit call to the superclass's constructor here.  That constructor could throw the exception " + sd.getName() + ", so the enclosing constructor needs to be declared to throw it", j);
+        _addError("There is an implicit call to the superclass's constructor here.  " + 
+                  "That constructor could throw the exception " + sd.getName() + 
+                  ", so the enclosing constructor needs to be declared to throw it", j);
       }
       
       else {
-        throw new RuntimeException("Internal Program Error: Something besides a method invocation or throw statement threw an exception.  Please report this bug.");
+        throw new RuntimeException("Internal Program Error: Something besides a method invocation or throw statement" + 
+                                   " threw an exception.  Please report this bug.");
       }
   }
   
-  /**
-   * Returns whether the sd is a checked exception, i.e. one that needs to be caught or declared to be thrown.
-   * This is defined as all subclasses of java.lang.Throwable except for subclasses of java.lang.RuntimeException
-   */
+  /** Returns whether the sd is a checked exception, i.e. one that needs to be caught or declared to be thrown.
+    * This is defined as all subclasses of java.lang.Throwable except for subclasses of java.lang.RuntimeException
+    */
   public boolean isCheckedException(SymbolData sd, JExpression that) {
     return sd.isSubClassOf(getSymbolData("java.lang.Throwable", _data, that, false)) &&
       ! sd.isSubClassOf(getSymbolData("java.lang.RuntimeException", _data, that, false)) &&
       ! sd.isSubClassOf(getSymbolData("java.lang.Error", _data, that, false));
   }
   
-  /**
-   * Return true if the Exception is a checked exception yet is not caught or declared to be thrown, and false otherwise.
-   * An exception is a checked if it does not extend either java.lang.RuntimeException or java.lang.Error,
-   * and is not declared to be thrown by the enclosing method.
-   * @param sd  The SymbolData of the Exception we are checking.
-   * @param that  The JExpression passed to getSymbolData for error purposes.
-   */
+  /** Return true if the Exception is a checked exception yet is not caught or declared to be thrown, and false
+    * otherwise.  An exception is a checked if it does not extend either java.lang.RuntimeException or java.lang.Error,
+    * and is not declared to be thrown by the enclosing method.
+    * @param sd  The SymbolData of the Exception we are checking.
+    * @param that  The JExpression passed to getSymbolData for error purposes.
+    */
   public boolean isUncaughtCheckedException(SymbolData sd, JExpression that) {
     return isCheckedException(sd, that);
   }
@@ -542,20 +562,13 @@ public class Bob extends TypeChecker {
     return forBodyOnly(that, items_result);
   }
 
-  /*Delegate to forBody*/
-  public TypeData forBracedBody(BracedBody that) {
-    return forBody(that);
-  }
+  /** Delegate to forBody*/
+  public TypeData forBracedBody(BracedBody that) { return forBody(that); }
   
-  /*Delegate to forBody*/
-  public TypeData forUnbracedBody(UnbracedBody that) {
-    return forBody(that);
-  }
+  /** Delegate to forBody*/
+  public TypeData forUnbracedBody(UnbracedBody that) { return forBody(that); }
   
-
-  /**
-   * Test the methods defined in the enclosing class.
-   */      
+  /** Test the methods defined in the enclosing class. */      
   public static class BobTest extends TestCase {
     
     private Bob _b;
@@ -566,28 +579,33 @@ public class Bob extends TypeChecker {
     private SymbolData _sd4;
     private SymbolData _sd5;
     private SymbolData _sd6;
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final"});
-    private ModifiersAndVisibility _finalPublicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final", "public"});
-    private ModifiersAndVisibility _publicAbstractMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public", "abstract"});
-    private ModifiersAndVisibility _publicStaticMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public", "static"});
+    private ModifiersAndVisibility _publicMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    private ModifiersAndVisibility _abstractMav =
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav =
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _finalPublicMav =
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final", "public"});
+    private ModifiersAndVisibility _publicAbstractMav =
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public", "abstract"});
+    private ModifiersAndVisibility _publicStaticMav =
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public", "static"});
     
     
-    public BobTest() {
-      this("");
-    }
-    public BobTest(String name) {
-      super(name);
-    }
+    public BobTest() { this(""); }
+    public BobTest(String name) { super(name); }
     
     public void setUp() {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
-      _b = new Bob(null, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
+      _b = new Bob(null, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
+                   new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
       LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
         _b._importedPackages.addFirst("java.lang");
       _sd1 = new SymbolData("i.like.monkey");
@@ -600,18 +618,21 @@ public class Bob extends TypeChecker {
     }
     
     public void testForInitializedVariableDeclarator() {
-      LanguageLevelVisitor llv = new LanguageLevelVisitor(_b._file, _b._package, _b._importedFiles, 
-                                                          _b._importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
-                                                          new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+      LanguageLevelVisitor llv =
+        new LanguageLevelVisitor(_b._file, _b._package, _b._importedFiles, 
+                                 _b._importedPackages, new LinkedList<String>(), 
+                                 new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
+                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       LanguageLevelConverter.symbolTable = llv.symbolTable = _b.symbolTable;
       
-      SourceInfo si = JExprParser.NO_SOURCE_INFO;
+      SourceInfo si = SourceInfo.NO_INFO;
       Expression e1 = new IntegerLiteral(si, 1);
       Expression e2 = new IntegerLiteral(si, 2);
       Expression e3 = new PlusExpression(si, new IntegerLiteral(si, 3), new CharLiteral(si, 'e'));
       Expression e4 = new CharLiteral(si, 'c');
 
-      ArrayType intArrayType = new ArrayType(JExprParser.NO_SOURCE_INFO, "int[]", new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"));
+      ArrayType intArrayType = 
+        new ArrayType(SourceInfo.NO_INFO, "int[]", new PrimitiveType(SourceInfo.NO_INFO, "int"));
 
       //make sure it works -- most testing done in testArrayInitializerHelper
       ArrayData intArray = new ArrayData(SymbolData.INT_TYPE, llv, si);
@@ -620,9 +641,10 @@ public class Bob extends TypeChecker {
       symbolTable.put("int[]", intArray);
       
       _b._data.addVar(new VariableData("foozle", _publicMav, intArray, false, _b._data));
-      InitializedVariableDeclarator ivd = new InitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intArrayType,
-                                                                            new Word(JExprParser.NO_SOURCE_INFO, "foozle"),
-                                                                            new ArrayInitializer(si, new VariableInitializerI[] {e1, e2, e3, e4}));
+      InitializedVariableDeclarator ivd = 
+        new InitializedVariableDeclarator(SourceInfo.NO_INFO, intArrayType,
+                                          new Word(SourceInfo.NO_INFO, "foozle"),
+                                          new ArrayInitializer(si, new VariableInitializerI[] {e1, e2, e3, e4}));
 
       assertEquals("Should return null", null, ivd.visit(_b));
       assertEquals("There should be no errors", 0, errors.size());
@@ -634,32 +656,36 @@ public class Bob extends TypeChecker {
       SymbolData sd3 = SymbolData.INT_TYPE;
       _b._data.addVar(new VariableData("j", _publicMav, SymbolData.DOUBLE_TYPE, false, _b._data));
       
-      InitializedVariableDeclarator ivd = new InitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO,
-                                                                            JExprParser.NO_TYPE,
-                                                                            new Word(JExprParser.NO_SOURCE_INFO, "j"),
-                                                                            new DoubleLiteral(JExprParser.NO_SOURCE_INFO, 1.0));
+      InitializedVariableDeclarator ivd = 
+        new InitializedVariableDeclarator(SourceInfo.NO_INFO,
+                                          JExprParser.NO_TYPE,
+                                          new Word(SourceInfo.NO_INFO, "j"),
+                                          new DoubleLiteral(SourceInfo.NO_INFO, 1.0));
       
 
-      assertEquals("Two assignable types should not throw an error; return null.", null, _b.forInitializedVariableDeclaratorOnly(ivd, sd1, sd1, sd3.getInstanceData()));
+      assertEquals("Two assignable types should not throw an error; return null.", null, 
+                   _b.forInitializedVariableDeclaratorOnly(ivd, sd1, sd1, sd3.getInstanceData()));
       assertEquals("Should be no errors", 0, errors.size());
       
-      assertEquals("Two unassignable types should throw an error; return null.", null, _b.forInitializedVariableDeclaratorOnly(ivd, sd1, sd1, sd2.getInstanceData()));
+      assertEquals("Two unassignable types should throw an error; return null.", null, 
+                   _b.forInitializedVariableDeclaratorOnly(ivd, sd1, sd1, sd2.getInstanceData()));
       assertEquals("Should now be one error", 1, errors.size());
-      assertEquals("Error message should be correct:", "Type: \"double\" expected, instead found type: \"boolean\".", errors.getLast().getFirst());
+      assertEquals("Error message should be correct:", "Type: \"double\" expected, instead found type: \"boolean\".", 
+                   errors.getLast().getFirst());
 
       SymbolData foo = new SymbolData("Foo");
-      assertEquals("An initialization from a SymbolData should return null", null, _b.forInitializedVariableDeclaratorOnly(ivd, sd1, null, foo));
+      assertEquals("An initialization from a SymbolData should return null", null, 
+                   _b.forInitializedVariableDeclaratorOnly(ivd, sd1, null, foo));
       assertEquals("There should be 2 errors", 2, errors.size());
-      assertEquals("Error message should be correct:", "Field or variable j cannot be initialized with the class or interface name Foo.  Perhaps you meant to create an instance or use Foo.class", errors.getLast().getFirst());
+      assertEquals("Error message should be correct:", 
+                   "Field or variable j cannot be initialized with the class or interface name Foo.  " + 
+                   "Perhaps you meant to create an instance or use Foo.class", errors.getLast().getFirst());
     }
-    
-      
         
     public void testForThrowStatementOnly() {
-      ThrowStatement s = new ThrowStatement(JExprParser.NO_SOURCE_INFO, new NullLiteral(JExprParser.NO_SOURCE_INFO));
-      SymbolData exception = _b.getSymbolData("java.lang.Throwable", s, false, true); // new SymbolData("java.lang.Throwable");
+      ThrowStatement s = new ThrowStatement(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO));
+      SymbolData exception = _b.getSymbolData("java.lang.Throwable", s, false, true); 
       InstanceData exceptionInstance = exception.getInstanceData();
-//      symbolTable.put("java.lang.Throwable", exception);
       
       SymbolData notAnException = new SymbolData("bob");
       InstanceData naeInstance = notAnException.getInstanceData();
@@ -678,24 +704,27 @@ public class Bob extends TypeChecker {
                    _b.forThrowStatementOnly(s, naeInstance));
       assertEquals("There should be 2 errors", 2, errors.size());
       assertEquals("Error message should be correct", 
-                   "You are attempting to throw bob, which does not implement the Throwable interface", errors.getLast().getFirst());
+                   "You are attempting to throw bob, which does not implement the Throwable interface", 
+                   errors.getLast().getFirst());
     }
       
   
     public void testForArrayInitializerHelper() {
-      LanguageLevelVisitor llv = new LanguageLevelVisitor(_b._file, _b._package, _b._importedFiles, 
-                                                          _b._importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
-                                                          new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+      LanguageLevelVisitor llv =
+        new LanguageLevelVisitor(_b._file, _b._package, _b._importedFiles, 
+                                 _b._importedPackages, new LinkedList<String>(), 
+                                 new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
+                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       LanguageLevelConverter.symbolTable = llv.symbolTable = _b.symbolTable;
       
-      SourceInfo si = JExprParser.NO_SOURCE_INFO;
+      SourceInfo si = SourceInfo.NO_INFO;
       
       Expression e1 = new IntegerLiteral(si, 1);
       Expression e2 = new IntegerLiteral(si, 2);
       Expression e3 = new PlusExpression(si, new IntegerLiteral(si, 3), new CharLiteral(si, 'e'));
       Expression e4 = new CharLiteral(si, 'c');
       Expression e5 = new DoubleLiteral(si, 5.8);
-      Expression e6 = new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "int"));
+      Expression e6 = new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "int"));
 
       ArrayInitializer a1 = new ArrayInitializer(si, new VariableInitializerI[] {e1, e3, e4});
       ArrayInitializer a2 = new ArrayInitializer(si, new VariableInitializerI[] {e2, e3, e1});
@@ -709,7 +738,8 @@ public class Bob extends TypeChecker {
       symbolTable.put("int[]", intArray);
       
       ArrayInitializer ia = new ArrayInitializer(si, new VariableInitializerI[] {e1, e2, e3, e4});
-      assertEquals("Should return instance of int[]", intArray.getInstanceData(), _b.forArrayInitializerHelper(ia, intArray));
+      assertEquals("Should return instance of int[]", intArray.getInstanceData(), 
+                   _b.forArrayInitializerHelper(ia, intArray));
       assertEquals("There should be no errors", 0, errors.size());
       
       //it works for a 2 dimensional array
@@ -718,37 +748,53 @@ public class Bob extends TypeChecker {
       symbolTable.put("int[][]", intArray2);
       
       ia = new ArrayInitializer(si, new VariableInitializerI[]{a1, a2});
-      assertEquals("Should return instance of int[][]", intArray2.getInstanceData(), _b.forArrayInitializerHelper(ia, intArray2));
+      assertEquals("Should return instance of int[][]", intArray2.getInstanceData(), 
+                   _b.forArrayInitializerHelper(ia, intArray2));
       assertEquals("There should be no errors", 0, errors.size());
       
       //it works for a 2 dimensional array with null as its elements
       ia = new ArrayInitializer(si, new VariableInitializerI[] {nl, nl});
-      assertEquals("Should return instance of int[][]", intArray2.getInstanceData(), _b.forArrayInitializerHelper(ia, intArray2));
+      assertEquals("Should return instance of int[][]", intArray2.getInstanceData(), 
+                   _b.forArrayInitializerHelper(ia, intArray2));
       
       //throw an error if the type passed to the helper is not an array data
-      assertEquals("Should return double", SymbolData.DOUBLE_TYPE.getInstanceData(), _b.forArrayInitializerHelper(ia, SymbolData.DOUBLE_TYPE));
+      assertEquals("Should return double", SymbolData.DOUBLE_TYPE.getInstanceData(), 
+                   _b.forArrayInitializerHelper(ia, SymbolData.DOUBLE_TYPE));
       assertEquals("There should be one error message", 1, errors.size());
-      assertEquals("The error message should be correct", "You cannot initialize the non-array type double with an array initializer", errors.getLast().getFirst());
+      assertEquals("The error message should be correct", 
+                   "You cannot initialize the non-array type double with an array initializer", 
+                   errors.getLast().getFirst());
 
       //throw an error if the type of one of the elements doesn't match
       ia = new ArrayInitializer(si, new VariableInitializerI[] {e1, e2, e5, e4});
-      assertEquals("Should return instance of int[]", intArray.getInstanceData(), _b.forArrayInitializerHelper(ia, intArray));
+      assertEquals("Should return instance of int[]", intArray.getInstanceData(), 
+                   _b.forArrayInitializerHelper(ia, intArray));
       assertEquals("There should be two error messages", 2, errors.size());
-      assertEquals("The error message should be correct", "The elements of this initializer should have type int but element 2 has type double", errors.getLast().getFirst());
+      assertEquals("The error message should be correct", 
+                   "The elements of this initializer should have type int but element 2 has type double", 
+                   errors.getLast().getFirst());
 
       //throw an error if null in 1 dimensional int array
       ia = new ArrayInitializer(si, new VariableInitializerI[] {nl, nl});
-      assertEquals("Should return instance of int[]", intArray.getInstanceData(), _b.forArrayInitializerHelper(ia, intArray));
+      assertEquals("Should return instance of int[]", intArray.getInstanceData(),
+                   _b.forArrayInitializerHelper(ia, intArray));
       assertEquals("There should be four error messages", 4, errors.size());
-      assertEquals("The error message should be correct", "The elements of this initializer should have type int but element 0 has type null", errors.get(2).getFirst());
-      assertEquals("The error message should be correct", "The elements of this initializer should have type int but element 1 has type null", errors.get(3).getFirst());
+      assertEquals("The error message should be correct", 
+                   "The elements of this initializer should have type int but element 0 has type null", 
+                   errors.get(2).getFirst());
+      assertEquals("The error message should be correct", 
+                   "The elements of this initializer should have type int but element 1 has type null", 
+                   errors.get(3).getFirst());
       
       //should throw error if type name is passed instead of instance
       ia = new ArrayInitializer(si, new VariableInitializerI[] {e1, e2, e3, e4, e6});
-      assertEquals("Should return instance of int[]", intArray.getInstanceData(), _b.forArrayInitializerHelper(ia, intArray));
+      assertEquals("Should return instance of int[]", intArray.getInstanceData(), 
+                   _b.forArrayInitializerHelper(ia, intArray));
       assertEquals("Should now be 5 error messages", 5, errors.size());
-      assertEquals("Error message should be correct", "The elements of this initializer should all be instances, but you have specified the type name int.  Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
-      
+      assertEquals("Error message should be correct", 
+                   "The elements of this initializer should all be instances, but you have specified the type name" + 
+                   " int.  Perhaps you meant to create a new instance of int",
+                   errors.getLast().getFirst());
     }
 
     public void testFindClassReference() {
@@ -759,19 +805,24 @@ public class Bob extends TypeChecker {
       symbolTable.put("java.lang.String", string);
       
       //if lhs is null, just look up SymbolData
-      assertEquals("Should return string", string, _b.findClassReference(null, "java.lang.String", new NullLiteral(JExprParser.NO_SOURCE_INFO)));
+      assertEquals("Should return string", string,
+                   _b.findClassReference(null, "java.lang.String", new NullLiteral(SourceInfo.NO_INFO)));
       assertEquals("Should not be an error", 0, errors.size());
       
       //if SymbolData cannot be found, do not add error--just return null
-      assertEquals("Should return null", null, _b.findClassReference(null, "non-existant", new NullLiteral(JExprParser.NO_SOURCE_INFO)));
+      assertEquals("Should return null", null, 
+                   _b.findClassReference(null, "non-existant", new NullLiteral(SourceInfo.NO_INFO)));
       assertEquals("Should be no errors", 0, errors.size());
       
       //if LHS is package data, try to look up fully qualified name
-      assertEquals("Should return string", string, _b.findClassReference(new PackageData("java.lang"), "String", new NullLiteral(JExprParser.NO_SOURCE_INFO)));
+      assertEquals("Should return string", string,
+                   _b.findClassReference(new PackageData("java.lang"), "String", new NullLiteral(SourceInfo.NO_INFO)));
       assertEquals("Should not be an error", 0, errors.size());
       
       //if symbol data cannot be found, do not give error
-      assertEquals("Should return null", null, _b.findClassReference(new PackageData("nonsense"), "non-existant", new NullLiteral(JExprParser.NO_SOURCE_INFO)));
+      assertEquals("Should return null", null, 
+                   _b.findClassReference(new PackageData("nonsense"), "non-existant", 
+                                         new NullLiteral(SourceInfo.NO_INFO)));
       assertEquals("Should be no errors", 0, errors.size());
       
       //otherwise, try to look up symbolData from context of lhs
@@ -780,11 +831,13 @@ public class Bob extends TypeChecker {
       inner.setPackage("java.lang");
       inner.setOuterData(string);
       string.addInnerClass(inner);
-      assertEquals("Should return inner", inner, _b.findClassReference(string, "Inner", new NullLiteral(JExprParser.NO_SOURCE_INFO)));
+      assertEquals("Should return inner", inner,
+                   _b.findClassReference(string, "Inner", new NullLiteral(SourceInfo.NO_INFO)));
       assertEquals("Should be no errors", 0, errors.size());
       
       //do not give error if it could not be found
-      assertEquals("Should return null", null, _b.findClassReference(string, "non-existant", new NullLiteral(JExprParser.NO_SOURCE_INFO)));
+      assertEquals("Should return null", null, 
+                   _b.findClassReference(string, "non-existant", new NullLiteral(SourceInfo.NO_INFO)));
       assertEquals("Should be no errors", 0, errors.size());
     }
   }

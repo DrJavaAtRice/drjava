@@ -234,15 +234,15 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
     private SymbolData _sd4;
     private SymbolData _sd5;
     private SymbolData _sd6;
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final"});
-    private ModifiersAndVisibility _finalPublicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final", "public"});
-    private ModifiersAndVisibility _publicAbstractMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public", "abstract"});
-    private ModifiersAndVisibility _publicStaticMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public", "static"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _finalPublicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final", "public"});
+    private ModifiersAndVisibility _publicAbstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public", "abstract"});
+    private ModifiersAndVisibility _publicStaticMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public", "static"});
     
     
     public LValueWithValueTypeCheckerTest() {
@@ -271,13 +271,13 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
 
     public void testDefaultCase() {
       //should add an error
-      new NullLiteral(JExprParser.NO_SOURCE_INFO).visit(_lvtc);
+      new NullLiteral(SourceInfo.NO_INFO).visit(_lvtc);
       assertEquals("Should be 1 error", 1, _lvtc._bob.errors.size());
       assertEquals("Error message should be correct", "You cannot assign a value to an expression of this kind.  Values can only be assigned to fields or variables",
                    _lvtc._bob.errors.getLast().getFirst());
 
       //should add an error
-      new PlusExpression(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 21), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 22)).visit(_lvtc);
+      new PlusExpression(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 21), new IntegerLiteral(SourceInfo.NO_INFO, 22)).visit(_lvtc);
       assertEquals("Should be 2 errors", 2, _lvtc._bob.errors.size());
       assertEquals("Error message should be correct", "You cannot assign a value to an expression of this kind.  Values can only be assigned to fields or variables",
                    _lvtc._bob.errors.getLast().getFirst());
@@ -285,7 +285,7 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
     
     public void testForIncrementExpression() {
       //should add an error
-      PositivePrefixIncrementExpression p = new PositivePrefixIncrementExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "bob")));
+      PositivePrefixIncrementExpression p = new PositivePrefixIncrementExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "bob")));
       assertEquals("Should return null", null, p.visit(_lvtc));
       assertEquals("Should be 1 error", 1, _lvtc._bob.errors.size());
       assertEquals("Error message should be correct", "You cannot assign a value to an increment expression", _lvtc._bob.errors.getLast().getFirst());
@@ -294,7 +294,7 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
 
     public void testForSimpleNameReference() {
       //first, consider the case where what we have is a variable reference:
-      SimpleNameReference var = new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "variable1"));
+      SimpleNameReference var = new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "variable1"));
       VariableData varData = new VariableData("variable1", _publicMav, SymbolData.INT_TYPE, false, _ta._data);
       _ta._vars.add(varData);
       
@@ -316,7 +316,7 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
       varData.setMav(_publicMav);
       
       //if variable is non-static, but you are in static context, cannot reference it. Should give error
-      MethodData newContext = new MethodData("method", _publicStaticMav, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[0], new String[0], _sd1, new NullLiteral(JExprParser.NO_SOURCE_INFO)); 
+      MethodData newContext = new MethodData("method", _publicStaticMav, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[0], new String[0], _sd1, new NullLiteral(SourceInfo.NO_INFO)); 
       _ta._data = newContext;
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), var.visit(_lvtc));
       assertEquals("Should be 3 errors", 3, _lvtc._bob.errors.size());
@@ -331,7 +331,7 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
       assertEquals("Should still be 3 errors", 3, _lvtc._bob.errors.size());
 
       //now, consider the case where what we have is a class reference:
-      SimpleNameReference className = new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "Frog"));
+      SimpleNameReference className = new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "Frog"));
       SymbolData frog = new SymbolData("Frog");
       frog.setIsContinuation(false);
       _lvtc._bob.symbolTable.put("Frog", frog);
@@ -348,12 +348,12 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
       assertEquals("Should still be 3 errors", 3, _lvtc._bob.errors.size());
       
       //If the name cannot be resolved, simply return a packageData.
-      SimpleNameReference fake = new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "notRealReference"));
+      SimpleNameReference fake = new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "notRealReference"));
       assertEquals("Should return package data", "notRealReference", (fake.visit(_lvtc)).getName());
       assertEquals("Should still be just 3 errors", 3, _lvtc._bob.errors.size());
       
       //if the reference is ambiguous (matches both an interface and a class) give an error
-      SimpleNameReference ambigRef = new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "ambigThing"));
+      SimpleNameReference ambigRef = new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "ambigThing"));
 
       SymbolData interfaceD = new SymbolData("interface");
       interfaceD.setIsContinuation(false);
@@ -395,12 +395,12 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
       //if lhs is a package data, we want to keep building it:
       
       //if whole reference is just package reference, return package data
-      ComplexNameReference ref1 = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "java")), new Word(JExprParser.NO_SOURCE_INFO, "lang"));
+      ComplexNameReference ref1 = new ComplexNameReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "java")), new Word(SourceInfo.NO_INFO, "lang"));
       assertEquals("Should return correct package data", "java.lang", ref1.visit(_lvtc).getName());
       assertEquals("Should be no errors", 0, _lvtc._bob.errors.size());
       
       //if reference builds to a class in the symbol table, return that class
-      ComplexNameReference ref2 = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, ref1, new Word(JExprParser.NO_SOURCE_INFO, "String"));
+      ComplexNameReference ref2 = new ComplexNameReference(SourceInfo.NO_INFO, ref1, new Word(SourceInfo.NO_INFO, "String"));
       SymbolData string = new SymbolData("java.lang.String");
       string.setPackage("java.lang");
       string.setMav(_publicMav);
@@ -417,7 +417,7 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
       //we're referencing a variable inside of symbol data lhs:
       VariableData myVar = new VariableData("myVar", _publicStaticMav, SymbolData.DOUBLE_TYPE, true, string);
       string.addVar(myVar);
-      ComplexNameReference varRef1 = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, ref2, new Word(JExprParser.NO_SOURCE_INFO, "myVar"));
+      ComplexNameReference varRef1 = new ComplexNameReference(SourceInfo.NO_INFO, ref2, new Word(SourceInfo.NO_INFO, "myVar"));
       
       //static var from static context
       assertEquals("Should return Double_Type instance", SymbolData.DOUBLE_TYPE.getInstanceData(), varRef1.visit(_lvtc));
@@ -441,7 +441,7 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
       VariableData stringVar = new VariableData("s", _publicMav, string, true, _lvtc._bob._data);
       _ta._vars.add(stringVar);
       myVar.gotValue();
-      ComplexNameReference varRef2 = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "s")), new Word(JExprParser.NO_SOURCE_INFO, "myVar"));
+      ComplexNameReference varRef2 = new ComplexNameReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "s")), new Word(SourceInfo.NO_INFO, "myVar"));
       assertEquals("Should return double instance", SymbolData.DOUBLE_TYPE.getInstanceData(), varRef2.visit(_lvtc));
       assertEquals("Should still just be 2 errors", 2, _lvtc._bob.errors.size());
       
@@ -469,9 +469,9 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
       _sd2.addVar(vd2);
       _sd1.addVar(vd1);
       
-      ComplexNameReference varRef3 = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "Snowball1")),
-                                                        new Word(JExprParser.NO_SOURCE_INFO, "Santa's Little Helper"));
-      ComplexNameReference varRef4 = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, varRef3, new Word(JExprParser.NO_SOURCE_INFO, "Mojo"));
+      ComplexNameReference varRef3 = new ComplexNameReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "Snowball1")),
+                                                        new Word(SourceInfo.NO_INFO, "Santa's Little Helper"));
+      ComplexNameReference varRef4 = new ComplexNameReference(SourceInfo.NO_INFO, varRef3, new Word(SourceInfo.NO_INFO, "Mojo"));
       
       Data oldData = _lvtc._bob._data;
       _lvtc._bob._data = _sd3;
@@ -494,7 +494,7 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
 
 
       //if inner is not visible, throw error
-      ComplexNameReference innerRef0 = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "s")), new Word(JExprParser.NO_SOURCE_INFO, "Inner"));
+      ComplexNameReference innerRef0 = new ComplexNameReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "s")), new Word(SourceInfo.NO_INFO, "Inner"));
       assertEquals("Should return null", null, innerRef0.visit(_lvtc));
       assertEquals("Should be 4 errors", 4, _lvtc._bob.errors.size());
       assertEquals("Error message should be correct", "The class or interface java.lang.String.Inner is package protected because there is no access specifier and cannot be accessed from i.like.monkey", _lvtc._bob.errors.getLast().getFirst());
@@ -502,13 +502,13 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
       inner.setMav(_publicMav);
       
       //if inner is not static, give error:
-      ComplexNameReference innerRef1 = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, ref2, new Word(JExprParser.NO_SOURCE_INFO, "Inner"));
+      ComplexNameReference innerRef1 = new ComplexNameReference(SourceInfo.NO_INFO, ref2, new Word(SourceInfo.NO_INFO, "Inner"));
       assertEquals("Should return inner", inner, innerRef1.visit(_lvtc));
       assertEquals("Should be 5 errors", 5, _lvtc._bob.errors.size());
       assertEquals("Error message should be correct", "Non-static inner class java.lang.String.Inner cannot be accessed from this context.  Perhaps you meant to instantiate it", _lvtc._bob.errors.getLast().getFirst());
   
       //if inner is not static and outer is not static, it's okay...
-      ComplexNameReference innerRef2 = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "s")), new Word(JExprParser.NO_SOURCE_INFO, "Inner"));
+      ComplexNameReference innerRef2 = new ComplexNameReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "s")), new Word(SourceInfo.NO_INFO, "Inner"));
       assertEquals("Should return inner", inner, innerRef2.visit(_lvtc));
       assertEquals("Should be 6 errors", 6, _lvtc._bob.errors.size());
       assertEquals("Error message should be correct", "Non-static inner class java.lang.String.Inner cannot be accessed from this context.  Perhaps you meant to instantiate it", _lvtc._bob.errors.getLast().getFirst());
@@ -521,14 +521,14 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
       
       
       //if the symbol could not be matched, give an error and return null
-      ComplexNameReference noSense = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, ref2, new Word(JExprParser.NO_SOURCE_INFO, "nonsense"));
+      ComplexNameReference noSense = new ComplexNameReference(SourceInfo.NO_INFO, ref2, new Word(SourceInfo.NO_INFO, "nonsense"));
       assertEquals("Should return null", null, noSense.visit(_lvtc));
       assertEquals("Should be 8 errors", 8, _lvtc._bob.errors.size());
       assertEquals("Error message should be correct", "Could not resolve nonsense from the context of java.lang.String", _lvtc._bob.errors.getLast().getFirst());
     
     
       //if the reference is ambiguous (matches both an interface and a class) give an error
-      ComplexNameReference ambigRef = new ComplexNameReference(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "cebu")), new Word(JExprParser.NO_SOURCE_INFO, "ambigThing"));
+      ComplexNameReference ambigRef = new ComplexNameReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "cebu")), new Word(SourceInfo.NO_INFO, "ambigThing"));
 
       SymbolData interfaceD = new SymbolData("interface");
       interfaceD.setIsContinuation(false);
@@ -569,21 +569,21 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
     public void testForArrayAccess() {
       ArrayData intArray = new ArrayData(SymbolData.INT_TYPE, 
                                    new LanguageLevelVisitor(_lvtc._bob._file, _lvtc._bob._package, _lvtc._bob._importedFiles, _lvtc._bob._importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>()),
-                                   JExprParser.NO_SOURCE_INFO);
+                                   SourceInfo.NO_INFO);
       VariableData variable1 = new VariableData("variable1", _publicMav, intArray, true, _ta._data);
       _ta._vars.add(variable1);
       
       VariableData intVar = new VariableData("intVar", _publicMav, SymbolData.INT_TYPE, true, _ta._data);
       _ta._vars.add(intVar);
 
-      MethodData makeArray = new MethodData("makeArray", _privateMav, new TypeParameter[0], intArray, new VariableData[0], new String[0], _ta._data.getSymbolData(), new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      MethodData makeArray = new MethodData("makeArray", _privateMav, new TypeParameter[0], intArray, new VariableData[0], new String[0], _ta._data.getSymbolData(), new NullLiteral(SourceInfo.NO_INFO));
       _ta._data.getSymbolData().addMethod(makeArray);
 
       //first, a simple index into an int[]
       
-      ArrayAccess a1 = new ArrayAccess(JExprParser.NO_SOURCE_INFO, 
-                                       new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "variable1")),
-                                       new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "intVar")));
+      ArrayAccess a1 = new ArrayAccess(SourceInfo.NO_INFO, 
+                                       new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "variable1")),
+                                       new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "intVar")));
 
       assertEquals("should return int", SymbolData.INT_TYPE.getInstanceData(), a1.visit(_lvtc));
       assertEquals("Should be 0 errors", 0, _lvtc._bob.errors.size());
@@ -591,22 +591,22 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
       
       //make sure that an arbitrary expression can occur in the index
       
-      ArrayAccess a2 = new ArrayAccess(JExprParser.NO_SOURCE_INFO,
-                                       new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "variable1")),
-                                       new PlusExpression(JExprParser.NO_SOURCE_INFO,
-                                                          new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 12),
-                                                          new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 22)));
+      ArrayAccess a2 = new ArrayAccess(SourceInfo.NO_INFO,
+                                       new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "variable1")),
+                                       new PlusExpression(SourceInfo.NO_INFO,
+                                                          new IntegerLiteral(SourceInfo.NO_INFO, 12),
+                                                          new IntegerLiteral(SourceInfo.NO_INFO, 22)));
                                                                
       assertEquals("should return int", SymbolData.INT_TYPE.getInstanceData(), a2.visit(_lvtc));
       assertEquals("Should be 0 errors", 0, _lvtc._bob.errors.size());
       
       //make sure that an arbitrary expression can occur in the array
       
-      ArrayAccess a3 = new ArrayAccess(JExprParser.NO_SOURCE_INFO,
-                                       new SimpleMethodInvocation(JExprParser.NO_SOURCE_INFO,
-                                                                  new Word(JExprParser.NO_SOURCE_INFO, "makeArray"),
-                                                                  new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0])),
-                                       new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "intVar")));
+      ArrayAccess a3 = new ArrayAccess(SourceInfo.NO_INFO,
+                                       new SimpleMethodInvocation(SourceInfo.NO_INFO,
+                                                                  new Word(SourceInfo.NO_INFO, "makeArray"),
+                                                                  new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0])),
+                                       new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "intVar")));
       assertEquals("should return int", SymbolData.INT_TYPE.getInstanceData(), a3.visit(_lvtc));
       assertEquals("Should be 0 errors", 0, _lvtc._bob.errors.size());
     }
@@ -617,19 +617,19 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
       _ta._vars.add(x);
       
       // make sure (((x))) is okay
-      Parenthesized p1 = new Parenthesized(JExprParser.NO_SOURCE_INFO,
-                                           new Parenthesized(JExprParser.NO_SOURCE_INFO,
-                                                             new Parenthesized(JExprParser.NO_SOURCE_INFO,
-                                                                              new SimpleNameReference(JExprParser.NO_SOURCE_INFO,
-                                                                                                      new Word(JExprParser.NO_SOURCE_INFO, "x")))));
+      Parenthesized p1 = new Parenthesized(SourceInfo.NO_INFO,
+                                           new Parenthesized(SourceInfo.NO_INFO,
+                                                             new Parenthesized(SourceInfo.NO_INFO,
+                                                                              new SimpleNameReference(SourceInfo.NO_INFO,
+                                                                                                      new Word(SourceInfo.NO_INFO, "x")))));
       
       assertEquals("should return int", SymbolData.INT_TYPE.getInstanceData(), p1.visit(_lvtc));
       assertEquals("Should be 0 errors", 0, _lvtc._bob.errors.size());
       
       // make sure ((1)) breaks
-      Parenthesized p2 = new Parenthesized(JExprParser.NO_SOURCE_INFO,
-                                           new Parenthesized(JExprParser.NO_SOURCE_INFO,
-                                                             new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 1)));
+      Parenthesized p2 = new Parenthesized(SourceInfo.NO_INFO,
+                                           new Parenthesized(SourceInfo.NO_INFO,
+                                                             new IntegerLiteral(SourceInfo.NO_INFO, 1)));
       assertEquals("should return null", null, p2.visit(_lvtc));
       assertEquals("Should be 1 error", 1, _lvtc._bob.errors.size());
       assertEquals("Error message should be correct", "You cannot assign a value to an expression of this kind.  Values can only be assigned to fields or variables", 

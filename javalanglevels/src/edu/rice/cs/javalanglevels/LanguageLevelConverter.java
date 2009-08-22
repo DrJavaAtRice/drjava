@@ -210,7 +210,7 @@ public class LanguageLevelConverter {
       }
       catch (IOException ioe) {
         // The NullLiteral is a hack to get a JExpression with the correct SourceInfo inside.
-        _addVisitorError(new Pair<String, JExpressionIF>(ioe.getMessage(), new NullLiteral(JExprParser.NO_SOURCE_INFO)));
+        _addVisitorError(new Pair<String, JExpressionIF>(ioe.getMessage(), new NullLiteral(SourceInfo.NO_INFO)));
       }
     }
     
@@ -273,14 +273,14 @@ public class LanguageLevelConverter {
         
         
         //Before you type check, make sure that all boxed types of primitives are in the symbol table
-        if (llv.symbolTable.get("java.lang.Integer") == null) {llv.getSymbolData("java.lang.Integer", JExprParser.NO_SOURCE_INFO);}
-        if (llv.symbolTable.get("java.lang.Double")==null) {llv.getSymbolData("java.lang.Double", JExprParser.NO_SOURCE_INFO);}
-        if (llv.symbolTable.get("java.lang.Character")==null) {llv.getSymbolData("java.lang.Character", JExprParser.NO_SOURCE_INFO);}
-        if (llv.symbolTable.get("java.lang.Boolean")==null) {llv.getSymbolData("java.lang.Boolean", JExprParser.NO_SOURCE_INFO);}
-        if (llv.symbolTable.get("java.lang.Long")==null) {llv.getSymbolData("java.lang.Long", JExprParser.NO_SOURCE_INFO);}
-        if (llv.symbolTable.get("java.lang.Byte")==null) {llv.getSymbolData("java.lang.Byte", JExprParser.NO_SOURCE_INFO);}
-        if (llv.symbolTable.get("java.lang.Short")==null) {llv.getSymbolData("java.lang.Short", JExprParser.NO_SOURCE_INFO);}
-        if (llv.symbolTable.get("java.lang.Float")==null) {llv.getSymbolData("java.lang.Float", JExprParser.NO_SOURCE_INFO);}
+        if (llv.symbolTable.get("java.lang.Integer") == null) {llv.getSymbolData("java.lang.Integer", SourceInfo.NO_INFO);}
+        if (llv.symbolTable.get("java.lang.Double")==null) {llv.getSymbolData("java.lang.Double", SourceInfo.NO_INFO);}
+        if (llv.symbolTable.get("java.lang.Character")==null) {llv.getSymbolData("java.lang.Character", SourceInfo.NO_INFO);}
+        if (llv.symbolTable.get("java.lang.Boolean")==null) {llv.getSymbolData("java.lang.Boolean", SourceInfo.NO_INFO);}
+        if (llv.symbolTable.get("java.lang.Long")==null) {llv.getSymbolData("java.lang.Long", SourceInfo.NO_INFO);}
+        if (llv.symbolTable.get("java.lang.Byte")==null) {llv.getSymbolData("java.lang.Byte", SourceInfo.NO_INFO);}
+        if (llv.symbolTable.get("java.lang.Short")==null) {llv.getSymbolData("java.lang.Short", SourceInfo.NO_INFO);}
+        if (llv.symbolTable.get("java.lang.Float")==null) {llv.getSymbolData("java.lang.Float", SourceInfo.NO_INFO);}
         
         
         // Type check.
@@ -388,11 +388,11 @@ public class LanguageLevelConverter {
       }
       catch (Augmentor.Exception ae) {
         // The NullLiteral is a hack to get a JExpression with the correct SourceInfo inside.
-        _addVisitorError(new Pair<String, JExpressionIF>(ae.getMessage(), new NullLiteral(JExprParser.NO_SOURCE_INFO)));
+        _addVisitorError(new Pair<String, JExpressionIF>(ae.getMessage(), new NullLiteral(SourceInfo.NO_INFO)));
       }
       catch (IOException ioe) {
         // The NullLiteral is a hack to get a JExpression with the correct SourceInfo inside.
-        _addVisitorError(new Pair<String, JExpressionIF>(ioe.getMessage(), new NullLiteral(JExprParser.NO_SOURCE_INFO)));
+        _addVisitorError(new Pair<String, JExpressionIF>(ioe.getMessage(), new NullLiteral(SourceInfo.NO_INFO)));
       }
     }
     return new Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>>(_parseExceptions,

@@ -704,7 +704,7 @@ public class BodyTypeChecker extends Bob {
     if (s1.getSuperClass() == null) {
       //return null;
       //since we know that Object should be the super class of everything, return Object.
-      return getSymbolData("java.lang.Object", _data, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      return getSymbolData("java.lang.Object", _data, new NullLiteral(SourceInfo.NO_INFO));
     }
     
     // Recur on the super class chain.   
@@ -726,7 +726,7 @@ public class BodyTypeChecker extends Bob {
 
   /*@return true if the symbol data is the generic SymbolData.EXCEPTIOn class or if it extends java.lang.Throwable*/
   protected boolean isException(SymbolData sd) {
-    return sd==SymbolData.EXCEPTION || sd.isSubClassOf(getSymbolData("java.lang.Throwable", new NullLiteral(JExprParser.NO_SOURCE_INFO), false, false));
+    return sd==SymbolData.EXCEPTION || sd.isSubClassOf(getSymbolData("java.lang.Throwable", new NullLiteral(SourceInfo.NO_INFO), false, false));
   }
   
   /**
@@ -1030,12 +1030,12 @@ public class BodyTypeChecker extends Bob {
     private SymbolData _sd4;
     private SymbolData _sd5;
     private SymbolData _sd6;
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
     
     
     public BodyTypeCheckerTest() {
@@ -1087,9 +1087,9 @@ public class BodyTypeChecker extends Bob {
     public void testForUninitializedVariableDeclaratorOnly() {
       VariableData vd1 = new VariableData("Mojo", _publicMav, SymbolData.INT_TYPE, false, _bd1);
       _bd1.addVar(vd1);
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                                                                new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                                                                new Word(JExprParser.NO_SOURCE_INFO, "Mojo"));
+      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                                                                new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                                                                new Word(SourceInfo.NO_INFO, "Mojo"));
       uvd.visit(_bbtc);
       assertTrue("_vars should contain Mojo.", _bbtc._vars.contains(vd1));
     }
@@ -1098,17 +1098,17 @@ public class BodyTypeChecker extends Bob {
       _bbtc.symbolTable.put("int", SymbolData.INT_TYPE);
       VariableData vd1 = new VariableData("Mojo", _publicMav, SymbolData.INT_TYPE, true, _bd1);
       _bd1.addVar(vd1);
-      InitializedVariableDeclarator ivd = new InitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                                                            new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                                                            new Word(JExprParser.NO_SOURCE_INFO, "Mojo"), 
-                                                                            new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 1));
+      InitializedVariableDeclarator ivd = new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                                                            new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                                                            new Word(SourceInfo.NO_INFO, "Mojo"), 
+                                                                            new IntegerLiteral(SourceInfo.NO_INFO, 1));
       ivd.visit(_bbtc);
       assertEquals("There should be no errors.", 0, errors.size());
       assertTrue("_vars should contain Mojo.", _bbtc._vars.contains(vd1));
-      ivd = new InitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                              new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                              new Word(JExprParser.NO_SOURCE_INFO, "Santa's Little Helper"), 
-                                              new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 1));
+      ivd = new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                              new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                              new Word(SourceInfo.NO_INFO, "Santa's Little Helper"), 
+                                              new IntegerLiteral(SourceInfo.NO_INFO, 1));
       try {
         ivd.visit(_bbtc);
         fail("Should have thrown a RuntimeException because there's no field named Santa's Little Helper.");
@@ -1120,31 +1120,31 @@ public class BodyTypeChecker extends Bob {
     
     public void testForBracedBodyOnly() {
       // Test one that works.
-      BracedBody bb1 = new BracedBody(JExprParser.NO_SOURCE_INFO,
-                                      new BodyItemI[] { new ValueReturnStatement(JExprParser.NO_SOURCE_INFO,
-                                                                                 new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 1))});
+      BracedBody bb1 = new BracedBody(SourceInfo.NO_INFO,
+                                      new BodyItemI[] { new ValueReturnStatement(SourceInfo.NO_INFO,
+                                                                                 new IntegerLiteral(SourceInfo.NO_INFO, 1))});
       TypeData sd = bb1.visit(_bbtc);
       assertEquals("There should be no errors", 0, errors.size());
       assertEquals("Should return int type", SymbolData.INT_TYPE.getInstanceData(), sd);
-      BracedBody bb2 = new BracedBody(JExprParser.NO_SOURCE_INFO,
-                                      new BodyItemI[] { new ValueReturnStatement(JExprParser.NO_SOURCE_INFO,
-                                                                                 new CharLiteral(JExprParser.NO_SOURCE_INFO, 'e'))});
+      BracedBody bb2 = new BracedBody(SourceInfo.NO_INFO,
+                                      new BodyItemI[] { new ValueReturnStatement(SourceInfo.NO_INFO,
+                                                                                 new CharLiteral(SourceInfo.NO_INFO, 'e'))});
      //test another one that works.
       sd = bb2.visit(_bbtc);
       assertEquals("There should be no errors", 0, errors.size());
       assertEquals("Should return char type", SymbolData.CHAR_TYPE.getInstanceData(), sd);
-      BracedBody bb3 = new BracedBody(JExprParser.NO_SOURCE_INFO,
-                                      new BodyItemI[] { new ValueReturnStatement(JExprParser.NO_SOURCE_INFO,
-                                                                                 new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 1)),
-                                                        new ValueReturnStatement(JExprParser.NO_SOURCE_INFO,
-                                                                                 new CharLiteral(JExprParser.NO_SOURCE_INFO, 'e'))});
+      BracedBody bb3 = new BracedBody(SourceInfo.NO_INFO,
+                                      new BodyItemI[] { new ValueReturnStatement(SourceInfo.NO_INFO,
+                                                                                 new IntegerLiteral(SourceInfo.NO_INFO, 1)),
+                                                        new ValueReturnStatement(SourceInfo.NO_INFO,
+                                                                                 new CharLiteral(SourceInfo.NO_INFO, 'e'))});
       //test one that should throw an error: unreachable return statement.                                                                                          
       sd = bb3.visit(_bbtc);
       assertEquals("There should be one error", 1, errors.size());
       assertEquals("The error message should be correct", "Unreachable statement.", errors.get(0).getFirst());
       assertEquals("Should return int type", SymbolData.INT_TYPE.getInstanceData(), sd);
       
-      BracedBody bb4 = new BracedBody(JExprParser.NO_SOURCE_INFO,
+      BracedBody bb4 = new BracedBody(SourceInfo.NO_INFO,
                                       new BodyItemI[0]);
       //test empty body.  should return null.
       sd = bb4.visit(_bbtc);
@@ -1157,8 +1157,8 @@ public class BodyTypeChecker extends Bob {
       _bbtc._bodyData = _bd2; //this body data has a void return type
 
       //test one that works
-      BracedBody bb1 = new BracedBody(JExprParser.NO_SOURCE_INFO, 
-                                      new BodyItemI[] { new VoidReturnStatement(JExprParser.NO_SOURCE_INFO)});
+      BracedBody bb1 = new BracedBody(SourceInfo.NO_INFO, 
+                                      new BodyItemI[] { new VoidReturnStatement(SourceInfo.NO_INFO)});
 
       TypeData sd = bb1.visit(_bbtc);
 
@@ -1176,18 +1176,18 @@ public class BodyTypeChecker extends Bob {
    
     public void testforValueReturnStatementOnly() {
       //value return statement returns something that is not a subclass the method return type
-      BracedBody bb1 = new BracedBody(JExprParser.NO_SOURCE_INFO,
-                                      new BodyItemI[] { new ValueReturnStatement(JExprParser.NO_SOURCE_INFO,
-                                                                                 new BooleanLiteral(JExprParser.NO_SOURCE_INFO, true))});
+      BracedBody bb1 = new BracedBody(SourceInfo.NO_INFO,
+                                      new BodyItemI[] { new ValueReturnStatement(SourceInfo.NO_INFO,
+                                                                                 new BooleanLiteral(SourceInfo.NO_INFO, true))});
       TypeData sd = bb1.visit(_bbtc);
       assertEquals("There should be one error", 1, errors.size());
       assertEquals("Should return boolean type", SymbolData.BOOLEAN_TYPE.getInstanceData(), sd);
       assertEquals("Error message should be correct", "This method expected to return type: \"int\" but here returned type: \"boolean\".", errors.get(0).getFirst());
       
       //value return statement returns something that is assignable from the method return type
-      BracedBody bb2 = new BracedBody(JExprParser.NO_SOURCE_INFO,
-                                      new BodyItemI[] { new ValueReturnStatement(JExprParser.NO_SOURCE_INFO,
-                                                                                 new CharLiteral(JExprParser.NO_SOURCE_INFO, 'c'))});
+      BracedBody bb2 = new BracedBody(SourceInfo.NO_INFO,
+                                      new BodyItemI[] { new ValueReturnStatement(SourceInfo.NO_INFO,
+                                                                                 new CharLiteral(SourceInfo.NO_INFO, 'c'))});
       sd = bb2.visit(_bbtc);
       assertEquals("There should be still be one error", 1, errors.size());
       assertEquals("Should return char type", SymbolData.CHAR_TYPE.getInstanceData(), sd);
@@ -1197,9 +1197,9 @@ public class BodyTypeChecker extends Bob {
       //method returns void
       _bbtc._bodyData = _bd2; //this body data has a void return type
       
-      BracedBody bb3 = new BracedBody(JExprParser.NO_SOURCE_INFO,
-                                      new BodyItemI[] { new ValueReturnStatement(JExprParser.NO_SOURCE_INFO,
-                                                                                 new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 1))});
+      BracedBody bb3 = new BracedBody(SourceInfo.NO_INFO,
+                                      new BodyItemI[] { new ValueReturnStatement(SourceInfo.NO_INFO,
+                                                                                 new IntegerLiteral(SourceInfo.NO_INFO, 1))});
 
       sd = bb3.visit(_bbtc);
       assertEquals("There should be two errors", 2, errors.size());
@@ -1207,9 +1207,9 @@ public class BodyTypeChecker extends Bob {
       assertEquals("Error message should be correct", "Cannot return a value when the method's expected return type is void.", errors.get(1).getFirst());
 
       // Test where the return value is a class name.
-      BracedBody bb4 = new BracedBody(JExprParser.NO_SOURCE_INFO,
-                                      new BodyItemI[] { new ValueReturnStatement(JExprParser.NO_SOURCE_INFO,
-                                                                                 new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "int")))});
+      BracedBody bb4 = new BracedBody(SourceInfo.NO_INFO,
+                                      new BodyItemI[] { new ValueReturnStatement(SourceInfo.NO_INFO,
+                                                                                 new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "int")))});
 
       sd = bb4.visit(_bbtc);
       assertEquals("There should be 3 errors", 3, errors.size());
@@ -1220,10 +1220,10 @@ public class BodyTypeChecker extends Bob {
     
     public void testForIfThenElseStatementOnly() {
       //test if the expression is not of boolean type
-      IfThenElseStatement ites1 = new IfThenElseStatement(JExprParser.NO_SOURCE_INFO,
-                                                          new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 1),
-                                                          new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 4)),
-                                                          new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new CharLiteral(JExprParser.NO_SOURCE_INFO, 'j')));
+      IfThenElseStatement ites1 = new IfThenElseStatement(SourceInfo.NO_INFO,
+                                                          new IntegerLiteral(SourceInfo.NO_INFO, 1),
+                                                          new ValueReturnStatement(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 4)),
+                                                          new ValueReturnStatement(SourceInfo.NO_INFO, new CharLiteral(SourceInfo.NO_INFO, 'j')));
 
       TypeData sd = ites1.visit(_bbtc);
       assertEquals("There should be one error", 1, errors.size());
@@ -1233,10 +1233,10 @@ public class BodyTypeChecker extends Bob {
                                                     
       
       //test if the branches do not return subtypes of each other
-      IfThenElseStatement ites2 = new IfThenElseStatement(JExprParser.NO_SOURCE_INFO,
-                                                          new BooleanLiteral(JExprParser.NO_SOURCE_INFO, true),
-                                                          new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 4)),
-                                                          new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new BooleanLiteral(JExprParser.NO_SOURCE_INFO, true)));
+      IfThenElseStatement ites2 = new IfThenElseStatement(SourceInfo.NO_INFO,
+                                                          new BooleanLiteral(SourceInfo.NO_INFO, true),
+                                                          new ValueReturnStatement(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 4)),
+                                                          new ValueReturnStatement(SourceInfo.NO_INFO, new BooleanLiteral(SourceInfo.NO_INFO, true)));
 
       sd = ites2.visit(_bbtc);
       assertEquals("There should be two errors", 2, errors.size());
@@ -1247,30 +1247,30 @@ public class BodyTypeChecker extends Bob {
                    errors.get(1).getFirst());                                                          
 
       //test if they do return subtypes of each other
-      IfThenElseStatement ites3 = new IfThenElseStatement(JExprParser.NO_SOURCE_INFO,
-                                                          new BooleanLiteral(JExprParser.NO_SOURCE_INFO, true),
-                                                          new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 4)),
-                                                          new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new CharLiteral(JExprParser.NO_SOURCE_INFO, 'f')));
+      IfThenElseStatement ites3 = new IfThenElseStatement(SourceInfo.NO_INFO,
+                                                          new BooleanLiteral(SourceInfo.NO_INFO, true),
+                                                          new ValueReturnStatement(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 4)),
+                                                          new ValueReturnStatement(SourceInfo.NO_INFO, new CharLiteral(SourceInfo.NO_INFO, 'f')));
 
       sd = ites3.visit(_bbtc);
       assertEquals("There should still be two errors", 2, errors.size());
       assertEquals("Should return int type", SymbolData.INT_TYPE.getInstanceData(), sd);
       
       //test if neither branch returns
-      IfThenElseStatement ites4 = new IfThenElseStatement(JExprParser.NO_SOURCE_INFO,
-                                                          new BooleanLiteral(JExprParser.NO_SOURCE_INFO, true),
-                                                          new EmptyStatement(JExprParser.NO_SOURCE_INFO),
-                                                          new EmptyStatement(JExprParser.NO_SOURCE_INFO));
+      IfThenElseStatement ites4 = new IfThenElseStatement(SourceInfo.NO_INFO,
+                                                          new BooleanLiteral(SourceInfo.NO_INFO, true),
+                                                          new EmptyStatement(SourceInfo.NO_INFO),
+                                                          new EmptyStatement(SourceInfo.NO_INFO));
 
       sd = ites4.visit(_bbtc);
       assertEquals("There should still be two errors", 2, errors.size());
       assertEquals("Should return null type", null, sd);
       
       //test if only one branch returns      
-      IfThenElseStatement ites5 = new IfThenElseStatement(JExprParser.NO_SOURCE_INFO,
-                                                          new BooleanLiteral(JExprParser.NO_SOURCE_INFO, true),
-                                                          new EmptyStatement(JExprParser.NO_SOURCE_INFO),
-                                                          new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 3)));
+      IfThenElseStatement ites5 = new IfThenElseStatement(SourceInfo.NO_INFO,
+                                                          new BooleanLiteral(SourceInfo.NO_INFO, true),
+                                                          new EmptyStatement(SourceInfo.NO_INFO),
+                                                          new ValueReturnStatement(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 3)));
 
       sd = ites5.visit(_bbtc);
       assertEquals("There should still be two errors", 2, errors.size());
@@ -1278,10 +1278,10 @@ public class BodyTypeChecker extends Bob {
 
       
       // Test for the word "boolean" as the condition.
-      IfThenElseStatement ites6 = new IfThenElseStatement(JExprParser.NO_SOURCE_INFO,
-                                                          new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "boolean")),
-                                                          new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 4)),
-                                                          new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 4)));
+      IfThenElseStatement ites6 = new IfThenElseStatement(SourceInfo.NO_INFO,
+                                                          new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "boolean")),
+                                                          new ValueReturnStatement(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 4)),
+                                                          new ValueReturnStatement(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 4)));
                                                           
       sd = ites6.visit(_bbtc);
       assertEquals("There should be 3 errors", 3, errors.size());
@@ -1294,10 +1294,10 @@ public class BodyTypeChecker extends Bob {
     
     public void testForBlock() {
       //Check that a block can reference fields in its enclosing method.
-      Block b = new Block(JExprParser.NO_SOURCE_INFO, 
-                          new BracedBody(JExprParser.NO_SOURCE_INFO,
-                                         new BodyItemI[] { new ValueReturnStatement(JExprParser.NO_SOURCE_INFO,
-                                                                                    new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")))}));
+      Block b = new Block(SourceInfo.NO_INFO, 
+                          new BracedBody(SourceInfo.NO_INFO,
+                                         new BodyItemI[] { new ValueReturnStatement(SourceInfo.NO_INFO,
+                                                                                    new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")))}));
       _bbtc._bodyData.addBlock(new BlockData(_bbtc._bodyData));
       LinkedList<VariableData> vars = new LinkedList<VariableData>();
       vars.addLast(new VariableData("i", _publicMav, SymbolData.INT_TYPE, true, _bd1));
@@ -1311,9 +1311,9 @@ public class BodyTypeChecker extends Bob {
       SymbolData sd1 = SymbolData.BOOLEAN_TYPE;
       SymbolData sd2 = SymbolData.INT_TYPE;
 
-      IfThenStatement its = new IfThenStatement(JExprParser.NO_SOURCE_INFO, 
-                                                new NullLiteral(JExprParser.NO_SOURCE_INFO), 
-                                                new EmptyStatement(JExprParser.NO_SOURCE_INFO));
+      IfThenStatement its = new IfThenStatement(SourceInfo.NO_INFO, 
+                                                new NullLiteral(SourceInfo.NO_INFO), 
+                                                new EmptyStatement(SourceInfo.NO_INFO));
       
 
       //test a correct condition type
@@ -1337,30 +1337,30 @@ public class BodyTypeChecker extends Bob {
     public void testForIfThenStatement() {
       //Test that the proper variable assignment happens.
       //here, a variable is only assigned in the then branch, so it should not be set after it returns.
-      Expression te = new LessThanExpression(JExprParser.NO_SOURCE_INFO, 
-                                             new SimpleNameReference(JExprParser.NO_SOURCE_INFO, 
-                                                                     new Word(JExprParser.NO_SOURCE_INFO, "j")),
-                                             new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
+      Expression te = new LessThanExpression(SourceInfo.NO_INFO, 
+                                             new SimpleNameReference(SourceInfo.NO_INFO, 
+                                                                     new Word(SourceInfo.NO_INFO, "j")),
+                                             new IntegerLiteral(SourceInfo.NO_INFO, 5));
       Statement ts = 
-        new ExpressionStatement(JExprParser.NO_SOURCE_INFO, 
-                                new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, 
-                                                               new SimpleNameReference(JExprParser.NO_SOURCE_INFO, 
-                                                                                       new Word(JExprParser.NO_SOURCE_INFO, "i")), 
-                                                               new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10)));
-      IfThenStatement ift = new IfThenStatement(JExprParser.NO_SOURCE_INFO, te, ts);
+        new ExpressionStatement(SourceInfo.NO_INFO, 
+                                new SimpleAssignmentExpression(SourceInfo.NO_INFO, 
+                                                               new SimpleNameReference(SourceInfo.NO_INFO, 
+                                                                                       new Word(SourceInfo.NO_INFO, "i")), 
+                                                               new IntegerLiteral(SourceInfo.NO_INFO, 10)));
+      IfThenStatement ift = new IfThenStatement(SourceInfo.NO_INFO, te, ts);
       
-      PrimitiveType intt = new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int");
+      PrimitiveType intt = new PrimitiveType(SourceInfo.NO_INFO, "int");
       UninitializedVariableDeclarator uvd = 
-        new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "i"));
+        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "i"));
       FormalParameter param = 
-        new FormalParameter(JExprParser.NO_SOURCE_INFO, 
-                            new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, 
-                                                                new Word(JExprParser.NO_SOURCE_INFO, "j")), false);
-      BracedBody bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] { 
-        new VariableDeclaration(JExprParser.NO_SOURCE_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
+        new FormalParameter(SourceInfo.NO_INFO, 
+                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, 
+                                                                new Word(SourceInfo.NO_INFO, "j")), false);
+      BracedBody bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { 
+        new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
       
-      ConcreteMethodDef cmd1 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], 
-                                   intt, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new FormalParameter[] {param}, 
+      ConcreteMethodDef cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
+                                   intt, new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[] {param}, 
                                                      new ReferenceType[0], bb);
 
       VariableData vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -1414,26 +1414,26 @@ public class BodyTypeChecker extends Bob {
  
       
       //test that if a variable is assigned in a branch of the if, and then returned, it is okay.
-      te = new LessThanExpression(JExprParser.NO_SOURCE_INFO, 
-                                  new SimpleNameReference(JExprParser.NO_SOURCE_INFO, 
-                                                          new Word(JExprParser.NO_SOURCE_INFO, "j")),
-                                  new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
+      te = new LessThanExpression(SourceInfo.NO_INFO, 
+                                  new SimpleNameReference(SourceInfo.NO_INFO, 
+                                                          new Word(SourceInfo.NO_INFO, "j")),
+                                  new IntegerLiteral(SourceInfo.NO_INFO, 5));
       Statement assignStatement = 
-        new ExpressionStatement(JExprParser.NO_SOURCE_INFO, 
-                                new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, 
-                                                               new SimpleNameReference(JExprParser.NO_SOURCE_INFO, 
-                                                                                       new Word(JExprParser.NO_SOURCE_INFO, "i")), 
-                                                               new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10)));
+        new ExpressionStatement(SourceInfo.NO_INFO, 
+                                new SimpleAssignmentExpression(SourceInfo.NO_INFO, 
+                                                               new SimpleNameReference(SourceInfo.NO_INFO, 
+                                                                                       new Word(SourceInfo.NO_INFO, "i")), 
+                                                               new IntegerLiteral(SourceInfo.NO_INFO, 10)));
       Statement returnStatement = 
-        new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, 
-                                 new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")));
-      ts = new Block(JExprParser.NO_SOURCE_INFO, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {assignStatement, returnStatement}));
-      ift = new IfThenStatement(JExprParser.NO_SOURCE_INFO, te, ts);
+        new ValueReturnStatement(SourceInfo.NO_INFO, 
+                                 new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")));
+      ts = new Block(SourceInfo.NO_INFO, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {assignStatement, returnStatement}));
+      ift = new IfThenStatement(SourceInfo.NO_INFO, te, ts);
       
-      bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new VariableDeclaration(JExprParser.NO_SOURCE_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
+      bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
       
-      cmd1 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], 
-                                   intt, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new FormalParameter[] {param}, 
+      cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
+                                   intt, new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[] {param}, 
                                    new ReferenceType[0], bb);
 
       vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -1462,14 +1462,14 @@ public class BodyTypeChecker extends Bob {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       
       // Test that an assignment in the if-expression throws an error
-      te = new LessThanExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")),
-        new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
-      ts = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10)));
-      ift = new IfThenStatement(JExprParser.NO_SOURCE_INFO, te, ts);
-      bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new VariableDeclaration(JExprParser.NO_SOURCE_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
+      te = new LessThanExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")),
+        new IntegerLiteral(SourceInfo.NO_INFO, 5));
+      ts = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10)));
+      ift = new IfThenStatement(SourceInfo.NO_INFO, te, ts);
+      bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
       
-      cmd1 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], 
-                                   intt, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new FormalParameter[] {param}, 
+      cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
+                                   intt, new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[] {param}, 
                                                      new ReferenceType[0], bb);
 
       vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -1490,10 +1490,10 @@ public class BodyTypeChecker extends Bob {
       _bbtc._bodyData = md1;
       _bbtc._data = md1;
       
-      te = new PlusAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")),
-        new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
-      ts = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10)));
-      ift = new IfThenStatement(JExprParser.NO_SOURCE_INFO, te, ts);
+      te = new PlusAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")),
+        new IntegerLiteral(SourceInfo.NO_INFO, 5));
+      ts = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10)));
+      ift = new IfThenStatement(SourceInfo.NO_INFO, te, ts);
       
       ift.visit(_bbtc);
       assertEquals("There should now be one error", 1, errors.size());
@@ -1506,19 +1506,19 @@ public class BodyTypeChecker extends Bob {
       
       //Test that the proper variable assignment happens.
       //here, a variable is only assigned in the then branch, so it should not be set after it returns.
-      Expression te = new LessThanExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")),
-        new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
-      Statement ts = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10)));
+      Expression te = new LessThanExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")),
+        new IntegerLiteral(SourceInfo.NO_INFO, 5));
+      Statement ts = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10)));
 
-      IfThenElseStatement ift = new IfThenElseStatement(JExprParser.NO_SOURCE_INFO, te, ts, new EmptyStatement(JExprParser.NO_SOURCE_INFO));
+      IfThenElseStatement ift = new IfThenElseStatement(SourceInfo.NO_INFO, te, ts, new EmptyStatement(SourceInfo.NO_INFO));
       
-      PrimitiveType intt = new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int");
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "i"));
-      FormalParameter param = new FormalParameter(JExprParser.NO_SOURCE_INFO, new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "j")), false);
-      BracedBody bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new VariableDeclaration(JExprParser.NO_SOURCE_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
+      PrimitiveType intt = new PrimitiveType(SourceInfo.NO_INFO, "int");
+      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "i"));
+      FormalParameter param = new FormalParameter(SourceInfo.NO_INFO, new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "j")), false);
+      BracedBody bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
       
-      ConcreteMethodDef cmd1 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], 
-                                   intt, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new FormalParameter[] {param}, 
+      ConcreteMethodDef cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
+                                   intt, new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[] {param}, 
                                                      new ReferenceType[0], bb);
 
       VariableData vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -1544,16 +1544,16 @@ public class BodyTypeChecker extends Bob {
       assertFalse("vd2 should not be assigned", vd2.hasValue());
       
       //test that if a variable is only assigned in the else case that it is not assigned afterwards
-      te = new LessThanExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")),
-        new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
-      Statement assignStatement = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10)));
-      ts = new Block(JExprParser.NO_SOURCE_INFO, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {assignStatement}));
-      ift = new IfThenElseStatement(JExprParser.NO_SOURCE_INFO, te, new EmptyStatement(JExprParser.NO_SOURCE_INFO), ts);
+      te = new LessThanExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")),
+        new IntegerLiteral(SourceInfo.NO_INFO, 5));
+      Statement assignStatement = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10)));
+      ts = new Block(SourceInfo.NO_INFO, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {assignStatement}));
+      ift = new IfThenElseStatement(SourceInfo.NO_INFO, te, new EmptyStatement(SourceInfo.NO_INFO), ts);
       
-      bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new VariableDeclaration(JExprParser.NO_SOURCE_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
+      bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
       
-      cmd1 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], 
-                                   intt, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new FormalParameter[] {param}, 
+      cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
+                                   intt, new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[] {param}, 
                                    new ReferenceType[0], bb);
                                    
       vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -1607,17 +1607,17 @@ public class BodyTypeChecker extends Bob {
  
       
       //test that if a variable is assigned in a branch of the if, and then returned, it is okay.
-      te = new LessThanExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")),
-        new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
-      assignStatement = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10)));
-      Statement returnStatement = new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")));
-      ts = new Block(JExprParser.NO_SOURCE_INFO, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {assignStatement, returnStatement}));
-      ift = new IfThenElseStatement(JExprParser.NO_SOURCE_INFO, te, ts, new EmptyStatement(JExprParser.NO_SOURCE_INFO));
+      te = new LessThanExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")),
+        new IntegerLiteral(SourceInfo.NO_INFO, 5));
+      assignStatement = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10)));
+      Statement returnStatement = new ValueReturnStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")));
+      ts = new Block(SourceInfo.NO_INFO, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {assignStatement, returnStatement}));
+      ift = new IfThenElseStatement(SourceInfo.NO_INFO, te, ts, new EmptyStatement(SourceInfo.NO_INFO));
       
-      bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new VariableDeclaration(JExprParser.NO_SOURCE_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
+      bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
       
-      cmd1 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], 
-                                   intt, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new FormalParameter[] {param}, 
+      cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
+                                   intt, new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[] {param}, 
                                    new ReferenceType[0], bb);
 
       vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -1648,16 +1648,16 @@ public class BodyTypeChecker extends Bob {
 
       
       //test that if a variable is assigned in the then case that it cannot be used in the else case.
-      te = new LessThanExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")),
-        new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
-      assignStatement = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10)));
-      ts = new Block(JExprParser.NO_SOURCE_INFO, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {assignStatement}));
-      ift = new IfThenElseStatement(JExprParser.NO_SOURCE_INFO, te, ts, new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new EqualsExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word (JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 32))));
+      te = new LessThanExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")),
+        new IntegerLiteral(SourceInfo.NO_INFO, 5));
+      assignStatement = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10)));
+      ts = new Block(SourceInfo.NO_INFO, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {assignStatement}));
+      ift = new IfThenElseStatement(SourceInfo.NO_INFO, te, ts, new ExpressionStatement(SourceInfo.NO_INFO, new EqualsExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word (SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 32))));
       
-      bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new VariableDeclaration(JExprParser.NO_SOURCE_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
+      bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
       
-      cmd1 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], 
-                                   intt, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new FormalParameter[] {param}, 
+      cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
+                                   intt, new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[] {param}, 
                                    new ReferenceType[0], bb);
                                    
       vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -1687,16 +1687,16 @@ public class BodyTypeChecker extends Bob {
       assertEquals("The error message should be correct", "You cannot use i because it may not have been given a value", errors.get(0).getFirst());
       
       //test that if a variable is assigned in both cases that it is assigned afterwards
-      te = new LessThanExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")),
-        new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
-      assignStatement = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10)));
-      ts = new Block(JExprParser.NO_SOURCE_INFO, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {assignStatement}));
-      ift = new IfThenElseStatement(JExprParser.NO_SOURCE_INFO, te, ts, ts);
+      te = new LessThanExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")),
+        new IntegerLiteral(SourceInfo.NO_INFO, 5));
+      assignStatement = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10)));
+      ts = new Block(SourceInfo.NO_INFO, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {assignStatement}));
+      ift = new IfThenElseStatement(SourceInfo.NO_INFO, te, ts, ts);
       
-      bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new VariableDeclaration(JExprParser.NO_SOURCE_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
+      bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
       
-      cmd1 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], 
-                                   intt, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new FormalParameter[] {param}, 
+      cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
+                                   intt, new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[] {param}, 
                                    new ReferenceType[0], bb);
                                    
       vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -1727,15 +1727,15 @@ public class BodyTypeChecker extends Bob {
       
       
       //Test that if assignment is used in the conditional expression, an error is thrown
-      te = new PlusAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
-      assignStatement = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10)));      
-      ts = new Block(JExprParser.NO_SOURCE_INFO, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {assignStatement}));
-      ift = new IfThenElseStatement(JExprParser.NO_SOURCE_INFO, te, new EmptyStatement(JExprParser.NO_SOURCE_INFO), ts);
+      te = new PlusAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 5));
+      assignStatement = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10)));      
+      ts = new Block(SourceInfo.NO_INFO, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {assignStatement}));
+      ift = new IfThenElseStatement(SourceInfo.NO_INFO, te, new EmptyStatement(SourceInfo.NO_INFO), ts);
       
-      bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new VariableDeclaration(JExprParser.NO_SOURCE_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
+      bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
       
-      cmd1 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], 
-                                   intt, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new FormalParameter[] {param}, 
+      cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
+                                   intt, new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[] {param}, 
                                    new ReferenceType[0], bb);
                                    
       vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -1763,17 +1763,17 @@ public class BodyTypeChecker extends Bob {
       assertEquals("The error message should be correct", "You cannot use an assignment expression in the conditional expression of an if-then-else statement at any language level", errors.get(1).getFirst());
       
       //test that if one branch returns a value but the other is a break or continue that SymbolData.NOT_FOUND is returned.
-      te = new LessThanExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")),
-        new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
-      returnStatement = new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")));
-      ts = new Block(JExprParser.NO_SOURCE_INFO, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {returnStatement}));
-      BreakStatement bs = new UnlabeledBreakStatement(JExprParser.NO_SOURCE_INFO);
-      ift = new IfThenElseStatement(JExprParser.NO_SOURCE_INFO, te, ts, bs);
+      te = new LessThanExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")),
+        new IntegerLiteral(SourceInfo.NO_INFO, 5));
+      returnStatement = new ValueReturnStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")));
+      ts = new Block(SourceInfo.NO_INFO, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {returnStatement}));
+      BreakStatement bs = new UnlabeledBreakStatement(SourceInfo.NO_INFO);
+      ift = new IfThenElseStatement(SourceInfo.NO_INFO, te, ts, bs);
       
-      bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new VariableDeclaration(JExprParser.NO_SOURCE_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
+      bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift});
       
-      cmd1 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], 
-                                   intt, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new FormalParameter[] {param}, 
+      cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
+                                   intt, new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[] {param}, 
                                    new ReferenceType[0], bb);
                                    
       vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -1803,20 +1803,20 @@ public class BodyTypeChecker extends Bob {
     public void testForForStatement() {
       //Test that the proper variable assignment happens.
       //here, a variable is only assigned in the for init, so it should not be set after it returns.
-      Expression te = new LessThanExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")),
-        new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
+      Expression te = new LessThanExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")),
+        new IntegerLiteral(SourceInfo.NO_INFO, 5));
 
-      UnparenthesizedExpressionList sel = new UnparenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] {new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10))});
-      ForStatement fs = new ForStatement(JExprParser.NO_SOURCE_INFO, sel, te, new UnparenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]), new EmptyStatement(JExprParser.NO_SOURCE_INFO));
-      //      IfThenElseStatement ift = new IfThenElseStatement(JExprParser.NO_SOURCE_INFO, te, ts, new EmptyStatement(JExprParser.NO_SOURCE_INFO));
+      UnparenthesizedExpressionList sel = new UnparenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10))});
+      ForStatement fs = new ForStatement(SourceInfo.NO_INFO, sel, te, new UnparenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]), new EmptyStatement(SourceInfo.NO_INFO));
+      //      IfThenElseStatement ift = new IfThenElseStatement(SourceInfo.NO_INFO, te, ts, new EmptyStatement(SourceInfo.NO_INFO));
       
-      PrimitiveType intt = new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int");
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "i"));
-      FormalParameter param = new FormalParameter(JExprParser.NO_SOURCE_INFO, new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "j")), false);
-      BracedBody bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new VariableDeclaration(JExprParser.NO_SOURCE_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), fs});
+      PrimitiveType intt = new PrimitiveType(SourceInfo.NO_INFO, "int");
+      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "i"));
+      FormalParameter param = new FormalParameter(SourceInfo.NO_INFO, new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "j")), false);
+      BracedBody bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), fs});
       
-      ConcreteMethodDef cmd1 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], 
-                                                     intt, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new FormalParameter[] {param}, 
+      ConcreteMethodDef cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
+                                                     intt, new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[] {param}, 
                                                      new ReferenceType[0], bb);
                                                      
       VariableData vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -1843,16 +1843,16 @@ public class BodyTypeChecker extends Bob {
       assertEquals("There should be no errors", 0, errors.size());
       
       //test that if a variable is testForForStdeclared in the for init that it has a value in the scope of the for statement, but not afterwards
-      te = new LessThanExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")),
-        new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
-      VariableDeclaration vd = new VariableDeclaration (JExprParser.NO_SOURCE_INFO, _publicMav, new VariableDeclarator[] { new InitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), new Word(JExprParser.NO_SOURCE_INFO, "i"), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10))});
-      UnparenthesizedExpressionList sel2 = new UnparenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] {te});
-      fs = new ForStatement(JExprParser.NO_SOURCE_INFO, sel, te, sel2, new ExpressionStatement(JExprParser.NO_SOURCE_INFO, te));
+      te = new LessThanExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")),
+        new IntegerLiteral(SourceInfo.NO_INFO, 5));
+      VariableDeclaration vd = new VariableDeclaration (SourceInfo.NO_INFO, _publicMav, new VariableDeclarator[] { new InitializedVariableDeclarator(SourceInfo.NO_INFO, new PrimitiveType(SourceInfo.NO_INFO, "int"), new Word(SourceInfo.NO_INFO, "i"), new IntegerLiteral(SourceInfo.NO_INFO, 10))});
+      UnparenthesizedExpressionList sel2 = new UnparenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {te});
+      fs = new ForStatement(SourceInfo.NO_INFO, sel, te, sel2, new ExpressionStatement(SourceInfo.NO_INFO, te));
             
-      bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {fs});
+      bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {fs});
       
-      cmd1 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], 
-                                   intt, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new FormalParameter[] {param}, 
+      cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
+                                   intt, new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[] {param}, 
                                    new ReferenceType[0], bb);
                                    
       vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -1879,17 +1879,17 @@ public class BodyTypeChecker extends Bob {
       assertEquals("There should be no errors", 0, errors.size());
       
       //here, a variable is only assigned in the for init and the for body, so it should not be set after it returns.
-      Statement ts = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10)));
-//      te = new Expression(JExprParser.NO_SOURCE_INFO, new ExpressionPiece[] { new Word(JExprParser.NO_SOURCE_INFO, "j"),
-//        new Operator(JExprParser.NO_SOURCE_INFO, "<"), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5)});
-      sel = new UnparenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] {new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10))});
-      fs = new ForStatement(JExprParser.NO_SOURCE_INFO, sel, new EmptyForCondition(JExprParser.NO_SOURCE_INFO), new UnparenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]), new Block(JExprParser.NO_SOURCE_INFO, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {ts})));
-      //      IfThenElseStatement ift = new IfThenElseStatement(JExprParser.NO_SOURCE_INFO, te, ts, new EmptyStatement(JExprParser.NO_SOURCE_INFO));
+      Statement ts = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10)));
+//      te = new Expression(SourceInfo.NO_INFO, new ExpressionPiece[] { new Word(SourceInfo.NO_INFO, "j"),
+//        new Operator(SourceInfo.NO_INFO, "<"), new IntegerLiteral(SourceInfo.NO_INFO, 5)});
+      sel = new UnparenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10))});
+      fs = new ForStatement(SourceInfo.NO_INFO, sel, new EmptyForCondition(SourceInfo.NO_INFO), new UnparenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]), new Block(SourceInfo.NO_INFO, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {ts})));
+      //      IfThenElseStatement ift = new IfThenElseStatement(SourceInfo.NO_INFO, te, ts, new EmptyStatement(SourceInfo.NO_INFO));
       
-      bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new VariableDeclaration(JExprParser.NO_SOURCE_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), fs});
+      bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), fs});
       
-      cmd1 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], 
-                                                     intt, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new FormalParameter[] {param}, 
+      cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
+                                                     intt, new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[] {param}, 
                                                      new ReferenceType[0], bb);
                                                      
       vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -1917,16 +1917,16 @@ public class BodyTypeChecker extends Bob {
       assertEquals("There should be no errors", 0, errors.size());
 
       //here, a variable is assigned before the for init, so it should still be set after it returns.
-//      te = new Expression(JExprParser.NO_SOURCE_INFO, new ExpressionPiece[] { new Word(JExprParser.NO_SOURCE_INFO, "j"),
-//        new Operator(JExprParser.NO_SOURCE_INFO, "<"), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5)});
-      sel = new UnparenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] {new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10))});
-      fs = new ForStatement(JExprParser.NO_SOURCE_INFO, sel, new EmptyForCondition(JExprParser.NO_SOURCE_INFO), new UnparenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]), new EmptyStatement(JExprParser.NO_SOURCE_INFO));
-      //      IfThenElseStatement ift = new IfThenElseStatement(JExprParser.NO_SOURCE_INFO, te, ts, new EmptyStatement(JExprParser.NO_SOURCE_INFO));
+//      te = new Expression(SourceInfo.NO_INFO, new ExpressionPiece[] { new Word(SourceInfo.NO_INFO, "j"),
+//        new Operator(SourceInfo.NO_INFO, "<"), new IntegerLiteral(SourceInfo.NO_INFO, 5)});
+      sel = new UnparenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10))});
+      fs = new ForStatement(SourceInfo.NO_INFO, sel, new EmptyForCondition(SourceInfo.NO_INFO), new UnparenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]), new EmptyStatement(SourceInfo.NO_INFO));
+      //      IfThenElseStatement ift = new IfThenElseStatement(SourceInfo.NO_INFO, te, ts, new EmptyStatement(SourceInfo.NO_INFO));
       
-      bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new VariableDeclaration(JExprParser.NO_SOURCE_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), fs});
+      bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), fs});
       
-      cmd1 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], 
-                                                     intt, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new FormalParameter[] {param}, 
+      cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
+                                                     intt, new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[] {param}, 
                                                      new ReferenceType[0], bb);
                                                      
       vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -1953,15 +1953,15 @@ public class BodyTypeChecker extends Bob {
       assertEquals("Should be 0 errors", 0, errors.size());
       
 //      make sure that assignment is not allowed in the conditional of the for statement
-      te = new PlusAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
-      vd = new VariableDeclaration (JExprParser.NO_SOURCE_INFO, _publicMav, new VariableDeclarator[] { new InitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), new Word(JExprParser.NO_SOURCE_INFO, "i"), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10))});
-      sel2 = new UnparenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] {te});
-      fs = new ForStatement(JExprParser.NO_SOURCE_INFO, sel, te, sel2, new EmptyStatement(JExprParser.NO_SOURCE_INFO));
+      te = new PlusAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")), new IntegerLiteral(SourceInfo.NO_INFO, 5));
+      vd = new VariableDeclaration (SourceInfo.NO_INFO, _publicMav, new VariableDeclarator[] { new InitializedVariableDeclarator(SourceInfo.NO_INFO, new PrimitiveType(SourceInfo.NO_INFO, "int"), new Word(SourceInfo.NO_INFO, "i"), new IntegerLiteral(SourceInfo.NO_INFO, 10))});
+      sel2 = new UnparenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {te});
+      fs = new ForStatement(SourceInfo.NO_INFO, sel, te, sel2, new EmptyStatement(SourceInfo.NO_INFO));
             
-      bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {fs});
+      bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {fs});
       
-      cmd1 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], 
-                                   intt, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new FormalParameter[] {param}, 
+      cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
+                                   intt, new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[] {param}, 
                                    new ReferenceType[0], bb);
                                    
       vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -1982,10 +1982,10 @@ public class BodyTypeChecker extends Bob {
       _bbtc._bodyData = md1;
       _bbtc._data = md1;
       
-      te = new PositivePrefixIncrementExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")));
-      vd = new VariableDeclaration (JExprParser.NO_SOURCE_INFO, _publicMav, new VariableDeclarator[] { new InitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), new Word(JExprParser.NO_SOURCE_INFO, "i"), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10))});
-      sel2 = new UnparenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] {te});
-      fs = new ForStatement(JExprParser.NO_SOURCE_INFO, sel, te, sel2, new EmptyStatement(JExprParser.NO_SOURCE_INFO));
+      te = new PositivePrefixIncrementExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")));
+      vd = new VariableDeclaration (SourceInfo.NO_INFO, _publicMav, new VariableDeclarator[] { new InitializedVariableDeclarator(SourceInfo.NO_INFO, new PrimitiveType(SourceInfo.NO_INFO, "int"), new Word(SourceInfo.NO_INFO, "i"), new IntegerLiteral(SourceInfo.NO_INFO, 10))});
+      sel2 = new UnparenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {te});
+      fs = new ForStatement(SourceInfo.NO_INFO, sel, te, sel2, new EmptyStatement(SourceInfo.NO_INFO));
 
       fs.visit(_bbtc);
       assertEquals("There should be 1 error", 1, errors.size());
@@ -1996,14 +1996,14 @@ public class BodyTypeChecker extends Bob {
     
     public void testForWhileStatement() {
       //Test that a variable without a value before the while statement, that is given a value in the body of the while statement, still doesn't have a value afterwards
-      Expression te = new LessThanExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")),
-        new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
+      Expression te = new LessThanExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")),
+        new IntegerLiteral(SourceInfo.NO_INFO, 5));
 
 
-      Statement assignStatement = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10)));      
+      Statement assignStatement = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10)));      
 
-      Statement ts = new Block(JExprParser.NO_SOURCE_INFO, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {assignStatement}));
-      WhileStatement ws = new WhileStatement(JExprParser.NO_SOURCE_INFO, te, ts);
+      Statement ts = new Block(SourceInfo.NO_INFO, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {assignStatement}));
+      WhileStatement ws = new WhileStatement(SourceInfo.NO_INFO, te, ts);
       
       VariableData vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
       VariableData vd2 = new VariableData("i", _packageMav, SymbolData.INT_TYPE, false, null);
@@ -2059,8 +2059,8 @@ public class BodyTypeChecker extends Bob {
 
      
       //Test that assignment is not allowed in the condition expression of the while
-      te = new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
-      ws = new WhileStatement(JExprParser.NO_SOURCE_INFO, te, ts);
+      te = new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 5));
+      ws = new WhileStatement(SourceInfo.NO_INFO, te, ts);
 
       vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
       vd2 = new VariableData("i", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -2093,14 +2093,14 @@ public class BodyTypeChecker extends Bob {
     
     public void testForWhileStatementOnly() {
       //Test that a boolean condition expression results in no error
-      Expression te = new LessThanExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")),
-        new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
+      Expression te = new LessThanExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")),
+        new IntegerLiteral(SourceInfo.NO_INFO, 5));
 
       
-      Statement assignStatement = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10)));      
+      Statement assignStatement = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10)));      
 
-      Statement ts = new Block(JExprParser.NO_SOURCE_INFO, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {assignStatement}));
-      WhileStatement ws = new WhileStatement(JExprParser.NO_SOURCE_INFO, te, ts);
+      Statement ts = new Block(SourceInfo.NO_INFO, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {assignStatement}));
+      WhileStatement ws = new WhileStatement(SourceInfo.NO_INFO, te, ts);
       _bbtc._bodyData.addBlock(new BlockData(_bbtc._bodyData));
 
       assertEquals("Should return null", null, _bbtc.forWhileStatementOnly(ws, SymbolData.BOOLEAN_TYPE.getInstanceData(), SymbolData.INT_TYPE.getInstanceData()));
@@ -2119,11 +2119,11 @@ public class BodyTypeChecker extends Bob {
     
     public void testForForStatementOnly() {
       
-      Expression te = new LessThanExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")),
-        new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
+      Expression te = new LessThanExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")),
+        new IntegerLiteral(SourceInfo.NO_INFO, 5));
 
-      UnparenthesizedExpressionList sel = new UnparenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] {new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10))});
-      ForStatement fs = new ForStatement(JExprParser.NO_SOURCE_INFO, sel, new NullLiteral(JExprParser.NO_SOURCE_INFO), new UnparenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]), new EmptyStatement(JExprParser.NO_SOURCE_INFO));
+      UnparenthesizedExpressionList sel = new UnparenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10))});
+      ForStatement fs = new ForStatement(SourceInfo.NO_INFO, sel, new NullLiteral(SourceInfo.NO_INFO), new UnparenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]), new EmptyStatement(SourceInfo.NO_INFO));
   
       
       //Test that a boolean condition results in no error
@@ -2144,14 +2144,14 @@ public class BodyTypeChecker extends Bob {
     
     public void testForDoStatement() {
       //Test that a variable without a value before the do statement, that is given a value in the body of the while statement, still doesn't have a value afterwards
-      Expression te = new LessThanExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")),
-        new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
+      Expression te = new LessThanExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")),
+        new IntegerLiteral(SourceInfo.NO_INFO, 5));
 
 
-      Statement assignStatement = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10)));      
+      Statement assignStatement = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10)));      
 
-      Statement ts = new Block(JExprParser.NO_SOURCE_INFO, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {assignStatement}));
-      DoStatement ds = new DoStatement(JExprParser.NO_SOURCE_INFO, ts, te);
+      Statement ts = new Block(SourceInfo.NO_INFO, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {assignStatement}));
+      DoStatement ds = new DoStatement(SourceInfo.NO_INFO, ts, te);
       
       VariableData vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
       VariableData vd2 = new VariableData("i", _packageMav, SymbolData.INT_TYPE, false, null);
@@ -2207,8 +2207,8 @@ public class BodyTypeChecker extends Bob {
 
      
       //Test that assignment is not allowed in the condition expression of the do
-      te = new PlusAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
-      ds = new DoStatement(JExprParser.NO_SOURCE_INFO, ts, te);
+      te = new PlusAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 5));
+      ds = new DoStatement(SourceInfo.NO_INFO, ts, te);
 
       vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
       vd2 = new VariableData("i", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -2238,14 +2238,14 @@ public class BodyTypeChecker extends Bob {
     }
     
     public void testForDoStatementOnly() {
-      Expression te = new LessThanExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")),
-        new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
+      Expression te = new LessThanExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")),
+        new IntegerLiteral(SourceInfo.NO_INFO, 5));
 
       
-      Statement assignStatement = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10)));      
+      Statement assignStatement = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10)));      
 
-      Statement ts = new Block(JExprParser.NO_SOURCE_INFO, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {assignStatement}));
-      DoStatement ds = new DoStatement(JExprParser.NO_SOURCE_INFO, ts, te);
+      Statement ts = new Block(SourceInfo.NO_INFO, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {assignStatement}));
+      DoStatement ds = new DoStatement(SourceInfo.NO_INFO, ts, te);
       _bbtc._bodyData.addBlock(new BlockData(_bbtc._bodyData));
 
       //Test that a boolean condition results in no error
@@ -2266,7 +2266,7 @@ public class BodyTypeChecker extends Bob {
 
    public void testForSwitchStatementOnly() {
      //if we did not see a default block, should return null
-     SwitchStatement ss = new SwitchStatement(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 1), new SwitchCase[0]);
+     SwitchStatement ss = new SwitchStatement(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 1), new SwitchCase[0]);
      assertEquals("Should return null--no default block", null, _bbtc.forSwitchStatementOnly(ss, 
                                                                                              SymbolData.CHAR_TYPE.getInstanceData(), 
                                                                                              new TypeData[] {SymbolData.INT_TYPE}, 
@@ -2303,32 +2303,32 @@ public class BodyTypeChecker extends Bob {
       _bbtc._vars.addLast(new VariableData("dan", _publicMav, SymbolData.INT_TYPE, true, _bbtc._bodyData));
       
       //assignment in switch expression should throw error
-      SwitchStatement ss = new SwitchStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "dan")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5)), new SwitchCase[0]);
+      SwitchStatement ss = new SwitchStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "dan")), new IntegerLiteral(SourceInfo.NO_INFO, 5)), new SwitchCase[0]);
       assertEquals("Should return null", null, ss.visit(_bbtc));
       assertEquals("Should be 1 error", 1, errors.size());
       assertEquals("Error message should be correct", "You cannot use an assignment expression in the switch expression of a switch statement at any language level.  Perhaps you meant to compare two values with '=='", errors.getLast().getFirst());
       
       //non int or char value in switch expression
-      ss = new SwitchStatement(JExprParser.NO_SOURCE_INFO, new DoubleLiteral(JExprParser.NO_SOURCE_INFO, 4.2), new SwitchCase[0]);
+      ss = new SwitchStatement(SourceInfo.NO_INFO, new DoubleLiteral(SourceInfo.NO_INFO, 4.2), new SwitchCase[0]);
       assertEquals("Should return null", null, ss.visit(_bbtc));
       assertEquals("Should be 2 error", 2, errors.size());
       assertEquals("Error message should be correct", "The switch expression must be either an int or a char.  You have used a double", errors.getLast().getFirst());
 
       //two switch cases with the same label
-      UnbracedBody emptyBody = new UnbracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]);
+      UnbracedBody emptyBody = new UnbracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
 
-      LabeledCase l1 = new LabeledCase(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5), emptyBody);
-      LabeledCase l2 = new LabeledCase(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5), emptyBody);
-      LabeledCase l3 = new LabeledCase(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 7), emptyBody);
+      LabeledCase l1 = new LabeledCase(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5), emptyBody);
+      LabeledCase l2 = new LabeledCase(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5), emptyBody);
+      LabeledCase l3 = new LabeledCase(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 7), emptyBody);
 
-      ss = new SwitchStatement(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "dan")), new SwitchCase[] {l1, l2, l3});
+      ss = new SwitchStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "dan")), new SwitchCase[] {l1, l2, l3});
       assertEquals("Should return null", null, ss.visit(_bbtc));
       assertEquals("Should be 3 errors", 3, errors.size());
       assertEquals("Error message should be correct", "You cannot have two switch cases with the same label 5", errors.getLast().getFirst());
       
       //two default cases
-      DefaultCase dc1 = new DefaultCase(JExprParser.NO_SOURCE_INFO, emptyBody);
-      ss = new SwitchStatement(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "dan")), new SwitchCase[] {dc1, dc1});
+      DefaultCase dc1 = new DefaultCase(SourceInfo.NO_INFO, emptyBody);
+      ss = new SwitchStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "dan")), new SwitchCase[] {dc1, dc1});
       assertEquals("Should return null", null, ss.visit(_bbtc));
       assertEquals("Should be 4 errors", 4, errors.size());
       assertEquals("Error message should be correct", "A switch statement can only have one default case", errors.getLast().getFirst());
@@ -2337,18 +2337,18 @@ public class BodyTypeChecker extends Bob {
       VariableData xData = new VariableData("x", _publicMav, SymbolData.INT_TYPE, false, _bbtc._bodyData);
       _bbtc._vars.addLast(xData);
 
-      ExpressionStatement assignX = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "x")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5)));
-      UnbracedBody returnBody = new UnbracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {assignX, new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5))});
-      UnbracedBody breakBody = new UnbracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {assignX, new UnlabeledBreakStatement(JExprParser.NO_SOURCE_INFO)});
-      UnbracedBody breakNoAssignBody = new UnbracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new UnlabeledBreakStatement(JExprParser.NO_SOURCE_INFO)});
-      UnbracedBody fallThroughBody = new UnbracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {assignX});
-      UnbracedBody fallThroughNoAssignBody = new UnbracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]);
+      ExpressionStatement assignX = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "x")), new IntegerLiteral(SourceInfo.NO_INFO, 5)));
+      UnbracedBody returnBody = new UnbracedBody(SourceInfo.NO_INFO, new BodyItemI[] {assignX, new ValueReturnStatement(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5))});
+      UnbracedBody breakBody = new UnbracedBody(SourceInfo.NO_INFO, new BodyItemI[] {assignX, new UnlabeledBreakStatement(SourceInfo.NO_INFO)});
+      UnbracedBody breakNoAssignBody = new UnbracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new UnlabeledBreakStatement(SourceInfo.NO_INFO)});
+      UnbracedBody fallThroughBody = new UnbracedBody(SourceInfo.NO_INFO, new BodyItemI[] {assignX});
+      UnbracedBody fallThroughNoAssignBody = new UnbracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
       
-      SwitchCase c1 = new LabeledCase(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5), returnBody);
-      SwitchCase c2 = new LabeledCase(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 6), breakBody);
-      SwitchCase c3 = new DefaultCase(JExprParser.NO_SOURCE_INFO, breakBody);
+      SwitchCase c1 = new LabeledCase(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5), returnBody);
+      SwitchCase c2 = new LabeledCase(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 6), breakBody);
+      SwitchCase c3 = new DefaultCase(SourceInfo.NO_INFO, breakBody);
       
-      ss = new SwitchStatement(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "dan")), new SwitchCase[] {c1, c2, c3});
+      ss = new SwitchStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "dan")), new SwitchCase[] {c1, c2, c3});
       
       assertEquals("Should return null", null, ss.visit(_bbtc));
       assertEquals("Should still be 4 errors", 4, errors.size());
@@ -2357,10 +2357,10 @@ public class BodyTypeChecker extends Bob {
       //x is assigned -- the first block falls through
       xData.lostValue();
       
-      c1 = new LabeledCase(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5), fallThroughNoAssignBody);
-      c2 = new DefaultCase(JExprParser.NO_SOURCE_INFO, breakBody);
-      c3 = new LabeledCase(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 6), breakBody);
-      ss = new SwitchStatement(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "dan")), new SwitchCase[] {c1, c2, c3});
+      c1 = new LabeledCase(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5), fallThroughNoAssignBody);
+      c2 = new DefaultCase(SourceInfo.NO_INFO, breakBody);
+      c3 = new LabeledCase(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 6), breakBody);
+      ss = new SwitchStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "dan")), new SwitchCase[] {c1, c2, c3});
      
       assertEquals("Should return null", null, ss.visit(_bbtc));
       assertEquals("Should still be 4 errors", 4, errors.size());
@@ -2369,10 +2369,10 @@ public class BodyTypeChecker extends Bob {
       //x is not assigned -- the second block does not fall through
       xData.lostValue();
       
-      c1 = new LabeledCase(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5), fallThroughNoAssignBody);
-      c2 = new LabeledCase(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 6), breakNoAssignBody);
-      c3 = new DefaultCase(JExprParser.NO_SOURCE_INFO, breakBody);
-      ss = new SwitchStatement(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "dan")), new SwitchCase[] {c1, c2, c3});
+      c1 = new LabeledCase(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5), fallThroughNoAssignBody);
+      c2 = new LabeledCase(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 6), breakNoAssignBody);
+      c3 = new DefaultCase(SourceInfo.NO_INFO, breakBody);
+      ss = new SwitchStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "dan")), new SwitchCase[] {c1, c2, c3});
      
       assertEquals("Should return null", null, ss.visit(_bbtc));
       assertEquals("Should still be 4 errors", 4, errors.size());
@@ -2381,10 +2381,10 @@ public class BodyTypeChecker extends Bob {
       //x is not assigned -- there is no default case
       xData.lostValue();
       
-      c1 = new LabeledCase(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5), fallThroughNoAssignBody);
-      c2 = new LabeledCase(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 6), fallThroughNoAssignBody);
-      c3 = new LabeledCase(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 7), breakBody);
-      ss = new SwitchStatement(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "dan")), new SwitchCase[] {c1, c2, c3});
+      c1 = new LabeledCase(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5), fallThroughNoAssignBody);
+      c2 = new LabeledCase(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 6), fallThroughNoAssignBody);
+      c3 = new LabeledCase(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 7), breakBody);
+      ss = new SwitchStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "dan")), new SwitchCase[] {c1, c2, c3});
      
       assertEquals("Should return null", null, ss.visit(_bbtc));
       assertEquals("Should still be 4 errors", 4, errors.size());
@@ -2393,10 +2393,10 @@ public class BodyTypeChecker extends Bob {
       //x is assigned -- the last case is always executed--but an error is added, because it falls through.
       xData.lostValue();
       
-      c1 = new LabeledCase(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5), fallThroughNoAssignBody);
-      c2 = new LabeledCase(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 6), fallThroughNoAssignBody);
-      c3 = new DefaultCase(JExprParser.NO_SOURCE_INFO, fallThroughBody);
-      ss = new SwitchStatement(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "dan")), new SwitchCase[] {c1, c2, c3});
+      c1 = new LabeledCase(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5), fallThroughNoAssignBody);
+      c2 = new LabeledCase(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 6), fallThroughNoAssignBody);
+      c3 = new DefaultCase(SourceInfo.NO_INFO, fallThroughBody);
+      ss = new SwitchStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "dan")), new SwitchCase[] {c1, c2, c3});
      
       assertEquals("Should return null", null, ss.visit(_bbtc));
       assertEquals("Should be 5 errors", 5, errors.size());
@@ -2407,19 +2407,19 @@ public class BodyTypeChecker extends Bob {
     
     public void testForLabeledCase() {
       symbolTable.put("java.lang.String", new SymbolData("java.lang.String"));
-      UnbracedBody emptyBody = new UnbracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]);
+      UnbracedBody emptyBody = new UnbracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
       //Test a label that is okay
-      LabeledCase lc = new LabeledCase(JExprParser.NO_SOURCE_INFO, new CharLiteral(JExprParser.NO_SOURCE_INFO, 'e'), emptyBody);
+      LabeledCase lc = new LabeledCase(SourceInfo.NO_INFO, new CharLiteral(SourceInfo.NO_INFO, 'e'), emptyBody);
       assertEquals("Should return null", null, lc.visit(_bbtc));
       assertEquals("There should be no errors", 0, errors.size());
 
-      lc = new LabeledCase(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 27), emptyBody);
+      lc = new LabeledCase(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 27), emptyBody);
       assertEquals("Should return null", null, lc.visit(_bbtc));
       assertEquals("There should be no errors", 0, errors.size());
       
       //Test that a braced body that returns something is handled correctly
-      UnbracedBody nonEmptyBody = new UnbracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5))});
-      lc = new LabeledCase(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 27), nonEmptyBody);
+      UnbracedBody nonEmptyBody = new UnbracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new ValueReturnStatement(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5))});
+      lc = new LabeledCase(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 27), nonEmptyBody);
       TypeData result = lc.visit(_bbtc);
       assertEquals("There should be no errors", 0, errors.size());
       assertEquals("Should return int", SymbolData.INT_TYPE.getInstanceData(), result);
@@ -2429,20 +2429,20 @@ public class BodyTypeChecker extends Bob {
       //Test some that are not:
       
       //label that is a more complex expression: length greater than 1
-      lc = new LabeledCase(JExprParser.NO_SOURCE_INFO, new PlusExpression(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 42)), emptyBody);
+      lc = new LabeledCase(SourceInfo.NO_INFO, new PlusExpression(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5), new IntegerLiteral(SourceInfo.NO_INFO, 42)), emptyBody);
       assertEquals("Should return null", null, lc.visit(_bbtc));
       assertEquals("There should be 1 error", 1, errors.size());
       assertEquals("The error message should be correct", "The labels of a switch statement must be constants.  You are using a more complicated expression of type int", errors.getLast().getFirst());
 
       //label that is a more complex expression: something other than a literal of length 1
       _bbtc._vars.addLast(new VariableData("dan", _publicMav, SymbolData.INT_TYPE, true, _bbtc._bodyData));
-      lc = new LabeledCase(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "dan")), emptyBody);
+      lc = new LabeledCase(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "dan")), emptyBody);
       assertEquals("Should return null", null, lc.visit(_bbtc));
       assertEquals("There should now be 2 errors", 2, errors.size());
       assertEquals("The error message should be correct", "The labels of a switch statement must be constants.  You are using a more complicated expression of type int", errors.getLast().getFirst());
                          
       //and a literal whose type is not int or char
-      lc = new LabeledCase(JExprParser.NO_SOURCE_INFO, new StringLiteral(JExprParser.NO_SOURCE_INFO, "hi!"), emptyBody);
+      lc = new LabeledCase(SourceInfo.NO_INFO, new StringLiteral(SourceInfo.NO_INFO, "hi!"), emptyBody);
       assertEquals("Should return null", null, lc.visit(_bbtc));
       assertEquals("There should now be 3 errors", 3, errors.size());
       assertEquals("The error message should be correct", "The labels of a switch statement must be constants of int or char type.  You specified a constant of type java.lang.String", errors.getLast().getFirst());
@@ -2450,49 +2450,49 @@ public class BodyTypeChecker extends Bob {
     }
     
     public void testForDefaultCase() {
-      UnbracedBody emptyBody = new UnbracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]);
-      UnbracedBody returnBody = new UnbracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5))});
-      UnbracedBody breakBody = new UnbracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new UnlabeledBreakStatement(JExprParser.NO_SOURCE_INFO)});
+      UnbracedBody emptyBody = new UnbracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
+      UnbracedBody returnBody = new UnbracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new ValueReturnStatement(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5))});
+      UnbracedBody breakBody = new UnbracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new UnlabeledBreakStatement(SourceInfo.NO_INFO)});
       
       //an empty body
-      DefaultCase dc = new DefaultCase(JExprParser.NO_SOURCE_INFO, emptyBody);
+      DefaultCase dc = new DefaultCase(SourceInfo.NO_INFO, emptyBody);
       assertEquals("Should return null", null, dc.visit(_bbtc));
       assertEquals("There should be no errors", 0, errors.size());
 
       //a body with a return statement
-      dc = new DefaultCase(JExprParser.NO_SOURCE_INFO, returnBody);
+      dc = new DefaultCase(SourceInfo.NO_INFO, returnBody);
       assertEquals("Should return int", SymbolData.INT_TYPE.getInstanceData(), dc.visit(_bbtc));
       assertEquals("There should be no errors", 0, errors.size());
        
       //a body with a break
-      dc = new DefaultCase(JExprParser.NO_SOURCE_INFO, breakBody);
+      dc = new DefaultCase(SourceInfo.NO_INFO, breakBody);
       assertEquals("Should return NOT_FOUND", SymbolData.NOT_FOUND, dc.visit(_bbtc));
       assertEquals("There should be no errors", 0, errors.size());
     }
     
     public void testForSwitchCase() {
-      UnbracedBody emptyBody = new UnbracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]);
-      UnbracedBody returnBody = new UnbracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5))});
-      UnbracedBody breakBody = new UnbracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new UnlabeledBreakStatement(JExprParser.NO_SOURCE_INFO)});
-      UnbracedBody nonEmptyBody = new UnbracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new EmptyStatement(JExprParser.NO_SOURCE_INFO)});
+      UnbracedBody emptyBody = new UnbracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
+      UnbracedBody returnBody = new UnbracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new ValueReturnStatement(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5))});
+      UnbracedBody breakBody = new UnbracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new UnlabeledBreakStatement(SourceInfo.NO_INFO)});
+      UnbracedBody nonEmptyBody = new UnbracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new EmptyStatement(SourceInfo.NO_INFO)});
      
       //empty body
-      DefaultCase dc = new DefaultCase(JExprParser.NO_SOURCE_INFO, emptyBody);
+      DefaultCase dc = new DefaultCase(SourceInfo.NO_INFO, emptyBody);
       assertEquals("Should return null", null, _bbtc.forSwitchCase(dc));
       assertEquals("There should be no errors", 0, errors.size());
 
       //return body
-      dc = new DefaultCase(JExprParser.NO_SOURCE_INFO, returnBody);
+      dc = new DefaultCase(SourceInfo.NO_INFO, returnBody);
       assertEquals("Should return int", SymbolData.INT_TYPE.getInstanceData(), _bbtc.forSwitchCase(dc));
       assertEquals("There should be no errors", 0, errors.size());
        
       //break body
-      dc = new DefaultCase(JExprParser.NO_SOURCE_INFO, breakBody);
+      dc = new DefaultCase(SourceInfo.NO_INFO, breakBody);
       assertEquals("Should return NOT_FOUND", SymbolData.NOT_FOUND, _bbtc.forSwitchCase(dc));
       assertEquals("There should be no errors", 0, errors.size());
       
       //non-empty body that does not return: fall-through
-      dc = new DefaultCase(JExprParser.NO_SOURCE_INFO, nonEmptyBody);
+      dc = new DefaultCase(SourceInfo.NO_INFO, nonEmptyBody);
       assertEquals("Should return null", null, _bbtc.forSwitchCase(dc));
       assertEquals("There should be one error", 1, errors.size());
       assertEquals("The error message should be correct", "You must end a non-empty switch case with a break or return statement at the Advanced level", errors.getLast().getFirst());
@@ -2508,22 +2508,22 @@ public class BodyTypeChecker extends Bob {
     }
     
     public void testCheckDuplicateExceptions() {
-      BracedBody emptyBody = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]);
-      Block b = new Block(JExprParser.NO_SOURCE_INFO, emptyBody);
+      BracedBody emptyBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
+      Block b = new Block(SourceInfo.NO_INFO, emptyBody);
 
-      NormalTryCatchStatement ntcs = new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[0]);
-      TryCatchFinallyStatement tcfs = new TryCatchFinallyStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[0], b);
+      NormalTryCatchStatement ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[0]);
+      TryCatchFinallyStatement tcfs = new TryCatchFinallyStatement(SourceInfo.NO_INFO, b, new CatchBlock[0], b);
       _bbtc.checkDuplicateExceptions(ntcs);
       _bbtc.checkDuplicateExceptions(tcfs);
       assertEquals("Should be no errors", 0, errors.size());
       
-      UninitializedVariableDeclarator uvd1 = new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "java.lang.Exception", new Type[0]), new Word(JExprParser.NO_SOURCE_INFO, "e"));
-      UninitializedVariableDeclarator uvd2 = new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "RuntimeException", new Type[0]), new Word(JExprParser.NO_SOURCE_INFO, "e"));
-      UninitializedVariableDeclarator uvd3 = new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "IOException", new Type[0]), new Word(JExprParser.NO_SOURCE_INFO, "e"));
+      UninitializedVariableDeclarator uvd1 = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Exception", new Type[0]), new Word(SourceInfo.NO_INFO, "e"));
+      UninitializedVariableDeclarator uvd2 = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "RuntimeException", new Type[0]), new Word(SourceInfo.NO_INFO, "e"));
+      UninitializedVariableDeclarator uvd3 = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "IOException", new Type[0]), new Word(SourceInfo.NO_INFO, "e"));
 
-      FormalParameter fp1 = new FormalParameter(JExprParser.NO_SOURCE_INFO, uvd1, false);
-      FormalParameter fp2 = new FormalParameter(JExprParser.NO_SOURCE_INFO, uvd2, false);
-      FormalParameter fp3 = new FormalParameter(JExprParser.NO_SOURCE_INFO, uvd3, false);
+      FormalParameter fp1 = new FormalParameter(SourceInfo.NO_INFO, uvd1, false);
+      FormalParameter fp2 = new FormalParameter(SourceInfo.NO_INFO, uvd2, false);
+      FormalParameter fp3 = new FormalParameter(SourceInfo.NO_INFO, uvd3, false);
 
       LanguageLevelVisitor llv = new LanguageLevelVisitor(new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
                                       new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
@@ -2537,45 +2537,45 @@ public class BodyTypeChecker extends Bob {
       llv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
 
       llv._importedFiles.addLast("java.io.IOException");
-      SymbolData e = llv.getSymbolData("java.lang.Exception", JExprParser.NO_SOURCE_INFO, true);
-      SymbolData re = llv.getSymbolData("java.lang.RuntimeException", JExprParser.NO_SOURCE_INFO, true);
-      SymbolData ioe = llv.getSymbolData("java.io.IOException", JExprParser.NO_SOURCE_INFO, true);
+      SymbolData e = llv.getSymbolData("java.lang.Exception", SourceInfo.NO_INFO, true);
+      SymbolData re = llv.getSymbolData("java.lang.RuntimeException", SourceInfo.NO_INFO, true);
+      SymbolData ioe = llv.getSymbolData("java.io.IOException", SourceInfo.NO_INFO, true);
       
       symbolTable.put("java.lang.Exception", e);
       symbolTable.put("java.lang.RuntimeException", re);
       symbolTable.put("java.io.IOException", ioe);
       
 
-      CatchBlock c1 = new CatchBlock(JExprParser.NO_SOURCE_INFO, fp1, b);
-      CatchBlock c2 = new CatchBlock(JExprParser.NO_SOURCE_INFO, fp2, b);
-      CatchBlock c3 = new CatchBlock(JExprParser.NO_SOURCE_INFO, fp3, b);
+      CatchBlock c1 = new CatchBlock(SourceInfo.NO_INFO, fp1, b);
+      CatchBlock c2 = new CatchBlock(SourceInfo.NO_INFO, fp2, b);
+      CatchBlock c3 = new CatchBlock(SourceInfo.NO_INFO, fp3, b);
       _bbtc._importedFiles.addLast("java.io.IOException");
       
       //just one exception, no error
-      ntcs = new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[] {c1});
+      ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[] {c1});
       _bbtc.checkDuplicateExceptions(ntcs);
       assertEquals("Should be no errors", 0, errors.size());
       
       //2nd exception is subclass of 1st exception: should throw error
-      ntcs = new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[]{c1, c2});
+      ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[]{c1, c2});
       _bbtc.checkDuplicateExceptions(ntcs);
       assertEquals("Should be one error", 1, errors.size());
       assertEquals("Error message should be correct", "Exception java.lang.RuntimeException has already been caught", errors.get(0).getFirst());
 
       //two exceptions, unrelated.  no error
-      ntcs = new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[]{c2, c3});
+      ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[]{c2, c3});
       _bbtc.checkDuplicateExceptions(ntcs);
       assertEquals("Should still be one error", 1, errors.size());
 
       //2nd and 3rd exceptions subclasses of 1st exception: should throw 2 errors
-      ntcs = new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[]{c1, c2, c3});
+      ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[]{c1, c2, c3});
       _bbtc.checkDuplicateExceptions(ntcs);
       assertEquals("Should be three errors", 3, errors.size());
       assertEquals("2nd Error message should be correct", "Exception java.lang.RuntimeException has already been caught", errors.get(1).getFirst());
       assertEquals("3rd Error message should be correct", "Exception java.io.IOException has already been caught", errors.get(2).getFirst());
       
       //1st exception subclass of 2nd exception: should be no error
-      ntcs = new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[]{c2, c1});
+      ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[]{c2, c1});
       _bbtc.checkDuplicateExceptions(ntcs);
       assertEquals("Should still be three errors", 3, errors.size());
     }
@@ -2619,7 +2619,7 @@ public class BodyTypeChecker extends Bob {
                                       _sd1,
                                       null);
                                       
-      NullLiteral nl = new NullLiteral(JExprParser.NO_SOURCE_INFO);
+      NullLiteral nl = new NullLiteral(SourceInfo.NO_INFO);
 
       _bbtc._importedFiles.addLast("java.io.IOException");
       
@@ -2637,8 +2637,8 @@ public class BodyTypeChecker extends Bob {
       llv._importedFiles.addLast("java.io.IOException");
 
 
-      SymbolData re = llv.getSymbolData("java.lang.RuntimeException", JExprParser.NO_SOURCE_INFO, true);
-      SymbolData ioe = llv.getSymbolData("java.io.IOException", JExprParser.NO_SOURCE_INFO, true);
+      SymbolData re = llv.getSymbolData("java.lang.RuntimeException", SourceInfo.NO_INFO, true);
+      SymbolData ioe = llv.getSymbolData("java.io.IOException", SourceInfo.NO_INFO, true);
       
       symbolTable.put("java.lang.RuntimeException", re);
       symbolTable.put("java.io.IOException", ioe);
@@ -2665,13 +2665,13 @@ public class BodyTypeChecker extends Bob {
       llv._hierarchy = new Hashtable<String, TypeDefBase>();
       llv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
 
-      SymbolData re = llv.getSymbolData("java.lang.RuntimeException", JExprParser.NO_SOURCE_INFO, true);
+      SymbolData re = llv.getSymbolData("java.lang.RuntimeException", SourceInfo.NO_INFO, true);
       symbolTable.put("java.lang.RuntimeException", re);
       
       VariableData vd = new VariableData("myException", _publicMav, re, true, _bbtc._bodyData);
       _bbtc._vars.addLast(vd);
-      Expression e = new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "myException"));
-      ThrowStatement ts = new ThrowStatement(JExprParser.NO_SOURCE_INFO, e);
+      Expression e = new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "myException"));
+      ThrowStatement ts = new ThrowStatement(SourceInfo.NO_INFO, e);
       
       assertEquals("Should return EXCEPTION", SymbolData.EXCEPTION.getInstanceData(), ts.visit(_bbtc));
       
@@ -2682,16 +2682,16 @@ public class BodyTypeChecker extends Bob {
     
     public void testMakeSureCaughtStuffWasThrown() {
       //TryCatchStatement that, SymbolData[] caught_array, LinkedList<Pair<SymbolData, JExpression>> thrown) {
-      BracedBody emptyBody = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]);
-      Block b = new Block(JExprParser.NO_SOURCE_INFO, emptyBody);
+      BracedBody emptyBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
+      Block b = new Block(SourceInfo.NO_INFO, emptyBody);
 
-      PrimitiveType intt = new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int");
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "i"));
-      FormalParameter param = new FormalParameter(JExprParser.NO_SOURCE_INFO, new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "j")), false);
+      PrimitiveType intt = new PrimitiveType(SourceInfo.NO_INFO, "int");
+      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "i"));
+      FormalParameter param = new FormalParameter(SourceInfo.NO_INFO, new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "j")), false);
 
       NormalTryCatchStatement ntcs =
-        new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, b,
-                                    new CatchBlock[] {new CatchBlock(JExprParser.NO_SOURCE_INFO,  param, b)});
+        new NormalTryCatchStatement(SourceInfo.NO_INFO, b,
+                                    new CatchBlock[] {new CatchBlock(SourceInfo.NO_INFO,  param, b)});
       SymbolData javaLangThrowable =  _bbtc.getSymbolData("java.lang.Throwable", ntcs, false, true); 
                                      // new SymbolData("java.lang.Throwable");
       _bbtc.symbolTable.put("java.lang.Throwable", javaLangThrowable);
@@ -2744,7 +2744,7 @@ public class BodyTypeChecker extends Bob {
       SymbolData e3 = new SymbolData("exception3");
       e3.setSuperClass(r);
       
-      NullLiteral nl = new NullLiteral(JExprParser.NO_SOURCE_INFO);
+      NullLiteral nl = new NullLiteral(SourceInfo.NO_INFO);
       
       assertTrue("Does not subclass RuntimeException or Error", _bbtc.isCheckedException(e1, nl));
       assertFalse("Subclasses java.lang.RuntimeException", _bbtc.isCheckedException(e2, nl));
@@ -2781,7 +2781,7 @@ public class BodyTypeChecker extends Bob {
       SymbolData e4 = new SymbolData("exception4");
       e4.setSuperClass(e1);
       
-      NullLiteral nl = new NullLiteral(JExprParser.NO_SOURCE_INFO);
+      NullLiteral nl = new NullLiteral(SourceInfo.NO_INFO);
       
       assertTrue("Does not subclass RuntimeException or Error or anything in the method data", _bbtc.isUncaughtCheckedException(e1, nl));
       assertFalse("Subclasses java.lang.RuntimeException", _bbtc.isUncaughtCheckedException(e2, nl));
@@ -2797,13 +2797,13 @@ public class BodyTypeChecker extends Bob {
     }
     
     public void testHandleUncheckedException() {
-      JExpression j = new SimpleMethodInvocation(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] {new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i"))}));
+      JExpression j = new SimpleMethodInvocation(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "myMethod"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i"))}));
       
       _bbtc.handleUncheckedException(new SymbolData("i.have.a.shoe"), j);
       assertEquals("There should be one error", 1, errors.size());
       assertEquals("The error message should be correct", "The method myMethod is declared to throw the exception i.have.a.shoe which needs to be caught or declared to be thrown", errors.get(0).getFirst()); 
-      Expression e = new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "myException"));
-      j = new ThrowStatement(JExprParser.NO_SOURCE_INFO, e);
+      Expression e = new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "myException"));
+      j = new ThrowStatement(SourceInfo.NO_INFO, e);
       _bbtc.handleUncheckedException(new SymbolData("you.have.a.pot"), j);
       assertEquals("There should be two errors", 2, errors.size());
       assertEquals("The error message should be correct", "This statement throws the exception you.have.a.pot which needs to be caught or declared to be thrown", errors.get(1).getFirst());
@@ -2811,16 +2811,16 @@ public class BodyTypeChecker extends Bob {
     }
     
     public void testCompareThrownAndCaught() {
-      JExpression j = new SimpleMethodInvocation(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] {new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i"))}));
+      JExpression j = new SimpleMethodInvocation(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "myMethod"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i"))}));
       
-      BracedBody emptyBody = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]);
-      Block b = new Block(JExprParser.NO_SOURCE_INFO, emptyBody);
+      BracedBody emptyBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
+      Block b = new Block(SourceInfo.NO_INFO, emptyBody);
 
-      PrimitiveType intt = new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int");
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "i"));
-      FormalParameter param = new FormalParameter(JExprParser.NO_SOURCE_INFO, new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "j")), false);
+      PrimitiveType intt = new PrimitiveType(SourceInfo.NO_INFO, "int");
+      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "i"));
+      FormalParameter param = new FormalParameter(SourceInfo.NO_INFO, new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "j")), false);
 
-      NormalTryCatchStatement ntcs = new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[] {new CatchBlock(JExprParser.NO_SOURCE_INFO,  param, b)});
+      NormalTryCatchStatement ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[] {new CatchBlock(SourceInfo.NO_INFO,  param, b)});
 
       SymbolData javaLangThrowable =  _bbtc.getSymbolData("java.lang.Throwable", ntcs, false, true); 
       _bbtc.symbolTable.put("java.lang.Throwable", javaLangThrowable);
@@ -2856,38 +2856,38 @@ public class BodyTypeChecker extends Bob {
       llv._hierarchy = new Hashtable<String, TypeDefBase>();
       llv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
 
-      SymbolData eb = llv.getSymbolData("java.util.prefs.BackingStoreException", JExprParser.NO_SOURCE_INFO, true);
-      SymbolData re = llv.getSymbolData("java.lang.RuntimeException", JExprParser.NO_SOURCE_INFO, true);
+      SymbolData eb = llv.getSymbolData("java.util.prefs.BackingStoreException", SourceInfo.NO_INFO, true);
+      SymbolData re = llv.getSymbolData("java.lang.RuntimeException", SourceInfo.NO_INFO, true);
       LanguageLevelConverter.symbolTable = symbolTable = llv.symbolTable;
 
       
       //Make sure it is okay to have something else other than an uncaught exception in a braced body.
-      BracedBody plainBody = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new UnlabeledBreakStatement(JExprParser.NO_SOURCE_INFO)});
+      BracedBody plainBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new UnlabeledBreakStatement(SourceInfo.NO_INFO)});
       plainBody.visit(_bbtc);
       assertEquals("There should be no errors", 0, errors.size());
 
       //Make sure it is okay to throw a Runtime Exception in a braced body, without catching it.
-      BracedBody runtimeBB = new BracedBody(JExprParser.NO_SOURCE_INFO, 
+      BracedBody runtimeBB = new BracedBody(SourceInfo.NO_INFO, 
                                      new BodyItemI[] { 
-        new ThrowStatement(JExprParser.NO_SOURCE_INFO, 
-                           new SimpleNamedClassInstantiation(JExprParser.NO_SOURCE_INFO, 
-                                         new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, 
+        new ThrowStatement(SourceInfo.NO_INFO, 
+                           new SimpleNamedClassInstantiation(SourceInfo.NO_INFO, 
+                                         new ClassOrInterfaceType(SourceInfo.NO_INFO, 
                                                                  "java.lang.RuntimeException", 
                                                                  new Type[0]), 
-                                                             new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0])))});
+                                                             new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0])))});
       runtimeBB.visit(_bbtc);
       assertEquals("There should be no errors", 0, errors.size());
       
       
       //Make sure it is okay to have a uncaught exception in a braced body, if the method is declared to throw it.
-      BracedBody bb = new BracedBody(JExprParser.NO_SOURCE_INFO, 
+      BracedBody bb = new BracedBody(SourceInfo.NO_INFO, 
                                      new BodyItemI[] { 
-        new ThrowStatement(JExprParser.NO_SOURCE_INFO, 
-        new SimpleNamedClassInstantiation(JExprParser.NO_SOURCE_INFO, 
-                                         new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, 
+        new ThrowStatement(SourceInfo.NO_INFO, 
+        new SimpleNamedClassInstantiation(SourceInfo.NO_INFO, 
+                                         new ClassOrInterfaceType(SourceInfo.NO_INFO, 
                                                                  "java.util.prefs.BackingStoreException", 
                                                                  new Type[0]), 
-                                          new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] {new StringLiteral(JExprParser.NO_SOURCE_INFO, "wee")})))});
+                                          new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new StringLiteral(SourceInfo.NO_INFO, "wee")})))});
 
       _bbtc._bodyData.getMethodData().setThrown(new String[]{"java.util.prefs.BackingStoreException"});
       _bbtc._thrown = new LinkedList<Pair<SymbolData, JExpression>>();
@@ -2916,12 +2916,12 @@ public class BodyTypeChecker extends Bob {
       _bbtc._bodyData.getSymbolData().addMethod(badMethod);                                      
       _bbtc._thrown = new LinkedList<Pair<SymbolData, JExpression>>();
       BracedBody bbMethod = 
-        new BracedBody(JExprParser.NO_SOURCE_INFO, 
+        new BracedBody(SourceInfo.NO_INFO, 
                        new BodyItemI[] { 
-        new ExpressionStatement(JExprParser.NO_SOURCE_INFO, 
-                                new SimpleMethodInvocation(JExprParser.NO_SOURCE_INFO, 
-                                                           new Word(JExprParser.NO_SOURCE_INFO, "throwsException"), 
-                                                           new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, 
+        new ExpressionStatement(SourceInfo.NO_INFO, 
+                                new SimpleMethodInvocation(SourceInfo.NO_INFO, 
+                                                           new Word(SourceInfo.NO_INFO, "throwsException"), 
+                                                           new ParenthesizedExpressionList(SourceInfo.NO_INFO, 
                                                                                            new Expression[0])))});
       bbMethod.visit(_bbtc);
       assertEquals("There should be two errors", 2, errors.size());
@@ -2942,7 +2942,7 @@ public class BodyTypeChecker extends Bob {
       _bbtc.symbolTable.put(_sd3.getName(), _sd3);
       MethodData constructor = new MethodData("zebra", _publicMav, new TypeParameter[0], _sd3, new VariableData[0], new String[] {"java.util.prefs.BackingStoreException"}, _sd3, null);
       _sd3.addMethod(constructor);
-      BracedBody bbConstr = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[]{new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleNamedClassInstantiation(JExprParser.NO_SOURCE_INFO, new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, _sd3.getName(), new Type[0]), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0])))});
+      BracedBody bbConstr = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[]{new ExpressionStatement(SourceInfo.NO_INFO, new SimpleNamedClassInstantiation(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, _sd3.getName(), new Type[0]), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0])))});
       _bbtc._thrown = new LinkedList<Pair<SymbolData, JExpression>>();
       bbConstr.visit(_bbtc);
       assertEquals("There should be three errors", 3, errors.size());
@@ -2968,21 +2968,21 @@ public class BodyTypeChecker extends Bob {
       llv._hierarchy = new Hashtable<String, TypeDefBase>();
       llv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
 
-      SymbolData eb = llv.getSymbolData("java.util.prefs.BackingStoreException", JExprParser.NO_SOURCE_INFO, true);
-      SymbolData re = llv.getSymbolData("java.lang.RuntimeException", JExprParser.NO_SOURCE_INFO, true);
+      SymbolData eb = llv.getSymbolData("java.util.prefs.BackingStoreException", SourceInfo.NO_INFO, true);
+      SymbolData re = llv.getSymbolData("java.lang.RuntimeException", SourceInfo.NO_INFO, true);
       
-      BracedBody emptyBody = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]);
-      BracedBody bb = new BracedBody(JExprParser.NO_SOURCE_INFO, 
+      BracedBody emptyBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
+      BracedBody bb = new BracedBody(SourceInfo.NO_INFO, 
                                      new BodyItemI[] { 
-        new ThrowStatement(JExprParser.NO_SOURCE_INFO, 
-        new SimpleNamedClassInstantiation(JExprParser.NO_SOURCE_INFO, 
-                                         new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, 
+        new ThrowStatement(SourceInfo.NO_INFO, 
+        new SimpleNamedClassInstantiation(SourceInfo.NO_INFO, 
+                                         new ClassOrInterfaceType(SourceInfo.NO_INFO, 
                                                                  "java.util.prefs.BackingStoreException", 
                                                                  new Type[0]), 
-                                          new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[]{new StringLiteral(JExprParser.NO_SOURCE_INFO, "arg")})))});
+                                          new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[]{new StringLiteral(SourceInfo.NO_INFO, "arg")})))});
       
-      Block b = new Block(JExprParser.NO_SOURCE_INFO, bb);
-      Block b2 = new Block(JExprParser.NO_SOURCE_INFO, emptyBody);
+      Block b = new Block(SourceInfo.NO_INFO, bb);
+      Block b2 = new Block(SourceInfo.NO_INFO, emptyBody);
     
       _bbtc._bodyData.getMethodData().setThrown(new String[0]);
       _bbtc._bodyData.addBlock(new BlockData(_bbtc._bodyData));
@@ -2991,19 +2991,19 @@ public class BodyTypeChecker extends Bob {
 
       
       //Test that an empty finally block behaves as expected
-      TryCatchFinallyStatement tcfs = new TryCatchFinallyStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[0], b2);
+      TryCatchFinallyStatement tcfs = new TryCatchFinallyStatement(SourceInfo.NO_INFO, b, new CatchBlock[0], b2);
       tcfs.visit(_bbtc);
       assertEquals("Should be 1 error", 1, errors.size());
       assertEquals("Error message should be correct", "This statement throws the exception java.util.prefs.BackingStoreException which needs to be caught or declared to be thrown", errors.get(0).getFirst());
             
       //Test that a finally block where only one branch ends abruptly acts as expected
-      IfThenElseStatement ites1 = new IfThenElseStatement(JExprParser.NO_SOURCE_INFO,
-                                                          new BooleanLiteral(JExprParser.NO_SOURCE_INFO, true),
-                                                          new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 4)),
-                                                          new EmptyStatement(JExprParser.NO_SOURCE_INFO));
+      IfThenElseStatement ites1 = new IfThenElseStatement(SourceInfo.NO_INFO,
+                                                          new BooleanLiteral(SourceInfo.NO_INFO, true),
+                                                          new ValueReturnStatement(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 4)),
+                                                          new EmptyStatement(SourceInfo.NO_INFO));
                                                           
-      BracedBody bb2 = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {ites1});
-      TryCatchFinallyStatement tcfs2 = new TryCatchFinallyStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[0], new Block(JExprParser.NO_SOURCE_INFO, bb2));
+      BracedBody bb2 = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {ites1});
+      TryCatchFinallyStatement tcfs2 = new TryCatchFinallyStatement(SourceInfo.NO_INFO, b, new CatchBlock[0], new Block(SourceInfo.NO_INFO, bb2));
       _bbtc._bodyData.removeAllBlocks();
       _bbtc._bodyData.addBlock(new BlockData(_bbtc._bodyData));
       _bbtc._bodyData.addBlock(new BlockData(_bbtc._bodyData));
@@ -3015,13 +3015,13 @@ public class BodyTypeChecker extends Bob {
       assertEquals("Error message should be correct", "This statement throws the exception java.util.prefs.BackingStoreException which needs to be caught or declared to be thrown", errors.get(1).getFirst());
                                       
       //Test that a finally block where both branches end abruptly acts as expected (break)
-      IfThenElseStatement ites2 = new IfThenElseStatement(JExprParser.NO_SOURCE_INFO,
-                                                          new BooleanLiteral(JExprParser.NO_SOURCE_INFO, false),
-                                                          new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 4)),
-                                                          new UnlabeledBreakStatement(JExprParser.NO_SOURCE_INFO));
+      IfThenElseStatement ites2 = new IfThenElseStatement(SourceInfo.NO_INFO,
+                                                          new BooleanLiteral(SourceInfo.NO_INFO, false),
+                                                          new ValueReturnStatement(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 4)),
+                                                          new UnlabeledBreakStatement(SourceInfo.NO_INFO));
                                       
-      BracedBody bb3 = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {ites2});
-      TryCatchFinallyStatement tcfs3 = new TryCatchFinallyStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[0], new Block(JExprParser.NO_SOURCE_INFO, bb3));
+      BracedBody bb3 = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {ites2});
+      TryCatchFinallyStatement tcfs3 = new TryCatchFinallyStatement(SourceInfo.NO_INFO, b, new CatchBlock[0], new Block(SourceInfo.NO_INFO, bb3));
 
       _bbtc._bodyData.removeAllBlocks();
       _bbtc._bodyData.addBlock(new BlockData(_bbtc._bodyData));
@@ -3034,13 +3034,13 @@ public class BodyTypeChecker extends Bob {
 
       //Test that a finally block where both branches end abruptly acts as expected (void return)
       _bbtc._bodyData.getMethodData().setReturnType(SymbolData.VOID_TYPE);
-      IfThenElseStatement ites3 = new IfThenElseStatement(JExprParser.NO_SOURCE_INFO,
-                                                          new BooleanLiteral(JExprParser.NO_SOURCE_INFO, true),
-                                                          new VoidReturnStatement(JExprParser.NO_SOURCE_INFO),
-                                                          new VoidReturnStatement(JExprParser.NO_SOURCE_INFO));
+      IfThenElseStatement ites3 = new IfThenElseStatement(SourceInfo.NO_INFO,
+                                                          new BooleanLiteral(SourceInfo.NO_INFO, true),
+                                                          new VoidReturnStatement(SourceInfo.NO_INFO),
+                                                          new VoidReturnStatement(SourceInfo.NO_INFO));
                                                           
-      BracedBody bb4 = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {ites3});
-      TryCatchFinallyStatement tcfs4 = new TryCatchFinallyStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[0], new Block(JExprParser.NO_SOURCE_INFO, bb4));
+      BracedBody bb4 = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {ites3});
+      TryCatchFinallyStatement tcfs4 = new TryCatchFinallyStatement(SourceInfo.NO_INFO, b, new CatchBlock[0], new Block(SourceInfo.NO_INFO, bb4));
       _bbtc._bodyData.removeAllBlocks();
       _bbtc._bodyData.addBlock(new BlockData(_bbtc._bodyData));
       _bbtc._bodyData.addBlock(new BlockData(_bbtc._bodyData));
@@ -3060,9 +3060,9 @@ public class BodyTypeChecker extends Bob {
       //      finally b2
       
       //Test that an error is thrown if a try catch statement is nested, an error is thrown but not caught, and finally doesn't return
-      TryCatchFinallyStatement inner = new TryCatchFinallyStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[0], b2);
-      TryCatchFinallyStatement nested = new TryCatchFinallyStatement(JExprParser.NO_SOURCE_INFO, 
-                                             new Block(JExprParser.NO_SOURCE_INFO, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {inner})), 
+      TryCatchFinallyStatement inner = new TryCatchFinallyStatement(SourceInfo.NO_INFO, b, new CatchBlock[0], b2);
+      TryCatchFinallyStatement nested = new TryCatchFinallyStatement(SourceInfo.NO_INFO, 
+                                             new Block(SourceInfo.NO_INFO, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {inner})), 
                                              new CatchBlock[0], b2);
                                              
       BlockData innerBD = new BlockData(_bbtc._bodyData);
@@ -3080,14 +3080,14 @@ public class BodyTypeChecker extends Bob {
       assertEquals("Error message should be correct", "This statement throws the exception java.util.prefs.BackingStoreException which needs to be caught or declared to be thrown", errors.get(2).getFirst());
                                       
       //Test that no error is thrown if the exception is caught
-      UninitializedVariableDeclarator uvd1 = new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "java.util.prefs.BackingStoreException", new Type[0]), new Word(JExprParser.NO_SOURCE_INFO, "e"));
-      FormalParameter fp1 = new FormalParameter(JExprParser.NO_SOURCE_INFO, uvd1, false);
+      UninitializedVariableDeclarator uvd1 = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.util.prefs.BackingStoreException", new Type[0]), new Word(SourceInfo.NO_INFO, "e"));
+      FormalParameter fp1 = new FormalParameter(SourceInfo.NO_INFO, uvd1, false);
       BlockData catchBD = new BlockData(_bbtc._bodyData);
       VariableData fpData = new VariableData("e", null, eb, true, catchBD);
       catchBD.addVar(fpData);
 
-      CatchBlock cb = new CatchBlock(JExprParser.NO_SOURCE_INFO, fp1, b2);
-      TryCatchFinallyStatement nested2 = new TryCatchFinallyStatement(JExprParser.NO_SOURCE_INFO, new Block(JExprParser.NO_SOURCE_INFO, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {inner})), new CatchBlock[] {cb}, b2);
+      CatchBlock cb = new CatchBlock(SourceInfo.NO_INFO, fp1, b2);
+      TryCatchFinallyStatement nested2 = new TryCatchFinallyStatement(SourceInfo.NO_INFO, new Block(SourceInfo.NO_INFO, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {inner})), new CatchBlock[] {cb}, b2);
       _bbtc._bodyData.removeAllBlocks();
       innerBD.resetBlockIterator();
       _bbtc._bodyData.addBlock(innerBD);
@@ -3099,14 +3099,14 @@ public class BodyTypeChecker extends Bob {
       assertEquals("There should still be 3 errors", 3, errors.size());
       
       //Test that no error is thrown if it is a runtime exception
-      BracedBody reb = new BracedBody(JExprParser.NO_SOURCE_INFO, 
+      BracedBody reb = new BracedBody(SourceInfo.NO_INFO, 
                                      new BodyItemI[] { 
-        new ThrowStatement(JExprParser.NO_SOURCE_INFO, 
-        new SimpleNamedClassInstantiation(JExprParser.NO_SOURCE_INFO, 
-                                         new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, 
+        new ThrowStatement(SourceInfo.NO_INFO, 
+        new SimpleNamedClassInstantiation(SourceInfo.NO_INFO, 
+                                         new ClassOrInterfaceType(SourceInfo.NO_INFO, 
                                                                  "java.lang.RuntimeException", 
                                                                  new Type[0]), 
-                                         new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0])))});
+                                         new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0])))});
       
       //      try {
       //        try {
@@ -3117,11 +3117,11 @@ public class BodyTypeChecker extends Bob {
       //      finally b2
       //      }
     
-      TryCatchFinallyStatement inner3 = new TryCatchFinallyStatement(JExprParser.NO_SOURCE_INFO, 
-                                                                     new Block(JExprParser.NO_SOURCE_INFO, reb), new CatchBlock[0], b2);
-      TryCatchFinallyStatement nested3 = new TryCatchFinallyStatement(JExprParser.NO_SOURCE_INFO, 
-                                                                      new Block(JExprParser.NO_SOURCE_INFO, 
-                                                                                new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {inner3})), 
+      TryCatchFinallyStatement inner3 = new TryCatchFinallyStatement(SourceInfo.NO_INFO, 
+                                                                     new Block(SourceInfo.NO_INFO, reb), new CatchBlock[0], b2);
+      TryCatchFinallyStatement nested3 = new TryCatchFinallyStatement(SourceInfo.NO_INFO, 
+                                                                      new Block(SourceInfo.NO_INFO, 
+                                                                                new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {inner3})), 
                                                                       new CatchBlock[0], b2);
                                                                                 
       _bbtc._bodyData.removeAllBlocks();
@@ -3152,35 +3152,35 @@ public class BodyTypeChecker extends Bob {
       llv._hierarchy = new Hashtable<String, TypeDefBase>();
       llv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
 
-      SymbolData eb = llv.getSymbolData("java.util.prefs.BackingStoreException", JExprParser.NO_SOURCE_INFO, true);
-      SymbolData re = llv.getSymbolData("java.lang.RuntimeException", JExprParser.NO_SOURCE_INFO, true);
+      SymbolData eb = llv.getSymbolData("java.util.prefs.BackingStoreException", SourceInfo.NO_INFO, true);
+      SymbolData re = llv.getSymbolData("java.lang.RuntimeException", SourceInfo.NO_INFO, true);
       
-      BracedBody emptyBody = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]);
-      BracedBody bb = new BracedBody(JExprParser.NO_SOURCE_INFO, 
+      BracedBody emptyBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
+      BracedBody bb = new BracedBody(SourceInfo.NO_INFO, 
                                      new BodyItemI[] { 
-        new ThrowStatement(JExprParser.NO_SOURCE_INFO, 
-        new SimpleNamedClassInstantiation(JExprParser.NO_SOURCE_INFO, 
-                                         new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, 
+        new ThrowStatement(SourceInfo.NO_INFO, 
+        new SimpleNamedClassInstantiation(SourceInfo.NO_INFO, 
+                                         new ClassOrInterfaceType(SourceInfo.NO_INFO, 
                                                                  "java.util.prefs.BackingStoreException", 
                                                                  new Type[0]), 
-                                          new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[]{new StringLiteral(JExprParser.NO_SOURCE_INFO, "boo")})))});
+                                          new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[]{new StringLiteral(SourceInfo.NO_INFO, "boo")})))});
       
-      Block b = new Block(JExprParser.NO_SOURCE_INFO, bb);
-      Block b2 = new Block(JExprParser.NO_SOURCE_INFO, emptyBody);
+      Block b = new Block(SourceInfo.NO_INFO, bb);
+      Block b2 = new Block(SourceInfo.NO_INFO, emptyBody);
     
       _bbtc._bodyData.getMethodData().setThrown(new String[0]);
       
       
 //       Test that an empty finally block behaves as expected
-      NormalTryCatchStatement tcfs = new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[0]);
+      NormalTryCatchStatement tcfs = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[0]);
       _bbtc._bodyData.addBlock(new BlockData(_bbtc._bodyData));
       tcfs.visit(_bbtc);
       assertEquals("Should be 1 error", 1, errors.size());
       assertEquals("Error message should be correct", "This statement throws the exception java.util.prefs.BackingStoreException which needs to be caught or declared to be thrown", errors.get(0).getFirst());
             
 //      Test that an error is thrown if a try catch statement is nested, an error is thrown but not caught, and finally doesn't return
-      NormalTryCatchStatement inner = new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[0]);
-      NormalTryCatchStatement nested = new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, new Block(JExprParser.NO_SOURCE_INFO, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {inner})), new CatchBlock[0]);
+      NormalTryCatchStatement inner = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[0]);
+      NormalTryCatchStatement nested = new NormalTryCatchStatement(SourceInfo.NO_INFO, new Block(SourceInfo.NO_INFO, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {inner})), new CatchBlock[0]);
       
       BlockData innerBD = new BlockData(_bbtc._bodyData);
       innerBD.addBlock(new BlockData(innerBD));
@@ -3197,15 +3197,15 @@ public class BodyTypeChecker extends Bob {
       assertEquals("Error message should be correct", "This statement throws the exception java.util.prefs.BackingStoreException which needs to be caught or declared to be thrown", errors.get(1).getFirst());
                                       
 //      Test that no error is thrown if the exception is caught
-      UninitializedVariableDeclarator uvd1 = new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "java.util.prefs.BackingStoreException", new Type[0]), new Word(JExprParser.NO_SOURCE_INFO, "e"));
-      FormalParameter fp1 = new FormalParameter(JExprParser.NO_SOURCE_INFO, uvd1, false);
+      UninitializedVariableDeclarator uvd1 = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.util.prefs.BackingStoreException", new Type[0]), new Word(SourceInfo.NO_INFO, "e"));
+      FormalParameter fp1 = new FormalParameter(SourceInfo.NO_INFO, uvd1, false);
       BlockData catchBD = new BlockData(_bbtc._bodyData);
       VariableData fpData = new VariableData("e", null, eb, true, catchBD);
       catchBD.addVar(fpData);
      
 
-      CatchBlock cb = new CatchBlock(JExprParser.NO_SOURCE_INFO, fp1, b2);
-      NormalTryCatchStatement nested2 = new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, new Block(JExprParser.NO_SOURCE_INFO, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {inner})), new CatchBlock[] {cb});
+      CatchBlock cb = new CatchBlock(SourceInfo.NO_INFO, fp1, b2);
+      NormalTryCatchStatement nested2 = new NormalTryCatchStatement(SourceInfo.NO_INFO, new Block(SourceInfo.NO_INFO, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {inner})), new CatchBlock[] {cb});
 
       _bbtc._bodyData.removeAllBlocks();
       innerBD.resetBlockIterator();
@@ -3218,17 +3218,17 @@ public class BodyTypeChecker extends Bob {
       assertEquals("There should still be 2 errors", 2, errors.size());
       
 //      Test that no error is thrown if it is a runtime exception
-      BracedBody reb = new BracedBody(JExprParser.NO_SOURCE_INFO, 
+      BracedBody reb = new BracedBody(SourceInfo.NO_INFO, 
                                      new BodyItemI[] { 
-        new ThrowStatement(JExprParser.NO_SOURCE_INFO, 
-        new SimpleNamedClassInstantiation(JExprParser.NO_SOURCE_INFO, 
-                                         new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, 
+        new ThrowStatement(SourceInfo.NO_INFO, 
+        new SimpleNamedClassInstantiation(SourceInfo.NO_INFO, 
+                                         new ClassOrInterfaceType(SourceInfo.NO_INFO, 
                                                                  "java.lang.RuntimeException", 
                                                                  new Type[0]), 
-                                         new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0])))});
+                                         new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0])))});
       
-      NormalTryCatchStatement inner3 = new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, new Block(JExprParser.NO_SOURCE_INFO, reb), new CatchBlock[0]);
-      NormalTryCatchStatement nested3 = new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, new Block(JExprParser.NO_SOURCE_INFO, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {inner3})), new CatchBlock[0]);
+      NormalTryCatchStatement inner3 = new NormalTryCatchStatement(SourceInfo.NO_INFO, new Block(SourceInfo.NO_INFO, reb), new CatchBlock[0]);
+      NormalTryCatchStatement nested3 = new NormalTryCatchStatement(SourceInfo.NO_INFO, new Block(SourceInfo.NO_INFO, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {inner3})), new CatchBlock[0]);
       
       _bbtc._bodyData.removeAllBlocks();
       innerBD.resetBlockIterator();

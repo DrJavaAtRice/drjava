@@ -158,13 +158,13 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
     
     private SymbolData _sd1;
     private MethodData _md1;
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final"});
-    private ModifiersAndVisibility _staticMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"static"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _staticMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"static"});
     
     
     public BodyBodyFullJavaVisitorTest() {
@@ -199,14 +199,14 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
     }
     
     public void xtestForMethodDefDoFirst() {
-      ConcreteMethodDef cmd = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, 
+      ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NO_INFO, 
                                                     _packageMav, 
                                                     new TypeParameter[0], 
-                                                    new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                                    new Word(JExprParser.NO_SOURCE_INFO, "methodName"),
+                                                    new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                                    new Word(SourceInfo.NO_INFO, "methodName"),
                                                     new FormalParameter[0],
                                                     new ReferenceType[0], 
-                                                    new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       cmd.visit(_bav);
       assertEquals("There should be one error.", 1, errors.size());
       assertEquals("The error message should be correct.", 
@@ -219,15 +219,15 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
     
     public void xtestForVariableDeclarationOnly() {
       // Check one that works
-      VariableDeclaration vdecl = new VariableDeclaration(JExprParser.NO_SOURCE_INFO,
+      VariableDeclaration vdecl = new VariableDeclaration(SourceInfo.NO_INFO,
                                                        _packageMav,
                                                        new VariableDeclarator[] {
-        new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                               new PrimitiveType(JExprParser.NO_SOURCE_INFO, "double"), 
-                               new Word (JExprParser.NO_SOURCE_INFO, "field1")),
-        new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                               new PrimitiveType(JExprParser.NO_SOURCE_INFO, "boolean"), 
-                               new Word (JExprParser.NO_SOURCE_INFO, "field2"))});
+        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                               new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                               new Word (SourceInfo.NO_INFO, "field1")),
+        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                               new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
+                               new Word (SourceInfo.NO_INFO, "field2"))});
       VariableData vd1 = new VariableData("field1", _packageMav, SymbolData.DOUBLE_TYPE, false, _bav._bodyData);
       VariableData vd2 = new VariableData("field2", _packageMav, SymbolData.BOOLEAN_TYPE, false, _bav._bodyData);
       vdecl.visit(_bav);
@@ -241,15 +241,15 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
       assertTrue("field2 was added.", _md1.getVars().contains(vd2));
       
       // Check one that doesn't work
-      VariableDeclaration vdecl2 = new VariableDeclaration(JExprParser.NO_SOURCE_INFO,
+      VariableDeclaration vdecl2 = new VariableDeclaration(SourceInfo.NO_INFO,
                                                         _packageMav,
                                                         new VariableDeclarator[] {
-        new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                            new PrimitiveType(JExprParser.NO_SOURCE_INFO, "double"), 
-                                            new Word (JExprParser.NO_SOURCE_INFO, "field3")),
-        new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                            new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                            new Word (JExprParser.NO_SOURCE_INFO, "field3"))});
+        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                            new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                                            new Word (SourceInfo.NO_INFO, "field3")),
+        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                            new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                            new Word (SourceInfo.NO_INFO, "field3"))});
       VariableData vd3 = new VariableData("field3", _packageMav, SymbolData.DOUBLE_TYPE, false, _bav._bodyData);
       vdecl2.visit(_bav);
       assertEquals("There should be one error.", 1, errors.size());
@@ -259,32 +259,32 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
     
     public void xtestForTryCatchStatement() {
       //Make sure that no error is thrown
-      BracedBody emptyBody = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]);
-      Block b = new Block(JExprParser.NO_SOURCE_INFO, emptyBody);
+      BracedBody emptyBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
+      Block b = new Block(SourceInfo.NO_INFO, emptyBody);
 
-      NormalTryCatchStatement ntcs = new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[0]);
-      TryCatchFinallyStatement tcfs = new TryCatchFinallyStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[0], b);
+      NormalTryCatchStatement ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[0]);
+      TryCatchFinallyStatement tcfs = new TryCatchFinallyStatement(SourceInfo.NO_INFO, b, new CatchBlock[0], b);
       ntcs.visit(_bav);
       tcfs.visit(_bav);
       assertEquals("After visiting both NormalTryCatchStatement and TryCatchFinallyStatement, there should be no errors", 0, errors.size());
       
       //make sure that if there is an error in one of the bodies, it is caught:   (this is an arbitrary error).
-      BracedBody errorBody = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {
-        new ExpressionStatement(JExprParser.NO_SOURCE_INFO, 
-                                new BitwiseOrExpression(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 1), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 2)))});
-      Block errorBlock = new Block(JExprParser.NO_SOURCE_INFO, errorBody);
+      BracedBody errorBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {
+        new ExpressionStatement(SourceInfo.NO_INFO, 
+                                new BitwiseOrExpression(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 1), new IntegerLiteral(SourceInfo.NO_INFO, 2)))});
+      Block errorBlock = new Block(SourceInfo.NO_INFO, errorBody);
       
-      ntcs = new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, errorBlock, new CatchBlock[0]);
+      ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, errorBlock, new CatchBlock[0]);
       ntcs.visit(_bav);
       assertEquals("Should be one error", 1, errors.size());
       assertEquals("Error message should be correct", "Bitwise or expressions cannot be used at any language level.  Perhaps you meant to compare two values using regular or (||)", errors.get(0).getFirst());
       
       //make sure that if there is an error in one of the catch statements, it is caught: (this is an arbitrary error).
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), new Word(JExprParser.NO_SOURCE_INFO, "i"));
-      FormalParameter fp = new FormalParameter(JExprParser.NO_SOURCE_INFO, uvd, false);
+      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, new PrimitiveType(SourceInfo.NO_INFO, "int"), new Word(SourceInfo.NO_INFO, "i"));
+      FormalParameter fp = new FormalParameter(SourceInfo.NO_INFO, uvd, false);
 
-      tcfs = new TryCatchFinallyStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[] {
-        new CatchBlock(JExprParser.NO_SOURCE_INFO, fp, errorBlock)}, b);
+      tcfs = new TryCatchFinallyStatement(SourceInfo.NO_INFO, b, new CatchBlock[] {
+        new CatchBlock(SourceInfo.NO_INFO, fp, errorBlock)}, b);
         
      tcfs.visit(_bav);
      assertEquals("Should be two errors", 2, errors.size());
@@ -296,9 +296,9 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
       //test one that works
       SymbolData obj = new SymbolData("java.lang.Object");
       symbolTable.put("java.lang.Object", obj);
-      InnerClassDef cd0 = new InnerClassDef(JExprParser.NO_SOURCE_INFO, _packageMav, new Word(JExprParser.NO_SOURCE_INFO, "Rod"),
-                                       new TypeParameter[0], new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], 
-                                       new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+      InnerClassDef cd0 = new InnerClassDef(SourceInfo.NO_INFO, _packageMav, new Word(SourceInfo.NO_INFO, "Rod"),
+                                       new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], 
+                                       new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
 
       cd0.visit(_bav);
       assertEquals("There should be no errors", 0, errors.size());
@@ -306,9 +306,9 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
       assertNotNull("Should have a inner class named Rod", innerClass);
       
       //test one with explicit modifiers
-      InnerClassDef cd1 = new InnerClassDef(JExprParser.NO_SOURCE_INFO, _publicMav, new Word(JExprParser.NO_SOURCE_INFO, "Todd"),
-                                       new TypeParameter[0], new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], 
-                                            new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+      InnerClassDef cd1 = new InnerClassDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "Todd"),
+                                       new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], 
+                                            new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       cd1.visit(_bav);
       assertEquals("There should be 1 error", 1, errors.size());
       assertEquals("The error message should be correct", "No modifiers may appear before a class declaration here", errors.getLast().getFirst());
@@ -316,9 +316,9 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
     
     public void xtestForInnerInterfaceDef() {
       //There should always be an error
-      InnerInterfaceDef iid = new InnerInterfaceDef(JExprParser.NO_SOURCE_INFO, _packageMav, new Word(JExprParser.NO_SOURCE_INFO, "Broken"),
+      InnerInterfaceDef iid = new InnerInterfaceDef(SourceInfo.NO_INFO, _packageMav, new Word(SourceInfo.NO_INFO, "Broken"),
                                                     new TypeParameter[0], new ReferenceType[0], 
-                                                    new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       iid.visit(_bav);
       assertEquals("There should be 1 error", 1, errors.size());
       assertEquals("The error message should be correct", "Inner interface declarations cannot appear here", errors.getLast().getFirst());

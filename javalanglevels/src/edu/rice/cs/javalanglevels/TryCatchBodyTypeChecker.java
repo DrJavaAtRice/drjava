@@ -98,7 +98,7 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
       SymbolData sd = p.getFirst();
       // Iterate over the caught array and see if the current thrown exception is a subclass of one of the exceptions.
       for (SymbolData currCaughtSD : caught_array) {
-        if (sd.isSubClassOf(currCaughtSD) || (!isUncaughtCheckedException(sd, new NullLiteral(JExprParser.NO_SOURCE_INFO)))) {
+        if (sd.isSubClassOf(currCaughtSD) || (!isUncaughtCheckedException(sd, new NullLiteral(SourceInfo.NO_INFO)))) {
           thrown.remove(p);
         }
       }
@@ -122,12 +122,12 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
     private SymbolData _sd4;
     private SymbolData _sd5;
     private SymbolData _sd6;
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
     
     
     public TryCatchBodyTypeCheckerTest() {
@@ -174,14 +174,14 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
     
     public void testForBracedBody() {
       //make sure it is okay to have a uncaught exception in a braced body
-      BracedBody bb = new BracedBody(JExprParser.NO_SOURCE_INFO, 
+      BracedBody bb = new BracedBody(SourceInfo.NO_INFO, 
                                      new BodyItemI[] { 
-        new ThrowStatement(JExprParser.NO_SOURCE_INFO, 
-                           new SimpleNamedClassInstantiation(JExprParser.NO_SOURCE_INFO, 
-                                         new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, 
+        new ThrowStatement(SourceInfo.NO_INFO, 
+                           new SimpleNamedClassInstantiation(SourceInfo.NO_INFO, 
+                                         new ClassOrInterfaceType(SourceInfo.NO_INFO, 
                                                                  "java.util.prefs.BackingStoreException", 
                                                                  new Type[0]), 
-                                                             new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] {new StringLiteral(JExprParser.NO_SOURCE_INFO, "arg")})))});
+                                                             new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new StringLiteral(SourceInfo.NO_INFO, "arg")})))});
       
       LanguageLevelVisitor llv = new LanguageLevelVisitor(new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
                                       new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
@@ -193,21 +193,21 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
       llv._hierarchy = new Hashtable<String, TypeDefBase>();
       llv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
 
-      SymbolData e = llv.getSymbolData("java.util.prefs.BackingStoreException", JExprParser.NO_SOURCE_INFO, true);
+      SymbolData e = llv.getSymbolData("java.util.prefs.BackingStoreException", SourceInfo.NO_INFO, true);
       
       bb.visit(_tcbtc);
       assertEquals("There should be no errors because it's ok to have uncaught exceptions in this visitor", 0, errors.size());
     }
     
     public void testCompareThrownAndCaught() {
-      BracedBody emptyBody = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]);
-      Block b = new Block(JExprParser.NO_SOURCE_INFO, emptyBody);
+      BracedBody emptyBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
+      Block b = new Block(SourceInfo.NO_INFO, emptyBody);
 
-      PrimitiveType intt = new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int");
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "i"));
-      FormalParameter param = new FormalParameter(JExprParser.NO_SOURCE_INFO, new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "j")), false);
+      PrimitiveType intt = new PrimitiveType(SourceInfo.NO_INFO, "int");
+      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "i"));
+      FormalParameter param = new FormalParameter(SourceInfo.NO_INFO, new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "j")), false);
 
-      NormalTryCatchStatement ntcs = new NormalTryCatchStatement(JExprParser.NO_SOURCE_INFO, b, new CatchBlock[] {new CatchBlock(JExprParser.NO_SOURCE_INFO,  param, b)});
+      NormalTryCatchStatement ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[] {new CatchBlock(SourceInfo.NO_INFO,  param, b)});
 
       SymbolData javaLangThrowable = _tcbtc.getSymbolData("java.lang.Throwable", ntcs, false, true); 
       _tcbtc.symbolTable.put("java.lang.Throwable", javaLangThrowable);

@@ -172,12 +172,12 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
     private InterfaceBodyIntermediateVisitor _ibiv;
     
     private SymbolData _sd1;
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
     
     
     public InterfaceBodyIntermediateVisitorTest() {
@@ -204,14 +204,14 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
     
     public void testForConcreteMethodDefDoFirst() {
       // Check that an error is thrown
-      ConcreteMethodDef cmd = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, 
+      ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NO_INFO, 
                                                     _publicMav, 
                                                     new TypeParameter[0], 
-                                                    new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                                    new Word(JExprParser.NO_SOURCE_INFO, "methodName"),
+                                                    new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                                    new Word(SourceInfo.NO_INFO, "methodName"),
                                                     new FormalParameter[0],
                                                     new ReferenceType[0], 
-                                                    new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       cmd.visit(_ibiv);
       assertEquals("There should not be 1 error", 1, errors.size());
       assertEquals("The error message should be correct", "You cannot have concrete methods definitions in interfaces", errors.getLast().getFirst());
@@ -221,11 +221,11 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
     public void testForAbstractMethodDefDoFirst() {
       // Check one that works
       _ibiv._symbolData.setMav(_abstractMav);
-      AbstractMethodDef amd2 = new AbstractMethodDef(JExprParser.NO_SOURCE_INFO, 
+      AbstractMethodDef amd2 = new AbstractMethodDef(SourceInfo.NO_INFO, 
                                                      _abstractMav, 
                                                      new TypeParameter[0], 
-                                                     new PrimitiveType(JExprParser.NO_SOURCE_INFO, "double"), 
-                                                     new Word(JExprParser.NO_SOURCE_INFO, "methodName"),
+                                                     new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                                                     new Word(SourceInfo.NO_INFO, "methodName"),
                                                      new FormalParameter[0],
                                                      new ReferenceType[0]);
       amd2.visit(_ibiv);
@@ -235,16 +235,16 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
     }
 
     public void testForInstanceInitializerDoFirst() {
-      InstanceInitializer ii = new InstanceInitializer(JExprParser.NO_SOURCE_INFO, 
-                                                       new Block(JExprParser.NO_SOURCE_INFO, 
-                                                                 new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0])));
+      InstanceInitializer ii = new InstanceInitializer(SourceInfo.NO_INFO, 
+                                                       new Block(SourceInfo.NO_INFO, 
+                                                                 new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0])));
       ii.visit(_ibiv);
       assertEquals("There should be one error.", 1, errors.size());
       assertEquals("The error message should be correct.", "This open brace must mark the beginning of an interface body", errors.get(0).getFirst());    
     }
 
     public void testForSimpleThisReferenceDoFirst() {
-     SimpleThisReference tl = new SimpleThisReference(JExprParser.NO_SOURCE_INFO);
+     SimpleThisReference tl = new SimpleThisReference(SourceInfo.NO_INFO);
      tl.visit(_ibiv);
      assertEquals("There should be one error", 1, errors.size());
      assertEquals("The error message should be correct", "The field 'this' does not exist in interfaces.  Only classes have a 'this' field.", errors.get(0).getFirst());
@@ -252,7 +252,7 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
     
     
     public void testForComplexThisReferenceDoFirst() {
-     ComplexThisReference tl = new ComplexThisReference(JExprParser.NO_SOURCE_INFO, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+     ComplexThisReference tl = new ComplexThisReference(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO));
      tl.visit(_ibiv);
      assertEquals("There should be one error", 1, errors.size());
      assertEquals("The error message should be correct", "The field 'this' does not exist in interfaces.  Only classes have a 'this' field.", errors.get(0).getFirst());
@@ -260,14 +260,14 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
     }
     
     public void testForSimpleSuperReferenceDoFirst() {
-      SimpleSuperReference sr = new SimpleSuperReference(JExprParser.NO_SOURCE_INFO);
+      SimpleSuperReference sr = new SimpleSuperReference(SourceInfo.NO_INFO);
       sr.visit(_ibiv);
       assertEquals("There should be one error", 1, errors.size());
       assertEquals("The error message should be correct", "The field 'super' does not exist in interfaces.  Only classes have a 'super' field", errors.get(0).getFirst());
     }
 
     public void testForComplexSuperReferenceDoFirst() {
-      ComplexSuperReference cr = new ComplexSuperReference(JExprParser.NO_SOURCE_INFO, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      ComplexSuperReference cr = new ComplexSuperReference(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO));
       cr.visit(_ibiv);
       assertEquals("There should be one error", 1, errors.size());
       assertEquals("The error message should be correct", "The field 'super' does not exist in interfaces.  Only classes have a 'super' field", errors.get(0).getFirst());
@@ -276,15 +276,15 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
     
     public void testForVariableDeclarationDoFirst() {
       // Check that an error is thrown
-      VariableDeclaration vdecl = new VariableDeclaration(JExprParser.NO_SOURCE_INFO,
+      VariableDeclaration vdecl = new VariableDeclaration(SourceInfo.NO_INFO,
                                                        _packageMav,
                                                        new VariableDeclarator[] {
-        new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                               new PrimitiveType(JExprParser.NO_SOURCE_INFO, "double"), 
-                               new Word (JExprParser.NO_SOURCE_INFO, "field1")),
-        new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                               new PrimitiveType(JExprParser.NO_SOURCE_INFO, "boolean"), 
-                               new Word (JExprParser.NO_SOURCE_INFO, "field2"))});
+        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                               new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                               new Word (SourceInfo.NO_INFO, "field1")),
+        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                               new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
+                               new Word (SourceInfo.NO_INFO, "field2"))});
       vdecl.visit(_ibiv);
       assertEquals("There should be one error", 1, errors.size());
       assertEquals("The error message should be correct", "You cannot have fields in interfaces at the Intermediate level", errors.getLast().getFirst());
@@ -292,11 +292,11 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
     
     public void testForAbstractMethodDef() {
       // Test one that works.
-      MethodDef mdef = new AbstractMethodDef(JExprParser.NO_SOURCE_INFO, 
+      MethodDef mdef = new AbstractMethodDef(SourceInfo.NO_INFO, 
                                              _abstractMav, 
                                              new TypeParameter[0], 
-                                             new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                             new Word(JExprParser.NO_SOURCE_INFO, "methodName"),
+                                             new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                             new Word(SourceInfo.NO_INFO, "methodName"),
                                              new FormalParameter[0],
                                              new ReferenceType[0]);
       _ibiv._symbolData.setMav(_abstractMav);
@@ -304,11 +304,11 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
       assertEquals("There should not be any errors.", 0, errors.size());
       
       // Test one that doesn't work.
-      mdef = new AbstractMethodDef(JExprParser.NO_SOURCE_INFO, 
+      mdef = new AbstractMethodDef(SourceInfo.NO_INFO, 
                                              _abstractMav, 
                                              new TypeParameter[0], 
-                                             new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                             new Word(JExprParser.NO_SOURCE_INFO, "monkey"),
+                                             new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                             new Word(SourceInfo.NO_INFO, "monkey"),
                                              new FormalParameter[0],
                                              new ReferenceType[0]);
       mdef.visit(_ibiv);
@@ -319,11 +319,11 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
       
       
       //It's okay for the method to be public
-      AbstractMethodDef amd3 = new AbstractMethodDef(JExprParser.NO_SOURCE_INFO, 
+      AbstractMethodDef amd3 = new AbstractMethodDef(SourceInfo.NO_INFO, 
                                                      _publicMav, 
                                                      new TypeParameter[0], 
-                                                     new PrimitiveType(JExprParser.NO_SOURCE_INFO, "double"), 
-                                                     new Word(JExprParser.NO_SOURCE_INFO, "methodName2"),
+                                                     new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                                                     new Word(SourceInfo.NO_INFO, "methodName2"),
                                                      new FormalParameter[0],
                                                      new ReferenceType[0]);
       amd3.visit(_ibiv);
@@ -331,11 +331,11 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
       assertTrue("The method def should be public", _ibiv._symbolData.getMethods().get(1).hasModifier("public"));
 
       //What if the method is called private? Should throw error
-      AbstractMethodDef amd4 = new AbstractMethodDef(JExprParser.NO_SOURCE_INFO, 
+      AbstractMethodDef amd4 = new AbstractMethodDef(SourceInfo.NO_INFO, 
                                                      _privateMav, 
                                                      new TypeParameter[0], 
-                                                     new PrimitiveType(JExprParser.NO_SOURCE_INFO, "double"), 
-                                                     new Word(JExprParser.NO_SOURCE_INFO, "methodName3"),
+                                                     new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                                                     new Word(SourceInfo.NO_INFO, "methodName3"),
                                                      new FormalParameter[0],
                                                      new ReferenceType[0]);
       amd4.visit(_ibiv);
@@ -343,11 +343,11 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
       assertEquals("The error message should be correct","Interface methods cannot be made private.  They must be public." , errors.get(1).getFirst());
     
       //What if the method is protected: Should throw error
-      AbstractMethodDef amd5 = new AbstractMethodDef(JExprParser.NO_SOURCE_INFO, 
+      AbstractMethodDef amd5 = new AbstractMethodDef(SourceInfo.NO_INFO, 
                                                      _protectedMav, 
                                                      new TypeParameter[0], 
-                                                     new PrimitiveType(JExprParser.NO_SOURCE_INFO, "double"), 
-                                                     new Word(JExprParser.NO_SOURCE_INFO, "methodName4"),
+                                                     new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                                                     new Word(SourceInfo.NO_INFO, "methodName4"),
                                                      new FormalParameter[0],
                                                      new ReferenceType[0]);
       amd5.visit(_ibiv);
@@ -358,8 +358,8 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
     
     public void testForConstructorDef() {
      ///this is a ConstructorDef with no formal paramaters and no throws
-      ConstructorDef cd = new ConstructorDef(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "MyClass"), _publicMav, new FormalParameter[0], new ReferenceType[0], 
-                                             new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+      ConstructorDef cd = new ConstructorDef(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "MyClass"), _publicMav, new FormalParameter[0], new ReferenceType[0], 
+                                             new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       
       //Check that the appropriate error is thrown.
       cd.visit(_ibiv);

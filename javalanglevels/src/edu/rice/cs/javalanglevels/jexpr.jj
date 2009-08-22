@@ -36,9 +36,8 @@ import edu.rice.cs.javalanglevels.*;
 import edu.rice.cs.javalanglevels.tree.*;
 
 public class JExprParser {
-  public static final SourceInfo NO_SOURCE_INFO = new SourceInfo(null, -1, -1, -1, -1);
 
-  public static final ClassOrInterfaceType NO_TYPE = new ClassOrInterfaceType(NO_SOURCE_INFO, "Object", new Type[0]);
+  public static final ClassOrInterfaceType NO_TYPE = new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]);
   private boolean _inInterface;
 
 //  private Vector<ParseException> _errors;

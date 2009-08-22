@@ -89,7 +89,7 @@ public class VariableData {
     */
   public VariableData(SymbolData type) {
     _name = "";
-    _modifiersAndVisibility = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]);
+    _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
     _type = type.getInstanceData();
     _hasBeenAssigned = false;
   }
@@ -149,7 +149,7 @@ public class VariableData {
       for (int i = 1; i <= modifiers.length; i++) {
         newModifiers[i] = modifiers[i-1];
       }
-      _modifiersAndVisibility = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, newModifiers);
+      _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NO_INFO, newModifiers);
     }
   }
 
@@ -162,7 +162,7 @@ public class VariableData {
       for (int i = 1; i <= modifiers.length; i++) {
         newModifiers[i] = modifiers[i-1];
       }
-      _modifiersAndVisibility = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, newModifiers);
+      _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NO_INFO, newModifiers);
     }
   }
   
@@ -175,7 +175,7 @@ public class VariableData {
       for (int i = 1; i <= modifiers.length; i++) {
         newModifiers[i] = modifiers[i-1];
       }
-      _modifiersAndVisibility = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, newModifiers);
+      _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NO_INFO, newModifiers);
     }
   }
 
@@ -265,9 +265,9 @@ public class VariableData {
     private VariableData _vd;
     private VariableData _vd2;
     
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _publicMav2 = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _publicMav2 = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
     
     public VariableDataTest() {
       this("");

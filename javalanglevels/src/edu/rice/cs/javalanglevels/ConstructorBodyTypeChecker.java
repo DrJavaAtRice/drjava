@@ -349,12 +349,12 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
     private SymbolData _sd4;
     private SymbolData _sd5;
     private SymbolData _sd6;
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
     
     
     public ConstructorBodyTypeCheckerTest() {
@@ -396,8 +396,8 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
       _cbtc._bodyData = _bd1; //this body data returns _sd1 (yeah, it's a constructor)
 
       //test one that works
-      BracedBody bb1 = new BracedBody(JExprParser.NO_SOURCE_INFO, 
-                                      new BodyItemI[] { new VoidReturnStatement(JExprParser.NO_SOURCE_INFO)});
+      BracedBody bb1 = new BracedBody(SourceInfo.NO_INFO, 
+                                      new BodyItemI[] { new VoidReturnStatement(SourceInfo.NO_INFO)});
 
       TypeData sd = bb1.visit(_cbtc);
 
@@ -408,9 +408,9 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
    
     public void testforValueReturnStatementOnly() {
       //value return statement should always throw an error.
-      BracedBody bb1 = new BracedBody(JExprParser.NO_SOURCE_INFO,
-                                      new BodyItemI[] { new ValueReturnStatement(JExprParser.NO_SOURCE_INFO,
-                                                                                 new BooleanLiteral(JExprParser.NO_SOURCE_INFO, true))});
+      BracedBody bb1 = new BracedBody(SourceInfo.NO_INFO,
+                                      new BodyItemI[] { new ValueReturnStatement(SourceInfo.NO_INFO,
+                                                                                 new BooleanLiteral(SourceInfo.NO_INFO, true))});
       TypeData sd = bb1.visit(_cbtc);
       assertEquals("There should be one error", 1, errors.size());
       assertEquals("Should return i.like.monkey type", _sd1.getInstanceData(), sd);
@@ -435,8 +435,8 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
       llv._hierarchy = new Hashtable<String, TypeDefBase>();
       llv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
 
-      SymbolData eb = llv.getSymbolData("java.util.prefs.BackingStoreException", JExprParser.NO_SOURCE_INFO, true);
-      SymbolData re = llv.getSymbolData("java.lang.RuntimeException", JExprParser.NO_SOURCE_INFO, true);
+      SymbolData eb = llv.getSymbolData("java.util.prefs.BackingStoreException", SourceInfo.NO_INFO, true);
+      SymbolData re = llv.getSymbolData("java.lang.RuntimeException", SourceInfo.NO_INFO, true);
       LanguageLevelConverter.symbolTable = symbolTable = llv.symbolTable;
 
       
@@ -451,7 +451,7 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
       MethodData constructor = new MethodData("zebra", _publicMav, new TypeParameter[0], _sd3, new VariableData[0], new String[] {"java.util.prefs.BackingStoreException"}, _sd3, null);
       _sd3.addMethod(constructor);
       
-      BracedBody supConstr = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[]{new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleSuperConstructorInvocation(JExprParser.NO_SOURCE_INFO, new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0])))});
+      BracedBody supConstr = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[]{new ExpressionStatement(SourceInfo.NO_INFO, new SimpleSuperConstructorInvocation(SourceInfo.NO_INFO, new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0])))});
       _cbtc._thrown = new LinkedList<Pair<SymbolData, JExpression>>();
       supConstr.visit(_cbtc);
       assertEquals("There should be one error", 1, errors.size());
@@ -467,7 +467,7 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
 //      //if implicit reference, still give error.
       _cbtc._thrown = new LinkedList<Pair<SymbolData, JExpression>>();
       _cbtc._bodyData.getMethodData().setThrown(new String[0]);
-      BracedBody emptyBody = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]);
+      BracedBody emptyBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
       emptyBody.visit(_cbtc);
       assertEquals("There should be 2 errors", 2, errors.size());
       assertEquals("The error message should be correct", "There is an implicit call to the superclass's constructor here.  That constructor could throw the exception java.util.prefs.BackingStoreException, so the enclosing constructor needs to be declared to throw it", errors.getLast().getFirst());
@@ -479,7 +479,7 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
       
       //make sure that it is not okay to invoke a this constructor that throws an exception if the enclosing constructor is not declared to throw it
       _cbtc._thrown = new LinkedList<Pair<SymbolData, JExpression>>();
-      BracedBody thisConstr = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[]{new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleThisConstructorInvocation(JExprParser.NO_SOURCE_INFO, new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0])))});
+      BracedBody thisConstr = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[]{new ExpressionStatement(SourceInfo.NO_INFO, new SimpleThisConstructorInvocation(SourceInfo.NO_INFO, new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0])))});
 
       MethodData thisConstructor = new MethodData("cebu", _publicMav, new TypeParameter[0], _sd6, new VariableData[0], new String[] {"java.util.prefs.BackingStoreException"}, _sd6, null);
       MethodData thisConstructorNoThrown = new MethodData("cebu", _publicMav, new TypeParameter[0], _sd6, new VariableData[0], new String[0], _sd6, null);
@@ -510,7 +510,7 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
       _sd5.setIsContinuation(false);
       symbolTable.put("elephant", _sd5);
       
-      BracedBody complexSC = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new ComplexSuperConstructorInvocation(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "e")), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0])))});
+      BracedBody complexSC = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new ExpressionStatement(SourceInfo.NO_INFO, new ComplexSuperConstructorInvocation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "e")), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0])))});
       oldData.getMethodData().setThrown(new String[0]);
       _cbtc._vars.add(new VariableData("e", _publicMav, _sd5, true, _sd3));
       _cbtc._data = oldData;
@@ -546,7 +546,7 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
       _sd3.addVar(vd2);
       _sd3.addVar(vd3);
       
-      SimpleThisConstructorInvocation constr = new SimpleThisConstructorInvocation(JExprParser.NO_SOURCE_INFO, new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] {new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5)}));
+      SimpleThisConstructorInvocation constr = new SimpleThisConstructorInvocation(SourceInfo.NO_INFO, new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new IntegerLiteral(SourceInfo.NO_INFO, 5)}));
       _cbtc.simpleThisConstructorInvocationAllowed(constr);
       assertEquals("Should be no errors", 0, errors.size());
       assertEquals("vd1 should have value", true, vd1.hasValue());
@@ -558,7 +558,7 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
       vd1.lostValue();
       vd2.lostValue();
       
-      SimpleThisConstructorInvocation constr2 = new SimpleThisConstructorInvocation(JExprParser.NO_SOURCE_INFO, new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]));
+      SimpleThisConstructorInvocation constr2 = new SimpleThisConstructorInvocation(SourceInfo.NO_INFO, new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
       _cbtc.simpleThisConstructorInvocationAllowed(constr2);
       assertEquals("Should be one error", 1, errors.size());
       assertEquals("Error message should be correct", "No constructor found in class zebra with signature: zebra().", errors.getLast().getFirst());
@@ -581,7 +581,7 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
 
     
     public void testComplexThisConstructorInvocationNotAllowed() {
-      ComplexThisConstructorInvocation constr = new ComplexThisConstructorInvocation(JExprParser.NO_SOURCE_INFO, new NullLiteral(JExprParser.NO_SOURCE_INFO), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]));
+      ComplexThisConstructorInvocation constr = new ComplexThisConstructorInvocation(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
       _cbtc.complexThisConstructorInvocationNotAllowed(constr);
       assertEquals("There should be 1 error", 1, errors.size());
       assertEquals("Error message should be correct", "Constructor Invocations of this form are never allowed.  A constructor invocation can appear here, but it must either be a super constructor invocation or have the form this(...)", errors.getLast().getFirst());
@@ -590,7 +590,7 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
 
     public void testSimpleSuperConstructorInvocationAllowed() {
       //if current class does not have a super class, give an error
-      SimpleSuperConstructorInvocation constr = new SimpleSuperConstructorInvocation(JExprParser.NO_SOURCE_INFO, new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] {new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5)}));
+      SimpleSuperConstructorInvocation constr = new SimpleSuperConstructorInvocation(SourceInfo.NO_INFO, new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new IntegerLiteral(SourceInfo.NO_INFO, 5)}));
       _cbtc.simpleSuperConstructorInvocationAllowed(constr);
       assertEquals("Should be 1 error", 1, errors.size());
       assertEquals("Error message should be correct", "The class i.like.monkey does not have a super class", errors.getLast().getFirst());
@@ -631,13 +631,13 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
     public void testComplexSuperConstructorInvocationAllowed() {
 
       //if enclosingResult is a PackageData, return null and add an error
-      ComplexSuperConstructorInvocation constr1 = new ComplexSuperConstructorInvocation(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "nonExistant")), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]));
+      ComplexSuperConstructorInvocation constr1 = new ComplexSuperConstructorInvocation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "nonExistant")), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
       _cbtc.complexSuperConstructorInvocationAllowed(constr1);
       assertEquals("Should be 1 error", 1, errors.size());
       assertEquals("Error message should be correct", "Could not resolve symbol nonExistant", errors.getLast().getFirst());
       
       //if the superclass is null, add error
-      ComplexSuperConstructorInvocation constr2 = new ComplexSuperConstructorInvocation(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "zebra")), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]));
+      ComplexSuperConstructorInvocation constr2 = new ComplexSuperConstructorInvocation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "zebra")), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
       symbolTable.put("zebra", _sd3);
       _sd3.setIsContinuation(false);
       _sd3.setMav(_publicMav);
@@ -653,7 +653,7 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
       
       //if the outer data of the super class does not match the name specified in the constructor, give error
       _sd5.setOuterData(_sd3);
-      ComplexSuperConstructorInvocation constr3 = new ComplexSuperConstructorInvocation(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "u.like.emu")), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]));
+      ComplexSuperConstructorInvocation constr3 = new ComplexSuperConstructorInvocation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "u.like.emu")), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
       symbolTable.put("u.like.emu", _sd4);
       _sd4.setPackage("u.like");
       _sd4.setIsContinuation(false);
@@ -668,7 +668,7 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
       assertEquals("Error message should be correct", "A qualified super constructor invocation can only be made from the context of an instance of the outer class of the super class.  You have specified a type name", errors.getLast().getFirst());
 
       //if it is an instance type but can't find constructor, give error
-      ComplexSuperConstructorInvocation constr4 = new ComplexSuperConstructorInvocation(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "var")), new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]));
+      ComplexSuperConstructorInvocation constr4 = new ComplexSuperConstructorInvocation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "var")), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
       _cbtc._vars.add(new VariableData("var", _publicMav, _sd3, true, _sd1));
       _cbtc.complexSuperConstructorInvocationAllowed(constr4);
       assertEquals("Should be 6 errors", 6, errors.size());
@@ -690,7 +690,7 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
     
     
     public void testImplicitSuperConstructor() {
-      BracedBody constr = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]);
+      BracedBody constr = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
       //if current class has a super class, but there isn't a constructor of the right form, give an error
       _sd1.setSuperClass(_sd3);
       _cbtc.implicitSuperConstructor(constr);

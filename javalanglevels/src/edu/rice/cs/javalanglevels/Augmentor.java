@@ -45,6 +45,8 @@ import junit.framework.TestCase;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 
+import static edu.rice.cs.javalanglevels.SourceInfo.NO_INFO;
+
 public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
 //  public static final Log _log = new Log("Augmentor.txt", true);
   
@@ -75,7 +77,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
   /** The symbol information from this source tree. */
   static private LanguageLevelVisitor _llv;
   
-  /** If true, generated toString, hashCode, & equals methods should correctly handle arrays & infinitely recursive structures */
+  /** If true, generated toString, hashCode, & equals methods should correctly handle arrays & infinitely recursive
+    * structures */
   static private boolean _safeSupportCode;
   
   /** A String of variable definitions to be written at the end of the top-level class definitions */
@@ -146,7 +149,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     return null;
   }
   
-  /** All formal parameters at the Elementary and Intermediate level (parameters to a method or in a catch clause) are augmented to be final.
+  /** All formal parameters at the Elementary and Intermediate level (parameters to a method or in a catch clause) are
+    * augmented to be final.
     * Always read up to the start of the FormalParameter before beginning augmentation.
     * @param that  The FormalParameter we are augmenting.
     */
@@ -168,8 +172,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
   public Void forConstructorDef(ConstructorDef that) {
     _readAndWriteThroughIndex(that.getSourceInfo().getStartLine(), that.getSourceInfo().getStartColumn() - 1);
     
-    if (_isIntermediateFile()) { //if this is an Intermediate level file, want to check and see if the constructor has modifiers.  If not,
-                                 //make it public by default
+    if (_isIntermediateFile()) { //if this is an Intermediate level file, want to check and see if the constructor has
+    //   modifiers.  If not, make it public by default
       String[] modifiers = that.getMav().getModifiers();
       boolean hasVisibilityModifier = false;
       for (int i = 0; i<modifiers.length; i++) {
@@ -202,7 +206,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     
     if (_isIntermediateFile()) { 
       /* Check if the method has explicit modifiers.  Unfortunately, the information in that.getMav().getModifiers() 
-       * is not reliable regarding what modifiers EXPLICITLY appear in the .dj1 file, so we have to do additional work. */
+       * is not reliable regarding what modifiers EXPLICITLY appear in a .dj1 file, so we have to do additional work. */
       
       String[] modifiers = that.getMav().getModifiers();
       String visibilityModifier = null;
@@ -212,36 +216,9 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
           break;
         }
       }
-
-//  This patch was created in an attempt to fix an augmentation bug by brute force; it didn't work      
-//      if (visibilityModifier != null) {
-//        // Check for explicit appearance in text
-//        String text = _peek(mdSourceInfo.getEndLine(), mdSourceInfo.getEndColumn());
-//        _log.log("Checking for presence of visibility modifier " + visibilityModifier + " in file " + _fileIn +  " on line " + _fileInLine + ":\n'" + text + "'");
-//        int len = text.length();
-//        // This analysis can be broken by deviously constructed comments
-//        int startModifier = text.indexOf(visibilityModifier);  // offset of modifier
-//        if (startModifier < 0) startModifier = len;  // This should never happen
-//        int startName = text.indexOf(that.getName().getText());  // offset of method name
-//        if (startName < 0) startName = len;  // This should never happen
-//        if (startName <= startModifier) { 
-//          visibilityModifier = null; // modifier does not explicitlly appear in text
-//          _log.log("No modifier was found");
-//        }
-//        else _log.log("Modifier was found");
-//      }
       
       if (visibilityModifier == null) {
         _writeToFileOut("public ");
-//  A continuation of the preceding unsucessful patch
-//        MethodData md = 
-//          _enclosingData.getSymbolData().getMethod(that.getName().getText(), 
-//                                                   formalParameters2TypeDatas(that.getParams(), _enclosingData));
-//        if (md == null) { 
-//          throw new RuntimeException("Internal Program Error: Can't find method data for " + that.getName() + 
-//                                     " Please report this bug."); 
-//        }
-//        md.addModifier("public");  // this operation is idempotent
       }
         
     }
@@ -284,12 +261,14 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
   public Void forClassDef(ClassDef cd) {
     String className = cd.getName().getText();
     SymbolData sd = _llv.symbolTable.get(_llv.getQualifiedClassName(className));
-    if (sd == null) { throw new RuntimeException("Internal Program Error: Can't find SymbolData for " + cd.getName().getText() + " Please report this bug."); }
+    if (sd == null) { throw new RuntimeException("Internal Program Error: Can't find SymbolData for " + 
+                                                 cd.getName().getText() + " Please report this bug."); }
 
     ModifiersAndVisibility m = cd.getMav();
     
-    if (_isElementaryFile() && sd.hasModifier("public")) { //if this is an Elementary level file that we augmented with "public", then we need to
-                                                           //augment the .java file with "public".  We should do this for all TestCase files.
+    if (_isElementaryFile() && sd.hasModifier("public")) { 
+      // If this is an Elementary level file that we augmented with "public", then we need to
+      // augment the .java file with "public".  We should do this for all TestCase files.
       _readAndWriteThroughIndex(m.getSourceInfo().getStartLine(), m.getSourceInfo().getStartColumn() - 1);
       _writeToFileOut("public ");
     }
@@ -338,28 +317,20 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
    */
   public Void forInnerClassDef(InnerClassDef cd) {
     String className = cd.getName().getText();
-    if (_enclosingData == null) {throw new RuntimeException("Internal Program Error: Enclosing Data is null.  Please report this bug.");}
+    if (_enclosingData == null) {
+      throw new RuntimeException("Internal Program Error: Enclosing Data is null.  Please report this bug.");
+    }
     SymbolData sd = _enclosingData.getInnerClassOrInterface(className);
     if (sd == null) {
-      throw new RuntimeException("Internal Program Error: Can't find SymbolData for " + cd.getName().getText() + ". Please report this bug.");
+      throw new RuntimeException("Internal Program Error: Can't find SymbolData for " + cd.getName().getText() + 
+                                 ". Please report this bug.");
     }
 
     BracedBody bb = cd.getBody();
     sd.setAnonymousInnerClassNum(0);
     bb.visit(new Augmentor(sd));
-    
-//    int baseIndent = cd.getSourceInfo().getStartColumn() - 1;
-//    className = LanguageLevelVisitor.getUnqualifiedClassName(sd.getName());
-    _readAndWriteThroughIndex(cd.getSourceInfo().getEndLine(), cd.getSourceInfo().getEndColumn() - 1);
-//    writeConstructor(className, sd, baseIndent);
-//    writeAccessors(sd, baseIndent);
-//    String valueToStringName = writeValueToString(sd, baseIndent);
-//    String valueEqualsName = writeValueEquals(sd, baseIndent);
-//    String valueHashCodeName = writeValueHashCode(sd, baseIndent, valueEqualsName);
-//    writeToString(sd, baseIndent, valueToStringName);
-//    writeEquals(className, sd, baseIndent, valueEqualsName);
-//    writeHashCode(className, sd, baseIndent, true, valueHashCodeName);
-//    _writeToFileOut(indentString(baseIndent, 0));
+
+    _readAndWriteThroughIndex(cd.getSourceInfo().getEndLine(), cd.getSourceInfo().getEndColumn() - 1);;
 
     // We don't bother visiting any of the signature nodes -- parameters, type, name, etc.
     return null;
@@ -375,7 +346,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
   public Void forInterfaceDef(InterfaceDef cd) {
     String interfaceName = cd.getName().getText();
     SymbolData sd = _llv.symbolTable.get(_llv.getQualifiedClassName(interfaceName));
-    if (sd == null) { throw new RuntimeException("Internal Program Error: Can't find SymbolData for " + cd.getName().getText() + ".  Please report this bug."); }
+    if (sd == null) { throw new RuntimeException("Internal Program Error: Can't find SymbolData for " +
+                                                 cd.getName().getText() + ".  Please report this bug."); }
 
     ModifiersAndVisibility m = cd.getMav();
     
@@ -402,18 +374,22 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     return null;
   }
 
-  /**
-   * Look up this inner interface in the enclosing data, and then visit its body with a new Augmentor.
-   * No code augmentation is done since InnerInterfaces can only appear at the Advanced Level, and
-   * we are not doing code augmentation at the Advanced Level.  If we were to start doing code augmentation 
-   * at the Advanced level, this might need to change.
-   * InnerInterfaceDefs can appear inside method or class or interface bodies.
-   */
+  /** Look up this inner interface in the enclosing data, and then visit its body with a new Augmentor.
+    * No code augmentation is done since InnerInterfaces can only appear at the Advanced Level, and
+    * we are not doing code augmentation at the Advanced Level.  If we were to start doing code augmentation 
+    * at the Advanced level, this might need to change.
+    * InnerInterfaceDefs can appear inside method or class or interface bodies.
+    */
   public Void forInnerInterfaceDef(InnerInterfaceDef cd) {
     String interfaceName = cd.getName().getText();
-    if (_enclosingData == null) {throw new RuntimeException("Internal Program Error: Enclosing Data is null.  Please report this bug.");}
+    if (_enclosingData == null) {
+      throw new RuntimeException("Internal Program Error: Enclosing Data is null.  Please report this bug.");
+    }
     SymbolData sd = _enclosingData.getInnerClassOrInterface(interfaceName);
-    if (sd == null) { throw new RuntimeException("Internal Program Error: Can't find SymbolData for " + cd.getName().getText() + ". Please report this bug."); }
+    if (sd == null) { 
+      throw new RuntimeException("Internal Program Error: Can't find SymbolData for " + cd.getName().getText() + 
+                                 ". Please report this bug."); 
+    }
 
     BracedBody bb = cd.getBody();
     sd.setAnonymousInnerClassNum(0);
@@ -432,7 +408,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     SymbolData sd = _enclosingData.getNextAnonymousInnerClass();
 //    _log.log("Augmenting anonymous class " + e + " with SymbolData " + sd);
     if (sd == null) {
-      throw new RuntimeException("Internal Program Error: Couldn't find the SymbolData for the anonymous inner class.  Please report this bug.");
+      throw new RuntimeException("Internal Program Error: Couldn't find the SymbolData for the anonymous inner class." +
+                                 "  Please report this bug.");
     }
     BracedBody bb = e.getBody();
     sd.setAnonymousInnerClassNum(0);
@@ -462,7 +439,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     return null;
   }
   
-  /**Visit the encosing part of this ComplexAnonymousClass name, and then delegate to forAnonymousClassInstantiation(e)*/
+  /** Visit the encosing part of this ComplexAnonymousClass name, and then delegate to 
+    * forAnonymousClassInstantiation(e). */
   public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation e) {
     e.getEnclosing().visit(this);
     forAnonymousClassInstantiation(e);
@@ -482,7 +460,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
       
     /* If importedPackages contains "junit.framework", then we had to import it while type checking this file.  Because
      * we assumed it was imported, the generated java file needs to import it as well. */
-    if (_isElementaryFile() && _llv._importedPackages.contains("junit.framework")) { // This assumes there are no package statements
+    if (_isElementaryFile() && _llv._importedPackages.contains("junit.framework")) { // Assumes no package statements
       _writeToFileOut("import junit.framework.*;" + newLine);
     }
 
@@ -541,7 +519,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     // Write the method signature.
     VariableData[] constructorParams = constructor.getParams();
     
-    _writeToFileOut(newLine + indentString(baseIndent, 1) + "/** This method is automatically generated by the Language Level Converter. */" + newLine);
+    _writeToFileOut(newLine + indentString(baseIndent, 1) + 
+                    "/** This method is automatically generated by the Language Level Converter. */" + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "public " + className + "(");
     for (int q = 0; q < constructorParams.length; q++) {
       if (q>0) {
@@ -568,7 +547,10 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
       
       if (hasLocalField) { localParams.add(param); }
       else if (param.getName().startsWith("super_")) { superParams.add(param); }
-      else { throw new RuntimeException("Internal Program Error: Unexpected parameter name in generated constructor: " + param.getName() +".  Please report this bug"); }
+      else { 
+        throw new RuntimeException("Internal Program Error: Unexpected parameter name in generated constructor: " + 
+                                   param.getName() +".  Please report this bug"); 
+      }
     }
     
     // Add the call to the super constructor here.
@@ -614,9 +596,13 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
         }
       }
       if (accessor != null) {
-        _writeToFileOut(newLine + indentString(baseIndent, 1) + "/** This method is automatically generated by the Language Level Converter. */" + newLine);
-        _writeToFileOut(indentString(baseIndent, 1) + "public " + Data.dollarSignsToDots(vars[i].getType().getName()) + " " + LanguageLevelVisitor.getFieldAccessorName(vars[i].getName()) + "() {" + newLine);
-        _writeToFileOut(indentString(baseIndent, 2) + "return " + vars[i].getName() + ";" + newLine + indentString(baseIndent, 1) + "}" + newLine);
+        _writeToFileOut(newLine + indentString(baseIndent, 1) + 
+                        "/** This method is automatically generated by the Language Level Converter. */" + newLine);
+        _writeToFileOut(indentString(baseIndent, 1) + "public " + 
+                        Data.dollarSignsToDots(vars[i].getType().getName()) + " " + 
+                        LanguageLevelVisitor.getFieldAccessorName(vars[i].getName()) + "() {" + newLine);
+        _writeToFileOut(indentString(baseIndent, 2) + "return " + vars[i].getName() + ";" + newLine + 
+                        indentString(baseIndent, 1) + "}" + newLine);
       }
     }
   }
@@ -641,8 +627,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
       }
     }
     if (toString == null) return;
-    
-    LinkedList<MethodData> allMds = _getVariableAccessorListHelper(sd); //This builds up a list of all MethodData accessors for the VariableDatas of this class.
+    // Builds a list of MethodData accessors for VariableDatas of this class.
+    LinkedList<MethodData> allMds = _getVariableAccessorListHelper(sd);
     MethodData[] mds = allMds.toArray(new MethodData[allMds.size()]);
 
     if (_safeSupportCode) { writeSafeToString(sd, baseIndent, valueToStringName, mds); }
@@ -650,18 +636,24 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
   }
     
   /** Helper to writeToString; writes a toString that handles infinitely-recursive data structures. */
-  protected static void writeSafeToString(SymbolData sd, int baseIndent, String valueToStringName, MethodData[] accessors) {
+  protected static void writeSafeToString(SymbolData sd, int baseIndent, String valueToStringName, 
+                                          MethodData[] accessors) {
     
     String flagName = sd.createUniqueName("__toStringFlag");
-    VariableData toStringFlag = new VariableData(flagName, new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[]{ "private", "static" }),
-                                 _llv.getSymbolDataHelper("java.util.LinkedList", JExprParser.NO_SOURCE_INFO, false, false, false, false),
+    VariableData toStringFlag = new VariableData(flagName, 
+                                                 new ModifiersAndVisibility(NO_INFO, 
+                                                                            new String[]{ "private", "static" }),
+                                 _llv.getSymbolDataHelper("java.util.LinkedList", SourceInfo.NO_INFO, 
+                                                          false, false, false, false),
                                  true, sd);
     toStringFlag.setGenerated(true);
     sd.addVar(toStringFlag);
     
-    _writeToFileOut(newLine + indentString(baseIndent, 1) + "/** This field is automatically generated by the Language Level Converter. */" + newLine);
+    _writeToFileOut(newLine + indentString(baseIndent, 1) + 
+                    "/** This field is automatically generated by the Language Level Converter. */" + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "private boolean " + flagName + " = false;" + newLine);
-    _writeToFileOut(newLine + indentString(baseIndent, 1) + "/** This method is automatically generated by the Language Level Converter. */" + newLine);
+    _writeToFileOut(newLine + indentString(baseIndent, 1) +
+                    "/** This method is automatically generated by the Language Level Converter. */" + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "public java.lang.String toString() {" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "if (" + flagName + ") {" + newLine);
     _writeToFileOut(indentString(baseIndent, 3) + "return getClass().getName() + \"(...)\";" + newLine);
@@ -699,9 +691,11 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
   }
   
   /** Helper to writeToString; writes a short toString that does not handle infinitely-recursive data structures. */
-  protected static void writeSimpleToString(SymbolData sd, int baseIndent, String valueToStringName, MethodData[] accessors) {
+  protected static void writeSimpleToString(SymbolData sd, int baseIndent, String valueToStringName,
+                                            MethodData[] accessors) {
     
-    _writeToFileOut(newLine + indentString(baseIndent, 1) + "/** This method is automatically generated by the Language Level Converter. */" + newLine);
+    _writeToFileOut(newLine + indentString(baseIndent, 1) + 
+                    "/** This method is automatically generated by the Language Level Converter. */" + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "public java.lang.String toString() {" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "return getClass().getName() + \"(\" + " + newLine);
     for (int i = 0; i < accessors.length; i++) {
@@ -749,45 +743,55 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
   }
     
   /** Helper to writeEquals; writes an equals that handles infinitely-recursive data structures. */
-  protected static void writeSafeEquals(String className, SymbolData sd, int baseIndent, String valueEqualsName, MethodData[] accessors) {
+  protected static void writeSafeEquals(String className, SymbolData sd, int baseIndent, String valueEqualsName, 
+                                        MethodData[] accessors) {
     
     String listName = sd.createUniqueName("__equalsList");
     
-    VariableData equalsList = new VariableData(listName, new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[]{ "private", "static" }),
-                                 _llv.getSymbolDataHelper("java.util.LinkedList", JExprParser.NO_SOURCE_INFO, false, false, false, false),
-                                 true, sd);
+    VariableData equalsList = 
+      new VariableData(listName, new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[]{ "private", "static" }),
+                       _llv.getSymbolDataHelper("java.util.LinkedList", SourceInfo.NO_INFO, false, false, false, false),
+                       true, sd);
     equalsList.setGenerated(true);
     sd.addVar(equalsList);
     
-    _writeToFileOut(newLine + indentString(baseIndent, 1) + "/** This field is automatically generated by the Language Level Converter. */");
+    _writeToFileOut(newLine + indentString(baseIndent, 1) + 
+                    "/** This field is automatically generated by the Language Level Converter. */");
     if (LanguageLevelConverter.OPT.javaVersion().supports(JavaVersion.JAVA_5))
-      _writeToFileOut(newLine + indentString(baseIndent, 1) + "private java.util.LinkedList<" + className + "> " + listName + " = new java.util.LinkedList<" + className + ">();" + newLine);
+      _writeToFileOut(newLine + indentString(baseIndent, 1) + "private java.util.LinkedList<" + className + "> " +
+                      listName + " = new java.util.LinkedList<" + className + ">();" + newLine);
     else
-      _writeToFileOut(newLine + indentString(baseIndent, 1) + "private java.util.LinkedList " + listName + " = new java.util.LinkedList();" + newLine + newLine);
+      _writeToFileOut(newLine + indentString(baseIndent, 1) + "private java.util.LinkedList " + listName + 
+                      " = new java.util.LinkedList();" + newLine + newLine);
 
-    _writeToFileOut(newLine + indentString(baseIndent, 1) + "/** This method is automatically generated by the Language Level Converter. */" + newLine);
+    _writeToFileOut(newLine + indentString(baseIndent, 1) + 
+                    "/** This method is automatically generated by the Language Level Converter. */" + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "public boolean equals(java.lang.Object o) {" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "if (this == o) {" + newLine);
     _writeToFileOut(indentString(baseIndent, 3) + "return true;" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "}" + newLine);
-    _writeToFileOut(indentString(baseIndent, 2) + "else if ((o == null) || (! o.getClass().equals(getClass()))) {" + newLine);
+    _writeToFileOut(indentString(baseIndent, 2) + "else if ((o == null) || (! o.getClass().equals(getClass()))) {" +
+                    newLine);
     _writeToFileOut(indentString(baseIndent, 3) + "return false;" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "}" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "else {" + newLine);
     _writeToFileOut(indentString(baseIndent, 3) + "boolean alreadyTested = false;" + newLine);
     if (LanguageLevelConverter.OPT.javaVersion().supports(JavaVersion.JAVA_5)) {
       _writeToFileOut(indentString(baseIndent, 3) + "for (" + className + " element : " + listName + ")" + newLine);
-      _writeToFileOut(indentString(baseIndent, 4) + "alreadyTested = alreadyTested || (o == element);" + newLine + newLine);
+      _writeToFileOut(indentString(baseIndent, 4) + "alreadyTested = alreadyTested || (o == element);" + newLine + 
+                      newLine);
     }
     else {
       if (LanguageLevelConverter.OPT.javaVersion().supports(JavaVersion.JAVA_5)) {
-        _writeToFileOut(indentString(baseIndent, 3) + "java.util.Iterator<" + className + "> i = " + listName + ".iterator();" + newLine);
+        _writeToFileOut(indentString(baseIndent, 3) + "java.util.Iterator<" + className + "> i = " + listName + 
+                        ".iterator();" + newLine);
       }
       else {
         _writeToFileOut(indentString(baseIndent, 3) + "java.util.Iterator i = " + listName + ".iterator();" + newLine);
       }
       _writeToFileOut(indentString(baseIndent, 3) + "while (!alreadyTested && i.hasNext())" + newLine);
-      _writeToFileOut(indentString(baseIndent, 4) + "alreadyTested = alreadyTested || (o == i.next());" + newLine + newLine);
+      _writeToFileOut(indentString(baseIndent, 4) + "alreadyTested = alreadyTested || (o == i.next());" + newLine +
+                      newLine);
     }
     _writeToFileOut(indentString(baseIndent, 3) + "if (alreadyTested) { " + newLine);
     _writeToFileOut(indentString(baseIndent, 4) + "return true;" + newLine);
@@ -834,14 +838,17 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
   }
   
   /** Helper to writeEquals; writes a simple equals that does not handle infinitely-recursive data structures. */
-  protected static void writeSimpleEquals(String className, SymbolData sd, int baseIndent, String valueEqualsName, MethodData[] accessors) {
+  protected static void writeSimpleEquals(String className, SymbolData sd, int baseIndent, String valueEqualsName, 
+                                          MethodData[] accessors) {
     
-    _writeToFileOut(newLine + indentString(baseIndent, 1) + "/** This method is automatically generated by the Language Level Converter. */" + newLine);
+    _writeToFileOut(newLine + indentString(baseIndent, 1) + 
+                    "/** This method is automatically generated by the Language Level Converter. */" + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "public boolean equals(java.lang.Object o) {" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "if (this == o) {" + newLine);
     _writeToFileOut(indentString(baseIndent, 3) + "return true;" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "}" + newLine);
-    _writeToFileOut(indentString(baseIndent, 2) + "else if ((o == null) || (! o.getClass().equals(getClass()))) {" + newLine);
+    _writeToFileOut(indentString(baseIndent, 2) + "else if ((o == null) || (! o.getClass().equals(getClass()))) {" +
+                    newLine);
     _writeToFileOut(indentString(baseIndent, 3) + "return false;" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "}" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "else {" + newLine);
@@ -879,7 +886,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
    */
   protected static void writeAnonEquals(int baseIndent) {
     
-    _writeToFileOut(newLine + indentString(baseIndent, 1) + "/** This method is automatically generated by the Language Level Converter. */" + newLine);
+    _writeToFileOut(newLine + indentString(baseIndent, 1) + 
+                    "/** This method is automatically generated by the Language Level Converter. */" + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "public boolean equals(java.lang.Object o) {" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "return (this == o);" + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "}" + newLine);
@@ -897,7 +905,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
    *                       by adding them to _endOfClassVarDefs.
    * @param valueHashCodeName  The name of the generated valueHashCode method
    */
-  protected static void writeHashCode(String className, SymbolData sd, int baseIndent, boolean waitForVarDef, String valueHashCodeName) {
+  protected static void writeHashCode(String className, SymbolData sd, int baseIndent, boolean waitForVarDef, 
+                                      String valueHashCodeName) {
     LinkedList<MethodData> methods = sd.getMethods();
     MethodData hashCode = null;
     Iterator<MethodData> iter = methods.iterator();
@@ -934,9 +943,10 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     
     String listName = "__hashCodeList";
     listName = sd.createUniqueName(listName);
-    VariableData hashCodeList = new VariableData(listName, new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[]{ "private", "static" }),
-                                 _llv.getSymbolDataHelper("java.util.LinkedList", JExprParser.NO_SOURCE_INFO, false, false, false, false),
-                                 true, sd);
+    VariableData hashCodeList =
+      new VariableData(listName, new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[]{ "private", "static" }),
+                       _llv.getSymbolDataHelper("java.util.LinkedList", SourceInfo.NO_INFO, false, false, false, false),
+                       true, sd);
     hashCodeList.setGenerated(true);
     
     if (waitForVarDef) {
@@ -947,7 +957,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
       outermostData.addVar(hashCodeList);
       _endOfClassVarDefs.add("/** This field is automatically generated by the Language Level Converter. */");
       if (LanguageLevelConverter.OPT.javaVersion().supports(JavaVersion.JAVA_5)) {
-        _endOfClassVarDefs.add("private static java.util.LinkedList<Object> " + listName + " = new java.util.LinkedList<Object>();");
+        _endOfClassVarDefs.add("private static java.util.LinkedList<Object> " + listName + 
+                               " = new java.util.LinkedList<Object>();");
       }
       else {
         _endOfClassVarDefs.add("private static java.util.LinkedList " + listName + " = new java.util.LinkedList();");
@@ -956,16 +967,21 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     }
     else {
       sd.addVar(hashCodeList);
-      _writeToFileOut(newLine + indentString(baseIndent, 1) + "/** This field is automatically generated by the Language Level Converter. */");
+      _writeToFileOut(newLine + indentString(baseIndent, 1) + 
+                      "/** This field is automatically generated by the Language Level Converter. */");
       if (LanguageLevelConverter.OPT.javaVersion().supports(JavaVersion.JAVA_5)) {
-        _writeToFileOut(newLine + indentString(baseIndent, 1) + "private static java.util.LinkedList<" + className + "> " + listName + " = new java.util.LinkedList<" + className + ">();" + newLine);
+        _writeToFileOut(newLine + indentString(baseIndent, 1) +
+                        "private static java.util.LinkedList<" + className + "> " + listName + 
+                        " = new java.util.LinkedList<" + className + ">();" + newLine);
       }
       else {
-        _writeToFileOut(newLine + indentString(baseIndent, 1) + "private static java.util.LinkedList " + listName + " = new java.util.LinkedList();" + newLine);
+        _writeToFileOut(newLine + indentString(baseIndent, 1) + 
+                        "private static java.util.LinkedList " + listName + " = new java.util.LinkedList();" + newLine);
       }
     }
     
-    _writeToFileOut(newLine + indentString(baseIndent, 1) + "/** This method is automatically generated by the Language Level Converter. */");
+    _writeToFileOut(newLine + indentString(baseIndent, 1) + 
+                    "/** This method is automatically generated by the Language Level Converter. */");
     _writeToFileOut(newLine + indentString(baseIndent, 1) + "public int hashCode() {" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "if (" + listName + ".contains(this)) {" + newLine);
     _writeToFileOut(indentString(baseIndent, 3) + "return -1;" + newLine);
@@ -1020,7 +1036,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
   protected static void writeSimpleHashCode(String className, SymbolData sd, int baseIndent, boolean waitForVarDef, 
                                             String valueHashCodeName, MethodData[] accessors) {
     
-    _writeToFileOut(newLine + indentString(baseIndent, 1) + "/** This method is automatically generated by the Language Level Converter. */");
+    _writeToFileOut(newLine + indentString(baseIndent, 1) + 
+                    "/** This method is automatically generated by the Language Level Converter. */");
     _writeToFileOut(newLine + indentString(baseIndent, 1) + "public int hashCode() {" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "return getClass().hashCode()");
     for (int i = 0; i < accessors.length; i++) {
@@ -1066,25 +1083,32 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
    */
 
   private static void writeSafeValueToString(SymbolData sd, int baseIndent, String methodName) {
-    String[] primitiveTypes = new String[]{"byte[]", "short[]", "char[]", "int[]", "long[]", "float[]", "double[]", "boolean[]"};
+    String[] primitiveTypes = new String[]{"byte[]", "short[]", "char[]", "int[]", "long[]", "float[]", "double[]",
+      "boolean[]"};
     boolean useGenerics = LanguageLevelConverter.OPT.javaVersion().supports(JavaVersion.JAVA_5);
     
     _writeToFileOut(newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "/**" + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + " * This method is automatically generated by the LanguageLevelConverter." + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + " * As a helper to toString(), it recursively generates a string for any object," + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) + 
+                    " * This method is automatically generated by the LanguageLevelConverter." + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) + 
+                    " * As a helper to toString(), it recursively generates a string for any object," + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + " * including nulls, arrays, and standard reference types." + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + " */" + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + "private java.lang.String " + methodName + "(java.lang.Object o) {" + newLine + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) + "private java.lang.String " + methodName + "(java.lang.Object o) {" +
+                    newLine + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "class ArrayToString {" + newLine + newLine);
     _writeToFileOut(indentString(baseIndent, 3) + "public String valueFor(java.lang.Object o) {" + newLine);
     _writeToFileOut(indentString(baseIndent, 4) + "if (o instanceof java.lang.Object[]) {" + newLine);
 
     if (useGenerics) {
-      _writeToFileOut(indentString(baseIndent, 5) + "return arrayToString((java.lang.Object[]) o, new java.util.HashSet<java.lang.Object[]>());" + newLine);
+      _writeToFileOut(indentString(baseIndent, 5) + 
+                      "return arrayToString((java.lang.Object[]) o, new java.util.HashSet<java.lang.Object[]>());" + 
+                      newLine);
     }
     else {
-      _writeToFileOut(indentString(baseIndent, 5) + "return arrayToString((java.lang.Object[]) o, new java.util.HashSet());" + newLine);
+      _writeToFileOut(indentString(baseIndent, 5) + 
+                      "return arrayToString((java.lang.Object[]) o, new java.util.HashSet());" + newLine);
     }
     _writeToFileOut(indentString(baseIndent, 4) + "}" + newLine);
     
@@ -1102,8 +1126,10 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     _writeToFileOut(indentString(baseIndent, 3) + "}" + newLine + newLine);
     
     for (String type : primitiveTypes) {
-      _writeToFileOut(indentString(baseIndent, 3) + "public java.lang.String arrayToString(" + type + " array) {" + newLine);
-      _writeToFileOut(indentString(baseIndent, 4) + "java.lang.StringBuffer result = new java.lang.StringBuffer();" + newLine);
+      _writeToFileOut(indentString(baseIndent, 3) + "public java.lang.String arrayToString(" + type + " array) {" +
+                      newLine);
+      _writeToFileOut(indentString(baseIndent, 4) + "java.lang.StringBuffer result = new java.lang.StringBuffer();" +
+                      newLine);
       _writeToFileOut(indentString(baseIndent, 4) + "result.append(\"[\");" + newLine);
       _writeToFileOut(indentString(baseIndent, 4) + "if (array.length > 0) { result.append(array[0]); }" + newLine);
       _writeToFileOut(indentString(baseIndent, 4) + "for (int i = 1; i < array.length; i++) {" + newLine);
@@ -1116,21 +1142,28 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     }
     
     if (useGenerics) {
-      _writeToFileOut(indentString(baseIndent, 3) + "public java.lang.String arrayToString(java.lang.Object[] array, java.util.HashSet<java.lang.Object[]> alreadyPrinted) {" + newLine);
+      _writeToFileOut(indentString(baseIndent, 3) + 
+                      "public java.lang.String arrayToString(java.lang.Object[] array, " + 
+                      "java.util.HashSet<java.lang.Object[]> alreadyPrinted) {" + newLine);
     }
     else {
-      _writeToFileOut(indentString(baseIndent, 3) + "public java.lang.String arrayToString(java.lang.Object[] array, java.util.HashSet alreadyPrinted) {" + newLine);
+      _writeToFileOut(indentString(baseIndent, 3) + 
+                      "public java.lang.String arrayToString(java.lang.Object[] array, " + 
+                      "java.util.HashSet alreadyPrinted) {" + newLine);
     }
-    _writeToFileOut(indentString(baseIndent, 4) + "if (alreadyPrinted.contains(array)) { return (\"[...]\"); }" + newLine);
+    _writeToFileOut(indentString(baseIndent, 4) + 
+                    "if (alreadyPrinted.contains(array)) { return (\"[...]\"); }" + newLine);
     _writeToFileOut(indentString(baseIndent, 4) + "else { alreadyPrinted.add(array); }" + newLine + newLine);
-    _writeToFileOut(indentString(baseIndent, 4) + "java.lang.StringBuffer result = new java.lang.StringBuffer();" + newLine);
+    _writeToFileOut(indentString(baseIndent, 4) + 
+                    "java.lang.StringBuffer result = new java.lang.StringBuffer();" + newLine);
     _writeToFileOut(indentString(baseIndent, 4) + "result.append(\"[\");" + newLine);
     _writeToFileOut(indentString(baseIndent, 4) + "boolean nonEmpty = false;" + newLine);
     _writeToFileOut(indentString(baseIndent, 4) + "for (int i = 0; i < array.length; i++) {" + newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "if (nonEmpty) { result.append(\", \"); }" + newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "nonEmpty = true;" + newLine + newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "if (array[i] instanceof java.lang.Object[]) {" + newLine);
-    _writeToFileOut(indentString(baseIndent, 6) + "result.append(arrayToString((java.lang.Object[]) array[i], alreadyPrinted));" + newLine);
+    _writeToFileOut(indentString(baseIndent, 6) + 
+                    "result.append(arrayToString((java.lang.Object[]) array[i], alreadyPrinted));" + newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "}" + newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "else {" + newLine);
     _writeToFileOut(indentString(baseIndent, 6) + "result.append(" + methodName + "(array[i]));" + newLine);
@@ -1143,7 +1176,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     
     _writeToFileOut(indentString(baseIndent, 2) + "}" + newLine + newLine); // end of inner class
     _writeToFileOut(indentString(baseIndent, 2) + "if (o == null) { return \"\" + null; }" + newLine);
-    _writeToFileOut(indentString(baseIndent, 2) + "else if (o.getClass().isArray()) { return new ArrayToString().valueFor(o); }" + newLine);
+    _writeToFileOut(indentString(baseIndent, 2) + 
+                    "else if (o.getClass().isArray()) { return new ArrayToString().valueFor(o); }" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "else { return o.toString(); }" + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "}" + newLine);
   }
@@ -1156,11 +1190,14 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
   private static void writeSimpleValueToString(SymbolData sd, int baseIndent, String methodName) {
     _writeToFileOut(newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "/**" + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + " * This method is automatically generated by the LanguageLevelConverter." + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + " * As a helper to toString(), it generates a string for any object," + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) + 
+                    " * This method is automatically generated by the LanguageLevelConverter." + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) + 
+                    " * As a helper to toString(), it generates a string for any object," + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + " * including nulls and standard reference types." + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + " */" + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + "private java.lang.String " + methodName + "(java.lang.Object o) {" + newLine + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) + "private java.lang.String " + methodName + "(java.lang.Object o) {" + 
+                    newLine + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "if (o == null) { return \"\" + null; }" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "else { return o.toString(); }" + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "}" + newLine);
@@ -1183,43 +1220,57 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
   
   /** Helper to writeValueEquals; writes a valueEquals that correctly handles arbitrary arrays. */
   private static void writeSafeValueEquals(SymbolData sd, int baseIndent, String methodName) {
-    String[] primitiveTypes = new String[]{"byte[]", "short[]", "char[]", "int[]", "long[]", "float[]", "double[]", "boolean[]"};
+    String[] primitiveTypes = new String[]{"byte[]", "short[]", "char[]", "int[]", "long[]", "float[]", "double[]", 
+      "boolean[]"};
     boolean useGenerics = LanguageLevelConverter.OPT.javaVersion().supports(JavaVersion.JAVA_5);
     
     _writeToFileOut(newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "/**" + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + " * This method is automatically generated by the LanguageLevelConverter." + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + " * As a helper to equals(Object), it recursively compares any two objects," + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + " * including nulls, arrays, and standard reference types." + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) + 
+                    " * This method is automatically generated by the LanguageLevelConverter." + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) + 
+                    " * As a helper to equals(Object), it recursively compares any two objects," + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) + 
+                    " * including nulls, arrays, and standard reference types." + newLine);
      _writeToFileOut(indentString(baseIndent, 1) + " */" + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + "private boolean " + methodName + "(java.lang.Object o1, java.lang.Object o2) {" + newLine + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) + "private boolean " + methodName + 
+                    "(java.lang.Object o1, java.lang.Object o2) {" + newLine + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "class ArrayEquals {" + newLine + newLine);
-    _writeToFileOut(indentString(baseIndent, 3) + "public boolean valueFor(java.lang.Object o1, java.lang.Object o2) {" + newLine);
-    _writeToFileOut(indentString(baseIndent, 4) + "if (o1 instanceof java.lang.Object[] && o2 instanceof java.lang.Object[]) {" + newLine);
+    _writeToFileOut(indentString(baseIndent, 3) + 
+                    "public boolean valueFor(java.lang.Object o1, java.lang.Object o2) {" + newLine);
+    _writeToFileOut(indentString(baseIndent, 4) + 
+                    "if (o1 instanceof java.lang.Object[] && o2 instanceof java.lang.Object[]) {" + newLine);
     if (useGenerics) {
-      _writeToFileOut(indentString(baseIndent, 5) + "return arrayEquals((java.lang.Object[]) o1, (java.lang.Object[]) o2, new java.util.HashSet<java.lang.Object>());" + newLine);
+      _writeToFileOut(indentString(baseIndent, 5) + "return arrayEquals((java.lang.Object[]) o1, " + 
+                      "(java.lang.Object[]) o2, new java.util.HashSet<java.lang.Object>());" + newLine);
     }
     else {
-      _writeToFileOut(indentString(baseIndent, 5) + "return arrayEquals((java.lang.Object[]) o1, (java.lang.Object[]) o2, new java.util.HashSet());" + newLine);
+      _writeToFileOut(indentString(baseIndent, 5) + "return arrayEquals((java.lang.Object[]) o1, " + 
+                      "(java.lang.Object[]) o2, new java.util.HashSet());" + newLine);
     }
     _writeToFileOut(indentString(baseIndent, 4) + "}" + newLine);
     
     for (String type : primitiveTypes) {
-      _writeToFileOut(indentString(baseIndent, 4) + "else if (o1 instanceof " + type + " && o2 instanceof " + type + ") {" + newLine);
-      _writeToFileOut(indentString(baseIndent, 5) + "return arrayEquals((" + type + ") o1, (" + type + ") o2);" + newLine);
+      _writeToFileOut(indentString(baseIndent, 4) + "else if (o1 instanceof " + type + " && o2 instanceof " + 
+                      type + ") {" + newLine);
+      _writeToFileOut(indentString(baseIndent, 5) + "return arrayEquals((" + type + ") o1, (" + type + ") o2);" + 
+                      newLine);
       _writeToFileOut(indentString(baseIndent, 4) + "}" + newLine);
     }
     
     _writeToFileOut(indentString(baseIndent, 4) + "else {" + newLine);
-    _writeToFileOut(indentString(baseIndent, 5) + "// o1 and o2 should be arrays, but if not, or if they have different types, equals(Object) is called" + newLine); 
+    _writeToFileOut(indentString(baseIndent, 5) + "// o1 and o2 should be arrays, but if not, " + 
+                    "or if they have different types, equals(Object) is called" + newLine); 
     _writeToFileOut(indentString(baseIndent, 5) + "return o1.equals(o2);" + newLine); 
     _writeToFileOut(indentString(baseIndent, 4) + "}" + newLine);
     
     _writeToFileOut(indentString(baseIndent, 3) + "}" + newLine + newLine);
     
     for (String type : primitiveTypes) {
-      _writeToFileOut(indentString(baseIndent, 3) + "public boolean arrayEquals(" + type + " array1, " + type + " array2) {" + newLine);
-      _writeToFileOut(indentString(baseIndent, 4) + "if (array1.length != array2.length) { return false; }" + newLine + newLine);
+      _writeToFileOut(indentString(baseIndent, 3) + "public boolean arrayEquals(" + type + " array1, " + type + 
+                      " array2) {" + newLine);
+      _writeToFileOut(indentString(baseIndent, 4) + "if (array1.length != array2.length) { return false; }" +
+                      newLine + newLine);
       _writeToFileOut(indentString(baseIndent, 4) + "else {" + newLine);
       _writeToFileOut(indentString(baseIndent, 5) + "for (int i = 0; i < array1.length; i++) {" + newLine);
       _writeToFileOut(indentString(baseIndent, 6) + "if (array1[i] != array2[i]) { return false; }" + newLine);
@@ -1230,29 +1281,43 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     }
     
     if (useGenerics) {
-      _writeToFileOut(indentString(baseIndent, 3) + "public boolean arrayEquals(final java.lang.Object[] array1, final java.lang.Object[] array2, java.util.HashSet<java.lang.Object> alreadyCompared) {" + newLine + newLine);
+      _writeToFileOut(indentString(baseIndent, 3) + "public boolean arrayEquals(final java.lang.Object[] array1, " + 
+                      "final java.lang.Object[] array2, java.util.HashSet<java.lang.Object> alreadyCompared) {" + 
+                      newLine + newLine);
     }
     else {
-      _writeToFileOut(indentString(baseIndent, 3) + "public boolean arrayEquals(final java.lang.Object[] array1, final java.lang.Object[] array2, java.util.HashSet alreadyCompared) {" + newLine + newLine);
+      _writeToFileOut(indentString(baseIndent, 3) + "public boolean arrayEquals(final java.lang.Object[] array1," +
+                      " final java.lang.Object[] array2, java.util.HashSet alreadyCompared) {" + newLine + newLine);
     }
     _writeToFileOut(indentString(baseIndent, 4) + "class ArrayPair {" + newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "public java.lang.Object[] array1() { return array1; }" + newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "public java.lang.Object[] array2() { return array2; }" + newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "public boolean equals(java.lang.Object o) {" + newLine);
-    _writeToFileOut(indentString(baseIndent, 6) + "if ((o == null) || ! (o instanceof ArrayPair)) { return false; }" + newLine);
-    _writeToFileOut(indentString(baseIndent, 6) + "else { return (array1.equals(((ArrayPair) o).array1())) && (array2.equals(((ArrayPair) o).array2())); }" + newLine);
+    _writeToFileOut(indentString(baseIndent, 6) + "if ((o == null) || ! (o instanceof ArrayPair)) { return false; }" + 
+                    newLine);
+    _writeToFileOut(indentString(baseIndent, 6) + 
+                    "else { return (array1.equals(((ArrayPair) o).array1())) && " + 
+                    "(array2.equals(((ArrayPair) o).array2())); }" + newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "}" + newLine);
-    _writeToFileOut(indentString(baseIndent, 5) + "public int hashCode() { return array1.hashCode() ^ (array2.hashCode() << 1); }" + newLine);
+    _writeToFileOut(indentString(baseIndent, 5) + 
+                    "public int hashCode() { return array1.hashCode() ^ (array2.hashCode() << 1); }" + newLine);
     _writeToFileOut(indentString(baseIndent, 4) + "}" + newLine + newLine);
-    _writeToFileOut(indentString(baseIndent, 4) + "if (array1.length != array2.length) { return false; }" + newLine + newLine);
+    _writeToFileOut(indentString(baseIndent, 4) + 
+                    "if (array1.length != array2.length) { return false; }" + newLine + newLine);
     _writeToFileOut(indentString(baseIndent, 4) + "else {" + newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "ArrayPair currentPair = new ArrayPair();" + newLine);
-    _writeToFileOut(indentString(baseIndent, 5) + "if (alreadyCompared.contains(currentPair)) { return true; }" + newLine);
+    _writeToFileOut(indentString(baseIndent, 5) + "if (alreadyCompared.contains(currentPair)) { return true; }" + 
+                    newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "alreadyCompared.add(currentPair);" + newLine + newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "boolean result = true;" + newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "for (int i = 0; i < array1.length; i++) {" + newLine);
-    _writeToFileOut(indentString(baseIndent, 6) + "if (array1[i] instanceof java.lang.Object[] && array2[i] instanceof java.lang.Object[]) {" + newLine);
-    _writeToFileOut(indentString(baseIndent, 7) + "result = arrayEquals((java.lang.Object[]) array1[i], (java.lang.Object[]) array2[i], alreadyCompared);" + newLine);
+    _writeToFileOut(indentString(baseIndent, 6) + 
+                    "if (array1[i] instanceof java.lang.Object[] && array2[i] instanceof java.lang.Object[]) {" + 
+                    newLine);
+    _writeToFileOut(indentString(baseIndent, 7) + 
+                    "result = arrayEquals((java.lang.Object[]) array1[i], " + 
+                    "(java.lang.Object[]) array2[i], alreadyCompared);" + 
+                    newLine);
     _writeToFileOut(indentString(baseIndent, 6) + "}" + newLine);
     _writeToFileOut(indentString(baseIndent, 6) + "else {" + newLine);
     _writeToFileOut(indentString(baseIndent, 7) + "result = " + methodName + "(array1[i], array2[i]);"+ newLine);
@@ -1267,7 +1332,9 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     _writeToFileOut(indentString(baseIndent, 2) + "}" + newLine + newLine); // end of inner class
     _writeToFileOut(indentString(baseIndent, 2) + "if (o1 == null) { return o2 == null; }" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "else if (o2 == null) { return false; }" + newLine);
-    _writeToFileOut(indentString(baseIndent, 2) + "else if (o1.getClass().isArray() && o2.getClass().isArray()) { return new ArrayEquals().valueFor(o1, o2); }" + newLine);
+    _writeToFileOut(indentString(baseIndent, 2) + 
+                    "else if (o1.getClass().isArray() && o2.getClass().isArray()) " +
+                    "{ return new ArrayEquals().valueFor(o1, o2); }" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "else { return o1.equals(o2); }" + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "}" + newLine);
   }
@@ -1278,26 +1345,27 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
   private static void writeSimpleValueEquals(SymbolData sd, int baseIndent, String methodName) {
     _writeToFileOut(newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "/**" + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + " * This method is automatically generated by the LanguageLevelConverter." + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + " * As a helper to equals(Object), it compares any two objects," + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) + 
+                    " * This method is automatically generated by the LanguageLevelConverter." + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) + 
+                    " * As a helper to equals(Object), it compares any two objects," + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + " * including nulls and standard reference types." + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + " */" + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + "private boolean " + methodName + "(java.lang.Object o1, java.lang.Object o2) {" + newLine + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) + "private boolean " +
+                    methodName + "(java.lang.Object o1, java.lang.Object o2) {" + newLine + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "if (o1 == null) { return o2 == null; }" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "else if (o2 == null) { return false; }" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "else { return o1.equals(o2); }" + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "}" + newLine);
   }
   
-  /**
-   * Write a method to generate a hash code for any Object, including arrays, nulls, and other reference types.
-   * 
-   * @param sd  The method's enclosing class.
-   * @param baseIndent  The base indent level (number of spaces).
-   * @param valueEqualsName  The name of the method generated by writeValueEquals()
-   * 
-   * @return  The name of the generated valueHashCode method (__valueHashCode by default).
-   */
+  /** Write a method to generate a hash code for any Object, including arrays, nulls, and other reference types. 
+    * @param sd  The method's enclosing class.
+    * @param baseIndent  The base indent level (number of spaces).
+    * @param valueEqualsName  The name of the method generated by writeValueEquals()
+    * 
+    * @return  The name of the generated valueHashCode method (__valueHashCode by default).
+    */
   private static String writeValueHashCode(SymbolData sd, int baseIndent, String valueEqualsName) {
     String methodName = sd.createUniqueMethodName("__valueHashCode");
     if (_safeSupportCode) { writeSafeValueHashCode(sd, baseIndent, valueEqualsName, methodName); }
@@ -1307,24 +1375,32 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
   
   /** Helper to writeValueHashCode; writes a valueHashCode that correctly handles arbitrary arrays. */
   private static void writeSafeValueHashCode(SymbolData sd, int baseIndent, String valueEqualsName, String methodName) {
-    String[] primitiveTypes = new String[]{"byte[]", "short[]", "char[]", "int[]", "long[]", "float[]", "double[]", "boolean[]"};
+    String[] primitiveTypes =
+      new String[]{"byte[]", "short[]", "char[]", "int[]", "long[]", "float[]", "double[]", "boolean[]"};
     boolean useGenerics = LanguageLevelConverter.OPT.javaVersion().supports(JavaVersion.JAVA_5);
     
     _writeToFileOut(newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "/**" + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + " * This method is automatically generated by the LanguageLevelConverter." + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + " * As a helper to hashCode(), it recursively generates a hash code for any object," + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + " * including nulls, arrays, and standard reference types." + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) + 
+                    " * This method is automatically generated by the LanguageLevelConverter." + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) + 
+                    " * As a helper to hashCode(), it recursively generates a hash code for any object," + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) +
+                    " * including nulls, arrays, and standard reference types." + newLine);
      _writeToFileOut(indentString(baseIndent, 1) + " */" + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + "private int " + methodName + "(java.lang.Object o) {" + newLine + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) + "private int " + methodName + "(java.lang.Object o) {" + 
+                    newLine + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "class ArrayHashCode {" + newLine + newLine);
     _writeToFileOut(indentString(baseIndent, 3) + "public int valueFor(java.lang.Object o) {" + newLine);
     _writeToFileOut(indentString(baseIndent, 4) + "if (o instanceof java.lang.Object[]) {" + newLine);
     if (useGenerics) {
-      _writeToFileOut(indentString(baseIndent, 5) + "return arrayHashCode((java.lang.Object[]) o, new java.util.LinkedList<java.lang.Object>());" + newLine);
+      _writeToFileOut(indentString(baseIndent, 5) + 
+                      "return arrayHashCode((java.lang.Object[]) o, new java.util.LinkedList<java.lang.Object>());" + 
+                      newLine);
     }
     else {
-      _writeToFileOut(indentString(baseIndent, 5) + "return arrayHashCode((java.lang.Object[]) o, new java.util.LinkedList());" + newLine);
+      _writeToFileOut(indentString(baseIndent, 5) + 
+                      "return arrayHashCode((java.lang.Object[]) o, new java.util.LinkedList());" + newLine);
     }
     _writeToFileOut(indentString(baseIndent, 4) + "}" + newLine);
     
@@ -1335,7 +1411,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     }
     
     _writeToFileOut(indentString(baseIndent, 4) + "else {" + newLine);
-    _writeToFileOut(indentString(baseIndent, 5) + "// o should be an array, but if not, hashCode() is called" + newLine); 
+    _writeToFileOut(indentString(baseIndent, 5) + "// o should be an array, but if not, hashCode() is called" + 
+                    newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "return o.hashCode();" + newLine); 
     _writeToFileOut(indentString(baseIndent, 4) + "}" + newLine);
     _writeToFileOut(indentString(baseIndent, 3) + "}" + newLine + newLine);
@@ -1356,27 +1433,35 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     }
     
     if (useGenerics) {
-      _writeToFileOut(indentString(baseIndent, 3) + "public int arrayHashCode(final java.lang.Object[] array, final java.util.LinkedList<java.lang.Object> alreadyGenerated) {" + newLine + newLine);
+      _writeToFileOut(indentString(baseIndent, 3) + "public int arrayHashCode(final java.lang.Object[] array, " + 
+                      "final java.util.LinkedList<java.lang.Object> alreadyGenerated) {" + newLine + newLine);
     }
     else {
-      _writeToFileOut(indentString(baseIndent, 3) + "public int arrayHashCode(final java.lang.Object[] array, final java.util.LinkedList alreadyGenerated) {" + newLine + newLine);
+      _writeToFileOut(indentString(baseIndent, 3) + "public int arrayHashCode(final java.lang.Object[] array, " + 
+                      "final java.util.LinkedList alreadyGenerated) {" + newLine + newLine);
     }
     _writeToFileOut(indentString(baseIndent, 4) + "class ArrayWrapper {" + newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "public java.lang.Object[] array() { return array; }" + newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "public boolean equals(java.lang.Object o) {" + newLine);
-    _writeToFileOut(indentString(baseIndent, 6) + "return (o != null) && (o instanceof ArrayWrapper)  && " + valueEqualsName + "(array, ((ArrayWrapper) o).array());" + newLine);
+    _writeToFileOut(indentString(baseIndent, 6) + "return (o != null) && (o instanceof ArrayWrapper)  && " + 
+                    valueEqualsName + "(array, ((ArrayWrapper) o).array());" + newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "}" + newLine);
-    _writeToFileOut(indentString(baseIndent, 5) + "public int hashCode() { return 0; } // This method should never be used -- only here for consistency." + newLine);
+    _writeToFileOut(indentString(baseIndent, 5) + 
+                    "public int hashCode() { return 0; } // This method should never be used -- " + 
+                    "only here for consistency." + newLine);
     _writeToFileOut(indentString(baseIndent, 4) + "}" + newLine + newLine);
 
     _writeToFileOut(indentString(baseIndent, 4) + "ArrayWrapper currentWrapper = new ArrayWrapper();" + newLine);
-    _writeToFileOut(indentString(baseIndent, 4) + "if (alreadyGenerated.contains(currentWrapper)) { return -1; }" + newLine);
+    _writeToFileOut(indentString(baseIndent, 4) + "if (alreadyGenerated.contains(currentWrapper)) { return -1; }" + 
+                    newLine);
     _writeToFileOut(indentString(baseIndent, 4) + "alreadyGenerated.addLast(currentWrapper);" + newLine + newLine);
     
     _writeToFileOut(indentString(baseIndent, 4) + "int result = 0;" + newLine);
     _writeToFileOut(indentString(baseIndent, 4) + "for (int i = 0; i < array.length; i++) {" + newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "if (array[i] instanceof java.lang.Object[]) {" + newLine);
-    _writeToFileOut(indentString(baseIndent, 6) + "result = (result << 1) ^ (arrayHashCode((java.lang.Object[]) array[i], alreadyGenerated) >> 1);" + newLine);
+    _writeToFileOut(indentString(baseIndent, 6) +
+                    "result = (result << 1) ^ (arrayHashCode((java.lang.Object[]) array[i], alreadyGenerated) >> 1);" +
+                    newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "}" + newLine);
     _writeToFileOut(indentString(baseIndent, 5) + "else {" + newLine);
     _writeToFileOut(indentString(baseIndent, 6) + "result = (result << 1) ^ " + methodName + "(array[i]);" + newLine);
@@ -1388,7 +1473,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     
     _writeToFileOut(indentString(baseIndent, 2) + "}" + newLine + newLine); // end of inner class
     _writeToFileOut(indentString(baseIndent, 2) + "if (o == null) { return 0; }" + newLine);
-    _writeToFileOut(indentString(baseIndent, 2) + "else if (o.getClass().isArray()) { return new ArrayHashCode().valueFor(o); }" + newLine);
+    _writeToFileOut(indentString(baseIndent, 2) + 
+                    "else if (o.getClass().isArray()) { return new ArrayHashCode().valueFor(o); }" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "else { return o.hashCode(); }" + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "}" + newLine);
   }
@@ -1396,14 +1482,18 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
   /** Helper to writeValueHashCode; writes a valueHashCode that does not handle arrays. 
    *  NOTE: This is currently unused.  For the simple case, no valueHashCode method is generated.
    */
-  private static void writeSimpleValueHashCode(SymbolData sd, int baseIndent, String valueEqualsName, String methodName) {
+  private static void writeSimpleValueHashCode(SymbolData sd, int baseIndent, String valueEqualsName, 
+                                               String methodName) {
     _writeToFileOut(newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "/**" + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + " * This method is automatically generated by the LanguageLevelConverter." + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + " * As a helper to hashCode(), it generates a hash code for any object," + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) + 
+                    " * This method is automatically generated by the LanguageLevelConverter." + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) + 
+                    " * As a helper to hashCode(), it generates a hash code for any object," + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + " * including nulls and standard reference types." + newLine);
      _writeToFileOut(indentString(baseIndent, 1) + " */" + newLine);
-    _writeToFileOut(indentString(baseIndent, 1) + "private int " + methodName + "(java.lang.Object o) {" + newLine + newLine);
+    _writeToFileOut(indentString(baseIndent, 1) + "private int " + methodName + "(java.lang.Object o) {" + 
+                    newLine + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "if (o == null) { return 0; }" + newLine);
     _writeToFileOut(indentString(baseIndent, 2) + "else { return o.hashCode(); }" + newLine);
     _writeToFileOut(indentString(baseIndent, 1) + "}" + newLine);
@@ -1448,20 +1538,25 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
       }
       // Note that we don't need to check interface fields, because they are always static.
       
+      // Insure that we traverse the superclass hierarchy before we traverse the outer class hierarchy    
       SymbolData superClass = tempSd.getSuperClass();
-      if (superClass != null) classes.addFirst(superClass); // Insure that we traverse the superclass hierarchy before we traverse the outer class hierarchy
+      if (superClass != null) classes.addFirst(superClass); 
       Data outerData = tempSd.getOuterData();
       if (outerData != null) { classes.addLast(outerData.getSymbolData()); }
     }
   
-    // Eliminate those accessors that are inaccessible, that throw exceptions, that are static, that are shadowed, or that have a different return type
+    // Eliminate those accessors that are inaccessible, that throw exceptions, that are static, that are shadowed, 
+    // or that have a different return type
     LinkedList<MethodData> allMethods = new LinkedList<MethodData>();
     for (int i = accessorMappings.size() - 1; i >= 0; i--) {
       VariableData vd = accessorMappings.get(i).getFirst();
       MethodData md = accessorMappings.get(i).getSecond();
-      boolean canSeeMethod = TypeChecker.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), md.getMav(), md.getName(), md.getSymbolData(), currClass, "method", false);
+      boolean canSeeMethod =
+        TypeChecker.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), md.getMav(), md.getName(), 
+                                       md.getSymbolData(), currClass, "method", false);
       //TODO: it is okay to throw Runtime exceptions or Errors) {
-      if (canSeeMethod && (! md.hasModifier("static")) && (md.getThrown().length == 0) && vd.getType().getSymbolData().isAssignableTo(md.getReturnType(), LanguageLevelConverter.OPT.javaVersion())) {
+      if (canSeeMethod && (! md.hasModifier("static")) && (md.getThrown().length == 0) &&
+          vd.getType().getSymbolData().isAssignableTo(md.getReturnType(), LanguageLevelConverter.OPT.javaVersion())) {
         boolean isShadowed = false;
         for (int j = i - 1; j >= 0; j--) {
           if (accessorMappings.get(j).getSecond().getName().equals(md.getName())) { isShadowed = true; break; }
@@ -1506,7 +1601,9 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
       int charsRead = _fileIn.read(chars, 0, lastLineLength);
       if (charsRead != lastLineLength) {
         _fileOut.flush();
-        throw new RuntimeException("Internal Program Error: Attempt to read in " + _llv._file.getName() + " past the end of file: line " + line + ", column " + column + "; (currently at " + _fileInLine + ", " + _fileInColumn + ").  Please report this bug.");
+        throw new RuntimeException("Internal Program Error: Attempt to read in " + _llv._file.getName() + 
+                                   " past the end of file: line " + line + ", column " + column + "; (currently at " +
+                                   _fileInLine + ", " + _fileInColumn + ").  Please report this bug.");
       }
       result.append(chars);
       _fileInLine = line;
@@ -1538,7 +1635,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
       for(int i=0; i<lines.length-1; ++i) {
         _fileOut.write(lines[i]);
         // add line number to map if it doesn't exist yet
-        if (_lineNumberMap.get(_fileOutCorrespondingLine)==null) _lineNumberMap.put(_fileOutCorrespondingLine, _fileOutLine);
+        if (_lineNumberMap.get(_fileOutCorrespondingLine)==null) 
+          _lineNumberMap.put(_fileOutCorrespondingLine, _fileOutLine);
         // end-of-line line number mapping; disabled since we output the entire map at the beginning of the file
         // _fileOut.write("//["+_fileOutCorrespondingLine+"]");
         _fileOut.write(newLine);
@@ -1610,7 +1708,11 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     private Symboltable _s = new Symboltable();
     
     public void setUp() {
-      LanguageLevelVisitor llv = new ElementaryVisitor(_f, new LinkedList<Pair<String, JExpressionIF>>(), _s, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
+      LanguageLevelVisitor llv =
+        new ElementaryVisitor(_f, new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+                              new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+                              new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
+                              new Hashtable<SymbolData, LanguageLevelVisitor>());
       _a = new Augmentor(true, null, null, llv);
       LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_1_4, IterUtil.<File>empty());
     }
@@ -1620,22 +1722,34 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
       TypeData[] result = formalParameters2TypeDatas(fp, _a._enclosingData);
       assertEquals("The result is empty", 0, result.length);
       
-      PrimitiveType intt = new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int");
-      FormalParameter param = new FormalParameter(JExprParser.NO_SOURCE_INFO, new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "j")), false);
+      PrimitiveType intt = new PrimitiveType(SourceInfo.NO_INFO, "int");
+      FormalParameter param = 
+        new FormalParameter(SourceInfo.NO_INFO,
+                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, 
+                                                                new Word(SourceInfo.NO_INFO, "j")), false);
       SymbolData intData = SymbolData.INT_TYPE;
       _s.put("int", intData);
       
-      ClassOrInterfaceType stringt = new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "java.lang.String", new Type[0]);
-      FormalParameter param2 = new FormalParameter(JExprParser.NO_SOURCE_INFO, new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, stringt, new Word(JExprParser.NO_SOURCE_INFO, "j")), false);
+      ClassOrInterfaceType stringt = new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.String", new Type[0]);
+      FormalParameter param2 =
+        new FormalParameter(SourceInfo.NO_INFO, 
+                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, stringt, 
+                                                                new Word(SourceInfo.NO_INFO, "j")), false);
       SymbolData stringData = new SymbolData("java.lang.String");
       _s.put("java.lang.String", stringData);
 
       fp = new FormalParameter[]{ param, param2 };
       result = formalParameters2TypeDatas(fp, _a._enclosingData);
-      assertTrue("Arrays should be equal", LanguageLevelVisitor.arrayEquals(result, new TypeData[]{ intData, stringData }));
+      assertTrue("Arrays should be equal", 
+                 LanguageLevelVisitor.arrayEquals(result, new TypeData[]{ intData, stringData }));
       
+      UninitializedVariableDeclarator vd =
+        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                            new ClassOrInterfaceType(SourceInfo.NO_INFO, "Inner", new Type[0]), 
+                                            new Word(SourceInfo.NO_INFO, "t"));
       //test an inner class
-      FormalParameter param3 = new FormalParameter(JExprParser.NO_SOURCE_INFO, new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO,  new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "Inner", new Type[0]), new Word(JExprParser.NO_SOURCE_INFO, "t")), false);
+      FormalParameter param3 = 
+        new FormalParameter(SourceInfo.NO_INFO, vd, false);
       fp = new FormalParameter[] {param3};
       SymbolData inner = new SymbolData("Inner");
       inner.setIsContinuation(false);
@@ -1652,41 +1766,88 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     }
 
     public void testIsElementaryFile() {
-      _llv = new ElementaryVisitor(new File("elementary.dj0"), new LinkedList<Pair<String, JExpressionIF>>(), _s, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
+      _llv = new ElementaryVisitor(new File("elementary.dj0"), new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
+                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
       assertTrue("This is an elementary file", _isElementaryFile());
-      _llv = new IntermediateVisitor(new File("intermediate.dj1"), new LinkedList<Pair<String, JExpressionIF>>(), _s, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
+      _llv = new IntermediateVisitor(new File("intermediate.dj1"), 
+                                     new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+                                     new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+                                     new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
+                                     new Hashtable<SymbolData, LanguageLevelVisitor>());
       assertFalse("This is an intermediate file", _isElementaryFile());
-      _llv = new AdvancedVisitor(new File("advanced.dj2"), new LinkedList<Pair<String, JExpressionIF>>(), _s, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
+      _llv = new AdvancedVisitor(new File("advanced.dj2"),
+                                 new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+                                 new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
+                                 new Hashtable<SymbolData, LanguageLevelVisitor>());
       assertFalse("This is an advanced file", _isElementaryFile());
-      _llv = new ElementaryVisitor(new File("full.java"), new LinkedList<Pair<String, JExpressionIF>>(), _s, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
+      _llv = new ElementaryVisitor(new File("full.java"), 
+                                   new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
+                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
       assertFalse("This is a full file", _isElementaryFile());
     }
 
     public void testIsIntermediateFile() {
-      _llv = new ElementaryVisitor(new File("elementary.dj0"), new LinkedList<Pair<String, JExpressionIF>>(), _s, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
+      _llv = new ElementaryVisitor(new File("elementary.dj0"), 
+                                   new LinkedList<Pair<String, JExpressionIF>>(), _s,
+                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
+                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
       assertFalse("This is an elementary file", _isIntermediateFile());
-      _llv = new IntermediateVisitor(new File("intermediate.dj1"), new LinkedList<Pair<String, JExpressionIF>>(), _s, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
+      _llv = new IntermediateVisitor(new File("intermediate.dj1"),
+                                     new LinkedList<Pair<String, JExpressionIF>>(), _s,
+                                     new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+                                     new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
+                                     new Hashtable<SymbolData, LanguageLevelVisitor>());
       assertTrue("This is an intermediate file", _isIntermediateFile());
-      _llv = new AdvancedVisitor(new File("advanced.dj2"), new LinkedList<Pair<String, JExpressionIF>>(), _s, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
+      _llv = new AdvancedVisitor(new File("advanced.dj2"),
+                                 new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+                                 new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
+                                 new Hashtable<SymbolData, LanguageLevelVisitor>());
       assertFalse("This is an advanced file", _isIntermediateFile());
-      _llv = new ElementaryVisitor(new File("full.java"), new LinkedList<Pair<String, JExpressionIF>>(), _s, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
+      _llv = new ElementaryVisitor(new File("full.java"),
+                                   new LinkedList<Pair<String, JExpressionIF>>(), _s,
+                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
+                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
       assertFalse("This is a full file", _isIntermediateFile());
     }
 
     public void testIsAdvancedFile() {
-      _llv = new ElementaryVisitor(new File("elementary.dj0"), new LinkedList<Pair<String, JExpressionIF>>(), _s, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
+      _llv = new ElementaryVisitor(new File("elementary.dj0"),
+                                   new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
+                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
       assertFalse("This is an elementary file", _isAdvancedFile());
-      _llv = new IntermediateVisitor(new File("intermediate.dj1"), new LinkedList<Pair<String, JExpressionIF>>(), _s, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
+      _llv = new IntermediateVisitor(new File("intermediate.dj1"), 
+                                     new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+                                     new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+                                     new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
+                                     new Hashtable<SymbolData, LanguageLevelVisitor>());
       assertFalse("This is an intermediate file", _isAdvancedFile());
-      _llv = new AdvancedVisitor(new File("advanced.dj2"), new LinkedList<Pair<String, JExpressionIF>>(), _s, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
+      _llv = new AdvancedVisitor(new File("advanced.dj2"), 
+                                 new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+                                 new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
+                                 new Hashtable<SymbolData, LanguageLevelVisitor>());
       assertTrue("This is an advanced file", _isAdvancedFile());
-      _llv = new ElementaryVisitor(new File("full.java"), new LinkedList<Pair<String, JExpressionIF>>(), _s, new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
+      _llv = new ElementaryVisitor(new File("full.java"), 
+                                   new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
+                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
       assertFalse("This is a full file", _isAdvancedFile());
     }
     
     public void testGetVariableAccessorListHelper() {
-      ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-      ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"private"});
+      ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+      ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
 
       SymbolData houston = new SymbolData("Houston");
       SymbolData texas = new SymbolData("Texas");
@@ -1694,8 +1855,11 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
       
       //first, add a field to texas that has a public gettor.  This one should be returned.
       texas.addVar(new VariableData("lone_star", _publicMav, SymbolData.INT_TYPE, true, texas));
-      MethodData lone_star = new MethodData("lone_star", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[0], 
-                                     new String[0], texas, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      MethodData lone_star = new MethodData("lone_star", _publicMav, 
+                                            new TypeParameter[0], SymbolData.INT_TYPE, 
+                                            new VariableData[0], 
+                                            new String[0], texas, 
+                                            new NullLiteral(SourceInfo.NO_INFO));
       texas.addMethod(lone_star); 
 
       //no gettor for cool, therefore, it should not be returned.
@@ -1704,14 +1868,23 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
 
       //now, add a private gettor for armidillo to texas.  This should not be returned, because it is private.
       texas.addVar(new VariableData("armadillo", _publicMav, SymbolData.BOOLEAN_TYPE, true, texas));
-      MethodData armadillo = new MethodData("armadillo", _privateMav, new TypeParameter[0], SymbolData.BOOLEAN_TYPE, new VariableData[0], 
-                                     new String[0], texas, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      MethodData armadillo = new MethodData("armadillo", _privateMav, 
+                                            new TypeParameter[0], 
+                                            SymbolData.BOOLEAN_TYPE,
+                                            new VariableData[0], 
+                                            new String[0], texas, 
+                                            new NullLiteral(SourceInfo.NO_INFO));
       texas.addMethod(armadillo);
       
-      //now add a field badRoad to Houston.  Its gettor returns a supertype of its type, so it is okay to call.  Will be returned.
+      // Now add a field badRoad to Houston.  Its gettor returns a supertype of its type, so it is okay to call.  
+      // Will be returned.
       houston.addVar(new VariableData("badRoad", _publicMav, SymbolData.CHAR_TYPE, true, houston));
-      MethodData badRoad = new MethodData("badRoad", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[0], 
-                                     new String[0], houston, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      MethodData badRoad = new MethodData("badRoad", _publicMav,
+                                          new TypeParameter[0],
+                                          SymbolData.INT_TYPE,
+                                          new VariableData[0], 
+                                          new String[0], houston, 
+                                          new NullLiteral(SourceInfo.NO_INFO));
       houston.addMethod(badRoad);
       
       LinkedList<MethodData> expected = new LinkedList<MethodData>();

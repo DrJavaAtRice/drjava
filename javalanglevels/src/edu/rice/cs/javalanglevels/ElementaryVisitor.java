@@ -403,7 +403,7 @@ public class ElementaryVisitor extends LanguageLevelVisitor {
    /** Test the methods in the above class. */
   public static class ElementaryVisitorTest extends TestCase {
     
-    private static SourceInfo _noSourceInfo = JExprParser.NO_SOURCE_INFO;
+    private static SourceInfo _noSourceInfo = SourceInfo.NO_INFO;
     private static ClassOrInterfaceType _noType = JExprParser.NO_TYPE;
     
     private ElementaryVisitor _bv;

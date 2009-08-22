@@ -105,13 +105,13 @@ public class VoidMethodsNotAllowedClassBodyTypeChecker extends ClassBodyTypeChec
     private SymbolData _sd4;
     private SymbolData _sd5;
     private SymbolData _sd6;
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final"});
-    private ModifiersAndVisibility _publicAbstractMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public", "abstract"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _publicAbstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public", "abstract"});
     
     
     public VoidMethodsNotAllowedClassBodyTypeCheckerTest() {
@@ -136,12 +136,12 @@ public class VoidMethodsNotAllowedClassBodyTypeChecker extends ClassBodyTypeChec
     
     public void testForConcreteMethodDef() {
       //Test that if a method returns void, an error is thrown
-      BracedBody bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new VoidReturnStatement(JExprParser.NO_SOURCE_INFO)});
+      BracedBody bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VoidReturnStatement(SourceInfo.NO_INFO)});
 
-      ConcreteMethodDef cmd = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, 
+      ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NO_INFO, 
                                                     _publicMav, new TypeParameter[0], 
-                                                     new VoidReturn(JExprParser.NO_SOURCE_INFO, "void"), 
-                                                    new Word(JExprParser.NO_SOURCE_INFO, "myMethod3"), 
+                                                     new VoidReturn(SourceInfo.NO_INFO, "void"), 
+                                                    new Word(SourceInfo.NO_INFO, "myMethod3"), 
                                                     new FormalParameter[0], 
                                                     new ReferenceType[0], bb);
 
@@ -157,8 +157,8 @@ public class VoidMethodsNotAllowedClassBodyTypeChecker extends ClassBodyTypeChec
     }
     
     public void testForAbstractMethodDef() {
-      AbstractMethodDef amd = new AbstractMethodDef(JExprParser.NO_SOURCE_INFO, _publicAbstractMav, new TypeParameter[0], 
-                                                     new VoidReturn(JExprParser.NO_SOURCE_INFO, "void"), new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new FormalParameter[0], 
+      AbstractMethodDef amd = new AbstractMethodDef(SourceInfo.NO_INFO, _publicAbstractMav, new TypeParameter[0], 
+                                                     new VoidReturn(SourceInfo.NO_INFO, "void"), new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[0], 
                                                      new ReferenceType[0]);
 
       

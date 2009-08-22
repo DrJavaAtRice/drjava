@@ -522,7 +522,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     * values for anything that will not be used.
     */
   public static boolean checkAccessibility(ModifiersAndVisibility mav, SymbolData enclosingSD, SymbolData thisSD) { 
-    return checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), mav, "", enclosingSD, thisSD,"", false);
+    return checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), mav, "", enclosingSD, thisSD,"", false);
   }
 
 
@@ -1033,7 +1033,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     }
     ClassBodyTypeChecker cbtc = null;
     //See if sd is a test class.  If so, it must be public.
-    SymbolData testSd = getSymbolData("junit.framework.TestCase", new NullLiteral(JExprParser.NO_SOURCE_INFO), false, true);
+    SymbolData testSd = getSymbolData("junit.framework.TestCase", new NullLiteral(SourceInfo.NO_INFO), false, true);
     if (testSd != null && sd.isSubClassOf(testSd)) { 
       if (! sd.hasModifier("public")) {
         _addError(sd.getName() + " extends TestCase and thus must be explicitly declared public", that);
@@ -1258,12 +1258,12 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     private SymbolData _sd4;
     private SymbolData _sd5;
     private SymbolData _sd6;
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
     
     
     public TypeCheckerTest() { this(""); }
@@ -1323,9 +1323,9 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       _sd3.setIsContinuation(false);
       SymbolData sd = symbolTable.get("java.lang.Object");
       sd.setPackage("java.lang");
-      assertEquals("Should get _sd3 from the Symboltable.", _sd3, _btc.getSymbolData("zebra", new NullLiteral(JExprParser.NO_SOURCE_INFO), true, true));
-      assertEquals("Should get sd from the Symboltable.", sd, _btc.getSymbolData("Object", new NullLiteral(JExprParser.NO_SOURCE_INFO), true, true));
-      _btc.getSymbolData("koala", new NullLiteral(JExprParser.NO_SOURCE_INFO), true, true);
+      assertEquals("Should get _sd3 from the Symboltable.", _sd3, _btc.getSymbolData("zebra", new NullLiteral(SourceInfo.NO_INFO), true, true));
+      assertEquals("Should get sd from the Symboltable.", sd, _btc.getSymbolData("Object", new NullLiteral(SourceInfo.NO_INFO), true, true));
+      _btc.getSymbolData("koala", new NullLiteral(SourceInfo.NO_INFO), true, true);
       
       
       assertEquals("Should be one error", 1, errors.size());
@@ -1334,7 +1334,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       
       sd.setPackage("notRightPackage");
-      _btc.getSymbolData("Object", new NullLiteral(JExprParser.NO_SOURCE_INFO), true, true);
+      _btc.getSymbolData("Object", new NullLiteral(SourceInfo.NO_INFO), true, true);
       assertEquals("Should be 1 error", 1, errors.size());
       assertEquals("Error message should be correct", "The class java.lang.Object is not in the right package. Perhaps you meant to package it?", errors.get(0).getFirst());
       
@@ -1343,7 +1343,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       sdThread.setIsContinuation(false);
       sdThread.setPackage("java.lang");
       symbolTable.put("java.lang.Thread", sdThread);
-      assertEquals("Should return null", null, _btc.getSymbolData("Thread", new NullLiteral(JExprParser.NO_SOURCE_INFO), true, true));
+      assertEquals("Should return null", null, _btc.getSymbolData("Thread", new NullLiteral(SourceInfo.NO_INFO), true, true));
       
       assertEquals("Should now be 2 errors", 2, errors.size());
       assertEquals("Error message should be correct", "java.lang.Thread implements the Runnable interface, which is not allowed at any language level", errors.get(1).getFirst());
@@ -1361,7 +1361,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       symbolTable.put("myClass", sdOther);
       symbolTable.put("java.lang.Runnable", run);
       
-      assertEquals("Should return sdOther", sdOther, _btc.getSymbolData("myClass", new NullLiteral(JExprParser.NO_SOURCE_INFO), true, true));
+      assertEquals("Should return sdOther", sdOther, _btc.getSymbolData("myClass", new NullLiteral(SourceInfo.NO_INFO), true, true));
       assertEquals("Should still just be 2 errors", 2, errors.size());
       
       //Test an inner class from the context of the outer class
@@ -1371,14 +1371,14 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       sd.setIsContinuation(false);
       sdOuter.addInnerClass(sdInner);
       sdInner.setOuterData(sdOuter);
-      assertEquals("Should return sdInner", sdInner, _btc.getSymbolData("inner", sdOuter, new NullLiteral(JExprParser.NO_SOURCE_INFO)));
+      assertEquals("Should return sdInner", sdInner, _btc.getSymbolData("inner", sdOuter, new NullLiteral(SourceInfo.NO_INFO)));
       
       //Test an inner interface from the context of the outer class
       sdInner.setInterface(true);
       sdOuter = new SymbolData("outer");
       sd.setIsContinuation(false);
       sdOuter.addInnerInterface(sdInner);
-      assertEquals("Should return sdInner", sdInner, _btc.getSymbolData("inner", sdOuter, new NullLiteral(JExprParser.NO_SOURCE_INFO)));
+      assertEquals("Should return sdInner", sdInner, _btc.getSymbolData("inner", sdOuter, new NullLiteral(SourceInfo.NO_INFO)));
       
       
       //Test that the correct inner class is returned
@@ -1413,17 +1413,17 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       sd3.addInnerClass(sd2);
       sd2.setOuterData(sd3);
       
-      assertEquals("Should return A.D", sd4, _btc.getSymbolData("A.D", sd3, new NullLiteral(JExprParser.NO_SOURCE_INFO)));
-      assertEquals("Should return B.D", sd5, _btc.getSymbolData("B.D", sd3, new NullLiteral(JExprParser.NO_SOURCE_INFO)));
-      assertEquals("Should return null", null, _btc.getSymbolData("D", sd3, new NullLiteral(JExprParser.NO_SOURCE_INFO)));
-      assertEquals("Should return B", sd2, _btc.getSymbolData("B", sd1, new NullLiteral(JExprParser.NO_SOURCE_INFO)));
-      assertEquals("Should return C.A", sd1, _btc.getSymbolData("A", sd5, new NullLiteral(JExprParser.NO_SOURCE_INFO)));
+      assertEquals("Should return A.D", sd4, _btc.getSymbolData("A.D", sd3, new NullLiteral(SourceInfo.NO_INFO)));
+      assertEquals("Should return B.D", sd5, _btc.getSymbolData("B.D", sd3, new NullLiteral(SourceInfo.NO_INFO)));
+      assertEquals("Should return null", null, _btc.getSymbolData("D", sd3, new NullLiteral(SourceInfo.NO_INFO)));
+      assertEquals("Should return B", sd2, _btc.getSymbolData("B", sd1, new NullLiteral(SourceInfo.NO_INFO)));
+      assertEquals("Should return C.A", sd1, _btc.getSymbolData("A", sd5, new NullLiteral(SourceInfo.NO_INFO)));
       //Test a class defined in the context of a method
       MethodData md = new MethodData("myMethod", _publicMav, new TypeParameter[0], 
                     SymbolData.INT_TYPE, new VariableData[0], new String[0], sdOuter, 
-                    new NullLiteral(JExprParser.NO_SOURCE_INFO));
+                    new NullLiteral(SourceInfo.NO_INFO));
       md.addInnerClass(sd3);
-      assertEquals("Should return sd3", sd3, _btc.getSymbolData("C", md, new NullLiteral(JExprParser.NO_SOURCE_INFO)));
+      assertEquals("Should return sd3", sd3, _btc.getSymbolData("C", md, new NullLiteral(SourceInfo.NO_INFO)));
     }
    
     public void testGetQualifiedClassName() {
@@ -1510,40 +1510,40 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       _sd6.setOuterData(_sd2);
       _sd2.addInnerClass(_sd6);
       // public
-      assertTrue("checkAccessibility with public mav and same package", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _publicMav, "fieldOfDreams", _sd1, _sd2, "field"));
-      assertTrue("checkAccessibility with public mav and different packages", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _publicMav, "fieldOfDreams", _sd1, _sd4, "field"));
-      assertTrue("checkAccessibility with public mav and is outer class", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _publicMav, "fieldOfDreams", _sd2, _sd6, "field"));
-      assertTrue("checkAccessibility with public mav and is super class", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _publicMav, "fieldOfDreams", _sd3, _sd6, "field"));
-      assertTrue("checkAccessibility for a class and its outer class", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _publicMav, _sd6.getName(), _sd2, _sd6, "class"));
-      assertTrue("checkAccessibility for a class and a class it is not related to", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _publicMav, _sd6.getName(), _sd2, _sd4, "class"));
+      assertTrue("checkAccessibility with public mav and same package", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _publicMav, "fieldOfDreams", _sd1, _sd2, "field"));
+      assertTrue("checkAccessibility with public mav and different packages", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _publicMav, "fieldOfDreams", _sd1, _sd4, "field"));
+      assertTrue("checkAccessibility with public mav and is outer class", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _publicMav, "fieldOfDreams", _sd2, _sd6, "field"));
+      assertTrue("checkAccessibility with public mav and is super class", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _publicMav, "fieldOfDreams", _sd3, _sd6, "field"));
+      assertTrue("checkAccessibility for a class and its outer class", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _publicMav, _sd6.getName(), _sd2, _sd6, "class"));
+      assertTrue("checkAccessibility for a class and a class it is not related to", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _publicMav, _sd6.getName(), _sd2, _sd4, "class"));
       
       // protected
-      assertTrue("checkAccessibility with protected mav and same package", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _protectedMav, "fieldOfDreams", _sd1, _sd2, "field"));
-      assertFalse("checkAccessibility with protected mav and different package", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _protectedMav, "fieldOfDreams", _sd1, _sd4, "field"));
-      assertTrue("checkAccessibility with protected mav and is outer class", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _protectedMav, "fieldOfDreams", _sd2, _sd6, "field"));
-      assertTrue("checkAccessibility with protected mav and is super class", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _protectedMav, "fieldOfDreams", _sd3, _sd6, "field"));
-      assertTrue("checkAccessibility for a class and its outer class", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _protectedMav, _sd6.getName(), _sd2, _sd6, "class"));
-      assertFalse("checkAccessibility for a class and a class it is not related to", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _protectedMav, _sd6.getName(), _sd2, _sd4, "class"));
+      assertTrue("checkAccessibility with protected mav and same package", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _protectedMav, "fieldOfDreams", _sd1, _sd2, "field"));
+      assertFalse("checkAccessibility with protected mav and different package", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _protectedMav, "fieldOfDreams", _sd1, _sd4, "field"));
+      assertTrue("checkAccessibility with protected mav and is outer class", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _protectedMav, "fieldOfDreams", _sd2, _sd6, "field"));
+      assertTrue("checkAccessibility with protected mav and is super class", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _protectedMav, "fieldOfDreams", _sd3, _sd6, "field"));
+      assertTrue("checkAccessibility for a class and its outer class", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _protectedMav, _sd6.getName(), _sd2, _sd6, "class"));
+      assertFalse("checkAccessibility for a class and a class it is not related to", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _protectedMav, _sd6.getName(), _sd2, _sd4, "class"));
 
       
       // private
-      assertFalse("checkAccessibility with private mav and same package", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _privateMav, "fieldOfDreams", _sd1, _sd2, "field"));
-      assertFalse("checkAccessibility with private mav and different package", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _privateMav, "fieldOfDreams", _sd1, _sd4, "field"));
-      assertTrue("checkAccessibility with private mav and is outer class", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _privateMav, "fieldOfDreams", _sd2, _sd6, "field"));
-      assertFalse("checkAccessibility with private mav and is super class", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _privateMav, "fieldOfDreams", _sd3, _sd6, "field"));
+      assertFalse("checkAccessibility with private mav and same package", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _privateMav, "fieldOfDreams", _sd1, _sd2, "field"));
+      assertFalse("checkAccessibility with private mav and different package", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _privateMav, "fieldOfDreams", _sd1, _sd4, "field"));
+      assertTrue("checkAccessibility with private mav and is outer class", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _privateMav, "fieldOfDreams", _sd2, _sd6, "field"));
+      assertFalse("checkAccessibility with private mav and is super class", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _privateMav, "fieldOfDreams", _sd3, _sd6, "field"));
       assertEquals("There should be 5 errors", 5, errors.size());
       assertEquals("The last error message should be correct", "The field fieldOfDreams is private and cannot be accessed from " + _sd6.getName(), errors.getLast().getFirst());
-      assertTrue("checkAccessibility with private mav and same file", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _privateMav, "fieldOfDreams", _sd3, _sd3, "field"));      
-      assertTrue("checkAccessibility for a class and its outer class", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _privateMav, _sd6.getName(), _sd2, _sd6, "class"));
-      assertFalse("checkAccessibility for a class and a class it is not related to", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _privateMav, _sd6.getName(), _sd2, _sd4, "class"));
+      assertTrue("checkAccessibility with private mav and same file", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _privateMav, "fieldOfDreams", _sd3, _sd3, "field"));      
+      assertTrue("checkAccessibility for a class and its outer class", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _privateMav, _sd6.getName(), _sd2, _sd6, "class"));
+      assertFalse("checkAccessibility for a class and a class it is not related to", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _privateMav, _sd6.getName(), _sd2, _sd4, "class"));
 
       // package
-      assertTrue("checkAccessibility with package mav and same package", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _packageMav, "fieldOfDreams", _sd1, _sd2, "field"));
-      assertFalse("checkAccessibility with package mav and different package", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _packageMav, "fieldOfDreams", _sd1, _sd4, "field"));
-      assertTrue("checkAccessibility with package mav and is outer class", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _packageMav, "fieldOfDreams", _sd2, _sd6, "field"));
-      assertTrue("checkAccessibility with package mav and is super class", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _packageMav, "fieldOfDreams", _sd3, _sd6, "field"));
-      assertTrue("checkAccessibility for a class and its outer class", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _packageMav, _sd6.getName(), _sd2, _sd6, "class"));
-      assertFalse("checkAccessibility for a class and a class it is not related to", _btc.checkAccessibility(new NullLiteral(JExprParser.NO_SOURCE_INFO), _packageMav, _sd6.getName(), _sd2, _sd4, "class"));
+      assertTrue("checkAccessibility with package mav and same package", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _packageMav, "fieldOfDreams", _sd1, _sd2, "field"));
+      assertFalse("checkAccessibility with package mav and different package", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _packageMav, "fieldOfDreams", _sd1, _sd4, "field"));
+      assertTrue("checkAccessibility with package mav and is outer class", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _packageMav, "fieldOfDreams", _sd2, _sd6, "field"));
+      assertTrue("checkAccessibility with package mav and is super class", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _packageMav, "fieldOfDreams", _sd3, _sd6, "field"));
+      assertTrue("checkAccessibility for a class and its outer class", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _packageMav, _sd6.getName(), _sd2, _sd6, "class"));
+      assertFalse("checkAccessibility for a class and a class it is not related to", _btc.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), _packageMav, _sd6.getName(), _sd2, _sd4, "class"));
 
     }
     
@@ -1553,29 +1553,29 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       VariableData vd0 = new VariableData("field0", _privateMav, _sd1, true, _sd6);
       VariableData vd1 = new VariableData("field1", _publicMav, _sd1, true, _sd3);
       VariableData vd2 = new VariableData("field2", _privateMav, _sd2, true, _sd2);
-      VariableData vd3 = new VariableData("variable1", new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]), _sd3, true, _sd3);
+      VariableData vd3 = new VariableData("variable1", new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]), _sd3, true, _sd3);
       MethodData md = new MethodData("method1", _protectedMav, null, null, null, null, _sd3, null);
       md.addVar(vd3);
       _sd6.addVar(vd0);
       _sd3.addVar(vd1);
       _sd2.addVar(vd2);
       _sd3.addMethod(md);
-      assertEquals("Should find field0", vd0, _btc.getFieldOrVariable("field0", _sd6, _sd6, new NullLiteral(JExprParser.NO_SOURCE_INFO)));
-      assertEquals("Should find field1", vd1, _btc.getFieldOrVariable("field1", _sd6, _sd6, new NullLiteral(JExprParser.NO_SOURCE_INFO)));
-      assertEquals("Should find field2", vd2, _btc.getFieldOrVariable("field2", _sd6, _sd6, new NullLiteral(JExprParser.NO_SOURCE_INFO)));
-      assertEquals("Should not find field7", null, _btc.getFieldOrVariable("field7", _sd6, _sd6, new NullLiteral(JExprParser.NO_SOURCE_INFO)));
-      assertEquals("Should find variable1", vd3, _btc.getFieldOrVariable("variable1", md, _sd3, new NullLiteral(JExprParser.NO_SOURCE_INFO)));
+      assertEquals("Should find field0", vd0, _btc.getFieldOrVariable("field0", _sd6, _sd6, new NullLiteral(SourceInfo.NO_INFO)));
+      assertEquals("Should find field1", vd1, _btc.getFieldOrVariable("field1", _sd6, _sd6, new NullLiteral(SourceInfo.NO_INFO)));
+      assertEquals("Should find field2", vd2, _btc.getFieldOrVariable("field2", _sd6, _sd6, new NullLiteral(SourceInfo.NO_INFO)));
+      assertEquals("Should not find field7", null, _btc.getFieldOrVariable("field7", _sd6, _sd6, new NullLiteral(SourceInfo.NO_INFO)));
+      assertEquals("Should find variable1", vd3, _btc.getFieldOrVariable("variable1", md, _sd3, new NullLiteral(SourceInfo.NO_INFO)));
       
       // test that passing in a list of variables to use will not recur (if called from the type checker)
-      assertEquals("Should not find field1", null, _btc.getFieldOrVariable("field1", _sd6, _sd6, new NullLiteral(JExprParser.NO_SOURCE_INFO), new LinkedList<VariableData>()));
+      assertEquals("Should not find field1", null, _btc.getFieldOrVariable("field1", _sd6, _sd6, new NullLiteral(SourceInfo.NO_INFO), new LinkedList<VariableData>()));
       assertEquals("There should be no errors", 0, errors.size());
     }
     
     public void test_addError() {
       LinkedList<Pair<String, JExpressionIF>> e = new LinkedList<Pair<String, JExpressionIF>>();
       
-      NullLiteral nl = new NullLiteral(JExprParser.NO_SOURCE_INFO);
-      NullLiteral nl2 = new NullLiteral(JExprParser.NO_SOURCE_INFO);
+      NullLiteral nl = new NullLiteral(SourceInfo.NO_INFO);
+      NullLiteral nl2 = new NullLiteral(SourceInfo.NO_INFO);
       
       e.addLast(new Pair<String,JExpressionIF>("Boy, is this an error!", nl));
       _addError("Boy, is this an error!", nl);
@@ -1702,9 +1702,9 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     public void testForPrimitiveType() {
       assertEquals("Should return SymbolData.INT_TYPE.", 
                    SymbolData.INT_TYPE, 
-                   _btc.forPrimitiveType(new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int")));
+                   _btc.forPrimitiveType(new PrimitiveType(SourceInfo.NO_INFO, "int")));
       try {
-        _btc.forPrimitiveType(new PrimitiveType(JExprParser.NO_SOURCE_INFO, "Maggie"));
+        _btc.forPrimitiveType(new PrimitiveType(SourceInfo.NO_INFO, "Maggie"));
         fail("Should have thrown an exception.");
       }
       catch(RuntimeException re) {
@@ -1745,7 +1745,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
                                                         new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       LanguageLevelConverter.symbolTable = llv.symbolTable = _btc.symbolTable;
       
-      SourceInfo si = JExprParser.NO_SOURCE_INFO;
+      SourceInfo si = SourceInfo.NO_INFO;
       
       ArrayData intArray = new ArrayData(SymbolData.INT_TYPE, llv, si);
       assertTrue("Should be able to assign an array to Object", _btc._isAssignableFrom(symbolTable.get("java.lang.Object"), intArray));
@@ -1809,7 +1809,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       _sd1.addInnerClass(_sd4);
       
       //no cyclic inheritance
-      InterfaceDef nl = new InterfaceDef(JExprParser.NO_SOURCE_INFO, _publicMav, new Word(JExprParser.NO_SOURCE_INFO, "name"), new TypeParameter[0], new ReferenceType[0], new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+      InterfaceDef nl = new InterfaceDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "name"), new TypeParameter[0], new ReferenceType[0], new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       assertFalse("Should not be cyclic inheritance", _btc.checkForCyclicInheritance(_sd1, new LinkedList<SymbolData>(), nl));
       
       //if you and your super interface implement the same interface, it's okay
@@ -1839,9 +1839,9 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     
     public void testForClassDef() {
       
-      ClassDef cd = new ClassDef(JExprParser.NO_SOURCE_INFO, _publicMav, new Word(JExprParser.NO_SOURCE_INFO, "Lisa"),
-                                 new TypeParameter[0], new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "Object", new Type[0]), new ReferenceType[0], 
-                                 new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+      ClassDef cd = new ClassDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "Lisa"),
+                                 new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), new ReferenceType[0], 
+                                 new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
 
      //Test that no cyclic inheritance goes okay
       SymbolData Lisa = new SymbolData("Lisa");
@@ -1864,9 +1864,9 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       assertEquals("Error message should be correct", "Cyclic inheritance involving Lisa", errors.get(0).getFirst());
       
       //Test that if you extend a final class, an error is thrown
-      ClassDef cd2 = new ClassDef(JExprParser.NO_SOURCE_INFO, _publicMav, new Word(JExprParser.NO_SOURCE_INFO, "Me"),
-                                 new TypeParameter[0], new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "Parent", new Type[0]), new ReferenceType[0], 
-                                 new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+      ClassDef cd2 = new ClassDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "Me"),
+                                 new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "Parent", new Type[0]), new ReferenceType[0], 
+                                 new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       SymbolData parent = new SymbolData("Parent");
       parent.setMav(_finalMav);
       parent.setSuperClass(symbolTable.get("java.lang.Object"));
@@ -1886,9 +1886,9 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
 
       
       //Test that if you extend a class you cannot see, an error is thrown
-      ClassDef cd3 = new ClassDef(JExprParser.NO_SOURCE_INFO, _publicMav, new Word(JExprParser.NO_SOURCE_INFO, "somewhereElse.Lisa"),
-                                 new TypeParameter[0], new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], 
-                                 new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+      ClassDef cd3 = new ClassDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "somewhereElse.Lisa"),
+                                 new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], 
+                                 new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
 
       Lisa = new SymbolData("somewhereElse.Lisa");
       Lisa.setSuperClass(new SymbolData("hungry"));
@@ -1911,9 +1911,9 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       Lisa.addInterface(superI);
       _btc.symbolTable.put("superI", superI);
 
-      ClassDef cd4 = new ClassDef(JExprParser.NO_SOURCE_INFO, _publicMav, new Word(JExprParser.NO_SOURCE_INFO, "somewhereElse.Lisa"),
-                                  new TypeParameter[0], new TypeVariable(JExprParser.NO_SOURCE_INFO, "super"), new ReferenceType[] {new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "superI",  new Type[0])},
-                                  new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+      ClassDef cd4 = new ClassDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "somewhereElse.Lisa"),
+                                  new TypeParameter[0], new TypeVariable(SourceInfo.NO_INFO, "super"), new ReferenceType[] {new ClassOrInterfaceType(SourceInfo.NO_INFO, "superI",  new Type[0])},
+                                  new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
                                   
     
                                   
@@ -1922,13 +1922,13 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       assertEquals("The 4th error message should be correct", "The interface superI is package protected because there is no access specifier and cannot be accessed from somewhereElse.Lisa", errors.get(3).getFirst());
       
       // Test that if a class has a final field and a constructor that sets the value, it won't throw an error
-      VariableDeclaration vd = new VariableDeclaration(JExprParser.NO_SOURCE_INFO, _finalMav, new VariableDeclarator[] {new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), new Word(JExprParser.NO_SOURCE_INFO, "i"))});
-      ExpressionStatement se = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 1)));      
-      BracedBody cbb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {se});
-      ConstructorDef consD = new ConstructorDef(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "Jimes"), _publicMav, new FormalParameter[0], new ReferenceType[0], cbb);
-      BracedBody b = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {vd, consD});
-      ClassDef cd5 = new ClassDef(JExprParser.NO_SOURCE_INFO, _publicMav, new Word(JExprParser.NO_SOURCE_INFO, "Jimes"),
-                                  new TypeParameter[0], new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {vd, consD}));
+      VariableDeclaration vd = new VariableDeclaration(SourceInfo.NO_INFO, _finalMav, new VariableDeclarator[] {new UninitializedVariableDeclarator(SourceInfo.NO_INFO, new PrimitiveType(SourceInfo.NO_INFO, "int"), new Word(SourceInfo.NO_INFO, "i"))});
+      ExpressionStatement se = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 1)));      
+      BracedBody cbb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {se});
+      ConstructorDef consD = new ConstructorDef(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "Jimes"), _publicMav, new FormalParameter[0], new ReferenceType[0], cbb);
+      BracedBody b = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {vd, consD});
+      ClassDef cd5 = new ClassDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "Jimes"),
+                                  new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {vd, consD}));
 
       SymbolData sd = new SymbolData("Jimes");
       VariableData vData = new VariableData("i", _finalMav, SymbolData.INT_TYPE, false, sd);
@@ -1951,16 +1951,16 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       
       // Test that if a class has a final field, that if there are no constructors, an error is thrown since the value of the field cannot be set.
       vData.lostValue();
-      b = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {vd});
-      cd5 = new ClassDef(JExprParser.NO_SOURCE_INFO, _publicMav, new Word(JExprParser.NO_SOURCE_INFO, "Jimes"), new TypeParameter[0], new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], b);
+      b = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {vd});
+      cd5 = new ClassDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "Jimes"), new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], b);
  
       cd5.visit(_btc);
       assertEquals("There should be 5 errors now", 5, errors.size());
       assertEquals("The error message should be correct", "The final field i has not been initialized", errors.get(4).getFirst());
       
       //Test that if the class implements java.lang.Runnable, then an error is thrown.
-      ClassDef cd6 = new ClassDef(JExprParser.NO_SOURCE_INFO, _publicMav, new Word(JExprParser.NO_SOURCE_INFO, "JimesH"),
-                                  new TypeParameter[0], new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "java.lang.Object", new Type[0]), new ReferenceType[] {new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "java.lang.Runnable", new Type[0])}, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+      ClassDef cd6 = new ClassDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "JimesH"),
+                                  new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), new ReferenceType[] {new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Runnable", new Type[0])}, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       sd = new SymbolData("JimesH");
       sd.setIsContinuation(false);
       
@@ -1980,8 +1980,8 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       assertEquals("The error message should be correct", "JimesH implements the Runnable interface, which is not allowed at any language level", errors.get(5).getFirst());
 
       //Test that if a class implements another class, an error is thrown
-      ClassDef cd7 = new ClassDef(JExprParser.NO_SOURCE_INFO, _publicMav, new Word(JExprParser.NO_SOURCE_INFO, "Hspia"),
-                                  new TypeParameter[0], new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "superSD", new Type[0]), new ReferenceType[] {new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "java.lang.String", new Type[0])}, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+      ClassDef cd7 = new ClassDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "Hspia"),
+                                  new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "superSD", new Type[0]), new ReferenceType[] {new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.String", new Type[0])}, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       sd = new SymbolData("Hspia");
       sd.setIsContinuation(false);
       
@@ -2066,8 +2066,8 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     }
     
     public void testForInterfaceDef() {
-      InterfaceDef id = new InterfaceDef(JExprParser.NO_SOURCE_INFO, _publicMav, new Word(JExprParser.NO_SOURCE_INFO, "Lisa"),
-                                         new TypeParameter[0], new ReferenceType[] {new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "superI", new Type[0])}, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+      InterfaceDef id = new InterfaceDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "Lisa"),
+                                         new TypeParameter[0], new ReferenceType[] {new ClassOrInterfaceType(SourceInfo.NO_INFO, "superI", new Type[0])}, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
 
       //Test that no cyclic inheritance goes okay
       SymbolData Lisa = new SymbolData("Lisa");
@@ -2093,9 +2093,9 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       assertEquals("Error message should be correct", "Cyclic inheritance involving Lisa", errors.get(0).getFirst());
       
       //Test that if you implement an interface you cannot see, an error is thrown:
-      InterfaceDef id2 = new InterfaceDef(JExprParser.NO_SOURCE_INFO, _publicMav, new Word(JExprParser.NO_SOURCE_INFO, "somewhereElse.Lisa"),
-                                  new TypeParameter[0], new ReferenceType[] {new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "superI",  new Type[0])},
-                                  new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+      InterfaceDef id2 = new InterfaceDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "somewhereElse.Lisa"),
+                                  new TypeParameter[0], new ReferenceType[] {new ClassOrInterfaceType(SourceInfo.NO_INFO, "superI",  new Type[0])},
+                                  new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
                                   
                                   
       Lisa = new SymbolData("somewhereElse.Lisa");
@@ -2113,8 +2113,8 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
 
       
       //Test that if the interface extends java.lang.Runnable, then an error is thrown.
-      InterfaceDef id3 = new InterfaceDef(JExprParser.NO_SOURCE_INFO, _publicMav, new Word(JExprParser.NO_SOURCE_INFO, "JimesH"),
-                                  new TypeParameter[0], new ReferenceType[] {new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "java.lang.Runnable", new Type[0])}, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+      InterfaceDef id3 = new InterfaceDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "JimesH"),
+                                  new TypeParameter[0], new ReferenceType[] {new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Runnable", new Type[0])}, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       SymbolData sd = new SymbolData("JimesH");
       sd.setIsContinuation(false);
       sd.setInterface(true);
@@ -2136,8 +2136,8 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
 
       //Test that an error is thrown if you implement a class
 
-      InterfaceDef id4 = new InterfaceDef(JExprParser.NO_SOURCE_INFO, _publicMav, new Word(JExprParser.NO_SOURCE_INFO, "Bart"),
-                                         new TypeParameter[0], new ReferenceType[] {new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "superC", new Type[0])}, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+      InterfaceDef id4 = new InterfaceDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "Bart"),
+                                         new TypeParameter[0], new ReferenceType[] {new ClassOrInterfaceType(SourceInfo.NO_INFO, "superC", new Type[0])}, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
 
       //Test that no cyclic inheritance goes okay
       SymbolData me = new SymbolData("Bart");
@@ -2175,10 +2175,10 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     }
     
     public void testForClassImportStatement() {
-      Word[] words = new Word[] {new Word(JExprParser.NO_SOURCE_INFO, "alpha"),
-        new Word(JExprParser.NO_SOURCE_INFO, "beta")};
-      CompoundWord cw = new CompoundWord(JExprParser.NO_SOURCE_INFO, words);
-      ClassImportStatement cis = new ClassImportStatement(JExprParser.NO_SOURCE_INFO, cw);
+      Word[] words = new Word[] {new Word(SourceInfo.NO_INFO, "alpha"),
+        new Word(SourceInfo.NO_INFO, "beta")};
+      CompoundWord cw = new CompoundWord(SourceInfo.NO_INFO, words);
+      ClassImportStatement cis = new ClassImportStatement(SourceInfo.NO_INFO, cw);
       SymbolData sd = new SymbolData("alpha.beta");
       //Test one that will work
       sd.setPackage("alpha");
@@ -2199,11 +2199,11 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     }
 
     public void testForPackageStatement() {
-      Word[] badWords = new Word[] {new Word(JExprParser.NO_SOURCE_INFO, "java"), new Word(JExprParser.NO_SOURCE_INFO, "lang"), new Word(JExprParser.NO_SOURCE_INFO, "Object")};
-      Word[] okWords = new Word[] {new Word(JExprParser.NO_SOURCE_INFO, "java"), new Word(JExprParser.NO_SOURCE_INFO, "lang")};
+      Word[] badWords = new Word[] {new Word(SourceInfo.NO_INFO, "java"), new Word(SourceInfo.NO_INFO, "lang"), new Word(SourceInfo.NO_INFO, "Object")};
+      Word[] okWords = new Word[] {new Word(SourceInfo.NO_INFO, "java"), new Word(SourceInfo.NO_INFO, "lang")};
 
-      PackageStatement badPackage = new PackageStatement(JExprParser.NO_SOURCE_INFO, new CompoundWord(JExprParser.NO_SOURCE_INFO, badWords));
-      PackageStatement okPackage = new PackageStatement(JExprParser.NO_SOURCE_INFO, new CompoundWord(JExprParser.NO_SOURCE_INFO, okWords));
+      PackageStatement badPackage = new PackageStatement(SourceInfo.NO_INFO, new CompoundWord(SourceInfo.NO_INFO, badWords));
+      PackageStatement okPackage = new PackageStatement(SourceInfo.NO_INFO, new CompoundWord(SourceInfo.NO_INFO, okWords));
       
       SymbolData object = new SymbolData("java.lang.Object");
       object.setPackage("java.lang");
@@ -2220,17 +2220,17 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     
     public void testAutoBoxingAndUnboxing() {
       //Test that autoboxing works for a method invocation going from java.lang.Integer to int
-      Expression e = new SimpleMethodInvocation(JExprParser.NO_SOURCE_INFO,
-                                                new Word(JExprParser.NO_SOURCE_INFO, "myMethod"),
-                                                new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[]{
-        new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i"))}));
-      BodyItemI[] bii = new BodyItemI[] {new ExpressionStatement(JExprParser.NO_SOURCE_INFO, e)};
-      BracedBody b = new BracedBody(JExprParser.NO_SOURCE_INFO, bii);
+      Expression e = new SimpleMethodInvocation(SourceInfo.NO_INFO,
+                                                new Word(SourceInfo.NO_INFO, "myMethod"),
+                                                new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[]{
+        new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i"))}));
+      BodyItemI[] bii = new BodyItemI[] {new ExpressionStatement(SourceInfo.NO_INFO, e)};
+      BracedBody b = new BracedBody(SourceInfo.NO_INFO, bii);
       
       VariableData vd1 = new VariableData("i", _publicMav, symbolTable.get("java.lang.Integer"), true, _sd1);
       VariableData vd2 = new VariableData("i", _publicMav, SymbolData.INT_TYPE, true, null);
       _sd1.addVar(vd1);
-      MethodData md = new MethodData("myMethod", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[] {vd2}, new String[0], null, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      MethodData md = new MethodData("myMethod", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[] {vd2}, new String[0], null, new NullLiteral(SourceInfo.NO_INFO));
       vd2.setEnclosingData(md);
       _sd1.addMethod(md);
       
@@ -2239,8 +2239,8 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       assertEquals("There should be no errors", 0, errors.size());
 
       //Test that autoboxing works for a method invocation going from double java.lang.Double
-      bii = new BodyItemI[] {new ExpressionStatement(JExprParser.NO_SOURCE_INFO, e)};
-      b = new BracedBody(JExprParser.NO_SOURCE_INFO, bii);
+      bii = new BodyItemI[] {new ExpressionStatement(SourceInfo.NO_INFO, e)};
+      b = new BracedBody(SourceInfo.NO_INFO, bii);
       
       
       vd1 = new VariableData("i", _publicMav, symbolTable.get("java.lang.Double"), true, null);
@@ -2248,7 +2248,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       _sd1.setVars(new LinkedList<VariableData>());
       _sd1.addVar(vd2);
       _sd1.setMethods(new LinkedList<MethodData>());
-      md = new MethodData("myMethod", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[] {vd1}, new String[0], null, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      md = new MethodData("myMethod", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[] {vd1}, new String[0], null, new NullLiteral(SourceInfo.NO_INFO));
       vd1.setEnclosingData(md);
       _sd1.addMethod(md);
       
@@ -2262,14 +2262,14 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       _sd1.setVars(new LinkedList<VariableData>());
       _sd1.addVar(vd2);
       _sd1.addVar(new VariableData("t", _publicMav, SymbolData.BOOLEAN_TYPE, false, _sd1));
-      _sd1.addMethod(new MethodData("myMethod", _publicMav, new TypeParameter[0], SymbolData.BOOLEAN_TYPE, new VariableData[] {vd2}, new String[0], null, new NullLiteral(JExprParser.NO_SOURCE_INFO)));
+      _sd1.addMethod(new MethodData("myMethod", _publicMav, new TypeParameter[0], SymbolData.BOOLEAN_TYPE, new VariableData[] {vd2}, new String[0], null, new NullLiteral(SourceInfo.NO_INFO)));
       
-      Expression e2 = new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO,
-                                                     new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "t")),
+      Expression e2 = new SimpleAssignmentExpression(SourceInfo.NO_INFO,
+                                                     new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "t")),
                                                      e);
                   
-      BodyItemI[] bii2 = new BodyItemI[] {new ExpressionStatement(JExprParser.NO_SOURCE_INFO, e2)};
-      BracedBody b2 = new BracedBody(JExprParser.NO_SOURCE_INFO, bii2);
+      BodyItemI[] bii2 = new BodyItemI[] {new ExpressionStatement(SourceInfo.NO_INFO, e2)};
+      BracedBody b2 = new BracedBody(SourceInfo.NO_INFO, bii2);
 
       b2.visit(new ClassBodyTypeChecker(_sd1, _btc._file, "", new LinkedList<String>(), new LinkedList<String>(), _sd1.getVars(), new LinkedList<Pair<SymbolData, JExpression>>()));
       
@@ -2280,12 +2280,12 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       _sd1.setIsContinuation(false);
       symbolTable.put("i.like.monkey", _sd1);
       _sd1.setPackage("i.like");
-      e = new SimpleNamedClassInstantiation(JExprParser.NO_SOURCE_INFO,
-                                              new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "i.like.monkey", new Type[0]),
-                                              new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[] {new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i"))}));
+      e = new SimpleNamedClassInstantiation(SourceInfo.NO_INFO,
+                                              new ClassOrInterfaceType(SourceInfo.NO_INFO, "i.like.monkey", new Type[0]),
+                                              new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i"))}));
       
-      bii = new BodyItemI[] {new ExpressionStatement(JExprParser.NO_SOURCE_INFO, e)};
-      b = new BracedBody(JExprParser.NO_SOURCE_INFO, bii);
+      bii = new BodyItemI[] {new ExpressionStatement(SourceInfo.NO_INFO, e)};
+      b = new BracedBody(SourceInfo.NO_INFO, bii);
       
       _sd1.setVars(new LinkedList<VariableData>());
       
@@ -2294,7 +2294,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
 
       _sd1.addVar(vd1);
       _sd1.setMethods(new LinkedList<MethodData>());
-      md = new MethodData("monkey", _publicMav, new TypeParameter[0], _sd1, new VariableData[]{vd2}, new String[0], _sd1, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      md = new MethodData("monkey", _publicMav, new TypeParameter[0], _sd1, new VariableData[]{vd2}, new String[0], _sd1, new NullLiteral(SourceInfo.NO_INFO));
       vd2.setEnclosingData(md);
       _sd1.addMethod(md);
       
@@ -2304,10 +2304,10 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       
       
       //Test that autoboxing works for an assignment from int to Integer
-      ExpressionStatement se = new ExpressionStatement(JExprParser.NO_SOURCE_INFO,
-                                   new PlusAssignmentExpression(JExprParser.NO_SOURCE_INFO,
-                                       new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")),
-                                       new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j"))));
+      ExpressionStatement se = new ExpressionStatement(SourceInfo.NO_INFO,
+                                   new PlusAssignmentExpression(SourceInfo.NO_INFO,
+                                       new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")),
+                                       new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j"))));
       
       
       _sd1.addVar(vd2);
@@ -2319,8 +2319,8 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       VariableData vd1Prim = new VariableData("i", _publicMav, SymbolData.INT_TYPE, true, null);
       VariableData vd2Obj = new VariableData("j", _publicMav, symbolTable.get("java.lang.Short"), true, null);
       VariableData vd2Prim = new VariableData("j", _publicMav, SymbolData.SHORT_TYPE, true, null);
-      MethodData md1 = new MethodData("myMethod2", _publicMav, new TypeParameter[0], SymbolData.BOOLEAN_TYPE, new VariableData[] {vd1Prim, vd2Prim}, new String[0], _sd1, new NullLiteral(JExprParser.NO_SOURCE_INFO));
-      MethodData md2 = new MethodData("myMethod2", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[] {vd1Obj, vd2Obj}, new String[0], _sd1, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      MethodData md1 = new MethodData("myMethod2", _publicMav, new TypeParameter[0], SymbolData.BOOLEAN_TYPE, new VariableData[] {vd1Prim, vd2Prim}, new String[0], _sd1, new NullLiteral(SourceInfo.NO_INFO));
+      MethodData md2 = new MethodData("myMethod2", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[] {vd1Obj, vd2Obj}, new String[0], _sd1, new NullLiteral(SourceInfo.NO_INFO));
       vd1Obj.setEnclosingData(md2);
       vd1Prim.setEnclosingData(md1);
       vd2Obj.setEnclosingData(md2);
@@ -2333,13 +2333,13 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       _sd1.addVar(vd1Prim);
       _sd1.addVar(vd2Obj);
       
-      e = new SimpleMethodInvocation(JExprParser.NO_SOURCE_INFO,
-                                                new Word(JExprParser.NO_SOURCE_INFO, "myMethod2"),
-                                     new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[]{
-                                                                                new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")),
-                                                                                  new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j"))}));
-      bii = new BodyItemI[] {new ExpressionStatement(JExprParser.NO_SOURCE_INFO, e)};
-      b = new BracedBody(JExprParser.NO_SOURCE_INFO, bii);
+      e = new SimpleMethodInvocation(SourceInfo.NO_INFO,
+                                                new Word(SourceInfo.NO_INFO, "myMethod2"),
+                                     new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[]{
+                                                                                new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")),
+                                                                                  new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j"))}));
+      bii = new BodyItemI[] {new ExpressionStatement(SourceInfo.NO_INFO, e)};
+      b = new BracedBody(SourceInfo.NO_INFO, bii);
       
       b.visit(new ClassBodyTypeChecker(_sd1, _btc._file, "", new LinkedList<String>(), new LinkedList<String>(), _sd1.getVars(), new LinkedList<Pair<SymbolData, JExpression>>()));
       
@@ -2353,7 +2353,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       
       _sd1.setMethods(new LinkedList<MethodData>());
       _sd1.addMethod(md1);      
-      MethodData md3 = new MethodData("myMethod2", _publicMav, new TypeParameter[0], SymbolData.BOOLEAN_TYPE, new VariableData[] {vd1Prim, vd2Prim}, new String[0], _sd1, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      MethodData md3 = new MethodData("myMethod2", _publicMav, new TypeParameter[0], SymbolData.BOOLEAN_TYPE, new VariableData[] {vd1Prim, vd2Prim}, new String[0], _sd1, new NullLiteral(SourceInfo.NO_INFO));
       b.visit(new ClassBodyTypeChecker(subSd, _btc._file, "", new LinkedList<String>(), new LinkedList<String>(), _sd1.getVars(), new LinkedList<Pair<SymbolData, JExpression>>()));
       assertEquals("There should still be one error", 1, errors.size());
       

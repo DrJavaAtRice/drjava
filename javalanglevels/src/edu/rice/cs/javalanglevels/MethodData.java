@@ -91,8 +91,8 @@ public class MethodData extends BodyData {
   
   /**Constructor used by the LanguageLevelConverter, where only the name and params matter*/
   public MethodData(String name, VariableData[] params) {
-    this(name, new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]), new TypeParameter[0], null, 
-         params, new String[0], null, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+    this(name, new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]), new TypeParameter[0], null, 
+         params, new String[0], null, new NullLiteral(SourceInfo.NO_INFO));
   }
   
   /** Factory methods used for debugging purposes among other things. */
@@ -115,11 +115,12 @@ public class MethodData extends BodyData {
   
   /** Two MethodDatas are equal if ... */ 
   public boolean equals (Object obj) {
+    if (obj == this) return true;
     if (obj == null) return false;
     if ((obj.getClass() != this.getClass())) { //|| (obj.hashCode() != this.hashCode())) {
       return false;
     }
-    MethodData md = (MethodData)obj;
+    MethodData md = (MethodData) obj;
 
     return _name.equals(md.getName()) &&
       _modifiersAndVisibility.equals(md.getMav()) &&
@@ -150,9 +151,7 @@ public class MethodData extends BodyData {
   public VariableData[] getParams() { return _params; }
   
   /**Set the method params to be p*/
-  public void setParams(VariableData[] p) {
-    _params = p;
-  }
+  public void setParams(VariableData[] p) { _params = p; }
   
   /**@return the thrown array for this method*/
   public String[] getThrown() { return _thrown; }
@@ -186,10 +185,10 @@ public class MethodData extends BodyData {
     private MethodData _md;
     private MethodData _md2;
     
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _publicMav2 = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _publicMav2 = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
     
     public MethodDataTest() { this(""); }
     
@@ -200,11 +199,11 @@ public class MethodData extends BodyData {
       VariableData vd2 = new VariableData("v2", _protectedMav, SymbolData.BOOLEAN_TYPE, true, _md);
       TypeParameter[] tp = new TypeParameter[0];
       
-      Type t = new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int");
-      Word name = new Word(JExprParser.NO_SOURCE_INFO, "m");
-      Word paramName = new Word(JExprParser.NO_SOURCE_INFO, "i");
-      FormalParameter fp = new FormalParameter(JExprParser.NO_SOURCE_INFO, new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, t, paramName), false);
-      MethodDef mdef = new AbstractMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, tp, t, name, new FormalParameter[] {fp}, new ReferenceType[0]);
+      Type t = new PrimitiveType(SourceInfo.NO_INFO, "int");
+      Word name = new Word(SourceInfo.NO_INFO, "m");
+      Word paramName = new Word(SourceInfo.NO_INFO, "i");
+      FormalParameter fp = new FormalParameter(SourceInfo.NO_INFO, new UninitializedVariableDeclarator(SourceInfo.NO_INFO, t, paramName), false);
+      MethodDef mdef = new AbstractMethodDef(SourceInfo.NO_INFO, _publicMav, tp, t, name, new FormalParameter[] {fp}, new ReferenceType[0]);
       _md = new MethodData("m", _publicMav, tp, SymbolData.INT_TYPE, new VariableData[] {vd},
                              new String[] {"I throw this"}, SymbolData.BOOLEAN_TYPE, mdef);
 
@@ -241,8 +240,8 @@ public class MethodData extends BodyData {
      assertFalse("Two MethodDatas with different MAVs are not equal", _md.equals(_md2));
      
     //different type parameters
-     TypeParameter[] tp2 = new TypeParameter[] {new TypeParameter(JExprParser.NO_SOURCE_INFO, new TypeVariable(JExprParser.NO_SOURCE_INFO,"tv"), 
-                                                                new TypeVariable(JExprParser.NO_SOURCE_INFO,"i"))};
+     TypeParameter[] tp2 = new TypeParameter[] {new TypeParameter(SourceInfo.NO_INFO, new TypeVariable(SourceInfo.NO_INFO,"tv"), 
+                                                                new TypeVariable(SourceInfo.NO_INFO,"i"))};
    
      _md2 = new MethodData("m", _publicMav2, tp2, SymbolData.INT_TYPE, new VariableData[]{vd},
                            new String[] {"I throw this"}, SymbolData.BOOLEAN_TYPE, mdef);

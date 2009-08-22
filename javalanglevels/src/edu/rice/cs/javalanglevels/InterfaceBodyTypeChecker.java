@@ -149,12 +149,12 @@ public class InterfaceBodyTypeChecker extends Bob {
     private SymbolData _sd4;
     private SymbolData _sd5;
     private SymbolData _sd6;
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
     
     
     public InterfaceBodyTypeCheckerTest() {
@@ -184,9 +184,9 @@ public class InterfaceBodyTypeChecker extends Bob {
     public void testForUninitializedVariableDeclaratorOnly() {
       VariableData vd1 = new VariableData("Mojo", _publicMav, SymbolData.INT_TYPE, false, _sd1);
       _sd1.addVar(vd1);
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                                                                new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                                                                new Word(JExprParser.NO_SOURCE_INFO, "Mojo"));
+      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                                                                new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                                                                new Word(SourceInfo.NO_INFO, "Mojo"));
       uvd.visit(_ibbtc);
       _ibbtc.forUninitializedVariableDeclaratorOnly(uvd, SymbolData.INT_TYPE, null);
       assertEquals("There should be one error", 1, errors.size());
@@ -196,17 +196,17 @@ public class InterfaceBodyTypeChecker extends Bob {
     public void testForInitializedVariableDeclaratorOnly() {
       VariableData vd1 = new VariableData("Mojo", _publicMav, SymbolData.INT_TYPE, false, _sd1);
       _sd1.addVar(vd1);
-      InitializedVariableDeclarator ivd = new InitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                                                            new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                                                            new Word(JExprParser.NO_SOURCE_INFO, "Mojo"), 
-                                                                            new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 1));
+      InitializedVariableDeclarator ivd = new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                                                            new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                                                            new Word(SourceInfo.NO_INFO, "Mojo"), 
+                                                                            new IntegerLiteral(SourceInfo.NO_INFO, 1));
       ivd.visit(_ibbtc);
       assertEquals("There should be no errors.", 0, errors.size());
       assertTrue("_vars should contain Mojo.", _ibbtc._vars.contains(vd1));
-      ivd = new InitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                              new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                              new Word(JExprParser.NO_SOURCE_INFO, "Santa's Little Helper"), 
-                                              new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 1));
+      ivd = new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                              new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                              new Word(SourceInfo.NO_INFO, "Santa's Little Helper"), 
+                                              new IntegerLiteral(SourceInfo.NO_INFO, 1));
       try {
         ivd.visit(_ibbtc);
         fail("Should have thrown a RuntimeException because there's no field named Santa's Little Helper.");
@@ -218,26 +218,26 @@ public class InterfaceBodyTypeChecker extends Bob {
     
     public void testForConcreteMethodDef() {
       FormalParameter[] fps = new FormalParameter[] {
-        new FormalParameter(JExprParser.NO_SOURCE_INFO, 
-                            new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                                              new PrimitiveType(JExprParser.NO_SOURCE_INFO, "double"), 
-                                                              new Word (JExprParser.NO_SOURCE_INFO, "field1")),
+        new FormalParameter(SourceInfo.NO_INFO, 
+                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                                              new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                                                              new Word (SourceInfo.NO_INFO, "field1")),
                             false),
-        new FormalParameter(JExprParser.NO_SOURCE_INFO, 
-                            new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                                              new PrimitiveType(JExprParser.NO_SOURCE_INFO, "boolean"), 
-                                                              new Word (JExprParser.NO_SOURCE_INFO, "field2")),
+        new FormalParameter(SourceInfo.NO_INFO, 
+                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                                              new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
+                                                              new Word (SourceInfo.NO_INFO, "field2")),
                             false)};
-      ConcreteMethodDef cmd = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, 
+      ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NO_INFO, 
                                                     _packageMav, 
                                                     new TypeParameter[0], 
-                                                    new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                                    new Word(JExprParser.NO_SOURCE_INFO, "methodName"),
+                                                    new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                                    new Word(SourceInfo.NO_INFO, "methodName"),
                                                     fps,
                                                     new ReferenceType[0], 
-                                                    new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {
-        new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, 
-                                 new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5))}));
+                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {
+        new ValueReturnStatement(SourceInfo.NO_INFO, 
+                                 new IntegerLiteral(SourceInfo.NO_INFO, 5))}));
       MethodData md = new MethodData("methodName", 
                                      _packageMav, 
                                      new TypeParameter[0], 
@@ -260,7 +260,7 @@ public class InterfaceBodyTypeChecker extends Bob {
 
     
     public void testForTypeOnly() {
-      Type t = new PrimitiveType(JExprParser.NO_SOURCE_INFO, "double");
+      Type t = new PrimitiveType(SourceInfo.NO_INFO, "double");
       t.visit(_ibbtc);
       assertEquals("There should be no errors", 0, errors.size());
       
@@ -268,7 +268,7 @@ public class InterfaceBodyTypeChecker extends Bob {
       sd.setIsContinuation(false);
       symbolTable.put("Adam", sd);
       sd.setMav(_publicMav);
-      t = new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "Adam", new Type[0]);
+      t = new ClassOrInterfaceType(SourceInfo.NO_INFO, "Adam", new Type[0]);
       t.visit(_ibbtc);
       assertEquals("There should still be no errors", 0, errors.size());
       
@@ -278,12 +278,12 @@ public class InterfaceBodyTypeChecker extends Bob {
       innerSd.setOuterData(sd);
       innerSd.setMav(_publicMav);
       _ibbtc.symbolTable.put("USaigehgihdsgslghdlighs", innerSd);
-      t = new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "Adam.Wulf", new Type[0]);
+      t = new ClassOrInterfaceType(SourceInfo.NO_INFO, "Adam.Wulf", new Type[0]);
       t.visit(_ibbtc);
       assertEquals("There should still be no errors", 0, errors.size());
       
       innerSd.setMav(_privateMav);
-      t = new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "Adam.Wulf", new Type[0]);
+      t = new ClassOrInterfaceType(SourceInfo.NO_INFO, "Adam.Wulf", new Type[0]);
       t.visit(_ibbtc);
       assertEquals("There should be one error", 1, errors.size());
       assertEquals("The error message should be correct", "The class or interface Adam.Wulf is private and cannot be accessed from " + _ibbtc._symbolData.getName(),
@@ -291,7 +291,7 @@ public class InterfaceBodyTypeChecker extends Bob {
       
       sd.setMav(_privateMav);
       innerSd.setMav(_publicMav);
-      t = new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "Adam.Wulf", new Type[0]);
+      t = new ClassOrInterfaceType(SourceInfo.NO_INFO, "Adam.Wulf", new Type[0]);
       t.visit(_ibbtc);
       assertEquals("There should be two errors", 2, errors.size());
       assertEquals("The error message should be correct", "The class or interface Adam is private and cannot be accessed from " + _ibbtc._symbolData.getName(),

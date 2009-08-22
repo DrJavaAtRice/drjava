@@ -62,7 +62,8 @@ public class BodyBodyElementaryVisitor extends ElementaryVisitor {
    * @importedFiles  A list of classes that were specifically imported
    * @param importedPackages  A list of package names that were specifically imported
    * @param classDefsInThisFile  A list of the classes that are defined in the source file
-   * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need to be resolved
+   * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need to be
+   * resolved
    */
   public BodyBodyElementaryVisitor(BodyData bodyData, 
                                    File file, String packageName, 
@@ -99,7 +100,8 @@ public class BodyBodyElementaryVisitor extends ElementaryVisitor {
     BlockData bd = new BlockData(_bodyData);
     _bodyData.addBlock(bd);
     that.getStatements().visit(new BodyBodyElementaryVisitor(bd, _file, _package, _importedFiles, _importedPackages, 
-                                                             _classNamesInThisFile, continuations, _innerClassesToBeParsed));
+                                                             _classNamesInThisFile, continuations, 
+                                                             _innerClassesToBeParsed));
     return null;
   }
   
@@ -124,7 +126,8 @@ public class BodyBodyElementaryVisitor extends ElementaryVisitor {
         StringBuffer s = new StringBuffer("the keyword(s) ");
         String[] modifiers = vds[i].getMav().getModifiers();
         for (int j = 0; j<modifiers.length; j++) { s.append("\"" + modifiers[j] + "\" "); }
-        _addAndIgnoreError("You cannot use " + s.toString() + "to declare a local variable at the Elementary level", vd);
+        _addAndIgnoreError("You cannot use " + s.toString() + "to declare a local variable at the Elementary level", 
+                           vd);
       }
       vds[i].setFinal();
       
@@ -132,31 +135,29 @@ public class BodyBodyElementaryVisitor extends ElementaryVisitor {
     return vds;
   }
   
-  /**
-   * Test most of the methods declared above right here:
-   */
+  /** Test most of the methods declared above right here: */
   public static class BodyBodyElementaryVisitorTest extends TestCase {
     
     private BodyBodyElementaryVisitor _bbv;
     
     private SymbolData _sd1;
     private MethodData _md1;
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final"});
-    private ModifiersAndVisibility _finalPrivateMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[]{"final", "private"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    private ModifiersAndVisibility _abstractMav =
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _finalPrivateMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[]{"final", "private"});
     
     
-    public BodyBodyElementaryVisitorTest() {
-      this("");
-    }
+    public BodyBodyElementaryVisitorTest() { this(""); }
     
-    public BodyBodyElementaryVisitorTest(String name) {
-      super(name);
-    }
+    public BodyBodyElementaryVisitorTest(String name) { super(name); }
     
     public void setUp() {
       _sd1 = new SymbolData("i.like.monkey");
@@ -171,7 +172,8 @@ public class BodyBodyElementaryVisitor extends ElementaryVisitor {
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       _hierarchy = new Hashtable<String, TypeDefBase>();
       _bbv = new BodyBodyElementaryVisitor(_md1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
-                                           new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+                                           new LinkedList<String>(),
+                                           new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
                                            new LinkedList<String>());
       _bbv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
       _bbv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
@@ -181,14 +183,14 @@ public class BodyBodyElementaryVisitor extends ElementaryVisitor {
     }
     
     public void testForMethodDefDoFirst() {
-      ConcreteMethodDef cmd = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, 
+      ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NO_INFO, 
                                                     _packageMav, 
                                                     new TypeParameter[0], 
-                                                    new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                                    new Word(JExprParser.NO_SOURCE_INFO, "methodName"),
+                                                    new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                                    new Word(SourceInfo.NO_INFO, "methodName"),
                                                     new FormalParameter[0],
                                                     new ReferenceType[0], 
-                                                    new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[0]));
+                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       cmd.visit(_bbv);
       assertEquals("There should be one error.", 1, errors.size());
       assertEquals("The error message should be correct.", 
@@ -201,15 +203,15 @@ public class BodyBodyElementaryVisitor extends ElementaryVisitor {
     
     public void testForVariableDeclarationOnly() {
       // Check one that works
-      VariableDeclaration vdecl = new VariableDeclaration(JExprParser.NO_SOURCE_INFO,
+      VariableDeclaration vdecl = new VariableDeclaration(SourceInfo.NO_INFO,
                                                           _packageMav,
                                                           new VariableDeclarator[] {
-        new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                            new PrimitiveType(JExprParser.NO_SOURCE_INFO, "double"), 
-                                            new Word (JExprParser.NO_SOURCE_INFO, "field1")),
-          new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                              new PrimitiveType(JExprParser.NO_SOURCE_INFO, "boolean"), 
-                                              new Word (JExprParser.NO_SOURCE_INFO, "field2"))});
+        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                            new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                                            new Word (SourceInfo.NO_INFO, "field1")),
+          new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                              new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
+                                              new Word (SourceInfo.NO_INFO, "field2"))});
       VariableData vd1 = new VariableData("field1", _finalMav, SymbolData.DOUBLE_TYPE, false, _bbv._bodyData);
       VariableData vd2 = new VariableData("field2", _finalMav, SymbolData.BOOLEAN_TYPE, false, _bbv._bodyData);
       vdecl.visit(_bbv);
@@ -218,19 +220,20 @@ public class BodyBodyElementaryVisitor extends ElementaryVisitor {
       assertTrue("field2 was added.", _md1.getVars().contains(vd2));
       
       // Check one that doesn't work
-      VariableDeclaration vdecl2 = new VariableDeclaration(JExprParser.NO_SOURCE_INFO,
+      VariableDeclaration vdecl2 = new VariableDeclaration(SourceInfo.NO_INFO,
                                                            _packageMav,
                                                            new VariableDeclarator[] {
-        new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                            new PrimitiveType(JExprParser.NO_SOURCE_INFO, "double"), 
-                                            new Word (JExprParser.NO_SOURCE_INFO, "field3")),
-          new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                              new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                              new Word (JExprParser.NO_SOURCE_INFO, "field3"))});
+        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                            new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                                            new Word (SourceInfo.NO_INFO, "field3")),
+          new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                              new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                              new Word (SourceInfo.NO_INFO, "field3"))});
       VariableData vd3 = new VariableData("field3", _finalMav, SymbolData.DOUBLE_TYPE, false, _bbv._bodyData);
       vdecl2.visit(_bbv);
       assertEquals("There should be one error.", 1, errors.size());
-      assertEquals("The error message should be correct", "You cannot have two variables with the same name.", errors.get(0).getFirst());
+      assertEquals("The error message should be correct", "You cannot have two variables with the same name.", 
+                   errors.get(0).getFirst());
       assertTrue("field3 was added.", _md1.getVars().contains(vd3));
     }
   }

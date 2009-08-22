@@ -369,12 +369,12 @@ public class ClassBodyTypeChecker extends Bob {
     private SymbolData _sd4;
     private SymbolData _sd5;
     private SymbolData _sd6;
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
     
     
     public ClassBodyTypeCheckerTest() {
@@ -401,9 +401,9 @@ public class ClassBodyTypeChecker extends Bob {
     public void testForUninitializedVariableDeclaratorOnly() {
       VariableData vd1 = new VariableData("Mojo", _publicMav, SymbolData.INT_TYPE, false, _cbbtc._data);
       _sd1.addVar(vd1);
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                                                                new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                                                                new Word(JExprParser.NO_SOURCE_INFO, "Mojo"));
+      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                                                                new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                                                                new Word(SourceInfo.NO_INFO, "Mojo"));
 //      uvd.visit(_cbbtc);
       _cbbtc.forUninitializedVariableDeclaratorOnly(uvd, SymbolData.INT_TYPE, null);
       assertTrue("_vars should contain Mojo.", _cbbtc._vars.contains(vd1));      
@@ -412,17 +412,17 @@ public class ClassBodyTypeChecker extends Bob {
     public void testForInitializedVariableDeclaratorOnly() {
       VariableData vd1 = new VariableData("Mojo", _publicMav, SymbolData.INT_TYPE, false, _cbbtc._data);
       _sd1.addVar(vd1);
-      InitializedVariableDeclarator ivd = new InitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                                                            new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                                                            new Word(JExprParser.NO_SOURCE_INFO, "Mojo"), 
-                                                                            new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 1));
+      InitializedVariableDeclarator ivd = new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                                                            new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                                                            new Word(SourceInfo.NO_INFO, "Mojo"), 
+                                                                            new IntegerLiteral(SourceInfo.NO_INFO, 1));
       ivd.visit(_cbbtc);
       assertEquals("There should be no errors.", 0, errors.size());
       assertTrue("_vars should contain Mojo.", _cbbtc._vars.contains(vd1));
-      ivd = new InitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                              new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                              new Word(JExprParser.NO_SOURCE_INFO, "Santa's Little Helper"), 
-                                              new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 1));
+      ivd = new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                              new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                              new Word(SourceInfo.NO_INFO, "Santa's Little Helper"), 
+                                              new IntegerLiteral(SourceInfo.NO_INFO, 1));
       try {
         ivd.visit(_cbbtc);
         fail("Should have thrown a RuntimeException because there's no field named Santa's Little Helper.");
@@ -450,25 +450,25 @@ public class ClassBodyTypeChecker extends Bob {
     
     public void testForConcreteMethodDef() {
       FormalParameter[] fps = new FormalParameter[] {
-        new FormalParameter(JExprParser.NO_SOURCE_INFO, 
-                            new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                                              new PrimitiveType(JExprParser.NO_SOURCE_INFO, "double"), 
-                                                              new Word (JExprParser.NO_SOURCE_INFO, "field1")),
+        new FormalParameter(SourceInfo.NO_INFO, 
+                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                                              new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                                                              new Word (SourceInfo.NO_INFO, "field1")),
                             false),
-        new FormalParameter(JExprParser.NO_SOURCE_INFO, 
-                            new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, 
-                                                              new PrimitiveType(JExprParser.NO_SOURCE_INFO, "boolean"), 
-                                                              new Word (JExprParser.NO_SOURCE_INFO, "field2")),
+        new FormalParameter(SourceInfo.NO_INFO, 
+                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                                              new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
+                                                              new Word (SourceInfo.NO_INFO, "field2")),
                             false)};
-      ConcreteMethodDef cmd = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, 
+      ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NO_INFO, 
                                                     _packageMav, 
                                                     new TypeParameter[0], 
-                                                    new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                                    new Word(JExprParser.NO_SOURCE_INFO, "methodName"),
+                                                    new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                                    new Word(SourceInfo.NO_INFO, "methodName"),
                                                     fps,
                                                     new ReferenceType[0], 
-                                                    new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {
-        new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5) )}));
+                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {
+        new ValueReturnStatement(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5) )}));
       MethodData md = new MethodData("methodName", 
                                      _packageMav, 
                                      new TypeParameter[0], 
@@ -481,16 +481,16 @@ public class ClassBodyTypeChecker extends Bob {
       cmd.visit(_cbbtc);
       assertEquals("There should be no errors.", 0, errors.size());
       
-      cmd = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, 
+      cmd = new ConcreteMethodDef(SourceInfo.NO_INFO, 
                                                     _packageMav, 
                                                     new TypeParameter[0], 
-                                                    new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                                    new Word(JExprParser.NO_SOURCE_INFO, "Selma"),
+                                                    new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                                    new Word(SourceInfo.NO_INFO, "Selma"),
                                                     fps,
                                                     new ReferenceType[0], 
-                                                    new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {
-                                                          new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, 
-                                                                                   new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5))}));
+                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {
+                                                          new ValueReturnStatement(SourceInfo.NO_INFO, 
+                                                                                   new IntegerLiteral(SourceInfo.NO_INFO, 5))}));
       
       try {
         cmd.visit(_cbbtc);
@@ -502,13 +502,13 @@ public class ClassBodyTypeChecker extends Bob {
       
       
       //Check that an uninitialized variable is caught:
-      PrimitiveType intt = new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int");
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "i"));
+      PrimitiveType intt = new PrimitiveType(SourceInfo.NO_INFO, "int");
+      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "i"));
 
-      Statement s = new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")));
-      ConcreteMethodDef cmd0 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], intt,
-                                                    new Word(JExprParser.NO_SOURCE_INFO, "invalidMethod"), new FormalParameter[0],
-                                                    new ReferenceType[0], new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new VariableDeclaration(JExprParser.NO_SOURCE_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), s}));
+      Statement s = new ValueReturnStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")));
+      ConcreteMethodDef cmd0 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], intt,
+                                                    new Word(SourceInfo.NO_INFO, "invalidMethod"), new FormalParameter[0],
+                                                    new ReferenceType[0], new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), s}));
       VariableData vd = new VariableData("i", _packageMav, SymbolData.INT_TYPE, false, null);
       MethodData md0 = new MethodData("invalidMethod", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE,
                                      new VariableData[0], new String[0], _sd1, cmd0);
@@ -524,19 +524,19 @@ public class ClassBodyTypeChecker extends Bob {
 
       
       //Check that the lexical scope of an if then statement is handled correctly.
-      Expression te = new LessThanExpression(JExprParser.NO_SOURCE_INFO,
-                                             new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")),
-                                             new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
-      Statement ts = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10)));
-      IfThenStatement ift = new IfThenStatement(JExprParser.NO_SOURCE_INFO, te, ts);
+      Expression te = new LessThanExpression(SourceInfo.NO_INFO,
+                                             new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")),
+                                             new IntegerLiteral(SourceInfo.NO_INFO, 5));
+      Statement ts = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10)));
+      IfThenStatement ift = new IfThenStatement(SourceInfo.NO_INFO, te, ts);
       
       
-      FormalParameter param = new FormalParameter(JExprParser.NO_SOURCE_INFO, new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, intt, new Word(JExprParser.NO_SOURCE_INFO, "j")), false);
-      BracedBody bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new VariableDeclaration(JExprParser.NO_SOURCE_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift,
-        new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")))});
+      FormalParameter param = new FormalParameter(SourceInfo.NO_INFO, new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "j")), false);
+      BracedBody bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift,
+        new ValueReturnStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")))});
       
-      ConcreteMethodDef cmd1 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], 
-                                   intt, new Word(JExprParser.NO_SOURCE_INFO, "myMethod"), new FormalParameter[] {param}, 
+      ConcreteMethodDef cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
+                                   intt, new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[] {param}, 
                                                      new ReferenceType[0], bb);
 
       VariableData vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -556,14 +556,14 @@ public class ClassBodyTypeChecker extends Bob {
       assertEquals("The error message should be correct", "You cannot use i because it may not have been given a value", errors.get(1).getFirst());
       
       //Check that a final variable cannot be reassigned to
-      s = new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")));
-      VariableDeclaration i = new VariableDeclaration(JExprParser.NO_SOURCE_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd});
-      ExpressionStatement se = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 2)));
-      ExpressionStatement se2 = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5)));
+      s = new ValueReturnStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")));
+      VariableDeclaration i = new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd});
+      ExpressionStatement se = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 2)));
+      ExpressionStatement se2 = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 5)));
       
-      BracedBody b = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {i, se, se2, s});
-      ConcreteMethodDef cmd2 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], intt,
-                                                    new Word(JExprParser.NO_SOURCE_INFO, "doubleAssignmentMethod"), new FormalParameter[0],
+      BracedBody b = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {i, se, se2, s});
+      ConcreteMethodDef cmd2 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], intt,
+                                                    new Word(SourceInfo.NO_INFO, "doubleAssignmentMethod"), new FormalParameter[0],
                                                     new ReferenceType[0], b);
       
       VariableData vdi = new VariableData("i", _finalMav, SymbolData.INT_TYPE, false, null);
@@ -581,20 +581,20 @@ public class ClassBodyTypeChecker extends Bob {
  
        
       //test that if a variable is assigned in a branch of the if, and then returned, it is okay.
-      te = new LessThanExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")),
-       new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5));
-      Statement assignStatement = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 10)));
-      Statement returnStatement = new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")));
-      ts = new Block(JExprParser.NO_SOURCE_INFO, new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {assignStatement, returnStatement}));
-      ift = new IfThenStatement(JExprParser.NO_SOURCE_INFO, te, ts);
+      te = new LessThanExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")),
+       new IntegerLiteral(SourceInfo.NO_INFO, 5));
+      Statement assignStatement = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10)));
+      Statement returnStatement = new ValueReturnStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")));
+      ts = new Block(SourceInfo.NO_INFO, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {assignStatement, returnStatement}));
+      ift = new IfThenStatement(SourceInfo.NO_INFO, te, ts);
       
-      bb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new VariableDeclaration(JExprParser.NO_SOURCE_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), 
+      bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), 
         ift, 
-        new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, 
-                                 new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 5))});
+        new ValueReturnStatement(SourceInfo.NO_INFO, 
+                                 new IntegerLiteral(SourceInfo.NO_INFO, 5))});
       
-      ConcreteMethodDef cmd4 = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], 
-                                   intt, new Word(JExprParser.NO_SOURCE_INFO, "myMethod3"), new FormalParameter[] {param}, 
+      ConcreteMethodDef cmd4 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
+                                   intt, new Word(SourceInfo.NO_INFO, "myMethod3"), new FormalParameter[] {param}, 
                                    new ReferenceType[0], bb);
 
       vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -637,17 +637,17 @@ public class ClassBodyTypeChecker extends Bob {
                                      new String[0],
                                      superSd,
                                      null);
-      MethodDef mDef = new ConcreteMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                             new Word(JExprParser.NO_SOURCE_INFO, "methodName"), new FormalParameter[0], new ReferenceType[0], 
-                                             new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new ValueReturnStatement(JExprParser.NO_SOURCE_INFO, new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 76))}));
+      MethodDef mDef = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                             new Word(SourceInfo.NO_INFO, "methodName"), new FormalParameter[0], new ReferenceType[0], 
+                                             new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new ValueReturnStatement(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 76))}));
       _sd1.addMethod(md4);
       _cbbtc._symbolData = _sd1;
       mDef.visit(_cbbtc);
       assertEquals("There should be one error.", 1, errors.size());
       assertEquals("The error message should be correct", "methodName() in " + _sd1.getName() + " cannot override methodName() in aiya; attempting to use different return types",
                    errors.get(0).getFirst());
-      mDef = new AbstractMethodDef(JExprParser.NO_SOURCE_INFO, _publicMav, new TypeParameter[0], new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), 
-                                   new Word(JExprParser.NO_SOURCE_INFO, "methodName"), new FormalParameter[0], new ReferenceType[0]);
+      mDef = new AbstractMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                   new Word(SourceInfo.NO_INFO, "methodName"), new FormalParameter[0], new ReferenceType[0]);
       
       mDef.visit(_cbbtc);
       assertEquals("There should be two errors.", 2, errors.size());
@@ -656,7 +656,7 @@ public class ClassBodyTypeChecker extends Bob {
     }
     
     public void testForTypeOnly() {
-      Type t = new PrimitiveType(JExprParser.NO_SOURCE_INFO, "double");
+      Type t = new PrimitiveType(SourceInfo.NO_INFO, "double");
       t.visit(_cbbtc);
       assertEquals("There should be no errors", 0, errors.size());
       
@@ -664,7 +664,7 @@ public class ClassBodyTypeChecker extends Bob {
       sd.setIsContinuation(false);
       symbolTable.put("Adam", sd);
       sd.setMav(_publicMav);
-      t = new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "Adam", new Type[0]);
+      t = new ClassOrInterfaceType(SourceInfo.NO_INFO, "Adam", new Type[0]);
       t.visit(_cbbtc);
       assertEquals("There should still be no errors", 0, errors.size());
       
@@ -674,12 +674,12 @@ public class ClassBodyTypeChecker extends Bob {
       innerSd.setOuterData(sd);
       innerSd.setMav(_publicMav);
       _cbbtc.symbolTable.put("USaigehgihdsgslghdlighs", innerSd);
-      t = new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "Adam.Wulf", new Type[0]);
+      t = new ClassOrInterfaceType(SourceInfo.NO_INFO, "Adam.Wulf", new Type[0]);
       t.visit(_cbbtc);
       assertEquals("There should still be no errors", 0, errors.size());
       
       innerSd.setMav(_privateMav);
-      t = new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "Adam.Wulf", new Type[0]);
+      t = new ClassOrInterfaceType(SourceInfo.NO_INFO, "Adam.Wulf", new Type[0]);
       t.visit(_cbbtc);
       
       assertEquals("There should be one error", 1, errors.size());
@@ -688,7 +688,7 @@ public class ClassBodyTypeChecker extends Bob {
       
       sd.setMav(_privateMav);
       innerSd.setMav(_publicMav);
-      t = new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "Adam.Wulf", new Type[0]);
+      t = new ClassOrInterfaceType(SourceInfo.NO_INFO, "Adam.Wulf", new Type[0]);
       t.visit(_cbbtc);
       assertEquals("There should be two errors", 2, errors.size());
       assertEquals("The error message should be correct", "The class or interface Adam is private and cannot be accessed from " + _cbbtc._symbolData.getName(),
@@ -696,12 +696,12 @@ public class ClassBodyTypeChecker extends Bob {
     }
     
     public void testForConstructorDef() {
-      VariableDeclaration vd = new VariableDeclaration(JExprParser.NO_SOURCE_INFO, _finalMav, new VariableDeclarator[] {new UninitializedVariableDeclarator(JExprParser.NO_SOURCE_INFO, new PrimitiveType(JExprParser.NO_SOURCE_INFO, "int"), new Word(JExprParser.NO_SOURCE_INFO, "i"))});
-      ExpressionStatement se = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "i")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 1)));      
-      BracedBody cbb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {se});
-      ConstructorDef cd = new ConstructorDef(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "Jimes"), _publicMav, new FormalParameter[0], new ReferenceType[0], cbb);
-      BracedBody b = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {vd, cd});
-      ClassDef classDef = new ClassDef(JExprParser.NO_SOURCE_INFO, _publicMav, new Word(JExprParser.NO_SOURCE_INFO, "Jimes"), new TypeParameter[0], new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], b);
+      VariableDeclaration vd = new VariableDeclaration(SourceInfo.NO_INFO, _finalMav, new VariableDeclarator[] {new UninitializedVariableDeclarator(SourceInfo.NO_INFO, new PrimitiveType(SourceInfo.NO_INFO, "int"), new Word(SourceInfo.NO_INFO, "i"))});
+      ExpressionStatement se = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 1)));      
+      BracedBody cbb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {se});
+      ConstructorDef cd = new ConstructorDef(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "Jimes"), _publicMav, new FormalParameter[0], new ReferenceType[0], cbb);
+      BracedBody b = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {vd, cd});
+      ClassDef classDef = new ClassDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "Jimes"), new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], b);
 
       SymbolData sd = new SymbolData("Jimes");
       VariableData vData = new VariableData("i", _finalMav, SymbolData.INT_TYPE, false, sd);
@@ -736,10 +736,10 @@ public class ClassBodyTypeChecker extends Bob {
       
       // test that if the constructor does not assign a value to the final field, then an error is thrown
       vData.lostValue();
-      cbb = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {});
-      cd = new ConstructorDef(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "Jimes"), _publicMav, new FormalParameter[0], new ReferenceType[0], cbb);
-      b = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {vd, cd});
-      classDef = new ClassDef(JExprParser.NO_SOURCE_INFO, _publicMav, new Word(JExprParser.NO_SOURCE_INFO, "Jimes"), new TypeParameter[0], new ClassOrInterfaceType(JExprParser.NO_SOURCE_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], b);
+      cbb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {});
+      cd = new ConstructorDef(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "Jimes"), _publicMav, new FormalParameter[0], new ReferenceType[0], cbb);
+      b = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {vd, cd});
+      classDef = new ClassDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "Jimes"), new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], b);
  
       classDef.visit(_cbbtc);
       assertEquals("There should be 2 errors now", 2, errors.size());
@@ -753,9 +753,9 @@ public class ClassBodyTypeChecker extends Bob {
       LinkedList<VariableData> vs = new LinkedList<VariableData>();
       vs.addLast(vData);
       _cbbtc = new ClassBodyTypeChecker(sd, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), vs, new LinkedList<Pair<SymbolData, JExpression>>());
-      ExpressionStatement assign = new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleAssignmentExpression(JExprParser.NO_SOURCE_INFO, new SimpleNameReference(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "j")), new IntegerLiteral(JExprParser.NO_SOURCE_INFO, 45)));
-      b = new BracedBody(JExprParser.NO_SOURCE_INFO, new BodyItemI[] {new ExpressionStatement(JExprParser.NO_SOURCE_INFO, new SimpleThisConstructorInvocation(JExprParser.NO_SOURCE_INFO, new ParenthesizedExpressionList(JExprParser.NO_SOURCE_INFO, new Expression[0]))), assign});
-      cd = new ConstructorDef(JExprParser.NO_SOURCE_INFO, new Word(JExprParser.NO_SOURCE_INFO, "name"), _publicMav, new FormalParameter[0], new ReferenceType[0], b);
+      ExpressionStatement assign = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")), new IntegerLiteral(SourceInfo.NO_INFO, 45)));
+      b = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new ExpressionStatement(SourceInfo.NO_INFO, new SimpleThisConstructorInvocation(SourceInfo.NO_INFO, new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]))), assign});
+      cd = new ConstructorDef(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "name"), _publicMav, new FormalParameter[0], new ReferenceType[0], b);
       cd.visit(_cbbtc);
       assertEquals("There should now be 3 errors", 3, errors.size());
       assertEquals("The error message should be correct","You cannot assign a value to j because it is immutable and has already been given a value" , errors.getLast().getFirst());

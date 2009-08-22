@@ -343,7 +343,7 @@ public class SymbolData extends TypeData {
 
   /**Do some initialization*/
   static {
-    ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
+    ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
     VOID_TYPE.setIsContinuation(false);    
     VOID_TYPE.setMav(_publicMav);
     NOT_FOUND.setIsContinuation(false);
@@ -454,7 +454,7 @@ public class SymbolData extends TypeData {
   public SymbolData(String name) {
     super(null);
     _name = name;
-    _modifiersAndVisibility = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]);
+    _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
     _typeParameters = new TypeParameter[0];
     _methods = new LinkedList<MethodData>();
     _superClass = null;
@@ -1388,13 +1388,13 @@ public class SymbolData extends TypeData {
     
     private SymbolData _sd;
     
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"final"});
-    private ModifiersAndVisibility _publicFinalMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[]{"public", "final"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _publicFinalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[]{"public", "final"});
     
     public SymbolDataTest() {
       this("");
@@ -1902,8 +1902,8 @@ public class SymbolData extends TypeData {
       //different type parameters
       _sd2 = new SymbolData("i.like.monkey", 
                             _publicMav, 
-                            new TypeParameter[] { new TypeParameter(JExprParser.NO_SOURCE_INFO, new TypeVariable(JExprParser.NO_SOURCE_INFO,"tv"), 
-                                                                    new TypeVariable(JExprParser.NO_SOURCE_INFO,"i")) }, 
+                            new TypeParameter[] { new TypeParameter(SourceInfo.NO_INFO, new TypeVariable(SourceInfo.NO_INFO,"tv"), 
+                                                                    new TypeVariable(SourceInfo.NO_INFO,"i")) }, 
                             superSd, 
                             new LinkedList<SymbolData>(), null);
       assertFalse("Equals should return false if class type parameters are different", _sd.equals(_sd2));
@@ -1970,8 +1970,8 @@ public class SymbolData extends TypeData {
     }
     
     public void test_isAssignable() {
-      MethodData md = new MethodData("Overwritten", _publicMav, new TypeParameter[0], _sd, new VariableData[0], new String[0], _sd, new NullLiteral(JExprParser.NO_SOURCE_INFO));
-      MethodData md2 = new MethodData("Overwriting", _publicMav, new TypeParameter[0], _sd, new VariableData[0], new String[0], _sd, new NullLiteral(JExprParser.NO_SOURCE_INFO));
+      MethodData md = new MethodData("Overwritten", _publicMav, new TypeParameter[0], _sd, new VariableData[0], new String[0], _sd, new NullLiteral(SourceInfo.NO_INFO));
+      MethodData md2 = new MethodData("Overwriting", _publicMav, new TypeParameter[0], _sd, new VariableData[0], new String[0], _sd, new NullLiteral(SourceInfo.NO_INFO));
 
       //tests a wide variety of possibilities, but not all possibilities.
       assertTrue("Should be assignable", _isCompatible(md, md2));
@@ -2126,7 +2126,7 @@ public class SymbolData extends TypeData {
       SymbolData outer2 = new SymbolData("outer2");
       outer2.addInnerClass(outer1);
       outer1.setOuterData(outer2);
-      outer2.setMav(new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"static"}));
+      outer2.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"static"}));
       SymbolData outer3 = new SymbolData("outer3");
       outer3.addInnerClass(outer2);
       outer2.setOuterData(outer3);

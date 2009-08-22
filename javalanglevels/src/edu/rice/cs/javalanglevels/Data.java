@@ -429,7 +429,7 @@ public abstract class Data {
     */
   public void addModifier(String modifier) {
     if (! hasModifier(modifier)) {
-      if (_modifiersAndVisibility == null) { setMav(new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[0])); }
+      if (_modifiersAndVisibility == null) { setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0])); }
       String[] modifiers = _modifiersAndVisibility.getModifiers();
       String[] newModifiers = new String[modifiers.length + 1];
       newModifiers[0] = modifier;
@@ -446,12 +446,12 @@ public abstract class Data {
     * @return  The new variable name which does not shadow anything in vars.
     */
   public String createUniqueName(String varName) {
-    VariableData vd = TypeChecker.getFieldOrVariable(varName, this, getSymbolData(), new NullLiteral(JExprParser.NO_SOURCE_INFO), getVars(), true, false);
+    VariableData vd = TypeChecker.getFieldOrVariable(varName, this, getSymbolData(), new NullLiteral(SourceInfo.NO_INFO), getVars(), true, false);
     String newName = varName;
     int counter = 0;  //note: it is possible that the counter could wrap around and this could run infinitely, but that is very unlikely.
     while (vd != null && counter != -1) {
       newName = varName + counter; counter++;
-      vd = TypeChecker.getFieldOrVariable(newName, this, getSymbolData(), new NullLiteral(JExprParser.NO_SOURCE_INFO), getVars(), true, false);
+      vd = TypeChecker.getFieldOrVariable(newName, this, getSymbolData(), new NullLiteral(SourceInfo.NO_INFO), getVars(), true, false);
     }
     
     if (counter == -1) {throw new RuntimeException("Internal Program Error: Unable to rename variable " + varName + ".  All possible names were taken.  Please report this bug");}
@@ -467,11 +467,11 @@ public abstract class Data {
     
     private Data _d;
     
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _staticMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"static"});
-    private ModifiersAndVisibility _lotsaMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"public", "final", "abstract"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(JExprParser.NO_SOURCE_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _staticMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"static"});
+    private ModifiersAndVisibility _lotsaMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public", "final", "abstract"});
+    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
     
     public DataTest() {
       this("");
@@ -644,7 +644,7 @@ public abstract class Data {
       SymbolData sd7 = new SymbolData("test123.myMethod$bob");
       MethodData md = new MethodData("myMethod", _publicMav, new TypeParameter[0], 
                     SymbolData.INT_TYPE, new VariableData[0], new String[0], sd1, 
-                    new NullLiteral(JExprParser.NO_SOURCE_INFO));
+                    new NullLiteral(SourceInfo.NO_INFO));
       md.addInnerClass(sd7);
       assertEquals("Should return sd7", sd7, md.getInnerClassOrInterface("bob"));
       
