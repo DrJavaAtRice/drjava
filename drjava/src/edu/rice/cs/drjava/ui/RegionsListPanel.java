@@ -132,16 +132,16 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
         try {
           int lnr = doc.getLineOfOffset(r.getStartOffset())+1;
           int startOffset = doc._getOffset(lnr - 3);
-          if (startOffset<0) { startOffset = 0; }
+          if (startOffset < 0) { startOffset = 0; }
           int endOffset = doc._getOffset(lnr + 3);
-          if (endOffset<0) { endOffset = doc.getLength()-1; }
+          if (endOffset < 0) { endOffset = doc.getLength()-1; }
           
           // convert to HTML (i.e. < to &lt; and > to &gt; and newlines to <br>)
           String s = doc.getText(startOffset, endOffset-startOffset);
           
           // this highlights the actual region in red
           int rStart = r.getStartOffset() - startOffset;
-          if (rStart<0) { rStart = 0; }
+          if (rStart < 0) { rStart = 0; }
           int rEnd = r.getEndOffset() - startOffset;
           if (rEnd>s.length()) { rEnd = s.length(); }
           if ((rStart <= s.length()) && (rEnd >= rStart)) {

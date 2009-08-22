@@ -179,7 +179,7 @@ public class LanguageLevelStackTraceMapper {
     String dp = d.getPackageName();
     int dotPos = s.getClassName().lastIndexOf('.');
     if ((dp.length() == 0) && (dotPos >= 0)) return false; // d in default package, s not
-    if ((dp.length() > 0) && (dotPos<0)) return false; // s in default package, d not
+    if ((dp.length() > 0) && (dotPos < 0)) return false; // s in default package, d not
     String sp = "";
     if (dotPos >= 0) {
       sp = s.getClassName().substring(0, dotPos);

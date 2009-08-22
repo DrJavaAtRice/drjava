@@ -132,9 +132,9 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     _nextErrorButton = new JButton(MainFrame.getIcon("Down16.gif"));//new JButton("Next Error");
     _prevErrorButton = new JButton(MainFrame.getIcon("Up16.gif"));//new JButton("Prev Error");
     
-    _nextErrorButton.setMargin(new Insets(0,0,0,0));
+    _nextErrorButton.setMargin(new Insets(0, 0, 0, 0));
     _nextErrorButton.setToolTipText("Go to the next error");
-    _prevErrorButton.setMargin(new Insets(0,0,0,0));
+    _prevErrorButton.setMargin(new Insets(0, 0, 0, 0));
     _prevErrorButton.setToolTipText("Go to the previous error");
     
     
@@ -145,7 +145,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     //    _uiBox.add(_errorPanel, BorderLayout.WEST);
     _errorNavButtonsPanel.add(_prevErrorButton, BorderLayout.NORTH);
     _errorNavButtonsPanel.add(_nextErrorButton, BorderLayout.SOUTH);
-    _errorNavButtonsPanel.setBorder(new EmptyBorder(18,5,18,5)); // 5 pix padding on sides
+    _errorNavButtonsPanel.setBorder(new EmptyBorder(18, 5, 18, 5)); // 5 pix padding on sides
     
     //    JPanel middlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
     //    middlePanel.add(_errorNavButtonsPanel);
@@ -291,23 +291,16 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       // Set the editor pane to be uneditable, but allow selecting text.
       setEditable(false);
       
-      DrJava.getConfig().addOptionListener(COMPILER_ERROR_COLOR,
-                                           new CompilerErrorColorOptionListener());
+      DrJava.getConfig().addOptionListener(COMPILER_ERROR_COLOR, new CompilerErrorColorOptionListener());
       
       // Set the colors.
-      StyleConstants.setForeground(NORMAL_ATTRIBUTES,
-                                   DrJava.getConfig().getSetting
-                                     (DEFINITIONS_NORMAL_COLOR));
-      StyleConstants.setForeground(BOLD_ATTRIBUTES,
-                                   DrJava.getConfig().getSetting
-                                     (DEFINITIONS_NORMAL_COLOR));
+      StyleConstants.setForeground(NORMAL_ATTRIBUTES, DrJava.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR));
+      StyleConstants.setForeground(BOLD_ATTRIBUTES, DrJava.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR));
       setBackground(DrJava.getConfig().getSetting(DEFINITIONS_BACKGROUND_COLOR));
       
       // Add OptionListeners for the colors.
-      DrJava.getConfig().addOptionListener(DEFINITIONS_NORMAL_COLOR,
-                                           new ForegroundColorListener());
-      DrJava.getConfig().addOptionListener(DEFINITIONS_BACKGROUND_COLOR,
-                                           new BackgroundColorListener());
+      DrJava.getConfig().addOptionListener(DEFINITIONS_NORMAL_COLOR, new ForegroundColorListener());
+      DrJava.getConfig().addOptionListener(DEFINITIONS_BACKGROUND_COLOR, new BackgroundColorListener());
       
       /* Item listener instead of change listener so that this code won't be called (twice) every time the mouse moves
        * over the _showHighlightsCheckBox (5/26/05)
@@ -758,7 +751,11 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
             
             if (! prevDoc.equals(doc)) {
               model.setActiveDocument(doc);
-              EventQueue.invokeLater(new Runnable() { public void run() { model.addToBrowserHistory(); } });
+              EventQueue.invokeLater(new Runnable() { 
+                public void run() { 
+                  model.addToBrowserHistory(); 
+                  model.refreshActiveDocument();
+                } });
             }
             else model.refreshActiveDocument();
             

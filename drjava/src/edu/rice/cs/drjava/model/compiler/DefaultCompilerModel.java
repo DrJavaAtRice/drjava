@@ -290,7 +290,7 @@ public class DefaultCompilerModel implements CompilerModel {
       JExpressionIF jexpr = pair.getSecond();
       
       SourceInfo si;
-      if (jexpr == null) si = JExprParser.NO_SOURCE_INFO;
+      if (jexpr == null) si = SourceInfo.NO_INFO;
       else si = pair.getSecond().getSourceInfo();
       
       errors.addLast(new DJError(si.getFile(), si.getStartLine()-1, si.getStartColumn()-1, message, false));

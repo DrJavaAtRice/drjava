@@ -44,15 +44,16 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.HashMap;
 
-import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.StringOps;
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.DummyGlobalModel;
 import edu.rice.cs.drjava.model.GlobalModel;
-import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FileMovedException;
+import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.OperationCanceledException;
+import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
 
 /** Contains the CompilerErrors for a set of compiled file after a compile has ended.
   * @version $Id$
@@ -148,8 +149,8 @@ public class CompilerErrorModel {
     // Sort the errors by file and position
     Arrays.sort(_errors);
     
-    // Populates _positions.
-    _calculatePositions();
+    // Populates _positions.  Must run in event thread because it may open files.
+    Utilities.invokeLater(new Runnable() { public void run() { _calculatePositions(); } });
   }
   
   /** Accessor for errors maintained here.

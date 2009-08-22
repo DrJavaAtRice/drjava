@@ -48,6 +48,7 @@ import javax.swing.text.Position;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.util.OperationCanceledException;
+import edu.rice.cs.util.swing.Utilities;
 
 /** Tests the CompilerErrorModel.
  *  @version $Id$
@@ -63,7 +64,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
   public void testConstructNoErrors() {
     getter = new TestDocGetter();
     model = new CompilerErrorModel(new DJError[0], getter);
-    
+    Utilities.clearEventQueue();  // constructor for CompilerErrorModel calls invokeLater
     // We successfully built the model, now test the basics.
     assertEquals("Should have no compiler errors.", 0, model.getNumErrors());
     assertEquals("Should have 0 warnings" , 0, model.getNumWarnings());
@@ -79,7 +80,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
       new DJError("Test warning without File", true) 
     };
     model = new CompilerErrorModel(errors, getter);
-    
+    Utilities.clearEventQueue();  // constructor for CompilerErrorModel calls invokeLater
     // We successfully built the model, now test the basics.
     assertEquals("Should have 2 errors.", 2, model.getNumErrors());
     assertEquals("Should have 2 warnings" , 2, model.getNumWarnings());
@@ -99,7 +100,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     DJError[] copy = new DJError[errors.length];
     for (int i = 0; i < errors.length; i++) copy[i] = errors[i];
     model = new CompilerErrorModel(copy, getter);
-    
+    Utilities.clearEventQueue();  // constructor for CompilerErrorModel calls invokeLater
     // We successfully built the model, now test the basics.
     assertEquals("Should have 3 compiler errors.", 3, model.getNumErrors());
     assertEquals("Should have 1 warning" , 1, model.getNumWarnings());
@@ -121,6 +122,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     DJError[] copy = new DJError[errors.length];
     for (int i = 0; i < errors.length; i++)  copy[i] = errors[i];
     model = new CompilerErrorModel(copy, getter);
+    Utilities.clearEventQueue();  // constructor for CompilerErrorModel calls invokeLater
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have 3 compiler errors.", 3, model.getNumErrors());
@@ -143,7 +145,8 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     DJError[] copy = new DJError[errors.length];
     for (int i = 0; i < errors.length; i++) copy[i] = errors[i];
     model = new CompilerErrorModel(copy, getter);
-    
+        Utilities.clearEventQueue();  // constructor for CompilerErrorModel calls invokeLater
+        
     // We successfully built the model, now test the basics.
     assertEquals("Should have 4 compiler errors.", 4, model.getNumErrors());
     assertEquals("Should have 1 warning" , 1, model.getNumWarnings());
@@ -171,7 +174,8 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     DJError[] copy = new DJError[errors.length];
     for (int i = 0; i < errors.length; i++) copy[i] = errors[i];
     model = new CompilerErrorModel(copy, getter);
-    
+    Utilities.clearEventQueue();  // constructor for CompilerErrorModel calls invokeLater
+        
     // We successfully built the model, now test the basics.
     assertEquals("Should have 7 compiler errors.", 7, model.getNumErrors());
     assertEquals("Should have 2 warnings" , 2, model.getNumWarnings());
@@ -203,7 +207,8 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     DJError[] copy = new DJError[errors.length];
     for (int i = 0; i < errors.length; i++) copy[i] = errors[i];
     model = new CompilerErrorModel(copy, getter);
-    
+    Utilities.clearEventQueue();  // constructor for CompilerErrorModel calls invokeLater
+        
     // We successfully built the model, now test the basics.
     assertEquals("Should have 8 compiler errors.", 8, model.getNumErrors());
     assertEquals("Should have 3 warnings" , 3, model.getNumWarnings());
@@ -236,6 +241,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     DJError[] copy = new DJError[errors.length];
     for (int i = 0; i < errors.length; i++) copy[i] = errors[i];
     model = new CompilerErrorModel(copy, getter);
+    Utilities.clearEventQueue();  // constructor for CompilerErrorModel calls invokeLater
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have 8 compiler errors.", 8, model.getNumErrors());
@@ -281,7 +287,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
   /** Tests CompilerErrorModel.getPosition(DJError). */
   public void testGetPosition() {
     fullSetup();
-    
+
     Position pos = model.getPosition(errors[1]);
     assertEquals("Incorrect error Position.", 125, pos.getOffset());
     pos = model.getPosition(errors[5]);
@@ -333,6 +339,8 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
       new DJError(files[0], 0, 0, "Test error with File", false) 
     };
     model = new CompilerErrorModel(errors, getter);
+    Utilities.clearEventQueue();  // constructor for CompilerErrorModel calls invokeLater
+    
     model.getErrorAtOffset(getter.getDocumentForFile(files[0]), 25);
     String temp = texts[0];
     texts[0] = texts[1];
@@ -343,6 +351,8 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
       new DJError(files[1], 2, 0, "Test error with File", false)
     };
     model = new CompilerErrorModel(errors, getter);
+    Utilities.clearEventQueue();  // constructor for CompilerErrorModel calls invokeLater
+    
     model.getErrorAtOffset(getter.getDocumentForFile(files[0]), 10);
   }
   
@@ -402,5 +412,6 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     DJError[] copy = new DJError[errors.length];
     for (int i = 0; i < errors.length; i++) copy[i] = errors[i];
     model = new CompilerErrorModel(copy, getter);
+    Utilities.clearEventQueue();  // constructor for CompilerErrorModel calls invokeLater
   }
 }

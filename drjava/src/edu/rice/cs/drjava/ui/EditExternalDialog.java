@@ -322,7 +322,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
   /** Edit a command. */
   private void _edit() {
     final int selectedIndex = _list.getSelectedIndex();
-    if ((selectedIndex<0) || (selectedIndex>=DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT))) {
+    if ((selectedIndex < 0) || (selectedIndex>=DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT))) {
       return;
     }
     _mainFrame.removeModalWindowAdapter(this);
@@ -350,7 +350,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
   private void _remove() {
     int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
     final int selectedIndex = _list.getSelectedIndex();
-    if ((selectedIndex<0) ||
+    if ((selectedIndex < 0) ||
         (selectedIndex>=DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)) ||
         (count<=0)) {
       _removeButton.setEnabled(false);
@@ -417,7 +417,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
   private void _down() {
     final int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
     final int selectedIndex = _list.getSelectedIndex();
-    if ((selectedIndex<0) ||
+    if ((selectedIndex < 0) ||
         (selectedIndex>=DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)-1) ||
         (count<=0)) {
       _removeButton.setEnabled(false);

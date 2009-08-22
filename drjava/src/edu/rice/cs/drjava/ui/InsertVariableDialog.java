@@ -139,7 +139,7 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
     updatePanes();
     _tabbedPane.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
-        if (_tabbedPane.getSelectedIndex()<0) { return; }
+        if (_tabbedPane.getSelectedIndex() < 0) { return; }
         String category = _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex());
         Map<String, DrJavaProperty> properties = PropertyMaps.TEMPLATE.getProperties(category);
         String key = _varTableModel.get(category).getValueAt(_varTable.get(category).getSelectedRow(),0).toString();

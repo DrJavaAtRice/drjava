@@ -1220,7 +1220,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     OpenDefinitionsDocument odd = _openFile(file);
 //    Utilities.showDebug("File " + file + " opened");
     // Make sure this is on the classpath
-    addDocToClassPath(odd);
+    addDocToClassPath(odd);  // Redundant; done in _openFile
     setClassPathChanged(true);
     return odd;
   }
@@ -2473,6 +2473,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Add the current location to the browser history.  Only runs in event thread. Assumes that doc is not null.
     * @param before true if the location should be inserted before the current region */
   public void addToBrowserHistory(boolean before) {
+    assert EventQueue.isDispatchThread();
 //    edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("addToBrowserHistory()");
     _notifier.updateCurrentLocationInDoc();
 //    edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("addToBrowserHistory: after updateCurrentLocationInDoc");

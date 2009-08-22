@@ -49,6 +49,7 @@ import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
@@ -173,24 +174,32 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   public void testOpenRealFile() throws BadLocationException, IOException {
     final File tempFile = writeToNewTempFile(BAR_TEXT);
     
-    TestListener listener = new TestFileIOListener(tempFile); 
+    final TestListener listener = new TestFileIOListener(tempFile); 
     
     _model.addListener(listener);
-    try {
-      OpenDefinitionsDocument doc = _model.openFile(new FileSelector(tempFile));
-      listener.assertOpenCount(1);
-      listener.assertCloseCount(1);  // Untitled document is closed when doc is opened
-      assertModified(false, doc);
-      assertContents(BAR_TEXT, doc);
-    }
-    catch (AlreadyOpenException aoe) {
-      // Should not be open
-      fail("File was already open!");
-    }
-    catch (OperationCanceledException oce) {
-      // Should not be canceled
-      fail("Open was unexpectedly canceled!");
-    }
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        try {
+          OpenDefinitionsDocument doc = _model.openFile(new FileSelector(tempFile));
+          listener.assertOpenCount(1);
+          listener.assertCloseCount(1);  // Untitled document is closed when doc is opened
+          assertModified(false, doc);
+          assertContents(BAR_TEXT, doc);
+        }
+        catch(AlreadyOpenException aoe) {
+          // Should not be open
+          fail("File was already open!");
+        }
+        catch(OperationCanceledException oce) {
+          // Should not be canceled
+          fail("Open was unexpectedly canceled!");
+        }
+        catch(Exception e) { 
+          // Should never happen
+          fail("Exception thrown in testOpenRealFile.  Traceback: " + e);
+        }
+      }
+    });
     
     _log.log("testOpenRealFile completed");
   }
@@ -201,7 +210,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     assertNumOpenDocs(2);
     
-    TestListener listener = new TestIOListener() {
+    final TestListener listener = new TestIOListener() {
       public synchronized boolean canAbandonFile(OpenDefinitionsDocument doc) {
         canAbandonCount++;
         return true; // yes allow the abandon
@@ -209,27 +218,37 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     };
     
     _model.addListener(listener);
-    try {
-      //OpenDefinitionsDocument newDoc =
-      _model.openFile(new CancelingSelector());
-    }
-    catch (AlreadyOpenException aoe) {
-      // Should not be open
-      fail("File was already open!");
-    }
-    catch (OperationCanceledException oce) {
-      // we expect this to be thrown
-    }
-    finally {
-      assertNumOpenDocs(2);
-      listener.assertOpenCount(0);
-      listener.assertCloseCount(0);
-      
-      List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
-      doc = docs.get(1);
-      assertModified(true, doc);
-      assertContents(FOO_TEXT, doc);
-    }
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        try {
+          //OpenDefinitionsDocument newDoc =
+          _model.openFile(new CancelingSelector());
+        }
+        catch(AlreadyOpenException aoe) {
+          // Should not be open
+          fail("File was already open!");
+        }
+        catch(OperationCanceledException oce) {
+          // we expect this to be thrown
+        }
+        catch(Exception e) {  // should never happen
+          throw new UnexpectedException(e);  
+        }
+        finally {
+          assertNumOpenDocs(2);
+          listener.assertOpenCount(0);
+          listener.assertCloseCount(0);
+          
+          List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+          OpenDefinitionsDocument doc = docs.get(1);
+          assertModified(true, doc);
+          try { assertContents(FOO_TEXT, doc); }
+          catch(BadLocationException e) { 
+            fail("BadLocation in assertContents test. Traceback: " + e);
+          }
+        }
+      }
+    });
     
     _log.log("testCancelOpenFile completed");
   }
@@ -265,60 +284,84 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   public void testReopenFile() throws BadLocationException, IOException {
     final File tempFile = writeToNewTempFile(BAR_TEXT);
     
-    TestListener listener = new TestFileIOListener(tempFile);
+    final TestListener listener = new TestFileIOListener(tempFile);
     
     _model.addListener(listener);
-    try {
-      OpenDefinitionsDocument doc = _model.openFile(new FileSelector(tempFile));
-      listener.assertOpenCount(1);
-      listener.assertCloseCount(1);  //  Untitled document closed when doc is opened
-      assertModified(false, doc);
-      assertContents(BAR_TEXT, doc);
-    }
-    catch (AlreadyOpenException aoe) {
-      // Should not be open
-      fail("File was already open!");
-    }
-    catch (OperationCanceledException oce) {
-      // Should not be canceled
-      fail("Open was unexpectedly canceled!");
-    }
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        try {
+          OpenDefinitionsDocument doc = _model.openFile(new FileSelector(tempFile));
+          listener.assertOpenCount(1);
+          listener.assertCloseCount(1);  //  Untitled document closed when doc is opened
+          assertModified(false, doc);
+          assertContents(BAR_TEXT, doc);
+        }
+        catch (AlreadyOpenException aoe) {
+          // Should not be open
+          fail("File was already open!");
+        }
+        catch (OperationCanceledException oce) {
+          // Should not be canceled
+          fail("Open was unexpectedly canceled!");
+        }
+        catch (Exception e) {
+          // Should not happen
+          fail("Exception thrown in testReopenFile().  Traceback: " + e);
+        }
+      }
+    });
     
     // Now reopen
-    try {
-      //OpenDefinitionsDocument doc2 =
-      _model.openFile(new FileSelector(tempFile));
-      fail("file should already be open");
-    }
-    catch (AlreadyOpenException aoe) {
-      // Should not be open
-      listener.assertOpenCount(1);
-      listener.assertCloseCount(1);  
-    }
-    catch (OperationCanceledException oce) {
-      // Should not be canceled
-      fail("Open was unexpectedly canceled!");
-    }
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        try {
+          //OpenDefinitionsDocument doc2 =
+          _model.openFile(new FileSelector(tempFile));
+          fail("file should already be open");
+        }
+        catch (AlreadyOpenException aoe) {
+          // Should not be opened
+          listener.assertOpenCount(1);
+          listener.assertCloseCount(1);  
+        }
+        catch (OperationCanceledException oce) {
+          // Should not be canceled
+          fail("Open was unexpectedly canceled!");
+        }
+        catch (Exception e) {
+          // Should not happen
+          fail("Exception thrown in testReopenFile().  Traceback: " + e);
+        }
+      }
+    });
     
     // Now reopen same file with a different path
     //  eg. /tmp/MyFile -> /tmp/./MyFile
-    try {
-      File parent = tempFile.getParentFile();
-      String dotSlash = "." + System.getProperty("file.separator");
-      parent = new File(parent, dotSlash);
-      File sameFile = new File(parent, tempFile.getName());
-      //OpenDefinitionsDocument doc2 =
-      _model.openFile(new FileSelector(sameFile));
-      fail("file should already be open");
-    }
-    catch (AlreadyOpenException aoe) {
-      // Should not be open
-      listener.assertOpenCount(1);
-    }
-    catch (OperationCanceledException oce) {
-      // Should not be canceled
-      fail("Open was unexpectedly canceled!");
-    }
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        try {
+          File parent = tempFile.getParentFile();
+          String dotSlash = "." + System.getProperty("file.separator");
+          parent = new File(parent, dotSlash);
+          File sameFile = new File(parent, tempFile.getName());
+          //OpenDefinitionsDocument doc2 =
+          _model.openFile(new FileSelector(sameFile));
+          fail("file should already be open");
+        }
+        catch (AlreadyOpenException aoe) {
+          // Should not be open
+          listener.assertOpenCount(1);
+        }
+        catch (OperationCanceledException oce) {
+          // Should not be canceled
+          fail("Open was unexpectedly canceled!");
+        }
+        catch (Exception e) {
+          // Should not happen
+          fail("Exception thrown in testReopenFile().  Traceback: " + e);
+        }
+      }
+    });
     _log.log("testReopenFile completed");
   }
   
@@ -374,7 +417,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
     assertNumOpenDocs(3);
     
-    TestListener listener = new TestIOListener() {
+    final TestListener listener = new TestIOListener() {
       public synchronized boolean canAbandonFile(OpenDefinitionsDocument doc) {
         canAbandonCount++;
         return true; // yes allow the abandon
@@ -382,31 +425,41 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     };
     
     _model.addListener(listener);
-    try {
-      //OpenDefinitionsDocument newDoc =
-      _model.openFiles(new CancelingSelector());
-    }
-    catch (AlreadyOpenException aoe) {
-      // Should not be open
-      fail("File was already open!");
-    }
-    catch (OperationCanceledException oce) {
-      // we expect this to be thrown
-    }
-    finally {
-      assertNumOpenDocs(3);
-      listener.assertOpenCount(0);
-      listener.assertCloseCount(0);
-      
-      List<OpenDefinitionsDocument> docs = _model.getSortedOpenDefinitionsDocuments();
-      doc1 = docs.get(1);
-      assertModified(true, doc1);
-      assertContents(FOO_TEXT, doc1);
-      
-      doc2 = docs.get(2);
-      assertModified(true, doc2);
-      assertContents(BAR_TEXT, doc2);
-    }
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        try {
+          try {
+            //OpenDefinitionsDocument newDoc =
+            _model.openFiles(new CancelingSelector());
+          }
+          catch (AlreadyOpenException aoe) {
+            // Should not be open
+            fail("File was already open!");
+          }
+          catch (OperationCanceledException oce) {
+            // we expect this to be thrown
+          }
+          finally {
+            assertNumOpenDocs(3);
+            listener.assertOpenCount(0);
+            listener.assertCloseCount(0);
+            
+            List<OpenDefinitionsDocument> docs = _model.getSortedOpenDefinitionsDocuments();
+            OpenDefinitionsDocument newDoc1 = docs.get(1);
+            assertModified(true, newDoc1);
+            assertContents(FOO_TEXT, newDoc1);
+            
+            OpenDefinitionsDocument newDoc2 = docs.get(2);
+            assertModified(true, newDoc2);
+            assertContents(BAR_TEXT, newDoc2);
+          }
+        }
+        catch (Exception e) {
+          // should never happen
+          fail("Exception thrown in testCancelOpenMultipleFiles.  Traceback: \n" + e);
+        }
+      }
+    });
     
     _log.log("testCancelOpenMultipleFiles completed");
   }
@@ -474,28 +527,38 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     final File tempFile2 = writeToNewTempFile(BAR_TEXT);
     // don't catch and fail!
     
-    TestListener listener = new TestIOListener();
+    final TestListener listener = new TestIOListener();
     
     _model.addListener(listener);
-    // Open file 1
-    OpenDefinitionsDocument doc = _model.openFile(new FileSelector(tempFile1));
-    listener.assertOpenCount(1);
-    listener.assertCloseCount(1);  // closed Untitled document
-    assertModified(false, doc);
-    assertContents(FOO_TEXT, doc);
-    
-    // Get file 1
-    OpenDefinitionsDocument doc1 = _model.getDocumentForFile(tempFile1);
-    listener.assertOpenCount(1);
-    listener.assertCloseCount(1);   // closed Untitled document
-    assertEquals("opened document", doc, doc1);
-    assertContents(FOO_TEXT, doc1);
-    
-    // Get file 2, forcing it to be opened
-    OpenDefinitionsDocument doc2 = _model.getDocumentForFile(tempFile2);
-    listener.assertOpenCount(2);
-    listener.assertCloseCount(1);  // closed Untitled document
-    assertContents(BAR_TEXT, doc2);
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        try {    
+          // Open file 1
+          OpenDefinitionsDocument doc = _model.openFile(new FileSelector(tempFile1));
+          listener.assertOpenCount(1);
+          listener.assertCloseCount(1);  // closed Untitled document
+          assertModified(false, doc);
+          assertContents(FOO_TEXT, doc);
+          
+          // Get file 1
+          OpenDefinitionsDocument doc1 = _model.getDocumentForFile(tempFile1);
+          listener.assertOpenCount(1);
+          listener.assertCloseCount(1);   // closed Untitled document
+          assertEquals("opened document", doc, doc1);
+          assertContents(FOO_TEXT, doc1);
+          
+          // Get file 2, forcing it to be opened
+          OpenDefinitionsDocument doc2 = _model.getDocumentForFile(tempFile2);
+          listener.assertOpenCount(2);
+          listener.assertCloseCount(1);  // closed Untitled document
+          assertContents(BAR_TEXT, doc2);
+        }
+        catch (Exception e) {
+          // should never happen
+          fail("Exception thrown in testForceFileOpen. Traceback: \n" + e);
+        }
+      }
+    });
   }
   
   /** Attempts to make the first save of a document, but cancels instead. */
@@ -765,21 +828,28 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   public void testSaveAsExistsAndOpen() throws BadLocationException, IOException {
     
     final File file1 = tempFile(1);
-    final OpenDefinitionsDocument doc1 = _model.getDocumentForFile(file1);
-    changeDocumentText(FOO_TEXT,doc1);
-    saveFileAs(doc1, new FileSelector(file1));
-    
-    final File file2 = tempFile(2);
-    final OpenDefinitionsDocument doc2 = _model.getDocumentForFile(file2);
-    changeDocumentText(BAR_TEXT, doc2);
-    
+        
     Utilities.invokeAndWait(new Runnable() {
       public void run() { 
-        try { 
-          doc2.saveFileAs(new WarningFileSelector(file1));
-          fail("Did not warn of open file as expected");
+        try {
+          OpenDefinitionsDocument doc1 = _model.getDocumentForFile(file1);
+          changeDocumentText(FOO_TEXT,doc1);
+          saveFileAs(doc1, new FileSelector(file1));
+          
+          File file2 = tempFile(2);
+          OpenDefinitionsDocument doc2 = _model.getDocumentForFile(file2);
+          changeDocumentText(BAR_TEXT, doc2);
+          
+          try { 
+            doc2.saveFileAs(new WarningFileSelector(file1));
+            fail("Did not warn of open file as expected");
+          }
+          catch (OpenWarningException e) { /* Good behavior for file saving ... */ }
         }
-        catch (Exception e) { /* Good behavior for file saving ... */ }
+        catch (Exception e) {
+          // should never happen
+          fail("Exception thrown in testSaveAsExistsAndOpen.  Traceback: \n" + e);
+        }
       }
     });
     
@@ -1111,7 +1181,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     File _expected;
     TestFileIOListener(File f) { _expected = f; }
     public void fileOpened(OpenDefinitionsDocument doc) {
+//      System.err.println("TestIOListener.fileOpened called.  openCount = " + openCount);
       super.fileOpened(doc);
+//      System.err.println("After super.fileOpened called, openCount = " + openCount);
       File file = FileOps.NULL_FILE;
       try { file = doc.getFile(); }
       catch (FileMovedException fme) { fail("file does not exist"); }     // We know file should exist

@@ -200,7 +200,7 @@ public class ConfigOptionListeners implements OptionConstants {
       catch(NumberFormatException nfe) {
         heapSize = -1; // invalid
       }
-      if (heapSize<0) {
+      if (heapSize < 0) {
         String[] options = new String[] { "Clean \"Maximum Heap\" Setting",
           "Ignore" };
         int result = JOptionPane.
@@ -371,7 +371,7 @@ public class ConfigOptionListeners implements OptionConstants {
       catch(NumberFormatException nfe) {
         heapSize = -1; // invalid
       }
-      if (heapSize<0) {
+      if (heapSize < 0) {
         String[] options = new String[] { "Clean \"Maximum Heap\" Setting",
           "Ignore" };
         int result = JOptionPane.

@@ -303,31 +303,42 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
   public void testCompleteFilename() throws BadLocationException, IOException, OperationCanceledException, 
     AlreadyOpenException {
     // Untitled
-    OpenDefinitionsDocument doc = _model.getActiveDocument();
-    assertEquals("untitled display filename", "(Untitled)", doc.getCompletePath());
-
-    // Ends in ".java"
-    File file = File.createTempFile("DrJava-filename-test", ".java", _tempDir).getCanonicalFile();
-    file.deleteOnExit();
-    String name = file.getAbsolutePath();
-    doc = _model.openFile(new FileSelector(file));
-            
-    assertEquals(".java display filename", name, doc.getCompletePath());
-
-    // Doesn't contain ".java"
-    file = File.createTempFile("DrJava-filename-test", ".txt", _tempDir).getCanonicalFile();
-    file.deleteOnExit();
-    name = file.getAbsolutePath();
-    doc = _model.openFile(new FileSelector(file));
-    assertEquals(".txt display filename", name, doc.getCompletePath());
-
-    // Modified File
-    file = File.createTempFile("DrJava-filename-test", ".java", _tempDir).getCanonicalFile();
-    file.deleteOnExit();
-    name = file.getAbsolutePath();
-    doc = _model.openFile(new FileSelector(file));
-    changeDocumentText("foo", doc);
-    assertEquals(".java.txt display filename", name + " *", doc.getCompletePath());
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        try {
+          OpenDefinitionsDocument doc = _model.getActiveDocument();
+          assertEquals("untitled display filename", "(Untitled)", doc.getCompletePath());
+          
+          // Ends in ".java"
+          File file1 = File.createTempFile("DrJava-filename-test", ".java", _tempDir).getCanonicalFile();
+          file1.deleteOnExit();
+          String name = file1.getAbsolutePath();
+          doc = _model.openFile(new FileSelector(file1));
+          
+          assertEquals(".java display filename", name, doc.getCompletePath());
+          
+          // Doesn't contain ".java"
+          File file2 = File.createTempFile("DrJava-filename-test", ".txt", _tempDir).getCanonicalFile();
+          file2.deleteOnExit();
+          name = file2.getAbsolutePath();
+          
+          doc = _model.openFile(new FileSelector(file2));
+          assertEquals(".txt display filename", name, doc.getCompletePath());
+          
+          // Modified File
+          File file3 = File.createTempFile("DrJava-filename-test", ".java", _tempDir).getCanonicalFile();
+          file3.deleteOnExit();
+          name = file3.getAbsolutePath();
+          doc = _model.openFile(new FileSelector(file3));
+          changeDocumentText("foo", doc);
+          assertEquals(".java.txt display filename", name + " *", doc.getCompletePath());
+        }
+        catch (Exception e) {
+          // should never happen
+          fail("testCompleteFilename threw exception.  Traceback: \n" + e);
+        }
+      }
+    });
     _log.log("testDisplayFilename completed");
   }
   

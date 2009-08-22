@@ -280,13 +280,13 @@ public class ExternalProcessPanel extends AbortablePanel {
     char ch;
     while((end >= 0) && (end<line.length())) {
       ch = line.charAt(end);
-      if (ch==':') {
-        if ((end+1<line.length()) && (Character.isDigit(line.charAt(end+1)))) {
+      if (ch == ':') {
+        if ((end + 1 < line.length()) && (Character.isDigit(line.charAt(end+1)))) {
           // perhaps a colon followed by a line number: Foo.java:10
           // advance to the end of the number, then break
           do {
             ++end;
-          } while((end<line.length()) && (Character.isDigit(line.charAt(end))));
+          } while((end < line.length()) && (Character.isDigit(line.charAt(end))));
           break;
         }
         else {
@@ -298,7 +298,7 @@ public class ExternalProcessPanel extends AbortablePanel {
         // character is a Java identifier part, advance
         ++end;
       }
-      else if ((ch=='.') || (ch==File.separatorChar)) {
+      else if ((ch=='.') || (ch == File.separatorChar)) {
         // allow the period and file separator, could be the part of file name; advance
         ++end;
       }
@@ -333,12 +333,12 @@ public class ExternalProcessPanel extends AbortablePanel {
       ch = line.charAt(start);
       while(start > 0) {
         ch = line.charAt(start);
-        if ((ch==':') || (ch=='.') || (Character.isJavaIdentifierPart(ch))) { --start; } else { break; }
+        if ((ch == ':') || (ch == '.') || (Character.isJavaIdentifierPart(ch))) { --start; } else { break; }
       }
       // LOG.log("\tstart="+start+"\n\tend="+end);
       if ((start >= 0) && (end>=start) && (start<line.length()) && (end<line.length())) {
-        name = line.substring(start,end).replace(File.separatorChar,'.');
-        if ((name.length() > 0) && (!Character.isJavaIdentifierPart(name.charAt(0)))) { name = name.substring(1); }
+        name = line.substring(start,end).replace(File.separatorChar, '.');
+        if ((name.length() > 0) && (! Character.isJavaIdentifierPart(name.charAt(0)))) { name = name.substring(1); }
         if (simpleName == null) { simpleName = name; }
         if (name.equals(oldName)) { break; }
         if ((name.indexOf(".java") >= 0) ||

@@ -5467,7 +5467,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                 String rel = FileOps.stringMakeRelativeTo(f, buildDir);
                 String full = rel.replace(File.separatorChar, '.');
                 full = full.substring(0, full.lastIndexOf(".class"));
-                if (full.indexOf('$')<0) {
+                if (full.indexOf('$') < 0) {
                   // no $ in the name means not an inner class
                   // we do not support inner classes, because that would mean
                   // having to determine public static scope
