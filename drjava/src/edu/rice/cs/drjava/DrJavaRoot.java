@@ -355,7 +355,7 @@ public class DrJavaRoot {
     * @param f file to open
     * @param lineNo line number to jump to, or -1 of not specified */
   public static void handleRemoteOpenFile(File f, int lineNo) {
-    DrJava._log.log("DrJavaRoot.handleRemoteOpenFile, f="+f);
+    DrJava._log.log("DrJavaRoot.handleRemoteOpenFile, f=" + f);
     if (_mainFrame != null) { 
       DrJava._log.log("\tcalling _mainFrame");
       _mainFrame.handleRemoteOpenFile(f, lineNo);

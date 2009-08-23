@@ -122,7 +122,7 @@ public class EventHandlerThread extends Thread {
         _debugger.printMessage("The debugger may have become unstable as a result.");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         e.printStackTrace(new PrintWriter(baos, true));
-        _debugger.printMessage("Stack trace: "+baos.toString());
+        _debugger.printMessage("Stack trace: " + baos.toString());
       }
     }
     
@@ -217,7 +217,7 @@ public class EventHandlerThread extends Thread {
 //  private void _handleModificationWatchpointEvent(ModificationWatchpointEvent e) {
 //    _debugger.printMessage("ModificationWatchpointEvent occured ");
 //    _debugger.printMessage("Field: " + e.field() + " Value: " +
-//                          e.valueToBe() +"]");
+//                          e.valueToBe()  + "]");
 //  }
   
   /** Responds when a class of interest has been prepared. Allows the debugger to set a pending breakpoint before any 

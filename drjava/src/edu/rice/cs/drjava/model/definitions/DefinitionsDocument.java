@@ -651,7 +651,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         if (openParenPos != -1 && text.charAt(openParenPos) == '(') {
           // this might be an inner class
           newPos = _findPrevKeyword(text, "new", openParenPos);
-//            if (oldLog) System.err.println("\tnew found at "+newPos+", openCurlyPos="+curPos);
+//            if (oldLog) System.err.println("\tnew found at " + newPos + ", openCurlyPos=" + curPos);
           if (! _isAnonymousInnerClass(newPos, curPos)) {
             // not an anonymous inner class
             newPos = -1;
@@ -734,15 +734,15 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 
   public boolean _isAnonymousInnerClass(final int pos, final int openCurlyPos) throws BadLocationException {
 //    String t = getText(0, openCurlyPos+1);
-//    System.err.print("_isAnonymousInnerClass("+pos+", "+openCurlyPos+")");
-//    System.err.println("_isAnonymousInnerClass("+pos+", "+openCurlyPos+"): `"+
-//                       t.substring(pos, openCurlyPos+1)+"`");
+//    System.err.print("_isAnonymousInnerClass(" + pos + ", " + openCurlyPos + ")");
+//    System.err.println("_isAnonymousInnerClass(" + pos + ", " + openCurlyPos + "): `" + 
+//                       t.substring(pos, openCurlyPos+1) + "`");
     
     // Check cache
     final Query key = new Query.AnonymousInnerClass(pos, openCurlyPos);
     Boolean cached = (Boolean) _checkCache(key);
     if (cached != null) {
-//      System.err.println(" ==> "+cached);
+//      System.err.println(" ==> " + cached);
       return cached;
     }
     int newPos = pos;
@@ -763,12 +763,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         }
         
         /* Determine parenStart, the postion immediately before the open parenthesis following the superclass name. */
-//         System.err.println("\tclass = `"+text.substring(classStart,classEnd)+"`");
+//         System.err.println("\tclass = `" + text.substring(classStart,classEnd) + "`");
         int parenStart = getFirstNonWSCharPos(classEnd);
         if (parenStart != -1) {
           int origParenStart = parenStart;
           
-//           System.err.println("\tfirst non-whitespace after class = "+parenStart+" `"+text.charAt(parenStart)+"`");
+//           System.err.println("\tfirst non-whitespace after class = " + parenStart + " `" + text.charAt(parenStart) + "`");
           if (text.charAt(origParenStart) == '<') {
             parenStart = -1;
             // might be a generic class
@@ -787,16 +787,16 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
             int parenEnd = balanceForward();
             if (parenEnd > -1) {
               parenEnd = parenEnd + parenStart + 1;
-//               System.err.println("\tafter closing paren = "+parenEnd);
+//               System.err.println("\tafter closing paren = " + parenEnd);
               int afterParen = getFirstNonWSCharPos(parenEnd);
-//               System.err.println("\tfirst non-whitespace after paren = "+parenStart+" `"+text.charAt(afterParen)+"`");
+//               System.err.println("\tfirst non-whitespace after paren = " + parenStart + " `" + text.charAt(afterParen) + "`");
               cached = (afterParen == openCurlyPos); 
             }
           }
         }
       }
       _storeInCache(key, cached, openCurlyPos);
-//      System.err.println(" ==> "+cached);
+//      System.err.println(" ==> " + cached);
       return cached;
 //    }
   }
@@ -855,9 +855,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     final String text = getText(0, newPos - 2);  // excludes miminal (empty) argument list after class name
     int index = 1;
     
-//    if (oldLog) System.err.println("anon before "+pos+" enclosed by "+className);
+//    if (oldLog) System.err.println("anon before " + pos + " enclosed by " + className);
     while ((newPos = _findPrevKeyword(text, "new", newPos - 4)) != -1) { // excludes space + minimal class name + args
-//      if (oldLog) System.err.println("new found at "+newPos);
+//      if (oldLog) System.err.println("new found at " + newPos);
       int afterNewPos = newPos + "new".length();
       int classStart = getFirstNonWSCharPos(afterNewPos);
       if (classStart == -1) { continue; }
@@ -869,12 +869,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         }
         ++classEnd;
       }
-//      if (oldLog) System.err.println("\tclass = `"+text.substring(classStart,classEnd)+"`");
+//      if (oldLog) System.err.println("\tclass = `" + text.substring(classStart,classEnd) + "`");
       int parenStart = getFirstNonWSCharPos(classEnd);
       if (parenStart == -1) { continue; }
       int origParenStart = parenStart;
       
-//      if (oldLog) System.err.println("\tfirst non-whitespace after class = "+parenStart+" `"+text.charAt(parenStart)+"`");
+//      if (oldLog) System.err.println("\tfirst non-whitespace after class = " + parenStart + " `" + text.charAt(parenStart) + "`");
       if (text.charAt(origParenStart) == '<') {
         parenStart = -1;
         // might be a generic class
@@ -893,11 +893,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       if (nextOpenCurly == -1) { continue; }
 //      if (oldLog) System.err.println("{ found at " + nextOpenCurly + ": `" + 
 //                                     text.substring(newPos, nextOpenCurly + 1) + "`");
-//      if (oldLog) System.err.println("_isAnonymousInnerClass("+newPos+", "+nextOpenCurly+")");
+//      if (oldLog) System.err.println("_isAnonymousInnerClass(" + newPos + ", " + nextOpenCurly + ")");
       if (_isAnonymousInnerClass(newPos, nextOpenCurly)) {
 //        if (oldLog) System.err.println("is anonymous inner class");
         String cn = _getEnclosingClassName(newPos, true);
-//        if (oldLog) System.err.println("enclosing class = "+cn);
+//        if (oldLog) System.err.println("enclosing class = " + cn);
         if (! cn.startsWith(className)) { break; }
         else if (! cn.equals(className)) {
           newPos = findPrevEnclosingBrace(newPos, '{', '}');

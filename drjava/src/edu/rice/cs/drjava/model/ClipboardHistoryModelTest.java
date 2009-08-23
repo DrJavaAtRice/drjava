@@ -14,12 +14,12 @@ public class ClipboardHistoryModelTest extends TestCase {
     Assert.assertEquals("Clipboard does not return expected string", "abcd", clip.getMostRecent());
     
     for(int i = 0; i < 10; i++){
-      clip.put(""+(char)(i+26));
+      clip.put("" + (char)(i+26));
     }
     
     List<String> strings = clip.getStrings();
     for(int i = 0; i < 10; i++){
-      Assert.assertEquals("Clipboard does not return expected string in list", ""+(char)(i+26), strings.get(i));
+      Assert.assertEquals("Clipboard does not return expected string in list", "" + (char)(i+26), strings.get(i));
     }
     
     clip.resize(5);

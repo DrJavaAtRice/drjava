@@ -84,7 +84,7 @@ public class UnaryOpProperty<P,R> extends EagerProperty {
   public void update(PropertyMaps pm) {
     P op;
     if (_attributes.get(_op1Name) == null) {
-      _value = "("+_name+" Error...)";
+      _value = "(" + _name + " Error...)";
       return;
     }
     else {
@@ -92,7 +92,7 @@ public class UnaryOpProperty<P,R> extends EagerProperty {
         op = _parse.value(_attributes.get(_op1Name));
       }
       catch(Exception e) {
-        _value = "("+_name+" Error...)";
+        _value = "(" + _name + " Error...)";
         return;
       }
     }

@@ -245,7 +245,7 @@ public class DefaultCompilerModel implements CompilerModel {
 //          File workDir = _model.getWorkingDirectory();
 //          if (workDir == FileOps.NULL_FILE) workDir = null;
 //          if (workDir != null && ! workDir.exists() && ! workDir.mkdirs()) {
-//            throw new IOException("Could not create working directory: "+workDir);
+//            throw new IOException("Could not create working directory: " + workDir);
 //          }
           
           _compileFiles(filesToCompile, buildDir);
@@ -400,9 +400,9 @@ public class DefaultCompilerModel implements CompilerModel {
       File canonicalFile = IOUtil.attemptCanonicalFile(f);
       String fileName = canonicalFile.getPath();
       
-      if(files.contains(new File(fileName.substring(0,fileName.lastIndexOf(".java"))+".dj0")) ||
-         files.contains(new File(fileName.substring(0,fileName.lastIndexOf(".java"))+".dj1")) ||
-         files.contains(new File(fileName.substring(0,fileName.lastIndexOf(".java"))+".dj2"))
+      if(files.contains(new File(fileName.substring(0,fileName.lastIndexOf(".java")) + ".dj0")) ||
+         files.contains(new File(fileName.substring(0,fileName.lastIndexOf(".java")) + ".dj1")) ||
+         files.contains(new File(fileName.substring(0,fileName.lastIndexOf(".java")) + ".dj2"))
         ) {
         files.remove(new File(fileName));
       }
@@ -427,13 +427,13 @@ public class DefaultCompilerModel implements CompilerModel {
 //                                                       "These .java files need to be closed for proper compiling. \n \n \n"
 //                                                       + filesToBeClosed.toString().replace(", ","\n"),true).show();
       ScrollableListDialog<File> dialog = new ScrollableListDialog.Builder<File>()
-        .setTitle("Java File"+(filesToBeClosed.size() == 1?"":"s")+" Need to Be Closed")
-        .setText("The following .java "+(filesToBeClosed.size() == 1?
+        .setTitle("Java File" + (filesToBeClosed.size() == 1?"":"s") + " Need to Be Closed")
+        .setText("The following .java " + (filesToBeClosed.size() == 1?
                                            "file has a matching .dj? file":
-                                           "files have matching .dj? files")+" open.\n"+
+                                           "files have matching .dj? files") + " open.\n" + 
                  (filesToBeClosed.size() == 1?
                     "This .java file needs":
-                    "These .java files need")+" to be closed for proper compiling.")
+                    "These .java files need") + " to be closed for proper compiling.")
         .setItems(filesToBeClosed)
         .setMessageType(JOptionPane.WARNING_MESSAGE)
         .setFitToScreen(true)
@@ -499,7 +499,7 @@ public class DefaultCompilerModel implements CompilerModel {
             .setTitle("Delete Class Files")
             .setText("We suggest that you delete all class files in the directories with language\n" +
                      "level files. Do you want to delete the class files in the following director" +
-                     (dirsWithLLFiles.size() == 1?"y":"ies")+"?")
+                     (dirsWithLLFiles.size() == 1?"y":"ies") + "?")
             .setItems(new ArrayList<File>(dirsWithLLFiles))
             .setMessageType(JOptionPane.QUESTION_MESSAGE)
             .setFitToScreen(true)
@@ -653,9 +653,9 @@ public class DefaultCompilerModel implements CompilerModel {
         if (classNames == null) classNames = new HashSet<String>();
         classNames.addAll(e.getValue());
         dirToClassNameMap.put(dir,classNames);
-//          System.out.println(e.getKey()+" --> "+dir);
+//          System.out.println(e.getKey() + " --> " + dir);
 //          for(String name: e.getValue()) {
-//            System.out.println("\t"+name);
+//            System.out.println("\t" + name);
 //          }
       }
       catch(IOException ioe) { /* we'll fail to delete this, but that's better than deleting something we shouldn't */ }
@@ -663,11 +663,11 @@ public class DefaultCompilerModel implements CompilerModel {
     // Now that we have a map from parent directories to the class names that should be deleted
     // in them, we scan the files in each directory, then check if the names match the class names.      
     for(final Map.Entry<File,Set<String>> e: dirToClassNameMap.entrySet()) {
-//        System.out.println("Processing dir: "+e.getKey());
-//        System.out.println("\t"+java.util.Arrays.toString(e.getValue().toArray(new String[0])));
+//        System.out.println("Processing dir: " + e.getKey());
+//        System.out.println("\t" + java.util.Arrays.toString(e.getValue().toArray(new String[0])));
       e.getKey().listFiles(new java.io.FilenameFilter() {
         public boolean accept(File dir, String name) {
-//            System.out.println("\t"+name);
+//            System.out.println("\t" + name);
           int endPos = name.lastIndexOf(".class");
           if (endPos < 0) return false; // can't be a class file
           int dollarPos = name.indexOf('$');

@@ -188,19 +188,19 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
     assertEquals(2, pim.getMatchingItems().size());
     assertEquals("", pim.getSharedMaskExtension());
 
-    pim.setMask(pim.getMask()+".");
+    pim.setMask(pim.getMask() + ".");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("FileOps.", pim.getMask());
     assertEquals(1, pim.getMatchingItems().size());
     assertEquals("java", pim.getSharedMaskExtension());
 
-    pim.setMask(pim.getMask()+"x");
+    pim.setMask(pim.getMask() + "x");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("FileOps.x", pim.getMask());
     assertEquals(0, pim.getMatchingItems().size());
     assertEquals("", pim.getSharedMaskExtension());
 
-    pim.setMask(pim.getMask()+"y");
+    pim.setMask(pim.getMask() + "y");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("FileOps.xy", pim.getMask());
     assertEquals(0, pim.getMatchingItems().size());
@@ -382,19 +382,19 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
     assertEquals(2, pim.getMatchingItems().size());
     assertEquals("", pim.getSharedMaskExtension());
 
-    pim.setMask(pim.getMask()+".");
+    pim.setMask(pim.getMask() + ".");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("fILEOPS.", pim.getMask());
     assertEquals(1, pim.getMatchingItems().size());
     assertEquals("java", pim.getSharedMaskExtension());
 
-    pim.setMask(pim.getMask()+"x");
+    pim.setMask(pim.getMask() + "x");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("fILEOPS.x", pim.getMask());
     assertEquals(0, pim.getMatchingItems().size());
     assertEquals("", pim.getSharedMaskExtension());
 
-    pim.setMask(pim.getMask()+"y");
+    pim.setMask(pim.getMask() + "y");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("fILEOPS.xy", pim.getMask());
     assertEquals(0, pim.getMatchingItems().size());
@@ -684,17 +684,17 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
     assertEquals("F ileOps", pim.getMask());
     assertEquals(2, pim.getMatchingItems().size());
 
-    pim.setMask(pim.getMask()+".");
+    pim.setMask(pim.getMask() + ".");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F ileOps.", pim.getMask());
     assertEquals(1, pim.getMatchingItems().size());
 
-    pim.setMask(pim.getMask()+"x");
+    pim.setMask(pim.getMask() + "x");
     assertEquals("AboutDialog.java", pim.getCurrentItem());
     assertEquals("F ileOps.x", pim.getMask());
     assertEquals(0, pim.getMatchingItems().size());
 
-    pim.setMask(pim.getMask()+"y");
+    pim.setMask(pim.getMask() + "y");
     assertEquals("AboutDialog.java", pim.getCurrentItem());
     assertEquals("F ileOps.xy", pim.getMask());
     assertEquals(0, pim.getMatchingItems().size());
@@ -921,17 +921,17 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
     assertEquals("F IlEOpS", pim.getMask());
     assertEquals(2, pim.getMatchingItems().size());
 
-    pim.setMask(pim.getMask()+".");
+    pim.setMask(pim.getMask() + ".");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F IlEOpS.", pim.getMask());
     assertEquals(1, pim.getMatchingItems().size());
 
-    pim.setMask(pim.getMask()+"x");
+    pim.setMask(pim.getMask() + "x");
     assertEquals("AboutDialog.java", pim.getCurrentItem());
     assertEquals("F IlEOpS.x", pim.getMask());
     assertEquals(0, pim.getMatchingItems().size());
 
-    pim.setMask(pim.getMask()+"y");
+    pim.setMask(pim.getMask() + "y");
     assertEquals("AboutDialog.java", pim.getCurrentItem());
     assertEquals("F IlEOpS.xy", pim.getMask());
     assertEquals(0, pim.getMatchingItems().size());

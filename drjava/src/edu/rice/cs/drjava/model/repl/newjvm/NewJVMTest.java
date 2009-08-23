@@ -201,7 +201,7 @@ public final class NewJVMTest extends DrJavaTestCase {
 
     // test syntax error handling
     //  (temporarily disabled until bug 750605 fixed)
-//       _jvm.interpret("x+");
+//       _jvm.interpret("x + ");
 //       assertTrue("syntax error was reported",
 //                  ! _jvm.syntaxErrorMsgBuf.equals("") );
 //     }

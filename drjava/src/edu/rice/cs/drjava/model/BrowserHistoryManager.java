@@ -72,7 +72,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     if ((current != null) && (similarRegions(current, r))) {
       // the region to be added is similar to the current region
       // just update the current region
-//      edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("Updating instead of adding: "+current+" --> "+r);
+//      edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("Updating instead of adding: " + current + " --> " + r);
       current.update(r);
     }
     else {
@@ -103,7 +103,7 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
     if ((current != null) && (similarRegions(current, r))) {
       // the region to be added is similar to the current region
       // just update the current region
-//      edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("Updating instead of adding: "+current+" --> "+r);
+//      edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("Updating instead of adding: " + current + " --> " + r);
       current.update(r);
     }
     else {
@@ -243,6 +243,6 @@ public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<B
   public String toString() {
     ArrayList<BrowserDocumentRegion> future = new ArrayList<BrowserDocumentRegion>(_futureRegions);
     Collections.reverse(future);
-    return "Past: "+_pastRegions.toString()+", Future: "+future.toString();
+    return "Past: " + _pastRegions.toString() + ", Future: " + future.toString();
   }
 }

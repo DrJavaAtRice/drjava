@@ -193,8 +193,8 @@ public class DrJava {
               if (failCount > 0) {
                 // 2nd time that spawning has failed, give up
                 JOptionPane.showMessageDialog(null,
-                                              "DrJava was unable to start, and resetting your configuration\n"+
-                                              "did not help. Please file a support request at\n"+
+                                              "DrJava was unable to start, and resetting your configuration\n" + 
+                                              "did not help. Please file a support request at\n" + 
                                               "https://sourceforge.net/projects/drjava/",
                                               "Could Not Start DrJava",
                                               JOptionPane.ERROR_MESSAGE);
@@ -203,7 +203,7 @@ public class DrJava {
               else {
                 // 1st time that spawning has failed, offer to reset configuration
                 int result = JOptionPane.showConfirmDialog(null,
-                                                           "DrJava was unable to start. Your configuration file (.drjava)\n"+
+                                                           "DrJava was unable to start. Your configuration file (.drjava)\n" + 
                                                            "might be corrupt. Do you want to reset your configuration?",
                                                            "Could Not Start DrJava",
                                                            JOptionPane.YES_NO_OPTION);
@@ -253,7 +253,7 @@ public class DrJava {
     // Loop through arguments looking for known options
     int argIndex = 0;
     int len = args.length;
-    _log.log("handleCommandLineArgs. _filesToOpen: "+_filesToOpen);
+    _log.log("handleCommandLineArgs. _filesToOpen: " + _filesToOpen);
     _log.log("\t_filesToOpen cleared");
     _filesToOpen.clear();
     
@@ -297,7 +297,7 @@ public class DrJava {
     
     if ((!("".equals(getConfig().getSetting(MASTER_JVM_XMX)))) &&
         (!(edu.rice.cs.drjava.config.OptionConstants.heapSizeChoices.get(0).equals(getConfig().getSetting(MASTER_JVM_XMX))))) { 
-      _jvmArgs.add("-Xmx"+getConfig().getSetting(MASTER_JVM_XMX).trim()+"M");
+      _jvmArgs.add("-Xmx" + getConfig().getSetting(MASTER_JVM_XMX).trim() + "M");
       heapSizeGiven = true;
     }
     List<String> configArgs = ArgumentTokenizer.tokenize(getConfig().getSetting(MASTER_JVM_ARGS));
@@ -321,7 +321,7 @@ public class DrJava {
     // Open the remaining args as filenames
     
     for (int i = argIndex; i < len; i++) { addFileToOpen(args[i]); }
-    _log.log("\t _filesToOpen now contains: "+_filesToOpen);
+    _log.log("\t _filesToOpen now contains: " + _filesToOpen);
 
     return true;
   }
@@ -398,7 +398,7 @@ public class DrJava {
 //      text = new String[] {
 //        "The file you chose did not appear to be the correct 'tools.jar'",
 //        "that is compatible with the version of Java that is used to",
-//        "run DrJava (Java version "+System.getProperty("java.version")+").",
+//        "run DrJava (Java version " + System.getProperty("java.version") + ").",
 //        "Your choice might be an incompatible version of the file.",
 //        "Would you like to pick again?  The 'tools.jar' file is ",
 //        "generally located in the 'lib' subdirectory under your ",
@@ -411,9 +411,9 @@ public class DrJava {
 //      text = new String[] {
 //        "The file you chose did not appear to be the correct 'tools.jar'",
 //        "that is compatible with the version of Java that is used to",
-//        "run DrJava (Java version "+System.getProperty("java.version")+").",
+//        "run DrJava (Java version " + System.getProperty("java.version") + ").",
 //        "The file you have selected appears to be for",
-//        "Java version "+selectedVersion+".",
+//        "Java version " + selectedVersion + ".",
 //        "Your choice might be an incompatible version of the file.",
 //        "Would you like to pick again?  The 'tools.jar' file is ",
 //        "generally located in the 'lib' subdirectory under your ",
@@ -429,7 +429,7 @@ public class DrJava {
   
   /* Erase all non-final bindings created in this class.  Only used in testing. */
   public static void cleanUp() {
-    _log.log("cleanUp. _filesToOpen: "+_filesToOpen);
+    _log.log("cleanUp. _filesToOpen: " + _filesToOpen);
     _filesToOpen.clear();
     _log.log("\t_filesToOpen cleared");
     _jvmArgs.clear();
@@ -466,17 +466,17 @@ public class DrJava {
       
       String[] options = new String[] { "Yes", "Yes, and ignore from now on", "No" };
       int res = javax.swing.JOptionPane.showOptionDialog(null,
-                                                         "<html>DrJava has detected that you are using Compiz.<br>"+
-                                                         "<br>"+
-                                                         "Compiz and Java Swing are currently incompatible and can cause<br>"+
-                                                         "DrJava or your computer to crash.<br>"+
-                                                         "<br>"+
-                                                         "We recommend that you <b>disable Compiz</b>. On Ubuntu, go to<br>"+
-                                                         "System->Preferences->Appearence, display the Visual Effects tab,<br>"+
-                                                         "and select 'None'.<br>"+
-                                                         "<br>"+
-                                                         "For more information, please go to http://drjava.org/compiz<br>"+
-                                                         "<br>"+
+                                                         "<html>DrJava has detected that you are using Compiz.<br>" + 
+                                                         "<br>" + 
+                                                         "Compiz and Java Swing are currently incompatible and can cause<br>" + 
+                                                         "DrJava or your computer to crash.<br>" + 
+                                                         "<br>" + 
+                                                         "We recommend that you <b>disable Compiz</b>. On Ubuntu, go to<br>" + 
+                                                         "System->Preferences->Appearence, display the Visual Effects tab,<br>" + 
+                                                         "and select 'None'.<br>" + 
+                                                         "<br>" + 
+                                                         "For more information, please go to http://drjava.org/compiz<br>" + 
+                                                         "<br>" + 
                                                          "Do you want to start DrJava anyway?</html>",
                                                          "Compiz detected",
                                                          JOptionPane.DEFAULT_OPTION,

@@ -86,7 +86,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
         try {
-	  superSetUp(); // super.setUp() should be called first
+   superSetUp(); // super.setUp() should be called first
 
           // create temp directory for this test
           _base = new File(System.getProperty("java.io.tmpdir")).getCanonicalFile();

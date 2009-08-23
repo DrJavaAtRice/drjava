@@ -178,7 +178,7 @@ public class ExternalProcessPanel extends AbortablePanel {
       // MainFrame.LOG.log("\tUpdate thread started");
     }
     catch(Exception e) {
-      _sb.append("\n\nException from process:\n"+e.toString());
+      _sb.append("\n\nException from process:\n" + e.toString());
       _textArea.setText(_sb.toString());
       edu.rice.cs.util.GeneralProcessCreator.LOG.log(_sb.toString());
       abortActionPerformed(null);
@@ -270,10 +270,10 @@ public class ExternalProcessPanel extends AbortablePanel {
     while((start-1 > 0) && (t.charAt(start-1) != '\n')) { --start; }
     while((end >= 0) && (end < t.length()) && (t.charAt(end) != '\n')) { ++end; }
 
-    // LOG.log("\tstart="+start+"\n\tend="+end);
+    // LOG.log("\tstart=" + start + "\n\tend=" + end);
     if ((start < 0) || (end < 0) || (start >= t.length()) || (end >= t.length())) return;
     final String line = t.substring(start,end);
-    // LOG.log("\t'"+line+"'");
+    // LOG.log("\t'" + line + "'");
     caret -= start; // calculate caret position within the line
     if (caret>=line.length()) { caret = line.length()-1; }
     start = end = caret;
@@ -315,12 +315,12 @@ public class ExternalProcessPanel extends AbortablePanel {
     list = new ArrayList<GoToFileListEntry>(docs.size());
     // create a list with fully qualified class names
     for(OpenDefinitionsDocument d: docs) {
-      // LOG.log("Doc: "+d);
+      // LOG.log("Doc: " + d);
       try {
         String fullyQualified = d.getPackageName() + "." + d.toString();
         if (fullyQualified.startsWith(".")) { fullyQualified = fullyQualified.substring(1); }
         list.add(new GoToFileListEntry(d, fullyQualified));
-        // LOG.log("\tname: "+fullyQualified);
+        // LOG.log("\tname: " + fullyQualified);
       }
       catch(IllegalStateException ex) { /* ignore */ }
     }
@@ -335,7 +335,7 @@ public class ExternalProcessPanel extends AbortablePanel {
         ch = line.charAt(start);
         if ((ch == ':') || (ch == '.') || (Character.isJavaIdentifierPart(ch))) { --start; } else { break; }
       }
-      // LOG.log("\tstart="+start+"\n\tend="+end);
+      // LOG.log("\tstart=" + start + "\n\tend=" + end);
       if ((start >= 0) && (end>=start) && (start<line.length()) && (end<line.length())) {
         name = line.substring(start,end).replace(File.separatorChar, '.');
         if ((name.length() > 0) && (! Character.isJavaIdentifierPart(name.charAt(0)))) { name = name.substring(1); }
@@ -346,7 +346,7 @@ public class ExternalProcessPanel extends AbortablePanel {
             (name.indexOf(".dj0") >= 0) ||
             (name.indexOf(".dj1") >= 0) ||
             (name.indexOf(".dj2") >= 0)) {
-          // LOG.log("\t--> '"+name+"'");
+          // LOG.log("\t--> '" + name + "'");
           uniqueMatch = getUniqueMatch(name, pim);
           if (uniqueMatch != null) {
             // unique match found, go there
@@ -464,14 +464,14 @@ public class ExternalProcessPanel extends AbortablePanel {
               (_erris != null) &&
               ((_red = _is.read(_buf)) >= 0)) {
 
-          // MainFrame.LOG.log("\tread "+_red+" bytes");
+          // MainFrame.LOG.log("\tread " + _red + " bytes");
           _sb.append(new String(_buf, 0, _red));
           if (finish) { _changeCount = 1; } else { ++_changeCount; }
         }
         while((_changeCount <= BUFFER_READS_PER_TIMER) &&
               (_erris != null) &&
               ((_errred = _erris.read(_errbuf)) >= 0)) {
-          // MainFrame.LOG.log("\tread "+_red+" bytes");
+          // MainFrame.LOG.log("\tread " + _red + " bytes");
           _sb.append(new String(_errbuf, 0, _errred));
           if (finish) { _changeCount = 1; } else { ++_changeCount; }
         }
@@ -516,7 +516,7 @@ public class ExternalProcessPanel extends AbortablePanel {
           }
           catch(IllegalThreadStateException e) {
             // process has NOT finished yet, display the I/O exception
-            _sb.append("\n\nI/O Exception reading from process:\n"+ioe.toString());
+            _sb.append("\n\nI/O Exception reading from process:\n" + ioe.toString());
             edu.rice.cs.util.GeneralProcessCreator.LOG.log("\n\nI/O Exception reading from process:");
             edu.rice.cs.util.GeneralProcessCreator.LOG.log(ioe.toString(),ioe);
           }
@@ -570,7 +570,7 @@ public class ExternalProcessPanel extends AbortablePanel {
               }
               catch(javax.swing.text.BadLocationException e) { /* ignore, do not truncate */ }
             }
-            // MainFrame.LOG.log("\ttext length = "+s.length());
+            // MainFrame.LOG.log("\ttext length = " + s.length());
           }
         });
       }

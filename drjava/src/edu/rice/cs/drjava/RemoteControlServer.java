@@ -56,7 +56,7 @@ import java.net.*;
   * 
   * A client can tell a server to open a file and jump to a certain line number by sending QUERY_PREFIX + " " + 
   * absoluteFileName + File.pathSeparator + lineNumber.
-  * The server will respond with RESPONSE_PREFIX, or RESPONSE_PREFIX+" "+error if an error occurred.
+  * The server will respond with RESPONSE_PREFIX, or RESPONSE_PREFIX + " " + error if an error occurred.
   * 
   * This class is declared final because it cannot be robustly subclassed because the constructor starts a thread.
   */
@@ -68,7 +68,7 @@ public final class RemoteControlServer {
   public static final String RESPONSE_PREFIX = "DrJava Remote Control ";
   
   /** Prefix of a legitimate response by this server, including the user name. */
-  public static final String RESPONSE_PREFIX_WITH_USER = RESPONSE_PREFIX+System.getProperty("user.name")+"!";
+  public static final String RESPONSE_PREFIX_WITH_USER = RESPONSE_PREFIX+System.getProperty("user.name") + "!";
   
   /** Create a new remote control server, running in its own daemon thread.
     * @param frame main frame

@@ -220,7 +220,7 @@ public class NewVersionPopup extends JDialog {
         if (!f.exists()) { continue; }
         if (f.isDirectory()) {
           // this is a directory, maybe DrJava is contained here as individual files
-          File cf = new File(f, edu.rice.cs.drjava.DrJava.class.getName().replace('.', File.separatorChar)+".class");
+          File cf = new File(f, edu.rice.cs.drjava.DrJava.class.getName().replace('.', File.separatorChar) + ".class");
           if (cf.exists() && cf.isFile()) {
             found = f;
             break;
@@ -232,7 +232,7 @@ public class NewVersionPopup extends JDialog {
           // if it's not a jar file, an exception will already have been thrown
           // so we know it is a jar file
           // now let's check if it contains DrJava
-          if (jf.getJarEntry(edu.rice.cs.drjava.DrJava.class.getName().replace('.', '/')+".class") != null) {
+          if (jf.getJarEntry(edu.rice.cs.drjava.DrJava.class.getName().replace('.', '/') + ".class") != null) {
             found = f;
             break;
           }
@@ -306,7 +306,7 @@ public class NewVersionPopup extends JDialog {
           LOG.log("updateAction");
           
           final File targetFile = getTargetFile();
-          LOG.log("\ttargetFile = "+targetFile);
+          LOG.log("\ttargetFile = " + targetFile);
           if ((targetFile == null) || (targetFile.getParentFile() == null)) {
             abortUpdate("Could not determine where DrJava is located on this computer.", true);
             return;
@@ -319,14 +319,14 @@ public class NewVersionPopup extends JDialog {
           else if (targetFile.toString().endsWith(".exe")) { fileName += ".exe"; }
           else if (targetFile.toString().endsWith(".app")) { fileName += "-osx.tar.gz"; }
           else { abortUpdate("Could not determine the file type to download.", true); return; }
-          LOG.log("\tfileName = "+fileName);
+          LOG.log("\tfileName = " + fileName);
           
           // determine temp file name
           File destFile = FileOps.generateNewFileName(targetFile.getParentFile(),
                                                       fileName.substring(0,lastDotPos),
                                                       fileName.substring(lastDotPos));
           toCleanUp.add(destFile);
-          LOG.log("Downloading to "+destFile);
+          LOG.log("Downloading to " + destFile);
           
           File macTempDir = null;
           File macTarFile = null;
@@ -334,12 +334,12 @@ public class NewVersionPopup extends JDialog {
             // assume this is on the Mac
             // check that tar exists
             macTarFile = new File("/usr/bin/tar");
-            LOG.log("Searching for "+macTarFile);
+            LOG.log("Searching for " + macTarFile);
             if (!macTarFile.exists()) {
               String path = System.getenv("PATH");
               for(String p: path.split(System.getProperty("path.separator"))) {
                 macTarFile = new File(p, "tar");
-                LOG.log("Searching for "+macTarFile);
+                LOG.log("Searching for " + macTarFile);
                 if (macTarFile.exists()) break;
               }
               if (!macTarFile.exists()) { abortUpdate("Could not find tar on this computer.", true); return; }
@@ -357,16 +357,16 @@ public class NewVersionPopup extends JDialog {
           edu.rice.cs.plt.io.IOUtil.copyInputStream(tempClassIn, tempClassOut);
           tempClassIn.close();
           tempClassOut.close();
-          LOG.log("Copied drjava.jar to "+tempClassFile);
+          LOG.log("Copied drjava.jar to " + tempClassFile);
           
           // download new file
           URL fileURL = new URL(getAutomaticDownloadURL()+fileName);
-          LOG.log("fileURL = "+fileURL);
+          LOG.log("fileURL = " + fileURL);
           
           URLConnection uc = fileURL.openConnection();
           final int length = uc.getContentLength();
           InputStream in = uc.getInputStream();
-          ProgressMonitorInputStream pin = new ProgressMonitorInputStream(_mainFrame, "Downloading "+fileName+" ...", in);
+          ProgressMonitorInputStream pin = new ProgressMonitorInputStream(_mainFrame, "Downloading " + fileName + " ...", in);
           ProgressMonitor pm = pin.getProgressMonitor();
           pm.setMaximum(length);
           pm.setMillisToDecideToPopup(0);
@@ -382,7 +382,7 @@ public class NewVersionPopup extends JDialog {
             abortUpdate("Could not download update."); return;
           }
           
-          LOG.log("Downloaded to "+destFile);
+          LOG.log("Downloaded to " + destFile);
           
           if (fileName.endsWith("-osx.tar.gz")) {
             // assume this is on the Mac, make temporary directory and tar xfz
@@ -431,15 +431,15 @@ public class NewVersionPopup extends JDialog {
                                                                               tempClassFile.getAbsolutePath());
               }
               catch(Exception e) {
-                LOG.log("Exception in shutdown hook: "+e);
+                LOG.log("Exception in shutdown hook: " + e);
                 tempClassFile.delete();
                 JOptionPane.showMessageDialog(null, 
-                                              "A new version of DrJava was downloaded. However,\n"+
-                                              "it could not be started automatically.\n\n"+
-                                              "The new copy is now installed at:\n"+
-                                              finalDestFile.getAbsolutePath()+"\n\n"+
-                                              "The old copy is still installed at:\n"+
-                                              targetFile.getAbsolutePath()+"\n\n"+
+                                              "A new version of DrJava was downloaded. However,\n" + 
+                                              "it could not be started automatically.\n\n" + 
+                                              "The new copy is now installed at:\n" + 
+                                              finalDestFile.getAbsolutePath() + "\n\n" + 
+                                              "The old copy is still installed at:\n" + 
+                                              targetFile.getAbsolutePath() + "\n\n" + 
                                               "Please start DrJava manually.",
                                               "Error Updating DrJava", JOptionPane.ERROR_MESSAGE);
                 // NOTE: it would be nice if this error message would keep the application alive until the user closes it
@@ -453,16 +453,16 @@ public class NewVersionPopup extends JDialog {
           Runtime.getRuntime().removeShutdownHook(restart);
           tempClassFile.delete();
           JOptionPane.showMessageDialog(_mainFrame, 
-                                        "A new version of DrJava was downloaded. However, you chose\n"+
-                                        "not to restart DrJava, so the old version was not automatically\n"+
-                                        "replaced.\n\n"+
-                                        "The new copy is now installed at:\n"+
-                                        finalDestFile.getAbsolutePath()+"\n\n"+
-                                        "The old copy is still installed at:\n"+
+                                        "A new version of DrJava was downloaded. However, you chose\n" + 
+                                        "not to restart DrJava, so the old version was not automatically\n" + 
+                                        "replaced.\n\n" + 
+                                        "The new copy is now installed at:\n" + 
+                                        finalDestFile.getAbsolutePath() + "\n\n" + 
+                                        "The old copy is still installed at:\n" + 
                                         targetFile.getAbsolutePath());
         }
         catch(InterruptedIOException iie) { /* aborted by user */ return; }
-        catch(IOException e) { abortUpdate("Error installing update:\n"+e.getMessage()); return; }
+        catch(IOException e) { abortUpdate("Error installing update:\n" + e.getMessage()); return; }
         finally {
           // clean up files
           for(File f: toCleanUp) { edu.rice.cs.plt.io.IOUtil.deleteRecursively(f); }
@@ -570,8 +570,8 @@ public class NewVersionPopup extends JDialog {
           _newestVersionString = versionSorter.get(versionSorter.lastKey())[1];
 
           return new String[] {
-            "A new "+newestType+" has been found.",
-              "The new version is: "+_newestVersionString,
+            "A new " + newestType + " has been found.",
+              "The new version is: " + _newestVersionString,
               "Do you want to download this new version?"};
         }
         else {

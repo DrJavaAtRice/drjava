@@ -64,7 +64,7 @@ public class DrJavaRestart {
   public static boolean delete(File f) {
     for(int i = 0; i < ATTEMPTS; ++i) {
       if (f.delete()) return true;
-      LOG.log("Failed to delete "+f+", trying again");
+      LOG.log("Failed to delete " + f + ", trying again");
       try {
         Thread.sleep(TIME_BETWEEN_ATTEMPTS);
       }
@@ -75,7 +75,7 @@ public class DrJavaRestart {
   public static boolean deleteRecursively(File f) {
     for(int i = 0; i < ATTEMPTS; ++i) {
       if (edu.rice.cs.plt.io.IOUtil.deleteRecursively(f)) return true;
-      LOG.log("Failed to recursively delete "+f+", trying again");
+      LOG.log("Failed to recursively delete " + f + ", trying again");
       try {
         Thread.sleep(TIME_BETWEEN_ATTEMPTS);
       }
@@ -86,7 +86,7 @@ public class DrJavaRestart {
   public static boolean rename(File from, File to) {
     for(int i = 0; i < ATTEMPTS; ++i) {
       if (from.renameTo(to)) return true;
-      LOG.log("Failed to rename "+from+" to "+to+", trying again");
+      LOG.log("Failed to rename " + from + " to " + to + ", trying again");
       try {
         Thread.sleep(TIME_BETWEEN_ATTEMPTS);
       }
@@ -103,8 +103,8 @@ public class DrJavaRestart {
     File exec = dest;
     
     try {      
-      LOG.log("source: "+source.getAbsolutePath());
-      LOG.log("dest  : "+dest.getAbsolutePath());
+      LOG.log("source: " + source.getAbsolutePath());
+      LOG.log("dest  : " + dest.getAbsolutePath());
       
       if (dest.exists()) {
         if (dest.isFile()) {
@@ -114,21 +114,21 @@ public class DrJavaRestart {
             if (!rename(source,dest)) {
               // could not rename, keep source as name
               exec = source;
-              message("A new version of DrJava was downloaded. However, it could not be\n"+
-                      "installed in the same place as the old DrJava.\n\n"+
-                      "The new copy is now installed at:\n"+
-                      source.getAbsolutePath()+"\n\n"+
+              message("A new version of DrJava was downloaded. However, it could not be\n" + 
+                      "installed in the same place as the old DrJava.\n\n" + 
+                      "The new copy is now installed at:\n" + 
+                      source.getAbsolutePath() + "\n\n" + 
                       "The old copy has been deleted.");
             }
           }
           else {
             // could not delete it, keep source as name
             exec = source;
-            message("A new version of DrJava was downloaded. However, it could not be\n"+
-                    "installed in the same place as the old DrJava.\n\n"+
-                    "The new copy is now installed at:\n"+
-                    source.getAbsolutePath()+"\n\n"+
-                    "The old copy is still installed at:\n"+
+            message("A new version of DrJava was downloaded. However, it could not be\n" + 
+                    "installed in the same place as the old DrJava.\n\n" + 
+                    "The new copy is now installed at:\n" + 
+                    source.getAbsolutePath() + "\n\n" + 
+                    "The old copy is still installed at:\n" + 
                     dest.getAbsolutePath());
           }
           LOG.log("Restarting...");
@@ -145,11 +145,11 @@ public class DrJavaRestart {
               // could rename, now delete the directory containing the former source
               delete(source.getParentFile());
               if (!deleteRecursively(old)) {
-                message("A new version of DrJava was downloaded. However, the old version"+
-                        "could not be deleted.\n\n"+
-                        "The new copy is now installed at:\n"+
-                        dest.getAbsolutePath()+"\n\n"+
-                        "The old copy is still installed at:\n"+
+                message("A new version of DrJava was downloaded. However, the old version" + 
+                        "could not be deleted.\n\n" + 
+                        "The new copy is now installed at:\n" + 
+                        dest.getAbsolutePath() + "\n\n" + 
+                        "The old copy is still installed at:\n" + 
                         old.getAbsolutePath());
               }
             }
@@ -159,20 +159,20 @@ public class DrJavaRestart {
               // try to rename dest back
               if (rename(old,dest)) {
                 // was at least able to rename back
-                message("A new version of DrJava was downloaded. However, it could not be\n"+
-                        "installed in the same place as the old DrJava.\n\n"+
-                        "The new copy is now installed at:\n"+
-                        source.getAbsolutePath()+"\n\n"+
-                        "The old copy is still installed at:\n"+
+                message("A new version of DrJava was downloaded. However, it could not be\n" + 
+                        "installed in the same place as the old DrJava.\n\n" + 
+                        "The new copy is now installed at:\n" + 
+                        source.getAbsolutePath() + "\n\n" + 
+                        "The old copy is still installed at:\n" + 
                         dest.getAbsolutePath());
               }
               else {
                 // couldn't even rename back
-                message("A new version of DrJava was downloaded. However, it could not be\n"+
-                        "installed in the same place as the old DrJava.\n\n"+
-                        "The new copy is now installed at:\n"+
-                        source.getAbsolutePath()+"\n\n"+
-                        "The old copy is still installed at:\n"+
+                message("A new version of DrJava was downloaded. However, it could not be\n" + 
+                        "installed in the same place as the old DrJava.\n\n" + 
+                        "The new copy is now installed at:\n" + 
+                        source.getAbsolutePath() + "\n\n" + 
+                        "The old copy is still installed at:\n" + 
                         old.getAbsolutePath());
               }
             }
@@ -180,22 +180,22 @@ public class DrJavaRestart {
           else {
             // could not rename keep source as name
             exec = source;
-            message("A new version of DrJava was downloaded. However, it could not be\n"+
-                    "installed in the same place as the old DrJava.\n\n"+
-                    "The new copy is now installed at:\n"+
-                    source.getAbsolutePath()+"\n\n"+
-                    "The old copy is still installed at:\n"+
+            message("A new version of DrJava was downloaded. However, it could not be\n" + 
+                    "installed in the same place as the old DrJava.\n\n" + 
+                    "The new copy is now installed at:\n" + 
+                    source.getAbsolutePath() + "\n\n" + 
+                    "The old copy is still installed at:\n" + 
                     dest.getAbsolutePath());
           }
           
           // check if Mac's open command exists
           File macOpenFile = new File("/usr/bin/open");
-          LOG.log("Searching for "+macOpenFile);
+          LOG.log("Searching for " + macOpenFile);
           if (!macOpenFile.exists()) {
             String path = System.getenv("PATH");
             for(String p: path.split(System.getProperty("path.separator"))) {
               macOpenFile = new File(p, "tar");
-              LOG.log("Searching for "+macOpenFile);
+              LOG.log("Searching for " + macOpenFile);
               if (macOpenFile.exists()) break;
             }
           }
@@ -218,8 +218,8 @@ public class DrJavaRestart {
       }
     }
     catch(Exception e) {
-      message("A new version of DrJava was downloaded. However, there was an error"+
-              "during installation:\n"+e.getMessage());
+      message("A new version of DrJava was downloaded. However, there was an error" + 
+              "during installation:\n" + e.getMessage());
     }
   }
 }

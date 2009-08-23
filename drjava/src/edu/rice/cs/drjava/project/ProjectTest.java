@@ -101,13 +101,13 @@ public class ProjectTest extends DrJavaTestCase {
       "   (path \"./[ Source Files ]/sexp/\")\n" +
       "   (path \"./[ External ]/\"))\n" +
       "(build-dir ;; absolute path\n" +
-      "   (file (name "+ convertToLiteral(new File(parent,"built").getCanonicalPath()) + ")))\n" +
+      "   (file (name " +  convertToLiteral(new File(parent,"built").getCanonicalPath()) + ")))\n" +
       "(work-dir ;; absolute path\n" +
-      "   (file (name "+ convertToLiteral(new File(parent,"src").getCanonicalPath()) + ")))\n" +
+      "   (file (name " +  convertToLiteral(new File(parent,"src").getCanonicalPath()) + ")))\n" +
       "(proj-root ;; absolute path\n" +
-      "   (file (name "+ convertToLiteral(new File(parent,"src").getCanonicalPath()) + ")))\n" +
+      "   (file (name " +  convertToLiteral(new File(parent,"src").getCanonicalPath()) + ")))\n" +
       "(classpaths\n" +
-      "   (file (name "+ convertToLiteral(new File(parent,"src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
+      "   (file (name " +  convertToLiteral(new File(parent,"src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
       "(main-class\n" +
       "   some.package.ClassName)";
     
@@ -165,10 +165,10 @@ public class ProjectTest extends DrJavaTestCase {
       "   (path \"./[ Source Files ]/sexp/\")\n" +
       "   (path \"./[ External ]/\"))\n" +
       "(build-dir ;; absolute path\n" +
-      "   (file (name "+ convertToLiteral(new File(parent, "built").getCanonicalPath()) + ")))\n" +
+      "   (file (name " +  convertToLiteral(new File(parent, "built").getCanonicalPath()) + ")))\n" +
       "(work-dir (file (name \"src\")))\n" +
       "(classpaths\n" +
-      "   (file (name "+ convertToLiteral(new File(parent, "src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
+      "   (file (name " +  convertToLiteral(new File(parent, "src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
       "(main-class\n" +
       "   some.ClassName)";
     
@@ -296,13 +296,13 @@ public class ProjectTest extends DrJavaTestCase {
       "   (path \"./[ Source Files ]/sexp/\")\n" +
       "   (path \"./[ External ]/\"))\n" +
       "(build-dir ;; absolute path\n" +
-      "   (file (name "+ convertToLiteral(new File(parent,"built").getCanonicalPath()) + ")))\n" +
+      "   (file (name " +  convertToLiteral(new File(parent,"built").getCanonicalPath()) + ")))\n" +
       "(work-dir ;; absolute path\n" +
-      "   (file (name "+ convertToLiteral(new File(parent,"src").getCanonicalPath()) + ")))\n" +
+      "   (file (name " +  convertToLiteral(new File(parent,"src").getCanonicalPath()) + ")))\n" +
       "(proj-root ;; absolute path\n" +
-      "   (file (name "+ convertToLiteral(new File(parent,"src").getCanonicalPath()) + ")))\n" +
+      "   (file (name " +  convertToLiteral(new File(parent,"src").getCanonicalPath()) + ")))\n" +
       "(classpaths\n" +
-      "   (file (name "+ convertToLiteral(new File(parent,"src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
+      "   (file (name " +  convertToLiteral(new File(parent,"src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
       "(main-class\n" +
       "   some.thing.ClassName)";
     
@@ -360,10 +360,10 @@ public class ProjectTest extends DrJavaTestCase {
       "   (path \"./[ Source Files ]/sexp/\")\n" +
       "   (path \"./[ External ]/\"))\n" +
       "(build-dir ;; absolute path\n" +
-      "   (file (name "+ convertToLiteral(new File(parent, "built").getCanonicalPath()) + ")))\n" +
+      "   (file (name " +  convertToLiteral(new File(parent, "built").getCanonicalPath()) + ")))\n" +
       "(work-dir (file (name \"src\")))\n" +
       "(classpaths\n" +
-      "   (file (name "+ convertToLiteral(new File(parent, "src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
+      "   (file (name " +  convertToLiteral(new File(parent, "src/edu/rice/cs/lib").getCanonicalPath()) + ")))\n" +
       "(main-class\n" +
       "   some.thing.Name)";
     

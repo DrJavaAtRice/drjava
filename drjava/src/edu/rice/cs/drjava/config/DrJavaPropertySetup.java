@@ -235,7 +235,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       "Required attributes:\n" +
       "\tfile=\"<file to test>\"\n" +
       "Multiple files can be specified, separated by ${path.separator}, " +
-      "which is " +File.pathSeparator+" on this machine. If multiple " +
+      "which is " +File.pathSeparator + " on this machine. If multiple " +
       "files are specified, then a list of values, each " +
       "separated by ${path.separator}, is returned.";
     
@@ -275,7 +275,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       "Required attributes:\n" +
       "\tfile=\"<file to test>\"\n" +
       "Multiple files can be specified, separated by ${path.separator}, " +
-      "which is " +File.pathSeparator+" on this machine. If multiple " +
+      "which is " +File.pathSeparator + " on this machine. If multiple " +
       "files are specified, then a list of values, each " +
       "separated by ${path.separator}, is returned.";
     
@@ -1217,7 +1217,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           PropertyMaps.TEMPLATE.removeVariable(name);
         }
         catch(IllegalArgumentException e) {
-          _value = "(var Error: " +e.getMessage()+"...)";
+          _value = "(var Error: " +e.getMessage() + "...)";
         }
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
@@ -1264,7 +1264,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           pm.setVariable(name,val);
         }
         catch(IllegalArgumentException e) {
-          _value = "(var.set Error: " +e.getMessage()+"...)";
+          _value = "(var.set Error: " +e.getMessage() + "...)";
           return;
         }
         _value = "";
@@ -1348,7 +1348,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           }
         }
         catch(IllegalArgumentException e) {
-          _value = "(for Error: " +e.getMessage()+"...)";
+          _value = "(for Error: " +e.getMessage() + "...)";
         }
         pm.removeVariable(var);
         val = sb.toString();
@@ -1404,7 +1404,7 @@ public class DrJavaPropertySetup implements OptionConstants {
         if (!f.exists()) { continue; }
         if (f.isDirectory()) {
           // this is a directory, maybe DrJava is contained here as individual files
-          File cf = new File(f, edu.rice.cs.drjava.DrJava.class.getName().replace('.', File.separatorChar)+".class");
+          File cf = new File(f, edu.rice.cs.drjava.DrJava.class.getName().replace('.', File.separatorChar) + ".class");
           if (cf.exists() && cf.isFile()) {
             found = f;
             break;
@@ -1416,7 +1416,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           // if it's not a jar file, an exception will already have been thrown
           // so we know it is a jar file
           // now let's check if it contains DrJava
-          if (jf.getJarEntry(edu.rice.cs.drjava.DrJava.class.getName().replace('.', '/')+".class") != null) {
+          if (jf.getJarEntry(edu.rice.cs.drjava.DrJava.class.getName().replace('.', '/') + ".class") != null) {
             found = f;
             break;
           }

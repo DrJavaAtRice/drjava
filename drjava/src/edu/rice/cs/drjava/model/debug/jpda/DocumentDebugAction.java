@@ -93,7 +93,7 @@ public abstract class DocumentDebugAction<T extends EventRequest> extends DebugA
       // Still couldn't find a class name, use ""
       _className = "";
     }
-    // System.out.println("Breakpoint added: "+_className+", exact="+_exactClassName);
+    // System.out.println("Breakpoint added: " + _className + ", exact=" + _exactClassName);
     
     try {
       _file = doc.getFile();

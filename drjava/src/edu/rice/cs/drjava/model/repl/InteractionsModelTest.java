@@ -166,7 +166,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     _model = new IncompleteInputInteractionsModel(_adapter);   // override the one initialized in setUp()
     assertReplThrewContinuationException("void m() {");
     assertReplThrewContinuationException("void m() {;");
-    assertReplThrewContinuationException("1+");
+    assertReplThrewContinuationException("1 + ");
     assertReplThrewContinuationException("(1+2");
     assertReplThrewSyntaxException("(1+2;");
     assertReplThrewContinuationException("for (;;");

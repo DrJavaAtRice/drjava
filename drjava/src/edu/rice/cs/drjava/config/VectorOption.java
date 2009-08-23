@@ -158,7 +158,7 @@ public class VectorOption<T> extends Option<Vector<T>> {
             // invalid
             throw new OptionParseException(name, s, "A pipe | was discovered before the token '" + st.sval +
                                            "'. A pipe is only allowed in front of another pipe " +
-                                           "or the delimiter "+delim+".");
+                                           "or the delimiter " + delim + ".");
           }
           sb.append(st.sval);
           prevtok = tok;

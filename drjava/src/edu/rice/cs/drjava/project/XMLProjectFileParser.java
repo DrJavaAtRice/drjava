@@ -94,7 +94,7 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
 
       // read version... this string isn't actually used
       String version = xcParent.get("drjava.version", "unknown");
-      LOG.log("version = '"+version+"'");
+      LOG.log("version = '" + version + "'");
       
       pfir.setDrJavaVersion(version);
       
@@ -106,26 +106,26 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       // read project root; must be present
       try {
         s = _xc.get(".root");
-        LOG.log("root = '"+s+"'");
+        LOG.log("root = '" + s + "'");
         File root = new File(_parent, s);
         LOG.log("_parent = " + _parent);
         pfir.setProjectRoot(root);
         _srcFileBase = root.getCanonicalPath();
         LOG.log("_srcFileBase from reading the prject root = " + _srcFileBase);
       }
-      catch(XMLConfigException e) { throw new MalformedProjectFileException("XML Parse Error: "+e.getMessage()+"\n"+StringOps.getStackTrace(e)); }
+      catch(XMLConfigException e) { throw new MalformedProjectFileException("XML Parse Error: " + e.getMessage() + "\n" + StringOps.getStackTrace(e)); }
       
       // read create jar options
       try {
         s = _xc.get("createjar.file");
-        LOG.log("createjar.file = '"+s+"'");
+        LOG.log("createjar.file = '" + s + "'");
         File jarFile = new File(_parent, s);
         pfir.setCreateJarFile(jarFile);
       }
       catch(XMLConfigException e) { /* not present is ok too */ }
       try {
         s = _xc.get("createjar.flags");
-        LOG.log("createjar.flags = '"+s+"'");
+        LOG.log("createjar.flags = '" + s + "'");
         int flags = Integer.valueOf(s);
         pfir.setCreateJarFlags(flags);
       }
@@ -133,14 +133,14 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       
       try{
         s = _xc.get(".manifest");
-        LOG.log("manifest = '"+s+"'");
+        LOG.log("manifest = '" + s + "'");
         pfir.setCustomManifest(TextUtil.xmlUnescape(s));
       }catch(XMLConfigException e) { /* not present is fine */ }
       
       // read build dir
       try {
         s = _xc.get(".build");
-        LOG.log("build = '"+s+"'");
+        LOG.log("build = '" + s + "'");
         File buildDir = (!new File(s).isAbsolute())?new File(_parent, s):new File(s);
         pfir.setBuildDirectory(buildDir);
       }
@@ -149,16 +149,16 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       // read working dir; must be present
       try {
         s = _xc.get(".work");
-        LOG.log("work = '"+s+"'");
+        LOG.log("work = '" + s + "'");
         File workDir = (!new File(s).isAbsolute())?new File(_parent, s):new File(s);
         pfir.setWorkingDirectory(workDir);
       }
-      catch(XMLConfigException e) { throw new MalformedProjectFileException("XML Parse Error: "+e.getMessage()+"\n"+StringOps.getStackTrace(e)); }
+      catch(XMLConfigException e) { throw new MalformedProjectFileException("XML Parse Error: " + e.getMessage() + "\n" + StringOps.getStackTrace(e)); }
 
       // read main class
       try {
         s = _xc.get(".main");
-        LOG.log("main = '"+s+"'");
+        LOG.log("main = '" + s + "'");
         /*File mainClass = new File(_parent, s);
         pfir.setMainClass(mainClass);*/
         pfir.setMainClass(s);
@@ -197,48 +197,48 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
         // read bookmarks
         pfir.setBookmarks(readBookmarks());
       }
-      catch(XMLConfigException e) { throw new MalformedProjectFileException("XML Parse Error: "+e.getMessage()+"\n"+StringOps.getStackTrace(e)); }
+      catch(XMLConfigException e) { throw new MalformedProjectFileException("XML Parse Error: " + e.getMessage() + "\n" + StringOps.getStackTrace(e)); }
     }
     catch(XMLConfigException e) {
-      throw new MalformedProjectFileException("Malformed XML project file."+e.getMessage()+"\n"+StringOps.getStackTrace(e));
+      throw new MalformedProjectFileException("Malformed XML project file." + e.getMessage() + "\n" + StringOps.getStackTrace(e));
     }
     catch(NumberFormatException e) {
-      throw new MalformedProjectFileException("Malformed XML project file; a value that should have been an integer was not.\n"+StringOps.getStackTrace(e));
+      throw new MalformedProjectFileException("Malformed XML project file; a value that should have been an integer was not.\n" + StringOps.getStackTrace(e));
     }
     catch(IllegalArgumentException e) {
-      throw new MalformedProjectFileException("Malformed XML project file; a value had the wrong type.\n"+StringOps.getStackTrace(e));
+      throw new MalformedProjectFileException("Malformed XML project file; a value had the wrong type.\n" + StringOps.getStackTrace(e));
     }
     catch(IndexOutOfBoundsException e) {
-      throw new MalformedProjectFileException("Malformed XML project file; a required value was missing.\n"+StringOps.getStackTrace(e));
+      throw new MalformedProjectFileException("Malformed XML project file; a required value was missing.\n" + StringOps.getStackTrace(e));
     }    
     LOG.log(pfir.toString());
     return pfir;
   }
   
   protected List<DocFile> readSourceFiles(String path, String rootPath) throws MalformedProjectFileException {
-    LOG.log("readSourceFiles(path='"+path+"', rootPath='"+rootPath+"')");
+    LOG.log("readSourceFiles(path='" + path + "', rootPath='" + rootPath + "')");
     List<DocFile> docFList = new ArrayList<DocFile>();
-    List<Node> defs = _xc.getNodes(path+"/file");
-    LOG.log("\tdefs.size() = "+defs.size());
-    for(Node n: defs) { LOG.log("\t"+n.getNodeValue()); }
+    List<Node> defs = _xc.getNodes(path + "/file");
+    LOG.log("\tdefs.size() = " + defs.size());
+    for(Node n: defs) { LOG.log("\t" + n.getNodeValue()); }
 
     for(Node n: defs) {
-      LOG.log("\t"+n.toString());
+      LOG.log("\t" + n.toString());
       
       // now all path names are relative to node n...
       String name = _xc.get(".name",n);
-      LOG.log("\t\tname = '"+name+"'");
+      LOG.log("\t\tname = '" + name + "'");
       
       int selectFrom = _xc.getInt("select.from",n);
       int selectTo = _xc.getInt("select.to",n);
-      LOG.log("\t\tselect = '"+selectFrom+" to "+selectTo+"'");
+      LOG.log("\t\tselect = '" + selectFrom + " to " + selectTo + "'");
       
       int scrollCol = _xc.getInt("scroll.column",n);
       int scrollRow = _xc.getInt("scroll.row",n);
-      LOG.log("\t\tscroll = '"+scrollCol+" , "+scrollRow+"'");
+      LOG.log("\t\tscroll = '" + scrollCol + " , " + scrollRow + "'");
       
       String timestamp = _xc.get(".timestamp",n);
-      LOG.log("\t\ttimestamp = '"+timestamp+"'");
+      LOG.log("\t\ttimestamp = '" + timestamp + "'");
       Date modDate;
       try {
         // attemp parsing in default locale
@@ -256,12 +256,12 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       }
       
       String pkg = _xc.get(".package",n);
-      LOG.log("\t\tpackage = '"+pkg+"'");
+      LOG.log("\t\tpackage = '" + pkg + "'");
       
       boolean active;
       try {
         active = _xc.getBool(".active",n);
-        LOG.log("\t\tactive = '"+active+"'");
+        LOG.log("\t\tactive = '" + active + "'");
       }
       catch(XMLConfigException e) { active = false; /* it's ok if it doesn't exist */ }
       
@@ -285,7 +285,7 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
   
   protected List<AbsRelFile> readFiles(String path, String rootPath) {
     List<AbsRelFile> fList = new ArrayList<AbsRelFile>();
-    List<Node> defs = _xc.getNodes(path+"/file");
+    List<Node> defs = _xc.getNodes(path + "/file");
     for(Node n: defs) {
       // now all path names are relative to node n...
       String name = _xc.get(".name",n);

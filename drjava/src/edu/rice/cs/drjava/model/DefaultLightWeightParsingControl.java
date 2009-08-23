@@ -99,7 +99,7 @@ public final class DefaultLightWeightParsingControl implements LightWeightParsin
         }
         long current = System.currentTimeMillis();
         long delta = (_beginUpdates-current);
-        // _log.logTime("Begin updates at "+_beginUpdates+" (delta="+delta+")");
+        // _log.logTime("Begin updates at " + _beginUpdates + " (delta=" + delta + ")");
         if (current>=_beginUpdates) {
           OpenDefinitionsDocument doc = _model.getActiveDocument();
           Long last = _lastUpdates.get(doc);
@@ -108,11 +108,11 @@ public final class DefaultLightWeightParsingControl implements LightWeightParsin
             // _log.logTime("Update done.");
           }
           else {
-            // _log.logTime("Not updating, last update was at "+last);
+            // _log.logTime("Not updating, last update was at " + last);
           }
           delta = DrJava.getConfig().getSetting(OptionConstants.DIALOG_LIGHTWEIGHT_PARSING_DELAY).intValue();
         }
-        // _log.logTime("Not updating, sleeping for "+delta);
+        // _log.logTime("Not updating, sleeping for " + delta);
         try {
           Thread.sleep(delta);
         }
@@ -131,7 +131,7 @@ public final class DefaultLightWeightParsingControl implements LightWeightParsin
   
   /** Perform light-weight parsing. */
   public synchronized void update(final OpenDefinitionsDocument doc) {
-    _log.log("Update for "+doc);
+    _log.log("Update for " + doc);
     try {
       _lastUpdates.put(doc, System.currentTimeMillis());
       final String old = _enclosingClassNames.get(doc);
@@ -154,7 +154,7 @@ public final class DefaultLightWeightParsingControl implements LightWeightParsin
     * @param b  {@code true} to start or {@code false} to stop automatic updates
     */
   public void setAutomaticUpdates(boolean b) {
-    _log.log("setAutomaticUpdates("+b+")");
+    _log.log("setAutomaticUpdates(" + b + ")");
     _running = b;
     if (b) {
       delay();

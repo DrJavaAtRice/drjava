@@ -134,7 +134,7 @@ public abstract class OptionComponent<T> implements Serializable {
                                   "There was an error in one of the options that you entered.\n" +
                                   "Option: '" + getLabelText() + "'\n" +
                                   "Your value: '" + value + "'\n" +
-                                  "Error: "+ message,
+                                  "Error: " +  message,
                                   title,
                                   JOptionPane.WARNING_MESSAGE);
   }

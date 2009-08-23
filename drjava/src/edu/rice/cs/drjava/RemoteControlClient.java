@@ -87,7 +87,7 @@ public class RemoteControlClient {
       // send request
       String dString = RemoteControlServer.QUERY_PREFIX;
       if (f != null) {
-        dString = dString+" "+f.getAbsolutePath();
+        dString = dString + " " + f.getAbsolutePath();
       }
       byte[] buf = dString.getBytes();
       InetAddress address = InetAddress.getByName("127.0.0.1");
@@ -126,7 +126,7 @@ public class RemoteControlClient {
     for (int i = 0; i < args.length; ++i) {
       try {
         boolean ret = openFile(new File(args[i]));
-        System.out.println("openFile returned "+ret);
+        System.out.println("openFile returned " + ret);
       }
       catch(IOException ioe) {
         ioe.printStackTrace();

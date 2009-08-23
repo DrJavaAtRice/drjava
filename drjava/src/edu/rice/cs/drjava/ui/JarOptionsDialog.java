@@ -215,9 +215,9 @@ public class JarOptionsDialog extends SwingFrame {
     _makeExecutable.setSelected(((f & MAKE_EXECUTABLE) != 0));
     _customManifest.setSelected(((f & CUSTOM_MANIFEST) != 0));
     
-    LOG.log("_customManifestText set off of "+_model);
+    LOG.log("_customManifestText set off of " + _model);
     _customManifestText = _model.getCustomManifest();
-    LOG.log("\tto: "+_customManifestText);
+    LOG.log("\tto: " + _customManifestText);
     if(_customManifestText == null)
       _customManifestText = "";
     
@@ -247,7 +247,7 @@ public class JarOptionsDialog extends SwingFrame {
       
       // Main class
       _rootFile = _model.getBuildDirectory();
-      LOG.log("_loadSettings, rootFile="+_rootFile);
+      LOG.log("_loadSettings, rootFile=" + _rootFile);
       try {
         _rootFile = _rootFile.getCanonicalFile();
       } catch(IOException e) { }
@@ -528,7 +528,7 @@ public class JarOptionsDialog extends SwingFrame {
     * @return the panel containing the label and the selector for the main class.
     */
   private JPanel _makeMainClassSelectorPanel() {
-    LOG.log("_makeMainClassSelectorPanel, _rootFile="+_rootFile);
+    LOG.log("_makeMainClassSelectorPanel, _rootFile=" + _rootFile);
     FileChooser chooser = new FileChooser(_rootFile);
     chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     chooser.setMultiSelectionEnabled(false);
@@ -703,7 +703,7 @@ public class JarOptionsDialog extends SwingFrame {
       HashSet<String> _exceptions = new HashSet<String>();
       
       private boolean jarAll(File dir, JarBuilder jarFile, final File outputFile) throws IOException {
-        LOG.log("jarOthers("+dir+" , "+jarFile+")");
+        LOG.log("jarOthers(" + dir + " , " + jarFile + ")");
         java.io.FileFilter allFilter = new java.io.FileFilter() {
           public boolean accept(File f) {
             return !outputFile.equals(f);
@@ -716,10 +716,10 @@ public class JarOptionsDialog extends SwingFrame {
           for(int i = 0; i < files.length; i++){
             try {
               if(files[i].isDirectory()){
-                LOG.log("jarFile.addDirectoryRecursive("+files[i]+")");
+                LOG.log("jarFile.addDirectoryRecursive(" + files[i] + ")");
                 jarFile.addDirectoryRecursive(files[i], files[i].getName(), allFilter);
               }else{
-                LOG.log("jarFile.addFile("+files[i]+")");
+                LOG.log("jarFile.addFile(" + files[i] + ")");
                 jarFile.addFile(files[i], "", files[i].getName());
               }
             }
@@ -739,7 +739,7 @@ public class JarOptionsDialog extends SwingFrame {
        * @return true on success, false on failure
        */
       private boolean jarBuildDirectory(File dir, JarBuilder jarFile) throws IOException {
-      LOG.log("jarBuildDirectory("+dir+" , "+jarFile+")");
+      LOG.log("jarBuildDirectory(" + dir + " , " + jarFile + ")");
         
         java.io.FileFilter classFilter = new java.io.FileFilter() {
           public boolean accept(File f) {
@@ -749,21 +749,21 @@ public class JarOptionsDialog extends SwingFrame {
         
         File[] files = dir.listFiles(classFilter);
         
-        LOG.log("\tfiles = "+files);
+        LOG.log("\tfiles = " + files);
         
         if (files != null) { // listFiles may return null if there's an IO error
           for (int i = 0; i < files.length; i++) {
-            LOG.log("\t\tfiles["+i+"] = "+files[i]);
+            LOG.log("\t\tfiles[" + i + "] = " + files[i]);
             
             if(files[i] == null || !files[i].exists()) continue;
             
             try {
               if (files[i].isDirectory()) {
-                LOG.log("jarFile.addDirectoryRecursive("+files[i]+")");
+                LOG.log("jarFile.addDirectoryRecursive(" + files[i] + ")");
                 jarFile.addDirectoryRecursive(files[i], files[i].getName(), classFilter);
               }
               else {
-                LOG.log("jarFile.addFile("+files[i]+")");
+                LOG.log("jarFile.addFile(" + files[i] + ")");
                 jarFile.addFile(files[i], "", files[i].getName());
               }
             }
@@ -856,11 +856,11 @@ public class JarOptionsDialog extends SwingFrame {
             
             if(_jarAll.isSelected()){
               LOG.log("jarAll");
-              LOG.log("binRoot="+binRoot);
-              LOG.log("root="+_model.getProjectRoot());
-              LOG.log("FileOps.isAncestorOf(_model.getProjectRoot(),binRoot)="+FileOps.isAncestorOf(_model.getProjectRoot(),binRoot));
-              LOG.log("mainJar="+mainJar);
-              LOG.log("jarOut="+jarOut);
+              LOG.log("binRoot=" + binRoot);
+              LOG.log("root=" + _model.getProjectRoot());
+              LOG.log("FileOps.isAncestorOf(_model.getProjectRoot(),binRoot)=" + FileOps.isAncestorOf(_model.getProjectRoot(),binRoot));
+              LOG.log("mainJar=" + mainJar);
+              LOG.log("jarOut=" + jarOut);
               jarAll(_model.getProjectRoot(), mainJar, jarOut);
               if(!_model.getProjectRoot().equals(binRoot))
                 LOG.log("jarBuildDirectory");
@@ -908,7 +908,7 @@ public class JarOptionsDialog extends SwingFrame {
         }
         catch (Exception e) {
           // e.printStackTrace();
-          LOG.log("construct: "+e, e.getStackTrace());
+          LOG.log("construct: " + e, e.getStackTrace());
         }
         return null;
       }
@@ -931,7 +931,7 @@ public class JarOptionsDialog extends SwingFrame {
           }
           if ((_jarAll.isSelected() || _jarClasses.isSelected()) && _makeExecutable.isSelected()) {
             Object[] options = { "OK", "Run" };
-            int res = JOptionPane.showOptionDialog(JarOptionsDialog.this, "Jar file successfully written to '"+_jarFileSelector.getFileFromField().getName()+"'",
+            int res = JOptionPane.showOptionDialog(JarOptionsDialog.this, "Jar file successfully written to '" + _jarFileSelector.getFileFromField().getName() + "'",
                                                    "Jar Creation Successful", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
                                                    null, options, options[0]);
             JarOptionsDialog.this.setVisible(false);
@@ -945,12 +945,12 @@ public class JarOptionsDialog extends SwingFrame {
                     ConcurrentUtil.copyProcessErr(p, System.err);
                     ConcurrentUtil.copyProcessOut(p, System.out);
                     p.waitFor();
-                    JOptionPane.showMessageDialog(JarOptionsDialog.this,"Execution of jar file terminated (exit value = "+
-                                                  p.exitValue()+")", "Execution terminated.",
+                    JOptionPane.showMessageDialog(JarOptionsDialog.this,"Execution of jar file terminated (exit value = " + 
+                                                  p.exitValue() + ")", "Execution terminated.",
                                                   JOptionPane.INFORMATION_MESSAGE);
                   }
                   catch(Exception e) {
-                    JOptionPane.showMessageDialog(JarOptionsDialog.this, "An error occured while running the jar file: \n"+e, "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(JarOptionsDialog.this, "An error occured while running the jar file: \n" + e, "Error", JOptionPane.ERROR_MESSAGE);
                   }
                   finally {
                     JarOptionsDialog.this.setVisible(false);
@@ -980,7 +980,7 @@ public class JarOptionsDialog extends SwingFrame {
               ScrollableListDialog<String> dialog = new ScrollableListDialog.Builder<String>()
                 .setOwner(JarOptionsDialog.this)
                 .setTitle("Error Creating Jar")
-                .setText("<html>An error occured while creating the jar file. This could be because the file<br>"+
+                .setText("<html>An error occured while creating the jar file. This could be because the file<br>" + 
                          "that you are writing to or the file you are reading from could not be opened.</html>")
                 .setItems(new ArrayList<String>(_exceptions))
                 .setMessageType(JOptionPane.ERROR_MESSAGE)
@@ -991,7 +991,7 @@ public class JarOptionsDialog extends SwingFrame {
             }
             else {
               JOptionPane.showMessageDialog(JarOptionsDialog.this, 
-                                            "An error occured while creating the jar file. This could be because the file that you "+
+                                            "An error occured while creating the jar file. This could be because the file that you " + 
                                             "are writing to or the file you are reading from could not be opened.", 
                                             "Error Creating Jar",
                                             JOptionPane.ERROR_MESSAGE);
@@ -1045,7 +1045,7 @@ public class JarOptionsDialog extends SwingFrame {
     String currentManifest = _model.getCustomManifest();
     
     if(currentManifest == null || !(currentManifest.equals(_customManifestText))){
-      LOG.log("Updated Manifest on: "+_model);
+      LOG.log("Updated Manifest on: " + _model);
       _model.setCustomManifest(_customManifestText);
     }
     

@@ -452,7 +452,7 @@ public class ConfigFrame extends SwingFrame {
    
     addOptionComponent(panel, new VectorFileOptionComponent(OptionConstants.EXTRA_CLASSPATH,
                                                             "Extra Classpath", this,
-                                                            "<html>Any directories or jar files to add to the classpath<br>"+
+                                                            "<html>Any directories or jar files to add to the classpath<br>" + 
                                                             "of the Compiler and Interactions Pane.</html>", true));
     
     panel.displayComponents();
@@ -493,7 +493,7 @@ public class ConfigFrame extends SwingFrame {
                                                   "Whether to show a sample of the source code under the document's filename when fast switching documents."));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_CODE_PREVIEW_POPUPS, 
                                                   "Show Code Preview Popups", this,
-                                                  "<html>Whether to show a popup window with a code preview when the mouse is hovering<br>"+
+                                                  "<html>Whether to show a popup window with a code preview when the mouse is hovering<br>" + 
                                                   "over an item in the Breakpoints, Bookmarks and Find All panes.</html>"));
         
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.CLIPBOARD_HISTORY_SIZE,
@@ -505,8 +505,8 @@ public class ConfigFrame extends SwingFrame {
                                  "<html><p align=\"right\">" + 
                                  StringOps.
                                    splitStringAtWordBoundaries("Display Fully-Qualified Class Names in \"Go to File\" Dialog",
-                                                               27, "<br>", SEPS)+"</p></html>", this,
-                                 "<html>Whether to also display fully-qualified class names in the \"Go to File\" dialog.<br>"+
+                                                               27, "<br>", SEPS) + "</p></html>", this,
+                                 "<html>Whether to also display fully-qualified class names in the \"Go to File\" dialog.<br>" + 
                                  "Enabling this option on network drives might cause the dialog to display after a slight delay.</html>");
     addOptionComponent(panel, checkbox);
     
@@ -515,9 +515,9 @@ public class ConfigFrame extends SwingFrame {
                                  "<html><p align=\"right\">" + 
                                  StringOps.
                                    splitStringAtWordBoundaries("Scan Class Files After Each Compile for Auto-Completion and Auto-Import",
-                                                               27, "<br>", SEPS)+"</p></html>", this,
-                                 "<html>Whether to scan the class files after a compile to generate class names<br>"+
-                                 "used for auto-completion and auto-import.<br>"+
+                                                               27, "<br>", SEPS) + "</p></html>", this,
+                                 "<html>Whether to scan the class files after a compile to generate class names<br>" + 
+                                 "used for auto-completion and auto-import.<br>" + 
                                  "Enabling this option will slow compiles down.</html>");
     addOptionComponent(panel, checkbox);
     
@@ -526,7 +526,7 @@ public class ConfigFrame extends SwingFrame {
                                  "<html><p align=\"right\">" + 
                                  StringOps.
                                    splitStringAtWordBoundaries("Consider Java API Classes for Auto-Completion",
-                                                               27, "<br>", SEPS)+"</p></html>", this,
+                                                               27, "<br>", SEPS) + "</p></html>", this,
                                  "Whether to use the names of the Java API classes for auto-completion as well.");
     addOptionComponent(panel, checkbox);
     panel.displayComponents();
@@ -579,7 +579,7 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, new ColorOptionComponent(OptionConstants.BOOKMARK_COLOR, "Bookmark Color", this,
                                                 "The color for bookmarks in the Definitions Pane.", true));
     for (int i = 0; i < OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
-      addOptionComponent(panel, new ColorOptionComponent(OptionConstants.FIND_RESULTS_COLORS[i], "Find Results Color "+(i+1), this,
+      addOptionComponent(panel, new ColorOptionComponent(OptionConstants.FIND_RESULTS_COLORS[i], "Find Results Color " + (i+1), this,
                                                          "A color for highlighting find results in the Definitions Pane.", true));
     }
     addOptionComponent(panel, 
@@ -834,7 +834,7 @@ public class ConfigFrame extends SwingFrame {
                                                        "To exclude a package, add <code>packagename.*</code> to the list.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DEBUG_AUTO_IMPORT,
                                                   "Auto-Import after Breakpoint/Step", this,
-                                                  "<html>Whether the Debugger should automatically import packages<br>"+
+                                                  "<html>Whether the Debugger should automatically import packages<br>" + 
                                                   "and classes again after a breakpoint or step.</html>"));
     
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.AUTO_STEP_RATE,
@@ -893,7 +893,7 @@ public class ConfigFrame extends SwingFrame {
         // verify that the allclasses-frame.html file exists at that URL. do not actually parse it now
         boolean result = true;
         try {
-          java.net.URL url = new java.net.URL(s+"/allclasses-frame.html");
+          java.net.URL url = new java.net.URL(s + "/allclasses-frame.html");
           java.io.InputStream urls = url.openStream();
           java.io.InputStreamReader is = null;
           java.io.BufferedReader br = null;
@@ -912,7 +912,7 @@ public class ConfigFrame extends SwingFrame {
         catch(java.io.IOException ioe) { result = false; }
         if (!result) {
           JOptionPane.showMessageDialog(ConfigFrame.this,
-                                        "Could not find the Javadoc at the URL\n"+
+                                        "Could not find the Javadoc at the URL\n" + 
                                         s,
                                         "Error Adding Javadoc",
                                         JOptionPane.ERROR_MESSAGE); 
@@ -1074,7 +1074,7 @@ public class ConfigFrame extends SwingFrame {
                        new BooleanOptionComponent(OptionConstants.WARN_IF_COMPIZ, 
                                                   "Warn If Compiz Detected",
                                                   this,
-                                                  "<html>Whether DrJava should warn the user if Compiz is running.<br>"+
+                                                  "<html>Whether DrJava should warn the user if Compiz is running.<br>" + 
                                                   "Compiz and Java Swing are incompatible and can lead to crashes.</html>",
                                                   false)
                          .setEntireColumn(true));
@@ -1157,24 +1157,24 @@ public class ConfigFrame extends SwingFrame {
                                                   "If this is not selected, the focus will be in the Find/Replace pane.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DRJAVA_USE_FORCE_QUIT, 
                                                   "Forcefully Quit DrJava", this,
-                                                  "<html>On some platforms, DrJava does not shut down properly when files are open<br>"+
+                                                  "<html>On some platforms, DrJava does not shut down properly when files are open<br>" + 
                                                   "(namely tablet PCs). Check this option to force DrJava to close.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.REMOTE_CONTROL_ENABLED, 
                                                   "Enable Remote Control", this,
-                                                  "<html>Whether DrJava should listen to a socket (see below) so it<br>"+
-                                                         "can be remote controlled and told to open files.<br>"+
+                                                  "<html>Whether DrJava should listen to a socket (see below) so it<br>" + 
+                                                         "can be remote controlled and told to open files.<br>" + 
                                                          "(Changes will not be applied until DrJava is restarted.)</html>"));
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.REMOTE_CONTROL_PORT, 
                                                          "Remote Control Port", this,
-                                                         "<html>A running instance of DrJava can be remote controlled and<br>"+
+                                                         "<html>A running instance of DrJava can be remote controlled and<br>" + 
                                                          "told to open files. This specifies the port used for remote control.</html>"));
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.FOLLOW_FILE_DELAY, 
                                                          "Follow File Delay", this,
-                                                         "<html>The delay in milliseconds that has to elapse before DrJava will check<br>"+
+                                                         "<html>The delay in milliseconds that has to elapse before DrJava will check<br>" + 
                                                          "if a file that is being followed or the output of an external process has changed.</html>"));
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.FOLLOW_FILE_LINES, 
                                                          "Maximum Lines in \"Follow File\" Window", this,
-                                                         "<html>The maximum number of lines to keep in a \"Follow File\"<br>"+
+                                                         "<html>The maximum number of lines to keep in a \"Follow File\"<br>" + 
                                                          "or \"External Process\" pane. Enter 0 for unlimited.</html>"));
     
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
@@ -1214,8 +1214,8 @@ public class ConfigFrame extends SwingFrame {
   /** Adds all of the components for the file types panel of the preferences window. */
   private void _setupFileTypesPanel(ConfigPanel panel) {
     if (PlatformFactory.ONLY.canRegisterFileExtensions()) {
-      addOptionComponent(panel, new LabelComponent("<html>Assign DrJava project files and DrJava extensions<br>"+
-                                                   "(with the extensions .drjava and .djapp) to DrJava.<br>"+
+      addOptionComponent(panel, new LabelComponent("<html>Assign DrJava project files and DrJava extensions<br>" + 
+                                                   "(with the extensions .drjava and .djapp) to DrJava.<br>" + 
                                                    "When double-clicking on a .drjava file, DrJava will open it.</html>", this, true));
       
       panel.addComponent(new ButtonComponent(new ActionListener() {
@@ -1256,8 +1256,8 @@ public class ConfigFrame extends SwingFrame {
       
       addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
       addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
-      addOptionComponent(panel, new LabelComponent("<html>Assign Java source files with the<br>"+
-                                                   "extension .java to DrJava. When double-clicking<br>"+
+      addOptionComponent(panel, new LabelComponent("<html>Assign Java source files with the<br>" + 
+                                                   "extension .java to DrJava. When double-clicking<br>" + 
                                                    "on a .java file, DrJava will open it.</html>", this, true));
 
       panel.addComponent(new ButtonComponent(new ActionListener() {
@@ -1301,20 +1301,20 @@ public class ConfigFrame extends SwingFrame {
       
       addOptionComponent(panel, new ForcedChoiceOptionComponent(OptionConstants.FILE_EXT_REGISTRATION,
                                                                 "<html>Automatically assign .java, .drjava and .djapp Files to DrJava</html>", this,
-                                                                "<html>Assign files with the extensions .java, .drjava and .djapp to DrJava.<br>"+
-                                                                "When double-clicking those files, they will be opened in DrJava.<br><br>"+
-                                                                "Selecting 'always' will re-establish this association every time DrJava<br>"+
-                                                                "started, without asking. Selecting 'ask me' will ask the user at start up<br>"+
-                                                                "if the association has been changed. Selecting 'never' will not assign<br>"+
+                                                                "<html>Assign files with the extensions .java, .drjava and .djapp to DrJava.<br>" + 
+                                                                "When double-clicking those files, they will be opened in DrJava.<br><br>" + 
+                                                                "Selecting 'always' will re-establish this association every time DrJava<br>" + 
+                                                                "started, without asking. Selecting 'ask me' will ask the user at start up<br>" + 
+                                                                "if the association has been changed. Selecting 'never' will not assign<br>" + 
                                                                 ".java, .drjava and .djapp files to DrJava."));
     }
     else {
       addOptionComponent(panel, 
-                         new LabelComponent("<html><br><br>"+
+                         new LabelComponent("<html><br><br>" + 
                                             (PlatformFactory.ONLY.isMacPlatform()?
                                                "File associations are managed automatically by Mac OS.":
                                                (PlatformFactory.ONLY.isWindowsPlatform()?
-                                                  "To set file associations, please use the .exe file version of DrJava.<br>"+
+                                                  "To set file associations, please use the .exe file version of DrJava.<br>" + 
                                                 "Configuring file associations is not supported for the .jar file version.":
                                                   "Managing file associations is not supported yet on this operating system."))+
                                             "</html>",
@@ -1370,13 +1370,13 @@ public class ConfigFrame extends SwingFrame {
                                                   "The number of interactions to remember in the history."));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_AUTOIMPORT_ENABLED, 
                                                          "Enable the \"Auto Import\" Dialog", this,
-                                                         "<html>Whether DrJava should open the \"Auto Import\" dialog when<br>"+
+                                                         "<html>Whether DrJava should open the \"Auto Import\" dialog when<br>" + 
                                                          "an undefined class is encountered in the Interactions Pane.</html>"));
     VectorStringOptionComponent autoImportClasses =
       new VectorStringOptionComponent(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES, "Classes to Auto-Import", this,
-                                      "<html>List of classes to auto-import every time the<br>"+
-                                      "Interaction Pane is reset or started. Examples:<br><br>"+
-                                      "java.io.File<br>"+
+                                      "<html>List of classes to auto-import every time the<br>" + 
+                                      "Interaction Pane is reset or started. Examples:<br><br>" + 
+                                      "java.io.File<br>" + 
                                       "java.util.*</html>") {
       protected boolean verify(String s) {
         boolean result = true;
@@ -1390,7 +1390,7 @@ public class ConfigFrame extends SwingFrame {
         }
         if (!result) {
           JOptionPane.showMessageDialog(ConfigFrame.this,
-                                        "This is not a valid class name:\n"+
+                                        "This is not a valid class name:\n" + 
                                         s,
                                         "Error Adding Class Name",
                                         JOptionPane.ERROR_MESSAGE); 
@@ -1406,8 +1406,8 @@ public class ConfigFrame extends SwingFrame {
                                                     splitStringAtWordBoundaries("Restore last working directory of the Interactions pane on start up",
                                                                                 33, "<br>", SEPS), this,
                                                   "<html>Whether to restore the last working directory of the Interaction pane on start up,<br>" +
-                                                  "or to always use the value of the \"user.home\" Java property<br>"+
-                                                  "(currently "+System.getProperty("user.home")+")."));
+                                                  "or to always use the value of the \"user.home\" Java property<br>" + 
+                                                  "(currently " + System.getProperty("user.home") + ")."));
 
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
@@ -1419,11 +1419,11 @@ public class ConfigFrame extends SwingFrame {
                                                        "What kind of access control should DrJava enforce in the Interactions Pane?"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DYNAMICJAVA_REQUIRE_SEMICOLON, 
                                                          "Require Semicolon", this,
-                                                         "<html>Whether DrJava should require a semicolon at the<br>"+
+                                                         "<html>Whether DrJava should require a semicolon at the<br>" + 
                                                          "end of a statement in the Interactions Pane.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DYNAMICJAVA_REQUIRE_VARIABLE_TYPE, 
                                                          "Require Variable Type", this,
-                                                         "<html>Whether DrJava should require a variable type for<br>"+
+                                                         "<html>Whether DrJava should require a variable type for<br>" + 
                                                          "variable declarations in the Interactions Pane.</html>"));
     
     panel.displayComponents();
@@ -1498,7 +1498,7 @@ public class ConfigFrame extends SwingFrame {
   private class PanelTreeSelectionListener implements TreeSelectionListener {
     public void valueChanged(TreeSelectionEvent e) {
       Object o = _tree.getLastSelectedPathComponent();
-      //System.out.println("Object o : "+o);
+      //System.out.println("Object o : " + o);
       if (o instanceof PanelTreeNode) {
         //System.out.println("o is instanceof PanelTreeNode");
         PanelTreeNode child = (PanelTreeNode) _tree.getLastSelectedPathComponent();

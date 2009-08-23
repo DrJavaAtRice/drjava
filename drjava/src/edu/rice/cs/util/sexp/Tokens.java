@@ -98,7 +98,7 @@ public interface Tokens {
     
     private boolean _bool;
     private BooleanToken(boolean bool){
-      super(""+bool);
+      super("" + bool);
       _bool = bool;
     }
     public boolean getValue() { return _bool; }

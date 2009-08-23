@@ -184,7 +184,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
-//    _log.log("****"+getInteractionsText());
+//    _log.log("****" + getInteractionsText());
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(2); // fires
@@ -291,7 +291,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
-//    _log.log("****"+getInteractionsText());
+//    _log.log("****" + getInteractionsText());
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(3);  // fires
@@ -396,7 +396,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
       _asyncStep(Debugger.StepType.STEP_OVER);
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
-//    _log.log("****"+getInteractionsText());
+//    _log.log("****" + getInteractionsText());
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(4);  // fires

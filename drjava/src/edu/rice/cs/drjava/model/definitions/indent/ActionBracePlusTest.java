@@ -57,11 +57,11 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
     // (1) 
     
     _text = 
-      "method(\n"+
+      "method(\n" + 
       ")\n";
 
     _aligned = 
-      "method(\n"+
+      "method(\n" + 
       "      )\n";
  
     _setDocText(_text);
@@ -82,11 +82,11 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
     // (2) 
     
     _text = 
-     "var = method(arg1,\n"+
+     "var = method(arg1,\n" + 
      "  arg2, arg3) + 4;";
 
     _aligned = 
-     "var = method(arg1,\n"+
+     "var = method(arg1,\n" + 
      "             arg2, arg3) + 4;";
  
     _setDocText(_text);
@@ -101,12 +101,12 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
     // (3) 
      
     _text =
-     "boolean method(\n"+
-     "int[] a, String b)\n"+
+     "boolean method(\n" + 
+     "int[] a, String b)\n" + 
      "{}";
     _aligned = 
-     "boolean method(\n"+
-     "               int[] a, String b)\n"+
+     "boolean method(\n" + 
+     "               int[] a, String b)\n" + 
      "{}";
 
     _setDocText(_text);
@@ -121,14 +121,14 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
     // (4) 
  
     _text =
-     "boolean method(\n"+
-     "int[] a,\n"+
-     "               String b)\n"+
+     "boolean method(\n" + 
+     "int[] a,\n" + 
+     "               String b)\n" + 
      "{}";
     _aligned = 
-     "boolean method(\n"+
-     "               int[] a,\n"+
-     "               String b)\n"+
+     "boolean method(\n" + 
+     "               int[] a,\n" + 
+     "               String b)\n" + 
      "{}";
 
     _setDocText(_text);
@@ -142,16 +142,16 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
     // (5) 
 
     _text =
-     "array[\n"+
-     "              new Listener() {\n"+
-     "           method() {\n"+
-     "           }\n"+
+     "array[\n" + 
+     "              new Listener() {\n" + 
+     "           method() {\n" + 
+     "           }\n" + 
      "      }]";
     _aligned =
-     "array[\n"+
-     "      new Listener() {\n"+
-     "           method() {\n"+
-     "           }\n"+
+     "array[\n" + 
+     "      new Listener() {\n" + 
+     "           method() {\n" + 
+     "           }\n" + 
      "      }]";
 
     _setDocText(_text);
@@ -171,11 +171,11 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
     // (6) 
     
     _text = 
-     "var = method(foo.\n"+
+     "var = method(foo.\n" + 
      "  bar(), arg3) + 4;";
 
     _aligned = 
-     "var = method(foo.\n"+
+     "var = method(foo.\n" + 
      "               bar(), arg3) + 4;";
  
     _setDocText(_text);
@@ -195,7 +195,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
     // (7) 
     
     _text = 
-      "foo(i,\n"+
+      "foo(i,\n" + 
       "    j.\n" +
       "bar().\n" +
       "// bar();\n" +
@@ -203,7 +203,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
       "    k);";
 
     _aligned = 
-      "foo(i,\n"+
+      "foo(i,\n" + 
       "    j.\n" +
       "      bar().\n" +
       "      // bar();\n" +

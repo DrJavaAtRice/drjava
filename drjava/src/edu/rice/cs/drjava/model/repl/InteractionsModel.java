@@ -228,7 +228,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
             line = line.substring(1).trim();
           } while(line.startsWith("import "));
         }
-//          System.err.println("Preparing to interpret '" + toEval +"'");
+//          System.err.println("Preparing to interpret '" + toEval  + "'");
         final String evalText = toEval;
 
         new Thread(new Runnable() { 
@@ -264,7 +264,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 
     if (sb.length() > 0) {
       interpret(sb.toString());
-      _document.insertBeforeLastPrompt("Auto-import: "+sb.toString() + "\n", InteractionsDocument.DEBUGGER_STYLE);
+      _document.insertBeforeLastPrompt("Auto-import: " + sb.toString() + "\n", InteractionsDocument.DEBUGGER_STYLE);
     }
   }
   
@@ -854,7 +854,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
     if (sb.length() > 0) {
       interpret(sb.toString());
-      _document.insertBeforeLastPrompt("Default imports: "+sb.toString() + "\n", InteractionsDocument.DEBUGGER_STYLE);
+      _document.insertBeforeLastPrompt("Default imports: " + sb.toString() + "\n", InteractionsDocument.DEBUGGER_STYLE);
     }
   }
   

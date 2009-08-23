@@ -96,7 +96,7 @@ public class LanguageLevelStackTraceMapper {
     if(cache.containsKey(FileName)) return replaceStackTraceElement(s,d,cache.get(FileName));
     
     String dn = d.getName();
-    dn = dn.substring(0, dn.lastIndexOf('.'))+".java";
+    dn = dn.substring(0, dn.lastIndexOf('.')) + ".java";
     File javaFile = new File(d.getParentFile(), dn);
     
     cache.put(FileName,ReadLanguageLevelLineBlock(javaFile));  
@@ -159,7 +159,7 @@ public class LanguageLevelStackTraceMapper {
    * @param s the StackTraceElement
    */
   private boolean matches(File f, StackTraceElement s) {
-    LOG.log("matches("+f+", "+s+")");
+    LOG.log("matches(" + f + ", " + s + ")");
     if (s.getFileName() == null) return false;
     OpenDefinitionsDocument d;      
     try{
@@ -173,7 +173,7 @@ public class LanguageLevelStackTraceMapper {
     if (!isLLFileName(dn)) return false;
     
 // replace suffix with ".java"
-    dn = dn.substring(0, dn.lastIndexOf('.'))+".java";
+    dn = dn.substring(0, dn.lastIndexOf('.')) + ".java";
     
 // make sure packages match
     String dp = d.getPackageName();
@@ -205,8 +205,8 @@ public class LanguageLevelStackTraceMapper {
     
     try{  ReadLine = BReader.readLine();  }  catch(java.io.IOException e){}
     
-    LOG.log("ReadLine = '"+ReadLine+"'");
-    LOG.log("\tlastIndex = "+ReadLine.lastIndexOf(" "));
+    LOG.log("ReadLine = '" + ReadLine + "'");
+    LOG.log("\tlastIndex = " + ReadLine.lastIndexOf(" "));
     Integer MapSize = new Integer (ReadLine.substring(ReadLine.lastIndexOf(" ")+1));
     
     try{  ReadLine = BReader.readLine();  }  catch(java.io.IOException e){}
@@ -254,8 +254,8 @@ public class LanguageLevelStackTraceMapper {
     
     try{  ReadLine = BReader.readLine();  }  catch(java.io.IOException e){}
     
-    LOG.log("ReadLine = '"+ReadLine+"'");
-    LOG.log("\tlastIndex = "+ReadLine.lastIndexOf(" "));
+    LOG.log("ReadLine = '" + ReadLine + "'");
+    LOG.log("\tlastIndex = " + ReadLine.lastIndexOf(" "));
     Integer MapSize = new Integer (ReadLine.substring(ReadLine.lastIndexOf(" ")+1));
     
     try{  ReadLine = BReader.readLine();  }  catch(java.io.IOException e){}
@@ -316,9 +316,9 @@ public class LanguageLevelStackTraceMapper {
   
   /** Change a language level extension into a .java extension. */
   public static File getJavaFileForLLFile(File llFile) {
-    if (!isLLFile(llFile)) throw new AssertionError("File is not a language level file: "+llFile);
+    if (!isLLFile(llFile)) throw new AssertionError("File is not a language level file: " + llFile);
     String dn = llFile.getPath();
-    dn = dn.substring(0, dn.lastIndexOf('.'))+".java";
+    dn = dn.substring(0, dn.lastIndexOf('.')) + ".java";
     return new File(dn);
   }
 }

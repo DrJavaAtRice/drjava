@@ -146,7 +146,7 @@ public class KeyBindingManager {
         KeyStrokeData conflictKSD = _keyToDataMap.get(ks);
         String key = opt.format(ks);
         KeyStrokeData newKSD = _actionToDataMap.get(a);
-        String text = "\""+ key +"\"" + " is already assigned to \"" + conflictKSD.getName() +
+        String text = "\"" +  key  + "\"" + " is already assigned to \"" + conflictKSD.getName() +
           "\".\nWould you like to assign \"" + key + "\" to \"" + newKSD.getName() + "\"?";
         int rc = JOptionPane.showConfirmDialog(_mainFrame, text, "DrJava", JOptionPane.YES_NO_OPTION);
 

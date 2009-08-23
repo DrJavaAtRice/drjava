@@ -60,7 +60,7 @@ public class DummyOpenDefDocTest extends DrJavaTestCase {
       //Do nothing, this is expected.
     }
     catch(Exception e) {
-      fail("DummyOpenDefDoc did not throw UnsupportedOperationException, but "+e);
+      fail("DummyOpenDefDoc did not throw UnsupportedOperationException, but " + e);
     }
   }
 }

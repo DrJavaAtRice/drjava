@@ -445,38 +445,38 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     assertEquals("1",p.getCurrent(pm));
     p.setAttribute("list","");
     assertEquals("0",p.getCurrent(pm));
-    p.setAttribute("list","abc"+PS+"def");
+    p.setAttribute("list","abc" + PS + "def");
     assertEquals("2",p.getCurrent(pm));
-    p.setAttribute("list",PS+"abc"+PS+"def");
+    p.setAttribute("list",PS + "abc" + PS + "def");
     assertEquals("3",p.getCurrent(pm));
-    p.setAttribute("list",PS+"abc"+PS+"def"+PS);
+    p.setAttribute("list",PS + "abc" + PS + "def" + PS);
     assertEquals("4",p.getCurrent(pm));
-    p.setAttribute("list",PS+"abc"+PS+"def"+PS+PS);
+    p.setAttribute("list",PS + "abc" + PS + "def" + PS+PS);
     assertEquals("5",p.getCurrent(pm));
-    p.setAttribute("list",PS+PS+"abc"+PS+"def"+PS+PS);
+    p.setAttribute("list",PS+PS + "abc" + PS + "def" + PS+PS);
     assertEquals("6",p.getCurrent(pm));
-    p.setAttribute("list",PS+PS+"abc"+PS+PS+"def"+PS+PS);
+    p.setAttribute("list",PS+PS + "abc" + PS+PS + "def" + PS+PS);
     assertEquals("7",p.getCurrent(pm));
     
     p.setAttribute("list","abc 123");
     assertEquals("1",p.getCurrent(pm));
     p.setAttribute("list","");
     assertEquals("0",p.getCurrent(pm));
-    p.setAttribute("list","abc 123"+PS+"def 456");
+    p.setAttribute("list","abc 123" + PS + "def 456");
     assertEquals("2",p.getCurrent(pm));
-    p.setAttribute("list",PS+"abc 123"+PS+"def 456");
+    p.setAttribute("list",PS + "abc 123" + PS + "def 456");
     assertEquals("3",p.getCurrent(pm));
-    p.setAttribute("list",PS+"abc 123"+PS+"def 456"+PS);
+    p.setAttribute("list",PS + "abc 123" + PS + "def 456" + PS);
     assertEquals("4",p.getCurrent(pm));
-    p.setAttribute("list",PS+"abc 123"+PS+"def 456"+PS+PS);
+    p.setAttribute("list",PS + "abc 123" + PS + "def 456" + PS+PS);
     assertEquals("5",p.getCurrent(pm));
-    p.setAttribute("list",PS+PS+"abc 123"+PS+"def 456"+PS+PS);
+    p.setAttribute("list",PS+PS + "abc 123" + PS + "def 456" + PS+PS);
     assertEquals("6",p.getCurrent(pm));
-    p.setAttribute("list",PS+PS+"abc 123"+PS+PS+"def 456"+PS+PS);
+    p.setAttribute("list",PS+PS + "abc 123" + PS+PS + "def 456" + PS+PS);
     assertEquals("7",p.getCurrent(pm));
     
     p.setAttribute("sep"," ");
-    p.setAttribute("list","abc"+PS+"def");
+    p.setAttribute("list","abc" + PS + "def");
     assertEquals("1",p.getCurrent(pm));
     p.setAttribute("list","");
     assertEquals("0",p.getCurrent(pm));
@@ -508,13 +508,13 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     assertEquals("", p.getCurrent(pm));
     p.setAttribute("list","abc");
     assertEquals("abc", p.getCurrent(pm));
-    p.setAttribute("list","abc"+PS);
+    p.setAttribute("list","abc" + PS);
     assertEquals("abc", p.getCurrent(pm));
-    p.setAttribute("list","abc"+PS+"def");
+    p.setAttribute("list","abc" + PS + "def");
     assertEquals("abc", p.getCurrent(pm));
-    p.setAttribute("list",PS+"def");
+    p.setAttribute("list",PS + "def");
     assertEquals("", p.getCurrent(pm));
-    p.setAttribute("list","abc"+PS+"def"+PS+"ghi");
+    p.setAttribute("list","abc" + PS + "def" + PS + "ghi");
     assertEquals("abc", p.getCurrent(pm));
     
     p.setAttribute("list","");
@@ -522,13 +522,13 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     assertEquals("", p.getCurrent(pm));
     p.setAttribute("list","abc");
     assertEquals("", p.getCurrent(pm));
-    p.setAttribute("list","abc"+PS);
+    p.setAttribute("list","abc" + PS);
     assertEquals("", p.getCurrent(pm));
-    p.setAttribute("list","abc"+PS+"def");
+    p.setAttribute("list","abc" + PS + "def");
     assertEquals("def", p.getCurrent(pm));
-    p.setAttribute("list",PS+"def");
+    p.setAttribute("list",PS + "def");
     assertEquals("def", p.getCurrent(pm));
-    p.setAttribute("list","abc"+PS+"def"+PS+"ghi");
+    p.setAttribute("list","abc" + PS + "def" + PS + "ghi");
     assertEquals("def", p.getCurrent(pm));
     
     p.setAttribute("list","");
@@ -537,14 +537,14 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     assertEquals("", p.getCurrent(pm));
     p.setAttribute("list","abc");
     assertEquals("abc", p.getCurrent(pm));
-    p.setAttribute("list","abc"+PS);
-    assertEquals("abc"+PS, p.getCurrent(pm));
-    p.setAttribute("list","abc"+PS+"def");
-    assertEquals("abc"+PS+"def", p.getCurrent(pm));
-    p.setAttribute("list",PS+"def");
-    assertEquals(PS+"def", p.getCurrent(pm));
-    p.setAttribute("list","abc"+PS+"def"+PS+"ghi");
-    assertEquals("abc"+PS+"def", p.getCurrent(pm));
+    p.setAttribute("list","abc" + PS);
+    assertEquals("abc" + PS, p.getCurrent(pm));
+    p.setAttribute("list","abc" + PS + "def");
+    assertEquals("abc" + PS + "def", p.getCurrent(pm));
+    p.setAttribute("list",PS + "def");
+    assertEquals(PS + "def", p.getCurrent(pm));
+    p.setAttribute("list","abc" + PS + "def" + PS + "ghi");
+    assertEquals("abc" + PS + "def", p.getCurrent(pm));
     
     p.setAttribute("list","");
     p.setAttribute("index","1");
@@ -552,14 +552,14 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     assertEquals("", p.getCurrent(pm));
     p.setAttribute("list","abc");
     assertEquals("", p.getCurrent(pm));
-    p.setAttribute("list","abc"+PS);
+    p.setAttribute("list","abc" + PS);
     assertEquals("", p.getCurrent(pm));
-    p.setAttribute("list","abc"+PS+"def");
+    p.setAttribute("list","abc" + PS + "def");
     assertEquals("def", p.getCurrent(pm));
-    p.setAttribute("list",PS+"def");
+    p.setAttribute("list",PS + "def");
     assertEquals("def", p.getCurrent(pm));
-    p.setAttribute("list","abc"+PS+"def"+PS+"ghi");
-    assertEquals("def"+PS+"ghi", p.getCurrent(pm));
+    p.setAttribute("list","abc" + PS + "def" + PS + "ghi");
+    assertEquals("def" + PS + "ghi", p.getCurrent(pm));
     
     p.resetAttributes();
     p.setAttribute("sep"," ");
@@ -648,54 +648,54 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     assertEquals("abc",p.getCurrent(pm));
     p.setAttribute("list","");
     assertEquals("",p.getCurrent(pm));
-    p.setAttribute("list","abc"+PS+"def");
+    p.setAttribute("list","abc" + PS + "def");
     assertEquals("abc def",p.getCurrent(pm));
-    p.setAttribute("list",PS+"abc"+PS+"def");
+    p.setAttribute("list",PS + "abc" + PS + "def");
     assertEquals(" abc def",p.getCurrent(pm));
-    p.setAttribute("list",PS+"abc"+PS+"def"+PS);
+    p.setAttribute("list",PS + "abc" + PS + "def" + PS);
     assertEquals(" abc def ",p.getCurrent(pm));
-    p.setAttribute("list",PS+"abc"+PS+"def"+PS+PS);
+    p.setAttribute("list",PS + "abc" + PS + "def" + PS+PS);
     assertEquals(" abc def  ",p.getCurrent(pm));
-    p.setAttribute("list",PS+PS+"abc"+PS+"def"+PS+PS);
+    p.setAttribute("list",PS+PS + "abc" + PS + "def" + PS+PS);
     assertEquals("  abc def  ",p.getCurrent(pm));
-    p.setAttribute("list",PS+PS+"abc"+PS+PS+"def"+PS+PS);
+    p.setAttribute("list",PS+PS + "abc" + PS+PS + "def" + PS+PS);
     assertEquals("  abc  def  ",p.getCurrent(pm));
     
     p.setAttribute("list","abc 123");
     assertEquals("abc 123",p.getCurrent(pm));
     p.setAttribute("list","");
     assertEquals("",p.getCurrent(pm));
-    p.setAttribute("list","abc 123"+PS+"def 456");
+    p.setAttribute("list","abc 123" + PS + "def 456");
     assertEquals("abc 123 def 456",p.getCurrent(pm));
-    p.setAttribute("list",PS+"abc 123"+PS+"def 456");
+    p.setAttribute("list",PS + "abc 123" + PS + "def 456");
     assertEquals(" abc 123 def 456",p.getCurrent(pm));
-    p.setAttribute("list",PS+"abc 123"+PS+"def 456"+PS);
+    p.setAttribute("list",PS + "abc 123" + PS + "def 456" + PS);
     assertEquals(" abc 123 def 456 ",p.getCurrent(pm));
-    p.setAttribute("list",PS+"abc 123"+PS+"def 456"+PS+PS);
+    p.setAttribute("list",PS + "abc 123" + PS + "def 456" + PS+PS);
     assertEquals(" abc 123 def 456  ",p.getCurrent(pm));
-    p.setAttribute("list",PS+PS+"abc 123"+PS+"def 456"+PS+PS);
+    p.setAttribute("list",PS+PS + "abc 123" + PS + "def 456" + PS+PS);
     assertEquals("  abc 123 def 456  ",p.getCurrent(pm));
-    p.setAttribute("list",PS+PS+"abc 123"+PS+PS+"def 456"+PS+PS);
+    p.setAttribute("list",PS+PS + "abc 123" + PS+PS + "def 456" + PS+PS);
     assertEquals("  abc 123  def 456  ",p.getCurrent(pm));
     
     p.setAttribute("old"," ");
     p.setAttribute("new",PS);
-    p.setAttribute("list","abc"+PS+"def");
-    assertEquals("abc"+PS+"def",p.getCurrent(pm));
+    p.setAttribute("list","abc" + PS + "def");
+    assertEquals("abc" + PS + "def",p.getCurrent(pm));
     p.setAttribute("list","");
     assertEquals("",p.getCurrent(pm));
     p.setAttribute("list","abc def");
-    assertEquals("abc"+PS+"def",p.getCurrent(pm));
+    assertEquals("abc" + PS + "def",p.getCurrent(pm));
     p.setAttribute("list"," abc def");
-    assertEquals(PS+"abc"+PS+"def",p.getCurrent(pm));
+    assertEquals(PS + "abc" + PS + "def",p.getCurrent(pm));
     p.setAttribute("list"," abc def ");
-    assertEquals(PS+"abc"+PS+"def"+PS,p.getCurrent(pm));
+    assertEquals(PS + "abc" + PS + "def" + PS,p.getCurrent(pm));
     p.setAttribute("list"," abc def  ");
-    assertEquals(PS+"abc"+PS+"def"+PS+PS,p.getCurrent(pm));
+    assertEquals(PS + "abc" + PS + "def" + PS+PS,p.getCurrent(pm));
     p.setAttribute("list","  abc def  ");
-    assertEquals(PS+PS+"abc"+PS+"def"+PS+PS,p.getCurrent(pm));
+    assertEquals(PS+PS + "abc" + PS + "def" + PS+PS,p.getCurrent(pm));
     p.setAttribute("list","  abc  def  ");
-    assertEquals(PS+PS+"abc"+PS+PS+"def"+PS+PS,p.getCurrent(pm));
+    assertEquals(PS+PS + "abc" + PS+PS + "def" + PS+PS,p.getCurrent(pm));
   }
   
   public void testFakeConfigProperties() throws CloneNotSupportedException {
@@ -758,28 +758,28 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     // tmpfile
     p = pm.getProperty("Misc","tmpfile");
     String s = StringOps.unescapeFileName(p.getCurrent(pm));
-    assertTrue(s.startsWith(TMPDIR+"DrJava-Execute-"));
+    assertTrue(s.startsWith(TMPDIR + "DrJava-Execute-"));
     String s2 = StringOps.unescapeFileName(p.getCurrent(pm));
-    assertTrue(s2.startsWith(TMPDIR+"DrJava-Execute-"));
+    assertTrue(s2.startsWith(TMPDIR + "DrJava-Execute-"));
     assertFalse(s.equals(s2));
     p.setAttribute("name","foo");
     s = StringOps.unescapeFileName(p.getCurrent(pm));
-    assertEquals(TMPDIR+"foo", s);
+    assertEquals(TMPDIR + "foo", s);
     
     File dir = FileOps.createTempDirectory("DrJavaPropertySetupTest");
     p.setAttribute("dir",StringOps.escapeFileName(dir.getAbsolutePath()));
     s = StringOps.unescapeFileName(p.getCurrent(pm));
-    assertEquals(dir.getAbsolutePath()+File.separator+"foo", s);
+    assertEquals(dir.getAbsolutePath()+File.separator + "foo", s);
     
     p.resetAttributes();
     p.setAttribute("dir",StringOps.escapeFileName(dir.getAbsolutePath()));
     s = StringOps.unescapeFileName(p.getCurrent(pm));
-    assertTrue(s.startsWith(dir.getAbsolutePath()+File.separator+"DrJava-Execute-"));
+    assertTrue(s.startsWith(dir.getAbsolutePath()+File.separator + "DrJava-Execute-"));
     
     final String TEST_STRING = "This is a test file from DrJavaPropertySetupTest.";
     p.setAttribute("content",TEST_STRING);
     s = StringOps.unescapeFileName(p.getCurrent(pm));
-    assertTrue(s.startsWith(dir.getAbsolutePath()+File.separator+"DrJava-Execute-"));
+    assertTrue(s.startsWith(dir.getAbsolutePath()+File.separator + "DrJava-Execute-"));
     String text = edu.rice.cs.plt.io.IOUtil.toString(new File(s));
     assertEquals(TEST_STRING, text);
     
@@ -804,7 +804,7 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     p.setAttribute("file",StringOps.escapeFileName(dir.getAbsolutePath())+File.pathSeparator+
                           StringOps.escapeFileName(fil.getAbsolutePath())+File.pathSeparator+
                           StringOps.escapeFileName(notFound.getAbsolutePath()));
-    assertEquals("true"+File.pathSeparator+"false"+File.pathSeparator+"false", p.getCurrent(pm));
+    assertEquals("true" + File.pathSeparator + "false" + File.pathSeparator + "false", p.getCurrent(pm));
     
     // file.isfile
     p = pm.getProperty("File","file.isfile");    
@@ -825,7 +825,7 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     p.setAttribute("file",StringOps.escapeFileName(dir.getAbsolutePath())+File.pathSeparator+
                           StringOps.escapeFileName(fil.getAbsolutePath())+File.pathSeparator+
                           StringOps.escapeFileName(notFound.getAbsolutePath()));
-    assertEquals("false"+File.pathSeparator+"true"+File.pathSeparator+"false", p.getCurrent(pm));
+    assertEquals("false" + File.pathSeparator + "true" + File.pathSeparator + "false", p.getCurrent(pm));
     
     // file.isfile
     p = pm.getProperty("File","file.exists");    
@@ -846,7 +846,7 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     p.setAttribute("file",StringOps.escapeFileName(dir.getAbsolutePath())+File.pathSeparator+
                           StringOps.escapeFileName(fil.getAbsolutePath())+File.pathSeparator+
                           StringOps.escapeFileName(notFound.getAbsolutePath()));
-    assertEquals("true"+File.pathSeparator+"true"+File.pathSeparator+"false", p.getCurrent(pm));
+    assertEquals("true" + File.pathSeparator + "true" + File.pathSeparator + "false", p.getCurrent(pm));
     
     // file.parent
     p = pm.getProperty("File","file.parent");
@@ -924,7 +924,7 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     fil = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("DrJavaPropertySetupTest",".txt",dir1);
     p.setAttribute("file",StringOps.escapeFileName(fil.getAbsolutePath()));
     p.setAttribute("base",StringOps.escapeFileName(dir2.getAbsolutePath()));
-    assertEquals(".."+FS+dir1.getName()+FS+fil.getName(), StringOps.unescapeFileName(p.getCurrent(pm)));
+    assertEquals(".." + FS+dir1.getName()+FS+fil.getName(), StringOps.unescapeFileName(p.getCurrent(pm)));
         
     // file.mkdir
     p = pm.getProperty("File","file.mkdir");

@@ -228,7 +228,7 @@ public class JarCreationTest extends DrJavaTestCase {
 
       JarEntry ent = null;
       while( (ent = jarStream.getNextJarEntry()) != null ) {
-        assertTrue("found "+ent.getName()+" should be in list", fileNames.contains(ent.getName()));
+        assertTrue("found " + ent.getName() + " should be in list", fileNames.contains(ent.getName()));
         fileNames.remove(ent.getName());
       }
     }

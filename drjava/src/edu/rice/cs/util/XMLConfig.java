@@ -449,7 +449,7 @@ public class XMLConfig {
             // ignore
           }
           else {
-            throw new XMLConfigException("Node "+n.getNodeName()+" contained node "+child.getNodeName()+", but should only contain #text and #comment.");
+            throw new XMLConfigException("Node " + n.getNodeName() + " contained node " + child.getNodeName() + ", but should only contain #text and #comment.");
           }
           child = child.getNextSibling();
         }
@@ -715,7 +715,7 @@ public class XMLConfig {
     
     if (path.indexOf('.') > -1) {
       if (!(n instanceof Element)) {
-        throw new XMLConfigException("Node "+n.getNodeName()+" should be an element so it can contain attributes");
+        throw new XMLConfigException("Node " + n.getNodeName() + " should be an element so it can contain attributes");
       }
       return n;
     }
@@ -754,7 +754,7 @@ public class XMLConfig {
     if (n == null) { return ""; }
     String path = "";
     while(n.getParentNode() != null) {
-      path = n.getNodeName()+"/"+path;
+      path = n.getNodeName() + "/" + path;
       n = n.getParentNode();
     }
     

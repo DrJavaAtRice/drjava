@@ -120,9 +120,9 @@ public class ConfigOptionListeners implements OptionConstants {
         result = JOptionPane.
           showOptionDialog(parent,
                            "You seem to have specified the maximum heap size as part of the\n" +
-                           "\"JVM Args for Interactions JVM\" setting: \"-Xmx"+size+"\"\n"+
-                           "The \"Maximum Heap Memory for Interactions JVM\" setting should be used instead.\n"+
-                           "Would you like to copy the value \""+newSetting+"\" into the \"Maximum Heap\" setting,\n"+
+                           "\"JVM Args for Interactions JVM\" setting: \"-Xmx" + size + "\"\n" + 
+                           "The \"Maximum Heap Memory for Interactions JVM\" setting should be used instead.\n" + 
+                           "Would you like to copy the value \"" + newSetting + "\" into the \"Maximum Heap\" setting,\n" + 
                            "just clean up \"JVM Args for Interactions JVM\", or ignore this potential problem?",
                            "Maximum Heap Size Set in JVM Arguments",
                            0,
@@ -137,10 +137,10 @@ public class ConfigOptionListeners implements OptionConstants {
         result = JOptionPane.
           showOptionDialog(parent,
                            "You seem to have specified the maximum heap size as part of the\n" +
-                           "\"JVM Args for Interactions JVM\" setting: \"-Xmx"+size+"\"\n"+
-                           "The \"Maximum Heap Memory for Interactions JVM\" setting should be used instead.\n"+
-                           "Furthermore, the specified heap size \""+size+"\" is invalid.\n"+
-                           "Would you like to clean up the \"JVM Args for Interactions JVM\"\n"+
+                           "\"JVM Args for Interactions JVM\" setting: \"-Xmx" + size + "\"\n" + 
+                           "The \"Maximum Heap Memory for Interactions JVM\" setting should be used instead.\n" + 
+                           "Furthermore, the specified heap size \"" + size + "\" is invalid.\n" + 
+                           "Would you like to clean up the \"JVM Args for Interactions JVM\"\n" + 
                            "or ignore this potential problem?",
                            "Maximum Heap Size Set in JVM Arguments",
                            0,
@@ -205,7 +205,7 @@ public class ConfigOptionListeners implements OptionConstants {
           "Ignore" };
         int result = JOptionPane.
           showOptionDialog(parent,
-                           "The \"Maximum Heap Memory for Interactions JVM\" setting is invalid: \""+size+"\"\n"+
+                           "The \"Maximum Heap Memory for Interactions JVM\" setting is invalid: \"" + size + "\"\n" + 
                            "Would you like to clean up the \"Maximum Heap\" setting or ignore this potential problem?",
                            "Invalid Maximum Heap Size",
                            0,
@@ -301,9 +301,9 @@ public class ConfigOptionListeners implements OptionConstants {
         result = JOptionPane.
           showOptionDialog(parent,
                            "You seem to have specified the maximum heap size as part of the\n" +
-                           "\"JVM Args for Main JVM\" setting: \"-Xmx"+size+"\"\n"+
-                           "The \"Maximum Heap Memory for Main JVM\" setting should be used instead.\n"+
-                           "Would you like to copy the value \""+newSetting+"\" into the \"Maximum Heap\" setting,\n"+
+                           "\"JVM Args for Main JVM\" setting: \"-Xmx" + size + "\"\n" + 
+                           "The \"Maximum Heap Memory for Main JVM\" setting should be used instead.\n" + 
+                           "Would you like to copy the value \"" + newSetting + "\" into the \"Maximum Heap\" setting,\n" + 
                            "just clean up \"JVM Args for Main JVM\", or ignore this potential problem?",
                            "Maximum Heap Size Set in JVM Arguments",
                            0,
@@ -317,10 +317,10 @@ public class ConfigOptionListeners implements OptionConstants {
         result = JOptionPane.
           showOptionDialog(parent,
                            "You seem to have specified the maximum heap size as part of the\n" +
-                           "\"JVM Args for Main JVM\" setting: \"-Xmx"+size+"\"\n"+
-                           "The \"Maximum Heap Memory for Main JVM\" setting should be used instead.\n"+
-                           "Furthermore, the specified heap size \""+size+"\" is invalid.\n"+
-                           "Would you like to clean up the \"JVM Args for Main JVM\"\n"+
+                           "\"JVM Args for Main JVM\" setting: \"-Xmx" + size + "\"\n" + 
+                           "The \"Maximum Heap Memory for Main JVM\" setting should be used instead.\n" + 
+                           "Furthermore, the specified heap size \"" + size + "\" is invalid.\n" + 
+                           "Would you like to clean up the \"JVM Args for Main JVM\"\n" + 
                            "or ignore this potential problem?",
                            "Maximum Heap Size Set in JVM Arguments",
                            0,
@@ -376,7 +376,7 @@ public class ConfigOptionListeners implements OptionConstants {
           "Ignore" };
         int result = JOptionPane.
           showOptionDialog(parent,
-                           "The \"Maximum Heap Memory for Main JVM\" setting is invalid: \""+size+"\"\n"+
+                           "The \"Maximum Heap Memory for Main JVM\" setting is invalid: \"" + size + "\"\n" + 
                            "Would you like to clean up the \"Maximum Heap\" setting or ignore this potential problem?",
                            "Invalid Maximum Heap Size",
                            0,
@@ -418,10 +418,10 @@ public class ConfigOptionListeners implements OptionConstants {
         "Ignore" };
       int result = JOptionPane.
         showOptionDialog(parent,
-                         "You seem to have specified "+sb.toString()+"as part of the\n" +
-                         "\"Custom Javadoc Parameters\" setting. The \"Access Level\"\n"+
-                         "setting should be used instead. Would you like to copy the\n"+
-                         "parameter into the \"Access Level\" setting, just clean up\n"+
+                         "You seem to have specified " + sb.toString() + "as part of the\n" +
+                         "\"Custom Javadoc Parameters\" setting. The \"Access Level\"\n" + 
+                         "setting should be used instead. Would you like to copy the\n" + 
+                         "parameter into the \"Access Level\" setting, just clean up\n" + 
                          "\"Custom Javadoc Parameters\", or ignore this potential problem?",
                          "Access Level Set in Custom Javadoc Parameters",
                          0,

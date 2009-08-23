@@ -273,7 +273,7 @@ public class DrJavaErrorWindow extends JDialog {
       });
       _errorInfo.setEditable(false);
       _errorInfo.setBackground(getContentPane().getBackground());
-      _indexLabel.setText("Error "+(_errorIndex+1)+" of "+(_errorCount));
+      _indexLabel.setText("Error " + (_errorIndex+1) + " of " + (_errorCount));
     }
     else {
       _errorInfo = new JEditorPane("text/html", HEADER_HTML+NO_ERRORS_HTML);

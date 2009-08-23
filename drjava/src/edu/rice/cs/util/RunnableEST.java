@@ -89,7 +89,7 @@ public abstract class RunnableEST implements Runnable {
     }
 
     public String toString() {
-        String s = getClass().getName()+": "+super.getCause().getClass();
+        String s = getClass().getName() + ": " + super.getCause().getClass();
         String message = getLocalizedMessage();
         return (message != null) ? (s + ": " + message) : s;
     }

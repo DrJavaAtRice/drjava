@@ -166,12 +166,12 @@ public class StringOpsTest extends DrJavaTestCase {
   public void testFlatten() {
     assertEquals("", StringOps.flatten(""));
     assertEquals("abc", StringOps.flatten("abc"));
-    assertEquals(""+StringOps.SEPARATOR, StringOps.flatten("\n"));
-    assertEquals(""+StringOps.SEPARATOR+StringOps.SEPARATOR+StringOps.SEPARATOR, StringOps.flatten("\n\n\n"));
-    assertEquals("abc"+StringOps.SEPARATOR+"def"+StringOps.SEPARATOR+"ghi"+StringOps.SEPARATOR, StringOps.flatten("abc\ndef\nghi\n"));
-    assertEquals("abc"+StringOps.SEPARATOR+StringOps.SEPARATOR+
-                 "def"+StringOps.SEPARATOR+StringOps.SEPARATOR+
-                 "ghi"+StringOps.SEPARATOR+StringOps.SEPARATOR, StringOps.flatten("abc\n\ndef\n\nghi\n\n"));
+    assertEquals("" + StringOps.SEPARATOR, StringOps.flatten("\n"));
+    assertEquals("" + StringOps.SEPARATOR+StringOps.SEPARATOR+StringOps.SEPARATOR, StringOps.flatten("\n\n\n"));
+    assertEquals("abc" + StringOps.SEPARATOR + "def" + StringOps.SEPARATOR + "ghi" + StringOps.SEPARATOR, StringOps.flatten("abc\ndef\nghi\n"));
+    assertEquals("abc" + StringOps.SEPARATOR+StringOps.SEPARATOR+
+                 "def" + StringOps.SEPARATOR+StringOps.SEPARATOR+
+                 "ghi" + StringOps.SEPARATOR+StringOps.SEPARATOR, StringOps.flatten("abc\n\ndef\n\nghi\n\n"));
   }
   
   /** Test the getOffsetAndLength() method of StringOps class. */
@@ -266,32 +266,32 @@ public class StringOpsTest extends DrJavaTestCase {
     String toConvert = " a  b  c  d";
     String expResult = "\" a  b  c  d\"";
     String actResult = StringOps.convertToLiteral(toConvert);
-    assertEquals("converting "+toConvert+" should yield "+ expResult, expResult, actResult);
+    assertEquals("converting " + toConvert + " should yield " +  expResult, expResult, actResult);
     
     toConvert = "\\ hello world \\";
     expResult = "\"\\\\ hello world \\\\\"";
     actResult = StringOps.convertToLiteral(toConvert);
-    assertEquals("converting "+toConvert+" should yield "+ expResult, expResult, actResult);
+    assertEquals("converting " + toConvert + " should yield " +  expResult, expResult, actResult);
     
     toConvert = "\\\n\\n";
     expResult = "\"\\\\\\n\\\\n\"";
     actResult = StringOps.convertToLiteral(toConvert);
-    assertEquals("converting "+toConvert+" should yield "+ expResult, expResult, actResult);
+    assertEquals("converting " + toConvert + " should yield " +  expResult, expResult, actResult);
     
     toConvert = "\\\"\t\\t";
     expResult = "\"\\\\\\\"\\t\\\\t\"";
     actResult = StringOps.convertToLiteral(toConvert);
-    assertEquals("converting "+toConvert+" should yield "+ expResult, expResult, actResult);
+    assertEquals("converting " + toConvert + " should yield " +  expResult, expResult, actResult);
     
     toConvert = "\"\\\"\t\\n\n\\\n\"";
     expResult = "\"\\\"\\\\\\\"\\t\\\\n\\n\\\\\\n\\\"\"";
     actResult = StringOps.convertToLiteral(toConvert);
-    assertEquals("converting "+toConvert+" should yield "+ expResult, expResult, actResult);
+    assertEquals("converting " + toConvert + " should yield " +  expResult, expResult, actResult);
     
     toConvert = "    ";
     expResult = "\"    \"";
     actResult = StringOps.convertToLiteral(toConvert);
-    assertEquals("converting "+toConvert+" should yield "+ expResult, expResult, actResult);
+    assertEquals("converting " + toConvert + " should yield " +  expResult, expResult, actResult);
   }
   
   private static class TestGetSimpleNameInner {
@@ -337,25 +337,25 @@ public class StringOpsTest extends DrJavaTestCase {
   public void testGetSimpleName() {
     String exp = "Integer";
     String act = StringOps.getSimpleName(java.lang.Integer.class);
-    assertEquals("Wrong simple name for java.lang.Integer, exp="+exp+", act="+act,
+    assertEquals("Wrong simple name for java.lang.Integer, exp=" + exp + ", act=" + act,
                  exp,
                  act);
     
     exp = "TestGetSimpleNameInner";
     act = StringOps.getSimpleName(TestGetSimpleNameInner.class);
-    assertEquals("Wrong simple name for TestGetSimpleNameInner, exp="+exp+", act="+act,
+    assertEquals("Wrong simple name for TestGetSimpleNameInner, exp=" + exp + ", act=" + act,
                  exp,
                  act);
     
     exp = "Nested";
     act = StringOps.getSimpleName(TestGetSimpleNameInner.Nested.class);
-    assertEquals("Wrong simple name for TestGetSimpleNameInner.Nested, exp="+exp+", act="+act,
+    assertEquals("Wrong simple name for TestGetSimpleNameInner.Nested, exp=" + exp + ", act=" + act,
                  exp,
                  act);
     
     exp = "Inner";
     act = StringOps.getSimpleName(TestGetSimpleNameInner.Inner.class);
-    assertEquals("Wrong simple name for TestGetSimpleNameInner.Inner, exp="+exp+", act="+act,
+    assertEquals("Wrong simple name for TestGetSimpleNameInner.Inner, exp=" + exp + ", act=" + act,
                  exp,
                  act);
     
@@ -365,31 +365,31 @@ public class StringOpsTest extends DrJavaTestCase {
     
     exp = "";
     act = StringOps.getSimpleName(l.getClass());
-    assertEquals("Wrong simple name for anonymous inner class, exp="+exp+", act="+act,
+    assertEquals("Wrong simple name for anonymous inner class, exp=" + exp + ", act=" + act,
                  exp,
                  act);
     
     exp = "";
     act = StringOps.getSimpleName(TestGetSimpleNameInner.anonClass());
-    assertEquals("Wrong simple name for anonymous inner class, exp="+exp+", act="+act,
+    assertEquals("Wrong simple name for anonymous inner class, exp=" + exp + ", act=" + act,
                  exp,
                  act);
     
     exp = "";
     act = StringOps.getSimpleName(TestGetSimpleNameInner.Nested.anonClass());
-    assertEquals("Wrong simple name for anonymous inner class, exp="+exp+", act="+act,
+    assertEquals("Wrong simple name for anonymous inner class, exp=" + exp + ", act=" + act,
                  exp,
                  act);
     
     exp = "";
     act = StringOps.getSimpleName((new TestGetSimpleNameInner()).getInner().anonClass());
-    assertEquals("Wrong simple name for anonymous inner class, exp="+exp+", act="+act,
+    assertEquals("Wrong simple name for anonymous inner class, exp=" + exp + ", act=" + act,
                  exp,
                  act);
     
     exp = "";
     act = StringOps.getSimpleName(TestGetSimpleNameInner.getLambda().value(null));
-    assertEquals("Wrong simple name for anonymous inner class, exp="+exp+", act="+act,
+    assertEquals("Wrong simple name for anonymous inner class, exp=" + exp + ", act=" + act,
                  exp,
                  act);
   }
@@ -400,25 +400,25 @@ public class StringOpsTest extends DrJavaTestCase {
 //  public void testGetSimpleName15() {
 //    String exp = java.lang.Integer.class.getSimpleName();
 //    String act = StringOps.getSimpleName(java.lang.Integer.class);
-//    assertEquals("Wrong simple name for java.lang.Integer, exp="+exp+", act="+act,
+//    assertEquals("Wrong simple name for java.lang.Integer, exp=" + exp + ", act=" + act,
 //                 exp,
 //                 act);
 //    
 //    exp = TestGetSimpleNameInner.class.getSimpleName();
 //    act = StringOps.getSimpleName(TestGetSimpleNameInner.class);
-//    assertEquals("Wrong simple name for TestGetSimpleNameInner, exp="+exp+", act="+act,
+//    assertEquals("Wrong simple name for TestGetSimpleNameInner, exp=" + exp + ", act=" + act,
 //                 exp,
 //                 act);
 //    
 //    exp = TestGetSimpleNameInner.Nested.class.getSimpleName();
 //    act = StringOps.getSimpleName(TestGetSimpleNameInner.Nested.class);
-//    assertEquals("Wrong simple name for TestGetSimpleNameInner.Nested, exp="+exp+", act="+act,
+//    assertEquals("Wrong simple name for TestGetSimpleNameInner.Nested, exp=" + exp + ", act=" + act,
 //                 exp,
 //                 act);
 //    
 //    exp = TestGetSimpleNameInner.Inner.class.getSimpleName();
 //    act = StringOps.getSimpleName(TestGetSimpleNameInner.Inner.class);
-//    assertEquals("Wrong simple name for TestGetSimpleNameInner.Inner, exp="+exp+", act="+act,
+//    assertEquals("Wrong simple name for TestGetSimpleNameInner.Inner, exp=" + exp + ", act=" + act,
 //                 exp,
 //                 act);
 //    
@@ -428,31 +428,31 @@ public class StringOpsTest extends DrJavaTestCase {
 //    
 //    exp = l.getClass().getSimpleName();
 //    act = StringOps.getSimpleName(l.getClass());
-//    assertEquals("Wrong simple name for anonymous inner class, exp="+exp+", act="+act,
+//    assertEquals("Wrong simple name for anonymous inner class, exp=" + exp + ", act=" + act,
 //                 exp,
 //                 act);
 //    
 //    exp = TestGetSimpleNameInner.anonClass().getSimpleName();
 //    act = StringOps.getSimpleName(TestGetSimpleNameInner.anonClass());
-//    assertEquals("Wrong simple name for anonymous inner class, exp="+exp+", act="+act,
+//    assertEquals("Wrong simple name for anonymous inner class, exp=" + exp + ", act=" + act,
 //                 exp,
 //                 act);
 //    
 //    exp = TestGetSimpleNameInner.Nested.anonClass().getSimpleName();
 //    act = StringOps.getSimpleName(TestGetSimpleNameInner.Nested.anonClass());
-//    assertEquals("Wrong simple name for anonymous inner class, exp="+exp+", act="+act,
+//    assertEquals("Wrong simple name for anonymous inner class, exp=" + exp + ", act=" + act,
 //                 exp,
 //                 act);
 //    
 //    exp = (new TestGetSimpleNameInner()).getInner().anonClass().getSimpleName();
 //    act = StringOps.getSimpleName((new TestGetSimpleNameInner()).getInner().anonClass());
-//    assertEquals("Wrong simple name for anonymous inner class, exp="+exp+", act="+act,
+//    assertEquals("Wrong simple name for anonymous inner class, exp=" + exp + ", act=" + act,
 //                 exp,
 //                 act);
 //    
 //    exp = TestGetSimpleNameInner.getLambda().apply(null).getSimpleName();
 //    act = StringOps.getSimpleName(TestGetSimpleNameInner.getLambda().apply(null));
-//    assertEquals("Wrong simple name for anonymous inner class, exp="+exp+", act="+act,
+//    assertEquals("Wrong simple name for anonymous inner class, exp=" + exp + ", act=" + act,
 //                 exp,
 //                 act);
 //  }
@@ -549,7 +549,7 @@ public class StringOpsTest extends DrJavaTestCase {
     List<List<String>> pipe = seqs.get(0);
     assertEquals(1, pipe.size());
     List<String> l = pipe.get(0);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(3, l.size());
     assertEquals("a", l.get(0));
     assertEquals("b", l.get(1));
@@ -560,7 +560,7 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(1, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a'b c'", l.get(0));
     
@@ -569,7 +569,7 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(1, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a\"b c\"", l.get(0));
     
@@ -578,7 +578,7 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(1, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a\"b 'c'\"", l.get(0));
     
@@ -587,7 +587,7 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(1, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(2, l.size());
     assertEquals("a", l.get(0));
     assertEquals("\"b c\"", l.get(1));
@@ -597,7 +597,7 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(1, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+edu.rice.cs.plt.iter.IterUtil.toString(seqs));
+    // System.err.println("l = " + edu.rice.cs.plt.iter.IterUtil.toString(seqs));
     assertEquals(1, l.size());
     assertEquals("\u001b", l.get(0));
     
@@ -606,7 +606,7 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(1, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("\u001b", l.get(0));
     
@@ -615,7 +615,7 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(1, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals(" ", l.get(0));
     
@@ -624,7 +624,7 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(1, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a b", l.get(0));
   }
@@ -635,13 +635,13 @@ public class StringOpsTest extends DrJavaTestCase {
     List<List<String>> pipe = seqs.get(0);
     assertEquals(2, pipe.size());
     List<String> l = pipe.get(0);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(3, l.size());
     assertEquals("a", l.get(0));
     assertEquals("b", l.get(1));
     assertEquals("c", l.get(2));
     l = pipe.get(1);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(4, l.size());
     assertEquals("d", l.get(0));
     assertEquals("e", l.get(1));
@@ -653,11 +653,11 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a'b c'", l.get(0));
     l = pipe.get(1);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("d'e f g'", l.get(0));
     
@@ -666,11 +666,11 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a\"b c\"", l.get(0));
     l = pipe.get(1);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("d\"e f\"g", l.get(0));
     
@@ -679,11 +679,11 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a\"b 'c'\"", l.get(0));
     l = pipe.get(1);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("d\"e 'f'\"g", l.get(0));
     
@@ -692,12 +692,12 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(2, l.size());
     assertEquals("a", l.get(0));
     assertEquals("\"b c\"", l.get(1));
     l = pipe.get(1);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(3, l.size());
     assertEquals("d", l.get(0));
     assertEquals("\"e f\"", l.get(1));
@@ -708,11 +708,11 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+edu.rice.cs.plt.iter.IterUtil.toString(seqs));
+    // System.err.println("l = " + edu.rice.cs.plt.iter.IterUtil.toString(seqs));
     assertEquals(1, l.size());
     assertEquals(" ", l.get(0)); // now this is an escaped space
     l = pipe.get(1);
-    // System.err.println("l = "+edu.rice.cs.plt.iter.IterUtil.toString(seqs));
+    // System.err.println("l = " + edu.rice.cs.plt.iter.IterUtil.toString(seqs));
     assertEquals(1, l.size());
     assertEquals("\u001b", l.get(0)); // this is still a dangling escape
     
@@ -721,11 +721,11 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("\u001b", l.get(0));
     l = pipe.get(1);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("\u001b", l.get(0));
     
@@ -734,15 +734,15 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(3, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals(" ", l.get(0));
     l = pipe.get(1);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals(" ", l.get(0));
     l = pipe.get(2);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals(" ", l.get(0));
     
@@ -751,11 +751,11 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a b", l.get(0));
     l = pipe.get(1);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("c d e", l.get(0));
   }
@@ -766,14 +766,14 @@ public class StringOpsTest extends DrJavaTestCase {
     List<List<String>> pipe = seqs.get(0);
     assertEquals(1, pipe.size());
     List<String> l = pipe.get(0);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(3, l.size());
     assertEquals("a", l.get(0));
     assertEquals("b", l.get(1));
     assertEquals("c", l.get(2));
     pipe = seqs.get(1);
     l = pipe.get(0);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(4, l.size());
     assertEquals("d", l.get(0));
     assertEquals("e", l.get(1));
@@ -785,12 +785,12 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(1, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a'b c'", l.get(0));
     pipe = seqs.get(1);
     l = pipe.get(0);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("d'e f g'", l.get(0));
     
@@ -799,12 +799,12 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(1, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a\"b c\"", l.get(0));
     pipe = seqs.get(1);
     l = pipe.get(0);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("d\"e f\"g", l.get(0));
     
@@ -813,12 +813,12 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(1, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a\"b 'c'\"", l.get(0));
     pipe = seqs.get(1);
     l = pipe.get(0);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("d\"e 'f'\"g", l.get(0));
     
@@ -827,13 +827,13 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(1, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(2, l.size());
     assertEquals("a", l.get(0));
     assertEquals("\"b c\"", l.get(1));
     pipe = seqs.get(1);
     l = pipe.get(0);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(3, l.size());
     assertEquals("d", l.get(0));
     assertEquals("\"e f\"", l.get(1));
@@ -844,12 +844,12 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(1, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+edu.rice.cs.plt.iter.IterUtil.toString(seqs));
+    // System.err.println("l = " + edu.rice.cs.plt.iter.IterUtil.toString(seqs));
     assertEquals(1, l.size());
     assertEquals(" ", l.get(0)); // now this is an escaped space
     pipe = seqs.get(1);
     l = pipe.get(0);
-    // System.err.println("l = "+edu.rice.cs.plt.iter.IterUtil.toString(seqs));
+    // System.err.println("l = " + edu.rice.cs.plt.iter.IterUtil.toString(seqs));
     assertEquals(1, l.size());
     assertEquals("\u001b", l.get(0)); // this is still a dangling escape
     
@@ -858,12 +858,12 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(1, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("\u001b", l.get(0));
     pipe = seqs.get(1);
     l = pipe.get(0);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("\u001b", l.get(0));
     
@@ -872,17 +872,17 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(1, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals(" ", l.get(0));
     pipe = seqs.get(1);
     l = pipe.get(0);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals(" ", l.get(0));
     pipe = seqs.get(2);
     l = pipe.get(0);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals(" ", l.get(0));
     
@@ -891,12 +891,12 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(1, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a b", l.get(0));
     pipe = seqs.get(1);
     l = pipe.get(0);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("c d e", l.get(0));
   }
@@ -907,13 +907,13 @@ public class StringOpsTest extends DrJavaTestCase {
     List<List<String>> pipe = seqs.get(0);
     assertEquals(2, pipe.size());
     List<String> l = pipe.get(0);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(3, l.size());
     assertEquals("a", l.get(0));
     assertEquals("b", l.get(1));
     assertEquals("c", l.get(2));
     l = pipe.get(1);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(4, l.size());
     assertEquals("d", l.get(0));
     assertEquals("e", l.get(1));
@@ -922,13 +922,13 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(1);
     assertEquals(2, pipe.size());
     l = pipe.get(0);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(3, l.size());
     assertEquals("a2", l.get(0));
     assertEquals("b2", l.get(1));
     assertEquals("c2", l.get(2));
     l = pipe.get(1);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(4, l.size());
     assertEquals("d2", l.get(0));
     assertEquals("e2", l.get(1));
@@ -940,21 +940,21 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a'b c'", l.get(0));
     l = pipe.get(1);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("d'e f g'", l.get(0));
     pipe = seqs.get(1);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a2'b2 c2'", l.get(0));
     l = pipe.get(1);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("d2'e2 f2 g2'", l.get(0));
     
@@ -963,21 +963,21 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a\"b c\"", l.get(0));
     l = pipe.get(1);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("d\"e f\"g", l.get(0));
     pipe = seqs.get(1);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a2\"b2 c2\"", l.get(0));
     l = pipe.get(1);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("d2\"e2 f2\"g2", l.get(0));
     
@@ -986,21 +986,21 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a\"b 'c'\"", l.get(0));
     l = pipe.get(1);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("d\"e 'f'\"g", l.get(0));
     pipe = seqs.get(1);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a2\"b2 'c2'\"", l.get(0));
     l = pipe.get(1);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("d2\"e2 'f2'\"g2", l.get(0));
     
@@ -1009,12 +1009,12 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(2, l.size());
     assertEquals("a", l.get(0));
     assertEquals("\"b c\"", l.get(1));
     l = pipe.get(1);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(3, l.size());
     assertEquals("d", l.get(0));
     assertEquals("\"e f\"", l.get(1));
@@ -1022,12 +1022,12 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(1);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(2, l.size());
     assertEquals("a2", l.get(0));
     assertEquals("\"b2 c2\"", l.get(1));
     l = pipe.get(1);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(3, l.size());
     assertEquals("d2", l.get(0));
     assertEquals("\"e2 f2\"", l.get(1));
@@ -1038,21 +1038,21 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+edu.rice.cs.plt.iter.IterUtil.toString(seqs));
+    // System.err.println("l = " + edu.rice.cs.plt.iter.IterUtil.toString(seqs));
     assertEquals(1, l.size());
     assertEquals(" ", l.get(0)); // now this is an escaped space
     l = pipe.get(1);
-    // System.err.println("l = "+edu.rice.cs.plt.iter.IterUtil.toString(seqs));
+    // System.err.println("l = " + edu.rice.cs.plt.iter.IterUtil.toString(seqs));
     assertEquals(1, l.size());
     assertEquals(" ", l.get(0)); // now this is an escaped space
     pipe = seqs.get(1);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+edu.rice.cs.plt.iter.IterUtil.toString(seqs));
+    // System.err.println("l = " + edu.rice.cs.plt.iter.IterUtil.toString(seqs));
     assertEquals(1, l.size());
     assertEquals(" ", l.get(0)); // now this is an escaped space
     l = pipe.get(1);
-    // System.err.println("l = "+edu.rice.cs.plt.iter.IterUtil.toString(seqs));
+    // System.err.println("l = " + edu.rice.cs.plt.iter.IterUtil.toString(seqs));
     assertEquals(1, l.size());
     assertEquals("\u001b", l.get(0)); // this is still a dangling escape
     
@@ -1061,21 +1061,21 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("\u001b", l.get(0));
     l = pipe.get(1);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("\u001b", l.get(0));
     pipe = seqs.get(1);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("\u001b", l.get(0));
     l = pipe.get(1);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("\u001b", l.get(0));
     
@@ -1084,29 +1084,29 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(3, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals(" ", l.get(0));
     l = pipe.get(1);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals(" ", l.get(0));
     l = pipe.get(2);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals(" ", l.get(0));
     pipe = seqs.get(1);
     assertEquals(3, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals(" ", l.get(0));
     l = pipe.get(1);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals(" ", l.get(0));
     l = pipe.get(2);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals(" ", l.get(0));
     
@@ -1115,21 +1115,21 @@ public class StringOpsTest extends DrJavaTestCase {
     pipe = seqs.get(0);
     assertEquals(2, pipe.size());
     l = pipe.get(0);    
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a b", l.get(0));
     l = pipe.get(1);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("c d e", l.get(0));
     pipe = seqs.get(1);
     assertEquals(2, pipe.size());
     l = pipe.get(0);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("a2 b2", l.get(0));
     l = pipe.get(1);
-    // System.err.println("l = "+java.util.Arrays.toString(l.toArray()));
+    // System.err.println("l = " + java.util.Arrays.toString(l.toArray()));
     assertEquals(1, l.size());
     assertEquals("c2 d2 e2", l.get(0));
   }
@@ -1168,9 +1168,9 @@ public class StringOpsTest extends DrJavaTestCase {
     String source = "abc $${xxx}xyz";
     String actual = StringOps.replaceVariables(source,props,PropertyMaps.GET_LAZY);
     String expected = "abc ${xxx}xyz";
-//    System.err.println("source  : "+source);
-//    System.err.println("expected: "+expected);
-//    System.err.println("actual  : "+actual);
+//    System.err.println("source  : " + source);
+//    System.err.println("expected: " + expected);
+//    System.err.println("actual  : " + actual);
     assertEquals(expected, actual);
     assertEquals("${xxx}xyz", StringOps.replaceVariables("$${xxx}xyz",props,PropertyMaps.GET_LAZY));
   }

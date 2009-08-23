@@ -382,8 +382,8 @@ public class BalancingStreamTokenizer {
     while(wit.hasNext()) {
       int c = wit.next();
       if (begin.charAt(0) == c) {
-        throw new QuoteStartsWithWhitespaceException("Cannot add quote pair '"+
-                                                     begin+"'-'"+end+"' because the first character of the beginning has "+
+        throw new QuoteStartsWithWhitespaceException("Cannot add quote pair '" + 
+                                                     begin + "'-'" + end + "' because the first character of the beginning has " + 
                                                      "already been marked as whitespace");
       }
     }
@@ -392,7 +392,7 @@ public class BalancingStreamTokenizer {
     while(qit.hasNext()) {
       String s = qit.next();
       if (s.equals(end)) {
-        throw new QuoteStartsWithWhitespaceException("Cannot add quote pair '"+begin+"'-'"+end+
+        throw new QuoteStartsWithWhitespaceException("Cannot add quote pair '" + begin + "'-'" + end+
                                                      "' because the end is already used as beginning of another quote pair");
       }
     }
@@ -435,8 +435,8 @@ public class BalancingStreamTokenizer {
     while(wit.hasNext()) {
       int c = wit.next();
       if (kw.charAt(0) == c) {
-        throw new KeywordStartsWithWhitespaceException("Cannot add keyword '"+
-                                                       kw+"' because the first character of the beginning has "+
+        throw new KeywordStartsWithWhitespaceException("Cannot add keyword '" + 
+                                                       kw + "' because the first character of the beginning has " + 
                                                        "already been marked as whitespace");
       }
     }
@@ -446,9 +446,9 @@ public class BalancingStreamTokenizer {
     while(qit.hasNext()) {
       String s = qit.next();
       if (s.startsWith(kw)) {
-        throw new KeywordStartsWithQuoteException("Cannot add keyword '"+
-                                                  kw+"' because it has the same beginning as the quote pair '"+
-                                                  s+"'-'"+_state.quotePairs.get(s)+"'");
+        throw new KeywordStartsWithQuoteException("Cannot add keyword '" + 
+                                                  kw + "' because it has the same beginning as the quote pair '" + 
+                                                  s + "'-'" + _state.quotePairs.get(s) + "'");
       }
     }
 

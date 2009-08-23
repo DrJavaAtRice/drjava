@@ -60,7 +60,7 @@ public class ClassAndInterfaceFinderTest extends DrJavaTestCase {
       assertEquals("stringInterfaceRecognition","Aa.12_34", s);
     }
     catch (Exception e) {
-      fail("stringInterfaceRecognition threw "+e);
+      fail("stringInterfaceRecognition threw " + e);
     }
   }
   
@@ -75,7 +75,7 @@ public class ClassAndInterfaceFinderTest extends DrJavaTestCase {
       assertEquals("stringInterfaceRejection","", s);
     }
     catch (Exception e) {
-      fail("stringInterfaceRejection threw "+ e);
+      fail("stringInterfaceRejection threw " +  e);
     }
   }
   

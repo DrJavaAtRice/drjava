@@ -177,7 +177,7 @@ public class LogTest extends MultiThreadedTestCase {
     catch (NullPointerException e) {
       //e.printStackTrace();
       StackTraceElement[] stes = e.getStackTrace();
-      method = "\tat "+stes[0].toString();
+      method = "\tat " + stes[0].toString();
       log2.log("Message 2", stes);
     }
     
@@ -246,9 +246,9 @@ public class LogTest extends MultiThreadedTestCase {
     Date now = new Date();
     String s0 = fin.readLine();
     Date time0 = parse(s0);
-    //ltl.log("earlier = "+earlier);
-    //ltl.log("now     = "+now);
-    //ltl.log("time0   = "+time0);
+    //ltl.log("earlier = " + earlier);
+    //ltl.log("now     = " + now);
+    //ltl.log("time0   = " + time0);
     assertTrue("Log not opened after 'earlier' and before 'now'", withinTolerance(earlier, time0, now));
     
     String log3OpenMsg = "Log '" + file3.getName() + "' opened: ";

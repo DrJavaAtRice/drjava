@@ -60,7 +60,7 @@ public class ConfigProperty extends EagerProperty {
     for (OptionParser<?> op : om.keys()) {
       String key = op.getName();
       String value = om.getString(op);
-      if (_name.equals("config."+key)) {
+      if (_name.equals("config." + key)) {
         if (op instanceof VectorOption<?>) {
           @SuppressWarnings("unchecked")
           Vector<?> vec = ((VectorOption)op).parse(value);
@@ -101,7 +101,7 @@ public class ConfigProperty extends EagerProperty {
     OptionMap om = DrJava.getConfig().getOptionMap();
     for (OptionParser<?> op : om.keys()) {
       String key = op.getName();
-      if (_name.equals("config."+key)) {
+      if (_name.equals("config." + key)) {
         if (op instanceof VectorOption<?>) {
           _isList = true;
           _attributes.put("sep", java.io.File.pathSeparator);

@@ -80,12 +80,12 @@ public class LessPanel extends AbortablePanel {
   protected void initThread(File f) {
     try {
       // MainFrame.LOG.log("\tLessPanel ctor");
-      // MainFrame.LOG.log("\texists: "+f.exists());
-      // MainFrame.LOG.log("\tcanRead: "+f.canRead());
-      // MainFrame.LOG.log("\tisFile: "+f.isFile());
+      // MainFrame.LOG.log("\texists: " + f.exists());
+      // MainFrame.LOG.log("\tcanRead: " + f.canRead());
+      // MainFrame.LOG.log("\tisFile: " + f.isFile());
       if (f.exists() && f.canRead() && f.isFile()) {
         // MainFrame.LOG.log("\texists, can be read, is file");
-        // MainFrame.LOG.log("\tfile length = "+f.length());
+        // MainFrame.LOG.log("\tfile length = " + f.length());
         _f = f;
         _fr = new FileReader(_f);
         _red = -1;
@@ -183,11 +183,11 @@ public class LessPanel extends AbortablePanel {
               _fr.close();
               _fr = new FileReader(_f);
               _fr.skip(_totalRead);
-              // MainFrame.LOG.log("\treading... skipped to "+_totalRead);
+              // MainFrame.LOG.log("\treading... skipped to " + _totalRead);
               // abort after reading 5 blocks (50 kB), read more later
               // don't block the event thread any longer
               while((changeCount<=BUFFER_READS_PER_TIMER) && ((_red = _fr.read(_buf)) >= 0)) {
-                // MainFrame.LOG.log("\tread "+_red+" bytes");
+                // MainFrame.LOG.log("\tread " + _red + " bytes");
                 _totalRead += _red;
                 sb.append(new String(_buf, 0, _red));
                 ++changeCount;
@@ -201,7 +201,7 @@ public class LessPanel extends AbortablePanel {
             catch(IOException ioe) {
               // MainFrame.LOG.log("\taborted");
               // stop polling
-              sb.append("\n\nI/O Exception reading file "+_f+"\n");
+              sb.append("\n\nI/O Exception reading file " + _f + "\n");
               ++changeCount;
               abortActionPerformed(null);
             }
@@ -225,7 +225,7 @@ public class LessPanel extends AbortablePanel {
                   }
                   catch(javax.swing.text.BadLocationException e) { /* ignore, do not truncate */ }
                 }
-                // MainFrame.LOG.log("\ttext length = "+s.length());
+                // MainFrame.LOG.log("\ttext length = " + s.length());
               }
             }
           }

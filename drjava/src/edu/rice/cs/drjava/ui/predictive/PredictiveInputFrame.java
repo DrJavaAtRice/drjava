@@ -728,7 +728,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
 
   /** Update the extension label based on the model. */
   private void updateExtensionLabel() {
-    _sharedExtLabel.setText(_pim.getSharedMaskExtension()+" ");
+    _sharedExtLabel.setText(_pim.getSharedMaskExtension() + " ");
     _tabCompletesLabel.setVisible(_pim.getSharedMaskExtension().length() > 0);
   }
 

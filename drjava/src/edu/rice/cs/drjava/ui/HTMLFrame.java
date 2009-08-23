@@ -109,7 +109,7 @@ public class HTMLFrame extends SwingFrame {
   
   private static abstract class ConsolidatedAction extends ResourceAction {
     private ConsolidatedAction(String name) {
-      super(name,name+"16.gif");
+      super(name,name + "16.gif");
     }
   }
   

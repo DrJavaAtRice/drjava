@@ -585,7 +585,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       File f = e.file();
       if (LanguageLevelStackTraceMapper.isLLFile(f)) {
         String dn = f.getName();
-        dn = dn.substring(0, dn.lastIndexOf('.'))+".java";
+        dn = dn.substring(0, dn.lastIndexOf('.')) + ".java";
         StackTraceElement ste = new StackTraceElement(e.className(), "", dn, e.lineNumber());
         ste = _compilerModel.getLLSTM().replaceStackTraceElement(ste, f);
         e.setLineNumber(ste.getLineNumber());

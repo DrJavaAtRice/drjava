@@ -189,7 +189,7 @@ public class PendingRequestManager {
             // Do not disable action; the line number might just be in another class in the same file
             String exactClassName = a.getExactClassName();
             if (exactClassName != null && exactClassName.equals(rt.name())) {
-              _manager.printMessage(actions.get(i).toString()+" not on an executable line; disabled.");
+              _manager.printMessage(actions.get(i).toString() + " not on an executable line; disabled.");
               actions.get(i).setEnabled(false);
             }
             

@@ -94,7 +94,7 @@ public class HighlightManager {
     
     HighlightInfo newLite = new HighlightInfo(startOffset,endOffset,p);
     
-//      Utilities.showDebug("Adding highlight from "+startOffset+" to "+endOffset);
+//      Utilities.showDebug("Adding highlight from " + startOffset + " to " + endOffset);
     Stack<HighlightInfo> lineStack = _getStackAt(newLite);
     
     if (lineStack != null) {
@@ -163,17 +163,17 @@ public class HighlightManager {
     Stack<HighlightInfo> lineStack = _getStackAt(newLite);
     
     if (lineStack== null) {
-      //System.out.println("Error! No stack to access in region from " + startOffset+ " to "+ endOffset);
+      //System.out.println("Error! No stack to access in region from " + startOffset+ " to " +  endOffset);
       return;
     }
     
     int searchResult = lineStack.search(newLite);
-    //System.out.println("searchResult: "+searchResult);
+    //System.out.println("searchResult: " + searchResult);
     
     if (searchResult == 1) {
       HighlightInfo liteToRemove = lineStack.pop();
       _component.getHighlighter().removeHighlight(liteToRemove.getHighlightTag());
-      //System.out.println("Removed highlight @ "+startOffset);
+      //System.out.println("Removed highlight @ " + startOffset);
     }
     else if (searchResult > 1) {
       //System.out.println("Removing old instance...");
@@ -233,15 +233,15 @@ public class HighlightManager {
         
       HighlightInfo hi = (HighlightInfo)o;
       /*
-       //System.out.println("p0: "+p0+"  obj.p0: "+obj.p0);
-       //System.out.println("p1: "+p1+"  obj.p1: "+obj.p1);
-       //System.out.println("p: "+p+"  obj.p: "+obj.p);
+       //System.out.println("p0: " + p0 + "  obj.p0: " + obj.p0);
+       //System.out.println("p1: " + p1 + "  obj.p1: " + obj.p1);
+       //System.out.println("p: " + p + "  obj.p: " + obj.p);
        */
       boolean result = getStartOffset() == hi.getStartOffset() && 
         getEndOffset() == hi.getEndOffset() &&
         getPainter() == hi.getPainter();
       
-      //System.out.println("HighlightInfo.equals() = "+result);
+      //System.out.println("HighlightInfo.equals() = " + result);
       return result;
     }
     

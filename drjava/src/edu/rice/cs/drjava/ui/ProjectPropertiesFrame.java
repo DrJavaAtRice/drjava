@@ -316,7 +316,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
     c.insets = labelInsets;
 
     JLabel prLabel = new JLabel("Project Root");
-    prLabel.setToolTipText("<html>The root directory for the project source files .<br>"+
+    prLabel.setToolTipText("<html>The root directory for the project source files .<br>" + 
     "If not specified, the parent directory of the project file.</html>");
     gridbag.setConstraints(prLabel, c);
 
@@ -336,8 +336,8 @@ public class ProjectPropertiesFrame extends SwingFrame {
     c.insets = labelInsets;
 
     JLabel bdLabel = new JLabel("Build Directory");
-    bdLabel.setToolTipText("<html>The directory the class files will be compiled into.<br>"+
-        "If not specified, the class files will be compiled into<br>"+
+    bdLabel.setToolTipText("<html>The directory the class files will be compiled into.<br>" + 
+        "If not specified, the class files will be compiled into<br>" + 
     "the same directory as their corresponding source files</html>");
     gridbag.setConstraints(bdLabel, c);
 
@@ -376,7 +376,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
     c.insets = labelInsets;
 
     JLabel classLabel = new JLabel("Main Class");
-    classLabel.setToolTipText("<html>The class containing the <code>main</code><br>"+
+    classLabel.setToolTipText("<html>The class containing the <code>main</code><br>" + 
                               "method for the entire project</html>");
     gridbag.setConstraints(classLabel, c);
     panel.add(classLabel);
@@ -395,12 +395,12 @@ public class ProjectPropertiesFrame extends SwingFrame {
 
     //    ExtraProjectClasspaths
     JLabel extrasLabel = new JLabel("Extra Classpath");
-    extrasLabel.setToolTipText("<html>The list of extra classpaths to load with the project.<br>"+  
-                               "This may include either JAR files or directories. Any<br>"+
-                               "classes defined in these classpath locations will be <br>"+
-                               "visible in the interactions pane and also accessible <br>"+
-                               "by the compiler when compiling the project.<br>"+
-                               "The entries are relative to the project file unless<br>"+
+    extrasLabel.setToolTipText("<html>The list of extra classpaths to load with the project.<br>" +   
+                               "This may include either JAR files or directories. Any<br>" + 
+                               "classes defined in these classpath locations will be <br>" + 
+                               "visible in the interactions pane and also accessible <br>" + 
+                               "by the compiler when compiling the project.<br>" + 
+                               "The entries are relative to the project file unless<br>" + 
                                "the 'Absolute' checkbox is marked.</html>");
     gridbag.setConstraints(extrasLabel, c);
     panel.add(extrasLabel);
@@ -436,7 +436,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
     
     //    Files excluded from auto-refresh
     JLabel excludedLabel = new JLabel("<html>Files Excluded from<br>Auto-Refresh</html>");
-    excludedLabel.setToolTipText("<html>The list of source files excluded from project auto-refresh.<br>"+
+    excludedLabel.setToolTipText("<html>The list of source files excluded from project auto-refresh.<br>" + 
                                  "These files will not be added to the project.</html>");
     gridbag.setConstraints(excludedLabel, c);
     panel.add(excludedLabel);
@@ -633,7 +633,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
         String qualifiedName = mainClass.getAbsolutePath().substring(sourceRoot.getAbsolutePath().length());
         
         //Strip off any leading slashes
-        if(qualifiedName.startsWith(""+File.separatorChar))
+        if(qualifiedName.startsWith("" + File.separatorChar))
           qualifiedName = qualifiedName.substring(1);
         
         //Remove the .java extension if it exists

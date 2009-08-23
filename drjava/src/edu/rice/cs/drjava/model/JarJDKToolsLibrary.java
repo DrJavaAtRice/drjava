@@ -203,7 +203,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       String name = current.getName();
       if (name.startsWith("jdk")) { result = JavaVersion.parseFullVersion(name.substring(3)); }
       else if (name.startsWith("j2sdk")) { result = JavaVersion.parseFullVersion(name.substring(5)); }
-      else if (name.matches("\\d+\\.\\d+\\.\\d+")) { result = JavaVersion.parseFullVersion(name); }
+      else if (name.matches("\\d+\\.\\d+\\.\\d + ")) { result = JavaVersion.parseFullVersion(name); }
       current = current.getParentFile();
     } while (current != null && result == null);
     
@@ -343,7 +343,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     // matches: starts with "j2sdk", starts with "jdk", has form "[number].[number].[number]" (OS X), starts with "java-" (Linux)
     Predicate<File> subdirFilter = LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("j2sdk.*"),
                                                  IOUtil.regexCanonicalCaseFilePredicate("jdk.*"),
-                                                 LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("\\d+\\.\\d+\\.\\d+"),
+                                                 LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("\\d+\\.\\d+\\.\\d + "),
                                                                IOUtil.regexCanonicalCaseFilePredicate("java.*")));
     for (File root : roots) {
       for (File subdir : IOUtil.attemptListFilesAsIterable(root, subdirFilter)) {

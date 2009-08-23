@@ -144,7 +144,7 @@ public final class JavaInterpreterTest extends DrJavaTestCase {
 ////      // bit complement
 ////      Pair.make("~6", new Integer(~6)),
 //      // unary plus
-////      Pair.make("+5", new Integer(+5)),
+////      Pair.make(" + 5", new Integer(+5)),
 ////      // unary minus
 ////      Pair.make("-5", new Integer(-5)),
 //      // left shift
@@ -188,7 +188,7 @@ public final class JavaInterpreterTest extends DrJavaTestCase {
 //      // not equal to
 //      Pair.make("5.5 != 5.5", Boolean.valueOf(5 != 5)),
 //      // unary plus
-//      Pair.make("+5.6", new Double(+5.6)),
+//      Pair.make(" + 5.6", new Double(+5.6)),
 //      // unary minus
 //      Pair.make("-5.6", new Double(-5.6)),
 //      // times
@@ -422,7 +422,7 @@ public final class JavaInterpreterTest extends DrJavaTestCase {
 //    assertEquals("externally defined variable x",
 //                 new Integer(3), _interpreter.interpret("x"));
 //    assertEquals("incremented externally defined variable x",
-//                 new Integer(4), _interpreter.interpret("++x"));
+//                 new Integer(4), _interpreter.interpret(" + +x"));
 //  }
 //
 //  /** Test that the value of a variable can be queried externally. */

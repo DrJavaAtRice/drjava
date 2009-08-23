@@ -58,7 +58,7 @@ public class PropertyMaps implements Cloneable {
     
     OptionMap om = DrJava.getConfig().getOptionMap();
     for (OptionParser<?> op : om.keys()) {
-      String key = "config."+op.getName();
+      String key = "config." + op.getName();
       TEMPLATE.setProperty("Config", new ConfigProperty(key));
     }
   }
@@ -150,7 +150,7 @@ public class PropertyMaps implements Cloneable {
     for(String category: _props.keySet()) {
       if (category.equals(VARIABLES_CATEGORY)) continue;
       if (getProperty(category, name) != null) {
-        throw new IllegalArgumentException("Variable "+name+" already used for a built-in property");
+        throw new IllegalArgumentException("Variable " + name + " already used for a built-in property");
       }
     }
     // name not used by built-in
@@ -168,7 +168,7 @@ public class PropertyMaps implements Cloneable {
   public void setVariable(String name, String value) {
     Stack<VariableProperty> varStack = _variables.get(name);
     if ((varStack == null) ||
-        (varStack.empty())) { throw new IllegalArgumentException("Variable "+name+" does not exist."); }
+        (varStack.empty())) { throw new IllegalArgumentException("Variable " + name + " does not exist."); }
     VariableProperty p = varStack.peek();
     p.setValue(value);
   }
@@ -179,7 +179,7 @@ public class PropertyMaps implements Cloneable {
   public void removeVariable(String name) {
     Stack<VariableProperty> varStack = _variables.get(name);
     if ((varStack == null) ||
-        (varStack.empty())) { throw new IllegalArgumentException("Variable "+name+" does not exist."); }
+        (varStack.empty())) { throw new IllegalArgumentException("Variable " + name + " does not exist."); }
     VariableProperty p = varStack.pop();
     if (varStack.empty()) {
       // no shadowed variables

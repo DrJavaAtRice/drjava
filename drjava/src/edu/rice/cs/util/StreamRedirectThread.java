@@ -185,19 +185,19 @@ public class StreamRedirectThread extends Thread {
             out.flush();
           }
           catch (IOException exc) {
-            GeneralProcessCreator.LOG.log("StreamRedirectThread "+getName()+" had IOException while writing: "+exc);
+            GeneralProcessCreator.LOG.log("StreamRedirectThread " + getName() + " had IOException while writing: " + exc);
             throw new StreamRedirectException("An error occurred during stream redirection, while piping data into a process.",
                                               exc);
           }
         }
-        GeneralProcessCreator.LOG.log("StreamRedirectThread "+getName()+" finished copying");
+        GeneralProcessCreator.LOG.log("StreamRedirectThread " + getName() + " finished copying");
         out.flush();
         if (close) {
           in.close();
         }
       }
       catch (IOException exc) {
-        GeneralProcessCreator.LOG.log("StreamRedirectThread "+getName()+" had IOException: "+exc);
+        GeneralProcessCreator.LOG.log("StreamRedirectThread " + getName() + " had IOException: " + exc);
         throw new StreamRedirectException("An error occurred during stream redirection, while piping data out of a process.",
                                           exc);
       }
@@ -212,7 +212,7 @@ public class StreamRedirectThread extends Thread {
         out.close();
       }
       catch (IOException exc) {
-        GeneralProcessCreator.LOG.log("StreamRedirectThread "+getName()+" had IOException: "+exc);
+        GeneralProcessCreator.LOG.log("StreamRedirectThread " + getName() + " had IOException: " + exc);
         throw new StreamRedirectException("An error occurred during stream redirection, while piping data out of a process.",
                                           exc);
       }

@@ -146,15 +146,15 @@ public class ProcessChain extends Process {
 //              }
 //              catch(InterruptedException e) { interrupted = true; }
 //            } while(interrupted);
-//            GeneralProcessCreator.LOG.log("Process "+index+" has terminated");
+//            GeneralProcessCreator.LOG.log("Process " + index + " has terminated");
 //          }
 //        });
 //        _deathThreads[i].start();
       }
       catch(IOException e) {
-        GeneralProcessCreator.LOG.log("\nIOException in external process: "+e.getMessage()+"\nCheck your command line.\n");
+        GeneralProcessCreator.LOG.log("\nIOException in external process: " + e.getMessage() + "\nCheck your command line.\n");
         // could not start the process, record error and abort
-        _debugOutput.println("\nIOException in external process: "+e.getMessage()+"\nCheck your command line.\n");
+        _debugOutput.println("\nIOException in external process: " + e.getMessage() + "\nCheck your command line.\n");
         _debugOutput.flush();
         _aborted = true;
         destroy();
@@ -165,13 +165,13 @@ public class ProcessChain extends Process {
     for(int i = 0; i < _processes.length-1; ++i) {
       // _processes.length-1 because we're processing the gaps between the processes:
       // (P0 P1 P2) has two gaps: P0-P1 and P1-P2. There's always one less gap than processes.
-      StreamRedirectThread r = new StreamRedirectThread("stdout Redirector "+i,
+      StreamRedirectThread r = new StreamRedirectThread("stdout Redirector " + i,
                                                         _processes[i].getInputStream(),
                                                         _processes[i+1].getOutputStream(),
                                                         new ProcessChainThreadGroup(this));
       _redirectors.add(r);
       r.start();
-      r = new StreamRedirectThread("stderr Redirector "+i,
+      r = new StreamRedirectThread("stderr Redirector " + i,
                                    _processes[i].getErrorStream(),
                                    _processes[i+1].getOutputStream(),
                                    new ProcessChainThreadGroup(this));
@@ -179,13 +179,13 @@ public class ProcessChain extends Process {
       r.start();
     }
     // now pipe output from the last process into our output streams
-    StreamRedirectThread r = new StreamRedirectThread("stdout Redirector "+(_processes.length-1),
+    StreamRedirectThread r = new StreamRedirectThread("stdout Redirector " + (_processes.length-1),
                                                       _processes[_processes.length-1].getInputStream(),
                                                       _combinedStdOutStream,
                                                       new ProcessChainThreadGroup(this));
     _redirectors.add(r);
     r.start();
-    r = new StreamRedirectThread("stderr Redirector "+(_processes.length-1),
+    r = new StreamRedirectThread("stderr Redirector " + (_processes.length-1),
                                  _processes[_processes.length-1].getErrorStream(),
                                  _combinedStdErrStream,
                                  new ProcessChainThreadGroup(this));
@@ -367,8 +367,8 @@ public class ProcessChain extends Process {
       destroy();
       if ((e instanceof StreamRedirectException) &&
           (e.getCause() instanceof java.io.IOException)) {
-        _debugOut.println("\n\n\nAn exception occurred during the execution of the command line:\n"+
-                          e.toString()+"\n\n");
+        _debugOut.println("\n\n\nAn exception occurred during the execution of the command line:\n" + 
+                          e.toString() + "\n\n");
       }
       else {
         DrJavaErrorHandler.record(e);

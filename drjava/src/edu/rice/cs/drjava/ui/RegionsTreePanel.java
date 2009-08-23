@@ -399,7 +399,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
                   else {
                     s = StringOps.encodeHTML(s);
                   }
-                  return "<html><pre>"+s+"</pre></html>";
+                  return "<html><pre>" + s + "</pre></html>";
                 }
                 catch(javax.swing.text.BadLocationException ble) { return ""; /* just display an empty tool tip*/ }
               }

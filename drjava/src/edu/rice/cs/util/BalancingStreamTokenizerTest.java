@@ -885,7 +885,7 @@ public class BalancingStreamTokenizerTest extends TestCase {
     BalancingStreamTokenizer tok = make("abc \\\"def ghi\\\" 123\n456 'abc def\\' xxx' 789", '\\');
     tok.defaultTwoQuoteSetup();
     String s = tok.getNextToken();
-    // System.err.println("testEscapeQuoted: "+s);
+    // System.err.println("testEscapeQuoted: " + s);
     assertEquals("abc", s);
     assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
     s = tok.getNextToken();
@@ -922,7 +922,7 @@ public class BalancingStreamTokenizerTest extends TestCase {
     BalancingStreamTokenizer tok = make("abc \\\"def ghi 'abc'\\\" 123\n456 'abc def \\\"xxx \\'111\\' yyy\\\"' 789", '\\');
     tok.defaultTwoQuoteSetup();
     String s = tok.getNextToken();
-    // System.err.println("testEscapeNestedQuoted: "+s);
+    // System.err.println("testEscapeNestedQuoted: " + s);
     assertEquals("abc", s);
     assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
     s = tok.getNextToken();
@@ -1129,7 +1129,7 @@ public class BalancingStreamTokenizerTest extends TestCase {
     tok.addKeyword(";");
     tok.addKeyword("=");
     String s = tok.getNextToken();
-    // System.err.println("testEscapeDollarNestedQuotedKeywords: "+s);
+    // System.err.println("testEscapeDollarNestedQuotedKeywords: " + s);
     assertEquals("abc=", s);
     assertEquals(BalancingStreamTokenizer.Token.NORMAL, tok.token());
     s = tok.getNextToken();

@@ -52,10 +52,10 @@ public final class OptionMapLoaderTest extends DrJavaTestCase implements OptionC
   
   /** an artificially created properties "file" **/
   public static final String OPTION_DOC = 
-    "# this is a fake header\n"+
-    "this.is.a.real.key = value\n"+
-    "indent.level = 1\n"+
-    "javac.location = foo\n"+
+    "# this is a fake header\n" + 
+    "this.is.a.real.key = value\n" + 
+    "indent.level = 1\n" + 
+    "javac.location = foo\n" + 
     "extra.classpath = bam\n\n";
   
   public void testProperConfigSet() throws IOException {

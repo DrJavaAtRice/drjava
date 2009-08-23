@@ -97,7 +97,7 @@ public class FileOpsTest extends DrJavaTestCase {
       for (int j = 0; j < 2; j++) {
         File file = new File(parentDir, "file" + i + "-" + j);
         FileOps.writeStringToFile(file,
-                                  "Some text for file "+file.getAbsolutePath());
+                                  "Some text for file " + file.getAbsolutePath());
         assertTrue(file + " exists", file.exists());
       }
       
@@ -350,8 +350,8 @@ public class FileOpsTest extends DrJavaTestCase {
     String p = System.getProperty("path.separator");
     String expected, actual, input;
     
-    input = "."+p+"drjava"+p+p+f+"home"+f+"foo"+f+"junit.jar";
-    expected = ud+f+"."+p+ud+f+"drjava"+p+ud+p+(new File(f+"home"+f+"foo"+f+"junit.jar")).getAbsolutePath();
+    input = "." + p + "drjava" + p+p+f + "home" + f + "foo" + f + "junit.jar";
+    expected = ud+f + "." + p+ud+f + "drjava" + p+ud+p+(new File(f + "home" + f + "foo" + f + "junit.jar")).getAbsolutePath();
     actual = FileOps.convertToAbsolutePathEntries(input);
     assertEquals("testConvertToAbsolutePathEntries for several paths failed, input = '" + input + "', expected = '" + 
                  expected + "', actual = '" + actual + "'", expected, actual);
@@ -364,7 +364,7 @@ public class FileOpsTest extends DrJavaTestCase {
     expected = ud + p + ud + p + ud + p + ud + f + ".";
     actual = FileOps.convertToAbsolutePathEntries(input);
     assertEquals("testConvertToAbsolutePathEntries for several empty paths failed, input = '" + input + 
-                 "', expected = '" +expected+"', actual = '" + actual + "'", expected, actual);
+                 "', expected = '" +expected + "', actual = '" + actual + "'", expected, actual);
     input = p + p;
     expected = ud + p + ud + p + ud;
     actual = FileOps.convertToAbsolutePathEntries(input);

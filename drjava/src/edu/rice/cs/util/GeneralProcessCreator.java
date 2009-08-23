@@ -93,7 +93,7 @@ public class GeneralProcessCreator extends ProcessCreator {
   /** Reconstructs the command line for a process chain. */
   protected static String getProcessChainCmdLine(List<List<String>> pipe) {
     StringBuilder sb = new StringBuilder();
-    final String sep = " "+ProcessChain.PIPE_SEPARATOR+" ";
+    final String sep = " " + ProcessChain.PIPE_SEPARATOR + " ";
     for (int i = 0; i < pipe.size(); ++i) {
       sb.append(sep);
       sb.append(getProcessCmdLine(pipe.get(i)));
@@ -108,7 +108,7 @@ public class GeneralProcessCreator extends ProcessCreator {
   /** Reconstructs the command line for a process sequence. */
   protected static String getProcessSequenceCmdLine(List<List<List<String>>> seqs) {
     StringBuilder sb = new StringBuilder();
-    final String sep = " "+ProcessChain.PROCESS_SEPARATOR+" ";
+    final String sep = " " + ProcessChain.PROCESS_SEPARATOR + " ";
     for (int i = 0; i < seqs.size(); ++i) {
       sb.append(sep);
       sb.append(getProcessChainCmdLine(seqs.get(i)));
@@ -182,7 +182,7 @@ public class GeneralProcessCreator extends ProcessCreator {
       int i = 0;
       for(String key: _env.keySet()) {
         String value = _env.get(key);
-        env[i] = key+"="+value;
+        env[i] = key + "=" + value;
       }
     }
 
@@ -191,7 +191,7 @@ public class GeneralProcessCreator extends ProcessCreator {
       _evaluatedCmdLine = StringOps.replaceVariables(_cmdline, _props, PropertyMaps.GET_CURRENT);
       _seqs = StringOps.commandLineToLists(_evaluatedCmdLine);
     }
-    LOG.log("\t"+edu.rice.cs.plt.iter.IterUtil.toString(_seqs));
+    LOG.log("\t" + edu.rice.cs.plt.iter.IterUtil.toString(_seqs));
     if (_seqs.size()<1) { throw new IOException("No process to start."); }
     if (_seqs.size() == 1) {
       // only one piping chain, creating a process sequence is not necessary

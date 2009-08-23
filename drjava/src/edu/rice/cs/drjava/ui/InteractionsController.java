@@ -479,7 +479,7 @@ public class InteractionsController extends AbstractConsoleController {
 //      String text = _doc.getCurrentInteraction();
 //      toEval = text.trim();
 //      if (toEval.startsWith("java ")) toEval = _testClassCall(toEval);
-////          System.err.println("Preparing to interpret '" + text +"'");
+////          System.err.println("Preparing to interpret '" + text  + "'");
 //      _prepareToInterpret(text);  // Writes a newLine!
 //    }
 //    try { _model.interpret(toEval); }

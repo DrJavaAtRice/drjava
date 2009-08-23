@@ -211,7 +211,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     listener.assertJUnitStartCount(1);
     
-    if (printMessages) System.out.println("errors: "+_model.getJUnitModel().getJUnitErrorModel());
+    if (printMessages) System.out.println("errors: " + _model.getJUnitModel().getJUnitErrorModel());
     
     listener.assertNonTestCaseCount(0);
     assertEquals("test case should have no errors reported",  0,
@@ -561,7 +561,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _model.addListener(listener2);
     OpenDefinitionsDocument doc = setupDocument(NON_TESTCASE_TEXT);
     File file = new File(_tempDir, "NonTestCase.java");
-//    System.err.println("-----> file = "+file+" -- canWrite() = "+file.canWrite()+" -- exists() = "+file.exists());
+//    System.err.println("-----> file = " + file + " -- canWrite() = " + file.canWrite() + " -- exists() = " + file.exists());
     saveFile(doc, new FileSelector(file));
     
     listener2.compile(doc);

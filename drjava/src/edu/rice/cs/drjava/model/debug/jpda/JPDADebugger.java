@@ -724,10 +724,10 @@ public class JPDADebugger implements Debugger {
         }
         
         for(File f: files) {
-          if (f.getName().equals(className+".java") ||
-              f.getName().equals(className+".dj0") ||
-              f.getName().equals(className+".dj1") ||
-              f.getName().equals(className+".dj2")) {
+          if (f.getName().equals(className + ".java") ||
+              f.getName().equals(className + ".dj0") ||
+              f.getName().equals(className + ".dj1") ||
+              f.getName().equals(className + ".dj2")) {
             fileName = f.getName();
             break;
           }
@@ -758,7 +758,7 @@ public class JPDADebugger implements Debugger {
     * @throws DebugException if current thread is not suspended
     */
   public /* synchronized */ void scrollToSource(DebugStackData stackData) throws DebugException {
-    // System.out.println("scrollToSource DebugStackData: "+stackData.getLine());
+    // System.out.println("scrollToSource DebugStackData: " + stackData.getLine());
     assert EventQueue.isDispatchThread();
     _ensureReady();
     if (_runningThread != null) {
@@ -807,7 +807,7 @@ public class JPDADebugger implements Debugger {
     * @param bp the breakpoint
     */
   public /* synchronized */ void scrollToSource(Breakpoint bp, boolean shouldHighlight) {
-    // System.out.println("scrollToSource Breakpoint: "+bp.getLineNumber());
+    // System.out.println("scrollToSource Breakpoint: " + bp.getLineNumber());
     openAndScroll(bp.getDocument(), bp.getLineNumber(), bp.getClassName(), shouldHighlight);
   }
   
@@ -1233,7 +1233,7 @@ public class JPDADebugger implements Debugger {
   private void openAndScroll(OpenDefinitionsDocument doc, Location location, boolean shouldHighlight) {
     // try {
     //   System.out.println("scrollToSource Location: " + location.lineNumber() + " " + location.sourceName() + " " +
-    //     location.sourcePath()+" "+doc);
+    //     location.sourcePath() + " " + doc);
     // } catch(AbsentInformationException aie) { }
     openAndScroll(doc, location.lineNumber(), location.declaringType().name(), shouldHighlight);
   }

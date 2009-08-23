@@ -412,7 +412,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     }
     public Integer forNumberAtom(NumberAtom n) { return n.intValue(); }
     public Integer forTextAtom(TextAtom t) {
-      throw new PrivateProjectException("Found a string '"+t+"', expected an integer");
+      throw new PrivateProjectException("Found a string '" + t + "', expected an integer");
     }
   };
 

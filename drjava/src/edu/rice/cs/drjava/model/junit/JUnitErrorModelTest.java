@@ -135,10 +135,10 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     "}";
   
   private static final String LANGUAGE_LEVEL_TEST =
-    "class MyTest extends junit.framework.TestCase {\n"+
-    "  void testMyMethod() {\n"+
-    "    assertEquals(\"OneString\", \"TwoStrings\");\n"+
-    "  }\n"+
+    "class MyTest extends junit.framework.TestCase {\n" + 
+    "  void testMyMethod() {\n" + 
+    "    assertEquals(\"OneString\", \"TwoStrings\");\n" + 
+    "  }\n" + 
     "}\n";
   
 //  private void testSaveFile(final OpenDefinitionsDocument doc, final FileSelector fs) {
@@ -183,7 +183,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     //JUnitError[] errorsWithoutPositions = _m.getErrorsWithoutPositions();
     //assertTrue("testResults should not be null", testResults != null);
     
-    assertEquals("the test results should have one error and one failure "+_m.getNumErrors(), 2, _m.getNumErrors());
+    assertEquals("the test results should have one error and one failure " + _m.getNumErrors(), 2, _m.getNumErrors());
     
     assertEquals("test case has one error reported" + _m.getError(0).message(), _m.getError(0).isWarning(), false);
     
@@ -280,7 +280,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 //    
 //    _m = _model.getJUnitModel().getJUnitErrorModel();
 //    
-//    assertEquals("the test results should have one failure "+_m.getNumErrors(), 1, _m.getNumErrors());
+//    assertEquals("the test results should have one failure " + _m.getNumErrors(), 1, _m.getNumErrors());
 //    
 //    assertEquals("the error line should be line number 2", 2, _m.getError(0).lineNumber());
 //    debug.logEnd();

@@ -131,7 +131,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
         f.getPath().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION);
     }
     public String getDescription() { 
-      return "DrJava External Process Files (*"+EXTPROCESS_FILE_EXTENSION+")";
+      return "DrJava External Process Files (*" + EXTPROCESS_FILE_EXTENSION + ")";
     }
   };
 
@@ -142,7 +142,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
         f.getPath().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION);
     }
     public String getDescription() { 
-      return "DrJava External Process Files (*"+PROJECT_FILE_EXTENSION+")";
+      return "DrJava External Process Files (*" + PROJECT_FILE_EXTENSION + ")";
     }
   };
 
@@ -489,18 +489,18 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
     switch (rc) {
       case JFileChooser.CANCEL_OPTION:
       case JFileChooser.ERROR_OPTION: {
-        //System.out.println("\tcancel/error, rc="+rc);
+        //System.out.println("\tcancel/error, rc=" + rc);
         return;
       }
       
       case JFileChooser.APPROVE_OPTION: {
-        //System.out.println("\tapprove, rc="+rc);
+        //System.out.println("\tapprove, rc=" + rc);
         File[] chosen = _exportChooser.getSelectedFiles();
         if (chosen == null) {
           //System.out.println("\tchosen=null");
           return;
         } 
-        //System.out.println("\tchosen.length="+chosen.length);
+        //System.out.println("\tchosen.length=" + chosen.length);
         // If this is a single-selection dialog, getSelectedFiles() will always
         // return a zero-size array -- handle it differently.
         if (chosen.length == 0) {
@@ -508,7 +508,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
           if (!f.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
             f = new File(f.getAbsolutePath()+OptionConstants.EXTPROCESS_FILE_EXTENSION);
           }
-          //System.out.println("\tindex="+_list.getSelectedIndex()+", file="+f);
+          //System.out.println("\tindex=" + _list.getSelectedIndex() + ", file=" + f);
           ExecuteExternalDialog.saveToFile(_list.getSelectedIndex(), f);
         }
         return;

@@ -92,7 +92,7 @@ public interface OptionConstants {
   public static final String EXTPROCESS_FILE_EXTENSION = ".djapp";
 
   /** The configuration XML file that DrJava looks for inside a .djapp file */
-  public static final String EXTPROCESS_FILE_NAME_INSIDE_JAR = "process"+EXTPROCESS_FILE_EXTENSION;
+  public static final String EXTPROCESS_FILE_NAME_INSIDE_JAR = "process" + EXTPROCESS_FILE_EXTENSION;
   
   public static final FileOption JAVAC_LOCATION = new FileOption("javac.location", FileOps.NULL_FILE);
   
@@ -1378,29 +1378,29 @@ public interface OptionConstants {
   
   /** The number of saved external processes. */
   public static final NonNegativeIntegerOption EXTERNAL_SAVED_COUNT =
-    new NonNegativeIntegerOption(EXTERNAL_SAVED_PREFIX+"count", Integer.valueOf(0));
+    new NonNegativeIntegerOption(EXTERNAL_SAVED_PREFIX + "count", Integer.valueOf(0));
   
   /** The names of saved external processes. */
   public static final VectorOption<String> EXTERNAL_SAVED_NAMES =
-    new VectorOption<String>(EXTERNAL_SAVED_PREFIX+"names",
+    new VectorOption<String>(EXTERNAL_SAVED_PREFIX + "names",
                              new StringOption("",""),
                              new Vector<String>());
   
   /** The command lines of saved external processes. */
   public static final VectorOption<String> EXTERNAL_SAVED_CMDLINES =
-    new VectorOption<String>(EXTERNAL_SAVED_PREFIX+"cmdlines",
+    new VectorOption<String>(EXTERNAL_SAVED_PREFIX + "cmdlines",
                              new StringOption("",""),
                              new Vector<String>());
   
   /** The work directories of saved external processes. */
   public static final VectorOption<String> EXTERNAL_SAVED_WORKDIRS =
-    new VectorOption<String>(EXTERNAL_SAVED_PREFIX+"workdirs",
+    new VectorOption<String>(EXTERNAL_SAVED_PREFIX + "workdirs",
                              new StringOption("",""),
                              new Vector<String>());
   
   /** The script file (or "" if none) of saved external processes. */
   public static final VectorOption<String> EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES =
-    new VectorOption<String>(EXTERNAL_SAVED_PREFIX+"enclosingdjappfiles",
+    new VectorOption<String>(EXTERNAL_SAVED_PREFIX + "enclosingdjappfiles",
                              new StringOption("",""),
                              new Vector<String>());
   

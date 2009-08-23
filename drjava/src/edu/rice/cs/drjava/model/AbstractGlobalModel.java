@@ -484,7 +484,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // some/package/SomeClass/Inner.java (not found)
     // some/package/SomeClass.java (not found)
     path = path.replace('.', File.separatorChar);
-    File tempFile = new File(getProjectRoot(), path+".java");
+    File tempFile = new File(getProjectRoot(), path + ".java");
     while(path.length() > 0){
       if(tempFile.exists()){
         return tempFile;
@@ -2064,7 +2064,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Gets the document for the specified file; may involve opening the file. */
   public OpenDefinitionsDocument getDocumentForFile(File file) throws IOException {
     if ((file instanceof NullFile) ||
-	(file instanceof FileOps.NullFile)) return null;
+ (file instanceof FileOps.NullFile)) return null;
  
     // Check if this file is already open
     OpenDefinitionsDocument doc = _getOpenDocument(file);
@@ -2205,7 +2205,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         // a class file; therefore, it cannot ever be out of sync.
         try {
           boolean b = doc.containsClassOrInterfaceOrEnum();
-          System.out.println("Checking contents of "+doc+": "+b);
+          System.out.println("Checking contents of " + doc + ": " + b);
           if (b) outOfSync.add(doc);
         }
         catch(BadLocationException e) {
@@ -2489,7 +2489,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }
-//    edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("addToBrowserHistory: startPos = "+startPos.getOffset());
+//    edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("addToBrowserHistory: startPos = " + startPos.getOffset());
     BrowserDocumentRegion r = new BrowserDocumentRegion(doc, startPos, endPos);
     if (before) {
       _browserHistoryManager.addBrowserRegionBefore(r, _notifier);
@@ -2497,7 +2497,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     else {
       _browserHistoryManager.addBrowserRegion(r, _notifier);
     }
-//    edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("addToBrowserHistory: "+_browserHistoryManager);
+//    edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("addToBrowserHistory: " + _browserHistoryManager);
   }
   
   /** throws an UnsupportedOperationException */
@@ -3402,7 +3402,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Forwarding method to sync the definitions with whatever view component is representing them. */
     public void setCurrentLocation(int location) { 
-//      edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("setCurrentLocation "+this+": "+location);
+//      edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("setCurrentLocation " + this + ": " + location);
       _caretPosition = location; 
       getDocument().setCurrentLocation(location); 
     }

@@ -132,7 +132,7 @@ public class ProcessSequence extends Process {
         boolean interrupted = false;
         // wait for the completion of each of the subprocesses
         while(_index < _processes.length) {
-          GeneralProcessCreator.LOG.log("Waiting for process "+_index);
+          GeneralProcessCreator.LOG.log("Waiting for process " + _index);
           do {
             interrupted = false;
             try {
@@ -140,20 +140,20 @@ public class ProcessSequence extends Process {
             }
             catch(InterruptedException e) { interrupted = true; }
           } while(interrupted);
-          GeneralProcessCreator.LOG.log("Process "+_index+" terminated");
+          GeneralProcessCreator.LOG.log("Process " + _index + " terminated");
           // a process has just terminated
           if (_index < _processes.length-1) {
             // increase index;
             ++_index;
             try {
               _processes[_index] = _creators[_index].start();
-              GeneralProcessCreator.LOG.log("Process "+_index+" started");
+              GeneralProcessCreator.LOG.log("Process " + _index + " started");
               connectProcess(_processes[_index]);
             }
             catch(IOException e) {
-              GeneralProcessCreator.LOG.log("\nIOException in external process: "+e.getMessage()+"\nCheck your command line.\n");
+              GeneralProcessCreator.LOG.log("\nIOException in external process: " + e.getMessage() + "\nCheck your command line.\n");
               // could not start the process, record error but continue
-              _debugOutput.println("\nIOException in external process: "+e.getMessage()+"\nCheck your command line.\n");
+              _debugOutput.println("\nIOException in external process: " + e.getMessage() + "\nCheck your command line.\n");
               _debugOutput.flush();
               _processes[_index] = DUMMY_PROCESS;
             }
@@ -178,10 +178,10 @@ public class ProcessSequence extends Process {
       _processes[_index] = _creators[_index].start();
     }
     catch(IOException e) {
-      GeneralProcessCreator.LOG.log("\nIOException in external process: "+e.getMessage()+"\nCheck your command line.\n");
+      GeneralProcessCreator.LOG.log("\nIOException in external process: " + e.getMessage() + "\nCheck your command line.\n");
       // could not start the process, record error but continue
       _processes[_index] = DUMMY_PROCESS;
-      _debugOutput.println("\nIOException in external process: "+e.getMessage()+"\nCheck your command line.\n");
+      _debugOutput.println("\nIOException in external process: " + e.getMessage() + "\nCheck your command line.\n");
       _debugOutput.flush();
     }
     connectProcess(_processes[_index]);
@@ -306,7 +306,7 @@ public class ProcessSequence extends Process {
     // that pipes all the data into a combined input stream that serves as this
     // process sequence's input stream
     if (_stdOutRedirector == null) {
-      _stdOutRedirector = new StreamRedirectThread("stdout Redirector "+_index,
+      _stdOutRedirector = new StreamRedirectThread("stdout Redirector " + _index,
                                                    p.getInputStream(),
                                                    _combinedStdOutStream,
                                                    false/*close*/,
@@ -318,7 +318,7 @@ public class ProcessSequence extends Process {
       _stdOutRedirector.setInputStream(p.getInputStream());
     }
     if (_stdErrRedirector == null) {
-      _stdErrRedirector = new StreamRedirectThread("stderr Redirector "+_index,
+      _stdErrRedirector = new StreamRedirectThread("stderr Redirector " + _index,
                                                    p.getErrorStream(),
                                                    _combinedStdErrStream,
                                                    false/*close*/,
@@ -342,8 +342,8 @@ public class ProcessSequence extends Process {
     public void uncaughtException(Thread t, Throwable e) {
       if ((e instanceof StreamRedirectException) &&
           (e.getCause() instanceof IOException)) {
-        _debugOut.println("\n\n\nAn exception occurred during the execution of the command line:\n"+
-                          e.toString()+"\n\n");
+        _debugOut.println("\n\n\nAn exception occurred during the execution of the command line:\n" + 
+                          e.toString() + "\n\n");
       }
       else {
         DrJavaErrorHandler.record(e);

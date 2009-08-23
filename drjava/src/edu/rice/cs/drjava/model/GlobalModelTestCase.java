@@ -106,39 +106,37 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    */
   public void setUp() throws Exception {
     super.setUp();  // declared to throw Exception
+    debug.logStart();
+    _log.log("Setting up " + this);
+    _model = new TestGlobalModel();
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
-        try {
-          debug.logStart();
-          _log.log("Setting up " + this);
-          _model = new TestGlobalModel();
-          // ensure that the JVM is ready to run; the GlobalModelJUnitTest test cases sometimes received a
-          // late _junitModel.junitJVMReady() notification after the unit tests had already been started, and
-          // that was interpreted as trying to start JUnit tests while tests were already running.
-          _model.ensureJVMStarterFinished();
-          // create an interactions pane which is essential to the function of the interactions model; 
-          _interactionsController =  // InteractionsController constructor creates an interactions pane
-            new InteractionsController(_model.getInteractionsModel(), _model.getSwingInteractionsDocument(),
-                                       new Runnable() { public void run() { } });
-          _log.log("Global model created for " + this);
-          DrJava.getConfig().resetToDefaults();
-          String user = System.getProperty("user.name");
-          
-          _tempDir = /* IOUtil.createAndMarkTempDirectory */ FileOps.createTempDirectory("DrJava-test-" + user /*, ""*/);
-//          System.err.println("Temp Directory is " + _tempDir.getAbsolutePath());
-          
-          _model.setResetAfterCompile(false);
-          _log.log("Completed (GlobalModelTestCase) set up of " + this);
-          debug.logEnd();
-          
-//          _model.getOpenDefinitionsDocuments().get(0).saveFile(new FileSelector(new File(_tempDir, "blank document")));
-        }
+        // ensure that the JVM is ready to run; the GlobalModelJUnitTest test cases sometimes received a
+        // late _junitModel.junitJVMReady() notification after the unit tests had already been started, and
+        // that was interpreted as trying to start JUnit tests while tests were already running.
+        _model.ensureJVMStarterFinished();
+        // create an interactions pane which is essential to the function of the interactions model; 
+        _interactionsController =  // InteractionsController constructor creates an interactions pane
+          new InteractionsController(_model.getInteractionsModel(),
+                                     _model.getSwingInteractionsDocument(),
+                                     new Runnable() { public void run() { } });
+        _log.log("Global model created for " + this);
+        DrJava.getConfig().resetToDefaults();
+        String user = System.getProperty("user.name");
+        try { _tempDir = FileOps.createTempDirectory("DrJava-test-" + user /*, ""*/); }
+        
         catch(IOException e) {
           fail("IOException thrown with traceback: \n" + e);
         }
       }
     });
+    Utilities.clearEventQueue(); // Let some pending event queue operations complete
+    _model.setResetAfterCompile(false);
+    
+    _log.log("Completed (GlobalModelTestCase) set up of " + this);
+    debug.logEnd();
   }
+  
 
   /** Teardown for each test case, which recursively deletes the temporary directory created in setUp. */
   public void tearDown() throws Exception {
@@ -1223,7 +1221,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       synchronized(this) { junitStartCount++; }
     }
     @Override public void junitSuiteStarted(int numTests) {
-      if (printMessages) System.out.println("listener.junitSuiteStarted, numTests = "+numTests);
+      if (printMessages) System.out.println("listener.junitSuiteStarted, numTests = " + numTests);
       assertJUnitStartCount(1);
       synchronized(this) { junitSuiteStartedCount++; }
     }
@@ -1245,7 +1243,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       _notifyJUnitDone();
     }
     @Override public void classFileError(ClassFileError e) {
-      if (printMessages) System.out.println("listener.classFileError, e="+e);
+      if (printMessages) System.out.println("listener.classFileError, e=" + e);
       synchronized(this) { classFileErrorCount++; }
       _log.log("classFileError() called; notifying JUnitDone");
       _notifyJUnitDone();

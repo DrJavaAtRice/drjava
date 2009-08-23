@@ -100,7 +100,7 @@ public class SExpParserTest extends DrJavaTestCase {
     // use a few visitors to test the instances
     final SExpVisitor<String> innerVisitor = new SExpVisitor<String>() {
       private String _failMe(String who) {
-        fail("The inside was "+ who +" but should have been text");
+        fail("The inside was " +  who  + " but should have been text");
         return "";
       }
       public String forEmpty(Empty e){ return _failMe("an empty list"); }
@@ -112,7 +112,7 @@ public class SExpParserTest extends DrJavaTestCase {
     
     final SExpVisitor<String> outerVisitor = new SExpVisitor<String>() {
       private String _failMe(String who) {
-        fail("The top-level was "+ who +" but should have been a cons");
+        fail("The top-level was " +  who  + " but should have been a cons");
         return "";
       }
       public String forEmpty(Empty e){ return _failMe("an empty list"); }
@@ -134,7 +134,7 @@ public class SExpParserTest extends DrJavaTestCase {
       fail("Didn't throw a parse exception");
     }catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 
-                   "A top-level s-expression must be a list. "+
+                   "A top-level s-expression must be a list. " + 
                    "Invalid start of list: true",
                    e.getMessage());
     }
@@ -144,7 +144,7 @@ public class SExpParserTest extends DrJavaTestCase {
       fail("Didn't throw a parse exception");
     }catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 
-                   "A top-level s-expression must be a list. "+
+                   "A top-level s-expression must be a list. " + 
                    "Invalid start of list: 123",
                    e.getMessage());
     }
@@ -154,7 +154,7 @@ public class SExpParserTest extends DrJavaTestCase {
       fail("Didn't throw a parse exception");
     }catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 
-                   "A top-level s-expression must be a list. "+
+                   "A top-level s-expression must be a list. " + 
                    "Invalid start of list: [help",
                    e.getMessage());
     }
@@ -188,7 +188,7 @@ public class SExpParserTest extends DrJavaTestCase {
       fail("Didn't throw a parse exception");
     }catch(SExpParseException e) {
       assertEquals("Incorrect exception message", 
-                   "A top-level s-expression must be a list. "+
+                   "A top-level s-expression must be a list. " + 
                    "Invalid start of list: )",
                    e.getMessage());
     }

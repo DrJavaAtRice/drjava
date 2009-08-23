@@ -96,7 +96,7 @@ public class IndentFiles {
     */
   public static void indentFiles(Vector<String> fileNames, int indentLevel, boolean silent) {
     //System.setProperty("java.awt.headless", "true"); // attempt headless AWT
-    //System.out.println("Using Headless AWT: "+isHeadless());
+    //System.out.println("Using Headless AWT: " + isHeadless());
     Indenter indenter = new Indenter(indentLevel);
     
     if (! silent) System.out.println("DrJava - Indenting files:");

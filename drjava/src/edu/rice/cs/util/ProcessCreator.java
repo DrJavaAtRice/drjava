@@ -152,7 +152,7 @@ public class ProcessCreator {
       int i = 0;
       for(String key: _env.keySet()) {
         String value = _env.get(key);
-        env[i] = key+"="+value;
+        env[i] = key + "=" + value;
       }
     }
     

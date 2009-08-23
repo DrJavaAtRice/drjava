@@ -324,7 +324,7 @@ public class FindReplaceMachine {
       //  Utilities.show("Found " + count + " occurrences. Calling findNext() inside loop");
       fr = findNext(false);           // find next match in current doc
       //  Utilities.show("Call on findNext() returned " + fr.toString() + "in doc '" + 
-      //    _doc.getText().substring(0,fr.getFoundOffset())+"[|]"+_doc.getText().substring(fr.getFoundOffset()) + "'");
+      //    _doc.getText().substring(0,fr.getFoundOffset()) + "[|]" + _doc.getText().substring(fr.getFoundOffset()) + "'");
     }
     return count;
   }
@@ -549,7 +549,7 @@ public class FindReplaceMachine {
       
       try { 
         
-//      if (wrapped && allWrapped) Utilities.show(start +", " + len + ", " + docLen + ", doc = '" + doc.getText() + "'");
+//      if (wrapped && allWrapped) Utilities.show(start  + ", " + len + ", " + docLen + ", doc = '" + doc.getText() + "'");
         text = doc.getText(start, len);
         
         if (! _matchCase) {

@@ -173,7 +173,7 @@ public class ProjectProfile implements ProjectFileIR {
     }
     
     //Return a guess at the main class if its not in a source file
-    File toRet = new File(main.replace('.',File.separatorChar)+".java");
+    File toRet = new File(main.replace('.',File.separatorChar) + ".java");
     
     return toRet;
   }
@@ -289,8 +289,8 @@ public class ProjectProfile implements ProjectFileIR {
       String cleanManifest = TextUtil.xmlEscape(_manifest);
       xc.set("drjava/project.manifest", cleanManifest);
       
-      LOG.log("dirty manifest: "+_manifest);
-      LOG.log("clean manifest: "+cleanManifest);
+      LOG.log("dirty manifest: " + _manifest);
+      LOG.log("clean manifest: " + cleanManifest);
     }
     
     if (_buildDir != null && _buildDir.getPath() != "") {
@@ -498,7 +498,7 @@ public class ProjectProfile implements ProjectFileIR {
     //write the project manifest
     if(_manifest != null){
       fw.write("\n(proj-manifest");
-      fw.write("\n"+_manifest);
+      fw.write("\n" + _manifest);
       fw.write(")");
     }
     
@@ -572,7 +572,7 @@ public class ProjectProfile implements ProjectFileIR {
     if (_mainClass != null) {
       fw.write("\n;; rooted at the (parent of the) project file");
       fw.write("\n(main-class");
-      fw.write("\n" + " "+ getMainClass() );
+      fw.write("\n" + " " +  getMainClass() );
       fw.write(")");
     }
     else fw.write("\n;; no main class");

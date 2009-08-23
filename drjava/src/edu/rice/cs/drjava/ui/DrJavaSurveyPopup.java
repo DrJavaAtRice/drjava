@@ -186,7 +186,7 @@ public class DrJavaSurveyPopup extends JDialog {
     try {
       // append build time here so it does not change when comparing the survey information
       // to the information submitted the last time; the revision number does matter, though
-      String result = getSurveyURL()+"&buildtime="+Version.getBuildTimeString();
+      String result = getSurveyURL() + "&buildtime=" + Version.getBuildTimeString();
       LOG.log(result);
       
       if (!maySubmitSurvey()) {

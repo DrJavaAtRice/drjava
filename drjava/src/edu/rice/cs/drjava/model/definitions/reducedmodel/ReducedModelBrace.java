@@ -323,7 +323,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
       int offset = getBlockOffset();
       prev();  // does not affect offset
       assert offset == getBlockOffset();
-//      System.err.println("+ openBraceImmediatelyLeft() {");
+//      System.err.println(" +  openBraceImmediatelyLeft() {");
 //      System.err.println("  getBlockOffset(): " + getBlockOffset());
 //      System.err.println("  current().isOpen(): " + current().isOpen());
 //      System.err.println("  _isCurrentBraceMatchable(): " + _isCurrentBraceMatchable());
@@ -342,7 +342,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
       int offset = getBlockOffset();
       prev();  // does not affect block offset
       assert offset == getBlockOffset();
-//      System.err.println("+ closedBraceImmediatelyLeft() {");
+//      System.err.println(" +  closedBraceImmediatelyLeft() {");
 //      System.err.println("  getBlockOffset(): " + getBlockOffset());
 //      System.err.println("  current().isClosed(): " + _current().isClosed());
 //      System.err.println("  _isCurrentBraceMatchable(): " + _isCurrentBraceMatchable());
@@ -372,7 +372,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
 //    System.err.println("Balancing backward with iterator cursor at " + absOffset() + " and walker at " + _parent.walkerOffset());
     
     if (! closedBraceImmediatelyLeft() || isShadowed()) {
-//      System.err.println("closedBraceImmediatelyLeft(): "+closedBraceImmediatelyLeft());
+//      System.err.println("closedBraceImmediatelyLeft(): " + closedBraceImmediatelyLeft());
       iter.dispose();
 //      System.err.println("balanceBackward immediately aborted; returning -1");
       return -1;

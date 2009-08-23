@@ -47,91 +47,91 @@ import edu.rice.cs.drjava.project.ProjectFileIR;
 public class XMLProjectFileParserTest extends DrJavaTestCase {
   public void testXMLParse() throws IOException, MalformedProjectFileException, java.text.ParseException {
     String xml = 
-      "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"+
-      "<drjava version=\""+edu.rice.cs.drjava.Version.getVersionString()+"\">\n"+
-      "  <project root=\"src\" build=\"classes\" work=\"\" main=\"some.main.ClassName\">\n"+
-      "    <createjar file=\"drjava-15.jar\" flags=\"3\"/>\n"+
-      "    <source>\n"+
+      "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" + 
+      "<drjava version=\"" + edu.rice.cs.drjava.Version.getVersionString() + "\">\n" + 
+      "  <project root=\"src\" build=\"classes\" work=\"\" main=\"some.main.ClassName\">\n" + 
+      "    <createjar file=\"drjava-15.jar\" flags=\"3\"/>\n" + 
+      "    <source>\n" + 
       
-      "      <file name=\"edu/rice/cs/drjava/DrJava.java\" package=\"edu.rice.cs.drjava\" timestamp=\"27-Mar-2008 15:05:07\" active=\"true\">\n"+
-      "        <select from=\"0\" to=\"0\"/>\n"+
-      "        <scroll column=\"0\" row=\"0\"/>\n"+
-      "      </file>\n"+
+      "      <file name=\"edu/rice/cs/drjava/DrJava.java\" package=\"edu.rice.cs.drjava\" timestamp=\"27-Mar-2008 15:05:07\" active=\"true\">\n" + 
+      "        <select from=\"0\" to=\"0\"/>\n" + 
+      "        <scroll column=\"0\" row=\"0\"/>\n" + 
+      "      </file>\n" + 
 
-      "      <file name=\"edu/rice/cs/drjava/config/FileProperty.java\" package=\"edu.rice.cs.drjava.config\" timestamp=\"14-Mar-2008 14:18:43\">\n"+
-      "        <select from=\"0\" to=\"0\"/>\n"+
-      "        <scroll column=\"0\" row=\"0\"/>\n"+
-      "      </file>\n"+
+      "      <file name=\"edu/rice/cs/drjava/config/FileProperty.java\" package=\"edu.rice.cs.drjava.config\" timestamp=\"14-Mar-2008 14:18:43\">\n" + 
+      "        <select from=\"0\" to=\"0\"/>\n" + 
+      "        <scroll column=\"0\" row=\"0\"/>\n" + 
+      "      </file>\n" + 
 
-      "      <file name=\"edu/rice/cs/drjava/ui/config/BooleanOptionComponent.java\" package=\"edu.rice.cs.drjava.ui.config\" timestamp=\"30-Mar-2008 09:27:01\">\n"+
-      "        <select from=\"0\" to=\"0\"/>\n"+
-      "        <scroll column=\"0\" row=\"0\"/>\n"+
-      "      </file>\n"+
+      "      <file name=\"edu/rice/cs/drjava/ui/config/BooleanOptionComponent.java\" package=\"edu.rice.cs.drjava.ui.config\" timestamp=\"30-Mar-2008 09:27:01\">\n" + 
+      "        <select from=\"0\" to=\"0\"/>\n" + 
+      "        <scroll column=\"0\" row=\"0\"/>\n" + 
+      "      </file>\n" + 
 
-      "      <file name=\"edu/rice/cs/drjava/model/FindReplaceMachine.java\" package=\"edu.rics.cs.drjava.model\" timestamp=\"02-Apr-2008 10:58:15\">\n"+
-      "        <select from=\"0\" to=\"0\"/>\n"+
-      "        <scroll column=\"0\" row=\"0\"/>\n"+
-      "      </file>\n"+
+      "      <file name=\"edu/rice/cs/drjava/model/FindReplaceMachine.java\" package=\"edu.rics.cs.drjava.model\" timestamp=\"02-Apr-2008 10:58:15\">\n" + 
+      "        <select from=\"0\" to=\"0\"/>\n" + 
+      "        <scroll column=\"0\" row=\"0\"/>\n" + 
+      "      </file>\n" + 
 
-      "      <file name=\"edu/rice/cs/drjava/project/XMLProjectFileParser.java\" package=\"edu.rics.cs.drjava.project\" timestamp=\"01-Apr-2008 14:30:25\">\n"+
-      "        <select from=\"0\" to=\"0\"/>\n"+
-      "        <scroll column=\"0\" row=\"0\"/>\n"+
-      "      </file>\n"+
+      "      <file name=\"edu/rice/cs/drjava/project/XMLProjectFileParser.java\" package=\"edu.rics.cs.drjava.project\" timestamp=\"01-Apr-2008 14:30:25\">\n" + 
+      "        <select from=\"0\" to=\"0\"/>\n" + 
+      "        <scroll column=\"0\" row=\"0\"/>\n" + 
+      "      </file>\n" + 
 
-      "      <file name=\"edu/rice/cs/drjava/ui/BackgroundColorListener.java\" package=\"edu.rics.cs.drjava.ui\" timestamp=\"10-Mar-2008 11:03:08\">\n"+
-      "        <select from=\"0\" to=\"0\"/>\n"+
-      "        <scroll column=\"0\" row=\"0\"/>\n"+
-      "      </file>\n"+
+      "      <file name=\"edu/rice/cs/drjava/ui/BackgroundColorListener.java\" package=\"edu.rics.cs.drjava.ui\" timestamp=\"10-Mar-2008 11:03:08\">\n" + 
+      "        <select from=\"0\" to=\"0\"/>\n" + 
+      "        <scroll column=\"0\" row=\"0\"/>\n" + 
+      "      </file>\n" + 
 
-      "    </source>\n"+
-      "    <included>\n"+
+      "    </source>\n" + 
+      "    <included>\n" + 
 
-      "      <file name=\""+System.getProperty("user.dir")+"/testFiles/sample-project-file.xml\" package=\"\" timestamp=\"13-Sep-2004 06:03:06\">\n"+
-      "        <select from=\"0\" to=\"0\"/>\n"+
-      "        <scroll column=\"0\" row=\"0\"/>\n"+
-      "      </file>\n"+
+      "      <file name=\"" + System.getProperty("user.dir") + "/testFiles/sample-project-file.xml\" package=\"\" timestamp=\"13-Sep-2004 06:03:06\">\n" + 
+      "        <select from=\"0\" to=\"0\"/>\n" + 
+      "        <scroll column=\"0\" row=\"0\"/>\n" + 
+      "      </file>\n" + 
       
-      "    </included>\n"+
+      "    </included>\n" + 
       
-      "    <excluded>\n"+
-      "      <file name=\"edu/rice/cs/drjava/ui/config/ColorOptionComponent.java\" package=\"edu.rice.cs.drjava.ui.config\" timestamp=\"30-Mar-2008 09:27:01\">\n"+
-      "        <select from=\"0\" to=\"0\"/>\n"+
-      "        <scroll column=\"0\" row=\"0\"/>\n"+
-      "      </file>\n"+
-      "    </excluded>\n"+
+      "    <excluded>\n" + 
+      "      <file name=\"edu/rice/cs/drjava/ui/config/ColorOptionComponent.java\" package=\"edu.rice.cs.drjava.ui.config\" timestamp=\"30-Mar-2008 09:27:01\">\n" + 
+      "        <select from=\"0\" to=\"0\"/>\n" + 
+      "        <scroll column=\"0\" row=\"0\"/>\n" + 
+      "      </file>\n" + 
+      "    </excluded>\n" + 
       
-      "    <collapsed>\n"+
+      "    <collapsed>\n" + 
 
-      "      <path name=\"./[ Source Files ]/parser/\"/>\n"+
-      "      <path name=\"./[ Source Files ]/grammar/util/\"/>\n"+
+      "      <path name=\"./[ Source Files ]/parser/\"/>\n" + 
+      "      <path name=\"./[ Source Files ]/grammar/util/\"/>\n" + 
 
-      "    </collapsed>\n"+
-      "    <classpath>\n"+
+      "    </collapsed>\n" + 
+      "    <classpath>\n" + 
       
-      "      <file name=\""+System.getProperty("user.dir")+"/lib\"/>\n"+
-      "      <file name=\""+System.getProperty("user.dir")+"/lib/buildlib\"/>\n"+
+      "      <file name=\"" + System.getProperty("user.dir") + "/lib\"/>\n" + 
+      "      <file name=\"" + System.getProperty("user.dir") + "/lib/buildlib\"/>\n" + 
       
-      "    </classpath>\n"+
-      "    <breakpoints>\n"+
+      "    </classpath>\n" + 
+      "    <breakpoints>\n" + 
 
-      "      <breakpoint file=\"edu/rice/cs/drjava/DrJava.java\" line=\"50\" enabled=\"true\"/>\n"+
-      "      <breakpoint file=\"edu/rice/cs/drjava/DrJava.java\" line=\"55\" enabled=\"true\"/>\n"+
-      "      <breakpoint file=\"edu/rice/cs/drjava/DrJava.java\" line=\"53\" enabled=\"true\"/>\n"+
+      "      <breakpoint file=\"edu/rice/cs/drjava/DrJava.java\" line=\"50\" enabled=\"true\"/>\n" + 
+      "      <breakpoint file=\"edu/rice/cs/drjava/DrJava.java\" line=\"55\" enabled=\"true\"/>\n" + 
+      "      <breakpoint file=\"edu/rice/cs/drjava/DrJava.java\" line=\"53\" enabled=\"true\"/>\n" + 
 
-      "    </breakpoints>\n"+
-      "    <watches>\n"+
+      "    </breakpoints>\n" + 
+      "    <watches>\n" + 
       
-      "      <watch name=\"args[0]\"/>\n"+
-      "      <watch name=\"e\"/>\n"+
+      "      <watch name=\"args[0]\"/>\n" + 
+      "      <watch name=\"e\"/>\n" + 
       
-      "    </watches>\n"+
-      "    <bookmarks>\n"+
+      "    </watches>\n" + 
+      "    <bookmarks>\n" + 
       
-      "      <bookmark file=\"edu/rice/cs/drjava/DrJava.java\" from=\"851\" to=\"900\"/>\n"+
-      "      <bookmark file=\"edu/rice/cs/drjava/DrJava.java\" from=\"959\" to=\"1071\"/>\n"+
+      "      <bookmark file=\"edu/rice/cs/drjava/DrJava.java\" from=\"851\" to=\"900\"/>\n" + 
+      "      <bookmark file=\"edu/rice/cs/drjava/DrJava.java\" from=\"959\" to=\"1071\"/>\n" + 
       
-      "    </bookmarks>\n"+
-      "  </project>\n"+
+      "    </bookmarks>\n" + 
+      "  </project>\n" + 
       "</drjava>\n";
     
     //File f = new File("testFiles/sample-project-file.xml");

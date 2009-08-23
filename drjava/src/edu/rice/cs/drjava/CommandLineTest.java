@@ -362,9 +362,9 @@ public final class CommandLineTest extends DrJavaTestCase {
     
     assertTrue("child directory created OK", new File(newDirectory, "childDir").mkdir());
     
-    File relativeFile = new File(newDirectory, "."+FS+"X.java");
-    File relativeFile2 = new File(newDirectory, "."+FS+"Y.java");
-    File relativeFile3 = new File(newDirectory, "childDir"+FS+".."+FS+"Z.java");
+    File relativeFile = new File(newDirectory, "." + FS + "X.java");
+    File relativeFile2 = new File(newDirectory, "." + FS + "Y.java");
+    File relativeFile3 = new File(newDirectory, "childDir" + FS + ".." + FS + "Z.java");
     
     try {
       checkFile(relativeFile, funnyName);

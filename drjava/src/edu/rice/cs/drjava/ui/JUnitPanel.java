@@ -196,9 +196,9 @@ public class JUnitPanel extends ErrorPanel {
   private void _displayStackTrace (JUnitError e) {
     _errorLabel.setText((e.isWarning() ? "Error: " : "Failure: ") +
                         e.message());
-    _fileLabel.setText("File: "+(new File(e.fileName())).getName());
+    _fileLabel.setText("File: " + (new File(e.fileName())).getName());
     if (!e.testName().equals("")) {
-      _testLabel.setText("Test: "+e.testName());
+      _testLabel.setText("Test: " + e.testName());
     }
     else {
       _testLabel.setText("");
@@ -408,7 +408,7 @@ public class JUnitPanel extends ErrorPanel {
 //    }
     
     private void _setupStackTraceFrame() {
-      //DrJava.consoleOut().println("Stack Trace for Error: \n"+ e.stackTrace());
+      //DrJava.consoleOut().println("Stack Trace for Error: \n" +  e.stackTrace());
       JDialog _dialog = new JDialog(_frame,"JUnit Error Stack Trace",false);
       _stackFrame = _dialog;
       _stackTextArea = new JTextArea();

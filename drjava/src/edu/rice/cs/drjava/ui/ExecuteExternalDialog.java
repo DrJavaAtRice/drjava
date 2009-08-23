@@ -181,7 +181,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
   /** PropertyMaps used for substitution when replacing variables. */
   protected PropertyMaps _props;
   
-  public static final String STALE_TOOLTIP = "<html>Note: Values of variables might not be current for<br>"+
+  public static final String STALE_TOOLTIP = "<html>Note: Values of variables might not be current for<br>" + 
     "performance reasons. They will be current when executed.</html>";
   
   /** Returns the last state of the frame, i.e. the location and dimension.
@@ -593,7 +593,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
                          _commandLineCmdAS,
                          _varCommandLineCmdStyle,
                          _varErrorCommandLineCmdStyle);
-          _commandLinePreviewLabel.setText("<html>Command line preview:<br>("+_commandLinePreview.getText().length()+
+          _commandLinePreviewLabel.setText("<html>Command line preview:<br>(" + _commandLinePreview.getText().length()+
                                            " characters)</html>");
         }
         catch(BadLocationException ble) { _commandLinePreview.setText("Error."); }
@@ -623,7 +623,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
                          _varCommandLineCmdStyle,
                          _varErrorCommandLineCmdStyle);
         }
-        catch(BadLocationException ble) { _commandLinePreview.setText("Error: "+ble); }
+        catch(BadLocationException ble) { _commandLinePreview.setText("Error: " + ble); }
       }
       public void changedUpdate(DocumentEvent e) { update(e); }
       public void insertUpdate(DocumentEvent e) { update(e); }
@@ -652,7 +652,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
                          _varErrorCommandLineCmdStyle);
         }
         catch(BadLocationException ble) {
-          _commandLinePreview.setText("Error: "+ble);
+          _commandLinePreview.setText("Error: " + ble);
         }
       }
       public void changedUpdate(DocumentEvent e) { update(e); }
@@ -826,7 +826,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
                                                                             new File(enclosingFile):null);
     ProcessCreator pc = new GeneralProcessCreator(cmdline, workdir.trim(), pm);
     String label = "External";
-    if (!name.equals("")) { label += ": "+name; }
+    if (!name.equals("")) { label += ": " + name; }
     final ExternalProcessPanel panel = new ExternalProcessPanel(_mainFrame, label, pc);
     _mainFrame._tabs.addLast(panel);
     panel.getMainPanel().addFocusListener(new FocusAdapter() {
@@ -843,7 +843,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
   /** Execute the command line. */
   private void _runCommand() {
     _mainFrame.updateStatusField("Executing external process...");
-    GeneralProcessCreator.LOG.log("_runCommand(): ${enclosing.djapp.file} = "+_commandEnclosingFileLine.getText());
+    GeneralProcessCreator.LOG.log("_runCommand(): ${enclosing.djapp.file} = " + _commandEnclosingFileLine.getText());
     
     _mainFrame.removeModalWindowAdapter(this);
     if (_commandLinePreview.getText().length() > 0) {
@@ -882,7 +882,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     else {
       int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
       _mainFrame.removeModalWindowAdapter(this);
-      String name = JOptionPane.showInputDialog(this, "Name for saved process:", "External Java "+(count+1));
+      String name = JOptionPane.showInputDialog(this, "Name for saved process:", "External Java " + (count+1));
       _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
       if (name == null) {
         // Always apply and save settings
@@ -907,7 +907,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     * @param enclosingFile the enclosing .djapp JAR file, or "" if not enclosed
     * @return number of processes in the menu */
   public static int addToMenu(String name, String cmdline, String workdir, String enclosingFile) {
-    GeneralProcessCreator.LOG.log("addToMenu(): enclosingFile = "+enclosingFile);
+    GeneralProcessCreator.LOG.log("addToMenu(): enclosingFile = " + enclosingFile);
     int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
     ++count;
     final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
@@ -941,7 +941,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     * @param enclosingFile the enclosing .djapp JAR file, or "" if not enclosed
     */
   public static void editInMenu(int editIndex, String name, String cmdline, String workdir, String enclosingFile) {
-    GeneralProcessCreator.LOG.log("editInMenu(): enclosingFile = "+enclosingFile);
+    GeneralProcessCreator.LOG.log("editInMenu(): enclosingFile = " + enclosingFile);
     final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
     final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
     final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
@@ -970,8 +970,8 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     final Vector<String> enclosingFiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     
     XMLConfig xc = new XMLConfig();
-//    System.out.println("saveToFile("+index+", "+f+")");
-//    System.out.println("\t"+names.get(index));
+//    System.out.println("saveToFile(" + index + ", " + f + ")");
+//    System.out.println("\t" + names.get(index));
     xc.set("drjava/extprocess/name", names.get(index));
     xc.set("drjava/extprocess/cmdline", cmdlines.get(index));
     xc.set("drjava/extprocess/workdir", workdirs.get(index));

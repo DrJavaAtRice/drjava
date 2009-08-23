@@ -754,7 +754,6 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
               EventQueue.invokeLater(new Runnable() { 
                 public void run() { 
                   model.addToBrowserHistory(); 
-                  model.refreshActiveDocument();
                 } });
             }
             else model.refreshActiveDocument();

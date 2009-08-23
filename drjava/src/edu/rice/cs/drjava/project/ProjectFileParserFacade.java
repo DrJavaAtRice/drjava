@@ -111,25 +111,25 @@ public class ProjectFileParserFacade {
       }
     }
     
-    LOG.log("DoFixup? "+doFixup);
+    LOG.log("DoFixup? " + doFixup);
     
     if(!doFixup || pfir.getMainClass() == null) return pfir;
     
     String mainClass = pfir.getMainClass();
     
-    LOG.log("\tmainClass = \""+mainClass+"\"");
+    LOG.log("\tmainClass = \"" + mainClass + "\"");
     
     String qualifiedName = mainClass;
     
     //Strip off any leading slashes
-    if(qualifiedName.startsWith(""+File.separatorChar))
+    if(qualifiedName.startsWith("" + File.separatorChar))
       qualifiedName = qualifiedName.substring(1);
     
     //Remove the .java extension if it exists
     if(qualifiedName.toLowerCase().endsWith(".java"))
       qualifiedName = qualifiedName.substring(0, qualifiedName.length() - 5);
     
-    LOG.log("\tsetMainClass = \""+qualifiedName+"\"");
+    LOG.log("\tsetMainClass = \"" + qualifiedName + "\"");
     
     //Replace path seperators with java standard '.' package seperators.
     pfir.setMainClass(qualifiedName.replace(File.separatorChar, '.'));

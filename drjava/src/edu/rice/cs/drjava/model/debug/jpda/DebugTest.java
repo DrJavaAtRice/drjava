@@ -547,7 +547,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
     
-    _log.log("****"+getInteractionsText());
+    _log.log("****" + getInteractionsText());
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(3);  // fires
@@ -667,7 +667,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
     
-    _log.log("****"+getInteractionsText());
+    _log.log("****" + getInteractionsText());
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(3);  // fires
@@ -742,7 +742,7 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
       while (_pendingNotifies > 0) _notifierLock.wait();
     }
     
-    _log.log("****"+getInteractionsText());
+    _log.log("****" + getInteractionsText());
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(3);  // fires

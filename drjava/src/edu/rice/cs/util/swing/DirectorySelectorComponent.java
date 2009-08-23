@@ -215,7 +215,7 @@ public class DirectorySelectorComponent extends JPanel {
     }
     
     if (newFile != FileOps.NULL_FILE && _mustExist && ! newFile.exists()) {
-      JOptionPane.showMessageDialog(_parent, "The file '"+ newValue + "'\nis invalid because it does not exist.",
+      JOptionPane.showMessageDialog(_parent, "The file '" +  newValue + "'\nis invalid because it does not exist.",
                                     "Invalid File Name", JOptionPane.ERROR_MESSAGE);
       resetFileField(); // revert if not valid
       _validationInProgress = false;

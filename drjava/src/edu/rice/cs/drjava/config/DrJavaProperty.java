@@ -116,7 +116,7 @@ public abstract class DrJavaProperty implements Cloneable {
     */
   public void setAttribute(String key, String value) {
     if (!_attributes.containsKey(key)) {
-      throw new IllegalArgumentException("Attribute "+key+" not known to property "+_name);
+      throw new IllegalArgumentException("Attribute " + key + " not known to property " + _name);
     }
     _attributes.put(key, value);
   }
@@ -138,7 +138,7 @@ public abstract class DrJavaProperty implements Cloneable {
     */
   public String getAttribute(String key) {
     if (!_attributes.containsKey(key)) {
-      throw new IllegalArgumentException("Attribute "+key+" not known to property "+_name);
+      throw new IllegalArgumentException("Attribute " + key + " not known to property " + _name);
     }
     return _attributes.get(key);
   }
@@ -164,8 +164,8 @@ public abstract class DrJavaProperty implements Cloneable {
   public DrJavaProperty listenToInvalidatesOf(DrJavaProperty other) {
     if (other == this) {
       DEACTIVATED_DUE_TO_ERROR = true;
-      RuntimeException e = new IllegalArgumentException("Property cannot listen for invalidation of itself. "+
-                                                        "Variables for external processes will not function correctly anymore. "+
+      RuntimeException e = new IllegalArgumentException("Property cannot listen for invalidation of itself. " + 
+                                                        "Variables for external processes will not function correctly anymore. " + 
                                                         "This is a SERIOUS programming error. Please notify the DrJava team.");
       edu.rice.cs.drjava.ui.DrJavaErrorHandler.record(e);
       throw e;
@@ -201,7 +201,7 @@ public abstract class DrJavaProperty implements Cloneable {
         else { sb.append(", "); }
         sb.append(it.next().getName());
       }
-      sb.append(". Variables for external processes will not function correctly anymore. "+
+      sb.append(". Variables for external processes will not function correctly anymore. " + 
                 "This is a SERIOUS programming error. Please notify the DrJava team.");
       DEACTIVATED_DUE_TO_ERROR = true;
       RuntimeException e = new InfiniteLoopException(sb.toString());

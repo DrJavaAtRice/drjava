@@ -935,7 +935,7 @@ public abstract class FileOps {
     boolean shouldBackup = edu.rice.cs.drjava.DrJava.getConfig().
       getSetting(edu.rice.cs.drjava.config.OptionConstants.BACKUP_FILES);
     boolean madeBackup = false;
-    File backup = new File(roFile.getAbsolutePath()+"~");
+    File backup = new File(roFile.getAbsolutePath() + "~");
     try {
       boolean noBackup = true;
       if (backup.exists()) {
@@ -1042,7 +1042,7 @@ public abstract class FileOps {
     if (temp.exists()) {
       int count = 2;
       do {
-        temp = new File(dir, prefix+"-"+count+suffix);
+        temp = new File(dir, prefix + "-" + count+suffix);
         ++count;
       } while(temp.exists() && (count<max));
       if (temp.exists()) { throw new IOException("Could not generate a file name that did not already exist."); }

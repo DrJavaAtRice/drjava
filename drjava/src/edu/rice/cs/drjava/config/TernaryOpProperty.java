@@ -111,7 +111,7 @@ public class TernaryOpProperty<O,P,Q,R> extends EagerProperty {
   public void update(PropertyMaps pm) {
     O op1;
     if (_attributes.get(_op1Name) == null) {
-      _value = "("+_name+" Error...)";
+      _value = "(" + _name + " Error...)";
       return;
     }
     else {
@@ -119,13 +119,13 @@ public class TernaryOpProperty<O,P,Q,R> extends EagerProperty {
         op1 = _parse1.value(_attributes.get(_op1Name));
       }
       catch(Exception e) {
-        _value = "("+_name+" Error...)";
+        _value = "(" + _name + " Error...)";
         return;
       }
     }
     P op2;
     if (_attributes.get(_op2Name) == null) {
-      _value = "("+_name+" Error...)";
+      _value = "(" + _name + " Error...)";
       return;
     }
     else {
@@ -133,13 +133,13 @@ public class TernaryOpProperty<O,P,Q,R> extends EagerProperty {
         op2 = _parse2.value(_attributes.get(_op2Name));
       }
       catch(Exception e) {
-        _value = "("+_name+" Error...)";
+        _value = "(" + _name + " Error...)";
         return;
       }
     }
     Q op3;
     if (_attributes.get(_op3Name) == null) {
-      _value = "("+_name+" Error...)";
+      _value = "(" + _name + " Error...)";
       return;
     }
     else {
@@ -147,7 +147,7 @@ public class TernaryOpProperty<O,P,Q,R> extends EagerProperty {
         op3 = _parse3.value(_attributes.get(_op3Name));
       }
       catch(Exception ee) {
-        _value = "("+_name+" Error...)";
+        _value = "(" + _name + " Error...)";
         return;
       }
     }

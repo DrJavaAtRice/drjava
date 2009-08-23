@@ -115,7 +115,7 @@ public class SExpParser {
         return null;
       }
       else {
-        throw new PrivateParseException("A top-level s-expression must be a list. "+
+        throw new PrivateParseException("A top-level s-expression must be a list. " + 
                                         "Invalid start of list: " + t);
       }
     }

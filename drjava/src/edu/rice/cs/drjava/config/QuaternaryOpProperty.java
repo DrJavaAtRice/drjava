@@ -124,7 +124,7 @@ public class QuaternaryOpProperty<N,O,P,Q,R> extends EagerProperty {
   public void update(PropertyMaps pm) {
     N op1;
     if (_attributes.get(_op1Name) == null) {
-      _value = "("+_name+" Error...)";
+      _value = "(" + _name + " Error...)";
       return;
     }
     else {
@@ -132,13 +132,13 @@ public class QuaternaryOpProperty<N,O,P,Q,R> extends EagerProperty {
         op1 = _parse1.value(_attributes.get(_op1Name));
       }
       catch(Exception e) {
-        _value = "("+_name+" Error...)";
+        _value = "(" + _name + " Error...)";
         return;
       }
     }
     O op2;
     if (_attributes.get(_op2Name) == null) {
-      _value = "("+_name+" Error...)";
+      _value = "(" + _name + " Error...)";
       return;
     }
     else {
@@ -146,13 +146,13 @@ public class QuaternaryOpProperty<N,O,P,Q,R> extends EagerProperty {
         op2 = _parse2.value(_attributes.get(_op2Name));
       }
       catch(Exception e) {
-        _value = "("+_name+" Error...)";
+        _value = "(" + _name + " Error...)";
         return;
       }
     }
     P op3;
     if (_attributes.get(_op3Name) == null) {
-      _value = "("+_name+" Error...)";
+      _value = "(" + _name + " Error...)";
       return;
     }
     else {
@@ -160,13 +160,13 @@ public class QuaternaryOpProperty<N,O,P,Q,R> extends EagerProperty {
         op3 = _parse3.value(_attributes.get(_op3Name));
       }
       catch(Exception e) {
-        _value = "("+_name+" Error...)";
+        _value = "(" + _name + " Error...)";
         return;
       }
     }
     Q op4;
     if (_attributes.get(_op4Name) == null) {
-      _value = "("+_name+" Error...)";
+      _value = "(" + _name + " Error...)";
       return;
     }
     else {
@@ -174,7 +174,7 @@ public class QuaternaryOpProperty<N,O,P,Q,R> extends EagerProperty {
         op4 = _parse4.value(_attributes.get(_op4Name));
       }
       catch(Exception ee) {
-        _value = "("+_name+" Error...)";
+        _value = "(" + _name + " Error...)";
         return;
       }
     }

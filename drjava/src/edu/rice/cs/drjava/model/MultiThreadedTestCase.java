@@ -154,7 +154,7 @@ public abstract class MultiThreadedTestCase extends DrJavaTestCase {
         if (_e instanceof RuntimeException) throw (RuntimeException)_e;
         else {
           // avoid checked exceptions
-          throw new AssertionFailedError("Exception in thread "+_t+": "+_e);
+          throw new AssertionFailedError("Exception in thread " + _t + ": " + _e);
         }
       }            
     }

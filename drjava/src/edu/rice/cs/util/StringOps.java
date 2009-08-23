@@ -311,7 +311,7 @@ public abstract class StringOps {
    */
   public static String getSimpleName(Class<?> c) {
     if (c.isArray())
-      return getSimpleName(c.getComponentType())+"[]";
+      return getSimpleName(c.getComponentType()) + "[]";
 
     if (isAnonymousClass(c)) {
       return "";
@@ -646,14 +646,14 @@ public abstract class StringOps {
           else if (next==ProcessChain.PROCESS_SEPARATOR_CHAR) { sb.append(ProcessChain.PROCESS_SEPARATOR_CHAR); ++i; }
           else if (next==ProcessChain.PIPE_SEPARATOR_CHAR) { sb.append(ProcessChain.PIPE_SEPARATOR_CHAR); ++i; }
           else if (next==':') { sb.append(':'); ++i; }
-          else { throw new IllegalArgumentException("1b hex followed by character other than space, "+
+          else { throw new IllegalArgumentException("1b hex followed by character other than space, " + 
                                                     "path separator, process separator, pipe, colon, or 1b hex"); }
         }
-        else { throw new IllegalArgumentException("1b hex followed by character other than space, "+
+        else { throw new IllegalArgumentException("1b hex followed by character other than space, " + 
                                                     "path separator, process separator, pipe, colon, or 1b hex"); }
       }
       else {
-        sb.append(""+s.charAt(i));
+        sb.append("" + s.charAt(i));
       }
     }
     return sb.toString();
@@ -695,7 +695,7 @@ public abstract class StringOps {
     tok.addKeyword(new Character((char)0x1F).toString()); // unit separator
     // also add escaped space as keyword, but treat it differently
     final String ESCAPE = String.valueOf((char)0x1B);
-    final String ESCAPED_SPACE = ESCAPE+" ";
+    final String ESCAPED_SPACE = ESCAPE + " ";
     tok.addKeyword(ESCAPED_SPACE); // escaped space
     // also add escaped path separator (';' or ':') as keyword, but treat it differently
     final String ESCAPED_PATH_SEPARATOR = ESCAPE+java.io.File.pathSeparator;
@@ -707,7 +707,7 @@ public abstract class StringOps {
     final String ESCAPED_PIPE_SEPARATOR = ESCAPE+ProcessChain.PIPE_SEPARATOR;
     tok.addKeyword(ESCAPED_PIPE_SEPARATOR); // escaped pipe
     // also add escaped colon (':') as keyword on Windows, but treat it differently
-    final String ESCAPED_COLON = ESCAPE+":";
+    final String ESCAPED_COLON = ESCAPE + ":";
     if (!ESCAPED_COLON.equals(ESCAPED_PATH_SEPARATOR)) {
       tok.addKeyword(ESCAPED_COLON); // escaped colon
     }
@@ -808,16 +808,16 @@ public abstract class StringOps {
     tok.addQuotes("\"", "\"");
     
     // LOG.log("---------");
-    // LOG.log("Replacing: "+str);
+    // LOG.log("Replacing: " + str);
     StringBuilder sb = new StringBuilder();
     String next = null;
     try {
       while((next=tok.getNextToken()) != null) {
-        // LOG.log("Token: "+next);
+        // LOG.log("Token: " + next);
         if ((tok.token() == BalancingStreamTokenizer.Token.QUOTED) &&
             (next.startsWith("${")) &&
             (next.endsWith("}"))) {
-          // LOG.log("Found property: "+next);
+          // LOG.log("Found property: " + next);
           String key;
           String attrList = "";
           int firstCurly = next.indexOf('}');
@@ -834,8 +834,8 @@ public abstract class StringOps {
             // for attribute list, cut off ${propertyname; and }
             attrList = next.substring(firstSemi+1,next.length()-1).trim();
           }
-          // LOG.log("\tKey      = '"+key+"'");
-          // LOG.log("\tAttrList = '"+attrList+"'");
+          // LOG.log("\tKey      = '" + key + "'");
+          // LOG.log("\tAttrList = '" + attrList + "'");
           DrJavaProperty p = props.getProperty(key);
           if (p != null) {
             // found property name
@@ -857,34 +857,34 @@ public abstract class StringOps {
                 while((n=atok.getNextToken()) != null) {
                   if ((n == null) || (atok.token() != BalancingStreamTokenizer.Token.NORMAL) ||
                       n.equals(";") || n.equals("=") || n.startsWith("\"")) {
-                    throw new IllegalArgumentException("Unknown attribute list format for property "+key+"; expected name, but was "+n);
+                    throw new IllegalArgumentException("Unknown attribute list format for property " + key + "; expected name, but was " + n);
                   }
                   String name = n;
-                  // LOG.log("\t\tname = '"+name+"'");
+                  // LOG.log("\t\tname = '" + name + "'");
                   n = atok.getNextToken();
                   if ((n == null) || (atok.token() != BalancingStreamTokenizer.Token.KEYWORD) || (!n.equals("="))) {
-                    throw new IllegalArgumentException("Unknown attribute list format for property "+key+"; expected =, but was "+n);
+                    throw new IllegalArgumentException("Unknown attribute list format for property " + key + "; expected =, but was " + n);
                   }
                   // LOG.log("\t\tread '='");
                   n = atok.getNextToken();
                   if ((n == null) || (atok.token() != BalancingStreamTokenizer.Token.QUOTED) || (!n.startsWith("\""))) {
-                    throw new IllegalArgumentException("Unknown attribute list format for property "+key+"; expected \", but was "+n);
+                    throw new IllegalArgumentException("Unknown attribute list format for property " + key + "; expected \", but was " + n);
                   }
                   String value = "";
                   if (n.length()>1) {
                     value = n.substring(1,n.length()-1);
-                    // LOG.log("\t\tvalue = '"+value+"'");
+                    // LOG.log("\t\tvalue = '" + value + "'");
                   }
                   n = atok.getNextToken();
                   if (((n != null) && ((atok.token() != BalancingStreamTokenizer.Token.KEYWORD) || (!n.equals(";")))) ||
                       ((n == null) && (atok.token() != BalancingStreamTokenizer.Token.END))) {
-                    throw new IllegalArgumentException("Unknown attribute list format for property "+key);
+                    throw new IllegalArgumentException("Unknown attribute list format for property " + key);
                   }
                   // LOG.log("\t\tread ';' or EOF");
                   // processed correctly
-                  // LOG.log("\t\treplacing variables in '"+value+"'...");
+                  // LOG.log("\t\treplacing variables in '" + value + "'...");
                   // String replacedValue = replaceVariables(value, props, getter);
-                  // LOG.log("\t\treplaced value is '"+replacedValue+"'");
+                  // LOG.log("\t\treplaced value is '" + replacedValue + "'");
                   attrs.put(name,value);
                   // p.setAttribute(name, replacedValue);
                   
@@ -898,11 +898,11 @@ public abstract class StringOps {
               }
               // append the value of the property, e.g. /home/user instead of "${property.name}"
               String finalValue = getter.value(p,props);
-              // LOG.log("\tfinal value: '"+finalValue+"'");
+              // LOG.log("\tfinal value: '" + finalValue + "'");
               sb.append(finalValue);
             }              
             catch(IllegalArgumentException e) {
-              sb.append("<-- Error: "+e.getMessage()+" -->");
+              sb.append("<-- Error: " + e.getMessage() + " -->");
             }
           }
           else {
@@ -916,13 +916,13 @@ public abstract class StringOps {
       }
     }
     catch(IllegalArgumentException e) {
-      return "<-- Error: "+e.getMessage()+" -->";
+      return "<-- Error: " + e.getMessage() + " -->";
     }
     catch(IOException e) {
-      return "<-- Error: "+e.getMessage()+" -->";
+      return "<-- Error: " + e.getMessage() + " -->";
     }
     
-    // LOG.log("Returning '"+sb.toString()+"'");
+    // LOG.log("Returning '" + sb.toString() + "'");
     // LOG.log("---------");
     
     return sb.toString();
@@ -955,34 +955,34 @@ public abstract class StringOps {
       else { break; /* first character that is not a separator */ }
     }
 //    System.out.println("Removed all leading and trailing separator chars");
-//    System.out.println("String: "+s);
+//    System.out.println("String: " + s);
     
     java.util.StringTokenizer tok = new java.util.StringTokenizer(s, wordSepChars);
     StringBuilder sbl = new StringBuilder(); // current line
-//    System.out.println("hasMoreElements? "+tok.hasMoreElements());
+//    System.out.println("hasMoreElements? " + tok.hasMoreElements());
     while(tok.hasMoreElements()) {
       String token = tok.nextToken();
-//      System.out.println("\ttoken: "+token);
+//      System.out.println("\ttoken: " + token);
       sbl.append(token);
-//      System.out.println("\tline (length="+sbl.length()+"): "+sbl.toString());
+//      System.out.println("\tline (length=" + sbl.length() + "): " + sbl.toString());
       if (sbl.length() >= widthInChars) {
 //        System.out.println("\tnewline");
-//        System.out.println("\t\thasMoreElements? "+tok.hasMoreElements());
+//        System.out.println("\t\thasMoreElements? " + tok.hasMoreElements());
         if (tok.hasMoreElements()) {
 //          System.out.println("\t\tinserting line break");
           sbl.append(lineBreak);
         }
-//        System.out.println("\t\tFinal line: "+sbl.toString());
+//        System.out.println("\t\tFinal line: " + sbl.toString());
         sb.append(sbl.toString());
-//        System.out.println("\t\tEntire buffer: "+sb.toString());
+//        System.out.println("\t\tEntire buffer: " + sb.toString());
         sbl.setLength(0);
       }
       else { sbl.append(" "); }
     }
-//    System.out.println("No more tokens. Last line: "+sbl.toString());
+//    System.out.println("No more tokens. Last line: " + sbl.toString());
     if (sbl.length() > 0) { sb.append(sbl.toString()); }
 
-//    System.out.println("Final entire buffer: "+sb.toString());
+//    System.out.println("Final entire buffer: " + sb.toString());
     return sb.toString();
   }
   

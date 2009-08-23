@@ -1468,11 +1468,11 @@ public final class IndentTest extends DrJavaTestCase {
     //IndentRuleAction _action = new ActionBracePlus(0);
     
     String _text =
-      "method(\n"+
+      "method(\n" + 
       ")\n";
     
     String _aligned =
-      "method(\n"+
+      "method(\n" + 
       ")\n";
     
     _doc.insertString(0, _text, null);
@@ -1493,11 +1493,11 @@ public final class IndentTest extends DrJavaTestCase {
 //    IndentRuleAction _action = new ActionBracePlus("");
 //
 //    String _text =
-//      "int[] ar = new int[] {\n"+
+//      "int[] ar = new int[] {\n" + 
 //      "1,1,1,1,1,1,1,1,1 };";
 //
 //    String _aligned =
-//      "int[] ar = new int[] {\n"+
+//      "int[] ar = new int[] {\n" + 
 //      "                      1,1,1,1,1,1,1,1,1 };";
 //
 //    doc.insertString(0, _text, null);
@@ -1517,11 +1517,11 @@ public final class IndentTest extends DrJavaTestCase {
 //    IndentRuleAction _action = new ActionBracePlus("");
 //
 //    String _text =
-//      "int[] ar = new int[] { 1,1,1,\n"+
+//      "int[] ar = new int[] { 1,1,1,\n" + 
 //      "1,1,1,1,1,1 };";
 //
 //    String _aligned =
-//      "int[] ar = new int[] { 1,1,1,\n"+
+//      "int[] ar = new int[] { 1,1,1,\n" + 
 //      "                       1,1,1,1,1,1 };";
 //
 //    doc.insertString(0, _text, null);
@@ -1541,11 +1541,11 @@ public final class IndentTest extends DrJavaTestCase {
 //    IndentRuleAction _action = new ActionBracePlus("");
 //
 //    String _text =
-//      "int[] blah = new int[] {1, 2, 3\n"+
+//      "int[] blah = new int[] {1, 2, 3\n" + 
 //      "};";
 //
 //    String _aligned =
-//      "int[] blah = new int[] {1, 2, 3\n"+
+//      "int[] blah = new int[] {1, 2, 3\n" + 
 //      "                        };";
 //
 //    doc.insertString(0, _text, null);
@@ -1565,11 +1565,11 @@ public final class IndentTest extends DrJavaTestCase {
 //    IndentRuleAction _action = new ActionBracePlus("");
 //
 //    String _text =
-//      "int[] blah = new int[]\n"+
+//      "int[] blah = new int[]\n" + 
 //      "{4, 5, 6};";
 //
 //    String _aligned =
-//      "int[] blah = new int[]\n"+
+//      "int[] blah = new int[]\n" + 
 //      "  {4, 5, 6};";
 //
 //    doc.insertString(0, _text, null);
