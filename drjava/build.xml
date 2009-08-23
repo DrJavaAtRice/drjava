@@ -394,7 +394,7 @@
   
   
   <target name="do-test" depends="resolve-jvm-args, resolve-junit-jar">
-    <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}', java=${test-jvm}" />
+    <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}'" />
     <extendclasspath path="${junit-jar}" />
     <junit haltonfailure="${test-halt}" failureproperty="test-failed"
            fork="yes" forkmode="perTest" maxmemory="800M" jvm="${test-jvm}" dir="${basedir}">

@@ -776,7 +776,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
     
     final File goto1_file = new File(_tempDir, "GotoFileUnderCursor1.java");
-    String goto1_string = "GotoFileUnderCursorTest";
+    final String goto1_string = "GotoFileUnderCursorTest";
     IOUtil.writeStringToFile(goto1_file, goto1_string);
     goto1_file.deleteOnExit();
     
@@ -809,26 +809,25 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       }});
     
     Utilities.clearEventQueue();
-    SingleDisplayModel model = _frame.getModel();
-    OpenDefinitionsDocument goto1_doc = model.getDocumentForFile(goto1_file);
-    OpenDefinitionsDocument goto2_doc = model.getDocumentForFile(goto2_file);
-    model.setActiveDocument(model.getDocumentForFile(goto1_file));
-    assertEquals("Document contains the incorrect text", goto1_string, model.getActiveDocument().getText());
-    
-    Utilities.invokeAndWait(new Runnable() {
-      public void run() { _frame._gotoFileUnderCursor(); }
-    });
-    
-    Utilities.clearEventQueue();
-    assertEquals("Incorrect active document; did not go to?", goto2_doc, model.getActiveDocument());
-    
-    Utilities.invokeAndWait(new Runnable() {
-      public void run() { _frame._gotoFileUnderCursor(); }
-    });
-    
-    Utilities.clearEventQueue();
-    assertEquals("Incorrect active document; did not go to?", goto1_doc, model.getActiveDocument());
-    
+    Utilities.invokeAndWait(new Runnable() { public void run() {
+      SingleDisplayModel model = _frame.getModel();
+      try {
+        OpenDefinitionsDocument goto1_doc = model.getDocumentForFile(goto1_file);
+        OpenDefinitionsDocument goto2_doc = model.getDocumentForFile(goto2_file);
+        model.setActiveDocument(model.getDocumentForFile(goto1_file));
+        assertEquals("Document contains the incorrect text", goto1_string, model.getActiveDocument().getText());
+        
+        _frame._gotoFileUnderCursor();
+        
+        assertEquals("Incorrect active document; did not go to?", goto2_doc, model.getActiveDocument());
+        
+        _frame._gotoFileUnderCursor();
+        
+        assertEquals("Incorrect active document; did not go to?", goto1_doc, model.getActiveDocument());
+      }
+      catch(IOException ioe) { throw new UnexpectedException(ioe); }
+    } });
+
     _log.log("gotoFileUnderCursor completed");
   }
   
@@ -838,7 +837,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
     
     final File goto1_file = new File(_tempDir, "GotoFileUnderCursor2Test.java");
-    String goto1_string = "GotoFileUnderCursor2";
+    final String goto1_string = "GotoFileUnderCursor2";
     IOUtil.writeStringToFile(goto1_file, goto1_string);
     goto1_file.deleteOnExit();
     
@@ -876,26 +875,24 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     
     Utilities.clearEventQueue();
     
-    SingleDisplayModel model = _frame.getModel();
-    OpenDefinitionsDocument goto1_doc = model.getDocumentForFile(goto1_file);
-    OpenDefinitionsDocument goto2_doc = model.getDocumentForFile(goto2_file);
-    model.setActiveDocument(model.getDocumentForFile(goto1_file));
-    assertEquals("Document contains the incorrect text", goto1_string, model.getActiveDocument().getText());
-    
-    Utilities.invokeAndWait(new Runnable() {
-      public void run() { _frame._gotoFileUnderCursor(); }
-    });
-    
-    Utilities.clearEventQueue();
-    
-    assertEquals("Incorrect active document; did not go to?", goto2_doc, model.getActiveDocument());
-    
-    Utilities.invokeAndWait(new Runnable() {
-      public void run() { _frame._gotoFileUnderCursor(); }
-    });
-    
-    Utilities.clearEventQueue();
-    assertEquals("Incorrect active document; did not go to?", goto1_doc, model.getActiveDocument());
+    Utilities.invokeAndWait(new Runnable() { public void run() {
+      SingleDisplayModel model = _frame.getModel();
+      try {
+        OpenDefinitionsDocument goto1_doc = model.getDocumentForFile(goto1_file);
+        OpenDefinitionsDocument goto2_doc = model.getDocumentForFile(goto2_file);
+        model.setActiveDocument(model.getDocumentForFile(goto1_file));
+        assertEquals("Document contains the incorrect text", goto1_string, model.getActiveDocument().getText());
+        
+        _frame._gotoFileUnderCursor();
+        
+        assertEquals("Incorrect active document; did not go to?", goto2_doc, model.getActiveDocument());
+        
+        _frame._gotoFileUnderCursor();
+        
+        assertEquals("Incorrect active document; did not go to?", goto1_doc, model.getActiveDocument());
+      }
+      catch(IOException ioe) { throw new UnexpectedException(ioe); }
+    } });
     
     _log.log("gotoFileUnderCursorAppendJava completed");
   }
@@ -907,7 +904,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
     
     final File goto1_file = new File(_tempDir, "GotoFileUnderCursor3.java");
-    String goto1_string = "GotoFileUnderCursor";
+    final String goto1_string = "GotoFileUnderCursor";
     IOUtil.writeStringToFile(goto1_file, goto1_string);
     goto1_file.deleteOnExit();
     
@@ -943,11 +940,16 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     
     Utilities.clearEventQueue();
     
-    SingleDisplayModel model = _frame.getModel();
-    model.setActiveDocument(model.getDocumentForFile(goto1_file));
-    
-    assertEquals("Document contains the incorrect text", goto1_string, model.getActiveDocument().getText());
-    
+    Utilities.invokeAndWait(new Runnable() { public void run() {
+      SingleDisplayModel model = _frame.getModel();
+      try {
+        model.setActiveDocument(model.getDocumentForFile(goto1_file));
+        
+        assertEquals("Document contains the incorrect text", goto1_string, model.getActiveDocument().getText());
+      }
+      catch(IOException ioe) { throw new UnexpectedException(ioe); }
+    } });
+
     Utilities.invokeAndWait(new Runnable() { public void run() { _frame._gotoFileUnderCursor(); } });                    
     Utilities.clearEventQueue();  // wait for any asynchronous actions to complete
     
