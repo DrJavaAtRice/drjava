@@ -34,11 +34,14 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.iter;
 
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Iterator;
 import java.util.HashSet;
 import edu.rice.cs.plt.object.Composite;
 import edu.rice.cs.plt.object.ObjectUtil;
+import edu.rice.cs.plt.tuple.Option;
+import edu.rice.cs.plt.tuple.OptionUnwrapException;
 
 /**
  * An Iterator that returns each value only once.  Values are compared via {@code equals()} and
@@ -49,7 +52,7 @@ public class NoDuplicatesIterator<T> extends ReadOnlyIterator<T> implements Comp
   
   private final Iterator<? extends T> _i;
   private final Set<T> _seen;
-  private T _lookahead;
+  private Option<T> _lookahead;
   
   public NoDuplicatesIterator(Iterator<? extends T> i) {
     _i = i;
@@ -60,29 +63,32 @@ public class NoDuplicatesIterator<T> extends ReadOnlyIterator<T> implements Comp
   public int compositeHeight() { return ObjectUtil.compositeHeight(_i) + 1; }
   public int compositeSize() { return ObjectUtil.compositeSize(_i) + 1; }
   
-  public boolean hasNext() { return _lookahead != null; }
+  public boolean hasNext() { return _lookahead.isSome(); }
   
   public T next() {
-    T result = _lookahead;
-    advanceLookahead();
-    return result;
+    try {
+      T result = _lookahead.unwrap();
+      advanceLookahead();
+      return result;
+    }
+    catch (OptionUnwrapException e) { throw new NoSuchElementException(); }
   }
   
   /**
    * Finds the next unique value in {@code _i}.  Ignores the previous value of
    * {@code _lookahead}.  If a value is found, sets {@code _lookahead} to that
-   * value; otherwise, sets it to {@code null}.
+   * value; otherwise, sets it to Option.none.
    */
   private void advanceLookahead() {
     // This class is similar to FilteredIterator, but can't be implemented
     // as an instance because we need to manipulate the "seen" set here, before 
     // a "next" value is returned.  Otherwise, the lookahead test fails to
     // consider the most recently-seen value.
-    _lookahead = null;
-    while (_i.hasNext() && _lookahead == null) {
+    _lookahead = Option.none();
+    while (_i.hasNext() && _lookahead.isNone()) {
       T next = _i.next();
       if (!_seen.contains(next)) {
-        _lookahead = next;
+        _lookahead = Option.some(next);
         _seen.add(next);
       }
     }

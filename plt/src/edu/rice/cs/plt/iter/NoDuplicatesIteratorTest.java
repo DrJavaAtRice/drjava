@@ -60,6 +60,7 @@ public class NoDuplicatesIteratorTest extends TestCase {
     assertIteratorUnchecked(make(1, 2, 1), 1, 2);
     assertIterator(make(1, 2, 1, 3, 2), 1, 2, 3);
     assertIteratorUnchecked(make(1, 2, 1, 3, 2), 1, 2, 3);
+    assertIterator(make(1, 2, null, 4, null, 2, 5), 1, 2, null, 4, 5);
   }
   
 }
