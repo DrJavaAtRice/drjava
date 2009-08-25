@@ -114,8 +114,8 @@ class WindowsPlatform extends DefaultPlatform {
   /** Register .drjava and .djapp file extensions.
     * @return true if registering succeeded */
   public boolean registerDrJavaFileExtensions() {
-    boolean retval = registerFileExtension(OptionConstants.PROJECT_FILE_EXTENSION, DRJAVA_PROJECT_PROGID, "text", "text/plain");
-    retval &= registerFileExtension(OptionConstants.EXTPROCESS_FILE_EXTENSION, DRJAVA_EXTPROCESS_PROGID, "program", "multipart/mixed");
+    boolean retval = registerFileExtension(OptionConstants.PROJECT_FILE_EXTENSION, DRJAVA_PROJECT_PROGID, "DrJava project file", "text", "text/plain");
+    retval &= registerFileExtension(OptionConstants.EXTPROCESS_FILE_EXTENSION, DRJAVA_EXTPROCESS_PROGID, "DrJava addon file", "program", "multipart/mixed");
     return retval;
   }
 
@@ -137,7 +137,7 @@ class WindowsPlatform extends DefaultPlatform {
   /** Register .java file extension.
     * @return true if registering succeeded */
   public boolean registerJavaFileExtension() {
-    return registerFileExtension(".java", DRJAVA_JAVA_PROGID, "text", "text/plain");
+    return registerFileExtension(".java", DRJAVA_JAVA_PROGID, "Java source file", "text", "text/plain");
   }
   
   /** Unregister .java file extension.
@@ -179,8 +179,9 @@ class WindowsPlatform extends DefaultPlatform {
   /** Register a file extension.
     * @param extension extension, like ".drjava"
     * @param progid program ID, like "DrJava.Project"
+    * @param fileDesc file description, like "DrJava project file"
     * @return true if registering succeeded */
-  private boolean registerFileExtension(String extension, String progid, String perceived, String mime) {
+  private boolean registerFileExtension(String extension, String progid, String fileDesc, String perceived, String mime) {
     try {
       String cmdLine = getCommandLine();
       //      The general form of a file extension key is:
@@ -216,7 +217,7 @@ class WindowsPlatform extends DefaultPlatform {
       WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension+"\\OpenWithProgids", progid, "");
       WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, extension+"\\OpenWithList", progid, "");
       
-      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, progid, "", "DrJava project file");
+      WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, progid, "", fileDesc);
       
       WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, progid+"\\shell\\open", "FriendlyAppName", "DrJava");
       WindowsRegistry.setKey(WindowsRegistry.HKEY_CLASSES_ROOT, progid+"\\shell\\open\\command", "",
