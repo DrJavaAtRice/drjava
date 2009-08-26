@@ -17,24 +17,27 @@ public final class DynamicJava {
     debug.log();
     Interpreter i = new Interpreter(Options.DEFAULT);
     BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-    while (true) {
+    String input;
+    do {
       System.out.print("> ");
       System.out.flush();
-      String input = in.readLine();
-      try {
-        Option<Object> result = i.interpret(input);
-        result.apply(new OptionVisitor<Object, Void>() {
-          public Void forSome(Object o) { System.out.println(TextUtil.toString(o)); return null; }
-          public Void forNone() { return null; }
-        });
+      input = in.readLine();
+      if (input != null) {
+        try {
+          Option<Object> result = i.interpret(input);
+          result.apply(new OptionVisitor<Object, Void>() {
+            public Void forSome(Object o) { System.out.println(TextUtil.toString(o)); return null; }
+            public Void forNone() { return null; }
+          });
+        }
+        catch (InterpreterException e) { e.printUserMessage(); debug.log(e); }
+        catch (RuntimeException e) {
+          System.out.println("INTERNAL ERROR: Uncaught exception");
+          e.printStackTrace();
+        }
+        System.out.println();
       }
-      catch (InterpreterException e) { e.printUserMessage(); debug.log(e); }
-      catch (RuntimeException e) {
-        System.out.println("INTERNAL ERROR: Uncaught exception");
-        e.printStackTrace();
-      }
-      System.out.println();
-    }
+    } while (input != null);
   }
   
 }

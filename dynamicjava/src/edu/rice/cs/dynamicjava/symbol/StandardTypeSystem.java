@@ -568,10 +568,9 @@ public abstract class StandardTypeSystem extends TypeSystem {
     }
   }
   
-  /**
-   * @return  A string representing the type
-   */
-  public String userRepresentation(Type t) {
+  public String userRepresentation(Type t) { return userRepresentation(IterUtil.singleton(t)) ;}
+  
+  public String userRepresentation(Iterable<? extends Type> ts) {
     final StringBuilder result = new StringBuilder();
     
     class VariableHandler {
@@ -764,11 +763,16 @@ public abstract class StandardTypeSystem extends TypeSystem {
     };
     
     Runnable1<Type> dumpType = new DumpType();
-    dumpType.run(t);
+    boolean first = true;
+    for (Type t : ts) {
+      if (first) { first = false; }
+      else { result.append(", "); }
+      dumpType.run(t);
+    }
     if (!variableHandler.isEmpty()) {
-      result.append(" (");
+      result.append(" [");
       variableHandler.dumpBounds(dumpType);
-      result.append(")");
+      result.append("]");
     }
     return result.toString();
   }

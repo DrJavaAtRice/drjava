@@ -270,10 +270,7 @@ public class ExpressionChecker {
   }
   
   private String nodeTypesString(Iterable<? extends Node> nodes) {
-    Lambda<Node, String> typeString = new Lambda<Node, String>() {
-      public String value(Node n) { return ts.userRepresentation(getType(n)); }
-    };
-    return IterUtil.toString(IterUtil.map(nodes, typeString), "", ", ", "");
+    return ts.userRepresentation(IterUtil.map(nodes, NODE_TYPE));
   }
   
   

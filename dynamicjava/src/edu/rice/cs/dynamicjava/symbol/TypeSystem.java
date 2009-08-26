@@ -213,6 +213,8 @@ public abstract class TypeSystem {
   /** Produce a string representing the type */
   public abstract String userRepresentation(Type t);
   
+  /** Produce a string representing the list of types */
+  public abstract String userRepresentation(Iterable<? extends Type> ts);
   
   /* Class Type Operations */
   

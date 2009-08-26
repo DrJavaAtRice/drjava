@@ -472,36 +472,55 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
 
   protected Iterable<Type> captureTypeArgs(Iterable<? extends Type> targs,
                                            Iterable<? extends VariableType> params) {
-    List<BoundedSymbol> captureVars = new LinkedList<BoundedSymbol>();
+    // Create uninitialized placeholders for capture variables and normalized capture variables
+    List<VariableType> captureVars = new LinkedList<VariableType>();
+    List<VariableType> normCaptureVars = new LinkedList<VariableType>();
     List<Type> newArgs = new LinkedList<Type>();
+    List<Type> normNewArgs = new LinkedList<Type>();
     for (Type arg : targs) {
       if (arg instanceof Wildcard) {
-        BoundedSymbol s = new BoundedSymbol(new Object());
-        captureVars.add(s);
-        newArgs.add(new VariableType(s));
+        VariableType var = new VariableType(new BoundedSymbol(new Object()));
+        VariableType normVar = new VariableType(new BoundedSymbol(new Object()));
+        captureVars.add(var);
+        newArgs.add(var);
+        normCaptureVars.add(normVar);
+        normNewArgs.add(normVar);
       }
-      else { captureVars.add(null); newArgs.add(arg); }
+      else { newArgs.add(arg); normNewArgs.add(arg); }
     }
     
+    // Initialize bounds of captureVars
     final SubstitutionMap sigma = new SubstitutionMap(params, newArgs);
-    for (Triple<BoundedSymbol, Type, VariableType> triple : IterUtil.zip(captureVars, targs, params)) {
-      Type arg = triple.second();
+    Iterator<VariableType> captureVarsI = captureVars.iterator();
+    for (Pair<VariableType, Type> p : IterUtil.zip(params, targs)) {
+      Type arg = p.second();
       if (arg instanceof Wildcard) {
         Wildcard argW = (Wildcard) arg;
         Type argU = argW.symbol().upperBound();
         Type argL = argW.symbol().lowerBound();
-        VariableType param = triple.third();
+        VariableType param = p.first();
         Type paramU = substitute(param.symbol().upperBound(), sigma);
         Type paramL = substitute(param.symbol().lowerBound(), sigma);
-        Type captureU = argU.equals(paramU) ? argU : new IntersectionType(IterUtil.make(argU, paramU));
-        Type captureL = argL.equals(paramL) ? argL : new UnionType(IterUtil.make(argL, paramL));
-        // These bounds aren't normalized because we can't perform subtype checks on uninstantiated variables.
-        // That's okay, though, because we don't assume anywhere that variable bounds are normalized.
-        triple.first().initializeUpperBound(captureU);
-        triple.first().initializeLowerBound(captureL);
+        Type captureU = new IntersectionType(IterUtil.make(argU, paramU));
+        Type captureL = new UnionType(IterUtil.make(argL, paramL));
+        VariableType captureVar = captureVarsI.next();
+        captureVar.symbol().initializeUpperBound(captureU);
+        captureVar.symbol().initializeLowerBound(captureL);
       }
     }
-    return newArgs;
+    
+    // Initialize bounds of normCaptureVars by normalizing captureVars bounds (must be done
+    // in a second stage because we can't perform subtype checks on uninstantiated variables).
+    Normalizer norm = new Normalizer(new NormSubtyper());
+    SubstitutionMap sigmaNorm = new SubstitutionMap(captureVars, normCaptureVars);
+    for (Pair<VariableType, VariableType> p : IterUtil.zip(captureVars, normCaptureVars)) {
+      Type upper = substitute(norm.value(p.first().symbol().upperBound()), sigmaNorm);
+      Type lower = substitute(norm.value(p.first().symbol().lowerBound()), sigmaNorm);
+      p.second().symbol().initializeUpperBound(upper);
+      p.second().symbol().initializeLowerBound(lower);
+    }
+    
+    return normNewArgs;
   }
   
   private abstract class ConstraintFormula {
