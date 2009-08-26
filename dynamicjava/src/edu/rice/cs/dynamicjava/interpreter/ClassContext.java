@@ -132,7 +132,7 @@ public class ClassContext extends DelegatingContext {
    * if there is no such value (for example, in a static context).
    */
   @Override public DJClass getThis(String className) {
-    if (className.equals(_c.declaredName())) { return _c; }
+    if (!_c.isAnonymous() && className.equals(_c.declaredName())) { return _c; }
     else { return super.getThis(className); }
   }
   

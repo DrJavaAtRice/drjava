@@ -317,6 +317,7 @@ public class TreeClass implements DJClass {
     public Box<Object> boxForReceiver(Object receiver) {
       return _loaded.value().boxForReceiver(receiver);
     }
+    public String toString() { return "TreeField(" + declaredName() + ")"; }
   }
   
   
@@ -347,12 +348,14 @@ public class TreeClass implements DJClass {
     
     public String declaredName() { return TreeClass.this.declaredName(); }
     public Access.Module accessModule() { return _accessModule; }
+    public Type returnType() { return SymbolUtil.thisType(TreeClass.this); }
     
     public Object evaluate(Object outer, Iterable<Object> args, RuntimeBindings bindings, Options options) 
       throws EvaluatorException {
       if (_outerClass == null) { args = IterUtil.compose(bindings, args); }
       return _loaded.value().evaluate(outer, args, bindings, options);
     }
+    public String toString() { return "TreeConstructor(" + declaredName() + ")"; }
   }
   
   
@@ -445,6 +448,8 @@ public class TreeClass implements DJClass {
       if (isStatic()) { args = IterUtil.compose(bindings, args); }
       return _loaded.value().evaluate(receiver, args, bindings, options);
     }
+    
+    public String toString() { return "TreeMethod(" + declaredName() + ")"; }
   }
     
   

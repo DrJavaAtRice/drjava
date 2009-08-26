@@ -114,7 +114,12 @@ public class ExpressionEvaluator extends AbstractVisitor<Object> implements Lamb
    * @param args  May be null, meaning there are no arguments
    */
   private Object handleConstructor(Expression node, Expression outer, Iterable<Expression> args) {
-    Object outerVal = (outer == null) ? null : value(outer);
+    Object outerVal;
+    if (outer == null) {
+      if (hasEnclosingThis(node)) { outerVal = _bindings.getThis(getEnclosingThis(node)); }
+      else { outerVal = null; }
+    }
+    else { outerVal = value(outer); }
     
     Iterable<Object> argVals;
     if (args == null) { argVals = IterUtil.empty(); }

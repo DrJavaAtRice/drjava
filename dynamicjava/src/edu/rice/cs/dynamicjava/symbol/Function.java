@@ -8,5 +8,6 @@ public interface Function {
   public String declaredName();
   public Iterable<VariableType> declaredTypeParameters();
   public Iterable<LocalVariable> declaredParameters();
+  public Type returnType();
   public Iterable<Type> thrownTypes();
 }

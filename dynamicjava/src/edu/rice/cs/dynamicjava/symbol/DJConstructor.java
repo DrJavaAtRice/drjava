@@ -7,6 +7,7 @@ import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
 /** Represents a constructor declaration. */
 public interface DJConstructor extends Function, Access.Limited {
   public Access accessibility();
+  public Access.Module accessModule();
   public Object evaluate(Object outer, Iterable<Object> args, RuntimeBindings bindings, Options options) 
     throws EvaluatorException;
 }

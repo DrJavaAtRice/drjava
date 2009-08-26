@@ -7,11 +7,16 @@ import edu.rice.cs.plt.recur.*;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
+import edu.rice.cs.plt.collect.Order;
+import edu.rice.cs.plt.collect.PredicateSet;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.interpreter.TypeUtil;
 import koala.dynamicjava.interpreter.NodeProperties;
+import edu.rice.cs.dynamicjava.Options;
+import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
+import edu.rice.cs.dynamicjava.interpreter.RuntimeBindings;
 import edu.rice.cs.dynamicjava.symbol.type.*;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -194,22 +199,14 @@ public abstract class StandardTypeSystem extends TypeSystem {
     }
   };
   
-  /**
-   * Determine if values of type {@code t} are not dependent on an outer object (for example, a non-static 
-   * inner class has such a dependency)
-   */
-  public boolean isStatic(Type t) { return t.apply(IS_STATIC); }
+  public Option<Type> dynamicallyEnclosingType(Type t) { return t.apply(DYNAMICALLY_ENCLOSING); }
   
-  private static final TypeVisitorLambda<Boolean> IS_STATIC = new TypeAbstractVisitor<Boolean>() {
-    public Boolean defaultCase(Type t) { return true; }
+  private static final TypeVisitorLambda<Option<Type>> DYNAMICALLY_ENCLOSING =
+      new TypeAbstractVisitor<Option<Type>>() {
+    public Option<Type> defaultCase(Type t) { return Option.none(); }
     
-    @Override public Boolean forClassType(ClassType t) {
-      DJClass outer = null;
-      for (DJClass inner : SymbolUtil.outerClassChain(t.ofClass())) {
-        if (outer != null && !inner.isStatic()) { return false; }
-        outer = inner;
-      }
-      return true;
+    @Override public Option<Type> forClassType(ClassType t) {
+      return Option.<Type>wrap(SymbolUtil.dynamicOuterClassType(t));
     }
   };
   
@@ -364,11 +361,6 @@ public abstract class StandardTypeSystem extends TypeSystem {
     @Override public Type forWildcard(Wildcard t) { throw new IllegalArgumentException(); }
     @Override public Type forTopType(TopType t) { throw new IllegalArgumentException(); }
     @Override public Type forBottomType(BottomType t) { throw new IllegalArgumentException(); }
-  };
-  
-  // Not defined statically because it depends on non-static "erase" (allowing subclasses to override erase)
-  private final Lambda<Type, Type> ERASE_LAMBDA = new Lambda<Type, Type>() {
-    public Type value(Type t) { return erase(t); }
   };
   
   /**
@@ -603,7 +595,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
       public String registerVariable(VariableType v) {
         String result = _names.get(v);
         if (result == null) {
-          if (v.symbol().generated()) { _captureVars++; result = "?" + _captureVars; }
+          if (v.symbol().generated()) { _captureVars++; result = "?T" + _captureVars; }
           else { result = v.symbol().name(); }
           _vars.add(v);
           _names.put(v, result);
@@ -1317,39 +1309,884 @@ public abstract class StandardTypeSystem extends TypeSystem {
     });
   }
   
-  /** Get a class's immediate supertype.  The result is either null or the result of a {@link #meet} call. */
+  /** Get a class type's immediate supertype.  The result may be null. */
   protected Type immediateSupertype(ClassType t) {
-    return t.apply(new TypeAbstractVisitor<Type>() {
-      public Type defaultCase(Type t) { throw new IllegalArgumentException(); }
-      public Type forSimpleClassType(SimpleClassType t) { return immediateSupertype(t); }
-      public Type forRawClassType(RawClassType t) { return immediateSupertype(t); }
-      public Type forParameterizedClassType(ParameterizedClassType t) { return immediateSupertype(t); }
-    });
-  }
-  
-  protected Type immediateSupertype(SimpleClassType t) {
     if (t.equals(OBJECT)) { return null; }
-    // can't use meet here because there may be a circular dependency with subtyping
-    else { return new IntersectionType(IterUtil.compose(OBJECT, t.ofClass().declaredSupertypes())); }
+    else {
+      final Iterable<Type> declaredSupers = t.ofClass().declaredSupertypes();
+      if (IterUtil.isEmpty(declaredSupers)) { return OBJECT; }
+      else {
+        Iterable<? extends Type> instantiatedSupers = t.apply(new TypeAbstractVisitor<Iterable<? extends Type>>() {
+          @Override public Iterable<? extends Type> defaultCase(Type t) { return declaredSupers; }
+          @Override public Iterable<? extends Type> forRawClassType(RawClassType t) {
+            return IterUtil.mapSnapshot(declaredSupers, ERASE);
+          }
+          @Override public Iterable<? extends Type> forParameterizedClassType(ParameterizedClassType t) {
+            ParameterizedClassType tCap = capture(t);
+            DJClass c = tCap.ofClass();
+            return substitute(c.declaredSupertypes(), SymbolUtil.allTypeParameters(c), tCap.typeArguments());
+          }
+        });
+        if (IterUtil.sizeOf(instantiatedSupers, 2) > 1) { return new IntersectionType(instantiatedSupers); }
+        else { return IterUtil.first(instantiatedSupers); }
+      }
+    }
+  }
+    
+  /**
+   * Lookup the constructor corresponding the the given invocation.
+   * @param t  The type of the object to be constructed.
+   * @param typeArgs  The type arguments for the constructor's type parameters.
+   * @param args  A list of typed expressions corresponding to the constructor's parameters.
+   * @param expected  The type expected in the invocation's calling context, if any.
+   * @return  A {@link TypeSystem.ConstructorInvocation} object representing the matched constructor.
+   * @throws InvalidTypeArgumentException  If the type arguments are invalid (for example, a primitive type).
+   * @throws UnmatchedLookupException  If 0 or more than 1 constructor matches the given arguments and type 
+   *                                   arguments.
+   */
+  // TODO: Must produce a reasonable value when looking up a constructor in an interface (for anonymous classes)
+  public ConstructorInvocation lookupConstructor(final Type t, final Iterable<? extends Type> typeArgs, 
+                                                 final Iterable<? extends Expression> args,
+                                                 final Option<Type> expected)
+    throws InvalidTypeArgumentException, UnmatchedLookupException {
+    debug.logStart(new String[]{"t","typeArgs","arg types","expected"},
+                   wrap(t), wrap(typeArgs), wrap(IterUtil.map(args, NodeProperties.NODE_TYPE)), wrap(expected)); try {
+                     
+    Iterable<ConstructorInvocationCandidate> constructors = 
+      t.apply(new TypeAbstractVisitor<Iterable<ConstructorInvocationCandidate>>() {
+        @Override public Iterable<ConstructorInvocationCandidate> defaultCase(Type t) { return IterUtil.empty(); }
+        @Override public Iterable<ConstructorInvocationCandidate> forClassType(final ClassType t) {
+          return IterUtil.mapSnapshot(t.ofClass().declaredConstructors(),
+                                       new Lambda<DJConstructor, ConstructorInvocationCandidate>() {
+            public ConstructorInvocationCandidate value(DJConstructor k) {
+              return new ConstructorInvocationCandidate(k, t, typeArgs, args, expected);
+            }
+          });
+        }
+      });
+    Iterable<ConstructorInvocationCandidate> results = bestMatches(constructors);
+    // TODO: provide more error-message information
+    int matches = IterUtil.sizeOf(results);
+    if (matches != 1) { throw new UnmatchedLookupException(matches); }
+    else { return IterUtil.first(results).invocation(); }
+    
+    } finally { debug.logEnd(); }
   }
   
-  protected Type immediateSupertype(RawClassType t) {
-    Iterable<Type> erasedSups = IterUtil.map(t.ofClass().declaredSupertypes(), new Lambda<Type, Type>() {
-      public Type value(Type t) { return t.apply(ERASE); }
+  public boolean containsMethod(Type t, String name) { return containsMethod(t, name, false); }
+  public boolean containsStaticMethod(Type t, String name) { return containsMethod(t, name, true); }
+  private boolean containsMethod(Type t, String name, boolean onlyStatic) {
+    MethodFinder<MethodInvocation> finder = new MethodFinder<MethodInvocation>(name, onlyStatic) {
+      protected MethodInvocationCandidate<MethodInvocation> makeInvocationCandidate(DJMethod m,
+                                                                                    ClassType declaringType) {
+        // a version of the method that depends on no type information (which may not be available)
+        DJMethod noSignatureMethod = new DelegatingMethod(m) {
+          public Iterable<VariableType> declaredTypeParameters() { return IterUtil.empty(); }
+          public Type returnType() { return BOTTOM; }
+          public Iterable<Type> thrownTypes() { return IterUtil.empty(); }
+          @Override public Iterable<LocalVariable> declaredParameters() { return IterUtil.empty(); }
+          protected Iterable<? extends Type> parameterTypes() { return IterUtil.empty(); }
+        };
+        // anonymous stub used only for inheritance checking
+        return new MethodInvocationCandidate<MethodInvocation>(noSignatureMethod, OBJECT, EMPTY_TYPE_ITERABLE,
+                                                                 IterUtil.<Expression>empty(), NONE_TYPE_OPTION) {
+          public MethodInvocation invocation() { throw new UnsupportedOperationException(); }
+          @Override public boolean overrides(FunctionInvocationCandidate<MethodInvocation> c) { return false; }
+        };
+      }
+    };
+    return finder.hasMatch(t);
+  }
+  
+  public ObjectMethodInvocation lookupMethod(final Expression object, String name, 
+                                             final Iterable<? extends Type> typeArgs, 
+                                             final Iterable<? extends Expression> args,
+                                             final Option<Type> expected)
+      throws InvalidTypeArgumentException, UnmatchedLookupException {
+    MethodFinder<ObjectMethodInvocation> finder = new MethodFinder<ObjectMethodInvocation>(name, false) {
+      public ObjectMethodInvocationCandidate makeInvocationCandidate(DJMethod m, ClassType declaringType) {
+        return new ObjectMethodInvocationCandidate(m, declaringType, object, typeArgs, args, expected);
+      }
+    };
+    return finder.findSingleMethod(NodeProperties.getType(object));
+  }
+  
+  public StaticMethodInvocation lookupStaticMethod(Type t, String name, 
+                                                   final Iterable<? extends Type> typeArgs, 
+                                                   final Iterable<? extends Expression> args,
+                                                   final Option<Type> expected)
+    throws InvalidTypeArgumentException, UnmatchedLookupException {
+    MethodFinder<StaticMethodInvocation> finder = new MethodFinder<StaticMethodInvocation>(name, true) {
+      public StaticMethodInvocationCandidate makeInvocationCandidate(DJMethod m, ClassType declaringType) {
+        return new StaticMethodInvocationCandidate(m, declaringType, typeArgs, args, expected);
+      }
+    };
+    return finder.findSingleMethod(t);
+  }
+  
+  public boolean containsField(Type t, String name) { return containsField(t, name, false); }
+  public boolean containsStaticField(Type t, String name) { return containsField(t, name, true); }
+  private boolean containsField(Type t, String name, boolean onlyStatic) {
+    FieldFinder<FieldReference> finder = new FieldFinder<FieldReference>(name, onlyStatic) {
+      protected FieldReference makeFieldReference(Type t, DJField f) {
+        return new FieldReference(f, BOTTOM) {}; // anonymous stub just used for inheritance checking
+      }
+    };
+    return finder.hasMatch(t);
+  }
+  
+  public ObjectFieldReference lookupField(final Expression object, final String name)
+    throws UnmatchedLookupException {
+    FieldFinder<ObjectFieldReference> finder = new FieldFinder<ObjectFieldReference>(name, false) {
+      public ObjectFieldReference makeFieldReference(Type t, DJField f) {
+        return new ObjectFieldReference(f, fieldType(f, t), makeCast(t, object));
+      }
+    };
+    return finder.findSingleField(NodeProperties.getType(object));
+  }
+  
+  public StaticFieldReference lookupStaticField(Type t, final String name)
+    throws UnmatchedLookupException {
+    FieldFinder<StaticFieldReference> finder = new FieldFinder<StaticFieldReference>(name, true) {
+      public StaticFieldReference makeFieldReference(Type t, DJField f) {
+        return new StaticFieldReference(f, fieldType(f, t));
+      }
+    };
+    return finder.findSingleField(t);
+  }
+  
+  private Type fieldType(final DJField f, Type declaringType) {
+    return declaringType.apply(new TypeAbstractVisitor<Type>() {
+      @Override public Type defaultCase(Type declaringType) { return f.type(); }
+      @Override public Type forRawClassType(RawClassType declaringType) { return erase(f.type()); }
+      @Override public Type forParameterizedClassType(ParameterizedClassType declaringType) {
+        ParameterizedClassType cap = capture(declaringType);
+        return substitute(f.type(), SymbolUtil.allTypeParameters(cap.ofClass()), cap.typeArguments());
+      }
     });
-    // can't use meet here because there may be a circular dependency with subtyping
-    return new IntersectionType(IterUtil.compose(OBJECT, erasedSups));
   }
   
-  protected Type immediateSupertype(ParameterizedClassType t) {
-    ParameterizedClassType tCap = capture(t);
-    DJClass c = tCap.ofClass();
-    Iterable<? extends Type> sups =
-      substitute(c.declaredSupertypes(), SymbolUtil.allTypeParameters(c), tCap.typeArguments());
-    // can't use meet here because there may be a circular dependency with subtyping
-    return new IntersectionType(IterUtil.compose(OBJECT, sups));
+  public boolean containsClass(Type t, final String name) {
+    return new ClassFinder(name, EMPTY_TYPE_ITERABLE, false).hasMatch(t);
   }
   
+  public boolean containsStaticClass(Type t, final String name) {
+    return new ClassFinder(name, EMPTY_TYPE_ITERABLE, true).hasMatch(t);
+  }
+  
+  public ClassType lookupClass(Expression object, String name, Iterable<? extends Type> typeArgs)
+    throws InvalidTypeArgumentException, UnmatchedLookupException {
+    return new ClassFinder(name, typeArgs, false).findSingleClass(NodeProperties.getType(object));
+  }
+  
+  public ClassType lookupClass(Type t, final String name, Iterable<? extends Type> typeArgs)
+    throws InvalidTypeArgumentException, UnmatchedLookupException {
+    return new ClassFinder(name, typeArgs, false).findSingleClass(t);
+  }
+  
+  public ClassType lookupStaticClass(Type t, final String name, final Iterable<? extends Type> typeArgs)
+    throws InvalidTypeArgumentException, UnmatchedLookupException {
+    return new ClassFinder(name, typeArgs, true).findSingleClass(t);
+  }
+  
+  /**
+   * Test whether the given arguments are within the bounds of the corresponding parameters.  Assumes
+   * that {@code params} and {@code args} have matching arity.
+   * 
+   * @return  {@code true} iff the given arguments are within the bounds of the given parameters
+   */
+  protected boolean inBounds(Iterable<? extends VariableType> params, Iterable<? extends Type> args) {
+    SubstitutionMap sigma = new SubstitutionMap(params, args);
+    for (Pair<VariableType, Type> pair : IterUtil.zip(params, args)) {
+      VariableType param = pair.first();
+      Type arg = pair.second();
+      if (!isSubtype(substitute(param.symbol().lowerBound(), sigma), arg)) { return false; }
+      if (!isSubtype(arg, substitute(param.symbol().upperBound(), sigma))) { return false; }
+    }
+    return true;
+  }
+  
+  /**
+   * Implementation of member lookup.  Subclasses provide an implementation of {@link #declaredMatches},
+   * which produces the set of matches for a particular type.  Traversal of the type hierarchy
+   * is managed here.
+   */
+  private abstract class MemberFinder<T> {
+    /** Test whether a search of the given type produces at least one result. */
+    public boolean hasMatch(Type t) { return !IterUtil.isEmpty(findFirst(t)); }
+    /**
+     * Produce the set of matching members least-removed from type t.  If t declares at least one
+     * match, no supertype recursion takes place.
+     */
+    public PredicateSet<T> findFirst(Type t) { return find(t, false); }
+    
+    /** Produce all matching members of t (both declared and inherited). */
+    public PredicateSet<T> findAll(Type t) { return find(t, true); }
+    
+    /** Get a list of all declared members of t that match. */
+    protected abstract Iterable<T> declaredMatches(Type t);
+    
+    /** Whether the child type inherits the given match from a supertype. */
+    protected abstract boolean inherits(Type child, PredicateSet<T> childMatches, T match); 
+    
+    private PredicateSet<T> find(final Type t, final boolean findAll) {
+      debug.logStart("t", wrap(t)); try {
+        
+      final PredicateSet<T> childMatches = CollectUtil.asPredicateSet(declaredMatches(t));
+      if (!findAll && !IterUtil.isEmpty(childMatches)) {
+        // take snapshot of lazily-constructed set
+        return CollectUtil.makeSet(childMatches);
+      }
+      else {
+        PredicateSet<T> fromSupers = t.apply(new TypeAbstractVisitor<PredicateSet<T>>() {
+          
+          public PredicateSet<T> defaultCase(Type t) { return CollectUtil.emptySet(); }
+          
+          @Override public PredicateSet<T> forArrayType(ArrayType t) {
+            return find(CLONEABLE_AND_SERIALIZABLE, findAll);
+          }
+          
+          @Override public PredicateSet<T> forClassType(ClassType t) {
+            Type superT = immediateSupertype(t);
+            if (superT == null) { return CollectUtil.emptySet(); }
+            else { return find(superT, findAll); }
+          }
+          
+          @Override public PredicateSet<T> forVariableType(VariableType t) {
+            return find(t.symbol().upperBound(), findAll);
+          }
+          
+          @Override public PredicateSet<T> forIntersectionType(IntersectionType t) {
+            PredicateSet<T> result = CollectUtil.emptySet();
+            for (Type tSup : t.ofTypes()) {
+              PredicateSet<T> forSup = find(tSup, findAll);
+              result = CollectUtil.union(result, forSup);
+            }
+            return result;
+          }
+          
+          @Override public PredicateSet<T> forUnionType(UnionType t) {
+            Iterable<? extends Type> sups = t.ofTypes();
+            if (IterUtil.isEmpty(sups)) { return CollectUtil.emptySet(); }
+            else {
+              PredicateSet<T> result = find(IterUtil.first(sups), findAll);
+              for (Type tSup : IterUtil.skipFirst(sups)) {
+                PredicateSet<T> forSup = find(tSup, findAll);
+                result = CollectUtil.intersection(result, forSup);
+                // don't short-circuit when empty, because the empty test is expensive
+              }
+              return result;
+            }
+          }
+          
+        });
+        PredicateSet<T> result = CollectUtil.union(childMatches, CollectUtil.filter(fromSupers, new Predicate<T>() {
+          public boolean contains(T match) { return inherits(t, childMatches, match); }
+        }));
+        // take snapshot of lazily-constructed sets
+        return CollectUtil.makeSet(result);
+      }
+      
+      } finally { debug.logEnd(); }
+    }
+  }
+  
+  private abstract class MethodFinder<I extends MethodInvocation>
+                         extends MemberFinder<MethodInvocationCandidate<I>> {
+    private final String _name;
+    private final boolean _onlyStatic;
+    protected MethodFinder(String name, boolean onlyStatic) { _name = name; _onlyStatic = onlyStatic; }
+    
+    /** Search for matching methods and determine the best applicable instance, if any. */
+    public I findSingleMethod(Type t) throws UnmatchedLookupException {
+      debug.logStart(new String[]{"t","name"}, wrap(t)); try {
+        
+      PredicateSet<MethodInvocationCandidate<I>> candidates = findAll(t);
+      Iterable<MethodInvocationCandidate<I>> best = bestMatches(candidates);
+      // TODO: provide more error-message information
+      int matches = IterUtil.sizeOf(best);
+      if (matches != 1) { throw new UnmatchedLookupException(matches); }
+      else { return IterUtil.first(best).invocation(); }
+      
+      } finally { debug.logEnd(); }
+    }
+    
+    protected abstract MethodInvocationCandidate<I> makeInvocationCandidate(DJMethod m, ClassType declaringType);
+    
+    protected Iterable<MethodInvocationCandidate<I>> declaredMatches(Type t) {
+      return t.apply(new TypeAbstractVisitor<Iterable<MethodInvocationCandidate<I>>>() {
+        private boolean matches(DJMethod m) {
+          return m.declaredName().equals(_name) && !(_onlyStatic && !m.isStatic());
+        }
+        @Override public Iterable<MethodInvocationCandidate<I>> defaultCase(Type t) { return IterUtil.empty(); }
+        @Override public Iterable<MethodInvocationCandidate<I>> forClassType(ClassType t) {
+          List<MethodInvocationCandidate<I>> result = new LinkedList<MethodInvocationCandidate<I>>();
+          for (DJMethod m : t.ofClass().declaredMethods()) {
+            if (matches(m)) { result.add(makeInvocationCandidate(m, t)); }
+          }
+          return result;
+        }
+      });
+    }
+
+    protected boolean inherits(Type child, PredicateSet<MethodInvocationCandidate<I>> childMatches,
+                               MethodInvocationCandidate<I> match) {
+      // TODO: follow the JLS definition of method inheritance (8.4.8)
+      if (match.accessibility().equals(Access.PRIVATE)) { return false; }
+      else {
+        for (MethodInvocationCandidate<I> childMethod : childMatches) {
+          if (childMethod.overrides(match)) { return false; }
+        }
+        return true;
+      }
+    }
+
+  }
+  
+  private abstract class FieldFinder<T extends FieldReference> extends MemberFinder<T> {
+    private final String _name;
+    private final boolean _onlyStatic;
+    protected FieldFinder(String name, boolean onlyStatic) { _name = name; _onlyStatic = onlyStatic; }
+    
+    /** If a single field is produced by findFirst(t), return it; otherwise, throw an exception. */
+    public T findSingleField(Type t) throws UnmatchedLookupException {
+      debug.logStart(new String[]{"t","name","onlyStatic"}, wrap(t), _name, _onlyStatic); try {
+        
+      Iterable<T> results = findFirst(t);
+      // TODO: provide more error-message information
+      int matches = IterUtil.sizeOf(results);
+      if (matches != 1) { throw new UnmatchedLookupException(matches); }
+      else { return IterUtil.first(results); }
+      
+      } finally { debug.logEnd(); }
+    }
+    
+    protected abstract T makeFieldReference(Type declaringType, DJField field);
+    
+    protected Iterable<T> declaredMatches(Type t) {
+      Iterable<T> result = t.apply(new TypeAbstractVisitor<Iterable<T>>() {
+        private boolean matches(DJField f) {
+          return f.declaredName().equals(_name) && !(_onlyStatic && !f.isStatic());
+        }
+        @Override public Iterable<T> defaultCase(Type t) { return IterUtil.empty(); }
+        @Override public Iterable<T> forArrayType(ArrayType t) {
+          if (_name.equals("length") && !_onlyStatic) {
+            return IterUtil.make(makeFieldReference(t, ArrayLengthField.INSTANCE));
+          }
+          else { return IterUtil.empty(); }
+        }
+        @Override public Iterable<T> forClassType(ClassType t) {
+          for (DJField f : t.ofClass().declaredFields()) {
+            if (matches(f)) { return IterUtil.make(makeFieldReference(t, f)); }
+          }
+          return IterUtil.empty();
+        }
+      });
+      return result;
+    }
+
+    protected boolean inherits(Type child, PredicateSet<T> childMatches, T match) {
+      // TODO: follow the JLS definition of field inheritance (8.3)
+      return childMatches.isEmpty() && !match.field().accessibility().equals(Access.PRIVATE);
+    }
+
+  }
+  
+  private class ClassFinder extends MemberFinder<ClassType> {
+    private final String _name;
+    private final Iterable<? extends Type> _typeArgs;
+    private final boolean _onlyStatic;
+    protected ClassFinder(String name, Iterable<? extends Type> typeArgs, boolean onlyStatic) {
+      _name = name;
+      _typeArgs = typeArgs;
+      _onlyStatic = onlyStatic;
+    }
+    
+    /**
+     * If a single class is produced by findFirst(t) and the type arguments are valid, return the
+     * type; otherwise, throw an exception.
+     */
+    public ClassType findSingleClass(Type t) throws InvalidTypeArgumentException, UnmatchedLookupException {
+      debug.logStart(new String[]{"t","name","typeArgs", "onlyStatic"},
+                     wrap(t), _name, wrap(_typeArgs), _onlyStatic); try {
+                       
+      Iterable<ClassType> results = findFirst(t);
+      // TODO: provide more error-message information
+      int matches = IterUtil.sizeOf(results);
+      if (matches != 1) { throw new UnmatchedLookupException(matches); }
+      else {
+        ClassType result = IterUtil.first(results);
+        final Iterable<VariableType> params = SymbolUtil.allTypeParameters(result.ofClass());
+        try {
+          return result.apply(new TypeAbstractVisitor<ClassType>() {
+            public ClassType defaultCase(Type t) { throw new IllegalArgumentException(); }
+            
+            @Override public ClassType forSimpleClassType(SimpleClassType t) {
+              if (IterUtil.isEmpty(params)) { return t; }
+              else { return new RawClassType(t.ofClass()); }
+            }
+            
+            @Override public ClassType forRawClassType(RawClassType t) {
+              return t;
+            }
+            
+            @Override public ClassType forParameterizedClassType(ParameterizedClassType t) {
+              try {
+                if (IterUtil.sizeOf(params) != IterUtil.sizeOf(t.typeArguments())) {
+                  throw new InvalidTypeArgumentException();
+                }
+                return t;
+              }
+              catch (InvalidTypeArgumentException e) { throw new WrappedException(e); }
+            }
+          });
+        }
+        catch (WrappedException e) {
+          if (e.getCause() instanceof InvalidTypeArgumentException) {
+            throw (InvalidTypeArgumentException) e.getCause();
+          }
+          else { throw e; }
+        }
+      }
+      
+      } finally { debug.logEnd(); }
+    }
+    
+    /**
+     * The given type arguments are applied to the result, but no checks are
+     * made for their correctness (a ParameterizedClassType result may have the wrong number of
+     * arguments, including the case of missing arguments from a raw outer type; a SimpleClassType
+     * result may be missing arguments).
+     */
+    protected Iterable<ClassType> declaredMatches(Type t) {
+      return t.apply(new TypeAbstractVisitor<Iterable<ClassType>>() {
+        
+        @Override public Iterable<ClassType> defaultCase(Type t) { return IterUtil.empty(); }
+        
+        @Override public Iterable<ClassType> forClassType(final ClassType t) {
+            
+          Predicate<DJClass> matchInner = new Predicate<DJClass>() {
+            public boolean contains(DJClass c) {
+              return !c.isAnonymous() && c.declaredName().equals(_name) && !(_onlyStatic && !c.isStatic());
+            }
+          };
+          Lambda<DJClass, ClassType> makeType = new Lambda<DJClass, ClassType>() {
+            public ClassType value(DJClass c) {
+              ClassType dynamicOuter; // may be null
+              if (c.isStatic()) { dynamicOuter = SymbolUtil.dynamicOuterClassType(t); }
+              else { dynamicOuter = t; }
+              if (dynamicOuter instanceof ParameterizedClassType) {
+                Iterable<? extends Type> outerTypeArgs = ((ParameterizedClassType) dynamicOuter).typeArguments();
+                return new ParameterizedClassType(c, IterUtil.compose(outerTypeArgs, _typeArgs));
+              }
+              else if (dynamicOuter instanceof RawClassType) {
+                // malformed if type args is nonempty -- that should be caught by findSingleClass
+                return IterUtil.isEmpty(_typeArgs) ? new RawClassType(c) : new ParameterizedClassType(c, _typeArgs);
+              }
+              else {
+                return IterUtil.isEmpty(_typeArgs) ? new SimpleClassType(c) : new ParameterizedClassType(c, _typeArgs);
+              }
+            }
+          };
+          return IterUtil.map(IterUtil.filter(t.ofClass().declaredClasses(), matchInner), makeType);
+        }
+          
+      });
+    }
+
+    protected boolean inherits(Type child, PredicateSet<ClassType> childMatches, ClassType match) {
+      // TODO: follow the JLS definition of class inheritance (8.5)
+      return childMatches.isEmpty() && !match.ofClass().accessibility().equals(Access.PRIVATE);
+    }
+
+  }
+  
+  private abstract class FunctionInvocationCandidate<I extends FunctionInvocation> {
+    protected final Function _f;
+    protected final SignatureMatcher _matcher;
+    
+    public FunctionInvocationCandidate(Function f, Iterable<? extends Type> targs,
+                                       Iterable<? extends Expression> args, Option<Type> expected) {
+      _f = f;
+      _matcher = makeMatcher(f.declaredTypeParameters(), targs, parameterTypes(), args, f.returnType(), expected);
+    }
+    
+    public abstract I invocation();
+    
+    protected SubstitutionMap substitution() {
+      return new SubstitutionMap(_f.declaredTypeParameters(), _matcher.typeArguments());
+    }
+    
+    protected Iterable<Type> parameterTypes() { return SymbolUtil.declaredParameterTypes(_f); }
+    protected Iterable<VariableType> typeParameters() { return _f.declaredTypeParameters(); }
+    
+    private SignatureMatcher makeMatcher(Iterable<? extends VariableType> tparams,
+                                         Iterable<? extends Type> targs,
+                                         Iterable<? extends Type> params,
+                                         Iterable<? extends Expression> args,
+                                         Type returned, Option<Type> expected) {
+      // Note: per the JLS, we allow the presence of (ignored) targs when tparams is empty
+      int argCount = IterUtil.sizeOf(args);
+      int paramCount = IterUtil.sizeOf(params);
+      if (argCount == paramCount - 1) {
+        if (IterUtil.isEmpty(tparams)) {
+          return new EmptyVarargMatcher(params, args, tparams, EMPTY_TYPE_ITERABLE);
+        }
+        else if (IterUtil.isEmpty(targs)) {
+          return new EmptyVarargInferenceMatcher(params, args, tparams, returned, expected);
+        }
+        else if (IterUtil.sizeOf(tparams) == IterUtil.sizeOf(targs) && inBounds(tparams, targs)) {
+          return new EmptyVarargMatcher(substitute(params, tparams, targs), args, tparams, targs);
+        }
+        else { return NullMatcher.INSTANCE; }
+      }
+      else if (argCount == paramCount) {
+        if (IterUtil.isEmpty(tparams)) { 
+          return new SimpleMatcher(params, args, tparams, EMPTY_TYPE_ITERABLE);
+        }
+        else if (IterUtil.isEmpty(targs)) {
+          return new InferenceMatcher(params, args, tparams, returned, expected);
+        }
+        else if (IterUtil.sizeOf(tparams) == IterUtil.sizeOf(targs) && inBounds(tparams, targs)) { 
+          return new SimpleMatcher(substitute(params, tparams, targs), args, tparams, targs);
+        }
+        else { return NullMatcher.INSTANCE; }
+      }
+      else if (argCount > paramCount && paramCount >= 1) {
+        if (IterUtil.isEmpty(tparams)) { 
+          return new MultiVarargMatcher(params, args, tparams, EMPTY_TYPE_ITERABLE);
+        }
+        else if (IterUtil.isEmpty(targs)) {
+          return new MultiVarargInferenceMatcher(params, args, tparams, returned, expected);
+        }
+        else if (IterUtil.sizeOf(tparams) == IterUtil.sizeOf(targs) && inBounds(tparams, targs)) {
+          return new MultiVarargMatcher(substitute(params, tparams, targs), args, tparams, targs);
+        }
+        else { return NullMatcher.INSTANCE; }
+      }
+      else { return NullMatcher.INSTANCE; }
+    }
+    
+    /**
+     * True if this declaration is override-compatible with the given declaration
+     * from a supertype.  (See JLS 8.4.2.)
+     */
+    public boolean overrides(FunctionInvocationCandidate<I> c) {
+      if (_f.declaredName().equals(c._f.declaredName())) {
+        Iterable<Type> subParams = parameterTypes();
+        Iterable<Type> supParams = c.parameterTypes();
+        Iterable<VariableType> subTParams = typeParameters();
+        Iterable<VariableType> supTParams = c.typeParameters();
+        if (IterUtil.sizeOf(subParams) == IterUtil.sizeOf(supParams)) {
+          Iterable<? extends Type> supParamsToCompare;
+          if (IterUtil.isEmpty(subTParams) && !IterUtil.isEmpty(supTParams)) {
+            supParamsToCompare = IterUtil.map(supParams, ERASE);
+          }
+          else if (IterUtil.sizeOf(subTParams) == IterUtil.sizeOf(supTParams)) {
+            supParamsToCompare = substitute(supParams, supTParams, subTParams);
+          }
+          else { return false; }
+          for (Pair<Type, Type> p : IterUtil.zip(subParams, supParamsToCompare)) {
+            if (!isEqual(p.first(), p.second())) { return false; }
+          }
+          return true;
+        }
+        else { return false; }
+      }
+      else { return false; }
+    }
+    
+    /**
+     * True iff this declaration's parameters could be used to invoke c.  Must only be invoked with matched
+     * SignatureMatchers.  This relation is defined in JLS 15.12.2.5.
+     */
+    public boolean moreSpecificThan(FunctionInvocationCandidate<I> c) {
+      SignatureMatcher m = makeMatcher(c.typeParameters(), EMPTY_TYPE_ITERABLE, c.parameterTypes(), 
+                                       IterUtil.mapSnapshot(parameterTypes(), EMPTY_EXPRESSION_FOR_TYPE),
+                                       BOTTOM, NONE_TYPE_OPTION);
+      return m.matches();
+    }
+    
+  }
+  
+  /**
+   * Get a minimal sublist of the invocation candidates that are best matches.  Only candidates that
+   * match in the same stage ({@code matches()}, {@code matchesWithBoxing()}, or {@code matchesWithVarargs()})
+   * may appear in the result.  Of those that match, a list with most specific signatures is returned. 
+   */
+  private static <I extends FunctionInvocation, T extends FunctionInvocationCandidate<I>>
+      Iterable<T> bestMatches(Iterable<T> candidates) {
+    // This would be a static member of FunctionInvocationCandidate if that were legal;
+    // it accesses the _matcher field as if it were.
+    List<T> matches = new LinkedList<T>();
+    for (T c : candidates) {
+      if (c._matcher.matches()) { matches.add(c); }
+    }
+    if (matches.isEmpty()) {
+      for (T c : candidates) {
+        if (c._matcher.matchesWithBoxing()) { matches.add(c); }
+      }
+    }
+    if (matches.isEmpty()) {
+      for (T c : candidates) {
+        if (c._matcher.matchesWithVarargs()) { matches.add(c); }
+      }
+    }
+    return CollectUtil.minList(matches, new Order<T>() {
+      public boolean contains(T c1, T c2) {
+        return c1.moreSpecificThan(c2);
+      }
+    });
+  }
+  
+  private static final Lambda<Type, Expression> EMPTY_EXPRESSION_FOR_TYPE = new Lambda<Type, Expression>() {
+    public Expression value(Type t) {
+      Expression result = TypeUtil.makeEmptyExpression();
+      NodeProperties.setType(result, t);
+      return result;
+    }
+  };
+  
+  private abstract class MethodInvocationCandidate<I extends MethodInvocation>
+                         extends FunctionInvocationCandidate<I> {
+    protected final Type _declaringType;
+    protected final DJMethod _declaredMethod; // the method, as declared
+    protected final DJMethod _method; // the method, after conversions based on the declaring type
+    protected MethodInvocationCandidate(DJMethod declaredMethod, Type declaringType,
+                                        Iterable<? extends Type> targs,
+                                        Iterable<? extends Expression> args,
+                                        Option<Type> expected) {
+      super(instantiateMethod(declaredMethod, declaringType), targs, args, expected);
+      _declaredMethod = declaredMethod;
+      _declaringType = declaringType;
+      _method = (DJMethod) _f;
+    }
+    public Access accessibility() { return _method.accessibility(); }
+  }
+
+  private class ObjectMethodInvocationCandidate extends MethodInvocationCandidate<ObjectMethodInvocation> {
+    private final Expression _object;
+    public ObjectMethodInvocationCandidate(DJMethod declaredMethod, Type declaringType, Expression object,
+                                           Iterable<? extends Type> targs, Iterable<? extends Expression> args,
+                                           Option<Type> expected) {
+      super(declaredMethod, declaringType, targs, args, expected);
+     _object = object; 
+    }
+    public ObjectMethodInvocation invocation() {
+      SubstitutionMap sigma = substitution();
+      Type returnType = substitute(_method.returnType(), sigma);
+      Expression receiver = makeCast(_declaringType, _object);
+      Iterable<? extends Type> targs = _matcher.typeArguments();
+      Iterable<? extends Expression> args = _matcher.arguments();
+      Iterable<? extends Type> thrown = substitute(_method.thrownTypes(), sigma);
+      return new ObjectMethodInvocation(_declaredMethod, returnType, receiver,targs, args, thrown);
+    }
+  }
+  
+  private class StaticMethodInvocationCandidate extends MethodInvocationCandidate<StaticMethodInvocation> {
+    public StaticMethodInvocationCandidate(DJMethod declaredMethod, Type declaringType,
+                                           Iterable<? extends Type> targs, Iterable<? extends Expression> args,
+                                           Option<Type> expected) {
+      super(declaredMethod, declaringType, targs, args, expected);
+    }
+    public StaticMethodInvocation invocation() {
+      SubstitutionMap sigma = substitution();
+      Type returnType = substitute(_method.returnType(), sigma);
+      Iterable<? extends Type> targs = _matcher.typeArguments();
+      Iterable<? extends Expression> args = _matcher.arguments();
+      Iterable<? extends Type> thrown = substitute(_method.thrownTypes(), sigma);
+      return new StaticMethodInvocation(_declaredMethod, returnType, targs, args, thrown);
+    }
+  }
+  
+  private class ConstructorInvocationCandidate extends FunctionInvocationCandidate<ConstructorInvocation> {
+    private final DJConstructor _declaredConstructor; // the constructor, as declared -- necessary for compilation
+    protected ConstructorInvocationCandidate(DJConstructor declaredConstructor, Type declaringType,
+                                             Iterable<? extends Type> targs,
+                                             Iterable<? extends Expression> args,
+                                             Option<Type> expected) {
+      super(instantiateConstructor(declaredConstructor, declaringType), targs, args, expected);
+      _declaredConstructor = declaredConstructor;
+    }
+    public ConstructorInvocation invocation() {
+      SubstitutionMap sigma = substitution();
+      Iterable<? extends Type> targs = _matcher.typeArguments();
+      Iterable<? extends Expression> args = _matcher.arguments();
+      Iterable<? extends Type> thrown = substitute(_f.thrownTypes(), sigma);
+      return new ConstructorInvocation(_declaredConstructor, targs, args, thrown);
+    }
+  }
+  
+  /**
+   * Instantiate a method based on its enclosing type.  Would be static in MethodInvocationCandidate
+   * if that were allowed.
+   */
+  private DJMethod instantiateMethod(final DJMethod declaredMethod, Type declaringType) {
+    Type dynamicContext;
+    if (declaredMethod.isStatic()) {
+      if (declaringType instanceof ClassType) {
+        dynamicContext = SymbolUtil.dynamicOuterClassType((ClassType) declaringType);
+      }
+      else { dynamicContext = null; }
+    }
+    else { dynamicContext = declaringType; }
+    if (dynamicContext == null) { return declaredMethod; }
+    else {
+      return dynamicContext.apply(new TypeAbstractVisitor<DJMethod>() {
+        @Override public DJMethod defaultCase(Type dynamicContext) { return declaredMethod; }
+        @Override public DJMethod forRawClassType(RawClassType dynamicContext) {
+          // TODO: raw member access warnings
+          return new ErasedMethod(declaredMethod);
+        }
+        @Override public DJMethod forParameterizedClassType(ParameterizedClassType dynamicContext) {
+          ParameterizedClassType dynamicContextCap = capture(dynamicContext);
+          Iterable<VariableType> tparams = SymbolUtil.allTypeParameters(dynamicContextCap.ofClass());
+          return new InstantiatedMethod(declaredMethod, tparams, dynamicContextCap.typeArguments());
+        }
+      });
+    }
+  }
+
+  /**
+   * Instantiate a method based on its enclosing type.  Would be static in MethodInvocationCandidate
+   * if that were allowed.
+   */
+  private DJConstructor instantiateConstructor(final DJConstructor declaredConstructor, Type declaringType) {
+    return declaringType.apply(new TypeAbstractVisitor<DJConstructor>() {
+      @Override public DJConstructor defaultCase(Type declaringType) { return declaredConstructor; }
+      @Override public DJConstructor forRawClassType(RawClassType declaringType) {
+        // TODO: raw member access warnings
+        return new ErasedConstructor(declaredConstructor);
+      }
+      @Override public DJConstructor forParameterizedClassType(ParameterizedClassType declaringType) {
+        Iterable<VariableType> tparams = SymbolUtil.allTypeParameters(declaringType.ofClass());
+        ParameterizedClassType declaringTypeCap = capture(declaringType);
+        return new InstantiatedConstructor(declaredConstructor, tparams, declaringTypeCap.typeArguments());
+      }
+    });
+  }
+
+  private static abstract class DelegatingFunction<T extends Function> implements Function {
+    protected final T _delegate;
+    protected DelegatingFunction(T delegate) { _delegate = delegate; }
+    
+    public String declaredName() { return _delegate.declaredName(); }
+    public Iterable<LocalVariable> declaredParameters() {
+      return IterUtil.mapSnapshot(IterUtil.zip(_delegate.declaredParameters(), parameterTypes()),
+                                               new Lambda<Pair<LocalVariable, Type>, LocalVariable>() {
+        public LocalVariable value(Pair<LocalVariable, Type> p) {
+          return new LocalVariable(p.first().declaredName(), p.second(), p.first().isFinal());
+        }
+      });
+    }
+
+    public abstract Iterable<VariableType> declaredTypeParameters();
+    public abstract Type returnType();
+    public abstract Iterable<Type> thrownTypes();
+    protected abstract Iterable<? extends Type> parameterTypes();
+  }
+  
+  private static abstract class DelegatingMethod extends DelegatingFunction<DJMethod> implements DJMethod {
+    protected DelegatingMethod(DJMethod delegate) { super(delegate); }
+    public boolean isStatic() { return _delegate.isStatic(); }
+    public boolean isAbstract() { return _delegate.isAbstract(); }
+    public boolean isFinal() { return _delegate.isFinal(); }
+    public Access accessibility() { return _delegate.accessibility(); }
+    public Access.Module accessModule() { return _delegate.accessModule(); }
+    public Object evaluate(Object receiver, Iterable<Object> args, RuntimeBindings bindings, Options options) 
+        throws EvaluatorException {
+      return _delegate.evaluate(receiver, args, bindings, options); 
+    }
+  }
+  
+  private class ErasedMethod extends DelegatingMethod {
+    public ErasedMethod(DJMethod m) { super(m); }
+    public Iterable<VariableType> declaredTypeParameters() { return IterUtil.empty(); }
+    public Type returnType() { return erase(_delegate.returnType()); }
+    public Iterable<Type> thrownTypes() { return IterUtil.mapSnapshot(_delegate.thrownTypes(), ERASE); }
+    protected Iterable<Type> parameterTypes() {
+      return IterUtil.mapSnapshot(SymbolUtil.declaredParameterTypes(_delegate), ERASE);
+    }
+  }
+  
+  private class InstantiatedMethod extends DelegatingMethod {
+    private final SubstitutionMap _sigma;
+    private final Iterable<VariableType> _tparams;
+    public InstantiatedMethod(DJMethod m, Iterable<VariableType> classTParams, Iterable<? extends Type> classTArgs) {
+      super(m);
+      Pair<Iterable<VariableType>, SubstitutionMap> p = instantiateTypeParameters(m, classTParams, classTArgs);
+      _tparams = p.first();
+      _sigma = p.second();
+    }
+    
+    public Type returnType() { return substitute(_delegate.returnType(), _sigma); }
+    public Iterable<VariableType> declaredTypeParameters() { return _tparams; }
+    public Iterable<Type> thrownTypes() { return IterUtil.relax(substitute(_delegate.thrownTypes(), _sigma)); }
+    public Iterable<? extends Type> parameterTypes() {
+      return substitute(SymbolUtil.declaredParameterTypes(_delegate), _sigma);
+    }
+  }
+  
+  private static abstract class DelegatingConstructor extends DelegatingFunction<DJConstructor>
+                                                      implements DJConstructor {
+    protected DelegatingConstructor(DJConstructor delegate) { super(delegate); }
+    public Type returnType() { return _delegate.returnType(); }
+    public Access accessibility() { return _delegate.accessibility(); }
+    public Access.Module accessModule() { return _delegate.accessModule(); }
+    public Object evaluate(Object outer, Iterable<Object> args, RuntimeBindings bindings, Options options) 
+        throws EvaluatorException {
+      return _delegate.evaluate(outer, args, bindings, options); 
+    }
+  }
+  
+  private class ErasedConstructor extends DelegatingConstructor {
+    public ErasedConstructor(DJConstructor k) { super(k); }
+    public Iterable<VariableType> declaredTypeParameters() { return IterUtil.empty(); }
+    public Iterable<Type> thrownTypes() { return IterUtil.mapSnapshot(_delegate.thrownTypes(), ERASE); }
+    protected Iterable<Type> parameterTypes() {
+      return IterUtil.mapSnapshot(SymbolUtil.declaredParameterTypes(_delegate), ERASE);
+    }
+  }
+  
+  private class InstantiatedConstructor extends DelegatingConstructor {
+    private final SubstitutionMap _sigma;
+    private final Iterable<VariableType> _tparams;
+    public InstantiatedConstructor(DJConstructor k, Iterable<VariableType> classTParams,
+                                   Iterable<? extends Type> classTArgs) {
+      super(k);
+      Pair<Iterable<VariableType>, SubstitutionMap> p = instantiateTypeParameters(k, classTParams, classTArgs);
+      _tparams = p.first();
+      _sigma = p.second();
+    }
+    
+    public Iterable<VariableType> declaredTypeParameters() { return _tparams; }
+    public Iterable<Type> thrownTypes() { return IterUtil.relax(substitute(_delegate.thrownTypes(), _sigma)); }
+    public Iterable<? extends Type> parameterTypes() {
+      return substitute(SymbolUtil.declaredParameterTypes(_delegate), _sigma);
+    }
+  }
+  
+  /** Create new type parameters for function {@code f} with bounds instantiated by the given substitution. */
+  private Pair<Iterable<VariableType>, SubstitutionMap>
+      instantiateTypeParameters(Function f,
+                                Iterable<? extends VariableType> enclosingTParams,
+                                Iterable<? extends Type> enclosingTArgs) {
+    Iterable<VariableType> origTParams = f.declaredTypeParameters();
+    Iterable<VariableType> tparams = IterUtil.mapSnapshot(origTParams, new Lambda<VariableType, VariableType>() {
+      public VariableType value(VariableType var) {
+        return new VariableType(new BoundedSymbol(new Object(), var.symbol().name()));
+      }
+    });
+    SubstitutionMap sigma = new SubstitutionMap(IterUtil.compose(enclosingTParams, origTParams),
+                                                IterUtil.compose(enclosingTArgs, tparams));
+    for (Pair<VariableType, VariableType> p : IterUtil.zip(origTParams, tparams)) {
+      VariableType origParam = p.first();
+      VariableType newParam = p.second();
+      newParam.symbol().initializeUpperBound(substitute(origParam.symbol().upperBound(), sigma));
+      newParam.symbol().initializeLowerBound(substitute(origParam.symbol().lowerBound(), sigma));
+    }
+    return Pair.make(tparams, sigma);
+  }
   
   /**
    * A wrapper to optimize the three-stage method-signature matching algorithm.  Clients are
@@ -1358,7 +2195,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
    * other accessor methods provide the results of a match <em>after</em> one of the match methods 
    * returns {@code true}.
    */
-  private static abstract class SignatureChecker {
+  private static abstract class SignatureMatcher {
     /** Must be invoked first */
     public abstract boolean matches();
     
@@ -1369,32 +2206,24 @@ public abstract class StandardTypeSystem extends TypeSystem {
     public abstract boolean matchesWithVarargs();
     
     /** Must only be invoked after one of the match() methods returns {@code true} */
-    public abstract Iterable<? extends VariableType> typeParameters();
-    
-    /** Must only be invoked after one of the match() methods returns {@code true} */
     public abstract Iterable<? extends Type> typeArguments();
-    
-    /** Must only be invoked after one of the match() methods returns {@code true} */
-    public abstract Iterable<? extends Type> parameters();
     
     /** Must only be invoked after one of the match() methods returns {@code true} */
     public abstract Iterable<? extends Expression> arguments();
   }
   
-  private static class NullChecker extends SignatureChecker {
-    public static final NullChecker INSTANCE = new NullChecker();
-    private NullChecker() {}
+  private static class NullMatcher extends SignatureMatcher {
+    public static final NullMatcher INSTANCE = new NullMatcher();
+    private NullMatcher() {}
     public boolean matches() { return false; }
     public boolean matchesWithBoxing() { return false; }
     public boolean matchesWithVarargs() { return false; }
-    public Iterable<? extends VariableType> typeParameters() { throw new IllegalStateException(); }
     public Iterable<? extends Type> typeArguments() { throw new IllegalStateException(); }
-    public Iterable<? extends Type> parameters() { throw new IllegalStateException(); }
     public Iterable<? extends Expression> arguments() { throw new IllegalStateException(); }
   }
   
   // cannot be defined statically, because it relies on the definition of non-static methods
-  private class SimpleChecker extends SignatureChecker {
+  private class SimpleMatcher extends SignatureMatcher {
     protected Iterable<? extends Type> _params;
     protected Iterable<? extends Expression> _args;
     protected Iterable<? extends VariableType> _tparams;
@@ -1404,7 +2233,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
     protected boolean _matchesAllButLast; // true if matchesWithBoxing() is true on all but the last arg
     
     /**  Assumes {@code params.size() == args.size()} */
-    public SimpleChecker(Iterable<? extends Type> params, Iterable<? extends Expression> args, 
+    public SimpleMatcher(Iterable<? extends Type> params, Iterable<? extends Expression> args, 
                          Iterable<? extends VariableType> tparams, Iterable<? extends Type> targs) {
       _params = params;
       _args = args;
@@ -1412,9 +2241,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
       _targs = targs;
     }
     
-    public Iterable<? extends VariableType> typeParameters() { return _tparams; }
     public Iterable<? extends Type> typeArguments() { return _targs; }
-    public Iterable<? extends Type> parameters() { return _params; }
     public Iterable<? extends Expression> arguments() { return _args; }
     
     public boolean matches() {
@@ -1487,13 +2314,13 @@ public abstract class StandardTypeSystem extends TypeSystem {
   }
   
   // cannot be defined statically, because it relies on the definition of non-static methods
-  private class InferenceChecker extends SimpleChecker {
+  private class InferenceMatcher extends SimpleMatcher {
     
     protected final Type _returned;
     protected final Option<Type> _expected;
     
     /**  Assumes {@code params.size() == args.size()} */
-    public InferenceChecker(Iterable<? extends Type> params, Iterable<? extends Expression> args, 
+    public InferenceMatcher(Iterable<? extends Type> params, Iterable<? extends Expression> args, 
                             Iterable<? extends VariableType> tparams,
                             Type returned, Option<Type> expected) {
       super(params, args, tparams, null);
@@ -1541,13 +2368,13 @@ public abstract class StandardTypeSystem extends TypeSystem {
   }
   
   // cannot be defined statically, because it relies on the definition of non-static methods
-  private class EmptyVarargChecker extends SimpleChecker {
+  private class EmptyVarargMatcher extends SimpleMatcher {
     
-    // Can't use _paramForVarargs, because SimpleChecker doesn't know about the final parameter
+    // Can't use _paramForVarargs, because SimpleMatcher doesn't know about the final parameter
     private Type _varargParam;
     
     /**  Assumes {@code params.size() - 1 == args.size()} */
-    public EmptyVarargChecker(Iterable<? extends Type> params, Iterable<? extends Expression> args, 
+    public EmptyVarargMatcher(Iterable<? extends Type> params, Iterable<? extends Expression> args, 
                               Iterable<? extends VariableType> tparams, Iterable<? extends Type> targs) {
       super(params, args, tparams, targs);
       _varargParam = IterUtil.last(_params);
@@ -1573,13 +2400,13 @@ public abstract class StandardTypeSystem extends TypeSystem {
   }
   
   // cannot be defined statically, because it relies on the definition of non-static methods
-  private class EmptyVarargInferenceChecker extends InferenceChecker {
+  private class EmptyVarargInferenceMatcher extends InferenceMatcher {
     
-    // Can't use _paramForVarargs, because SimpleChecker doesn't know about the final parameter
+    // Can't use _paramForVarargs, because SimpleMatcher doesn't know about the final parameter
     private Type _varargParam;
     
     /**  Assumes {@code params.size() - 1 == args.size()} */
-    public EmptyVarargInferenceChecker(Iterable<? extends Type> params, Iterable<? extends Expression> args, 
+    public EmptyVarargInferenceMatcher(Iterable<? extends Type> params, Iterable<? extends Expression> args, 
                                        Iterable<? extends VariableType> tparams,
                                        Type returned, Option<Type> expected) {
       super(params, args, tparams, returned, expected);
@@ -1606,13 +2433,13 @@ public abstract class StandardTypeSystem extends TypeSystem {
   }
   
   // cannot be defined statically, because it relies on the definition of non-static methods
-  private class MultiVarargChecker extends SimpleChecker {
+  private class MultiVarargMatcher extends SimpleMatcher {
     
     private Type _varargParam;
     private Iterable<Expression> _varargArgs;
     
     /**  Assumes {@code 1 <= params.size() < args.size()} */
-    public MultiVarargChecker(Iterable<? extends Type> params, Iterable<? extends Expression> args, 
+    public MultiVarargMatcher(Iterable<? extends Type> params, Iterable<? extends Expression> args, 
                               Iterable<? extends VariableType> tparams, Iterable<? extends Type> targs) {
       super(params, args, tparams, targs);
       _varargParam = IterUtil.last(_params);
@@ -1650,13 +2477,13 @@ public abstract class StandardTypeSystem extends TypeSystem {
   }
   
   // cannot be defined statically, because it relies on the definition of non-static methods
-  private class MultiVarargInferenceChecker extends InferenceChecker {
+  private class MultiVarargInferenceMatcher extends InferenceMatcher {
     
     private Type _varargParam;
     private Iterable<Expression> _varargArgs;
     
     /**  Assumes {@code 1 <= params.size() < args.size()} */
-    public MultiVarargInferenceChecker(Iterable<? extends Type> params, Iterable<? extends Expression> args, 
+    public MultiVarargInferenceMatcher(Iterable<? extends Type> params, Iterable<? extends Expression> args, 
                                        Iterable<? extends VariableType> tparams,
                                        Type returned, Option<Type> expected) {
       super(params, args, tparams, returned, expected);
@@ -1695,1042 +2522,6 @@ public abstract class StandardTypeSystem extends TypeSystem {
       return false;
     }
     
-  }
-  
-  
-  private SignatureChecker makeChecker(Iterable<? extends VariableType> tparams, Iterable<? extends Type> targs,
-                                       Iterable<? extends Type> params, Iterable<? extends Expression> args,
-                                       Type returned, Option<Type> expected) {
-    // Note: per the JLS, we allow the presense of (ignored) targs when tparams is empty
-    int argCount = IterUtil.sizeOf(args);
-    int paramCount = IterUtil.sizeOf(params);
-    if (argCount == paramCount - 1) {
-      if (IterUtil.isEmpty(tparams)) {
-        return new EmptyVarargChecker(params, args, tparams, EMPTY_TYPE_ITERABLE);
-      }
-      else if (IterUtil.isEmpty(targs)) {
-        return new EmptyVarargInferenceChecker(params, args, tparams, returned, expected);
-      }
-      else if (IterUtil.sizeOf(tparams) == IterUtil.sizeOf(targs) && inBounds(tparams, targs)) {
-        return new EmptyVarargChecker(substitute(params, tparams, targs), args, tparams, targs);
-      }
-      else { return NullChecker.INSTANCE; }
-    }
-    else if (argCount == paramCount) {
-      if (IterUtil.isEmpty(tparams)) { 
-        return new SimpleChecker(params, args, tparams, EMPTY_TYPE_ITERABLE);
-      }
-      else if (IterUtil.isEmpty(targs)) {
-        return new InferenceChecker(params, args, tparams, returned, expected);
-      }
-      else if (IterUtil.sizeOf(tparams) == IterUtil.sizeOf(targs) && inBounds(tparams, targs)) { 
-        return new SimpleChecker(substitute(params, tparams, targs), args, tparams, targs);
-      }
-      else { return NullChecker.INSTANCE; }
-    }
-    else if (argCount > paramCount && paramCount >= 1) {
-      if (IterUtil.isEmpty(tparams)) { 
-        return new MultiVarargChecker(params, args, tparams, EMPTY_TYPE_ITERABLE);
-      }
-      else if (IterUtil.isEmpty(targs)) {
-        return new MultiVarargInferenceChecker(params, args, tparams, returned, expected);
-      }
-      else if (IterUtil.sizeOf(tparams) == IterUtil.sizeOf(targs) && inBounds(tparams, targs)) {
-        return new MultiVarargChecker(substitute(params, tparams, targs), args, tparams, targs);
-      }
-      else { return NullChecker.INSTANCE; }
-    }
-    else { return NullChecker.INSTANCE; }
-  }
-  
-  /**
-   * Given a list of signatures, find those that match the arguments.  The process of creating
-   * SignatureCheckers and result values is deferred to two lambdas provided as arguments.
-   * The sequence of matching first on explicit signatures, then boxing-compatible signatures, and 
-   * finally vararg-compatible signatures is handled by this method.
-   * 
-   * @param <T>  The signature type ({@code DJMethod}, for example)
-   * @param <R>  The result type ({@code MethodInvocation}, for example)
-   * @param sigs  A list of signatures
-   * @param makeChecker  Factory to create a new SignatureChecker from a signature
-   * @param makeResult  Factory to create a result value from a signature and its matching
-   *                    SignatureChecker
-   */
-  private <T, R> Iterable<R> findSignatureMatches(Iterable<? extends T> sigs, 
-                                                  Lambda<? super T, ? extends SignatureChecker> makeChecker,
-                                                  Lambda2<? super T, ? super SignatureChecker, 
-                                                  ? extends R> makeResult) {
-    Iterable<? extends SignatureChecker> checkers = IterUtil.mapSnapshot(sigs, makeChecker);
-    Iterable<Pair<T, SignatureChecker>> pairs = IterUtil.zip(sigs, checkers);
-    Iterable<Pair<T, SignatureChecker>> resultPairs = IterUtil.empty();
-    for (Pair<T, SignatureChecker> pair : pairs) {
-      if (pair.second().matches()) { resultPairs = IterUtil.compose(resultPairs, pair); }
-    }
-    if (IterUtil.isEmpty(resultPairs)) {
-      for (Pair<T, SignatureChecker> pair : pairs) {
-        if (pair.second().matchesWithBoxing()) { resultPairs = IterUtil.compose(resultPairs, pair); }
-      }
-    }
-    if (IterUtil.isEmpty(resultPairs)) {
-      for (Pair<T, SignatureChecker> pair : pairs) {
-        if (pair.second().matchesWithVarargs()) { resultPairs = IterUtil.compose(resultPairs, pair); }
-      }
-    }
-    resultPairs = mostSpecificSignatures(resultPairs);
-    return IterUtil.map(IterUtil.pairFirsts(resultPairs), IterUtil.pairSeconds(resultPairs),
-                        makeResult);
-  }
-  
-  private static final Lambda<Type, Expression> EMPTY_EXPRESSION_FOR_TYPE = new Lambda<Type, Expression>() {
-    public Expression value(Type t) {
-      Expression result = TypeUtil.makeEmptyExpression();
-      NodeProperties.setType(result, t);
-      return result;
-    }
-  };
-  
-  /** Compute the most specific signatures in the list. */
-  private <T extends Pair<?, SignatureChecker>> Iterable<T> mostSpecificSignatures(Iterable<T> allSigs) {
-//    System.out.println("All matching signatures: " + allSigs);
-    Iterable<T> result = IterUtil.empty();
-    for (T sig : allSigs) {
-      boolean keep = true;
-      for (T sig2 : allSigs) {
-        keep &= (sig == sig2) || isMoreSpecific(sig.second(), sig2.second());
-        if (!keep) { break; }
-      }
-      if (keep) { result = IterUtil.compose(result, sig); }
-    }
-//    System.out.println("Most specific signatures: " + result);
-    if (IterUtil.isEmpty(result)) { return allSigs; }
-    else { return result; }
-  }
-  
-  /**
-   * True iff sig1's parameters could be used to invoke sig2.  This relation is defined in 
-   * JLS 15.12.2.5.
-   */
-  private boolean isMoreSpecific(SignatureChecker sig1, SignatureChecker sig2) {
-    SignatureChecker c = makeChecker(sig2.typeParameters(), EMPTY_TYPE_ITERABLE, sig2.parameters(), 
-                                     IterUtil.mapSnapshot(sig1.parameters(), EMPTY_EXPRESSION_FOR_TYPE),
-                                     BOTTOM, NONE_TYPE_OPTION);
-    return c.matches();
-  }
-  
-  /**
-   * Lookup the constructor corresponding the the given invocation.
-   * @param t  The type of the object to be constructed.
-   * @param typeArgs  The type arguments for the constructor's type parameters.
-   * @param args  A list of typed expressions corresponding to the constructor's parameters.
-   * @param expected  The type expected in the invocation's calling context, if any.
-   * @return  A {@link TypeSystem.ConstructorInvocation} object representing the matched constructor.
-   * @throws InvalidTargetException  If the type {@code t} cannot be constructed.
-   * @throws InvalidTypeArgumentException  If the type arguments are invalid (for example, a primitive type).
-   * @throws UnmatchedLookupException  If 0 or more than 1 constructor matches the given arguments and type 
-   *                                   arguments.
-   */
-  // TODO: Must produce a reasonable value when looking up a constructor in an interface (for anonymous classes)
-  public ConstructorInvocation lookupConstructor(final Type t, final Iterable<? extends Type> typeArgs, 
-                                                 final Iterable<? extends Expression> args,
-                                                 final Option<Type> expected)
-    throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException {
-    debug.logStart(new String[]{"t","typeArgs","arg types","expected"},
-                   wrap(t), wrap(typeArgs), wrap(IterUtil.map(args, NodeProperties.NODE_TYPE)), wrap(expected)); try {
-                     
-    Iterable<ConstructorInvocation> results = 
-      t.apply(new TypeAbstractVisitor<Iterable<ConstructorInvocation>>() {
-      
-      public Iterable<ConstructorInvocation> defaultCase(Type t) { return IterUtil.empty(); }
-      
-      @Override public Iterable<ConstructorInvocation> forSimpleClassType(final SimpleClassType t) {
-        Iterable<DJConstructor> allConstructors = t.ofClass().declaredConstructors();
-        Lambda<DJConstructor, SignatureChecker> makeChecker = 
-          new Lambda<DJConstructor, SignatureChecker>() {
-          public SignatureChecker value(DJConstructor k) {
-            //debug.logValues(new String[]{"k", "declaredParameterTypes"}, k, SymbolUtil.declaredParameterTypes(k));
-            return makeChecker(k.declaredTypeParameters(), typeArgs, SymbolUtil.declaredParameterTypes(k),
-                               args, t, expected);
-          }
-        };
-        Lambda2<DJConstructor, SignatureChecker, ConstructorInvocation> makeResult = 
-          new Lambda2<DJConstructor, SignatureChecker, ConstructorInvocation>() {
-          public ConstructorInvocation value(DJConstructor k, SignatureChecker checker) {
-            SubstitutionMap sigma = new SubstitutionMap(checker.typeParameters(),
-                                                        checker.typeArguments());
-            // TODO: Handle the thrown types (using sigma)
-            return new ConstructorInvocation(k, checker.typeArguments(), checker.arguments(), 
-                                             k.thrownTypes());
-          }
-        };
-        return findSignatureMatches(allConstructors, makeChecker, makeResult);
-      }
-      
-      @Override public Iterable<ConstructorInvocation> forRawClassType(final RawClassType t) {
-        // TODO: Handle raw member access warnings; make sure this is correct
-        Iterable<DJConstructor> allConstructors = t.ofClass().declaredConstructors();
-//        System.out.println("All constructors in type " + userRepresentation(t) + ": " +
-//                           IterUtil.multilineToString(allConstructors));
-        Lambda<DJConstructor, SignatureChecker> makeChecker = 
-          new Lambda<DJConstructor, SignatureChecker>() {
-          public SignatureChecker value(DJConstructor k) {
-            return makeChecker(IterUtil.<VariableType>empty(), typeArgs, 
-                               IterUtil.map(SymbolUtil.declaredParameterTypes(k), ERASE_LAMBDA),
-                               args, t, expected);
-          }
-        };
-        Lambda2<DJConstructor, SignatureChecker, ConstructorInvocation> makeResult = 
-          new Lambda2<DJConstructor, SignatureChecker, ConstructorInvocation>() {
-          public ConstructorInvocation value(DJConstructor k, SignatureChecker checker) {
-            // TODO: Handle the thrown types
-            return new ConstructorInvocation(k, checker.typeArguments(), checker.arguments(), 
-                                             k.thrownTypes());
-          }
-        };
-        return findSignatureMatches(allConstructors, makeChecker, makeResult);
-      }
-      
-      @Override public Iterable<ConstructorInvocation> forParameterizedClassType(final ParameterizedClassType t) {
-        final SubstitutionMap classSigma = 
-          new SubstitutionMap(t.ofClass().declaredTypeParameters(), t.typeArguments());
-        Iterable<DJConstructor> allConstructors = t.ofClass().declaredConstructors();
-//        System.out.println("All constructors in type " + userRepresentation(t) + ": " +
-//                           IterUtil.multilineToString(allConstructors));
-        Lambda<DJConstructor, SignatureChecker> makeChecker = 
-          new Lambda<DJConstructor, SignatureChecker>() {
-          public SignatureChecker value(DJConstructor k) {
-            // TODO: substitute out class type parameters from the method's parameters' bounds
-            //       (how does the JLS handle this?)
-            return makeChecker(k.declaredTypeParameters(), typeArgs, 
-                               substitute(SymbolUtil.declaredParameterTypes(k), classSigma),
-                               args, t, expected);
-          }
-        };
-        Lambda2<DJConstructor, SignatureChecker, ConstructorInvocation> makeResult = 
-          new Lambda2<DJConstructor, SignatureChecker, ConstructorInvocation>() {
-          public ConstructorInvocation value(DJConstructor k, SignatureChecker checker) {
-            // TODO: Handle the thrown types
-            return new ConstructorInvocation(k, checker.typeArguments(), checker.arguments(), 
-                                             k.thrownTypes());
-          }
-        };
-        return findSignatureMatches(allConstructors, makeChecker, makeResult);
-      }
-    });
-    
-    // TODO: provide more error-message information
-    int matches = IterUtil.sizeOf(results);
-    if (matches != 1) { throw new UnmatchedLookupException(matches); }
-    else { return IterUtil.first(results); }
-    
-    } finally { debug.logEnd(); }
-  }
-  
-  public boolean containsMethod(Type t, String name) {
-    return containsMethod(t, name, false);
-  }
-  
-  public boolean containsStaticMethod(Type t, String name) {
-    return containsMethod(t, name, true);
-  }
-  
-  private boolean containsMethod(Type t, final String name, final boolean requireStatic) {
-    debug.logStart(new String[]{"t","name","requireStatic"}, wrap(t), name, requireStatic); try {
-    
-    class LookupMethod extends TypeAbstractVisitor<Iterable<Object>> {
-      
-      private boolean _includePrivate;
-      
-      public LookupMethod(boolean includePrivate) {
-        _includePrivate = includePrivate;
-      }
-      
-      private boolean validMethod(DJMethod m) { 
-        return
-          (_includePrivate || !m.accessibility().equals(Access.PRIVATE)) &&
-          (!requireStatic || m.isStatic());
-      }
-      
-      public Iterable<Object> defaultCase(Type t) { return IterUtil.empty(); }
-      
-      @Override public Iterable<Object> forClassType(ClassType t) {
-        debug.logValues(new String[]{"t","methods"}, wrap(t), t.ofClass().declaredMethods());
-        for (DJMethod m : t.ofClass().declaredMethods()) {
-          if (m.declaredName().equals(name) && validMethod(m)) {
-            return IterUtil.singleton(null);
-          }
-        }
-        return IterUtil.empty();
-      }
-    }
-    Iterable<? extends Object> results = lookupMember(t, new LookupMethod(true), new LookupMethod(false));
-    return !IterUtil.isEmpty(results);
-    
-    } finally { debug.logEnd(); }
-  }
-  
-  /**
-   * Lookup the method corresponding the the given invocation.
-   * @param object  A typed expression representing the object whose method is to be invoked.
-   * @param name  The name of the method.
-   * @param typeArgs  The type arguments for the method's type parameters.
-   * @param args  A list of typed expressions corresponding to the method's parameters.
-   * @param expected  The type expected in the invocation's calling context, if any.
-   * @return  An {@link TypeSystem.ObjectMethodInvocation} object representing the matched method.
-   * @throws InvalidTargetException  If {@code object} cannot be used to invoke a method.
-   * @throws InvalidTypeArgumentException  If the type arguments are invalid (for example, a primitive type).
-   * @throws UnmatchedLookupException  If 0 or more than 1 method matches the given name, arguments, and type 
-   *                                   arguments.
-   */
-  public ObjectMethodInvocation lookupMethod(final Expression object, final String name, 
-                                             final Iterable<? extends Type> typeArgs, 
-                                             final Iterable<? extends Expression> args,
-                                             final Option<Type> expected)
-    throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException {
-    debug.logStart(new String[]{"t","name", "typeArgs","arg types","expected"},
-                   wrap(NodeProperties.getType(object)), name, wrap(typeArgs),
-                   wrap(IterUtil.map(args, NodeProperties.NODE_TYPE)), wrap(expected)); try {
-
-    class LookupMethod extends TypeAbstractVisitor<Iterable<ObjectMethodInvocation>> {
-      
-      private Predicate<? super DJMethod> _matchMethod;
-      
-      public LookupMethod(final boolean includePrivate) {
-        _matchMethod = new Predicate<DJMethod>() {
-          public boolean contains(DJMethod m) {
-            if (m.declaredName().equals(name)) {
-              return includePrivate || !m.accessibility().equals(Access.PRIVATE);
-            }
-            else { return false; }
-          }
-        };
-      }
-      
-      public Iterable<ObjectMethodInvocation> defaultCase(Type t) { return IterUtil.empty(); }
-      
-      @Override public Iterable<ObjectMethodInvocation> forSimpleClassType(final SimpleClassType t) {
-        Iterable<DJMethod> methods = IterUtil.filter(t.ofClass().declaredMethods(), _matchMethod);
-//        System.out.println("Matching methods in type " + userRepresentation(t) + ": " +
-//                           IterUtil.multilineToString(matchingMethods));
-        Lambda<DJMethod, SignatureChecker> makeChecker = new Lambda<DJMethod, SignatureChecker>() {
-          public SignatureChecker value(DJMethod m) {
-            return makeChecker(m.declaredTypeParameters(), typeArgs, SymbolUtil.declaredParameterTypes(m),
-                               args, m.returnType(), expected);
-          }
-        };
-        Lambda2<DJMethod, SignatureChecker, ObjectMethodInvocation> makeResult = 
-          new Lambda2<DJMethod, SignatureChecker, ObjectMethodInvocation>() {
-          public ObjectMethodInvocation value(DJMethod m, SignatureChecker checker) {
-            SubstitutionMap sigma = new SubstitutionMap(checker.typeParameters(), checker.typeArguments());
-            Type returned = substitute(m.returnType(), sigma);
-            // TODO: Handle the thrown types
-            return new ObjectMethodInvocation(m, returned, makeCast(t, object), checker.typeArguments(), 
-                                              checker.arguments(), m.thrownTypes());
-          }
-        };
-        return findSignatureMatches(methods, makeChecker, makeResult);
-      }
-      
-      @Override public Iterable<ObjectMethodInvocation> forRawClassType(final RawClassType t) {
-        // TODO: Handle raw member access warnings; make sure this is correct
-        Iterable<DJMethod> methods = IterUtil.filter(t.ofClass().declaredMethods(), _matchMethod);
-//        System.out.println("Matching methods in type " + userRepresentation(t) + ": " +
-//                           IterUtil.multilineToString(matchingMethods));
-        Lambda<DJMethod, SignatureChecker> makeChecker = new Lambda<DJMethod, SignatureChecker>() {
-          public SignatureChecker value(DJMethod m) {
-            return makeChecker(IterUtil.<VariableType>empty(), typeArgs, 
-                               IterUtil.map(SymbolUtil.declaredParameterTypes(m), ERASE_LAMBDA),
-                               args, m.returnType(), expected);
-          }
-        };
-        Lambda2<DJMethod, SignatureChecker, ObjectMethodInvocation> makeResult = 
-          new Lambda2<DJMethod, SignatureChecker, ObjectMethodInvocation>() {
-          public ObjectMethodInvocation value(DJMethod m, SignatureChecker checker) {
-            Type returned = erase(m.returnType());
-            // TODO: Handle the thrown types
-            return new ObjectMethodInvocation(m, returned, makeCast(t, object), checker.typeArguments(), 
-                                              checker.arguments(), m.thrownTypes());
-          }
-        };
-        return findSignatureMatches(methods, makeChecker, makeResult);
-      }
-      
-      @Override public Iterable<ObjectMethodInvocation> forParameterizedClassType(final ParameterizedClassType t) {
-        final SubstitutionMap classSigma =
-          new SubstitutionMap(SymbolUtil.allTypeParameters(t.ofClass()), t.typeArguments());
-        Iterable<DJMethod> methods = IterUtil.filter(t.ofClass().declaredMethods(), _matchMethod);
-//        System.out.println("Matching methods in type " + userRepresentation(t) + ": " +
-//                           IterUtil.multilineToString(matchingMethods));
-        Lambda<DJMethod, SignatureChecker> makeChecker = new Lambda<DJMethod, SignatureChecker>() {
-          public SignatureChecker value(DJMethod m) {
-            // TODO: substitute out class type parameters from the method's parameters' bounds
-            //       (how does the JLS handle this?)
-            return makeChecker(m.declaredTypeParameters(), typeArgs, 
-                               substitute(SymbolUtil.declaredParameterTypes(m), classSigma),
-                               args, m.returnType(), expected);
-          }
-        };
-        Lambda2<DJMethod, SignatureChecker, ObjectMethodInvocation> makeResult = 
-          new Lambda2<DJMethod, SignatureChecker, ObjectMethodInvocation>() {
-          public ObjectMethodInvocation value(DJMethod m, SignatureChecker checker) {
-            SubstitutionMap sigma = new SubstitutionMap(checker.typeParameters(), checker.typeArguments());
-            Type rawReturned = m.returnType();
-            Type returned = substitute(substitute(rawReturned, classSigma), sigma);
-            // TODO: Handle the thrown types
-            return new ObjectMethodInvocation(m, returned, makeCast(t, object), checker.typeArguments(), 
-                                              checker.arguments(), m.thrownTypes());
-          }
-        };
-        return findSignatureMatches(methods, makeChecker, makeResult);
-      }
-      
-    }
-    Iterable<? extends ObjectMethodInvocation> results = lookupMember(NodeProperties.getType(object), 
-                                                                      new LookupMethod(true), 
-                                                                      new LookupMethod(false));
-    // TODO: provide more error-message information
-    int matches = IterUtil.sizeOf(results);
-    if (matches != 1) { throw new UnmatchedLookupException(matches); }
-    else { return IterUtil.first(results); }
-    
-    } finally { debug.logEnd(); }
-  }
-  
-  /**
-   * Lookup the static method corresponding the the given invocation.
-   * @param t  The type in which to search for a static method.
-   * @param name  The name of the method.
-   * @param typeArgs  The type arguments for the method's type parameters.
-   * @param args  A list of typed expressions corresponding to the method's parameters.
-   * @param expected  The type expected in the invocation's calling context, if any.
-   * @return  A {@link TypeSystem.StaticMethodInvocation} object representing the matched method.
-   * @throws InvalidTargetException  If method invocation is not legal for the type {@code t}.
-   * @throws InvalidTypeArgumentException  If the type arguments are invalid (for example, a primitive type).
-   * @throws UnmatchedLookupException  If 0 or more than 1 method matches the given name, arguments, and type 
-   *                                   arguments.
-   */
-  public StaticMethodInvocation lookupStaticMethod(Type t, final String name, 
-                                                   final Iterable<? extends Type> typeArgs, 
-                                                   final Iterable<? extends Expression> args,
-                                                   final Option<Type> expected)
-    throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException {
-    debug.logStart(new String[]{"t","name","typeArgs","arg types","expected"},
-                   wrap(t), name, wrap(typeArgs), wrap(IterUtil.map(args, NodeProperties.NODE_TYPE)),
-                   wrap(expected)); try {
-                     
-    class LookupMethod extends TypeAbstractVisitor<Iterable<StaticMethodInvocation>> {
-      
-      private Predicate<? super DJMethod> _matchMethod;
-      
-      public LookupMethod(final boolean includePrivate) {
-        _matchMethod = new Predicate<DJMethod>() {
-          public boolean contains(DJMethod m) {
-            if (m.declaredName().equals(name)) {
-              if (includePrivate) { return m.isStatic(); }
-              else { return m.isStatic() && !m.accessibility().equals(Access.PRIVATE); }
-            }
-            else { return false; }
-          }
-        };
-      }
-      
-      public Iterable<StaticMethodInvocation> defaultCase(Type t) { return IterUtil.empty(); }
-      
-      @Override public Iterable<StaticMethodInvocation> forSimpleClassType(SimpleClassType t) {
-        Iterable<DJMethod> methods = IterUtil.filter(t.ofClass().declaredMethods(), _matchMethod);
-//        System.out.println("Matching methods in type " + userRepresentation(t) + ": " +
-//                           IterUtil.multilineToString(matchingMethods));
-        Lambda<DJMethod, SignatureChecker> makeChecker = new Lambda<DJMethod, SignatureChecker>() {
-          public SignatureChecker value(DJMethod m) {
-            return makeChecker(m.declaredTypeParameters(), typeArgs, SymbolUtil.declaredParameterTypes(m),
-                               args, m.returnType(), expected);
-          }
-        };
-        Lambda2<DJMethod, SignatureChecker, StaticMethodInvocation> makeResult = 
-          new Lambda2<DJMethod, SignatureChecker, StaticMethodInvocation>() {
-          public StaticMethodInvocation value(DJMethod m, SignatureChecker checker) {
-            SubstitutionMap sigma = new SubstitutionMap(checker.typeParameters(), checker.typeArguments());
-            Type returned = substitute(m.returnType(), sigma);
-            // TODO: Handle the thrown types
-            return new StaticMethodInvocation(m, returned, checker.typeArguments(), checker.arguments(),
-                                              m.thrownTypes());
-          }
-        };
-        return findSignatureMatches(methods, makeChecker, makeResult);
-      }
-      
-      @Override public Iterable<StaticMethodInvocation> forRawClassType(RawClassType t) {
-        // TODO: Handle raw member access warnings; make sure this is correct
-        Iterable<DJMethod> methods = IterUtil.filter(t.ofClass().declaredMethods(), _matchMethod);
-//        System.out.println("Matching methods in type " + userRepresentation(t) + ": " +
-//                           IterUtil.multilineToString(matchingMethods));
-        Lambda<DJMethod, SignatureChecker> makeChecker = new Lambda<DJMethod, SignatureChecker>() {
-          public SignatureChecker value(DJMethod m) {
-            return makeChecker(IterUtil.<VariableType>empty(), typeArgs, 
-                               IterUtil.map(SymbolUtil.declaredParameterTypes(m), ERASE_LAMBDA),
-                               args, m.returnType(), expected);
-          }
-        };
-        Lambda2<DJMethod, SignatureChecker, StaticMethodInvocation> makeResult = 
-          new Lambda2<DJMethod, SignatureChecker, StaticMethodInvocation>() {
-          public StaticMethodInvocation value(DJMethod m, SignatureChecker checker) {
-            Type returned = erase(m.returnType());
-            // TODO: Handle the thrown types
-            return new StaticMethodInvocation(m, returned, checker.typeArguments(), checker.arguments(),
-                                              m.thrownTypes());
-          }
-        };
-        return findSignatureMatches(methods, makeChecker, makeResult);
-      }
-      
-      @Override public Iterable<StaticMethodInvocation> forParameterizedClassType(ParameterizedClassType t) {
-        final SubstitutionMap classSigma = 
-          new SubstitutionMap(SymbolUtil.allTypeParameters(t.ofClass()), t.typeArguments());
-        Iterable<DJMethod> methods = IterUtil.filter(t.ofClass().declaredMethods(), _matchMethod);
-//        System.out.println("Matching methods in type " + userRepresentation(t) + ": " +
-//                           IterUtil.multilineToString(matchingMethods));
-        Lambda<DJMethod, SignatureChecker> makeChecker = new Lambda<DJMethod, SignatureChecker>() {
-          public SignatureChecker value(DJMethod m) {
-            // TODO: substitute out class type parameters from the method's parameters' bounds
-            //       (how does the JLS handle this?)
-            return makeChecker(m.declaredTypeParameters(), typeArgs, 
-                               substitute(SymbolUtil.declaredParameterTypes(m), classSigma),
-                               args, m.returnType(), expected);
-          }
-        };
-        Lambda2<DJMethod, SignatureChecker, StaticMethodInvocation> makeResult = 
-          new Lambda2<DJMethod, SignatureChecker, StaticMethodInvocation>() {
-          public StaticMethodInvocation value(DJMethod m, SignatureChecker checker) {
-            SubstitutionMap sigma = new SubstitutionMap(checker.typeParameters(), 
-                                                        checker.typeArguments());
-            Type rawReturned = m.returnType();
-            Type returned = substitute(substitute(rawReturned, classSigma), sigma);
-            // TODO: Handle the thrown types
-            return new StaticMethodInvocation(m, returned, checker.typeArguments(), 
-                                              checker.arguments(), m.thrownTypes());
-          }
-        };
-        return findSignatureMatches(methods, makeChecker, makeResult);
-      }
-      
-    }
-    Iterable<? extends StaticMethodInvocation> results = lookupMember(t, new LookupMethod(true), 
-                                                                      new LookupMethod(false));
-    // TODO: provide more error-message information
-    int matches = IterUtil.sizeOf(results);
-    if (matches != 1) { throw new UnmatchedLookupException(matches); }
-    else { return IterUtil.first(results); }
-    
-    } finally { debug.logEnd(); }
-  }
-  
-  
-  public boolean containsField(Type t, String name) {
-    return containsField(t, name, false);
-  }
-  
-  public boolean containsStaticField(Type t, String name) {
-    return containsField(t, name, true);
-  }
-  
-  private boolean containsField(Type t, final String name, final boolean requireStatic) {
-    debug.logStart(new String[]{"t", "name", "requireStatic"}, wrap(t), name, requireStatic); try {
-    
-    class LookupField extends TypeAbstractVisitor<Iterable<Object>> {
-      
-      private boolean _includePrivate;
-      
-      public LookupField(boolean includePrivate) {
-        _includePrivate = includePrivate;
-      }
-      
-      private boolean validField(DJField f) { 
-        return
-          (_includePrivate || !f.accessibility().equals(Access.PRIVATE)) &&
-          (!requireStatic || f.isStatic());
-      }
-      
-      public Iterable<Object> defaultCase(Type t) { return IterUtil.empty(); }
-      
-      @Override public Iterable<Object> forArrayType(ArrayType t) {
-        return name.equals("length") ? IterUtil.singleton(null) : IterUtil.empty();
-      }
-      
-      @Override public Iterable<Object> forClassType(ClassType t) {
-        for (DJField f : t.ofClass().declaredFields()) {
-          if (f.declaredName().equals(name) && validField(f)) {
-            return IterUtil.singleton(null);
-          }
-        }
-        return IterUtil.empty();
-      }
-      
-    }
-    Iterable<? extends Object> results = lookupMember(t, new LookupField(true), new LookupField(false));
-    return !IterUtil.isEmpty(results);
-    
-    } finally { debug.logEnd(); }
-  }
-
-  /**
-   * Lookup the field with the given name in the given object.
-   * @param object  A typed expression representing the object whose field is to be accessed.
-   * @param name  The name of the field.
-   * @return An {@link TypeSystem.ObjectFieldReference} object representing the matched field.
-   * @throws InvalidTargetException  If {@code object} cannot be used to access a field.
-   * @throws UnmatchedLookupException  If 0 or more than 1 field matches the given name.
-   */
-  public ObjectFieldReference lookupField(final Expression object, final String name)
-    throws InvalidTargetException, UnmatchedLookupException {
-    debug.logStart(new String[]{"t", "name"}, wrap(NodeProperties.getType(object)), name); try {
-
-    class LookupField extends TypeAbstractVisitor<Iterable<ObjectFieldReference>> {
-      
-      private boolean _includePrivate;
-      
-      public LookupField(boolean includePrivate) {
-        _includePrivate = includePrivate;
-      }
-      
-      private boolean validField(DJField f) { 
-        return _includePrivate || !f.accessibility().equals(Access.PRIVATE);
-      }
-      
-      public Iterable<ObjectFieldReference> defaultCase(Type t) { return IterUtil.empty(); }
-      
-      @Override public Iterable<ObjectFieldReference> forArrayType(ArrayType t) {
-        if (name.equals("length")) {
-          return IterUtil.make(new ObjectFieldReference(ArrayLengthField.INSTANCE, INT, object));
-        }
-        else { return IterUtil.empty(); }
-      }
-      
-      @Override public Iterable<ObjectFieldReference> forSimpleClassType(SimpleClassType t) {
-        for (DJField f : t.ofClass().declaredFields()) {
-          if (f.declaredName().equals(name) && validField(f)) {
-            return IterUtil.make(new ObjectFieldReference(f, f.type(), makeCast(t, object)));
-          }
-        }
-        return IterUtil.empty();
-      }
-      
-      @Override public Iterable<ObjectFieldReference> forRawClassType(RawClassType t) {
-        // TODO: Handle raw member access warnings
-        for (DJField f : t.ofClass().declaredFields()) {
-          if (f.declaredName().equals(name) && validField(f)) {
-            return IterUtil.make(new ObjectFieldReference(f, erase(f.type()), makeCast(t, object)));
-          }
-        }
-        return IterUtil.empty();
-      }
-      
-      @Override public Iterable<ObjectFieldReference> forParameterizedClassType(ParameterizedClassType t) {
-        for (DJField f : t.ofClass().declaredFields()) {
-          if (f.declaredName().equals(name) && validField(f)) {
-            Type fieldType = substitute(f.type(), SymbolUtil.allTypeParameters(t.ofClass()), 
-                                        t.typeArguments());
-            return IterUtil.make(new ObjectFieldReference(f, fieldType, makeCast(t, object)));
-          }
-        }
-        return IterUtil.empty();
-      }
-      
-    }
-    Iterable<? extends ObjectFieldReference> results = lookupMember(NodeProperties.getType(object), 
-                                                                    new LookupField(true), 
-                                                                    new LookupField(false));
-    // TODO: provide more error-message information
-    int matches = IterUtil.sizeOf(results);
-    if (matches != 1) { throw new UnmatchedLookupException(matches); }
-    else { return IterUtil.first(results); }
-    
-    } finally { debug.logEnd(); }
-  }
-  
-  
-  /**
-   * Lookup the static field with the given name.
-   * @param t  The type in which to search for a static field.
-   * @param name  The name of the field.
-   * @return A {@link TypeSystem.StaticFieldReference} object representing the matched field.
-   * @throws InvalidTargetException  If field access is not legal for the type {@code t}.
-   * @throws UnmatchedLookupException  If 0 or more than 1 field matches the given name.
-   */
-  public StaticFieldReference lookupStaticField(Type t, final String name)
-    throws InvalidTargetException, UnmatchedLookupException {
-    debug.logStart(new String[]{"t", "name"}, wrap(t), name); try {
-    
-    class LookupField extends TypeAbstractVisitor<Iterable<StaticFieldReference>> {
-      
-      private boolean _includePrivate;
-      
-      public LookupField(boolean includePrivate) {
-        _includePrivate = includePrivate;
-      }
-      
-      private boolean validField(DJField f) {
-        if (_includePrivate) { return f.isStatic(); }
-        else { return f.isStatic() && !f.accessibility().equals(Access.PRIVATE); }
-      }
-      
-      public Iterable<StaticFieldReference> defaultCase(Type t) { return IterUtil.empty(); }
-      
-      @Override public Iterable<StaticFieldReference> forSimpleClassType(SimpleClassType t) {
-        for (DJField f : t.ofClass().declaredFields()) {
-          if (f.declaredName().equals(name) && validField(f)) {
-            return IterUtil.make(new StaticFieldReference(f, f.type()));
-          }
-        }
-        return IterUtil.empty();
-      }
-      
-      @Override public Iterable<StaticFieldReference> forRawClassType(RawClassType t) {
-        // TODO: Handle raw member access warnings
-        for (DJField f : t.ofClass().declaredFields()) {
-          if (f.declaredName().equals(name) && validField(f)) {
-            return IterUtil.make(new StaticFieldReference(f, erase(f.type())));
-          }
-        }
-        return IterUtil.empty();
-      }
-      
-      @Override public Iterable<StaticFieldReference> forParameterizedClassType(ParameterizedClassType t) {
-        for (DJField f : t.ofClass().declaredFields()) {
-          if (f.declaredName().equals(name) && validField(f)) {
-            Type fieldType = substitute(f.type(), SymbolUtil.allTypeParameters(t.ofClass()), 
-                                        t.typeArguments());
-            return IterUtil.make(new StaticFieldReference(f, fieldType));
-          }
-        }
-        return IterUtil.empty();
-      }
-      
-    }
-    Iterable<? extends StaticFieldReference> results = lookupMember(t, new LookupField(true), 
-                                                                    new LookupField(false));
-    // TODO: provide more error-message information
-    int matches = IterUtil.sizeOf(results);
-    if (matches != 1) { throw new UnmatchedLookupException(matches); }
-    else { return IterUtil.first(results); }
-    
-    } finally { debug.logEnd(); }
-  }
-  
-  
-  public boolean containsClass(Type t, final String name) {
-    debug.logStart(new String[]{"t","name"}, wrap(t), name); try {
-    
-    // TODO: We allow nonstatic classes and ambiguous references here.  Is that correct?
-    Lambda<Boolean, Predicate<DJClass>> makePred = new Lambda<Boolean, Predicate<DJClass>>() {
-      public Predicate<DJClass> value(final Boolean includePrivate) {
-        return new Predicate<DJClass>() {
-          public boolean contains(DJClass c) {
-            if (c.declaredName().equals(name)) {
-              return includePrivate || !c.accessibility().equals(Access.PRIVATE);
-            }
-            else { return false; }
-          }
-        };
-      }
-    };
-    Iterable<? extends ClassType> classes = lookupClasses(t, makePred, EMPTY_TYPE_ITERABLE);
-    return !IterUtil.isEmpty(classes);
-    
-    } finally { debug.logEnd(); }
-  }
-  
-  public boolean containsStaticClass(Type t, final String name) {
-    debug.logStart(new String[]{"t","name"}, wrap(t), name); try {
-    
-    Lambda<Boolean, Predicate<DJClass>> makePred = new Lambda<Boolean, Predicate<DJClass>>() {
-      public Predicate<DJClass> value(final Boolean includePrivate) {
-        return new Predicate<DJClass>() {
-          public boolean contains(DJClass c) {
-            if (c.declaredName().equals(name)) {
-              if (includePrivate) { return c.isStatic(); }
-              else { return c.isStatic() && !c.accessibility().equals(Access.PRIVATE); }
-            }
-            else { return false; }
-          }
-        };
-      }
-    };
-    Iterable<? extends ClassType> classes = lookupClasses(t, makePred, EMPTY_TYPE_ITERABLE);
-    return !IterUtil.isEmpty(classes);
-    
-    } finally { debug.logEnd(); }
-  }
-  
-  /**
-   * Lookup the class with the given name in the given object.
-   * @param object  A typed expression representing the object whose class is to be accessed.
-   * @param name  The name of the class.
-   * @param typeArgs  The type arguments for the class
-   * @return A type representing the named class.
-   * @throws InvalidTargetException  If {@code object} cannot be used to access a class.
-   * @throws InvalidTypeArgumentException  If the type arguments are invalid or do not correspond to the 
-   *                                        class's formal parameters (bounds are not checked, so the result
-   *                                        may not be well-formed).
-   * @throws UnmatchedLookupException  If 0 or more than 1 class matches the given name.
-   */  
-  public ClassType lookupClass(Expression object, String name, Iterable<? extends Type> typeArgs)
-    throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException {
-    return lookupClass(NodeProperties.getType(object), name, typeArgs);
-  }
-  
-  /**
-   * Lookup the class with the given name in the given type.
-   * @param t  The type in which to search for a static class.
-   * @param name  The name of the class.
-   * @param typeArgs  The type arguments for the class
-   * @return A type representing the named class.
-   * @throws InvalidTargetException  If class access is not legal for the type {@code t}.
-   * @throws InvalidTypeArgumentException  If the type arguments are invalid or do not correspond to the 
-   *                                        class's formal parameters (bounds are not checked, so the result
-   *                                        may not be well-formed).
-   * @throws UnmatchedLookupException  If 0 or more than 1 class matches the given name.
-   */  
-  public ClassType lookupClass(Type t, final String name, Iterable<? extends Type> typeArgs)
-    throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException {
-    debug.logStart(new String[]{"t", "name", "typeArgs"}, t, name, typeArgs); try {
-      
-    Lambda<Boolean, Predicate<DJClass>> makePred = new Lambda<Boolean, Predicate<DJClass>>() {
-      public Predicate<DJClass> value(final Boolean includePrivate) {
-        return new Predicate<DJClass>() {
-          public boolean contains(DJClass c) {
-            if (c.declaredName().equals(name)) {
-              return includePrivate || !c.accessibility().equals(Access.PRIVATE);
-            }
-            else { return false; }
-          }
-        };
-      }
-    };
-    return lookupClass(t, makePred, typeArgs, name);
-    
-    } finally { debug.logEnd(); }
-  }
-  
-  /**
-   * Lookup the static class with the given name.
-   * @param t  The type in which to search for a static class.
-   * @param name  The name of the class.
-   * @param typeArgs  The type arguments for the class
-   * @return A type representing the named class.
-   * @throws InvalidTargetException  If class access is not legal for the type {@code t}.
-   * @throws InvalidTypeArgumentException  If the type arguments are invalid or do not correspond to the 
-   *                                        class's formal parameters (bounds are not checked, so the result
-   *                                        may not be well-formed).
-   * @throws UnmatchedLookupException  If 0 or more than 1 class matches the given name.
-   */
-  public ClassType lookupStaticClass(Type t, final String name, final Iterable<? extends Type> typeArgs)
-    throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException {
-    debug.logStart(new String[]{"t", "name", "typeArgs"}, t, name, typeArgs); try {
-      
-    Lambda<Boolean, Predicate<DJClass>> makePred = new Lambda<Boolean, Predicate<DJClass>>() {
-      public Predicate<DJClass> value(final Boolean includePrivate) {
-        return new Predicate<DJClass>() {
-          public boolean contains(DJClass c) {
-            if (c.declaredName().equals(name)) {
-              if (includePrivate) { return c.isStatic(); }
-              else { return c.isStatic() && !c.accessibility().equals(Access.PRIVATE); }
-            }
-            else { return false; }
-          }
-        };
-      }
-    };
-    return lookupClass(t, makePred, typeArgs, name);
-    
-    } finally { debug.logEnd(); }
-  }
-  
-  /** Look up an inner class based on the given predicate. */
-  private ClassType lookupClass(Type t, Lambda<? super Boolean, ? extends Predicate<? super DJClass>> makePred,
-                                Iterable<? extends Type> typeArgs, String name)
-    throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException {
-    Iterable<? extends ClassType> results = lookupClasses(t, makePred, typeArgs);
-    // TODO: provide more error-message information
-    int matches = IterUtil.sizeOf(results);
-    if (matches != 1) { throw new UnmatchedLookupException(matches); }
-    else {
-      ClassType result = IterUtil.first(results);
-      final Iterable<VariableType> params = SymbolUtil.allTypeParameters(result.ofClass());
-      try {
-        return result.apply(new TypeAbstractVisitor<ClassType>() {
-          public ClassType defaultCase(Type t) { throw new IllegalArgumentException(); }
-          
-          @Override public ClassType forSimpleClassType(SimpleClassType t) {
-            if (IterUtil.isEmpty(params)) { return t; }
-            else { return new RawClassType(t.ofClass()); }
-          }
-          
-          @Override public ClassType forRawClassType(RawClassType t) {
-            return t;
-          }
-          
-          @Override public ClassType forParameterizedClassType(ParameterizedClassType t) {
-            try {
-              if (IterUtil.sizeOf(params) != IterUtil.sizeOf(t.typeArguments())) {
-                throw new InvalidTypeArgumentException();
-              }
-              return t;
-            }
-            catch (InvalidTypeArgumentException e) { throw new WrappedException(e); }
-          }
-        });
-      }
-      catch (WrappedException e) {
-        if (e.getCause() instanceof InvalidTypeArgumentException) {
-          throw (InvalidTypeArgumentException) e.getCause();
-        }
-        else { throw e; }
-      }
-    }
-  }
-  
-  /**
-   * Produces a list of all inner classes matching the given predicate in type {@code t}.  No
-   * errors are thrown.  The given type arguments are applied to the result, but no checks are
-   * made for their correctness (a ParameterizedClassType result may have the wrong number of
-   * arguments, including the case of missing arguments from a raw outer type; a SimpleClassType
-   * result may be missing arguments).
-   */
-  private Iterable<? extends ClassType> 
-    lookupClasses(Type t, Lambda<? super Boolean, ? extends Predicate<? super DJClass>> makePred,
-                  final Iterable<? extends Type> typeArgs) {
-    /** Produces a type for the inner class; note that no checks are made on the type arguments */
-    class LookupClass extends TypeAbstractVisitor<Iterable<ClassType>> {
-      
-      private final Predicate<? super DJClass> _matchInner;
-      
-      public LookupClass(Predicate<? super DJClass> matchInner) {
-        _matchInner = matchInner;
-      }
-      
-      public Iterable<ClassType> defaultCase(Type t) { return IterUtil.empty(); }
-      
-      @Override public Iterable<ClassType> forClassType(final ClassType t) {
-        debug.logStart("t", wrap(t)); try {
-          
-        Lambda<DJClass, ClassType> makeType = new Lambda<DJClass, ClassType>() {
-          public ClassType value(DJClass c) {
-            ClassType dynamicOuter; // may be null
-            if (c.isStatic()) { dynamicOuter = SymbolUtil.dynamicOuterClassType(t); }
-            else { dynamicOuter = t; }
-            if (dynamicOuter instanceof ParameterizedClassType) {
-              Iterable<? extends Type> outerTypeArgs = ((ParameterizedClassType) dynamicOuter).typeArguments();
-              return new ParameterizedClassType(c, IterUtil.compose(outerTypeArgs, typeArgs));
-            }
-            else if (dynamicOuter instanceof RawClassType) {
-              // malformed if type args is nonempty -- that should be caught by the caller
-              return IterUtil.isEmpty(typeArgs) ? new RawClassType(c) : new ParameterizedClassType(c, typeArgs);
-            }
-            else {
-              return IterUtil.isEmpty(typeArgs) ? new SimpleClassType(c) : new ParameterizedClassType(c, typeArgs);
-            }
-          }
-        };
-        debug.logValue("declaredClasses", t.ofClass().declaredClasses());
-        return IterUtil.mapSnapshot(IterUtil.filter(t.ofClass().declaredClasses(), _matchInner), makeType);
-        
-        } finally { debug.logEnd(); }
-      }
-      
-    }
-    return lookupMember(t, new LookupClass(makePred.value(true)), new LookupClass(makePred.value(false)));
-  }
-  
-  /**
-   * Test whether the given arguments are within the bounds of the corresponding parameters.  Assumes
-   * that {@code params} and {@code args} have matching arity.
-   * 
-   * @return  {@code true} iff the given arguments are within the bounds of the given parameters
-   */
-  protected boolean inBounds(Iterable<? extends VariableType> params, Iterable<? extends Type> args) {
-    SubstitutionMap sigma = new SubstitutionMap(params, args);
-    for (Pair<VariableType, Type> pair : IterUtil.zip(params, args)) {
-      VariableType param = pair.first();
-      Type arg = pair.second();
-      if (!isSubtype(substitute(param.symbol().lowerBound(), sigma), arg)) { return false; }
-      if (!isSubtype(arg, substitute(param.symbol().upperBound(), sigma))) { return false; }
-    }
-    return true;
-  }
-  
-  /**
-   * Provides the recursive framework for class member lookup.  {@code baseCase} and 
-   * {@code recursiveBaseCase} are visitors that produce a list of members for the given type.
-   * If the result of {@code t.apply(baseCase)} is nonempty, that result is returned.  Otherwise,
-   * this method is recursively invoked on a class type's supertypes, an array type's interfaces
-   * ({@code Serializable} and {@code Cloneable}), a variable's upper bound, or each of an 
-   * intersection's members.
-   */
-  private <T> Iterable<? extends T> 
-    lookupMember(Type t, TypeVisitor<? extends Iterable<? extends T>> baseCase, 
-                 TypeVisitor<? extends Iterable<? extends T>> recursiveBaseCase) {
-    return lookupMember(t, new HashSet<Type>(), baseCase, recursiveBaseCase);
-  }
-  
-  /**
-   * Implements {@code lookupMember}, keeping track of types that have already been checked,
-   * and returning an empty iterable in that case
-   */
-  private <T> Iterable<? extends T>
-    lookupMember(Type t, final Set<Type> alreadyChecked,
-                 TypeVisitor<? extends Iterable<? extends T>> baseCase, 
-                 final TypeVisitor<? extends Iterable<? extends T>> recursiveBaseCase) {
-    debug.logStart("t", wrap(t)); try {
-      
-    if (alreadyChecked.contains(t)) { return IterUtil.empty(); }
-    
-    final Iterable<? extends T> baseResult = t.apply(baseCase);
-    alreadyChecked.add(t);
-    if (!IterUtil.isEmpty(baseResult)) { return baseResult; }
-    else {
-      return t.apply(new TypeAbstractVisitor<Iterable<? extends T>>() {
-        
-        public Iterable<? extends T> defaultCase(Type t) { return baseResult; }
-        
-        @Override public Iterable<? extends T> forArrayType(ArrayType t) {
-          return lookupMember(CLONEABLE_AND_SERIALIZABLE, alreadyChecked, recursiveBaseCase, recursiveBaseCase);
-        }
-        
-        @Override public Iterable<? extends T> forSimpleClassType(SimpleClassType t) {
-          Type superT = immediateSupertype(t);
-          if (superT == null) { return baseResult; }
-          else { return lookupMember(superT, alreadyChecked, recursiveBaseCase, recursiveBaseCase); }
-        }
-        
-        @Override public Iterable<? extends T> forRawClassType(RawClassType t) {
-          Type superT = immediateSupertype(t);
-          if (superT == null) { return baseResult; }
-          else { return lookupMember(superT, alreadyChecked, recursiveBaseCase, recursiveBaseCase); }
-        }
-        
-        @Override public Iterable<? extends T> forParameterizedClassType(ParameterizedClassType t) {
-          Type superT = immediateSupertype(t);
-          if (superT == null) { return baseResult; }
-          else { return lookupMember(superT, alreadyChecked, recursiveBaseCase, recursiveBaseCase); }
-        }
-        
-        @Override public Iterable<? extends T> forVariableType(VariableType t) {
-          return lookupMember(t.symbol().upperBound(), alreadyChecked, recursiveBaseCase, recursiveBaseCase);
-        }
-        
-        @Override public Iterable<? extends T> forIntersectionType(IntersectionType t) {
-          Iterable<? extends T> result = IterUtil.empty();
-          for (Type tSup : t.ofTypes()) {
-            Iterable<? extends T> forSup = lookupMember(tSup, alreadyChecked, recursiveBaseCase, 
-                                                        recursiveBaseCase);
-            result = IterUtil.compose(result, forSup);
-          }
-          return result;
-        }
-        
-      });
-    }
-    
-    } finally { debug.logEnd(); }
   }
   
 }

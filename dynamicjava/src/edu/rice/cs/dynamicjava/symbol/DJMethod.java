@@ -11,7 +11,7 @@ public interface DJMethod extends Function, Access.Limited {
   public boolean isAbstract();
   public boolean isFinal();
   public Access accessibility();
-  public Type returnType();
+  public Access.Module accessModule();
   public Object evaluate(Object receiver, Iterable<Object> args, RuntimeBindings bindings, Options options) 
     throws EvaluatorException;
 }

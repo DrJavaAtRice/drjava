@@ -114,6 +114,8 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  *     non-static {@code SimpleMethodCall}s and {@code SimpleFieldAccess}es.</li>
  * <li>CONSTRUCTOR on {@code ConstructorCall}s and all allocations: {@code SimpleAllocation}s,
  *     {@code InnerAllocation}s, {@code AnonymousAllocation}s, and {@code AnonymousInnerAllocation}s</li>
+ * <li>ENCLOSING_THIS on {@code SimpleAllocation}s and {@code AnonymousAllocations}s that represent
+ *     inner allocations with a "this" value of the given class as the enclosing object</li>
  * <li>FIELD on all {@code FieldAccess}es</li>
  * <li>METHOD on all {@code MethodCall}s</li>
  * <li>VARIABLE on all {@code VariableAccess}es, {@code VariableDeclarations}, and {@code FormalParameters}</li>
@@ -204,9 +206,10 @@ public class ExpressionChecker {
     catch (InvalidTypeArgumentException e) {
       throw new ExecutionError("type.argument", node);
     }
-    catch (TypeSystemException e) {
+    catch (UnmatchedLookupException e) {
       setErrorStrings(node, ts.userRepresentation(type), nodeTypesString(args));
-      throw new ExecutionError("no.such.constructor", node);
+      if (e.matches() > 1) { throw new ExecutionError("ambiguous.constructor", node); }
+      else { throw new ExecutionError("no.such.constructor", node); }
     }
   }
   
@@ -217,7 +220,7 @@ public class ExpressionChecker {
   
   /**
    * Verify that the given symbol is accessible.  If {@code alwaysCheckPrivate}, private access is
-   * checked even when the options dictate otherwise.
+   * checked even when the options dictate otherwise.  Assumes symbol is not an anonymous class.
    */
   private void checkAccessibility(Access.Limited symbol, Node node, boolean alwaysCheckPrivate) {
     switch (symbol.accessibility()) {
@@ -352,7 +355,6 @@ public class ExpressionChecker {
           }
         }
         catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
-        catch (InvalidTargetException e) { throw new RuntimeException("context produced bad type"); }
         catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
         catch (UnmatchedLookupException e) {
           if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
@@ -375,7 +377,6 @@ public class ExpressionChecker {
               checkAccessibility(memberType.ofClass(), node);
               classType = memberType;
             }
-            catch (InvalidTargetException e) { throw new RuntimeException("ts.containsClass lied"); }
             catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
             catch (UnmatchedLookupException e) {
               if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
@@ -482,7 +483,6 @@ public class ExpressionChecker {
         return setType(node, result);
       }
       catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
-      catch (InvalidTargetException e) { throw new RuntimeException("context produced bad type"); }
       catch (UnmatchedLookupException e) {
         if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
         else { throw new ExecutionError("ambiguous.name", node); }
@@ -506,9 +506,10 @@ public class ExpressionChecker {
         addRuntimeCheck(node, result, ref.field().type());
         return setType(node, result);
       }
-      catch (TypeSystemException e) {
+      catch (UnmatchedLookupException e) {
         setErrorStrings(node, ts.userRepresentation(receiverT), node.getFieldName());
-        throw new ExecutionError("no.such.field", node);
+        if (e.matches() > 1) { throw new ExecutionError("ambiguous.field", node); }
+        else { throw new ExecutionError("no.such.field", node); }
       }
     }
     
@@ -534,9 +535,10 @@ public class ExpressionChecker {
         addRuntimeCheck(node, result, ref.field().type());
         return setType(node, result);
       }
-      catch (TypeSystemException e) {
+      catch (UnmatchedLookupException e) {
         setErrorStrings(node, ts.userRepresentation(t), node.getFieldName());
-        throw new ExecutionError("no.such.field", node);
+        if (e.matches() > 1) { throw new ExecutionError("ambiguous.field", node); }
+        else { throw new ExecutionError("no.such.field", node); }
       }
     }
     
@@ -555,9 +557,10 @@ public class ExpressionChecker {
         addRuntimeCheck(node, result, ref.field().type());
         return setType(node, result);
       }
-      catch (TypeSystemException e) {
+      catch (UnmatchedLookupException e) {
         setErrorStrings(node, ts.userRepresentation(t), node.getFieldName());
-        throw new ExecutionError("no.such.static.field", node);
+        if (e.matches() > 1) { throw new ExecutionError("ambiguous.field", node); }
+        else { throw new ExecutionError("no.such.static.field", node); }
       }
     }
     
@@ -612,9 +615,10 @@ public class ExpressionChecker {
       catch (InvalidTypeArgumentException e) {
         throw new ExecutionError("type.argument", node);
       }
-      catch (TypeSystemException e) {
+      catch (UnmatchedLookupException e) {
         setErrorStrings(node, ts.userRepresentation(t), node.getMethodName(), nodeTypesString(args));
-        throw new ExecutionError("no.such.method", node);
+        if (e.matches() > 1) { throw new ExecutionError("ambiguous.method", node); }
+        else { throw new ExecutionError("no.such.method", node); }
       }
     }
     
@@ -672,9 +676,10 @@ public class ExpressionChecker {
       catch (InvalidTypeArgumentException e) {
         throw new ExecutionError("type.argument", node);
       }
-      catch (TypeSystemException e) {
+      catch (UnmatchedLookupException e) {
         setErrorStrings(node, ts.userRepresentation(receiverT), node.getMethodName(), nodeTypesString(args));
-        throw new ExecutionError("no.such.method", node);
+        if (e.matches() > 1) { throw new ExecutionError("ambiguous.method", node); }
+        else { throw new ExecutionError("no.such.method", node); }
       }
     }
     
@@ -714,9 +719,10 @@ public class ExpressionChecker {
       catch (InvalidTypeArgumentException e) {
         throw new ExecutionError("type.argument", node);
       }
-      catch (TypeSystemException e) {
+      catch (UnmatchedLookupException e) {
         setErrorStrings(node, ts.userRepresentation(t), node.getMethodName(), nodeTypesString(args));
-        throw new ExecutionError("no.such.method", node);
+        if (e.matches() > 1) { throw new ExecutionError("ambiguous.method", node); }
+        else { throw new ExecutionError("no.such.method", node); }
       }
     }
     
@@ -750,9 +756,10 @@ public class ExpressionChecker {
       catch (InvalidTypeArgumentException e) {
         throw new ExecutionError("type.argument", node);
       }
-      catch (TypeSystemException e) {
+      catch (UnmatchedLookupException e) {
         setErrorStrings(node, ts.userRepresentation(t), node.getMethodName(), nodeTypesString(args));
-        throw new ExecutionError("no.such.static.method", node);
+        if (e.matches() > 1) { throw new ExecutionError("ambiguous.method", node); }
+        else { throw new ExecutionError("no.such.method", node); }
       }
     }
     
@@ -835,10 +842,13 @@ public class ExpressionChecker {
      */
     @Override public Type visit(SimpleAllocation node) {
       Type t = checkTypeName(node.getCreationType());
-      // TODO: Allow a simple allocation of a dynamic inner class defined in the current context
-      //       (where "new Inner()" is the equivalent of "this.new Inner()" or "SomeOuter.this.new Inner()")
-      if (!ts.isConcrete(t) || !ts.isStatic(t)) {
-        throw new ExecutionError("allocation.type", node);
+      if (!ts.isConcrete(t)) { throw new ExecutionError("allocation.type", node); }
+
+      Option<Type> dynamicOuter = ts.dynamicallyEnclosingType(t);
+      if (dynamicOuter.isSome()) {
+        DJClass enclosingThis = enclosingThis(dynamicOuter.unwrap());
+        if (enclosingThis == null) { throw new ExecutionError("allocation.type", node); }
+        else { setEnclosingThis(node, enclosingThis); }
       }
       
       Iterable<? extends Expression> args = node.getArguments();
@@ -860,9 +870,10 @@ public class ExpressionChecker {
       catch (InvalidTypeArgumentException e) {
         throw new ExecutionError("type.argument", node);
       }
-      catch (TypeSystemException e) {
+      catch (UnmatchedLookupException e) {
         setErrorStrings(node, ts.userRepresentation(t), nodeTypesString(args));
-        throw new ExecutionError("no.such.constructor", node);
+        if (e.matches() > 1) { throw new ExecutionError("ambiguous.constructor", node); }
+        else { throw new ExecutionError("no.such.constructor", node); }
       }
     }
     
@@ -872,9 +883,15 @@ public class ExpressionChecker {
      */
     @Override public Type visit(AnonymousAllocation node) {
       Type t = checkTypeName(node.getCreationType());
-      // TODO: Allow a simple allocation of a dynamic inner class defined in the current context (as above)
-      if (!ts.isStatic(t) || (!ts.isExtendable(t) && !ts.isImplementable(t))) {
+      if (!ts.isExtendable(t) && !ts.isImplementable(t)) {
         throw new ExecutionError("allocation.type", node);
+      }
+      
+      Option<Type> dynamicOuter = ts.dynamicallyEnclosingType(t);
+      if (dynamicOuter.isSome()) {
+        DJClass enclosingThis = enclosingThis(dynamicOuter.unwrap());
+        if (enclosingThis == null) { throw new ExecutionError("allocation.type", node); }
+        else { setEnclosingThis(node, enclosingThis); }
       }
       
       Iterable<? extends Expression> args = node.getArguments();
@@ -896,9 +913,10 @@ public class ExpressionChecker {
         catch (InvalidTypeArgumentException e) {
           throw new ExecutionError("type.argument", node);
         }
-        catch (TypeSystemException e) {
+        catch (UnmatchedLookupException e) {
           setErrorStrings(node, ts.userRepresentation(t), nodeTypesString(args));
-          throw new ExecutionError("no.such.constructor", node);
+          if (e.matches() > 1) { throw new ExecutionError("ambiguous.constructor", node); }
+          else { throw new ExecutionError("no.such.constructor", node); }
         }
       }
       
@@ -912,6 +930,19 @@ public class ExpressionChecker {
       
       setConstructor(node, IterUtil.first(c.declaredConstructors()));
       return setType(node, ts.makeClassType(c));
+    }
+    
+    /**
+     * Determine the innermost "this" class that can be used as an allocation's enclosing object
+     * where the given type is expected.  May return {@code null} if none is found.
+     */
+    private DJClass enclosingThis(Type expected) {
+      DJClass candidate = context.getThis();
+      while (candidate != null) {
+        if (ts.isSubtype(SymbolUtil.thisType(candidate), expected)) { return candidate; }
+        candidate = SymbolUtil.dynamicOuterClass(candidate);
+      }
+      return null;
     }
     
     /**
@@ -956,17 +987,19 @@ public class ExpressionChecker {
         catch (InvalidTypeArgumentException e) {
           throw new ExecutionError("type.argument", node);
         }
-        catch (TypeSystemException e) {
+        catch (UnmatchedLookupException e) {
           setErrorStrings(node, ts.userRepresentation(t), nodeTypesString(args));
-          throw new ExecutionError("no.such.constructor", node);
+          if (e.matches() > 1) { throw new ExecutionError("ambiguous.constructor", node); }
+          else { throw new ExecutionError("no.such.constructor", node); }
         }
       }
       catch (InvalidTypeArgumentException e) {
         throw new ExecutionError("type.argument", node);
       }
-      catch (TypeSystemException e) {
+      catch (UnmatchedLookupException e) {
         setErrorStrings(node, ts.userRepresentation(enclosing), node.getClassName());
-        throw new ExecutionError("no.such.inner.class", node);
+        if (e.matches() > 1) { throw new ExecutionError("ambiguous.inner.class", node); }
+        else { throw new ExecutionError("no.such.inner.class", node); }
       }
     }
     
@@ -1011,17 +1044,19 @@ public class ExpressionChecker {
         catch (InvalidTypeArgumentException e) {
           throw new ExecutionError("type.argument", node);
         }
-        catch (TypeSystemException e) {
+        catch (UnmatchedLookupException e) {
           setErrorStrings(node, ts.userRepresentation(t), nodeTypesString(args));
-          throw new ExecutionError("no.such.constructor", node);
+          if (e.matches() > 1) { throw new ExecutionError("ambiguous.constructor", node); }
+          else { throw new ExecutionError("no.such.constructor", node); }
         }
       }
       catch (InvalidTypeArgumentException e) {
         throw new ExecutionError("type.argument", node);
       }
-      catch (TypeSystemException e) {
+      catch (UnmatchedLookupException e) {
         setErrorStrings(node, ts.userRepresentation(enclosing), node.getClassName());
-        throw new ExecutionError("no.such.inner.class", node);
+        if (e.matches() > 1) { throw new ExecutionError("ambiguous.inner.class", node); }
+        else { throw new ExecutionError("no.such.inner.class", node); }
       }
       
       TreeClassLoader loader = new TreeClassLoader(context.getClassLoader(), opt);

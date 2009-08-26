@@ -130,12 +130,6 @@ public abstract class TypeSystem {
    */
   public abstract boolean isConcrete(Type t);
   
-  /**
-   * Determine if values of type {@code t} are not dependent on an outer object (for example, a non-static 
-   * inner class has such a dependency)
-   */
-  public abstract boolean isStatic(Type t);
-  
   /** Determine if {@code t} is valid in the {@code extends} clause of a class definition */
   public abstract boolean isExtendable(Type t);
   
@@ -212,6 +206,9 @@ public abstract class TypeSystem {
    * {@link #isArray}).
    */
   public abstract Type arrayElementType(Type t);
+  
+  /** Get the type of the object, if any, that dynamically encloses instances of {@code t}. */
+  public abstract Option<Type> dynamicallyEnclosingType(Type t);
 
   /** Produce a string representing the type */
   public abstract String userRepresentation(Type t);
@@ -319,7 +316,6 @@ public abstract class TypeSystem {
    * @param args  A list of typed expressions corresponding to the constructor's parameters.
    * @param expected  The type expected in the invocation's calling context, if any.
    * @return  A {@link ConstructorInvocation} object representing the matched constructor.
-   * @throws InvalidTargetException  If the type {@code t} cannot be constructed.
    * @throws InvalidTypeArgumentException  If the type arguments are invalid (for example, a primitive type).
    * @throws UnmatchedLookupException  If 0 or more than 1 constructor matches the given arguments and type 
    *                                   arguments.
@@ -328,7 +324,7 @@ public abstract class TypeSystem {
   public abstract ConstructorInvocation lookupConstructor(Type t, Iterable<? extends Type> typeArgs, 
                                                           Iterable<? extends Expression> args,
                                                           Option<Type> expected)
-    throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException;
+    throws InvalidTypeArgumentException, UnmatchedLookupException;
   
   
   public abstract boolean containsMethod(Type t, String name);
@@ -343,7 +339,6 @@ public abstract class TypeSystem {
    * @param args  A list of typed expressions corresponding to the method's parameters.
    * @param expected  The type expected in the invocation's calling context, if any.
    * @return  An {@link ObjectMethodInvocation} object representing the matched method.
-   * @throws InvalidTargetException  If {@code object} cannot be used to invoke a method.
    * @throws InvalidTypeArgumentException  If the type arguments are invalid (for example, a primitive type).
    * @throws UnmatchedLookupException  If 0 or more than 1 method matches the given name, arguments, and type 
    *                                   arguments.
@@ -352,7 +347,7 @@ public abstract class TypeSystem {
                                                       Iterable<? extends Type> typeArgs, 
                                                       Iterable<? extends Expression> args,
                                                       Option<Type> expected)
-    throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException;
+    throws InvalidTypeArgumentException, UnmatchedLookupException;
     
   
   /**
@@ -363,7 +358,6 @@ public abstract class TypeSystem {
    * @param args  A list of typed expressions corresponding to the method's parameters.
    * @param expected  The type expected in the invocation's calling context, if any.
    * @return  A {@link StaticMethodInvocation} object representing the matched method.
-   * @throws InvalidTargetException  If method invocation is not legal for the type {@code t}.
    * @throws InvalidTypeArgumentException  If the type arguments are invalid (for example, a primitive type).
    * @throws UnmatchedLookupException  If 0 or more than 1 method matches the given name, arguments, and type 
    *                                   arguments.
@@ -372,7 +366,7 @@ public abstract class TypeSystem {
                                                             Iterable<? extends Type> typeArgs, 
                                                             Iterable<? extends Expression> args,
                                                             Option<Type> expected)
-    throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException;
+    throws InvalidTypeArgumentException, UnmatchedLookupException;
   
   
   public abstract boolean containsField(Type t, String name);
@@ -384,22 +378,20 @@ public abstract class TypeSystem {
    * @param object  A typed expression representing the object whose field is to be accessed.
    * @param name  The name of the field.
    * @return An {@link ObjectFieldReference} object representing the matched field.
-   * @throws InvalidTargetException  If {@code object} cannot be used to access a field.
    * @throws UnmatchedLookupException  If 0 or more than 1 field matches the given name.
    */
   public abstract ObjectFieldReference lookupField(Expression object, String name)
-    throws InvalidTargetException, UnmatchedLookupException;
+    throws UnmatchedLookupException;
   
   /**
    * Lookup the static field with the given name.
    * @param t  The type in which to search for a static field.
    * @param name  The name of the field.
    * @return A {@link StaticFieldReference} object representing the matched field.
-   * @throws InvalidTargetException  If field access is not legal for the type {@code t}.
    * @throws UnmatchedLookupException  If 0 or more than 1 field matches the given name.
    */
   public abstract StaticFieldReference lookupStaticField(Type t, String name)
-    throws InvalidTargetException, UnmatchedLookupException;
+    throws UnmatchedLookupException;
   
   
   public abstract boolean containsClass(Type t, String name);
@@ -412,14 +404,13 @@ public abstract class TypeSystem {
    * @param name  The name of the class.
    * @param typeArgs  The type arguments for the class
    * @return A type representing the named class.
-   * @throws InvalidTargetException  If {@code object} cannot be used to access a class.
    * @throws InvalidTypeArgumentException  If the type arguments are invalid or do not correspond to the 
    *                                        class's formal parameters (bounds are not checked, so the result
    *                                        may not be well-formed).
    * @throws UnmatchedLookupException  If 0 or more than 1 class matches the given name.
    */  
   public abstract ClassType lookupClass(Expression object, String name, Iterable<? extends Type> typeArgs)
-    throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException;
+    throws InvalidTypeArgumentException, UnmatchedLookupException;
   
   /**
    * Lookup the class with the given name in the given type.
@@ -427,14 +418,13 @@ public abstract class TypeSystem {
    * @param name  The name of the class.
    * @param typeArgs  The type arguments for the class
    * @return A type representing the named class.
-   * @throws InvalidTargetException  If class access is not legal for the type {@code t}.
    * @throws InvalidTypeArgumentException  If the type arguments are invalid or do not correspond to the 
    *                                        class's formal parameters (bounds are not checked, so the
    *                                        result may not be well-formed).
    * @throws UnmatchedLookupException  If 0 or more than 1 class matches the given name.
    */  
   public abstract ClassType lookupClass(Type t, String name, Iterable<? extends Type> typeArgs)
-    throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException;
+    throws InvalidTypeArgumentException, UnmatchedLookupException;
 
   /**
    * Lookup the static class with the given name.
@@ -442,23 +432,22 @@ public abstract class TypeSystem {
    * @param name  The name of the class.
    * @param typeArgs  The type arguments for the class
    * @return A type representing the named class.
-   * @throws InvalidTargetException  If class access is not legal for the type {@code t}.
    * @throws InvalidTypeArgumentException  If the type arguments are invalid or do not correspond to the 
    *                                        class's formal parameters (bounds are not checked, so the result
    *                                        may not be well-formed).
    * @throws UnmatchedLookupException  If 0 or more than 1 class matches the given name.
    */
   public abstract ClassType lookupStaticClass(Type t, String name, Iterable<? extends Type> typeArgs)
-    throws InvalidTargetException, InvalidTypeArgumentException, UnmatchedLookupException;
+    throws InvalidTypeArgumentException, UnmatchedLookupException;
   
   
   /** Abstraction of the result of a method or constructor lookup */
-  public static abstract class ProcedureInvocation {
+  public static abstract class FunctionInvocation {
     private final Iterable<? extends Type> _typeArgs;
     private final Iterable<? extends Expression> _args;
     private final Iterable<? extends Type> _thrown;
 
-    protected ProcedureInvocation(Iterable<? extends Type> typeArgs, Iterable<? extends Expression> args, 
+    protected FunctionInvocation(Iterable<? extends Type> typeArgs, Iterable<? extends Expression> args, 
                                   Iterable<? extends Type> thrown) {
       _typeArgs = typeArgs;
       _args = args;
@@ -480,7 +469,7 @@ public abstract class TypeSystem {
   
   
   /** The result of a constructor lookup */
-  public static class ConstructorInvocation extends ProcedureInvocation {
+  public static class ConstructorInvocation extends FunctionInvocation {
     private final DJConstructor _constructor;
     
     public ConstructorInvocation(DJConstructor constructor, Iterable<? extends Type> typeArgs, 
@@ -495,7 +484,7 @@ public abstract class TypeSystem {
   
   
   /** Abstraction of the result of a static or non-static method lookup */
-  public static abstract class MethodInvocation extends ProcedureInvocation {
+  public static abstract class MethodInvocation extends FunctionInvocation {
     private final DJMethod _method;
     private final Type _returnType;
     
@@ -592,9 +581,6 @@ public abstract class TypeSystem {
   }
   
   public static class UnsupportedConversionException extends TypeSystemException {
-  }
-  
-  public static class InvalidTargetException extends TypeSystemException {
   }
   
   public static class UnmatchedLookupException extends TypeSystemException {

@@ -206,7 +206,8 @@ public class JavaClass implements DJClass {
       };
     }
       
-  }
+    public String toString() { return "JavaField(" + declaredName() + ")"; }
+}
 
   private static final String[] FIELD_GET_EXTRA_STACK =
     new String[]{ "java.lang.reflect.Field.get",
@@ -250,6 +251,8 @@ public class JavaClass implements DJClass {
       return result;
     }
     
+    public Type returnType() { return SymbolUtil.thisType(JavaClass.this); }
+    
     public Iterable<Type> thrownTypes() {
       return IterUtil.mapSnapshot(IterUtil.asIterable(_k.getExceptionTypes()), CLASS_AS_TYPE);
     }
@@ -286,6 +289,7 @@ public class JavaClass implements DJClass {
       }
     }
     
+    public String toString() { return "JavaConstructor(" + declaredName() + ")"; }
   }
   
   private static final String[] CONSTRUCTOR_EXTRA_STACK =
@@ -338,6 +342,7 @@ public class JavaClass implements DJClass {
       }
     }
     
+    public String toString() { return "JavaMethod(" + declaredName() + ")"; }
   }
   
   private static final String[] METHOD_EXTRA_STACK =

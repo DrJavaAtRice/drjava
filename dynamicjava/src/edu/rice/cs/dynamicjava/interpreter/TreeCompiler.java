@@ -1018,10 +1018,10 @@ public class TreeCompiler {
   
   /* AUXILIARY STATIC METHODS */
   
-  private static String typeSignature(Type t) { return encodeType(t, '.'); }
+  private static String typeSignature(Type t) { return encodeType(t); }
   
   /** Nonstatic because it depends on field _opt. */
-  private String typeDescriptor(Type t) { return encodeType(_opt.typeSystem().erase(t), '$'); }
+  private String typeDescriptor(Type t) { return encodeType(_opt.typeSystem().erase(t)); }
   
   private static String className(DJClass c) { return c.fullName().replace('.', '/'); }
   
@@ -1085,7 +1085,7 @@ public class TreeCompiler {
   }
   
   /** Abstraction of typeDescriptor and typeSignature.  */
-  private static String encodeType(Type t, final char classDelim) {
+  private static String encodeType(Type t) {
     final StringBuilder result = new StringBuilder();
     t.apply(new TypeAbstractVisitor_void() {
       @Override public void forBooleanType(BooleanType t) { result.append('Z'); }
@@ -1104,25 +1104,27 @@ public class TreeCompiler {
         boolean first = true;
         for (DJClass c : SymbolUtil.outerClassChain(t.ofClass())) {
           if (first) { result.append(className(c)); first = false; }
-          else { result.append(classDelim).append(c.declaredName()); }
+          else { result.append('$').append(c.declaredName()); }
         }
         result.append(';');
       }
       
       @Override public void forParameterizedClassType(ParameterizedClassType t) {
         result.append('L');
-        boolean first = true;
+        Character classDelim = null;
         Iterator<? extends Type> args = t.typeArguments().iterator();
         DJClass tClass = t.ofClass();
         for (DJClass c : SymbolUtil.outerClassChain(tClass)) {
-          if (first) { result.append(className(c)); first = false; }
+          if (classDelim == null) { result.append(className(c)); }
           else { result.append(classDelim).append(c.declaredName()); }
+          classDelim = '$';
           if (SymbolUtil.dynamicallyEncloses(c, tClass)) {
             Iterable<VariableType> params = c.declaredTypeParameters();
             if (!IterUtil.isEmpty(params)) {
               result.append('<');
               for (VariableType param : params) { args.next().apply(this); }
               result.append('>');
+              classDelim = '.';
             }
           }
         }

@@ -268,6 +268,7 @@ public class Java5Class extends JavaClass {
   private class Java5Field extends JavaField {
     public Java5Field(Field f) { super(f); }
     @Override public Type type() { return CONVERT_TYPE.value(_f.getGenericType()); }
+    @Override public String toString() { return "Java5Field(" + declaredName() + ")"; }
   }
   
   private class Java5Constructor extends JavaConstructor {
@@ -281,6 +282,7 @@ public class Java5Class extends JavaClass {
     protected Thunk<Iterable<LocalVariable>> makeParamThunk() {
       return paramFactory(_k.getGenericParameterTypes(), _k.isVarArgs());
     }
+    @Override public String toString() { return "Java5Constructor(" + declaredName() + ")"; }
   }
 
   private class Java5Method extends JavaMethod {
@@ -295,6 +297,7 @@ public class Java5Class extends JavaClass {
     protected Thunk<Iterable<LocalVariable>> makeParamThunk() {
       return paramFactory(_m.getGenericParameterTypes(), _m.isVarArgs());
     }
+    @Override public String toString() { return "Java5Method(" + declaredName() + ")"; }
   }
   
   private static Thunk<Iterable<LocalVariable>> paramFactory(final java.lang.reflect.Type[] ts,

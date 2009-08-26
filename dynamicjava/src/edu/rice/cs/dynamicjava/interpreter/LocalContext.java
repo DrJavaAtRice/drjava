@@ -63,7 +63,7 @@ public class LocalContext extends DelegatingContext {
   
   private DJClass declaredClass(String name) {
     for (DJClass c : _classes) {
-      if (c.declaredName().equals(name)) { return c; }
+      if (!c.isAnonymous() && c.declaredName().equals(name)) { return c; }
     }
     return null;
   }

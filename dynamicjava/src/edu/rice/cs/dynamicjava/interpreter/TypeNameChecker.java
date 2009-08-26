@@ -278,7 +278,6 @@ public class TypeNameChecker {
           }
         }
         catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
-        catch (InvalidTargetException e) { throw new RuntimeException("context produced bad type"); }
         catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
         catch (UnmatchedLookupException e) {
           if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
@@ -291,7 +290,6 @@ public class TypeNameChecker {
           new ExpressionChecker(context, opt).checkAccessibility(memberType.ofClass(), node);
           t = memberType;
         }
-        catch (InvalidTargetException e) { throw new RuntimeException("lookup produced bad type"); }
         catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
         catch (UnmatchedLookupException e) {
           if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
@@ -340,7 +338,6 @@ public class TypeNameChecker {
           }
         }
         catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
-        catch (InvalidTargetException e) { throw new RuntimeException("context produced bad type"); }
         catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
         catch (UnmatchedLookupException e) {
           if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
@@ -355,7 +352,6 @@ public class TypeNameChecker {
           new ExpressionChecker(context, opt).checkAccessibility(memberType.ofClass(), node);
           t = memberType;
         }
-        catch (InvalidTargetException e) { throw new RuntimeException("lookup produced bad type"); }
         catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument", node); }
         catch (UnmatchedLookupException e) {
           if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }

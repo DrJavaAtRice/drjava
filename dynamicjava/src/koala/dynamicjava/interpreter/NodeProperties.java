@@ -339,6 +339,23 @@ public class NodeProperties {
     }
 
 
+    /** This DJClass of "this" used implicitly as the enclosing object of an allocation. */
+    public final static String ENCLOSING_THIS = "enclosingThis";
+    
+    public static DJClass getEnclosingThis(Node n) {
+      return (DJClass) n.getProperty(ENCLOSING_THIS);
+    }
+    
+    public static DJClass setEnclosingThis(Node n, DJClass c) {
+      n.setProperty(ENCLOSING_THIS, c);
+      return c;
+    }
+    
+    public static boolean hasEnclosingThis(Node n) {
+      return n.hasProperty(ENCLOSING_THIS);
+    }
+
+
     /** VariableType declared in a class or method signature */
     public final static String TYPE_VARIABLE = "typeVariable";
 

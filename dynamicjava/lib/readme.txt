@@ -6,7 +6,7 @@ buildlib/*.jar: Binaries used in the build process, but that should not be part
 VERSIONS:
 
 asm-3.1.jar: ASM 3.1 (http://asm.objectweb.org)
-plt.jar:     plt-20090731-r4961
+plt.jar:     plt-20090824-r5028
 
 buildlib/ant-contrib.jar:           ANT Contrib 1.0b3
 buildlib/astgen.jar:                Built 2009-03-26

@@ -67,7 +67,7 @@ public class SymbolUtil {
   /**
    * Determine the type of an enclosing object of a value of the given type.  The result is a
    * parameterization of {@code dynamicOuterClass(t.ofClass())}, where the parameters are drawn 
-   * from {@code t}.
+   * from {@code t}, or {@code null} if there is no such class.
    */
   public static ClassType dynamicOuterClassType(ClassType t) {
     final DJClass outer = dynamicOuterClass(t.ofClass());

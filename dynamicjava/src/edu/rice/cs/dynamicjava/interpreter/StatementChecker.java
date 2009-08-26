@@ -244,14 +244,11 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
       }
       else {
         try { result = ts.lookupClass(result, piece, IterUtil.<Type>empty()); }
-        catch (InvalidTargetException e) { throw new RuntimeException("unexpected bad type"); }
         catch (InvalidTypeArgumentException e) { throw new RuntimeException("can't create raw type"); }
         catch (UnmatchedLookupException e) {
-          if (ts.containsClass(result, piece)) { throw new ExecutionError("ambiguous.name", node); }
-          else {
-            setErrorStrings(node, piece);
-            throw new ExecutionError("undefined.class", node);
-          }
+          setErrorStrings(node, piece);
+          if (e.matches() > 1) { throw new ExecutionError("ambiguous.inner.class"); }
+          else { throw new ExecutionError("no.such.inner.class", node); }
         }
       }
     }
