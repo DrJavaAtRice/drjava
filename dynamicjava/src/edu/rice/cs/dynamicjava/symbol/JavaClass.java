@@ -243,9 +243,10 @@ public class JavaClass implements DJClass {
     public Access accessibility() { return extractAccessibility(_k.getModifiers()); }
     public Access.Module accessModule() { return JavaClass.this.accessModule(); }
     protected Thunk<Iterable<LocalVariable>> makeParamThunk() { return paramFactory(_k.getParameterTypes()); }
-    public Iterable<VariableType> declaredTypeParameters() { return IterUtil.empty(); }
+    public Iterable<VariableType> typeParameters() { return IterUtil.empty(); }
+    public DJConstructor declaredSignature() { return this; }
     
-    public Iterable<LocalVariable> declaredParameters() {
+    public Iterable<LocalVariable> parameters() {
       Iterable<LocalVariable> result = _params.value();
       if (_outerType != null) { result = IterUtil.skipFirst(result); }
       return result;
@@ -311,12 +312,13 @@ public class JavaClass implements DJClass {
     public Access accessibility() { return extractAccessibility(_m.getModifiers()); }
     public Access.Module accessModule() { return JavaClass.this.accessModule(); }
     public Type returnType() { return classAsType(_m.getReturnType()); }
-    public Iterable<VariableType> declaredTypeParameters() { return IterUtil.empty(); }
-    public Iterable<LocalVariable> declaredParameters() { return _params.value(); }
+    public Iterable<VariableType> typeParameters() { return IterUtil.empty(); }
+    public Iterable<LocalVariable> parameters() { return _params.value(); }
     public Iterable<Type> thrownTypes() {
       return IterUtil.mapSnapshot(IterUtil.asIterable(_m.getExceptionTypes()), CLASS_AS_TYPE);
     }
     
+    public DJMethod declaredSignature() { return this; }
     public Object evaluate(Object receiver, Iterable<Object> args, RuntimeBindings bindings, 
                            Options options) throws EvaluatorException {
       if (!isStatic() && receiver == null) {

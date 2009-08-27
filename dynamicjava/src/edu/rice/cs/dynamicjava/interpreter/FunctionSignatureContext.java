@@ -37,7 +37,7 @@ public class FunctionSignatureContext extends DelegatingContext {
   }
   
   private VariableType declaredTypeVariable(String name) {
-    for (VariableType t : _f.declaredTypeParameters()) {
+    for (VariableType t : _f.typeParameters()) {
       if (t.symbol().name().equals(name)) { return t; }
     }
     return null;

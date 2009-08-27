@@ -1385,10 +1385,10 @@ public abstract class StandardTypeSystem extends TypeSystem {
                                                                                     ClassType declaringType) {
         // a version of the method that depends on no type information (which may not be available)
         DJMethod noSignatureMethod = new DelegatingMethod(m) {
-          public Iterable<VariableType> declaredTypeParameters() { return IterUtil.empty(); }
+          public Iterable<VariableType> typeParameters() { return IterUtil.empty(); }
           public Type returnType() { return BOTTOM; }
           public Iterable<Type> thrownTypes() { return IterUtil.empty(); }
-          @Override public Iterable<LocalVariable> declaredParameters() { return IterUtil.empty(); }
+          @Override public Iterable<LocalVariable> parameters() { return IterUtil.empty(); }
           protected Iterable<? extends Type> parameterTypes() { return IterUtil.empty(); }
         };
         // anonymous stub used only for inheritance checking
@@ -1812,17 +1812,17 @@ public abstract class StandardTypeSystem extends TypeSystem {
     public FunctionInvocationCandidate(Function f, Iterable<? extends Type> targs,
                                        Iterable<? extends Expression> args, Option<Type> expected) {
       _f = f;
-      _matcher = makeMatcher(f.declaredTypeParameters(), targs, parameterTypes(), args, f.returnType(), expected);
+      _matcher = makeMatcher(f.typeParameters(), targs, parameterTypes(), args, f.returnType(), expected);
     }
     
     public abstract I invocation();
     
     protected SubstitutionMap substitution() {
-      return new SubstitutionMap(_f.declaredTypeParameters(), _matcher.typeArguments());
+      return new SubstitutionMap(_f.typeParameters(), _matcher.typeArguments());
     }
     
     protected Iterable<Type> parameterTypes() { return SymbolUtil.declaredParameterTypes(_f); }
-    protected Iterable<VariableType> typeParameters() { return _f.declaredTypeParameters(); }
+    protected Iterable<VariableType> typeParameters() { return _f.typeParameters(); }
     
     private SignatureMatcher makeMatcher(Iterable<? extends VariableType> tparams,
                                          Iterable<? extends Type> targs,
@@ -1954,14 +1954,12 @@ public abstract class StandardTypeSystem extends TypeSystem {
   private abstract class MethodInvocationCandidate<I extends MethodInvocation>
                          extends FunctionInvocationCandidate<I> {
     protected final Type _declaringType;
-    protected final DJMethod _declaredMethod; // the method, as declared
     protected final DJMethod _method; // the method, after conversions based on the declaring type
     protected MethodInvocationCandidate(DJMethod declaredMethod, Type declaringType,
                                         Iterable<? extends Type> targs,
                                         Iterable<? extends Expression> args,
                                         Option<Type> expected) {
       super(instantiateMethod(declaredMethod, declaringType), targs, args, expected);
-      _declaredMethod = declaredMethod;
       _declaringType = declaringType;
       _method = (DJMethod) _f;
     }
@@ -1983,7 +1981,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
       Iterable<? extends Type> targs = _matcher.typeArguments();
       Iterable<? extends Expression> args = _matcher.arguments();
       Iterable<? extends Type> thrown = substitute(_method.thrownTypes(), sigma);
-      return new ObjectMethodInvocation(_declaredMethod, returnType, receiver,targs, args, thrown);
+      return new ObjectMethodInvocation(_method, returnType, receiver,targs, args, thrown);
     }
   }
   
@@ -1999,25 +1997,23 @@ public abstract class StandardTypeSystem extends TypeSystem {
       Iterable<? extends Type> targs = _matcher.typeArguments();
       Iterable<? extends Expression> args = _matcher.arguments();
       Iterable<? extends Type> thrown = substitute(_method.thrownTypes(), sigma);
-      return new StaticMethodInvocation(_declaredMethod, returnType, targs, args, thrown);
+      return new StaticMethodInvocation(_method, returnType, targs, args, thrown);
     }
   }
   
   private class ConstructorInvocationCandidate extends FunctionInvocationCandidate<ConstructorInvocation> {
-    private final DJConstructor _declaredConstructor; // the constructor, as declared -- necessary for compilation
     protected ConstructorInvocationCandidate(DJConstructor declaredConstructor, Type declaringType,
                                              Iterable<? extends Type> targs,
                                              Iterable<? extends Expression> args,
                                              Option<Type> expected) {
       super(instantiateConstructor(declaredConstructor, declaringType), targs, args, expected);
-      _declaredConstructor = declaredConstructor;
     }
     public ConstructorInvocation invocation() {
       SubstitutionMap sigma = substitution();
       Iterable<? extends Type> targs = _matcher.typeArguments();
       Iterable<? extends Expression> args = _matcher.arguments();
       Iterable<? extends Type> thrown = substitute(_f.thrownTypes(), sigma);
-      return new ConstructorInvocation(_declaredConstructor, targs, args, thrown);
+      return new ConstructorInvocation((DJConstructor) _f, targs, args, thrown);
     }
   }
   
@@ -2075,8 +2071,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
     protected DelegatingFunction(T delegate) { _delegate = delegate; }
     
     public String declaredName() { return _delegate.declaredName(); }
-    public Iterable<LocalVariable> declaredParameters() {
-      return IterUtil.mapSnapshot(IterUtil.zip(_delegate.declaredParameters(), parameterTypes()),
+    public Iterable<LocalVariable> parameters() {
+      return IterUtil.mapSnapshot(IterUtil.zip(_delegate.parameters(), parameterTypes()),
                                                new Lambda<Pair<LocalVariable, Type>, LocalVariable>() {
         public LocalVariable value(Pair<LocalVariable, Type> p) {
           return new LocalVariable(p.first().declaredName(), p.second(), p.first().isFinal());
@@ -2084,7 +2080,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
       });
     }
 
-    public abstract Iterable<VariableType> declaredTypeParameters();
+    public abstract Iterable<VariableType> typeParameters();
     public abstract Type returnType();
     public abstract Iterable<Type> thrownTypes();
     protected abstract Iterable<? extends Type> parameterTypes();
@@ -2097,6 +2093,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
     public boolean isFinal() { return _delegate.isFinal(); }
     public Access accessibility() { return _delegate.accessibility(); }
     public Access.Module accessModule() { return _delegate.accessModule(); }
+    public DJMethod declaredSignature() { return _delegate.declaredSignature(); }
     public Object evaluate(Object receiver, Iterable<Object> args, RuntimeBindings bindings, Options options) 
         throws EvaluatorException {
       return _delegate.evaluate(receiver, args, bindings, options); 
@@ -2105,7 +2102,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   
   private class ErasedMethod extends DelegatingMethod {
     public ErasedMethod(DJMethod m) { super(m); }
-    public Iterable<VariableType> declaredTypeParameters() { return IterUtil.empty(); }
+    public Iterable<VariableType> typeParameters() { return IterUtil.empty(); }
     public Type returnType() { return erase(_delegate.returnType()); }
     public Iterable<Type> thrownTypes() { return IterUtil.mapSnapshot(_delegate.thrownTypes(), ERASE); }
     protected Iterable<Type> parameterTypes() {
@@ -2124,7 +2121,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
     }
     
     public Type returnType() { return substitute(_delegate.returnType(), _sigma); }
-    public Iterable<VariableType> declaredTypeParameters() { return _tparams; }
+    public Iterable<VariableType> typeParameters() { return _tparams; }
     public Iterable<Type> thrownTypes() { return IterUtil.relax(substitute(_delegate.thrownTypes(), _sigma)); }
     public Iterable<? extends Type> parameterTypes() {
       return substitute(SymbolUtil.declaredParameterTypes(_delegate), _sigma);
@@ -2137,6 +2134,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
     public Type returnType() { return _delegate.returnType(); }
     public Access accessibility() { return _delegate.accessibility(); }
     public Access.Module accessModule() { return _delegate.accessModule(); }
+    public DJConstructor declaredSignature() { return _delegate.declaredSignature(); }
     public Object evaluate(Object outer, Iterable<Object> args, RuntimeBindings bindings, Options options) 
         throws EvaluatorException {
       return _delegate.evaluate(outer, args, bindings, options); 
@@ -2145,7 +2143,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   
   private class ErasedConstructor extends DelegatingConstructor {
     public ErasedConstructor(DJConstructor k) { super(k); }
-    public Iterable<VariableType> declaredTypeParameters() { return IterUtil.empty(); }
+    public Iterable<VariableType> typeParameters() { return IterUtil.empty(); }
     public Iterable<Type> thrownTypes() { return IterUtil.mapSnapshot(_delegate.thrownTypes(), ERASE); }
     protected Iterable<Type> parameterTypes() {
       return IterUtil.mapSnapshot(SymbolUtil.declaredParameterTypes(_delegate), ERASE);
@@ -2163,7 +2161,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
       _sigma = p.second();
     }
     
-    public Iterable<VariableType> declaredTypeParameters() { return _tparams; }
+    public Iterable<VariableType> typeParameters() { return _tparams; }
     public Iterable<Type> thrownTypes() { return IterUtil.relax(substitute(_delegate.thrownTypes(), _sigma)); }
     public Iterable<? extends Type> parameterTypes() {
       return substitute(SymbolUtil.declaredParameterTypes(_delegate), _sigma);
@@ -2175,7 +2173,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
       instantiateTypeParameters(Function f,
                                 Iterable<? extends VariableType> enclosingTParams,
                                 Iterable<? extends Type> enclosingTArgs) {
-    Iterable<VariableType> origTParams = f.declaredTypeParameters();
+    Iterable<VariableType> origTParams = f.typeParameters();
     Iterable<VariableType> tparams = IterUtil.mapSnapshot(origTParams, new Lambda<VariableType, VariableType>() {
       public VariableType value(VariableType var) {
         return new VariableType(new BoundedSymbol(new Object(), var.symbol().name()));

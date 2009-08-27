@@ -90,8 +90,8 @@ public class FunctionWrapperClass implements DJClass {
   private class FunctionWrapperMethod implements DJMethod {
     private final LocalFunction _f;
     public FunctionWrapperMethod(LocalFunction f) { _f = f; }
-    public Iterable<VariableType> declaredTypeParameters() { return _f.declaredTypeParameters(); }
-    public Iterable<LocalVariable> declaredParameters() { return _f.declaredParameters(); }
+    public Iterable<VariableType> typeParameters() { return _f.typeParameters(); }
+    public Iterable<LocalVariable> parameters() { return _f.parameters(); }
     public Iterable<Type> thrownTypes() { return _f.thrownTypes(); }
     public String declaredName() { return _f.declaredName(); }
     public Type returnType() { return _f.returnType(); }
@@ -100,6 +100,7 @@ public class FunctionWrapperClass implements DJClass {
     public boolean isFinal() { return false; }
     public Access accessibility() { return Access.PUBLIC; }
     public Access.Module accessModule() { return _accessModule; }
+    public DJMethod declaredSignature() { return this; }
     public Object evaluate(Object receiver, Iterable<Object> args, RuntimeBindings bindings, Options options) 
       throws EvaluatorException {
       return _f.evaluate(args, bindings, options);

@@ -235,7 +235,7 @@ public class SymbolUtil {
   }
   
   public static Iterable<Type> declaredParameterTypes(Function f) {
-    return IterUtil.map(f.declaredParameters(), TYPE_OF_VARIABLE);
+    return IterUtil.map(f.parameters(), TYPE_OF_VARIABLE);
   }
   
   private static final Lambda<Variable, Type> TYPE_OF_VARIABLE = new Lambda<Variable, Type>() {

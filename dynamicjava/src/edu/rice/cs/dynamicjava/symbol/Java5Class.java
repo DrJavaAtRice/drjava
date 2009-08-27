@@ -273,7 +273,7 @@ public class Java5Class extends JavaClass {
   
   private class Java5Constructor extends JavaConstructor {
     public Java5Constructor(Constructor<?> k) { super(k); }
-    @Override public Iterable<VariableType> declaredTypeParameters() {
+    @Override public Iterable<VariableType> typeParameters() {
       return IterUtil.mapSnapshot(IterUtil.asIterable(_k.getTypeParameters()), CONVERT_VAR);
     }
     @Override public Iterable<Type> thrownTypes() {
@@ -288,7 +288,7 @@ public class Java5Class extends JavaClass {
   private class Java5Method extends JavaMethod {
     public Java5Method(Method m) { super(m); }
     @Override public Type returnType() { return CONVERT_TYPE.value(_m.getGenericReturnType()); }
-    @Override public Iterable<VariableType> declaredTypeParameters() {
+    @Override public Iterable<VariableType> typeParameters() {
       return IterUtil.mapSnapshot(IterUtil.asIterable(_m.getTypeParameters()), CONVERT_VAR);
     }
     @Override public Iterable<Type> thrownTypes() {

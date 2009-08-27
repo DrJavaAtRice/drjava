@@ -328,13 +328,13 @@ public class TreeClass implements DJClass {
     public TreeConstructor() {
       _loaded = LazyThunk.make(new Thunk<DJConstructor>() {
         public DJConstructor value() {
-          Iterable<LocalVariable> params = TreeConstructor.this.declaredParameters();
+          Iterable<LocalVariable> params = TreeConstructor.this.parameters();
           if (_outerClass == null) {
             params = IterUtil.compose(new LocalVariable("", RUNTIME_BINDINGS_TYPE, false), params);
           }
           DJClass c = SymbolUtil.wrapClass(TreeClass.this.load());
           for (DJConstructor candidate : c.declaredConstructors()) {
-            if (paramsMatch(params, candidate.declaredParameters())) {
+            if (paramsMatch(params, candidate.parameters())) {
               return candidate;
             }
           }
@@ -350,6 +350,7 @@ public class TreeClass implements DJClass {
     public Access.Module accessModule() { return _accessModule; }
     public Type returnType() { return SymbolUtil.thisType(TreeClass.this); }
     
+    public DJConstructor declaredSignature() { return this; }
     public Object evaluate(Object outer, Iterable<Object> args, RuntimeBindings bindings, Options options) 
       throws EvaluatorException {
       if (_outerClass == null) { args = IterUtil.compose(bindings, args); }
@@ -361,8 +362,8 @@ public class TreeClass implements DJClass {
   
   private class DefaultTreeConstructor extends TreeConstructor {
     public Access accessibility() { return Access.PUBLIC; }
-    public Iterable<VariableType> declaredTypeParameters() { return IterUtil.empty(); }
-    public Iterable<LocalVariable> declaredParameters() { return IterUtil.empty(); }
+    public Iterable<VariableType> typeParameters() { return IterUtil.empty(); }
+    public Iterable<LocalVariable> parameters() { return IterUtil.empty(); }
     public Iterable<Type> thrownTypes() { return IterUtil.empty(); }
   }
   
@@ -373,14 +374,14 @@ public class TreeClass implements DJClass {
       _k = k;
     }
     public Access accessibility() { return extractAccessibility(_k.getModifiers()); }
-    public Iterable<VariableType> declaredTypeParameters() {
+    public Iterable<VariableType> typeParameters() {
       if (_k instanceof PolymorphicConstructorDeclaration) {
         TypeParameter[] ps = ((PolymorphicConstructorDeclaration)_k).getTypeParameters();
         return IterUtil.mapSnapshot(IterUtil.asIterable(ps), NodeProperties.NODE_TYPE_VARIABLE);
       }
       else { return IterUtil.empty(); }
     }
-    public Iterable<LocalVariable> declaredParameters() {
+    public Iterable<LocalVariable> parameters() {
       return IterUtil.mapSnapshot(_k.getParameters(), NodeProperties.NODE_VARIABLE);
     }
     public Iterable<Type> thrownTypes() {
@@ -397,14 +398,14 @@ public class TreeClass implements DJClass {
       _m = m;
       _loaded = LazyThunk.make(new Thunk<DJMethod>() {
         public DJMethod value() {
-          Iterable<LocalVariable> params = TreeMethod.this.declaredParameters();
+          Iterable<LocalVariable> params = TreeMethod.this.parameters();
           if (TreeMethod.this.isStatic()) {
             params = IterUtil.compose(new LocalVariable("", RUNTIME_BINDINGS_TYPE, false), params);
           }
           DJClass c = SymbolUtil.wrapClass(TreeClass.this.load());
           for (DJMethod candidate : c.declaredMethods()) {
             if (TreeMethod.this.declaredName().equals(candidate.declaredName()) &&
-                paramsMatch(params, candidate.declaredParameters())) {
+                paramsMatch(params, candidate.parameters())) {
               return candidate;
             }
           }
@@ -427,7 +428,7 @@ public class TreeClass implements DJClass {
     
     public Type returnType() { return NodeProperties.getType(_m.getReturnType()); }
       
-    public Iterable<VariableType> declaredTypeParameters() {
+    public Iterable<VariableType> typeParameters() {
       if (_m instanceof PolymorphicMethodDeclaration) {
         TypeParameter[] ps = ((PolymorphicMethodDeclaration)_m).getTypeParameters();
         return IterUtil.mapSnapshot(IterUtil.asIterable(ps), NodeProperties.NODE_TYPE_VARIABLE);
@@ -435,13 +436,15 @@ public class TreeClass implements DJClass {
       else { return IterUtil.empty(); }
     }
     
-    public Iterable<LocalVariable> declaredParameters() {
+    public Iterable<LocalVariable> parameters() {
       return IterUtil.mapSnapshot(_m.getParameters(), NodeProperties.NODE_VARIABLE);
     }
     
     public Iterable<Type> thrownTypes() {
       return IterUtil.mapSnapshot(_m.getExceptions(), NodeProperties.NODE_TYPE);
     }
+    
+    public DJMethod declaredSignature() { return this; }
     
     public Object evaluate(Object receiver, Iterable<Object> args, RuntimeBindings bindings, Options options) 
       throws EvaluatorException {

@@ -366,11 +366,11 @@ public class TreeCompiler {
         mv.visitVarInsn(ALOAD, 1);
         stack.adjust(1);
       }
-      DJConstructor superTarget = NodeProperties.getConstructor(ast);
+      DJConstructor superTarget = NodeProperties.getConstructor(ast).declaredSignature();
       List<Expression> superArgs = ast.getArguments();
       if (superArgs != null) { emitAnonSuperArgs(mv, superTarget, superArgs, stack); }
       mv.visitMethodInsn(INVOKESPECIAL, className(superC), "<init>",
-                         paramListDescriptor(extraArg, superTarget.declaredParameters()) + "V");
+                         paramListDescriptor(extraArg, superTarget.parameters()) + "V");
       stack.reset();
     }
     
@@ -409,11 +409,11 @@ public class TreeCompiler {
                        EVALUATE_EXPRESSION_DESCRIPTOR);
     stack.adjust(-2);
     
-    DJConstructor superTarget = NodeProperties.getConstructor(ast);
+    DJConstructor superTarget = NodeProperties.getConstructor(ast).declaredSignature();
     List<Expression> superArgs = ast.getArguments();
     if (superArgs != null) { emitAnonSuperArgs(mv, superTarget, superArgs, stack); }
     String callDescriptor = paramListDescriptor(typeDescriptor(SymbolUtil.thisType(superOuterC)),
-                                                superTarget.declaredParameters()) + "V";
+                                                superTarget.parameters()) + "V";
     mv.visitMethodInsn(INVOKESPECIAL, className(superC), "<init>", callDescriptor);
     stack.reset();
     
@@ -481,7 +481,7 @@ public class TreeCompiler {
     else {
       callsSuper = call.isSuper();
       if (callsSuper) { emitBindingsFactoryAssignment(mv, bindingsVar, stack); }
-      DJConstructor callTarget = NodeProperties.getConstructor(call);
+      DJConstructor callTarget = NodeProperties.getConstructor(call).declaredSignature();
       DJClass extendsC = extractClass(extendsT);
       stack.mark();
       mv.visitVarInsn(ALOAD, 0);
@@ -532,7 +532,7 @@ public class TreeCompiler {
       // evaluate super/this call args
       int i = 0;
       for (Pair<LocalVariable, Expression> arg :
-           IterUtil.zip(callTarget.declaredParameters(), call.getArguments())) {
+           IterUtil.zip(callTarget.parameters(), call.getArguments())) {
         Type paramT = arg.first().type();
         Object val = expressionConstantVal(arg.second());
         if (val == null) {
@@ -553,7 +553,7 @@ public class TreeCompiler {
       }
       
       mv.visitMethodInsn(INVOKESPECIAL, callsSuper ? className(extendsC) : _name, "<init>",
-                         paramListDescriptor(extraArg, callTarget.declaredParameters()) + "V");
+                         paramListDescriptor(extraArg, callTarget.parameters()) + "V");
       stack.reset();
     }
       
@@ -849,7 +849,7 @@ public class TreeCompiler {
   private void emitAnonSuperArgs(MethodVisitor mv, DJConstructor k, List<Expression> args,
                                  StackSizeTracker stack) {
     int i = 0;
-    for (Pair<LocalVariable, Expression> arg : IterUtil.zip(k.declaredParameters(), args)) {
+    for (Pair<LocalVariable, Expression> arg : IterUtil.zip(k.parameters(), args)) {
       String key = "anon super arg " + i;
       _expressions.put(key, arg.second());
       Type paramT = arg.first().type();

@@ -12,6 +12,9 @@ public interface DJMethod extends Function, Access.Limited {
   public boolean isFinal();
   public Access accessibility();
   public Access.Module accessModule();
+  /** Get the original declared method (prior to any substitutions, etc). */
+  public DJMethod declaredSignature();
+  /** Invoke the method with the given parameters. */
   public Object evaluate(Object receiver, Iterable<Object> args, RuntimeBindings bindings, Options options) 
     throws EvaluatorException;
 }

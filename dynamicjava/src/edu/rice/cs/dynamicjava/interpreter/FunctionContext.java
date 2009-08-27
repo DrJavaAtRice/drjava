@@ -38,7 +38,7 @@ public class FunctionContext extends DelegatingContext {
   }
   
   private LocalVariable getParameter(String name) {
-    for (LocalVariable v : _f.declaredParameters()) {
+    for (LocalVariable v : _f.parameters()) {
       if (v.declaredName().equals(name)) { return v; }
     }
     return null;

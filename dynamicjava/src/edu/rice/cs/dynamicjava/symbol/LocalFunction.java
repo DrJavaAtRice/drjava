@@ -28,7 +28,7 @@ public class LocalFunction implements Function {
   
   public Type returnType() { return NodeProperties.getType(_ast.getReturnType()); }
   
-  public Iterable<VariableType> declaredTypeParameters() {
+  public Iterable<VariableType> typeParameters() {
     if (_ast instanceof PolymorphicMethodDeclaration) {
       TypeParameter[] ps = ((PolymorphicMethodDeclaration)_ast).getTypeParameters();
       return IterUtil.mapSnapshot(IterUtil.asIterable(ps), NodeProperties.NODE_TYPE_VARIABLE);
@@ -36,7 +36,7 @@ public class LocalFunction implements Function {
     else { return IterUtil.empty(); }
   }
   
-  public Iterable<LocalVariable> declaredParameters() {
+  public Iterable<LocalVariable> parameters() {
     return IterUtil.mapSnapshot(_ast.getParameters(), NodeProperties.NODE_VARIABLE);
   }
   
@@ -46,7 +46,7 @@ public class LocalFunction implements Function {
   
   public Object evaluate(Iterable<Object> args, RuntimeBindings bindings, Options options)
     throws EvaluatorException {
-    RuntimeBindings bodyBindings = new RuntimeBindings(bindings, declaredParameters(), args);
+    RuntimeBindings bodyBindings = new RuntimeBindings(bindings, parameters(), args);
     try {
       _ast.getBody().acceptVisitor(new StatementEvaluator(bodyBindings, options));
       // if there was no return, return null or an appropriate zero primitive
