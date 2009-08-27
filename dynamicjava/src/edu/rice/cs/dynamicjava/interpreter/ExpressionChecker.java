@@ -207,11 +207,62 @@ public class ExpressionChecker {
       throw new ExecutionError("type.argument", node);
     }
     catch (UnmatchedLookupException e) {
-      setErrorStrings(node, ts.userRepresentation(type), nodeTypesString(args));
-      if (e.matches() > 1) { throw new ExecutionError("ambiguous.constructor", node); }
-      else { throw new ExecutionError("no.such.constructor", node); }
+      throw unmatchedFunctionError("constructor", e, node, type, "", targs, args, Option.<Type>none(), false);
     }
   }
+  
+  /**
+   * Dynamically determines the appropriate error message type and initializes ERROR_STRINGS with the following:
+   * {@code 0=type, 1=name, 2=targs, 3=args, 4=expected, 5=candidates}.
+   */
+  private ExecutionError unmatchedFunctionError(String kind, UnmatchedLookupException e, Node node, Type type,
+                                                String name, Iterable<? extends Type> targs,
+                                                Iterable<? extends Expression> args, Option<Type> expected,
+                                                boolean onlyStatic) {
+    String error = ((e.matches() > 1) ? "ambiguous." : "no.such.") + kind;
+    Iterable<? extends Function> candidates = IterUtil.empty();
+    if (e instanceof UnmatchedFunctionLookupException) {
+      candidates = ((UnmatchedFunctionLookupException) e).candidates();
+    }
+    else if (e instanceof AmbiguousFunctionLookupException) {
+      candidates = ((AmbiguousFunctionLookupException) e).candidates();
+    }
+    if (!IterUtil.isEmpty(targs)) { error += ".poly"; }
+    if (expected.isSome()) { error += ".expected"; }
+    if (!IterUtil.isEmpty(candidates)) { error += ".candidates"; }
+    String typeS = (onlyStatic ? "static " : "") + ts.userRepresentation(type);
+    String expectedS = expected.isSome() ? ts.userRepresentation(expected.unwrap()) : "";
+    String candidatesS;
+    if (IterUtil.sizeOf(candidates, 2) == 1) {
+     candidatesS = SIGNATURE_STRING.value(IterUtil.first(candidates));
+    }
+    else {
+      String prefix = "\n        "; 
+      candidatesS = IterUtil.toString(IterUtil.map(candidates, SIGNATURE_STRING), prefix, "," + prefix, "");
+    }
+    setErrorStrings(node, typeS, name, ts.userRepresentation(targs), nodeTypesString(args), expectedS, candidatesS);
+    throw new ExecutionError(error, node);
+  }
+  
+  private final Lambda<Function, String> SIGNATURE_STRING = new Lambda<Function, String>() {
+    public String value(Function f) {
+      StringBuilder result = new StringBuilder();
+      if (!IterUtil.isEmpty(f.typeParameters())) {
+        result.append("<");
+        result.append(ts.userRepresentation(f.typeParameters()));
+        result.append("> ");
+      }
+      if (!(f instanceof DJConstructor)) {
+        result.append(ts.userRepresentation(f.returnType()));
+        result.append(" ");
+      }
+      result.append(f.declaredName());
+      result.append("(");
+      result.append(ts.userRepresentation(SymbolUtil.parameterTypes(f)));
+      result.append(")");
+      return result.toString();
+    }
+  };
   
   /** Verify that the given symbol is accessible. */
   public void checkAccessibility(Access.Limited symbol, Node node) {
@@ -587,9 +638,11 @@ public class ExpressionChecker {
         catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
       }
       
+      DJClass enclosingThis = enclosingThis(t);
+      boolean onlyStatic = (enclosingThis == null);
       try {
         MethodInvocation inv;
-        if (context.getThis() == null) {
+        if (onlyStatic) {
           inv = ts.lookupStaticMethod(t, node.getMethodName(), targs, args, expected);
         }
         else {
@@ -601,9 +654,7 @@ public class ExpressionChecker {
         checkThrownExceptions(inv.thrown(), node);
         node.setArguments(CollectUtil.makeList(inv.args()));
         setMethod(node, inv.method());
-        if (!inv.method().isStatic()) {
-          setDJClass(node, t.ofClass());
-        }
+        if (!onlyStatic) { setDJClass(node, enclosingThis); }
         Type result = ts.capture(inv.returnType());
         debug.logValue("Type of method call " + node.getMethodName(), ts.wrap(result));
         addRuntimeCheck(node, result, inv.method().returnType());
@@ -613,9 +664,7 @@ public class ExpressionChecker {
         throw new ExecutionError("type.argument", node);
       }
       catch (UnmatchedLookupException e) {
-        setErrorStrings(node, ts.userRepresentation(t), node.getMethodName(), nodeTypesString(args));
-        if (e.matches() > 1) { throw new ExecutionError("ambiguous.method", node); }
-        else { throw new ExecutionError("no.such.method", node); }
+        throw unmatchedFunctionError("method", e, node, t, node.getMethodName(), targs, args, expected, onlyStatic);
       }
     }
     
@@ -674,9 +723,7 @@ public class ExpressionChecker {
         throw new ExecutionError("type.argument", node);
       }
       catch (UnmatchedLookupException e) {
-        setErrorStrings(node, ts.userRepresentation(receiverT), node.getMethodName(), nodeTypesString(args));
-        if (e.matches() > 1) { throw new ExecutionError("ambiguous.method", node); }
-        else { throw new ExecutionError("no.such.method", node); }
+        throw unmatchedFunctionError("method", e, node, receiverT, node.getMethodName(), targs, args, expected, false);
       }
     }
     
@@ -717,9 +764,7 @@ public class ExpressionChecker {
         throw new ExecutionError("type.argument", node);
       }
       catch (UnmatchedLookupException e) {
-        setErrorStrings(node, ts.userRepresentation(t), node.getMethodName(), nodeTypesString(args));
-        if (e.matches() > 1) { throw new ExecutionError("ambiguous.method", node); }
-        else { throw new ExecutionError("no.such.method", node); }
+        throw unmatchedFunctionError("method", e, node, t, node.getMethodName(), targs, args, expected, false);
       }
     }
     
@@ -754,9 +799,7 @@ public class ExpressionChecker {
         throw new ExecutionError("type.argument", node);
       }
       catch (UnmatchedLookupException e) {
-        setErrorStrings(node, ts.userRepresentation(t), node.getMethodName(), nodeTypesString(args));
-        if (e.matches() > 1) { throw new ExecutionError("ambiguous.method", node); }
-        else { throw new ExecutionError("no.such.method", node); }
+        throw unmatchedFunctionError("method", e, node, t, node.getMethodName(), targs, args, expected, true);
       }
     }
     
@@ -868,9 +911,7 @@ public class ExpressionChecker {
         throw new ExecutionError("type.argument", node);
       }
       catch (UnmatchedLookupException e) {
-        setErrorStrings(node, ts.userRepresentation(t), nodeTypesString(args));
-        if (e.matches() > 1) { throw new ExecutionError("ambiguous.constructor", node); }
-        else { throw new ExecutionError("no.such.constructor", node); }
+        throw unmatchedFunctionError("constructor", e, node, t, "", targs, args, expected, false);
       }
     }
     
@@ -911,9 +952,7 @@ public class ExpressionChecker {
           throw new ExecutionError("type.argument", node);
         }
         catch (UnmatchedLookupException e) {
-          setErrorStrings(node, ts.userRepresentation(t), nodeTypesString(args));
-          if (e.matches() > 1) { throw new ExecutionError("ambiguous.constructor", node); }
-          else { throw new ExecutionError("no.such.constructor", node); }
+          throw unmatchedFunctionError("constructor", e, node, t, "", targs, args, expected, false);
         }
       }
       
@@ -930,8 +969,8 @@ public class ExpressionChecker {
     }
     
     /**
-     * Determine the innermost "this" class that can be used as an allocation's enclosing object
-     * where the given type is expected.  May return {@code null} if none is found.
+     * Determine the innermost "this" class that can be used where the given type is expected.
+     * May return {@code null} if none is found.
      */
     private DJClass enclosingThis(Type expected) {
       DJClass candidate = context.getThis();
@@ -985,9 +1024,7 @@ public class ExpressionChecker {
           throw new ExecutionError("type.argument", node);
         }
         catch (UnmatchedLookupException e) {
-          setErrorStrings(node, ts.userRepresentation(t), nodeTypesString(args));
-          if (e.matches() > 1) { throw new ExecutionError("ambiguous.constructor", node); }
-          else { throw new ExecutionError("no.such.constructor", node); }
+          throw unmatchedFunctionError("constructor", e, node, t, "", targs, args, expected, false);
         }
       }
       catch (InvalidTypeArgumentException e) {
@@ -1042,9 +1079,7 @@ public class ExpressionChecker {
           throw new ExecutionError("type.argument", node);
         }
         catch (UnmatchedLookupException e) {
-          setErrorStrings(node, ts.userRepresentation(t), nodeTypesString(args));
-          if (e.matches() > 1) { throw new ExecutionError("ambiguous.constructor", node); }
-          else { throw new ExecutionError("no.such.constructor", node); }
+          throw unmatchedFunctionError("constructor", e, node, t, "", targs, args, expected, false);
         }
       }
       catch (InvalidTypeArgumentException e) {

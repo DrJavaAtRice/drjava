@@ -591,5 +591,24 @@ public abstract class TypeSystem {
     public int matches() { return _matches; }
   }
   
-    
+  /** A function lookup that failed because none of the given candidates matched the provided arguments. */
+  public static class UnmatchedFunctionLookupException extends UnmatchedLookupException {
+    private final Iterable<? extends Function> _candidates;
+    public UnmatchedFunctionLookupException(Iterable<? extends Function> candidates) {
+      super(0);
+      _candidates = candidates;
+    }
+    public Iterable<? extends Function> candidates() { return _candidates; }
+  }
+  
+  /** A function lookup that failed because all of the given candidates equally matched the provided arguments. */
+  public static class AmbiguousFunctionLookupException extends UnmatchedLookupException {
+    private final Iterable<? extends Function> _candidates;
+    public AmbiguousFunctionLookupException(Iterable<? extends Function> candidates) {
+      super(IterUtil.sizeOf(candidates));
+      _candidates = candidates;
+    }
+    public Iterable<? extends Function> candidates() { return _candidates; }
+  }
+  
 }

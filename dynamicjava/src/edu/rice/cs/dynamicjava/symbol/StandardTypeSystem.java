@@ -1356,63 +1356,68 @@ public abstract class StandardTypeSystem extends TypeSystem {
     debug.logStart(new String[]{"t","typeArgs","arg types","expected"},
                    wrap(t), wrap(typeArgs), wrap(IterUtil.map(args, NodeProperties.NODE_TYPE)), wrap(expected)); try {
                      
-    Iterable<ConstructorInvocationCandidate> constructors = 
-      t.apply(new TypeAbstractVisitor<Iterable<ConstructorInvocationCandidate>>() {
-        @Override public Iterable<ConstructorInvocationCandidate> defaultCase(Type t) { return IterUtil.empty(); }
-        @Override public Iterable<ConstructorInvocationCandidate> forClassType(final ClassType t) {
-          return IterUtil.mapSnapshot(t.ofClass().declaredConstructors(),
-                                       new Lambda<DJConstructor, ConstructorInvocationCandidate>() {
-            public ConstructorInvocationCandidate value(DJConstructor k) {
-              return new ConstructorInvocationCandidate(k, t, typeArgs, args, expected);
+    Iterable<DJConstructor> constructors = 
+      t.apply(new TypeAbstractVisitor<Iterable<DJConstructor>>() {
+        @Override public Iterable<DJConstructor> defaultCase(Type t) { return IterUtil.empty(); }
+        @Override public Iterable<DJConstructor> forSimpleClassType(SimpleClassType t) {
+          return t.ofClass().declaredConstructors();
+        }
+        @Override public Iterable<DJConstructor> forRawClassType(RawClassType t) {
+          return IterUtil.mapSnapshot(t.ofClass().declaredConstructors(), new Lambda<DJConstructor, DJConstructor>() {
+            public DJConstructor value(DJConstructor k) {
+              // TODO: raw member access warnings
+              return new ErasedConstructor(k);
+            }
+          });
+        }
+        @Override public Iterable<DJConstructor> forParameterizedClassType(ParameterizedClassType t) {
+          final Iterable<VariableType> classTParams = SymbolUtil.allTypeParameters(t.ofClass());
+          final Iterable<? extends Type> classTArgs = capture(t).typeArguments();
+          return IterUtil.mapSnapshot(t.ofClass().declaredConstructors(), new Lambda<DJConstructor, DJConstructor>() {
+            public DJConstructor value(DJConstructor k) {
+              return new InstantiatedConstructor(k, classTParams, classTArgs);
             }
           });
         }
       });
-    Iterable<ConstructorInvocationCandidate> results = bestMatches(constructors);
+      
+    Iterable<FunctionInvocationCandidate<DJConstructor>> cs = bestInvocations(constructors, typeArgs, args, expected);
     // TODO: provide more error-message information
-    int matches = IterUtil.sizeOf(results);
-    if (matches != 1) { throw new UnmatchedLookupException(matches); }
-    else { return IterUtil.first(results).invocation(); }
+    int matches = IterUtil.sizeOf(cs);
+    if (matches == 0) { throw new UnmatchedFunctionLookupException(constructors); }
+    else if (matches > 1) {
+      Iterable<DJConstructor> ks = IterUtil.map(cs, new Lambda<FunctionInvocationCandidate<DJConstructor>,
+                                                               DJConstructor>() {
+        public DJConstructor value(FunctionInvocationCandidate<DJConstructor> c) { return c.function(); }
+      });
+      throw new AmbiguousFunctionLookupException(ks);
+    }
+    else {
+      FunctionInvocationCandidate<DJConstructor> c = IterUtil.first(cs);
+      DJConstructor k = c.function();
+      SubstitutionMap sigma = c.substitution();
+      return new ConstructorInvocation(k, c.typeArguments(), c.arguments(), substitute(k.thrownTypes(), sigma));
+    }
     
     } finally { debug.logEnd(); }
   }
   
-  public boolean containsMethod(Type t, String name) { return containsMethod(t, name, false); }
-  public boolean containsStaticMethod(Type t, String name) { return containsMethod(t, name, true); }
-  private boolean containsMethod(Type t, String name, boolean onlyStatic) {
-    MethodFinder<MethodInvocation> finder = new MethodFinder<MethodInvocation>(name, onlyStatic) {
-      protected MethodInvocationCandidate<MethodInvocation> makeInvocationCandidate(DJMethod m,
-                                                                                    ClassType declaringType) {
-        // a version of the method that depends on no type information (which may not be available)
-        DJMethod noSignatureMethod = new DelegatingMethod(m) {
-          public Iterable<VariableType> typeParameters() { return IterUtil.empty(); }
-          public Type returnType() { return BOTTOM; }
-          public Iterable<Type> thrownTypes() { return IterUtil.empty(); }
-          @Override public Iterable<LocalVariable> parameters() { return IterUtil.empty(); }
-          protected Iterable<? extends Type> parameterTypes() { return IterUtil.empty(); }
-        };
-        // anonymous stub used only for inheritance checking
-        return new MethodInvocationCandidate<MethodInvocation>(noSignatureMethod, OBJECT, EMPTY_TYPE_ITERABLE,
-                                                                 IterUtil.<Expression>empty(), NONE_TYPE_OPTION) {
-          public MethodInvocation invocation() { throw new UnsupportedOperationException(); }
-          @Override public boolean overrides(FunctionInvocationCandidate<MethodInvocation> c) { return false; }
-        };
-      }
-    };
-    return finder.hasMatch(t);
-  }
+  public boolean containsMethod(Type t, String name) { return new MethodFinder(name, false).hasMatch(t); }
+  public boolean containsStaticMethod(Type t, String name) { return new MethodFinder(name, true).hasMatch(t); }
   
   public ObjectMethodInvocation lookupMethod(final Expression object, String name, 
                                              final Iterable<? extends Type> typeArgs, 
                                              final Iterable<? extends Expression> args,
                                              final Option<Type> expected)
       throws InvalidTypeArgumentException, UnmatchedLookupException {
-    MethodFinder<ObjectMethodInvocation> finder = new MethodFinder<ObjectMethodInvocation>(name, false) {
-      public ObjectMethodInvocationCandidate makeInvocationCandidate(DJMethod m, ClassType declaringType) {
-        return new ObjectMethodInvocationCandidate(m, declaringType, object, typeArgs, args, expected);
-      }
-    };
-    return finder.findSingleMethod(NodeProperties.getType(object));
+    Type t = NodeProperties.getType(object);
+    FunctionInvocationCandidate<DJMethod> result =
+        new MethodFinder(name, false).findSingleMethod(t, typeArgs, args, expected);
+    DJMethod m = result.function();
+    SubstitutionMap sigma = result.substitution();
+    // TODO: Is there any reason to invoke makeCast on the receiver?
+    return new ObjectMethodInvocation(m, substitute(m.returnType(), sigma), object, result.typeArguments(),
+                                      result.arguments(), substitute(m.thrownTypes(), sigma));
   }
   
   public StaticMethodInvocation lookupStaticMethod(Type t, String name, 
@@ -1420,12 +1425,12 @@ public abstract class StandardTypeSystem extends TypeSystem {
                                                    final Iterable<? extends Expression> args,
                                                    final Option<Type> expected)
     throws InvalidTypeArgumentException, UnmatchedLookupException {
-    MethodFinder<StaticMethodInvocation> finder = new MethodFinder<StaticMethodInvocation>(name, true) {
-      public StaticMethodInvocationCandidate makeInvocationCandidate(DJMethod m, ClassType declaringType) {
-        return new StaticMethodInvocationCandidate(m, declaringType, typeArgs, args, expected);
-      }
-    };
-    return finder.findSingleMethod(t);
+    FunctionInvocationCandidate<DJMethod> result =
+        new MethodFinder(name, true).findSingleMethod(t, typeArgs, args, expected);
+    DJMethod m = result.function();
+    SubstitutionMap sigma = result.substitution();
+    return new StaticMethodInvocation(m, substitute(m.returnType(), sigma), result.typeArguments(),
+                                      result.arguments(), substitute(m.thrownTypes(), sigma));
   }
   
   public boolean containsField(Type t, String name) { return containsField(t, name, false); }
@@ -1595,56 +1600,86 @@ public abstract class StandardTypeSystem extends TypeSystem {
     }
   }
   
-  private abstract class MethodFinder<I extends MethodInvocation>
-                         extends MemberFinder<MethodInvocationCandidate<I>> {
+  private class MethodFinder extends MemberFinder<DJMethod> {
     private final String _name;
     private final boolean _onlyStatic;
     protected MethodFinder(String name, boolean onlyStatic) { _name = name; _onlyStatic = onlyStatic; }
     
     /** Search for matching methods and determine the best applicable instance, if any. */
-    public I findSingleMethod(Type t) throws UnmatchedLookupException {
+    public FunctionInvocationCandidate<DJMethod>
+        findSingleMethod(Type t, Iterable<? extends Type> targs, Iterable<? extends Expression> args,
+                         Option<Type> expected) throws UnmatchedLookupException {
       debug.logStart(new String[]{"t","name"}, wrap(t)); try {
         
-      PredicateSet<MethodInvocationCandidate<I>> candidates = findAll(t);
-      Iterable<MethodInvocationCandidate<I>> best = bestMatches(candidates);
+      PredicateSet<DJMethod> candidates = findAll(t);
+      Iterable<FunctionInvocationCandidate<DJMethod>> best = bestInvocations(candidates, targs, args, expected);
       // TODO: provide more error-message information
       int matches = IterUtil.sizeOf(best);
-      if (matches != 1) { throw new UnmatchedLookupException(matches); }
-      else { return IterUtil.first(best).invocation(); }
+      if (matches == 0) { throw new UnmatchedFunctionLookupException(candidates); }
+      else if (matches > 1) {
+        Iterable<DJMethod> ms = IterUtil.map(best, new Lambda<FunctionInvocationCandidate<DJMethod>, DJMethod>() {
+          public DJMethod value(FunctionInvocationCandidate<DJMethod> c) { return c.function(); }
+        });
+        throw new AmbiguousFunctionLookupException(ms);
+      }
+      else { return IterUtil.first(best); }
       
       } finally { debug.logEnd(); }
     }
     
-    protected abstract MethodInvocationCandidate<I> makeInvocationCandidate(DJMethod m, ClassType declaringType);
-    
-    protected Iterable<MethodInvocationCandidate<I>> declaredMatches(Type t) {
-      return t.apply(new TypeAbstractVisitor<Iterable<MethodInvocationCandidate<I>>>() {
+    protected Iterable<DJMethod> declaredMatches(Type t) {
+      return t.apply(new TypeAbstractVisitor<Iterable<DJMethod>>() {
         private boolean matches(DJMethod m) {
           return m.declaredName().equals(_name) && !(_onlyStatic && !m.isStatic());
         }
-        @Override public Iterable<MethodInvocationCandidate<I>> defaultCase(Type t) { return IterUtil.empty(); }
-        @Override public Iterable<MethodInvocationCandidate<I>> forClassType(ClassType t) {
-          List<MethodInvocationCandidate<I>> result = new LinkedList<MethodInvocationCandidate<I>>();
+        @Override public Iterable<DJMethod> defaultCase(Type t) { return IterUtil.empty(); }
+        @Override public Iterable<DJMethod> forClassType(ClassType t) {
+          List<DJMethod> result = new LinkedList<DJMethod>();
           for (DJMethod m : t.ofClass().declaredMethods()) {
-            if (matches(m)) { result.add(makeInvocationCandidate(m, t)); }
+            if (matches(m)) { result.add(instantiateMethod(m, t)); }
           }
           return result;
         }
       });
     }
 
-    protected boolean inherits(Type child, PredicateSet<MethodInvocationCandidate<I>> childMatches,
-                               MethodInvocationCandidate<I> match) {
+    protected boolean inherits(Type child, PredicateSet<DJMethod> childMatches, DJMethod match) {
       // TODO: follow the JLS definition of method inheritance (8.4.8)
       if (match.accessibility().equals(Access.PRIVATE)) { return false; }
       else {
-        for (MethodInvocationCandidate<I> childMethod : childMatches) {
-          if (childMethod.overrides(match)) { return false; }
+        for (DJMethod childMethod : childMatches) {
+          if (overrides(childMethod, match)) { return false; }
         }
         return true;
       }
     }
 
+    /** True iff child is override-compatible with the parent.  (See JLS 8.4.2.) */
+    private boolean overrides(DJMethod child, DJMethod parent) {
+      if (child.declaredName().equals(parent.declaredName())) {
+        Iterable<Type> subParams = SymbolUtil.parameterTypes(child);
+        Iterable<Type> supParams = SymbolUtil.parameterTypes(parent);
+        Iterable<VariableType> subTParams = child.typeParameters();
+        Iterable<VariableType> supTParams = parent.typeParameters();
+        if (IterUtil.sizeOf(subParams) == IterUtil.sizeOf(supParams)) {
+          Iterable<? extends Type> supParamsToCompare;
+          if (IterUtil.isEmpty(subTParams) && !IterUtil.isEmpty(supTParams)) {
+            supParamsToCompare = IterUtil.map(supParams, ERASE);
+          }
+          else if (IterUtil.sizeOf(subTParams) == IterUtil.sizeOf(supTParams)) {
+            supParamsToCompare = substitute(supParams, supTParams, subTParams);
+          }
+          else { return false; }
+          for (Pair<Type, Type> p : IterUtil.zip(subParams, supParamsToCompare)) {
+            if (!isEqual(p.first(), p.second())) { return false; }
+          }
+          return true;
+        }
+        else { return false; }
+      }
+      else { return false; }
+    }
+    
   }
   
   private abstract class FieldFinder<T extends FieldReference> extends MemberFinder<T> {
@@ -1805,24 +1840,23 @@ public abstract class StandardTypeSystem extends TypeSystem {
 
   }
   
-  private abstract class FunctionInvocationCandidate<I extends FunctionInvocation> {
-    protected final Function _f;
-    protected final SignatureMatcher _matcher;
+  private class FunctionInvocationCandidate<F extends Function> {
+    private final F _f;
+    private final SignatureMatcher _matcher;
     
-    public FunctionInvocationCandidate(Function f, Iterable<? extends Type> targs,
+    public FunctionInvocationCandidate(F f, Iterable<? extends Type> targs,
                                        Iterable<? extends Expression> args, Option<Type> expected) {
       _f = f;
-      _matcher = makeMatcher(f.typeParameters(), targs, parameterTypes(), args, f.returnType(), expected);
+      _matcher = makeMatcher(f.typeParameters(), targs, SymbolUtil.parameterTypes(f), args, f.returnType(), expected);
     }
     
-    public abstract I invocation();
+    public F function() { return _f; }
+    public Iterable<? extends Type> typeArguments() { return _matcher.typeArguments(); }
+    public Iterable<? extends Expression> arguments() { return _matcher.arguments(); }
     
-    protected SubstitutionMap substitution() {
+    public SubstitutionMap substitution() {
       return new SubstitutionMap(_f.typeParameters(), _matcher.typeArguments());
     }
-    
-    protected Iterable<Type> parameterTypes() { return SymbolUtil.declaredParameterTypes(_f); }
-    protected Iterable<VariableType> typeParameters() { return _f.typeParameters(); }
     
     private SignatureMatcher makeMatcher(Iterable<? extends VariableType> tparams,
                                          Iterable<? extends Type> targs,
@@ -1872,41 +1906,12 @@ public abstract class StandardTypeSystem extends TypeSystem {
     }
     
     /**
-     * True if this declaration is override-compatible with the given declaration
-     * from a supertype.  (See JLS 8.4.2.)
-     */
-    public boolean overrides(FunctionInvocationCandidate<I> c) {
-      if (_f.declaredName().equals(c._f.declaredName())) {
-        Iterable<Type> subParams = parameterTypes();
-        Iterable<Type> supParams = c.parameterTypes();
-        Iterable<VariableType> subTParams = typeParameters();
-        Iterable<VariableType> supTParams = c.typeParameters();
-        if (IterUtil.sizeOf(subParams) == IterUtil.sizeOf(supParams)) {
-          Iterable<? extends Type> supParamsToCompare;
-          if (IterUtil.isEmpty(subTParams) && !IterUtil.isEmpty(supTParams)) {
-            supParamsToCompare = IterUtil.map(supParams, ERASE);
-          }
-          else if (IterUtil.sizeOf(subTParams) == IterUtil.sizeOf(supTParams)) {
-            supParamsToCompare = substitute(supParams, supTParams, subTParams);
-          }
-          else { return false; }
-          for (Pair<Type, Type> p : IterUtil.zip(subParams, supParamsToCompare)) {
-            if (!isEqual(p.first(), p.second())) { return false; }
-          }
-          return true;
-        }
-        else { return false; }
-      }
-      else { return false; }
-    }
-    
-    /**
      * True iff this declaration's parameters could be used to invoke c.  Must only be invoked with matched
      * SignatureMatchers.  This relation is defined in JLS 15.12.2.5.
      */
-    public boolean moreSpecificThan(FunctionInvocationCandidate<I> c) {
-      SignatureMatcher m = makeMatcher(c.typeParameters(), EMPTY_TYPE_ITERABLE, c.parameterTypes(), 
-                                       IterUtil.mapSnapshot(parameterTypes(), EMPTY_EXPRESSION_FOR_TYPE),
+    public boolean moreSpecificThan(FunctionInvocationCandidate<F> c) {
+      SignatureMatcher m = makeMatcher(c._f.typeParameters(), EMPTY_TYPE_ITERABLE, SymbolUtil.parameterTypes(c._f), 
+                                       IterUtil.mapSnapshot(SymbolUtil.parameterTypes(_f), EMPTY_EXPRESSION_FOR_TYPE),
                                        BOTTOM, NONE_TYPE_OPTION);
       return m.matches();
     }
@@ -1918,26 +1923,35 @@ public abstract class StandardTypeSystem extends TypeSystem {
    * match in the same stage ({@code matches()}, {@code matchesWithBoxing()}, or {@code matchesWithVarargs()})
    * may appear in the result.  Of those that match, a list with most specific signatures is returned. 
    */
-  private static <I extends FunctionInvocation, T extends FunctionInvocationCandidate<I>>
-      Iterable<T> bestMatches(Iterable<T> candidates) {
+  private <F extends Function>
+      Iterable<FunctionInvocationCandidate<F>> bestInvocations(Iterable<F> functions,
+                                                               final Iterable<? extends Type> targs,
+                                                               final Iterable<? extends Expression> args,
+                                                               final Option<Type> expected) {
     // This would be a static member of FunctionInvocationCandidate if that were legal;
     // it accesses the _matcher field as if it were.
-    List<T> matches = new LinkedList<T>();
-    for (T c : candidates) {
+    Iterable<FunctionInvocationCandidate<F>> candidates = IterUtil.mapSnapshot(functions,
+                                                                     new Lambda<F, FunctionInvocationCandidate<F>>() {
+      public FunctionInvocationCandidate<F> value(F f) {
+        return new FunctionInvocationCandidate<F>(f, targs, args, expected);
+      }
+    });
+    List<FunctionInvocationCandidate<F>> matches = new LinkedList<FunctionInvocationCandidate<F>>();
+    for (FunctionInvocationCandidate<F> c : candidates) {
       if (c._matcher.matches()) { matches.add(c); }
     }
     if (matches.isEmpty()) {
-      for (T c : candidates) {
+      for (FunctionInvocationCandidate<F> c : candidates) {
         if (c._matcher.matchesWithBoxing()) { matches.add(c); }
       }
     }
     if (matches.isEmpty()) {
-      for (T c : candidates) {
+      for (FunctionInvocationCandidate<F> c : candidates) {
         if (c._matcher.matchesWithVarargs()) { matches.add(c); }
       }
     }
-    return CollectUtil.minList(matches, new Order<T>() {
-      public boolean contains(T c1, T c2) {
+    return CollectUtil.minList(matches, new Order<FunctionInvocationCandidate<F>>() {
+      public boolean contains(FunctionInvocationCandidate<F> c1, FunctionInvocationCandidate<F> c2) {
         return c1.moreSpecificThan(c2);
       }
     });
@@ -1950,72 +1964,6 @@ public abstract class StandardTypeSystem extends TypeSystem {
       return result;
     }
   };
-  
-  private abstract class MethodInvocationCandidate<I extends MethodInvocation>
-                         extends FunctionInvocationCandidate<I> {
-    protected final Type _declaringType;
-    protected final DJMethod _method; // the method, after conversions based on the declaring type
-    protected MethodInvocationCandidate(DJMethod declaredMethod, Type declaringType,
-                                        Iterable<? extends Type> targs,
-                                        Iterable<? extends Expression> args,
-                                        Option<Type> expected) {
-      super(instantiateMethod(declaredMethod, declaringType), targs, args, expected);
-      _declaringType = declaringType;
-      _method = (DJMethod) _f;
-    }
-    public Access accessibility() { return _method.accessibility(); }
-  }
-
-  private class ObjectMethodInvocationCandidate extends MethodInvocationCandidate<ObjectMethodInvocation> {
-    private final Expression _object;
-    public ObjectMethodInvocationCandidate(DJMethod declaredMethod, Type declaringType, Expression object,
-                                           Iterable<? extends Type> targs, Iterable<? extends Expression> args,
-                                           Option<Type> expected) {
-      super(declaredMethod, declaringType, targs, args, expected);
-     _object = object; 
-    }
-    public ObjectMethodInvocation invocation() {
-      SubstitutionMap sigma = substitution();
-      Type returnType = substitute(_method.returnType(), sigma);
-      Expression receiver = makeCast(_declaringType, _object);
-      Iterable<? extends Type> targs = _matcher.typeArguments();
-      Iterable<? extends Expression> args = _matcher.arguments();
-      Iterable<? extends Type> thrown = substitute(_method.thrownTypes(), sigma);
-      return new ObjectMethodInvocation(_method, returnType, receiver,targs, args, thrown);
-    }
-  }
-  
-  private class StaticMethodInvocationCandidate extends MethodInvocationCandidate<StaticMethodInvocation> {
-    public StaticMethodInvocationCandidate(DJMethod declaredMethod, Type declaringType,
-                                           Iterable<? extends Type> targs, Iterable<? extends Expression> args,
-                                           Option<Type> expected) {
-      super(declaredMethod, declaringType, targs, args, expected);
-    }
-    public StaticMethodInvocation invocation() {
-      SubstitutionMap sigma = substitution();
-      Type returnType = substitute(_method.returnType(), sigma);
-      Iterable<? extends Type> targs = _matcher.typeArguments();
-      Iterable<? extends Expression> args = _matcher.arguments();
-      Iterable<? extends Type> thrown = substitute(_method.thrownTypes(), sigma);
-      return new StaticMethodInvocation(_method, returnType, targs, args, thrown);
-    }
-  }
-  
-  private class ConstructorInvocationCandidate extends FunctionInvocationCandidate<ConstructorInvocation> {
-    protected ConstructorInvocationCandidate(DJConstructor declaredConstructor, Type declaringType,
-                                             Iterable<? extends Type> targs,
-                                             Iterable<? extends Expression> args,
-                                             Option<Type> expected) {
-      super(instantiateConstructor(declaredConstructor, declaringType), targs, args, expected);
-    }
-    public ConstructorInvocation invocation() {
-      SubstitutionMap sigma = substitution();
-      Iterable<? extends Type> targs = _matcher.typeArguments();
-      Iterable<? extends Expression> args = _matcher.arguments();
-      Iterable<? extends Type> thrown = substitute(_f.thrownTypes(), sigma);
-      return new ConstructorInvocation((DJConstructor) _f, targs, args, thrown);
-    }
-  }
   
   /**
    * Instantiate a method based on its enclosing type.  Would be static in MethodInvocationCandidate
@@ -2045,25 +1993,6 @@ public abstract class StandardTypeSystem extends TypeSystem {
         }
       });
     }
-  }
-
-  /**
-   * Instantiate a method based on its enclosing type.  Would be static in MethodInvocationCandidate
-   * if that were allowed.
-   */
-  private DJConstructor instantiateConstructor(final DJConstructor declaredConstructor, Type declaringType) {
-    return declaringType.apply(new TypeAbstractVisitor<DJConstructor>() {
-      @Override public DJConstructor defaultCase(Type declaringType) { return declaredConstructor; }
-      @Override public DJConstructor forRawClassType(RawClassType declaringType) {
-        // TODO: raw member access warnings
-        return new ErasedConstructor(declaredConstructor);
-      }
-      @Override public DJConstructor forParameterizedClassType(ParameterizedClassType declaringType) {
-        Iterable<VariableType> tparams = SymbolUtil.allTypeParameters(declaringType.ofClass());
-        ParameterizedClassType declaringTypeCap = capture(declaringType);
-        return new InstantiatedConstructor(declaredConstructor, tparams, declaringTypeCap.typeArguments());
-      }
-    });
   }
 
   private static abstract class DelegatingFunction<T extends Function> implements Function {
@@ -2106,7 +2035,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
     public Type returnType() { return erase(_delegate.returnType()); }
     public Iterable<Type> thrownTypes() { return IterUtil.mapSnapshot(_delegate.thrownTypes(), ERASE); }
     protected Iterable<Type> parameterTypes() {
-      return IterUtil.mapSnapshot(SymbolUtil.declaredParameterTypes(_delegate), ERASE);
+      return IterUtil.mapSnapshot(SymbolUtil.parameterTypes(_delegate), ERASE);
     }
   }
   
@@ -2124,7 +2053,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
     public Iterable<VariableType> typeParameters() { return _tparams; }
     public Iterable<Type> thrownTypes() { return IterUtil.relax(substitute(_delegate.thrownTypes(), _sigma)); }
     public Iterable<? extends Type> parameterTypes() {
-      return substitute(SymbolUtil.declaredParameterTypes(_delegate), _sigma);
+      return substitute(SymbolUtil.parameterTypes(_delegate), _sigma);
     }
   }
   
@@ -2146,7 +2075,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
     public Iterable<VariableType> typeParameters() { return IterUtil.empty(); }
     public Iterable<Type> thrownTypes() { return IterUtil.mapSnapshot(_delegate.thrownTypes(), ERASE); }
     protected Iterable<Type> parameterTypes() {
-      return IterUtil.mapSnapshot(SymbolUtil.declaredParameterTypes(_delegate), ERASE);
+      return IterUtil.mapSnapshot(SymbolUtil.parameterTypes(_delegate), ERASE);
     }
   }
   
@@ -2164,7 +2093,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
     public Iterable<VariableType> typeParameters() { return _tparams; }
     public Iterable<Type> thrownTypes() { return IterUtil.relax(substitute(_delegate.thrownTypes(), _sigma)); }
     public Iterable<? extends Type> parameterTypes() {
-      return substitute(SymbolUtil.declaredParameterTypes(_delegate), _sigma);
+      return substitute(SymbolUtil.parameterTypes(_delegate), _sigma);
     }
   }
   

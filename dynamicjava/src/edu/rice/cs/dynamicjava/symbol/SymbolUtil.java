@@ -234,7 +234,7 @@ public class SymbolUtil {
     else { return null; }
   }
   
-  public static Iterable<Type> declaredParameterTypes(Function f) {
+  public static Iterable<Type> parameterTypes(Function f) {
     return IterUtil.map(f.parameters(), TYPE_OF_VARIABLE);
   }
   
