@@ -208,6 +208,8 @@ public abstract class DelegatingContext implements TypeContext {
     return _next.getThis(className);
   }
   
+  public boolean hasThis(DJClass c) { return _next.hasThis(c); }
+  
   /**
    * The expected type of a {@code return} statement in the given context, or {@code null}
    * if {@code return} statements should not appear here.

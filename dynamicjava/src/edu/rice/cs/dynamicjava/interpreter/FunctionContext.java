@@ -79,6 +79,11 @@ public class FunctionContext extends DelegatingContext {
     else { return super.getThis(className); }
   }
   
+  @Override public boolean hasThis(DJClass c) {
+    if (isStatic()) { return false; }
+    else { return super.hasThis(c); }
+  }
+  
   @Override public Type getReturnType() {
     if (_f instanceof LocalFunction) { return ((LocalFunction) _f).returnType(); }
     else if (_f instanceof DJMethod) { return ((DJMethod) _f).returnType(); }

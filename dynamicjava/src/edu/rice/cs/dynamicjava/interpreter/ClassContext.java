@@ -136,6 +136,8 @@ public class ClassContext extends DelegatingContext {
     else { return super.getThis(className); }
   }
   
+  @Override public boolean hasThis(DJClass c) { return c.equals(_c) || super.hasThis(c); }
+  
   /**
    * The expected type of a {@code return} statement in the given context, or {@code null}
    * if {@code return} statements should not appear here.

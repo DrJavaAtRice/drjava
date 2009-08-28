@@ -135,6 +135,9 @@ public interface TypeContext {
    */
   public DJClass getThis(String className);
   
+  /** Test whether "this" is defined for the given class. */
+  public boolean hasThis(DJClass c);
+  
   /**
    * The expected type of a {@code return} statement in the given context, or {@code null}
    * if {@code return} statements should not appear here.

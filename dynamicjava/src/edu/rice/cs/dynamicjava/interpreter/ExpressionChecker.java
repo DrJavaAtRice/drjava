@@ -500,8 +500,10 @@ public class ExpressionChecker {
           setErrorStrings(node, node.getFieldName());
           throw new ExecutionError("undefined.name", node);
         }
+        DJClass enclosingThis = enclosingThis(t);
+        boolean onlyStatic = (enclosingThis == null);
         FieldReference ref;
-        if (context.getThis() == null) {
+        if (onlyStatic) {
           ref = ts.lookupStaticField(t, node.getFieldName());
         }
         else {
@@ -512,9 +514,7 @@ public class ExpressionChecker {
         checkAccessibility(ref.field(), node);
         setField(node, ref.field());
         setVariableType(node, ref.type());
-        if (!ref.field().isStatic()) {
-          setDJClass(node, t.ofClass());
-        }
+        if (!onlyStatic) { setDJClass(node, enclosingThis); }
         Type result = ts.capture(ref.type());
         addRuntimeCheck(node, result, ref.field().type());
         return setType(node, result);
@@ -958,16 +958,19 @@ public class ExpressionChecker {
     }
     
     /**
-     * Determine the innermost "this" class that can be used where the given type is expected.
+     * Determine a "this" class that can be used where the given type is expected.
      * May return {@code null} if none is found.
      */
     private DJClass enclosingThis(Type expected) {
-      DJClass candidate = context.getThis();
-      while (candidate != null) {
-        if (ts.isSubtype(SymbolUtil.thisType(candidate), expected)) { return candidate; }
-        candidate = SymbolUtil.dynamicOuterClass(candidate);
-      }
-      return null;
+      return expected.apply(new TypeAbstractVisitor<DJClass>() {
+        @Override public DJClass defaultCase(Type t) { return null; }
+        @Override public DJClass forClassType(ClassType t) {
+          if (context.hasThis(t.ofClass()) && ts.isSubtype(SymbolUtil.thisType(t.ofClass()), t)) {
+            return t.ofClass();
+          }
+          else { return null; }
+        }
+      });
     }
     
     /**

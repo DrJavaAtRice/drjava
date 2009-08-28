@@ -27,6 +27,7 @@ public class BaseContext implements TypeContext {
   public Type getReturnType() { return null; }
   public DJClass getThis() { return null; }
   public DJClass getThis(String className) { return null; }
+  public boolean hasThis(DJClass c) { return false; }
   public DJClass getTopLevelClass(String name, TypeSystem ts) throws AmbiguousNameException { return null; }
   public VariableType getTypeVariable(String name, TypeSystem ts) { return null; }
   public TypeContext importField(DJClass c, String name) { throw new UnsupportedOperationException(); }
