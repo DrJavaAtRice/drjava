@@ -221,15 +221,20 @@ public class ExpressionChecker {
                                                 boolean onlyStatic) {
     String error = ((e.matches() > 1) ? "ambiguous." : "no.such.") + kind;
     Iterable<? extends Function> candidates = IterUtil.empty();
+    boolean noMatch = false;
     if (e instanceof UnmatchedFunctionLookupException) {
       candidates = ((UnmatchedFunctionLookupException) e).candidates();
+      if (IterUtil.isEmpty(candidates)) { noMatch = true; }
     }
     else if (e instanceof AmbiguousFunctionLookupException) {
       candidates = ((AmbiguousFunctionLookupException) e).candidates();
     }
-    if (!IterUtil.isEmpty(targs)) { error += ".poly"; }
-    if (expected.isSome()) { error += ".expected"; }
-    if (!IterUtil.isEmpty(candidates)) { error += ".candidates"; }
+    if (error.equals("no.such.method") && noMatch) { error += ".name"; }
+    else {
+      if (!IterUtil.isEmpty(targs)) { error += ".poly"; }
+      if (expected.isSome()) { error += ".expected"; }
+      if (!IterUtil.isEmpty(candidates)) { error += ".candidates"; }
+    }
     String typeS = (onlyStatic ? "static " : "") + ts.userRepresentation(type);
     String expectedS = expected.isSome() ? ts.userRepresentation(expected.unwrap()) : "";
     String candidatesS;
@@ -238,30 +243,14 @@ public class ExpressionChecker {
     }
     else {
       String prefix = "\n        "; 
-      candidatesS = IterUtil.toString(IterUtil.map(candidates, SIGNATURE_STRING), prefix, "," + prefix, "");
+      candidatesS = IterUtil.toString(IterUtil.map(candidates, SIGNATURE_STRING), prefix, prefix, "");
     }
     setErrorStrings(node, typeS, name, ts.userRepresentation(targs), nodeTypesString(args), expectedS, candidatesS);
     throw new ExecutionError(error, node);
   }
   
   private final Lambda<Function, String> SIGNATURE_STRING = new Lambda<Function, String>() {
-    public String value(Function f) {
-      StringBuilder result = new StringBuilder();
-      if (!IterUtil.isEmpty(f.typeParameters())) {
-        result.append("<");
-        result.append(ts.userRepresentation(f.typeParameters()));
-        result.append("> ");
-      }
-      if (!(f instanceof DJConstructor)) {
-        result.append(ts.userRepresentation(f.returnType()));
-        result.append(" ");
-      }
-      result.append(f.declaredName());
-      result.append("(");
-      result.append(ts.userRepresentation(SymbolUtil.parameterTypes(f)));
-      result.append(")");
-      return result.toString();
-    }
+    public String value(Function f) { return ts.userRepresentation(f); }
   };
   
   /** Verify that the given symbol is accessible. */

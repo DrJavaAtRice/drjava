@@ -216,6 +216,9 @@ public abstract class TypeSystem {
   /** Produce a string representing the list of types */
   public abstract String userRepresentation(Iterable<? extends Type> ts);
   
+  /** Produce a string representing the signature of the function */
+  public abstract String userRepresentation(Function f);
+  
   /* Class Type Operations */
   
   /** Create a {@link SimpleClassType} or {@link RawClassType} corresponding to the given class. */
