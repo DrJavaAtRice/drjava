@@ -287,24 +287,17 @@ public abstract class StandardTypeSystem extends TypeSystem {
   }
   
   
-  /**
-   * Determine the type bound to {@code super} in the body of the given type's declaration, or
-   * {@code null} if no such type exists.
-   */
   public Type immediateSuperclass(Type t) {
     if (t instanceof ClassType) { return ((ClassType) t).ofClass().immediateSuperclass(); }
     else { return null; }
   }
   
-  /**
-   * @return  The capture {@code t}.  Capture eliminates wildcards in a 
-   *          {@link ParameterizedClassType}.
-   */
   public Type capture(Type t) { return t.apply(CAPTURE); }
   
   // cannot be defined statically, because it relies on the definition of non-static "capture"
   private final TypeVisitorLambda<Type> CAPTURE = new TypeAbstractVisitor<Type>() {
     public Type defaultCase(Type t) { return t; }
+    public Type forVarargArrayType(VarargArrayType t) { return new SimpleArrayType(t.ofType()); }
     @Override public Type forParameterizedClassType(ParameterizedClassType t) { return capture(t); }
   };
   
@@ -424,6 +417,17 @@ public abstract class StandardTypeSystem extends TypeSystem {
     }
     
   };
+  
+  /** Convert a raw class type to its wildcard-parameterized equivalent. */
+  protected ParameterizedClassType parameterize(final RawClassType t) {
+    Iterable<VariableType> tparams = SymbolUtil.allTypeParameters(t.ofClass());
+    return new ParameterizedClassType(t.ofClass(), IterUtil.mapSnapshot(tparams, new Lambda<VariableType, Type>() {
+      public Type value(VariableType param) {
+        // identity is determined by t and param -- result should be identical when repeatedly invoked
+        return new Wildcard(new BoundedSymbol(Pair.make(t, param), OBJECT, NULL));
+      }
+    }));
+  }
   
   /**
    * @return  The type of the Class object associated with t (for example, (informally)
@@ -667,7 +671,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
     
     public void forVarargArrayType(VarargArrayType t) {
       run(t.ofType());
-      _result.append("[]");
+      _result.append("...");
     }
     
     public void forSimpleClassType(SimpleClassType t) {
@@ -700,7 +704,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
             _result.append(">");
           }
         }
-        if (inner != null) { _result.append("."); _result.append(c.declaredName()); }
+        if (inner != null) { _result.append("."); _result.append(inner.declaredName()); }
         c = inner;
       }
     }
@@ -1649,7 +1653,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
     public FunctionInvocationCandidate<DJMethod>
         findSingleMethod(Type t, Iterable<? extends Type> targs, Iterable<? extends Expression> args,
                          Option<Type> expected) throws UnmatchedLookupException {
-      debug.logStart(new String[]{"t","name"}, wrap(t)); try {
+      debug.logStart(new String[]{"t","name","onlyStatic"}, wrap(t), _name, _onlyStatic); try {
         
       PredicateSet<DJMethod> candidates = findAll(t);
       Iterable<FunctionInvocationCandidate<DJMethod>> best = bestInvocations(candidates, targs, args, expected);

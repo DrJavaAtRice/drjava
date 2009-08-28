@@ -178,7 +178,10 @@ public abstract class TypeSystem {
 
   /* Unary Operations on Types */
   
-  /** Compute the capture of {@code t}.  Capture eliminates wildcards in a {@link ParameterizedClassType}. */
+  /**
+   * Compute the capture of {@code t}.  Capture eliminates wildcards in a {@link ParameterizedClassType}
+   * and converts VarargArrayTypes to StandardArrayTypes.
+   */
   public abstract Type capture(Type t);
   
   /**

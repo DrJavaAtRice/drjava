@@ -4,6 +4,7 @@ import java.util.*;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.tuple.Triple;
 import edu.rice.cs.plt.tuple.Option;
+import edu.rice.cs.plt.tuple.Wrapper;
 import edu.rice.cs.plt.recur.*;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -38,7 +39,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
    * invocations should use distinct instances.
    */
   private class WellFormedChecker extends TypeAbstractVisitor<Boolean> implements Predicate<Type> {
-    RecursionStack<Type> _stack = new RecursionStack<Type>();
+    RecursionStack<Type> _stack = new RecursionStack<Type>(Wrapper.<Type>factory());
     public boolean contains(Type t) { return t.apply(this); }
     
     @Override public Boolean defaultCase(Type t) { return true; }
@@ -113,7 +114,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
    * invocations should use distinct instances.
    */
   private class NormSubtyper implements Order<Type>, Lambda2<Type, Type, Boolean> {
-    RecursionStack2<Type, Type> _stack = new RecursionStack2<Type, Type>();
+    RecursionStack2<Type, Type> _stack = new RecursionStack2<Type, Type>(Pair.<Type, Type>factory());
     
     public Boolean value(Type subT, Type superT) { return contains(subT, superT); }
     
@@ -178,9 +179,9 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
       // Handle subT-based cases:
       return subT.apply(new TypeAbstractVisitor<Boolean>() {
         
-        public Boolean defaultCase(Type t) { return false; }
+        @Override public Boolean defaultCase(Type t) { return false; }
         
-        public Boolean forCharType(CharType subT) {
+        @Override public Boolean forCharType(CharType subT) {
           return superT.apply(new TypeAbstractVisitor<Boolean>() {
             public Boolean defaultCase(Type superT) { return false; }
             @Override public Boolean forCharType(CharType superT) { return true; }
@@ -190,7 +191,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
           });
         }
         
-        public Boolean forByteType(ByteType subT) {
+        @Override public Boolean forByteType(ByteType subT) {
           return superT.apply(new TypeAbstractVisitor<Boolean>() {
             public Boolean defaultCase(Type superT) { return false; }
             @Override public Boolean forIntegerType(IntegerType superT) { return true; }
@@ -198,7 +199,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
           });
         }
         
-        public Boolean forShortType(ShortType subT) {
+        @Override public Boolean forShortType(ShortType subT) {
           return superT.apply(new TypeAbstractVisitor<Boolean>() {
             public Boolean defaultCase(Type superT) { return false; }
             @Override public Boolean forShortType(ShortType superT) { return true; }
@@ -208,7 +209,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
           });
         }
         
-        public Boolean forIntType(IntType subT) {
+        @Override public Boolean forIntType(IntType subT) {
           return superT.apply(new TypeAbstractVisitor<Boolean>() {
             public Boolean defaultCase(Type superT) { return false; }
             @Override public Boolean forIntType(IntType superT) { return true; }
@@ -217,7 +218,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
           });
         }
         
-        public Boolean forLongType(LongType subT) {
+        @Override public Boolean forLongType(LongType subT) {
           return superT.apply(new TypeAbstractVisitor<Boolean>() {
             public Boolean defaultCase(Type superT) { return false; }
             @Override public Boolean forLongType(LongType superT) { return true; }
@@ -225,13 +226,13 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
           });
         }
         
-        public Boolean forFloatType(FloatType subT) { return superT instanceof FloatingPointType; }
+        @Override public Boolean forFloatType(FloatType subT) { return superT instanceof FloatingPointType; }
         
-        public Boolean forNullType(NullType subT) { return isReference(superT); }
+        @Override public Boolean forNullType(NullType subT) { return isReference(superT); }
         
-        public Boolean forSimpleArrayType(SimpleArrayType subT) { return handleArrayType(subT); }
+        @Override public Boolean forSimpleArrayType(SimpleArrayType subT) { return handleArrayType(subT); }
         
-        public Boolean forVarargArrayType(VarargArrayType subT) { return handleArrayType(subT); }
+        @Override public Boolean forVarargArrayType(VarargArrayType subT) { return handleArrayType(subT); }
         
         private Boolean handleArrayType(final ArrayType subT) {
           return superT.apply(new TypeAbstractVisitor<Boolean>() {
@@ -252,74 +253,81 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
           });
         }
         
-        public Boolean forClassType(final ClassType subT) {
+        /**
+         * Recur on {@code newSub}, a class's parent type.  {@code newSub} may be null, as in
+         * {@code immediateSupertype()}.
+         */
+        private Boolean recurOnClassParent(final Type newSub) {
+          if (newSub == null) { return false; }
+          else {
+            Thunk<Boolean> recurOnParent = new Thunk<Boolean>() {
+              public Boolean value() {
+                Type newSubNorm = new Normalizer(NormSubtyper.this).value(newSub);
+                return NormSubtyper.this.contains(newSubNorm, superT);
+              }
+            };
+            return _stack.apply(recurOnParent, false, newSub, superT);
+          }
+        }
+        
+        @Override public Boolean forSimpleClassType(final SimpleClassType subT) {
           return superT.apply(new TypeAbstractVisitor<Boolean>() {
             public Boolean defaultCase(Type superT) { return false; }
             @Override public Boolean forClassType(final ClassType superT) {
-              final Type newSub = immediateSupertype(subT);
-              if (newSub == null) { return false; }
-              else {
-                Thunk<Boolean> recurOnParent = new Thunk<Boolean>() {
-                  public Boolean value() {
-                    Type newSubNorm = new Normalizer(NormSubtyper.this).value(newSub);
-                    return NormSubtyper.this.contains(newSubNorm, superT);
-                  }
-                };
-                return _stack.apply(recurOnParent, false, subT, superT);
-              }
+              return recurOnClassParent(immediateSupertype(subT));
             }
           });
         }
         
-        public Boolean forParameterizedClassType(final ParameterizedClassType subT) {
+        @Override public Boolean forRawClassType(final RawClassType subT) {
           return superT.apply(new TypeAbstractVisitor<Boolean>() {
             public Boolean defaultCase(Type superT) { return false; }
-            
+            @Override public Boolean forClassType(final ClassType superT) {
+              return recurOnClassParent(immediateSupertype(subT));
+            }
             @Override public Boolean forParameterizedClassType(final ParameterizedClassType superT) {
               if (subT.ofClass().equals(superT.ofClass())) {
-                
-                Thunk<Boolean> containedArgs = new Thunk<Boolean>() {
-                  public Boolean value() {
-                    boolean result = true;
-                    ParameterizedClassType subCapT = capture(subT);
-                    for (final Pair<Type, Type> args : IterUtil.zip(subCapT.typeArguments(), 
-                                                                    superT.typeArguments())) {
-                      result &= args.second().apply(new TypeAbstractVisitor<Boolean>() {
-                        public Boolean defaultCase(Type superArg) {
-                          Type subArg = args.first();
-                          return NormSubtyper.this.contains(subArg, superArg) &&
-                                 NormSubtyper.this.contains(superArg, subArg);
-                        }
-                        @Override public Boolean forWildcard(Wildcard superArg) {
-                          Type subArg = args.first();
-                          return NormSubtyper.this.contains(superArg.symbol().lowerBound(), subArg) &&
-                                 NormSubtyper.this.contains(subArg, superArg.symbol().upperBound());
-                        }
-                      });
-                      if (!result) { break; }
-                    }
-                    return result;
-                  }
-                };
-                
-                return _stack.apply(containedArgs, false, subT, superT) || forClassType(superT);
+                return recurOnClassParent(parameterize(subT)) || forClassType(superT);
               }
               else { return forClassType(superT); }
             }
-            
-            @Override public Boolean forClassType(ClassType superT) {
-              Type newSub = immediateSupertype(subT);
-              if (newSub == null) { return false; }
-              else {
-                // results of immediateSupertype() and erase() are always normalized
-                return NormSubtyper.this.contains(newSub, superT) || NormSubtyper.this.contains(erase(subT), superT);
-              }
-            }
-            
           });
         }
         
-        public Boolean forVariableType(final VariableType subT) {
+        @Override public Boolean forParameterizedClassType(final ParameterizedClassType subT) {
+          return superT.apply(new TypeAbstractVisitor<Boolean>() {
+            public Boolean defaultCase(Type superT) { return false; }
+            @Override public Boolean forClassType(ClassType superT) {
+              return recurOnClassParent(immediateSupertype(subT)) || recurOnClassParent(erase(subT));
+            }
+            @Override public Boolean forParameterizedClassType(final ParameterizedClassType superT) {
+              if (subT.ofClass().equals(superT.ofClass())) {
+                boolean containedArgs = true;
+                ParameterizedClassType subCapT = capture(subT);
+                for (final Pair<Type, Type> args : IterUtil.zip(subCapT.typeArguments(), 
+                                                                superT.typeArguments())) {
+                  containedArgs &= args.second().apply(new TypeAbstractVisitor<Boolean>() {
+                    public Boolean defaultCase(Type superArg) {
+                      Type subArg = args.first();
+                      return NormSubtyper.this.contains(subArg, superArg) &&
+                             NormSubtyper.this.contains(superArg, subArg);
+                    }
+                    @Override public Boolean forWildcard(Wildcard superArg) {
+                      Type subArg = args.first();
+                      return NormSubtyper.this.contains(superArg.symbol().lowerBound(), subArg) &&
+                             NormSubtyper.this.contains(subArg, superArg.symbol().upperBound());
+                    }
+                  });
+                  if (!containedArgs) { break; }
+                }
+                return containedArgs || forClassType(superT);
+              }
+              else { return forClassType(superT); }
+            }
+          });
+        }
+        
+        @Override public Boolean forVariableType(final VariableType subT) {
           Thunk<Boolean> checkUpperBound = new Thunk<Boolean>() {
             public Boolean value() {
               Type bound = new Normalizer(NormSubtyper.this).value(subT.symbol().upperBound());
@@ -332,16 +340,17 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
           return _stack.apply(checkUpperBound, checkInfinite, subT, superT);
         }
         
-        public Boolean forIntersectionType(IntersectionType subT) {
+        @Override public Boolean forIntersectionType(IntersectionType subT) {
           return IterUtil.or(subT.ofTypes(), subtypes(superT)); 
         }
         
-        public Boolean forUnionType(UnionType subT) {
+        @Override public Boolean forUnionType(UnionType subT) {
           return IterUtil.and(subT.ofTypes(), subtypes(superT)); 
         }
         
         public Boolean forBottomType(BottomType subT) { return true; }
       });
+      
       //} finally { debug.logEnd(); }
     }
   };
@@ -785,8 +794,8 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
     
     public Inferencer(Set<? extends VariableType> vars) {
       _vars = vars;
-      _subStack = new RecursionStack2<Type, Type>();
-      _supStack = new RecursionStack2<Type, Type>();
+      _subStack = new RecursionStack2<Type, Type>(Pair.<Type, Type>factory());
+      _supStack = new RecursionStack2<Type, Type>(Pair.<Type, Type>factory());
       _subtyper = new NormSubtyper();
     }
     
@@ -1143,7 +1152,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
     }
     
     private final TypeVisitorLambda<Boolean> _containsVar = new TypeAbstractVisitor<Boolean>() {
-      private final RecursionStack<Type> _stack = new RecursionStack<Type>();
+      private final RecursionStack<Type> _stack = new RecursionStack<Type>(Wrapper.<Type>factory());
       public Boolean defaultCase(Type t) { return false; }
       @Override public Boolean forArrayType(ArrayType t) { return t.ofType().apply(this); }
       @Override public Boolean forParameterizedClassType(ParameterizedClassType t) {
