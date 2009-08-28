@@ -325,7 +325,7 @@ public final class CollectUtil {
       return new SingletonSet<T>(IterUtil.first(elements));
     }
     else {
-      HashSet<T> result = new HashSet<T>(asCollection(elements));
+      Set<T> result = new LinkedHashSet<T>(asCollection(elements));
       return new ImmutableSet<T>(result) {
         @Override public boolean hasFixedSize() { return true; }
         @Override public boolean isStatic() { return true; }
@@ -352,7 +352,7 @@ public final class CollectUtil {
       return new SingletonRelation<T1, T2>(elt.first(), elt.second());
     }
     else {
-      Relation<T1, T2> result = IndexedRelation.makeHashBased();
+      Relation<T1, T2> result = IndexedRelation.makeLinkedHashBased();
       for (Pair<? extends T1, ? extends T2> elt : pairs) {
         result.add(elt.first(), elt.second());
       }
