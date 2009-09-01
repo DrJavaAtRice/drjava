@@ -5551,38 +5551,38 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   private void _junit() {
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    
     hourglassOn(); // turned off in junitStarted/nonTestCase/_junitInterrupted  
-    new Thread("Run JUnit on Current Document") {
-      public void run() {
-        _disableJUnitActions();
-        // now also works with multiple documents
+    // moved this back into the event thread to fix bug 2848696
+    // this code doesn't have to run in an auxiliary thread
+    // the actual unit testing later is done in a separate thread
+    _disableJUnitActions();
+    // now also works with multiple documents
 //        hourglassOn();  // moved into the prelude before this thread start  
-        try { _model.getJUnitModel().junitDocs(_model.getDocumentNavigator().getSelectedDocuments()); }
-        catch(UnexpectedException e) { _junitInterrupted(e); }
-        catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
-      }
-    }.start();
+    try { _model.getJUnitModel().junitDocs(_model.getDocumentNavigator().getSelectedDocuments()); }
+    catch(UnexpectedException e) { _junitInterrupted(e); }
+    catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
   }
   
   private void _junitFolder() {
     updateStatusField("Running Unit Tests in Current Folder");
     hourglassOn();  // turned off in junitStarted/nonTestCase/_junitInterrupted
-    new Thread("Run JUnit on specified folder") {
-      public void run() { 
-        _disableJUnitActions();
+    // moved this back into the event thread to fix bug 2848696
+    // this code doesn't have to run in an auxiliary thread
+    // the actual unit testing later is done in a separate thread
+    _disableJUnitActions();
 //        hourglassOn();  // turned off when JUnitStarted event is fired
-        if (_model.getDocumentNavigator().isGroupSelected()) {
-          ArrayList<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getDocuments();
-          final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
-          for (OpenDefinitionsDocument doc: docs) {
-            if (_model.getDocumentNavigator().isSelectedInGroup(doc)) l.add(doc);
-          }
-          try { _model.getJUnitModel().junitDocs(l); }  // hourglassOn executed by junitStarted()
-          catch(UnexpectedException e) { _junitInterrupted(e); }
-          catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
-        }
+    if (_model.getDocumentNavigator().isGroupSelected()) {
+      ArrayList<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getDocuments();
+      final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
+      for (OpenDefinitionsDocument doc: docs) {
+        if (_model.getDocumentNavigator().isSelectedInGroup(doc)) l.add(doc);
       }
-    }.start();
+      try { _model.getJUnitModel().junitDocs(l); }  // hourglassOn executed by junitStarted()
+      catch(UnexpectedException e) { _junitInterrupted(e); }
+      catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
+    }
   }
   
   /** Tests the documents in the project source tree. Assumes that DrJava is in project mode. */
