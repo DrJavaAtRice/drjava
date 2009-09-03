@@ -14,6 +14,7 @@ import edu.rice.cs.plt.collect.Order;
 import edu.rice.cs.plt.collect.PredicateSet;
 import edu.rice.cs.plt.collect.Relation;
 
+import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.symbol.type.*;
 
 import static edu.rice.cs.plt.iter.IterUtil.mapSnapshot;
@@ -31,7 +32,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 public class JLSTypeSystem extends StandardTypeSystem {
   
-  public static final JLSTypeSystem INSTANCE = new JLSTypeSystem();
+  public JLSTypeSystem(Options opt) { super(opt); }
   
   /** Determine if the type is well-formed. */
   public boolean isWellFormed(Type t) { return t.apply(new WellFormedTester()); }

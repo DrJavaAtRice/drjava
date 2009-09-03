@@ -11,6 +11,7 @@ import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.collect.Order;
 
+import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.symbol.type.*;
 
 import static edu.rice.cs.plt.iter.IterUtil.map;
@@ -27,7 +28,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 public class ExtendedTypeSystem extends StandardTypeSystem {
   
-  public static final ExtendedTypeSystem INSTANCE = new ExtendedTypeSystem();
+  public ExtendedTypeSystem(Options opt) { super(opt); }
   
   /** Determine if the type is well-formed. */
   public boolean isWellFormed(Type t) {

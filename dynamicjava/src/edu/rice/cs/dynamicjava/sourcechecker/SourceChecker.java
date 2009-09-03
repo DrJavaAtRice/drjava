@@ -29,6 +29,8 @@ import edu.rice.cs.plt.collect.Relation;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Lambda;
+import edu.rice.cs.plt.lambda.LambdaUtil;
+import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.reflect.PathClassLoader;
 import edu.rice.cs.plt.text.ArgumentParser;
 import edu.rice.cs.plt.text.TextUtil;
@@ -188,12 +190,15 @@ public class SourceChecker {
     argParser.supportAlias("cp", "classpath");
     argParser.supportOption("jls");
     argParser.requireParams(1);
-    ArgumentParser.Result parsedArgs = argParser.parse(args);
+    final ArgumentParser.Result parsedArgs = argParser.parse(args);
     
-    final TypeSystem ts = parsedArgs.hasOption("jls") ? JLSTypeSystem.INSTANCE : ExtendedTypeSystem.INSTANCE;
     Options opt = new Options() {
-      public TypeSystem typeSystem() { return ts; }
-      public boolean enforceAllAccess() { return true; }
+      @Override protected Thunk<? extends TypeSystem> typeSystemFactory() {
+        TypeSystem result = parsedArgs.hasOption("jls") ? new JLSTypeSystem(this) : new ExtendedTypeSystem(this);
+        return LambdaUtil.valueLambda(result);
+      }
+      @Override public boolean enforceAllAccess() { return true; }
+      @Override public boolean prohibitUncheckedCasts() { return false; }
     };
     Iterable<File> cp = IOUtil.parsePath(parsedArgs.getUnaryOption("classpath"));
     Iterable<File> sources = IterUtil.map(parsedArgs.params(), IOUtil.FILE_FACTORY);

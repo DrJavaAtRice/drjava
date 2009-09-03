@@ -28,10 +28,9 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  */
 public abstract class StandardTypeSystem extends TypeSystem {
   
-  private final boolean _supportBoxing;
+  private final Options _opt;
   
-  protected StandardTypeSystem() { _supportBoxing = true; }
-  protected StandardTypeSystem(boolean supportBoxing) { _supportBoxing = supportBoxing; }
+  protected StandardTypeSystem(Options opt) { _opt  = opt; }
 
   /** Determine if the type is well-formed. */
   public abstract boolean isWellFormed(Type t);
@@ -233,7 +232,6 @@ public abstract class StandardTypeSystem extends TypeSystem {
   
   /** Determine if {@link #cast} would succeed given an expression of the given type */
   public boolean isCastable(Type target, Type expT) {
-    // TODO: Handle unchecked warnings -- perhaps at the call site
     try {
       Expression e = TypeUtil.makeEmptyExpression();
       NodeProperties.setType(e, expT);
@@ -270,7 +268,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   
   public boolean isPrimitiveConvertible(Type t) {
     return isPrimitive(t) ||
-      (_supportBoxing && !isSubtype(t, NULL) &&
+      (!_opt.prohibitBoxing() && !isSubtype(t, NULL) &&
        (isSubtype(t, BOOLEAN_CLASS) || 
         isSubtype(t, CHARACTER_CLASS) ||
         isSubtype(t, BYTE_CLASS) ||
@@ -283,7 +281,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   
   
   public boolean isReferenceConvertible(Type t) {
-    return isReference(t) || _supportBoxing && t instanceof PrimitiveType;
+    return isReference(t) || !_opt.prohibitBoxing() && t instanceof PrimitiveType;
   }
   
   
@@ -864,7 +862,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   public Expression makePrimitive(Expression e) throws UnsupportedConversionException {
     Type t = NodeProperties.getType(e);
     if (isPrimitive(t)) { return e; }
-    else if (!_supportBoxing) { throw new UnsupportedConversionException(); }
+    else if (_opt.prohibitBoxing()) { throw new UnsupportedConversionException(); }
     // Note: The spec is not clear about whether a *subtype* (such as a variable) can
     //       be unboxed.  We allow it here unless the type is null, because that seems
     //       like the correct approach.
@@ -905,7 +903,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   public Expression makeReference(final Expression e) throws UnsupportedConversionException {
     Type t = NodeProperties.getType(e);
     if (isReference(t)) { return e; }
-    else if (!_supportBoxing) { throw new UnsupportedConversionException(); }
+    else if (_opt.prohibitBoxing()) { throw new UnsupportedConversionException(); }
     else {
       Expression result = t.apply(new TypeAbstractVisitor<Expression>() {
         public Expression defaultCase(Type t) {  return null; }
@@ -1065,7 +1063,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
       @Override public Pair<Expression, Expression> forNumericType(NumericType t1) { return checkForNumericE2(); }
       
       private boolean isNumericReference(Type t) {
-        return _supportBoxing &&
+        return !_opt.prohibitBoxing() &&
           (isSubtype(t, CHARACTER_CLASS) || 
            isSubtype(t, BYTE_CLASS) || 
            isSubtype(t, SHORT_CLASS) || 
@@ -1075,7 +1073,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
            isSubtype(t, DOUBLE_CLASS));
       }
       
-      private boolean isBooleanReference(Type t) { return _supportBoxing && isSubtype(t, BOOLEAN_CLASS); }
+      private boolean isBooleanReference(Type t) { return !_opt.prohibitBoxing() && isSubtype(t, BOOLEAN_CLASS); }
       
       private Pair<Expression, Expression> checkForNumericE2() {
         return NodeProperties.getType(e2).apply(new TypeAbstractVisitor<Pair<Expression, Expression>>() {
@@ -1132,8 +1130,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
    * @return  An expression equivalent to {@code e}, wrapped in any necessary conversions
    * @throws  UnsupportedConversionException  If the cast is to an incompatible type.
    */
-  public Expression cast(Type target, final Expression e) 
-    throws UnsupportedConversionException {
+  public Expression cast(final Type target, final Expression e) throws UnsupportedConversionException {
     Expression result = target.apply(new TypeAbstractVisitor<Expression>() {
       
       @Override public Expression forPrimitiveType(PrimitiveType target) {
@@ -1146,15 +1143,14 @@ public abstract class StandardTypeSystem extends TypeSystem {
         catch (UnsupportedConversionException e) { return null; }
       }
       
-      public Expression defaultCase(Type target) {
+      @Override public Expression defaultCase(Type target) {
         try {
           Expression result = makeReference(e);
           Type source = NodeProperties.getType(result);
           if (!isSubtype(source, target)) {
-            // TODO: implement correctly instead of this simplified version (join might come in handy):           
-            if (isSubtype(target, source)) {
+            if (validCheckedCast(target, source) ||
+                (!_opt.prohibitUncheckedCasts() && validUncheckedCast(target, source))) {
               NodeProperties.setCheckedType(result, erasedClass(target));
-              // TODO: unchecked warnings
             }
             else { throw new UnsupportedConversionException(); }
           }
@@ -1165,6 +1161,51 @@ public abstract class StandardTypeSystem extends TypeSystem {
     });
     if (result == null) { throw new UnsupportedConversionException(); }
     else { return result; }
+  }
+  
+  /**
+   * Whether a reference down-cast is valid and guaranteed safe. See JLS 5.5.  (This is not completely faithful
+   * to the JLS, simply because the details in the JLS are very complex.)
+   */
+  private boolean validCheckedCast(Type target, final Type source) {
+    return target.apply(new TypeAbstractVisitor<Boolean>() {
+      @Override public Boolean defaultCase(Type target) {
+        return isReifiable(target) && isSubtype(target, erase(source));
+      }
+      @Override public Boolean forClassType(ClassType target) {
+        return isReifiable(target) && (target.getClass().isInterface() || isSubtype(target, erase(source)));
+      }
+      @Override public Boolean forParameterizedClassType(ParameterizedClassType target) {
+        if (isReifiable(target)) { return target.getClass().isInterface() || isSubtype(target, erase(source)); }
+        else {
+          if (isSubtype(target, source)) {
+            // Verify that that, given a value of type source & erase(target), it must have type target.
+            // Must show, where target=Target<T1..Tn>, forall X1..Xn, Target<X1..Xn> <: source implies Xi=Ti.
+            ParameterizedClassType wildCapt = capture(parameterize(new RawClassType(target.ofClass())));
+            Iterable<VariableType> unboundArgs =
+              IterUtil.filterInstances(IterUtil.relax(wildCapt.typeArguments()), VariableType.class);
+            Iterable<Type> boundArgs = inferTypeArguments(unboundArgs, EMPTY_TYPE_ITERABLE, wildCapt,
+                                                          EMPTY_TYPE_ITERABLE, Option.some(source));
+            return boundArgs != null && IterUtil.and(boundArgs, target.typeArguments(), new Predicate2<Type, Type>() {
+              public boolean contains(Type inferred, Type orig) { return isEqual(inferred, orig); }
+            });
+          }
+          else { return false; }
+        }
+      }
+      @Override public Boolean forArrayType(ArrayType target) {
+        if (isArray(source)) { return validCheckedCast(target.ofType(), arrayElementType(source)); }
+        else { return defaultCase(target); }
+      }
+    });
+  }
+  
+  /**
+   * Whether a reference down-cast is valid as an unchecked cast. See JLS 5.5.  (This is not completely faithful
+   * to the JLS, simply because the details in the JLS are very complex.)
+   */
+  private boolean validUncheckedCast(Type target, Type source) {
+    return isSubtype(target, erase(source)) || isSubtype(source, erase(target));
   }
   
   /**
@@ -1509,14 +1550,29 @@ public abstract class StandardTypeSystem extends TypeSystem {
   }
   
   private Type fieldType(final DJField f, Type declaringType) {
-    return declaringType.apply(new TypeAbstractVisitor<Type>() {
-      @Override public Type defaultCase(Type declaringType) { return f.type(); }
-      @Override public Type forRawClassType(RawClassType declaringType) { return erase(f.type()); }
-      @Override public Type forParameterizedClassType(ParameterizedClassType declaringType) {
-        ParameterizedClassType cap = capture(declaringType);
-        return substitute(f.type(), SymbolUtil.allTypeParameters(cap.ofClass()), cap.typeArguments());
+    Type dynamicContext;
+    if (f.isStatic()) {
+      if (declaringType instanceof ClassType) {
+        dynamicContext = SymbolUtil.dynamicOuterClassType((ClassType) declaringType);
       }
-    });
+      else { dynamicContext = null; }
+    }
+    else { dynamicContext = declaringType; }
+    if (dynamicContext == null) { return f.type(); }
+    else {
+      return dynamicContext.apply(new TypeAbstractVisitor<Type>() {
+        @Override public Type defaultCase(Type dynamicContext) { return f.type(); }
+        @Override public Type forRawClassType(RawClassType dynamicContext) {
+          // TODO: raw member access warnings
+          return erase(f.type());
+        }
+        @Override public Type forParameterizedClassType(ParameterizedClassType dynamicContext) {
+          ParameterizedClassType dynamicContextCap = capture(dynamicContext);
+          Iterable<VariableType> tparams = SymbolUtil.allTypeParameters(dynamicContextCap.ofClass());
+          return substitute(f.type(), tparams, dynamicContextCap.typeArguments());
+        }
+      });
+    }
   }
   
   public boolean containsClass(Type t, final String name) {
