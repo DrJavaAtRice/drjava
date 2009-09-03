@@ -224,7 +224,7 @@ public class TreeCompiler {
         paramAsts = ((GenericClassDeclaration) ast).getTypeParameters();
       }
       else if (ast instanceof GenericInterfaceDeclaration) {
-        paramAsts = ((GenericClassDeclaration) ast).getTypeParameters();
+        paramAsts = ((GenericInterfaceDeclaration) ast).getTypeParameters();
       }
       else { paramAsts = new TypeParameter[0]; }
       
