@@ -871,12 +871,18 @@ public class ExpressionChecker {
      */
     @Override public Type visit(SimpleAllocation node) {
       Type t = checkTypeName(node.getCreationType());
-      if (!ts.isConcrete(t)) { throw new ExecutionError("allocation.type", node); }
+      if (!ts.isConcrete(t)) {
+        setErrorStrings(node, ts.userRepresentation(t));
+        throw new ExecutionError("allocation.type", node);
+      }
 
       Option<Type> dynamicOuter = ts.dynamicallyEnclosingType(t);
       if (dynamicOuter.isSome()) {
         DJClass enclosingThis = enclosingThis(dynamicOuter.unwrap());
-        if (enclosingThis == null) { throw new ExecutionError("allocation.type", node); }
+        if (enclosingThis == null) {
+          setErrorStrings(node, ts.userRepresentation(t), ts.userRepresentation(dynamicOuter.unwrap()));
+          throw new ExecutionError("inner.allocation", node);
+        }
         else { setEnclosingThis(node, enclosingThis); }
       }
       
@@ -911,13 +917,17 @@ public class ExpressionChecker {
     @Override public Type visit(AnonymousAllocation node) {
       Type t = checkTypeName(node.getCreationType());
       if (!ts.isExtendable(t) && !ts.isImplementable(t)) {
-        throw new ExecutionError("allocation.type", node);
+        setErrorStrings(node, ts.userRepresentation(t));
+        throw new ExecutionError("invalid.supertype", node);
       }
       
       Option<Type> dynamicOuter = ts.dynamicallyEnclosingType(t);
       if (dynamicOuter.isSome()) {
         DJClass enclosingThis = enclosingThis(dynamicOuter.unwrap());
-        if (enclosingThis == null) { throw new ExecutionError("allocation.type", node); }
+        if (enclosingThis == null) {
+          setErrorStrings(node, ts.userRepresentation(t), ts.userRepresentation(dynamicOuter.unwrap()));
+          throw new ExecutionError("inner.allocation", node);
+        }
         else { setEnclosingThis(node, enclosingThis); }
       }
       
@@ -993,6 +1003,7 @@ public class ExpressionChecker {
           throw new ExecutionError("static.inner.allocation", node);
         }
         if (!ts.isConcrete(t)) {
+          setErrorStrings(node, ts.userRepresentation(t));
           throw new ExecutionError("allocation.type", node);
         }
         
@@ -1049,7 +1060,8 @@ public class ExpressionChecker {
           throw new ExecutionError("static.inner.allocation", node);
         }
         if (!ts.isExtendable(t)) {
-          throw new ExecutionError("allocation.type", node);
+          setErrorStrings(node, ts.userRepresentation(t));
+          throw new ExecutionError("invalid.supertype", node);
         }
         setSuperType(node, t);
         
