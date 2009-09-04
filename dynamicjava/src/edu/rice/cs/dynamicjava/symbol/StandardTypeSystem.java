@@ -627,7 +627,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   
   public String userRepresentation(Iterable<? extends Type> ts) {
     TypeWriter w = new TypeWriter();
-    w.runOnList(ts);
+    w.runOnList(ts, ", ");
     w.appendConstraints();
     return w.result();
   }
@@ -636,7 +636,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
     TypeWriter w = new TypeWriter();
     if (!IterUtil.isEmpty(f.typeParameters())) {
       w.append("<");
-      w.runOnList(f.typeParameters());
+      w.runOnList(f.typeParameters(), ", ");
       w.append("> ");
     }
     if (!(f instanceof DJConstructor)) {
@@ -645,7 +645,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
     }
     w.append(f.declaredName());
     w.append("(");
-    w.runOnList(SymbolUtil.parameterTypes(f));
+    w.runOnList(SymbolUtil.parameterTypes(f), ", ");
     w.append(")");
     w.appendConstraints();
     return w.result();
@@ -688,10 +688,10 @@ public abstract class StandardTypeSystem extends TypeSystem {
       _stack.run(recur, dontRecur, t/*, 2*/); 
     }
     
-    public void runOnList(Iterable<? extends Type> ts) {
+    public void runOnList(Iterable<? extends Type> ts, String delim) {
       boolean first = true;
       for (Type t : ts) {
-        if (!first) { _result.append(", "); }
+        if (!first) { _result.append(delim); }
         first = false;
         run(t);
       }
@@ -720,20 +720,18 @@ public abstract class StandardTypeSystem extends TypeSystem {
       _result.append("...");
     }
     
-    public void forSimpleClassType(SimpleClassType t) {
-      _result.append(SymbolUtil.shortName(t.ofClass()));
-    }
+    public void forSimpleClassType(SimpleClassType t) { appendClassName(t.ofClass()); }
     
     public void forRawClassType(RawClassType t) {
       _result.append("raw ");
-      _result.append(SymbolUtil.shortName(t.ofClass()));
+      appendClassName(t.ofClass());
     }
     
     public void forParameterizedClassType(ParameterizedClassType t) {
       Iterator<DJClass> classes = SymbolUtil.outerClassChain(t.ofClass()).iterator();
       Iterator<? extends Type> targs = t.typeArguments().iterator();
       DJClass c = classes.next();
-      _result.append(SymbolUtil.shortName(c));
+      appendClassName(c);
       DJClass inner;
       while (c != null) {
         inner = classes.hasNext() ? classes.next() : null; // next in the chain, or null if c is last
@@ -755,6 +753,14 @@ public abstract class StandardTypeSystem extends TypeSystem {
       }
     }
     
+    private void appendClassName(DJClass c) {
+      if (c.isAnonymous()) {
+        _result.append("anonymous ");
+        runOnList(c.declaredSupertypes(), " & ");
+      }
+      else { _result.append(SymbolUtil.shortName(c)); }
+    }
+    
     public void forVariableType(VariableType t) {
       String name = _variableHandler.registerVariable(t);
       _result.append(name);
@@ -768,14 +774,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
         run(IterUtil.first(t.ofTypes()));
         _result.append(")");
       }
-      else {
-        boolean first = true;
-        for (Type componentT : t.ofTypes()) {
-          if (first) { first = false; }
-          else { _result.append(" & "); }
-          run(componentT);
-        }
-      }
+      else { runOnList(t.ofTypes(), " & "); }
     }
     
     public void forUnionType(UnionType t) {
@@ -786,14 +785,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
         run(IterUtil.first(t.ofTypes()));
         _result.append(")");
       }
-      else {
-        boolean first = true;
-        for (Type componentT : t.ofTypes()) {
-          if (first) { first = false; }
-          else { _result.append(" | "); }
-          run(componentT);
-        }
-      }
+      else { runOnList(t.ofTypes(), " | "); }
     }
     
     public void forWildcard(Wildcard t) {
@@ -1783,6 +1775,9 @@ public abstract class StandardTypeSystem extends TypeSystem {
       debug.logStart(new String[]{"t","name","onlyStatic"}, wrap(t), _name, _onlyStatic); try {
         
       PredicateSet<DJMethod> candidates = findAll(t);
+      if (_name.equals("entrySet")) {
+        Type foo = candidates.iterator().next().returnType();
+      }
       Iterable<FunctionInvocationCandidate<DJMethod>> best = bestInvocations(candidates, targs, args, expected);
       // TODO: provide more error-message information
       int matches = IterUtil.sizeOf(best);

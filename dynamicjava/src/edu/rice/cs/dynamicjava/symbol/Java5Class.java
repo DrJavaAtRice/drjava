@@ -134,35 +134,29 @@ public class Java5Class extends JavaClass {
     
   private static Type convertParameterizedType(ParameterizedType paramT, 
                                                final PrecomputedRecursionStack<java.lang.reflect.Type, Type> stack) {
-    Iterable<Type> targsBuilder = IterUtil.empty();
-    boolean raw = false; // true iff an enclosing type is raw, and so this type must also be raw
+    // assumes getRawType and getOwnerType return class types
+    ClassType rawT = (ClassType) convertType(paramT.getRawType(), stack);
+    ClassType ownerT = (paramT.getOwnerType() == null) ? null : (ClassType) convertType(paramT.getOwnerType(), stack);
+    ClassType enclosingT = rawT.ofClass().isStatic() ? SymbolUtil.dynamicOuterClassType(ownerT) : ownerT;
     
-    if (paramT.getOwnerType() != null) {
-      Type ownerT = convertType(paramT.getOwnerType(), stack);
-      Iterable<? extends Type> outerArgs = ownerT.apply(new TypeAbstractVisitor<Iterable<? extends Type>>() {
-        
-        public Iterable<? extends Type> defaultCase(Type ownerT) { 
-          throw new IllegalArgumentException("Owner of ParameterizedType must be a class type");
-        }
-        
-        @Override public Iterable<? extends Type> forSimpleClassType(SimpleClassType ownerT) { 
+    Iterable<? extends Type> outerArgs = IterUtil.empty();
+    boolean raw = false; // true iff an enclosing type is raw, and so this type must also be raw
+    if (enclosingT != null) {
+      Iterable<? extends Type> ts = enclosingT.apply(new TypeAbstractVisitor<Iterable<? extends Type>>() {
+        @Override public Iterable<? extends Type> forSimpleClassType(SimpleClassType enclosingT) { 
           return IterUtil.empty();
         }
-        
-        @Override public Iterable<? extends Type> forRawClassType(RawClassType ownerT) { return null; }
-        
-        @Override public Iterable<? extends Type> forParameterizedClassType(ParameterizedClassType ownerT) { 
-          return ownerT.typeArguments();
+        @Override public Iterable<? extends Type> forRawClassType(RawClassType enclosingT) { return null; }
+        @Override public Iterable<? extends Type> forParameterizedClassType(ParameterizedClassType enclosingT) { 
+          return enclosingT.typeArguments();
         }
       });
-      if (outerArgs == null) { raw = true; }
-      else { targsBuilder = IterUtil.compose(targsBuilder, outerArgs); }
+      if (ts == null) { raw = true; }
+      else { outerArgs = ts; }
     }
     
-    targsBuilder = IterUtil.compose(targsBuilder, convertTypes(paramT.getActualTypeArguments(), stack));
-    
-    Type rawT = convertType(paramT.getRawType(), stack);
-    final Iterable<Type> targs = targsBuilder; // targsBuilder must be redeclared as final
+    Iterable<Type> directArgs = convertTypes(paramT.getActualTypeArguments(), stack);
+    final Iterable<Type> targs = IterUtil.compose(outerArgs, directArgs);
     Type result = rawT.apply(new TypeAbstractVisitor<Type>() {
       
       public Type defaultCase(Type t) { 
