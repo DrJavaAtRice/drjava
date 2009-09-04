@@ -34,48 +34,36 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.ui.config;
+package edu.rice.cs.util.swing;
 
+import java.awt.*;
 import javax.swing.*;
 
-import edu.rice.cs.util.swing.SwingFrame;
-
-/** Displays a label in the form of an option component, to be displayed in a config panel. */
-public class LabelComponent extends OptionComponent<Object> {
-  private JTextArea _text;
-
-  public LabelComponent(String text, SwingFrame parent, boolean left) {
-    super(left?text:"", parent);
-    _text = new JTextArea(left?"":text);
-    _text.setEditable(false);
-    _text.setBackground(parent.getBackground());
-//    _text.setBackground(new Color(204,204,204));
+/** Dialog that gets displayed when the program is processing data. */
+public class ProcessingDialog extends JDialog {
+  private Component _parent;
+  private JProgressBar _pb;
+  
+  public ProcessingDialog(Frame parent, String title, String label) {
+    super(parent, title);
+    setResizable(false);    
+    _parent = parent;
+    setSize(350, 150);
+    Utilities.setPopupLoc(this, parent);
+    JLabel waitLabel = new JLabel(label, SwingConstants.CENTER);
+    getRootPane().setLayout(new BorderLayout());
+    getRootPane().add(waitLabel, BorderLayout.CENTER);
+    _pb = new JProgressBar(0, 100);
+    _pb.setValue(0);
+    _pb.setStringPainted(false);
+    _pb.setIndeterminate(true);
+    getRootPane().add(_pb, BorderLayout.SOUTH);
   }
-
-  public LabelComponent(String text, SwingFrame parent, String description, boolean left) {
-    this(text, parent, left);
-    setDescription(description);
+  
+  public JProgressBar getProgressBar() { return _pb; }
+  
+  public void setVisible(boolean vis) {
+    Utilities.setPopupLoc(this, _parent);
+    super.setVisible(vis);
   }
-
-  public LabelComponent(String text, SwingFrame parent) { this(text,parent,false); }
-
-  public LabelComponent(String text, SwingFrame parent, String description) {
-    this(text, parent, description, false);
-  }
-
-  public void setDescription(String description) {
-    _text.setToolTipText(description);
-    _label.setToolTipText(description);
-  }
-
-  /** Updates the config object with the new setting.  (Does nothing.)
-   * @return true if the new value is set successfully
-   */
-  public boolean updateConfig() { return true; }
-
-  /** Displays the given value.  (Never changes.) */
-  public void setValue(Object value) { }
-
-  /** Return's this OptionComponent's configurable component. */
-  public JTextArea getComponent() { return _text; }
 }

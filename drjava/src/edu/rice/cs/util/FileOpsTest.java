@@ -411,4 +411,146 @@ public class FileOpsTest extends DrJavaTestCase {
     
     edu.rice.cs.plt.io.IOUtil.deleteRecursively(dir1);
   }
+  
+  /** Tests for getShortFile. This test creates a file and writes to it using a long file name, then
+    * checks if the short file name is the same (canonical) file and that it contains teh same data. */
+  public void testGetShortFile() throws IOException {
+    File dir1 = FileOps.createTempDirectory("DrJavaTestTempDir");
+    File dir2 = new File(dir1, "Documents and Settings" + File.separator + "User Name" + File.separator + "My Documents");
+    assertTrue("Couldn't create temp directory", dir2.mkdirs());
+    
+    File longF = new File(dir2, "rt.concjunit.txt");
+    PrintWriter pw = new PrintWriter(new FileWriter(longF));
+    String s = new java.util.Date().toString() + " "+System.currentTimeMillis();
+    pw.println(s);
+    pw.close();
+    
+    File shortF = FileOps.getShortFile(longF);
+    assertTrue("Short file name doesn't exist", shortF.exists());
+    BufferedReader br = new BufferedReader(new FileReader(shortF));
+    String line = br.readLine();
+    br.close();
+    assertEquals("File contents are not the same", s, line);
+    assertEquals("Files are not the same", longF.getCanonicalFile(), shortF.getCanonicalFile());
+    
+    longF = new File(dir2, "prefix and space rt.concjunit.txt");
+    pw = new PrintWriter(new FileWriter(longF));
+    s = new java.util.Date().toString() + " "+System.currentTimeMillis();
+    pw.println(s);
+    pw.close();
+    
+    shortF = FileOps.getShortFile(longF);
+    assertTrue("Short file name doesn't exist", shortF.exists());
+    br = new BufferedReader(new FileReader(shortF));
+    line = br.readLine();
+    br.close();
+    assertEquals("File contents are not the same", s, line);
+    assertEquals("Files are not the same", longF.getCanonicalFile(), shortF.getCanonicalFile());
+    
+    longF = new File(dir2, "short.txt");
+    pw = new PrintWriter(new FileWriter(longF));
+    s = new java.util.Date().toString() + " "+System.currentTimeMillis();
+    pw.println(s);
+    pw.close();
+    
+    shortF = FileOps.getShortFile(longF);
+    assertTrue("Short file name doesn't exist", shortF.exists());
+    br = new BufferedReader(new FileReader(shortF));
+    line = br.readLine();
+    br.close();
+    assertEquals("File contents are not the same", s, line);
+    assertEquals("Files are not the same", longF.getCanonicalFile(), shortF.getCanonicalFile());
+    
+    File dir3 = new File(dir2, "Another Long Directory");
+    assertTrue("Couldn't create temp directory", dir3.mkdirs());
+
+    longF = new File(dir3, "rt.concjunit.txt");
+    pw = new PrintWriter(new FileWriter(longF));
+    s = new java.util.Date().toString() + " "+System.currentTimeMillis();
+    pw.println(s);
+    pw.close();
+    
+    shortF = FileOps.getShortFile(longF);
+    assertTrue("Short file name doesn't exist", shortF.exists());
+    br = new BufferedReader(new FileReader(shortF));
+    line = br.readLine();
+    br.close();
+    assertEquals("File contents are not the same", s, line);
+    assertEquals("Files are not the same", longF.getCanonicalFile(), shortF.getCanonicalFile());
+    
+    longF = new File(dir3, "prefix and space rt.concjunit.txt");
+    pw = new PrintWriter(new FileWriter(longF));
+    s = new java.util.Date().toString() + " "+System.currentTimeMillis();
+    pw.println(s);
+    pw.close();
+    
+    shortF = FileOps.getShortFile(longF);
+    assertTrue("Short file name doesn't exist", shortF.exists());
+    br = new BufferedReader(new FileReader(shortF));
+    line = br.readLine();
+    br.close();
+    assertEquals("File contents are not the same", s, line);
+    assertEquals("Files are not the same", longF.getCanonicalFile(), shortF.getCanonicalFile());
+    
+    longF = new File(dir3, "short.txt");
+    pw = new PrintWriter(new FileWriter(longF));
+    s = new java.util.Date().toString() + " "+System.currentTimeMillis();
+    pw.println(s);
+    pw.close();
+    
+    shortF = FileOps.getShortFile(longF);
+    assertTrue("Short file name doesn't exist", shortF.exists());
+    br = new BufferedReader(new FileReader(shortF));
+    line = br.readLine();
+    br.close();
+    assertEquals("File contents are not the same", s, line);
+    assertEquals("Files are not the same", longF.getCanonicalFile(), shortF.getCanonicalFile());
+    
+    File dir4 = new File(dir2, "shortdir");
+    assertTrue("Couldn't create temp directory", dir4.mkdirs());
+
+    longF = new File(dir4, "rt.concjunit.txt");
+    pw = new PrintWriter(new FileWriter(longF));
+    s = new java.util.Date().toString() + " "+System.currentTimeMillis();
+    pw.println(s);
+    pw.close();
+    
+    shortF = FileOps.getShortFile(longF);
+    assertTrue("Short file name doesn't exist", shortF.exists());
+    br = new BufferedReader(new FileReader(shortF));
+    line = br.readLine();
+    br.close();
+    assertEquals("File contents are not the same", s, line);
+    assertEquals("Files are not the same", longF.getCanonicalFile(), shortF.getCanonicalFile());
+    
+    longF = new File(dir4, "prefix and space rt.concjunit.txt");
+    pw = new PrintWriter(new FileWriter(longF));
+    s = new java.util.Date().toString() + " "+System.currentTimeMillis();
+    pw.println(s);
+    pw.close();
+    
+    shortF = FileOps.getShortFile(longF);
+    assertTrue("Short file name doesn't exist", shortF.exists());
+    br = new BufferedReader(new FileReader(shortF));
+    line = br.readLine();
+    br.close();
+    assertEquals("File contents are not the same", s, line);
+    assertEquals("Files are not the same", longF.getCanonicalFile(), shortF.getCanonicalFile());
+    
+    longF = new File(dir4, "short.txt");
+    pw = new PrintWriter(new FileWriter(longF));
+    s = new java.util.Date().toString() + " "+System.currentTimeMillis();
+    pw.println(s);
+    pw.close();
+    
+    shortF = FileOps.getShortFile(longF);
+    assertTrue("Short file name doesn't exist", shortF.exists());
+    br = new BufferedReader(new FileReader(shortF));
+    line = br.readLine();
+    br.close();
+    assertEquals("File contents are not the same", s, line);
+    assertEquals("Files are not the same", longF.getCanonicalFile(), shortF.getCanonicalFile());
+    
+    FileOps.deleteDirectory(dir1);
+  }
 }

@@ -70,6 +70,27 @@ public class FileOptionComponent extends OptionComponent<File> implements Option
     this(opt, text, parent, jfc);
     setDescription(description);
   }
+  
+  /** Constructor that allows for a user-supplied FileSelectorComponent. */
+  public FileOptionComponent (FileOption opt, String text, SwingFrame parent, FileSelectorComponent fsc) {
+    super(opt, text, parent);
+    _component = fsc;
+    File setting = DrJava.getConfig().getSetting(_option);
+    if (setting != _option.getDefault()) { _component.setFileField(setting); }
+    _component.getFileField().getDocument().addDocumentListener(new DocumentListener() {
+      public void insertUpdate(DocumentEvent e) { notifyChangeListeners(); }
+      public void removeUpdate(DocumentEvent e) { notifyChangeListeners(); }
+      public void changedUpdate(DocumentEvent e) { notifyChangeListeners(); }
+    });
+  }
+  
+  /** Constructor that allows for a user-supplied FileSelectorComponent and a tooltip. */
+  public FileOptionComponent (FileOption opt, String text, SwingFrame parent, String description, FileSelectorComponent fsc) {
+    this(opt, text, parent, fsc);
+    setDescription(description);
+  }
+  
+
 
   /** Sets the tooltip description text for this option.
     * @param description the tooltip text
@@ -100,7 +121,7 @@ public class FileOptionComponent extends OptionComponent<File> implements Option
   public void setValue(File value) { _component.setFileField(value); }
 
   /** Return's this OptionComponent's configurable component.  */
-  public JComponent getComponent() { return _component; }
+  public FileSelectorComponent getComponent() { return _component; }
   
   /** Set the file filter for this file option component */
   public void setFileFilter(FileFilter fileFilter) { _component.setFileFilter(fileFilter); }

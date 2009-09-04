@@ -298,7 +298,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         f.getPath().endsWith(OLD_PROJECT_FILE_EXTENSION);
     }
     public String getDescription() { 
-      return "DrJava Project Files (*" + PROJECT_FILE_EXTENSION + ", *" + PROJECT_FILE_EXTENSION2 + ", *" + OLD_PROJECT_FILE_EXTENSION + ")";
+      return "DrJava Project Files (*"+PROJECT_FILE_EXTENSION+", *"+PROJECT_FILE_EXTENSION2+", *"+OLD_PROJECT_FILE_EXTENSION+")";
     }
   };
   
@@ -387,8 +387,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _moveToAuxiliaryAction = new AbstractAction("Include With Project") {
     { /* initalization block */
       String msg = 
-      "<html>Open this document each time this project is opened.<br>" + 
-      "This file would then be compiled and tested with the<br>" + 
+      "<html>Open this document each time this project is opened.<br>"+
+      "This file would then be compiled and tested with the<br>"+
       "rest of the project.</html>";
       putValue(Action.SHORT_DESCRIPTION, msg);
     }
@@ -401,8 +401,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _moveAllToAuxiliaryAction = new AbstractAction("Include All With Project") {
     { /* initalization block */
       String msg = 
-      "<html>Open these documents each time this project is opened.<br>" + 
-      "These files would then be compiled and tested with the<br>" + 
+      "<html>Open these documents each time this project is opened.<br>"+
+      "These files would then be compiled and tested with the<br>"+
       "rest of the project.</html>";
       putValue(Action.SHORT_DESCRIPTION, msg);
     }
@@ -1566,7 +1566,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                           String stripPrefix,
                                                           String suffix) {
     // TODO: put this in an AsyncTask
-    URL url = MainFrame.class.getResource("/edu/rice/cs/drjava/docs/javaapi" + suffix);
+    URL url = MainFrame.class.getResource("/edu/rice/cs/drjava/docs/javaapi"+suffix);
     return _generateJavaAPISet(base, stripPrefix, url);
   }
   
@@ -1686,7 +1686,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         try {
           Set<JavaAPIListEntry> additionalList = _generateJavaAPISet(url + "/",
                                                                      "", // relative links
-                                                                     new URL(url + "/allclasses-frame.html"));
+                                                                     new URL(url+"/allclasses-frame.html"));
           _javaAPISet.addAll(additionalList);
         }
         catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
@@ -2320,7 +2320,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       BrowserDocumentRegion r = rm.prevCurrentRegion(_model.getNotifier());
       if (r != null) scrollToDocumentAndOffset(r.getDocument(), r.getStartOffset(), false, false);
       _configureBrowsing();
-//      MainFrame.MFLOG.log("browseBack: " + rm);
+//      MainFrame.MFLOG.log("browseBack: "+rm);
     }
   };
   
@@ -2341,7 +2341,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       BrowserDocumentRegion r = rm.nextCurrentRegion(_model.getNotifier());
       if (r != null) scrollToDocumentAndOffset(r.getDocument(), r.getStartOffset(), false, false);
       _configureBrowsing();
-//      MainFrame.MFLOG.log("browseForward: " + rm);
+//      MainFrame.MFLOG.log("browseForward: "+rm);
     }
   };
   
@@ -3196,7 +3196,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpTabs();
     
     // DefinitionsPane
-    _recentDocFrame = new RecentDocFrame(MainFrame.this);
+      _recentDocFrame = new RecentDocFrame(MainFrame.this);
     OpenDefinitionsDocument activeDoc = _model.getActiveDocument();
     _recentDocFrame.pokeDocument(activeDoc);
     _currentDefDoc = activeDoc.getDocument();
@@ -3470,6 +3470,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       ConfigOptionListeners.sanitizeMasterJVMArgs(MainFrame.this, config.getSetting(MASTER_JVM_ARGS), masterJVMArgsListener);
       ConfigOptionListeners.sanitizeMasterJVMXMX(MainFrame.this, config.getSetting(MASTER_JVM_XMX));
       ConfigOptionListeners.sanitizeJavadocCustomParams(MainFrame.this, config.getSetting(JAVADOC_CUSTOM_PARAMS));
+    config.addOptionListener(REMOTE_CONTROL_ENABLED, new ConfigOptionListeners.
+                               RequiresDrJavaRestartListener<Boolean>(_configFrame, "Remote Control"));
+    config.addOptionListener(REMOTE_CONTROL_PORT, new ConfigOptionListeners.
+                               RequiresDrJavaRestartListener<Integer>(_configFrame, "Remote Control Port"));
+    config.addOptionListener(JUNIT_LOCATION, new ConfigOptionListeners.
+                               RequiresDrJavaRestartListener<File>(_configFrame, "JUnit Location"));
     
     // If any errors occurred while parsing config file, show them
     _showConfigException();
@@ -3491,7 +3497,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
              ((e.getModifiersEx() & (InputEvent.CTRL_DOWN_MASK|InputEvent.SHIFT_DOWN_MASK))
                 == (InputEvent.CTRL_DOWN_MASK|InputEvent.SHIFT_DOWN_MASK))) &&
             (e.getComponent().getClass().equals(DefinitionsPane.class))) {
-//          System.out.println("discarding `, modifiers = " + e.getModifiersEx() + ": " + e.getComponent());
+//          System.out.println("discarding `, modifiers = "+e.getModifiersEx()+": "+e.getComponent());
           discardEvent = true;
         }
         return discardEvent;
@@ -3512,9 +3518,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           Object[] options = {"Disable","Ignore"};
           String msg = "<html>Could not start DrJava's remote control server";
           if (RemoteControlClient.getServerUser() != null) {
-            msg += "<br>because user " + RemoteControlClient.getServerUser() + " is already using the same port";
+            msg += "<br>because user "+RemoteControlClient.getServerUser()+" is already using the same port";
           }
-          msg += ".<br>Please select an unused port in the Preferences dialog.<br>" + 
+          msg += ".<br>Please select an unused port in the Preferences dialog.<br>"+
             "In the meantime, do you want to disable the remote control feature?";
           int n = JOptionPane.showOptionDialog(MainFrame.this,
                                                msg,
@@ -3557,9 +3563,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             Object[] options = {"Yes", "No", "Always", "Never"};
             String text = "Do you want to associate .java, .drjava and .djapp files with DrJava?\n" + 
               "Double-clicking on those files will open them in DrJava.\n\n" +
-              "Select 'Always' to let DrJava do this automatically.\n" + 
-              "Select 'Never' if you don't want to be asked again.\n\n" + 
-              "You can change this setting in the Preferences dialog under\n" + 
+              "Select 'Always' to let DrJava do this automatically.\n"+
+              "Select 'Never' if you don't want to be asked again.\n\n"+
+              "You can change this setting in the Preferences dialog under\n"+
               "Miscellaneous/File Types.";
             
             rc = JOptionPane.showOptionDialog(MainFrame.this, text, "Set File Associations?", JOptionPane.YES_NO_OPTION,
@@ -3584,7 +3590,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (!alreadyShowedDialog) {
       // check for new version if desired by user
       // but only if we haven't just asked if the user wants to download a new version
-      // two dialogs on program start is too much clutter
+      // two dialogs on program start is too much clutter    
       if (!DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
             .equals(OptionConstants.VersionNotificationChoices.DISABLED) &&
           !edu.rice.cs.util.swing.Utilities.TEST_MODE) {
@@ -3649,10 +3655,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                   new FileProperty("drjava.current.file", new Thunk<File>() {
       public File value() { return _model.getActiveDocument().getRawFile(); }
     }, 
-                                   "Returns the current document in DrJava.\n" + 
-                                   "Optional attributes:\n" + 
-                                   "\trel=\"<dir to which the output should be relative\"\n" + 
-                                   "\tsquote=\"<true to enclose file in single quotes>\"\n" + 
+                                   "Returns the current document in DrJava.\n"+
+                                   "Optional attributes:\n"+
+                                   "\trel=\"<dir to which the output should be relative\"\n"+
+                                   "\tsquote=\"<true to enclose file in single quotes>\"\n"+
                                    "\tdquote=\"<true to enclose file in double quotes>\"") {
                                      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                    });
@@ -3680,10 +3686,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                   new FileProperty("drjava.working.dir", new Thunk<File>() {
       public File value() { return _model.getInteractionsModel().getWorkingDirectory(); }
     },
-                                   "Returns the current working directory of DrJava.\n" + 
-                                   "Optional attributes:\n" + 
-                                   "\trel=\"<dir to which output should be relative\"\n" + 
-                                   "\tsquote=\"<true to enclose file in single quotes>\"\n" + 
+                                   "Returns the current working directory of DrJava.\n"+
+                                   "Optional attributes:\n"+
+                                   "\trel=\"<dir to which output should be relative\"\n"+
+                                   "\tsquote=\"<true to enclose file in single quotes>\"\n"+
                                    "\tdquote=\"<true to enclose file in double quotes>\"") {
                                      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                    });
@@ -3692,10 +3698,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                   new FileProperty("drjava.master.working.dir", new Thunk<File>() {
       public File value() { return _model.getMasterWorkingDirectory(); }
     },
-                                   "Returns the working directory of the DrJava master JVM.\n" + 
-                                   "Optional attributes:\n" + 
-                                   "\trel=\"<dir to which output should be relative\"\n" + 
-                                   "\tsquote=\"<true to enclose file in single quotes>\"\n" + 
+                                   "Returns the working directory of the DrJava master JVM.\n"+
+                                   "Optional attributes:\n"+
+                                   "\trel=\"<dir to which output should be relative\"\n"+
+                                   "\tsquote=\"<true to enclose file in single quotes>\"\n"+
                                    "\tdquote=\"<true to enclose file in double quotes>\"") {
                                      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                    });
@@ -3704,11 +3710,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     PropertyMaps.TEMPLATE.
       setProperty("DrJava", 
                   new FileListProperty("drjava.all.files", File.pathSeparator, DEF_DIR,
-                                       "Returns a list of all files open in DrJava.\n" + 
-                                       "Optional attributes:\n" + 
-                                       "\trel=\"<dir to which output should be relative\"\n" + 
-                                       "\tsep=\"<separator between files>\"\n" + 
-                                       "\tsquote=\"<true to enclose file in single quotes>\"\n" + 
+                                       "Returns a list of all files open in DrJava.\n"+
+                                       "Optional attributes:\n"+
+                                       "\trel=\"<dir to which output should be relative\"\n"+
+                                       "\tsep=\"<separator between files>\"\n"+
+                                       "\tsquote=\"<true to enclose file in single quotes>\"\n"+
                                        "\tdquote=\"<true to enclose file in double quotes>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
@@ -3727,8 +3733,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                        "to a project and are underneath the project root.\n" +
                                        "Optional attributes:\n" +
                                        "\trel=\"<dir to which output should be relative\"\n" +
-                                       "\tsep=\"<separator between files>\"\n" + 
-                                       "\tsquote=\"<true to enclose file in single quotes>\"\n" + 
+                                       "\tsep=\"<separator between files>\"\n"+
+                                       "\tsquote=\"<true to enclose file in single quotes>\"\n"+
                                        "\tdquote=\"<true to enclose file in double quotes>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
@@ -3748,8 +3754,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                        "the project.\n" +
                                        "Optional attributes:\n" +
                                        "\trel=\"<dir to which output should be relative\"\n" +
-                                       "\tsep=\"<separator between files>\"\n" + 
-                                       "\tsquote=\"<true to enclose file in single quotes>\"\n" + 
+                                       "\tsep=\"<separator between files>\"\n"+
+                                       "\tsquote=\"<true to enclose file in single quotes>\"\n"+
                                        "\tdquote=\"<true to enclose file in double quotes>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
@@ -3764,13 +3770,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     PropertyMaps.TEMPLATE.
       setProperty("DrJava", 
                   new FileListProperty("drjava.external.files", File.pathSeparator, DEF_DIR,
-                                       "Returns a list of all files open in DrJava that are " + 
-                                       "not underneath the project root and are not included in " + 
-                                       "the project.\n" + 
-                                       "Optional attributes:\n" + 
-                                       "\trel=\"<dir to which output should be relative\"\n" + 
-                                       "\tsep=\"<separator between files>\"\n" + 
-                                       "\tsquote=\"<true to enclose file in single quotes>\"\n" + 
+                                       "Returns a list of all files open in DrJava that are "+
+                                       "not underneath the project root and are not included in "+
+                                       "the project.\n"+
+                                       "Optional attributes:\n"+
+                                       "\trel=\"<dir to which output should be relative\"\n"+
+                                       "\tsep=\"<separator between files>\"\n"+
+                                       "\tsquote=\"<true to enclose file in single quotes>\"\n"+
                                        "\tdquote=\"<true to enclose file in double quotes>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
@@ -3786,9 +3792,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     PropertyMaps.TEMPLATE.
       setProperty("Misc", 
                   new DrJavaProperty("input", "(User Input...)",
-                                     "Get an input string from the user.\n" + 
-                                     "Optional attributes:\n" + 
-                                     "\tprompt=\"<prompt to display>\"\n" + 
+                                     "Get an input string from the user.\n"+
+                                     "Optional attributes:\n"+
+                                     "\tprompt=\"<prompt to display>\"\n"+
                                      "\tdefault=\"<suggestion to the user>\"") {
       public String toString() {
         return "(User Input...)";
@@ -3837,7 +3843,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     PropertyMaps.TEMPLATE.
       setProperty("Project", 
                   new DrJavaProperty("project.changed",
-                                     "Evaluates to true if the project has been " + 
+                                     "Evaluates to true if the project has been "+
                                      "changed since the last save.") {  //TODO: factor out repeated code!
       public void update(PropertyMaps pm) {
 //        long millis = System.currentTimeMillis();
@@ -3860,10 +3866,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                    new Thunk<File>() {
       public File value() { return _model.getProjectFile(); }
     },
-                                   "Returns the current project file in DrJava.\n" + 
-                                   "Optional attributes:\n" + 
-                                   "\trel=\"<dir to which the output should be relative\"\n" + 
-                                   "\tsquote=\"<true to enclose file in single quotes>\"\n" + 
+                                   "Returns the current project file in DrJava.\n"+
+                                   "Optional attributes:\n"+
+                                   "\trel=\"<dir to which the output should be relative\"\n"+
+                                   "\tsquote=\"<true to enclose file in single quotes>\"\n"+
                                    "\tdquote=\"<true to enclose file in double quotes>\"") {
                                      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                    });
@@ -3874,10 +3880,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                    new Thunk<File>() {
       public File value() { return new File(_model.getMainClass()); }
     },
-                                   "Returns the current project file in DrJava.\n" + 
-                                   "Optional attributes:\n" + 
-                                   "\trel=\"<dir to which the output should be relative\"\n" + 
-                                   "\tsquote=\"<true to enclose file in single quotes>\"\n" + 
+                                   "Returns the current project file in DrJava.\n"+
+                                   "Optional attributes:\n"+
+                                   "\trel=\"<dir to which the output should be relative\"\n"+
+                                   "\tsquote=\"<true to enclose file in single quotes>\"\n"+
                                    "\tdquote=\"<true to enclose file in double quotes>\"") {
                                      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                    });
@@ -3887,10 +3893,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                    new Thunk<File>() {
       public File value() { return _model.getProjectRoot(); }
     },
-                                   "Returns the current project root in DrJava.\n" + 
-                                   "Optional attributes:\n" + 
-                                   "\trel=\"<dir to which the output should be relative\"\n" + 
-                                   "\tsquote=\"<true to enclose file in single quotes>\"\n" + 
+                                   "Returns the current project root in DrJava.\n"+
+                                   "Optional attributes:\n"+
+                                   "\trel=\"<dir to which the output should be relative\"\n"+
+                                   "\tsquote=\"<true to enclose file in single quotes>\"\n"+
                                    "\tdquote=\"<true to enclose file in double quotes>\"") {
                                      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                    });
@@ -3900,20 +3906,20 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                    new Thunk<File>() {
       public File value() { return _model.getBuildDirectory(); }
     },
-                                   "Returns the current build directory in DrJava.\n" + 
-                                   "Optional attributes:\n" + 
-                                   "\trel=\"<dir to which the output should be relative\"\n" + 
-                                   "\tsquote=\"<true to enclose file in single quotes>\"\n" + 
+                                   "Returns the current build directory in DrJava.\n"+
+                                   "Optional attributes:\n"+
+                                   "\trel=\"<dir to which the output should be relative\"\n"+
+                                   "\tsquote=\"<true to enclose file in single quotes>\"\n"+
                                    "\tdquote=\"<true to enclose file in double quotes>\"") {
                                      public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
                                    });
     RecursiveFileListProperty classFilesProperty = 
       new RecursiveFileListProperty("project.class.files", File.pathSeparator, DEF_DIR,
                                     _model.getBuildDirectory().getAbsolutePath(),
-                                    "Returns the class files currently in the build directory.\n" + 
-                                    "\trel=\"<dir to which the output should be relative\"\n" + 
-                                    "\tsep=\"<string to separate files in the list>\"\n" + 
-                                    "\tsquote=\"<true to enclose file in single quotes>\"\n" + 
+                                    "Returns the class files currently in the build directory.\n"+
+                                    "\trel=\"<dir to which the output should be relative\"\n"+
+                                    "\tsep=\"<string to separate files in the list>\"\n"+
+                                    "\tsquote=\"<true to enclose file in single quotes>\"\n"+
                                     "\tdquote=\"<true to enclose file in double quotes>\"") {
       /** Reset the attributes. */
       public void resetAttributes() {
@@ -3947,12 +3953,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     PropertyMaps.TEMPLATE.
       setProperty("Project", 
                   new FileListProperty("project.excluded.files", File.pathSeparator, DEF_DIR,
-                                       "Returns a list of files that are excluded from DrJava's " + 
-                                       "project auto-refresh.\n" + 
-                                       "Optional attributes:\n" + 
-                                       "\trel=\"<dir to which output should be relative\"\n" + 
-                                       "\tsep=\"<separator between files>\"\n" + 
-                                       "\tsquote=\"<true to enclose file in single quotes>\"\n" + 
+                                       "Returns a list of files that are excluded from DrJava's "+
+                                       "project auto-refresh.\n"+
+                                       "Optional attributes:\n"+
+                                       "\trel=\"<dir to which output should be relative\"\n"+
+                                       "\tsep=\"<separator between files>\"\n"+
+                                       "\tsquote=\"<true to enclose file in single quotes>\"\n"+
                                        "\tdquote=\"<true to enclose file in double quotes>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
@@ -3965,12 +3971,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     PropertyMaps.TEMPLATE.
       setProperty("Project", 
                   new FileListProperty("project.extra.class.path", File.pathSeparator, DEF_DIR,
-                                       "Returns a list of files in the project's extra " + 
-                                       "class path.\n" + 
-                                       "Optional attributes:\n" + 
-                                       "\trel=\"<dir to which output should be relative\"\n" + 
-                                       "\tsep=\"<separator between files>\"\n" + 
-                                       "\tsquote=\"<true to enclose file in single quotes>\"\n" + 
+                                       "Returns a list of files in the project's extra "+
+                                       "class path.\n"+
+                                       "Optional attributes:\n"+
+                                       "\trel=\"<dir to which output should be relative\"\n"+
+                                       "\tsep=\"<separator between files>\"\n"+
+                                       "\tsquote=\"<true to enclose file in single quotes>\"\n"+
                                        "\tdquote=\"<true to enclose file in double quotes>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
@@ -4005,10 +4011,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       public boolean isCurrent() { return false; }
     });
     PropertyMaps.TEMPLATE.setProperty("Action", new DrJavaActionProperty("action.open.file", "(Open File...)",
-                                                                         "Execute an \"Open File\" action.\n" + 
-                                                                         "Required attributes:\n" + 
-                                                                         "\tfile=\"<file to open>\"\n" + 
-                                                                         "Optional attributes:\n" + 
+                                                                         "Execute an \"Open File\" action.\n"+
+                                                                         "Required attributes:\n"+
+                                                                         "\tfile=\"<file to open>\"\n"+
+                                                                         "Optional attributes:\n"+
                                                                          "\tline=\"<line number to display>") {
       public void update(PropertyMaps pm) {
         if (_attributes.get("file") != null) {
@@ -4653,7 +4659,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   private boolean _checkProjectClose() {
-    _log.log("is changed? " + _model.isProjectChanged() + " based on " + _model);
+    _log.log("is changed? "+_model.isProjectChanged()+" based on "+_model);
     
     if (_model.isProjectChanged()) {
       String fname = _model.getProjectFile().getName();
@@ -4786,11 +4792,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                           JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
       }
       else {
-        fileName = l.size() + " files";
-        String text = "Closing these " + fileName + " will permanently remove them from the current project." + 
+        fileName = l.size()+" files";
+        String text = "Closing these "+fileName+" will permanently remove them from the current project." + 
           "\nAre you sure that you want to close these files?";
         
-        rc = JOptionPane.showOptionDialog(MainFrame.this, text, "Close " + l.size() + " files?", JOptionPane.YES_NO_OPTION,
+        rc = JOptionPane.showOptionDialog(MainFrame.this, text, "Close "+l.size()+" files?", JOptionPane.YES_NO_OPTION,
                                           JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
       }
       if (rc != JOptionPane.YES_OPTION) return;
@@ -5075,12 +5081,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           !fileName.endsWith(PROJECT_FILE_EXTENSION2) &&
           !fileName.endsWith(OLD_PROJECT_FILE_EXTENSION)) {
         // doesn't end in .drjava or .xml or .pjt
-        String text = "The file name does not end with a DrJava project file " + 
-          "extension (" + PROJECT_FILE_EXTENSION + " or " + PROJECT_FILE_EXTENSION2 + " or " + OLD_PROJECT_FILE_EXTENSION + "):\n" + 
-          file.getName() + "\n" + 
-          "Do you want to append " + PROJECT_FILE_EXTENSION + " at the end?";
+        String text = "The file name does not end with a DrJava project file "+
+          "extension ("+PROJECT_FILE_EXTENSION+" or "+PROJECT_FILE_EXTENSION2+" or "+OLD_PROJECT_FILE_EXTENSION+"):\n"+
+          file.getName()+"\n"+
+          "Do you want to append "+PROJECT_FILE_EXTENSION+" at the end?";
         
-        Object[] options = {"Append " + PROJECT_FILE_EXTENSION, "Don't Change File Name"};  
+        Object[] options = {"Append "+PROJECT_FILE_EXTENSION, "Don't Change File Name"};  
         int rc = 0;
         if (!Utilities.TEST_MODE) {
           rc = JOptionPane.showOptionDialog(MainFrame.this, text, "Append Extension?", JOptionPane.YES_NO_OPTION,
@@ -5099,10 +5105,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       fileName = file.getCanonicalPath();
       if (fileName.endsWith(OLD_PROJECT_FILE_EXTENSION)) {
         String text = "The project will be saved in XML format." + 
-          "\nDo you want to change the project file's extension to " + PROJECT_FILE_EXTENSION + "?";
+          "\nDo you want to change the project file's extension to "+PROJECT_FILE_EXTENSION+"?";
         
-        Object[] options = {"Change to " + PROJECT_FILE_EXTENSION + "", "Keep \"" + 
-          fileName.substring(fileName.lastIndexOf('.')) + "\""};  
+        Object[] options = {"Change to "+PROJECT_FILE_EXTENSION+"", "Keep \"" + 
+          fileName.substring(fileName.lastIndexOf('.'))+"\""};  
         int rc = 1;
         if (!Utilities.TEST_MODE) {
           rc = JOptionPane.showOptionDialog(MainFrame.this, text, "Change Extension?", JOptionPane.YES_NO_OPTION,
@@ -5467,7 +5473,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                 String rel = FileOps.stringMakeRelativeTo(f, buildDir);
                 String full = rel.replace(File.separatorChar, '.');
                 full = full.substring(0, full.lastIndexOf(".class"));
-                if (full.indexOf('$') < 0) {
+                if (full.indexOf('$')<0) {
                   // no $ in the name means not an inner class
                   // we do not support inner classes, because that would mean
                   // having to determine public static scope
@@ -5557,13 +5563,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // moved this back into the event thread to fix bug 2848696
     // this code doesn't have to run in an auxiliary thread
     // the actual unit testing later is done in a separate thread
-    _disableJUnitActions();
-    // now also works with multiple documents
+        _disableJUnitActions();
+        // now also works with multiple documents
 //        hourglassOn();  // moved into the prelude before this thread start  
-    try { _model.getJUnitModel().junitDocs(_model.getDocumentNavigator().getSelectedDocuments()); }
-    catch(UnexpectedException e) { _junitInterrupted(e); }
-    catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
-  }
+        try { _model.getJUnitModel().junitDocs(_model.getDocumentNavigator().getSelectedDocuments()); }
+        catch(UnexpectedException e) { _junitInterrupted(e); }
+        catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
+      }
   
   private void _junitFolder() {
     updateStatusField("Running Unit Tests in Current Folder");
@@ -5571,19 +5577,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // moved this back into the event thread to fix bug 2848696
     // this code doesn't have to run in an auxiliary thread
     // the actual unit testing later is done in a separate thread
-    _disableJUnitActions();
+        _disableJUnitActions();
 //        hourglassOn();  // turned off when JUnitStarted event is fired
-    if (_model.getDocumentNavigator().isGroupSelected()) {
-      ArrayList<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getDocuments();
-      final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
-      for (OpenDefinitionsDocument doc: docs) {
-        if (_model.getDocumentNavigator().isSelectedInGroup(doc)) l.add(doc);
+        if (_model.getDocumentNavigator().isGroupSelected()) {
+          ArrayList<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getDocuments();
+          final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
+          for (OpenDefinitionsDocument doc: docs) {
+            if (_model.getDocumentNavigator().isSelectedInGroup(doc)) l.add(doc);
+          }
+          try { _model.getJUnitModel().junitDocs(l); }  // hourglassOn executed by junitStarted()
+          catch(UnexpectedException e) { _junitInterrupted(e); }
+          catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
+        }
       }
-      try { _model.getJUnitModel().junitDocs(l); }  // hourglassOn executed by junitStarted()
-      catch(UnexpectedException e) { _junitInterrupted(e); }
-      catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
-    }
-  }
   
   /** Tests the documents in the project source tree. Assumes that DrJava is in project mode. */
   private void _junitProject() {
@@ -7055,7 +7061,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     private void updateLocation(int line, int col) { // Can run outside the event thread because setText is thread safe.
-      _currLocationField.setText(line + ":" + col  + " \t");  // Space before "\t" required on Mac to avoid obscuring
+      _currLocationField.setText(line + ":" + col +" \t");  // Space before "\t" required on Mac to avoid obscuring
 //  Lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
 //      _model.getParsingControl().delay();
     }
@@ -7438,11 +7444,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                      _openAllFolderAction));
               }
               m.add(Utilities.
-                      createDelegateAction("Close All Folders (" + groupSelectedCount + ")", _closeFolderAction));
+                      createDelegateAction("Close All Folders ("+groupSelectedCount+")", _closeFolderAction));
               m.add(Utilities.
-                      createDelegateAction("Compile All Folders (" + groupSelectedCount + ")", _compileFolderAction));
+                      createDelegateAction("Compile All Folders ("+groupSelectedCount+")", _compileFolderAction));
               m.add(Utilities.
-                      createDelegateAction("Test All Folders (" + groupSelectedCount + ")", _junitFolderAction));
+                      createDelegateAction("Test All Folders ("+groupSelectedCount+")", _junitFolderAction));
               
             }
           }
@@ -7464,11 +7470,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               m.add(Utilities.createDelegateAction("Run File as Applet", _runAppletAction));
             }
             else if (docSelectedCount>1) {
-              m.add(Utilities.createDelegateAction("Save All Files (" + docSelectedCount + ")", _saveAction));
-              m.add(Utilities.createDelegateAction("Revert All Files to Saved (" + docSelectedCount + ")", _revertAction));
-              m.add(Utilities.createDelegateAction("Close All Files  (" + docSelectedCount + ")", _closeAction));
-              m.add(Utilities.createDelegateAction("Compile All Files (" + docSelectedCount + ")", _compileAction));
-              m.add(Utilities.createDelegateAction("Test All Files (" + docSelectedCount + ")", _junitAction));
+              m.add(Utilities.createDelegateAction("Save All Files ("+docSelectedCount+")", _saveAction));
+              m.add(Utilities.createDelegateAction("Revert All Files to Saved ("+docSelectedCount+")", _revertAction));
+              m.add(Utilities.createDelegateAction("Close All Files  ("+docSelectedCount+")", _closeAction));
+              m.add(Utilities.createDelegateAction("Compile All Files ("+docSelectedCount+")", _compileAction));
+              m.add(Utilities.createDelegateAction("Test All Files ("+docSelectedCount+")", _junitAction));
             }
           }
           if (externalSelected && !docSelected && !auxiliarySelected) {
@@ -7479,7 +7485,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                    _moveToAuxiliaryAction));
             }
             else if (docSelectedCount>1) {
-              m.add(Utilities.createDelegateAction("Include All Files With Project (" + docSelectedCount + ")",
+              m.add(Utilities.createDelegateAction("Include All Files With Project ("+docSelectedCount+")",
                                                    _moveToAuxiliaryAction));
             }
           }
@@ -7491,7 +7497,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                    _removeAuxiliaryAction));
             }
             else if (docSelectedCount>1) {
-              m.add(Utilities.createDelegateAction("Do Not Include Any Files With Project (" + docSelectedCount + ")",
+              m.add(Utilities.createDelegateAction("Do Not Include Any Files With Project ("+docSelectedCount+")",
                                                    _removeAuxiliaryAction));
             }
           }
@@ -8490,7 +8496,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Ask the user to increase the slave's max heap setting. */
   void askToIncreaseSlaveMaxHeap() {
-    String value = "set to " + DrJava.getConfig().getSetting(SLAVE_JVM_XMX) + " MB";
+    String value = "set to "+DrJava.getConfig().getSetting(SLAVE_JVM_XMX)+" MB";
     if ((!("".equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX)))) &&
         ((OptionConstants.heapSizeChoices.get(0).equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX))))) { 
       value = "not set, implying the system's default";
@@ -8500,7 +8506,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       showInputDialog(MainFrame.this,
                       "Your program ran out of memory. You may try to enter a larger\n" +
                       "maximum heap size for the Interactions JVM. The maximum heap size is\n" +
-                      "currently " + value + ".\n" + 
+                      "currently "+value+".\n"+
                       "A restart is required after changing this setting.",
                       "Increase Maximum Heap Size?",
                       JOptionPane.QUESTION_MESSAGE,
@@ -8528,7 +8534,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Ask the user to increase the master's max heap setting. */
   void askToIncreaseMasterMaxHeap() {
-    String value = "set to " + DrJava.getConfig().getSetting(MASTER_JVM_XMX) + " MB";
+    String value = "set to "+DrJava.getConfig().getSetting(MASTER_JVM_XMX)+" MB";
     if ((!("".equals(DrJava.getConfig().getSetting(MASTER_JVM_XMX)))) &&
         ((OptionConstants.heapSizeChoices.get(0).equals(DrJava.getConfig().getSetting(MASTER_JVM_XMX))))) { 
       value = "not set, implying the system's default";
@@ -8647,7 +8653,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       ScrollableListDialog<String> dialog = new ScrollableListDialog.Builder<String>()
         .setOwner(MainFrame.this)
         .setTitle("Files are Read-Only")
-        .setText("The following files could not be saved because they are read-only.\n" + 
+        .setText("The following files could not be saved because they are read-only.\n"+
                  "Do you want to overwrite them anyway?")
         .setItems(filePaths)
         .setSelectedItems(filePaths)
@@ -9147,8 +9153,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         ScrollableListDialog<OpenDefinitionsDocument> dialog = new ScrollableListDialog.Builder<OpenDefinitionsDocument>()
           .setOwner(MainFrame.this)
           .setTitle("Must Compile All Source Files to Run Unit Tests")
-          .setText("Before you can run unit tests, you must first compile all out of sync source files.\n" + 
-                   "The files below are out of sync. Would you like to compile all files and\n" + 
+          .setText("Before you can run unit tests, you must first compile all out of sync source files.\n"+
+                   "The files below are out of sync. Would you like to compile all files and\n"+
                    "run the specified test(s)?")
           .setItems(outOfSync)
           .setMessageType(JOptionPane.QUESTION_MESSAGE)
@@ -9834,7 +9840,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       String name = xc.get("drjava/extprocess/name");
       ExecuteExternalDialog.addToMenu(name, xc.get("drjava/extprocess/cmdline"),
                                       xc.get("drjava/extprocess/workdir"), "");
-      JOptionPane.showMessageDialog(null, "The installation was successful for:\n" + name,
+      JOptionPane.showMessageDialog(null, "The installation was successful for:\n"+name,
                                     "Installation Successful", JOptionPane.INFORMATION_MESSAGE);
       // We override the drjava/extprocess/enclosingfile and set it to the empty string ""
       // because this external process did not come from a *.djapp file that was a JAR file.
@@ -9855,7 +9861,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       String name = xc.get("drjava/extprocess/name");
       ExecuteExternalDialog.addToMenu(name, xc.get("drjava/extprocess/cmdline"),
                                       xc.get("drjava/extprocess/workdir"), file.getAbsolutePath());
-      JOptionPane.showMessageDialog(null, "The installation was successful for:\n" + name,
+      JOptionPane.showMessageDialog(null, "The installation was successful for:\n"+name,
                                     "Installation Successful", JOptionPane.INFORMATION_MESSAGE);
       // We override the drjava/extprocess/enclosingfile and set it to the file specified
       // because this external process came from a *.djapp file that was a JAR file.
@@ -10081,7 +10087,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         String end = f.getName();
         int lastIndex = end.lastIndexOf(File.separatorChar);
         if (lastIndex >= 0) end = end.substring(lastIndex+1);
-        final LessPanel panel = new LessPanel(this, "Follow: " + end, f);
+        final LessPanel panel = new LessPanel(this, "Follow: "+end, f);
         _tabs.addLast(panel);
         panel.getMainPanel().addFocusListener(new FocusAdapter() {
           public void focusGained(FocusEvent e) { _lastFocusOwner = panel; }

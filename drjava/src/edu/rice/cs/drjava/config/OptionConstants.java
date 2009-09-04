@@ -94,8 +94,16 @@ public interface OptionConstants {
   /** The configuration XML file that DrJava looks for inside a .djapp file */
   public static final String EXTPROCESS_FILE_NAME_INSIDE_JAR = "process" + EXTPROCESS_FILE_EXTENSION;
   
+  /** tools.jar location, or NULL_FILE if not specified. */
   public static final FileOption JAVAC_LOCATION = new FileOption("javac.location", FileOps.NULL_FILE);
+
+  /** junitrt.jar/concutest-junit-3.8.2-withrt.jar location, or NULL_FILE if not specified. */
+  public static final FileOption JUNIT_LOCATION = new FileOption("junit.location", FileOps.NULL_FILE);
   
+  /** ConcJUnit processed Java Runtime (rt.concjunit.jar) location, or NULL_FILE if not specified. */
+  public static final FileOption RT_CONCJUNIT_LOCATION = new FileOption("rt.concjunit.location", FileOps.NULL_FILE);
+  
+  /** Extra class path. */
   public static final VectorOption<File> EXTRA_CLASSPATH = new ClassPathOption().evaluate("extra.classpath");
   
   public static final VectorOption<String> EXTRA_COMPILERS =
@@ -1019,6 +1027,9 @@ public interface OptionConstants {
   
   /** Whether to warn that a restart is necessary before the theme will change. */
   public static final BooleanOption WARN_CHANGE_THEME = new BooleanOption("warn.change.theme", Boolean.TRUE);
+
+  /** Whether to warn that a restart is necessary before these miscellaneous preferences will change. */
+  public static final BooleanOption WARN_CHANGE_MISC = new BooleanOption("warn.change.misc", Boolean.TRUE);
   
   /** Whether to warn that a file's path contains a "#' symbol. */
   public static final BooleanOption WARN_PATH_CONTAINS_POUND =

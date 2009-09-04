@@ -585,6 +585,36 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     if (dir == FileOps.NULL_FILE) { dir = IOUtil.WORKING_DIRECTORY; }
 
     List<String> jvmArgs = new ArrayList<String>();
+    // ConcJUnit argument: -Xbootclasspath/p:rt.concjunit.jar
+    File junitLocation = DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION);
+    boolean concJUnitLocationConfigured =
+      edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidConcJUnitFile(junitLocation);
+    File rtLocation = DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION);
+    boolean rtLocationConfigured =
+      edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidRTConcJUnitFile(rtLocation);
+    if (!rtLocationConfigured && // not valid
+        (rtLocation != null) && // not null
+        (!FileOps.NULL_FILE.equals(rtLocation)) && // not NULL_FILE
+        (rtLocation.exists())) { // but exists
+      // invalid file, clear setting
+      DrJava.getConfig().setSetting(OptionConstants.RT_CONCJUNIT_LOCATION, FileOps.NULL_FILE);
+      rtLocationConfigured = false;
+    }
+    if (concJUnitLocationConfigured && rtLocationConfigured) {
+      try {
+        // NOTE: this is a work-around
+        // it seems like it's impossible to pass long file names here on Windows
+        // so we are using a clumsy method that determines the short file name
+        File shortF = FileOps.getShortFile(rtLocation);
+        jvmArgs.add("-Xbootclasspath/p:"+shortF.getAbsolutePath().replace(File.separatorChar, '/'));
+      }
+      catch(IOException ioe) {
+        // we couldn't get the short file name (on Windows), disable "lucky" warnings
+        DrJava.getConfig().setSetting(OptionConstants.RT_CONCJUNIT_LOCATION, FileOps.NULL_FILE);
+        rtLocationConfigured = false;
+      }
+    }
+    
     if (_allowAssertions) { jvmArgs.add("-ea"); }
     int debugPort = _getDebugPort();
     if (debugPort > -1) {
@@ -601,6 +631,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     if (PlatformFactory.ONLY.isMacPlatform()) {
       jvmArgs.add("-Xdock:name=Interactions");
     }
+    
     jvmArgs.addAll(ArgumentTokenizer.tokenize(slaveArgs));
     
     invokeSlave(new JVMBuilder(_startupClassPath).directory(dir).jvmArguments(jvmArgs));
@@ -628,7 +659,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
     DrJavaErrorHandler.record(e);
   }
-  
   
   /*
    * Helper classes

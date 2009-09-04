@@ -51,6 +51,7 @@ import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.swing.ProcessingDialog;
 import edu.rice.cs.util.swing.ScrollableListDialog;
 import edu.rice.cs.util.StreamRedirectThread;
 import edu.rice.cs.util.FileOps;
@@ -137,7 +138,7 @@ public class JarOptionsDialog extends SwingFrame {
   /** Root of the chooser. */
   private File _rootFile;
   /** Processing dialog. */
-  private ProcessingFrame _processingFrame;  
+  private ProcessingDialog _processingDialog;  
   /** Last frame state. It can be stored and restored. */
   private FrameState _lastState = null;
   /** Holds the current text of the custom manifest. */
@@ -168,28 +169,7 @@ public class JarOptionsDialog extends SwingFrame {
     if (_lastState != null) setLocation(_lastState.getLocation());
     else Utilities.setPopupLoc(this, _mainFrame);
     validate();
-  }
-  
-  /** Frame that gets displayed when the program is processing data. */
-  private static class ProcessingFrame extends SwingFrame {
-    private Component _parent;
-    
-    public ProcessingFrame(Component parent, String title, String label) {
-      super(title);
-      _parent = parent;
-      setSize(350, 150);
-      Utilities.setPopupLoc(this, parent);
-      JLabel waitLabel = new JLabel(label, SwingConstants.CENTER);
-      getRootPane().setLayout(new BorderLayout());
-      getRootPane().add(waitLabel, BorderLayout.CENTER);
-      initDone();  // call mandated by SwingFrame contract
-    }
-    
-    public void setVisible(boolean vis) {
-      Utilities.setPopupLoc(this, _parent);
-      super.setVisible(vis);
-    }
-  }
+  }  
   
   /** Create a "Create Jar" dialog
     * @param mf the instance of mainframe to query into the project
@@ -696,8 +676,8 @@ public class JarOptionsDialog extends SwingFrame {
     }
     
     setEnabled(false);
-    _processingFrame = new ProcessingFrame(this, "Creating Jar File", "Processing, please wait.");
-    _processingFrame.setVisible(true);
+    _processingDialog = new ProcessingDialog(this, "Creating Jar File", "Processing, please wait.");
+    _processingDialog.setVisible(true);
     SwingWorker worker = new SwingWorker() {
       boolean _success = false;
       HashSet<String> _exceptions = new HashSet<String>();
@@ -913,8 +893,8 @@ public class JarOptionsDialog extends SwingFrame {
         return null;
       }
       public void finished() {
-        _processingFrame.setVisible(false);
-        _processingFrame.dispose();
+        _processingDialog.setVisible(false);
+        _processingDialog.dispose();
         JarOptionsDialog.this.setEnabled(true);
         if (_success) {
           if (_exceptions.size() > 0) {
@@ -1064,7 +1044,7 @@ public class JarOptionsDialog extends SwingFrame {
     if (vis) {
       _mainFrame.hourglassOn();
       _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
-      ProcessingFrame pf = new ProcessingFrame(this, "Checking class files", "Processing, please wait.");
+      ProcessingDialog pf = new ProcessingDialog(this, "Checking class files", "Processing, please wait.");
       pf.setVisible(true);
       _loadSettings();
       pf.setVisible(false);

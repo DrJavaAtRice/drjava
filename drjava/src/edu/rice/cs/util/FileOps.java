@@ -40,11 +40,13 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.jar.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.text.TextUtil;
 
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 
@@ -1048,5 +1050,198 @@ public abstract class FileOps {
       if (temp.exists()) { throw new IOException("Could not generate a file name that did not already exist."); }
     }
     return temp;
+  }
+  
+  /** On Windows, return an 8.3 file name for the specified file. On other OSes, return the file unmodified.
+    * @param f file for which to find an 8.3 file name
+    * @return short file name for the file (or unmodified on non-Windows)
+    * @throws IOException if an 8.3 file name could not be found */
+  public static File getShortFile(File f) throws IOException {
+    if (!edu.rice.cs.drjava.platform.PlatformFactory.ONLY.isWindowsPlatform()) { return f; }
+    
+    String s = "";
+    File parent = f.getParentFile();
+    
+    // find what file system root this file is on
+    File[] roots = f.listRoots();
+    File root = new File(File.separator);
+    for(File r: roots) {
+      if (f.getCanonicalPath().startsWith(r.getAbsolutePath())) {
+        root = r;
+        break;
+      }
+    }
+    
+    // move up towards the root
+    while(parent != null) {
+      try {
+        // run a DIR /X /A in the directory containing f, i.e. in parent
+        Process p = new ProcessBuilder("cmd", "/C", "dir", "/X", "/A").directory(parent).redirectErrorStream(true).start();
+        
+        // read the stdout of that process
+        BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        String line;
+        boolean found = false;
+        
+        // until the stdout stream has ended
+        while((line = br.readLine()) != null) {
+          // the format of a line is:
+          //  Volume in drive C is SYSTEM
+          //  Volume Serial Number is B4ED-7405
+          //
+          //  Directory of C:\
+          //
+          // 09/02/2009  11:02 PM    <DIR>          DOCUME~1     Documents and Settings
+          // 09/02/2009  11:02 PM               123 LONGFI~1     Long File Name
+          // 09/02/2009  11:02 PM    <DIR>                       shortdir
+          // 09/02/2009  11:02 PM               123              short
+          
+          // skip empty lines
+          if (line.trim().length() == 0) continue;
+          
+          // header starts with whitespace
+          if (line.startsWith(" ")) continue;
+          
+          // strip off first two columns
+          int pos = line.indexOf("  ");
+          if (pos == -1) continue;
+          pos = line.indexOf("  ", pos+2);
+          if (pos == -1) continue;
+          line = line.substring(pos).trim();
+          
+          // <DIR>          DOCUME~1     Documents and Settings
+          //            123 LONGFI~1     Long File Name
+          // <DIR>                       shortdir
+          //            123              short
+          
+          // strip off third column (<DIR> or file size)
+          pos = line.indexOf(' ');
+          if (pos == -1) continue;
+          line = line.substring(pos).trim();
+          
+          File shortF = null;
+          // if the line ends with the file name we are looking for...
+          if (line.equals(f.getName())) {
+            // short file name only
+            shortF = new File(parent, line);
+            if (f.getCanonicalFile().equals(shortF.getCanonicalFile())) {
+              // this is the short file name we are looking for
+              found = true;
+            }
+          }
+          else if (line.startsWith(f.getName())) {
+            // perhaps already short file name of a long file name
+            shortF = new File(parent, f.getName());
+            if (f.getCanonicalFile().equals(shortF.getCanonicalFile())) {
+              // this is the short file name we are looking for
+              found = true;
+            }
+          }
+          else if (line.endsWith(" "+f.getName())) {
+            // remove the long file name at the end and trim off whitespace
+            // DOCUME~1
+            // LONGFI~1
+            // 
+            // 
+            String shortLine = line.substring(0, line.length() - f.getName().length()).trim();
+            
+            if (line.length() == 0) {
+              // already short
+              found = true;
+              shortF = f;
+            }
+            else {
+              shortF = new File(parent, shortLine);
+              
+              // if this file exists, check that it is exactly the file we're looking for
+              if (shortF.exists()) {
+                if (f.getCanonicalFile().equals(shortF.getCanonicalFile())) {
+                  // this is the short file name we are looking for
+                  // set flag to true, but continue reading lines from the process
+                  // otherwise DIR /X may block because the stdout stream is full
+                  found = true;
+                }
+              }
+            }
+          }
+          if (found && (shortF != null)) {
+            // prepend the short file name to s
+            s = shortF.getName()+((s.length()==0)?"":(File.separator+s));
+          }
+        }
+
+        try {
+          // wait until the process is done
+          p.waitFor();
+        }
+        catch(InterruptedException ie) {
+          throw new IOException("Could not get short windows file name: "+ie);
+        }
+        if (!found) {
+          throw new IOException("Could not get short windows file name: "+f.getAbsolutePath()+" not found");
+        }
+      }
+      catch(IOException ioe) {
+          throw new IOException("Could not get short windows file name: "+ioe);
+      }
+      f = parent;
+      parent = parent.getParentFile();
+    }
+    // create the short file
+    File shortF = new File(root, s);
+    if (!shortF.exists()) {
+      throw new IOException("Could not get short windows file name: "+shortF.getAbsolutePath()+" not found");
+    }
+    return shortF;
+  }
+
+  /** Returns the drjava.jar file.
+    * @return drjava.jar file */
+  public static File getDrJavaFile() {
+    String[] cps = System.getProperty("java.class.path").split(TextUtil.regexEscape(File.pathSeparator),-1);
+    File found = null;
+    for(String cp: cps) {
+      try {
+        File f = new File(cp);
+        if (!f.exists()) { continue; }
+        if (f.isDirectory()) {
+          // this is a directory, maybe DrJava is contained here as individual files
+          File cf = new File(f, edu.rice.cs.drjava.DrJava.class.getName().replace('.', File.separatorChar) + ".class");
+          if (cf.exists() && cf.isFile()) {
+            found = f;
+            break;
+          }
+        }
+        else if (f.isFile()) {
+          // this is a file, it should be a jar file
+          JarFile jf = new JarFile(f);
+          // if it's not a jar file, an exception will already have been thrown
+          // so we know it is a jar file
+          // now let's check if it contains DrJava
+          if (jf.getJarEntry(edu.rice.cs.drjava.DrJava.class.getName().replace('.', '/') + ".class") != null) {
+            found = f;
+            break;
+          }
+        }
+      }
+      catch(IOException e) { /* ignore, we'll continue with the next classpath item */ }
+    }
+    return found.getAbsoluteFile();
+  }
+  
+  /** Returns the current DrJava application, i.e. the drjava.jar, drjava.exe or DrJava.app file.
+    * @return DrJava application file */
+  public static File getDrJavaApplicationFile() {
+    File found = FileOps.getDrJavaFile();
+    if (found != null) {
+      if (edu.rice.cs.drjava.platform.PlatformFactory.ONLY.isMacPlatform()) {
+        // fix for Mac applications
+        String s = found.getAbsolutePath();
+        if (s.endsWith(".app/Contents/Resources/Java/drjava.jar")) {
+          found = new File(s.substring(0, s.lastIndexOf("/Contents/Resources/Java/drjava.jar")));
+        }
+      }
+    }
+    return found.getAbsoluteFile();
   }
 }

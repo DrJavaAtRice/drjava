@@ -54,6 +54,7 @@ import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.FileOps;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -161,8 +162,25 @@ public class DrJava {
       while(failCount < 2) {
         // Restart if there are custom JVM args
         String masterMemory = getConfig().getSetting(MASTER_JVM_XMX).trim();
+        File junitLocation = getConfig().getSetting(JUNIT_LOCATION);
+        boolean junitLocationConfigured =
+          (edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidJUnitFile(junitLocation) ||
+           edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidConcJUnitFile(junitLocation));
+        _log.log("junitLocation: "+junitLocation);
+        _log.log("junitLocationConfigured: "+junitLocationConfigured);
+        if (!junitLocationConfigured && // not valid 
+            (junitLocation != null) && // not null
+            (!FileOps.NULL_FILE.equals(junitLocation)) && // not NULL_FILE
+            (junitLocation.exists())) { // but exists
+          // invalid file, clear setting
+          getConfig().setSetting(JUNIT_LOCATION, FileOps.NULL_FILE);
+          getConfig().saveConfiguration();
+          junitLocationConfigured = false;
+        }
         boolean restart = (getConfig().getSetting(MASTER_JVM_ARGS).length() > 0)
-          || (!"".equals(masterMemory) && !OptionConstants.heapSizeChoices.get(0).equals(masterMemory));
+          || (!"".equals(masterMemory) && !OptionConstants.heapSizeChoices.get(0).equals(masterMemory))
+          || junitLocationConfigured;
+        _log.log("restart: "+restart);
         
         LinkedList<String> classArgs = new LinkedList<String>();
         classArgs.addAll(_filesToOpen);
@@ -181,7 +199,22 @@ public class DrJava {
           // Run a new copy of DrJava and exit
           try {
             boolean failed = false;
-            Process p = JVMBuilder.DEFAULT.jvmArguments(_jvmArgs).start(DrJavaRoot.class.getName(), classArgs);
+            JVMBuilder jvmb = JVMBuilder.DEFAULT.jvmArguments(_jvmArgs);
+            
+            // extend classpath if JUnit/ConcJUnit location specified
+            _log.log("JVMBuilder: classPath = "+jvmb.classPath());
+            ArrayList<File> extendedClassPath = new ArrayList<File>();
+            if (junitLocationConfigured) {
+              extendedClassPath.add(junitLocation);
+            }
+            for(File f: jvmb.classPath()) { extendedClassPath.add(f); }
+            _log.log("JVMBuilder: extendedClassPath = "+extendedClassPath);
+            jvmb = jvmb.classPath(edu.rice.cs.plt.iter.IterUtil.asSizedIterable(extendedClassPath));
+            _log.log("JVMBuilder: jvmArguments = "+jvmb.jvmArguments());
+            _log.log("JVMBuilder: classPath = "+jvmb.classPath());
+            
+            // start new DrJava
+            Process p = jvmb.start(DrJavaRoot.class.getName(), classArgs);
             DelayedInterrupter timeout = new DelayedInterrupter(WAIT_BEFORE_DECLARING_SUCCESS);
             try {
               int exitValue = p.waitFor();

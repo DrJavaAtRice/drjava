@@ -40,6 +40,7 @@ import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
 import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.FileReader;
 import java.rmi.RemoteException;
 
@@ -50,6 +51,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.jar.JarFile;
+import java.util.jar.JarEntry;
 
 import javax.swing.JOptionPane;
 
@@ -66,6 +69,7 @@ import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Box;
 import edu.rice.cs.plt.lambda.SimpleBox;
+import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
@@ -583,7 +587,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     for(JUnitError e: errors){
       e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
       File f = e.file();
-      if (LanguageLevelStackTraceMapper.isLLFile(f)) {
+      if ((f!=null) && (LanguageLevelStackTraceMapper.isLLFile(f))) {
         String dn = f.getName();
         dn = dn.substring(0, dn.lastIndexOf('.')) + ".java";
         StackTraceElement ste = new StackTraceElement(e.className(), "", dn, e.lineNumber());
@@ -615,5 +619,100 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     _junitErrorModel = new JUnitErrorModel(errors, _model, true);
     _notifyJUnitEnded();
     _testInProgress = false;
+  }
+  
+  //-------------------------- ConcJUnit Utilities --------------------------//
+  /** Check if the file is a valid jar file containing the files in the varargs.
+    * @param f file to check
+    * @param checkFilesInJar file names that should be in the jar file
+    * @return true if f is a jar file and the files are in the jar */
+  protected static boolean isValidJarFile(final File f, String... checkFilesInJar) {
+    if ((f==null) || (FileOps.NULL_FILE.equals(f)) || (!f.exists())) return false;
+      JarFile jf = null;
+      try {
+        jf = new JarFile(f);
+        for(String s: checkFilesInJar) {
+          JarEntry je = jf.getJarEntry(s);
+          if (je==null) return false;
+        }
+        return true;
+        // we already have a JUnit version 4.4 as junit.jar
+        // running junit.runner.Version to get the version string
+        // isn't a valid criterion for compatibility
+//        JVMBuilder jvmb = JVMBuilder.DEFAULT.classPath(f);
+//        Process p = jvmb.start("junit.runner.Version");
+//        BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+//        String line = br.readLine();
+//        try {
+//          p.waitFor();
+//        }
+//        catch(InterruptedException ie) { return false; }
+//        return "3.8.2".equals(line);
+      }
+      catch(IOException ioe) { return false; }
+      finally {
+        try {
+          if (jf != null) jf.close();
+        }
+        catch(IOException ioe) { /* ignore, just trying to close the file */ }
+      }
+  }
+  
+  /** Check if the file is a valid junit.jar file.
+    * @param f file to check
+    * @return true if f is a valid junit.jar file */
+  public static boolean isValidJUnitFile(final File f) {
+    return isValidJarFile(f,
+                          "junit/framework/Test.class",
+                          "junit/runner/Version.class");
+  }
+
+  /** Check if the file is a valid concutest-junit-xxx-withrt.jar file.
+    * @param f file to check
+    * @return true if f is a valid concutest-junit-xxx-withrt.jar file */
+  public static boolean isValidConcJUnitFile(final File f) {
+    return isValidJarFile(f,
+                          "junit/framework/Test.class",
+                          "junit/runner/Version.class",
+                          "junit/runner/ConcutestVersion.class",
+                          "edu/rice/cs/cunit/concJUnit/ConcJUnitFileInstrumentorLauncher.class",
+                          "edu/rice/cs/cunit/concJUnit/MultithreadedTestError.class",
+                          "edu/rice/cs/cunit/concJUnit/ThreadSets.class");
+  }
+
+  /** Check if the file is a valid rt.concjunit.jar file.
+    * @param f file to check
+    * @return true if f is a valid rt.concjunit.jar file */
+  public static boolean isValidRTConcJUnitFile(final File f) {
+    return isValidJarFile(f,
+                          "java/lang/Object.class",
+                          "java/lang/Thread.class",
+                          "java/lang/String.class",
+                          "edu/rice/cs/cunit/concJUnit/ThreadSets.class");
+  }
+  
+  /** Generate the rt.concjunit.jar file using the specified concutest-junit-XXX-withrt.jar file.
+    * @param rtFile target rt.concjunit.jar file
+    * @param concJUnitJarFile concutest-junit-XXX-withrt.jar file that contains the instrumentor 
+    * @param tmpDir temporary directory for the processing
+    * @return true if successful */
+  public static boolean generateRTConcJUnitJarFile(File rtFile, File concJUnitJarFile, File tmpDir) {
+    if (!isValidConcJUnitFile(concJUnitJarFile)) return false;
+
+    try {
+      JVMBuilder jvmb = new JVMBuilder(tmpDir).classPath(concJUnitJarFile);
+      Process p = jvmb.start("edu.rice.cs.cunit.concJUnit.ConcJUnitFileInstrumentorLauncher", "-r");
+      BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+      String line;
+      while((line = br.readLine()) != null) { /* just read and discard any output */ }
+      try {
+        p.waitFor();
+      }
+      catch(InterruptedException ie) { return false; }
+      if (p.exitValue() != 0) { return false; }
+      edu.rice.cs.plt.io.IOUtil.copyFile(new File(tmpDir, "rt.concjunit.jar"), rtFile);
+      return isValidRTConcJUnitFile(rtFile);
+    }
+    catch(IOException ioe) { return false; }
   }
 }

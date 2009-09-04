@@ -20,6 +20,7 @@
   <property name="test-repeat" value="1" />
   <property name="test-timeout" value="1440" />
   <property name="test-formatter" value="oneline" />
+  <property name="use-concjunit" value="false" />
   <property name="findbugs-formatter" value="html" />
   <property name="test-halt" value="false" />
   <property name="force-server" value="no" />
@@ -142,7 +143,7 @@
     <echo message="                runs (default: 1)" />
     <echo message="drjava.test.config: Location of the DrJava configuration file to use" />
     <echo message="                    in tests (default: testFiles/drjava.basic.config)" />
-    <echo message="use-concjunit: Set to true to test using ConcJUnit instead of JUnit." />
+    <echo message="use-concjunit: Set to true to test ConcJUnit instead of JUnit." />
   </target>
   
   
@@ -839,7 +840,7 @@
     <delete file="instr.concjunit.txt" failonerror="${clean-can-fail}" />
     <delete file="rt.concjunit.jar" failonerror="${clean-can-fail}" />	
   </target>
-    
+  
 
   <!-- ******************
        Subversion Targets 
@@ -1356,7 +1357,7 @@
     <available file="${generate-dir}" property="already-generated" />
   </target>
 
-
+  
   
   <!-- *****************
        ConcJUnit Targets
@@ -1365,15 +1366,10 @@
     <if>
       <istrue value="${use-concjunit}" />
       <then>
-        <property name="junit-jar-1" location="lib/buildlib/concutest-junit-3.8.2.jar" />
+        <property name="junit-jar-1" location="lib/buildlib/concutest-junit-3.8.2-withrt.jar" />
         <available property="junit-jar" value="${junit-jar-1}" file="${junit-jar-1}" />
 
-        <fail message="Can't find concutest-junit-3.8.2.jar in the lib/buildlib directory" unless="junit-jar" />
-
-        <property name="concjunit-rt-jar-1" location="lib/buildlib/concjunitrt.jar" />
-        <available property="concjunit-rt-jar" value="${concjunit-rt-jar-1}" file="${concjunit-rt-jar-1}" />
-
-        <fail message="Can't find concjunitrt.jar in the lib/buildlib directory" unless="concjunit-rt-jar" />
+        <fail message="Can't find concutest-junit-3.8.2-withrt.jar in the lib/buildlib directory" unless="junit-jar" />
 
         <property name="rt-concjunit-jar-1" location="rt.concjunit.jar" />
 
@@ -1383,7 +1379,7 @@
           </not>
           <then>
             <echo message="Instrumenting Java runtime (no changes made to original), java=${test-jvm}" />
-            <java jar="${concjunit-rt-jar}" jvm="${test-jvm}" fork="yes" inputstring="Y"/>
+            <java jar="${junit-jar}" jvm="${test-jvm}" fork="yes" inputstring="Y"/>
           </then>
           <else>
             <echo message="${rt-concjunit-jar-1} already exists, not instrumenting." />

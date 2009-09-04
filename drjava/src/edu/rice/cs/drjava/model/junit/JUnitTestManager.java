@@ -136,6 +136,7 @@ public class JUnitTestManager {
     * so no need for explicit synchronization.
     * @return false if no test suite (even an empty one) has been set up
     */
+  @SuppressWarnings("unchecked")
   public /* synchronized */ boolean runTestSuite() {
     
     _log.log("runTestSuite() called");
@@ -253,31 +254,35 @@ public class JUnitTestManager {
        * etc...
        */
       trace = trace.substring(trace.indexOf('\n')+1);
-      while (trace.indexOf("junit.framework.Assert") != -1 &&
-             trace.indexOf("junit.framework.Assert") < trace.indexOf("(")) {
-        /* the format of the trace will have "at junit.framework.Assert..."
-         * on each line until the line of the actual source file.
-         * if the exception was thrown from the test case (so the test failed
-         * without going through assert), then the source file will be on
-         * the first line of the stack trace
-         */
-        trace = trace.substring(trace.indexOf('\n') + 1);
-      }
-      trace = trace.substring(trace.indexOf('(')+1);
-      trace = trace.substring(0, trace.indexOf(')'));
-      
-      // If the exception occurred in a subclass of the test class, then update our
-      // concept of the class and test name. Otherwise, we're only here to pick up the
-      // line number.
-      if (combined.indexOf(className) == -1) {
-        className = trace.substring(0,trace.lastIndexOf('.'));
-        classNameAndTest = className + "." + testName;
-      }
-      
-      try {
-        lineNum = Integer.parseInt(trace.substring(trace.indexOf(':') + 1)) - 1;
-      }
-      catch (NumberFormatException e) { throw new UnexpectedException(e); }
+      if (trace.trim().length()>0) {
+        while (trace.indexOf("junit.framework.Assert") != -1 &&
+               trace.indexOf("junit.framework.Assert") < trace.indexOf("(")) {
+          /* the format of the trace will have "at junit.framework.Assert..."
+           * on each line until the line of the actual source file.
+           * if the exception was thrown from the test case (so the test failed
+           * without going through assert), then the source file will be on
+           * the first line of the stack trace
+           */
+          trace = trace.substring(trace.indexOf('\n') + 1);
+        }
+        trace = trace.substring(trace.indexOf('(')+1);
+        trace = trace.substring(0, trace.indexOf(')'));
+        // If the exception occurred in a subclass of the test class, then update our
+        // concept of the class and test name. Otherwise, we're only here to pick up the
+        // line number.
+        if (combined.indexOf(className) == -1) {
+          int dotPos = trace.lastIndexOf('.');
+          if (dotPos!=-1) {
+            className = trace.substring(0,dotPos);
+            classNameAndTest = className + "." + testName;
+          }
+        }
+        
+        try {
+          lineNum = Integer.parseInt(trace.substring(trace.indexOf(':') + 1)) - 1;
+        }
+        catch (NumberFormatException e) { lineNum = 0; } // may be native method
+      }      
     }
     
     if (lineNum < 0) {
@@ -291,7 +296,7 @@ public class JUnitTestManager {
     boolean isFailure = (failure.thrownException() instanceof AssertionFailedError) &&
       !classNameAndTest.equals("junit.framework.TestSuite$1.warning");
     
-//    for dubugging    
+//    for debugging    
 //    try{
 //      File temp = File.createTempFile("asdf", "java", new File("/home/awulf"));
 //      FileWriter writer = new FileWriter(temp);
@@ -322,7 +327,6 @@ public class JUnitTestManager {
       return new JUnitError(new File("nofile"), 0, 0, message, !isFailure, testName, className, exception, stackTrace);
     }
     
-    
     return new JUnitError(file, lineNum, 0, message, !isFailure, testName, className, exception, stackTrace);
   }
   
@@ -332,7 +336,7 @@ public class JUnitTestManager {
     int lineNum;
     int idxClassname = sw.indexOf(classname);
     if (idxClassname == -1) return -1;
-    
+
     String theLine = sw.substring(idxClassname, sw.length());
     
     theLine = theLine.substring(theLine.indexOf(classname), theLine.length());
@@ -343,7 +347,7 @@ public class JUnitTestManager {
       int i = theLine.indexOf(":") + 1;
       lineNum = Integer.parseInt(theLine.substring(i, theLine.length())) - 1;
     }
-    catch (NumberFormatException e) { throw new UnexpectedException(e); }
+    catch (NumberFormatException e) { lineNum = 0; } // may be native method
     
     return lineNum;
   }

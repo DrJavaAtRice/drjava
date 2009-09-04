@@ -484,7 +484,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // some/package/SomeClass/Inner.java (not found)
     // some/package/SomeClass.java (not found)
     path = path.replace('.', File.separatorChar);
-    File tempFile = new File(getProjectRoot(), path + ".java");
+    File tempFile = new File(getProjectRoot(), path+".java");
     while(path.length() > 0){
       if(tempFile.exists()){
         return tempFile;
@@ -733,7 +733,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public void removeExcludedFile(File f) {
       synchronized(_exclFiles) {
-        for(int i = 0; i < _exclFiles.size(); i++) {
+        for(int i = 0;i < _exclFiles.size();i++) {
           try {
             if(_exclFiles.get(i).getCanonicalPath().equals(f.getCanonicalPath())) {
               _exclFiles.remove(i);
@@ -2205,7 +2205,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         // a class file; therefore, it cannot ever be out of sync.
         try {
           boolean b = doc.containsClassOrInterfaceOrEnum();
-          System.out.println("Checking contents of " + doc + ": " + b);
+          System.out.println("Checking contents of "+doc+": "+b);
           if (b) outOfSync.add(doc);
         }
         catch(BadLocationException e) {
@@ -2289,11 +2289,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     DrJava.getConfig().addOptionListener(DYNAMICJAVA_ACCESS_CONTROL, new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oce) {
         boolean enforceAllAccess = DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
-          .equals(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL_CHOICES.get(2)); // "all"
+          .equals(OptionConstants.DynamicJavaAccessControlChoices.PRIVATE_AND_PACKAGE); // "all"
         getInteractionsModel().setEnforceAllAccess(enforceAllAccess);
         
         boolean enforcePrivateAccess = !DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
-          .equals(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL_CHOICES.get(0)); // not "none"
+          .equals(OptionConstants.DynamicJavaAccessControlChoices.DISABLED); // not "none"
         getInteractionsModel().setEnforcePrivateAccess(enforcePrivateAccess);
       }
     });
@@ -2489,7 +2489,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }
-//    edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("addToBrowserHistory: startPos = " + startPos.getOffset());
+//    edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("addToBrowserHistory: startPos = "+startPos.getOffset());
     BrowserDocumentRegion r = new BrowserDocumentRegion(doc, startPos, endPos);
     if (before) {
       _browserHistoryManager.addBrowserRegionBefore(r, _notifier);
@@ -2497,7 +2497,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     else {
       _browserHistoryManager.addBrowserRegion(r, _notifier);
     }
-//    edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("addToBrowserHistory: " + _browserHistoryManager);
+//    edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("addToBrowserHistory: "+_browserHistoryManager);
   }
   
   /** throws an UnsupportedOperationException */
@@ -3402,7 +3402,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Forwarding method to sync the definitions with whatever view component is representing them. */
     public void setCurrentLocation(int location) { 
-//      edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("setCurrentLocation " + this + ": " + location);
+//      edu.rice.cs.drjava.ui.MainFrame.MFLOG.log("setCurrentLocation "+this+": "+location);
       _caretPosition = location; 
       getDocument().setCurrentLocation(location); 
     }

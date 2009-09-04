@@ -53,12 +53,15 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeData;
+import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.util.swing.SwingFrame;
+import edu.rice.cs.util.swing.SwingWorker;
+import edu.rice.cs.util.swing.ProcessingDialog;
 import edu.rice.cs.plt.lambda.Runnable1;
-import edu.rice.cs.drjava.platform.PlatformFactory;
 
 /** The frame for setting Configuration options on the fly
  *  @version $Id$
@@ -82,6 +85,7 @@ public class ConfigFrame extends SwingFrame {
   private final JPanel _mainPanel;
   private final JFileChooser _fileOptionChooser;
   private final JFileChooser _browserChooser;
+  private final JFileChooser _jarChooser;
   private final DirectoryChooser _dirChooser;
   
   private StringOptionComponent javadocCustomParams;
@@ -149,7 +153,7 @@ public class ConfigFrame extends SwingFrame {
     NullPointerException. workDir == null is supposed to be impossible. */
     if (workDir == null || workDir == FileOps.NULL_FILE) workDir = new File(System.getProperty("user.dir"));
     _fileOptionChooser = new JFileChooser(workDir);
-
+    _jarChooser = new JFileChooser(workDir);
     _browserChooser = new JFileChooser(workDir);
     _dirChooser = new DirectoryChooser(this);
   
@@ -213,7 +217,7 @@ public class ConfigFrame extends SwingFrame {
 
     // Make sure each row is expanded
     int row = 0;
-    while(row < _tree.getRowCount()) {
+    while(row<_tree.getRowCount()) {
       _tree.expandRow(row);
       ++row;
     }
@@ -234,6 +238,11 @@ public class ConfigFrame extends SwingFrame {
     _fileOptionChooser.setApproveButtonText("Select");
     _fileOptionChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     _fileOptionChooser.setFileFilter(ClassPathFilter.ONLY);
+    
+    _jarChooser.setDialogTitle("Select");
+    _jarChooser.setApproveButtonText("Select");
+    _jarChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    _jarChooser.setFileFilter(ClassPathFilter.ONLY);
     
     _browserChooser.setDialogTitle("Select Web Browser");
     _browserChooser.setApproveButtonText("Select");
@@ -396,6 +405,9 @@ public class ConfigFrame extends SwingFrame {
     PanelTreeNode debugNode = _createPanel("Debugger");
     _setupDebugPanel(debugNode.getPanel());
 
+    PanelTreeNode junitNode = _createPanel("JUnit");
+    _setupJUnitPanel(junitNode.getPanel());
+    
     PanelTreeNode javadocNode = _createPanel("Javadoc");
     _setupJavadocPanel(javadocNode.getPanel());
 
@@ -452,7 +464,7 @@ public class ConfigFrame extends SwingFrame {
    
     addOptionComponent(panel, new VectorFileOptionComponent(OptionConstants.EXTRA_CLASSPATH,
                                                             "Extra Classpath", this,
-                                                            "<html>Any directories or jar files to add to the classpath<br>" + 
+                                                            "<html>Any directories or jar files to add to the classpath<br>"+
                                                             "of the Compiler and Interactions Pane.</html>", true));
     
     panel.displayComponents();
@@ -493,7 +505,7 @@ public class ConfigFrame extends SwingFrame {
                                                   "Whether to show a sample of the source code under the document's filename when fast switching documents."));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SHOW_CODE_PREVIEW_POPUPS, 
                                                   "Show Code Preview Popups", this,
-                                                  "<html>Whether to show a popup window with a code preview when the mouse is hovering<br>" + 
+                                                  "<html>Whether to show a popup window with a code preview when the mouse is hovering<br>"+
                                                   "over an item in the Breakpoints, Bookmarks and Find All panes.</html>"));
         
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.CLIPBOARD_HISTORY_SIZE,
@@ -505,8 +517,8 @@ public class ConfigFrame extends SwingFrame {
                                  "<html><p align=\"right\">" + 
                                  StringOps.
                                    splitStringAtWordBoundaries("Display Fully-Qualified Class Names in \"Go to File\" Dialog",
-                                                               27, "<br>", SEPS) + "</p></html>", this,
-                                 "<html>Whether to also display fully-qualified class names in the \"Go to File\" dialog.<br>" + 
+                                                               27, "<br>", SEPS)+"</p></html>", this,
+                                 "<html>Whether to also display fully-qualified class names in the \"Go to File\" dialog.<br>"+
                                  "Enabling this option on network drives might cause the dialog to display after a slight delay.</html>");
     addOptionComponent(panel, checkbox);
     
@@ -515,9 +527,9 @@ public class ConfigFrame extends SwingFrame {
                                  "<html><p align=\"right\">" + 
                                  StringOps.
                                    splitStringAtWordBoundaries("Scan Class Files After Each Compile for Auto-Completion and Auto-Import",
-                                                               27, "<br>", SEPS) + "</p></html>", this,
-                                 "<html>Whether to scan the class files after a compile to generate class names<br>" + 
-                                 "used for auto-completion and auto-import.<br>" + 
+                                                               27, "<br>", SEPS)+"</p></html>", this,
+                                 "<html>Whether to scan the class files after a compile to generate class names<br>"+
+                                 "used for auto-completion and auto-import.<br>"+
                                  "Enabling this option will slow compiles down.</html>");
     addOptionComponent(panel, checkbox);
     
@@ -526,7 +538,7 @@ public class ConfigFrame extends SwingFrame {
                                  "<html><p align=\"right\">" + 
                                  StringOps.
                                    splitStringAtWordBoundaries("Consider Java API Classes for Auto-Completion",
-                                                               27, "<br>", SEPS) + "</p></html>", this,
+                                                               27, "<br>", SEPS)+"</p></html>", this,
                                  "Whether to use the names of the Java API classes for auto-completion as well.");
     addOptionComponent(panel, checkbox);
     panel.displayComponents();
@@ -579,7 +591,7 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, new ColorOptionComponent(OptionConstants.BOOKMARK_COLOR, "Bookmark Color", this,
                                                 "The color for bookmarks in the Definitions Pane.", true));
     for (int i = 0; i < OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
-      addOptionComponent(panel, new ColorOptionComponent(OptionConstants.FIND_RESULTS_COLORS[i], "Find Results Color " + (i+1), this,
+      addOptionComponent(panel, new ColorOptionComponent(OptionConstants.FIND_RESULTS_COLORS[i], "Find Results Color "+(i+1), this,
                                                          "A color for highlighting find results in the Definitions Pane.", true));
     }
     addOptionComponent(panel, 
@@ -834,7 +846,7 @@ public class ConfigFrame extends SwingFrame {
                                                        "To exclude a package, add <code>packagename.*</code> to the list.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DEBUG_AUTO_IMPORT,
                                                   "Auto-Import after Breakpoint/Step", this,
-                                                  "<html>Whether the Debugger should automatically import packages<br>" + 
+                                                  "<html>Whether the Debugger should automatically import packages<br>"+
                                                   "and classes again after a breakpoint or step.</html>"));
     
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.AUTO_STEP_RATE,
@@ -893,7 +905,7 @@ public class ConfigFrame extends SwingFrame {
         // verify that the allclasses-frame.html file exists at that URL. do not actually parse it now
         boolean result = true;
         try {
-          java.net.URL url = new java.net.URL(s + "/allclasses-frame.html");
+          java.net.URL url = new java.net.URL(s+"/allclasses-frame.html");
           java.io.InputStream urls = url.openStream();
           java.io.InputStreamReader is = null;
           java.io.BufferedReader br = null;
@@ -912,7 +924,7 @@ public class ConfigFrame extends SwingFrame {
         catch(java.io.IOException ioe) { result = false; }
         if (!result) {
           JOptionPane.showMessageDialog(ConfigFrame.this,
-                                        "Could not find the Javadoc at the URL\n" + 
+                                        "Could not find the Javadoc at the URL\n"+
                                         s,
                                         "Error Adding Javadoc",
                                         JOptionPane.ERROR_MESSAGE); 
@@ -1074,7 +1086,7 @@ public class ConfigFrame extends SwingFrame {
                        new BooleanOptionComponent(OptionConstants.WARN_IF_COMPIZ, 
                                                   "Warn If Compiz Detected",
                                                   this,
-                                                  "<html>Whether DrJava should warn the user if Compiz is running.<br>" + 
+                                                  "<html>Whether DrJava should warn the user if Compiz is running.<br>"+
                                                   "Compiz and Java Swing are incompatible and can lead to crashes.</html>",
                                                   false)
                          .setEntireColumn(true));
@@ -1157,24 +1169,25 @@ public class ConfigFrame extends SwingFrame {
                                                   "If this is not selected, the focus will be in the Find/Replace pane.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DRJAVA_USE_FORCE_QUIT, 
                                                   "Forcefully Quit DrJava", this,
-                                                  "<html>On some platforms, DrJava does not shut down properly when files are open<br>" + 
+                                                  "<html>On some platforms, DrJava does not shut down properly when files are open<br>"+
                                                   "(namely tablet PCs). Check this option to force DrJava to close.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.REMOTE_CONTROL_ENABLED, 
                                                   "Enable Remote Control", this,
-                                                  "<html>Whether DrJava should listen to a socket (see below) so it<br>" + 
-                                                         "can be remote controlled and told to open files.<br>" + 
+                                                  "<html>Whether DrJava should listen to a socket (see below) so it<br>"+
+                                                         "can be remote controlled and told to open files.<br>"+
                                                          "(Changes will not be applied until DrJava is restarted.)</html>"));
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.REMOTE_CONTROL_PORT, 
                                                          "Remote Control Port", this,
-                                                         "<html>A running instance of DrJava can be remote controlled and<br>" + 
-                                                         "told to open files. This specifies the port used for remote control.</html>"));
+                                                         "<html>A running instance of DrJava can be remote controlled and<br>"+
+                                                         "told to open files. This specifies the port used for remote control.<br>" + 
+                                                         "(Changes will not be applied until DrJava is restarted.)</html>"));
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.FOLLOW_FILE_DELAY, 
                                                          "Follow File Delay", this,
-                                                         "<html>The delay in milliseconds that has to elapse before DrJava will check<br>" + 
+                                                         "<html>The delay in milliseconds that has to elapse before DrJava will check<br>"+
                                                          "if a file that is being followed or the output of an external process has changed.</html>"));
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.FOLLOW_FILE_LINES, 
                                                          "Maximum Lines in \"Follow File\" Window", this,
-                                                         "<html>The maximum number of lines to keep in a \"Follow File\"<br>" + 
+                                                         "<html>The maximum number of lines to keep in a \"Follow File\"<br>"+
                                                          "or \"External Process\" pane. Enter 0 for unlimited.</html>"));
     
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
@@ -1214,8 +1227,8 @@ public class ConfigFrame extends SwingFrame {
   /** Adds all of the components for the file types panel of the preferences window. */
   private void _setupFileTypesPanel(ConfigPanel panel) {
     if (PlatformFactory.ONLY.canRegisterFileExtensions()) {
-      addOptionComponent(panel, new LabelComponent("<html>Assign DrJava project files and DrJava extensions<br>" + 
-                                                   "(with the extensions .drjava and .djapp) to DrJava.<br>" + 
+      addOptionComponent(panel, new LabelComponent("<html>Assign DrJava project files and DrJava extensions<br>"+
+                                                   "(with the extensions .drjava and .djapp) to DrJava.<br>"+
                                                    "When double-clicking on a .drjava file, DrJava will open it.</html>", this, true));
       
       panel.addComponent(new ButtonComponent(new ActionListener() {
@@ -1256,8 +1269,8 @@ public class ConfigFrame extends SwingFrame {
       
       addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
       addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
-      addOptionComponent(panel, new LabelComponent("<html>Assign Java source files with the<br>" + 
-                                                   "extension .java to DrJava. When double-clicking<br>" + 
+      addOptionComponent(panel, new LabelComponent("<html>Assign Java source files with the<br>"+
+                                                   "extension .java to DrJava. When double-clicking<br>"+
                                                    "on a .java file, DrJava will open it.</html>", this, true));
 
       panel.addComponent(new ButtonComponent(new ActionListener() {
@@ -1301,20 +1314,20 @@ public class ConfigFrame extends SwingFrame {
       
       addOptionComponent(panel, new ForcedChoiceOptionComponent(OptionConstants.FILE_EXT_REGISTRATION,
                                                                 "<html>Automatically assign .java, .drjava and .djapp Files to DrJava</html>", this,
-                                                                "<html>Assign files with the extensions .java, .drjava and .djapp to DrJava.<br>" + 
-                                                                "When double-clicking those files, they will be opened in DrJava.<br><br>" + 
-                                                                "Selecting 'always' will re-establish this association every time DrJava<br>" + 
-                                                                "started, without asking. Selecting 'ask me' will ask the user at start up<br>" + 
-                                                                "if the association has been changed. Selecting 'never' will not assign<br>" + 
+                                                                "<html>Assign files with the extensions .java, .drjava and .djapp to DrJava.<br>"+
+                                                                "When double-clicking those files, they will be opened in DrJava.<br><br>"+
+                                                                "Selecting 'always' will re-establish this association every time DrJava<br>"+
+                                                                "started, without asking. Selecting 'ask me' will ask the user at start up<br>"+
+                                                                "if the association has been changed. Selecting 'never' will not assign<br>"+
                                                                 ".java, .drjava and .djapp files to DrJava."));
     }
     else {
       addOptionComponent(panel, 
-                         new LabelComponent("<html><br><br>" + 
+                         new LabelComponent("<html><br><br>"+
                                             (PlatformFactory.ONLY.isMacPlatform()?
                                                "File associations are managed automatically by Mac OS.":
                                                (PlatformFactory.ONLY.isWindowsPlatform()?
-                                                  "To set file associations, please use the .exe file version of DrJava.<br>" + 
+                                                  "To set file associations, please use the .exe file version of DrJava.<br>"+
                                                 "Configuring file associations is not supported for the .jar file version.":
                                                   "Managing file associations is not supported yet on this operating system."))+
                                             "</html>",
@@ -1370,13 +1383,13 @@ public class ConfigFrame extends SwingFrame {
                                                   "The number of interactions to remember in the history."));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_AUTOIMPORT_ENABLED, 
                                                          "Enable the \"Auto Import\" Dialog", this,
-                                                         "<html>Whether DrJava should open the \"Auto Import\" dialog when<br>" + 
+                                                         "<html>Whether DrJava should open the \"Auto Import\" dialog when<br>"+
                                                          "an undefined class is encountered in the Interactions Pane.</html>"));
     VectorStringOptionComponent autoImportClasses =
       new VectorStringOptionComponent(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES, "Classes to Auto-Import", this,
-                                      "<html>List of classes to auto-import every time the<br>" + 
-                                      "Interaction Pane is reset or started. Examples:<br><br>" + 
-                                      "java.io.File<br>" + 
+                                      "<html>List of classes to auto-import every time the<br>"+
+                                      "Interaction Pane is reset or started. Examples:<br><br>"+
+                                      "java.io.File<br>"+
                                       "java.util.*</html>") {
       protected boolean verify(String s) {
         boolean result = true;
@@ -1390,7 +1403,7 @@ public class ConfigFrame extends SwingFrame {
         }
         if (!result) {
           JOptionPane.showMessageDialog(ConfigFrame.this,
-                                        "This is not a valid class name:\n" + 
+                                        "This is not a valid class name:\n"+
                                         s,
                                         "Error Adding Class Name",
                                         JOptionPane.ERROR_MESSAGE); 
@@ -1406,8 +1419,8 @@ public class ConfigFrame extends SwingFrame {
                                                     splitStringAtWordBoundaries("Restore last working directory of the Interactions pane on start up",
                                                                                 33, "<br>", SEPS), this,
                                                   "<html>Whether to restore the last working directory of the Interaction pane on start up,<br>" +
-                                                  "or to always use the value of the \"user.home\" Java property<br>" + 
-                                                  "(currently " + System.getProperty("user.home") + ")."));
+                                                  "or to always use the value of the \"user.home\" Java property<br>"+
+                                                  "(currently "+System.getProperty("user.home")+")."));
 
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
@@ -1419,16 +1432,318 @@ public class ConfigFrame extends SwingFrame {
                                                        "What kind of access control should DrJava enforce in the Interactions Pane?"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DYNAMICJAVA_REQUIRE_SEMICOLON, 
                                                          "Require Semicolon", this,
-                                                         "<html>Whether DrJava should require a semicolon at the<br>" + 
+                                                         "<html>Whether DrJava should require a semicolon at the<br>"+
                                                          "end of a statement in the Interactions Pane.</html>"));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DYNAMICJAVA_REQUIRE_VARIABLE_TYPE, 
                                                          "Require Variable Type", this,
-                                                         "<html>Whether DrJava should require a variable type for<br>" + 
+                                                         "<html>Whether DrJava should require a variable type for<br>"+
                                                          "variable declarations in the Interactions Pane.</html>"));
     
     panel.displayComponents();
   }
 
+  /** Add all of the components for the JUnit panel of the preferences window. */
+  private void _setupJUnitPanel(ConfigPanel panel) {
+    final FileOptionComponent junitLoc =
+      new FileOptionComponent(OptionConstants.JUNIT_LOCATION, "JUnit/ConcJUnit Location", this,
+                              "<html>Optional location of the JUnit 3.8.2 junit.jar file.<br>"+
+                              "If this is left blank, the JUnit integrated into DrJava is used.<br>"+
+                              "To use ConcJUnit, select the concutest-junit-3.8.2-withrt.jar file.<br>" + 
+                              "(Changes will not be applied until DrJava is restarted.)</html>",
+                              new FileSelectorComponent(this, _jarChooser, 30, 10f) {
+      public void setFileField(File file) {
+        if (edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidJUnitFile(file) ||
+            edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidConcJUnitFile(file)) {
+          super.setFileField(file);
+        }
+        else if (file.exists()) { // invalid JUnit/ConcJUnit file, but exists
+          new edu.rice.cs.drjava.ui.DrJavaScrollableDialog(_parent, "Invalid JUnit/ConcJUnit File", "Stack trace:",
+                                                           edu.rice.cs.util.StringOps.getStackTrace(), 600, 400, false).show();
+          JOptionPane.showMessageDialog(_parent, "The file '"+ file.getName() + "'\nis not a valid JUnit/ConcJUnit file.",
+                                        "Invalid JUnit/ConcJUnit File", JOptionPane.ERROR_MESSAGE);
+          resetFileField(); // revert if not valid          
+        }
+      }
+      public boolean validateTextField() {
+        String newValue = _fileField.getText().trim();
+        
+        File newFile = FileOps.NULL_FILE;
+        if (!newValue.equals(""))
+          newFile = new File(newValue);
+        
+        if (newFile != FileOps.NULL_FILE && !newFile.exists()) {
+          JOptionPane.showMessageDialog(_parent, "The file '"+ newFile.getName() + "'\nis invalid because it does not exist.",
+                                        "Invalid File Name", JOptionPane.ERROR_MESSAGE);
+          if (_file != null && ! _file.exists()) _file = FileOps.NULL_FILE;
+          resetFileField(); // revert if not valid
+          
+          return false;
+        }
+        else {
+          if (edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidJUnitFile(newFile) ||
+              edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidConcJUnitFile(newFile) ||
+              FileOps.NULL_FILE.equals(newFile)) {
+            setFileField(newFile);
+            return true;
+          }
+          else {
+            new edu.rice.cs.drjava.ui.DrJavaScrollableDialog(_parent, "Invalid JUnit/ConcJUnit File", "newFile is NULL_FILE? "+(FileOps.NULL_FILE.equals(newFile)),
+                                                             edu.rice.cs.util.StringOps.getStackTrace(), 600, 400, false).show();
+            JOptionPane.showMessageDialog(_parent, "The file '"+ newFile.getName() + "'\nis not a valid JUnit/ConcJUnit file.",
+                                          "Invalid JUnit/ConcJUnit File", JOptionPane.ERROR_MESSAGE);
+            resetFileField(); // revert if not valid
+            
+            return false;
+          }
+        }
+      }    
+    });
+    junitLoc.setFileFilter(ClassPathFilter.ONLY);
+    addOptionComponent(panel, junitLoc);
+    
+    final FileOptionComponent rtConcJUnitLoc =
+      new FileOptionComponent(OptionConstants.RT_CONCJUNIT_LOCATION, "ConcJUnit Runtime Location", this,
+                              "<html>Optional location of the Java Runtime Library processed<br>"+
+                              "to generate &quot;lucky&quot; warnings. If left blank, &quot;lucky&quot; warnings<br>"+
+                              "will not be generated. This setting is deactivated if the path to<br>"+
+                              "ConcJUnit has not been specified above.<br>" + 
+                              "(Changes will not be applied until the Interactions Pane is reset.)</html>",
+                              new FileSelectorComponent(this, _jarChooser, 30, 10f) {
+      public void setFileField(File file) {
+        if (edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidRTConcJUnitFile(file)) {
+          super.setFileField(file);
+        }
+        else if (file.exists()) { // invalid but exists
+          JOptionPane.showMessageDialog(_parent, "The file '"+ file.getName() + "'\nis not a valid ConcJUnit Runtime file.",
+                                        "Invalid ConcJUnit Runtime File", JOptionPane.ERROR_MESSAGE);
+          resetFileField(); // revert if not valid          
+        }
+      }
+      public boolean validateTextField() {
+        String newValue = _fileField.getText().trim();
+        
+        File newFile = FileOps.NULL_FILE;
+        if (!newValue.equals(""))
+          newFile = new File(newValue);
+        
+        if (newFile != FileOps.NULL_FILE && !newFile.exists()) {
+          JOptionPane.showMessageDialog(_parent, "The file '"+ newFile.getName() + "'\nis invalid because it does not exist.",
+                                        "Invalid File Name", JOptionPane.ERROR_MESSAGE);
+          if (_file != null && ! _file.exists()) _file = FileOps.NULL_FILE;
+          resetFileField(); // revert if not valid
+          
+          return false;
+        }
+        else {
+          if (edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidRTConcJUnitFile(newFile) ||
+              FileOps.NULL_FILE.equals(newFile)) {
+            setFileField(newFile);
+            return true;
+          }
+          else {
+            JOptionPane.showMessageDialog(_parent, "The file '"+ newFile.getName() + "'\nis not a valid ConcJUnit Runtime file.",
+                                          "Invalid ConcJUnit Runtime File", JOptionPane.ERROR_MESSAGE);
+            resetFileField(); // revert if not valid
+            
+            return false;
+          }
+        }
+      }    
+    });
+    rtConcJUnitLoc.setFileFilter(ClassPathFilter.ONLY);
+    OptionComponent.ChangeListener rtConcJUnitListener = new OptionComponent.ChangeListener() {
+      public Object value(Object oc) {
+        File f = junitLoc.getComponent().getFileFromField();
+        rtConcJUnitLoc.getComponent().
+          setEnabled(edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidConcJUnitFile(f));
+        return null;
+      }
+    };
+    junitLoc.addChangeListener(rtConcJUnitListener);
+    addOptionComponent(panel, rtConcJUnitLoc);
+    
+    ActionListener processRTListener = new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        File rtFile = rtConcJUnitLoc.getComponent().getFileFromField();
+        if ((rtFile == null) || (FileOps.NULL_FILE.equals(rtFile))) {
+          // no entry, suggest a place
+          File drJavaFile = FileOps.getDrJavaApplicationFile();
+          File parent = drJavaFile.getParentFile();
+          if (parent == null) {
+            parent = new File(System.getProperty("user.dir"));
+          }
+          rtFile = new File(parent, "rt.concjunit.jar"); 
+        }
+        JFileChooser saveChooser = new JFileChooser() {
+          public void setCurrentDirectory(File dir) {
+            //next two lines are order dependent!
+            super.setCurrentDirectory(dir);
+            setDialogTitle("Save:  " + getCurrentDirectory());
+          }
+        };
+        saveChooser.setPreferredSize(new Dimension(650, 410));
+        saveChooser.setSelectedFile(rtFile);
+        saveChooser.setFileFilter(new javax.swing.filechooser.FileFilter() {
+          public boolean accept(File f) {
+            return f.isDirectory() || 
+              f.getPath().endsWith(".jar");
+          }
+          public String getDescription() { 
+            return "Java Archive Files (*.jar)";
+          }
+        });
+        saveChooser.setMultiSelectionEnabled(false);
+        int rc = saveChooser.showSaveDialog(ConfigFrame.this);
+        if (rc == JFileChooser.APPROVE_OPTION) {
+          final File targetFile = saveChooser.getSelectedFile();
+          int n = JOptionPane.YES_OPTION;
+          if (targetFile.exists()) {
+            Object[] options = {"Yes","No"};
+            n = JOptionPane.showOptionDialog(ConfigFrame.this,
+                                             "This file already exists.  Do you wish to overwrite the file?",
+                                             "Confirm Overwrite",
+                                             JOptionPane.YES_NO_OPTION,
+                                             JOptionPane.QUESTION_MESSAGE,
+                                             null,
+                                             options,
+                                             options[1]);
+          }
+          if (n == JOptionPane.YES_OPTION) {
+            ConfigFrame.this.setEnabled(false);
+            final ProcessingDialog processingDialog =
+              new ProcessingDialog(ConfigFrame.this, "Creating ConcJUnit Runtime", "Processing, please wait.");
+            final JProgressBar pb = processingDialog.getProgressBar();
+            processingDialog.setVisible(true);
+            try {
+              final File tmpDir = FileOps.createTempDirectory("DrJavaGenerateRTConcJUnitJar");
+              
+              SwingWorker worker = new SwingWorker() {
+                volatile Boolean _success = null;
+                Thread _processIncrementer = new Thread(new Runnable() {
+                  public void run() {
+                    File tmpFile = new File(tmpDir, "rt.concjunit.jar");
+                    boolean indeterminate = true;
+                    try {
+                      while (_success == null) {
+                        Thread.sleep(1000);
+                        if (tmpFile.exists()) {
+                          if (indeterminate) {
+                            pb.setIndeterminate(false);
+                            indeterminate = false;
+                          }
+                          pb.setValue((int)(100.0/(30*1024*1024)*tmpFile.length()));
+                        }
+                      }
+                    }
+                    catch(InterruptedException ie) {
+                      pb.setIndeterminate(true);
+                    }
+                  }
+                });
+                public Object construct() {
+                  _processIncrementer.start();
+                  _success = edu.rice.cs.drjava.model.junit.DefaultJUnitModel.
+                    generateRTConcJUnitJarFile(targetFile, junitLoc.getComponent().getFileFromField(), tmpDir);
+                  return null;
+                }
+                
+                public void finished() {
+                  pb.setValue(100);
+                  processingDialog.setVisible(false);
+                  processingDialog.dispose();
+                  ConfigFrame.this.setEnabled(true);
+                  if ((_success != null) && (_success)) {
+                    rtConcJUnitLoc.getComponent().setFileField(targetFile);
+                    JOptionPane.showMessageDialog(ConfigFrame.this,
+                                                  "Successfully generated ConcJUnit Runtime File:\n"+targetFile,
+                                                  "Could Not Generate",
+                                                  JOptionPane.INFORMATION_MESSAGE);
+                  }
+                  else {
+                    JOptionPane.showMessageDialog(ConfigFrame.this,
+                                                  "Could not generate ConcJUnit Runtime File:\n"+targetFile,
+                                                  "Could Not Generate",
+                                                  JOptionPane.ERROR_MESSAGE);
+                  }
+                  edu.rice.cs.plt.io.IOUtil.deleteRecursively(tmpDir);
+                }
+              };
+              worker.start();
+            }
+            catch(IOException ioe) {
+              JOptionPane.showMessageDialog(ConfigFrame.this,
+                                            "Could not generate ConcJUnit Runtime file:\n"+targetFile,
+                                            "Could Not Generate",
+                                            JOptionPane.ERROR_MESSAGE);
+            }
+          }
+        }
+      }
+    };
+    final ButtonComponent processRT =
+      new ButtonComponent(processRTListener, "Generate ConcJUnit Runtime File", this,
+                          "<html>Generate the ConcJUnit Runtime file specified above.<br>"+
+                          "This setting is deactivated if the path to ConcJUnit has not been specified above.</html>");
+    OptionComponent.ChangeListener processRTChangeListener = new OptionComponent.ChangeListener() {
+      public Object value(Object oc) {
+        File f = junitLoc.getComponent().getFileFromField();
+        processRT.getComponent().
+          setEnabled(edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidConcJUnitFile(f));
+        return null;
+      }
+    };
+    junitLoc.addChangeListener(processRTChangeListener);
+    addOptionComponent(panel, processRT);
+    
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
+    final LabelComponent junitStatus = new LabelComponent("<html>&nbsp;</html>", this, true);
+    final LabelComponent luckyStatus = new LabelComponent("<html>&nbsp;</html>", this, true);
+    OptionComponent.ChangeListener junitStatusChangeListener = new OptionComponent.ChangeListener() {
+      public Object value(Object oc) {
+        File f = junitLoc.getComponent().getFileFromField();
+        String s, t;
+        if ((f==null) || FileOps.NULL_FILE.equals(f) || !f.exists()) {
+          s = "DrJava uses the built-in JUnit.";
+          t = "";
+        }
+        else {
+          if (edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidConcJUnitFile(f)) {
+            s = "DrJava uses ConcJUnit.";
+            File rtf = rtConcJUnitLoc.getComponent().getFileFromField();
+            if ((rtf!=null) && !FileOps.NULL_FILE.equals(rtf) && rtf.exists() &&
+                edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidRTConcJUnitFile(rtf)) {
+              t = "\"Lucky\" warnings are enabled.";
+            }
+            else {
+              t = "\"Lucky\" warnings are disabled.";
+            }
+          }
+          else if (edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidJUnitFile(f)) {
+            s = "DrJava uses JUnit in a separate file.";
+            t = "";
+          }
+          else {
+            s = "DrJava uses the built-in JUnit.";
+            t = "";
+          }
+        }
+        junitStatus.getComponent().setText(s);
+        luckyStatus.getComponent().setText(t);
+        return null;
+      }
+    };
+    junitLoc.addChangeListener(junitStatusChangeListener);
+    rtConcJUnitLoc.addChangeListener(junitStatusChangeListener);
+    addOptionComponent(panel, junitStatus);
+    addOptionComponent(panel, luckyStatus);
+    
+    rtConcJUnitListener.value(junitLoc);
+    processRTChangeListener.value(junitLoc);
+    junitStatusChangeListener.value(junitLoc);
+    
+    panel.displayComponents();
+  }
+  
   /** Private class to handle rendering of tree nodes, each of which
     *  corresponds to a ConfigPanel.  These nodes should only be accessed
     *  from the event handling thread.
@@ -1498,7 +1813,7 @@ public class ConfigFrame extends SwingFrame {
   private class PanelTreeSelectionListener implements TreeSelectionListener {
     public void valueChanged(TreeSelectionEvent e) {
       Object o = _tree.getLastSelectedPathComponent();
-      //System.out.println("Object o : " + o);
+      //System.out.println("Object o : "+o);
       if (o instanceof PanelTreeNode) {
         //System.out.println("o is instanceof PanelTreeNode");
         PanelTreeNode child = (PanelTreeNode) _tree.getLastSelectedPathComponent();
