@@ -1656,7 +1656,7 @@ public class ConfigFrame extends SwingFrame {
                     rtConcJUnitLoc.getComponent().setFileField(targetFile);
                     JOptionPane.showMessageDialog(ConfigFrame.this,
                                                   "Successfully generated ConcJUnit Runtime File:\n"+targetFile,
-                                                  "Could Not Generate",
+                                                  "Generation Successful",
                                                   JOptionPane.INFORMATION_MESSAGE);
                   }
                   else {
