@@ -1177,7 +1177,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
         return isReifiable(target) && (target.getClass().isInterface() || isSubtype(target, erase(source)));
       }
       @Override public Boolean forParameterizedClassType(ParameterizedClassType target) {
-        if (isReifiable(target)) { return target.getClass().isInterface() || isSubtype(target, erase(source)); }
+        if (isReifiable(target)) { return target.ofClass().isInterface() || isSubtype(target, erase(source)); }
         else {
           if (isSubtype(target, source)) {
             // Verify that that, given a value of type source & erase(target), it must have type target.
