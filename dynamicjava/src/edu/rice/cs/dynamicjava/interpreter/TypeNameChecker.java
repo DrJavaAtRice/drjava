@@ -373,7 +373,7 @@ public class TypeNameChecker {
       if (node.getUpperBound().isSome()) {
         upper = checkStructure(node.getUpperBound().unwrap());
         if (!ts.isReference(upper)) {
-          setErrorStrings(node, ts.userRepresentation(upper));
+          setErrorStrings(node, ts.typePrinter().print(upper));
           throw new ExecutionError("wildcard.bound", node);
         }
       }
@@ -382,7 +382,7 @@ public class TypeNameChecker {
       if (node.getLowerBound().isSome()) {
         lower = checkStructure(node.getLowerBound().unwrap());
         if (!ts.isReference(lower)) {
-          setErrorStrings(node, ts.userRepresentation(lower));
+          setErrorStrings(node, ts.typePrinter().print(lower));
           throw new ExecutionError("wildcard.bound", node);
         }
       }

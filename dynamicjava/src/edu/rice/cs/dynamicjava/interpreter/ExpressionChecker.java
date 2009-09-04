@@ -199,7 +199,7 @@ public class ExpressionChecker {
       // elsewhere)
       DJConstructor k = inv.constructor();
       if (k.accessibility().equals(Access.PRIVATE) && !k.accessModule().equals(context.accessModule())) {
-        setErrorStrings(node, ts.userRepresentation(type));
+        setErrorStrings(node, ts.typePrinter().print(type));
         throw new ExecutionError("inaccessible.super.call", node);
       }
       checkThrownExceptions(inv.thrown(), node);
@@ -223,6 +223,7 @@ public class ExpressionChecker {
                                                 String name, Iterable<? extends Type> targs,
                                                 Iterable<? extends Expression> args, Option<Type> expected,
                                                 boolean onlyStatic) {
+    final TypePrinter printer = ts.typePrinter();
     String error = ((e.matches() > 1) ? "ambiguous." : "no.such.") + kind;
     Iterable<? extends Function> candidates = IterUtil.empty();
     boolean noMatch = false;
@@ -239,23 +240,22 @@ public class ExpressionChecker {
       if (expected.isSome()) { error += ".expected"; }
       if (!IterUtil.isEmpty(candidates)) { error += ".candidates"; }
     }
-    String typeS = (onlyStatic ? "static " : "") + ts.userRepresentation(type);
-    String expectedS = expected.isSome() ? ts.userRepresentation(expected.unwrap()) : "";
+    String typeS = (onlyStatic ? "static " : "") + printer.print(type);
+    String expectedS = expected.isSome() ? printer.print(expected.unwrap()) : "";
     String candidatesS;
     if (IterUtil.sizeOf(candidates, 2) == 1) {
-     candidatesS = SIGNATURE_STRING.value(IterUtil.first(candidates));
+     candidatesS = printer.print(IterUtil.first(candidates));
     }
     else {
       String prefix = "\n        "; 
-      candidatesS = IterUtil.toString(IterUtil.map(candidates, SIGNATURE_STRING), prefix, prefix, "");
+      Lambda<Function, String> printSig = new Lambda<Function, String>() {
+        public String value(Function f) { return printer.print(f); }
+      };
+      candidatesS = IterUtil.toString(IterUtil.map(candidates, printSig), prefix, prefix, "");
     }
-    setErrorStrings(node, typeS, name, ts.userRepresentation(targs), nodeTypesString(args), expectedS, candidatesS);
+    setErrorStrings(node, typeS, name, printer.print(targs), nodeTypesString(args, printer), expectedS, candidatesS);
     throw new ExecutionError(error, node);
   }
-  
-  private final Lambda<Function, String> SIGNATURE_STRING = new Lambda<Function, String>() {
-    public String value(Function f) { return ts.userRepresentation(f); }
-  };
   
   /** Verify that the thrown exceptions are expected in this context. */
   private void checkThrownExceptions(Iterable<? extends Type> thrownTypes, Node node) {
@@ -268,15 +268,15 @@ public class ExpressionChecker {
           if (ts.isAssignable(t, thrown)) { valid = true; break; }
         }
         if (!valid) {
-          setErrorStrings(node, ts.userRepresentation(thrown));
+          setErrorStrings(node, ts.typePrinter().print(thrown));
           throw new ExecutionError("uncaught.exception", node);
         }
       }
     }
   }
   
-  private String nodeTypesString(Iterable<? extends Node> nodes) {
-    return ts.userRepresentation(IterUtil.map(nodes, NODE_TYPE));
+  private String nodeTypesString(Iterable<? extends Node> nodes, TypePrinter printer) {
+    return printer.print(IterUtil.map(nodes, NODE_TYPE));
   }
   
   
@@ -387,7 +387,7 @@ public class ExpressionChecker {
             // TODO: Improve error when memberName is a non-static class
           }
           else {
-            setErrorStrings(node, ts.userRepresentation(classType), memberName.image());
+            setErrorStrings(node, ts.typePrinter().print(classType), memberName.image());
             throw new ExecutionError("no.such.member", node);
           }
         }
@@ -507,7 +507,7 @@ public class ExpressionChecker {
         return setType(node, result);
       }
       catch (UnmatchedLookupException e) {
-        setErrorStrings(node, ts.userRepresentation(receiverT), node.getFieldName());
+        setErrorStrings(node, ts.typePrinter().print(receiverT), node.getFieldName());
         if (e.matches() > 1) { throw new ExecutionError("ambiguous.field", node); }
         else { throw new ExecutionError("no.such.field", node); }
       }
@@ -535,7 +535,7 @@ public class ExpressionChecker {
         return setType(node, result);
       }
       catch (UnmatchedLookupException e) {
-        setErrorStrings(node, ts.userRepresentation(t), node.getFieldName());
+        setErrorStrings(node, ts.typePrinter().print(t), node.getFieldName());
         if (e.matches() > 1) { throw new ExecutionError("ambiguous.field", node); }
         else { throw new ExecutionError("no.such.field", node); }
       }
@@ -556,7 +556,7 @@ public class ExpressionChecker {
         return setType(node, result);
       }
       catch (UnmatchedLookupException e) {
-        setErrorStrings(node, ts.userRepresentation(t), node.getFieldName());
+        setErrorStrings(node, ts.typePrinter().print(t), node.getFieldName());
         if (e.matches() > 1) { throw new ExecutionError("ambiguous.field", node); }
         else { throw new ExecutionError("no.such.static.field", node); }
       }
@@ -815,7 +815,8 @@ public class ExpressionChecker {
         try { newCells.add(ts.assign(elementType, exp)); }
         catch (UnsupportedConversionException e) {
           Type expT = getType(exp);
-          setErrorStrings(exp, ts.userRepresentation(expT), ts.userRepresentation(elementType));
+          TypePrinter printer = ts.typePrinter();
+          setErrorStrings(exp, printer.print(expT), printer.print(elementType));
           throw new ExecutionError("assignment.types", exp);
         }
       }
@@ -832,7 +833,7 @@ public class ExpressionChecker {
     @Override public Type visit(SimpleAllocation node) {
       Type t = checkTypeName(node.getCreationType());
       if (!ts.isConcrete(t)) {
-        setErrorStrings(node, ts.userRepresentation(t));
+        setErrorStrings(node, ts.typePrinter().print(t));
         throw new ExecutionError("allocation.type", node);
       }
 
@@ -840,7 +841,8 @@ public class ExpressionChecker {
       if (dynamicOuter.isSome()) {
         DJClass enclosingThis = enclosingThis(dynamicOuter.unwrap());
         if (enclosingThis == null) {
-          setErrorStrings(node, ts.userRepresentation(t), ts.userRepresentation(dynamicOuter.unwrap()));
+          TypePrinter printer = ts.typePrinter();
+          setErrorStrings(node, printer.print(t), printer.print(dynamicOuter.unwrap()));
           throw new ExecutionError("inner.allocation", node);
         }
         else { setEnclosingThis(node, enclosingThis); }
@@ -876,7 +878,7 @@ public class ExpressionChecker {
     @Override public Type visit(AnonymousAllocation node) {
       Type t = checkTypeName(node.getCreationType());
       if (!ts.isExtendable(t) && !ts.isImplementable(t)) {
-        setErrorStrings(node, ts.userRepresentation(t));
+        setErrorStrings(node, ts.typePrinter().print(t));
         throw new ExecutionError("invalid.supertype", node);
       }
       
@@ -884,7 +886,8 @@ public class ExpressionChecker {
       if (dynamicOuter.isSome()) {
         DJClass enclosingThis = enclosingThis(dynamicOuter.unwrap());
         if (enclosingThis == null) {
-          setErrorStrings(node, ts.userRepresentation(t), ts.userRepresentation(dynamicOuter.unwrap()));
+          TypePrinter printer = ts.typePrinter();
+          setErrorStrings(node, printer.print(t), printer.print(dynamicOuter.unwrap()));
           throw new ExecutionError("inner.allocation", node);
         }
         else { setEnclosingThis(node, enclosingThis); }
@@ -956,11 +959,11 @@ public class ExpressionChecker {
       try {
         ClassType t = ts.lookupClass(node.getExpression(), node.getClassName(), classTargs, context.accessModule());
         if (t.ofClass().isStatic()) {
-          setErrorStrings(node, node.getClassName(), ts.userRepresentation(getType(node.getExpression())));
+          setErrorStrings(node, node.getClassName(), ts.typePrinter().print(getType(node.getExpression())));
           throw new ExecutionError("static.inner.allocation", node);
         }
         if (!ts.isConcrete(t)) {
-          setErrorStrings(node, ts.userRepresentation(t));
+          setErrorStrings(node, ts.typePrinter().print(t));
           throw new ExecutionError("allocation.type", node);
         }
         
@@ -990,7 +993,7 @@ public class ExpressionChecker {
         throw new ExecutionError("type.argument", node);
       }
       catch (UnmatchedLookupException e) {
-        setErrorStrings(node, ts.userRepresentation(enclosing), node.getClassName());
+        setErrorStrings(node, ts.typePrinter().print(enclosing), node.getClassName());
         if (e.matches() > 1) { throw new ExecutionError("ambiguous.inner.class", node); }
         else { throw new ExecutionError("no.such.inner.class", node); }
       }
@@ -1011,11 +1014,11 @@ public class ExpressionChecker {
       try {
         ClassType t = ts.lookupClass(node.getExpression(), node.getClassName(), classTargs, context.accessModule());
         if (t.ofClass().isStatic()) {
-          setErrorStrings(node, node.getClassName(), ts.userRepresentation(getType(node.getExpression())));
+          setErrorStrings(node, node.getClassName(), ts.typePrinter().print(getType(node.getExpression())));
           throw new ExecutionError("static.inner.allocation", node);
         }
         if (!ts.isExtendable(t)) {
-          setErrorStrings(node, ts.userRepresentation(t));
+          setErrorStrings(node, ts.typePrinter().print(t));
           throw new ExecutionError("invalid.supertype", node);
         }
         setSuperType(node, t);
@@ -1044,7 +1047,7 @@ public class ExpressionChecker {
         throw new ExecutionError("type.argument", node);
       }
       catch (UnmatchedLookupException e) {
-        setErrorStrings(node, ts.userRepresentation(enclosing), node.getClassName());
+        setErrorStrings(node, ts.typePrinter().print(enclosing), node.getClassName());
         if (e.matches() > 1) { throw new ExecutionError("ambiguous.inner.class", node); }
         else { throw new ExecutionError("no.such.inner.class", node); }
       }
@@ -1073,7 +1076,7 @@ public class ExpressionChecker {
     @Override public Type visit(ArrayAccess node) {
       Type arrayType = check(node.getExpression());
       if (!ts.isArray(arrayType)) {
-        setErrorStrings(node, ts.userRepresentation(arrayType));
+        setErrorStrings(node, ts.typePrinter().print(arrayType));
         throw new ExecutionError("array.required", node);
       }
       Type elementType = ts.arrayElementType(arrayType);
@@ -1334,7 +1337,8 @@ public class ExpressionChecker {
       Type rightT = check(node.getRightExpression());
       if (ts.isReference(leftT) && ts.isReference(rightT)) {
         if (ts.isDisjoint(leftT, rightT)) {
-          setErrorStrings(node, ts.userRepresentation(leftT), ts.userRepresentation(rightT));
+          TypePrinter printer = ts.typePrinter();
+          setErrorStrings(node, printer.print(leftT), printer.print(rightT));
           throw new ExecutionError("compare.type", node);
         }
         setOperation(node, objectCase);
@@ -1356,13 +1360,15 @@ public class ExpressionChecker {
             node.setRightExpression(promoted.second());
           }
           else {
-            setErrorStrings(node, ts.userRepresentation(leftT), ts.userRepresentation(rightT));
+            TypePrinter printer = ts.typePrinter();
+            setErrorStrings(node, printer.print(leftT), printer.print(rightT));
             throw new ExecutionError("compare.type", node);
           }
           setOperation(node, primitiveCase);
         }
         catch (UnsupportedConversionException e) {
-          setErrorStrings(node, ts.userRepresentation(leftT), ts.userRepresentation(rightT));
+            TypePrinter printer = ts.typePrinter();
+            setErrorStrings(node, printer.print(leftT), printer.print(rightT));
           throw new ExecutionError("compare.type", node);
         }
       }
@@ -1393,8 +1399,9 @@ public class ExpressionChecker {
         return setType(node, TypeSystem.BOOLEAN);
       }
       catch (UnsupportedConversionException e) {
-        setErrorStrings(node, ts.userRepresentation(getType(node.getLeftExpression())),
-                        ts.userRepresentation(getType(node.getRightExpression())));
+        TypePrinter printer = ts.typePrinter();
+        setErrorStrings(node, printer.print(getType(node.getLeftExpression())),
+                        printer.print(getType(node.getRightExpression())));
         throw new ExecutionError("compare.type", node);
       }
     }
@@ -1638,8 +1645,8 @@ public class ExpressionChecker {
         return setType(node, result);
       }
       catch (UnsupportedConversionException e) {
-        setErrorStrings(node, ts.userRepresentation(rightT),
-                        ts.userRepresentation(target));
+        TypePrinter printer = ts.typePrinter();
+        setErrorStrings(node, printer.print(rightT), printer.print(target));
         throw new ExecutionError("assignment.types", node);
       }
     }
@@ -1686,7 +1693,8 @@ public class ExpressionChecker {
         return setType(node, ts.capture(t));
       }
       catch (UnsupportedConversionException e) {
-        setErrorStrings(node, ts.userRepresentation(fromT), ts.userRepresentation(t));
+        TypePrinter printer = ts.typePrinter();
+        setErrorStrings(node, printer.print(fromT), printer.print(t));
         throw new ExecutionError("cast.types", node);
       }
     }

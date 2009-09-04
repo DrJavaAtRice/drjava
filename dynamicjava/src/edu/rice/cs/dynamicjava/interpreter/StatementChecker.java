@@ -291,7 +291,8 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
           node.setInitializer(newInit);
         }
         catch (UnsupportedConversionException e) {
-          setErrorStrings(node, ts.userRepresentation(initT), ts.userRepresentation(t));
+          TypePrinter printer = ts.typePrinter();
+          setErrorStrings(node, printer.print(initT), printer.print(t));
           throw new ExecutionError("assignment.types", node);
         }
       }
@@ -435,7 +436,8 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
     if (ts.isArray(collType)) {
       Type elementType = ts.arrayElementType(collType);
       if (!ts.isAssignable(paramT, elementType)) {
-        setErrorStrings(node, ts.userRepresentation(elementType), ts.userRepresentation(paramT));
+        TypePrinter printer = ts.typePrinter();
+        setErrorStrings(node, printer.print(elementType), printer.print(paramT));
         throw new ExecutionError("assignment.types", node);
       }
     }
@@ -453,7 +455,8 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
                                                    context.accessModule());
         
         if (!ts.isAssignable(paramT, nextInv.returnType())) {
-          setErrorStrings(node, ts.userRepresentation(nextInv.returnType()), ts.userRepresentation(paramT));
+          TypePrinter printer = ts.typePrinter();
+          setErrorStrings(node, printer.print(nextInv.returnType()), printer.print(paramT));
           throw new ExecutionError("assignment.types", node);
         }
       }
@@ -517,7 +520,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
       try {
         Expression exp = ts.makePrimitive(node.getSelector());
         if (!(getType(exp) instanceof IntegralType) || (getType(exp) instanceof LongType)) {
-          setErrorStrings(node, ts.userRepresentation(t));
+          setErrorStrings(node, ts.typePrinter().print(t));
           throw new ExecutionError("selector.type", node);
         }
         node.setSelector(exp);
@@ -549,7 +552,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
           throw new ExecutionError("invalid.constant", exp);
         }
         if (!ts.isAssignable(t, getType(exp), getValue(exp))) {
-          setErrorStrings(node, ts.userRepresentation(getType(exp)));
+          setErrorStrings(node, ts.typePrinter().print(getType(exp)));
           throw new ExecutionError("switch.label.type", exp);
         }
         if (values.contains(getValue(exp))) { 
@@ -587,7 +590,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
       FormalParameter p = c.getException();
       Type caughtT = checkTypeName(p.getType());
       if (!ts.isAssignable(TypeSystem.THROWABLE, caughtT)) {
-        setErrorStrings(c, ts.userRepresentation(caughtT));
+        setErrorStrings(c, ts.typePrinter().print(caughtT));
         throw new ExecutionError("catch.type", c);
       }
       if (!ts.isReifiable(caughtT)) {
@@ -617,7 +620,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
   @Override public TypeContext visit(ThrowStatement node) {
     Type thrown = checkType(node.getExpression());
     if (!ts.isAssignable(TypeSystem.THROWABLE, thrown)) {
-      setErrorStrings(node, ts.userRepresentation(thrown));
+      setErrorStrings(node, ts.typePrinter().print(thrown));
       throw new ExecutionError("throw.type", node);
     }
     else if (ts.isAssignable(TypeSystem.EXCEPTION, thrown)) {
@@ -628,7 +631,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
         if (ts.isAssignable(t, thrown)) { valid = true; break; }
       }
       if (!valid) {
-        setErrorStrings(node, ts.userRepresentation(thrown));
+        setErrorStrings(node, ts.typePrinter().print(thrown));
         throw new ExecutionError("uncaught.exception", node);
       }
     }
@@ -644,8 +647,8 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
 
     if (node.getExpression() == null) {
       if (!expected.equals(TypeSystem.VOID)) {
-        setErrorStrings(node, ts.userRepresentation(TypeSystem.VOID),
-                        ts.userRepresentation(expected));
+        TypePrinter printer = ts.typePrinter();
+        setErrorStrings(node, printer.print(TypeSystem.VOID), printer.print(expected));
         throw new ExecutionError("return.type", node);
       }
     }
@@ -656,8 +659,8 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
         node.setExpression(newExp);
       }
       catch (UnsupportedConversionException e) {
-        setErrorStrings(node, ts.userRepresentation(getType(node.getExpression())),
-                        ts.userRepresentation(expected));
+        TypePrinter printer = ts.typePrinter();
+        setErrorStrings(node, printer.print(getType(node.getExpression())), printer.print(expected));
         throw new ExecutionError("return.type", node);
       }
     }

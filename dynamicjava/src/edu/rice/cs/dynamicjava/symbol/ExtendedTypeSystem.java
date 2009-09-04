@@ -551,6 +551,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
       if (isEmpty()) { return "{}"; }
       else if (!isSatisfiable()) { return "{ false }"; }
       else {
+        TypePrinter printer = typePrinter();
         StringBuilder result = new StringBuilder();
         boolean firstScenario = true;
         for (ConstraintScenario s : scenarios()) {
@@ -561,11 +562,11 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
           for (VariableType var : s.boundVariables()) {
             if (firstVar) { result.append(", "); }
             firstVar = false;
-            result.append(userRepresentation(s.lowerBound(var)));
+            result.append(printer.print(s.lowerBound(var)));
             result.append(" <: ");
             result.append(var.symbol().name());
             result.append(" <: ");
-            result.append(userRepresentation(s.upperBound(var)));
+            result.append(printer.print(s.upperBound(var)));
           }
           result.append(" }");
         }

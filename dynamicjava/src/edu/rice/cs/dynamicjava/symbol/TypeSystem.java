@@ -82,7 +82,7 @@ public abstract class TypeSystem {
     private Type _t;
     public TypeWrapper(Type t) { _t = t; }
     /** Produce a string using {@link #userRepresentation}. */
-    public String toString() { return userRepresentation(_t); }
+    public String toString() { return typePrinter().print(_t); }
     /** Compare two TypeWrappers using {@link #isEqual}. */
     public boolean equals(Object o) {
       if (this == o) { return true; }
@@ -93,6 +93,8 @@ public abstract class TypeSystem {
     public int hashCode() { throw new UnsupportedOperationException(); }
   }
   
+  
+  public abstract TypePrinter typePrinter();
   
   /* Type Predicates */
   
@@ -213,15 +215,6 @@ public abstract class TypeSystem {
   /** Get the type of the object, if any, that dynamically encloses instances of {@code t}. */
   public abstract Option<Type> dynamicallyEnclosingType(Type t);
 
-  /** Produce a string representing the type */
-  public abstract String userRepresentation(Type t);
-  
-  /** Produce a string representing the list of types */
-  public abstract String userRepresentation(Iterable<? extends Type> ts);
-  
-  /** Produce a string representing the signature of the function */
-  public abstract String userRepresentation(Function f);
-  
   /* Class Type Operations */
   
   /** Create a {@link SimpleClassType} or {@link RawClassType} corresponding to the given class. */
@@ -451,6 +444,15 @@ public abstract class TypeSystem {
                                               Access.Module accessModule)
     throws InvalidTypeArgumentException, UnmatchedLookupException;
   
+  
+  public static interface TypePrinter {
+    /** Produce a string representing the type */
+    public String print(Type t);
+    /** Produce a string representing the list of types */
+    public String print(Iterable<? extends Type> ts);
+    /** Produce a string representing the signature of the function */
+    public String print(Function f);
+  }
   
   /** Abstraction of the result of a method or constructor lookup */
   public static abstract class FunctionInvocation {

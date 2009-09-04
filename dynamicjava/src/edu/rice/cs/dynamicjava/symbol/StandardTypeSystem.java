@@ -1,6 +1,7 @@
 package edu.rice.cs.dynamicjava.symbol;
 
 import java.util.*;
+
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.recur.*;
@@ -94,6 +95,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
   }
   
   private final DJClass CLASS = SymbolUtil.wrapClass(Class.class);
+  
+  public TypePrinter typePrinter() { return new StandardTypePrinter(); }
   
   /** Determine if {@code t} is a primitive. */
   public boolean isPrimitive(Type t) { return t.apply(IS_PRIMITIVE); }
@@ -617,247 +620,6 @@ public abstract class StandardTypeSystem extends TypeSystem {
       });
     }
   }
-  
-  public String userRepresentation(Type t) {
-    TypeWriter w = new TypeWriter();
-    w.run(t);
-    w.appendConstraints();
-    return w.result();
-  }
-  
-  public String userRepresentation(Iterable<? extends Type> ts) {
-    TypeWriter w = new TypeWriter();
-    w.runOnList(ts, ", ");
-    w.appendConstraints();
-    return w.result();
-  }
-  
-  public String userRepresentation(Function f) {
-    TypeWriter w = new TypeWriter();
-    if (!IterUtil.isEmpty(f.typeParameters())) {
-      w.append("<");
-      w.runOnList(f.typeParameters(), ", ");
-      w.append("> ");
-    }
-    if (!(f instanceof DJConstructor)) {
-      w.run(f.returnType());
-      w.append(" ");
-    }
-    w.append(f.declaredName());
-    w.append("(");
-    w.runOnList(SymbolUtil.parameterTypes(f), ", ");
-    w.append(")");
-    w.appendConstraints();
-    return w.result();
-  }
-  
-  private class TypeWriter extends TypeVisitorRunnable1 {
-    
-    private final StringBuilder _result;
-    private final VariableHandler _variableHandler;
-    private final RecursionStack<Type> _stack;
-    
-    public TypeWriter() {
-      _result = new StringBuilder();
-      _variableHandler = new VariableHandler();
-      _stack = new RecursionStack<Type>();
-    }
-    
-    public String result() { return _result.toString(); }
-    
-    public void append(String s) { _result.append(s); }
-
-    public void appendConstraints() {
-      if (!_variableHandler.isEmpty()) {
-        _result.append(" [");
-        _variableHandler.dumpBounds();
-        _result.append("]");
-      }
-    }
-    
-    /**
-     * Running is preferred over applying the visitor, as invoking this will put the
-     * value being processed on the stack, and avoid unnecessary repetition
-     */
-    @Override public void run(final Type t) {
-//        String prefix = ""; for (int i = 0; i < _stack.size(); i++) { prefix += "  "; }
-//        System.out.println(prefix + "Running on id " + System.identityHashCode(t) + ": " + t);
-      Runnable recur = new Runnable() { public void run() { t.apply(TypeWriter.this); } };
-      Runnable dontRecur = new Runnable() { public void run() { _result.append("..."); } };
-      //Threshold of 2 causes the loop to be printed twice
-      _stack.run(recur, dontRecur, t/*, 2*/); 
-    }
-    
-    public void runOnList(Iterable<? extends Type> ts, String delim) {
-      boolean first = true;
-      for (Type t : ts) {
-        if (!first) { _result.append(delim); }
-        first = false;
-        run(t);
-      }
-    }
-    
-    public void forBooleanType(BooleanType t) { _result.append("boolean"); }
-    public void forCharType(CharType t) { _result.append("char"); }
-    public void forByteType(ByteType t) { _result.append("byte"); }
-    public void forShortType(ShortType t) { _result.append("short"); }
-    public void forIntType(IntType t) { _result.append("int"); }
-    public void forLongType(LongType t) { _result.append("long"); }
-    public void forFloatType(FloatType t) { _result.append("float"); }
-    public void forDoubleType(DoubleType t) { _result.append("double"); }
-    public void forNullType(NullType t) { _result.append("(null)"); }
-    public void forVoidType(VoidType t) { _result.append("void"); }
-    public void forTopType(TopType t) { _result.append("(top)"); }
-    public void forBottomType(BottomType t) { _result.append("(bottom)"); }
-    
-    public void forSimpleArrayType(SimpleArrayType t) {
-      run(t.ofType());
-      _result.append("[]");
-    }
-    
-    public void forVarargArrayType(VarargArrayType t) {
-      run(t.ofType());
-      _result.append("...");
-    }
-    
-    public void forSimpleClassType(SimpleClassType t) { appendClassName(t.ofClass()); }
-    
-    public void forRawClassType(RawClassType t) {
-      _result.append("raw ");
-      appendClassName(t.ofClass());
-    }
-    
-    public void forParameterizedClassType(ParameterizedClassType t) {
-      Iterator<DJClass> classes = SymbolUtil.outerClassChain(t.ofClass()).iterator();
-      Iterator<? extends Type> targs = t.typeArguments().iterator();
-      DJClass c = classes.next();
-      appendClassName(c);
-      DJClass inner;
-      while (c != null) {
-        inner = classes.hasNext() ? classes.next() : null; // next in the chain, or null if c is last
-        if (inner == null || !inner.isStatic()) {
-          Iterable<VariableType> params = c.declaredTypeParameters();
-          if (!IterUtil.isEmpty(params)) {
-            _result.append("<");
-            boolean firstParam = true;
-            for (VariableType param : params) { // param is ignored -- it's just a counter
-              if (!firstParam) { _result.append(", "); }
-              firstParam = false;
-              run(targs.next());
-            }
-            _result.append(">");
-          }
-        }
-        if (inner != null) { _result.append("."); _result.append(inner.declaredName()); }
-        c = inner;
-      }
-    }
-    
-    private void appendClassName(DJClass c) {
-      if (c.isAnonymous()) {
-        _result.append("anonymous ");
-        runOnList(c.declaredSupertypes(), " & ");
-      }
-      else { _result.append(SymbolUtil.shortName(c)); }
-    }
-    
-    public void forVariableType(VariableType t) {
-      String name = _variableHandler.registerVariable(t);
-      _result.append(name);
-    }
-    
-    public void forIntersectionType(IntersectionType t) {
-      int size = IterUtil.sizeOf(t.ofTypes());
-      if (size == 0) { _result.append("(empty intersect)"); }
-      else if (size == 1) {
-        _result.append("(intersect ");
-        run(IterUtil.first(t.ofTypes()));
-        _result.append(")");
-      }
-      else { runOnList(t.ofTypes(), " & "); }
-    }
-    
-    public void forUnionType(UnionType t) {
-      int size = IterUtil.sizeOf(t.ofTypes());
-      if (size == 0) { _result.append("(empty union)"); }
-      else if (size == 1) {
-        _result.append("(union ");
-        run(IterUtil.first(t.ofTypes()));
-        _result.append(")");
-      }
-      else { runOnList(t.ofTypes(), " | "); }
-    }
-    
-    public void forWildcard(Wildcard t) {
-      _result.append("?");
-      if (!isEqual(t.symbol().upperBound(), OBJECT)) {
-        _result.append(" extends ");
-        run(t.symbol().upperBound());
-      }
-      if (!isEqual(t.symbol().lowerBound(), NULL)) {
-        _result.append(" super ");
-        run(t.symbol().lowerBound());
-      }
-    }
-    
-    private class VariableHandler {
-      // could use a LinkedHashMap, but that doesn't allow indexed access (iterators
-      // lead to ConcurrentModificationExceptions)
-      private final List<VariableType> _vars = new ArrayList<VariableType>();
-      private final Map<VariableType, String> _names = new HashMap<VariableType, String>();
-      int _captureVars = 0;
-      
-      public boolean isEmpty() {
-        for (VariableType v : _vars) {
-          Type upper = v.symbol().upperBound();
-          Type lower = v.symbol().lowerBound();
-          boolean printUpper = !isEqual(upper, OBJECT) /*&& !isEqual(upper, TOP)*/;
-          boolean printLower = !isEqual(lower, NULL) /*&& !isEqual(lower, BOTTOM)*/;
-          if (printUpper || printLower) { return false; }
-        }
-        return true;
-      }
-      
-      public String registerVariable(VariableType v) {
-        String result = _names.get(v);
-        if (result == null) {
-          if (v.symbol().generated()) { _captureVars++; result = "?T" + _captureVars; }
-          else { result = v.symbol().name(); }
-          _vars.add(v);
-          _names.put(v, result);
-        }
-        return result;
-      }
-      
-      public void dumpBounds() {
-        boolean printedFirst = false;
-        for (int i = 0; i < _vars.size(); i++) {
-          VariableType v = _vars.get(i);
-          Type upper = v.symbol().upperBound();
-          Type lower = v.symbol().lowerBound();
-          boolean printUpper = !isEqual(upper, OBJECT) /*&& !isEqual(upper, TOP)*/;
-          boolean printLower = !isEqual(lower, NULL) /*&& !isEqual(lower, BOTTOM)*/;
-          if (printUpper || printLower) {
-            if (printedFirst) { _result.append("; "); }
-            else { printedFirst = true; }
-          }
-          if (printUpper) { 
-            _result.append(_names.get(v));
-            _result.append(" <: ");
-            TypeWriter.this.run(upper); // may increase the size of _vars
-          }
-          if (printLower) {
-            if (printUpper) { _result.append(", "); }
-            _result.append(_names.get(v));
-            _result.append(" :> ");
-            TypeWriter.this.run(lower); // may increase the size of _vars
-          }
-        }
-      }
-      
-    }
-  }
-  
   
   /**
    * Create a {@link SimpleClassType} or {@link RawClassType} corresponding to the given class.
@@ -1673,6 +1435,226 @@ public abstract class StandardTypeSystem extends TypeSystem {
     return true;
   }
   
+  
+  private class StandardTypePrinter implements TypePrinter {
+    
+    private final Map<VariableType, String> _names = new HashMap<VariableType, String>();
+    int _captureVars = 0;
+  
+    public String print(Type t) {
+      Visitor v = new Visitor();
+      v.run(t);
+      v.appendConstraints();
+      return v.result();
+    }
+    
+    public String print(Iterable<? extends Type> ts) {
+      Visitor v = new Visitor();
+      v.runOnList(ts, ", ");
+      v.appendConstraints();
+      return v.result();
+    }
+    
+    public String print(Function f) {
+      Visitor v = new Visitor();
+      if (!IterUtil.isEmpty(f.typeParameters())) {
+        v.append("<");
+        v.runOnList(f.typeParameters(), ", ");
+        v.append("> ");
+      }
+      if (!(f instanceof DJConstructor)) {
+        v.run(f.returnType());
+        v.append(" ");
+      }
+      v.append(f.declaredName());
+      v.append("(");
+      v.runOnList(SymbolUtil.parameterTypes(f), ", ");
+      v.append(")");
+      v.appendConstraints();
+      return v.result();
+    }
+  
+    private class Visitor extends TypeVisitorRunnable1 {
+      private final StringBuilder _result = new StringBuilder();
+      private final RecursionStack<Type> _stack = new RecursionStack<Type>();
+      // variables that have bounds that should be printed in appendConstraints()
+      private final List<VariableType> _boundedVars = new ArrayList<VariableType>();
+      
+      public String result() { return _result.toString(); }
+      
+      public void append(String s) { _result.append(s); }
+  
+      public void appendConstraints() {
+        if (!_boundedVars.isEmpty()) {
+          _result.append(" [");
+          // not using an iterator because the list may grow during iteration
+          for (int i = 0; i < _boundedVars.size(); i++) {
+            if (i > 0) { _result.append("; "); }
+            VariableType v = _boundedVars.get(i);
+            Type upper = v.symbol().upperBound();
+            Type lower = v.symbol().lowerBound();
+            boolean printUpper = !isEqual(upper, OBJECT) /*&& !isEqual(upper, TOP)*/;
+            boolean printLower = !isEqual(lower, NULL) /*&& !isEqual(lower, BOTTOM)*/;
+            if (printUpper) {
+              _result.append(nameForVariable(v));
+              _result.append(" <: ");
+              run(upper); // may increase the size of _vars
+            }
+            if (printLower) {
+              if (printUpper) { _result.append(", "); }
+              _result.append(nameForVariable(v));
+              _result.append(" :> ");
+              run(lower); // may increase the size of _vars
+            }
+          }
+          _result.append("]");
+        }
+      }
+      
+      private String nameForVariable(VariableType t) {
+        String name = _names.get(t);
+        if (name == null) {
+          if (t.symbol().generated()) { _captureVars++; name = "?T" + _captureVars; }
+          else { name = t.symbol().name(); }
+          _names.put(t, name);
+          // check to see if bounds need to be printed
+          Type upper = t.symbol().upperBound();
+          Type lower = t.symbol().lowerBound();
+          boolean printUpper = !isEqual(upper, OBJECT) /*&& !isEqual(upper, TOP)*/;
+          boolean printLower = !isEqual(lower, NULL) /*&& !isEqual(lower, BOTTOM)*/;
+          if (printUpper || printLower) _boundedVars.add(t);
+        }
+        return name;
+      }
+      
+      /**
+       * Running is preferred over applying the visitor, as invoking this will put the
+       * value being processed on the stack, and avoid unnecessary repetition
+       */
+      @Override public void run(final Type t) {
+  //        String prefix = ""; for (int i = 0; i < _stack.size(); i++) { prefix += "  "; }
+  //        System.out.println(prefix + "Running on id " + System.identityHashCode(t) + ": " + t);
+        Runnable recur = new Runnable() { public void run() { t.apply(Visitor.this); } };
+        Runnable dontRecur = new Runnable() { public void run() { _result.append("..."); } };
+        //Threshold of 2 causes the loop to be printed twice
+        _stack.run(recur, dontRecur, t/*, 2*/); 
+      }
+      
+      public void runOnList(Iterable<? extends Type> ts, String delim) {
+        boolean first = true;
+        for (Type t : ts) {
+          if (!first) { _result.append(delim); }
+          first = false;
+          run(t);
+        }
+      }
+      
+      public void forBooleanType(BooleanType t) { _result.append("boolean"); }
+      public void forCharType(CharType t) { _result.append("char"); }
+      public void forByteType(ByteType t) { _result.append("byte"); }
+      public void forShortType(ShortType t) { _result.append("short"); }
+      public void forIntType(IntType t) { _result.append("int"); }
+      public void forLongType(LongType t) { _result.append("long"); }
+      public void forFloatType(FloatType t) { _result.append("float"); }
+      public void forDoubleType(DoubleType t) { _result.append("double"); }
+      public void forNullType(NullType t) { _result.append("(null)"); }
+      public void forVoidType(VoidType t) { _result.append("void"); }
+      public void forTopType(TopType t) { _result.append("(top)"); }
+      public void forBottomType(BottomType t) { _result.append("(bottom)"); }
+      
+      public void forSimpleArrayType(SimpleArrayType t) {
+        run(t.ofType());
+        _result.append("[]");
+      }
+      
+      public void forVarargArrayType(VarargArrayType t) {
+        run(t.ofType());
+        _result.append("...");
+      }
+      
+      public void forSimpleClassType(SimpleClassType t) { appendClassName(t.ofClass()); }
+      
+      public void forRawClassType(RawClassType t) {
+        _result.append("raw ");
+        appendClassName(t.ofClass());
+      }
+      
+      public void forParameterizedClassType(ParameterizedClassType t) {
+        Iterator<DJClass> classes = SymbolUtil.outerClassChain(t.ofClass()).iterator();
+        Iterator<? extends Type> targs = t.typeArguments().iterator();
+        DJClass c = classes.next();
+        appendClassName(c);
+        DJClass inner;
+        while (c != null) {
+          inner = classes.hasNext() ? classes.next() : null; // next in the chain, or null if c is last
+          if (inner == null || !inner.isStatic()) {
+            Iterable<VariableType> params = c.declaredTypeParameters();
+            if (!IterUtil.isEmpty(params)) {
+              _result.append("<");
+              boolean firstParam = true;
+              for (VariableType param : params) { // param is ignored -- it's just a counter
+                if (!firstParam) { _result.append(", "); }
+                firstParam = false;
+                run(targs.next());
+              }
+              _result.append(">");
+            }
+          }
+          if (inner != null) { _result.append("."); _result.append(inner.declaredName()); }
+          c = inner;
+        }
+      }
+      
+      private void appendClassName(DJClass c) {
+        if (c.isAnonymous()) {
+          _result.append("anonymous ");
+          runOnList(c.declaredSupertypes(), " & ");
+        }
+        else { _result.append(SymbolUtil.shortName(c)); }
+      }
+      
+      public void forVariableType(VariableType t) {
+        _result.append(nameForVariable(t));
+      }
+      
+      public void forIntersectionType(IntersectionType t) {
+        int size = IterUtil.sizeOf(t.ofTypes());
+        if (size == 0) { _result.append("(empty intersect)"); }
+        else if (size == 1) {
+          _result.append("(intersect ");
+          run(IterUtil.first(t.ofTypes()));
+          _result.append(")");
+        }
+        else { runOnList(t.ofTypes(), " & "); }
+      }
+      
+      public void forUnionType(UnionType t) {
+        int size = IterUtil.sizeOf(t.ofTypes());
+        if (size == 0) { _result.append("(empty union)"); }
+        else if (size == 1) {
+          _result.append("(union ");
+          run(IterUtil.first(t.ofTypes()));
+          _result.append(")");
+        }
+        else { runOnList(t.ofTypes(), " | "); }
+      }
+      
+      public void forWildcard(Wildcard t) {
+        _result.append("?");
+        if (!isEqual(t.symbol().upperBound(), OBJECT)) {
+          _result.append(" extends ");
+          run(t.symbol().upperBound());
+        }
+        if (!isEqual(t.symbol().lowerBound(), NULL)) {
+          _result.append(" super ");
+          run(t.symbol().lowerBound());
+        }
+      }
+      
+    }
+    
+  }
+
   /**
    * Implementation of member lookup.  Subclasses provide an implementation of {@link #declaredMatches},
    * which produces the set of matches for a particular type.  Traversal of the type hierarchy
@@ -1775,9 +1757,6 @@ public abstract class StandardTypeSystem extends TypeSystem {
       debug.logStart(new String[]{"t","name","onlyStatic"}, wrap(t), _name, _onlyStatic); try {
         
       PredicateSet<DJMethod> candidates = findAll(t);
-      if (_name.equals("entrySet")) {
-        Type foo = candidates.iterator().next().returnType();
-      }
       Iterable<FunctionInvocationCandidate<DJMethod>> best = bestInvocations(candidates, targs, args, expected);
       // TODO: provide more error-message information
       int matches = IterUtil.sizeOf(best);

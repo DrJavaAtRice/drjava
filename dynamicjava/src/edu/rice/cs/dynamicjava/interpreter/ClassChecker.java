@@ -383,7 +383,8 @@ public class ClassChecker {
           node.setInitializer(newInit);
         }
         catch (TypeSystem.UnsupportedConversionException e) {
-          setErrorStrings(node, ts.userRepresentation(initT), ts.userRepresentation(expectedT));
+          TypeSystem.TypePrinter printer = ts.typePrinter();
+          setErrorStrings(node, printer.print(initT), printer.print(expectedT));
           throw new ExecutionError("assignment.types", node);
         }
       }
