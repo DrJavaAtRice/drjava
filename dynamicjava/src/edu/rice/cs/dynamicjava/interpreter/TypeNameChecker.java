@@ -273,7 +273,7 @@ public class TypeNameChecker {
             t = context.getTypeVariable(name, ts);
             if (t == null) {
               Type outer = context.typeContainingMemberClass(name, ts);
-              if (outer != null) { t = ts.lookupClass(outer, name, IterUtil.<Type>empty()); }
+              if (outer != null) { t = ts.lookupClass(outer, name, IterUtil.<Type>empty(), context.accessModule()); }
             }
           }
         }
@@ -286,8 +286,7 @@ public class TypeNameChecker {
       }
       while (ids.hasNext()) {
         try {
-          ClassType memberType = ts.lookupClass(t, ids.next().image(), IterUtil.<Type>empty());
-          new ExpressionChecker(context, opt).checkAccessibility(memberType.ofClass(), node);
+          ClassType memberType = ts.lookupClass(t, ids.next().image(), IterUtil.<Type>empty(), context.accessModule());
           t = memberType;
         }
         catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
@@ -327,7 +326,7 @@ public class TypeNameChecker {
           t = (c == null) ? null : ts.makeClassType(c, targs);
           if (t == null) {
             Type outer = context.typeContainingMemberClass(name, ts);
-            if (outer != null) { t = ts.lookupClass(outer, name, targs); }
+            if (outer != null) { t = ts.lookupClass(outer, name, targs, context.accessModule()); }
           }
           if (t == null) { 
             if (!IterUtil.isEmpty(targs)) {
@@ -348,8 +347,7 @@ public class TypeNameChecker {
       while (ids.hasNext()) {
         try {
           Iterable<Type> targs = checkStructureForList(allTargs.next());
-          ClassType memberType = ts.lookupClass(t, ids.next().image(), targs);
-          new ExpressionChecker(context, opt).checkAccessibility(memberType.ofClass(), node);
+          ClassType memberType = ts.lookupClass(t, ids.next().image(), targs, context.accessModule());
           t = memberType;
         }
         catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument", node); }

@@ -178,9 +178,15 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
         }
         String member = split.second();
         TypeContext result = context;
-        if (ts.containsStaticField(t, member)) { result = result.importField(t.ofClass(), member); }
-        if (ts.containsStaticMethod(t, member)) { result = result.importMethod(t.ofClass(), member); }
-        if (ts.containsStaticClass(t, member)) { result = result.importMemberClass(t.ofClass(), member); }
+        if (ts.containsStaticField(t, member, context.accessModule())) {
+          result = result.importField(t.ofClass(), member);
+        }
+        if (ts.containsStaticMethod(t, member, context.accessModule())) {
+          result = result.importMethod(t.ofClass(), member);
+        }
+        if (ts.containsStaticClass(t, member, context.accessModule())) {
+          result = result.importMemberClass(t.ofClass(), member);
+        }
         if (result == context) {
           setErrorStrings(node, node.getName());
           throw new ExecutionError("undefined.name", node);
@@ -204,7 +210,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
         if (split.first() != null) {
           ClassType t = resolveClassName(split.first(), node);
           if (t != null) {
-            if (ts.containsClass(t, split.second())) {
+            if (ts.containsClass(t, split.second(), context.accessModule())) {
               return context.importMemberClass(t.ofClass(), split.second());
             }
             else {
@@ -243,7 +249,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
         catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
       }
       else {
-        try { result = ts.lookupClass(result, piece, IterUtil.<Type>empty()); }
+        try { result = ts.lookupClass(result, piece, IterUtil.<Type>empty(), context.accessModule()); }
         catch (InvalidTypeArgumentException e) { throw new RuntimeException("can't create raw type"); }
         catch (UnmatchedLookupException e) {
           setErrorStrings(node, piece);
@@ -435,18 +441,16 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
     }
     else if (ts.isIterable(collType)) {
       try {
-        MethodInvocation iteratorInv = ts.lookupMethod(node.getCollection(), "iterator", 
-                                                       IterUtil.<Type>empty(),
-                                                       IterUtil.<Expression>empty(),
-                                                       Option.<Type>none());
+        MethodInvocation iteratorInv = ts.lookupMethod(node.getCollection(), "iterator", IterUtil.<Type>empty(),
+                                                       IterUtil.<Expression>empty(), Option.<Type>none(),
+                                                       context.accessModule());
         
         
         Expression getIterator = TypeUtil.makeEmptyExpression(node.getCollection());
         setType(getIterator, iteratorInv.returnType());
-        MethodInvocation nextInv = ts.lookupMethod(getIterator, "next", 
-                                                   IterUtil.<Type>empty(),
-                                                   IterUtil.<Expression>empty(),
-                                                   Option.<Type>none());
+        MethodInvocation nextInv = ts.lookupMethod(getIterator, "next", IterUtil.<Type>empty(),
+                                                   IterUtil.<Expression>empty(), Option.<Type>none(),
+                                                   context.accessModule());
         
         if (!ts.isAssignable(paramT, nextInv.returnType())) {
           setErrorStrings(node, ts.userRepresentation(nextInv.returnType()), ts.userRepresentation(paramT));

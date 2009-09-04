@@ -61,7 +61,7 @@ public class ClassContext extends DelegatingContext {
   }
   
   private boolean hasMemberClass(String name, TypeSystem ts) {
-    return ts.containsClass(_thisType, name);
+    return ts.containsClass(_thisType, name, accessModule());
   }
 
   /** Test whether {@code name} is an in-scope field or local variable */
@@ -84,7 +84,7 @@ public class ClassContext extends DelegatingContext {
   }
   
   private boolean hasField(String name, TypeSystem ts) {
-    return ts.containsField(_thisType, name);
+    return ts.containsField(_thisType, name, accessModule());
   }
   
   /** Test whether {@code name} is an in-scope method or local function */
@@ -107,7 +107,7 @@ public class ClassContext extends DelegatingContext {
   }
   
   private boolean hasMethod(String name, TypeSystem ts) {
-    return ts.containsMethod(_thisType, name);
+    return ts.containsMethod(_thisType, name, accessModule());
   }
   
 

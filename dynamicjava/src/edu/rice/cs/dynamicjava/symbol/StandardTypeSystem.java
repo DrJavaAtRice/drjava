@@ -882,7 +882,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
     ObjectMethodCall result = new ObjectMethodCall(exp, methodName, null, exp.getSourceInfo());
     try {
       ObjectMethodInvocation inv = lookupMethod(exp, methodName, EMPTY_TYPE_ITERABLE, EMPTY_EXPRESSION_ITERABLE,
-                                                NONE_TYPE_OPTION);
+                                                NONE_TYPE_OPTION, new TopLevelAccessModule(""));
       result.setExpression(inv.object());
       result.setArguments(CollectUtil.makeList(inv.args()));
       NodeProperties.setMethod(result, inv.method());
@@ -929,7 +929,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
       StaticMethodCall m = new StaticMethodCall(boxedTypeName, "valueOf", arguments, exp.getSourceInfo());
       try {
         MethodInvocation inv = lookupStaticMethod(boxedType, "valueOf", EMPTY_TYPE_ITERABLE, arguments,
-                                                  NONE_TYPE_OPTION);
+                                                  NONE_TYPE_OPTION, new TopLevelAccessModule(""));
         m.setArguments(CollectUtil.makeList(inv.args()));
         NodeProperties.setMethod(m, inv.method());
         NodeProperties.setType(m, capture(inv.returnType()));
@@ -940,7 +940,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
     else {
       SimpleAllocation k = new SimpleAllocation(boxedTypeName, arguments, exp.getSourceInfo());
       try {
-        ConstructorInvocation inv = lookupConstructor(boxedType, EMPTY_TYPE_ITERABLE, arguments, NONE_TYPE_OPTION); 
+        ConstructorInvocation inv = lookupConstructor(boxedType, EMPTY_TYPE_ITERABLE, arguments, NONE_TYPE_OPTION,
+                                                      new TopLevelAccessModule("")); 
         k.setArguments(CollectUtil.makeList(inv.args()));
         NodeProperties.setConstructor(k, inv.constructor());
         NodeProperties.setType(k, boxedType);
@@ -1436,7 +1437,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   // TODO: Must produce a reasonable value when looking up a constructor in an interface (for anonymous classes)
   public ConstructorInvocation lookupConstructor(final Type t, final Iterable<? extends Type> typeArgs, 
                                                  final Iterable<? extends Expression> args,
-                                                 final Option<Type> expected)
+                                                 final Option<Type> expected, final Access.Module accessModule)
     throws InvalidTypeArgumentException, UnmatchedLookupException {
     debug.logStart(new String[]{"t","typeArgs","arg types","expected"},
                    wrap(t), wrap(typeArgs), wrap(IterUtil.map(args, NodeProperties.NODE_TYPE)), wrap(expected)); try {
@@ -1465,8 +1466,11 @@ public abstract class StandardTypeSystem extends TypeSystem {
           });
         }
       });
-      
-    Iterable<FunctionInvocationCandidate<DJConstructor>> cs = bestInvocations(constructors, typeArgs, args, expected);
+    
+    Iterable<DJConstructor> accessible = IterUtil.filter(constructors, new Predicate<DJConstructor>() {
+      public boolean contains(DJConstructor k) { return accessible(k, accessModule); }
+    });
+    Iterable<FunctionInvocationCandidate<DJConstructor>> cs = bestInvocations(accessible, typeArgs, args, expected);
     // TODO: provide more error-message information
     int matches = IterUtil.sizeOf(cs);
     if (matches == 0) { throw new UnmatchedFunctionLookupException(constructors); }
@@ -1487,17 +1491,21 @@ public abstract class StandardTypeSystem extends TypeSystem {
     } finally { debug.logEnd(); }
   }
   
-  public boolean containsMethod(Type t, String name) { return new MethodFinder(name, false).hasMatch(t); }
-  public boolean containsStaticMethod(Type t, String name) { return new MethodFinder(name, true).hasMatch(t); }
+  public boolean containsMethod(Type t, String name, Access.Module accessModule) {
+    return new MethodFinder(name, accessModule, false).hasMatch(t);
+  }
+  public boolean containsStaticMethod(Type t, String name, Access.Module accessModule) {
+    return new MethodFinder(name, accessModule, true).hasMatch(t);
+  }
   
-  public ObjectMethodInvocation lookupMethod(final Expression object, String name, 
-                                             final Iterable<? extends Type> typeArgs, 
-                                             final Iterable<? extends Expression> args,
-                                             final Option<Type> expected)
+  public ObjectMethodInvocation lookupMethod(Expression object, String name, 
+                                             Iterable<? extends Type> typeArgs, 
+                                             Iterable<? extends Expression> args,
+                                             Option<Type> expected, Access.Module accessModule)
       throws InvalidTypeArgumentException, UnmatchedLookupException {
     Type t = NodeProperties.getType(object);
     FunctionInvocationCandidate<DJMethod> result =
-        new MethodFinder(name, false).findSingleMethod(t, typeArgs, args, expected);
+        new MethodFinder(name, accessModule, false).findSingleMethod(t, typeArgs, args, expected);
     DJMethod m = result.function();
     SubstitutionMap sigma = result.substitution();
     // TODO: Is there any reason to invoke makeCast on the receiver?
@@ -1506,22 +1514,26 @@ public abstract class StandardTypeSystem extends TypeSystem {
   }
   
   public StaticMethodInvocation lookupStaticMethod(Type t, String name, 
-                                                   final Iterable<? extends Type> typeArgs, 
-                                                   final Iterable<? extends Expression> args,
-                                                   final Option<Type> expected)
+                                                   Iterable<? extends Type> typeArgs, 
+                                                   Iterable<? extends Expression> args,
+                                                   Option<Type> expected, Access.Module accessModule)
     throws InvalidTypeArgumentException, UnmatchedLookupException {
     FunctionInvocationCandidate<DJMethod> result =
-        new MethodFinder(name, true).findSingleMethod(t, typeArgs, args, expected);
+        new MethodFinder(name, accessModule, true).findSingleMethod(t, typeArgs, args, expected);
     DJMethod m = result.function();
     SubstitutionMap sigma = result.substitution();
     return new StaticMethodInvocation(m, substitute(m.returnType(), sigma), result.typeArguments(),
                                       result.arguments(), substitute(m.thrownTypes(), sigma));
   }
   
-  public boolean containsField(Type t, String name) { return containsField(t, name, false); }
-  public boolean containsStaticField(Type t, String name) { return containsField(t, name, true); }
-  private boolean containsField(Type t, String name, boolean onlyStatic) {
-    FieldFinder<FieldReference> finder = new FieldFinder<FieldReference>(name, onlyStatic) {
+  public boolean containsField(Type t, String name, Access.Module accessModule) {
+    return containsField(t, name, accessModule, false);
+  }
+  public boolean containsStaticField(Type t, String name, Access.Module accessModule) {
+    return containsField(t, name, accessModule, true);
+  }
+  private boolean containsField(Type t, String name, Access.Module accessModule, boolean onlyStatic) {
+    FieldFinder<FieldReference> finder = new FieldFinder<FieldReference>(name, accessModule, onlyStatic) {
       protected FieldReference makeFieldReference(Type t, DJField f) {
         return new FieldReference(f, BOTTOM) {}; // anonymous stub just used for inheritance checking
       }
@@ -1529,9 +1541,9 @@ public abstract class StandardTypeSystem extends TypeSystem {
     return finder.hasMatch(t);
   }
   
-  public ObjectFieldReference lookupField(final Expression object, final String name)
+  public ObjectFieldReference lookupField(final Expression object, String name, Access.Module accessModule)
     throws UnmatchedLookupException {
-    FieldFinder<ObjectFieldReference> finder = new FieldFinder<ObjectFieldReference>(name, false) {
+    FieldFinder<ObjectFieldReference> finder = new FieldFinder<ObjectFieldReference>(name, accessModule, false) {
       public ObjectFieldReference makeFieldReference(Type t, DJField f) {
         return new ObjectFieldReference(f, fieldType(f, t), makeCast(t, object));
       }
@@ -1539,9 +1551,9 @@ public abstract class StandardTypeSystem extends TypeSystem {
     return finder.findSingleField(NodeProperties.getType(object));
   }
   
-  public StaticFieldReference lookupStaticField(Type t, final String name)
+  public StaticFieldReference lookupStaticField(Type t, String name, Access.Module accessModule)
     throws UnmatchedLookupException {
-    FieldFinder<StaticFieldReference> finder = new FieldFinder<StaticFieldReference>(name, true) {
+    FieldFinder<StaticFieldReference> finder = new FieldFinder<StaticFieldReference>(name, accessModule, true) {
       public StaticFieldReference makeFieldReference(Type t, DJField f) {
         return new StaticFieldReference(f, fieldType(f, t));
       }
@@ -1575,27 +1587,49 @@ public abstract class StandardTypeSystem extends TypeSystem {
     }
   }
   
-  public boolean containsClass(Type t, final String name) {
-    return new ClassFinder(name, EMPTY_TYPE_ITERABLE, false).hasMatch(t);
+  public boolean containsClass(Type t, String name, Access.Module accessModule) {
+    return new ClassFinder(name, EMPTY_TYPE_ITERABLE, accessModule, false).hasMatch(t);
   }
   
-  public boolean containsStaticClass(Type t, final String name) {
-    return new ClassFinder(name, EMPTY_TYPE_ITERABLE, true).hasMatch(t);
+  public boolean containsStaticClass(Type t, String name, Access.Module accessModule) {
+    return new ClassFinder(name, EMPTY_TYPE_ITERABLE, accessModule, true).hasMatch(t);
   }
   
-  public ClassType lookupClass(Expression object, String name, Iterable<? extends Type> typeArgs)
+  public ClassType lookupClass(Expression object, String name, Iterable<? extends Type> typeArgs,
+                               Access.Module accessModule)
     throws InvalidTypeArgumentException, UnmatchedLookupException {
-    return new ClassFinder(name, typeArgs, false).findSingleClass(NodeProperties.getType(object));
+    return new ClassFinder(name, typeArgs, accessModule, false).findSingleClass(NodeProperties.getType(object));
   }
   
-  public ClassType lookupClass(Type t, final String name, Iterable<? extends Type> typeArgs)
+  public ClassType lookupClass(Type t, String name, Iterable<? extends Type> typeArgs, Access.Module accessModule)
     throws InvalidTypeArgumentException, UnmatchedLookupException {
-    return new ClassFinder(name, typeArgs, false).findSingleClass(t);
+    return new ClassFinder(name, typeArgs, accessModule, false).findSingleClass(t);
   }
   
-  public ClassType lookupStaticClass(Type t, final String name, final Iterable<? extends Type> typeArgs)
+  public ClassType lookupStaticClass(Type t, final String name, final Iterable<? extends Type> typeArgs,
+                                     Access.Module accessModule)
     throws InvalidTypeArgumentException, UnmatchedLookupException {
-    return new ClassFinder(name, typeArgs, true).findSingleClass(t);
+    return new ClassFinder(name, typeArgs, accessModule, true).findSingleClass(t);
+  }
+  
+  /**
+   * Determine whether the given symbol should be considered accessible from the given accessing context
+   * (for the purposes of lookup).
+   */
+  private boolean accessible(Access.Limited symbol, Access.Module accessingModule) {
+    switch (symbol.accessibility()) {
+      case PRIVATE:
+        return (!_opt.enforcePrivateAccess() && !_opt.enforceAllAccess()) ||
+                symbol.accessModule().equals(accessingModule);
+      case PACKAGE:
+        return !_opt.enforceAllAccess() ||
+                symbol.accessModule().packageName().equals(accessingModule.packageName());
+      case PROTECTED:
+        // TODO: implement protected-access checks
+        return !_opt.enforceAllAccess() || true;
+      default:
+        return true; // public access is always valid
+    }
   }
   
   /**
@@ -1702,8 +1736,13 @@ public abstract class StandardTypeSystem extends TypeSystem {
   
   private class MethodFinder extends MemberFinder<DJMethod> {
     private final String _name;
+    private final Access.Module _accessModule;
     private final boolean _onlyStatic;
-    protected MethodFinder(String name, boolean onlyStatic) { _name = name; _onlyStatic = onlyStatic; }
+    protected MethodFinder(String name, Access.Module accessModule, boolean onlyStatic) {
+      _name = name;
+      _accessModule = accessModule;
+      _onlyStatic = onlyStatic;
+    }
     
     /** Search for matching methods and determine the best applicable instance, if any. */
     public FunctionInvocationCandidate<DJMethod>
@@ -1730,7 +1769,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
     protected Iterable<DJMethod> declaredMatches(Type t) {
       return t.apply(new TypeAbstractVisitor<Iterable<DJMethod>>() {
         private boolean matches(DJMethod m) {
-          return m.declaredName().equals(_name) && !(_onlyStatic && !m.isStatic());
+          return m.declaredName().equals(_name) && !(_onlyStatic && !m.isStatic()) && accessible(m, _accessModule);
         }
         @Override public Iterable<DJMethod> defaultCase(Type t) { return IterUtil.empty(); }
         @Override public Iterable<DJMethod> forClassType(ClassType t) {
@@ -1784,8 +1823,13 @@ public abstract class StandardTypeSystem extends TypeSystem {
   
   private abstract class FieldFinder<T extends FieldReference> extends MemberFinder<T> {
     private final String _name;
+    private final Access.Module _accessModule;
     private final boolean _onlyStatic;
-    protected FieldFinder(String name, boolean onlyStatic) { _name = name; _onlyStatic = onlyStatic; }
+    protected FieldFinder(String name, Access.Module accessModule, boolean onlyStatic) {
+      _name = name;
+      _accessModule = accessModule;
+      _onlyStatic = onlyStatic;
+    }
     
     /** If a single field is produced by findFirst(t), return it; otherwise, throw an exception. */
     public T findSingleField(Type t) throws UnmatchedLookupException {
@@ -1805,7 +1849,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
     protected Iterable<T> declaredMatches(Type t) {
       Iterable<T> result = t.apply(new TypeAbstractVisitor<Iterable<T>>() {
         private boolean matches(DJField f) {
-          return f.declaredName().equals(_name) && !(_onlyStatic && !f.isStatic());
+          return f.declaredName().equals(_name) && !(_onlyStatic && !f.isStatic()) && accessible(f, _accessModule);
         }
         @Override public Iterable<T> defaultCase(Type t) { return IterUtil.empty(); }
         @Override public Iterable<T> forArrayType(ArrayType t) {
@@ -1834,10 +1878,13 @@ public abstract class StandardTypeSystem extends TypeSystem {
   private class ClassFinder extends MemberFinder<ClassType> {
     private final String _name;
     private final Iterable<? extends Type> _typeArgs;
+    private final Access.Module _accessModule;
     private final boolean _onlyStatic;
-    protected ClassFinder(String name, Iterable<? extends Type> typeArgs, boolean onlyStatic) {
+    protected ClassFinder(String name, Iterable<? extends Type> typeArgs, Access.Module accessModule,
+                          boolean onlyStatic) {
       _name = name;
       _typeArgs = typeArgs;
+      _accessModule = accessModule;
       _onlyStatic = onlyStatic;
     }
     
@@ -1906,7 +1953,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
             
           Predicate<DJClass> matchInner = new Predicate<DJClass>() {
             public boolean contains(DJClass c) {
-              return !c.isAnonymous() && c.declaredName().equals(_name) && !(_onlyStatic && !c.isStatic());
+              return !c.isAnonymous() && c.declaredName().equals(_name) && !(_onlyStatic && !c.isStatic()) &&
+                      accessible(c, _accessModule);
             }
           };
           Lambda<DJClass, ClassType> makeType = new Lambda<DJClass, ClassType>() {

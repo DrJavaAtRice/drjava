@@ -32,11 +32,11 @@ public class Interpreter {
   }
   
   public Interpreter(Options opt) {
-    this(opt, new TopLevelContext(Interpreter.class.getClassLoader()), RuntimeBindings.EMPTY);
+    this(opt, new TopLevelContext(Interpreter.class.getClassLoader(), opt), RuntimeBindings.EMPTY);
   }
   
   public Interpreter(Options opt, ClassLoader loader) {
-    this(opt, new TopLevelContext(loader), RuntimeBindings.EMPTY);
+    this(opt, new TopLevelContext(loader, opt), RuntimeBindings.EMPTY);
   }
   
   public Option<Object> interpret(String code) throws InterpreterException {

@@ -331,13 +331,13 @@ public abstract class TypeSystem {
   // Must produce a reasonable value when looking up a constructor in an interface (for anonymous classes)
   public abstract ConstructorInvocation lookupConstructor(Type t, Iterable<? extends Type> typeArgs, 
                                                           Iterable<? extends Expression> args,
-                                                          Option<Type> expected)
+                                                          Option<Type> expected, Access.Module accessModule)
     throws InvalidTypeArgumentException, UnmatchedLookupException;
   
   
-  public abstract boolean containsMethod(Type t, String name);
+  public abstract boolean containsMethod(Type t, String name, Access.Module accessModule);
   
-  public abstract boolean containsStaticMethod(Type t, String name);
+  public abstract boolean containsStaticMethod(Type t, String name, Access.Module accessModule);
   
   /**
    * Lookup the method corresponding the the given invocation.
@@ -354,7 +354,7 @@ public abstract class TypeSystem {
   public abstract ObjectMethodInvocation lookupMethod(Expression object, String name,
                                                       Iterable<? extends Type> typeArgs, 
                                                       Iterable<? extends Expression> args,
-                                                      Option<Type> expected)
+                                                      Option<Type> expected, Access.Module accessModule)
     throws InvalidTypeArgumentException, UnmatchedLookupException;
     
   
@@ -373,13 +373,13 @@ public abstract class TypeSystem {
   public abstract StaticMethodInvocation lookupStaticMethod(Type t, String name,
                                                             Iterable<? extends Type> typeArgs, 
                                                             Iterable<? extends Expression> args,
-                                                            Option<Type> expected)
+                                                            Option<Type> expected, Access.Module accessModule)
     throws InvalidTypeArgumentException, UnmatchedLookupException;
   
   
-  public abstract boolean containsField(Type t, String name);
+  public abstract boolean containsField(Type t, String name, Access.Module accessModule);
   
-  public abstract boolean containsStaticField(Type t, String name);
+  public abstract boolean containsStaticField(Type t, String name, Access.Module accessModule);
   
   /**
    * Lookup the field with the given name in the given object.
@@ -388,7 +388,7 @@ public abstract class TypeSystem {
    * @return An {@link ObjectFieldReference} object representing the matched field.
    * @throws UnmatchedLookupException  If 0 or more than 1 field matches the given name.
    */
-  public abstract ObjectFieldReference lookupField(Expression object, String name)
+  public abstract ObjectFieldReference lookupField(Expression object, String name, Access.Module accessModule)
     throws UnmatchedLookupException;
   
   /**
@@ -398,13 +398,13 @@ public abstract class TypeSystem {
    * @return A {@link StaticFieldReference} object representing the matched field.
    * @throws UnmatchedLookupException  If 0 or more than 1 field matches the given name.
    */
-  public abstract StaticFieldReference lookupStaticField(Type t, String name)
+  public abstract StaticFieldReference lookupStaticField(Type t, String name, Access.Module accessModule)
     throws UnmatchedLookupException;
   
   
-  public abstract boolean containsClass(Type t, String name);
+  public abstract boolean containsClass(Type t, String name, Access.Module accessModule);
   
-  public abstract boolean containsStaticClass(Type t, String name);
+  public abstract boolean containsStaticClass(Type t, String name, Access.Module accessModule);
   
   /**
    * Lookup the class with the given name in the given object.
@@ -417,7 +417,8 @@ public abstract class TypeSystem {
    *                                        may not be well-formed).
    * @throws UnmatchedLookupException  If 0 or more than 1 class matches the given name.
    */  
-  public abstract ClassType lookupClass(Expression object, String name, Iterable<? extends Type> typeArgs)
+  public abstract ClassType lookupClass(Expression object, String name, Iterable<? extends Type> typeArgs,
+                                        Access.Module accessModule)
     throws InvalidTypeArgumentException, UnmatchedLookupException;
   
   /**
@@ -431,7 +432,8 @@ public abstract class TypeSystem {
    *                                        result may not be well-formed).
    * @throws UnmatchedLookupException  If 0 or more than 1 class matches the given name.
    */  
-  public abstract ClassType lookupClass(Type t, String name, Iterable<? extends Type> typeArgs)
+  public abstract ClassType lookupClass(Type t, String name, Iterable<? extends Type> typeArgs,
+                                        Access.Module accessModule)
     throws InvalidTypeArgumentException, UnmatchedLookupException;
 
   /**
@@ -445,7 +447,8 @@ public abstract class TypeSystem {
    *                                        may not be well-formed).
    * @throws UnmatchedLookupException  If 0 or more than 1 class matches the given name.
    */
-  public abstract ClassType lookupStaticClass(Type t, String name, Iterable<? extends Type> typeArgs)
+  public abstract ClassType lookupStaticClass(Type t, String name, Iterable<? extends Type> typeArgs,
+                                              Access.Module accessModule)
     throws InvalidTypeArgumentException, UnmatchedLookupException;
   
   

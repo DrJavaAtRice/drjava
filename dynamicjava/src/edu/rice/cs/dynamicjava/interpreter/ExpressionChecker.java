@@ -191,16 +191,20 @@ public class ExpressionChecker {
     }
     
     try {
-      ConstructorInvocation inv = ts.lookupConstructor(type, targs, args, Option.<Type>none());
-      // Note that super constructor calls *have to* be accessible, even if accessibility
+      ConstructorInvocation inv = ts.lookupConstructor(type, targs, args, Option.<Type>none(), context.accessModule());
+      // Super constructor calls *have to* be accessible, even if accessibility
       // checking is turned off -- a call to a private constructor cannot be compiled
       // in a way that it will run successfully (since constructor calls are the only code
       // that is directly compiled rather than being interpreted, we don't have this problem
       // elsewhere)
-      checkAccessibility(inv.constructor(), node, true);
+      DJConstructor k = inv.constructor();
+      if (k.accessibility().equals(Access.PRIVATE) && !k.accessModule().equals(context.accessModule())) {
+        setErrorStrings(node, ts.userRepresentation(type));
+        throw new ExecutionError("inaccessible.super.call", node);
+      }
       checkThrownExceptions(inv.thrown(), node);
       node.setArguments(CollectUtil.makeList(inv.args()));
-      setConstructor(node, inv.constructor());
+      setConstructor(node, k);
       setType(node, type);
     }
     catch (InvalidTypeArgumentException e) {
@@ -252,44 +256,6 @@ public class ExpressionChecker {
   private final Lambda<Function, String> SIGNATURE_STRING = new Lambda<Function, String>() {
     public String value(Function f) { return ts.userRepresentation(f); }
   };
-  
-  /** Verify that the given symbol is accessible. */
-  public void checkAccessibility(Access.Limited symbol, Node node) {
-    checkAccessibility(symbol, node, false);
-  }
-  
-  /**
-   * Verify that the given symbol is accessible.  If {@code alwaysCheckPrivate}, private access is
-   * checked even when the options dictate otherwise.  Assumes symbol is not an anonymous class.
-   */
-  private void checkAccessibility(Access.Limited symbol, Node node, boolean alwaysCheckPrivate) {
-    switch (symbol.accessibility()) {
-      case PRIVATE:
-        if (alwaysCheckPrivate || opt.enforcePrivateAccess() || opt.enforceAllAccess()) {
-          if (!symbol.accessModule().equals(context.accessModule())) {
-            setErrorStrings(node, symbol.declaredName());
-            throw new ExecutionError("illegal.private.access", node);
-          }
-        }
-        break;
-      case PACKAGE:
-        if (opt.enforceAllAccess()) {
-          if (!symbol.accessModule().packageName().equals(context.accessModule().packageName())) {
-            setErrorStrings(node, symbol.declaredName());
-            throw new ExecutionError("illegal.package.access", node);
-          }
-        }
-        break;
-      case PROTECTED:
-        if (opt.enforceAllAccess()) {
-          // TODO: implement protected-access checks
-        }
-        break;
-      case PUBLIC:
-        // access is always valid
-        break;
-    }
-  }
   
   /** Verify that the thrown exceptions are expected in this context. */
   private void checkThrownExceptions(Iterable<? extends Type> thrownTypes, Node node) {
@@ -378,7 +344,6 @@ public class ExpressionChecker {
         try {
           DJClass c = context.getTopLevelClass(className, ts);
           if (c != null) {
-            checkAccessibility(c, node);
             classType = ts.makeClassType(c);
           }
           else {
@@ -386,7 +351,7 @@ public class ExpressionChecker {
             if (classType == null) {
               // must be a member class (note that a simple name "Foo" can reference a member class)
               Type outer = context.typeContainingMemberClass(className, ts);
-              classType = ts.lookupStaticClass(outer, className, IterUtil.<Type>empty());
+              classType = ts.lookupStaticClass(outer, className, IterUtil.<Type>empty(), context.accessModule());
               // TODO: Improve error when memberName is a non-static class
             }
           }
@@ -401,17 +366,17 @@ public class ExpressionChecker {
         // Append member names until a field is encountered (or until all names are used up)
         while (ids.hasNext() && resultExp == null) {
           IdentifierToken memberName = ids.next();
-          if (ts.containsField(classType, memberName.image())) {
+          if (ts.containsField(classType, memberName.image(), context.accessModule())) {
             ReferenceTypeName rt = new ReferenceTypeName(classIds, SourceInfo.span(first, last)); 
             resultExp = new StaticFieldAccess(rt, memberName.image(), SourceInfo.span(first, memberName)); 
           }
-          else if (ts.containsClass(classType, memberName.image())) {
+          else if (ts.containsClass(classType, memberName.image(), context.accessModule())) {
             last = memberName;
             className += "." + last.image();
             classIds.add(last);
             try {
-              ClassType memberType = ts.lookupStaticClass(classType, memberName.image(), IterUtil.<Type>empty());
-              checkAccessibility(memberType.ofClass(), node);
+              ClassType memberType = ts.lookupStaticClass(classType, memberName.image(), IterUtil.<Type>empty(),
+                                                          context.accessModule());
               classType = memberType;
             }
             catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
@@ -504,14 +469,13 @@ public class ExpressionChecker {
         boolean onlyStatic = (enclosingThis == null);
         FieldReference ref;
         if (onlyStatic) {
-          ref = ts.lookupStaticField(t, node.getFieldName());
+          ref = ts.lookupStaticField(t, node.getFieldName(), context.accessModule());
         }
         else {
           Expression obj = TypeUtil.makeEmptyExpression(node);
           setType(obj, t);
-          ref = ts.lookupField(obj, node.getFieldName());
+          ref = ts.lookupField(obj, node.getFieldName(), context.accessModule());
         }
-        checkAccessibility(ref.field(), node);
         setField(node, ref.field());
         setVariableType(node, ref.type());
         if (!onlyStatic) { setDJClass(node, enclosingThis); }
@@ -534,9 +498,8 @@ public class ExpressionChecker {
       Expression receiver = node.getExpression();
       Type receiverT = check(receiver);
       try {
-        ObjectFieldReference ref = ts.lookupField(receiver, node.getFieldName());
+        ObjectFieldReference ref = ts.lookupField(receiver, node.getFieldName(), context.accessModule());
         node.setExpression(ref.object());
-        checkAccessibility(ref.field(), node);
         setField(node, ref.field());
         setVariableType(node, ref.type());
         Type result = ts.capture(ref.type());
@@ -563,8 +526,7 @@ public class ExpressionChecker {
       Expression obj = TypeUtil.makeEmptyExpression(node);
       setType(obj, t);
       try {
-        FieldReference ref = ts.lookupField(obj, node.getFieldName());
-        checkAccessibility(ref.field(), node);
+        FieldReference ref = ts.lookupField(obj, node.getFieldName(), context.accessModule());
         setField(node, ref.field());
         setDJClass(node, c);
         setVariableType(node, ref.type());
@@ -586,8 +548,7 @@ public class ExpressionChecker {
     @Override public Type visit(StaticFieldAccess node) {
       Type t = checkTypeName(node.getFieldType());
       try {
-        FieldReference ref = ts.lookupStaticField(t, node.getFieldName());
-        checkAccessibility(ref.field(), node);
+        FieldReference ref = ts.lookupStaticField(t, node.getFieldName(), context.accessModule());
         setField(node, ref.field());
         setVariableType(node, ref.type());
         Type result = ts.capture(ref.type());
@@ -632,14 +593,13 @@ public class ExpressionChecker {
       try {
         MethodInvocation inv;
         if (onlyStatic) {
-          inv = ts.lookupStaticMethod(t, node.getMethodName(), targs, args, expected);
+          inv = ts.lookupStaticMethod(t, node.getMethodName(), targs, args, expected, context.accessModule());
         }
         else {
           Expression obj = TypeUtil.makeEmptyExpression(node);
           setType(obj, t);
-          inv = ts.lookupMethod(obj, node.getMethodName(), targs, args, expected);
+          inv = ts.lookupMethod(obj, node.getMethodName(), targs, args, expected, context.accessModule());
         }
-        checkAccessibility(inv.method(), node);
         checkThrownExceptions(inv.thrown(), node);
         node.setArguments(CollectUtil.makeList(inv.args()));
         setMethod(node, inv.method());
@@ -697,8 +657,8 @@ public class ExpressionChecker {
       
       try {
         // Note: Changes made below may also need to be made in the TypeSystem's boxing & unboxing implementations
-        ObjectMethodInvocation inv = ts.lookupMethod(receiver, node.getMethodName(), targs, args, expected);
-        checkAccessibility(inv.method(), node);
+        ObjectMethodInvocation inv = ts.lookupMethod(receiver, node.getMethodName(), targs, args, expected,
+                                                     context.accessModule());
         checkThrownExceptions(inv.thrown(), node);
         node.setExpression(inv.object());
         node.setArguments(CollectUtil.makeList(inv.args()));
@@ -738,8 +698,8 @@ public class ExpressionChecker {
       Expression obj = TypeUtil.makeEmptyExpression(node);
       setType(obj, t);
       try {
-        MethodInvocation inv = ts.lookupMethod(obj, node.getMethodName(), targs, args, expected);
-        checkAccessibility(inv.method(), node);
+        MethodInvocation inv = ts.lookupMethod(obj, node.getMethodName(), targs, args, expected,
+                                               context.accessModule());
         checkThrownExceptions(inv.thrown(), node);
         node.setArguments(CollectUtil.makeList(inv.args()));
         setMethod(node, inv.method());
@@ -774,8 +734,8 @@ public class ExpressionChecker {
       
       try {
         // Note: Changes made below may also need to be made in the TypeSystem's boxing & unboxing implementations
-        MethodInvocation inv = ts.lookupStaticMethod(t, node.getMethodName(), targs, args, expected);
-        checkAccessibility(inv.method(), node);
+        MethodInvocation inv = ts.lookupStaticMethod(t, node.getMethodName(), targs, args, expected,
+                                                     context.accessModule());
         checkThrownExceptions(inv.thrown(), node);
         node.setArguments(CollectUtil.makeList(inv.args()));
         setMethod(node, inv.method());
@@ -895,8 +855,7 @@ public class ExpressionChecker {
       }
       
       try {
-        ConstructorInvocation inv = ts.lookupConstructor(t, targs, args, expected);
-        checkAccessibility(inv.constructor(), node);
+        ConstructorInvocation inv = ts.lookupConstructor(t, targs, args, expected, context.accessModule());
         checkThrownExceptions(inv.thrown(), node);
         node.setArguments(CollectUtil.makeList(inv.args()));
         setConstructor(node, inv.constructor());
@@ -942,8 +901,7 @@ public class ExpressionChecker {
       if (!(IterUtil.isEmpty(args) && IterUtil.isEmpty(targs) && ts.isImplementable(t))) {
         // Super constructor invocation is something besides Object()
         try {
-          ConstructorInvocation inv = ts.lookupConstructor(t, targs, args, expected);
-          checkAccessibility(inv.constructor(), node);
+          ConstructorInvocation inv = ts.lookupConstructor(t, targs, args, expected, context.accessModule());
           checkThrownExceptions(inv.thrown(), node);
           node.setArguments(CollectUtil.makeList(inv.args()));
         }
@@ -996,8 +954,7 @@ public class ExpressionChecker {
       }
       
       try {
-        ClassType t = ts.lookupClass(node.getExpression(), node.getClassName(), classTargs);
-        checkAccessibility(t.ofClass(), node);
+        ClassType t = ts.lookupClass(node.getExpression(), node.getClassName(), classTargs, context.accessModule());
         if (t.ofClass().isStatic()) {
           setErrorStrings(node, node.getClassName(), ts.userRepresentation(getType(node.getExpression())));
           throw new ExecutionError("static.inner.allocation", node);
@@ -1016,8 +973,7 @@ public class ExpressionChecker {
         }
         
         try {
-          ConstructorInvocation inv = ts.lookupConstructor(t, targs, args, expected);
-          checkAccessibility(inv.constructor(), node);
+          ConstructorInvocation inv = ts.lookupConstructor(t, targs, args, expected, context.accessModule());
           checkThrownExceptions(inv.thrown(), node);
           node.setArguments(CollectUtil.makeList(inv.args()));
           setConstructor(node, inv.constructor());
@@ -1053,8 +1009,7 @@ public class ExpressionChecker {
       }
       
       try {
-        ClassType t = ts.lookupClass(node.getExpression(), node.getClassName(), classTargs);
-        checkAccessibility(t.ofClass(), node);
+        ClassType t = ts.lookupClass(node.getExpression(), node.getClassName(), classTargs, context.accessModule());
         if (t.ofClass().isStatic()) {
           setErrorStrings(node, node.getClassName(), ts.userRepresentation(getType(node.getExpression())));
           throw new ExecutionError("static.inner.allocation", node);
@@ -1074,8 +1029,7 @@ public class ExpressionChecker {
         }
         
         try {
-          ConstructorInvocation inv = ts.lookupConstructor(t, targs, args, expected);
-          checkAccessibility(inv.constructor(), node);
+          ConstructorInvocation inv = ts.lookupConstructor(t, targs, args, expected, context.accessModule());
           checkThrownExceptions(inv.thrown(), node);
           node.setArguments(CollectUtil.makeList(inv.args()));
         }

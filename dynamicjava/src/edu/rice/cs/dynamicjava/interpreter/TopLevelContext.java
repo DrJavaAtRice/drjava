@@ -7,6 +7,7 @@ import edu.rice.cs.plt.iter.SequenceIterator;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.text.TextUtil;
 
+import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
 import edu.rice.cs.dynamicjava.symbol.type.ClassType;
@@ -20,6 +21,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public class TopLevelContext extends DelegatingContext {
 
   private final TypeContext _next; // need to save here for making copies
+  private final Options _opt;
   private final String _currentPackage;
   private final Iterator<Integer> _anonymousCounter;
     
@@ -45,17 +47,18 @@ public class TopLevelContext extends DelegatingContext {
    * Make a top-level context that delegates to a LibraryContext based on the given class loader.
    * The context is initialized with an on-demand import of "java.lang".
    */
-  public TopLevelContext(ClassLoader loader) {
-    this(new LibraryContext(SymbolUtil.classLibrary(loader)));
+  public TopLevelContext(ClassLoader loader, Options opt) {
+    this(new LibraryContext(SymbolUtil.classLibrary(loader)), opt);
   }
   
   /**
    * Make a top-level context that delegates to the given context.
    * The context is initialized with an on-demand import of "java.lang".
    */
-  public TopLevelContext(TypeContext next) {
+  public TopLevelContext(TypeContext next, Options opt) {
     super(next);
     _next = next;
+    _opt = opt;
     _currentPackage = "";
     _anonymousCounter = new SequenceIterator<Integer>(1, LambdaUtil.INCREMENT_INT);
     _onDemandPackages = new HashSet<String>();
@@ -77,6 +80,7 @@ public class TopLevelContext extends DelegatingContext {
   private TopLevelContext(TypeContext next, String currentPackage, TopLevelContext bindings) {
     super(next);
     _next = next;
+    _opt = bindings._opt;
     _currentPackage = currentPackage;
     _anonymousCounter = bindings._anonymousCounter;
     _onDemandPackages = (HashSet<String>) bindings._onDemandPackages.clone();
@@ -190,6 +194,12 @@ public class TopLevelContext extends DelegatingContext {
           else if (onDemandNames.size() == 1) { result = super.getTopLevelClass(onDemandNames.get(0), ts); }
         }
       }
+      if (result != null && (_opt.enforcePrivateAccess() || _opt.enforceAllAccess())) {
+        if (!result.accessibility().equals(Access.PUBLIC) &&
+            !_currentPackage.equals(result.accessModule().packageName())) {
+          result = null;
+        }
+      }
       return result;
     }
   }
@@ -211,11 +221,14 @@ public class TopLevelContext extends DelegatingContext {
       LinkedList<ClassType> onDemandMatches = new LinkedList<ClassType>();
       for (DJClass c : _onDemandClasses) {
         ClassType t = ts.makeClassType(c);
-        if (ts.containsClass(t, name)) { onDemandMatches.add(t); }
+        // accessModule() is not actually the referencing context, but should have
+        // the same package name, which is all that matters (private members 
+        // should always be inaccessible if they're reached via an import)
+        if (ts.containsClass(t, name, accessModule())) { onDemandMatches.add(t); }
       }
       for (DJClass c : _staticOnDemandClasses) {
         ClassType t = ts.makeClassType(c);
-        if (ts.containsStaticClass(t, name)) { onDemandMatches.add(t); }
+        if (ts.containsStaticClass(t, name, accessModule())) { onDemandMatches.add(t); }
       }
       if (onDemandMatches.size() > 1) { throw new AmbiguousNameException(); }
       else if (onDemandMatches.size() == 1) { result = onDemandMatches.getFirst(); }
@@ -251,7 +264,7 @@ public class TopLevelContext extends DelegatingContext {
       LinkedList<ClassType> onDemandMatches = new LinkedList<ClassType>();
       for (DJClass c : _staticOnDemandClasses) {
         ClassType t = ts.makeClassType(c);
-        if (ts.containsStaticField(t, name)) { onDemandMatches.add(t); }
+        if (ts.containsStaticField(t, name, accessModule())) { onDemandMatches.add(t); }
       }
       if (onDemandMatches.size() > 1) { throw new AmbiguousNameException(); }
       else if (onDemandMatches.size() == 1) { result = onDemandMatches.getFirst(); }
@@ -287,7 +300,7 @@ public class TopLevelContext extends DelegatingContext {
       LinkedList<ClassType> onDemandMatches = new LinkedList<ClassType>();
       for (DJClass c : _staticOnDemandClasses) {
         ClassType t = ts.makeClassType(c);
-        if (ts.containsStaticMethod(t, name)) { onDemandMatches.add(t); }
+        if (ts.containsStaticMethod(t, name, accessModule())) { onDemandMatches.add(t); }
       }
       if (onDemandMatches.size() > 1) { throw new AmbiguousNameException(); }
       else if (onDemandMatches.size() == 1) { result = onDemandMatches.getFirst(); }

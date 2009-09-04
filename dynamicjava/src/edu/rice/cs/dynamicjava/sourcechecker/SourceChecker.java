@@ -91,7 +91,7 @@ public class SourceChecker {
     debug.logStart("creating TreeLibrary");
     Library sourceLib = new TreeLibrary(sources, classLib.classLoader(), _opt);
     debug.logEnd("creating TreeLibrary");
-    return new TopLevelContext(new LibraryContext(new LibraryContext(classLib), sourceLib));
+    return new TopLevelContext(new LibraryContext(new LibraryContext(classLib), sourceLib), _opt);
   }
   
   private Relation<TypeDeclaration, ClassChecker> extractDeclarations(Iterable<CompilationUnit> sources,
