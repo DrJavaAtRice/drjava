@@ -148,8 +148,8 @@ public abstract class TypeSystem {
    */
   public abstract boolean isSubtype(Type subT, Type superT);
 
-  /** Determine if {@link #cast} would succeed given an expression of the given type */
-  public abstract boolean isCastable(Type target, Type expT);
+  /** Whether two types are known to be disjoint.  */
+  public abstract boolean isDisjoint(Type t1, Type t2);
 
   /** Determine if {@link #assign} would succeed given a non-constant expression of the given type */
   public abstract boolean isAssignable(Type target, Type expT);

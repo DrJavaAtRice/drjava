@@ -1333,7 +1333,8 @@ public class ExpressionChecker {
       Type leftT = check(node.getLeftExpression());
       Type rightT = check(node.getRightExpression());
       if (ts.isReference(leftT) && ts.isReference(rightT)) {
-        if (!ts.isCastable(leftT, rightT) && !ts.isCastable(rightT, leftT)) {
+        if (ts.isDisjoint(leftT, rightT)) {
+          setErrorStrings(node, ts.userRepresentation(leftT), ts.userRepresentation(rightT));
           throw new ExecutionError("compare.type", node);
         }
         setOperation(node, objectCase);
@@ -1355,11 +1356,13 @@ public class ExpressionChecker {
             node.setRightExpression(promoted.second());
           }
           else {
+            setErrorStrings(node, ts.userRepresentation(leftT), ts.userRepresentation(rightT));
             throw new ExecutionError("compare.type", node);
           }
           setOperation(node, primitiveCase);
         }
         catch (UnsupportedConversionException e) {
+          setErrorStrings(node, ts.userRepresentation(leftT), ts.userRepresentation(rightT));
           throw new ExecutionError("compare.type", node);
         }
       }
@@ -1390,6 +1393,8 @@ public class ExpressionChecker {
         return setType(node, TypeSystem.BOOLEAN);
       }
       catch (UnsupportedConversionException e) {
+        setErrorStrings(node, ts.userRepresentation(getType(node.getLeftExpression())),
+                        ts.userRepresentation(getType(node.getRightExpression())));
         throw new ExecutionError("compare.type", node);
       }
     }
@@ -1567,7 +1572,7 @@ public class ExpressionChecker {
     @Override public Type visit(InstanceOfExpression node) {
       Type expT = check(node.getExpression());
       Type targetT = checkTypeName(node.getReferenceType());
-      if (!ts.isReference(expT) || !ts.isReference(targetT) || !ts.isCastable(targetT, expT)) {
+      if (!ts.isReference(expT) || !ts.isReference(targetT) || ts.isDisjoint(targetT, expT)) {
         throw new ExecutionError("instanceof.type", node);
       }
       if (!ts.isReifiable(targetT)) {

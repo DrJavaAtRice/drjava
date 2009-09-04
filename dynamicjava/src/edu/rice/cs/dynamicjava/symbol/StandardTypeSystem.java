@@ -230,15 +230,63 @@ public abstract class StandardTypeSystem extends TypeSystem {
   };
   
   
-  /** Determine if {@link #cast} would succeed given an expression of the given type */
-  public boolean isCastable(Type target, Type expT) {
-    try {
-      Expression e = TypeUtil.makeEmptyExpression();
-      NodeProperties.setType(e, expT);
-      cast(target, e);
-      return true;
+  /** Whether two types are known to be disjoint.  (Standard version is implicitly defined in JLS 5.5.)  */
+  public boolean isDisjoint(final Type s, final Type t) {
+    // By default, returns null for arrays and classes
+    abstract class Visitor extends TypeAbstractVisitor<Boolean> {
+      private final Type _other;
+      public Visitor(Type other) { _other = other; }
+      public abstract boolean recur(Type that);
+      @Override public Boolean forPrimitiveType(PrimitiveType that) {
+        return !isSubtype(that, _other) && !isSubtype(_other, that);
+      }
+      @Override public Boolean forNullType(NullType that) {
+        return !isSubtype(that, _other);
+      }
+      @Override public Boolean forArrayType(ArrayType that) { return null; }
+      @Override public Boolean forClassType(ClassType that) { return null; }
+      @Override public Boolean forIntersectionType(IntersectionType that) {
+        for (Type elt : that.ofTypes()) { if (recur(elt)) return true; }
+        return false;
+      }
+      @Override public Boolean forUnionType(UnionType that) {
+        for (Type elt : that.ofTypes()) { if (!recur(elt)) return false; }
+        return true;
+      }
+      @Override public Boolean forVariableType(VariableType that) {
+        // TODO: to be correct, we would need to recur (checked by a RecursionStack)
+        return false;
+      }
+      @Override public Boolean forTopType(TopType s) { return false; }
+      @Override public Boolean forBottomType(BottomType s) { return true; }
     }
-    catch (UnsupportedConversionException e) { return false; }
+    
+    Boolean sResult = s.apply(new Visitor(t) {
+      public boolean recur(Type that) { return isDisjoint(that, t); }
+    });
+    if (sResult != null) { return sResult; }
+    else {
+      return t.apply(new Visitor(s) {
+        public boolean recur(Type that) { return isDisjoint(s, that); }
+        @Override public Boolean forArrayType(ArrayType t) {
+          if (s instanceof ArrayType) { return isDisjoint(((ArrayType) s).ofType(), t.ofType()); }
+          else { return !isSubtype(t, s); }
+        }
+        @Override public Boolean forClassType(ClassType t) {
+          if (s instanceof ArrayType) { return !isSubtype(s, t); }
+          else {
+            ClassType sAsClass = (ClassType) s;
+            if (sAsClass.ofClass().isFinal() || t.ofClass().isFinal() ||
+                (!sAsClass.ofClass().isInterface() && !t.ofClass().isInterface())) {
+              // either one of them is a final class or both are non-final classes
+              if (!isSubtype(s, erase(t)) && !isSubtype(t, erase(s))) { return true; }
+            }
+            // TODO: The JLS also checks for disjoint type arguments (comparing *all* common superclasses)
+            return false;
+          }
+        }
+      });
+    }
   }
   
   /** Determine if {@link #assign} would succeed given a non-constant expression of the given type */
@@ -1149,8 +1197,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
           Expression result = makeReference(e);
           Type source = NodeProperties.getType(result);
           if (!isSubtype(source, target)) {
-            if (validCheckedCast(target, source) ||
-                (!_opt.prohibitUncheckedCasts() && validUncheckedCast(target, source))) {
+            if (!isDisjoint(source, target) && (!_opt.prohibitUncheckedCasts() || validCheckedCast(target, source))) {
               NodeProperties.setCheckedType(result, erasedClass(target));
             }
             else { throw new UnsupportedConversionException(); }
@@ -1165,48 +1212,33 @@ public abstract class StandardTypeSystem extends TypeSystem {
   }
   
   /**
-   * Whether a reference down-cast is valid and guaranteed safe. See JLS 5.5.  (This is not completely faithful
-   * to the JLS, simply because the details in the JLS are very complex.)
+   * Whether a reference down-cast is valid and guaranteed safe. May assume that
+   * source is not a subtype of target and that the two are not disjoint.  See JLS 5.5.
    */
   private boolean validCheckedCast(Type target, final Type source) {
     return target.apply(new TypeAbstractVisitor<Boolean>() {
-      @Override public Boolean defaultCase(Type target) {
-        return isReifiable(target) && isSubtype(target, erase(source));
-      }
-      @Override public Boolean forClassType(ClassType target) {
-        return isReifiable(target) && (target.getClass().isInterface() || isSubtype(target, erase(source)));
-      }
+      @Override public Boolean defaultCase(Type target) { return isReifiable(target); }
       @Override public Boolean forParameterizedClassType(ParameterizedClassType target) {
-        if (isReifiable(target)) { return target.ofClass().isInterface() || isSubtype(target, erase(source)); }
-        else {
-          if (isSubtype(target, source)) {
-            // Verify that that, given a value of type source & erase(target), it must have type target.
-            // Must show, where target=Target<T1..Tn>, forall X1..Xn, Target<X1..Xn> <: source implies Xi=Ti.
-            ParameterizedClassType wildCapt = capture(parameterize(new RawClassType(target.ofClass())));
-            Iterable<VariableType> unboundArgs =
-              IterUtil.filterInstances(IterUtil.relax(wildCapt.typeArguments()), VariableType.class);
-            Iterable<Type> boundArgs = inferTypeArguments(unboundArgs, EMPTY_TYPE_ITERABLE, wildCapt,
-                                                          EMPTY_TYPE_ITERABLE, Option.some(source));
-            return boundArgs != null && IterUtil.and(boundArgs, target.typeArguments(), new Predicate2<Type, Type>() {
-              public boolean contains(Type inferred, Type orig) { return isEqual(inferred, orig); }
-            });
-          }
-          else { return false; }
+        if (isReifiable(target)) { return true; }
+        else if (isSubtype(target, source)) {
+          // Verify that that, given a value of type source & erase(target), it must have type target.
+          // Must show, where target=Target<T1..Tn>, forall X1..Xn, Target<X1..Xn> <: source implies Xi=Ti.
+          ParameterizedClassType wildCapt = capture(parameterize(new RawClassType(target.ofClass())));
+          Iterable<VariableType> unboundArgs =
+            IterUtil.filterInstances(IterUtil.relax(wildCapt.typeArguments()), VariableType.class);
+          Iterable<Type> boundArgs = inferTypeArguments(unboundArgs, EMPTY_TYPE_ITERABLE, wildCapt,
+                                                        EMPTY_TYPE_ITERABLE, Option.some(source));
+          return boundArgs != null && IterUtil.and(boundArgs, target.typeArguments(), new Predicate2<Type, Type>() {
+            public boolean contains(Type inferred, Type orig) { return isEqual(inferred, orig); }
+          });
         }
+        else { return false; }
       }
       @Override public Boolean forArrayType(ArrayType target) {
         if (isArray(source)) { return validCheckedCast(target.ofType(), arrayElementType(source)); }
         else { return defaultCase(target); }
       }
     });
-  }
-  
-  /**
-   * Whether a reference down-cast is valid as an unchecked cast. See JLS 5.5.  (This is not completely faithful
-   * to the JLS, simply because the details in the JLS are very complex.)
-   */
-  private boolean validUncheckedCast(Type target, Type source) {
-    return isSubtype(target, erase(source)) || isSubtype(source, erase(target));
   }
   
   /**
