@@ -39,6 +39,7 @@
   <property name="java14-home" value="${env.JAVA14_HOME}" />
   <property name="java5-home" value="${env.JAVA5_HOME}" />
   <property name="java6-home" value="${env.JAVA6_HOME}" />
+  <property name="openjdk6-home" value="${env.OPENJDK6_HOME}" />
   
   <property name="is-development" value="yes" /> <!-- Development or stable release -->
   <property name="tag-append" value="" /> <!-- "stable", "beta", or none -->
@@ -84,6 +85,7 @@
     <echo message="JAVA14_HOME: Home folder of the Java 1.4 JDK" />
     <echo message="JAVA5_HOME: Home folder of the Java 5 JDK" />
     <echo message="JAVA6_HOME: Home folder of the Java 6 JDK" />
+    <echo message="OPENJDK6_HOME: Home folder of the OpenJDK 6" />
     <echo message="" />
     <echo message="For control over the version of Java used to run Ant, set JAVA_HOME." />
     <echo message="Ant may also require ANT_HOME to be set.  Note that the value of " />
@@ -173,6 +175,16 @@
       <param name="source-version" value="1.6" />
       <param name="runtime-jar" value="${java6-runtime}" />
       <param name="extra-classpath" value="${java6-tools}" />
+    </antcall>
+  </target>
+  
+  <target name="compile-openjdk6" depends="resolve-openjdk6-runtime, resolve-openjdk6-tools" 
+          description="Compile the 'openjdk6' sources">
+    <antcall target="do-compile">
+      <param name="platform-tag" value="openjdk6" />
+      <param name="source-version" value="1.6" />
+      <param name="runtime-jar" value="${openjdk6-runtime}" />
+      <param name="extra-classpath" value="${openjdk6-tools}" />
     </antcall>
   </target>
   
@@ -316,6 +328,15 @@
       <param name="platform-tag" value="jdk6" />
       <param name="extra-classpath" value="${java6-tools}" />
       <param name="test-jvm" value="${java6-exec}" />
+    </antcall>
+  </target>
+
+  <target name="test-openjdk6" depends="compile-openjdk6, resolve-openjdk6-exec, resolve-openjdk6-tools" 
+          description="Run all 'openjdk6' tests (after compiling); use -Dtest-spec=... to filter">
+    <antcall target="iterate-tests">
+      <param name="platform-tag" value="openjdk6" />
+      <param name="extra-classpath" value="${openjdk6-tools}" />
+      <param name="test-jvm" value="${openjdk6-exec}" />
     </antcall>
   </target>
 
@@ -470,6 +491,7 @@
       <fileset dir="classes/base-jdk14" />
       <fileset dir="classes/base-jdk5" />
       <fileset dir="classes/base-jdk6" />
+      <fileset dir="classes/base-openjdk6" />
       <fileset dir="classes/base-mac" />
       <fileset dir="classes/base-windows" />
       <!-- Additional platform types should be listed here -->
@@ -485,6 +507,7 @@
       <fileset dir="classes/base-jdk14" />
       <fileset dir="classes/base-jdk5" />
       <fileset dir="classes/base-jdk6" />
+      <fileset dir="classes/base-openjdk6" />
       <fileset dir="classes/base-mac" />
       <fileset dir="classes/base-windows" />
       <!-- Additional platform types should be listed here -->
@@ -507,6 +530,7 @@
     <delete dir="classes/test-jdk14" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-jdk5" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-jdk6" failonerror="${clean-can-fail}" />
+    <delete dir="classes/test-openjdk6" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-mac" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-windows" failonerror="${clean-can-fail}" />
     
@@ -887,6 +911,55 @@
     <available property="java6-tools" value="${java6-tools-3}" file="${java6-tools-3}" />
 
     <fail message="Can't find tools.jar in the Java 6 home: ${java6-home}" unless="java6-tools" />
+  </target>
+
+  <target name="resolve-openjdk6-runtime">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so openjdk6-runtime will only be set the *first* time. -->
+
+    <property name="openjdk6-runtime-1" location="${openjdk6-home}/lib/rt.jar" />
+    <available property="openjdk6-runtime" value="${openjdk6-runtime-1}" file="${openjdk6-runtime-1}" />
+
+    <property name="openjdk6-runtime-2" location="${openjdk6-home}/jre/lib/rt.jar" />
+    <available property="openjdk6-runtime" value="${openjdk6-runtime-2}" file="${openjdk6-runtime-2}" />
+
+    <property name="openjdk6-runtime-3" location="${openjdk6-home}/../Classes/classes.jar" />
+    <available property="openjdk6-runtime" value="${openjdk6-runtime-3}" file="${openjdk6-runtime-3}" />
+
+    <fail message="Can't find rt.jar in the Java 6 home: ${openjdk6-home}" unless="openjdk6-runtime" />
+  </target>
+  
+  <target name="resolve-openjdk6-exec">
+    <!-- We rely on "location" to generate a platform-specific path -->
+
+    <property name="openjdk6-exec-1" location="${openjdk6-home}/bin/java.exe" />
+    <condition property="openjdk6-exec" value="${openjdk6-exec-1}">
+      <and>
+        <available file="${openjdk6-exec-1}" />
+        <os family="windows" />
+      </and>
+    </condition>
+    
+    <property name="openjdk6-exec-2" location="${openjdk6-home}/bin/java" />
+    <available property="openjdk6-exec" value="${openjdk6-exec-2}" file="${openjdk6-exec-2}" />
+
+    <fail message="Can't find the java executable in the Java 6 home: ${openjdk6-home}" unless="openjdk6-exec" />
+  </target>
+  
+  <target name="resolve-openjdk6-tools">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so openjdk6-tools will only be set the *first* time. -->
+
+    <property name="openjdk6-tools-1" location="${openjdk6-home}/lib/tools.jar" />
+    <available property="openjdk6-tools" value="${openjdk6-tools-1}" file="${openjdk6-tools-1}" />
+
+    <property name="openjdk6-tools-2" location="${openjdk6-home}/jre/lib/tools.jar" />
+    <available property="openjdk6-tools" value="${openjdk6-tools-2}" file="${openjdk6-tools-2}" />
+
+    <property name="openjdk6-tools-3" location="${openjdk6-home}/../Classes/classes.jar" />
+    <available property="openjdk6-tools" value="${openjdk6-tools-3}" file="${openjdk6-tools-3}" />
+
+    <fail message="Can't find tools.jar in the Java 6 home: ${openjdk6-home}" unless="openjdk6-tools" />
   </target>
   
   <target name="assert-jar-exists">

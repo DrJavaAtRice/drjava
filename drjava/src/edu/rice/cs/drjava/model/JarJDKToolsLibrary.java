@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.jar.JarFile;
+import java.util.jar.JarEntry;
 import java.util.jar.Manifest;
 import java.io.IOException;
 
@@ -129,7 +130,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         new ShadowingClassLoader(JarJDKToolsLibrary.class.getClassLoader(), true, TOOLS_PACKAGES, true);
       Iterable<File> path = IterUtil.singleton(IOUtil.attemptAbsoluteFile(f));
       
-      String compilerAdapter = adapterForCompiler(version.majorVersion());
+      String compilerAdapter = adapterForCompiler(version);
       if (compilerAdapter != null) {
         
         // determine boot class path
@@ -165,7 +166,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         catch (LinkageError e) { /* can't load */ }
       }
       
-      String debuggerAdapter = adapterForDebugger(version.majorVersion());
+      String debuggerAdapter = adapterForDebugger(version);
       String debuggerPackage = "edu.rice.cs.drjava.model.debug.jpda";
       if (debuggerAdapter != null) {
         try {
@@ -199,11 +200,16 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
 
     // We could start with f.getParentFile(), but this simplifies the logic
     File current = IOUtil.attemptCanonicalFile(f);
+    String parsedVersion = "";
+    String vendor = "";
     do {
       String name = current.getName();
-      if (name.startsWith("jdk")) { result = JavaVersion.parseFullVersion(name.substring(3)); }
-      else if (name.startsWith("j2sdk")) { result = JavaVersion.parseFullVersion(name.substring(5)); }
-      else if (name.matches("\\d+\\.\\d+\\.\\d + ")) { result = JavaVersion.parseFullVersion(name); }
+      String path = current.getAbsolutePath();
+      if (path.startsWith("/System/Library/Frameworks/JavaVM.framework")) vendor = "apple";
+      else if (path.toLowerCase().contains("openjdk")) vendor = "openjdk";
+      if (name.startsWith("jdk")) { result = JavaVersion.parseFullVersion(parsedVersion = name.substring(3),vendor,vendor); }
+      else if (name.startsWith("j2sdk")) { result = JavaVersion.parseFullVersion(parsedVersion = name.substring(5),vendor,vendor); }
+      else if (name.matches("\\d+\\.\\d+\\.\\d + ")) { result = JavaVersion.parseFullVersion(parsedVersion = name,vendor,vendor); }
       current = current.getParentFile();
     } while (current != null && result == null);
     
@@ -216,7 +222,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         if (v != null) {
           int space = v.indexOf(' ');
           if (space >= 0) v = v.substring(0,space);
-          result = JavaVersion.parseFullVersion(v);
+          result = JavaVersion.parseFullVersion(parsedVersion = v,vendor,vendor);
         }
       }
       catch(IOException ioe) { result = null; }
@@ -230,6 +236,26 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         // Couldn't find a good version number, so we'll just guess that it's the currently-running version
         // Useful where the tools.jar file is in an unusual custom location      
         result = JavaVersion.CURRENT_FULL;
+      }
+    }
+    // distinguish Sun Java 6 and OpenJDK 6 if it is still unknown
+    if (result != null &&
+        result.vendor()==JavaVersion.VendorType.UNKNOWN &&
+        result.majorVersion().equals(JavaVersion.JAVA_6)) {
+      JarFile jf = null;
+      try {
+        jf = new JarFile(f);
+        JarEntry je = jf.getJarEntry("com/sun/tools/javac/util/DefaultFileManager.class");
+        if (je==null) vendor = "openjdk";
+        else vendor = "sun";
+        result = JavaVersion.parseFullVersion(parsedVersion,vendor,vendor);
+      }
+      catch(IOException ioe) { /* keep existing version */ }
+      finally {
+        try {
+          if (jf != null) jf.close();
+        }
+        catch(IOException ioe) { /* ignore, just trying to close the file */ }
       }
     }
     return result;
@@ -330,10 +356,6 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     addIfDir(new File("/usr/lib/jvm/java-1.5.0-sun"), roots);
     addIfDir(new File("/usr/lib/jvm/java-6-openjdk"), roots);
 
-    addIfDir(new File("/home/mgricken/usr/lib/jvm"), roots);
-    addIfDir(new File("/home/mgricken/usr/lib/jvm/java-6-sun"), roots);
-    addIfDir(new File("/home/mgricken/usr/lib/jvm/java-1.5.0-sun"), roots);
-    addIfDir(new File("/home/mgricken/usr/lib/jvm/java-6-openjdk"), roots);
     addIfDir(new File("/home/javaplt/java/Linux-i686"), roots);
 
     /* jars is a list of possible tools.jar (or classes.jar) files; we want to eliminate duplicates & 

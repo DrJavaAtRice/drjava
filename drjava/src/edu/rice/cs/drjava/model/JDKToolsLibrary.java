@@ -89,17 +89,19 @@ public class JDKToolsLibrary {
   
   public String toString() { return "JDK library " + _version.versionString(); }
   
-  protected static String adapterForCompiler(JavaVersion version) {
-    switch (version) {
-      case JAVA_6: return "edu.rice.cs.drjava.model.compiler.Javac160Compiler";
+  protected static String adapterForCompiler(JavaVersion.FullVersion version) {
+    switch (version.majorVersion()) {
+      case JAVA_6: return (version.vendor()==JavaVersion.VendorType.OPENJDK)?
+        "edu.rice.cs.drjava.model.compiler.Javac160OpenJDKCompiler":
+        "edu.rice.cs.drjava.model.compiler.Javac160Compiler";
       case JAVA_5: return "edu.rice.cs.drjava.model.compiler.Javac150Compiler";
       case JAVA_1_4: return "edu.rice.cs.drjava.model.compiler.Javac141Compiler";
       default: return null;
     }
   }
   
-  protected static String adapterForDebugger(JavaVersion version) {
-    switch (version) {
+  protected static String adapterForDebugger(JavaVersion.FullVersion version) {
+    switch (version.majorVersion()) {
       case JAVA_6: return "edu.rice.cs.drjava.model.debug.jpda.JPDADebugger";
       case JAVA_5: return "edu.rice.cs.drjava.model.debug.jpda.JPDADebugger";
       case JAVA_1_4: return "edu.rice.cs.drjava.model.debug.jpda.JPDADebugger";
@@ -114,7 +116,7 @@ public class JDKToolsLibrary {
     FullVersion version = JavaVersion.CURRENT_FULL;
 
     CompilerInterface compiler = NoCompilerAvailable.ONLY;
-    String compilerAdapter = adapterForCompiler(version.majorVersion());
+    String compilerAdapter = adapterForCompiler(version);
     if (compilerAdapter != null) {
       List<File> bootClassPath = null;
       String bootProp = System.getProperty("sun.boot.class.path");
@@ -130,7 +132,7 @@ public class JDKToolsLibrary {
     }
     
     Debugger debugger = NoDebuggerAvailable.ONLY;
-    String debuggerAdapter = adapterForDebugger(version.majorVersion());
+    String debuggerAdapter = adapterForDebugger(version);
     if (debuggerAdapter != null) {
       try {
         Debugger attempt = (Debugger) ReflectUtil.loadObject(debuggerAdapter, new Class<?>[]{GlobalModel.class}, model);
