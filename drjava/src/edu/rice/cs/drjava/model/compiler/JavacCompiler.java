@@ -48,8 +48,8 @@ import edu.rice.cs.plt.reflect.JavaVersion;
   */
 public abstract class JavacCompiler implements CompilerInterface {
   
-  private JavaVersion.FullVersion _version;
-  private String _location;
+  protected final JavaVersion.FullVersion _version;
+  protected final String _location;
   protected List<? extends File> _defaultBootClassPath;
   
   protected JavacCompiler(JavaVersion.FullVersion version, String location, List<? extends File> defaultBootClassPath) {

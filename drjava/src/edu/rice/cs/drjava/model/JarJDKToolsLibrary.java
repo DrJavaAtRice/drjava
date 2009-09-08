@@ -115,7 +115,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   public File location() { return _location; }
   
   public String toString() { return super.toString() + " at " + _location; }
-  
+  public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("tools.txt",true);
   /** Create a JarJDKToolsLibrary from a specific {@code "tools.jar"} or {@code "classes.jar"} file. */
   public static JarJDKToolsLibrary makeFromFile(File f, GlobalModel model) {
     FullVersion version = guessVersion(f);
@@ -131,39 +131,48 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       Iterable<File> path = IterUtil.singleton(IOUtil.attemptAbsoluteFile(f));
       
       String compilerAdapter = adapterForCompiler(version);
+      LOG.log("compilerAdapter: "+compilerAdapter );
       if (compilerAdapter != null) {
         
         // determine boot class path
         File libDir = null;
-        if (f.getName().equals("classes.jar")) { libDir = f.getParentFile(); }
+        if (f.getName().equals("classes.jar")) { LOG.log("[1]"); libDir = f.getParentFile(); }
         else if (f.getName().equals("tools.jar")) {
+          LOG.log("[2]");
           File jdkLibDir = f.getParentFile();
           if (jdkLibDir != null) {
+            LOG.log("[3]");
             File jdkRoot = jdkLibDir.getParentFile();
             if (jdkRoot != null) {
+              LOG.log("[4]");
               File jreLibDir = new File(jdkRoot, "jre/lib");
-              if (IOUtil.attemptExists(new File(jreLibDir, "rt.jar"))) { libDir = jreLibDir; }
+              if (IOUtil.attemptExists(new File(jreLibDir, "rt.jar"))) { LOG.log("[5]"); libDir = jreLibDir; }
             }
             if (libDir == null) {
-              if (IOUtil.attemptExists(new File(jdkLibDir, "rt.jar"))) { libDir = jdkLibDir; }
+              if (IOUtil.attemptExists(new File(jdkLibDir, "rt.jar"))) { LOG.log("[6]"); libDir = jdkLibDir; }
             }
           }
         }
+        LOG.log("libDir: "+libDir);
         List<File> bootClassPath = null; // null defers to the compiler's default behavior
         if (libDir != null) {
+          LOG.log("[7]");
           File[] jars = IOUtil.attemptListFiles(libDir, IOUtil.extensionFilePredicate("jar"));
-          if (jars != null) { bootClassPath = Arrays.asList(jars); }
+          LOG.log("jars: "+jars);
+          if (jars != null) { LOG.log("jars: "+java.util.Arrays.toString(jars)); bootClassPath = Arrays.asList(jars); }
         }
 
         try {
           Class<?>[] sig = { FullVersion.class, String.class, List.class };
           Object[] args = { version, f.toString(), bootClassPath };
+          LOG.log("args, version: "+version+" f: "+f.toString()+" bootClassPath: "+bootClassPath);
           CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadLibraryAdapter(loader, path, compilerAdapter, 
                                                                                          sig, args);
+          LOG.log("attempt: "+attempt+", isAvailable: "+attempt.isAvailable());
           if (attempt.isAvailable()) { compiler = attempt; }
         }
-        catch (ReflectException e) { /* can't load */ }
-        catch (LinkageError e) { /* can't load */ }
+        catch (ReflectException e) { LOG.log("ReflectException", e); /* can't load */ }
+        catch (LinkageError e) { LOG.log("ReflectException", e); /* can't load */ }
       }
       
       String debuggerAdapter = adapterForDebugger(version);
@@ -245,9 +254,20 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       JarFile jf = null;
       try {
         jf = new JarFile(f);
-        JarEntry je = jf.getJarEntry("com/sun/tools/javac/util/DefaultFileManager.class");
-        if (je==null) vendor = "openjdk";
-        else vendor = "sun";
+        if (jf.getJarEntry("edu/rice/cs/mint/comp/TransStaging.class")!=null &&
+            jf.getJarEntry("com/sun/source/tree/BracketExprTree.class")!=null &&
+            jf.getJarEntry("com/sun/source/tree/BracketStatTree.class")!=null &&
+            jf.getJarEntry("com/sun/source/tree/EscapeExprTree.class")!=null &&
+            jf.getJarEntry("com/sun/source/tree/EscapeStatTree.class")!=null &&
+            jf.getJarEntry("com/sun/tools/javac/util/DefaultFileManager.class")==null) {
+          vendor = "mint";
+        }    
+        else if (jf.getJarEntry("com/sun/tools/javac/util/DefaultFileManager.class")==null) {
+          vendor = "openjdk";
+        }
+        else {
+          vendor = "sun";
+        }
         result = JavaVersion.parseFullVersion(parsedVersion,vendor,vendor);
       }
       catch(IOException ioe) { /* keep existing version */ }

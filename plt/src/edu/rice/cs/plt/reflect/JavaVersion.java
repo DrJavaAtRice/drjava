@@ -116,6 +116,10 @@ public enum JavaVersion {
   public static FullVersion parseFullVersion(String java_version, String java_runtime_name, String java_vm_vendor) {
     VendorType vendor = VendorType.UNKNOWN;
     String vendorString = null;
+    if (java_runtime_name.toLowerCase().contains("mint")) {
+      vendor = VendorType.MINT;
+      vendorString = "Mint";
+    }
     if (java_runtime_name.toLowerCase().contains("openjdk")) {
       vendor = VendorType.OPENJDK;
       vendorString = "OpenJDK";
@@ -296,5 +300,5 @@ public enum JavaVersion {
   private static enum ReleaseType { UNRECOGNIZED, EARLY_ACCESS, BETA, RELEASE_CANDIDATE, STABLE; }
 
   /** The vendor of this version. */
-  public static enum VendorType { UNKNOWN, OPENJDK, APPLE, SUN; }
+  public static enum VendorType { UNKNOWN, MINT, OPENJDK, APPLE, SUN; }
 }

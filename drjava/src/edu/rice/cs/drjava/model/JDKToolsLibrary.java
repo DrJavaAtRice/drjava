@@ -91,9 +91,13 @@ public class JDKToolsLibrary {
   
   protected static String adapterForCompiler(JavaVersion.FullVersion version) {
     switch (version.majorVersion()) {
-      case JAVA_6: return (version.vendor()==JavaVersion.VendorType.OPENJDK)?
-        "edu.rice.cs.drjava.model.compiler.Javac160OpenJDKCompiler":
-        "edu.rice.cs.drjava.model.compiler.Javac160Compiler";
+      case JAVA_6: {
+        switch (version.vendor()) {
+          case OPENJDK: return "edu.rice.cs.drjava.model.compiler.Javac160OpenJDKCompiler";
+          case MINT: return "edu.rice.cs.drjava.model.compiler.MintCompiler";
+          default: return "edu.rice.cs.drjava.model.compiler.Javac160Compiler";
+        }
+      }
       case JAVA_5: return "edu.rice.cs.drjava.model.compiler.Javac150Compiler";
       case JAVA_1_4: return "edu.rice.cs.drjava.model.compiler.Javac141Compiler";
       default: return null;
