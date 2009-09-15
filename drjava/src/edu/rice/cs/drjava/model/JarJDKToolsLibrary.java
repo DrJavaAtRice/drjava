@@ -218,11 +218,13 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       try {
         jf = new JarFile(f);
         Manifest mf = jf.getManifest();
-        String v = mf.getMainAttributes().getValue("Created-By");
-        if (v != null) {
-          int space = v.indexOf(' ');
-          if (space >= 0) v = v.substring(0,space);
-          result = JavaVersion.parseFullVersion(parsedVersion = v,vendor,vendor);
+        if (mf != null) {
+          String v = mf.getMainAttributes().getValue("Created-By");
+          if (v != null) {
+            int space = v.indexOf(' ');
+            if (space >= 0) v = v.substring(0,space);
+            result = JavaVersion.parseFullVersion(parsedVersion = v,vendor,vendor);
+          }
         }
       }
       catch(IOException ioe) { result = null; }
