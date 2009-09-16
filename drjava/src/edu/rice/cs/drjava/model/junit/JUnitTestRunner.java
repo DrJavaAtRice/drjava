@@ -71,7 +71,7 @@ public class JUnitTestRunner extends BaseTestRunner {
     _errorCount = 0;
     _failureCount = 0;
   }
-  
+ 
   public synchronized TestResult runSuite(TestSuite suite) {
     // Reset all bookkeeping
     _errorCount = 0;
@@ -120,6 +120,5 @@ public class JUnitTestRunner extends BaseTestRunner {
   
   @Override protected void runFailed(String message) {
     throw new UnexpectedException(message);
-  }
-  
+  }  
 }
