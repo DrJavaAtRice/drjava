@@ -2,7 +2,6 @@ package edu.rice.cs.dynamicjava.symbol;
 
 import java.util.*;
 import edu.rice.cs.plt.tuple.Pair;
-import edu.rice.cs.plt.tuple.Triple;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.Wrapper;
 import edu.rice.cs.plt.recur.*;
@@ -28,7 +27,15 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 public class ExtendedTypeSystem extends StandardTypeSystem {
   
-  public ExtendedTypeSystem(Options opt) { super(opt); }
+  /** Whether the inference algorithm should attempt to pack capture variables that appear as inference results. */
+  private final boolean _packCaptureVars;
+  
+  public ExtendedTypeSystem(Options opt) { this(opt, true); }
+  
+  public ExtendedTypeSystem(Options opt, boolean packCaptureVars) {
+    super(opt);
+    _packCaptureVars = packCaptureVars;
+  }
   
   /** Determine if the type is well-formed. */
   public boolean isWellFormed(Type t) {
@@ -134,7 +141,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
         
         @Override public Boolean forVariableType(final VariableType superT) {
           return subT.apply(new TypeAbstractVisitor<Boolean>() {
-            public Boolean defaultCase(final Type subT) {
+            @Override public Boolean defaultCase(final Type subT) {
               Thunk<Boolean> checkLowerBound = new Thunk<Boolean>() {
                 public Boolean value() {
                   Type bound = new Normalizer(NormSubtyper.this).value(superT.symbol().lowerBound());
@@ -152,13 +159,19 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
             @Override public Boolean forIntersectionType(IntersectionType subT) {
               return defaultCase(subT) ? true : null;
             }
+            @Override public Boolean forUnionType(UnionType subT) { return null; }
             @Override public Boolean forBottomType(BottomType subT) { return true; }
           });
         }
         
-        @Override public Boolean forIntersectionType(IntersectionType superT) {
-          if (subT instanceof BottomType) { return true; }
-          else { return IterUtil.and(superT.ofTypes(), supertypes(subT)); }
+        @Override public Boolean forIntersectionType(final IntersectionType superT) {
+          return subT.apply(new TypeAbstractVisitor<Boolean>() {
+            @Override public Boolean defaultCase(Type subT) {
+              return IterUtil.and(superT.ofTypes(), supertypes(subT));
+            }
+            @Override public Boolean forUnionType(UnionType subT) { return null; }
+            @Override public Boolean forBottomType(BottomType subT) { return true; }
+          });
         }
         
         @Override public Boolean forUnionType(final UnionType superT) {
@@ -166,9 +179,10 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
             @Override public Boolean defaultCase(Type t) {
               return IterUtil.or(superT.ofTypes(), supertypes(subT)); 
             }
-            public Boolean forVariableType(VariableType t) { return defaultCase(subT) ? true : null; }
-            public Boolean forUnionType(UnionType t) { return null; }
-            public Boolean forBottomType(BottomType t) { return true; }
+            @Override public Boolean forVariableType(VariableType t) { return defaultCase(subT) ? true : null; }
+            @Override public Boolean forIntersectionType(IntersectionType t) { return null; }
+            @Override public Boolean forUnionType(UnionType t) { return null; }
+            @Override public Boolean forBottomType(BottomType t) { return true; }
           });
         }
         
@@ -560,7 +574,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
           result.append("{ ");
           boolean firstVar = true;
           for (VariableType var : s.boundVariables()) {
-            if (firstVar) { result.append(", "); }
+            if (!firstVar) { result.append(", "); }
             firstVar = false;
             result.append(printer.print(s.lowerBound(var)));
             result.append(" <: ");
@@ -765,7 +779,23 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
     //debug.logValue("constraints", constraints);
     if (!transConstraints.isSatisfiable()) { return null; }
 
-    // try to use lower bounds
+    // try to use packed lower bounds
+    if (_packCaptureVars) {
+      for (final ConstraintScenario s : transConstraints.scenarios()) {
+        Iterable<Type> result = IterUtil.mapSnapshot(tparams, new Lambda<VariableType, Type>() {
+          public Type value(VariableType param) {
+            Type result = s.lowerBound(param);
+            while (result instanceof VariableType && ((VariableType) result).symbol().generated()) {
+              result = ((VariableType) result).symbol().upperBound();
+            }
+            return result;
+          }
+        });
+        if (inBounds(tparams, result)) { return result; }
+      }
+    }
+    
+    // packed lower bounds don't work, try to use lower bounds
     for (final ConstraintScenario s : transConstraints.scenarios()) {
       Iterable<Type> result = IterUtil.mapSnapshot(tparams, new Lambda<VariableType, Type>() {
         public Type value(VariableType param) { return s.lowerBound(param); }

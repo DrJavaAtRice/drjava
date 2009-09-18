@@ -1479,6 +1479,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
       private final RecursionStack<Type> _stack = new RecursionStack<Type>();
       // variables that have bounds that should be printed in appendConstraints()
       private final List<VariableType> _boundedVars = new ArrayList<VariableType>();
+      private final Set<VariableType> _seenVars = new HashSet<VariableType>();
       
       public String result() { return _result.toString(); }
       
@@ -1517,12 +1518,15 @@ public abstract class StandardTypeSystem extends TypeSystem {
           if (t.symbol().generated()) { _captureVars++; name = "?T" + _captureVars; }
           else { name = t.symbol().name(); }
           _names.put(t, name);
+        }
+        if (!_seenVars.contains(t)) {
+          _seenVars.add(t);
           // check to see if bounds need to be printed
           Type upper = t.symbol().upperBound();
           Type lower = t.symbol().lowerBound();
           boolean printUpper = !isEqual(upper, OBJECT) /*&& !isEqual(upper, TOP)*/;
           boolean printLower = !isEqual(lower, NULL) /*&& !isEqual(lower, BOTTOM)*/;
-          if (printUpper || printLower) _boundedVars.add(t);
+          if (printUpper || printLower) { _boundedVars.add(t); }
         }
         return name;
       }
@@ -2064,8 +2068,45 @@ public abstract class StandardTypeSystem extends TypeSystem {
      * SignatureMatchers.  This relation is defined in JLS 15.12.2.5.
      */
     public boolean moreSpecificThan(FunctionInvocationCandidate<F> c) {
-      SignatureMatcher m = makeMatcher(c._f.typeParameters(), EMPTY_TYPE_ITERABLE, SymbolUtil.parameterTypes(c._f), 
-                                       IterUtil.mapSnapshot(SymbolUtil.parameterTypes(_f), EMPTY_EXPRESSION_FOR_TYPE),
+      Iterable<Type> supParams = SymbolUtil.parameterTypes(c._f);
+      Iterable<Type> subParams = SymbolUtil.parameterTypes(_f);
+      if (SymbolUtil.isVararg(c._f)) {
+        // Adjust param type lists to match arities, if possible.  Can't use SignatureMatcher.matchesWithVarargs()
+        // because it uses boxing, which is not allowed here.
+        int supArity = IterUtil.sizeOf(supParams);
+        int subArity = IterUtil.sizeOf(subParams);
+        if (SymbolUtil.isVararg(_f)) {
+          if (subArity < supArity) { // fill in extra sub args
+            Iterable<Type> prefixSubs = IterUtil.skipLast(subParams);
+            Type lastSub = IterUtil.last(subParams);
+            Iterable<Type> subExtras = IterUtil.copy(((ArrayType) lastSub).ofType(), supArity-subArity);
+            subParams = IterUtil.compose(IterUtil.compose(prefixSubs, subExtras), lastSub);
+          }
+          else if (subArity > supArity) {
+            Iterable<Type> prefixSups = IterUtil.skipLast(supParams);
+            Type lastSup = IterUtil.last(supParams);
+            Iterable<Type> supExtras = IterUtil.copy(((ArrayType) lastSup).ofType(), subArity-supArity);
+            supParams = IterUtil.compose(IterUtil.compose(prefixSups, supExtras), lastSup);
+          }
+          // if they're equal, no adjustments are needed
+        }
+        else {
+          // This case doesn't occur in practice, because "more specific" is only used to compare
+          // methods that all match in the same phase (directly, with boxing, or with varargs).
+          if (subArity < supArity) { supParams = IterUtil.skipLast(supParams); } // allow sub to elide the vararg param
+          else if (subArity > supArity) {
+            Iterable<Type> prefixSups = IterUtil.skipLast(supParams);
+            Type lastSup = IterUtil.last(supParams);
+            int varargArgs = subArity-(supArity-1); // expect this many args of the vararg type
+            supParams = IterUtil.compose(prefixSups, IterUtil.copy(((ArrayType) lastSup).ofType(), varargArgs));
+          }
+          // if they're equal, no adjustments are needed
+          // (If lastSup is T..., lastSub might be a subtype of T or of T[].  For the purposes of
+          // "more specific", we arbitrarily require it to be a subtype of T[].)
+        }
+      }
+      SignatureMatcher m = makeMatcher(c._f.typeParameters(), EMPTY_TYPE_ITERABLE, supParams, 
+                                       IterUtil.mapSnapshot(subParams, EMPTY_EXPRESSION_FOR_TYPE),
                                        BOTTOM, NONE_TYPE_OPTION);
       return m.matches();
     }
