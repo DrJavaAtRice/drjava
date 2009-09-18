@@ -101,7 +101,7 @@ public class ClassContext extends DelegatingContext {
    * Return the most inner type containing a method with the given name, or {@code null}
    * if there is no such type.
    */
-  @Override public ClassType typeContainingMethod(String name, TypeSystem ts) throws AmbiguousNameException {
+  @Override public Type typeContainingMethod(String name, TypeSystem ts) {
     if (hasMethod(name, ts)) { return _thisType; }
     else { return super.typeContainingMethod(name, ts); }
   }
@@ -136,7 +136,10 @@ public class ClassContext extends DelegatingContext {
     else { return super.getThis(className); }
   }
   
-  @Override public boolean hasThis(DJClass c) { return c.equals(_c) || super.hasThis(c); }
+  @Override public DJClass getThis(Type expected, TypeSystem ts) {
+    if (ts.isSubtype(_thisType, expected)) { return _c; }
+    else { return super.getThis(expected, ts); }
+  }
   
   /**
    * The expected type of a {@code return} statement in the given context, or {@code null}

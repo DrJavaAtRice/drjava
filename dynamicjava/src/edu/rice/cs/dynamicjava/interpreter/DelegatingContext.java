@@ -153,7 +153,7 @@ public abstract class DelegatingContext implements TypeContext {
    * Return the most inner type containing a method with the given name, or {@code null}
    * if there is no such type.
    */
-  public ClassType typeContainingMethod(String name, TypeSystem ts) throws AmbiguousNameException {
+  public Type typeContainingMethod(String name, TypeSystem ts) {
     return _next.typeContainingMethod(name, ts);
   }
   
@@ -208,7 +208,7 @@ public abstract class DelegatingContext implements TypeContext {
     return _next.getThis(className);
   }
   
-  public boolean hasThis(DJClass c) { return _next.hasThis(c); }
+  public DJClass getThis(Type expected, TypeSystem ts) { return _next.getThis(expected, ts); }
   
   /**
    * The expected type of a {@code return} statement in the given context, or {@code null}

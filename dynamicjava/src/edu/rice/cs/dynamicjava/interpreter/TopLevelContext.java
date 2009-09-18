@@ -2,13 +2,17 @@ package edu.rice.cs.dynamicjava.interpreter;
 
 import java.util.*;
 
+import edu.rice.cs.plt.collect.IndexedRelation;
+import edu.rice.cs.plt.collect.Relation;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.iter.SequenceIterator;
+import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.text.TextUtil;
 
 import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.symbol.*;
+import edu.rice.cs.dynamicjava.symbol.type.IntersectionType;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
 import edu.rice.cs.dynamicjava.symbol.type.ClassType;
 
@@ -41,7 +45,7 @@ public class TopLevelContext extends DelegatingContext {
   /** Classes containing an individually-imported field */
   private final HashMap<String, DJClass> _importedFields;
   /** Classes containing an individually-imported method */
-  private final HashMap<String, DJClass> _importedMethods;
+  private final Relation<String, DJClass> _importedMethods;
   
   /**
    * Make a top-level context that delegates to a LibraryContext based on the given class loader.
@@ -67,7 +71,7 @@ public class TopLevelContext extends DelegatingContext {
     _importedTopLevelClasses = new HashMap<String, DJClass>();
     _importedMemberClasses = new HashMap<String, DJClass>();
     _importedFields = new HashMap<String, DJClass>();
-    _importedMethods = new HashMap<String, DJClass>();
+    _importedMethods = new IndexedRelation<String, DJClass>(false);
     
     _onDemandPackages.add("java.lang");
   }
@@ -89,7 +93,8 @@ public class TopLevelContext extends DelegatingContext {
     _importedTopLevelClasses = (HashMap<String, DJClass>) bindings._importedTopLevelClasses.clone();
     _importedMemberClasses = (HashMap<String, DJClass>) bindings._importedMemberClasses.clone();
     _importedFields = (HashMap<String, DJClass>) bindings._importedFields.clone();
-    _importedMethods = (HashMap<String, DJClass>) bindings._importedMethods.clone();
+    _importedMethods = new IndexedRelation<String, DJClass>(false);
+    _importedMethods.addAll(bindings._importedMethods);
   }
   
   protected TypeContext duplicate(TypeContext next) {
@@ -153,8 +158,7 @@ public class TopLevelContext extends DelegatingContext {
   /** Import the method(s) of {@code c} with the given name */
   @Override public TypeContext importMethod(DJClass c, String name) {
     TopLevelContext result = new TopLevelContext(this);
-    // Under strict circumstances, a duplicate import for a name is illegal, but DynamicJava allows it
-    result._importedMethods.put(name, c);
+    result._importedMethods.add(name, c); // overloads with any others already imported
     return result;
   }
     
@@ -285,30 +289,35 @@ public class TopLevelContext extends DelegatingContext {
   
   /** Test whether {@code name} is an in-scope method */
   @Override public boolean methodExists(String name, TypeSystem ts) {
-    try { return typeContainingMethod(name, ts) != null; }
-    catch (AmbiguousNameException e) { return true; }
+    return typeContainingMethod(name, ts) != null;
   }
   
   /**
    * Return the most inner type containing a method with the given name, or {@code null}
    * if there is no such type.
    */
-  @Override public ClassType typeContainingMethod(String name, TypeSystem ts) throws AmbiguousNameException {
-    DJClass explicitImport = _importedMethods.get(name);
-    ClassType result = explicitImport == null ? null : ts.makeClassType(explicitImport);
-    if (result == null) {
+  @Override public Type typeContainingMethod(String name, final TypeSystem ts) {
+    Iterable<ClassType> matches;
+    Iterable<DJClass> explicitImports = _importedMethods.matchFirst(name);
+    if (!IterUtil.isEmpty(explicitImports)) {
+      matches = IterUtil.mapSnapshot(explicitImports, new Lambda<DJClass, ClassType>() {
+        public ClassType value(DJClass c) { return ts.makeClassType(c); }
+      });
+    }
+    else {
       LinkedList<ClassType> onDemandMatches = new LinkedList<ClassType>();
       for (DJClass c : _staticOnDemandClasses) {
         ClassType t = ts.makeClassType(c);
         if (ts.containsStaticMethod(t, name, accessModule())) { onDemandMatches.add(t); }
       }
-      if (onDemandMatches.size() > 1) { throw new AmbiguousNameException(); }
-      else if (onDemandMatches.size() == 1) { result = onDemandMatches.getFirst(); }
-      if (result == null) {
-        result = super.typeContainingMethod(name, ts);
-      }
+      matches = onDemandMatches;
     }
-    return result;
+    
+    switch (IterUtil.sizeOf(matches, 2)) {
+      case 0: return null;
+      case 1: return IterUtil.first(matches);
+      default: return new IntersectionType(matches);
+    }
   }
   
   
@@ -338,7 +347,7 @@ public class TopLevelContext extends DelegatingContext {
    */
   @Override public DJClass getThis(String className) { return null; }
   
-  @Override public boolean hasThis(DJClass c) { return false; }
+  @Override public DJClass getThis(Type expected, TypeSystem ts) { return null; }
   
   /**
    * The expected type of a {@code return} statement in the given context, or {@code null}

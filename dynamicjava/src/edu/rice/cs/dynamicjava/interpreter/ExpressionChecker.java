@@ -506,7 +506,7 @@ public class ExpressionChecker {
           setErrorStrings(node, node.getFieldName());
           throw new ExecutionError("undefined.name", node);
         }
-        DJClass enclosingThis = enclosingThis(t);
+        DJClass enclosingThis = context.getThis(t, ts);
         boolean onlyStatic = (enclosingThis == null);
         FieldReference ref;
         if (onlyStatic) {
@@ -613,23 +613,20 @@ public class ExpressionChecker {
       
       Iterable<Type> targs = IterUtil.empty();
       
-      ClassType t;
+      Type t;
       if (context.localFunctionExists(node.getMethodName(), ts)) {
         Iterable<LocalFunction> matches = context.getLocalFunctions(node.getMethodName(), ts);
         t = ts.makeClassType(new FunctionWrapperClass(context.accessModule(), matches));
       }
       else {
-        try {
-          t = context.typeContainingMethod(node.getMethodName(), ts);
-          if (t == null) {
-            setErrorStrings(node, node.getMethodName());
-            throw new ExecutionError("undefined.name", node);
-          }
+        t = context.typeContainingMethod(node.getMethodName(), ts);
+        if (t == null) {
+          setErrorStrings(node, node.getMethodName());
+          throw new ExecutionError("undefined.name", node);
         }
-        catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
       }
       
-      DJClass enclosingThis = enclosingThis(t);
+      DJClass enclosingThis = context.getThis(t, ts);
       boolean onlyStatic = (enclosingThis == null);
       try {
         MethodInvocation inv;
@@ -874,7 +871,7 @@ public class ExpressionChecker {
 
       Option<Type> dynamicOuter = ts.dynamicallyEnclosingType(t);
       if (dynamicOuter.isSome()) {
-        DJClass enclosingThis = enclosingThis(dynamicOuter.unwrap());
+        DJClass enclosingThis = context.getThis(dynamicOuter.unwrap(), ts);
         if (enclosingThis == null) {
           TypePrinter printer = ts.typePrinter();
           setErrorStrings(node, printer.print(t), printer.print(dynamicOuter.unwrap()));
@@ -919,7 +916,7 @@ public class ExpressionChecker {
       
       Option<Type> dynamicOuter = ts.dynamicallyEnclosingType(t);
       if (dynamicOuter.isSome()) {
-        DJClass enclosingThis = enclosingThis(dynamicOuter.unwrap());
+        DJClass enclosingThis = context.getThis(dynamicOuter.unwrap(), ts);
         if (enclosingThis == null) {
           TypePrinter printer = ts.typePrinter();
           setErrorStrings(node, printer.print(t), printer.print(dynamicOuter.unwrap()));
@@ -961,22 +958,6 @@ public class ExpressionChecker {
       
       setConstructor(node, IterUtil.first(c.declaredConstructors()));
       return setType(node, ts.makeClassType(c));
-    }
-    
-    /**
-     * Determine a "this" class that can be used where the given type is expected.
-     * May return {@code null} if none is found.
-     */
-    private DJClass enclosingThis(Type expected) {
-      return expected.apply(new TypeAbstractVisitor<DJClass>() {
-        @Override public DJClass defaultCase(Type t) { return null; }
-        @Override public DJClass forClassType(ClassType t) {
-          if (context.hasThis(t.ofClass()) && ts.isSubtype(SymbolUtil.thisType(t.ofClass()), t)) {
-            return t.ofClass();
-          }
-          else { return null; }
-        }
-      });
     }
     
     /**

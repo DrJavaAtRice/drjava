@@ -100,7 +100,7 @@ public interface TypeContext {
    * Return the most inner type containing a method with the given name, or {@code null}
    * if there is no such type.
    */
-  public ClassType typeContainingMethod(String name, TypeSystem ts) throws AmbiguousNameException;
+  public Type typeContainingMethod(String name, TypeSystem ts);
   
   /** Test whether {@code name} is an in-scope local function */
   public boolean localFunctionExists(String name, TypeSystem ts);
@@ -135,8 +135,11 @@ public interface TypeContext {
    */
   public DJClass getThis(String className);
   
-  /** Test whether "this" is defined for the given class. */
-  public boolean hasThis(DJClass c);
+  /**
+   * Return the innermost "this" class with the given type in the current context,
+   * or {@code null} if there is no such value (for example, in a static context).
+   */
+  public DJClass getThis(Type expected, TypeSystem ts);
   
   /**
    * The expected type of a {@code return} statement in the given context, or {@code null}
