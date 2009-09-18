@@ -216,6 +216,41 @@ public class ExpressionChecker {
   }
   
   /**
+   * Check an expression appearing as the switch case in an enum switch statement.
+   * @return  The field corresponding to the enum constant's value.
+   */
+  public DJField checkEnumSwitchCase(Expression exp, Type enumT) {
+    if (!(exp instanceof AmbiguousName)) {
+      throw new ExecutionError("invalid.enum.constant", exp);
+    }
+    List<IdentifierToken> ids = ((AmbiguousName) exp).getIdentifiers();
+    if (ids.size() != 1) {
+      throw new ExecutionError("invalid.enum.constant", exp);
+    }
+    String name = ids.get(0).image();
+    Expression translation = new SimpleFieldAccess(name);
+    try {
+      // Should actually verify that that the name is a declared enum constant, not just
+      // a static field.  But that requires a lot of unimplemented support where we're
+      // otherwise treating enums as syntactic sugar for normal class declarations.
+      StaticFieldReference ref = ts.lookupStaticField(enumT, name, context.accessModule());
+      setField(translation, ref.field());
+      Type t = ts.capture(ref.type());
+      if (!ts.isSubtype(t, enumT)) {
+        throw new ExecutionError("invalid.enum.constant", exp);
+      }
+      addRuntimeCheck(translation, t, ref.field().type());
+      setType(translation, t);
+      setType(exp, t);
+      setTranslation(exp, translation);
+      return ref.field();
+    }
+    catch (UnmatchedLookupException e) {
+      throw new ExecutionError("invalid.enum.constant", exp);
+    }
+  }
+  
+  /**
    * Dynamically determines the appropriate error message type and initializes ERROR_STRINGS with the following:
    * {@code 0=type, 1=name, 2=targs, 3=args, 4=expected, 5=candidates}.
    */
@@ -272,6 +307,12 @@ public class ExpressionChecker {
           throw new ExecutionError("uncaught.exception", node);
         }
       }
+    }
+  }
+  
+  private void addRuntimeCheck(Node node, Type expectedType, Type declaredActualType) {
+    if (!ts.isSubtype(ts.erase(declaredActualType), ts.erase(expectedType))) {
+      setCheckedType(node, ts.erasedClass(expectedType));
     }
   }
   
@@ -749,12 +790,6 @@ public class ExpressionChecker {
       }
       catch (UnmatchedLookupException e) {
         throw unmatchedFunctionError("method", e, node, t, node.getMethodName(), targs, args, expected, true);
-      }
-    }
-    
-    private void addRuntimeCheck(Node node, Type expectedType, Type declaredActualType) {
-      if (!ts.isSubtype(ts.erase(declaredActualType), ts.erase(expectedType))) {
-        setCheckedType(node, ts.erasedClass(expectedType));
       }
     }
     

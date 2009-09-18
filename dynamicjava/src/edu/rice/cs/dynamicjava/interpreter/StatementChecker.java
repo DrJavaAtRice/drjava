@@ -516,7 +516,8 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
    */
   @Override public TypeContext visit(SwitchStatement node) {
     Type t = checkType(node.getSelector());
-    if (!ts.isEnum(t)) {
+    boolean switchEnum = ts.isEnum(t);
+    if (!switchEnum) {
       try {
         Expression exp = ts.makePrimitive(node.getSelector());
         if (!(getType(exp) instanceof IntegralType) || (getType(exp) instanceof LongType)) {
@@ -538,16 +539,20 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
          - A local variable is in scope for the rest of the switch statement's body -- it "falls through"
          - A local class is *only* in scope in its SwitchBlock -- it does not "fall through"
          This is a mess.  For now we just follow a no-fall-through approach. */
-      
-      bk.acceptVisitor(this);
-      
       if (bk.getExpression() == null) {
         if (hasDefault) { throw new ExecutionError("duplicate.switch.case", node); }
         hasDefault = true;
       }
-      
+      else if (switchEnum) {
+        DJField val = new ExpressionChecker(context, opt).checkEnumSwitchCase(bk.getExpression(), t);
+        if (values.contains(val)) {
+          throw new ExecutionError("duplicate.switch.case", bk);
+        }
+        values.add(val);
+      }
       else {
         Expression exp = bk.getExpression();
+        checkType(exp);
         if (!hasValue(exp) || getValue(exp) == null) {
           throw new ExecutionError("invalid.constant", exp);
         }
@@ -556,12 +561,14 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
           throw new ExecutionError("switch.label.type", exp);
         }
         if (values.contains(getValue(exp))) { 
-          throw new ExecutionError("duplicate.switch.case", node);
+          throw new ExecutionError("duplicate.switch.case", bk);
         }
         values.add(getValue(exp));
       }
+      
+      if (bk.getStatements() != null) { checkList(bk.getStatements()); }
     }
-    
+      
     return context;
   }
 
