@@ -241,8 +241,9 @@ public class ExpressionChecker {
       }
       addRuntimeCheck(translation, t, ref.field().type());
       setType(translation, t);
-      setType(exp, t);
       setTranslation(exp, translation);
+      setType(exp, t);
+      if (hasValue(translation)) { setValue(exp, getValue(translation)); }
       return ref.field();
     }
     catch (UnmatchedLookupException e) {
@@ -345,6 +346,7 @@ public class ExpressionChecker {
         // VARIABLE_TYPE and TYPE properties are important in the enclosing context; others
         // (such as FIELD) are not, and need not be copied to the AmbiguousName
         if (hasVariableType(resolvedExp)) { setVariableType(node, getVariableType(resolvedExp)); }
+        if (hasValue(resolvedExp)) { setValue(node, getValue(resolvedExp)); }
         return setType(node, getType(resolvedExp));
       }
     }
@@ -518,6 +520,8 @@ public class ExpressionChecker {
           ref = ts.lookupField(obj, node.getFieldName(), context.accessModule());
         }
         setField(node, ref.field());
+        Option<Object> val = ref.field().constantValue();
+        if (val.isSome()) { setValue(node, val.unwrap()); }
         setVariableType(node, ref.type());
         if (!onlyStatic) { setDJClass(node, enclosingThis); }
         Type result = ts.capture(ref.type());
@@ -591,6 +595,8 @@ public class ExpressionChecker {
       try {
         FieldReference ref = ts.lookupStaticField(t, node.getFieldName(), context.accessModule());
         setField(node, ref.field());
+        Option<Object> val = ref.field().constantValue();
+        if (val.isSome()) { setValue(node, val.unwrap()); }
         setVariableType(node, ref.type());
         Type result = ts.capture(ref.type());
         addRuntimeCheck(node, result, ref.field().type());

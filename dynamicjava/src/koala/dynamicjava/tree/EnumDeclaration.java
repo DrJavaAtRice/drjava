@@ -29,6 +29,8 @@
 package koala.dynamicjava.tree;
 
 import java.util.*;
+
+import koala.dynamicjava.tree.tiger.GenericReferenceTypeName;
 import koala.dynamicjava.tree.visitor.Visitor;
 
 import static koala.dynamicjava.tree.ModifierSet.Modifier.*;
@@ -90,12 +92,23 @@ public class EnumDeclaration extends ClassDeclaration {
     // will return false, but since dynamicjava uses 
     // TigerUtilities.isEnum(), this doesn't pose too big of a problem.
     super(mods, 
-          name, new ReferenceTypeName("java.lang.Enum"), impl,
+          name, makeTypeName(name), impl,
       AddValues(name,
         HandleConstructors(name,
           makeEnumBodyDeclarationsFromEnumConsts(name, body)),
         body.getConstants()),
       si);
+  }
+  
+  private static ReferenceTypeName makeTypeName(String name) {
+    List<Identifier> c = Arrays.asList(new Identifier("java"), new Identifier("lang"), new Identifier("Enum"));
+    List<TypeName> emptyTargs = Collections.emptyList(); 
+    List<ReferenceTypeName> targs = Arrays.asList(new ReferenceTypeName(name));
+    List<List<? extends TypeName>> allTArgs = new LinkedList<List<? extends TypeName>>();
+    allTArgs.add(emptyTargs);
+    allTArgs.add(emptyTargs);
+    allTArgs.add(targs);
+    return new GenericReferenceTypeName(c, allTArgs);
   }
 
   static List<Node> AddValues(String enumTypeName, List<Node> body, List<EnumConstant> consts){

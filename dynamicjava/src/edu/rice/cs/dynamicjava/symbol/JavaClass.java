@@ -11,6 +11,7 @@ import edu.rice.cs.dynamicjava.interpreter.RuntimeBindings;
 import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
 
 import edu.rice.cs.plt.reflect.ReflectUtil;
+import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Thunk;
@@ -165,6 +166,18 @@ public class JavaClass implements DJClass {
     public boolean isStatic() { return Modifier.isStatic(_f.getModifiers()); }
     public Access accessibility() { return extractAccessibility(_f.getModifiers()); }
     public Access.Module accessModule() { return JavaClass.this.accessModule(); }
+    
+    public Option<Object> constantValue() {
+      // Whether a field is declared as a constant is not available via the reflection API,
+      // so we approximate by treating all static final fields as constants.
+      // (Note that some code my execute here during the type checking phase, before "run time".
+      // This seems to be unavoidable given the reflection-based design.)
+      if (isStatic() && isFinal()) {
+        try { return Option.some(boxForReceiver(null).value()); }
+        catch (WrappedException e) { return Option.none(); }
+      }
+      else { return Option.none(); }
+    }
     
     public Box<Object> boxForReceiver(final Object receiver) {
       return new Box<Object>() {

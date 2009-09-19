@@ -309,7 +309,7 @@ public class TypeNameChecker {
      */
     @Override public Type visit(GenericReferenceTypeName node) {
       Iterator<? extends IdentifierToken> ids = node.getIdentifiers().iterator();
-      Iterator<List<? extends TypeName>> allTargs = node.getTypeArguments().iterator();
+      Iterator<? extends List<? extends TypeName>> allTargs = node.getTypeArguments().iterator();
       String name = "";
       Type t = null;
       

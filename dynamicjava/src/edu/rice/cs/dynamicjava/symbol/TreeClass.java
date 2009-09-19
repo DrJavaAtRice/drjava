@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.LazyThunk;
 import edu.rice.cs.plt.lambda.Box;
+import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.iter.IterUtil;
 
@@ -317,6 +318,19 @@ public class TreeClass implements DJClass {
       return isInterface() ? Access.PUBLIC : extractAccessibility(_f.getModifiers());
     }
     public Access.Module accessModule() { return _accessModule; }
+    public Option<Object> constantValue() {
+      if (isFinal() && isStatic()) {
+        Expression init = _f.getInitializer();
+        if (init != null) {
+          if (NodeProperties.hasValue(init)) { return Option.some(NodeProperties.getValue(init)); }
+          // Since hasValue depends on the order of type checking, and the current order is
+          // naive, also allow values for literals that haven't yet been checked
+          // (this still produces incorrect results for non-literal, not-yet-checked constant expressions)
+          else if (init instanceof Literal) { return Option.some(((Literal) init).getValue()); }
+        }
+      }
+      return Option.none();
+    }
     public Box<Object> boxForReceiver(Object receiver) {
       return _loaded.value().boxForReceiver(receiver);
     }

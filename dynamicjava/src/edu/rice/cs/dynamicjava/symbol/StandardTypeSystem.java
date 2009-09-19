@@ -876,7 +876,9 @@ public abstract class StandardTypeSystem extends TypeSystem {
            isSubtype(t, DOUBLE_CLASS));
       }
       
-      private boolean isBooleanReference(Type t) { return !_opt.prohibitBoxing() && isSubtype(t, BOOLEAN_CLASS); }
+      private boolean isBooleanReference(Type t) {
+        return !_opt.prohibitBoxing() && isSubtype(t, BOOLEAN_CLASS) && !isSubtype(t, NULL);
+      }
       
       private Pair<Expression, Expression> checkForNumericE2() {
         return NodeProperties.getType(e2).apply(new TypeAbstractVisitor<Pair<Expression, Expression>>() {
