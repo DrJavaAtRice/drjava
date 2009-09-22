@@ -1675,11 +1675,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       _javaAPISet = _generateJavaAPISet(base, stripPrefix, suffix);
       
-      // add JUnit 3.8.2
-      Set<JavaAPIListEntry> junit382APIList = _generateJavaAPISet(DrJava.getConfig().getSetting(JUNIT_3_8_2_LINK) + "/",
-                                                                  "", // relative links
-                                                                  "/allclasses-junit3.8.2.html");
-      _javaAPISet.addAll(junit382APIList);
+      // add JUnit
+      Set<JavaAPIListEntry> junitAPIList = _generateJavaAPISet(DrJava.getConfig().getSetting(JUNIT_LINK) + "/",
+                                                               "", // relative links
+                                                               "/allclasses-junit4.4.html");
+      _javaAPISet.addAll(junitAPIList);
       
       // add additional Javadoc libraries
       for(String url: DrJava.getConfig().getSetting(JAVADOC_ADDITIONAL_LINKS)) {
@@ -3424,12 +3424,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
     };
     DrJava.getConfig().addOptionListener(JAVADOC_1_6_LINK, link16OptionListener);
-    OptionListener<String> link382OptionListener = new OptionListener<String>() {
+    OptionListener<String> linkJUnitOptionListener = new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oce) {
         _javaAPISet = null;
       }
     };
-    DrJava.getConfig().addOptionListener(JUNIT_3_8_2_LINK, link382OptionListener);
+    DrJava.getConfig().addOptionListener(JUNIT_LINK, linkJUnitOptionListener);
     OptionListener<Vector<String>> additionalLinkOptionListener = new OptionListener<Vector<String>>() {
       public void optionChanged(OptionEvent<Vector<String>> oce) {
         _javaAPISet = null;
@@ -8653,8 +8653,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       ScrollableListDialog<String> dialog = new ScrollableListDialog.Builder<String>()
         .setOwner(MainFrame.this)
         .setTitle("Files are Read-Only")
-        .setText("The following files could not be saved because they are read-only.\n"+
-                 "Do you want to overwrite them anyway?")
+        .setText("<html>The following files could not be saved because they are read-only.<br>"+
+                 "Do you want to overwrite them anyway?</html>")
         .setItems(filePaths)
         .setSelectedItems(filePaths)
         .setMessageType(JOptionPane.QUESTION_MESSAGE)
@@ -9153,8 +9153,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         ScrollableListDialog<OpenDefinitionsDocument> dialog = new ScrollableListDialog.Builder<OpenDefinitionsDocument>()
           .setOwner(MainFrame.this)
           .setTitle("Must Compile All Source Files to Run Unit Tests")
-          .setText("Before you can run unit tests, you must first compile all out of sync source files.\n"+
-                   "The files below are out of sync. Would you like to compile all files and\n"+
+          .setText("<html>Before you can run unit tests, you must first compile all out of sync source files.<br>"+
+                   "The files below are out of sync. Would you like to compile all files and<br>"+
                    "run the specified test(s)?")
           .setItems(outOfSync)
           .setMessageType(JOptionPane.QUESTION_MESSAGE)

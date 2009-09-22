@@ -893,9 +893,9 @@ public class ConfigFrame extends SwingFrame {
                                                  "Javadoc 1.6 URL", this,
                                                  "URL for the Java 1.6 API, for generating links to library classes."));
     addOptionComponent(panel, 
-                       new StringOptionComponent(OptionConstants.JUNIT_3_8_2_LINK,
-                                                 "JUnit 3.8.2 URL", this,
-                                                 "URL for the JUnit 3.8.2 API, for \"Open Java API Javadoc\"."));
+                       new StringOptionComponent(OptionConstants.JUNIT_LINK,
+                                                 "JUnit URL", this,
+                                                 "URL for the JUnit API, for \"Open Java API Javadoc\"."));
 
     VectorStringOptionComponent additionalJavadoc =
       new VectorStringOptionComponent(OptionConstants.JAVADOC_ADDITIONAL_LINKS, "Additional Javadoc URLs", this,
@@ -1156,11 +1156,6 @@ public class ConfigFrame extends SwingFrame {
                                                   this,
                                                   "Whether to clear the Console output after resetting the Interactions Pane."));
 
-    addOptionComponent(panel, 
-                       new BooleanOptionComponent(OptionConstants.FORCE_TEST_SUFFIX, 
-                                                  "Require test classes in projects to end in \"Test\"", 
-                                                  this,
-                                                  "Whether to force test classes in projects to end in \"Test\"."));
     addOptionComponent(panel, 
                        new BooleanOptionComponent(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE, 
                                                   "Focus on the definitions pane after find/replace", 
@@ -1740,6 +1735,12 @@ public class ConfigFrame extends SwingFrame {
     rtConcJUnitListener.value(junitLoc);
     processRTChangeListener.value(junitLoc);
     junitStatusChangeListener.value(junitLoc);
+    
+    addOptionComponent(panel, 
+                       new BooleanOptionComponent(OptionConstants.FORCE_TEST_SUFFIX, 
+                                                  "Require test classes in projects to end in \"Test\"", 
+                                                  this,
+                                                  "Whether to force test classes in projects to end in \"Test\"."));
     
     panel.displayComponents();
   }
