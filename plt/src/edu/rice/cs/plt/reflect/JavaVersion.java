@@ -135,6 +135,9 @@ public enum JavaVersion {
     
     String number;
     String typeString;
+    // if version doesn't start with "1." and has only one dot, prefix with "1."
+    // example: 6.0 --> 1.6.0
+    if ((!java_version.startsWith("1.")) && (java_version.replaceAll("[^\\.]","").length()==1)) java_version = "1."+java_version;
     int dash = java_version.indexOf('-');
     if (dash == -1) { number = java_version; typeString = null; }
     else { number = java_version.substring(0, dash); typeString = java_version.substring(dash+1); }
@@ -225,6 +228,15 @@ public enum JavaVersion {
     
     /** Get the major version associated with this full version */
     public JavaVersion majorVersion() { return _majorVersion; }
+    
+    /** Get the maintenance associated with this full version */
+    public int maintenance() { return _maintenance; }
+    
+    /** Get the update associated with this full version */
+    public int update() { return _update; }    
+    
+    /** Get the update associated with this full version */
+    public ReleaseType release() { return _type; }    
 
     /** Get the vendor associated with this full version */
     public VendorType vendor() { return _vendor; }
