@@ -10,6 +10,11 @@ public class LocalVariable implements Variable {
   private final Type _type;
   private final boolean _isFinal;
   
+  /**
+   * Create a local variable with the given name, type, and "final" modifier.  Until sophisticated
+   * control-flow analysis is implemented, variables that are declared final but uninitialized
+   * should be considered non-final.
+   */
   public LocalVariable(String name, Type type, boolean isFinal) {
     _name = name;
     _type = type;

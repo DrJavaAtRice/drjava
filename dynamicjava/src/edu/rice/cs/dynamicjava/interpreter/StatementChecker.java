@@ -278,13 +278,14 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
       return new LocalContext(context, v);
     }
     else {
+      boolean initialized = (node.getInitializer() != null);
       Type t = checkTypeName(node.getType());
-      LocalVariable v = new LocalVariable(node.getName(), t, node.getModifiers().isFinal());
+      LocalVariable v = new LocalVariable(node.getName(), t, initialized && node.getModifiers().isFinal());
       setVariable(node, v);
       setErasedType(node, ts.erasedClass(t));
       TypeContext newContext = new LocalContext(context, v);
       
-      if (node.getInitializer() != null) {
+      if (initialized) {
         Type initT = checkType(node.getInitializer(), t);
         try {
           Expression newInit = ts.assign(t, node.getInitializer());
