@@ -167,7 +167,7 @@ public abstract class DelegatingContext implements TypeContext {
    * convenience, delegating to a trivial instance of
    * {@link #getLocalFunctions(String, TypeSystem, Iterable)}.
    */
-  public Iterable<LocalFunction> getLocalFunctions(String name, TypeSystem ts) {
+  public final Iterable<LocalFunction> getLocalFunctions(String name, TypeSystem ts) {
     return getLocalFunctions(name, ts, IterUtil.<LocalFunction>empty());
   }
   
@@ -210,7 +210,7 @@ public abstract class DelegatingContext implements TypeContext {
   
   public DJClass getThis(Type expected, TypeSystem ts) { return _next.getThis(expected, ts); }
   
-  public boolean inConstructorBody() { return _next.inConstructorBody(); }
+  public DJClass initializingClass() { return _next.initializingClass(); }
   
   /**
    * The expected type of a {@code return} statement in the given context, or {@code null}

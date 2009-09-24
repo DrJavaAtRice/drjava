@@ -6,6 +6,8 @@ import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
 
 /** Represents a constructor declaration. */
 public interface DJConstructor extends Function, Access.Limited {
+  /** The class declaring this constructor.  May be null for certain special fields. */
+  public DJClass declaringClass();
   public Access accessibility();
   public Access.Module accessModule();
   /** Get the original declared constructor (prior to any substitutions, etc). */

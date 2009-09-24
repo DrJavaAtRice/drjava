@@ -7,6 +7,7 @@ import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
 import edu.rice.cs.dynamicjava.symbol.type.ClassType;
+import edu.rice.cs.dynamicjava.symbol.type.VariableType;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -37,20 +38,16 @@ public class ClassContext extends DelegatingContext {
     return new ClassContext(next, _c, _anonymousCounter);
   }
   
-  /** Test whether {@code name} is an in-scope top-level class, member class, or type variable */
+  // Class and type variable names:
+  
   @Override public boolean typeExists(String name, TypeSystem ts) {
     return hasMemberClass(name, ts) || super.typeExists(name, ts);
   }
   
-  /** Test whether {@code name} is an in-scope member class */
   @Override public boolean memberClassExists(String name, TypeSystem ts) {
     return hasMemberClass(name, ts) || super.memberClassExists(name, ts);
   }
   
-  /**
-   * Return the most inner type containing a class with the given name, or {@code null}
-   * if there is no such type.
-   */
   @Override public ClassType typeContainingMemberClass(String name, TypeSystem ts) throws AmbiguousNameException {
     debug.logStart(new String[]{"class","name"}, _c, name); try {
       
@@ -60,51 +57,78 @@ public class ClassContext extends DelegatingContext {
     } finally { debug.logEnd(); }
   }
   
+  @Override public boolean topLevelClassExists(String name, TypeSystem ts) {
+    return hasMemberClass(name, ts) ? false : super.topLevelClassExists(name, ts);
+  }
+  
+  @Override public DJClass getTopLevelClass(String name, TypeSystem ts) throws AmbiguousNameException {
+    return hasMemberClass(name, ts) ? null : super.getTopLevelClass(name, ts);
+  }
+  
+  @Override public boolean typeVariableExists(String name, TypeSystem ts) {
+    return hasMemberClass(name, ts) ? false : super.typeVariableExists(name, ts);
+  }
+  
+  @Override public VariableType getTypeVariable(String name, TypeSystem ts) {
+    return hasMemberClass(name, ts) ? null : super.getTypeVariable(name, ts);
+  }
+  
   private boolean hasMemberClass(String name, TypeSystem ts) {
     return ts.containsClass(_thisType, name, accessModule());
   }
+  
+  // Variable and field names:
 
-  /** Test whether {@code name} is an in-scope field or local variable */
   @Override public boolean variableExists(String name, TypeSystem ts) {
     return hasField(name, ts) || super.variableExists(name, ts);
   }
   
-  /** Test whether {@code name} is an in-scope field */
   @Override public boolean fieldExists(String name, TypeSystem ts) {
     return hasField(name, ts) || super.fieldExists(name, ts);
   }
   
-  /**
-   * Return the most inner type containing a field with the given name, or {@code null}
-   * if there is no such type.
-   */
   @Override public ClassType typeContainingField(String name, TypeSystem ts) throws AmbiguousNameException {
     if (hasField(name, ts)) { return _thisType; }
     else { return super.typeContainingField(name, ts); }
+  }
+  
+  @Override public boolean localVariableExists(String name, TypeSystem ts) {
+    return hasField(name, ts) ? false : super.localVariableExists(name, ts); 
+  }
+  
+  @Override public LocalVariable getLocalVariable(String name, TypeSystem ts) {
+    return hasField(name, ts) ? null : super.getLocalVariable(name, ts);
   }
   
   private boolean hasField(String name, TypeSystem ts) {
     return ts.containsField(_thisType, name, accessModule());
   }
   
-  /** Test whether {@code name} is an in-scope method or local function */
+  // Method and local function names:
+  
   @Override public boolean functionExists(String name, TypeSystem ts) {
     return hasMethod(name, ts) || super.functionExists(name, ts);
   }
   
-  /** Test whether {@code name} is an in-scope method */
   @Override public boolean methodExists(String name, TypeSystem ts) {
     return hasMethod(name, ts) || super.methodExists(name, ts);
   }
   
-  /**
-   * Return the most inner type containing a method with the given name, or {@code null}
-   * if there is no such type.
-   */
   @Override public Type typeContainingMethod(String name, TypeSystem ts) {
-    if (hasMethod(name, ts)) { return _thisType; }
-    else { return super.typeContainingMethod(name, ts); }
+    return hasMethod(name, ts) ? _thisType : super.typeContainingMethod(name, ts);
   }
+  
+  @Override public boolean localFunctionExists(String name, TypeSystem ts) {
+    return hasMethod(name, ts) ? false : super.localFunctionExists(name, ts);
+  }
+  
+  @Override public Iterable<LocalFunction> getLocalFunctions(String name, TypeSystem ts,
+                                                              Iterable<LocalFunction> partial) {
+    return !IterUtil.isEmpty(partial) || hasMethod(name, ts) ? partial : super.getLocalFunctions(name, ts, partial);
+  }
+  
+  
+  
   
   private boolean hasMethod(String name, TypeSystem ts) {
     return ts.containsMethod(_thisType, name, accessModule());
@@ -141,7 +165,7 @@ public class ClassContext extends DelegatingContext {
     else { return super.getThis(expected, ts); }
   }
   
-  @Override public boolean inConstructorBody() { return false; }
+  @Override public DJClass initializingClass() { return null; }
   
   /**
    * The expected type of a {@code return} statement in the given context, or {@code null}

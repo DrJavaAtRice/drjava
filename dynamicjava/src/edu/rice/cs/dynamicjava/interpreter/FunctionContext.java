@@ -3,6 +3,7 @@ package edu.rice.cs.dynamicjava.interpreter;
 import edu.rice.cs.plt.iter.IterUtil;
 
 import edu.rice.cs.dynamicjava.symbol.*;
+import edu.rice.cs.dynamicjava.symbol.type.ClassType;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -13,7 +14,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  */
 public class FunctionContext extends DelegatingContext {
   
-  private Function _f;
+  private final Function _f;
   
   public FunctionContext(TypeContext next, Function f) {
     super(next);
@@ -35,6 +36,14 @@ public class FunctionContext extends DelegatingContext {
   @Override public LocalVariable getLocalVariable(String name, TypeSystem ts) {
     LocalVariable result = getParameter(name);
     return result == null ? super.getLocalVariable(name, ts) : result;
+  }
+  
+  @Override public boolean fieldExists(String name, TypeSystem ts) {
+    return (getParameter(name) == null) ? super.fieldExists(name, ts) : false;
+  }
+  
+  @Override public ClassType typeContainingField(String name, TypeSystem ts) throws AmbiguousNameException {
+    return (getParameter(name) == null) ? super.typeContainingField(name, ts) : null;
   }
   
   private LocalVariable getParameter(String name) {
@@ -61,6 +70,14 @@ public class FunctionContext extends DelegatingContext {
     else { return partial; }
   }
   
+  @Override public boolean methodExists(String name, TypeSystem ts) {
+    return isLocalFunction(name) ? false : super.methodExists(name, ts);
+  }
+  
+  @Override public Type typeContainingMethod(String name, TypeSystem ts) {
+    return isLocalFunction(name) ? null : super.typeContainingMethod(name, ts);
+  }
+  
   private boolean isLocalFunction(String name) {
     return (_f instanceof LocalFunction) && ((LocalFunction) _f).declaredName().equals(name);
   }
@@ -84,7 +101,9 @@ public class FunctionContext extends DelegatingContext {
     else { return super.getThis(expected, ts); }
   }
   
-  @Override public boolean inConstructorBody() { return _f instanceof DJConstructor; }
+  @Override public DJClass initializingClass() {
+    return (_f instanceof DJConstructor) ? ((DJConstructor) _f).declaringClass() : null;
+  }
   
   @Override public Type getReturnType() {
     if (_f instanceof LocalFunction) { return ((LocalFunction) _f).returnType(); }

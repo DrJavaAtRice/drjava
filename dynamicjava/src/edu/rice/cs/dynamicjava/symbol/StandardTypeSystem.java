@@ -2214,6 +2214,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   
   private static abstract class DelegatingMethod extends DelegatingFunction<DJMethod> implements DJMethod {
     protected DelegatingMethod(DJMethod delegate) { super(delegate); }
+    public DJClass declaringClass() { return _delegate.declaringClass(); }
     public boolean isStatic() { return _delegate.isStatic(); }
     public boolean isAbstract() { return _delegate.isAbstract(); }
     public boolean isFinal() { return _delegate.isFinal(); }
@@ -2257,6 +2258,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   private static abstract class DelegatingConstructor extends DelegatingFunction<DJConstructor>
                                                       implements DJConstructor {
     protected DelegatingConstructor(DJConstructor delegate) { super(delegate); }
+    public DJClass declaringClass() { return _delegate.declaringClass(); }
     public Type returnType() { return _delegate.returnType(); }
     public Access accessibility() { return _delegate.accessibility(); }
     public Access.Module accessModule() { return _delegate.accessModule(); }

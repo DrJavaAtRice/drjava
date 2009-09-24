@@ -26,7 +26,7 @@ public class ClassSignatureContext extends DelegatingContext {
   }
   
   /** Test whether {@code name} is an in-scope top-level class, member class, or type variable */
-  public boolean typeExists(String name, TypeSystem ts) {
+  @Override public boolean typeExists(String name, TypeSystem ts) {
     return matchesClass(name) || matchesTypeVariable(name) || super.typeExists(name, ts);
   }
   

@@ -161,6 +161,7 @@ public class JavaClass implements DJClass {
     protected final Field _f;
     public JavaField(Field f) { _f = f; }
     public String declaredName() { return _f.getName(); }
+    public DJClass declaringClass() { return JavaClass.this; }
     public Type type() { return classAsType(_f.getType()); }
     public boolean isFinal() { return Modifier.isFinal(_f.getModifiers()); }
     public boolean isStatic() { return Modifier.isStatic(_f.getModifiers()); }
@@ -253,6 +254,7 @@ public class JavaClass implements DJClass {
     }
     
     public String declaredName() { return JavaClass.this.declaredName(); }
+    public DJClass declaringClass() { return JavaClass.this; }
     public Access accessibility() { return extractAccessibility(_k.getModifiers()); }
     public Access.Module accessModule() { return JavaClass.this.accessModule(); }
     protected Thunk<Iterable<LocalVariable>> makeParamThunk() { return paramFactory(_k.getParameterTypes()); }
@@ -319,6 +321,7 @@ public class JavaClass implements DJClass {
     public JavaMethod(Method m) { _m = m; _params = makeParamThunk(); /* allows overriding */ }
     protected Thunk<Iterable<LocalVariable>> makeParamThunk() { return paramFactory(_m.getParameterTypes()); }
     public String declaredName() { return _m.getName(); }
+    public DJClass declaringClass() { return JavaClass.this; }
     public boolean isStatic() { return Modifier.isStatic(_m.getModifiers()); }
     public boolean isAbstract() { return Modifier.isAbstract(_m.getModifiers()); }
     public boolean isFinal() { return Modifier.isFinal(_m.getModifiers()); }

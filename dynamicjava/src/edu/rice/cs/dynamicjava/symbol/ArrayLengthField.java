@@ -14,6 +14,7 @@ public class ArrayLengthField implements DJField {
   private ArrayLengthField() {}
   
   public String declaredName() { return "length"; }
+  public DJClass declaringClass() { return null; }
   public Type type() { return TypeSystem.INT; }
   public boolean isFinal() { return true; }
   public boolean isStatic() { return false; }

@@ -3,6 +3,8 @@ package edu.rice.cs.dynamicjava.interpreter;
 import edu.rice.cs.dynamicjava.symbol.DJClass;
 import edu.rice.cs.dynamicjava.symbol.Library;
 import edu.rice.cs.dynamicjava.symbol.TypeSystem;
+import edu.rice.cs.dynamicjava.symbol.type.ClassType;
+import edu.rice.cs.dynamicjava.symbol.type.VariableType;
 import edu.rice.cs.plt.iter.IterUtil;
 
 /** A context that can access top-level classes from a {@link Library}. */
@@ -23,19 +25,14 @@ public class LibraryContext extends DelegatingContext {
     return new LibraryContext(next, _library);
   }
 
-  /** Test whether {@code name} is an in-scope top-level class, member class, or type variable */
   @Override public boolean typeExists(String name, TypeSystem ts) {
-    return !(IterUtil.isEmpty(_library.declaredClasses(name))) ||
-           super.typeExists(name, ts);
+    return hasClass(name) || super.typeExists(name, ts);
   }
   
-  /** Test whether {@code name} is an in-scope top-level class */
   @Override public boolean topLevelClassExists(String name, TypeSystem ts) {
-    return !(IterUtil.isEmpty(_library.declaredClasses(name))) ||
-           super.topLevelClassExists(name, ts);
+    return hasClass(name) || super.topLevelClassExists(name, ts);
   }
   
-  /** Return the top-level class with the given name, or {@code null} if it does not exist. */
   @Override public DJClass getTopLevelClass(String name, TypeSystem ts) throws AmbiguousNameException {
     Iterable<DJClass> matches = _library.declaredClasses(name);
     int size = IterUtil.sizeOf(matches, 2);
@@ -44,6 +41,26 @@ public class LibraryContext extends DelegatingContext {
       case 1: return IterUtil.first(matches);
       default: throw new AmbiguousNameException();
     }
+  }
+  
+  @Override public boolean memberClassExists(String name, TypeSystem ts) {
+    return hasClass(name) ? false : super.memberClassExists(name, ts);
+  }
+  
+  @Override public ClassType typeContainingMemberClass(String name, TypeSystem ts) throws AmbiguousNameException {
+    return hasClass(name) ? null : super.typeContainingMemberClass(name, ts);
+  }
+  
+  @Override public boolean typeVariableExists(String name, TypeSystem ts) {
+    return hasClass(name) ? false : super.typeVariableExists(name, ts);
+  }
+  
+  @Override public VariableType getTypeVariable(String name, TypeSystem ts) {
+    return hasClass(name) ? null : super.getTypeVariable(name, ts);
+  }
+
+  private boolean hasClass(String name) {
+    return !IterUtil.isEmpty(_library.declaredClasses(name));
   }
   
   @Override public ClassLoader getClassLoader() { return _library.classLoader(); }

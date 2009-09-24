@@ -1656,17 +1656,17 @@ public class ExpressionChecker {
       if (!hasVariableType(left)) {
         throw new ExecutionError("left.expression", node);
       }
-      if (!context.inConstructorBody()) {
-        if (hasVariable(left) && getVariable(left).isFinal()) {
-          setErrorStrings(node, getVariable(left).declaredName());
-          throw new ExecutionError("cannot.modify", node);
-        }
-        else if (hasField(left) && getField(left).isFinal()) {
+      if (hasVariable(left) && getVariable(left).isFinal()) {
+        setErrorStrings(node, getVariable(left).declaredName());
+        throw new ExecutionError("cannot.modify", node);
+      }
+      if (hasField(left) && getField(left).isFinal()) {
+        DJClass initializing = context.initializingClass();
+        if (initializing == null || !initializing.equals(getField(left).declaringClass())) {
           setErrorStrings(node, getField(left).declaredName());
           throw new ExecutionError("cannot.modify", node);
         }
-      }
-      
+      }      
       Type target = getVariableType(left);
       Type rightT = check(node.getRightExpression(), target);
       try {

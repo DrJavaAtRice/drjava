@@ -311,6 +311,7 @@ public class TreeClass implements DJClass {
       });
     }
     public String declaredName() { return _f.getName(); }
+    public DJClass declaringClass() { return TreeClass.this; }
     public Type type() { return NodeProperties.getType(_f.getType()); }
     public boolean isFinal() { return _f.getModifiers().isFinal() || isInterface(); }
     public boolean isStatic() { return _f.getModifiers().isStatic() || isInterface(); }
@@ -364,6 +365,7 @@ public class TreeClass implements DJClass {
     }
     
     public String declaredName() { return TreeClass.this.declaredName(); }
+    public DJClass declaringClass() { return TreeClass.this; }
     public Access.Module accessModule() { return _accessModule; }
     public Type returnType() { return SymbolUtil.thisType(TreeClass.this); }
     
@@ -435,6 +437,7 @@ public class TreeClass implements DJClass {
     }
     
     public String declaredName() { return _m.getName(); }
+    public DJClass declaringClass() { return TreeClass.this; }
     public boolean isStatic() { return _m.getModifiers().isStatic(); }
     public boolean isAbstract() { return _m.getModifiers().isAbstract() || isInterface(); }
     public boolean isFinal() { return _m.getModifiers().isFinal(); }

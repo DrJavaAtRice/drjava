@@ -141,8 +141,8 @@ public interface TypeContext {
    */
   public DJClass getThis(Type expected, TypeSystem ts);
   
-  /** Whether this is immediately within a constructor body. */
-  public boolean inConstructorBody();
+  /** Class which is being initialized (via a constructor or initialization block); {@code null} otherwise. */
+  public DJClass initializingClass();
   
   /**
    * The expected type of a {@code return} statement in the given context, or {@code null}
