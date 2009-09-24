@@ -33,7 +33,7 @@ public final class DynamicJava {
         catch (InterpreterException e) { e.printUserMessage(); debug.log(e); }
         catch (RuntimeException e) {
           System.out.println("INTERNAL ERROR: Uncaught exception");
-          e.printStackTrace();
+          e.printStackTrace(System.out);
         }
         System.out.println();
       }

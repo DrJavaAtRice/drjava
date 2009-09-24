@@ -141,6 +141,9 @@ public interface TypeContext {
    */
   public DJClass getThis(Type expected, TypeSystem ts);
   
+  /** Whether this is immediately within a constructor body. */
+  public boolean inConstructorBody();
+  
   /**
    * The expected type of a {@code return} statement in the given context, or {@code null}
    * if {@code return} statements should not appear here.

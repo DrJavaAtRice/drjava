@@ -141,6 +141,8 @@ public class ClassContext extends DelegatingContext {
     else { return super.getThis(expected, ts); }
   }
   
+  @Override public boolean inConstructorBody() { return false; }
+  
   /**
    * The expected type of a {@code return} statement in the given context, or {@code null}
    * if {@code return} statements should not appear here.

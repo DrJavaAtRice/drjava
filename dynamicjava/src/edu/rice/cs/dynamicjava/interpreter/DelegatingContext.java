@@ -210,6 +210,8 @@ public abstract class DelegatingContext implements TypeContext {
   
   public DJClass getThis(Type expected, TypeSystem ts) { return _next.getThis(expected, ts); }
   
+  public boolean inConstructorBody() { return _next.inConstructorBody(); }
+  
   /**
    * The expected type of a {@code return} statement in the given context, or {@code null}
    * if {@code return} statements should not appear here.

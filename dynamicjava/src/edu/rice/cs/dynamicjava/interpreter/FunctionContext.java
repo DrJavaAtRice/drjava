@@ -84,6 +84,8 @@ public class FunctionContext extends DelegatingContext {
     else { return super.getThis(expected, ts); }
   }
   
+  @Override public boolean inConstructorBody() { return _f instanceof DJConstructor; }
+  
   @Override public Type getReturnType() {
     if (_f instanceof LocalFunction) { return ((LocalFunction) _f).returnType(); }
     else if (_f instanceof DJMethod) { return ((DJMethod) _f).returnType(); }

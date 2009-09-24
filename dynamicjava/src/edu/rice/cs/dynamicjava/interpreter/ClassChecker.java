@@ -263,8 +263,8 @@ public class ClassChecker {
     @Override public Void visit(ConstructorDeclaration node) {
       DJConstructor k = getConstructor(node);
       if (_c.isAnonymous() || !_c.declaredName().equals(node.getName())) {
-        setErrorStrings(node, SymbolUtil.shortName(_c));
-        throw new ExecutionError("constructor.name");
+        setErrorStrings(node, node.getName());
+        throw new ExecutionError("constructor.name", node);
       }
       
       TypeContext sigContext = new FunctionSignatureContext(_bodyContext, k);

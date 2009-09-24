@@ -37,6 +37,7 @@ public class BaseContext implements TypeContext {
   public TypeContext importStaticMembers(DJClass c) { throw new UnsupportedOperationException(); }
   public TypeContext importTopLevelClass(DJClass c) { throw new UnsupportedOperationException(); }
   public TypeContext importTopLevelClasses(String pkg) { throw new UnsupportedOperationException(); }
+  public boolean inConstructorBody() { return false; }
   public boolean localFunctionExists(String name, TypeSystem ts) { return false; }
   public boolean localVariableExists(String name, TypeSystem ts) { return false; }
   public String makeAnonymousClassName() { throw new UnsupportedOperationException(); }

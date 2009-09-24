@@ -253,7 +253,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
         catch (InvalidTypeArgumentException e) { throw new RuntimeException("can't create raw type"); }
         catch (UnmatchedLookupException e) {
           setErrorStrings(node, piece);
-          if (e.matches() > 1) { throw new ExecutionError("ambiguous.inner.class"); }
+          if (e.matches() > 1) { throw new ExecutionError("ambiguous.inner.class", node); }
           else { throw new ExecutionError("no.such.inner.class", node); }
         }
       }

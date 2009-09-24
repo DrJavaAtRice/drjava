@@ -85,7 +85,7 @@ public class LocalizedMessageReader {
               numb += c;
             } while (++i < rawMessage.length());
             int n = Integer.parseInt(numb);
-            result += strings[n];
+            result += (n < strings.length) ? strings[n] : "%"+n;
           }
         } else {
           result += c;

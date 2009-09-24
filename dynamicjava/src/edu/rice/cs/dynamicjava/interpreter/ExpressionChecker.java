@@ -343,10 +343,12 @@ public class ExpressionChecker {
         Expression resolvedExp = (Expression) resolved;
         resolvedExp.acceptVisitor(this);
         setTranslation(node, resolvedExp);
-        // VARIABLE_TYPE and TYPE properties are important in the enclosing context; others
-        // (such as FIELD) are not, and need not be copied to the AmbiguousName
+        // VARIABLE_TYPE, TYPE, FIELD, and VARIABLE properties are important in the enclosing context;
+        // others are not, and need not be copied to the AmbiguousName
         if (hasVariableType(resolvedExp)) { setVariableType(node, getVariableType(resolvedExp)); }
         if (hasValue(resolvedExp)) { setValue(node, getValue(resolvedExp)); }
+        if (hasField(resolvedExp)) { setField(node, getField(resolvedExp)); }
+        if (hasVariable(resolvedExp)) { setVariable(node, getVariable(resolvedExp)); }
         return setType(node, getType(resolvedExp));
       }
     }
@@ -1654,9 +1656,15 @@ public class ExpressionChecker {
       if (!hasVariableType(left)) {
         throw new ExecutionError("left.expression", node);
       }
-      if (hasVariable(left) && getVariable(left).isFinal() ||
-          hasField(left) && getField(left).isFinal()) {
-        throw new ExecutionError("cannot.modify", node);
+      if (!context.inConstructorBody()) {
+        if (hasVariable(left) && getVariable(left).isFinal()) {
+          setErrorStrings(node, getVariable(left).declaredName());
+          throw new ExecutionError("cannot.modify", node);
+        }
+        else if (hasField(left) && getField(left).isFinal()) {
+          setErrorStrings(node, getField(left).declaredName());
+          throw new ExecutionError("cannot.modify", node);
+        }
       }
       
       Type target = getVariableType(left);

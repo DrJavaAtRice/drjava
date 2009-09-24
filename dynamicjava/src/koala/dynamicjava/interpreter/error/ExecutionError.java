@@ -75,22 +75,6 @@ public class ExecutionError extends Error {
   private String rawMessage;
   
   /**
-   * Constructs an <code>ExecutionError</code> with no detail message. 
-   */
-  public ExecutionError() {
-    this("");
-  }
-  
-  /**
-   * Constructs an <code>ExecutionError</code> with the specified 
-   * detail message. 
-   * @param s the detail message (a key in a resource file).
-   */
-  public ExecutionError(String s) {
-    this(s, null);
-  }
-  
-  /**
    * Constructs an <code>ExecutionError</code> with the specified 
    * detail message, filename, line and column. 
    * @param s  the detail message (a key in a resource file).
@@ -154,10 +138,8 @@ public class ExecutionError extends Error {
    * Returns the error message string of this exception
    */
   public String getMessage() {
-    return reader.getMessage(rawMessage,
-                             node != null &&
-                             node.hasProperty(NodeProperties.ERROR_STRINGS)
-                               ? (String[])node.getProperty(NodeProperties.ERROR_STRINGS)
-                               : null);
+    String [] args = new String[0];
+    if (node != null && NodeProperties.hasErrorStrings(node)) { args = NodeProperties.getErrorStrings(node); }
+    return reader.getMessage(rawMessage, args);
   }
 }
