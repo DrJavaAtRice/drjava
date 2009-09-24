@@ -106,9 +106,8 @@ public class FunctionContext extends DelegatingContext {
   }
   
   @Override public Type getReturnType() {
-    if (_f instanceof LocalFunction) { return ((LocalFunction) _f).returnType(); }
-    else if (_f instanceof DJMethod) { return ((DJMethod) _f).returnType(); }
-    else { return null; }
+    if (_f instanceof DJConstructor) { return TypeSystem.VOID; }
+    else { return _f.returnType(); }
   }
   
   @Override public Iterable<Type> getDeclaredThrownTypes() { return _f.thrownTypes(); }
