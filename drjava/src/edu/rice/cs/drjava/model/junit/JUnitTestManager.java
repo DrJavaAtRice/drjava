@@ -197,9 +197,8 @@ public class JUnitTestManager {
     */
   private boolean _isJUnitTest(Class<?> c) {
 
-    boolean result = (Test.class.isAssignableFrom(c) && !Modifier.isAbstract(c.getModifiers()) && 
-      !Modifier.isInterface(c.getModifiers()) ||
-      (new JUnit4TestAdapter(c).getTests().size()>1)) && !new JUnit4TestAdapter(c).getTests().get(0).toString().contains("initializationError")
+    boolean result = (Test.class.isAssignableFrom(c) && !Modifier.isAbstract(c.getModifiers()) && !Modifier.isInterface(c.getModifiers()) ||
+      (new JUnit4TestAdapter(c).getTests().size()>0)) && !new JUnit4TestAdapter(c).getTests().get(0).toString().contains("initializationError")
       ; //had to add specific check for initializationError. Is there a better way of checking if a class contains a test?
     debug.logValues(new String[]{"c", "isJUnitTest(c)"}, c, result);
     return result;
