@@ -194,7 +194,7 @@ public class TreeClass implements DJClass {
   
   public boolean isStatic() {
     if (_declaring == null) { return false; }
-    else { return _declaring.isInterface() || _ast instanceof EnumDeclaration || _mods.isStatic(); }
+    else { return _declaring.isInterface() || isInterface() || _ast instanceof EnumDeclaration || _mods.isStatic(); }
   }
   public boolean isAbstract() { return _mods.isAbstract(); }
   public boolean isFinal() { return _mods.isFinal(); }

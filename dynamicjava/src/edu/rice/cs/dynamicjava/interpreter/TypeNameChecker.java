@@ -277,22 +277,32 @@ public class TypeNameChecker {
             }
           }
         }
-        catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
+        catch (AmbiguousNameException e) {
+          setErrorStrings(node, name);
+          throw new ExecutionError("ambiguous.name", node);
+        }
         catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
         catch (UnmatchedLookupException e) {
           if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
-          else { throw new ExecutionError("ambiguous.name", node); }
+          else {
+            setErrorStrings(node, name);
+            throw new ExecutionError("ambiguous.name", node);
+          }
         }
       }
       while (ids.hasNext()) {
+        String nextId = ids.next().image();
         try {
-          ClassType memberType = ts.lookupClass(t, ids.next().image(), IterUtil.<Type>empty(), context.accessModule());
+          ClassType memberType = ts.lookupClass(t, nextId, IterUtil.<Type>empty(), context.accessModule());
           t = memberType;
         }
         catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
         catch (UnmatchedLookupException e) {
           if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
-          else { throw new ExecutionError("ambiguous.name", node); }
+          else {
+            setErrorStrings(node, nextId);
+            throw new ExecutionError("ambiguous.name", node);
+          }
         }
       }
       
@@ -336,24 +346,34 @@ public class TypeNameChecker {
             t = context.getTypeVariable(name, ts);
           }
         }
-        catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
+        catch (AmbiguousNameException e) {
+          setErrorStrings(node, name);
+          throw new ExecutionError("ambiguous.name", node);
+        }
         catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
         catch (UnmatchedLookupException e) {
           if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
-          else { throw new ExecutionError("ambiguous.name", node); }
+          else {
+            setErrorStrings(node, name);
+            throw new ExecutionError("ambiguous.name", node);
+          }
         }
       }
       
       while (ids.hasNext()) {
+        String nextId = ids.next().image();
         try {
           Iterable<Type> targs = checkStructureForList(allTargs.next());
-          ClassType memberType = ts.lookupClass(t, ids.next().image(), targs, context.accessModule());
+          ClassType memberType = ts.lookupClass(t, nextId, targs, context.accessModule());
           t = memberType;
         }
         catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument", node); }
         catch (UnmatchedLookupException e) {
           if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
-          else { throw new ExecutionError("ambiguous.name", node); }
+          else {
+            setErrorStrings(node, nextId);
+            throw new ExecutionError("ambiguous.name", node);
+          }
         }
       }
       

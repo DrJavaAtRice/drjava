@@ -401,11 +401,17 @@ public class ExpressionChecker {
             }
           }
         }
-        catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
+        catch (AmbiguousNameException e) {
+          setErrorStrings(node, className);
+          throw new ExecutionError("ambiguous.name", node);
+        }
         catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
         catch (UnmatchedLookupException e) {
           if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
-          else { throw new ExecutionError("ambiguous.name", node); }
+          else {
+            setErrorStrings(node, className);
+            throw new ExecutionError("ambiguous.name", node);
+          }
         }
         
         // Append member names until a field is encountered (or until all names are used up)
@@ -427,7 +433,10 @@ public class ExpressionChecker {
             catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
             catch (UnmatchedLookupException e) {
               if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
-              else { throw new ExecutionError("ambiguous.name", node); }
+              else {
+                setErrorStrings(node, memberName.image());
+                throw new ExecutionError("ambiguous.name", node);
+              }
             }
             // TODO: Improve error when memberName is a non-static class
           }
@@ -530,10 +539,16 @@ public class ExpressionChecker {
         addRuntimeCheck(node, result, ref.field().type());
         return setType(node, result);
       }
-      catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
+      catch (AmbiguousNameException e) {
+        setErrorStrings(node, node.getFieldName());
+        throw new ExecutionError("ambiguous.name", node);
+      }
       catch (UnmatchedLookupException e) {
         if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
-        else { throw new ExecutionError("ambiguous.name", node); }
+        else {
+          setErrorStrings(node, node.getFieldName());
+          throw new ExecutionError("ambiguous.name", node);
+        }
       }
     }
     

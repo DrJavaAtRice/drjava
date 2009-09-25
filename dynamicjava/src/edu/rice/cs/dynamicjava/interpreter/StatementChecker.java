@@ -227,7 +227,10 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
           }
           else { return context.importTopLevelClass(c); }
         }
-        catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
+        catch (AmbiguousNameException e) {
+          setErrorStrings(node, node.getName());
+          throw new ExecutionError("ambiguous.name", node);
+        }
       }
       
     }
@@ -246,7 +249,10 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
           DJClass c = context.getTopLevelClass(topLevelName, ts);
           result = (c == null) ? null : ts.makeClassType(c);
         }
-        catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
+        catch (AmbiguousNameException e) {
+          setErrorStrings(node, topLevelName);
+          throw new ExecutionError("ambiguous.name", node);
+        }
       }
       else {
         try { result = ts.lookupClass(result, piece, IterUtil.<Type>empty(), context.accessModule()); }

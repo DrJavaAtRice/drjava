@@ -83,6 +83,7 @@ public class ExecutionError extends Error {
   public ExecutionError(String s, Node n) {
     rawMessage = s;
     node       = n;
+    getMessage(); // ensure that s is valid while we have a useful stack trace
   }
   
   public ExecutionError(Throwable thrown) {
