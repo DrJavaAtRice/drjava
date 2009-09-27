@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.model.compiler;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.io.File;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.plt.reflect.JavaVersion;
@@ -72,5 +73,8 @@ public abstract class JavacCompiler implements CompilerInterface {
   public String getDescription() { return getName() + " from " + _location; }
   
   public String toString() { return getName(); }
-
+  
+  /** A compiler can instruct DrJava to include additional elements for the boot
+    * class path of the Interactions JVM. This isn't necessary for the Java compilers, though. */
+  public List<File> additionalBootClassPathForInteractions() { return new ArrayList<File>(); }
 }

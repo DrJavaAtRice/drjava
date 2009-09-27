@@ -128,7 +128,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   public File location() { return _location; }
   public List<File> bootClassPath() { return new ArrayList<File>(_bootClassPath); }
   
-  public String toString() { return super.toString() + " at " + _location; }
+  public String toString() { return super.toString() + " at " + _location + "\n" + bootClassPath(); }
 
   /** Create a JarJDKToolsLibrary from a specific {@code "tools.jar"} or {@code "classes.jar"} file. */
   public static JarJDKToolsLibrary makeFromFile(File f, GlobalModel model) {
@@ -179,7 +179,6 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
 
         try {
           Class<?>[] sig = { FullVersion.class, String.class, List.class };
-          msg("JarJDKToolsLibrary bootClassPath: "+((bootClassPath!=null)?IOUtil.pathToString(bootClassPath):"n/a"));
           Object[] args = { version, f.toString(), bootClassPath };
           CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadLibraryAdapter(loader, path, compilerAdapter, 
                                                                                          sig, args);
@@ -403,9 +402,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
                                                  LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("\\d+\\.\\d+\\.\\d+"),
                                                                IOUtil.regexCanonicalCaseFilePredicate("java.*")));
     for (File root : roots) {
-      msg("root: "+root);
       for (File subdir : IOUtil.attemptListFilesAsIterable(root, subdirFilter)) {
-        msg("\tsubdir: "+subdir);
         addIfFile(new File(subdir, "lib/tools.jar"), jars);
         addIfFile(new File(subdir, "Classes/classes.jar"), jars);
       }
@@ -448,24 +445,15 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     Iterable<JarJDKToolsLibrary> collapsed = IterUtil.reverse(IterUtil.collapse(results.values()));
     Iterable<JarJDKToolsLibrary> mintCollapsed = IterUtil.reverse(IterUtil.collapse(mintResults.values()));
     
-    for(JarJDKToolsLibrary javaLib: collapsed) {
-      msg("JDK: "+javaLib.version());
-    }
-    for(JarJDKToolsLibrary mintLib: mintCollapsed) {
-      msg("Mint: "+mintLib.version());
-    }
-    
     Map<FullVersion, Iterable<JarJDKToolsLibrary>> javaMintResults =
       new TreeMap<FullVersion, Iterable<JarJDKToolsLibrary>>();
     // now we have the JDK libraries in collapsed and the Mint libraries in mintCollapsed
     for(JarJDKToolsLibrary mintLib: mintCollapsed) {
       FullVersion mintVersion = mintLib.version();
-      msg("Mint version "+mintVersion.majorVersion()+": "+mintVersion);
       JarJDKToolsLibrary found = null;
       // try to find a JDK in results that matches mintVersion exactly, except for vendor
       for(JarJDKToolsLibrary javaLib: collapsed) {
         FullVersion javaVersion = javaLib.version();
-        msg("\tlooking for exact version: Java version "+javaVersion.majorVersion()+": "+javaVersion);
         if ((javaVersion.majorVersion().equals(mintVersion.majorVersion())) &&
             (javaVersion.maintenance()==mintVersion.maintenance()) &&
             (javaVersion.update()==mintVersion.update()) &&
@@ -478,7 +466,6 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       if (found==null) {
         for(JarJDKToolsLibrary javaLib: collapsed) {
           FullVersion javaVersion = javaLib.version();
-          msg("\tlooking for major version Java version "+javaVersion.majorVersion()+": "+javaVersion);
           if (javaVersion.majorVersion().equals(mintVersion.majorVersion())) {
             found = javaLib;
             break;
@@ -487,7 +474,6 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       }
       // if we found a JDK, then create a new Mint library
       if (found!=null) {
-        msg("\t#### picked "+found.version());
         JarJDKToolsLibrary lib = makeFromFile(mintLib.location(), model, found.bootClassPath());
         if (lib.isValid()) {
           FullVersion v = lib.version();
@@ -496,35 +482,18 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         }
       }
     }
-    Iterable<JarJDKToolsLibrary> composed =
-      IterUtil.compose(collapsed,IterUtil.reverse(IterUtil.collapse(javaMintResults.values())));
-
-    for(JarJDKToolsLibrary composedLib: composed) {
-      msg("Composed: "+composedLib.version());
-    }
-    return composed;
+    return IterUtil.compose(collapsed,IterUtil.reverse(IterUtil.collapse(javaMintResults.values())));
   }
   
   /** Add a canonicalized {@code f} to the given set if it is an existing directory or link */
   private static void addIfDir(File f, Set<? super File> set) {
     f = IOUtil.attemptCanonicalFile(f);
-    if (IOUtil.attemptIsDirectory(f)) { set.add(f); msg("added: directory "+f); }
+    if (IOUtil.attemptIsDirectory(f)) { set.add(f); }
   }
   
   /** Add a canonicalized {@code f} to the given set if it is an existing file */
   private static void addIfFile(File f, Set<? super File> set) {
     f = IOUtil.attemptCanonicalFile(f);
-    msg("checking file "+f);
-    if (IOUtil.attemptIsFile(f)) { set.add(f); msg("\tadded"); }
-  }
-
-  public static void msg(String s) {
-    try {
-      java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(new File(new File(System.getProperty("user.home")),
-                                                                                       "mintcompiler.txt").getAbsolutePath(),true));
-      pw.println(s);
-      pw.close();
-    }
-    catch(IOException ioe) { }
+    if (IOUtil.attemptIsFile(f)) { set.add(f); }
   }
 }

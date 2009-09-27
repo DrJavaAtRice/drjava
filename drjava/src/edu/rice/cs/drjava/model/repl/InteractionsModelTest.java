@@ -51,6 +51,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.util.List;
+import java.util.ArrayList;
 
 import java.rmi.RemoteException;
 
@@ -696,6 +698,10 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     public void addExternalFilesClassPath(File path) { fail("cannot add to classpath in a test"); }
     public void addExtraClassPath(File path) { fail("cannot add to classpath in a test"); }
     protected void _resetInterpreter(File wd, boolean force) { fail("cannot reset interpreter in a test"); }
+    public List<File> getCompilerBootClassPath() {
+      // TODO: figure out what to do here
+      return new ArrayList<File>();
+    }
     
     public void _notifyInteractionStarted() { }
     protected void _notifySyntaxErrorOccurred(int offset, int length) { }
@@ -826,6 +832,11 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     
     public boolean isContinuationException() { return continuationException; }
     public boolean isSyntaxException() { return syntaxException; }
+    
+    public List<File> getCompilerBootClassPath() {
+      // TODO: figure out what to do here      
+      return new ArrayList<File>();
+    }
   }
   
 //  public class TestInteractionsListener extends DummyInteractionsListener {

@@ -220,4 +220,9 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
    return (LLSTM.replaceStackTrace(stackTrace,files));
   }  
   
+  /** A compiler can instruct DrJava to include additional elements for the boot
+    * class path of the Interactions JVM. */
+  public List<File> getCompilerBootClassPath() {
+    return _model.getCompilerModel().getActiveCompiler().additionalBootClassPathForInteractions();
+  }
 }

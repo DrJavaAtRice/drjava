@@ -59,6 +59,7 @@ import javax.annotation.processing.Processor;
 
 import java.io.*;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.LinkedList;
 import java.util.Iterator;
@@ -92,7 +93,7 @@ public class MintCompiler extends JavacCompiler {
       try {
         // edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("jdk160.txt",true);
         // LOG.log("Filtering exe files from classpath.");
-        InputStream is = Javac160Compiler.class.getResourceAsStream("/junit.jar");
+        InputStream is = MintCompiler.class.getResourceAsStream("/junit.jar");
         if (is!=null) {
           // LOG.log("\tjunit.jar found");
           _tempJUnit = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile(PREFIX,SUFFIX);
@@ -145,6 +146,13 @@ public class MintCompiler extends JavacCompiler {
   }
 
   public String getName() { return "Mint " + _version.versionString(); }
+  
+  /** A compiler can instruct DrJava to include additional elements for the boot
+    * class path of the Interactions JVM. This is necessary for the Mint compiler,
+    * since the Mint compiler needs to be invoked at runtime. */
+  public java.util.List<File> additionalBootClassPathForInteractions() {
+    return Arrays.asList(new File(_location));
+  }
 
   public boolean isAvailable() {
     try {
@@ -190,11 +198,6 @@ public class MintCompiler extends JavacCompiler {
     debug.logValues(new String[]{ "this", "files", "classPath", "sourcePath", "destination", "bootClassPath", 
                                   "sourceVersion", "showWarnings" },
                               this, files, classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
-    msg("DrJava compile: files: "+((files!=null)?IOUtil.pathToString(files):"n/a"));
-    msg("            classPath: "+((classPath!=null)?IOUtil.pathToString(classPath):"n/a"));
-    msg("           sourcePath: "+((sourcePath!=null)?IOUtil.pathToString(sourcePath):"n/a"));
-    msg("          destination: "+destination);
-    msg("        bootClassPath: "+((bootClassPath!=null)?IOUtil.pathToString(bootClassPath):"n/a"));
     java.util.List<File> filteredClassPath = null;
     if (classPath!=null) {
       filteredClassPath = new LinkedList<File>(classPath);
@@ -212,19 +215,6 @@ public class MintCompiler extends JavacCompiler {
     LinkedList<DJError> errors = new LinkedList<DJError>();
     Context context = _createContext(filteredClassPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
     new CompilerErrorListener(context, errors);
-    
-//    JavaCompiler compiler = JavaCompiler.instance(context);
-//    
-//    /** Default FileManager provided by Context class */
-//    DefaultFileManager fileManager = (DefaultFileManager) context.get(JavaFileManager.class);
-//    com.sun.tools.javac.util.List<JavaFileObject> fileObjects = com.sun.tools.javac.util.List.nil();
-//    for (File f : files) fileObjects = fileObjects.prepend(fileManager.getRegularFile(f));
-//    
-//    try { compiler.compile(fileObjects); }
-//    catch(Throwable t) {  // compiler threw an exception/error (typically out of memory error)
-//      errors.addFirst(new DJError("Compile exception: " + t, false));
-//      error.log(t);
-//    }
 
     int result = compile(new String[] {},
                          ListBuffer.<File>lb().appendArray(files.toArray(new File[0])).toList(),
@@ -245,9 +235,6 @@ public class MintCompiler extends JavacCompiler {
     
     Context context = new Context();
     Options options = Options.instance(context);
-    msg("_createContext before: -classpath: "+options.get("-classpath")+
-        ", -bootclasspath: "+options.get("-bootclasspath"));
-    msg("bootClassPath: "+((bootClassPath!=null)?IOUtil.pathToString(bootClassPath):"n/a"));
     
     for (Map.Entry<String, String> e : CompilerOptions.getOptions(showWarnings).entrySet()) {
       options.put(e.getKey(), e.getValue());
@@ -262,9 +249,6 @@ public class MintCompiler extends JavacCompiler {
     if (bootClassPath != null) { options.put("-bootclasspath", IOUtil.pathToString(bootClassPath)); }
     if (sourceVersion != null) { options.put("-source", sourceVersion); }
     if (!showWarnings) { options.put("-nowarn", ""); }
-    
-    msg("_createContext after: -classpath: "+options.get("-classpath")+
-        ", -bootclasspath: "+options.get("-bootclasspath"));
     
     return context;
   }
@@ -363,110 +347,6 @@ public class MintCompiler extends JavacCompiler {
         this.fatalErrors = fatalErrors;
     }
 
-//    /** Process command line arguments: store all command line options
-//     *  in `options' table and return all source filenames.
-//     *  @param flags    The array of command line arguments.
-//     */
-//    public List<File> processArgs(String[] flags) { // XXX sb protected
-//        int ac = 0;
-//        while (ac < flags.length) {
-//            String flag = flags[ac];
-//            ac++;
-//
-//            Option option = null;
-//
-//            if (flag.length() > 0) {
-//                // quick hack to speed up file processing:
-//                // if the option does not begin with '-', there is no need to check
-//                // most of the compiler options.
-//                int firstOptionToCheck = flag.charAt(0) == '-' ? 0 : recognizedOptions.length-1;
-//                for (int j=firstOptionToCheck; j<recognizedOptions.length; j++) {
-//                    if (recognizedOptions[j].matches(flag)) {
-//                        option = recognizedOptions[j];
-//                        break;
-//                    }
-//                }
-//            }
-//
-//            if (option == null) {
-//                error("err.invalid.flag", flag);
-//                return null;
-//            }
-//
-//            if (option.hasArg()) {
-//                if (ac == flags.length) {
-//                    error("err.req.arg", flag);
-//                    return null;
-//                }
-//                String operand = flags[ac];
-//                ac++;
-//                if (option.process(options, flag, operand))
-//                    return null;
-//            } else {
-//                if (option.process(options, flag))
-//                    return null;
-//            }
-//        }
-//
-//        if (!checkDirectory("-d"))
-//            return null;
-//        if (!checkDirectory("-s"))
-//            return null;
-//
-//        String sourceString = options.get("-source");
-//        Source source = (sourceString != null)
-//            ? Source.lookup(sourceString)
-//            : Source.DEFAULT;
-//        String targetString = options.get("-target");
-//        Target target = (targetString != null)
-//            ? Target.lookup(targetString)
-//            : Target.DEFAULT;
-//        // We don't check source/target consistency for CLDC, as J2ME
-//        // profiles are not aligned with J2SE targets; moreover, a
-//        // single CLDC target may have many profiles.  In addition,
-//        // this is needed for the continued functioning of the JSR14
-//        // prototype.
-//        if (Character.isDigit(target.name.charAt(0))) {
-//            if (target.compareTo(source.requiredTarget()) < 0) {
-//                if (targetString != null) {
-//                    if (sourceString == null) {
-//                        warning("warn.target.default.source.conflict",
-//                                targetString,
-//                                source.requiredTarget().name);
-//                    } else {
-//                        warning("warn.source.target.conflict",
-//                                sourceString,
-//                                source.requiredTarget().name);
-//                    }
-//                    return null;
-//                } else {
-//                    options.put("-target", source.requiredTarget().name);
-//                }
-//            } else {
-//                if (targetString == null && !source.allowGenerics()) {
-//                    options.put("-target", Target.JDK1_4.name);
-//                }
-//            }
-//        }
-//        return filenames.toList();
-//    }
-//    // where
-//        private boolean checkDirectory(String optName) {
-//            String value = options.get(optName);
-//            if (value == null)
-//                return true;
-//            File file = new File(value);
-//            if (!file.exists()) {
-//                error("err.dir.not.found", value);
-//                return false;
-//            }
-//            if (!file.isDirectory()) {
-//                error("err.file.not.directory", value);
-//                return false;
-//            }
-//            return true;
-//        }
-
     /** Programmatic interface for main function.
      * @param args    The command line parameters.
      */
@@ -479,26 +359,6 @@ public class MintCompiler extends JavacCompiler {
         }
         return result;
     }
-
-    public static void msg(String s, Throwable t) {
-      try {
-        java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(new File(new File(System.getProperty("user.home")),
-                                                                                         "mintcompiler.txt").getAbsolutePath(),true));
-        pw.println(s);
-        t.printStackTrace(pw);
-        pw.close();
-      }
-      catch(IOException ioe) { }
-    }
-    public static void msg(String s) {
-      try {
-        java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(new File(new File(System.getProperty("user.home")),
-                                                                                         "mintcompiler.txt").getAbsolutePath(),true));
-        pw.println(s);
-        pw.close();
-      }
-      catch(IOException ioe) { }
-    }
     
     /** Programmatic interface for main function.
      * @param args    The command line parameters.
@@ -508,8 +368,6 @@ public class MintCompiler extends JavacCompiler {
                        Context context,
                        List<JavaFileObject> fileObjects,
                        Iterable<? extends Processor> processors) {
-        msg("MintCompiler.compile, args: "+java.util.Arrays.toString(args)+", files: "+files+", fileObjects: "+fileObjects);
-        
         if (options == null)
             options = Options.instance(context); // creates a new one
 
@@ -522,7 +380,6 @@ public class MintCompiler extends JavacCompiler {
          * into account.
          */
         try {
-            msg("\targs.length: "+args.length+", fileObjects.isEmpty(): "+fileObjects.isEmpty());
             if (args.length == 0 && files.isEmpty() && fileObjects.isEmpty()) {
                 return EXIT_CMDERR;
             }
@@ -543,13 +400,11 @@ public class MintCompiler extends JavacCompiler {
 //                                                  e.getMessage()));
 //                return EXIT_SYSERR;
 //            }
-            msg("\t[2]");
             boolean forceStdOut = options.get("stdout") != null;
             if (forceStdOut) {
                 out.flush();
                 out = new PrintWriter(System.out, true);
             }
-            msg("\t[3]");
             context.put(Log.outKey, out);
 
             // allow System property in following line as a Mustang legacy
@@ -557,14 +412,10 @@ public class MintCompiler extends JavacCompiler {
                         && System.getProperty("nonBatchMode") == null);
             if (batchMode)
                 CacheFSInfo.preRegister(context);
-            msg("\t[4] batchMode: "+batchMode);
             fileManager = context.get(JavaFileManager.class);
-            msg("\t[5]");
             comp = JavaCompiler.instance(context);
             if (comp == null) return EXIT_SYSERR;
-            msg("\t[6]");
             Log log = Log.instance(context);
-            msg("\t[7] !files.isEmpty(): "+(!files.isEmpty())+", files: "+files);
             if (!files.isEmpty()) {
                 // add filenames to fileObjects
                 comp = JavaCompiler.instance(context);
@@ -575,15 +426,9 @@ public class MintCompiler extends JavacCompiler {
                 for (JavaFileObject fo : otherFiles)
                     fileObjects = fileObjects.prepend(fo);
             }
-            msg("\t[8]");
-            msg("comp.compile: -classpath: "+options.get("-classpath")+
-                ", -bootclasspath: "+options.get("-bootclasspath"));
-            msg("comp.compile: "+options.keySet());
-            msg("comp.compile: fileObjects: "+fileObjects+", classnames: "+classnames);
             comp.compile(fileObjects,
                          classnames.toList(),
                          processors);
-            msg("\t[9]");
             if (log.expectDiagKeys != null) {
                 if (log.expectDiagKeys.size() == 0) {
                     Log.printLines(log.noticeWriter, "all expected diagnostics found");
@@ -593,40 +438,31 @@ public class MintCompiler extends JavacCompiler {
                     return EXIT_ERROR;
                 }
             }
-            msg("\t[10] comp.errorCount(): "+comp.errorCount());
             if (comp.errorCount() != 0 ||
                 options.get("-Werror") != null && comp.warningCount() != 0)
                 return EXIT_ERROR;
         } catch (IOException ex) {
-            msg("\t[A] ",ex);
             ioMessage(ex);
             return EXIT_SYSERR;
         } catch (OutOfMemoryError ex) {
-            msg("\t[B] ",ex);
             resourceMessage(ex);
             return EXIT_SYSERR;
         } catch (StackOverflowError ex) {
-            msg("\t[C] ",ex);
             resourceMessage(ex);
             return EXIT_SYSERR;
         } catch (FatalError ex) {
-            msg("\t[D] ",ex);
             feMessage(ex);
             return EXIT_SYSERR;
         } catch(AnnotationProcessingError ex) {
-            msg("\t[E] ",ex);
             apMessage(ex);
             return EXIT_SYSERR;
         } catch (ClientCodeException ex) {
-            msg("\t[F] ",ex);
             // as specified by javax.tools.JavaCompiler#getTask
             // and javax.tools.JavaCompiler.CompilationTask#call
             throw new RuntimeException(ex.getCause());
         } catch (PropagatedException ex) {
-            msg("\t[G] ",ex);
             throw ex.getCause();
         } catch (Throwable ex) {
-            msg("\t[H] ",ex);
             // Nasty.  If we've already reported an error, compensate
             // for buggy compiler error recovery by swallowing thrown
             // exceptions.
@@ -635,7 +471,6 @@ public class MintCompiler extends JavacCompiler {
                 bugMessage(ex);
             return EXIT_ABNORMAL;
         } finally {
-            msg("\t[*]");
             if (comp != null) comp.close();
             filenames = null;
             options = null;
@@ -646,9 +481,9 @@ public class MintCompiler extends JavacCompiler {
     /** Print a message reporting an internal error.
      */
     void bugMessage(Throwable ex) {
-////        Log.printLines(out, getLocalizedString("msg.bug",
-////                                               JavaCompiler.version()));
-////        ex.printStackTrace(out);
+        Log.printLines(out, getLocalizedString("msg.bug",
+                                               JavaCompiler.version()));
+        ex.printStackTrace(out);
     }
 
     /** Print a message reporting an fatal error.

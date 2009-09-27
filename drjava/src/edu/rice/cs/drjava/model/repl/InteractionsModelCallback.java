@@ -38,6 +38,7 @@ package edu.rice.cs.drjava.model.repl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /** Callback interface which allows an InteractionsModel to respond to events in a remote Java interpreter.  These
   * methods may run outside the event thread!
@@ -139,4 +140,7 @@ public interface InteractionsModelCallback {
    */
   public void interpreterReady(File wd);
   
+  /** A compiler can instruct DrJava to include additional elements for the boot
+    * class path of the Interactions JVM. */
+  public List<File> getCompilerBootClassPath();
 }

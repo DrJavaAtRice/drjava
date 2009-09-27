@@ -70,4 +70,6 @@ public class NoCompilerAvailable implements CompilerInterface {
     */
   @Override
   public String toString() { return "None"; }
+  
+  public List<File> additionalBootClassPathForInteractions() { return Arrays.<File>asList(); }
 }
