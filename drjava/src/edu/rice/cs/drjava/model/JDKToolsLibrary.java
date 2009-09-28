@@ -99,7 +99,6 @@ public class JDKToolsLibrary {
         }
       }
       case JAVA_5: return "edu.rice.cs.drjava.model.compiler.Javac150Compiler";
-      case JAVA_1_4: return "edu.rice.cs.drjava.model.compiler.Javac141Compiler";
       default: return null;
     }
   }
@@ -108,7 +107,6 @@ public class JDKToolsLibrary {
     switch (version.majorVersion()) {
       case JAVA_6: return "edu.rice.cs.drjava.model.debug.jpda.JPDADebugger";
       case JAVA_5: return "edu.rice.cs.drjava.model.debug.jpda.JPDADebugger";
-      case JAVA_1_4: return "edu.rice.cs.drjava.model.debug.jpda.JPDADebugger";
       default: return null;
     }
   }

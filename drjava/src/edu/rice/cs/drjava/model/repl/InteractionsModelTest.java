@@ -112,7 +112,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     */
   protected void _assertJavaTransformationTail(final String typed, final String expected) {
     assertTrue("main transformation should match expected",
-               TestInteractionsModel._transformJavaCommand(typed).endsWith(expected));
+               edu.rice.cs.drjava.model.compiler.JavacCompiler.transformJavaCommand(typed).endsWith(expected));
   }
 
   /** Asserts that the given string typed by the user of the form "applet classname" is transformed to the given
@@ -123,7 +123,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   protected void _assertAppletTransformation(final String typed, final String expected) {
     assertEquals("applet transformation should match expected",
                  expected, 
-                 TestInteractionsModel._transformAppletCommand(typed));
+                 edu.rice.cs.drjava.model.compiler.JavacCompiler.transformAppletCommand(typed));
   }
   
   /** Tests that the correct text is returned when interpreting. */
@@ -702,6 +702,10 @@ public final class InteractionsModelTest extends DrJavaTestCase {
       // TODO: figure out what to do here
       return new ArrayList<File>();
     }
+    public String transformCommands(String interactionsString) {
+      // TODO: figure out what to do here
+      return interactionsString;
+    }
     
     public void _notifyInteractionStarted() { }
     protected void _notifySyntaxErrorOccurred(int offset, int length) { }
@@ -836,6 +840,11 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     public List<File> getCompilerBootClassPath() {
       // TODO: figure out what to do here      
       return new ArrayList<File>();
+    }
+    
+    public String transformCommands(String interactionsString) {
+      // TODO: figure out what to do here
+      return interactionsString;
     }
   }
   

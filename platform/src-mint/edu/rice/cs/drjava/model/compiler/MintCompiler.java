@@ -68,6 +68,7 @@ import java.util.Iterator;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.util.ArgumentTokenizer;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
@@ -152,6 +153,31 @@ public class MintCompiler extends JavacCompiler {
     * since the Mint compiler needs to be invoked at runtime. */
   public java.util.List<File> additionalBootClassPathForInteractions() {
     return Arrays.asList(new File(_location));
+  }
+
+  /** Transform the command line to be interpreted into something the Interactions JVM can use.
+    * This replaces "java MyClass a b c" with Java code to call MyClass.main(new String[]{"a","b","c"}).
+    * "import MyClass" is not handled here.
+    * @param interactionsString unprocessed command line
+    * @return command line with commands transformed */
+  public String transformCommands(String interactionsString) {
+    if (interactionsString.startsWith("mint ") ||
+        interactionsString.startsWith("java ")) interactionsString = _transformMintCommand(interactionsString);
+    return interactionsString;    
+  }
+  
+  protected static String _transformMintCommand(String s) {
+    final String command = "edu.rice.cs.mint.runtime.Mint.execute(\"edu.rice.cs.drjava.interactions.class.path\", \"{0}\"{1});";
+    if (s.endsWith(";"))  s = _deleteSemiColon(s);
+    java.util.List<String> args = ArgumentTokenizer.tokenize(s, true);
+    final String classNameWithQuotes = args.get(1); // this is "MyClass"
+    final String className = classNameWithQuotes.substring(1, classNameWithQuotes.length() - 1); // removes quotes, becomes MyClass
+    final StringBuilder argsString = new StringBuilder();
+    for (int i = 2; i < args.size(); i++) {
+      argsString.append(",");
+      argsString.append(args.get(i));
+    }
+    return java.text.MessageFormat.format(command, className, argsString.toString());
   }
 
   public boolean isAvailable() {

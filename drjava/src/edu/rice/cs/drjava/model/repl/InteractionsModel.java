@@ -201,9 +201,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         String text = _document.getCurrentInteraction();
         String toEval = text.trim();
         _prepareToInterpret(toEval);  // Writes a newLine!
-        if (toEval.startsWith("java ")) toEval = _transformJavaCommand(toEval);
-        else if (toEval.startsWith("applet ")) toEval = _transformAppletCommand(toEval);
-        else if (DrJava.getConfig().getSetting(OptionConstants.DEBUG_AUTO_IMPORT).booleanValue() &&
+//        if (toEval.startsWith("java ")) toEval = _transformJavaCommand(toEval);
+//        else if (toEval.startsWith("applet ")) toEval = _transformAppletCommand(toEval);
+        toEval = transformCommands(toEval);
+        if (DrJava.getConfig().getSetting(OptionConstants.DEBUG_AUTO_IMPORT).booleanValue() &&
             toEval.startsWith("import ")) {
           // add the class or package after the import to the set of auto-imports
           // NOTE: this only processes import statements until the first non-import statement or comment is reached
@@ -860,56 +861,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Notifies listeners that the interpreter is ready. (Subclasses must maintain listeners.) */
   public abstract void _notifyInterpreterReady(File wd);
-
-  protected static String _transformJavaCommand(String s) {
-    // check the return type and public access before executing, per bug #1585210
-    String command = "try '{'\n" +
-                     "  java.lang.reflect.Method m = {0}.class.getMethod(\"main\", java.lang.String[].class);\n" +
-                     "  if (!m.getReturnType().equals(void.class)) throw new java.lang.NoSuchMethodException();\n" +
-                     "'}'\n" +
-                     "catch (java.lang.NoSuchMethodException e) '{'\n" +
-                     "  throw new java.lang.NoSuchMethodError(\"main\");\n" +
-                     "'}'\n" +
-                     "{0}.main(new String[]'{'{1}'}');";
-    return _transformCommand(s, command);
-  }
-  
-  protected static String _transformAppletCommand(String s) {
-    return _transformCommand(s,"edu.rice.cs.plt.swing.SwingUtil.showApplet(new {0}({1}), 400, 300);");
-  }
-  
-  /** Assumes a trimmed String. Returns a string of the call that the interpreter can use.
-    * The arguments get formatted as comma-separated list of strings enclosed in quotes.
-    * Example: _transformCommand("java MyClass arg1 arg2 arg3", "{0}.main(new String[]'{'{1}'}');")
-    * returns "MyClass.main(new String[]{\"arg1\",\"arg2\",\"arg3\"});"
-    * NOTE: the command to run is constructed using {@link java.text.MessageFormat}. That means that certain characters,
-    * single quotes and curly braces, for example, are special. To write single quotes, you need to double them.
-    * To write curly braces, you need to enclose them in single quotes. Example:
-    * MessageFormat.format("Abc {0} ''foo'' '{'something'}'", "def") returns "Abc def 'foo' {something}".
-    * @param s the command line, either "java MyApp arg1 arg2 arg3" or "applet MyApplet arg1 arg2 arg3"
-    * @param command the command to execute, with {0} marking the place for the class name and {1} the place for the arguments
-    */
-  protected static String _transformCommand(String s, String command) {
-    if (s.endsWith(";"))  s = _deleteSemiColon(s);
-    List<String> args = ArgumentTokenizer.tokenize(s, true);
-    final String classNameWithQuotes = args.get(1); // this is "MyClass"
-    final String className = classNameWithQuotes.substring(1, classNameWithQuotes.length() - 1); // removes quotes, becomes MyClass
-    final StringBuilder argsString = new StringBuilder();
-    boolean seenArg = false;
-    for (int i = 2; i < args.size(); i++) {
-      if (seenArg) argsString.append(",");
-      else seenArg = true;
-      argsString.append(args.get(i));
-    }
-    return java.text.MessageFormat.format(command, className, argsString.toString());
-  }
-  
-  /** Deletes the last character of a string.  Assumes semicolon at the end, but does not check.  Helper 
-    * for _transformCommand(String,String).
-    * @param s the String containing the semicolon
-    * @return a substring of s with one less character
-    */
-  protected static String _deleteSemiColon(String s) { return  s.substring(0, s.length() - 1); }
   
   /** Singleton InputListener which should never be asked for input. */
   private static class NoInputListener implements InputListener {

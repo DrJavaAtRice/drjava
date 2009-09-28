@@ -36,7 +36,6 @@
   <!-- *** Environment properties that are not needed may be removed *** -->
   <property environment="env" />
   <property name="drjava-jar" value="${env.DRJAVA_JAR}" />
-  <property name="java14-home" value="${env.JAVA14_HOME}" />
   <property name="java5-home" value="${env.JAVA5_HOME}" />
   <property name="java6-home" value="${env.JAVA6_HOME}" />
   <property name="openjdk6-home" value="${env.OPENJDK6_HOME}" />
@@ -83,7 +82,6 @@
     <echo message="      in Subversion targets" />
     <echo message="DRJAVA_JAR: Location of the drjava.jar file (most classes here " />
     <echo message="            implement interfaces defined there)." />
-    <echo message="JAVA14_HOME: Home folder of the Java 1.4 JDK" />
     <echo message="JAVA5_HOME: Home folder of the Java 5 JDK" />
     <echo message="JAVA6_HOME: Home folder of the Java 6 JDK" />
     <echo message="OPENJDK6_HOME: Home folder of the OpenJDK 6" />
@@ -150,16 +148,6 @@
        later APIs, the DrJava application is responsible for ensuring that those classes are 
        only loaded when the necessary APIs are available. -->
        
-  <target name="compile-jdk14" depends="resolve-java14-runtime, resolve-java14-tools" 
-          description="Compile the 'jdk14' sources">
-    <antcall target="do-compile">
-      <param name="platform-tag" value="jdk14" />
-      <param name="source-version" value="1.4" />
-      <param name="runtime-jar" value="${java14-runtime}" />
-      <param name="extra-classpath" value="${java14-tools}" />
-    </antcall>
-  </target>
-  
   <target name="compile-jdk5" depends="resolve-java5-runtime, resolve-java5-tools" 
           description="Compile the 'jdk5' sources">
     <antcall target="do-compile">
@@ -316,15 +304,6 @@
        Testing Targets
        *************** -->
   
-  <target name="test-jdk14" depends="compile-jdk14, resolve-java14-exec, resolve-java14-tools" 
-          description="Run all 'jdk14' tests (after compiling); use -Dtest-spec=... to filter">
-    <antcall target="iterate-tests">
-      <param name="platform-tag" value="jdk14" />
-      <param name="extra-classpath" value="${java14-tools}" />
-      <param name="test-jvm" value="${java14-exec}" />
-    </antcall>
-  </target>
-
   <target name="test-jdk5" depends="compile-jdk5, resolve-java5-exec, resolve-java5-tools" 
           description="Run all 'jdk5' tests (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
@@ -509,7 +488,6 @@
         <attribute name="Build-Version" value="${version-tag}" />
       </manifest>
       <fileset dir="classes/lib" />
-      <fileset dir="classes/base-jdk14" />
       <fileset dir="classes/base-jdk5" />
       <fileset dir="classes/base-jdk6" />
       <fileset dir="classes/base-openjdk6" />
@@ -526,7 +504,6 @@
         <attribute name="Built-By" value="${user.name}" />
         <attribute name="Build-Version" value="${version-tag}" />
       </manifest>
-      <fileset dir="classes/base-jdk14" />
       <fileset dir="classes/base-jdk5" />
       <fileset dir="classes/base-jdk6" />
       <fileset dir="classes/base-openjdk6" />
@@ -550,7 +527,6 @@
     <echo message="Deleting all intermediate build products" />
     
     <delete dir="classes/lib" failonerror="${clean-can-fail}" />
-    <delete dir="classes/test-jdk14" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-jdk5" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-jdk6" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-openjdk6" failonerror="${clean-can-fail}" />
@@ -788,56 +764,6 @@
        Property-resolution Targets 
        *************************** -->
   
-  <target name="resolve-java14-runtime">
-    <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so java14-runtime will only be set the *first* time. -->
-
-    <property name="java14-runtime-1" location="${java14-home}/lib/rt.jar" />
-    <available property="java14-runtime" value="${java14-runtime-1}" file="${java14-runtime-1}" />
-
-    <property name="java14-runtime-2" location="${java14-home}/jre/lib/rt.jar" />
-    <available property="java14-runtime" value="${java14-runtime-2}" file="${java14-runtime-2}" />
-
-    <property name="java14-runtime-3" location="${java14-home}/../Classes/classes.jar" />
-    <available property="java14-runtime" value="${java14-runtime-3}" file="${java14-runtime-3}" />
-
-    <fail message="Can't find rt.jar in the Java 1.4 home: ${java14-home}" unless="java14-runtime" />
-  </target>
-  
-  <target name="resolve-java14-exec">
-    <!-- We rely on "location" to generate a platform-specific path -->
-
-    <property name="java14-exec-1" location="${java14-home}/bin/java.exe" />
-    <condition property="java14-exec" value="${java14-exec-1}">
-      <and>
-        <available file="${java14-exec-1}" />
-        <os family="windows" />
-      </and>
-    </condition>
-    
-    <property name="java14-exec-2" location="${java14-home}/bin/java" />
-    <available property="java14-exec" value="${java14-exec-2}" file="${java14-exec-2}" />
-
-    <fail message="Can't find the java executable in the Java 1.4 home: ${java14-home}" unless="java14-exec" />
-  </target>
-  
-  <target name="resolve-java14-tools">
-    <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so java14-tools will only be set the *first* time. -->
-
-    <property name="java14-tools-1" location="${java14-home}/lib/tools.jar" />
-    <available property="java14-tools" value="${java14-tools-1}" file="${java14-tools-1}" />
-
-    <property name="java14-tools-2" location="${java14-home}/jre/lib/tools.jar" />
-    <available property="java14-tools" value="${java14-tools-2}" file="${java14-tools-2}" />
-
-    <property name="java14-tools-3" location="${java14-home}/../Classes/classes.jar" />
-    <available property="java14-tools" value="${java14-tools-3}" file="${java14-tools-3}" />
-
-    <fail message="Can't find tools.jar in the Java 1.4 home: ${java14-home}" unless="java14-tools" />
-  </target>
-  
-  
   <target name="resolve-java5-runtime">
     <!-- We rely on "location" to generate a platform-specific path; note that properties
          are immutable and so java5-runtime will only be set the *first* time. -->
@@ -1000,8 +926,13 @@
       </and>
     </condition>
     
-    <property name="mint-exec-2" location="${mint-home}/langtools/bin/mint" />
-    <available property="mint-exec" value="${mint-exec-2}" file="${mint-exec-2}" />
+    <if>
+      <not><isset property="mint-exec" /></not>
+      <then>
+        <property name="mint-exec-2" location="${mint-home}/langtools/bin/mint" />
+        <available property="mint-exec" value="${mint-exec-2}" file="${mint-exec-2}" />
+      </then>
+    </if>
 
     <fail message="Can't find the java executable in the Mint home: ${mint-home}" unless="mint-exec" />
     <echo message="${mint-exec}"/>

@@ -235,4 +235,14 @@ public class SimpleInteractionsModel extends InteractionsModel {
     // TODO: figure out what to do here
     return new ArrayList<File>();
   }
+  
+  /** Transform the command line to be interpreted into something the Interactions JVM can use.
+    * This replaces "java MyClass a b c" with Java code to call MyClass.main(new String[]{"a","b","c"}).
+    * "import MyClass" is not handled here.
+    * @param interactionsString unprocessed command line
+    * @return command line with commands transformed */
+  public String transformCommands(String interactionsString) {
+    // TODO: figure out what to do here
+    return interactionsString;
+  }
 }

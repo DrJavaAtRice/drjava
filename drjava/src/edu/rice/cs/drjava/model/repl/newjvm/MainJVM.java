@@ -987,6 +987,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public void interpreterWontStart(Exception e) { }
     public void interpreterReady(File wd) { }
     public List<File> getCompilerBootClassPath() { return new ArrayList<File>(); }
+    public String transformCommands(String interactionsString) { return interactionsString; }
   }
   
   /** JUnitModel which does not react to events. */

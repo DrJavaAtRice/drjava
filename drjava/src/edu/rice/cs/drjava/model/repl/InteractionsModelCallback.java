@@ -143,4 +143,11 @@ public interface InteractionsModelCallback {
   /** A compiler can instruct DrJava to include additional elements for the boot
     * class path of the Interactions JVM. */
   public List<File> getCompilerBootClassPath();
+  
+  /** Transform the command line to be interpreted into something the Interactions JVM can use.
+    * This replaces "java MyClass a b c" with Java code to call MyClass.main(new String[]{"a","b","c"}).
+    * "import MyClass" is not handled here.
+    * @param interactionsString unprocessed command line
+    * @return command line with commands transformed */
+  public String transformCommands(String interactionsString);
 }

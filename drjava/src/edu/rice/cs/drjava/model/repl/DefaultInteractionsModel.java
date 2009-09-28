@@ -225,4 +225,13 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   public List<File> getCompilerBootClassPath() {
     return _model.getCompilerModel().getActiveCompiler().additionalBootClassPathForInteractions();
   }
+  
+  /** Transform the command line to be interpreted into something the Interactions JVM can use.
+    * This replaces "java MyClass a b c" with Java code to call MyClass.main(new String[]{"a","b","c"}).
+    * "import MyClass" is not handled here.
+    * @param interactionsString unprocessed command line
+    * @return command line with commands transformed */
+  public String transformCommands(String interactionsString) {
+    return _model.getCompilerModel().getActiveCompiler().transformCommands(interactionsString);
+  }
 }

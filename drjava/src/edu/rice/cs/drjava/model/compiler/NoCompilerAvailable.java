@@ -72,4 +72,11 @@ public class NoCompilerAvailable implements CompilerInterface {
   public String toString() { return "None"; }
   
   public List<File> additionalBootClassPathForInteractions() { return Arrays.<File>asList(); }
+  
+  /** Transform the command line to be interpreted into something the Interactions JVM can use.
+    * This replaces "java MyClass a b c" with Java code to call MyClass.main(new String[]{"a","b","c"}).
+    * "import MyClass" is not handled here.
+    * @param interactionsString unprocessed command line
+    * @return command line with commands transformed */
+  public String transformCommands(String interactionsString) { return interactionsString; }
 }
