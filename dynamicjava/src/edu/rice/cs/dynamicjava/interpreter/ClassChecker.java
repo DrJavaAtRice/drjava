@@ -263,8 +263,8 @@ public class ClassChecker {
     @Override public Void visit(ConstructorDeclaration node) {
       DJConstructor k = getConstructor(node);
       if (_c.isAnonymous() || !_c.declaredName().equals(node.getName())) {
-        setErrorStrings(node, SymbolUtil.shortName(_c));
-        throw new ExecutionError("constructor.name");
+        setErrorStrings(node, node.getName());
+        throw new ExecutionError("constructor.name", node);
       }
       
       TypeContext sigContext = new FunctionSignatureContext(_bodyContext, k);
@@ -372,11 +372,11 @@ public class ClassChecker {
     }
     
     @Override public Void visit(FieldDeclaration node) {
-      // TODO: static context
       Expression init = node.getInitializer();
       if (init != null) {
+        TypeContext c = new InitializerContext(_bodyContext, getField(node).isStatic(), _c);
         Type expectedT = getType(node.getType());
-        Type initT = new ExpressionChecker(_bodyContext, _opt).check(init, expectedT);
+        Type initT = new ExpressionChecker(c, _opt).check(init, expectedT);
         TypeSystem ts = _opt.typeSystem();
         try {
           Expression newInit = ts.assign(expectedT, init);
@@ -392,13 +392,14 @@ public class ClassChecker {
     }
     
     @Override public Void visit(ClassInitializer node) {
-      // TODO: static context
-      node.getBlock().acceptVisitor(new StatementChecker(_bodyContext, _opt));
+      TypeContext c = new InitializerContext(_bodyContext, true, _c);
+      node.getBlock().acceptVisitor(new StatementChecker(c, _opt));
       return null;
     }
     
     @Override public Void visit(InstanceInitializer node) {
-      node.getBlock().acceptVisitor(new StatementChecker(_bodyContext, _opt));
+      TypeContext c = new InitializerContext(_bodyContext, false, _c);
+      node.getBlock().acceptVisitor(new StatementChecker(c, _opt));
       return null;
     }
   }

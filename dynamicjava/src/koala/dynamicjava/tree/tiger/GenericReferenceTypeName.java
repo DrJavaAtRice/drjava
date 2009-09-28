@@ -48,7 +48,7 @@ import java.util.List;
 
 public class GenericReferenceTypeName extends ReferenceTypeName {
   
-  private List<List<? extends TypeName>> _typeArguments;
+  private List<? extends List<? extends TypeName>> _typeArguments;
   
   /**
    * Initializes the type
@@ -56,7 +56,7 @@ public class GenericReferenceTypeName extends ReferenceTypeName {
    * @param typeArgs the type arguments
    * @exception IllegalArgumentException if ids is null
    */
-  public GenericReferenceTypeName(List<IdentifierToken> ids, List<List<? extends TypeName>> typeArgs) {
+  public GenericReferenceTypeName(List<? extends IdentifierToken> ids, List<? extends List<? extends TypeName>> typeArgs) {
     this(ids, typeArgs, SourceInfo.NONE);
   }
   
@@ -75,7 +75,7 @@ public class GenericReferenceTypeName extends ReferenceTypeName {
    * @param ids   the list of the tokens that compose the type name
    * @exception IllegalArgumentException if ids is null
    */
-  public GenericReferenceTypeName(List<IdentifierToken> ids, List<List<? extends TypeName>> typeArgs,
+  public GenericReferenceTypeName(List<? extends IdentifierToken> ids, List<? extends List<? extends TypeName>> typeArgs,
                                   SourceInfo si) {
     super(ids, si);
     if (ids.size() != typeArgs.size()) { throw new IllegalArgumentException("ids.size() != typeArgs.size()"); }
@@ -83,7 +83,7 @@ public class GenericReferenceTypeName extends ReferenceTypeName {
   }
   
 
-  public List<List<? extends TypeName>> getTypeArguments(){ return _typeArguments; }
+  public List<? extends List<? extends TypeName>> getTypeArguments(){ return _typeArguments; }
   
   /**
    * Allows a visitor to traverse the tree
@@ -99,7 +99,7 @@ public class GenericReferenceTypeName extends ReferenceTypeName {
   
   public String toStringHelper() {
     String typeArgS = "";
-    List<List<? extends TypeName>> alltas = getTypeArguments();
+    List<? extends List<? extends TypeName>> alltas = getTypeArguments();
     for( List<? extends TypeName> ta : alltas ){
       if(ta.size()>0)
         typeArgS = ""+ta.get(0);

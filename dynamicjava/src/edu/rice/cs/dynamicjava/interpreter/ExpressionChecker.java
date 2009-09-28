@@ -216,6 +216,42 @@ public class ExpressionChecker {
   }
   
   /**
+   * Check an expression appearing as the switch case in an enum switch statement.
+   * @return  The field corresponding to the enum constant's value.
+   */
+  public DJField checkEnumSwitchCase(Expression exp, Type enumT) {
+    if (!(exp instanceof AmbiguousName)) {
+      throw new ExecutionError("invalid.enum.constant", exp);
+    }
+    List<IdentifierToken> ids = ((AmbiguousName) exp).getIdentifiers();
+    if (ids.size() != 1) {
+      throw new ExecutionError("invalid.enum.constant", exp);
+    }
+    String name = ids.get(0).image();
+    Expression translation = new SimpleFieldAccess(name);
+    try {
+      // Should actually verify that that the name is a declared enum constant, not just
+      // a static field.  But that requires a lot of unimplemented support where we're
+      // otherwise treating enums as syntactic sugar for normal class declarations.
+      StaticFieldReference ref = ts.lookupStaticField(enumT, name, context.accessModule());
+      setField(translation, ref.field());
+      Type t = ts.capture(ref.type());
+      if (!ts.isSubtype(t, enumT)) {
+        throw new ExecutionError("invalid.enum.constant", exp);
+      }
+      addRuntimeCheck(translation, t, ref.field().type());
+      setType(translation, t);
+      setTranslation(exp, translation);
+      setType(exp, t);
+      if (hasValue(translation)) { setValue(exp, getValue(translation)); }
+      return ref.field();
+    }
+    catch (UnmatchedLookupException e) {
+      throw new ExecutionError("invalid.enum.constant", exp);
+    }
+  }
+  
+  /**
    * Dynamically determines the appropriate error message type and initializes ERROR_STRINGS with the following:
    * {@code 0=type, 1=name, 2=targs, 3=args, 4=expected, 5=candidates}.
    */
@@ -275,6 +311,12 @@ public class ExpressionChecker {
     }
   }
   
+  private void addRuntimeCheck(Node node, Type expectedType, Type declaredActualType) {
+    if (!ts.isSubtype(ts.erase(declaredActualType), ts.erase(expectedType))) {
+      setCheckedType(node, ts.erasedClass(expectedType));
+    }
+  }
+  
   private String nodeTypesString(Iterable<? extends Node> nodes, TypePrinter printer) {
     return printer.print(IterUtil.map(nodes, NODE_TYPE));
   }
@@ -301,9 +343,12 @@ public class ExpressionChecker {
         Expression resolvedExp = (Expression) resolved;
         resolvedExp.acceptVisitor(this);
         setTranslation(node, resolvedExp);
-        // VARIABLE_TYPE and TYPE properties are important in the enclosing context; others
-        // (such as FIELD) are not, and need not be copied to the AmbiguousName
+        // VARIABLE_TYPE, TYPE, FIELD, and VARIABLE properties are important in the enclosing context;
+        // others are not, and need not be copied to the AmbiguousName
         if (hasVariableType(resolvedExp)) { setVariableType(node, getVariableType(resolvedExp)); }
+        if (hasValue(resolvedExp)) { setValue(node, getValue(resolvedExp)); }
+        if (hasField(resolvedExp)) { setField(node, getField(resolvedExp)); }
+        if (hasVariable(resolvedExp)) { setVariable(node, getVariable(resolvedExp)); }
         return setType(node, getType(resolvedExp));
       }
     }
@@ -356,11 +401,17 @@ public class ExpressionChecker {
             }
           }
         }
-        catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
+        catch (AmbiguousNameException e) {
+          setErrorStrings(node, className);
+          throw new ExecutionError("ambiguous.name", node);
+        }
         catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
         catch (UnmatchedLookupException e) {
           if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
-          else { throw new ExecutionError("ambiguous.name", node); }
+          else {
+            setErrorStrings(node, className);
+            throw new ExecutionError("ambiguous.name", node);
+          }
         }
         
         // Append member names until a field is encountered (or until all names are used up)
@@ -382,7 +433,10 @@ public class ExpressionChecker {
             catch (InvalidTypeArgumentException e) { throw new ExecutionError("type.argument.arity", node); }
             catch (UnmatchedLookupException e) {
               if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
-              else { throw new ExecutionError("ambiguous.name", node); }
+              else {
+                setErrorStrings(node, memberName.image());
+                throw new ExecutionError("ambiguous.name", node);
+              }
             }
             // TODO: Improve error when memberName is a non-static class
           }
@@ -465,7 +519,7 @@ public class ExpressionChecker {
           setErrorStrings(node, node.getFieldName());
           throw new ExecutionError("undefined.name", node);
         }
-        DJClass enclosingThis = enclosingThis(t);
+        DJClass enclosingThis = context.getThis(t, ts);
         boolean onlyStatic = (enclosingThis == null);
         FieldReference ref;
         if (onlyStatic) {
@@ -477,16 +531,24 @@ public class ExpressionChecker {
           ref = ts.lookupField(obj, node.getFieldName(), context.accessModule());
         }
         setField(node, ref.field());
+        Option<Object> val = ref.field().constantValue();
+        if (val.isSome()) { setValue(node, val.unwrap()); }
         setVariableType(node, ref.type());
         if (!onlyStatic) { setDJClass(node, enclosingThis); }
         Type result = ts.capture(ref.type());
         addRuntimeCheck(node, result, ref.field().type());
         return setType(node, result);
       }
-      catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
+      catch (AmbiguousNameException e) {
+        setErrorStrings(node, node.getFieldName());
+        throw new ExecutionError("ambiguous.name", node);
+      }
       catch (UnmatchedLookupException e) {
         if (e.matches() == 0) { throw new ExecutionError("undefined.name.noinfo", node); }
-        else { throw new ExecutionError("ambiguous.name", node); }
+        else {
+          setErrorStrings(node, node.getFieldName());
+          throw new ExecutionError("ambiguous.name", node);
+        }
       }
     }
     
@@ -550,6 +612,8 @@ public class ExpressionChecker {
       try {
         FieldReference ref = ts.lookupStaticField(t, node.getFieldName(), context.accessModule());
         setField(node, ref.field());
+        Option<Object> val = ref.field().constantValue();
+        if (val.isSome()) { setValue(node, val.unwrap()); }
         setVariableType(node, ref.type());
         Type result = ts.capture(ref.type());
         addRuntimeCheck(node, result, ref.field().type());
@@ -572,23 +636,20 @@ public class ExpressionChecker {
       
       Iterable<Type> targs = IterUtil.empty();
       
-      ClassType t;
+      Type t;
       if (context.localFunctionExists(node.getMethodName(), ts)) {
         Iterable<LocalFunction> matches = context.getLocalFunctions(node.getMethodName(), ts);
         t = ts.makeClassType(new FunctionWrapperClass(context.accessModule(), matches));
       }
       else {
-        try {
-          t = context.typeContainingMethod(node.getMethodName(), ts);
-          if (t == null) {
-            setErrorStrings(node, node.getMethodName());
-            throw new ExecutionError("undefined.name", node);
-          }
+        t = context.typeContainingMethod(node.getMethodName(), ts);
+        if (t == null) {
+          setErrorStrings(node, node.getMethodName());
+          throw new ExecutionError("undefined.name", node);
         }
-        catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
       }
       
-      DJClass enclosingThis = enclosingThis(t);
+      DJClass enclosingThis = context.getThis(t, ts);
       boolean onlyStatic = (enclosingThis == null);
       try {
         MethodInvocation inv;
@@ -752,12 +813,6 @@ public class ExpressionChecker {
       }
     }
     
-    private void addRuntimeCheck(Node node, Type expectedType, Type declaredActualType) {
-      if (!ts.isSubtype(ts.erase(declaredActualType), ts.erase(expectedType))) {
-        setCheckedType(node, ts.erasedClass(expectedType));
-      }
-    }
-    
     /** Visits an ArrayAllocation.  JLS 15.10.
       * @return  The type of the array
       */
@@ -839,7 +894,7 @@ public class ExpressionChecker {
 
       Option<Type> dynamicOuter = ts.dynamicallyEnclosingType(t);
       if (dynamicOuter.isSome()) {
-        DJClass enclosingThis = enclosingThis(dynamicOuter.unwrap());
+        DJClass enclosingThis = context.getThis(dynamicOuter.unwrap(), ts);
         if (enclosingThis == null) {
           TypePrinter printer = ts.typePrinter();
           setErrorStrings(node, printer.print(t), printer.print(dynamicOuter.unwrap()));
@@ -884,7 +939,7 @@ public class ExpressionChecker {
       
       Option<Type> dynamicOuter = ts.dynamicallyEnclosingType(t);
       if (dynamicOuter.isSome()) {
-        DJClass enclosingThis = enclosingThis(dynamicOuter.unwrap());
+        DJClass enclosingThis = context.getThis(dynamicOuter.unwrap(), ts);
         if (enclosingThis == null) {
           TypePrinter printer = ts.typePrinter();
           setErrorStrings(node, printer.print(t), printer.print(dynamicOuter.unwrap()));
@@ -926,22 +981,6 @@ public class ExpressionChecker {
       
       setConstructor(node, IterUtil.first(c.declaredConstructors()));
       return setType(node, ts.makeClassType(c));
-    }
-    
-    /**
-     * Determine a "this" class that can be used where the given type is expected.
-     * May return {@code null} if none is found.
-     */
-    private DJClass enclosingThis(Type expected) {
-      return expected.apply(new TypeAbstractVisitor<DJClass>() {
-        @Override public DJClass defaultCase(Type t) { return null; }
-        @Override public DJClass forClassType(ClassType t) {
-          if (context.hasThis(t.ofClass()) && ts.isSubtype(SymbolUtil.thisType(t.ofClass()), t)) {
-            return t.ofClass();
-          }
-          else { return null; }
-        }
-      });
     }
     
     /**
@@ -1632,11 +1671,17 @@ public class ExpressionChecker {
       if (!hasVariableType(left)) {
         throw new ExecutionError("left.expression", node);
       }
-      if (hasVariable(left) && getVariable(left).isFinal() ||
-          hasField(left) && getField(left).isFinal()) {
+      if (hasVariable(left) && getVariable(left).isFinal()) {
+        setErrorStrings(node, getVariable(left).declaredName());
         throw new ExecutionError("cannot.modify", node);
       }
-      
+      if (hasField(left) && getField(left).isFinal()) {
+        DJClass initializing = context.initializingClass();
+        if (initializing == null || !initializing.equals(getField(left).declaringClass())) {
+          setErrorStrings(node, getField(left).declaredName());
+          throw new ExecutionError("cannot.modify", node);
+        }
+      }      
       Type target = getVariableType(left);
       Type rightT = check(node.getRightExpression(), target);
       try {

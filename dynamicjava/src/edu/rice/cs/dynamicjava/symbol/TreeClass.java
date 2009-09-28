@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.LazyThunk;
 import edu.rice.cs.plt.lambda.Box;
+import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.iter.IterUtil;
 
@@ -193,7 +194,7 @@ public class TreeClass implements DJClass {
   
   public boolean isStatic() {
     if (_declaring == null) { return false; }
-    else { return _declaring.isInterface() || _ast instanceof EnumDeclaration || _mods.isStatic(); }
+    else { return _declaring.isInterface() || isInterface() || _ast instanceof EnumDeclaration || _mods.isStatic(); }
   }
   public boolean isAbstract() { return _mods.isAbstract(); }
   public boolean isFinal() { return _mods.isFinal(); }
@@ -310,6 +311,7 @@ public class TreeClass implements DJClass {
       });
     }
     public String declaredName() { return _f.getName(); }
+    public DJClass declaringClass() { return TreeClass.this; }
     public Type type() { return NodeProperties.getType(_f.getType()); }
     public boolean isFinal() { return _f.getModifiers().isFinal() || isInterface(); }
     public boolean isStatic() { return _f.getModifiers().isStatic() || isInterface(); }
@@ -317,6 +319,19 @@ public class TreeClass implements DJClass {
       return isInterface() ? Access.PUBLIC : extractAccessibility(_f.getModifiers());
     }
     public Access.Module accessModule() { return _accessModule; }
+    public Option<Object> constantValue() {
+      if (isFinal() && isStatic()) {
+        Expression init = _f.getInitializer();
+        if (init != null) {
+          if (NodeProperties.hasValue(init)) { return Option.some(NodeProperties.getValue(init)); }
+          // Since hasValue depends on the order of type checking, and the current order is
+          // naive, also allow values for literals that haven't yet been checked
+          // (this still produces incorrect results for non-literal, not-yet-checked constant expressions)
+          else if (init instanceof Literal) { return Option.some(((Literal) init).getValue()); }
+        }
+      }
+      return Option.none();
+    }
     public Box<Object> boxForReceiver(Object receiver) {
       return _loaded.value().boxForReceiver(receiver);
     }
@@ -350,6 +365,7 @@ public class TreeClass implements DJClass {
     }
     
     public String declaredName() { return TreeClass.this.declaredName(); }
+    public DJClass declaringClass() { return TreeClass.this; }
     public Access.Module accessModule() { return _accessModule; }
     public Type returnType() { return SymbolUtil.thisType(TreeClass.this); }
     
@@ -421,6 +437,7 @@ public class TreeClass implements DJClass {
     }
     
     public String declaredName() { return _m.getName(); }
+    public DJClass declaringClass() { return TreeClass.this; }
     public boolean isStatic() { return _m.getModifiers().isStatic(); }
     public boolean isAbstract() { return _m.getModifiers().isAbstract() || isInterface(); }
     public boolean isFinal() { return _m.getModifiers().isFinal(); }

@@ -227,7 +227,10 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
           }
           else { return context.importTopLevelClass(c); }
         }
-        catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
+        catch (AmbiguousNameException e) {
+          setErrorStrings(node, node.getName());
+          throw new ExecutionError("ambiguous.name", node);
+        }
       }
       
     }
@@ -246,14 +249,17 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
           DJClass c = context.getTopLevelClass(topLevelName, ts);
           result = (c == null) ? null : ts.makeClassType(c);
         }
-        catch (AmbiguousNameException e) { throw new ExecutionError("ambiguous.name", node); }
+        catch (AmbiguousNameException e) {
+          setErrorStrings(node, topLevelName);
+          throw new ExecutionError("ambiguous.name", node);
+        }
       }
       else {
         try { result = ts.lookupClass(result, piece, IterUtil.<Type>empty(), context.accessModule()); }
         catch (InvalidTypeArgumentException e) { throw new RuntimeException("can't create raw type"); }
         catch (UnmatchedLookupException e) {
           setErrorStrings(node, piece);
-          if (e.matches() > 1) { throw new ExecutionError("ambiguous.inner.class"); }
+          if (e.matches() > 1) { throw new ExecutionError("ambiguous.inner.class", node); }
           else { throw new ExecutionError("no.such.inner.class", node); }
         }
       }
@@ -278,13 +284,14 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
       return new LocalContext(context, v);
     }
     else {
+      boolean initialized = (node.getInitializer() != null);
       Type t = checkTypeName(node.getType());
-      LocalVariable v = new LocalVariable(node.getName(), t, node.getModifiers().isFinal());
+      LocalVariable v = new LocalVariable(node.getName(), t, initialized && node.getModifiers().isFinal());
       setVariable(node, v);
       setErasedType(node, ts.erasedClass(t));
       TypeContext newContext = new LocalContext(context, v);
       
-      if (node.getInitializer() != null) {
+      if (initialized) {
         Type initT = checkType(node.getInitializer(), t);
         try {
           Expression newInit = ts.assign(t, node.getInitializer());
@@ -516,7 +523,8 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
    */
   @Override public TypeContext visit(SwitchStatement node) {
     Type t = checkType(node.getSelector());
-    if (!ts.isEnum(t)) {
+    boolean switchEnum = ts.isEnum(t);
+    if (!switchEnum) {
       try {
         Expression exp = ts.makePrimitive(node.getSelector());
         if (!(getType(exp) instanceof IntegralType) || (getType(exp) instanceof LongType)) {
@@ -538,16 +546,20 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
          - A local variable is in scope for the rest of the switch statement's body -- it "falls through"
          - A local class is *only* in scope in its SwitchBlock -- it does not "fall through"
          This is a mess.  For now we just follow a no-fall-through approach. */
-      
-      bk.acceptVisitor(this);
-      
       if (bk.getExpression() == null) {
         if (hasDefault) { throw new ExecutionError("duplicate.switch.case", node); }
         hasDefault = true;
       }
-      
+      else if (switchEnum) {
+        DJField val = new ExpressionChecker(context, opt).checkEnumSwitchCase(bk.getExpression(), t);
+        if (values.contains(val)) {
+          throw new ExecutionError("duplicate.switch.case", bk);
+        }
+        values.add(val);
+      }
       else {
         Expression exp = bk.getExpression();
+        checkType(exp);
         if (!hasValue(exp) || getValue(exp) == null) {
           throw new ExecutionError("invalid.constant", exp);
         }
@@ -556,12 +568,14 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
           throw new ExecutionError("switch.label.type", exp);
         }
         if (values.contains(getValue(exp))) { 
-          throw new ExecutionError("duplicate.switch.case", node);
+          throw new ExecutionError("duplicate.switch.case", bk);
         }
         values.add(getValue(exp));
       }
+      
+      if (bk.getStatements() != null) { checkList(bk.getStatements()); }
     }
-    
+      
     return context;
   }
 

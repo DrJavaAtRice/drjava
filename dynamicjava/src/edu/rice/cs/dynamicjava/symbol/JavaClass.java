@@ -11,6 +11,7 @@ import edu.rice.cs.dynamicjava.interpreter.RuntimeBindings;
 import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
 
 import edu.rice.cs.plt.reflect.ReflectUtil;
+import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Thunk;
@@ -160,11 +161,24 @@ public class JavaClass implements DJClass {
     protected final Field _f;
     public JavaField(Field f) { _f = f; }
     public String declaredName() { return _f.getName(); }
+    public DJClass declaringClass() { return JavaClass.this; }
     public Type type() { return classAsType(_f.getType()); }
     public boolean isFinal() { return Modifier.isFinal(_f.getModifiers()); }
     public boolean isStatic() { return Modifier.isStatic(_f.getModifiers()); }
     public Access accessibility() { return extractAccessibility(_f.getModifiers()); }
     public Access.Module accessModule() { return JavaClass.this.accessModule(); }
+    
+    public Option<Object> constantValue() {
+      // Whether a field is declared as a constant is not available via the reflection API,
+      // so we approximate by treating all static final fields as constants.
+      // (Note that some code my execute here during the type checking phase, before "run time".
+      // This seems to be unavoidable given the reflection-based design.)
+      if (isStatic() && isFinal()) {
+        try { return Option.some(boxForReceiver(null).value()); }
+        catch (WrappedException e) { return Option.none(); }
+      }
+      else { return Option.none(); }
+    }
     
     public Box<Object> boxForReceiver(final Object receiver) {
       return new Box<Object>() {
@@ -240,6 +254,7 @@ public class JavaClass implements DJClass {
     }
     
     public String declaredName() { return JavaClass.this.declaredName(); }
+    public DJClass declaringClass() { return JavaClass.this; }
     public Access accessibility() { return extractAccessibility(_k.getModifiers()); }
     public Access.Module accessModule() { return JavaClass.this.accessModule(); }
     protected Thunk<Iterable<LocalVariable>> makeParamThunk() { return paramFactory(_k.getParameterTypes()); }
@@ -306,6 +321,7 @@ public class JavaClass implements DJClass {
     public JavaMethod(Method m) { _m = m; _params = makeParamThunk(); /* allows overriding */ }
     protected Thunk<Iterable<LocalVariable>> makeParamThunk() { return paramFactory(_m.getParameterTypes()); }
     public String declaredName() { return _m.getName(); }
+    public DJClass declaringClass() { return JavaClass.this; }
     public boolean isStatic() { return Modifier.isStatic(_m.getModifiers()); }
     public boolean isAbstract() { return Modifier.isAbstract(_m.getModifiers()); }
     public boolean isFinal() { return Modifier.isFinal(_m.getModifiers()); }

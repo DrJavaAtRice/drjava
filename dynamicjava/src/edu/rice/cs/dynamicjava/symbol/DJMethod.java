@@ -7,6 +7,8 @@ import edu.rice.cs.dynamicjava.symbol.type.Type;
 
 /** Represents a method declaration. */
 public interface DJMethod extends Function, Access.Limited {
+  /** The class declaring this method.  May be null for certain special methods. */
+  public DJClass declaringClass();
   public boolean isStatic();
   public boolean isAbstract();
   public boolean isFinal();

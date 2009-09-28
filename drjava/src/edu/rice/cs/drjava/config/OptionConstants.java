@@ -958,8 +958,8 @@ public interface OptionConstants {
     new ForcedChoiceOption("javadoc.api.ref.version", JAVADOC_AUTO_TEXT, apiJavadocVersionChoices);
 
   /** URL for JUnit 3.8.2 javadocs. */
-  public static final StringOption JUNIT_3_8_2_LINK =
-    new StringOption("junit.3.8.2.link", "http://www.cs.rice.edu/~javaplt/javadoc/junit3.8.2");
+  public static final StringOption JUNIT_LINK =
+    new StringOption("junit.link", "http://junit.org/junit/javadoc/4.4");
 
   /** Additional Javadoc URLs. */
   public static final VectorOption<String> JAVADOC_ADDITIONAL_LINKS =

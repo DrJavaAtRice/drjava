@@ -187,6 +187,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "   public void testAB() { assertTrue(\"this is true\", true); } " +
     " }";
   
+  
 //  /** Creates a test suite for JUnit to run.
 //    * @return a test suite based on the methods in this class
 //    */
@@ -791,4 +792,37 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _model.removeListener(listener2);
     _log.log("testCorrectFilesAfterIncorrectChanges completed");
   }
+
+
+  
+  //JOHNCATE
+  public void testJUnit4StyleTestWorks() throws Exception {
+    
+    if (printMessages) System.out.println("----testJUnit4StyleTestWorks-----");
+    
+    final OpenDefinitionsDocument doc = setupDocument((_model._createOpenDefinitionsDocument(new File("testFiles/JUnit4StyleTest.java"))).getText());    
+    
+    final File file = new File(_tempDir, "JUnit4StyleTest.java");
+    saveFileAs(doc, new FileSelector(file));
+    JUnitTestListener listener = new JUnitTestListener();
+    _model.addListener(listener);
+    
+    listener.compile(doc); // synchronously compiles doc
+    listener.checkCompileOccurred();
+    
+    listener.runJUnit(doc);
+    // runJUnit waits until the thread started in DefaultJUnitModel._rawJUnitOpenDefDocs has called notify
+    
+    listener.assertJUnitStartCount(1);
+    
+    if (printMessages) System.out.println("errors: " + _model.getJUnitModel().getJUnitErrorModel());
+    
+    listener.assertNonTestCaseCount(0);
+    assertEquals("test case should have no errors reported",  0,
+                 _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
+    
+    _model.removeListener(listener);
+    _log.log("testJUnit4StyleTestWorks completed");
+  }
 }
+

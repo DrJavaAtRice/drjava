@@ -241,5 +241,11 @@ public class SymbolUtil {
   private static final Lambda<Variable, Type> TYPE_OF_VARIABLE = new Lambda<Variable, Type>() {
     public Type value(Variable v) { return v.type(); }
   };
+  
+  /** Test whether the function's last parameter has a VarargArrayType type. */
+  public static boolean isVararg(Function f) {
+    Iterable<LocalVariable> params = f.parameters();
+    return !IterUtil.isEmpty(params) && (IterUtil.last(params).type() instanceof VarargArrayType); 
+  }
 
 }

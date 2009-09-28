@@ -116,7 +116,7 @@ public class JUnitTestManager {
         if (_isJUnitTest(_testRunner.loadPossibleTest(cName))) {
           _testClassNames.add(cName);
           _testFiles.add(pair.second());
-          _suite.addTest(_testRunner.getTest(cName));
+          _suite.addTest(new JUnit4TestAdapter(_testRunner.loadPossibleTest(cName)));
         }
       }
       catch (ClassNotFoundException e) { error.log(e); }
@@ -189,14 +189,18 @@ public class JUnitTestManager {
     _log.log("test manager state reset");
   }
   
+
+    
   /** Determines if the given class is a junit Test.
     * @param c the class to check
     * @return true iff the given class is an instance of junit.framework.Test
     */
   private boolean _isJUnitTest(Class<?> c) {
-    boolean result = Test.class.isAssignableFrom(c) && !Modifier.isAbstract(c.getModifiers()) && 
-      !Modifier.isInterface(c.getModifiers());
-    //debug.logValues(new String[]{"c", "isJUnitTest(c)"}, c, result);
+
+    boolean result = (Test.class.isAssignableFrom(c) && !Modifier.isAbstract(c.getModifiers()) && !Modifier.isInterface(c.getModifiers()) ||
+      (new JUnit4TestAdapter(c).getTests().size()>0)) && !new JUnit4TestAdapter(c).getTests().get(0).toString().contains("initializationError")
+      ; //had to add specific check for initializationError. Is there a better way of checking if a class contains a test?
+    debug.logValues(new String[]{"c", "isJUnitTest(c)"}, c, result);
     return result;
   }
   

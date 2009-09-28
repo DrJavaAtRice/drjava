@@ -27,7 +27,7 @@ public class BaseContext implements TypeContext {
   public Type getReturnType() { return null; }
   public DJClass getThis() { return null; }
   public DJClass getThis(String className) { return null; }
-  public boolean hasThis(DJClass c) { return false; }
+  public DJClass getThis(Type expected, TypeSystem ts) { return null; }
   public DJClass getTopLevelClass(String name, TypeSystem ts) throws AmbiguousNameException { return null; }
   public VariableType getTypeVariable(String name, TypeSystem ts) { return null; }
   public TypeContext importField(DJClass c, String name) { throw new UnsupportedOperationException(); }
@@ -37,6 +37,7 @@ public class BaseContext implements TypeContext {
   public TypeContext importStaticMembers(DJClass c) { throw new UnsupportedOperationException(); }
   public TypeContext importTopLevelClass(DJClass c) { throw new UnsupportedOperationException(); }
   public TypeContext importTopLevelClasses(String pkg) { throw new UnsupportedOperationException(); }
+  public DJClass initializingClass() { return null; }
   public boolean localFunctionExists(String name, TypeSystem ts) { return false; }
   public boolean localVariableExists(String name, TypeSystem ts) { return false; }
   public String makeAnonymousClassName() { throw new UnsupportedOperationException(); }
@@ -47,7 +48,7 @@ public class BaseContext implements TypeContext {
   public boolean topLevelClassExists(String name, TypeSystem ts) { return false; }
   public ClassType typeContainingField(String name, TypeSystem ts) throws AmbiguousNameException { return null; }
   public ClassType typeContainingMemberClass(String name, TypeSystem ts) throws AmbiguousNameException { return null; }
-  public ClassType typeContainingMethod(String name, TypeSystem ts) throws AmbiguousNameException { return null; }
+  public Type typeContainingMethod(String name, TypeSystem ts) { return null; }
   public boolean typeExists(String name, TypeSystem ts) { return false; }
   public boolean typeVariableExists(String name, TypeSystem ts) { return false; }
   public boolean variableExists(String name, TypeSystem ts) { return false; }

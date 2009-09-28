@@ -1,6 +1,7 @@
 package edu.rice.cs.dynamicjava.interpreter;
 
 import edu.rice.cs.dynamicjava.symbol.*;
+import edu.rice.cs.dynamicjava.symbol.type.ClassType;
 import edu.rice.cs.dynamicjava.symbol.type.VariableType;
 
 // TODO: support references to methods within the body
@@ -20,20 +21,33 @@ public class FunctionSignatureContext extends DelegatingContext {
     return new FunctionSignatureContext(next, _f);
   }
   
-  /** Test whether {@code name} is an in-scope top-level class, member class, or type variable */
   @Override public boolean typeExists(String name, TypeSystem ts) {
     return declaredTypeVariable(name) != null || super.typeExists(name, ts);
   }
   
-  /** Test whether {@code name} is an in-scope type variable. */
   @Override public boolean typeVariableExists(String name, TypeSystem ts) {
     return declaredTypeVariable(name) != null || super.typeVariableExists(name, ts);
   }
   
-  /** Return the type variable with the given name, or {@code null} if it does not exist. */
   @Override public VariableType getTypeVariable(String name, TypeSystem ts) {
     VariableType result = declaredTypeVariable(name);
     return (result == null) ? super.getTypeVariable(name, ts) : result;
+  }
+  
+  @Override public boolean topLevelClassExists(String name, TypeSystem ts) {
+    return (declaredTypeVariable(name) == null) ? super.topLevelClassExists(name, ts) : false;
+  }
+  
+  @Override public DJClass getTopLevelClass(String name, TypeSystem ts) throws AmbiguousNameException {
+    return (declaredTypeVariable(name) == null) ? super.getTopLevelClass(name, ts) : null;
+  }
+  
+  @Override public boolean memberClassExists(String name, TypeSystem ts) {
+    return (declaredTypeVariable(name) == null) ? super.memberClassExists(name, ts) : false;
+  }
+  
+  @Override public ClassType typeContainingMemberClass(String name, TypeSystem ts) throws AmbiguousNameException {
+    return (declaredTypeVariable(name) == null) ? super.typeContainingMemberClass(name, ts) : null;
   }
   
   private VariableType declaredTypeVariable(String name) {

@@ -94,6 +94,7 @@ public class FunctionWrapperClass implements DJClass {
     public Iterable<LocalVariable> parameters() { return _f.parameters(); }
     public Iterable<Type> thrownTypes() { return _f.thrownTypes(); }
     public String declaredName() { return _f.declaredName(); }
+    public DJClass declaringClass() { return FunctionWrapperClass.this; }
     public Type returnType() { return _f.returnType(); }
     public boolean isStatic() { return true; }
     public boolean isAbstract() { return false; }

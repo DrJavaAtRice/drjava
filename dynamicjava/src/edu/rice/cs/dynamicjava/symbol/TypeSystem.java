@@ -8,6 +8,7 @@ import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.Lambda;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 import java.io.Serializable;
 
@@ -560,6 +561,18 @@ public abstract class TypeSystem {
     
     /** @return  The return type of the access (before capture) */
     public Type type() { return _type; }
+    
+    public boolean equals(Object that) {
+      if (this == that) { return true; }
+      else if (!(that instanceof FieldReference)) { return false; }
+      else {
+        FieldReference r = (FieldReference) that;
+        return _field.equals(r._field) && _type.equals(r._type);
+      }
+    }
+    
+    public int hashCode() { return ObjectUtil.hash(FieldReference.class, _field, _type); }
+    
   }
   
   

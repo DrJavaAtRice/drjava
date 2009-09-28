@@ -2,13 +2,17 @@ package edu.rice.cs.dynamicjava.interpreter;
 
 import java.util.*;
 
+import edu.rice.cs.plt.collect.IndexedRelation;
+import edu.rice.cs.plt.collect.Relation;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.iter.SequenceIterator;
+import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.text.TextUtil;
 
 import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.symbol.*;
+import edu.rice.cs.dynamicjava.symbol.type.IntersectionType;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
 import edu.rice.cs.dynamicjava.symbol.type.ClassType;
 
@@ -18,7 +22,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  * The context at the top level of a source file or local block.  Manages package and
  * import statements.
  */
-public class TopLevelContext extends DelegatingContext {
+public class ImportContext extends DelegatingContext {
 
   private final TypeContext _next; // need to save here for making copies
   private final Options _opt;
@@ -41,13 +45,13 @@ public class TopLevelContext extends DelegatingContext {
   /** Classes containing an individually-imported field */
   private final HashMap<String, DJClass> _importedFields;
   /** Classes containing an individually-imported method */
-  private final HashMap<String, DJClass> _importedMethods;
+  private final Relation<String, DJClass> _importedMethods;
   
   /**
    * Make a top-level context that delegates to a LibraryContext based on the given class loader.
    * The context is initialized with an on-demand import of "java.lang".
    */
-  public TopLevelContext(ClassLoader loader, Options opt) {
+  public ImportContext(ClassLoader loader, Options opt) {
     this(new LibraryContext(SymbolUtil.classLibrary(loader)), opt);
   }
   
@@ -55,7 +59,7 @@ public class TopLevelContext extends DelegatingContext {
    * Make a top-level context that delegates to the given context.
    * The context is initialized with an on-demand import of "java.lang".
    */
-  public TopLevelContext(TypeContext next, Options opt) {
+  public ImportContext(TypeContext next, Options opt) {
     super(next);
     _next = next;
     _opt = opt;
@@ -67,17 +71,17 @@ public class TopLevelContext extends DelegatingContext {
     _importedTopLevelClasses = new HashMap<String, DJClass>();
     _importedMemberClasses = new HashMap<String, DJClass>();
     _importedFields = new HashMap<String, DJClass>();
-    _importedMethods = new HashMap<String, DJClass>();
+    _importedMethods = new IndexedRelation<String, DJClass>(false);
     
     _onDemandPackages.add("java.lang");
   }
   
-  private TopLevelContext(TopLevelContext copy) {
+  private ImportContext(ImportContext copy) {
     this(copy._next, copy._currentPackage, copy);
   }
   
   @SuppressWarnings("unchecked")
-  private TopLevelContext(TypeContext next, String currentPackage, TopLevelContext bindings) {
+  private ImportContext(TypeContext next, String currentPackage, ImportContext bindings) {
     super(next);
     _next = next;
     _opt = bindings._opt;
@@ -89,43 +93,44 @@ public class TopLevelContext extends DelegatingContext {
     _importedTopLevelClasses = (HashMap<String, DJClass>) bindings._importedTopLevelClasses.clone();
     _importedMemberClasses = (HashMap<String, DJClass>) bindings._importedMemberClasses.clone();
     _importedFields = (HashMap<String, DJClass>) bindings._importedFields.clone();
-    _importedMethods = (HashMap<String, DJClass>) bindings._importedMethods.clone();
+    _importedMethods = new IndexedRelation<String, DJClass>(false);
+    _importedMethods.addAll(bindings._importedMethods);
   }
   
   protected TypeContext duplicate(TypeContext next) {
-    return new TopLevelContext(next, _currentPackage, this);
+    return new ImportContext(next, _currentPackage, this);
   }
 
   
   /* PACKAGE AND IMPORT MANAGEMENT */
   
   /** Set the current package to the given package name */
-  @Override public TypeContext setPackage(String name) { return new TopLevelContext(_next, name, this); }
+  @Override public TypeContext setPackage(String name) { return new ImportContext(_next, name, this); }
   
   /** Import on demand all top-level classes in the given package */
   @Override public TypeContext importTopLevelClasses(String pkg) {
-    TopLevelContext result = new TopLevelContext(this);
+    ImportContext result = new ImportContext(this);
     result._onDemandPackages.add(pkg);
     return result;
   }
   
   /** Import on demand all member classes of the given class */
   @Override public TypeContext importMemberClasses(DJClass outer) {
-    TopLevelContext result = new TopLevelContext(this);
+    ImportContext result = new ImportContext(this);
     result._onDemandClasses.add(outer);
     return result;
   }    
   
   /** Import on demand all static members of the given class */
   @Override public TypeContext importStaticMembers(DJClass c) {
-    TopLevelContext result = new TopLevelContext(this);
+    ImportContext result = new ImportContext(this);
     result._staticOnDemandClasses.add(c);
     return result;
   }
   
   /** Import the given top-level class */
   @Override public TypeContext importTopLevelClass(DJClass c) {
-    TopLevelContext result = new TopLevelContext(this);
+    ImportContext result = new ImportContext(this);
     String name = c.declaredName();
     // Under strict circumstances, a duplicate import for a name is illegal, but DynamicJava allows it
     result._importedMemberClasses.remove(name);
@@ -135,7 +140,7 @@ public class TopLevelContext extends DelegatingContext {
   
   /** Import the member class(es) of {@code outer} with the given name */
   @Override public TypeContext importMemberClass(DJClass outer, String name) {
-    TopLevelContext result = new TopLevelContext(this);
+    ImportContext result = new ImportContext(this);
     // Under strict circumstances, a duplicate import for a name is illegal, but DynamicJava allows it
     result._importedTopLevelClasses.remove(name);
     result._importedMemberClasses.put(name, outer);
@@ -144,7 +149,7 @@ public class TopLevelContext extends DelegatingContext {
   
   /** Import the field(s) of {@code c} with the given name */
   @Override public TypeContext importField(DJClass c, String name) {
-    TopLevelContext result = new TopLevelContext(this);
+    ImportContext result = new ImportContext(this);
     // Under strict circumstances, a duplicate import for a name is illegal, but DynamicJava allows it
     result._importedFields.put(name, c);
     return result;
@@ -152,36 +157,36 @@ public class TopLevelContext extends DelegatingContext {
   
   /** Import the method(s) of {@code c} with the given name */
   @Override public TypeContext importMethod(DJClass c, String name) {
-    TopLevelContext result = new TopLevelContext(this);
-    // Under strict circumstances, a duplicate import for a name is illegal, but DynamicJava allows it
-    result._importedMethods.put(name, c);
+    ImportContext result = new ImportContext(this);
+    result._importedMethods.add(name, c); // overloads with any others already imported
     return result;
   }
     
   
   /* TYPES: TOP-LEVEL CLASSES, MEMBER CLASSES, AND TYPE VARIABLES */
   
-  /** Test whether {@code name} is an in-scope top-level class, member class, or type variable */
   @Override public boolean typeExists(String name, TypeSystem ts) {
-    return topLevelClassExists(name, ts) || memberClassExists(name, ts) || super.typeVariableExists(name, ts);
+    return importsTopLevelClass(name, ts) || importsMemberClass(name, ts) || super.typeExists(name, ts);
   }
   
-  /** Test whether {@code name} is an in-scope top-level class */
   @Override public boolean topLevelClassExists(String name, TypeSystem ts) {
-    try { return getTopLevelClass(name, ts) != null; }
+    return importsTopLevelClass(name, ts) || (!importsMemberClass(name, ts) && super.topLevelClassExists(name, ts));
+  }
+  
+  @Override public DJClass getTopLevelClass(String name, TypeSystem ts) throws AmbiguousNameException {
+    DJClass result = importedTopLevelClass(name, ts);
+    return (result == null && !importsMemberClass(name, ts)) ? super.getTopLevelClass(name, ts) : result;
+  }
+  
+  private boolean importsTopLevelClass(String name, TypeSystem ts) {
+    try { return importedTopLevelClass(name, ts) != null; }
     catch (AmbiguousNameException e) { return true; }
   }
   
-  /**
-   * Return the top-level class with the given name, or {@code null} if it does not exist.  If the name 
-   * contains a {@code '.'}, it is assumed to be a fully-qualified name; otherwise, the result relies on 
-   * the current import and package settings.  Note that a member class may shadow a top-level class, 
-   * resulting in a null result here.
-   */
-  @Override public DJClass getTopLevelClass(String name, TypeSystem ts) throws AmbiguousNameException {
-    if (TextUtil.contains(name, '.')) { return super.getTopLevelClass(name, ts); }
-    else {
-      DJClass result = _importedTopLevelClasses.get(name);
+  private DJClass importedTopLevelClass(String name, TypeSystem ts) throws AmbiguousNameException {
+    DJClass result = null;
+    if (!TextUtil.contains(name, '.')) { // qualified names cannot be imported
+      result = _importedTopLevelClasses.get(name);
       if (result == null) {
         result = super.getTopLevelClass(makeClassName(name), ts);
         if (result == null) {
@@ -200,21 +205,25 @@ public class TopLevelContext extends DelegatingContext {
           result = null;
         }
       }
-      return result;
     }
+    return result;
   }
   
-  /** Test whether {@code name} is an in-scope member class */
   @Override public boolean memberClassExists(String name, TypeSystem ts) {
-    try { return typeContainingMemberClass(name, ts) != null; }
+    return importsMemberClass(name, ts) || (!importsTopLevelClass(name, ts) && super.memberClassExists(name, ts));
+  }
+  
+  @Override public ClassType typeContainingMemberClass(String name, TypeSystem ts) throws AmbiguousNameException {
+    ClassType result = importedMemberClassType(name, ts);
+    return (result == null && !importsTopLevelClass(name, ts)) ? super.typeContainingMemberClass(name, ts) : result;
+  }
+  
+  private boolean importsMemberClass(String name, TypeSystem ts) {
+    try { return importedMemberClassType(name, ts) != null; }
     catch (AmbiguousNameException e) { return true; }
   }
-  
-  /**
-   * Return the most inner type containing a class with the given name, or {@code null}
-   * if there is no such type.
-   */
-  @Override public ClassType typeContainingMemberClass(String name, TypeSystem ts) throws AmbiguousNameException {
+    
+  private ClassType importedMemberClassType(String name, TypeSystem ts) throws AmbiguousNameException {
     DJClass explicitImport = _importedMemberClasses.get(name);
     ClassType result = explicitImport == null ? null : ts.makeClassType(explicitImport);
     if (result == null) {
@@ -241,23 +250,33 @@ public class TopLevelContext extends DelegatingContext {
   
   /* VARIABLES: FIELDS AND LOCAL VARIABLES */  
   
-  /** Test whether {@code name} is an in-scope field or local variable */
   @Override public boolean variableExists(String name, TypeSystem ts) {
-    return fieldExists(name, ts) || super.localVariableExists(name, ts);
+    return importsField(name, ts) || super.variableExists(name, ts);
   }
   
-  /** Test whether {@code name} is an in-scope field */
   @Override public boolean fieldExists(String name, TypeSystem ts) {
-    try { return typeContainingField(name, ts) != null; }
-    catch (AmbiguousNameException e) { return true; }
+    return importsField(name, ts) || super.fieldExists(name, ts);
   }
     
-  
-  /**
-   * Return the most inner type containing a field with the given name, or {@code null}
-   * if there is no such type.
-   */
   @Override public ClassType typeContainingField(String name, TypeSystem ts) throws AmbiguousNameException {
+    ClassType result = importedFieldType(name, ts);
+    return (result == null) ? super.typeContainingField(name, ts) : result;
+  }
+  
+  @Override public boolean localVariableExists(String name, TypeSystem ts) {
+    return !importsField(name, ts) && super.localVariableExists(name, ts);
+  }
+  
+  @Override public LocalVariable getLocalVariable(String name, TypeSystem ts) {
+    return importsField(name, ts) ? null : super.getLocalVariable(name, ts);
+  }
+
+  private boolean importsField(String name, TypeSystem ts) {
+    try { return importedFieldType(name, ts) != null; }
+    catch (AmbiguousNameException e) { return true; }
+  }
+  
+  private ClassType importedFieldType(String name, TypeSystem ts) throws AmbiguousNameException {
     DJClass explicitImport = _importedFields.get(name);
     ClassType result = explicitImport == null ? null : ts.makeClassType(explicitImport);
     if (result == null) {
@@ -278,37 +297,55 @@ public class TopLevelContext extends DelegatingContext {
   
   /* METHODS */
   
-  /** Test whether {@code name} is an in-scope method or local function */
   @Override public boolean functionExists(String name, TypeSystem ts) {
-    return methodExists(name, ts) || super.localFunctionExists(name, ts);
+    return importsMethod(name, ts) || super.functionExists(name, ts);
   }
   
-  /** Test whether {@code name} is an in-scope method */
   @Override public boolean methodExists(String name, TypeSystem ts) {
-    try { return typeContainingMethod(name, ts) != null; }
-    catch (AmbiguousNameException e) { return true; }
+    return importsMethod(name, ts) || super.methodExists(name, ts);
   }
   
-  /**
-   * Return the most inner type containing a method with the given name, or {@code null}
-   * if there is no such type.
-   */
-  @Override public ClassType typeContainingMethod(String name, TypeSystem ts) throws AmbiguousNameException {
-    DJClass explicitImport = _importedMethods.get(name);
-    ClassType result = explicitImport == null ? null : ts.makeClassType(explicitImport);
-    if (result == null) {
+  @Override public Type typeContainingMethod(String name, TypeSystem ts) {
+    Type result = importedMethodType(name, ts);
+    return (result == null) ? super.typeContainingMethod(name, ts) : result;
+  }
+  
+  @Override public boolean localFunctionExists(String name, TypeSystem ts) {
+    return !importsMethod(name, ts) && super.localFunctionExists(name, ts);
+  }
+  
+  @Override public Iterable<LocalFunction> getLocalFunctions(String name, TypeSystem ts,
+                                                              Iterable<LocalFunction> partial) {
+    boolean keepLooking = IterUtil.isEmpty(partial) && !importsMethod(name, ts);
+    return keepLooking ? super.getLocalFunctions(name, ts, partial) : partial;
+  }
+
+  private boolean importsMethod(String name, TypeSystem ts) {
+    return importedMethodType(name, ts) != null;
+  }
+
+  private Type importedMethodType(String name, final TypeSystem ts) {
+    Iterable<ClassType> matches;
+    Iterable<DJClass> explicitImports = _importedMethods.matchFirst(name);
+    if (!IterUtil.isEmpty(explicitImports)) {
+      matches = IterUtil.mapSnapshot(explicitImports, new Lambda<DJClass, ClassType>() {
+        public ClassType value(DJClass c) { return ts.makeClassType(c); }
+      });
+    }
+    else {
       LinkedList<ClassType> onDemandMatches = new LinkedList<ClassType>();
       for (DJClass c : _staticOnDemandClasses) {
         ClassType t = ts.makeClassType(c);
         if (ts.containsStaticMethod(t, name, accessModule())) { onDemandMatches.add(t); }
       }
-      if (onDemandMatches.size() > 1) { throw new AmbiguousNameException(); }
-      else if (onDemandMatches.size() == 1) { result = onDemandMatches.getFirst(); }
-      if (result == null) {
-        result = super.typeContainingMethod(name, ts);
-      }
+      matches = onDemandMatches;
     }
-    return result;
+    
+    switch (IterUtil.sizeOf(matches, 2)) {
+      case 0: return null;
+      case 1: return IterUtil.first(matches);
+      default: return new IntersectionType(matches);
+    }
   }
   
   
@@ -338,7 +375,9 @@ public class TopLevelContext extends DelegatingContext {
    */
   @Override public DJClass getThis(String className) { return null; }
   
-  @Override public boolean hasThis(DJClass c) { return false; }
+  @Override public DJClass getThis(Type expected, TypeSystem ts) { return null; }
+  
+  @Override public DJClass initializingClass() { return null; }
   
   /**
    * The expected type of a {@code return} statement in the given context, or {@code null}
