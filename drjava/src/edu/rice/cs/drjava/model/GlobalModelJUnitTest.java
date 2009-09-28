@@ -461,7 +461,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     catch (Exception e) { fail("Aborting unit testing runs recovery code in testing thread; no exception is thrown"); }
     
     listener.waitResetDone();  // reset should occur when test suite is started
-        
+    
 //    System.err.println("ResetDone");
     
     if (printMessages) System.out.println("after test");
@@ -567,7 +567,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     listener2.compile(doc);
     listener2.checkCompileOccurred();
-
+    
     listener2.resetCompileCounts();
     
     // Opending Test
@@ -747,7 +747,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     File file = new File(_tempDir, "NonTestCase.java");
     saveFile(doc, new FileSelector(file));
     _model.addListener(listener);
-   
+    
     listener.compile(doc);
     listener.checkCompileOccurred();
     _model.removeListener(listener);
@@ -792,18 +792,19 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _model.removeListener(listener2);
     _log.log("testCorrectFilesAfterIncorrectChanges completed");
   }
-
-
   
-  //JOHNCATE
+  
+  /*
+   * Tests if a JUnit4 style unit test works
+   */
   public void testJUnit4StyleTestWorks() throws Exception {
     
     if (printMessages) System.out.println("----testJUnit4StyleTestWorks-----");
     
-    final OpenDefinitionsDocument doc = setupDocument((_model._createOpenDefinitionsDocument(new File("testFiles/JUnit4StyleTest.java"))).getText());    
+    final OpenDefinitionsDocument doc = setupDocument((_model._createOpenDefinitionsDocument(new File("testFiles/GlobalModelJUnitTestFiles/JUnit4StyleTest.java"))).getText());    
     
     final File file = new File(_tempDir, "JUnit4StyleTest.java");
-    saveFileAs(doc, new FileSelector(file));
+    saveFile(doc, new FileSelector(file));
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
     
@@ -824,5 +825,105 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _model.removeListener(listener);
     _log.log("testJUnit4StyleTestWorks completed");
   }
+  
+  /**
+   * Tests to see if a JUnit4 style test with multiple test cases passes
+   */
+  public void testJUnit4MultiTest() throws Exception {
+    
+    if (printMessages) System.out.println("----testJUnit4MultiTest-----");
+    
+    final OpenDefinitionsDocument doc = setupDocument((_model._createOpenDefinitionsDocument(new File("testFiles/GlobalModelJUnitTestFiles/JUnit4MultiTest.java"))).getText());    
+    
+    final File file = new File(_tempDir, "JUnit4MultiTest.java");
+    saveFile(doc, new FileSelector(file));
+    JUnitTestListener listener = new JUnitTestListener();
+    _model.addListener(listener);
+    
+    listener.compile(doc); // synchronously compiles doc
+    listener.checkCompileOccurred();
+    
+    listener.runJUnit(doc);
+    // runJUnit waits until the thread started in DefaultJUnitModel._rawJUnitOpenDefDocs has called notify
+    
+    listener.assertJUnitStartCount(1);
+    
+    if (printMessages) System.out.println("errors: " + _model.getJUnitModel().getJUnitErrorModel());
+    
+    listener.assertNonTestCaseCount(0);
+    assertEquals("test case should have no errors reported",  0,
+                 _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
+    
+    _model.removeListener(listener);
+    _log.log("testJUnit4SMultiTest completed");
+  }
+  
+  
+  /**
+   * Tests to see if a JUnit4 style test with no test cases will not run
+   */
+  public void testJUnit4NoTest() throws Exception {
+    if (printMessages) System.out.println("----testJUnit4NoTest-----");
+    
+    final OpenDefinitionsDocument doc = setupDocument((_model._createOpenDefinitionsDocument(new File("testFiles/GlobalModelJUnitTestFiles/JUnit4NoTest.java"))).getText());
+    final File file = new File(_tempDir, "JUnit4NoTest.java");
+    saveFile(doc, new FileSelector(file));
+    
+    JUnitTestListener listener = new JUnitNonTestListener();
+    
+    _model.addListener(listener);
+    
+    listener.compile(doc);
+    listener.checkCompileOccurred();
+    
+    listener.runJUnit(doc);
+    // runJUnit waits until the thread started in DefaultJUnitModel._rawJUnitOpenDefDocs has called notify
+    
+    if (printMessages) System.out.println("after test");
+    
+    // Check events fired
+    listener.assertJUnitStartCount(0);  // JUnit is never started
+    listener.assertJUnitEndCount(0); // JUnit never started and hence never ended
+    listener.assertNonTestCaseCount(1);
+    listener.assertJUnitSuiteStartedCount(0);
+    listener.assertJUnitTestStartedCount(0);
+    listener.assertJUnitTestEndedCount(0);
+    _model.removeListener(listener);
+    
+    _log.log("testJUnit4NoTest completed");
+  }
+  
+  /**
+   * Tests to see if a JUnit4 style test with a test method and multiple nonTest methods will run
+   */
+  public void testJUnit4TwoMethod1Test() throws Exception {
+    
+    if (printMessages) System.out.println("----testJUnit4TwoMethod1Test-----");
+    
+    final OpenDefinitionsDocument doc = setupDocument((_model._createOpenDefinitionsDocument(new File("testFiles/GlobalModelJUnitTestFiles/JUnit4TwoMethod1Test.java"))).getText());    
+    
+    final File file = new File(_tempDir, "JUnit4TwoMethod1Test.java");
+    saveFile(doc, new FileSelector(file));
+    JUnitTestListener listener = new JUnitTestListener();
+    _model.addListener(listener);
+    
+    listener.compile(doc); // synchronously compiles doc
+    listener.checkCompileOccurred();
+    
+    listener.runJUnit(doc);
+    // runJUnit waits until the thread started in DefaultJUnitModel._rawJUnitOpenDefDocs has called notify
+    
+    listener.assertJUnitStartCount(1);
+    
+    if (printMessages) System.out.println("errors: " + _model.getJUnitModel().getJUnitErrorModel());
+    
+    listener.assertNonTestCaseCount(0);
+    assertEquals("test case should have no errors reported",  0,
+                 _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
+    
+    _model.removeListener(listener);
+    _log.log("testJUnit4TwoMethod1Test completed");
+  }
+  
 }
 
