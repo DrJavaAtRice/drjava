@@ -257,6 +257,10 @@ public enum JavaVersion {
         // this is Mint, v is not: this before v
         return -1;
       }
+      if ((v._vendor==VendorType.MINT) && (_vendor!=VendorType.MINT)) {
+        // v is Mint, this is not: v before this
+        return 1;
+      }
       
       int result = _majorVersion.compareTo(v._majorVersion);
       if (result == 0) {
