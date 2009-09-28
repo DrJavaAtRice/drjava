@@ -420,8 +420,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     try {
       String mint_home = System.getenv("MINT_HOME");
       if (mint_home!=null) {
-        addIfFile(new File(new File(mint_home), "dist/lib/classes.jar"), jars);
-        addIfFile(new File(new File(mint_home), "dist/lib/tools.jar"), jars);
+        addIfFile(new File(new File(mint_home), "langtools/dist/lib/classes.jar"), jars);
+        addIfFile(new File(new File(mint_home), "langtools/dist/lib/tools.jar"), jars);
       }
     }
     catch(Exception e) { /* ignore MINT_HOME variable */ }
@@ -451,15 +451,18 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       new TreeMap<FullVersion, Iterable<JarJDKToolsLibrary>>();
     // now we have the JDK libraries in collapsed and the Mint libraries in mintCollapsed
     for(JarJDKToolsLibrary mintLib: mintCollapsed) {
+//      msg("mintLib: "+mintLib.version());
       FullVersion mintVersion = mintLib.version();
       JarJDKToolsLibrary found = null;
       // try to find a JDK in results that matches mintVersion exactly, except for vendor
       for(JarJDKToolsLibrary javaLib: collapsed) {
+//        msg("\texact? "+javaLib.version());
         FullVersion javaVersion = javaLib.version();
         if ((javaVersion.majorVersion().equals(mintVersion.majorVersion())) &&
             (javaVersion.maintenance()==mintVersion.maintenance()) &&
             (javaVersion.update()==mintVersion.update()) &&
             (javaVersion.release()==mintVersion.release())) {
+//          msg("\t\tfound");
           found = javaLib;
           break;
         }
@@ -467,8 +470,10 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       // if we didn't find one, take the best JDK that matches the major version
       if (found==null) {
         for(JarJDKToolsLibrary javaLib: collapsed) {
+//          msg("\tmajor? "+javaLib.version());
           FullVersion javaVersion = javaLib.version();
           if (javaVersion.majorVersion().equals(mintVersion.majorVersion())) {
+//            msg("\t\tfound");
             found = javaLib;
             break;
           }
@@ -478,6 +483,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       if (found!=null) {
         JarJDKToolsLibrary lib = makeFromFile(mintLib.location(), model, found.bootClassPath());
         if (lib.isValid()) {
+//          msg("\t==> "+lib.version());
           FullVersion v = lib.version();
           if (javaMintResults.containsKey(v)) { javaMintResults.put(v, IterUtil.compose(lib, javaMintResults.get(v))); }
           else { javaMintResults.put(v, IterUtil.singleton(lib)); }
@@ -496,6 +502,17 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   /** Add a canonicalized {@code f} to the given set if it is an existing file */
   private static void addIfFile(File f, Set<? super File> set) {
     f = IOUtil.attemptCanonicalFile(f);
-    if (IOUtil.attemptIsFile(f)) { set.add(f); }
+//    msg("addIfFile: "+f);
+    if (IOUtil.attemptIsFile(f)) { set.add(f); /*msg("\tadded");*/ }
   }
+  
+//  public static void msg(String s) {   
+//    try {   
+//      java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(new File(new File(System.getProperty("user.home")),   
+//                                                                                       "mintcompiler.txt").getAbsolutePath(),true));   
+//      pw.println(s);   
+//      pw.close();   
+//    }   
+//    catch(java.io.IOException ioe) { }   
+//  }
 }

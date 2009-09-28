@@ -248,8 +248,16 @@ public enum JavaVersion {
      * Compare two versions.  Major, maintenance, and update numbers are ordered sequentially.  When comparing
      * two versions that are otherwise equivalent, early access releases precede betas, followed by
      * release candidates and stable releases. Within the release types, Unrecognized < OpenJDK < Apple < Sun.
+     * Exception: Mint versions come before anything else.
+     * Mint6-ea, Mint6-beta, Mint6-rc, Mint6, Mint7, ..., Java5, ...,
+     * Java6-unrecognized, Java6-OpenJDK, Java6-Apple, Java6-Sun, ..., Java7
      */
     public int compareTo(FullVersion v) {
+      if ((_vendor==VendorType.MINT) && (v._vendor!=VendorType.MINT)) {
+        // this is Mint, v is not: this before v
+        return -1;
+      }
+      
       int result = _majorVersion.compareTo(v._majorVersion);
       if (result == 0) {
         result = _maintenance - v._maintenance;
