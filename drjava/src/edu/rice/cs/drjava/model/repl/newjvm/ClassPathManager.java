@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.model.repl.newjvm;
 import java.io.File;
 import java.util.LinkedList;
 import java.lang.ClassLoader;
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.reflect.PathClassLoader;
@@ -81,6 +82,13 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
     // lazily map the lists to their snapshots -- the snapshot code executes every time
     // _fullPath is traversed
     _fullPath = IterUtil.collapse(IterUtil.map(allPaths, _makeSafeSnapshot));
+    updateProperty();
+  }
+  
+  public static final String INTERACTIONS_CLASS_PATH_PROPERTY = "edu.rice.cs.drjava.interactions.class.path";
+  
+  protected void updateProperty() {
+    System.setProperty(INTERACTIONS_CLASS_PATH_PROPERTY,IOUtil.pathToString(_fullPath));
   }
   
   private final Lambda<Iterable<File>, Iterable<File>> _makeSafeSnapshot =
@@ -93,7 +101,7 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   /** Adds the entry to the front of the project classpath
     * (this is the classpath specified in project properties)
     */
-  public synchronized void addProjectCP(File f) { _projectCP.addFirst(f); }
+  public synchronized void addProjectCP(File f) { _projectCP.addFirst(f); updateProperty(); }
   
   public synchronized Iterable<File> getProjectCP() { return IterUtil.snapshot(_projectCP); }
   
@@ -101,6 +109,7 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   public synchronized void addBuildDirectoryCP(File f) {
     _buildCP.remove(f); // eliminate duplicates
     _buildCP.addFirst(f);
+    updateProperty();
   }
   
   public synchronized Iterable<File> getBuildDirectoryCP() { return IterUtil.snapshot(_buildCP); }
@@ -109,6 +118,7 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   public synchronized void addProjectFilesCP(File f) {
     _projectFilesCP.remove(f); // eliminate duplicates
     _projectFilesCP.addFirst(f);
+    updateProperty();
   }
   
   public synchronized Iterable<File> getProjectFilesCP() { return IterUtil.snapshot(_projectFilesCP); }
@@ -117,6 +127,7 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   public synchronized void addExternalFilesCP(File f) {
     _externalFilesCP.remove(f); // eliminate duplicates
     _externalFilesCP.addFirst(f);
+    updateProperty();
   }
   
   public synchronized Iterable<File> getExternalFilesCP() { return IterUtil.snapshot(_externalFilesCP); }
@@ -125,6 +136,7 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   public synchronized void addExtraCP(File f) {
     _extraCP.remove(f); // eliminate duplicates
     _extraCP.addFirst(f);
+    updateProperty();
   }
   
   public Iterable<File> getExtraCP() { return IterUtil.snapshot(_extraCP); }
@@ -137,6 +149,7 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
     *                class loader.
     */
   public synchronized ClassLoader makeClassLoader(ClassLoader parent) {
+    updateProperty();
     return new PathClassLoader(parent, _fullPath);
   }
   
@@ -144,5 +157,5 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   public ClassLoader value(ClassLoader parent) { return makeClassLoader(parent); }
   
   /** Get a dynamic view of the full class path. */
-  public synchronized Iterable<File> getClassPath() { return _fullPath; }
+  public synchronized Iterable<File> getClassPath() { updateProperty(); return _fullPath; }
 }

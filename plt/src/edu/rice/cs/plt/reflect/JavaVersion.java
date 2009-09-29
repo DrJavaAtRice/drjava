@@ -116,6 +116,10 @@ public enum JavaVersion {
   public static FullVersion parseFullVersion(String java_version, String java_runtime_name, String java_vm_vendor) {
     VendorType vendor = VendorType.UNKNOWN;
     String vendorString = null;
+    if (java_runtime_name.toLowerCase().contains("mint")) {
+      vendor = VendorType.MINT;
+      vendorString = "Mint";
+    }
     if (java_runtime_name.toLowerCase().contains("openjdk")) {
       vendor = VendorType.OPENJDK;
       vendorString = "OpenJDK";
@@ -131,6 +135,9 @@ public enum JavaVersion {
     
     String number;
     String typeString;
+    // if version doesn't start with "1." and has only one dot, prefix with "1."
+    // example: 6.0 --> 1.6.0
+    if ((!java_version.startsWith("1.")) && (java_version.replaceAll("[^\\.]","").length()==1)) java_version = "1."+java_version;
     int dash = java_version.indexOf('-');
     if (dash == -1) { number = java_version; typeString = null; }
     else { number = java_version.substring(0, dash); typeString = java_version.substring(dash+1); }
@@ -221,6 +228,15 @@ public enum JavaVersion {
     
     /** Get the major version associated with this full version */
     public JavaVersion majorVersion() { return _majorVersion; }
+    
+    /** Get the maintenance associated with this full version */
+    public int maintenance() { return _maintenance; }
+    
+    /** Get the update associated with this full version */
+    public int update() { return _update; }    
+    
+    /** Get the update associated with this full version */
+    public ReleaseType release() { return _type; }    
 
     /** Get the vendor associated with this full version */
     public VendorType vendor() { return _vendor; }
@@ -232,8 +248,20 @@ public enum JavaVersion {
      * Compare two versions.  Major, maintenance, and update numbers are ordered sequentially.  When comparing
      * two versions that are otherwise equivalent, early access releases precede betas, followed by
      * release candidates and stable releases. Within the release types, Unrecognized < OpenJDK < Apple < Sun.
+     * Exception: Mint versions come before anything else.
+     * Mint6-ea, Mint6-beta, Mint6-rc, Mint6, Mint7, ..., Java5, ...,
+     * Java6-unrecognized, Java6-OpenJDK, Java6-Apple, Java6-Sun, ..., Java7
      */
     public int compareTo(FullVersion v) {
+      if ((_vendor==VendorType.MINT) && (v._vendor!=VendorType.MINT)) {
+        // this is Mint, v is not: this before v
+        return -1;
+      }
+      if ((v._vendor==VendorType.MINT) && (_vendor!=VendorType.MINT)) {
+        // v is Mint, this is not: v before this
+        return 1;
+      }
+      
       int result = _majorVersion.compareTo(v._majorVersion);
       if (result == 0) {
         result = _maintenance - v._maintenance;
@@ -296,5 +324,5 @@ public enum JavaVersion {
   private static enum ReleaseType { UNRECOGNIZED, EARLY_ACCESS, BETA, RELEASE_CANDIDATE, STABLE; }
 
   /** The vendor of this version. */
-  public static enum VendorType { UNKNOWN, OPENJDK, APPLE, SUN; }
+  public static enum VendorType { UNKNOWN, MINT, OPENJDK, APPLE, SUN; }
 }

@@ -39,6 +39,8 @@ package edu.rice.cs.drjava.model.repl;
 import java.io.File;
 import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.util.List;
+import java.util.ArrayList;
 
 import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
 import edu.rice.cs.drjava.model.AbstractGlobalModel;
@@ -224,4 +226,23 @@ public class SimpleInteractionsModel extends InteractionsModel {
   
   /** Returns null because console tab document is not supported in this model */
   public ConsoleDocument getConsoleDocument() { return null; }
+  
+  
+  /** A compiler can instruct DrJava to include additional elements for the boot
+    * class path of the Interactions JVM. */
+  public List<File> getCompilerBootClassPath() {
+    // not supported
+    // TODO: figure out what to do here
+    return new ArrayList<File>();
+  }
+  
+  /** Transform the command line to be interpreted into something the Interactions JVM can use.
+    * This replaces "java MyClass a b c" with Java code to call MyClass.main(new String[]{"a","b","c"}).
+    * "import MyClass" is not handled here.
+    * @param interactionsString unprocessed command line
+    * @return command line with commands transformed */
+  public String transformCommands(String interactionsString) {
+    // TODO: figure out what to do here
+    return interactionsString;
+  }
 }

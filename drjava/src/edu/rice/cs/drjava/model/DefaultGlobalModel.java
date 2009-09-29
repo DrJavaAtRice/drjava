@@ -152,6 +152,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         resetInteractions(workDir);  // use same working directory as current interpreter
       }
     }
+    public void activeCompilerChanged() {
+      File workDir = _interactionsModel.getWorkingDirectory();
+      resetInteractions(workDir, true);  // use same working directory as current interpreter
+    }
   };
   
   // ---- Compiler Fields ----

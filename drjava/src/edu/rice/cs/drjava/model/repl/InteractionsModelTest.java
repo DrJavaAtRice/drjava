@@ -51,6 +51,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.util.List;
+import java.util.ArrayList;
 
 import java.rmi.RemoteException;
 
@@ -110,7 +112,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     */
   protected void _assertJavaTransformationTail(final String typed, final String expected) {
     assertTrue("main transformation should match expected",
-               TestInteractionsModel._transformJavaCommand(typed).endsWith(expected));
+               edu.rice.cs.drjava.model.compiler.JavacCompiler.transformJavaCommand(typed).endsWith(expected));
   }
 
   /** Asserts that the given string typed by the user of the form "applet classname" is transformed to the given
@@ -121,7 +123,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   protected void _assertAppletTransformation(final String typed, final String expected) {
     assertEquals("applet transformation should match expected",
                  expected, 
-                 TestInteractionsModel._transformAppletCommand(typed));
+                 edu.rice.cs.drjava.model.compiler.JavacCompiler.transformAppletCommand(typed));
   }
   
   /** Tests that the correct text is returned when interpreting. */
@@ -696,6 +698,14 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     public void addExternalFilesClassPath(File path) { fail("cannot add to classpath in a test"); }
     public void addExtraClassPath(File path) { fail("cannot add to classpath in a test"); }
     protected void _resetInterpreter(File wd, boolean force) { fail("cannot reset interpreter in a test"); }
+    public List<File> getCompilerBootClassPath() {
+      // TODO: figure out what to do here
+      return new ArrayList<File>();
+    }
+    public String transformCommands(String interactionsString) {
+      // TODO: figure out what to do here
+      return interactionsString;
+    }
     
     public void _notifyInteractionStarted() { }
     protected void _notifySyntaxErrorOccurred(int offset, int length) { }
@@ -826,6 +836,16 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     
     public boolean isContinuationException() { return continuationException; }
     public boolean isSyntaxException() { return syntaxException; }
+    
+    public List<File> getCompilerBootClassPath() {
+      // TODO: figure out what to do here      
+      return new ArrayList<File>();
+    }
+    
+    public String transformCommands(String interactionsString) {
+      // TODO: figure out what to do here
+      return interactionsString;
+    }
   }
   
 //  public class TestInteractionsListener extends DummyInteractionsListener {

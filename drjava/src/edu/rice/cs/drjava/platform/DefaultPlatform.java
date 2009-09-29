@@ -95,26 +95,6 @@ class DefaultPlatform implements PlatformSupport {
     return System.getProperty("java.specification.version");
   }
 
-  /** Returns true if the classpath's tools.jar is from version 1.3. */
-  public boolean has13ToolsJar() {
-    // Javadoc's Main class should not have an execute(String[]) method.
-    try {
-      Class<?> main = Class.forName("com.sun.tools.javadoc.Main");
-      return !_javadocMainHasExecuteMethod(main);
-    }
-    catch (Throwable t) { return false; }
-  }
-
-  /** Returns true if the classpath's tools.jar is from version 1.4. */
-  public boolean has14ToolsJar() {
-    // Javadoc's Main class should have an execute(String[]) method.
-    try {
-      Class<?> main = Class.forName("com.sun.tools.javadoc.Main");
-      return _javadocMainHasExecuteMethod(main);
-    }
-    catch (Throwable t) { return false; }
-  }
-
   /** Returns true if the given class object for com.sun.tools.javadoc.Main
    *  has an execute(String[]) method.  If so, that means we have a 1.4
    *  version of tools.jar.

@@ -632,6 +632,20 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       jvmArgs.add("-Xdock:name=Interactions");
     }
     
+    // add additional boot class path items specified by the selected compiler
+    for (File f: _interactionsModel.getCompilerBootClassPath()) {
+      try {
+        // NOTE: this is a work-around
+        // it seems like it's impossible to pass long file names here on Windows
+        // so we are using a clumsy method that determines the short file name
+        File shortF = FileOps.getShortFile(f);
+        jvmArgs.add("-Xbootclasspath/a:"+shortF.getAbsolutePath().replace(File.separatorChar, '/'));
+      }
+      catch(IOException ioe) {
+        // TODO: figure out what to do here. error? warn?
+      }
+    }
+    
     jvmArgs.addAll(ArgumentTokenizer.tokenize(slaveArgs));
     
     invokeSlave(new JVMBuilder(_startupClassPath).directory(dir).jvmArguments(jvmArgs));
@@ -972,6 +986,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public void interpreterResetFailed(Throwable th) { }
     public void interpreterWontStart(Exception e) { }
     public void interpreterReady(File wd) { }
+    public List<File> getCompilerBootClassPath() { return new ArrayList<File>(); }
+    public String transformCommands(String interactionsString) { return interactionsString; }
   }
   
   /** JUnitModel which does not react to events. */
