@@ -28,6 +28,7 @@
   <property name="error" value="stderr" />
   <property name="plt.error.log" value="${error}" />
   <property name="clean-can-fail" value="yes" /> 
+  <property name="link-source" value="no" />
   
   <property environment="env" />
   <property name="java6-home" value="${env.JAVA6_HOME}" />
@@ -495,7 +496,7 @@
     <delete dir="docs/javadoc" />
     <mkdir dir="docs/javadoc" />
     <javadoc sourcepath="src" packagenames="*" destdir="docs/javadoc" maxmemory="512M"
-             access="protected" Use="yes" Version="yes" Author="yes" Windowtitle="${readable-project-name} API (${version-tag})">
+             access="protected" Use="yes" Version="yes" Author="yes" Windowtitle="${readable-project-name} API (${version-tag})" linksource="${link-source}">
       <classpath>
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />

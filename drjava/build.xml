@@ -30,6 +30,7 @@
   <property name="error" value="popup" />
   <property name="plt.error.log" value="${error}" />
   <property name="clean-can-fail" value="yes" /> 
+  <property name="link-source" value="no" />
 
   <property name="benchmark-count" value="5" />
   <property name="benchmark-skip" value="1" />
@@ -554,7 +555,7 @@
     <delete dir="docs/javadoc" />
     <mkdir dir="docs/javadoc" />
     <javadoc sourcepath="src" packagenames="*" destdir="docs/javadoc" maxmemory="512M"
-             access="private" Use="yes" Version="yes" Author="yes" Windowtitle="${readable-project-name} API (${version-tag})">
+             access="private" Use="yes" Version="yes" Author="yes" Windowtitle="${readable-project-name} API (${version-tag})" linksource="${link-source}">
       <classpath>
         <pathelement location="${java5-tools}" />
         <fileset refid="libs" />
