@@ -1064,6 +1064,23 @@ public class ConfigFrame extends SwingFrame {
                                                   false)
                          .setEntireColumn(true));
     addOptionComponent(panel, 
+                       new BooleanOptionComponent(OptionConstants.WARN_CHANGE_MISC,
+                                                  "Warn to Restart to Change Preferences (other)", 
+                                                  this,
+                                                  "<html>Whether DrJava should warn the user that preference<br>" +
+                                                  "changes will not be applied until DrJava is restarted.</html>.", 
+                                                  false)
+                         .setEntireColumn(true));
+    addOptionComponent(panel, 
+                       new BooleanOptionComponent(OptionConstants.WARN_CHANGE_INTERACTIONS,
+                                                  "Warn to Reset to Change Interactions", 
+                                                  this,
+                                                  "<html>Whether DrJava should warn the user that preference<br>" +
+                                                  "changes will not be applied until the Interactions Pane<br>" +
+                                                  "is reset.</html>.", 
+                                                  false)
+                         .setEntireColumn(true));
+    addOptionComponent(panel, 
                        new BooleanOptionComponent(OptionConstants.WARN_PATH_CONTAINS_POUND,
                                                   "Warn if File's Path Contains a '#' Symbol", 
                                                   this,
@@ -1439,6 +1456,13 @@ public class ConfigFrame extends SwingFrame {
 
   /** Add all of the components for the JUnit panel of the preferences window. */
   private void _setupJUnitPanel(ConfigPanel panel) {
+    final BooleanOptionComponent junitLocEnabled =
+      new BooleanOptionComponent(OptionConstants.JUNIT_LOCATION_ENABLED, "Use external JUnit", this,
+                                 "<html>If this is enabled, DrJava will use the JUnit configured<br>"+
+                                 "below under 'JUnit/ConcJUnit Location'. If it is disabled,<br>"+
+                                 "DrJava will use the JUnit that is built-in.</html>", false)
+      .setEntireColumn(true);
+    addOptionComponent(panel, junitLocEnabled);
     final FileOptionComponent junitLoc =
       new FileOptionComponent(OptionConstants.JUNIT_LOCATION, "JUnit/ConcJUnit Location", this,
                               "<html>Optional location of the JUnit 3.8.2 junit.jar file.<br>"+
@@ -1496,6 +1520,13 @@ public class ConfigFrame extends SwingFrame {
     junitLoc.setFileFilter(ClassPathFilter.ONLY);
     addOptionComponent(panel, junitLoc);
     
+    final BooleanOptionComponent rtConcJUnitLocEnabled =
+      new BooleanOptionComponent(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED, "Use ConcJUnit Runtime", this,
+                                 "<html>If this is enabled, DrJava will use the ConcJUnit Runtime<br>"+
+                                 "configured below under 'ConcJUnit Runtime Location'. If it is<br>"+
+                                 "disabled, DrJava will use the normal Java runtime.</html>", false)
+      .setEntireColumn(true);
+    addOptionComponent(panel, rtConcJUnitLocEnabled);
     final FileOptionComponent rtConcJUnitLoc =
       new FileOptionComponent(OptionConstants.RT_CONCJUNIT_LOCATION, "ConcJUnit Runtime Location", this,
                               "<html>Optional location of the Java Runtime Library processed<br>"+
@@ -1697,7 +1728,7 @@ public class ConfigFrame extends SwingFrame {
       public Object value(Object oc) {
         File f = junitLoc.getComponent().getFileFromField();
         String s, t;
-        if ((f==null) || FileOps.NULL_FILE.equals(f) || !f.exists()) {
+        if ((!junitLocEnabled.getComponent().isSelected()) || (f==null) || FileOps.NULL_FILE.equals(f) || !f.exists()) {
           s = "DrJava uses the built-in JUnit.";
           t = "";
         }
@@ -1705,7 +1736,7 @@ public class ConfigFrame extends SwingFrame {
           if (edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidConcJUnitFile(f)) {
             s = "DrJava uses ConcJUnit.";
             File rtf = rtConcJUnitLoc.getComponent().getFileFromField();
-            if ((rtf!=null) && !FileOps.NULL_FILE.equals(rtf) && rtf.exists() &&
+            if (rtConcJUnitLocEnabled.getComponent().isSelected() && (rtf!=null) && !FileOps.NULL_FILE.equals(rtf) && rtf.exists() &&
                 edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidRTConcJUnitFile(rtf)) {
               t = "\"Lucky\" warnings are enabled.";
             }
@@ -1727,7 +1758,9 @@ public class ConfigFrame extends SwingFrame {
         return null;
       }
     };
+    junitLocEnabled.addChangeListener(junitStatusChangeListener);
     junitLoc.addChangeListener(junitStatusChangeListener);
+    rtConcJUnitLocEnabled.addChangeListener(junitStatusChangeListener);
     rtConcJUnitLoc.addChangeListener(junitStatusChangeListener);
     addOptionComponent(panel, junitStatus);
     addOptionComponent(panel, luckyStatus);
@@ -1736,6 +1769,7 @@ public class ConfigFrame extends SwingFrame {
     processRTChangeListener.value(junitLoc);
     junitStatusChangeListener.value(junitLoc);
     
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, 
                        new BooleanOptionComponent(OptionConstants.FORCE_TEST_SUFFIX, 
                                                   "Require test classes in projects to end in \"Test\"", 

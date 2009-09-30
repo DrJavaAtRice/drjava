@@ -120,7 +120,7 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
   public void setValue(Boolean value) { _jcb.setSelected(value.booleanValue()); }
   
   /** Return's this OptionComponent's configurable component. */
-  public JComponent getComponent() { return _jcb; }
+  public JCheckBox getComponent() { return _jcb; }
   
   /** Whether the component should occupy the entire column. */
   public BooleanOptionComponent setEntireColumn(boolean entireColumn) {

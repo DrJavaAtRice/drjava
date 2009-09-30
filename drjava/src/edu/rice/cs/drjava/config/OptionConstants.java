@@ -99,9 +99,15 @@ public interface OptionConstants {
 
   /** junitrt.jar/concutest-junit-3.8.2-withrt.jar location, or NULL_FILE if not specified. */
   public static final FileOption JUNIT_LOCATION = new FileOption("junit.location", FileOps.NULL_FILE);
+
+  /** True if the JUnit jar in JUNIT_LOCATION should be used. */
+  public static final BooleanOption JUNIT_LOCATION_ENABLED = new BooleanOption("junit.location.enabled", Boolean.FALSE);
   
   /** ConcJUnit processed Java Runtime (rt.concjunit.jar) location, or NULL_FILE if not specified. */
   public static final FileOption RT_CONCJUNIT_LOCATION = new FileOption("rt.concjunit.location", FileOps.NULL_FILE);
+  
+  /** True if the JUnit jar in RT_CONCJUNIT_LOCATION should be used. */
+  public static final BooleanOption RT_CONCJUNIT_LOCATION_ENABLED = new BooleanOption("rt.concjunit.location.enabled", Boolean.FALSE);
   
   /** Extra class path. */
   public static final VectorOption<File> EXTRA_CLASSPATH = new ClassPathOption().evaluate("extra.classpath");
@@ -1030,6 +1036,9 @@ public interface OptionConstants {
 
   /** Whether to warn that a restart is necessary before these miscellaneous preferences will change. */
   public static final BooleanOption WARN_CHANGE_MISC = new BooleanOption("warn.change.misc", Boolean.TRUE);
+  
+  /** Whether to warn that a reset is necessary before these Interactions Pane preferences will change. */
+  public static final BooleanOption WARN_CHANGE_INTERACTIONS = new BooleanOption("warn.change.interactions", Boolean.TRUE);
   
   /** Whether to warn that a file's path contains a "#' symbol. */
   public static final BooleanOption WARN_PATH_CONTAINS_POUND =

@@ -538,4 +538,27 @@ public class ConfigOptionListeners implements OptionConstants {
       }
     }
   }
+
+  public static class RequiresInteractionsRestartListener<T> implements OptionListener<T> {
+    protected JFrame _parent;
+    protected String _description;
+    public RequiresInteractionsRestartListener(JFrame parent, String description) {
+      _parent = parent;
+      _description = description;
+    }
+    public void optionChanged(OptionEvent<T> oe) {
+      String title = "Apply Preference Changes";
+      String msg = "Changes to the '"+_description+"' preferences\nwill only take effect when you reset the Interactions Pane.";
+      if (DrJava.getConfig().getSetting(WARN_CHANGE_INTERACTIONS).booleanValue()) {
+        ConfirmCheckBoxDialog dialog =
+          new ConfirmCheckBoxDialog(_parent, title, msg,
+                                    "Do not show this message again",
+                                    JOptionPane.INFORMATION_MESSAGE,
+                                    JOptionPane.DEFAULT_OPTION);
+        if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue()) {
+          DrJava.getConfig().setSetting(WARN_CHANGE_INTERACTIONS, Boolean.FALSE);
+        }
+      }
+    }
+  }
 }

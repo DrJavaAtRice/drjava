@@ -588,11 +588,13 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     // ConcJUnit argument: -Xbootclasspath/p:rt.concjunit.jar
     File junitLocation = DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION);
     boolean concJUnitLocationConfigured =
+      DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION_ENABLED) &&
       edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidConcJUnitFile(junitLocation);
     File rtLocation = DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION);
     boolean rtLocationConfigured =
       edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidRTConcJUnitFile(rtLocation);
-    if (!rtLocationConfigured && // not valid
+    if (DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED) &&
+        !rtLocationConfigured && // not valid
         (rtLocation != null) && // not null
         (!FileOps.NULL_FILE.equals(rtLocation)) && // not NULL_FILE
         (rtLocation.exists())) { // but exists
@@ -600,7 +602,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       DrJava.getConfig().setSetting(OptionConstants.RT_CONCJUNIT_LOCATION, FileOps.NULL_FILE);
       rtLocationConfigured = false;
     }
-    if (concJUnitLocationConfigured && rtLocationConfigured) {
+    if (concJUnitLocationConfigured &&
+        rtLocationConfigured &&
+        DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED)) {
       try {
         // NOTE: this is a work-around
         // it seems like it's impossible to pass long file names here on Windows
