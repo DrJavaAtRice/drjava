@@ -3465,23 +3465,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     config.addOptionListener(MASTER_JVM_XMX, _masterJvmXmxListener);
     config.addOptionListener(JAVADOC_CUSTOM_PARAMS, 
                              new ConfigOptionListeners.JavadocCustomParamsListener(_configFrame));
-      ConfigOptionListeners.sanitizeSlaveJVMArgs(MainFrame.this, config.getSetting(SLAVE_JVM_ARGS), slaveJVMArgsListener);
-      ConfigOptionListeners.sanitizeSlaveJVMXMX(MainFrame.this, config.getSetting(SLAVE_JVM_XMX));
-      ConfigOptionListeners.sanitizeMasterJVMArgs(MainFrame.this, config.getSetting(MASTER_JVM_ARGS), masterJVMArgsListener);
-      ConfigOptionListeners.sanitizeMasterJVMXMX(MainFrame.this, config.getSetting(MASTER_JVM_XMX));
-      ConfigOptionListeners.sanitizeJavadocCustomParams(MainFrame.this, config.getSetting(JAVADOC_CUSTOM_PARAMS));
+    ConfigOptionListeners.sanitizeSlaveJVMArgs(MainFrame.this, config.getSetting(SLAVE_JVM_ARGS), slaveJVMArgsListener);
+    ConfigOptionListeners.sanitizeSlaveJVMXMX(MainFrame.this, config.getSetting(SLAVE_JVM_XMX));
+    ConfigOptionListeners.sanitizeMasterJVMArgs(MainFrame.this, config.getSetting(MASTER_JVM_ARGS), masterJVMArgsListener);
+    ConfigOptionListeners.sanitizeMasterJVMXMX(MainFrame.this, config.getSetting(MASTER_JVM_XMX));
+    ConfigOptionListeners.sanitizeJavadocCustomParams(MainFrame.this, config.getSetting(JAVADOC_CUSTOM_PARAMS));
     config.addOptionListener(REMOTE_CONTROL_ENABLED, new ConfigOptionListeners.
                                RequiresDrJavaRestartListener<Boolean>(_configFrame, "Remote Control"));
     config.addOptionListener(REMOTE_CONTROL_PORT, new ConfigOptionListeners.
                                RequiresDrJavaRestartListener<Integer>(_configFrame, "Remote Control Port"));
-    config.addOptionListener(JUNIT_LOCATION_ENABLED, new ConfigOptionListeners.
-                               RequiresDrJavaRestartListener<Boolean>(_configFrame, "Use External JUnit"));
-    config.addOptionListener(JUNIT_LOCATION, new ConfigOptionListeners.
-                               RequiresDrJavaRestartListener<File>(_configFrame, "JUnit Location"));
-    config.addOptionListener(RT_CONCJUNIT_LOCATION_ENABLED, new ConfigOptionListeners.
-                               RequiresInteractionsRestartListener<Boolean>(_configFrame, "Use ConcJUnit Runtime"));
-    config.addOptionListener(RT_CONCJUNIT_LOCATION, new ConfigOptionListeners.
-                               RequiresInteractionsRestartListener<File>(_configFrame, "ConcJUnit Runtime Location"));
     
     // If any errors occurred while parsing config file, show them
     _showConfigException();

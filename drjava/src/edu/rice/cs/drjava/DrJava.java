@@ -164,16 +164,17 @@ public class DrJava {
         String masterMemory = getConfig().getSetting(MASTER_JVM_XMX).trim();
         File junitLocation = getConfig().getSetting(JUNIT_LOCATION);
         boolean junitLocationConfigured =
-          (edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidJUnitFile(junitLocation) ||
-           edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidConcJUnitFile(junitLocation));
+          (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidJUnitFile(junitLocation) ||
+           edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(junitLocation));
         _log.log("junitLocation: "+junitLocation);
         _log.log("junitLocationConfigured: "+junitLocationConfigured);
-        if (!junitLocationConfigured && // not valid 
+        if (DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED) && // enabled
+            !junitLocationConfigured && // not valid 
             (junitLocation != null) && // not null
             (!FileOps.NULL_FILE.equals(junitLocation)) && // not NULL_FILE
             (junitLocation.exists())) { // but exists
           // invalid file, clear setting
-          getConfig().setSetting(JUNIT_LOCATION, FileOps.NULL_FILE);
+          getConfig().setSetting(JUNIT_LOCATION_ENABLED, false);
           getConfig().saveConfiguration();
           junitLocationConfigured = false;
         }

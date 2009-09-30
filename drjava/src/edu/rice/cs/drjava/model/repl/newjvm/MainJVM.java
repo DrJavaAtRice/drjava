@@ -63,7 +63,8 @@ import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.plt.concurrent.StateMonitor;
-
+import edu.rice.cs.plt.concurrent.CompletionMonitor;
+  
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.classloader.ClassFileError;
 
@@ -585,39 +586,77 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     if (dir == FileOps.NULL_FILE) { dir = IOUtil.WORKING_DIRECTORY; }
 
     List<String> jvmArgs = new ArrayList<String>();
+    
     // ConcJUnit argument: -Xbootclasspath/p:rt.concjunit.jar
-    File junitLocation = DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION);
-    boolean concJUnitLocationConfigured =
-      DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION_ENABLED) &&
-      edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidConcJUnitFile(junitLocation);
-    File rtLocation = DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION);
-    boolean rtLocationConfigured =
-      edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidRTConcJUnitFile(rtLocation);
-    if (DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED) &&
-        !rtLocationConfigured && // not valid
-        (rtLocation != null) && // not null
-        (!FileOps.NULL_FILE.equals(rtLocation)) && // not NULL_FILE
-        (rtLocation.exists())) { // but exists
-      // invalid file, clear setting
-      DrJava.getConfig().setSetting(OptionConstants.RT_CONCJUNIT_LOCATION, FileOps.NULL_FILE);
-      rtLocationConfigured = false;
-    }
-    if (concJUnitLocationConfigured &&
-        rtLocationConfigured &&
-        DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED)) {
-      try {
-        // NOTE: this is a work-around
-        // it seems like it's impossible to pass long file names here on Windows
-        // so we are using a clumsy method that determines the short file name
-        File shortF = FileOps.getShortFile(rtLocation);
-        jvmArgs.add("-Xbootclasspath/p:"+shortF.getAbsolutePath().replace(File.separatorChar, '/'));
-      }
-      catch(IOException ioe) {
-        // we couldn't get the short file name (on Windows), disable "lucky" warnings
-        DrJava.getConfig().setSetting(OptionConstants.RT_CONCJUNIT_LOCATION, FileOps.NULL_FILE);
+    // ------------------------------------------------------
+    // this section here loops if the rt.concjunit.jar file is
+    // being re-generated or the settings are changed
+    final CompletionMonitor cm = new CompletionMonitor();
+    boolean repeat;
+    do {
+      repeat = false;
+      File junitLocation = DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION);
+      boolean concJUnitLocationConfigured =
+        DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION_ENABLED) &&
+        edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(junitLocation);
+      
+      File rtLocation = DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION);
+      boolean rtLocationConfigured =
+        edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidRTConcJUnitFile(rtLocation);
+      
+      if (DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED) && // enabled
+          !rtLocationConfigured && // not valid
+          (rtLocation != null) && // not null
+          (!FileOps.NULL_FILE.equals(rtLocation)) && // not NULL_FILE
+          (rtLocation.exists())) { // but exists
+        // invalid file, clear setting
+        DrJava.getConfig().setSetting(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED, false);
         rtLocationConfigured = false;
+        javax.swing.JOptionPane.showMessageDialog(null,
+                                                  "The selected file is invalid and was disabled:\n"+rtLocation,
+                                                  "Invalid ConcJUnit Runtime File",
+                                                  javax.swing.JOptionPane.ERROR_MESSAGE);
       }
-    }
+      if (concJUnitLocationConfigured && // ConcJUnit configured and enabled
+          rtLocationConfigured && // "lucky" warnings configured
+          DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED)) { // and enabled
+        try {
+          // NOTE: this is a work-around
+          // it seems like it's impossible to pass long file names here on Windows
+          // so we are using a clumsy method that determines the short file name
+          File shortF = FileOps.getShortFile(rtLocation);
+          
+          // check the JavaVersion of the rt.concjunit.jar file to make sure it is compatible
+          if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isCompatibleRTConcJUnitFile(shortF)) {
+            // enabled, valid and compatible
+            // add the JVM argument
+            jvmArgs.add("-Xbootclasspath/p:"+shortF.getAbsolutePath().replace(File.separatorChar, '/'));
+          }
+          else {
+            // enabled, valid but incompatible
+            // ask to regenerate
+            repeat = true; // re-check settings
+            cm.reset();
+            edu.rice.cs.drjava.model.junit.ConcJUnitUtils.
+              showIncompatibleWantToRegenerateDialog(null,
+                                                     new Runnable() { public void run() { cm.signal(); } }, // yes
+                                                     new Runnable() { public void run() { cm.signal(); } }); // no
+            while(!cm.attemptEnsureSignaled()); // wait for dialog to finish
+          }
+        }
+        catch(IOException ioe) {
+          // we couldn't get the short file name (on Windows), disable "lucky" warnings
+          DrJava.getConfig().setSetting(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED, false);
+          rtLocationConfigured = false;
+          javax.swing.JOptionPane.showMessageDialog(null,
+                                                    "There was a problem with the selected file, and it was disabled:\n"+rtLocation,
+                                                    "Invalid ConcJUnit Runtime File",
+                                                    javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+      }
+    } while(repeat);
+    // end of the section that may loop
+    // ------------------------------------------------------
     
     if (_allowAssertions) { jvmArgs.add("-ea"); }
     int debugPort = _getDebugPort();

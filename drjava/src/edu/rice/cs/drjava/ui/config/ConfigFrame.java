@@ -87,7 +87,11 @@ public class ConfigFrame extends SwingFrame {
   private final JFileChooser _browserChooser;
   private final JFileChooser _jarChooser;
   private final DirectoryChooser _dirChooser;
-  
+  private final ConfigOptionListeners.RequiresDrJavaRestartListener<Boolean> _junitLocationEnabledListener;
+  private final ConfigOptionListeners.RequiresDrJavaRestartListener<File> _junitLocationListener;
+  private final ConfigOptionListeners.RequiresInteractionsRestartListener<Boolean> _rtConcJUnitLocationEnabledListener;
+  private final ConfigOptionListeners.RequiresInteractionsRestartListener<File> _rtConcJUnitLocationListener;
+    
   private StringOptionComponent javadocCustomParams;
   
   protected final String SEPS = " \t\n-,;.(";
@@ -105,6 +109,14 @@ public class ConfigFrame extends SwingFrame {
     super("Preferences");
 
     _mainFrame = frame;
+    _junitLocationEnabledListener = new ConfigOptionListeners.
+      RequiresDrJavaRestartListener<Boolean>(this, "Use External JUnit");
+    _junitLocationListener = new ConfigOptionListeners.
+      RequiresDrJavaRestartListener<File>(this, "JUnit Location");
+    _rtConcJUnitLocationEnabledListener = new ConfigOptionListeners.
+      RequiresInteractionsRestartListener<Boolean>(this, "Use ConcJUnit Runtime");
+    _rtConcJUnitLocationListener = new ConfigOptionListeners.
+      RequiresInteractionsRestartListener<File>(this, "ConcJUnit Runtime Location");
     
     Action applyAction = new AbstractAction("Apply") {
       public void actionPerformed(ActionEvent e) {
@@ -252,8 +264,28 @@ public class ConfigFrame extends SwingFrame {
     _dirChooser.setDialogTitle("Select");
     _dirChooser.setApproveButtonText("Select");
     _dirChooser.setMultiSelectionEnabled(false);
+  }
+  
+  private void enableChangeListeners() {
+    DrJava.getConfig().addOptionListener(OptionConstants.JUNIT_LOCATION_ENABLED,
+                                         _junitLocationEnabledListener);
+    DrJava.getConfig().addOptionListener(OptionConstants.JUNIT_LOCATION,
+                                         _junitLocationListener);
+    DrJava.getConfig().addOptionListener(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED,
+                                         _rtConcJUnitLocationEnabledListener);
+    DrJava.getConfig().addOptionListener(OptionConstants.RT_CONCJUNIT_LOCATION,
+                                         _rtConcJUnitLocationListener);
+  }
 
-    
+  private void disableChangeListeners() {
+    DrJava.getConfig().removeOptionListener(OptionConstants.JUNIT_LOCATION_ENABLED,
+                                            _junitLocationEnabledListener);
+    DrJava.getConfig().removeOptionListener(OptionConstants.JUNIT_LOCATION,
+                                            _junitLocationListener);
+    DrJava.getConfig().removeOptionListener(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED,
+                                            _rtConcJUnitLocationEnabledListener);
+    DrJava.getConfig().removeOptionListener(OptionConstants.RT_CONCJUNIT_LOCATION,
+                                            _rtConcJUnitLocationListener);
   }
 
   /** Returns the current master working directory, or the user's current directory if none is set. 20040213 Changed default 
@@ -299,11 +331,13 @@ public class ConfigFrame extends SwingFrame {
     if (vis) {
 //      _mainFrame.hourglassOn();
 //      _mainFrame.installModalWindowAdapter(this, NO_OP, CANCEL);
+      enableChangeListeners();
       toFront();
     }
     else {
 //      _mainFrame.removeModalWindowAdapter(this);
 //      _mainFrame.hourglassOff();
+      disableChangeListeners();
       _mainFrame.toFront();
     }
     super.setVisible(vis);
@@ -1471,8 +1505,8 @@ public class ConfigFrame extends SwingFrame {
                               "(Changes will not be applied until DrJava is restarted.)</html>",
                               new FileSelectorComponent(this, _jarChooser, 30, 10f) {
       public void setFileField(File file) {
-        if (edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidJUnitFile(file) ||
-            edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidConcJUnitFile(file)) {
+        if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidJUnitFile(file) ||
+            edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(file)) {
           super.setFileField(file);
         }
         else if (file.exists()) { // invalid JUnit/ConcJUnit file, but exists
@@ -1499,8 +1533,8 @@ public class ConfigFrame extends SwingFrame {
           return false;
         }
         else {
-          if (edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidJUnitFile(newFile) ||
-              edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidConcJUnitFile(newFile) ||
+          if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidJUnitFile(newFile) ||
+              edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(newFile) ||
               FileOps.NULL_FILE.equals(newFile)) {
             setFileField(newFile);
             return true;
@@ -1536,7 +1570,7 @@ public class ConfigFrame extends SwingFrame {
                               "(Changes will not be applied until the Interactions Pane is reset.)</html>",
                               new FileSelectorComponent(this, _jarChooser, 30, 10f) {
       public void setFileField(File file) {
-        if (edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidRTConcJUnitFile(file)) {
+        if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidRTConcJUnitFile(file)) {
           super.setFileField(file);
         }
         else if (file.exists()) { // invalid but exists
@@ -1561,7 +1595,7 @@ public class ConfigFrame extends SwingFrame {
           return false;
         }
         else {
-          if (edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidRTConcJUnitFile(newFile) ||
+          if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidRTConcJUnitFile(newFile) ||
               FileOps.NULL_FILE.equals(newFile)) {
             setFileField(newFile);
             return true;
@@ -1581,7 +1615,7 @@ public class ConfigFrame extends SwingFrame {
       public Object value(Object oc) {
         File f = junitLoc.getComponent().getFileFromField();
         rtConcJUnitLoc.getComponent().
-          setEnabled(edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidConcJUnitFile(f));
+          setEnabled(edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(f));
         return null;
       }
     };
@@ -1591,119 +1625,16 @@ public class ConfigFrame extends SwingFrame {
     ActionListener processRTListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         File rtFile = rtConcJUnitLoc.getComponent().getFileFromField();
-        if ((rtFile == null) || (FileOps.NULL_FILE.equals(rtFile))) {
-          // no entry, suggest a place
-          File drJavaFile = FileOps.getDrJavaApplicationFile();
-          File parent = drJavaFile.getParentFile();
-          if (parent == null) {
-            parent = new File(System.getProperty("user.dir"));
+        edu.rice.cs.drjava.model.junit.ConcJUnitUtils.
+          showGenerateRTConcJUnitJarFileDialog(ConfigFrame.this,
+                                               rtFile,
+                                               junitLoc.getComponent().getFileFromField(),
+                                               new Runnable1<File>() {
+          public void run(File targetFile) {
+            rtConcJUnitLoc.getComponent().setFileField(targetFile);
           }
-          rtFile = new File(parent, "rt.concjunit.jar"); 
-        }
-        JFileChooser saveChooser = new JFileChooser() {
-          public void setCurrentDirectory(File dir) {
-            //next two lines are order dependent!
-            super.setCurrentDirectory(dir);
-            setDialogTitle("Save:  " + getCurrentDirectory());
-          }
-        };
-        saveChooser.setPreferredSize(new Dimension(650, 410));
-        saveChooser.setSelectedFile(rtFile);
-        saveChooser.setFileFilter(new javax.swing.filechooser.FileFilter() {
-          public boolean accept(File f) {
-            return f.isDirectory() || 
-              f.getPath().endsWith(".jar");
-          }
-          public String getDescription() { 
-            return "Java Archive Files (*.jar)";
-          }
-        });
-        saveChooser.setMultiSelectionEnabled(false);
-        int rc = saveChooser.showSaveDialog(ConfigFrame.this);
-        if (rc == JFileChooser.APPROVE_OPTION) {
-          final File targetFile = saveChooser.getSelectedFile();
-          int n = JOptionPane.YES_OPTION;
-          if (targetFile.exists()) {
-            Object[] options = {"Yes","No"};
-            n = JOptionPane.showOptionDialog(ConfigFrame.this,
-                                             "This file already exists.  Do you wish to overwrite the file?",
-                                             "Confirm Overwrite",
-                                             JOptionPane.YES_NO_OPTION,
-                                             JOptionPane.QUESTION_MESSAGE,
-                                             null,
-                                             options,
-                                             options[1]);
-          }
-          if (n == JOptionPane.YES_OPTION) {
-            ConfigFrame.this.setEnabled(false);
-            final ProcessingDialog processingDialog =
-              new ProcessingDialog(ConfigFrame.this, "Creating ConcJUnit Runtime", "Processing, please wait.");
-            final JProgressBar pb = processingDialog.getProgressBar();
-            processingDialog.setVisible(true);
-            try {
-              final File tmpDir = FileOps.createTempDirectory("DrJavaGenerateRTConcJUnitJar");
-              
-              SwingWorker worker = new SwingWorker() {
-                volatile Boolean _success = null;
-                Thread _processIncrementer = new Thread(new Runnable() {
-                  public void run() {
-                    File tmpFile = new File(tmpDir, "rt.concjunit.jar");
-                    boolean indeterminate = true;
-                    try {
-                      while (_success == null) {
-                        Thread.sleep(1000);
-                        if (tmpFile.exists()) {
-                          if (indeterminate) {
-                            pb.setIndeterminate(false);
-                            indeterminate = false;
-                          }
-                          pb.setValue((int)(100.0/(30*1024*1024)*tmpFile.length()));
-                        }
-                      }
-                    }
-                    catch(InterruptedException ie) {
-                      pb.setIndeterminate(true);
-                    }
-                  }
-                });
-                public Object construct() {
-                  _processIncrementer.start();
-                  _success = edu.rice.cs.drjava.model.junit.DefaultJUnitModel.
-                    generateRTConcJUnitJarFile(targetFile, junitLoc.getComponent().getFileFromField(), tmpDir);
-                  return null;
-                }
-                
-                public void finished() {
-                  pb.setValue(100);
-                  processingDialog.setVisible(false);
-                  processingDialog.dispose();
-                  ConfigFrame.this.setEnabled(true);
-                  if ((_success != null) && (_success)) {
-                    rtConcJUnitLoc.getComponent().setFileField(targetFile);
-                    JOptionPane.showMessageDialog(ConfigFrame.this,
-                                                  "Successfully generated ConcJUnit Runtime File:\n"+targetFile,
-                                                  "Generation Successful",
-                                                  JOptionPane.INFORMATION_MESSAGE);
-                  }
-                  else {
-                    JOptionPane.showMessageDialog(ConfigFrame.this,
-                                                  "Could not generate ConcJUnit Runtime File:\n"+targetFile,
-                                                  "Could Not Generate",
-                                                  JOptionPane.ERROR_MESSAGE);
-                  }
-                  edu.rice.cs.plt.io.IOUtil.deleteRecursively(tmpDir);
-                }
-              };
-              worker.start();
-            }
-            catch(IOException ioe) {
-              JOptionPane.showMessageDialog(ConfigFrame.this,
-                                            "Could not generate ConcJUnit Runtime file:\n"+targetFile,
-                                            "Could Not Generate",
-                                            JOptionPane.ERROR_MESSAGE);
-            }
-          }
-        }
+        },
+                                               new Runnable() { public void run() { } });
       }
     };
     final ButtonComponent processRT =
@@ -1714,7 +1645,7 @@ public class ConfigFrame extends SwingFrame {
       public Object value(Object oc) {
         File f = junitLoc.getComponent().getFileFromField();
         processRT.getComponent().
-          setEnabled(edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidConcJUnitFile(f));
+          setEnabled(edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(f));
         return null;
       }
     };
@@ -1733,18 +1664,18 @@ public class ConfigFrame extends SwingFrame {
           t = "";
         }
         else {
-          if (edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidConcJUnitFile(f)) {
+          if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(f)) {
             s = "DrJava uses ConcJUnit.";
             File rtf = rtConcJUnitLoc.getComponent().getFileFromField();
             if (rtConcJUnitLocEnabled.getComponent().isSelected() && (rtf!=null) && !FileOps.NULL_FILE.equals(rtf) && rtf.exists() &&
-                edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidRTConcJUnitFile(rtf)) {
+                edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidRTConcJUnitFile(rtf)) {
               t = "\"Lucky\" warnings are enabled.";
             }
             else {
               t = "\"Lucky\" warnings are disabled.";
             }
           }
-          else if (edu.rice.cs.drjava.model.junit.DefaultJUnitModel.isValidJUnitFile(f)) {
+          else if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidJUnitFile(f)) {
             s = "DrJava uses JUnit in a separate file.";
             t = "";
           }
