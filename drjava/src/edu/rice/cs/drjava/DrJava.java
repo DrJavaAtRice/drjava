@@ -180,7 +180,7 @@ public class DrJava {
         }
         boolean restart = (getConfig().getSetting(MASTER_JVM_ARGS).length() > 0)
           || (!"".equals(masterMemory) && !OptionConstants.heapSizeChoices.get(0).equals(masterMemory))
-          || junitLocationConfigured;
+          || (DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED) && junitLocationConfigured);
         _log.log("restart: "+restart);
         
         LinkedList<String> classArgs = new LinkedList<String>();
@@ -205,7 +205,8 @@ public class DrJava {
             // extend classpath if JUnit/ConcJUnit location specified
             _log.log("JVMBuilder: classPath = "+jvmb.classPath());
             ArrayList<File> extendedClassPath = new ArrayList<File>();
-            if (junitLocationConfigured) {
+            if (DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED) &&
+                junitLocationConfigured) {
               extendedClassPath.add(junitLocation);
             }
             for(File f: jvmb.classPath()) { extendedClassPath.add(f); }
