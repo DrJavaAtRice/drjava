@@ -254,8 +254,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     }
     
     JDKToolsLibrary fromRuntime = JDKToolsLibrary.makeFromRuntime(this);
-    JavaVersion runtimeVersion = fromRuntime.version().majorVersion();
-    if (fromRuntime.isValid() && !results.containsKey(runtimeVersion)) { results.put(runtimeVersion.fullVersion(), fromRuntime); }
+    JavaVersion.FullVersion runtimeVersion = fromRuntime.version();
+    if (fromRuntime.isValid() && !results.containsKey(runtimeVersion)) { results.put(runtimeVersion, fromRuntime); }
     
     Iterable<JarJDKToolsLibrary> fromSearch = JarJDKToolsLibrary.search(this);
     for (JDKToolsLibrary t : fromSearch) {
