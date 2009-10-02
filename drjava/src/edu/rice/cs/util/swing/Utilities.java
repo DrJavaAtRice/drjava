@@ -88,12 +88,13 @@ public class Utilities {
     * @param newEvents true if the method should also clear new events that were added by the events just cleared
     */
   public static void clearEventQueue(boolean newEvents) {
+    assert ! EventQueue.isDispatchThread();
     final EventQueue q = Toolkit.getDefaultToolkit().getSystemEventQueue();
     do {
       // it is an error to be in the event queue, so Utilties.invokeAndWait shouldn't be used
       try { EventQueue.invokeAndWait(LambdaUtil.NO_OP); }
       catch (Exception e) { throw new UnexpectedException(e); }
-    } while(newEvents && (null!=q.peekEvent()));
+    } while (newEvents && (null != q.peekEvent()));
   }
   
   /** Show a modal debug message box with an OK button regardless of TEST_MODE.

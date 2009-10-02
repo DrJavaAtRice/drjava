@@ -1930,10 +1930,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               // find start
               int start = loc;
               while(start > 0) {
-                if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
+                if (! Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
                 --start;
               }
-              while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start < loc)) {
+              while((start<s.length()) && (! Character.isJavaIdentifierStart(s.charAt(start))) && (start < loc)) {
                 ++start;
               }
               
@@ -9425,6 +9425,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _compilerErrorPanel._close();
       _junitPanel._close();
       _javadocErrorPanel._close();
+      _model.resetConsole();
     }
     
     /* Opens project from command line. */
