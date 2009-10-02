@@ -9,6 +9,7 @@ import edu.rice.cs.plt.lambda.LazyThunk;
 import edu.rice.cs.plt.lambda.Predicate;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.recur.PrecomputedRecursionStack;
+import edu.rice.cs.plt.tuple.Wrapper;
 
 import edu.rice.cs.dynamicjava.symbol.type.*;
 import edu.rice.cs.dynamicjava.symbol.type.Type; // resolves ambiguity with java.lang.reflect.Type
@@ -225,7 +226,10 @@ public class Java5Class extends JavaClass {
   private static Lambda<java.lang.reflect.Type, Type> CONVERT_TYPE =
     new Lambda<java.lang.reflect.Type, Type>() {
     public Type value(java.lang.reflect.Type t) {
-      return convertType(t, new PrecomputedRecursionStack<java.lang.reflect.Type, Type>());
+      // must use .equals, not ==: see java java.lang.reflect.TypeVariable javadocs
+      PrecomputedRecursionStack<java.lang.reflect.Type, Type> stack =
+        PrecomputedRecursionStack.make(Wrapper.<java.lang.reflect.Type>factory());
+      return convertType(t, stack);
     }
   };
   
@@ -233,7 +237,10 @@ public class Java5Class extends JavaClass {
   private static final Lambda<TypeVariable<?>, VariableType> CONVERT_VAR =
     new Lambda<TypeVariable<?>, VariableType>() {
     public VariableType value(TypeVariable<?> var) {
-      return convertTypeVariable(var, new PrecomputedRecursionStack<java.lang.reflect.Type, Type>());
+      // must use .equals, not ==: see java java.lang.reflect.TypeVariable javadocs
+      PrecomputedRecursionStack<java.lang.reflect.Type, Type> stack =
+        PrecomputedRecursionStack.make(Wrapper.<java.lang.reflect.Type>factory());
+      return convertTypeVariable(var, stack);
     }
   };
   

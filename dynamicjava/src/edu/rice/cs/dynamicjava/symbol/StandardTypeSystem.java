@@ -17,6 +17,7 @@ import koala.dynamicjava.interpreter.TypeUtil;
 import koala.dynamicjava.interpreter.NodeProperties;
 import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
+import edu.rice.cs.dynamicjava.interpreter.ExpressionEvaluator;
 import edu.rice.cs.dynamicjava.interpreter.RuntimeBindings;
 import edu.rice.cs.dynamicjava.symbol.type.*;
 
@@ -32,7 +33,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   private final Options _opt;
   
   protected StandardTypeSystem(Options opt) { _opt  = opt; }
-
+  
   /** Determine if the type is well-formed. */
   public abstract boolean isWellFormed(Type t);
 
@@ -69,7 +70,6 @@ public abstract class StandardTypeSystem extends TypeSystem {
                                                        Iterable<? extends Type> args, Option<Type> expected);
 
 
-  
   protected static final Type CLONEABLE_AND_SERIALIZABLE = 
     new IntersectionType(IterUtil.make(CLONEABLE, SERIALIZABLE));
   
@@ -689,6 +689,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
       result.setArguments(CollectUtil.makeList(inv.args()));
       NodeProperties.setMethod(result, inv.method());
       NodeProperties.setType(result, capture(inv.returnType()));
+      if (NodeProperties.hasValue(exp)) { NodeProperties.setValue(result, NodeProperties.getValue(exp)); }
       return result;
     }
     catch (TypeSystemException e) { throw new RuntimeException("Unboxing method inaccessible", e); }
@@ -735,6 +736,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
         m.setArguments(CollectUtil.makeList(inv.args()));
         NodeProperties.setMethod(m, inv.method());
         NodeProperties.setType(m, capture(inv.returnType()));
+        if (NodeProperties.hasValue(exp)) { NodeProperties.setValue(m, NodeProperties.getValue(exp)); }
         return m;
       }
       catch (TypeSystemException e) { throw new RuntimeException("Boxing method inaccessible", e); }
@@ -747,6 +749,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
         k.setArguments(CollectUtil.makeList(inv.args()));
         NodeProperties.setConstructor(k, inv.constructor());
         NodeProperties.setType(k, boxedType);
+        if (NodeProperties.hasValue(exp)) { NodeProperties.setValue(k, NodeProperties.getValue(exp)); }
         return k;
       }
       catch (TypeSystemException e) { throw new RuntimeException("Boxing constructor inaccessible", e); }
@@ -866,7 +869,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
       @Override public Pair<Expression, Expression> forNumericType(NumericType t1) { return checkForNumericE2(); }
       
       private boolean isNumericReference(Type t) {
-        return !_opt.prohibitBoxing() &&
+        return !_opt.prohibitBoxing() && !isSubtype(t, NULL) &&
           (isSubtype(t, CHARACTER_CLASS) || 
            isSubtype(t, BYTE_CLASS) || 
            isSubtype(t, SHORT_CLASS) || 
@@ -908,7 +911,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
           Expression result2 = isEqual(numT2, joined) ? unboxed2 : makeCast(joined, unboxed2);
           return Pair.make(result1, result2);
         }
-        catch (UnsupportedConversionException e) { throw new IllegalArgumentException(); }
+        catch (UnsupportedConversionException e) { throw new IllegalArgumentException(e); }
       }
       
       private Pair<Expression, Expression> joinReferences() {
@@ -1135,7 +1138,15 @@ public abstract class StandardTypeSystem extends TypeSystem {
     Expression result = new CastExpression(null, e, e.getSourceInfo());
     if (isPrimitive(target)) {
       if (!isEqual(target, NodeProperties.getType(e))) {
-        NodeProperties.setConvertedType(e, erasedClass(target));
+        NodeProperties.setConvertedType(result, erasedClass(target));
+        if (NodeProperties.hasValue(e)) {
+          Object orig = NodeProperties.getValue(e);
+          Class<?> t = NodeProperties.getConvertedType(result).value();
+          NodeProperties.setValue(result, ExpressionEvaluator.convert(orig, t));
+        }
+      }
+      else {
+        if (NodeProperties.hasValue(e)) { NodeProperties.setValue(result, NodeProperties.getValue(e)); }
       }
     }
     else {
@@ -1475,7 +1486,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
       v.appendConstraints();
       return v.result();
     }
-  
+    
     private class Visitor extends TypeVisitorRunnable1 {
       private final StringBuilder _result = new StringBuilder();
       private final RecursionStack<Type> _stack = new RecursionStack<Type>();

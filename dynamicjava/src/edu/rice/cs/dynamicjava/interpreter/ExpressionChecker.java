@@ -1212,7 +1212,9 @@ public class ExpressionChecker {
       try {
         Expression exp = ts.unaryPromote(ts.makePrimitive(node.getExpression()));
         node.setExpression(exp);
-        return setType(node, getType(exp));
+        Type result = setType(node, getType(exp));
+        evaluateConstantExpression(node);
+        return result;
       }
       catch (UnsupportedConversionException e) {
         throw new ExecutionError("numeric.expression.type", node);
@@ -1233,7 +1235,9 @@ public class ExpressionChecker {
           node.setLeftExpression(left);
           node.setRightExpression(right);
           setOperation(node, ExpressionEvaluator.CONCATENATE);
-          return setType(node, TypeSystem.STRING);
+          setType(node, TypeSystem.STRING);
+          evaluateConstantExpression(node);
+          return TypeSystem.STRING;
         }
         catch (UnsupportedConversionException e) {
           throw new ExecutionError("addition.type", node);
@@ -1247,7 +1251,9 @@ public class ExpressionChecker {
           node.setLeftExpression(promoted.first());
           node.setRightExpression(promoted.second());
           setOperation(node, ExpressionEvaluator.ADD);
-          return setType(node, getType(promoted.first()));
+          Type result = setType(node, getType(promoted.first()));
+          evaluateConstantExpression(node);
+          return result;
         }
         catch (UnsupportedConversionException e) {
           throw new ExecutionError("addition.type", node);
@@ -1317,7 +1323,9 @@ public class ExpressionChecker {
         Pair<Expression, Expression> promoted = ts.binaryPromote(left, right);
         node.setLeftExpression(promoted.first());
         node.setRightExpression(promoted.second());
-        return setType(node, getType(promoted.first()));
+        Type result = setType(node, getType(promoted.first()));
+        evaluateConstantExpression(node);
+        return result;
       }
       catch (UnsupportedConversionException e) {
         throw new ExecutionError("numeric.expression.type", node);
@@ -1411,7 +1419,9 @@ public class ExpressionChecker {
           throw new ExecutionError("compare.type", node);
         }
       }
-      return setType(node, TypeSystem.BOOLEAN);
+      setType(node, TypeSystem.BOOLEAN);
+      evaluateConstantExpression(node);
+      return TypeSystem.BOOLEAN;
     }
     
     @Override public Type visit(LessExpression node) { return handleRelationalExpression(node); }
@@ -1435,7 +1445,9 @@ public class ExpressionChecker {
         Pair<Expression, Expression> promoted = ts.binaryPromote(left, right);
         node.setLeftExpression(promoted.first());
         node.setRightExpression(promoted.second());
-        return setType(node, TypeSystem.BOOLEAN);
+        setType(node, TypeSystem.BOOLEAN);
+        evaluateConstantExpression(node);
+        return TypeSystem.BOOLEAN;
       }
       catch (UnsupportedConversionException e) {
         TypePrinter printer = ts.typePrinter();
@@ -1473,11 +1485,11 @@ public class ExpressionChecker {
         else {
           throw new ExecutionError("bitwise.expression.type", node);
         }
-        
         node.setLeftExpression(left);
         node.setRightExpression(right);
-        
-        return setType(node, getType(left));
+        Type result = setType(node, getType(left));
+        evaluateConstantExpression(node);
+        return result;
       }
       catch (UnsupportedConversionException e) {
         throw new ExecutionError("bitwise.expression.type", node);
@@ -1547,7 +1559,9 @@ public class ExpressionChecker {
           throw new ExecutionError("shift.expression.type", node);
         }
         
-        return setType(node, getType(left));
+        Type result = setType(node, getType(left));
+        evaluateConstantExpression(node);
+        return result;
       }
       catch (UnsupportedConversionException e) {
         throw new ExecutionError("shift.expression.type", node);
@@ -1604,10 +1618,24 @@ public class ExpressionChecker {
         }
         node.setLeftExpression(left);
         node.setRightExpression(right);
-        return setType(node, TypeSystem.BOOLEAN);
+        setType(node, TypeSystem.BOOLEAN);
+        evaluateConstantExpression(node);
+        return TypeSystem.BOOLEAN;
       }
       catch (UnsupportedConversionException e) {
         throw new ExecutionError("boolean.expression.type", node);
+      }
+    }
+    
+    private void evaluateConstantExpression(BinaryExpression node) {
+      if (hasValue(node.getLeftExpression()) && hasValue(node.getRightExpression())) {
+        setValue(node, new ExpressionEvaluator(RuntimeBindings.EMPTY, opt).value(node));
+      }
+    }
+    
+    private void evaluateConstantExpression(UnaryExpression node) {
+      if (hasValue(node.getExpression())) {
+        setValue(node, new ExpressionEvaluator(RuntimeBindings.EMPTY, opt).value(node));
       }
     }
     

@@ -471,7 +471,7 @@ public class ExpressionEvaluator extends AbstractVisitor<Object> implements Lamb
   
   
   /** Convert a primitive to the appropriate type */
-  private static Object convert(Object obj, Class<?> target) {
+  public static Object convert(Object obj, Class<?> target) {
     if (target.equals(boolean.class)) {
       if (obj instanceof Boolean) { return obj; }
       else { throw new IllegalArgumentException(); }
