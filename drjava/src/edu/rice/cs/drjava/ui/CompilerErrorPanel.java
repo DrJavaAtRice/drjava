@@ -57,15 +57,11 @@ import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.Vector;
 
-/**
- * The panel which houses the list of errors after an unsuccessful compilation.
- * If the user clicks on the combobox, move the definitions cursor to the
- * error in the source.
- * If the cursor is moved onto a line with an error, select the appropriate
- * error in the list but do not move the cursor.
- *
- * @version $Id$
- */
+/** The panel which houses the list of errors after an unsuccessful compilation.  If the user clicks on the combobox,
+  * it moves the definitions cursor to the error in the source.  If the cursor is moved onto a line with an error, it 
+  * selects the appropriate error in the list but do not move the cursor.
+  * @version $Id$
+  */
 public class CompilerErrorPanel extends ErrorPanel {
   
   /** Whether a compile has occurred since the last compiler change. */

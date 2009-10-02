@@ -43,7 +43,7 @@ import edu.rice.cs.util.AbsRelFile;
 /** This state pattern is used by the global model to store any information pertaining to the currently open project.  
   * The state pattern is used because most project information is not needed in list view. (Elspeth Rocks)
   * 
-  * Hint: if you're looking for the instances of this interface, look in DefaultGlobalModel where they are defined 
+  * Hint: if you're looking for the instances of this interface, look in AbstractGlobalModel where they are defined 
   * as anonymous inner classes.
   */
 public interface FileGroupingState {

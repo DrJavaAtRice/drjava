@@ -51,6 +51,7 @@ import edu.rice.cs.drjava.DrJava;
 
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
+import edu.rice.cs.drjava.config.BooleanOption;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
@@ -233,7 +234,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     };
     _jvmStarter.start();
     
-// Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.    
+// Lightweight parsing has been disabled until we have something that is beneficial and works better in the background.    
 //    _parsingControl = new DefaultLightWeightParsingControl(this);
   }
   
@@ -254,13 +255,15 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     }
     
     JDKToolsLibrary fromRuntime = JDKToolsLibrary.makeFromRuntime(this);
+
     JavaVersion.FullVersion runtimeVersion = fromRuntime.version();
     if (fromRuntime.isValid() && !results.containsKey(runtimeVersion)) { results.put(runtimeVersion, fromRuntime); }
     
     Iterable<JarJDKToolsLibrary> fromSearch = JarJDKToolsLibrary.search(this);
     for (JDKToolsLibrary t : fromSearch) {
       JavaVersion.FullVersion tVersion = t.version();
-      if (!DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.DISPLAY_ALL_COMPILER_VERSIONS).booleanValue()) {
+      BooleanOption displayAllOption = edu.rice.cs.drjava.config.OptionConstants.DISPLAY_ALL_COMPILER_VERSIONS;
+      if (!DrJava.getConfig().getSetting(displayAllOption).booleanValue()) {
         tVersion = tVersion.majorVersion().fullVersion();
       }
       if (!results.containsKey(tVersion)) { results.put(tVersion, t); }
@@ -453,13 +456,16 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       * To write curly braces, you need to enclose them in single quotes. Example:
       * MessageFormat.format("Abc {0} ''foo'' '{'something'}'", "def") returns "Abc def 'foo' {something}".
       * 
-      * @param command - the command to run, with {0} indicating the place where the class name will be written
-      * @param qualifiedClassName - the qualified name of the class (in this document) to run.  If NULL, it is the name of the top level class.
+      * @param command  the command to run, with {0} indicating the place where the class name will be written
+      * @param qualifiedClassName  the qualified name of the class (in this document) to run.  If NULL, it is the name
+      *                             of the top level class.
       * 
       * @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
       * @exception IOException propagated from GlobalModel.compileAll()
       */
-    protected void _runInInteractions(final String command, String qualifiedClassName) throws ClassNameNotFoundException, IOException {
+    protected void _runInInteractions(final String command, String qualifiedClassName) throws ClassNameNotFoundException, 
+      IOException {
+      
       assert EventQueue.isDispatchThread();
 
       _notifier.prepareForRun(ConcreteOpenDefDoc.this);
@@ -532,7 +538,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       * NOTE: this code normally runs in the event thread; it cannot block waiting for an event that is triggered by
       * event thread execution!
       * 
-      * @param qualifiedClassName - the qualified name of the class (in this document) to run.  If NULL, it is the name of the top level class.
+      * @param qualifiedClassName  the qualified name of the class (in this document) to run.  If NULL, it is the name
+      *                            of the top level class.
       * 
       * @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
       * @exception IOException propagated from GlobalModel.compileAll()
@@ -547,7 +554,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       * NOTE: this code normally runs in the event thread; it cannot block waiting for an event that is triggered by
       * event thread execution!
       * 
-      * @param qualifiedClassName - the qualified name of the class (in this document) to run.  If NULL, it is the name of the top level class.
+      * @param qualifiedClassName  the qualified name of the class (in this document) to run.  If NULL, it is the name
+      *                            of the top level class.
       * 
       * @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
       * @exception IOException propagated from GlobalModel.compileAll()

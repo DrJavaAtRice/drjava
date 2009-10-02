@@ -154,7 +154,8 @@ public class JUnitPanel extends ErrorPanel {
     _errorListPane.setJUnitInProgress();
   }
   
-  /** Clean up when the tab is closed. */
+  /** Closes this panel and resets the corresponding model. */
+  @Override
   protected void _close() {
     super._close();
     getModel().getJUnitModel().resetJUnitErrors();

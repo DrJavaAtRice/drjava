@@ -69,21 +69,16 @@ public class ErrorCaretListener implements CaretListener {
    *  if the compiler output tab is showing.  Only runs in the event thread.
    */
   public void caretUpdate(final CaretEvent evt) {
-         
     assert EventQueue.isDispatchThread();
-    // Now we can assume at least one error.
-//    Utilities.invokeLater(new Runnable() {
-//      public void run() {
-        if (_frame.getSelectedErrorPanel() == null) return;
-        updateHighlight(evt.getDot());
-//      }
-//    });
+    if (_frame.getSelectedCompilerErrorPanel() == null) return;
+    updateHighlight(evt.getDot());
   }
   
   /** Update the highlight appropriately. */
   public void updateHighlight(final int curPos) {
-    ErrorPanel panel = _frame.getSelectedErrorPanel();
-    if (panel == null) return;  // no error panel is currently selected
+    assert EventQueue.isDispatchThread();
+    CompilerErrorPanel panel = _frame.getSelectedCompilerErrorPanel();
+    if (panel == null) return;  // no error panel is currently selected; redundant!
     
     CompilerErrorModel model =  panel.getErrorModel();
     
@@ -104,10 +99,13 @@ public class ErrorCaretListener implements CaretListener {
       // Select item wants the DJError
       errorListPane.selectItem(error);
     }
-  }
+  } 
   
   /** Hides the error highlight in the document. */
-  public void removeHighlight() { _definitionsPane.removeErrorHighlight(); }
+  public void removeHighlight() { 
+    assert EventQueue.isDispatchThread();
+    _definitionsPane.removeErrorHighlight(); 
+  }
 
   /** Highlights the given error in the source.  Only runs in event thread.
    *  @param pos the position of the error

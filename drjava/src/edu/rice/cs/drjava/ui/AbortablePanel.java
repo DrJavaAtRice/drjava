@@ -101,6 +101,7 @@ public abstract class AbortablePanel extends TabbedPanel {
   }
   
   /** Close the pane. Override to make sure that the abort action is performed. */
+  @Override
   protected void _close() {
     super._close();
     abortActionPerformed(null);

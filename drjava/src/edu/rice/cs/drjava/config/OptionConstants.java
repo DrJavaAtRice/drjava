@@ -624,8 +624,7 @@ public interface OptionConstants {
   public static final VectorOption<KeyStroke> KEY_BACKWARD =
     new VectorOption<KeyStroke>("key.backward", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)));
 
-  /** The key binding for moving the cursor backwards with selection
-   */
+  /** The key binding for moving the cursor backwards with selection */
   public static final VectorOption<KeyStroke> KEY_BACKWARD_SELECT =
     new VectorOption<KeyStroke>("key.backward.select", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, SHIFT_MASK)));
   
@@ -634,8 +633,7 @@ public interface OptionConstants {
   public static final VectorOption<KeyStroke> KEY_BEGIN_DOCUMENT =
     new VectorOption<KeyStroke>("key.begin.document", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, MASK)));
 
-  /** The key binding for moving the cursor to the beginning of the document
-   */
+  /** The key binding for moving the cursor to the beginning of the document */
   public static final VectorOption<KeyStroke> KEY_BEGIN_DOCUMENT_SELECT =
     new VectorOption<KeyStroke>("key.begin.document.select", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, SHIFT_MASK|MASK)));
   

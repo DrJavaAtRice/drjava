@@ -137,38 +137,42 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** The name of the keymap added to the super class (saved so it can be removed). */
   public static final String INDENT_KEYMAP_NAME = "INDENT_KEYMAP";
   
-  /** Updates match highlights.  Only runs in the event thread except in some unit tests. */
-  protected void matchUpdate(int offset) { 
+  /** Updates match highlights.  Only runs in the event thread. 
+    * @param offset   caret position immediately following some form of brace; hence offset > 0. 
+    * @param forward  true if the the preceding brace is "opening" 
+    */
+  protected void matchUpdate(int offset, boolean opening) { 
+    assert EventQueue.isDispatchThread();
+    assert offset > 0;
     _doc.setCurrentLocation(offset);  
     _removePreviousHighlight();
     
-    // Update the highlight if there is any. Not necessarily executed in event thread
-    int to = getCaretPosition();
-    int from = _doc.balanceBackward();
-    if (from > -1) {
-      // Found a matching open brace to this close brace
-      from = to - from;
-      _addHighlight(from, to);
-      //     Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
-      
-      String matchText = _matchText(from);
-      
-      if (matchText != null) _mainFrame.updateStatusField("Bracket matches: " + matchText);
-      else updateStatusField();
-    }
+    // Update the highlight if there is any.
+    int caretPos = getCaretPosition();
     
-    // if this wasn't a close brace, check for an open brace
-    else {
-      // (getCaretPosition will be the start of the highlight)
-      from = to;
+    if (opening) {
+      // getCaretPosition() will be the start of the highlight
       
-      to = _doc.balanceForward();
-      if (to > -1) {
-        to = to + from;
-        _addHighlight(from - 1, to);
-//        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
+      int to = _doc.balanceForward();  // relative distance to matching brace (if it exists)
+      if (to > -1) {  // matching closing brace exists
+        int end = caretPos + to;
+        _addHighlight(caretPos - 1, end);
       }
       updateStatusField();
+    }
+    else {
+      // Update highlight ends with getCaretPosition() 
+      
+      int from = _doc.balanceBackward();  // relative distance to matching brace (if it exists)
+      if (from > -1) { // matching opening brace was found
+        int start = caretPos - from;
+        _addHighlight(start, caretPos);
+        
+        String matchText = _matchText(start);
+        
+        if (matchText != null) _mainFrame.updateStatusField("Bracket matches: " + matchText);
+        else updateStatusField();
+      }
     }
   }
   
@@ -297,6 +301,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
      *  @param e
      */
     public void undoableEditHappened(UndoableEditEvent e) {
+      assert EventQueue.isDispatchThread();
 //      UndoWithPosition undo = new UndoWithPosition(e.getEdit(), _doc.getCurrentLocation());
       UndoableEdit undo = e.getEdit();
       if (! _inCompoundEdit) {
@@ -1140,6 +1145,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   protected void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm) {
     //_mainFrame.hourglassOn();
     // final int key = _doc.getUndoManager().startCompoundEdit(); //Commented out in regards to French KeyBoard Fix
+    assert EventQueue.isDispatchThread();
     try {
       _doc.indentLines(selStart, selEnd, reason, pm);
       endCompoundEdit();

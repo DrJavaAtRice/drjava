@@ -91,10 +91,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
   }
   
   /** Instantiates the GlobalModel to be used in the test cases. */
-  protected void createModel() {
-    //_model = new DefaultGlobalModel(_originalModel);
-    _model = new TestGlobalModel();
-  }
+  protected void createModel() { _model = new TestGlobalModel(); }
   
   /** Create a new temporary file in _tempDir. */
   protected File tempFile() throws IOException {

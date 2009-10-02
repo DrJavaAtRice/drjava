@@ -77,8 +77,8 @@ public class JavadocErrorPanel extends ErrorPanel {
     _errorListPane.setJavadocInProgress();
   }
 
-  /** Clean up when the tab is closed.
-   */
+  /** Closes this panel and resets the corresponding model. */
+  @Override
   protected void _close() {
     super._close();
     getModel().getJavadocModel().resetJavadocErrors();

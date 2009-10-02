@@ -155,7 +155,8 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     new BackgroundColorListener(c);
   }
   
-  /** Close the panel. */
+  /** Close the panel and update buttons. */
+  @Override
   protected void _close() {
 //    System.err.println("RegionsTreePanel.close() called");
     super._close();

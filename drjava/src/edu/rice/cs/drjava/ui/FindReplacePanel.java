@@ -943,6 +943,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     }
   }
   
+  @Override
   protected void _close() {
     _defPane.requestFocusInWindow();
     if (_displayed) stopListening();
@@ -1075,8 +1076,6 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     });
 //    _defPane.centerViewOnOffset(from);
   }
-  
-//  private void _close() { hide(); }
   
 //  public void hide() {
 //   System.err.println("*** Called hide ***");

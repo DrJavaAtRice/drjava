@@ -138,6 +138,9 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
   /** Called when the project is being closed. */
   public void projectClosed();
   
+  /** Called when all open files are closed. */
+  public void allFilesClosed();
+  
   /** Called if the project's modified state has changed. */
   public void projectModified();
   

@@ -345,6 +345,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     * _close operation inherited from RegionsTreePanel).  The latter merely removes the panel from the TabbedPane but 
     * does not affect its contents, so panels like Find/Replace can be regenerated with their contents preserved.
     */
+  @Override
   protected void _close() {
 //    System.err.println("FindResultsPanel.close() called on " + this);
     _regionManager.clearRegions();  // removes and unhighlights each region; regionListener closes the panel at the end

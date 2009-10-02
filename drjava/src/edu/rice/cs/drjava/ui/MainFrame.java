@@ -158,24 +158,28 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   // the event thread;
   private volatile DetachedFrame _tabbedPanesFrame;
   public volatile Component _lastFocusOwner;
+  
   private volatile CompilerErrorPanel _compilerErrorPanel;
-  private volatile InteractionsPane _consolePane;
-  private volatile JScrollPane _consoleScroll;  // redirects focus to embedded _consolePane
-  private volatile ConsoleController _consoleController;  // move to controller
-  private volatile JUnitPanel _junitErrorPanel;
+  private volatile JUnitPanel _junitPanel;
   private volatile JavadocErrorPanel _javadocErrorPanel;
   private volatile FindReplacePanel _findReplace;
   private volatile BreakpointsPanel _breakpointsPanel;
-  volatile BookmarksPanel _bookmarksPanel;
+  private volatile BookmarksPanel _bookmarksPanel;
+  private volatile DebugPanel _debugPanel;
+  
+  private volatile InteractionsPane _consolePane;
+  private volatile JScrollPane _consoleScroll;            // redirects focus to embedded _consolePane
+  private volatile ConsoleController _consoleController;  
+  
   private volatile InteractionsPane _interactionsPane;
-  private volatile JPanel _interactionsContainer;  // redirects focus to embedded _interactionsPane
-  private volatile InteractionsController _interactionsController;  // move to controller
+  private volatile JPanel _interactionsContainer;         // redirects focus to embedded _interactionsPane
+  private volatile InteractionsController _interactionsController;
+  private volatile InteractionsScriptController _interactionsScriptController;
+  private volatile InteractionsScriptPane _interactionsScriptPane;
   
   private volatile boolean _showDebugger;  // whether the supporting context is debugger capable
   
-  private volatile InteractionsScriptController _interactionsScriptController;
-  private volatile InteractionsScriptPane _interactionsScriptPane;
-  private volatile DebugPanel _debugPanel;
+
   private volatile DetachedFrame _debugFrame;
   
   /** Panel to hold both InteractionsPane and its sync message. */
@@ -1890,7 +1894,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                 if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
                 --start;
               }
-              while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start < loc)) {
+              while((start <  s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start < loc)) {
                 ++start;
               }
               
@@ -2820,12 +2824,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };
   
   private final MouseListener _resetFindReplaceListener = new MouseListener() {
-    public void mouseClicked (MouseEvent e) { }
-    public void mousePressed (MouseEvent e) { }
-    //as mouseReleased event so that it happens after the document has been set in the model and defPane
-    public void mouseReleased (MouseEvent e) {_findReplace.updateFirstDocInSearch();}
-    public void mouseEntered (MouseEvent e) { }
-    public void mouseExited (MouseEvent e) { }
+    public void mouseClicked(MouseEvent e) { }
+    public void mousePressed(MouseEvent e) { }
+    // As mouseReleased event so that it happens after the document has been set in the model and defPane
+    public void mouseReleased(MouseEvent e) {_findReplace.updateFirstDocInSearch();}
+    public void mouseEntered(MouseEvent e) { }
+    public void mouseExited(MouseEvent e) { }
   };
   
   // ------------- File Display Managers for File Icons ------------
@@ -3015,7 +3019,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _breakpointsPanel = null; 
     }
     
-      _compilerErrorPanel = new CompilerErrorPanel(_model, MainFrame.this);
+    _compilerErrorPanel = new CompilerErrorPanel(_model, MainFrame.this);
     _consoleController = new ConsoleController(_model.getConsoleDocument(), _model.getSwingConsoleDocument());
     _consolePane = _consoleController.getPane();
     
@@ -3040,7 +3044,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _interactionsContainer = new JPanel(new BorderLayout());
         _lastFocusOwner = _interactionsContainer;
     
-      _junitErrorPanel = new JUnitPanel(_model, MainFrame.this);
+      _junitPanel = new JUnitPanel(_model, MainFrame.this);
       _javadocErrorPanel = new JavadocErrorPanel(_model, MainFrame.this);
     
       _bookmarksPanel = new BookmarksPanel(MainFrame.this, _model.getBookmarkManager());
@@ -3219,7 +3223,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _redoAction.setDelegatee(_currentDefPane.getRedoAction());
     
     _compilerErrorPanel.reset();
-    _junitErrorPanel.reset();
+    _junitPanel.reset();
     _javadocErrorPanel.reset();
     
     // Create menubar and menus
@@ -4346,10 +4350,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Returns the current DefinitionsPane. */
   public DefinitionsPane getCurrentDefPane() { return _currentDefPane; }
   
+  /** Returns the compiler error panel. */
+  public CompilerErrorPanel getCompilerErrorPanel() { return _compilerErrorPanel; }
+
+  /** Returns the JUnit error panel. */
+  public JUnitPanel getJUnitPanel() { return _junitPanel; }
+  
+  /** Returns the javadoc error panel. */
+  public JavadocErrorPanel getJavadocErrorPanel() { return _javadocErrorPanel; }
+  
   /** Returns the currently shown error panel if there is one. Otherwise returns null. */
-  public ErrorPanel getSelectedErrorPanel() {
+  public CompilerErrorPanel getSelectedCompilerErrorPanel() {
     Component c = _tabbedPane.getSelectedComponent();
-    if (c instanceof ErrorPanel) return (ErrorPanel) c;
+    if (c instanceof CompilerErrorPanel) return (CompilerErrorPanel) c;
     return null;
   }
   
@@ -4360,7 +4373,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Returns whether the test output tab is currently showing. */
   public boolean isTestTabSelected() {
-    return _tabbedPane.getSelectedComponent() == _junitErrorPanel;
+    return _tabbedPane.getSelectedComponent() == _junitPanel;
   }
   
   /** Returns whether the JavaDoc output tab is currently showing. */
@@ -4757,11 +4770,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     finally { hourglassOff(); }
   }
   
-  /** Delegates directly to the model to close the active document */
+  /** Closes the active document.  The user is queried in some cases. */
   private void _close() {
-    //    LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
-    //    l.add(_model.getActiveDocument());
-    //    _model.closeFiles(l);
     
     // this works with multiple selected files now
     List<OpenDefinitionsDocument> l = _model.getDocumentNavigator().getSelectedDocuments();    
@@ -4900,7 +4910,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _model.setPageFormat(job.pageDialog(_model.getPageFormat()));
   }
   
-  //Called by testCases
+  // Called by testCases
   void closeAll() { _closeAll(); }
   
   private void _closeAll() {
@@ -5471,10 +5481,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                 String rel = FileOps.stringMakeRelativeTo(f, buildDir);
                 String full = rel.replace(File.separatorChar, '.');
                 full = full.substring(0, full.lastIndexOf(".class"));
-                if (full.indexOf('$')<0) {
-                  // no $ in the name means not an inner class
-                  // we do not support inner classes, because that would mean
-                  // having to determine public static scope
+                if (full.indexOf('$') < 0) {
+                  // No '$' in the name means not an inner class. we do not support inner classes, because that would
+                  // mean having to determine public static scope
                   hs2.add(new JavaAPIListEntry(s, full, null));
                 }
               }
@@ -7168,7 +7177,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     
     _tabs.addLast(_compilerErrorPanel);
-    _tabs.addLast(_junitErrorPanel);
+    _tabs.addLast(_junitPanel);
     _tabs.addLast(_javadocErrorPanel);
     _tabs.addLast(_findReplace);
     if (_showDebugger) { _tabs.addLast(_breakpointsPanel); }
@@ -7194,8 +7203,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _compilerErrorPanel.getMainPanel().addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) { _lastFocusOwner = _compilerErrorPanel; }
     });
-    _junitErrorPanel.getMainPanel().addFocusListener(new FocusAdapter() {
-      public void focusGained(FocusEvent e) { _lastFocusOwner = _junitErrorPanel; }
+    _junitPanel.getMainPanel().addFocusListener(new FocusAdapter() {
+      public void focusGained(FocusEvent e) { _lastFocusOwner = _junitPanel; }
     });
     _javadocErrorPanel.getMainPanel().addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) { _lastFocusOwner = _javadocErrorPanel; }
@@ -8079,7 +8088,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     _findReplace.setFieldFont(f);
     _compilerErrorPanel.setListFont(f);
-    _junitErrorPanel.setListFont(f);
+    _junitPanel.setListFont(f);
     _javadocErrorPanel.setListFont(f);
   }
   
@@ -8909,7 +8918,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           (_model.getBuildDirectory() != null)) {
         _scanClassFiles();
       }
-      if (_junitErrorPanel.isDisplayed()) _resetJUnit();
+      if (_junitPanel.isDisplayed()) _resetJUnit();
       _model.refreshActiveDocument();
     }
     
@@ -8941,8 +8950,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       /* Note: hourglassOn() is done by various junit commands (other than junitClasses); hourglass must be off 
        * for actual testing; the balancing simpleHourglassOff() is located here and in nonTestCase */
       
-      try { showTab(_junitErrorPanel, true);
-        _junitErrorPanel.setJUnitInProgress();
+      try { showTab(_junitPanel, true);
+        _junitPanel.setJUnitInProgress();
         // _junitAction.setEnabled(false);
         // _junitAllAction.setEnabled(false);
       }
@@ -8957,8 +8966,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
       // Only change GUI from event-dispatching thread
       // new ScrollableDialog(null, "junitClassesStarted called in MainFrame", "", "").show();
-      showTab(_junitErrorPanel, true);
-      _junitErrorPanel.setJUnitInProgress();
+      showTab(_junitPanel, true);
+      _junitPanel.setJUnitInProgress();
       // _junitAction.setEnabled(false);
       // _junitAllAction.setEnabled(false);
     }
@@ -8967,20 +8976,20 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void junitSuiteStarted(final int numTests) {
       assert EventQueue.isDispatchThread();
-      _junitErrorPanel.progressReset(numTests);
+      _junitPanel.progressReset(numTests);
     }
     
     public void junitTestStarted(final String name) {
       assert EventQueue.isDispatchThread();
-      _junitErrorPanel.getErrorListPane().testStarted(name); /* this does nothing! */         
+      _junitPanel.getErrorListPane().testStarted(name); /* this does nothing! */         
     }
     
     public void junitTestEnded(final String name, final boolean succeeded, final boolean causedError) {
       assert EventQueue.isDispatchThread();
 //      new ScrollableDialog(null, "junitTestEnded(" + name + ", " + succeeded + ", " + causedError + ")", "", "").
 //        show();
-      _junitErrorPanel.getErrorListPane().testEnded(name, succeeded, causedError);  // What does this do?
-      _junitErrorPanel.progressStep(succeeded);
+      _junitPanel.getErrorListPane().testEnded(name, succeeded, causedError);  // What does this do?
+      _junitPanel.progressStep(succeeded);
       _model.refreshActiveDocument();
     }
     
@@ -8988,8 +8997,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
 //      new ScrollableDialog(null, "MainFrame.junitEnded() called", "", "").show();
       _restoreJUnitActionsEnabled();
-      // Use EventQueue invokeLater to ensure that JUnitErrorPanel is "reset" after it is updated with test results
-      EventQueue.invokeLater(new Runnable() { public void run() { _junitErrorPanel.reset(); } });
+      // Use EventQueue invokeLater to ensure that JUnit panel is "reset" after it is updated with test results
+      EventQueue.invokeLater(new Runnable() { public void run() { _junitPanel.reset(); } });
       _model.refreshActiveDocument();
     }
     
@@ -9257,7 +9266,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                     JOptionPane.ERROR_MESSAGE);
       // clean up as in JUnitEnded 
       try {
-        if (!didCompileFail) showTab(_junitErrorPanel, true);
+        if (!didCompileFail) showTab(_junitPanel, true);
         _resetJUnit();
       }
       finally { 
@@ -9280,11 +9289,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                     "Testing works only on valid class files",
                                     JOptionPane.ERROR_MESSAGE);
       // clean up as junitEnded except hourglassOff (should factored into a private method)
-      showTab(_junitErrorPanel, true);
+      showTab(_junitPanel, true);
       _junitAction.setEnabled(true);
       _junitAllAction.setEnabled(true);
       _junitProjectAction.setEnabled(_model.isProjectActive());
-      _junitErrorPanel.reset();
+      _junitPanel.reset();
     }
     
     /** Only callable from within the event-handling thread */
@@ -9405,11 +9414,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
       _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
 //      new ScrollableDialog(null, "Closing JUnit Error Panel in MainFrame", "", "").show();
-      removeTab(_junitErrorPanel);
+      removeTab(_junitPanel);
       _runButton = _updateToolbarButton(_runButton, _runAction);
       _compileButton = _updateToolbarButton(_compileButton, _compileAllAction);
       _junitButton = _updateToolbarButton(_junitButton, _junitAllAction);
       projectRunnableChanged();
+    }
+    
+    public void allFilesClosed() {
+      _compilerErrorPanel._close();
+      _junitPanel._close();
+      _javadocErrorPanel._close();
     }
     
     /* Opens project from command line. */
@@ -9575,14 +9590,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _junitAction.setEnabled(true);
     _junitAllAction.setEnabled(true);
     _junitProjectAction.setEnabled(_model.isProjectActive());
-    _junitErrorPanel.reset();
+    _junitPanel.reset();
   }
   
   /* Pops up a message and cleans up after unit testing has been interrupted. */
   private void _junitInterrupted(final UnexpectedException e) {
     try {
       _showJUnitInterrupted(e);
-      removeTab(_junitErrorPanel);
+      removeTab(_junitPanel);
       _resetJUnit(); 
       _restoreJUnitActionsEnabled();
       _model.refreshActiveDocument();
@@ -9594,7 +9609,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private void _junitInterrupted(String message) {
     try {
       _showJUnitInterrupted(message);
-      removeTab(_junitErrorPanel);
+      removeTab(_junitPanel);
       _resetJUnit(); 
       _restoreJUnitActionsEnabled();
       _model.refreshActiveDocument();

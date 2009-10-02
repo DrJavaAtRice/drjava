@@ -89,26 +89,22 @@ public abstract class AbstractDJPane extends JTextPane
       * @param ce the event fired by the caret position change
       */
     public void caretUpdate(final CaretEvent ce) { 
-           
+      
       assert EventQueue.isDispatchThread();
-//      Utilities.invokeLater(new Runnable() { 
-//        public void run() {
-          _removePreviousHighlight();
-          
-          int offset = ce.getDot();
-          if (offset < 1) return;
-          DJDocument doc = getDJDocument();
-          try { 
-            char prevChar = doc.getText(offset - 1, 1).charAt(0);
-            if (prevChar == '{' || prevChar == '(' || prevChar == '}' || prevChar == ')') matchUpdate(offset);
-            else updateStatusField();  // update main frame status fields; a no-op for InteractionsPanes
-            
-          }
-          catch(BadLocationException e) { DrJavaErrorHandler.record(e); }
-//        }
-//      });
+      _removePreviousHighlight();
+      
+      int offset = ce.getDot();
+      if (offset < 1) return;
+      DJDocument doc = getDJDocument();
+      try { 
+        char prevChar = doc.getText(offset - 1, 1).charAt(0);
+        if (prevChar == '{' || prevChar == '(' ) matchUpdate(offset, true);       // forward match
+        else if (prevChar == '}' || prevChar == ')') matchUpdate(offset, false);  // backward match
+        else updateStatusField();  // update main frame status fields; a no-op for InteractionsPanes
+        
+      }
+      catch(BadLocationException e) { DrJavaErrorHandler.record(e); }
     }
-    
   };
   
   /** Our current paren/brace/bracket matching highlight. */
@@ -156,20 +152,22 @@ public abstract class AbstractDJPane extends JTextPane
     _matchHighlight = _highlightManager.addHighlight(from, to, MATCH_PAINTER);
   }
   
-  /** Updates the document location and checks caret position to see if it needs to set or remove a highlight from the 
-    * document.  When the cursor is immediately right of a ')', '}', or ']', it highlights up to the matching '(', '{",
-    * or '[', respectively.  This method must execute directly as part of the document update. If cannot be deferred 
-    * using invokeLater.  Only modifies fields added to DefaultStyledDocument)---not any Swing library classes.  Can be
-    * executed outside the event thread.
-    * @param offset the new offset of the caret
+  /** Updates the document location when the cursor is immediately to the right of a bracket and highlights the
+    * corresponding bracketed area.  The opening param indicates whether the preceding char is an opening bracket
+    * ['(', '{'] or a closing bracket [')', '}']  This method must execute directly as part of the document update.
+    * If cannot be deferred using invokeLater.  Only modifies fields added to DefaultStyledDocument)---not any Swing
+    * library classes.  Only executes in the event thread.
+    * @param offset   the new offset of the caret
+    * @param opening  true if the preceding character is an opening bracket ['(', '{']
     */
-  protected abstract void matchUpdate(int offset);
+  protected abstract void matchUpdate(int offset, boolean opening);
   
   /** Updates status fields in the main frame (title bar, selected file name) when document is modified. */
   protected abstract void updateStatusField();
 
   /** Removes the previous highlight so document is cleared when caret position changes.  Only runs in event thread. */
   protected void _removePreviousHighlight() {
+    assert EventQueue.isDispatchThread();
     if (_matchHighlight != null) {
       _matchHighlight.remove();
       //_highlightManager.removeHighlight((HighlightManager.HighlightInfo)_matchHighlight);

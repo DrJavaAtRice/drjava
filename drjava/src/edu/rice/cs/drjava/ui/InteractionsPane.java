@@ -191,32 +191,32 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   /** Returns the DJDocument held by the pane. */
   public DJDocument getDJDocument() { return _doc; }
   
-  /** Updates the current location and highlight (if one exists). Adds prompt position to prompt list.  Assumes read
-    * lock and reduced locks on _doc are already held. */
-  protected void matchUpdate(int offset) {
+  /** Updates match highlights.  Only runs in the event thread. 
+    * @param offset   caret position immediately following some form of brace; hence offset > 0. 
+    * @param forward  true if the the preceding brace is "opening" 
+    */
+  protected void matchUpdate(int offset, boolean opening) {
     if (! _doc.hasPrompt()) return;
     _doc.setCurrentLocation(offset); 
     _removePreviousHighlight();
     
-//    addToPromptList(getPromptPos()); // NOT USED
-    int to = getCaretPosition();
-    int from = _doc.balanceBackward(); //_doc()._reduced.balanceBackward();
-    if (from > -1) {
-      // Found a matching open brace to this close brace
-      from = to - from;
-      /* if (_notCrossesPrompt(to,from)) */ _addHighlight(from, to);  // _listOfPrompt NOT USED
-      //      Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
-    }
-    // if this wasn't a close brace, check for an open brace
-    else {
-      // (getCaretPosition will be the start of the highlight)
-      from = to;
-      to = _doc.balanceForward();
+    int caretPos = getCaretPosition();
+    
+    if (opening) {
+      // getCaretPosition() will be the start of the highlight
       
-      if (to > -1) {
-        to = to + from;
-        /* if (_notCrossesPrompt(to,from)) */ _addHighlight(from - 1, to);  // _listOfPrompt NOT USED
-//        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
+      int to = _doc.balanceForward();  // relative distance to matching bracket
+      
+      if (to > -1) {  // matching closing bracket was found
+        int end = caretPos + to;
+        _addHighlight(caretPos - 1, end);  
+      }
+    }
+    else {
+      int from = _doc.balanceBackward();
+      if (from > -1) {  // matching open bracket was found
+        int start = caretPos - from;
+        _addHighlight(start, caretPos);
       }
     }
   }

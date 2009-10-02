@@ -485,21 +485,14 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   protected void assertCompileErrorsPresent(boolean b) { assertCompileErrorsPresent("", b); }
 
   protected void assertCompileErrorsPresent(String name, boolean b) {
-    //DJError[] errors = _model.getCompileErrors();
     int numErrors = _model.getCompilerModel().getNumErrors();
 
     if (name.length() > 0)  name += ": ";
-
-    //StringBuffer buf = new StringBuffer();
-    //for (int i = 0; i < errors.length; i++) {
-    //  buf.append("\nerror #" + i + ": " + errors[i]);
-    //}
-
-    assertEquals(name + "compile errors > 0? numErrors =" + numErrors, b, numErrors > 0);
+    
+    assertEquals(name + " compile errors > 0 ? numErrors = " + numErrors, b, numErrors > 0);
   }
 
-    // These exceptions are specially used only in this test case.
-    // They are used to verify that the code blocks
+  // These exceptions are specially used only in this test case. They are used to verify that the code blocks
   public static class OverwriteException extends RuntimeException{ }
   public static class OpenWarningException extends RuntimeException{ }
   public static class FileMovedWarningException extends RuntimeException{ }
@@ -517,10 +510,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
 
   /** This class is used by several test cases in Compile Tests that expect incorrect behavior concerning the saving 
-   *  of files.  This special FileSelector is included to ensure compliance with these test cases, for which the 
-   *  intricacies of saving files are unimportant.  The only FileSelector that honest-to-supreme-deity matters is
-   *  is DefaultGlobalModel.ConcreteOpenDefDoc, which is much more like WarningFileSelector
-   */
+    * of files.  This special FileSelector is included to ensure compliance with these test cases, for which the 
+    * intricacies of saving files are unimportant.  The only FileSelector that honest-to-supreme-deity matters is
+    * is DefaultGlobalModel.ConcreteOpenDefDoc, which is much more like WarningFileSelector
+    */
 
   public static class FileSelector implements FileOpenSelector, FileSaveSelector {
     private volatile File _file1, _file2;
@@ -648,6 +641,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void projectModified() { }
     public void openProject(File pfile, FileOpenSelector files) { }
     public void projectClosed() { }
+    public void allFilesClosed() { }
     public void projectBuildDirChanged() { }
     public void projectWorkDirChanged() { }
     public void projectRunnableChanged() { }
@@ -660,7 +654,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       MultiThreadedTestCase.listenerFail(message + header);
     }
     
-// clearEventQueue must not be called from the event queue, and assertEquals shouldn't have unexpected side effects    
+// clearEventQueue must not be called from the event queue (?), and assertEquals shouldn't have unexpected side effects    
 //    public void assertEquals(String s, int expected, int actual) {
 //      if (!hasClearedEventQueue) {
 //        Utilities.clearEventQueue();

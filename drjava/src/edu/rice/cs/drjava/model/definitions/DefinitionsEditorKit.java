@@ -122,19 +122,16 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     */
   public String getContentType() { return "text/java"; }
   
-  /** We want to use our ColoringView to render text, so here we return
-    * a factory that creates ColoringViews.
-    */
+  /** We want to use our ColoringView to render text, so here we return a factory that creates ColoringViews. */
   public final ViewFactory getViewFactory() { return _factory; }
   
-  /**
-   * Brings the cursor to the beginning of the current word
-   * separated by whitespace or a delimiting character
-   */
+  /** Brings the cursor to the beginning of the current word separated by whitespace or a delimiting character. */
   static class BeginWordAction extends TextAction {
-    BeginWordAction(String nm, boolean select) {
+    private boolean _select;
+        
+    BeginWordAction(String nm, boolean b) {
       super(nm);
-      this.select = select;
+      _select = b;
     }
     
     public void actionPerformed(ActionEvent e) {
@@ -142,7 +139,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
       if (target != null) {
         try {
           int offs = target.getCaretPosition();
-          final String text = target.getDocument().getText(0,offs);
+          final String text = target.getDocument().getText(0, offs);
           while(offs > 0) {
             char chPrev = text.charAt(offs - 1);
             if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev) >= 0) || (Character.isWhitespace(chPrev))) {
@@ -152,11 +149,12 @@ public class DefinitionsEditorKit extends StyledEditorKit {
             if (offs == 0) break; // otherwise offs-1 below generates an index out of bounds
             char ch = text.charAt(offs);
             chPrev = text.charAt(offs - 1);
-            if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch) >= 0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev) >= 0) || Character.isWhitespace(ch) || Character.isWhitespace(chPrev)) {
+            if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch) >= 0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev) >= 0) 
+                  || Character.isWhitespace(ch) || Character.isWhitespace(chPrev)) {
               break;
             }
           }
-          if (select) {
+          if (_select) {
             target.moveCaretPosition(offs);
           } else {
             target.setCaretPosition(offs);
@@ -165,17 +163,15 @@ public class DefinitionsEditorKit extends StyledEditorKit {
         catch(BadLocationException ble) { throw new UnexpectedException(ble); }
       }
     }
-    private boolean select;
   }
   
-  /**
-   * Sets the cursor at the end of the current word
-   * separated by whitespace or a delimiting character
-   */
+  /** Sets the cursor at the end of the current word separated by whitespace or a delimiting character. */
   static class EndWordAction extends TextAction {
-    EndWordAction(String nm, boolean select) {
+    private boolean _select;
+    
+    EndWordAction(String nm, boolean b) {
       super(nm);
-      this.select = select;
+      _select = b;
     }
     
     public void actionPerformed(ActionEvent e) {
@@ -192,7 +188,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
               break;
             }
           }
-          if (select) {
+          if (_select) {
             target.moveCaretPosition(offs);
           } else {
             target.setCaretPosition(offs);
@@ -201,19 +197,18 @@ public class DefinitionsEditorKit extends StyledEditorKit {
         catch(BadLocationException ble) { throw new UnexpectedException(ble); }
       }
     }
-    private boolean select;
   }
   
-  /**
-   * Moves the cursor to the previous word beginning
-   * If the cursor is currently inside of a word, moves it to the beginning of that word
-   * Otherwise, moves the cursor to the beginning of the previous word
-   * Also stops at delimiting characters and at the end of a line
-   */
+  /** Moves the cursor to the beginning of the previous word. If the cursor is currently inside of a word, moves it to
+    * the beginning of that word.  Otherwise, moves the cursor to the beginning of the previous word.
+    * Also stops at delimiting characters and at the end of a line
+    */
   static class PreviousWordAction extends TextAction {
-    PreviousWordAction(String nm, boolean select) {
+    private boolean _select;
+    
+    PreviousWordAction(String nm, boolean b) {
       super(nm);
-      this.select = select;
+      _select = b;
     }
     
     public void actionPerformed(ActionEvent e) {
@@ -242,7 +237,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
               break;
             }
           }
-          if (select) {
+          if (_select) {
             target.moveCaretPosition(offs);
           } else {
             target.setCaretPosition(offs);
@@ -251,17 +246,17 @@ public class DefinitionsEditorKit extends StyledEditorKit {
         catch(BadLocationException ble) { throw new UnexpectedException(ble); }
       }
     }
-    private boolean select;
   }
   
-  /**
-   * Moves the cursor from the current word to the beginning of the next word
-   * Also stops at delimiting characters and at the end of a line
-   */ 
+  /** Moves the cursor from the current word to the beginning of the next word, stopping at delimiting characters and
+    * at the end of a line
+    */ 
   static class NextWordAction extends TextAction {
-    NextWordAction(String nm, boolean select) {
+    private boolean _select;
+    
+    NextWordAction(String nm, boolean b) {
       super(nm);
-      this.select = select;
+      _select = b;
     }
     
     public void actionPerformed(ActionEvent e) {
@@ -270,7 +265,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
         try {
           int offs = target.getCaretPosition();
           final int iOffs = offs;
-          final String text = target.getDocument().getText(iOffs,target.getDocument().getLength()-iOffs);
+          final String text = target.getDocument().getText(iOffs,target.getDocument().getLength() - iOffs);
           final int len = text.length();
           while((offs-iOffs) < len) {
             ++offs;
@@ -294,7 +289,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
                 break;
             }
           }
-          if (select) {
+          if (_select) {
             target.moveCaretPosition(offs);
           } else {
             target.setCaretPosition(offs);
@@ -303,14 +298,13 @@ public class DefinitionsEditorKit extends StyledEditorKit {
         catch(BadLocationException ble) { throw new UnexpectedException(ble); }
       }
     }
-    private boolean select;
   }
   
-  /**
-   * Defines the action for word selection as in when
-   * double-clicking a word
-   */
+  /** Defines the action for word selection as in when double-clicking a word. */
   static class SelectWordAction extends TextAction {
+    private Action start;
+    private Action end;
+    
     public SelectWordAction() {
       super(selectWordAction);
       start = new BeginWordAction("pigdog", false);
@@ -320,7 +314,5 @@ public class DefinitionsEditorKit extends StyledEditorKit {
       start.actionPerformed(e);
       end.actionPerformed(e);
     }
-    private Action start;
-    private Action end;
   }
 }

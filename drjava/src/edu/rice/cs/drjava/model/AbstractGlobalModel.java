@@ -172,16 +172,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   // ----- FIELDS -----
   
-  /** Adds a document to the list of auxiliary files.  The LinkedList class is not thread safe, so
-    * the add operation is synchronized.
-    */
-  public void addAuxiliaryFile(OpenDefinitionsDocument doc) { _state.addAuxFile(doc.getRawFile()); }
-  
-  /** Removes a document from the list of auxiliary files.  The LinkedList class is not thread safe, so
-    * operations on _auxiliaryFiles are synchronized.
-    */
-  public void removeAuxiliaryFile(OpenDefinitionsDocument doc) { _state.remAuxFile(doc.getRawFile()); }
-  
   /** Keeps track of all listeners to the model, and has the ability to notify them of some event.  Originally used
     * a Command Pattern style, but this has been replaced by having EventNotifier directly implement all listener
     * interfaces it supports.  Set in constructor so that subclasses can install their own notifier with additional
@@ -276,7 +266,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** @return manager for browser history regions. */
   public BrowserHistoryManager getBrowserHistoryManager() { return _browserHistoryManager; }
   
-  
 //  /** Completion monitor for loading the files of a project (as OpenDefinitionsDocuments). */
 //  public final CompletionMonitor projectLoading = new CompletionMonitor();
   
@@ -289,7 +278,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   // ----- CONSTRUCTORS -----
   
-  /** Constructs a new GlobalModel. Creates a new MainJVM and starts its Interpreter JVM. */
+  /** Constructs a new GlobalModel. */
   public AbstractGlobalModel() {
     _cache = new DocumentCache();
     
@@ -395,8 +384,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   // ----- STATE -----
   
-  /** Specifies the state of the navigator pane.  The global model delegates the compileAll command to the _state, a 
-    * FileGroupingState.nSynchronization is handled by the compilerModel.
+  /** Specifies the state of the navigator pane.  The global model delegates the compileAll command to the _state.
+    * FileGroupingState synchronization is handled by the compilerModel (??).
     */
   protected volatile FileGroupingState _state;
   
@@ -409,6 +398,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    _notifier.projectModified();  // not currently used
   }
   
+  /** Adds a document to the list of auxiliary files within _state.  The LinkedList class is not thread safe, so
+    * the add operation is synchronized.
+    */
+  public void addAuxiliaryFile(OpenDefinitionsDocument doc) { _state.addAuxFile(doc.getRawFile()); }
+  
+  /** Removes a document from the list of auxiliary files within _state.  The LinkedList class is not thread safe, so
+    * operations on _auxiliaryFiles are synchronized.
+    */
+  public void removeAuxiliaryFile(OpenDefinitionsDocument doc) { _state.remAuxFile(doc.getRawFile()); }
+    
   protected FileGroupingState
     makeProjectFileGroupingState(File pr, String main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, 
                                  File[] excludedFiles, Iterable<AbsRelFile> cp, File cjf, int cjflags, boolean refresh, String manifest) {
@@ -485,12 +484,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // some/package/SomeClass.java (not found)
     path = path.replace('.', File.separatorChar);
     File tempFile = new File(getProjectRoot(), path+".java");
-    while(path.length() > 0){
-      if(tempFile.exists()){
+    while (path.length() > 0){
+      if (tempFile.exists()){
         return tempFile;
-      }//if
+      } //if
       
-      if(path.indexOf(File.separatorChar) == -1)
+      if (path.indexOf(File.separatorChar) == -1)
         break;
       
       path = path.substring(0, path.lastIndexOf(File.separatorChar));
@@ -614,7 +613,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     ProjectFileGroupingState(File pr, String main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, 
-                             File[] excludedFiles, Iterable<AbsRelFile> cp, File cjf, int cjflags, boolean refreshStatus, String customManifest) {
+                             File[] excludedFiles, Iterable<AbsRelFile> cp, File cjf, int cjflags, boolean refreshStatus, 
+                             String customManifest) {
       _projRoot = pr;
       _mainClass = main;
       _buildDir = bd;
@@ -711,7 +711,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void addAuxFile(File f) {
       synchronized(_auxFiles) {
         if (_auxFiles.add(f)) setProjectChanged(true);
-//        setProjectChanged(true);  // This statement makes no sense; _auxFiles was not changed
       }
     }
     
@@ -724,10 +723,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public void addExcludedFile(File f) {
       if(f == null) return;
-      if (isAlreadyOpen(f)) return; // can't add files to the black list that are currently open
+      if (isAlreadyOpen(f)) return;  // can't add files to the black list that are currently open
       synchronized(_exclFiles) {
         if (_exclFiles.add(f)) setProjectChanged(true);
-//        setProjectChanged(true);  // This line makes no sense; _excludedFiles was not changed
       }
     }
     
@@ -1881,6 +1879,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     List<OpenDefinitionsDocument> docs = getOpenDefinitionsDocuments();
     boolean res = closeFiles(docs);
     if (res) {
+      // Close all error panels
+      Utilities.invokeLater(new Runnable() { public void run() { _notifier.allFilesClosed(); } });
+    
 //       _log.log("Resetting interactions pane to use " + getWorkingDirectory() + " as working directory");
       resetInteractions(getWorkingDirectory());
     }

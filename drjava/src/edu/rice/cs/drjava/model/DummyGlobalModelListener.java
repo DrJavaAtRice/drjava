@@ -207,6 +207,9 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
   /** Called when the project is being closed. */
   public void projectClosed() {  }
   
+  /** Called when all open files are being closed. */
+  public void allFilesClosed() {  }
+  
   /** Called when the projects modified state has changed. */
   public void projectModified() {  }
   
