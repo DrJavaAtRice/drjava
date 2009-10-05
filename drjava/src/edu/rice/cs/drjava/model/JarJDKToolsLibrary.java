@@ -138,6 +138,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   /** Create a JarJDKToolsLibrary from a specific {@code "tools.jar"} or {@code "classes.jar"} file. */
   public static JarJDKToolsLibrary makeFromFile(File f, GlobalModel model, List<File> additionalBootClassPath) {
     FullVersion version = guessVersion(f);
+//    msg("makeFromFile: "+f+" --> "+version);
     CompilerInterface compiler = NoCompilerAvailable.ONLY;
     Debugger debugger = NoDebuggerAvailable.ONLY;
     JavadocModel javadoc = new NoJavadocAvailable(model);
@@ -425,6 +426,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       }
     }
     catch(Exception e) { /* ignore MINT_HOME variable */ }
+    addIfFile(edu.rice.cs.util.FileOps.getDrJavaFile(), jars); // drjava.jar file itself; check if it's a combined Mint/DrJava jar
     
     // We store everything in reverse order, since that's the natural order of the versions
     Map<FullVersion, Iterable<JarJDKToolsLibrary>> results = 
@@ -452,6 +454,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     // now we have the JDK libraries in collapsed and the Mint libraries in mintCollapsed
     for(JarJDKToolsLibrary mintLib: mintCollapsed) {
 //      msg("mintLib: "+mintLib.version());
+//      msg("\t"+mintLib.location());
       FullVersion mintVersion = mintLib.version();
       JarJDKToolsLibrary found = null;
       // try to find a JDK in results that matches mintVersion exactly, except for vendor

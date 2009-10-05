@@ -1052,6 +1052,8 @@ public abstract class FileOps {
     return temp;
   }
   
+//  public static final edu.rice.cs.util.Log LOG = new Log("shortf.txt",true);
+  
   /** On Windows, return an 8.3 file name for the specified file. On other OSes, return the file unmodified.
     * @param f file for which to find an 8.3 file name
     * @return short file name for the file (or unmodified on non-Windows)
@@ -1074,6 +1076,7 @@ public abstract class FileOps {
     
     // move up towards the root
     while(parent != null) {
+//      LOG.log("parent: "+parent);
       try {
         // run a DIR /X /A in the directory containing f, i.e. in parent
         Process p = new ProcessBuilder("cmd", "/C", "dir", "/X", "/A").directory(parent).redirectErrorStream(true).start();
@@ -1085,88 +1088,102 @@ public abstract class FileOps {
         
         // until the stdout stream has ended
         while((line = br.readLine()) != null) {
-          // the format of a line is:
-          //  Volume in drive C is SYSTEM
-          //  Volume Serial Number is B4ED-7405
-          //
-          //  Directory of C:\
-          //
-          // 09/02/2009  11:02 PM    <DIR>          DOCUME~1     Documents and Settings
-          // 09/02/2009  11:02 PM               123 LONGFI~1     Long File Name
-          // 09/02/2009  11:02 PM    <DIR>                       shortdir
-          // 09/02/2009  11:02 PM               123              short
-          
-          // skip empty lines
-          if (line.trim().length() == 0) continue;
-          
-          // header starts with whitespace
-          if (line.startsWith(" ")) continue;
-          
-          // strip off first two columns
-          int pos = line.indexOf("  ");
-          if (pos == -1) continue;
-          pos = line.indexOf("  ", pos+2);
-          if (pos == -1) continue;
-          line = line.substring(pos).trim();
-          
-          // <DIR>          DOCUME~1     Documents and Settings
-          //            123 LONGFI~1     Long File Name
-          // <DIR>                       shortdir
-          //            123              short
-          
-          // strip off third column (<DIR> or file size)
-          pos = line.indexOf(' ');
-          if (pos == -1) continue;
-          line = line.substring(pos).trim();
-          
-          File shortF = null;
-          // if the line ends with the file name we are looking for...
-          if (line.equals(f.getName())) {
-            // short file name only
-            shortF = new File(parent, line);
-            if (f.getCanonicalFile().equals(shortF.getCanonicalFile())) {
-              // this is the short file name we are looking for
-              found = true;
-            }
-          }
-          else if (line.startsWith(f.getName())) {
-            // perhaps already short file name of a long file name
-            shortF = new File(parent, f.getName());
-            if (f.getCanonicalFile().equals(shortF.getCanonicalFile())) {
-              // this is the short file name we are looking for
-              found = true;
-            }
-          }
-          else if (line.endsWith(" "+f.getName())) {
-            // remove the long file name at the end and trim off whitespace
-            // DOCUME~1
-            // LONGFI~1
-            // 
-            // 
-            String shortLine = line.substring(0, line.length() - f.getName().length()).trim();
+          if (!found) {
+//            LOG.log("\tline: '"+line+"'");
+            // the format of a line is:
+            //  Volume in drive C is SYSTEM
+            //  Volume Serial Number is B4ED-7405
+            //
+            //  Directory of C:\
+            //
+            // 09/02/2009  11:02 PM    <DIR>          DOCUME~1     Documents and Settings
+            // 09/02/2009  11:02 PM               123 LONGFI~1     Long File Name
+            // 09/02/2009  11:02 PM    <DIR>                       shortdir
+            // 09/02/2009  11:02 PM               123              short
             
-            if (line.length() == 0) {
-              // already short
-              found = true;
-              shortF = f;
+            // skip empty lines
+            if (line.trim().length() == 0) continue;
+            
+            // header starts with whitespace
+            if (line.startsWith(" ")) continue;
+            
+            // strip off first two columns
+            int pos = line.indexOf("  ");
+            if (pos == -1) continue;
+            pos = line.indexOf("  ", pos+2);
+            if (pos == -1) continue;
+            line = line.substring(pos).trim();
+//            LOG.log("\t[1] '"+line+"'");
+            
+            // <DIR>          DOCUME~1     Documents and Settings
+            //            123 LONGFI~1     Long File Name
+            // <DIR>                       shortdir
+            //            123              short
+            
+            // strip off third column (<DIR> or file size)
+            pos = line.indexOf(' ');
+            if (pos == -1) continue;
+            line = line.substring(pos).trim();
+//            LOG.log("\t[2] '"+line+"'");
+            
+            File shortF = null;
+            // if the line ends with the file name we are looking for...
+            if (line.equals(f.getName())) {
+              // short file name only
+              shortF = new File(parent, line);
+//              LOG.log("\t[3] shortF = "+shortF);
+              if (f.getCanonicalFile().equals(shortF.getCanonicalFile())) {
+                // this is the short file name we are looking for
+//                LOG.log("\t[3a] found");
+                found = true;
+              }
             }
-            else {
-              shortF = new File(parent, shortLine);
+            else if (line.startsWith(f.getName()) && f.getName().contains("~")) {
+              // perhaps already short file name of a long file name
+              shortF = new File(parent, f.getName());
+//              LOG.log("\t[4] shortF = "+shortF);
+              if (f.getCanonicalFile().equals(shortF.getCanonicalFile())) {
+                // this is the short file name we are looking for
+//                LOG.log("\t[4a] found");
+                found = true;
+              }
+            }
+            else if (line.endsWith(" "+f.getName())) {
+              // remove the long file name at the end and trim off whitespace
+              // DOCUME~1
+              // LONGFI~1
+              // 
+              // 
+              String shortLine = line.substring(0, line.length() - f.getName().length()).trim();
+//              LOG.log("\t[5] shortLine: '"+shortLine+"'");
               
-              // if this file exists, check that it is exactly the file we're looking for
-              if (shortF.exists()) {
-                if (f.getCanonicalFile().equals(shortF.getCanonicalFile())) {
-                  // this is the short file name we are looking for
-                  // set flag to true, but continue reading lines from the process
-                  // otherwise DIR /X may block because the stdout stream is full
-                  found = true;
+              if (line.length() == 0) {
+                // already short
+                found = true;
+                shortF = f;
+//                LOG.log("\t[6] shortF = "+shortF);
+              }
+              else {
+                shortF = new File(parent, shortLine);
+//                LOG.log("\t[7] shortF = "+shortF);
+                
+                // if this file exists, check that it is exactly the file we're looking for
+                if (shortF.exists()) {
+                  if (f.getCanonicalFile().equals(shortF.getCanonicalFile())) {
+                    // this is the short file name we are looking for
+                    // set flag to true, but continue reading lines from the process
+                    // otherwise DIR /X may block because the stdout stream is full
+                    found = true;
+                  }
                 }
               }
             }
-          }
-          if (found && (shortF != null)) {
-            // prepend the short file name to s
-            s = shortF.getName()+((s.length()==0)?"":(File.separator+s));
+            if (found && (shortF != null)) {
+              // prepend the short file name to s
+//              LOG.log("\t[8 ] s = '"+s+"'");
+              s = shortF.getName()+((s.length()==0)?"":(File.separator+s));
+//              LOG.log("\t[8a] s = '"+s+"'");
+            }
           }
         }
 

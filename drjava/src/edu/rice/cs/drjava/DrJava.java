@@ -205,7 +205,7 @@ public class DrJava {
             // extend classpath if JUnit/ConcJUnit location specified
             _log.log("JVMBuilder: classPath = "+jvmb.classPath());
             ArrayList<File> extendedClassPath = new ArrayList<File>();
-            if (DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED) &&
+            if (DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION_ENABLED) &&
                 junitLocationConfigured) {
               extendedClassPath.add(junitLocation);
             }

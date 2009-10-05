@@ -70,6 +70,8 @@ import edu.rice.cs.util.classloader.ClassFileError;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
+import edu.rice.cs.drjava.model.JarJDKToolsLibrary;
+
 /**
  * <p>Manages a remote JVM.  Includes methods for communication in both directions: MainJVMRemoteI
  * provides callbacks allowing the remote JVM to access the model, and a variety of delegating

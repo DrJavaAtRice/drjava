@@ -517,6 +517,8 @@
         <attribute name="Main-Class" value="${main-class}" />
         <attribute name="Built-By" value="${user.name}" />
         <attribute name="Build-Version" value="${version-tag}" />
+	<!-- put the right version stamp into the jar file -->
+	<attribute name="Created-By" value="${java.version}"/>
       </manifest>
       <fileset dir="classes/lib" />
       <fileset dir="classes/base" />
@@ -531,6 +533,8 @@
         <attribute name="Main-Class" value="${main-class}" />
         <attribute name="Built-By" value="${user.name}" />
         <attribute name="Build-Version" value="${version-tag}" />
+	<!-- put the right version stamp into the jar file -->
+	<attribute name="Created-By" value="${java.version}"/>
       </manifest>
       <fileset dir="classes/base" />
     </jar>
