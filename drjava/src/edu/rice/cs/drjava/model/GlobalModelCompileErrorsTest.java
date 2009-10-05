@@ -62,6 +62,28 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   private static final String FOO_PACKAGE_AS_FIELD_2 = "class DrJavaTestFoo { int package = 5; }";
   private static final String BAR_MISSING_SEMI_TEXT_MULTIPLE_LINES =
     "class DrJavaTestFoo {\n  int a = 5;\n  int x\n }";
+  protected static final String COMPILER_ERRORS_2872797_TEXT =
+    "/**\n"+
+    " * This is a simple class that really doesn't do anything.\n"+
+    " * We'll use it to explore the kinds of error messages that\n"+
+    " * the compiler will report when it encounters errors in \n"+
+    " * Java source code.\n"+
+    " */\n"+
+    "public class CompilerErrors {\n"+
+    "\n"+
+    "  /**\n"+
+    "   * Some shared storage, an instance variable.\n"+
+    "   */\n"+
+    "  int shared = 5;\n"+
+    "  \n"+
+    "  /**\n"+
+    "   * a sample method. This method has no parameters\n"+
+    "   * and no return value.\n"+
+    "   */\n"+
+    "  public void sampleMethod() {\n"+
+    "    int x = 20;\n"+
+    "    System.out.println(\"This is sampleMethod. x is \" + x);\n"+
+    "  }\n"; // error, end of file, } missing
   
 //  /** Overrides setUp in order to save the Untitled file that resides in the model currently, so that saveBeforeCompile will not cause a failure*/
 //  public void setUp() throws IOException{
@@ -300,6 +322,32 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
                p1.getOffset() <= 20 && p1.getOffset() <= 29);
     assertTrue("location of error should be after 34 (line 3 or 4)", p2.getOffset() >= 34);
     
+    debug.logEnd();
+  }
+  
+  /** Tests compiling an invalid file and checks to make sure the class file was not created.  */
+  public void testCompileEndWhileParsing() throws BadLocationException, IOException, InterruptedException {
+    debug.logStart();
+    
+    final OpenDefinitionsDocument doc = setupDocument(COMPILER_ERRORS_2872797_TEXT);
+    final File dir = tempDirectory();
+    final File file = new File(dir, "CompilerErrors.java");
+    saveFile(doc, new FileSelector(file));
+    
+    CompileShouldFailListener listener = new CompileShouldFailListener();
+    _model.addListener(listener);
+    
+    testStartCompile(doc);
+    
+    listener.waitCompileDone();
+    assertCompileErrorsPresent(_name(), true);
+    listener.checkCompileOccurred();
+    
+    File compiled = classForJava(file, "CompilerErrors");
+    assertTrue(_name() + "Class file exists after compile?!", !compiled.exists());
+    _model.removeListener(listener);
+
+    file.delete();
     debug.logEnd();
   }
 }
