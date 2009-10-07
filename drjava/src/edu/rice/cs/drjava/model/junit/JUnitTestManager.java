@@ -65,8 +65,8 @@ import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
   * @version $Id$
   */
 public class JUnitTestManager {
-  
-  protected static final Log _log = new Log("/Users/cork/drjava/drjava/GlobalModel.txt", false);
+ 
+  protected static final Log _log = new Log("/home/jfc1/drjava/JUnitTestManager.txt", false);
   
   /** The interface to the master JVM via RMI. */
   private final JUnitModelCallback _jmc;
@@ -212,10 +212,15 @@ public class JUnitTestManager {
     * @return JUnitError
     */
   private JUnitError _makeJUnitError(TestFailure failure, List<String> classNames, boolean isError, List<File> files) {
-    
+ 
     Test failedTest = failure.failedTest();
     String testName;
-    if (failedTest instanceof TestCase) testName = ((TestCase)failedTest).getName();
+    /*if (failedTest instanceof TestCase) testName = ((TestCase)failedTest).getName();
+    else */ if(failedTest instanceof JUnit4TestCaseFacade)
+    {
+      testName = ((JUnit4TestCaseFacade) failedTest).toString(); 
+      testName = testName.substring(0,testName.indexOf('(')); //shaves off the class from TestName string
+    }
     else testName = failedTest.getClass().getName();
     
     String testString = failure.toString();
@@ -294,10 +299,11 @@ public class JUnitTestManager {
     }
     
 //    if (lineNum > -1) _errorsWithPos++;
-    
+
     String message =  (isError) ? failure.thrownException().toString(): 
       failure.thrownException().getMessage();
-    boolean isFailure = (failure.thrownException() instanceof AssertionFailedError) &&
+
+    boolean isFailure = (failure.thrownException() instanceof AssertionError || failure.thrownException() instanceof AssertionFailedError) &&
       !classNameAndTest.equals("junit.framework.TestSuite$1.warning");
     
 //    for debugging    

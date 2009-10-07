@@ -260,7 +260,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
     
     listener.runJUnit(doc);
-    
+   
     JUnitErrorModel jem = _model.getJUnitModel().getJUnitErrorModel();
     assertEquals("test case has one error reported", 1, jem.getNumErrors());
     assertTrue("first error should be an error not a warning", !jem.getError(0).isWarning());

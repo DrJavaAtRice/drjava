@@ -75,6 +75,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.Log;
 
 import org.objectweb.asm.*;
 
@@ -85,6 +86,9 @@ import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
   * @version $Id$
   */
 public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
+  
+  /** log for use in debugging */
+  private static Log _log = new Log("DefaultJUnitModel.txt", false);
   
   /** Manages listeners to this model. */
   private final JUnitEventNotifier _notifier = new JUnitEventNotifier();
@@ -126,6 +130,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     _compilerModel = compilerModel;
     _model = model;
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], _model, false);
+    _forceTestSuffix = edu.rice.cs.drjava.DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.FORCE_TEST_SUFFIX).booleanValue();
   }
   
   //-------------------------- Field Setters --------------------------------//
@@ -377,13 +382,14 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
             String name = entry.getName();
             if (! name.endsWith(".class")) continue;
             
-            /* In projects, ignore class names that do not end in "Test" if FORCE_TEST_SUFFIX option is set */
+            
+            /* Ignore class names that do not end in "Test" if FORCE_TEST_SUFFIX option is set */
             if (_forceTestSuffix) {
               String noExtName = name.substring(0, name.length() - 6);  // remove ".class" from name
               int indexOfLastDot = noExtName.lastIndexOf('.');
               String simpleClassName = noExtName.substring(indexOfLastDot + 1);
-//            System.err.println("Simple class name is " + simpleClassName);
-              if (isProject && ! simpleClassName.endsWith("Test")) continue;
+//            System.err.println("Simple class name is " + simpleClassName);  
+              if (/*isProject &&*/ ! simpleClassName.endsWith("Test")) continue;
             }
             
 //            System.err.println("Found test class: " + noExtName);
