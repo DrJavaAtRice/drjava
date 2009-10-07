@@ -294,7 +294,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     // Basically all non-alphanumeric chars are delimiters
     final HighlightStatus original = v.get(i);
     final String text;
-
+    
     
     try { text = getText(original.getLocation(), original.getLength()); }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
@@ -459,14 +459,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int getCurrentLocation() { return _currentLocation; }
   
-    /** Change the current location of the document.  Only runs in the event thread.
+  /** Change the current location of the document.  Only runs in the event thread.
     * @param loc the new absolute location 
     */
   public void setCurrentLocation(int loc) {
-    /** Change the current location of the document.  Identical to _move except that loc is absolute. Only runs in event
-      * thread.
-      * @param loc the new absolute location 
-      */
     if (loc < 0) {
       throw new UnexpectedException("Illegal location " + loc);  // was loc = 0
     }
@@ -537,7 +533,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   /** Assumes that read lock and reduced lock are already held. */
   public ReducedModelState getStateAtCurrent() { 
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     return _reduced.getStateAtCurrent(); 
   }
   
@@ -704,7 +700,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public int findPrevDelimiter(final int pos, final char[] delims, final boolean skipBracePhrases)
     throws BadLocationException {
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     // Check cache
     final Query key = new Query.PrevDelimiter(pos, delims, skipBracePhrases);
@@ -790,7 +786,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public boolean findCharInStmtBeforePos(char findChar, int position) {
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     if (position == -1) {
       String msg = 
@@ -836,7 +832,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int _findPrevCharPos(final int pos, final char[] whitespace) throws BadLocationException {
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     // Check cache
     final Query key = new Query.PrevCharPos(pos, whitespace);
@@ -949,7 +945,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param selEnd the offset of the last character of the region to indent
     */
   public void indentLines(int selStart, int selEnd) {
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     try { indentLines(selStart, selEnd, Indenter.IndentReason.OTHER, null); }
     catch (OperationCanceledException oce) {
       // Indenting without a ProgressMonitor should never be cancelled!
@@ -969,7 +965,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public void indentLines(int selStart, int selEnd, Indenter.IndentReason reason, ProgressMonitor pm)
     throws OperationCanceledException {
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     // Begins a compound edit.
     // int key = startCompoundEdit(); // commented out in connection with the FrenchKeyBoard Fix
@@ -1054,7 +1050,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param currPos A position on the current line
     */
   public int getIntelligentBeginLinePos(int currPos) throws BadLocationException {
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     String prefix;
     int firstChar;
@@ -1102,7 +1098,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param whitespace  characters to skip when looking for beginning of next statement
     */
   public int _getIndentOfCurrStmt(final int pos, final char[] delims, final char[] whitespace)  {
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     try {
       // Check cache
@@ -1169,7 +1165,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int findCharOnLine(final int pos, final char findChar) {
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();  // violated in some unit tests
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();  // violated in some unit tests
     
     // Check cache
     final Query key = new Query.CharOnLine(pos, findChar);
@@ -1217,7 +1213,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int _getLineStartPos(final int pos) {
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     if (pos < 0 || pos > getLength()) return -1;
     // Check cache
@@ -1244,7 +1240,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int _getLineEndPos(final int pos) {
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     if (pos < 0 || pos > getLength()) return -1;
     
@@ -1259,7 +1255,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     setCurrentLocation(pos);
     dist = _reduced.getDistToNextNewline();
     setCurrentLocation(oldPos);
-
+    
     newPos = pos + dist;
     assert newPos == getLength() || _getText(newPos, 1).charAt(0) == newline;
     _storeInCache(key, newPos, newPos);
@@ -1331,7 +1327,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public int getFirstNonWSCharPos(final int pos, final char[] whitespace, final boolean acceptComments) throws 
     BadLocationException {
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     // Check cache
     final Query key = new Query.FirstNonWSCharPos(pos, whitespace, acceptComments);
@@ -1439,7 +1435,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public boolean _inParenPhrase(final int pos) {
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     // Check cache
     final Query key = new Query.PosInParenPhrase(pos);
@@ -1461,7 +1457,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** Cached version of _reduced.getLineEnclosingBrace().  Assumes that read lock and reduced lock are already held. */
   public BraceInfo _getLineEnclosingBrace() {
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     // Check cache
     final int lineStart = _getLineStartPos(_currentLocation);
@@ -1586,12 +1582,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   /** Returns true if the current line has only blanks before the current location. Serves as a check so that
     * indentation will only move the caret when it is at or before the "smart" beginning of a line (i.e. the first
-    * non-blank character).  Assumes that the read lock is already held.
+    * non-blank character). Only runs in the event thread.
     * @return true if there are only blank characters before the current location on the current line.
     */
   private boolean onlyWhiteSpaceBeforeCurrent() throws BadLocationException{
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     int lineStart = _getLineStartPos(_currentLocation);
     if (lineStart < 0) lineStart = 0;    // _currentLocation on first line
@@ -1613,7 +1609,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   private int _getWhiteSpace() throws BadLocationException {
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     int lineEnd = _getLineEndPos(_currentLocation);  // index of next '\n' char or end of document
     int lineLen = lineEnd - _currentLocation;
@@ -1632,7 +1628,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
 //    System.err.println("lockState = " + _lockState);
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     int lineStart = _getLineStartPos(_currentLocation);
     if (lineStart < 0) lineStart = 0;    // _currentLocation on first line
@@ -1654,7 +1650,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public void setTab(int tab, int pos) {
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     try {
       int startPos = _getLineStartPos(pos);
@@ -1682,7 +1678,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public void setTab(String tab, int pos) {
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     try {
       int startPos = _getLineStartPos(pos);
@@ -1709,7 +1705,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @see edu.rice.cs.drjava.model.definitions.DefinitionsDocument.CommandUndoableEdit
     */
   protected void insertUpdate(AbstractDocument.DefaultDocumentEvent chng, AttributeSet attr) {
-   
+    
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     super.insertUpdate(chng, attr);
