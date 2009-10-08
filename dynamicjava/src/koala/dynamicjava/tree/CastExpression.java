@@ -38,9 +38,6 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class CastExpression extends UnaryExpression {
-  /**
-   * The targetType property name
-   */
   public final static String TARGET_TYPE = "targetType";
   
   /**
@@ -86,8 +83,7 @@ public class CastExpression extends UnaryExpression {
    */
   public void setTargetType(TypeName t) {
     //if (t == null) throw new IllegalArgumentException("t == null");
-    
-    firePropertyChange(TARGET_TYPE, targetType, targetType = t);
+    targetType = t;
   }
   
   /**

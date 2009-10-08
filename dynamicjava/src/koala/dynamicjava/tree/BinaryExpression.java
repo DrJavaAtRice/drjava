@@ -37,16 +37,6 @@ package koala.dynamicjava.tree;
 
 public abstract class BinaryExpression extends Expression {
   /**
-   * The leftExpression property name
-   */
-  public final static String LEFT_EXPRESSION = "leftExpression";
-  
-  /**
-   * The rightExpression property name
-   */
-  public final static String RIGHT_EXPRESSION = "rightExpression";
-  
-  /**
    * The LHS expression
    */
   private Expression leftExpression;
@@ -86,8 +76,7 @@ public abstract class BinaryExpression extends Expression {
    */
   public void setLeftExpression(Expression exp) {
     if (exp == null) throw new IllegalArgumentException("exp == null");
-    
-    firePropertyChange(LEFT_EXPRESSION, leftExpression, leftExpression = exp);
+    leftExpression = exp;
   }
   
   /**
@@ -103,8 +92,7 @@ public abstract class BinaryExpression extends Expression {
    */
   public void setRightExpression(Expression exp) {
     if (exp == null) throw new IllegalArgumentException("exp == null");
-    
-    firePropertyChange(RIGHT_EXPRESSION, rightExpression, rightExpression = exp);
+    rightExpression = exp;
   }
    /**
    * Implementation of toString for use in unit testing

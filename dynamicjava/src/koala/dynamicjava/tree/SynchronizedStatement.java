@@ -39,16 +39,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class SynchronizedStatement extends Statement {
   /**
-   * The lock property name
-   */
-  public final static String LOCK = "lock";
-  
-  /**
-   * The body property name
-   */
-  public final static String BODY = "body";
-  
-  /**
    * The lock object
    */
   private Expression lock;
@@ -88,8 +78,7 @@ public class SynchronizedStatement extends Statement {
    */
   public void setLock(Expression e) {
     if (e == null) throw new IllegalArgumentException("e == null");
-    
-    firePropertyChange(LOCK, lock, lock = e);
+    lock = e;
   }
   
   /**
@@ -105,8 +94,7 @@ public class SynchronizedStatement extends Statement {
    */
   public void setBody(Node node) {
     if (node == null) throw new IllegalArgumentException("node == null");
-    
-    firePropertyChange(BODY, body, body = node);
+    body = node;
   }
   
   /**

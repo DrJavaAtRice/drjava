@@ -40,27 +40,6 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class ConstructorDeclaration extends Declaration {
-
-  /**
-   * The name property name
-   */
-  public final static String NAME = "name";
-
-  /**
-   * The parameters property name
-   */
-  public final static String PARAMETERS = "parameters";
-
-  /**
-   * The exceptions property name
-   */
-  public final static String EXCEPTIONS = "exceptions";
-
-  /**
-   * The statements property name
-   */
-  public final static String STATEMENTS = "statements";
-
   /**
    * The name of this constructor
    */
@@ -146,8 +125,7 @@ public class ConstructorDeclaration extends Declaration {
    */
   public void setName(String s) {
     if (s == null) throw new IllegalArgumentException("s == null");
-
-    firePropertyChange(NAME, name, name = s);
+    name = s;
   }
 
   /**
@@ -161,7 +139,7 @@ public class ConstructorDeclaration extends Declaration {
    * Sets the parameters
    */
   public void setParameters(List<FormalParameter> l) {
-    firePropertyChange(PARAMETERS, parameters, parameters = l);
+    parameters = l;
   }
 
   /**
@@ -178,8 +156,7 @@ public class ConstructorDeclaration extends Declaration {
    */
   public void setExceptions(List<? extends ReferenceTypeName> l) {
     if (l == null) throw new IllegalArgumentException("l == null");
-
-    firePropertyChange(EXCEPTIONS, exceptions, exceptions = l);
+    exceptions = l;
   }
 
   /**
@@ -209,8 +186,7 @@ public class ConstructorDeclaration extends Declaration {
    */
   public void setStatements(List<Node> l) {
     if (l == null) throw new IllegalArgumentException("l == null");
-
-    firePropertyChange(STATEMENTS, statements, statements = l);
+    statements = l;
   }
 
   public boolean isVarArgs(){

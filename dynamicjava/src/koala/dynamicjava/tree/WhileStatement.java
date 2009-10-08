@@ -41,16 +41,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class WhileStatement extends Statement implements ContinueTarget {
   /**
-   * The condition property name
-   */
-  public final static String CONDITION = "condition";
-  
-  /**
-   * The body property name
-   */
-  public final static String BODY = "body";
-  
-  /**
    * The condition to evaluate at each loop
    */
   private Expression condition;
@@ -106,8 +96,7 @@ public class WhileStatement extends Statement implements ContinueTarget {
    */
   public void setCondition(Expression e) {
     if (e == null) throw new IllegalArgumentException("e == null");
-    
-    firePropertyChange(CONDITION, condition, condition = e);
+    condition = e;
   }
   
   /**
@@ -123,8 +112,7 @@ public class WhileStatement extends Statement implements ContinueTarget {
    */
   public void setBody(Node node) {
     if (node == null) throw new IllegalArgumentException("node == null");
-    
-    firePropertyChange(BODY, body, body = node);
+    body = node;
   }
   
   /**

@@ -39,15 +39,6 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class AmbiguousName extends PrimaryExpression implements LeftHandSide {
-  /**
-   * The identifiers property name
-   */
-  public final static String IDENTIFIERS = "identifiers";
-
-  /**
-   * The representation property name
-   */
-  public final static String REPRESENTATION = "representation";
 
   /**
    * The identifiers (tokens) that compose this name
@@ -117,11 +108,8 @@ public class AmbiguousName extends PrimaryExpression implements LeftHandSide {
    */
   public void setIdentifier(List<IdentifierToken> l) {
     if (l == null) throw new IllegalArgumentException("l == null");
-
-    firePropertyChange(IDENTIFIERS, identifiers, identifiers = l);
-    firePropertyChange(REPRESENTATION,
-                       representation,
-                       representation = TreeUtilities.listToName(l));
+    identifiers = l;
+    representation = TreeUtilities.listToName(l);
   }
 
   /**

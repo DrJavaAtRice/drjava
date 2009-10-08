@@ -41,17 +41,6 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class SimpleAllocation extends PrimaryExpression implements StatementExpression {
-
-  /**
-   * The creationType property name
-   */
-  public final static String CREATION_TYPE = "creationType";
-  
-  /**
-   * The arguments property name
-   */
-  public final static String ARGUMENTS = "arguments";
-  
   /**
    * The creationType
    */
@@ -100,8 +89,7 @@ public class SimpleAllocation extends PrimaryExpression implements StatementExpr
    */
   public void setCreationType(ReferenceTypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
-    
-    firePropertyChange(CREATION_TYPE, creationType, creationType = t);
+    creationType = t;
   }
 
   /**
@@ -115,8 +103,7 @@ public class SimpleAllocation extends PrimaryExpression implements StatementExpr
    * Sets the constructor arguments.
    */
   public void setArguments(List<? extends Expression> l) {
-    firePropertyChange(ARGUMENTS, arguments, 
-                       arguments = (l == null) ? new ArrayList<Expression>(0) : new ArrayList<Expression>(l));
+    arguments = (l == null) ? new ArrayList<Expression>(0) : new ArrayList<Expression>(l);
   }
   
   /**

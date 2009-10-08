@@ -41,16 +41,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class SwitchStatement extends Statement {
   /**
-   * The selector property name
-   */
-  public final static String SELECTOR = "selector";
-  
-  /**
-   * The bindings property name
-   */
-  public final static String BINDINGS = "bindings";
-  
-  /**
    * The selector
    */
   private Expression selector;
@@ -90,8 +80,7 @@ public class SwitchStatement extends Statement {
    */
   public void setSelector(Expression e) {
     if (e == null) throw new IllegalArgumentException("e == null");
-    
-    firePropertyChange(SELECTOR, selector, selector = e);
+    selector = e;
   }
   
   /**
@@ -107,8 +96,7 @@ public class SwitchStatement extends Statement {
    */
   public void setBindings(List<SwitchBlock> l) {
     if (l == null) throw new IllegalArgumentException("l == null");
-    
-    firePropertyChange(BINDINGS, bindings, bindings = l);
+    bindings = l;
   }
   
   /**

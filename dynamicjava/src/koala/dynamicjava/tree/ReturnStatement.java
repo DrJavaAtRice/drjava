@@ -73,7 +73,7 @@ public class ReturnStatement extends Statement implements ExpressionContainer {
    * Sets the expression
    */
   public void setExpression(Expression e) {
-    firePropertyChange(EXPRESSION, expression, expression = e);
+    expression = e;
   }
   
   /**

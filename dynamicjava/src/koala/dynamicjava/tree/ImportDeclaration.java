@@ -41,16 +41,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class ImportDeclaration extends Node {
   /**
-   * The name property name
-   */
-  public final static String NAME = "name";
-
-  /**
-   * The package property name
-   */
-  public final static String PACKAGE = "package";
-
-  /**
    * The name of the imported class or package
    */
   private String name;
@@ -121,8 +111,7 @@ public class ImportDeclaration extends Node {
    */
   public void setName(String s) {
     if (s == null) throw new IllegalArgumentException("s == null");
-
-    firePropertyChange(NAME, name, name = s);
+    name = s;
   }
 
   /**
@@ -145,7 +134,7 @@ public class ImportDeclaration extends Node {
    * Sets the package property
    */
   public void setPackage(boolean b) {
-    firePropertyChange(PACKAGE, pckage, pckage = b);
+    pckage = b;
   }
 
   /**

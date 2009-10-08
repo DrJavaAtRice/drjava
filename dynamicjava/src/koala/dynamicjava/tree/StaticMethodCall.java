@@ -42,11 +42,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class StaticMethodCall extends MethodCall {
   /**
-   * The methodType property name
-   */
-  public final static String METHOD_TYPE = "methodType";
-
-  /**
    * The type on which this method call applies
    */
   private TypeName methodType;
@@ -93,8 +88,7 @@ public class StaticMethodCall extends MethodCall {
    */
   public void setMethodType(ReferenceTypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
-
-    firePropertyChange(METHOD_TYPE, methodType, methodType = t);
+    methodType = t;
   }
 
   /**

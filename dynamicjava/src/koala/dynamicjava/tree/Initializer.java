@@ -37,11 +37,6 @@ package koala.dynamicjava.tree;
 
 public abstract class Initializer extends Node {
     /**
-     * The block property name
-     */
-    public final static String BLOCK = "block";
-
-    /**
      * The block
      */
     private BlockStatement block;
@@ -73,7 +68,6 @@ public abstract class Initializer extends Node {
      */
     public void setBlock(BlockStatement bs) {
 	if (bs == null) throw new IllegalArgumentException("bs == null");
-
-	firePropertyChange(BLOCK, block, block = bs);
+	block = bs;
     }
 }

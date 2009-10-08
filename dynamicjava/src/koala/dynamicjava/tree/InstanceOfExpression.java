@@ -39,11 +39,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class InstanceOfExpression extends Expression implements ExpressionContainer {
   /**
-   * The referenceType property name
-   */
-  public final static String REFERENCE_TYPE = "referenceType";
-  
-  /**
    * The expression to check
    */
   private Expression expression;
@@ -93,8 +88,7 @@ public class InstanceOfExpression extends Expression implements ExpressionContai
    */
   public void setExpression(Expression e) {
     if (e == null) throw new IllegalArgumentException("e == null");
-    
-    firePropertyChange(EXPRESSION, expression, expression = e);
+    expression = e;
   }
   
   /**
@@ -110,8 +104,7 @@ public class InstanceOfExpression extends Expression implements ExpressionContai
    */
   public void setReferenceType(TypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
-    
-    firePropertyChange(REFERENCE_TYPE, referenceType, referenceType = t);
+    referenceType = t;
   }
   
   /**

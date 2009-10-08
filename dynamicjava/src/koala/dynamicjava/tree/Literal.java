@@ -39,21 +39,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public abstract class Literal extends PrimaryExpression {
   /**
-   * The representation property name
-   */
-  public final static String REPRESENTATION = "representation";
-  
-  /**
-   * The value property name
-   */
-  public final static String VALUE = "value";
-  
-  /**
-   * The type property name
-   */
-  public final static String TYPE = "type";
-  
-  /**
    * The representation of the literal
    */
   private String representation;
@@ -98,8 +83,7 @@ public abstract class Literal extends PrimaryExpression {
    */
   public void setRepresentation(String s) {
     if (s == null) throw new IllegalArgumentException("s == null");
-    
-    firePropertyChange(REPRESENTATION, representation, representation = s);
+    representation = s;
   }
   
   /**
@@ -114,7 +98,7 @@ public abstract class Literal extends PrimaryExpression {
    * @exception IllegalArgumentException if o is null
    */
   public void setValue(Object o) {
-    firePropertyChange(VALUE, value, value = o);
+    value = o;
   }
   
   /**
@@ -129,7 +113,7 @@ public abstract class Literal extends PrimaryExpression {
    * Sets the type of this object
    */
   public void setType(Class<?> c) {
-    firePropertyChange(TYPE, type, type = c);
+    type = c;
   }
   
   /**

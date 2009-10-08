@@ -42,16 +42,6 @@ import java.util.*;
 public abstract class MethodCall extends PrimaryExpression
   implements StatementExpression {
   /**
-   * The methodName property name
-   */
-  public final static String METHOD_NAME = "methodName";
-  
-  /**
-   * The arguments property name
-   */
-  public final static String ARGUMENTS = "arguments";
-  
-  /**
    * The method name
    */
   private String methodName;
@@ -91,8 +81,7 @@ public abstract class MethodCall extends PrimaryExpression
    */
   public void setMethodName(String s) {
     if (s == null) throw new IllegalArgumentException("s == null");
-    
-    firePropertyChange(METHOD_NAME, methodName, methodName = s);
+    methodName = s;
   }
   
   /**
@@ -107,7 +96,6 @@ public abstract class MethodCall extends PrimaryExpression
    * Sets the constructor arguments.
    */
   public void setArguments(List<? extends Expression> l) {
-    firePropertyChange(ARGUMENTS, arguments, 
-                       arguments = (l == null) ? new ArrayList<Expression>(0) : new ArrayList<Expression>(l));
+    arguments = (l == null) ? new ArrayList<Expression>(0) : new ArrayList<Expression>(l);
   }
 }

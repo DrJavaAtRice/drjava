@@ -92,7 +92,7 @@ public class AnonymousInnerAllocation extends InnerAllocation {
    */
   public void setMembers(List<Node> l) {
     if (l == null) throw new IllegalArgumentException("l == null");
-    firePropertyChange(MEMBERS, members, members = l);
+    members = l;
   }
   
   /**

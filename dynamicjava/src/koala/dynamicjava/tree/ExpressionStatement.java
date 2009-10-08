@@ -90,7 +90,7 @@ public class ExpressionStatement extends Statement implements ExpressionContaine
   
   public void setExpression(Expression e) {
     if (e == null) throw new IllegalArgumentException("e == null");
-    firePropertyChange(EXPRESSION, expression, expression = e);
+    expression = e;
   }
   
   /**

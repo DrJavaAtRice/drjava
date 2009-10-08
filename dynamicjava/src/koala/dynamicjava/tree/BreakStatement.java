@@ -39,11 +39,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class BreakStatement extends Statement {
   /**
-   * The label property name
-   */
-  public final static String LABEL = "label";
-  
-  /**
    * The label
    */
   private String label;
@@ -78,7 +73,7 @@ public class BreakStatement extends Statement {
    * Sets the label
    */
   public void setLabel(String s) {
-    firePropertyChange(LABEL, label, label = s);
+    label = s;
   }
   
   /**

@@ -39,15 +39,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class ArrayAccess extends PrimaryExpression implements LeftHandSide,
   ExpressionContainer {
-  /**
-   * The expression property name
-   */
-  public final static String EXPRESSION = "expression";
-  
-  /**
-   * The cellNumber property name
-   */
-  public final static String CELL_NUMBER = "cellNumber";
   
   /**
    * The expression on which this array access applies
@@ -99,8 +90,7 @@ public class ArrayAccess extends PrimaryExpression implements LeftHandSide,
    */
   public void setExpression(Expression e) {
     if (e == null)  throw new IllegalArgumentException("e == null");
-    
-    firePropertyChange(EXPRESSION, expression, expression = e);
+    expression = e;
   }
   
   /**
@@ -116,8 +106,7 @@ public class ArrayAccess extends PrimaryExpression implements LeftHandSide,
    */
   public void setCellNumber(Expression e) {
     if (e == null)  throw new IllegalArgumentException("e == null");
-    
-    firePropertyChange(CELL_NUMBER, cellNumber, cellNumber = e);
+    cellNumber = e;
   }
   
   /**

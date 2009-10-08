@@ -39,11 +39,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class IfThenElseStatement extends IfThenStatement {
   /**
-   * The elseStatement property name
-   */
-  public final static String ELSE_STATEMENT = "elseStatement";
-  
-  /**
    * The 'else' statement
    */
   private Node elseStatement;
@@ -90,8 +85,7 @@ public class IfThenElseStatement extends IfThenStatement {
    */
   public void setElseStatement(Node node) {
     if (node == null) throw new IllegalArgumentException("node == null");
-    
-    firePropertyChange(ELSE_STATEMENT, elseStatement, elseStatement = node);
+    elseStatement = node;
   }
   
   /**

@@ -38,22 +38,6 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class VariableDeclaration extends Declaration {
-  
-  /**
-   * The type property name
-   */
-  public final static String TYPE = "type";
-  
-  /**
-   * The name property name
-   */
-  public final static String NAME = "name";
-  
-  /**
-   * The initializer property name
-   */
-  public final static String INITIALIZER = "initializer";
-  
   /**
    * The type of this variable
    */
@@ -122,8 +106,7 @@ public class VariableDeclaration extends Declaration {
    */
   public void setType(TypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
-    
-    firePropertyChange(TYPE, type, type = t);
+    type = t;
   }
   
   /**
@@ -139,8 +122,7 @@ public class VariableDeclaration extends Declaration {
    */
   public void setName(String s) {
     if (s == null) throw new IllegalArgumentException("s == null");
-    
-    firePropertyChange(NAME, name, name = s);
+    name = s;
   }
   
   /**
@@ -154,7 +136,7 @@ public class VariableDeclaration extends Declaration {
    * Sets the initializer
    */
   public void setInitializer(Expression e) {
-    firePropertyChange(INITIALIZER, initializer, initializer = e);
+    initializer = e;
   }
   
   /**

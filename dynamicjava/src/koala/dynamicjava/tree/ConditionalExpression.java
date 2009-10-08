@@ -39,21 +39,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class ConditionalExpression extends Expression {
   /**
-   * The conditionExpression property name
-   */
-  public final static String CONDITION_EXPRESSION = "conditionExpression";
-  
-  /**
-   * The ifTrueExpression property name
-   */
-  public final static String IF_TRUE_EXPRESSION = "ifTrueExpression";
-  
-  /**
-   * The ifFalseExpression property name
-   */
-  public final static String IF_FALSE_EXPRESSION = "ifFalseExpression";
-  
-  /**
    * The condition expression
    */
   private Expression conditionExpression;
@@ -114,10 +99,7 @@ public class ConditionalExpression extends Expression {
    */
   public void setConditionExpression(Expression e) {
     if (e == null) throw new IllegalArgumentException("e == null");
-    
-    firePropertyChange(CONDITION_EXPRESSION,
-                       conditionExpression,
-                       conditionExpression = e);
+    conditionExpression = e;
   }
   
   /**
@@ -133,8 +115,7 @@ public class ConditionalExpression extends Expression {
    */
   public void setIfTrueExpression(Expression e) {
     if (e == null) throw new IllegalArgumentException("e == null");
-    
-    firePropertyChange(IF_TRUE_EXPRESSION, ifTrueExpression, ifTrueExpression = e);
+    ifTrueExpression = e;
   }
   
   /**
@@ -150,10 +131,7 @@ public class ConditionalExpression extends Expression {
    */
   public void setIfFalseExpression(Expression e) {
     if (e == null) throw new IllegalArgumentException("e == null");
-    
-    firePropertyChange(IF_FALSE_EXPRESSION,
-                       ifFalseExpression,
-                       ifFalseExpression = e);
+    ifFalseExpression = e;
   }
   
   /**

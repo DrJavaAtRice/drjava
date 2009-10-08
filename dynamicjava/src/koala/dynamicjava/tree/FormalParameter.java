@@ -39,16 +39,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class FormalParameter extends Declaration {
   /**
-   * The type property name
-   */
-  public final static String TYPE = "type";
-  
-  /**
-   * The name property name
-   */
-  public final static String NAME = "name";
-  
-  /**
    * The type of this parameter
    */
   private TypeName type;
@@ -99,8 +89,7 @@ public class FormalParameter extends Declaration {
    */
   public void setType(TypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
-    
-    firePropertyChange(TYPE, type, type = t);
+    type = t;
   }
   
   /**
@@ -116,8 +105,7 @@ public class FormalParameter extends Declaration {
    */
   public void setName(String s) {
     if (s == null) throw new IllegalArgumentException("s == null");
-    
-    firePropertyChange(NAME, name, name = s);
+    name = s;
   }
   
   /**

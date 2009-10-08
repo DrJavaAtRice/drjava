@@ -45,16 +45,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class AssertStatement extends Statement {
   /**
-   * The condition property name
-   */
-  public final static String CONDITION = "condition";
-  
-  /**
-   * The Failed String property name
-   */
-  public final static String FAILED = "failed";
-  
-  /**
    * The condition and the failure string
    */
   private Expression condition, failedString;
@@ -100,15 +90,14 @@ public class AssertStatement extends Statement {
    */
   public void setCondition(Expression e) {
     if (e == null) throw new IllegalArgumentException("e == null");
-    
-    firePropertyChange(CONDITION, condition, condition = e);
+    condition = e;
   }
   
   /**
    * Sets the string to display on failure
    */
   public void setFailString(Expression e) {
-    firePropertyChange(FAILED, failedString, failedString = e);
+    failedString = e;
   }
   
   /**

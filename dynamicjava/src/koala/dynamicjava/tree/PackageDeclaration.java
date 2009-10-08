@@ -40,11 +40,6 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class PackageDeclaration extends Declaration {
-  /**
-   * The name property name
-   */
-  public final static String NAME = "name";
-  
   private String name;
   
   /**
@@ -88,8 +83,7 @@ public class PackageDeclaration extends Declaration {
    */
   public void setName(String s) {
     if (s == null) throw new IllegalArgumentException("s == null");
-    
-    firePropertyChange(NAME, name, name = s);
+    name = s;
   }
   
   /**

@@ -39,16 +39,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class IfThenStatement extends Statement {
   /**
-   * The condition property name
-   */
-  public final static String CONDITION = "condition";
-  
-  /**
-   * The thenStatement property name
-   */
-  public final static String THEN_STATEMENT = "thenStatement";
-  
-  /**
    * The condition
    */
   private Expression condition;
@@ -98,8 +88,7 @@ public class IfThenStatement extends Statement {
    */
   public void setCondition(Expression e) {
     if (e == null) throw new IllegalArgumentException("e == null");
-    
-    firePropertyChange(CONDITION, condition, condition = e);
+    condition = e;
   }
   
   /**
@@ -115,8 +104,7 @@ public class IfThenStatement extends Statement {
    */
   public void setThenStatement(Node node) {
     if (node == null) throw new IllegalArgumentException("node == null");
-    
-    firePropertyChange(THEN_STATEMENT, thenStatement, thenStatement = node);
+    thenStatement = node;
   }
   
   /**

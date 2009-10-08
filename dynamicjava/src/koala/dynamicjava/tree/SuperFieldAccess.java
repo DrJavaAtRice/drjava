@@ -41,11 +41,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class SuperFieldAccess extends FieldAccess {
   /**
-   * The className property name
-   */
-  public final static String CLASS_NAME = "className";
-  
-  /**
    * The class that qualify that object
    */
   private Option<String> className;
@@ -71,8 +66,7 @@ public class SuperFieldAccess extends FieldAccess {
    */
   public void setClassName(Option<String> cn) {
     if (cn == null) throw new IllegalArgumentException("cn == null");
-    
-    firePropertyChange(CLASS_NAME, className, className = cn);
+    className = cn;
   }
   
   /**

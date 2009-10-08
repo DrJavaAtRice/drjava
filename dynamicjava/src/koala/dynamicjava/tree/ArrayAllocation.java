@@ -38,10 +38,6 @@ import koala.dynamicjava.tree.visitor.*;
   */
 
 public class ArrayAllocation extends PrimaryExpression {
-
-  /** The creationType property name */
-  public final static String ELEMENT_TYPE = "creationType";
-  
   /** The creationType */
   private TypeName elementType;
   
@@ -86,8 +82,7 @@ public class ArrayAllocation extends PrimaryExpression {
    */
   public void setElementType(TypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
-    
-    firePropertyChange(ELEMENT_TYPE, elementType, elementType = t);
+    elementType = t;
   }
 
   /**

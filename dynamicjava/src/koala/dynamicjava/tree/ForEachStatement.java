@@ -75,21 +75,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class ForEachStatement extends ForSlashEachStatement implements ContinueTarget {
   /**
-   * The initialization property name
-   */
-  public final static String PARAMETER = "parameter";
-  
-  /**
-   * The update property name
-   */
-  public final static String COLLECTION = "collection";
-  
-  /**
-   * The body property name
-   */
-  public final static String BODY = "body";
-  
-  /**
    * The initialization statements
    */
   private FormalParameter parameter;
@@ -161,7 +146,7 @@ public class ForEachStatement extends ForSlashEachStatement implements ContinueT
    * Sets the initialization statements
    */
   public void setParameter(FormalParameter l) {
-    firePropertyChange(PARAMETER, parameter, parameter = l);
+    parameter = l;
   }
   
   /**
@@ -175,7 +160,7 @@ public class ForEachStatement extends ForSlashEachStatement implements ContinueT
    * Sets the condition to evaluate
    */
   public void setCollection(Expression e) {
-    firePropertyChange(COLLECTION, collection, collection = e);
+    collection = e;
   }
   
   /**
@@ -191,8 +176,7 @@ public class ForEachStatement extends ForSlashEachStatement implements ContinueT
    */
   public void setBody(Node node) {
     if (node == null) throw new IllegalArgumentException("node == null");
-    
-    firePropertyChange(BODY, body, body = node);
+    body = node;
   }
   
   /**

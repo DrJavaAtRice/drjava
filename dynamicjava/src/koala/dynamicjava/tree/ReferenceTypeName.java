@@ -44,20 +44,10 @@ public class ReferenceTypeName extends TypeName {
   // TODO: Develop a better representation with more structure (resolving package/class ambiguities).
   
   /**
-   * The representation property name
-   */
-  public final static String REPRESENTATION = "representation";
-
-  /**
    * The representation of this type
    */
   private String representation;
   
-  /**
-   * The representation property name
-   */
-  public final static String IDENTIFIERS = "identifiers";
-
   /**
    * The representation of this type
    */
@@ -124,8 +114,8 @@ public class ReferenceTypeName extends TypeName {
   public void setIdentifiers(List<? extends IdentifierToken> ids) {
     if (ids == null) throw new IllegalArgumentException("ids == null");
     if (ids.size() == 0) throw new IllegalArgumentException("ids.size() == 0");
-    firePropertyChange(IDENTIFIERS, identifiers, identifiers = ids);
-    firePropertyChange(REPRESENTATION, representation, representation = TreeUtilities.listToName(ids));
+    identifiers = ids;
+    representation = TreeUtilities.listToName(ids);
   }
 
   /**

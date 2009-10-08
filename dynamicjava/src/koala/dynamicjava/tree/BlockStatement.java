@@ -41,11 +41,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class BlockStatement extends Statement {
   /**
-   * The creationType property name
-   */
-  public final static String STATEMENTS = "statements";
-  
-  /**
    * The list of the statements contained in this block
    */
   private List<Node> statements;
@@ -84,8 +79,7 @@ public class BlockStatement extends Statement {
    */
   public void setStatements(List<Node> l) {
     if (l == null) throw new IllegalArgumentException("l == null");
-    
-    firePropertyChange(STATEMENTS, statements, statements = l);
+    statements = l;
   }
   
   /**

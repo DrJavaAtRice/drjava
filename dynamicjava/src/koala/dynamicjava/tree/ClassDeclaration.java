@@ -40,11 +40,6 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class ClassDeclaration extends TypeDeclaration {
-  /**
-   * The superclass property name
-   */
-  public final static String SUPERCLASS = "superclass";
-
   /** Default supertype */
   private static final ReferenceTypeName OBJECT = new ReferenceTypeName("java", "lang", "Object");
 
@@ -99,8 +94,7 @@ public class ClassDeclaration extends TypeDeclaration {
    */
   public void setSuperclass(ReferenceTypeName s) {
     if (s == null) throw new IllegalArgumentException("s == null");
-
-    firePropertyChange(SUPERCLASS, superclass, superclass = s);
+    superclass = s;
   }
 
   /**

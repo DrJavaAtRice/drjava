@@ -39,11 +39,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class StaticFieldAccess extends FieldAccess {
   /**
-   * The fieldType property name
-   */
-  public final static String FIELD_TYPE = "fieldType";
-  
-  /**
    * The type on which this field access applies
    */
   private ReferenceTypeName fieldType;
@@ -86,8 +81,7 @@ public class StaticFieldAccess extends FieldAccess {
    */
   public void setFieldType(ReferenceTypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
-    
-    firePropertyChange(FIELD_TYPE, fieldType, fieldType = t);
+    fieldType = t;
   }
   
   /**

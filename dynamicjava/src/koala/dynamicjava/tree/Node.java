@@ -64,10 +64,7 @@
 
 package koala.dynamicjava.tree;
 
-import java.beans.*;
 import java.util.*;
-
-import edu.rice.cs.plt.object.ObjectUtil;
 
 import koala.dynamicjava.tree.visitor.*;
 
@@ -79,25 +76,14 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public abstract class Node implements SourceInfo.Wrapper {
-  /**
-   * The sourceInfo property name
-   */
-  public final static String SOURCE_INFO = "sourceInfo";
-  
   private final Map<String,Object> properties;
   private SourceInfo sourceInfo;
   
   
-  /**
-   * The support for the property change mechanism
-   */
-  private PropertyChangeSupport propertyChangeSupport;
-  
   protected Node(SourceInfo si) {
     assert si != null;
     sourceInfo = si;
-    propertyChangeSupport = new PropertyChangeSupport(this);
-    properties = new HashMap<String, Object>(11);
+    properties = new HashMap<String, Object>();
   } 
   
   /** Returns the sourceInfo. */
@@ -110,7 +96,7 @@ public abstract class Node implements SourceInfo.Wrapper {
    */
   public void setSourceInfo(SourceInfo si) {
     assert si != null;
-    firePropertyChange(SOURCE_INFO, sourceInfo, sourceInfo = si);
+    sourceInfo = si;
   }
   
   
@@ -123,7 +109,7 @@ public abstract class Node implements SourceInfo.Wrapper {
    * @param value the new value to set
    */
   public void setProperty(String name, Object value) {
-    firePropertyChange(name, properties.put(name, value), value);
+    properties.put(name, value);
   }
   
   /**
@@ -161,85 +147,6 @@ public abstract class Node implements SourceInfo.Wrapper {
     properties.clear();
     properties.putAll(newProps);
   }
-  
-  /**
-   * Adds a PropertyChangeListener to the listener list.
-   * The listener is registered for all properties.
-   * @param listener  The PropertyChangeListener to be added
-   */
-  public void addPropertyChangeListener(PropertyChangeListener listener) {
-    propertyChangeSupport.addPropertyChangeListener(listener);
-  }
-  
-  /**
-   * Removes a PropertyChangeListener from the listener list.
-   * This removes a PropertyChangeListener that was registered
-   * for all properties.
-   * @param listener  The PropertyChangeListener to be removed
-   */
-  public void removePropertyChangeListener(PropertyChangeListener listener) {
-    propertyChangeSupport.removePropertyChangeListener(listener);
-  }
-  
-  /**
-   * Adds a PropertyChangeListener for a specific property.  The listener
-   * will be invoked only when a call on firePropertyChange names that
-   * specific property.
-   * @param propertyName  The name of the property to listen on.
-   * @param listener  The PropertyChangeListener to be added
-   */
-  public void addPropertyChangeListener(String propertyName,
-                                        PropertyChangeListener listener) {
-    propertyChangeSupport.addPropertyChangeListener(propertyName, listener);
-  }
-  
-  /**
-   * Removes a PropertyChangeListener for a specific property.
-   * @param propertyName  The name of the property that was listened on.
-   * @param listener  The PropertyChangeListener to be removed
-   */
-  public void removePropertyChangeListener(String propertyName,
-                                           PropertyChangeListener listener) {
-    propertyChangeSupport.removePropertyChangeListener(propertyName, listener);
-  }
-  
-  /**
-   * Report a bound property update to any registered listeners.
-   * No event is fired if old and new are equal and non-null.
-   * @param propertyName  The programmatic name of the property that was changed.
-   * @param oldValue  The old value of the property.
-   * @param newValue  The new value of the property.
-   */
-  protected void firePropertyChange(String propertyName,
-                                    boolean oldValue, boolean newValue) {
-    propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
-  }
-  
-  /**
-   * Report a bound property update to any registered listeners.
-   * No event is fired if old and new are equal and non-null.
-   * @param propertyName  The programmatic name of the property that was changed.
-   * @param oldValue  The old value of the property.
-   * @param newValue  The new value of the property.
-   */
-  protected void firePropertyChange(String propertyName,
-                                    int oldValue, int newValue) {
-    propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
-  }
-  
-  /**
-   * Report a bound property update to any registered listeners.
-   * No event is fired if old and new are equal and non-null.
-   * @param propertyName  The programmatic name of the property that was changed.
-   * @param oldValue  The old value of the property.
-   * @param newValue  The new value of the property.
-   */
-  protected void firePropertyChange(String propertyName,
-                                    Object oldValue, Object newValue) {
-    propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
-  }
-  
-  // Visitors support ///////////////////////////////////////////////////////////
   
   /**
    * Allows a visitor to traverse the tree

@@ -32,11 +32,6 @@ import koala.dynamicjava.tree.visitor.Visitor;
 
 public class VariableAccess extends PrimaryExpression implements LeftHandSide {
   /**
-   * The body property name
-   */
-  public final static String VARIABLE_NAME = "variableName";
-  
-  /**
    * The field name
    */
   private String variableName;
@@ -75,8 +70,7 @@ public class VariableAccess extends PrimaryExpression implements LeftHandSide {
    */
   public void setVariableName(String s) {
     if (s == null) throw new IllegalArgumentException("Null variable name in VariableAccess update");
-    
-    firePropertyChange(VARIABLE_NAME, variableName, variableName = s);
+    variableName = s;
   }
   
   /**

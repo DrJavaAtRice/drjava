@@ -38,22 +38,6 @@ import java.util.*;
  */
 
 public abstract class TypeDeclaration extends Declaration {
-
-  /**
-   * The name property name
-   */
-  public final static String NAME = "name";
-
-  /**
-   * The interfaces property name
-   */
-  public final static String INTERFACES = "interfaces";
-
-  /**
-   * The members property name
-   */
-  public final static String MEMBERS = "members";
-
   /**
    * The name of this class
    */
@@ -100,7 +84,7 @@ public abstract class TypeDeclaration extends Declaration {
    */
   public void setName(String s) {
     if (s == null) throw new IllegalArgumentException("s == null");
-    firePropertyChange(NAME, name, name = s);
+    name = s;
   }
 
   /**
@@ -115,7 +99,7 @@ public abstract class TypeDeclaration extends Declaration {
    * Sets the interfaces (a list of strings)
    */
   public void setInterfaces(List<? extends ReferenceTypeName> l) {
-    firePropertyChange(INTERFACES, interfaces, interfaces = l);
+    interfaces = l;
   }
 
   /**
@@ -131,7 +115,6 @@ public abstract class TypeDeclaration extends Declaration {
    */
   public void setMembers(List<Node> l) {
     if (l == null) throw new IllegalArgumentException("l == null");
-
-    firePropertyChange(MEMBERS, members, members = l);
+    members = l;
   }
 }

@@ -78,8 +78,7 @@ public class ThrowStatement extends Statement implements ExpressionContainer {
    */
   public void setExpression(Expression e) {
     if (e == null) throw new IllegalArgumentException("e == null");
-    
-    firePropertyChange(EXPRESSION, expression, expression = e);
+    expression = e;
   }
   
   /**

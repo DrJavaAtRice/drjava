@@ -40,22 +40,6 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class InnerAllocation extends PrimaryExpression implements StatementExpression, ExpressionContainer {
-
-  /**
-   * The className property name
-   */
-  public final static String CLASS_NAME = "className";
-  
-  /**
-   * The classTypeArguments property name
-   */
-  public final static String CLASS_TYPE_ARGUMENTS = "classTypeArguments";
-  
-  /**
-   * The arguments property name
-   */
-  public final static String ARGUMENTS = "arguments";
-    
   /**
    * The outer object expression
    */
@@ -122,7 +106,7 @@ public class InnerAllocation extends PrimaryExpression implements StatementExpre
    */
   public void setExpression(Expression e) {
     if (e == null) throw new IllegalArgumentException("e == null");
-    firePropertyChange(EXPRESSION, expression, expression = e);
+    expression = e;
   }
   
   /**
@@ -138,7 +122,7 @@ public class InnerAllocation extends PrimaryExpression implements StatementExpre
    */
   public void setClassName(String cn) {
     if (cn == null) throw new IllegalArgumentException("cn == null");
-    firePropertyChange(CLASS_NAME, className, className = cn);
+    className = cn;
   }
   
   /**
@@ -153,8 +137,7 @@ public class InnerAllocation extends PrimaryExpression implements StatementExpre
    * Sets the inner class type arguments.
    */
   public void setClassTypeArguments(List<TypeName> l) {
-    firePropertyChange(CLASS_TYPE_ARGUMENTS, classTypeArguments,
-                       (l == null) ? new ArrayList<TypeName>(0) : new ArrayList<TypeName>(l));
+    classTypeArguments = (l == null) ? new ArrayList<TypeName>(0) : new ArrayList<TypeName>(l);
   }
   
   /**
@@ -169,8 +152,7 @@ public class InnerAllocation extends PrimaryExpression implements StatementExpre
    * Sets the constructor arguments.
    */
   public void setArguments(List<? extends Expression> l) {
-    firePropertyChange(ARGUMENTS, arguments, 
-                       arguments = (l == null) ? new ArrayList<Expression>(0) : new ArrayList<Expression>(l));
+    arguments = (l == null) ? new ArrayList<Expression>(0) : new ArrayList<Expression>(l);
   }
   
   /**

@@ -41,31 +41,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class MethodDeclaration extends Declaration {
   /**
-   * The type property name
-   */
-  public final static String RETURN_TYPE = "returnType";
-
-  /**
-   * The name property name
-   */
-  public final static String NAME = "name";
-
-  /**
-   * The parameters property name
-   */
-  public final static String PARAMETERS = "parameters";
-
-  /**
-   * The exceptions property name
-   */
-  public final static String EXCEPTIONS = "exceptions";
-
-  /**
-   * The body property name
-   */
-  public final static String BODY = "body";
-
-  /**
    * The return type of this method
    */
   private TypeName returnType;
@@ -147,8 +122,7 @@ public class MethodDeclaration extends Declaration {
    */
   public void setReturnType(TypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
-
-    firePropertyChange(RETURN_TYPE, returnType, returnType = t);
+    returnType = t;
   }
 
   /**
@@ -164,8 +138,7 @@ public class MethodDeclaration extends Declaration {
    */
   public void setName(String s) {
     if (s == null) throw new IllegalArgumentException("s == null");
-
-    firePropertyChange(NAME, name, name = s);
+    name = s;
   }
 
   /**
@@ -181,8 +154,7 @@ public class MethodDeclaration extends Declaration {
    */
   public void setParameters(List<FormalParameter> l) {
     if (l == null) throw new IllegalArgumentException("l == null");
-
-    firePropertyChange(PARAMETERS, parameters, parameters = l);
+    parameters = l;
   }
 
   /**
@@ -199,8 +171,7 @@ public class MethodDeclaration extends Declaration {
    */
   public void setExceptions(List<? extends ReferenceTypeName> l) {
     if (l == null) throw new IllegalArgumentException("l == null");
-
-    firePropertyChange(EXCEPTIONS, exceptions, exceptions = l);
+    exceptions = l;
   }
 
   /**
@@ -214,7 +185,7 @@ public class MethodDeclaration extends Declaration {
    * Sets the body
    */
   public void setBody(BlockStatement bs) {
-    firePropertyChange(BODY, body, body = bs);
+    body = bs;
   }
 
 

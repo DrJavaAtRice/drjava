@@ -39,11 +39,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class TypeExpression extends PrimaryExpression {
   /**
-   * The type property name
-   */
-  public final static String TYPE = "type";
-  
-  /**
    * The type represented by this expression
    */
   private TypeName type;
@@ -83,8 +78,7 @@ public class TypeExpression extends PrimaryExpression {
    */
   public void setType(ReferenceTypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
-    
-    firePropertyChange(TYPE, type, type = t);
+    type = t;
   }
   
   /**

@@ -37,11 +37,6 @@ package koala.dynamicjava.tree;
 
 public abstract class PrimitiveTypeName extends TypeName {
   /**
-   * The value property name
-   */
-  public final static String VALUE = "value";
-  
-  /**
    * The value of the node
    */
   private Class<?> value;
@@ -72,8 +67,7 @@ public abstract class PrimitiveTypeName extends TypeName {
    */
   public void setValue(Class<?> c) {
     if (c == null) throw new IllegalArgumentException("c == null");
-    
-    firePropertyChange(VALUE, value, value = c);
+    value = c;
   }
   
   /**

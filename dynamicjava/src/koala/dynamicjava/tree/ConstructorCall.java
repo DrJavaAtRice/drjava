@@ -41,16 +41,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class ConstructorCall extends PrimaryExpression implements ExpressionContainer, StatementExpression {
   /**
-   * The arguments property name
-   */
-  public final static String ARGUMENTS = "arguments";
-  
-  /**
-   * The super property name
-   */
-  public final static String SUPER = "super";
-  
-  /**
    * The prefix expression
    */
   private Expression expression;
@@ -101,7 +91,7 @@ public class ConstructorCall extends PrimaryExpression implements ExpressionCont
    * Sets the prefix expression
    */
   public void setExpression(Expression e) {
-    firePropertyChange(EXPRESSION, expression, expression = e);
+    expression = e;
   }
   
   /**
@@ -115,8 +105,7 @@ public class ConstructorCall extends PrimaryExpression implements ExpressionCont
    * Sets the arguments
    */
   public void setArguments(List<? extends Expression> l) {
-    firePropertyChange(ARGUMENTS, arguments, 
-                       arguments = (l == null) ? new ArrayList<Expression>(0) : new ArrayList<Expression>(l));
+    arguments = (l == null) ? new ArrayList<Expression>(0) : new ArrayList<Expression>(l);
   }
   
   /**
@@ -130,7 +119,7 @@ public class ConstructorCall extends PrimaryExpression implements ExpressionCont
    * Sets the super property
    */
   public void setSuper(boolean b) {
-    firePropertyChange(SUPER, superCall, superCall = b);
+    superCall = b;
   }
   
   /**

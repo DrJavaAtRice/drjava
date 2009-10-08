@@ -39,11 +39,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class ArrayTypeName extends TypeName {
   /**
-   * The elementType property name
-   */
-  public final static String ELEMENT_TYPE = "elementType";
-  
-  /**
    * The type of the elements of the arrays represented by this type
    */
   private TypeName elementType;
@@ -89,8 +84,7 @@ public class ArrayTypeName extends TypeName {
    */
   public void setElementType(TypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
-    
-    firePropertyChange(ELEMENT_TYPE, elementType, elementType = t);
+    elementType = t;
   }
   
   public boolean isVararg() { return vararg; }

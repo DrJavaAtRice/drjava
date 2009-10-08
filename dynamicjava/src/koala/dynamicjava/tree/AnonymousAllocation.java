@@ -89,8 +89,7 @@ public class AnonymousAllocation extends SimpleAllocation implements StatementEx
    */
   public void setMembers(List<Node> l) {
     if (l == null) throw new IllegalArgumentException("l == null");
-    
-    firePropertyChange(MEMBERS, members, members = l);
+    members = l;
   }
   
   /**

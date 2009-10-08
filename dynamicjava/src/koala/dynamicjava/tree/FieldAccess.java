@@ -37,11 +37,6 @@ package koala.dynamicjava.tree;
 
 public abstract class FieldAccess extends PrimaryExpression implements LeftHandSide {
   /**
-   * The body property name
-   */
-  public final static String FIELD_NAME = "fieldName";
-  
-  /**
    * The field name
    */
   private String fieldName;
@@ -71,7 +66,6 @@ public abstract class FieldAccess extends PrimaryExpression implements LeftHandS
    */
   public void setFieldName(String s) {
     if (s == null) throw new IllegalArgumentException("Null field name in FieldAccess update");
-    
-    firePropertyChange(FIELD_NAME, fieldName, fieldName = s);
+    fieldName = s;
   }
 }

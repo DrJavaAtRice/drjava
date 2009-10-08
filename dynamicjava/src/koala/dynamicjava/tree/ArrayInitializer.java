@@ -41,16 +41,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class ArrayInitializer extends Expression {
   /**
-   * The cells property name
-   */
-  public final static String CELLS = "cells";
-  
-  /**
-   * The element type property name
-   */
-  public final static String ELEMENT_TYPE = "elementType";
-  
-  /**
    * The list of initialized cells
    */
   private List<Expression> cells;
@@ -96,8 +86,7 @@ public class ArrayInitializer extends Expression {
    */
   public void setCells(List<? extends Expression> l) {
     if (l == null) throw new IllegalArgumentException("l == null");
-    
-    firePropertyChange(CELLS, cells, cells = new ArrayList<Expression>(l));
+    cells = new ArrayList<Expression>(l);
   }
   
   /**
@@ -114,8 +103,7 @@ public class ArrayInitializer extends Expression {
    */
   public void setElementType(TypeName t) {
     if (t == null) throw new IllegalArgumentException("t == null");
-    
-    firePropertyChange(ELEMENT_TYPE, elementType, elementType = t);
+    elementType = t;
     if (t instanceof ArrayTypeName) {
       ArrayTypeName at = (ArrayTypeName)t;
       for (Expression init : cells) {

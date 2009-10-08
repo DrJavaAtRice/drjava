@@ -39,16 +39,6 @@ import koala.dynamicjava.tree.visitor.*;
 
 public class LabeledStatement extends Statement {
   /**
-   * The label property name
-   */
-  public final static String LABEL = "label";
-  
-  /**
-   * The statement property name
-   */
-  public final static String STATEMENT = "statement";
-  
-  /**
    * The label
    */
   private String label;
@@ -98,8 +88,7 @@ public class LabeledStatement extends Statement {
    */
   public void setLabel(String s) {
     if (s == null) throw new IllegalArgumentException("s == null");
-    
-    firePropertyChange(LABEL, label, label = s);
+    label = s;
   }
   
   /**
@@ -115,8 +104,7 @@ public class LabeledStatement extends Statement {
    */
   public void setStatement(Node n) {
     if (n == null) throw new IllegalArgumentException("n == null");
-    
-    firePropertyChange(STATEMENT, statement, statement = n);
+    statement = n;
   }
   
   /**
