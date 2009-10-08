@@ -124,14 +124,22 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
   
   public TypeContext value(Node n) { return n.acceptVisitor(this); }
   
-  private Type checkType(Expression exp) { return new ExpressionChecker(context, opt).check(exp); }
-  
-  private TypeContext checkList(Iterable<? extends Node> l) {
+  public TypeContext checkList(Iterable<? extends Node> l) {
+    ExecutionError error = null;
     TypeContext c = context;
-    for (Node n : l) { c = n.acceptVisitor(new StatementChecker(c, opt)); }
+    for (Node n : l) {
+      try { c = n.acceptVisitor(new StatementChecker(c, opt)); }
+      catch (ExecutionError e) {
+        if (hasErrorContext(n)) { c = getErrorContext(n); }
+        if (error == null) { error = e; }
+      }
+    }
+    if (error != null) { throw error; }
     return c;
   }
 
+  private Type checkType(Expression exp) { return new ExpressionChecker(context, opt).check(exp); }
+  
   private Type checkType(Expression exp, Type expected) {
     return new ExpressionChecker(context, opt).check(exp, expected);
   }
@@ -292,16 +300,19 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
       TypeContext newContext = new LocalContext(context, v);
       
       if (initialized) {
-        Type initT = checkType(node.getInitializer(), t);
         try {
-          Expression newInit = ts.assign(t, node.getInitializer());
-          node.setInitializer(newInit);
+          Type initT = checkType(node.getInitializer(), t);
+          try {
+            Expression newInit = ts.assign(t, node.getInitializer());
+            node.setInitializer(newInit);
+          }
+          catch (UnsupportedConversionException e) {
+            TypePrinter printer = ts.typePrinter();
+            setErrorStrings(node, printer.print(initT), printer.print(t));
+            throw new ExecutionError("assignment.types", node);
+          }
         }
-        catch (UnsupportedConversionException e) {
-          TypePrinter printer = ts.typePrinter();
-          setErrorStrings(node, printer.print(initT), printer.print(t));
-          throw new ExecutionError("assignment.types", node);
-        }
+        catch (ExecutionError e) { setErrorContext(node, newContext); throw e; }
       }
       return newContext;
     }

@@ -28,8 +28,10 @@
 
 package koala.dynamicjava.interpreter;
 
+import koala.dynamicjava.interpreter.error.ExecutionError;
 import koala.dynamicjava.tree.Node;
 import koala.dynamicjava.tree.Expression;
+import edu.rice.cs.dynamicjava.interpreter.TypeContext;
 import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
 import edu.rice.cs.dynamicjava.symbol.type.VariableType;
@@ -377,6 +379,38 @@ public class NodeProperties {
     };
     
     
+    /** An ExecutionError that occurred at the given node. */
+    public final static String ERROR = "error";
+
+    public static ExecutionError getError(Node n) {
+      return (ExecutionError) n.getProperty(ERROR);
+    }
+    
+    public static ExecutionError setError(Node n, ExecutionError e) {
+      n.setProperty(ERROR, e);
+      return e;
+    }
+    
+    public static boolean hasError(Node n) {
+      return n.hasProperty(ERROR);
+    }
+
+    /** The new context that would have been the result had there not been an error. */
+    public final static String ERROR_CONTEXT = "errorContext";
+
+    public static TypeContext getErrorContext(Node n) {
+      return (TypeContext) n.getProperty(ERROR_CONTEXT);
+    }
+    
+    public static TypeContext setErrorContext(Node n, TypeContext c) {
+      n.setProperty(ERROR_CONTEXT, c);
+      return c;
+    }
+    
+    public static boolean hasErrorContext(Node n) {
+      return n.hasProperty(ERROR_CONTEXT);
+    }
+
     /**
      * A Lambda2<Object, Object, Object> -- determines the operation to be used where it is 
      * ambiguous (for example, a PlusExpression might require addition or concatenation)

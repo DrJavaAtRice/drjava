@@ -68,26 +68,14 @@ public class Interpreter {
   }
   
   private TypeContext typeCheck(Iterable<Node> tree) throws InterpreterException {
-    try {
-      TypeContext newContext = _typeContext;
-      for (Node n : tree) {
-        newContext = n.acceptVisitor(new StatementChecker(newContext, _opt));
-      }
-      return newContext;
-    }
+    try { return new StatementChecker(_typeContext, _opt).checkList(tree); }
     catch (ExecutionError e) { throw new CheckerException(e); }
   }
   
   private Pair<RuntimeBindings, Option<Object>> evaluate(Iterable<Node> tree) throws InterpreterException {
     try {
-      RuntimeBindings newBindings = _bindings;
-      Option<Object> val = Option.none();
-      for (Node n : tree) {
-        StatementEvaluator.Result r = n.acceptVisitor(new StatementEvaluator(newBindings, _opt));
-        newBindings = r.bindings();
-        val = r.value();
-      }
-      return Pair.make(newBindings, val);
+      StatementEvaluator.Result r = new StatementEvaluator(_bindings, _opt).evaluateSequence(tree);
+      return Pair.make(r.bindings(), r.value());
     }
     catch (WrappedException e) {
       if (e.getCause() instanceof InterpreterException) { throw (InterpreterException) e.getCause(); }

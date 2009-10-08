@@ -84,10 +84,7 @@ public class ExecutionError extends Error {
     rawMessage = s;
     node       = n;
     getMessage(); // ensure that s is valid while we have a useful stack trace
-  }
-  
-  public ExecutionError(Throwable thrown) {
-    this.thrown = thrown;
+    NodeProperties.setError(n, this);
   }
   
   /**

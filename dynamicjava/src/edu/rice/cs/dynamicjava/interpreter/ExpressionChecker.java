@@ -229,6 +229,7 @@ public class ExpressionChecker {
     }
     String name = ids.get(0).image();
     Expression translation = new SimpleFieldAccess(name);
+    setTranslation(exp, translation);
     try {
       // Should actually verify that that the name is a declared enum constant, not just
       // a static field.  But that requires a lot of unimplemented support where we're
@@ -241,7 +242,6 @@ public class ExpressionChecker {
       }
       addRuntimeCheck(translation, t, ref.field().type());
       setType(translation, t);
-      setTranslation(exp, translation);
       setType(exp, t);
       if (hasValue(translation)) { setValue(exp, getValue(translation)); }
       return ref.field();
@@ -341,8 +341,8 @@ public class ExpressionChecker {
       }
       else {
         Expression resolvedExp = (Expression) resolved;
-        resolvedExp.acceptVisitor(this);
         setTranslation(node, resolvedExp);
+        resolvedExp.acceptVisitor(this);
         // VARIABLE_TYPE, TYPE, FIELD, and VARIABLE properties are important in the enclosing context;
         // others are not, and need not be copied to the AmbiguousName
         if (hasVariableType(resolvedExp)) { setVariableType(node, getVariableType(resolvedExp)); }
@@ -441,6 +441,7 @@ public class ExpressionChecker {
             // TODO: Improve error when memberName is a non-static class
           }
           else {
+            System.out.println("hi");
             setErrorStrings(node, ts.typePrinter().print(classType), memberName.image());
             throw new ExecutionError("no.such.member", node);
           }
@@ -699,8 +700,8 @@ public class ExpressionChecker {
             translation = new StaticMethodCall((ReferenceTypeName) resolved, node.getMethodName(),
                                                node.getArguments(), node.getSourceInfo());
           }
-          translation.acceptVisitor(this);
           setTranslation(node, translation);
+          translation.acceptVisitor(this);
           return setType(node, getType(translation));
         }
         else { receiver = (Expression) resolved; }

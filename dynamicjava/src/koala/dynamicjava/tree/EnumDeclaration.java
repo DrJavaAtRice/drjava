@@ -202,9 +202,9 @@ public class EnumDeclaration extends ClassDeclaration {
   }
 
   public static class EnumConstant extends Declaration {
-    String name;
-    List<Expression> args;
-    List<Node> classBody;
+    private String name;
+    private List<Expression> args;
+    private List<Node> classBody;
 
     public EnumConstant(ModifierSet mods, String _name, List<? extends Expression> _args, List<Node> _classBody,
                         SourceInfo si) {
@@ -214,9 +214,9 @@ public class EnumDeclaration extends ClassDeclaration {
       classBody = _classBody;
     }
 
-    String           getName() {return name;}
-    List<Expression> getArguments() {return args;}
-    List<Node>        getClassBody() {return classBody;}
+    public String           getName() {return name;}
+    public List<Expression> getArguments() {return args;}
+    public List<Node>        getClassBody() {return classBody;}
     
     public <T> T acceptVisitor(Visitor<T> visitor) {
       return visitor.visit(this);
@@ -232,11 +232,11 @@ public class EnumDeclaration extends ClassDeclaration {
       decls = d;
     }
 
-    List<EnumConstant> getConstants() {
+    public List<EnumConstant> getConstants() {
       return consts;
     }
 
-    List<Node> getDeclarations(){
+    public List<Node> getDeclarations(){
       return decls;
     }
   }

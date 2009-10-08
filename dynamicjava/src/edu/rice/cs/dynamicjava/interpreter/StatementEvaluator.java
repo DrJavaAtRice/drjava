@@ -60,7 +60,7 @@ public class StatementEvaluator extends AbstractVisitor<StatementEvaluator.Resul
   }
   
   
-  private Result evaluateSequence(Iterable<? extends Node> nodes) {
+  public Result evaluateSequence(Iterable<? extends Node> nodes) {
     Result result = new Result(_bindings);
     for (Node n : nodes) {
       result = n.acceptVisitor(new StatementEvaluator(result.bindings(), _opt));

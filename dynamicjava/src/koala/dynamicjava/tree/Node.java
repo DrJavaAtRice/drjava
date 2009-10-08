@@ -154,6 +154,14 @@ public abstract class Node implements SourceInfo.Wrapper {
     return properties.containsKey(name);
   }
   
+  /** Change the names of all properties by prefixing each name with the given string. */
+  public void archiveProperties(String prefix) {
+    Map<String, Object> newProps = new HashMap<String, Object>();
+    for (Map.Entry<String, Object> e : properties.entrySet()) { newProps.put(prefix + e.getKey(), e.getValue()); }
+    properties.clear();
+    properties.putAll(newProps);
+  }
+  
   /**
    * Adds a PropertyChangeListener to the listener list.
    * The listener is registered for all properties.

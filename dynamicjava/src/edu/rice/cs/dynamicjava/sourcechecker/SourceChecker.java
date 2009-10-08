@@ -8,14 +8,19 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
+import koala.dynamicjava.interpreter.NodeProperties;
 import koala.dynamicjava.interpreter.error.ExecutionError;
 import koala.dynamicjava.parser.wrapper.JavaCCParser;
 import koala.dynamicjava.parser.wrapper.ParseError;
 import koala.dynamicjava.tree.CompilationUnit;
+import koala.dynamicjava.tree.Node;
 import koala.dynamicjava.tree.SourceInfo;
 import koala.dynamicjava.tree.TypeDeclaration;
+import koala.dynamicjava.tree.visitor.DepthFirstVisitor;
 import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.interpreter.*;
 import edu.rice.cs.dynamicjava.symbol.ExtendedTypeSystem;
@@ -176,13 +181,56 @@ public class SourceChecker {
     protected ClassCheckerPhase(String description) { super(description); }
     protected final void step(Pair<TypeDeclaration, ClassChecker> arg) throws InterpreterException {
       try { step(arg.first(), arg.second()); }
-      catch (ExecutionError e) { throw new CheckerException(e); }
+      catch (ExecutionError e) { throw extractErrors(arg.first()); }
     }
     protected final SourceInfo location(Pair<TypeDeclaration, ClassChecker> arg) {
       return arg.first().getSourceInfo();
     }
     protected abstract void step(TypeDeclaration ast, ClassChecker checker);
   }
+  
+  
+  /** Get all ERROR values associated with the given AST. */
+  private static InterpreterException extractErrors(Node ast) {
+    // accumulate in a set to avoid duplicates from DAGs
+    final Set<ExecutionError> result = new LinkedHashSet<ExecutionError>();
+    new PropertiesDepthFirstVisitor() {
+      public void run(Node node) {
+        if (NodeProperties.hasError(node)) { result.add(NodeProperties.getError(node)); }
+        super.run(node);
+      }
+    }.run(ast);
+    return CompositeException.make(IterUtil.map(result, CheckerException.FACTORY));
+  }
+  
+  /**
+   * Append the given prefix to all properties of the given AST (the root node and its children),
+   * effectively hiding them so that the program can be re-processed. 
+   */
+  private static void archiveProperties(Node ast, final String prefix) {
+    new DepthFirstVisitor() {
+      public void run(Node node) {
+        node.archiveProperties(prefix);
+        super.run(node);
+      }
+    }.run(ast);
+  }
+  
+  
+  /**
+   * A DepthFirstVisitor extension that recurs on Node-typed properties.  Note that this may lead to
+   * multiple invocations of the same node (because the properties are often used to create DAGs).
+   */
+  private static class PropertiesDepthFirstVisitor extends DepthFirstVisitor {
+    public void run(Node node) {
+        node.acceptVisitor(this);
+        if (NodeProperties.hasLeftExpression(node)) { recur(NodeProperties.getLeftExpression(node)); }
+        if (NodeProperties.hasTranslation(node)) { recur(NodeProperties.getTranslation(node)); }
+        if (NodeProperties.hasStatementTranslation(node)) { recur(NodeProperties.getTranslation(node)); }
+    }
+  }
+  
+  
     
   public static void main(String... args) {
     ArgumentParser argParser = new ArgumentParser();

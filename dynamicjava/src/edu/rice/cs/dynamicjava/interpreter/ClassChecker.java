@@ -75,13 +75,20 @@ public class ClassChecker {
   }
    
   private void initializeNestedClassSignatures(Iterable<? extends Node> members, TypeContext sigContext) {
-    TypeContext bodyContext = new ClassContext(sigContext, _c); 
+    TypeContext bodyContext = new ClassContext(sigContext, _c);
+    ExecutionError error = null;
     for (Node member : members) {
-      if (member instanceof TypeDeclaration) {
-        ClassChecker nestedChecker = new ClassChecker(getDJClass(member), _loader, bodyContext, _opt);
-        nestedChecker.initializeClassSignatures((TypeDeclaration) member);
+      try {
+        if (member instanceof TypeDeclaration) {
+          ClassChecker nestedChecker = new ClassChecker(getDJClass(member), _loader, bodyContext, _opt);
+          nestedChecker.initializeClassSignatures((TypeDeclaration) member);
+        }
+      }
+      catch (ExecutionError e) {
+        if (error == null) { error = e; }
       }
     }
+    if (error != null) { throw error; }
   }
   
   /**
@@ -125,24 +132,27 @@ public class ClassChecker {
     checkClassMemberSignatures(ast.getMembers(), new ClassSignatureContext(_context, _c, _loader));
   }
   
-  private void checkClassMemberSignatures(Iterable<? extends Node> members, TypeContext sigContext) {
-    TypeContext bodyContext = new ClassContext(sigContext, _c); 
-    Visitor<Void> v = new ClassMemberSignatureVisitor(bodyContext);
+  private void visitMembers(Iterable<? extends Node> members, Visitor<?> v) {
+    ExecutionError error = null;
     for (Node n : members) {
       debug.logStart();
       try { n.acceptVisitor(v); }
+      catch (ExecutionError e) {
+        if (error == null) { error = e; }
+      }
       finally { debug.logEnd(); }
     }
+    if (error != null) { throw error; }
+  }
+  
+  private void checkClassMemberSignatures(Iterable<? extends Node> members, TypeContext sigContext) {
+    TypeContext bodyContext = new ClassContext(sigContext, _c);
+    visitMembers(members, new ClassMemberSignatureVisitor(bodyContext));
   }
 
   private void checkInterfaceMemberSignatures(Iterable<? extends Node> members, TypeContext sigContext) {
-    TypeContext bodyContext = new ClassContext(sigContext, _c); 
-    Visitor<Void> v = new InterfaceMemberSignatureVisitor(bodyContext);
-    for (Node n : members) {
-      debug.logStart();
-      try { n.acceptVisitor(v); }
-      finally { debug.logEnd(); }
-    }
+    TypeContext bodyContext = new ClassContext(sigContext, _c);
+    visitMembers(members, new InterfaceMemberSignatureVisitor(bodyContext));
   }
   
   /**
@@ -171,13 +181,8 @@ public class ClassChecker {
   
   private void checkBodies(Iterable<? extends Node> members) {
     TypeContext sigContext = new ClassSignatureContext(_context, _c, _loader);
-    TypeContext bodyContext = new ClassContext(sigContext, _c); 
-    MemberBodyVisitor bod = new MemberBodyVisitor(bodyContext);
-    for (Node n : members) {
-      debug.logStart();
-      try { n.acceptVisitor(bod); }
-      finally { debug.logEnd(); }
-    }
+    TypeContext bodyContext = new ClassContext(sigContext, _c);
+    visitMembers(members, new MemberBodyVisitor(bodyContext));
   }
   
   private static TypeParameter[] typeParameters(TypeDeclaration ast) {
@@ -363,9 +368,7 @@ public class ClassChecker {
       ExpressionChecker callChecker = new ExpressionChecker(bodyContext, _opt);
       ConstructorCall call = node.getConstructorCall();
       if (call != null) { callChecker.checkConstructorCall(call); }
-      for (Node n : node.getStatements()) {
-        bodyContext = n.acceptVisitor(new StatementChecker(bodyContext, _opt));
-      }
+      new StatementChecker(bodyContext, _opt).checkList(node.getStatements());
       // if the call is implicit, check it *after* checking the body (better error messages this way) 
       if (call == null) { callChecker.checkConstructorCall(new ConstructorCall(null, null, true)); }
       return null;
