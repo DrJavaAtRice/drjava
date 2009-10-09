@@ -30,6 +30,8 @@ package koala.dynamicjava.tree;
 
 import java.util.*;
 
+import edu.rice.cs.plt.tuple.Option;
+
 import koala.dynamicjava.tree.visitor.*;
 
 /**
@@ -41,12 +43,6 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class AnonymousAllocation extends SimpleAllocation implements StatementExpression {
-
-  /**
-   * The members property name
-   */
-  public final static String MEMBERS = "members";
-  
   /**
    * The members of the anonymous class
    */
@@ -60,7 +56,19 @@ public class AnonymousAllocation extends SimpleAllocation implements StatementEx
    * @exception IllegalArgumentException if tp is null or memb is null
    */
   public AnonymousAllocation(ReferenceTypeName tp, List<? extends Expression> args, List<Node> memb) {
-    this(tp, args, memb, SourceInfo.NONE);
+    this(Option.<List<TypeName>>none(), tp, args, memb, SourceInfo.NONE);
+  }
+  
+  /**
+   * Initializes the expression
+   * @param tp    the type prefix
+   * @param args  the arguments of the constructor. Can be null.
+   * @param memb  the members of the class
+   * @exception IllegalArgumentException if tp is null or memb is null
+   */
+  public AnonymousAllocation(Option<List<TypeName>> targs, ReferenceTypeName tp, List<? extends Expression> args,
+                              List<Node> memb) {
+    this(targs, tp, args, memb, SourceInfo.NONE);
   }
   
   /**
@@ -71,7 +79,19 @@ public class AnonymousAllocation extends SimpleAllocation implements StatementEx
    * @exception IllegalArgumentException if tp is null or memb is null
    */
   public AnonymousAllocation(ReferenceTypeName tp, List<? extends Expression> args, List<Node> memb, SourceInfo si) {
-    super(tp, args, si);
+    this(Option.<List<TypeName>>none(), tp, args, memb, si);
+  }
+  
+  /**
+   * Initializes the expression
+   * @param tp    the type prefix
+   * @param args  the arguments of the constructor. null if no arguments.
+   * @param memb  the members of the class
+   * @exception IllegalArgumentException if tp is null or memb is null
+   */
+  public AnonymousAllocation(Option<List<TypeName>> targs, ReferenceTypeName tp, List<? extends Expression> args,
+                              List<Node> memb, SourceInfo si) {
+    super(targs, tp, args, si);
     if (memb == null) throw new IllegalArgumentException("memb == null");
     members = memb;
   }
@@ -103,6 +123,6 @@ public class AnonymousAllocation extends SimpleAllocation implements StatementEx
    * Implementation of toString for use in unit testing
    */
   public String toString() {
-    return "("+getClass().getName()+": "+getCreationType()+" "+getArguments()+" "+getMembers()+")";
+    return "("+getTypeArgs()+" "+getClass().getName()+": "+getCreationType()+" "+getArguments()+" "+getMembers()+")";
   }
 }

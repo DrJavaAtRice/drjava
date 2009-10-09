@@ -159,13 +159,13 @@ public class TypeNameChecker {
    * Tag the given type parameters with a new VariableType, and set the bounds appropriately;
    * verify that the results are well-formed.
    */
-  public void checkTypeParameters(TypeParameter[] tparams) {
+  public void checkTypeParameters(Iterable<? extends TypeParameter> tparams) {
     checkStructureForTypeParameters(tparams);
     ensureWellFormedTypeParameters(tparams);
   }
 
   /** Tag the given type parameters with a new VariableType, and set the bounds appropriately. */
-  public void checkStructureForTypeParameters(TypeParameter[] tparams) {
+  public void checkStructureForTypeParameters(Iterable<? extends TypeParameter> tparams) {
     for (TypeParameter tparam : tparams) {
       setTypeVariable(tparam, new VariableType(new BoundedSymbol(tparam, tparam.getRepresentation())));
     }
@@ -185,7 +185,7 @@ public class TypeNameChecker {
    * Verify that the given type parameters (for which {@link #checkStructureForTypeParameters} has
    * already been invoked) are well-formed.
    */
-  public void ensureWellFormedTypeParameters(TypeParameter[] tparams) {
+  public void ensureWellFormedTypeParameters(Iterable<? extends TypeParameter> tparams) {
     for (TypeParameter tparam : tparams) {
       if (!ts.isWellFormed(getTypeVariable(tparam))) {
         throw new ExecutionError("malformed.type", tparam);

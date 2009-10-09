@@ -1,5 +1,7 @@
 package edu.rice.cs.dynamicjava.symbol;
 
+import java.util.Collections;
+
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.WrappedException;
 
@@ -12,7 +14,6 @@ import edu.rice.cs.dynamicjava.symbol.type.VariableType;
 
 import koala.dynamicjava.tree.MethodDeclaration;
 import koala.dynamicjava.tree.tiger.TypeParameter;
-import koala.dynamicjava.tree.tiger.PolymorphicMethodDeclaration;
 import koala.dynamicjava.interpreter.NodeProperties;
 
 /** Represents a local function declaration. */
@@ -29,11 +30,8 @@ public class LocalFunction implements Function {
   public Type returnType() { return NodeProperties.getType(_ast.getReturnType()); }
   
   public Iterable<VariableType> typeParameters() {
-    if (_ast instanceof PolymorphicMethodDeclaration) {
-      TypeParameter[] ps = ((PolymorphicMethodDeclaration)_ast).getTypeParameters();
-      return IterUtil.mapSnapshot(IterUtil.asIterable(ps), NodeProperties.NODE_TYPE_VARIABLE);
-    }
-    else { return IterUtil.empty(); }
+    Iterable<TypeParameter> tparams = _ast.getTypeParams().unwrap(Collections.<TypeParameter>emptyList());
+    return IterUtil.mapSnapshot(tparams, NodeProperties.NODE_TYPE_VARIABLE);
   }
   
   public Iterable<LocalVariable> parameters() {

@@ -30,6 +30,9 @@ package koala.dynamicjava.tree;
 
 import java.util.*;
 
+import edu.rice.cs.plt.tuple.Option;
+
+import koala.dynamicjava.tree.tiger.TypeParameter;
 import koala.dynamicjava.tree.visitor.*;
 
 /**
@@ -42,13 +45,39 @@ import koala.dynamicjava.tree.visitor.*;
 public class InterfaceDeclaration extends TypeDeclaration {
   /**
    * Creates a new interface declaration
+   * @param mods    the modifiers
+   * @param name    the name of the interface to declare
+   * @param tparams type parameters
+   * @param impl    the list of implemented interfaces. Can be null.
+   * @param body    the list of fields declarations
+   */
+  public InterfaceDeclaration(ModifierSet mods, String name, Option<List<TypeParameter>> tparams,
+                               List<? extends ReferenceTypeName> impl, List<Node> body) {
+    this(mods, name, tparams, impl, body, SourceInfo.NONE);
+  }
+
+  /**
+   * Creates a new interface declaration
    * @param mods  the modifiers
    * @param name  the name of the interface to declare
    * @param impl  the list of implemented interfaces. Can be null.
    * @param body  the list of fields declarations
    */
   public InterfaceDeclaration(ModifierSet mods, String name, List<? extends ReferenceTypeName> impl, List<Node> body) {
-    this(mods, name, impl, body, SourceInfo.NONE);
+    this(mods, name, Option.<List<TypeParameter>>none(), impl, body, SourceInfo.NONE);
+  }
+
+  /**
+   * Creates a new interface declaration
+   * @param mods    the modifiers
+   * @param name    the name of the interface to declare
+   * @param tparams type parameters
+   * @param impl    the list of implemented interfaces. Can be null.
+   * @param body    the list of fields declarations
+   */
+  public InterfaceDeclaration(ModifierSet mods, String name, Option<List<TypeParameter>> tparams,
+                               List<? extends ReferenceTypeName> impl, List<Node> body, SourceInfo si) {
+    super(mods, name, tparams, impl, body, si);
   }
 
   /**
@@ -60,7 +89,7 @@ public class InterfaceDeclaration extends TypeDeclaration {
    */
   public InterfaceDeclaration(ModifierSet mods, String name, List<? extends ReferenceTypeName> impl, List<Node> body,
                               SourceInfo si) {
-    super(mods, name, impl, body, si);
+    this(mods, name, Option.<List<TypeParameter>>none(), impl, body, si);
   }
 
   /**
@@ -78,6 +107,6 @@ public class InterfaceDeclaration extends TypeDeclaration {
   }
 
   protected String toStringHelper() {
-    return getModifiers()+" "+getName()+" "+getInterfaces()+" "+getMembers();
+    return getModifiers()+" "+getName()+" "+getTypeParams()+" "+getInterfaces()+" "+getMembers();
   }
 }

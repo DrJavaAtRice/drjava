@@ -30,6 +30,8 @@ package koala.dynamicjava.tree;
 
 import java.util.*;
 
+import edu.rice.cs.plt.tuple.Option;
+
 import koala.dynamicjava.tree.visitor.*;
 
 /**
@@ -54,31 +56,31 @@ public class AnonymousInnerAllocation extends InnerAllocation {
   
   /**
    * Initializes the expression
-   * @param exp   the outer object
-   * @param cn    the inner class name
-   * @param args  the arguments of the constructor. Can be null.
-   * @param memb  the members of the class
-   * @exception IllegalArgumentException if exp is null or memb is null or
-   *            tp is null
+   * @param exp    the outer object
+   * @param targs  constructor type arguments
+   * @param cn     the inner class name
+   * @param ctargs class type arguments
+   * @param args   the arguments of the constructor. Can be null.
+   * @param memb   the members of the class
    */
-  public AnonymousInnerAllocation(Expression exp, String cn, List<? extends TypeName> ctargs, 
-                                  List<? extends Expression> args, List<Node> memb) {
-    this(exp, cn, ctargs, args, memb, SourceInfo.NONE);
+  public AnonymousInnerAllocation(Expression exp, Option<List<TypeName>> targs, String cn,
+                                   Option<List<TypeName>> ctargs, List<? extends Expression> args, List<Node> memb) {
+    this(exp, targs, cn, ctargs, args, memb, SourceInfo.NONE);
   }
   
   /**
    * Initializes the expression
-   * @param exp   the outer object
-   * @param cn    the inner class name
-   * @param args  the arguments of the constructor. Can be null.
-   * @param memb  the members of the class
-   * @exception IllegalArgumentException if exp is null or memb is null or
-   *            tp is null
+   * @param exp    the outer object
+   * @param targs  constructor type arguments
+   * @param cn     the inner class name
+   * @param ctargs class type arguments
+   * @param args   the arguments of the constructor. Can be null.
+   * @param memb   the members of the class
    */
-  public AnonymousInnerAllocation(Expression exp, String cn, List<? extends TypeName> ctargs, 
-                                  List<? extends Expression> args, List<Node> memb,
-                                  SourceInfo si) {
-    super(exp, cn, ctargs, args, si);
+  public AnonymousInnerAllocation(Expression exp, Option<List<TypeName>> targs, String cn,
+                                   Option<List<TypeName>> ctargs, List<? extends Expression> args, List<Node> memb,
+                                   SourceInfo si) {
+    super(exp, targs, cn, ctargs, args, si);
     if (memb == null) throw new IllegalArgumentException("memb == null");
     members = memb;
   }
@@ -106,6 +108,7 @@ public class AnonymousInnerAllocation extends InnerAllocation {
    * Implementation of toString for use in unit testing
    */
   public String toString() {
-    return "("+getClass().getName()+": "+getClassName()+" "+getExpression()+" "+getArguments()+" "+getMembers()+")";
+    return "("+getClass().getName()+": "+getTypeArgs()+" "+getClassName()+" "+getClassTypeArgs()+" "+getExpression()+
+            " "+getArguments()+" "+getMembers()+")";
   }
 }

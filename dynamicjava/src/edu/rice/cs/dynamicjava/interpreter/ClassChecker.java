@@ -1,5 +1,7 @@
 package edu.rice.cs.dynamicjava.interpreter;
 
+import java.util.Collections;
+
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.tiger.*;
 import koala.dynamicjava.tree.visitor.*;
@@ -41,7 +43,10 @@ public class ClassChecker {
     TypeContext sigContext = new ClassSignatureContext(_context, _c, _loader);
     TypeNameChecker sigChecker = new TypeNameChecker(sigContext, _opt);
     debug.logStart("Initializing type parameters", "class", ast.getName());
-    try { sigChecker.checkStructureForTypeParameters(typeParameters(ast)); }
+    try {
+      Iterable<TypeParameter> tparams = ast.getTypeParams().unwrap(Collections.<TypeParameter>emptyList());
+      sigChecker.checkStructureForTypeParameters(tparams);
+    }
     finally { debug.logEnd(); }
     debug.logStart("Initializing supertypes", "class", ast.getName());
     try {
@@ -99,7 +104,10 @@ public class ClassChecker {
     TypeContext sigContext = new ClassSignatureContext(_context, _c, _loader);
     TypeNameChecker sigChecker = new TypeNameChecker(sigContext, _opt);
     debug.logStart("Check type parameters");
-    try { sigChecker.ensureWellFormedTypeParameters(typeParameters(ast)); }
+    try {
+      Iterable<TypeParameter> tparams = ast.getTypeParams().unwrap(Collections.<TypeParameter>emptyList());
+      sigChecker.ensureWellFormedTypeParameters(tparams);
+    }
     finally { debug.logEnd(); }
     debug.logStart("Check supertypes");
     try {
@@ -185,17 +193,6 @@ public class ClassChecker {
     visitMembers(members, new MemberBodyVisitor(bodyContext));
   }
   
-  private static TypeParameter[] typeParameters(TypeDeclaration ast) {
-    if (ast instanceof GenericClassDeclaration) {
-      return ((GenericClassDeclaration) ast).getTypeParameters();
-    }
-    else if (ast instanceof GenericInterfaceDeclaration) {
-      return ((GenericInterfaceDeclaration) ast).getTypeParameters();
-    }
-    else { return new TypeParameter[0]; }
-  }
-  
-  
   private abstract class MemberSignatureVisitor extends AbstractVisitor<Void> {
     
     protected final TypeContext _bodyContext;
@@ -218,11 +215,7 @@ public class ClassChecker {
       TypeContext sigContext = new FunctionSignatureContext(_bodyContext, m);
       TypeNameChecker sigChecker = new TypeNameChecker(sigContext, _opt);
 
-      TypeParameter[] tparams;
-      if (node instanceof PolymorphicMethodDeclaration) {
-        tparams = ((PolymorphicMethodDeclaration) node).getTypeParameters();
-      }
-      else { tparams = new TypeParameter[0]; }
+      Iterable<TypeParameter> tparams = node.getTypeParams().unwrap(Collections.<TypeParameter>emptyList());
       sigChecker.checkTypeParameters(tparams);
       
       Type returnT = sigChecker.check(node.getReturnType());
@@ -275,11 +268,7 @@ public class ClassChecker {
       TypeContext sigContext = new FunctionSignatureContext(_bodyContext, k);
       TypeNameChecker sigChecker = new TypeNameChecker(sigContext, _opt);
 
-      TypeParameter[] tparams;
-      if (node instanceof PolymorphicConstructorDeclaration) {
-        tparams = ((PolymorphicConstructorDeclaration) node).getTypeParameters();
-      }
-      else { tparams = new TypeParameter[0]; }
+      Iterable<TypeParameter> tparams = node.getTypeParams().unwrap(Collections.<TypeParameter>emptyList());
       sigChecker.checkTypeParameters(tparams);
       
       for (FormalParameter param : node.getParameters()) {

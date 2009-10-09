@@ -73,6 +73,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.dynamicjava.interpreter;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
@@ -347,11 +348,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
     TypeContext sigContext = new FunctionSignatureContext(context, f);
     TypeNameChecker sigChecker = new TypeNameChecker(sigContext, opt);
 
-    TypeParameter[] tparams;
-    if (node instanceof PolymorphicMethodDeclaration) {
-      tparams = ((PolymorphicMethodDeclaration) node).getTypeParameters();
-    }
-    else { tparams = new TypeParameter[0]; }
+    Iterable<TypeParameter> tparams = node.getTypeParams().unwrap(Collections.<TypeParameter>emptyList());
     sigChecker.checkTypeParameters(tparams);
 
     Type returnT = sigChecker.check(node.getReturnType());

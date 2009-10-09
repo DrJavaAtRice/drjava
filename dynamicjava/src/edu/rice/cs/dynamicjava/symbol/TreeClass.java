@@ -1,5 +1,6 @@
 package edu.rice.cs.dynamicjava.symbol;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.LinkedList;
 import edu.rice.cs.plt.lambda.Thunk;
@@ -97,14 +98,7 @@ public class TreeClass implements DJClass {
     if (_ast instanceof TypeDeclaration) {
       TypeDeclaration td = (TypeDeclaration) _ast;
 
-      TypeParameter[] tparams;
-      if (td instanceof GenericClassDeclaration) {
-        tparams = ((GenericClassDeclaration) td).getTypeParameters();
-      }
-      else if (td instanceof GenericInterfaceDeclaration) {
-        tparams = ((GenericInterfaceDeclaration) td).getTypeParameters();
-      }
-      else { tparams = new TypeParameter[0]; }
+      List<TypeParameter> tparams = td.getTypeParams().unwrap(Collections.<TypeParameter>emptyList());
       for (TypeParameter p : tparams) {
         BoundedSymbol tempBounds = new BoundedSymbol(new Object(), p.getRepresentation(),
                                                      TypeSystem.OBJECT, TypeSystem.NULL);
@@ -207,12 +201,9 @@ public class TreeClass implements DJClass {
   
   /** List all type variables declared by this class */
   public Iterable<VariableType> declaredTypeParameters() {
-    Iterable<TypeParameter> paramAsts = IterUtil.empty();
-    if (_ast instanceof GenericClassDeclaration) {
-      paramAsts = IterUtil.asIterable(((GenericClassDeclaration)_ast).getTypeParameters());
-    }
-    else if (_ast instanceof GenericInterfaceDeclaration) {
-      paramAsts = IterUtil.asIterable(((GenericInterfaceDeclaration)_ast).getTypeParameters());
+    List<TypeParameter> paramAsts = Collections.emptyList();
+    if (_ast instanceof TypeDeclaration) {
+      paramAsts = ((TypeDeclaration) _ast).getTypeParams().unwrap(paramAsts);
     }
     return IterUtil.mapSnapshot(paramAsts, NodeProperties.NODE_TYPE_VARIABLE);
   }
@@ -394,11 +385,8 @@ public class TreeClass implements DJClass {
     }
     public Access accessibility() { return extractAccessibility(_k.getModifiers()); }
     public Iterable<VariableType> typeParameters() {
-      if (_k instanceof PolymorphicConstructorDeclaration) {
-        TypeParameter[] ps = ((PolymorphicConstructorDeclaration)_k).getTypeParameters();
-        return IterUtil.mapSnapshot(IterUtil.asIterable(ps), NodeProperties.NODE_TYPE_VARIABLE);
-      }
-      else { return IterUtil.empty(); }
+      List<TypeParameter> paramAsts = _k.getTypeParams().unwrap(Collections.<TypeParameter>emptyList());
+      return IterUtil.mapSnapshot(paramAsts, NodeProperties.NODE_TYPE_VARIABLE);
     }
     public Iterable<LocalVariable> parameters() {
       return IterUtil.mapSnapshot(_k.getParameters(), NodeProperties.NODE_VARIABLE);
@@ -449,11 +437,8 @@ public class TreeClass implements DJClass {
     public Type returnType() { return NodeProperties.getType(_m.getReturnType()); }
       
     public Iterable<VariableType> typeParameters() {
-      if (_m instanceof PolymorphicMethodDeclaration) {
-        TypeParameter[] ps = ((PolymorphicMethodDeclaration)_m).getTypeParameters();
-        return IterUtil.mapSnapshot(IterUtil.asIterable(ps), NodeProperties.NODE_TYPE_VARIABLE);
-      }
-      else { return IterUtil.empty(); }
+      List<TypeParameter> paramAsts = _m.getTypeParams().unwrap(Collections.<TypeParameter>emptyList());
+      return IterUtil.mapSnapshot(paramAsts, NodeProperties.NODE_TYPE_VARIABLE);
     }
     
     public Iterable<LocalVariable> parameters() {

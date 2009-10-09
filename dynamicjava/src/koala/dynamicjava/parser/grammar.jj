@@ -424,9 +424,7 @@ public class Parser {
     }
     @Override public Primary withArgs(List<Expression> args, Token last) throws ParseException {
       SourceInfo si = _range(this, last);
-      if (_targs.isNone()) { return new ExpressionPrimary(new SimpleMethodCall(_name, args, si)); }
-      else { return _throwParseException("Simple method calls with type arguments aren't yet implemented"); }
-      // else { return new ExpressionPrimary(new PolymorphicSimpleMethodCall(_name, args, _targs, si)); }  
+      return new ExpressionPrimary(new SimpleMethodCall(_targs, _name, args, si));
     }
   }
   
@@ -458,8 +456,7 @@ public class Parser {
     }
     @Override public Primary withArgs(List<Expression> args, Token last) {
       SourceInfo si = _range(this, last);
-      if (_targs.isNone()) { return new ExpressionPrimary(new ObjectMethodCall(_obj, _name, args, si)); }
-      else { return new ExpressionPrimary(new PolymorphicObjectMethodCall(_obj, _name, args, _targs.unwrap(), si)); }  
+      return new ExpressionPrimary(new ObjectMethodCall(_obj, _targs, _name, args, si)); 
     }
   }
 
@@ -476,8 +473,7 @@ public class Parser {
     }
     @Override public Primary withArgs(List<Expression> args, Token last) {
       SourceInfo si = _range(this, last);
-      if (_targs.isNone()) { return new ExpressionPrimary(new StaticMethodCall(_type, _name, args, si)); }
-      else { return new ExpressionPrimary(new PolymorphicStaticMethodCall(_type, _name, args, _targs.unwrap(), si)); }  
+      return new ExpressionPrimary(new StaticMethodCall(_type, _targs, _name, args, si));
     }
   }
   
@@ -586,12 +582,7 @@ public class Parser {
     }
     @Override public Primary withArgs(List<Expression> args, Token last) throws ParseException {
       SourceInfo si = _range(this, last);
-      if (_targs.isNone()) {
-        return new ExpressionPrimary(new SuperMethodCall(_className, _name, args, si));
-      }
-      else {
-        return new ExpressionPrimary(new PolymorphicSuperMethodCall(_className, _name, args, _targs.unwrap(), si));
-      }  
+      return new ExpressionPrimary(new SuperMethodCall(_className, _targs, _name, args, si));
     }
   }
   
@@ -625,17 +616,11 @@ public class Parser {
       _args = args;
     }
     public Expression asExpression() {
-      if (_targs.isNone()) { return new SimpleAllocation(_type, _args, getSourceInfo()); }
-      else { return new PolymorphicSimpleAllocation(_type, _args, _targs.unwrap(), getSourceInfo()); }
+      return new SimpleAllocation(_targs, _type, _args, getSourceInfo());
     }
     @Override public Primary withClassBody(List<Node> members, Token last) {
       SourceInfo si = _range(this, last);
-      if (_targs.isNone()) {
-        return new ExpressionPrimary(new AnonymousAllocation(_type, _args, members, si));
-      }
-      else {
-        return new ExpressionPrimary(new PolymorphicAnonymousAllocation(_type, _args, members, _targs.unwrap(), si));
-      }
+      return new ExpressionPrimary(new AnonymousAllocation(_targs, _type, _args, members, si));
     }
   }
   
@@ -697,24 +682,11 @@ public class Parser {
       _args = args;
     }
     public Expression asExpression() {
-      if (_targs.isNone()) {
-        return new InnerAllocation(_outer, _name, _ctargs.unwrap(null), _args, getSourceInfo());
-      }
-      else {
-        return new PolymorphicInnerAllocation(_outer, _name, _ctargs.unwrap(null), _args, _targs.unwrap(),
-                                              getSourceInfo());
-      }
+      return new InnerAllocation(_outer, _targs, _name, _ctargs, _args, getSourceInfo());
     }
     @Override public Primary withClassBody(List<Node> members, Token last) {
       SourceInfo si = _range(this, last);
-      if (_targs.isNone()) {
-        return new ExpressionPrimary(new AnonymousInnerAllocation(_outer, _name, _ctargs.unwrap(null),
-                                                                  _args, members, si));
-      }
-      else {
-        return new ExpressionPrimary(new PolymorphicAnonymousInnerAllocation(_outer, _name, _ctargs.unwrap(null),
-                                                                             _args, members, _targs.unwrap(), si));
-      }
+	  return new ExpressionPrimary(new AnonymousInnerAllocation(_outer, _targs, _name, _ctargs, _args, members, si));
     }
   }
   
@@ -1525,7 +1497,7 @@ PARSER_END(Parser)
   {
     Token t;
     Token id;
-    TypeParameter[] typeParameters = null;
+    List<TypeParameter> typeParameters = null;
     ReferenceTypeName  ext  = null;
     List<? extends ReferenceTypeName> impl = null;
     List<Node> body;
@@ -1545,12 +1517,7 @@ PARSER_END(Parser)
         case LOCAL: checkModifiers(mods, Modifier.FINAL, Modifier.ABSTRACT, Modifier.STRICT); break;
         case REPL: checkModifiers(mods, Modifier.PUBLIC, Modifier.FINAL, Modifier.ABSTRACT, Modifier.STRICT); break;
       }
-      if (typeParameters != null) {
-        return new GenericClassDeclaration(mods, id.image, ext, impl, body, typeParameters, _range(mods, token));
-      }
-      else {
-        return new ClassDeclaration(mods, id.image, ext, impl, body, _range(mods, token));
-      }
+      return new ClassDeclaration(mods, id.image, Option.wrap(typeParameters), ext, impl, body, _range(mods, token));
     }
   }
   
@@ -1712,7 +1679,7 @@ PARSER_END(Parser)
   
   MethodDeclaration unmodifiedMethodDeclaration(ModifierSet mods, DeclType level) :
   {
-    TypeParameter[] typeParameters = null;
+    List<TypeParameter> typeParameters = null;
     TypeName typ;
     Token id;
     int dim = 0;
@@ -1754,14 +1721,8 @@ PARSER_END(Parser)
           if (dim > 0) {
             typ = new ArrayTypeName(typ, dim, false, typ.getSourceInfo());
           }
-          
-          if (typeParameters == null) {
-            return new MethodDeclaration(mods, typ, id.image, params, exceptions, body, _range(mods, token));
-          }
-          else {
-            return new PolymorphicMethodDeclaration(mods, typ, id.image, params, exceptions, body, typeParameters,
-                                                    _range(mods, token));
-          }
+          return new MethodDeclaration(mods, Option.wrap(typeParameters), typ, id.image, params, exceptions, body,
+                                       _range(mods, token)); 
         }
     }
     catch(ParseException pe) {
@@ -1869,7 +1830,7 @@ PARSER_END(Parser)
   
   ConstructorDeclaration unmodifiedConstructorDeclaration(ModifierSet mods) :
   {
-    TypeParameter[]   typeParameters = null;
+    List<TypeParameter>   typeParameters = null;
     Token                 id;
     List<FormalParameter> params;
     List<? extends ReferenceTypeName> exceptions = new LinkedList<ReferenceTypeName>();
@@ -1900,12 +1861,8 @@ PARSER_END(Parser)
           }
           checkModifiers(mods, Modifier.PUBLIC, Modifier.PRIVATE, Modifier.PROTECTED);
           if (lastFormalParameterIsVarArgs) mods.getFlags().add(Modifier.VARARGS);
-          if (typeParameters == null) {
-            return new ConstructorDeclaration(mods, id.image, params, exceptions, ci, stmts, _range(mods, token));
-          } else {
-            return new PolymorphicConstructorDeclaration(mods, id.image, params, exceptions, ci, stmts,
-                                                         typeParameters, _range(mods, token));
-          }
+          return new ConstructorDeclaration(mods, Option.wrap(typeParameters), id.image, params, exceptions, ci, stmts,
+                                            _range(mods, token));
         }
     }
     catch(ParseException pe) {
@@ -1937,7 +1894,7 @@ PARSER_END(Parser)
   InterfaceDeclaration unmodifiedInterfaceDeclaration(ModifierSet mods, DeclType level) :
   {
     Token id;
-    TypeParameter[] typeParameters = null;
+    List<TypeParameter> typeParameters = null;
     List<? extends ReferenceTypeName> impl = null;
     List<Node> list = new LinkedList<Node>();
     List<Node>  decl;
@@ -1961,11 +1918,7 @@ PARSER_END(Parser)
             case REPL: checkModifiers(mods, Modifier.PUBLIC, Modifier.ABSTRACT, Modifier.STRICT); break;
           }
       
-        if (typeParameters == null) {
-          return new InterfaceDeclaration(mods, id.image, impl, list, _range(mods, token));
-        } else {
-          return new GenericInterfaceDeclaration(mods, id.image, impl, list, typeParameters, _range(mods, token));
-        }
+        return new InterfaceDeclaration(mods, id.image, Option.wrap(typeParameters), impl, list, _range(mods, token));
       }
     }
     catch(ParseException pe) {
@@ -3499,7 +3452,7 @@ PARSER_END(Parser)
     }
   }
   
-  TypeParameter[] typeParameters() :
+  List<TypeParameter> typeParameters() :
   {
     List<TypeParameter> list = new LinkedList<TypeParameter>();
     TypeParameter temp;
@@ -3512,7 +3465,7 @@ PARSER_END(Parser)
      temp = typeParameter() { list.add(temp); }
     )*
       RightAngledBracket()
-    { return list.toArray(new TypeParameter[0]); }
+    { return list; }
   }
   
   TypeParameter typeParameter() :

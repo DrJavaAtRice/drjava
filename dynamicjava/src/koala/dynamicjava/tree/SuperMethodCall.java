@@ -48,14 +48,24 @@ public class SuperMethodCall extends MethodCall {
    */
   private Option<String> className;
   
-  public SuperMethodCall(Option<String> cn, String mn, List<? extends Expression> args, SourceInfo si) {
-    super(mn, args, si);
+  public SuperMethodCall(Option<String> cn, Option<List<TypeName>> targs, String mn,
+                          List<? extends Expression> args, SourceInfo si) {
+    super(targs, mn, args, si);
     if (cn == null) throw new IllegalArgumentException("cn == null");
     className = cn;
   }
   
+  public SuperMethodCall(Option<String> cn, String mn, List<? extends Expression> args, SourceInfo si) {
+    this(cn, Option.<List<TypeName>>none(), mn, args, si);
+  }
+  
+  public SuperMethodCall(Option<String> cn, Option<List<TypeName>> targs, String mn,
+                          List<? extends Expression> args) {
+    this(cn, targs, mn, args, SourceInfo.NONE);
+  }
+  
   public SuperMethodCall(Option<String> cn, String mn, List<? extends Expression> args) {
-    this(cn, mn, args, SourceInfo.NONE);
+    this(cn, Option.<List<TypeName>>none(), mn, args, SourceInfo.NONE);
   }
   
   /**
@@ -91,6 +101,6 @@ public class SuperMethodCall extends MethodCall {
    * Implementation of toString for use in unit testing
    */
   public String toStringHelper() {
-    return getClassName()+" "+getMethodName()+" "+getArguments();
+    return getClassName()+" "+getTypeArgs()+" "+getMethodName()+" "+getArguments();
   }
 }

@@ -223,7 +223,8 @@ public class SourceChecker {
    */
   private static class PropertiesDepthFirstVisitor extends DepthFirstVisitor {
     public void run(Node node) {
-        node.acceptVisitor(this);
+        try { node.acceptVisitor(this); }
+        catch (IllegalArgumentException e) { /* thrown by "empty" stub nodes -- ignore */ }
         if (NodeProperties.hasLeftExpression(node)) { recur(NodeProperties.getLeftExpression(node)); }
         if (NodeProperties.hasTranslation(node)) { recur(NodeProperties.getTranslation(node)); }
         if (NodeProperties.hasStatementTranslation(node)) { recur(NodeProperties.getTranslation(node)); }

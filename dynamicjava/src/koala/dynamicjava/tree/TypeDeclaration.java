@@ -30,6 +30,10 @@ package koala.dynamicjava.tree;
 
 import java.util.*;
 
+import koala.dynamicjava.tree.tiger.TypeParameter;
+
+import edu.rice.cs.plt.tuple.Option;
+
 /**
  * This class represents a type declaration
  *
@@ -38,35 +42,27 @@ import java.util.*;
  */
 
 public abstract class TypeDeclaration extends Declaration {
-  /**
-   * The name of this class
-   */
   private String name;
-
-  /**
-   * The implemented interfaces
-   */
-  private List<? extends ReferenceTypeName> interfaces;
-
-  /**
-   * The members
-   */
+  private Option<List<TypeParameter>> typeParams;
+  private List<? extends ReferenceTypeName> interfaces; // implements clause
   private List<Node> members;
 
   /**
    * Creates a new class declaration
-   * @param mods  the modifiers
-   * @param name  the name of the class to declare
-   * @param impl  the list of implemented interfaces (List of List of Token). Can be null.
-   * @param body  the list of fields declarations
+   * @param mods    the modifiers
+   * @param name    the name of the class to declare
+   * @param tparams declared type parameters
+   * @param impl    the list of implemented interfaces. Can be null.
+   * @param body    the list of fields declarations
    * @exception IllegalArgumentException if name is null or body is null
    */
-  protected TypeDeclaration(ModifierSet mods, String name, List<? extends ReferenceTypeName> impl, List<Node> body,
-                            SourceInfo si) {
+  protected TypeDeclaration(ModifierSet mods, String name, Option<List<TypeParameter>> tparams,
+                             List<? extends ReferenceTypeName> impl, List<Node> body,
+                             SourceInfo si) {
     super(mods, si);
-    if (name == null) throw new IllegalArgumentException("name == null");
-    if (body == null) throw new IllegalArgumentException("body == null");
+    if (name == null || tparams == null || body == null) throw new IllegalArgumentException();
     this.name = name;
+    typeParams = tparams;
     interfaces = impl;
     members = body;
   }
@@ -87,6 +83,13 @@ public abstract class TypeDeclaration extends Declaration {
     name = s;
   }
 
+  public Option<List<TypeParameter>> getTypeParams() { return typeParams; }
+  public void setTypeArgs(List<TypeParameter> tparams) { typeParams = Option.wrap(tparams); }
+  public void setTypeArgs(Option<List<TypeParameter>> tparams) {
+    if (tparams == null) throw new IllegalArgumentException();
+    typeParams = tparams;
+  }
+  
   /**
    * Returns a list that contains the names (String) of the implemented interfaces.
    * Can be null.

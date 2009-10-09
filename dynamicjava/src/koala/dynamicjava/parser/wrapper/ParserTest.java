@@ -533,7 +533,7 @@ public class ParserTest extends TestCase {
     List<Expression> args = new LinkedList<Expression>();
     args.add(new IntegerLiteral("3"));
     
-    Expression expected = new InnerAllocation(new AmbiguousName("list"), "Iterator", null, args); 
+    Expression expected = new InnerAllocation(new AmbiguousName("list"), "Iterator", Option.<List<TypeName>>none(), args); 
     verifyExprOutput( "list.new Iterator(3)", expected);
   }
   

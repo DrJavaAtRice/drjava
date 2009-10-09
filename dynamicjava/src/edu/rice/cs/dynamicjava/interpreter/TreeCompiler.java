@@ -219,17 +219,13 @@ public class TreeCompiler {
     
     String classSig = null;
     if (_java5) {
-      TypeParameter[] paramAsts;
-      if (ast instanceof GenericClassDeclaration) {
-        paramAsts = ((GenericClassDeclaration) ast).getTypeParameters();
+      List<TypeParameter> paramAsts = Collections.emptyList();
+      if (ast instanceof TypeDeclaration) {
+        paramAsts = ((TypeDeclaration) ast).getTypeParams().unwrap(paramAsts);
       }
-      else if (ast instanceof GenericInterfaceDeclaration) {
-        paramAsts = ((GenericInterfaceDeclaration) ast).getTypeParameters();
-      }
-      else { paramAsts = new TypeParameter[0]; }
       
       StringBuilder sigBuilder = new StringBuilder();
-      if (paramAsts.length > 0) { sigBuilder.append(typeParamListSignature(paramAsts)); }
+      if (!paramAsts.isEmpty()) { sigBuilder.append(typeParamListSignature(paramAsts)); }
       sigBuilder.append(typeSignature(extendsT));
       for (ReferenceTypeName implementsT : implementsTs) {
         sigBuilder.append(typeSignature(NodeProperties.getType(implementsT)));
@@ -436,14 +432,9 @@ public class TreeCompiler {
 
     String methodSig = null;
     if (_java5) {
-      TypeParameter[] typeParamAsts;
-      if (ast instanceof PolymorphicConstructorDeclaration) {
-        typeParamAsts = ((PolymorphicConstructorDeclaration) ast).getTypeParameters();
-      }
-      else { typeParamAsts = new TypeParameter[0]; }
-
+      List<TypeParameter> typeParamAsts = ast.getTypeParams().unwrap(Collections.<TypeParameter>emptyList());
       StringBuilder sigBuilder = new StringBuilder();
-      if (typeParamAsts.length > 0) { sigBuilder.append(typeParamListSignature(typeParamAsts)); }
+      if (!typeParamAsts.isEmpty()) { sigBuilder.append(typeParamListSignature(typeParamAsts)); }
       String firstArgSig = (outerT == null) ? RUNTIME_BINDINGS_DESCRIPTOR : typeSignature(outerT);
       sigBuilder.append(paramListSignature(firstArgSig, extractVars(params)));
       sigBuilder.append("V");
@@ -620,14 +611,10 @@ public class TreeCompiler {
 
     String methodSig = null;
     if (_java5) {
-      TypeParameter[] typeParamAsts;
-      if (ast instanceof PolymorphicMethodDeclaration) {
-        typeParamAsts = ((PolymorphicMethodDeclaration) ast).getTypeParameters();
-      }
-      else { typeParamAsts = new TypeParameter[0]; }
+      List<TypeParameter> typeParamAsts = ast.getTypeParams().unwrap(Collections.<TypeParameter>emptyList());
 
       StringBuilder sigBuilder = new StringBuilder();
-      if (typeParamAsts.length > 0) { sigBuilder.append(typeParamListSignature(typeParamAsts)); }
+      if (!typeParamAsts.isEmpty()) { sigBuilder.append(typeParamListSignature(typeParamAsts)); }
       sigBuilder.append(paramListSignature(extraArg, extractVars(params)));
       sigBuilder.append(typeSignature(returnT));
       for (ReferenceTypeName tn : exceptions) {
@@ -1041,7 +1028,7 @@ public class TreeCompiler {
     return result;
   }
   
-  private static String typeParamListSignature(TypeParameter[] params) {
+  private static String typeParamListSignature(Iterable<? extends TypeParameter> params) {
     StringBuilder result = new StringBuilder();
     result.append('<');
     for (TypeParameter p : params) {

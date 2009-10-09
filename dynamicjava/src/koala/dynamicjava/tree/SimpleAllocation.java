@@ -30,6 +30,8 @@ package koala.dynamicjava.tree;
 
 import java.util.*;
 
+import edu.rice.cs.plt.tuple.Option;
+
 import koala.dynamicjava.tree.visitor.*;
 
 /**
@@ -41,14 +43,8 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class SimpleAllocation extends PrimaryExpression implements StatementExpression {
-  /**
-   * The creationType
-   */
+  private Option<List<TypeName>> typeArgs;
   private ReferenceTypeName creationType;
-  
-  /**
-   * The arguments to pass to the constructor
-   */
   private List<Expression> arguments;
   
   /**
@@ -57,8 +53,8 @@ public class SimpleAllocation extends PrimaryExpression implements StatementExpr
    * @param args  the arguments of the constructor
    * @exception IllegalArgumentException if tp is null
    */
-  public SimpleAllocation(ReferenceTypeName tp, List<? extends Expression> args) {
-    this(tp, args, SourceInfo.NONE);
+  public SimpleAllocation(Option<List<TypeName>> targs, ReferenceTypeName tp, List<? extends Expression> args) {
+    this(targs, tp, args, SourceInfo.NONE);
   }
   
   /**
@@ -67,13 +63,40 @@ public class SimpleAllocation extends PrimaryExpression implements StatementExpr
    * @param args  the arguments of the constructor
    * @exception IllegalArgumentException if tp is null
    */
-  public SimpleAllocation(ReferenceTypeName tp, List<? extends Expression> args,
-                          SourceInfo si) {
+  public SimpleAllocation(ReferenceTypeName tp, List<? extends Expression> args) {
+    this(Option.<List<TypeName>>none(), tp, args, SourceInfo.NONE);
+  }
+  
+  /**
+   * Initializes the expression
+   * @param tp    the type prefix
+   * @param args  the arguments of the constructor
+   * @exception IllegalArgumentException if tp is null
+   */
+  public SimpleAllocation(ReferenceTypeName tp, List<? extends Expression> args, SourceInfo si) {
+    this(Option.<List<TypeName>>none(), tp, args, si);
+  }
+  
+  /**
+   * Initializes the expression
+   * @param tp    the type prefix
+   * @param args  the arguments of the constructor
+   * @exception IllegalArgumentException if tp is null
+   */
+  public SimpleAllocation(Option<List<TypeName>> targs, ReferenceTypeName tp, List<? extends Expression> args,
+                           SourceInfo si) {
     super(si);
-
-    if (tp == null) throw new IllegalArgumentException("tp == null");
+    if (tp == null || targs == null) throw new IllegalArgumentException();
+    typeArgs = targs;
     creationType = tp;
     arguments = (args == null) ? new ArrayList<Expression>(0) : new ArrayList<Expression>(args);
+  }
+  
+  public Option<List<TypeName>> getTypeArgs() { return typeArgs; }
+  public void setTypeArgs(List<TypeName> targs) { typeArgs = Option.wrap(targs); }
+  public void setTypeArgs(Option<List<TypeName>> targs) {
+    if (targs == null) throw new IllegalArgumentException();
+    typeArgs = targs;
   }
   
   /**
@@ -117,6 +140,6 @@ public class SimpleAllocation extends PrimaryExpression implements StatementExpr
    * Implementation of toString for use in unit testing
    */
   public String toString() {
-    return "("+getClass().getName()+": "+getCreationType()+" "+getArguments()+")";
+    return "("+getTypeArgs()+" "+getClass().getName()+": "+getCreationType()+" "+getArguments()+")";
   }
 }

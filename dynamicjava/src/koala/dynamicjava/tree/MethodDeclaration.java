@@ -30,6 +30,9 @@ package koala.dynamicjava.tree;
 
 import java.util.*;
 
+import edu.rice.cs.plt.tuple.Option;
+
+import koala.dynamicjava.tree.tiger.TypeParameter;
 import koala.dynamicjava.tree.visitor.*;
 
 /**
@@ -40,29 +43,12 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class MethodDeclaration extends Declaration {
-  /**
-   * The return type of this method
-   */
+  
+  private Option<List<TypeParameter>> typeParams;
   private TypeName returnType;
-
-  /**
-   * The name of this method
-   */
   private String name;
-
-  /**
-   * The parameters
-   */
   private List<FormalParameter> parameters;
-
-  /**
-   * The exceptions
-   */
   private List<? extends ReferenceTypeName> exceptions;
-
-  /**
-   * The body of the method
-   */
   private BlockStatement body;
 
   /**
@@ -78,7 +64,24 @@ public class MethodDeclaration extends Declaration {
    */
   public MethodDeclaration(ModifierSet mods, TypeName type, String name,
                            List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, BlockStatement body) {
-    this(mods, type, name, params, excepts, body, SourceInfo.NONE);
+    this(mods, Option.<List<TypeParameter>>none(), type, name, params, excepts, body, SourceInfo.NONE);
+  }
+
+  /**
+   * Creates a new method declaration
+   * @param mods    the modifiers
+   * @param tparams type parameters
+   * @param type    the return type of this method
+   * @param name    the name of the method to declare
+   * @param params  the parameters list
+   * @param excepts the exception list
+   * @param body    the body statement
+   * @exception IllegalArgumentException if name is null or type is null or
+   *            params is null or excepts is null
+   */
+  public MethodDeclaration(ModifierSet mods, Option<List<TypeParameter>> tparams, TypeName type, String name,
+                           List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, BlockStatement body) {
+    this(mods, tparams, type, name, params, excepts, body, SourceInfo.NONE);
   }
 
   /**
@@ -95,13 +98,32 @@ public class MethodDeclaration extends Declaration {
   public MethodDeclaration(ModifierSet mods, TypeName type, String name,
                            List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, BlockStatement body,
                            SourceInfo si) {
+    this(mods, Option.<List<TypeParameter>>none(), type, name, params, excepts, body, si);
+  }
+  /**
+   * Creates a new method declaration
+   * @param mods    the modifiers
+   * @param tparams type parameters
+   * @param type    the return type of this method
+   * @param name    the name of the method to declare
+   * @param params  the parameters list
+   * @param excepts the exception list
+   * @param body    the body statement
+   * @exception IllegalArgumentException if name is null or type is null or
+   *            params is null or excepts is null
+   */
+  public MethodDeclaration(ModifierSet mods, Option<List<TypeParameter>> tparams, TypeName type, String name,
+                           List<FormalParameter> params, List<? extends ReferenceTypeName> excepts, BlockStatement body,
+                           SourceInfo si) {
     super(mods, si);
 
+    if (tparams == null) throw new IllegalArgumentException("tparams == null");
     if (type == null)    throw new IllegalArgumentException("type == null");
     if (name == null)    throw new IllegalArgumentException("name == null");
     if (params == null)  throw new IllegalArgumentException("params == null");
     if (excepts == null) throw new IllegalArgumentException("excepts == null");
 
+    typeParams  = tparams;
     returnType  = type;
     this.name   = name;
     parameters  = params;
@@ -109,6 +131,13 @@ public class MethodDeclaration extends Declaration {
     exceptions = excepts;
   }
 
+  public Option<List<TypeParameter>> getTypeParams() { return typeParams; }
+  public void setTypeArgs(List<TypeParameter> tparams) { typeParams = Option.wrap(tparams); }
+  public void setTypeArgs(Option<List<TypeParameter>> tparams) {
+    if (tparams == null) throw new IllegalArgumentException();
+    typeParams = tparams;
+  }
+  
   /**
    * Gets the return type of this method
    */
@@ -204,6 +233,6 @@ public class MethodDeclaration extends Declaration {
   }
 
   public String toStringHelper() {
- return getModifiers()+" "+getReturnType()+" "+getName()+" "+getParameters()+" "+getExceptions()+" "+getBody();
+ return getModifiers()+" "+getTypeParams()+" "+getReturnType()+" "+getName()+" "+getParameters()+" "+getExceptions()+" "+getBody();
   }
 }

@@ -689,17 +689,9 @@ public class ExpressionChecker {
         Node resolved = resolveAmbiguousName((AmbiguousName) receiver);
         if (resolved instanceof ReferenceTypeName) {
           // this is actually a StaticMethodCall
-          Expression translation;
-          if (node instanceof PolymorphicObjectMethodCall) {
-            translation =
-              new PolymorphicStaticMethodCall((ReferenceTypeName) resolved, node.getMethodName(), node.getArguments(),
-                                              ((PolymorphicObjectMethodCall) node).getTypeArguments(),
-                                              node.getSourceInfo());
-          }
-          else {
-            translation = new StaticMethodCall((ReferenceTypeName) resolved, node.getMethodName(),
-                                               node.getArguments(), node.getSourceInfo());
-          }
+          Expression translation = new StaticMethodCall((ReferenceTypeName) resolved, node.getTypeArgs(),
+                                                        node.getMethodName(), node.getArguments(),
+                                                        node.getSourceInfo());
           setTranslation(node, translation);
           translation.acceptVisitor(this);
           return setType(node, getType(translation));
@@ -711,11 +703,7 @@ public class ExpressionChecker {
       
       Iterable<? extends Expression> args = node.getArguments();
       checkList(args);
-      
-      Iterable<Type> targs = IterUtil.empty();
-      if (node instanceof PolymorphicObjectMethodCall) {
-        targs = checkTypeNameList(((PolymorphicObjectMethodCall) node).getTypeArguments());
-      }
+      Iterable<Type> targs = checkTypeNameList(node.getTypeArgs().unwrap(Collections.<TypeName>emptyList())); 
       
       try {
         // Note: Changes made below may also need to be made in the TypeSystem's boxing & unboxing implementations
@@ -751,11 +739,7 @@ public class ExpressionChecker {
       
       Iterable<? extends Expression> args = node.getArguments();
       checkList(args);
-      
-      Iterable<Type> targs = IterUtil.empty();
-      if (node instanceof PolymorphicSuperMethodCall) {
-        targs = checkTypeNameList(((PolymorphicSuperMethodCall) node).getTypeArguments());
-      }
+      Iterable<Type> targs = checkTypeNameList(node.getTypeArgs().unwrap(Collections.<TypeName>emptyList())); 
       
       Expression obj = TypeUtil.makeEmptyExpression(node);
       setType(obj, t);
@@ -788,11 +772,7 @@ public class ExpressionChecker {
       
       Iterable<? extends Expression> args = node.getArguments();
       checkList(args);
-      
-      Iterable<Type> targs = IterUtil.empty();
-      if (node instanceof PolymorphicStaticMethodCall) {
-        targs = checkTypeNameList(((PolymorphicStaticMethodCall) node).getTypeArguments());
-      }
+      Iterable<Type> targs = checkTypeNameList(node.getTypeArgs().unwrap(Collections.<TypeName>emptyList())); 
       
       try {
         // Note: Changes made below may also need to be made in the TypeSystem's boxing & unboxing implementations
@@ -906,11 +886,7 @@ public class ExpressionChecker {
       
       Iterable<? extends Expression> args = node.getArguments();
       checkList(args);
-      
-      Iterable<Type> targs = IterUtil.empty();
-      if (node instanceof PolymorphicSimpleAllocation) {
-        targs = checkTypeNameList(((PolymorphicSimpleAllocation) node).getTypeArguments());
-      }
+      Iterable<Type> targs = checkTypeNameList(node.getTypeArgs().unwrap(Collections.<TypeName>emptyList()));
       
       try {
         ConstructorInvocation inv = ts.lookupConstructor(t, targs, args, expected, context.accessModule());
@@ -951,11 +927,7 @@ public class ExpressionChecker {
       
       Iterable<? extends Expression> args = node.getArguments();
       checkList(args);
-      
-      Iterable<Type> targs = IterUtil.empty();
-      if (node instanceof PolymorphicAnonymousAllocation) {
-        targs = checkTypeNameList(((PolymorphicAnonymousAllocation) node).getTypeArguments());
-      }
+      Iterable<Type> targs = checkTypeNameList(node.getTypeArgs().unwrap(Collections.<TypeName>emptyList())); 
       
       if (!(IterUtil.isEmpty(args) && IterUtil.isEmpty(targs) && ts.isImplementable(t))) {
         // Super constructor invocation is something besides Object()
@@ -990,11 +962,7 @@ public class ExpressionChecker {
      */
     @Override public Type visit(InnerAllocation node) {
       Type enclosing = check(node.getExpression());
-      
-      Iterable<Type> classTargs = IterUtil.empty();
-      if (node.getClassTypeArguments() != null) {
-        classTargs = checkTypeNameList(node.getClassTypeArguments());
-      }
+      Iterable<Type> classTargs = checkTypeNameList(node.getClassTypeArgs().unwrap(Collections.<TypeName>emptyList())); 
       
       try {
         ClassType t = ts.lookupClass(node.getExpression(), node.getClassName(), classTargs, context.accessModule());
@@ -1009,11 +977,7 @@ public class ExpressionChecker {
         
         Iterable<? extends Expression> args = node.getArguments();
         checkList(args);
-        
-        Iterable<Type> targs = IterUtil.empty();
-        if (node instanceof PolymorphicInnerAllocation) {
-          targs = checkTypeNameList(((PolymorphicInnerAllocation) node).getTypeArguments());
-        }
+        Iterable<Type> targs = checkTypeNameList(node.getTypeArgs().unwrap(Collections.<TypeName>emptyList())); 
         
         try {
           ConstructorInvocation inv = ts.lookupConstructor(t, targs, args, expected, context.accessModule());
@@ -1045,11 +1009,7 @@ public class ExpressionChecker {
      */
     @Override public Type visit(AnonymousInnerAllocation node) {
       Type enclosing = check(node.getExpression());
-      
-      Iterable<Type> classTargs = IterUtil.empty();
-      if (node.getClassTypeArguments() != null) {
-        classTargs = checkTypeNameList(node.getClassTypeArguments());
-      }
+      Iterable<Type> classTargs = checkTypeNameList(node.getClassTypeArgs().unwrap(Collections.<TypeName>emptyList())); 
       
       try {
         ClassType t = ts.lookupClass(node.getExpression(), node.getClassName(), classTargs, context.accessModule());
@@ -1065,11 +1025,7 @@ public class ExpressionChecker {
         
         Iterable<? extends Expression> args = node.getArguments();
         checkList(args);
-        
-        Iterable<Type> targs = IterUtil.empty();
-        if (node instanceof PolymorphicAnonymousInnerAllocation) {
-          targs = checkTypeNameList(((PolymorphicAnonymousInnerAllocation) node).getTypeArguments());
-        }
+        Iterable<Type> targs = checkTypeNameList(node.getTypeArgs().unwrap(Collections.<TypeName>emptyList())); 
         
         try {
           ConstructorInvocation inv = ts.lookupConstructor(t, targs, args, expected, context.accessModule());

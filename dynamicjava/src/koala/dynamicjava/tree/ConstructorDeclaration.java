@@ -30,6 +30,9 @@ package koala.dynamicjava.tree;
 
 import java.util.*;
 
+import edu.rice.cs.plt.tuple.Option;
+
+import koala.dynamicjava.tree.tiger.TypeParameter;
 import koala.dynamicjava.tree.visitor.*;
 
 /**
@@ -40,29 +43,11 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class ConstructorDeclaration extends Declaration {
-  /**
-   * The name of this constructor
-   */
+  private Option<List<TypeParameter>> typeParams;
   private String name;
-
-  /**
-   * The parameters
-   */
   private List<FormalParameter> parameters;
-
-  /**
-   * The exceptions
-   */
   private List<? extends ReferenceTypeName> exceptions;
-
-  /**
-   * The explicit constructor invocation
-   */
-  private ConstructorCall constructorInvocation;
-
-  /**
-   * The statements
-   */
+  private ConstructorCall constructorInvocation; // may be null
   private List<Node> statements;
 
   private boolean varargs;
@@ -81,7 +66,25 @@ public class ConstructorDeclaration extends Declaration {
   public ConstructorDeclaration(ModifierSet mods, String name,
                                 List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
                                 ConstructorCall eci, List<Node> stmts) {
-    this(mods, name, params, excepts, eci, stmts, SourceInfo.NONE);
+    this(mods, Option.<List<TypeParameter>>none(), name, params, excepts, eci, stmts, SourceInfo.NONE);
+  }
+
+  /**
+   * Creates a new method declaration
+   * @param mods    the modifiers
+   * @param tparams the type parameters
+   * @param name    the name of this constructor
+   * @param params  the parameters list
+   * @param excepts the exception list (a list of list of token)
+   * @param eci     the explicit constructor invocation
+   * @param stmts   the statements
+   * @exception IllegalArgumentException if name is null or params is null or
+   *            excepts is null or stmts is null
+   */
+  public ConstructorDeclaration(ModifierSet mods, Option<List<TypeParameter>> tparams, String name,
+                                List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
+                                ConstructorCall eci, List<Node> stmts) {
+    this(mods, tparams, name, params, excepts, eci, stmts, SourceInfo.NONE);
   }
 
   /**
@@ -99,12 +102,30 @@ public class ConstructorDeclaration extends Declaration {
                                 List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
                                 ConstructorCall eci, List<Node> stmts,
                                 SourceInfo si) {
+    this(mods, Option.<List<TypeParameter>>none(), name, params, excepts, eci, stmts, si);
+  }
+  /**
+   * Creates a new method declaration
+   * @param mods    the modifiers
+   * @param tparams the type parameters
+   * @param name    the name of this constructor
+   * @param params  the parameters list
+   * @param excepts the exception list (a list of list of token)
+   * @param eci     the explicit constructor invocation
+   * @param stmts   the statements
+   * @exception IllegalArgumentException if name is null or params is null or
+   *            excepts is null or stmts is null
+   */
+  public ConstructorDeclaration(ModifierSet mods, Option<List<TypeParameter>> tparams, String name,
+                                List<FormalParameter> params, List<? extends ReferenceTypeName> excepts,
+                                ConstructorCall eci, List<Node> stmts,
+                                SourceInfo si) {
     super(mods, si);
 
-    if (name == null)    throw new IllegalArgumentException("name == null");
-    if (params == null)  throw new IllegalArgumentException("params == null");
-    if (excepts == null) throw new IllegalArgumentException("excepts == null");
-    if (stmts == null)   throw new IllegalArgumentException("stmts == null");
+    if (tparams == null || name == null || params == null || excepts == null || stmts == null) {
+      throw new IllegalArgumentException();
+    }
+    typeParams            = tparams;
     this.name             = name;
     parameters            = params;
     constructorInvocation = eci;
@@ -112,6 +133,13 @@ public class ConstructorDeclaration extends Declaration {
     exceptions            = excepts;
   }
 
+  public Option<List<TypeParameter>> getTypeParams() { return typeParams; }
+  public void setTypeArgs(List<TypeParameter> tparams) { typeParams = Option.wrap(tparams); }
+  public void setTypeArgs(Option<List<TypeParameter>> tparams) {
+    if (tparams == null) throw new IllegalArgumentException();
+    typeParams = tparams;
+  }
+  
   /**
    * Returns the name of this constructor
    */

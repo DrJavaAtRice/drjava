@@ -30,6 +30,8 @@ package koala.dynamicjava.tree;
 
 import java.util.*;
 
+import edu.rice.cs.plt.tuple.Option;
+
 import koala.dynamicjava.tree.visitor.*;
 
 /**
@@ -49,13 +51,13 @@ public class ObjectMethodCall extends MethodCall implements ExpressionContainer 
   /**
    * Creates a new node
    * @param exp   the expression on which this method call applies
+   * @param targs type arguments
    * @param mn    the field name
    * @param args  the arguments. Can be null.
-   * @exception IllegalArgumentException if mn is null
    */
-  public ObjectMethodCall(Expression exp, String mn, List<? extends Expression> args,
-                          SourceInfo si) {
-    super(mn, args, si);
+  public ObjectMethodCall(Expression exp, Option<List<TypeName>> targs, String mn,
+                           List<? extends Expression> args, SourceInfo si) {
+    super(targs, mn, args, si);
     if (exp == null) { throw new IllegalArgumentException("exp == null"); }
     expression = exp;
   }
@@ -65,10 +67,31 @@ public class ObjectMethodCall extends MethodCall implements ExpressionContainer 
    * @param exp   the expression on which this method call applies
    * @param mn    the field name
    * @param args  the arguments. Can be null.
-   * @exception IllegalArgumentException if mn is null
+   */
+  public ObjectMethodCall(Expression exp, String mn, List<? extends Expression> args, SourceInfo si) {
+    this(exp, Option.<List<TypeName>>none(), mn, args, si);
+  }
+
+  /**
+   * Creates a new node
+   * @param exp   the expression on which this method call applies
+   * @param targs type arguments
+   * @param mn    the field name
+   * @param args  the arguments. Can be null.
+   */
+  public ObjectMethodCall(Expression exp, Option<List<TypeName>> targs, String mn,
+                           List<? extends Expression> args) {
+    this(exp, targs, mn, args, SourceInfo.NONE);
+  }
+
+  /**
+   * Creates a new node
+   * @param exp   the expression on which this method call applies
+   * @param mn    the field name
+   * @param args  the arguments. Can be null.
    */
   public ObjectMethodCall(Expression exp, String mn, List<? extends Expression> args) {
-    this(exp, mn, args, SourceInfo.NONE);
+    this(exp, Option.<List<TypeName>>none(), mn, args, SourceInfo.NONE);
   }
 
   /**
@@ -102,6 +125,6 @@ public class ObjectMethodCall extends MethodCall implements ExpressionContainer 
    * Implementation of toString for use in unit testing
    */
   public String toStringHelper() {
-    return getMethodName()+" "+getArguments()+" "+getExpression();
+    return getTypeArgs()+" "+getMethodName()+" "+getArguments()+" "+getExpression();
   }
 }

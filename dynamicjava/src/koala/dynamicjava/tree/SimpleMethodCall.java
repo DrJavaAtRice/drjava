@@ -30,6 +30,8 @@ package koala.dynamicjava.tree;
 
 import java.util.*;
 
+import edu.rice.cs.plt.tuple.Option;
+
 import koala.dynamicjava.tree.visitor.*;
 
 /**
@@ -47,9 +49,20 @@ public class SimpleMethodCall extends MethodCall {
    * @param args  the arguments. Can be null.
    * @exception IllegalArgumentException if mn is null
    */
-  public SimpleMethodCall(String mn, List<Expression> args,
+  public SimpleMethodCall(String mn, List<Expression> args, SourceInfo si) {
+    this(Option.<List<TypeName>>none(), mn, args, si);
+  }
+
+  /**
+   * Creates a new node
+   * @param targs type arguments
+   * @param mn    the function name
+   * @param args  the arguments. Can be null.
+   * @exception IllegalArgumentException if mn is null
+   */
+  public SimpleMethodCall(Option<List<TypeName>> targs, String mn, List<Expression> args,
                       SourceInfo si) {
-    super(mn, args, si);
+    super(targs, mn, args, si);
   }
   
   /**
@@ -63,6 +76,6 @@ public class SimpleMethodCall extends MethodCall {
    * Implementation of toString for use in unit testing
    */
   public String toString() {
-    return "("+getClass().getName()+": "+getMethodName()+" "+getArguments()+")";
+    return "("+getClass().getName()+": "+getTypeArgs()+" "+getMethodName()+" "+getArguments()+")";
   }
 }

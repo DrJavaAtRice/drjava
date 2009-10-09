@@ -1,24 +1,12 @@
 package koala.dynamicjava.tree.visitor;
 
-import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.Pair;
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.EnumDeclaration.EnumConstant;
-import koala.dynamicjava.tree.tiger.GenericClassDeclaration;
-import koala.dynamicjava.tree.tiger.GenericInterfaceDeclaration;
 import koala.dynamicjava.tree.tiger.GenericReferenceTypeName;
 import koala.dynamicjava.tree.tiger.HookTypeName;
-import koala.dynamicjava.tree.tiger.PolymorphicAnonymousAllocation;
-import koala.dynamicjava.tree.tiger.PolymorphicAnonymousInnerAllocation;
-import koala.dynamicjava.tree.tiger.PolymorphicConstructorDeclaration;
-import koala.dynamicjava.tree.tiger.PolymorphicInnerAllocation;
-import koala.dynamicjava.tree.tiger.PolymorphicMethodDeclaration;
-import koala.dynamicjava.tree.tiger.PolymorphicObjectMethodCall;
-import koala.dynamicjava.tree.tiger.PolymorphicSimpleAllocation;
-import koala.dynamicjava.tree.tiger.PolymorphicStaticMethodCall;
-import koala.dynamicjava.tree.tiger.PolymorphicSuperMethodCall;
 import koala.dynamicjava.tree.tiger.TypeParameter;
 
 /**
@@ -73,6 +61,17 @@ public class DepthFirstVisitor implements Visitor<Void>, Runnable1<Node> {
           for (Node n :nl) {
             if (n != null) { run(n); }
           }
+        }
+      }
+    }
+  }
+  
+  protected void recurOnList(Option<? extends Iterable<? extends Node>> opt) {
+    if (opt != null && opt.isSome()) {
+      Iterable<? extends Node> l = opt.unwrap();
+      if (l != null) {
+        for (Node n : l) {
+          if (n != null) { run(n); }
         }
       }
     }
@@ -256,9 +255,7 @@ public class DepthFirstVisitor implements Visitor<Void>, Runnable1<Node> {
 
   public Void visit(ObjectMethodCall node) {
     recur(node.getExpression());
-    if (node instanceof PolymorphicObjectMethodCall) {
-      recur(((PolymorphicObjectMethodCall) node).getTypeArguments());
-    }
+    recurOnList(node.getTypeArgs());
     recur(node.getArguments());
     return null;
   }
@@ -270,9 +267,7 @@ public class DepthFirstVisitor implements Visitor<Void>, Runnable1<Node> {
 
   public Void visit(StaticMethodCall node) {
     recur(node.getMethodType());
-    if (node instanceof PolymorphicStaticMethodCall) {
-      recur(((PolymorphicStaticMethodCall) node).getTypeArguments());
-    }
+    recurOnList(node.getTypeArgs());
     recur(node.getArguments());
     return null;
   }
@@ -284,9 +279,7 @@ public class DepthFirstVisitor implements Visitor<Void>, Runnable1<Node> {
   }
 
   public Void visit(SuperMethodCall node) {
-    if (node instanceof PolymorphicSuperMethodCall) {
-      recur(((PolymorphicSuperMethodCall) node).getTypeArguments());
-    }
+    recurOnList(node.getTypeArgs());
     recur(node.getArguments());
     return null;
   }
@@ -390,18 +383,14 @@ public class DepthFirstVisitor implements Visitor<Void>, Runnable1<Node> {
   }
 
   public Void visit(SimpleAllocation node) {
-    if (node instanceof PolymorphicSimpleAllocation) {
-      recur(((PolymorphicSimpleAllocation) node).getTypeArguments());
-    }
+    recurOnList(node.getTypeArgs());
     recur(node.getCreationType());
     recur(node.getArguments());
     return null;
   }
 
   public Void visit(AnonymousAllocation node) {
-    if (node instanceof PolymorphicAnonymousAllocation) {
-      recur(((PolymorphicAnonymousAllocation) node).getTypeArguments());
-    }
+    recurOnList(node.getTypeArgs());
     recur(node.getCreationType());
     recur(node.getArguments());
     recur(node.getMembers());
@@ -410,20 +399,16 @@ public class DepthFirstVisitor implements Visitor<Void>, Runnable1<Node> {
 
   public Void visit(InnerAllocation node) {
     recur(node.getExpression());
-    if (node instanceof PolymorphicInnerAllocation) {
-      recur(((PolymorphicInnerAllocation) node).getTypeArguments());
-    }
-    recur(node.getClassTypeArguments());
+    recurOnList(node.getTypeArgs());
+    recurOnList(node.getClassTypeArgs());
     recur(node.getArguments());
     return null;
   }
 
   public Void visit(AnonymousInnerAllocation node) {
     recur(node.getExpression());
-    if (node instanceof PolymorphicAnonymousInnerAllocation) {
-      recur(((PolymorphicAnonymousInnerAllocation) node).getTypeArguments());
-    }
-    recur(node.getClassTypeArguments());
+    recurOnList(node.getTypeArgs());
+    recurOnList(node.getClassTypeArgs());
     recur(node.getArguments());
     recur(node.getMembers());
     return null;
@@ -661,9 +646,7 @@ public class DepthFirstVisitor implements Visitor<Void>, Runnable1<Node> {
 
   public Void visit(ClassDeclaration node) {
     recur(node.getModifiers());
-    if (node instanceof GenericClassDeclaration) {
-      recur(((GenericClassDeclaration) node).getTypeParameters());
-    }
+    recurOnList(node.getTypeParams());
     recur(node.getSuperclass());
     recur(node.getInterfaces());
     recur(node.getMembers());
@@ -672,9 +655,7 @@ public class DepthFirstVisitor implements Visitor<Void>, Runnable1<Node> {
 
   public Void visit(InterfaceDeclaration node) {
     recur(node.getModifiers());
-    if (node instanceof GenericInterfaceDeclaration) {
-      recur(((GenericInterfaceDeclaration) node).getTypeParameters());
-    }
+    recurOnList(node.getTypeParams());
     recur(node.getInterfaces());
     recur(node.getMembers());
     return null;
@@ -682,9 +663,7 @@ public class DepthFirstVisitor implements Visitor<Void>, Runnable1<Node> {
 
   public Void visit(ConstructorDeclaration node) {
     recur(node.getModifiers());
-    if (node instanceof PolymorphicConstructorDeclaration) {
-      recur(((PolymorphicConstructorDeclaration) node).getTypeParameters());
-    }
+    recurOnList(node.getTypeParams());
     recur(node.getParameters());
     recur(node.getExceptions());
     recur(node.getConstructorCall());
@@ -694,9 +673,7 @@ public class DepthFirstVisitor implements Visitor<Void>, Runnable1<Node> {
 
   public Void visit(MethodDeclaration node) {
     recur(node.getModifiers());
-    if (node instanceof PolymorphicMethodDeclaration) {
-      recur(((PolymorphicMethodDeclaration) node).getTypeParameters());
-    }
+    recurOnList(node.getTypeParams());
     recur(node.getReturnType());
     recur(node.getParameters());
     recur(node.getExceptions());

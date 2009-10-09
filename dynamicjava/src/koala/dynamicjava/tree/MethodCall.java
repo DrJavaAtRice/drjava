@@ -30,6 +30,8 @@ package koala.dynamicjava.tree;
 
 import java.util.*;
 
+import edu.rice.cs.plt.tuple.Option;
+
 /**
  * An abstract parent for all method calls.  Concrete implementations include:<ul>
  * <li>{@link SimpleMethodCall}</li>
@@ -41,14 +43,9 @@ import java.util.*;
 
 public abstract class MethodCall extends PrimaryExpression
   implements StatementExpression {
-  /**
-   * The method name
-   */
-  private String methodName;
   
-  /**
-   * The arguments
-   */
+  private Option<List<TypeName>> typeArgs;
+  private String methodName;
   private List<Expression> arguments;
   
   /**
@@ -57,15 +54,20 @@ public abstract class MethodCall extends PrimaryExpression
    * @param args  the arguments. null if no arguments.
    * @exception IllegalArgumentException if mn is null
    */
-  protected MethodCall(String mn, List<? extends Expression> args,
+  protected MethodCall(Option<List<TypeName>> targs, String mn, List<? extends Expression> args,
                        SourceInfo si) {
     super(si);
-    
-
-    if (mn == null) throw new IllegalArgumentException("mn == null");
-    
+    if (mn == null || targs == null) throw new IllegalArgumentException();
+    typeArgs = targs;
     methodName = mn;
     arguments  = (args == null) ? new ArrayList<Expression>(0) : new ArrayList<Expression>(args);
+  }
+  
+  public Option<List<TypeName>> getTypeArgs() { return typeArgs; }
+  public void setTypeArgs(List<TypeName> targs) { typeArgs = Option.wrap(targs); }
+  public void setTypeArgs(Option<List<TypeName>> targs) {
+    if (targs == null) throw new IllegalArgumentException();
+    typeArgs = targs;
   }
   
   /**
