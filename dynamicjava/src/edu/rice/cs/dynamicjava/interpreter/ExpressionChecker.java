@@ -179,9 +179,9 @@ public class ExpressionChecker {
     
     Iterable<? extends Expression> args = node.getArguments();
     checkList(args);
-    
-    // TODO: implement explicit type arguments in constructor calls
     Iterable<Type> targs = IterUtil.empty();
+    // TODO: parse explicit type arguments in constructor calls
+    //Iterable<Type> targs = checkTypeNameList(node.getTypeArgs().unwrap(Collections.<TypeName>emptyList())); 
     
     Type type;
     if (node.isSuper()) { type = context.getThis().immediateSuperclass(); }
@@ -634,8 +634,7 @@ public class ExpressionChecker {
     @Override public Type visit(SimpleMethodCall node) {
       Iterable<? extends Expression> args = node.getArguments();
       checkList(args);
-      
-      Iterable<Type> targs = IterUtil.empty();
+      Iterable<Type> targs = checkTypeNameList(node.getTypeArgs().unwrap(Collections.<TypeName>emptyList())); 
       
       Type t;
       if (context.localFunctionExists(node.getMethodName(), ts)) {
