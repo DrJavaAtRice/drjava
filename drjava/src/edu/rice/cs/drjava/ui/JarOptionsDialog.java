@@ -533,7 +533,8 @@ public class JarOptionsDialog extends SwingFrame {
           getFileChooser().setCurrentDirectory(_rootFile);
         }
         super._chooseFile();
-        if(!getFileChooser().getSelectedFile().getAbsolutePath().startsWith(_rootFile.getAbsolutePath())){
+        File chosen = getFileChooser().getSelectedFile(); // getSelectedFile() may return null
+        if((chosen != null) && !chosen.getAbsolutePath().startsWith(_rootFile.getAbsolutePath())) {
           JOptionPane.showMessageDialog(JarOptionsDialog.this,
                                         "Main Class must be in Build Directory or one of its sub-directories.", 
                                         "Unable to set Main Class", JOptionPane.ERROR_MESSAGE);
