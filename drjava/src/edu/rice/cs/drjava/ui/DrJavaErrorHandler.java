@@ -108,17 +108,14 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
             }
           }
           else {
-            try {
-              if (thrown instanceof com.sun.jdi.VMOutOfMemoryException) {
-                // if this is an VMOutOfMemoryException, suggest to increase Interaction JVM's max heap
-                JFrame f = DrJavaErrorWindow.getFrame();
-                if (f instanceof MainFrame) {
-                  MainFrame mf = (MainFrame)f;
-                  mf.askToIncreaseSlaveMaxHeap();
-                }
+            if (thrown.toString().startsWith("com.sun.jdi.VMOutOfMemoryException")) {
+              // if this is an VMOutOfMemoryException, suggest to increase Interaction JVM's max heap
+              JFrame f = DrJavaErrorWindow.getFrame();
+              if (f instanceof MainFrame) {
+                MainFrame mf = (MainFrame)f;
+                mf.askToIncreaseSlaveMaxHeap();
               }
             }
-            catch(NoClassDefFoundError ncdfe) { /* ignore the case when VMOutOfMemoryException is not found because tools.jar is not on the classpath */ }
           }
           _errors.add(thrown);
           if (_errorsButton != null) {
