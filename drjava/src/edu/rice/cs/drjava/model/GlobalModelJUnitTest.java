@@ -797,7 +797,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /*
    * Tests if a JUnit4 style unit test works
    */
-  public void testJUnit4StyleTestWorks() throws Exception {
+  public void testJUnit4StyleTestWorks_NOJOIN() throws Exception {
     
     if (printMessages) System.out.println("----testJUnit4StyleTestWorks-----");
     
@@ -829,7 +829,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /**
    * Tests to see if a JUnit4 style test with multiple test cases passes
    */
-  public void testJUnit4MultiTest() throws Exception {
+  public void testJUnit4MultiTest_NOJOIN() throws Exception {
     
     if (printMessages) System.out.println("----testJUnit4MultiTest-----");
     
@@ -862,7 +862,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /**
    * Tests to see if a JUnit4 style test with no test cases will not run
    */
-  public void testJUnit4NoTest() throws Exception {
+  public void testJUnit4NoTest_NOJOIN() throws Exception {
     if (printMessages) System.out.println("----testJUnit4NoTest-----");
     
     final OpenDefinitionsDocument doc = setupDocument((_model._createOpenDefinitionsDocument(new File("testFiles/GlobalModelJUnitTestFiles/JUnit4NoTest.java"))).getText());
@@ -896,7 +896,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /**
    * Tests to see if a JUnit4 style test with a test method and multiple nonTest methods will run
    */
-  public void testJUnit4TwoMethod1Test() throws Exception {
+  public void testJUnit4TwoMethod1Test_NOJOIN() throws Exception {
     
     if (printMessages) System.out.println("----testJUnit4TwoMethod1Test-----");
     
