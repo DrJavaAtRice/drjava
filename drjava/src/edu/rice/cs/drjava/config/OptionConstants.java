@@ -1199,7 +1199,7 @@ public interface OptionConstants {
   
   /** File extension registration. */
   public static final ForcedChoiceOption DYNAMICJAVA_ACCESS_CONTROL =
-    new ForcedChoiceOption("dynamicjava.access.control", DynamicJavaAccessControlChoices.DISABLED,
+    new ForcedChoiceOption("dynamicjava.access.control", DynamicJavaAccessControlChoices.PRIVATE_AND_PACKAGE,
                            DYNAMICJAVA_ACCESS_CONTROL_CHOICES);
 
   /** The command-line arguments to be passed to the Master JVM. */
