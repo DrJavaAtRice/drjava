@@ -96,18 +96,6 @@ public interface OptionConstants {
   
   /** tools.jar location, or NULL_FILE if not specified. */
   public static final FileOption JAVAC_LOCATION = new FileOption("javac.location", FileOps.NULL_FILE);
-
-  /** junitrt.jar/concutest-junit-3.8.2-withrt.jar location, or NULL_FILE if not specified. */
-  public static final FileOption JUNIT_LOCATION = new FileOption("junit.location", FileOps.NULL_FILE);
-
-  /** True if the JUnit jar in JUNIT_LOCATION should be used. */
-  public static final BooleanOption JUNIT_LOCATION_ENABLED = new BooleanOption("junit.location.enabled", Boolean.FALSE);
-  
-  /** ConcJUnit processed Java Runtime (rt.concjunit.jar) location, or NULL_FILE if not specified. */
-  public static final FileOption RT_CONCJUNIT_LOCATION = new FileOption("rt.concjunit.location", FileOps.NULL_FILE);
-  
-  /** True if the JUnit jar in RT_CONCJUNIT_LOCATION should be used. */
-  public static final BooleanOption RT_CONCJUNIT_LOCATION_ENABLED = new BooleanOption("rt.concjunit.location.enabled", Boolean.FALSE);
   
   /** Extra class path. */
   public static final VectorOption<File> EXTRA_CLASSPATH = new ClassPathOption().evaluate("extra.classpath");
@@ -1503,4 +1491,37 @@ public interface OptionConstants {
   public static final ForcedChoiceOption FILE_EXT_REGISTRATION =
     new ForcedChoiceOption("file.ext.registration", FileExtRegistrationChoices.ASK_ME,
                            FILE_EXT_REGISTRATION_CHOICES);
+ 
+  /** JUnit/ConcJUnit. */
+
+  /** junitrt.jar/concutest-junit-3.8.2-withrt.jar location, or NULL_FILE if not specified. */
+  public static final FileOption JUNIT_LOCATION = new FileOption("junit.location", FileOps.NULL_FILE);
+
+  /** True if the JUnit jar in JUNIT_LOCATION should be used. */
+  public static final BooleanOption JUNIT_LOCATION_ENABLED = new BooleanOption("junit.location.enabled", Boolean.FALSE);
+  
+  /** ConcJUnit processed Java Runtime (rt.concjunit.jar) location, or NULL_FILE if not specified. */
+  public static final FileOption RT_CONCJUNIT_LOCATION = new FileOption("rt.concjunit.location", FileOps.NULL_FILE);
+
+  /** Possible options for Javadoc access levels. */
+  static final ArrayList<String> concJUnitCheckChoices =
+    ConcJUnitCheckChoices.evaluate();
+  public static class ConcJUnitCheckChoices {
+    public static final String ALL = "all-threads, no-join, lucky";
+    public static final String NO_LUCKY = "all-threads, no-join";
+    public static final String ONLY_THREADS = "all-threads";
+    public static final String NONE = "none (use JUnit)";
+    public static ArrayList<String> evaluate() {
+      ArrayList<String> aList = new ArrayList<String>(4);
+      aList.add(ALL);
+      aList.add(NO_LUCKY);
+      aList.add(ONLY_THREADS);
+      aList.add(NONE);
+      return aList;
+    }
+  }
+  
+  /** The concurrent test checks that ConcJUnit should perform. */
+  public static final ForcedChoiceOption CONCJUNIT_CHECKS_ENABLED =
+    new ForcedChoiceOption("concjunit.checks.enabled", ConcJUnitCheckChoices.NONE, concJUnitCheckChoices);
 }

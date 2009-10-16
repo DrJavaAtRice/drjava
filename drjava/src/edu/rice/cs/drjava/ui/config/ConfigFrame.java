@@ -87,9 +87,9 @@ public class ConfigFrame extends SwingFrame {
   private final JFileChooser _browserChooser;
   private final JFileChooser _jarChooser;
   private final DirectoryChooser _dirChooser;
-  private final ConfigOptionListeners.RequiresDrJavaRestartListener<Boolean> _junitLocationEnabledListener;
-  private final ConfigOptionListeners.RequiresDrJavaRestartListener<File> _junitLocationListener;
-  private final ConfigOptionListeners.RequiresInteractionsRestartListener<Boolean> _rtConcJUnitLocationEnabledListener;
+  private final ConfigOptionListeners.RequiresInteractionsRestartListener<Boolean> _junitLocationEnabledListener;
+  private final ConfigOptionListeners.RequiresInteractionsRestartListener<File> _junitLocationListener;
+  private final ConfigOptionListeners.RequiresInteractionsRestartListener<String> _concJUnitChecksEnabledListener;
   private final ConfigOptionListeners.RequiresInteractionsRestartListener<File> _rtConcJUnitLocationListener;
     
   private StringOptionComponent javadocCustomParams;
@@ -110,11 +110,11 @@ public class ConfigFrame extends SwingFrame {
 
     _mainFrame = frame;
     _junitLocationEnabledListener = new ConfigOptionListeners.
-      RequiresDrJavaRestartListener<Boolean>(this, "Use External JUnit");
+      RequiresInteractionsRestartListener<Boolean>(this, "Use External JUnit");
     _junitLocationListener = new ConfigOptionListeners.
-      RequiresDrJavaRestartListener<File>(this, "JUnit Location");
-    _rtConcJUnitLocationEnabledListener = new ConfigOptionListeners.
-      RequiresInteractionsRestartListener<Boolean>(this, "Use ConcJUnit Runtime");
+      RequiresInteractionsRestartListener<File>(this, "JUnit Location");
+    _concJUnitChecksEnabledListener = new ConfigOptionListeners.
+      RequiresInteractionsRestartListener<String>(this, "Enabled ConcJUnit Checks");
     _rtConcJUnitLocationListener = new ConfigOptionListeners.
       RequiresInteractionsRestartListener<File>(this, "ConcJUnit Runtime Location");
     
@@ -271,8 +271,8 @@ public class ConfigFrame extends SwingFrame {
                                          _junitLocationEnabledListener);
     DrJava.getConfig().addOptionListener(OptionConstants.JUNIT_LOCATION,
                                          _junitLocationListener);
-    DrJava.getConfig().addOptionListener(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED,
-                                         _rtConcJUnitLocationEnabledListener);
+    DrJava.getConfig().addOptionListener(OptionConstants.CONCJUNIT_CHECKS_ENABLED,
+                                         _concJUnitChecksEnabledListener);
     DrJava.getConfig().addOptionListener(OptionConstants.RT_CONCJUNIT_LOCATION,
                                          _rtConcJUnitLocationListener);
   }
@@ -282,8 +282,8 @@ public class ConfigFrame extends SwingFrame {
                                             _junitLocationEnabledListener);
     DrJava.getConfig().removeOptionListener(OptionConstants.JUNIT_LOCATION,
                                             _junitLocationListener);
-    DrJava.getConfig().removeOptionListener(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED,
-                                            _rtConcJUnitLocationEnabledListener);
+    DrJava.getConfig().removeOptionListener(OptionConstants.CONCJUNIT_CHECKS_ENABLED,
+                                            _concJUnitChecksEnabledListener);
     DrJava.getConfig().removeOptionListener(OptionConstants.RT_CONCJUNIT_LOCATION,
                                             _rtConcJUnitLocationListener);
   }
@@ -1499,10 +1499,9 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, junitLocEnabled);
     final FileOptionComponent junitLoc =
       new FileOptionComponent(OptionConstants.JUNIT_LOCATION, "JUnit/ConcJUnit Location", this,
-                              "<html>Optional location of the JUnit 3.8.2 junit.jar file.<br>"+
-                              "If this is left blank, the JUnit integrated into DrJava is used.<br>"+
-                              "To use ConcJUnit, select the concutest-junit-3.8.2-withrt.jar file.<br>" + 
-                              "(Changes will not be applied until DrJava is restarted.)</html>",
+                              "<html>Optional location of the JUnit or ConcJUnit jar file.<br>"+
+                              "(Changes will not be applied until the Interactions Pane<br>"+
+                              "is reset.)</html>",
                               new FileSelectorComponent(this, _jarChooser, 30, 10f) {
       public void setFileField(File file) {
         if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidJUnitFile(file) ||
@@ -1553,14 +1552,21 @@ public class ConfigFrame extends SwingFrame {
     });
     junitLoc.setFileFilter(ClassPathFilter.ONLY);
     addOptionComponent(panel, junitLoc);
-    
-    final BooleanOptionComponent rtConcJUnitLocEnabled =
-      new BooleanOptionComponent(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED, "Use ConcJUnit Runtime", this,
-                                 "<html>If this is enabled, DrJava will use the ConcJUnit Runtime<br>"+
-                                 "configured below under 'ConcJUnit Runtime Location'. If it is<br>"+
-                                 "disabled, DrJava will use the normal Java runtime.</html>", false)
-      .setEntireColumn(true);
-    addOptionComponent(panel, rtConcJUnitLocEnabled);
+
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
+
+    final ForcedChoiceOptionComponent concJUnitChecksEnabledComponent =
+      new ForcedChoiceOptionComponent(OptionConstants.CONCJUNIT_CHECKS_ENABLED, "Enabled ConcJUnit Checks", this,
+                                      "<html>The concurrent unit testing checks that should be performed.<br>"+
+                                      "'none' uses plain JUnit. ConcJUnit can also detect failures in<br>"+
+                                      "all threads ('all-threads'), detect threads that did not end in<br>"+
+                                      "time ('all-threads, join'), and threads that ended in time only<br>"+
+                                      "because they were lucky ('all-threads, nojoin, lucky).<br>"+
+                                      "The last setting requires a 'ConcJUnit Runtime Location' to be set.</html>");
+    addOptionComponent(panel, concJUnitChecksEnabledComponent);
+
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));    
+
     final FileOptionComponent rtConcJUnitLoc =
       new FileOptionComponent(OptionConstants.RT_CONCJUNIT_LOCATION, "ConcJUnit Runtime Location", this,
                               "<html>Optional location of the Java Runtime Library processed<br>"+
@@ -1611,16 +1617,6 @@ public class ConfigFrame extends SwingFrame {
       }    
     });
     rtConcJUnitLoc.setFileFilter(ClassPathFilter.ONLY);
-    OptionComponent.ChangeListener rtConcJUnitListener = new OptionComponent.ChangeListener() {
-      public Object value(Object oc) {
-        File f = junitLoc.getComponent().getFileFromField();
-        rtConcJUnitLoc.getComponent().
-          setEnabled(edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(f));
-        return null;
-      }
-    };
-    junitLoc.addChangeListener(rtConcJUnitListener);
-    addOptionComponent(panel, rtConcJUnitLoc);
     
     ActionListener processRTListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -1641,71 +1637,99 @@ public class ConfigFrame extends SwingFrame {
       new ButtonComponent(processRTListener, "Generate ConcJUnit Runtime File", this,
                           "<html>Generate the ConcJUnit Runtime file specified above.<br>"+
                           "This setting is deactivated if the path to ConcJUnit has not been specified above.</html>");
-    OptionComponent.ChangeListener processRTChangeListener = new OptionComponent.ChangeListener() {
+    
+    OptionComponent.ChangeListener rtConcJUnitListener = new OptionComponent.ChangeListener() {
       public Object value(Object oc) {
         File f = junitLoc.getComponent().getFileFromField();
-        processRT.getComponent().
-          setEnabled(edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(f));
+        boolean enabled = (!junitLocEnabled.getComponent().isSelected()) ||
+          edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(f);
+        rtConcJUnitLoc.getComponent().setEnabled(enabled);
+        processRT.getComponent().setEnabled(enabled);
+        concJUnitChecksEnabledComponent.getComponent().setEnabled(enabled);
         return null;
       }
     };
-    junitLoc.addChangeListener(processRTChangeListener);
+    junitLocEnabled.addChangeListener(rtConcJUnitListener);
+    junitLoc.addChangeListener(rtConcJUnitListener);
+    addOptionComponent(panel, rtConcJUnitLoc);
     addOptionComponent(panel, processRT);
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
-    final LabelComponent junitStatus = new LabelComponent("<html>&nbsp;</html>", this, true);
+    final LabelComponent internalExternalStatus = new LabelComponent("<html>&nbsp;</html>", this, true);
+    final LabelComponent threadsStatus = new LabelComponent("<html>&nbsp;</html>", this, true);
+    final LabelComponent joinStatus = new LabelComponent("<html>&nbsp;</html>", this, true);
     final LabelComponent luckyStatus = new LabelComponent("<html>&nbsp;</html>", this, true);
     OptionComponent.ChangeListener junitStatusChangeListener = new OptionComponent.ChangeListener() {
       public Object value(Object oc) {
         File f = junitLoc.getComponent().getFileFromField();
-        String s, t;
+        String[] s = new String[] { " ", " ", " ", " " };
+        boolean isConcJUnit = true;
         if ((!junitLocEnabled.getComponent().isSelected()) || (f==null) || FileOps.NULL_FILE.equals(f) || !f.exists()) {
-          s = "DrJava uses the built-in JUnit.";
-          t = "";
+          s[0] = "DrJava uses the built-in ConcJUnit framework.";
         }
         else {
-          if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(f)) {
-            s = "DrJava uses ConcJUnit.";
-            File rtf = rtConcJUnitLoc.getComponent().getFileFromField();
-            if (rtConcJUnitLocEnabled.getComponent().isSelected() && (rtf!=null) && !FileOps.NULL_FILE.equals(rtf) && rtf.exists() &&
-                edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidRTConcJUnitFile(rtf)) {
-              t = "\"Lucky\" warnings are enabled.";
-            }
-            else {
-              t = "\"Lucky\" warnings are disabled.";
-            }
+          String type = "ConcJUnit";
+          if (!edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(f)) {
+            type = "JUnit";
+            isConcJUnit = false;
           }
-          else if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidJUnitFile(f)) {
-            s = "DrJava uses JUnit in a separate file.";
-            t = "";
-          }
-          else {
-            s = "DrJava uses the built-in JUnit.";
-            t = "";
+          s[0] = "DrJava uses an external "+type+" framework.";
+        }
+        if (!isConcJUnit) {
+          s[1] = "JUnit does not support all-thread, no-join";
+          s[2] = "or lucky checks. They are all disabled.";
+        }
+        else {
+          s[1] = "All-thread checks are disabled.";
+          s[2] = "No-join checks are disabled.";
+          s[3] = "Lucky checks are disabled.";
+          if (!concJUnitChecksEnabledComponent.getCurrentComboBoxValue().
+                equals(OptionConstants.ConcJUnitCheckChoices.NONE)) {
+            s[1] = "All-thread checks are enabled.";
+            if (concJUnitChecksEnabledComponent.getCurrentComboBoxValue().
+                  equals(OptionConstants.ConcJUnitCheckChoices.ALL) ||
+                concJUnitChecksEnabledComponent.getCurrentComboBoxValue().
+                  equals(OptionConstants.ConcJUnitCheckChoices.NO_LUCKY)) {
+              s[2] = "No-join checks are enabled.";
+              if (concJUnitChecksEnabledComponent.getCurrentComboBoxValue().
+                    equals(OptionConstants.ConcJUnitCheckChoices.ALL)) {
+                File rtf = rtConcJUnitLoc.getComponent().getFileFromField();
+                if ((rtf!=null) && !FileOps.NULL_FILE.equals(rtf) && rtf.exists() &&
+                    edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidRTConcJUnitFile(rtf)) {
+                  s[3] = "Lucky checks are enabled.";
+                }
+              }
+            }
           }
         }
-        junitStatus.getComponent().setText(s);
-        luckyStatus.getComponent().setText(t);
+        internalExternalStatus.getComponent().setText(s[0]);
+        threadsStatus.getComponent().setText(s[1]);
+        joinStatus.getComponent().setText(s[2]);
+        luckyStatus.getComponent().setText(s[3]);
         return null;
       }
     };
+    concJUnitChecksEnabledComponent.addChangeListener(junitStatusChangeListener);
     junitLocEnabled.addChangeListener(junitStatusChangeListener);
     junitLoc.addChangeListener(junitStatusChangeListener);
-    rtConcJUnitLocEnabled.addChangeListener(junitStatusChangeListener);
     rtConcJUnitLoc.addChangeListener(junitStatusChangeListener);
-    addOptionComponent(panel, junitStatus);
+    addOptionComponent(panel, internalExternalStatus);
+    addOptionComponent(panel, threadsStatus);
+    addOptionComponent(panel, joinStatus);
     addOptionComponent(panel, luckyStatus);
     
     rtConcJUnitListener.value(junitLoc);
-    processRTChangeListener.value(junitLoc);
     junitStatusChangeListener.value(junitLoc);
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
-    addOptionComponent(panel, 
-                       new BooleanOptionComponent(OptionConstants.FORCE_TEST_SUFFIX, 
-                                                  "Require test classes in projects to end in \"Test\"", 
-                                                  this,
-                                                  "Whether to force test classes in projects to end in \"Test\"."));
+    final BooleanOptionComponent forceTestSuffix  =
+      new BooleanOptionComponent(OptionConstants.FORCE_TEST_SUFFIX,
+                                 "Require test classes in projects to end in \"Test\"",
+                                 this,
+                                 "Whether to force test classes in projects to end in \"Test\".",
+                                 false)
+      .setEntireColumn(true);
+    addOptionComponent(panel, forceTestSuffix);
     
     panel.displayComponents();
   }

@@ -1371,10 +1371,10 @@
     <if>
       <istrue value="${use-concjunit}" />
       <then>
-        <property name="junit-jar-1" location="lib/buildlib/concutest-junit-3.8.2-withrt.jar" />
+        <property name="junit-jar-1" location="lib/buildlib/concutest-junit-4.7-withrt.jar" />
         <available property="junit-jar" value="${junit-jar-1}" file="${junit-jar-1}" />
 
-        <fail message="Can't find concutest-junit-3.8.2-withrt.jar in the lib/buildlib directory" unless="junit-jar" />
+        <fail message="Can't find concutest-junit-4.7-withrt.jar in the lib/buildlib directory" unless="junit-jar" />
 
         <property name="rt-concjunit-jar-1" location="rt.concjunit.jar" />
 

@@ -160,7 +160,10 @@ public class ConcJUnitUtils {
                                          options[1]);
     if (n==0) {
       // yes
-      File concJUnitJarFile = DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION);
+      File concJUnitJarFile = FileOps.getDrJavaFile();
+      if (DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION_ENABLED)) {
+        concJUnitJarFile = DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION);
+      }
       File rtFile = DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION);
       showGenerateRTConcJUnitJarFileDialog(parentFrame,
                                            rtFile,
@@ -175,15 +178,21 @@ public class ConcJUnitUtils {
                                            new Runnable() {
                                              public void run() {
                                                // failure
-                                               DrJava.getConfig().setSetting(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED,
-                                                                             false);
+                                               if (DrJava.getConfig().getSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED).
+                                                     equals(OptionConstants.ConcJUnitCheckChoices.NO_LUCKY)) {
+                                                 DrJava.getConfig().setSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED,
+                                                                               OptionConstants.ConcJUnitCheckChoices.NO_LUCKY);
+                                               }
                                                noRunnable.run();
                                              } });
     }
     else {
       // no
-      DrJava.getConfig().setSetting(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED,
-                                    false);
+      if (DrJava.getConfig().getSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED).
+            equals(OptionConstants.ConcJUnitCheckChoices.NO_LUCKY)) {
+        DrJava.getConfig().setSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED,
+                                      OptionConstants.ConcJUnitCheckChoices.NO_LUCKY);
+      }
       noRunnable.run();
     }
   }

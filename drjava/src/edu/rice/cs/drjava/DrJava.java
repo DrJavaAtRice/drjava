@@ -162,25 +162,8 @@ public class DrJava {
       while(failCount < 2) {
         // Restart if there are custom JVM args
         String masterMemory = getConfig().getSetting(MASTER_JVM_XMX).trim();
-        File junitLocation = getConfig().getSetting(JUNIT_LOCATION);
-        boolean junitLocationConfigured =
-          (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidJUnitFile(junitLocation) ||
-           edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(junitLocation));
-        _log.log("junitLocation: "+junitLocation);
-        _log.log("junitLocationConfigured: "+junitLocationConfigured);
-        if (DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED) && // enabled
-            !junitLocationConfigured && // not valid 
-            (junitLocation != null) && // not null
-            (!FileOps.NULL_FILE.equals(junitLocation)) && // not NULL_FILE
-            (junitLocation.exists())) { // but exists
-          // invalid file, clear setting
-          getConfig().setSetting(JUNIT_LOCATION_ENABLED, false);
-          getConfig().saveConfiguration();
-          junitLocationConfigured = false;
-        }
         boolean restart = (getConfig().getSetting(MASTER_JVM_ARGS).length() > 0)
-          || (!"".equals(masterMemory) && !OptionConstants.heapSizeChoices.get(0).equals(masterMemory))
-          || (DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION_ENABLED) && junitLocationConfigured);
+          || (!"".equals(masterMemory) && !OptionConstants.heapSizeChoices.get(0).equals(masterMemory));
         _log.log("restart: "+restart);
         
         LinkedList<String> classArgs = new LinkedList<String>();
@@ -205,10 +188,6 @@ public class DrJava {
             // extend classpath if JUnit/ConcJUnit location specified
             _log.log("JVMBuilder: classPath = "+jvmb.classPath());
             ArrayList<File> extendedClassPath = new ArrayList<File>();
-            if (DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION_ENABLED) &&
-                junitLocationConfigured) {
-              extendedClassPath.add(junitLocation);
-            }
             for(File f: jvmb.classPath()) { extendedClassPath.add(f); }
             _log.log("JVMBuilder: extendedClassPath = "+extendedClassPath);
             jvmb = jvmb.classPath(edu.rice.cs.plt.iter.IterUtil.asSizedIterable(extendedClassPath));
