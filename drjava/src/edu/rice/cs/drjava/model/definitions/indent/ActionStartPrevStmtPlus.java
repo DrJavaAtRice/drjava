@@ -111,8 +111,10 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
         doc.setCurrentLocation(prevDelimiterPos + 1);   // move cursor to right of '}' or ')' delim
         int delta = doc.balanceBackward(); // Number of chars backward to matching '{' or '('
         if (delta < 0) { // no matching delimiter!
-          throw new UnexpectedException("No matching '{' or '(' preceding '" + delim + "' at offset " + here + " in "
-                                       + doc);
+          // No matching '{' or '(' preceding this delimiter here
+          // but throwing an unexpected exception is not right, because the
+          // user may be trying to indent code that is not balanced!
+          return supResult;
         }
         prevDelimiterPos -= delta - 1;  // Position just to right of matching '{' or '('
         doc.setCurrentLocation(here);

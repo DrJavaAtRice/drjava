@@ -1583,5 +1583,43 @@ public final class IndentTest extends DrJavaTestCase {
 //    _assertContents(_aligned, doc);
 //    assertEquals("Line aligned to open paren.", _aligned.length(), doc.getLength());
 //  }
-  
+
+  // test exhibiting bug 2870973: UnexpectedException when indenting with superfluous )
+  public void testNoBalancedParens() throws BadLocationException {
+    String _text =
+      "public class Foo {\n" + 
+      "  public void m() {\n" + 
+      "                                         _junitLocationEnabledListener = new ConfigOptionListeners.\n" + 
+      "                                           RequiresDrJavaRestartListener<Boolean>(this, \"Use External JUnit\"));\n" + 
+      "                                         _junitLocationListener = new ConfigOptionListeners.\n" + 
+      "                                           RequiresDrJavaRestartListener<File>(_configFrame, \"JUnit Location\"));\n" + 
+      "                                         _rtConcJUnitLocationEnabledListener = new ConfigOptionListeners.\n" + 
+      "                                           RequiresInteractionsRestartListener<Boolean>(_configFrame, \"Use ConcJUnit Runtime\"));\n" + 
+      "                                         _rtConcJUnitLocationListener = new ConfigOptionListeners.\n" + 
+      "                                           RequiresInteractionsRestartListener<File>(_configFrame, \"ConcJUnit Runtime Location\"));\n" + 
+      "  }\n" + 
+      "}\n";
+    
+    String _aligned =
+      "public class Foo {\n" + 
+      "  public void m() {\n" + 
+      "    _junitLocationEnabledListener = new ConfigOptionListeners.\n" + 
+      "      RequiresDrJavaRestartListener<Boolean>(this, \"Use External JUnit\"));\n" + 
+      "                                         _junitLocationListener = new ConfigOptionListeners.\n" + 
+      "                                           RequiresDrJavaRestartListener<File>(_configFrame, \"JUnit Location\"));\n" + 
+      "                                         _rtConcJUnitLocationEnabledListener = new ConfigOptionListeners.\n" + 
+      "                                           RequiresInteractionsRestartListener<Boolean>(_configFrame, \"Use ConcJUnit Runtime\"));\n" + 
+      "                                         _rtConcJUnitLocationListener = new ConfigOptionListeners.\n" + 
+      "                                           RequiresInteractionsRestartListener<File>(_configFrame, \"ConcJUnit Runtime Location\"));\n" + 
+      "  }\n" + 
+      "}\n";
+    
+    _doc.insertString(0, _text, null);
+    assertEquals("Document does not have the right length.", _text.length(), _doc.getLength());
+    safeIndentLines(0, _doc.getLength()); // Aligns second line, a second time.    
+//    System.err.println("Indented Text is:\n" + doc.getText());
+//    System.err.println("Correct Text is:\n" + _aligned);
+    _assertContents(_aligned, _doc);
+    assertEquals("Document does not have the right length after indent.", _aligned.length(), _doc.getLength());
+  }
 }
