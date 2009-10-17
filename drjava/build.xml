@@ -1390,7 +1390,7 @@
             <echo message="${rt-concjunit-jar-1} already exists, not instrumenting." />
           </else>
         </if>
-        <available property="concjunit-bootclasspath" value="-Xbootclasspath/p:${rt-concjunit-jar-1}" file="${rt-concjunit-jar-1}" />
+        <available property="concjunit-bootclasspath" value="-Xbootclasspath/p:'${rt-concjunit-jar-1}'" file="${rt-concjunit-jar-1}" />
         <echo message="boot classpath: ${concjunit-bootclasspath}" />
       </then>
       <else>
