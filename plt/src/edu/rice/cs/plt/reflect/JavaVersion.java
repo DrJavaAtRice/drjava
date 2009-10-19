@@ -75,7 +75,7 @@ public enum JavaVersion {
   
   /** Returns a FullVersion that corresponds to this JavaVersion, e.g. JAVA_6 will return a FullVersion 1.6.0_0. */
   public FullVersion fullVersion() {
-    return new FullVersion(this, 0, 0, ReleaseType.STABLE, "", VendorType.UNKNOWN, "");
+    return new FullVersion(this, 0, 0, ReleaseType.STABLE, null, VendorType.UNKNOWN, "");
   }
   
   /**
@@ -228,6 +228,11 @@ public enum JavaVersion {
     
     /** Get the major version associated with this full version */
     public JavaVersion majorVersion() { return _majorVersion; }
+    
+    /** Get a full version with the maintenance, update and release type zeroed out. */
+    public FullVersion onlyMajorVersionAndVendor() {
+      return new FullVersion(_majorVersion, 0, 0, ReleaseType.STABLE, null, _vendor, _vendorString);
+    }
     
     /** Get the maintenance associated with this full version */
     public int maintenance() { return _maintenance; }

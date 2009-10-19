@@ -278,7 +278,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
         if (!_interpreterOptions.typeSystem().isArray(t)) { return "<error: value is not an array>"; }
         t = _interpreterOptions.typeSystem().arrayElementType(t);
       }
-      return _interpreterOptions.typeSystem().userRepresentation(t);
+      return _interpreterOptions.typeSystem().typePrinter().print(t);
     }
   }
   
@@ -332,7 +332,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       vars.add(new LocalVariable(localVarNames[i], varT, false));
     }
     
-    TypeContext ctx = new TopLevelContext(_interpreterLoader);
+    TypeContext ctx = new ImportContext(_interpreterLoader, _interpreterOptions);
     if (pkg != null) { ctx = ctx.setPackage(pkg.getName()); }
     ctx = new ClassSignatureContext(ctx, c, _interpreterLoader);
     ctx = new ClassContext(ctx, c);

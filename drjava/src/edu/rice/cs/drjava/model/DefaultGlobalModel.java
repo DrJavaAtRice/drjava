@@ -237,32 +237,13 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
 // Lightweight parsing has been disabled until we have something that is beneficial and works better in the background.    
 //    _parsingControl = new DefaultLightWeightParsingControl(this);
   }
-  
-  // get a library from the map of maps
-  private static JDKToolsLibrary getLib(Map<JavaVersion.VendorType, Map<JavaVersion.FullVersion, JDKToolsLibrary>> map,
-                                        JavaVersion.VendorType vendor,
-                                        JavaVersion.FullVersion v) {
-    if (map.get(vendor)==null) return null;
-    else return map.get(vendor).get(v);
-  }
-  
-  // add a library to the map of maps
-  private static void putLib(Map<JavaVersion.VendorType, Map<JavaVersion.FullVersion, JDKToolsLibrary>> map,
-                             JavaVersion.VendorType vendor,
-                             JavaVersion.FullVersion v,
-                             JDKToolsLibrary lib) {
-    Map<JavaVersion.FullVersion, JDKToolsLibrary> m = map.get(vendor);
-    if (m==null) {
-      m = new TreeMap<JavaVersion.FullVersion, JDKToolsLibrary>();
-      map.put(vendor, m);
-    }
-    m.put(v, lib);
-  }
-  
-  private static JavaVersion.FullVersion fvOnly(JavaVersion.FullVersion tVersion) {
+
+  // makes the version coarser, if desired: if DISPLAY_ALL_COMPILER_VERSIONS is disabled, then only
+  // the major version and the vendor will be considered
+  private static JavaVersion.FullVersion coarsenVersion(JavaVersion.FullVersion tVersion) {
     BooleanOption displayAllOption = edu.rice.cs.drjava.config.OptionConstants.DISPLAY_ALL_COMPILER_VERSIONS;
     if (!DrJava.getConfig().getSetting(displayAllOption).booleanValue()) {
-      tVersion = tVersion.majorVersion().fullVersion();
+      tVersion = tVersion.onlyMajorVersionAndVendor();
     }
     return tVersion;
   }
@@ -274,18 +255,14 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     // almost always be true, it seems like more trouble than it is worth
     
     // map is sorted by version, lowest-to-highest
-    Map<JavaVersion.VendorType, Map<JavaVersion.FullVersion, JDKToolsLibrary>> results =
-      new TreeMap<JavaVersion.VendorType, Map<JavaVersion.FullVersion, JDKToolsLibrary>>();
+    Map<JavaVersion.FullVersion, JDKToolsLibrary> results = new TreeMap<JavaVersion.FullVersion, JDKToolsLibrary>();
     
     File configTools = DrJava.getConfig().getSetting(JAVAC_LOCATION);
     if (configTools != FileOps.NULL_FILE) {
       JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this);
       if (fromConfig.isValid()) { 
         JarJDKToolsLibrary.msg("From config: "+fromConfig);
-        putLib(results,
-               fromConfig.version().vendor(),
-               fvOnly(fromConfig.version()),
-               fromConfig);
+        results.put(coarsenVersion(fromConfig.version()), fromConfig);
       }
       else { JarJDKToolsLibrary.msg("From config: invalid "+fromConfig); }
     }
@@ -295,12 +272,9 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
 
     JavaVersion.FullVersion runtimeVersion = fromRuntime.version();
     if (fromRuntime.isValid()) {
-      if ((getLib(results, runtimeVersion.vendor(), fvOnly(runtimeVersion))==null)) {
+      if (!results.containsKey(coarsenVersion(runtimeVersion))) {
         JarJDKToolsLibrary.msg("From runtime: "+fromRuntime);
-        putLib(results,
-               runtimeVersion.vendor(),
-               fvOnly(runtimeVersion),
-               fromRuntime);
+        results.put(coarsenVersion(runtimeVersion), fromRuntime);
       }
       else { JarJDKToolsLibrary.msg("From runtime: duplicate "+fromRuntime); }
     }
@@ -309,21 +283,14 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     Iterable<JarJDKToolsLibrary> fromSearch = JarJDKToolsLibrary.search(this);
     for (JDKToolsLibrary t : fromSearch) {
       JavaVersion.FullVersion tVersion = t.version();
-      if (getLib(results, tVersion.vendor(), fvOnly(tVersion))==null) {
+      if (!results.containsKey(coarsenVersion(tVersion))) {
         JarJDKToolsLibrary.msg("From search: "+t);
-        putLib(results,
-               tVersion.vendor(),
-               fvOnly(tVersion),
-               t);
+        results.put(coarsenVersion(tVersion), t);
       }
       else { JarJDKToolsLibrary.msg("From search: duplicate "+t); }
     }
     
-    Iterable<JDKToolsLibrary> acc = IterUtil.empty();
-    for(Map<JavaVersion.FullVersion, JDKToolsLibrary> vmap: results.values()) {
-      acc = IterUtil.compose(acc, vmap.values());
-    }
-    return IterUtil.reverse(acc);
+    return IterUtil.reverse(results.values());
   }
   
 //  public void junitAll() { _state.junitAll(); }

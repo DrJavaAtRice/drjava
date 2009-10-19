@@ -1371,10 +1371,15 @@
     <if>
       <istrue value="${use-concjunit}" />
       <then>
-        <property name="junit-jar-1" location="lib/buildlib/concutest-junit-4.7-withrt.jar" />
+        <property name="junit-jar-1" location="lib/buildlib/concutest-junit-4.7-withrt-nodep.jar" />
         <available property="junit-jar" value="${junit-jar-1}" file="${junit-jar-1}" />
 
-        <fail message="Can't find concutest-junit-4.7-withrt.jar in the lib/buildlib directory" unless="junit-jar" />
+        <fail message="Can't find concutest-junit-4.7-withrt-nodep.jar in the lib/buildlib directory" unless="junit-jar" />
+
+        <property name="concjunitrt-jar-1" location="lib/buildlib/concjunitrt.jar" />
+        <available property="concjunitrt-jar" value="${concjunitrt-jar-1}" file="${concjunitrt-jar-1}" />
+
+        <fail message="Can't find concjunitrt.jar in the lib/buildlib directory" unless="concjunitrt-jar" />
 
         <property name="rt-concjunit-jar-1" location="rt.concjunit.jar" />
 
@@ -1384,7 +1389,7 @@
           </not>
           <then>
             <echo message="Instrumenting Java runtime (no changes made to original), java=${test-jvm}" />
-            <java jar="${junit-jar}" jvm="${test-jvm}" fork="yes" inputstring="Y"/>
+            <java jar="${concjunitrt-jar}" jvm="${test-jvm}" fork="yes" inputstring="Y"/>
           </then>
           <else>
             <echo message="${rt-concjunit-jar-1} already exists, not instrumenting." />
