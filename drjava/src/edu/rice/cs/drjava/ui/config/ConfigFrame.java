@@ -1620,11 +1620,15 @@ public class ConfigFrame extends SwingFrame {
     
     ActionListener processRTListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
+        File concJUnitJarFile = FileOps.getDrJavaFile();
+        if (junitLocEnabled.getComponent().isSelected()) {
+          concJUnitJarFile = junitLoc.getComponent().getFileFromField();
+        }
         File rtFile = rtConcJUnitLoc.getComponent().getFileFromField();
         edu.rice.cs.drjava.model.junit.ConcJUnitUtils.
           showGenerateRTConcJUnitJarFileDialog(ConfigFrame.this,
                                                rtFile,
-                                               junitLoc.getComponent().getFileFromField(),
+                                               concJUnitJarFile,
                                                new Runnable1<File>() {
           public void run(File targetFile) {
             rtConcJUnitLoc.getComponent().setFileField(targetFile);
@@ -1649,6 +1653,15 @@ public class ConfigFrame extends SwingFrame {
         return null;
       }
     };
+
+    OptionComponent.ChangeListener junitLocListener = new OptionComponent.ChangeListener() {
+      public Object value(Object oc) {
+        boolean enabled = junitLocEnabled.getComponent().isSelected();
+        junitLoc.getComponent().setEnabled(enabled);
+        return null;
+      }
+    };
+    junitLocEnabled.addChangeListener(junitLocListener);
     junitLocEnabled.addChangeListener(rtConcJUnitListener);
     junitLoc.addChangeListener(rtConcJUnitListener);
     addOptionComponent(panel, rtConcJUnitLoc);
@@ -1717,9 +1730,10 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, threadsStatus);
     addOptionComponent(panel, joinStatus);
     addOptionComponent(panel, luckyStatus);
-    
-    rtConcJUnitListener.value(junitLoc);
-    junitStatusChangeListener.value(junitLoc);
+
+    junitLocListener.value(null);
+    rtConcJUnitListener.value(null);
+    junitStatusChangeListener.value(null);
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     final BooleanOptionComponent forceTestSuffix  =

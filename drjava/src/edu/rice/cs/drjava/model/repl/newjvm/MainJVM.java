@@ -644,11 +644,12 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
             // ask to regenerate
             repeat = true; // re-check settings
             cm.reset();
-            edu.rice.cs.drjava.model.junit.ConcJUnitUtils.
+            boolean attempted = edu.rice.cs.drjava.model.junit.ConcJUnitUtils.
               showIncompatibleWantToRegenerateDialog(null,
                                                      new Runnable() { public void run() { cm.signal(); } }, // yes
                                                      new Runnable() { public void run() { cm.signal(); } }); // no
             while(!cm.attemptEnsureSignaled()); // wait for dialog to finish
+            if (!attempted) { repeat = false; }
           }
         }
         catch(IOException ioe) {

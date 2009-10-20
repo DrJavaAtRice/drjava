@@ -144,10 +144,11 @@ public class ConcJUnitUtils {
   
   /** Ask the user if the rt.concjunit.jar file should be regenerated.
     * @param parentFrame parent frame
+    * @return true if the user chose to regenerate
     */
-  public static void showIncompatibleWantToRegenerateDialog(final Frame parentFrame,
-                                                            final Runnable yesRunnable,
-                                                            final Runnable noRunnable) {
+  public static boolean showIncompatibleWantToRegenerateDialog(final Frame parentFrame,
+                                                               final Runnable yesRunnable,
+                                                               final Runnable noRunnable) {
     Object[] options = {"Yes","No"};
     int n = JOptionPane.showOptionDialog(parentFrame,
                                          "The specified ConcJUnit runtime file is incompatible with the\n"+
@@ -185,6 +186,7 @@ public class ConcJUnitUtils {
                                                }
                                                noRunnable.run();
                                              } });
+      return true;
     }
     else {
       // no
@@ -194,6 +196,7 @@ public class ConcJUnitUtils {
                                       OptionConstants.ConcJUnitCheckChoices.NO_LUCKY);
       }
       noRunnable.run();
+      return false;
     }
   }
   
@@ -303,6 +306,7 @@ public class ConcJUnitUtils {
                                               "Successfully generated ConcJUnit Runtime File:\n"+targetFile,
                                               "Generation Successful",
                                               JOptionPane.INFORMATION_MESSAGE);
+                edu.rice.cs.plt.io.IOUtil.deleteRecursively(tmpDir);
               }
               else {
                 failureRunnable.run();
@@ -311,7 +315,6 @@ public class ConcJUnitUtils {
                                               "Could Not Generate",
                                               JOptionPane.ERROR_MESSAGE);
               }
-              edu.rice.cs.plt.io.IOUtil.deleteRecursively(tmpDir);
             }
           };
           worker.start();
