@@ -1580,6 +1580,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                           URL url) {
     // TODO: put this in an AsyncTask
     Set<JavaAPIListEntry> s = new HashSet<JavaAPIListEntry>();
+    if (url==null) return s;
     try {
       InputStream urls = url.openStream();
       InputStreamReader is = null;
@@ -1680,10 +1681,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _javaAPISet = _generateJavaAPISet(base, stripPrefix, suffix);
       
       // add JUnit
-      Set<JavaAPIListEntry> junitAPIList = _generateJavaAPISet(DrJava.getConfig().getSetting(JUNIT_LINK) + "/",
-                                                               "", // relative links
-                                                               "/allclasses-junit4.4.html");
-      _javaAPISet.addAll(junitAPIList);
+      try {
+        Set<JavaAPIListEntry> junitAPIList = _generateJavaAPISet(DrJava.getConfig().getSetting(JUNIT_LINK) + "/",
+                                                                 "", // relative links
+                                                                 new URL(DrJava.getConfig().getSetting(JUNIT_LINK)+
+                                                                             "/allclasses-frame.html"));
+        _javaAPISet.addAll(junitAPIList);
+      }
+      catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
       
       // add additional Javadoc libraries
       for(String url: DrJava.getConfig().getSetting(JAVADOC_ADDITIONAL_LINKS)) {
