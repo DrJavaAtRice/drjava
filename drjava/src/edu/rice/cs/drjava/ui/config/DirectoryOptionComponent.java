@@ -99,7 +99,7 @@ public class DirectoryOptionComponent extends OptionComponent<File> implements O
   public void setValue(File value) { _component.setFileField(value); }
 
   /** Return's this OptionComponent's configurable component. */
-  public JComponent getComponent() { return _component; }
+  public DirectorySelectorComponent getComponent() { return _component; }
 
   /** Adds a filter to decide if a directory can be chosen. */
   public void addChoosableFileFilter(FileFilter filter) { _component.addChoosableFileFilter(filter); }

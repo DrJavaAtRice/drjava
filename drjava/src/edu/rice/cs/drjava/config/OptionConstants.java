@@ -1175,6 +1175,9 @@ public interface OptionConstants {
   /** The directory in use by the Interactions pane upon the previous quit. */
   public static final FileOption LAST_INTERACTIONS_DIRECTORY = new FileOption("last.interactions.dir", FileOps.NULL_FILE);
   
+  /** The directory for the Interactions pane to use (as long as there is no project working directory). */
+  public static final FileOption FIXED_INTERACTIONS_DIRECTORY = new FileOption("fixed.interactions.dir", FileOps.NULL_FILE);
+  
   /** Whether to save and restore Interactions pane directory at startUp/shutdown (sticky=true), or to use
     * "user.home" (sticky=false). */
   public static final BooleanOption STICKY_INTERACTIONS_DIRECTORY =

@@ -1425,6 +1425,37 @@ public class ConfigFrame extends SwingFrame {
   
   /** Add all of the components for the Interactions panel of the preferences window. */
   private void _setupInteractionsPanel(ConfigPanel panel) {
+    final DirectoryOptionComponent wdComponent =
+      new DirectoryOptionComponent(OptionConstants.FIXED_INTERACTIONS_DIRECTORY,
+                                   "Interactions Working Directory", this,
+                                   "<html>Working directory for the Interactions Pane (unless<br>"+
+                                   "a project working directory has been set).</html>",
+                                   _dirChooser);
+    addOptionComponent(panel, wdComponent);
+    final BooleanOptionComponent stickyComponent = 
+      new BooleanOptionComponent(OptionConstants.STICKY_INTERACTIONS_DIRECTORY,
+                                 "<html><p align=\"right\">" + 
+                                 StringOps.
+                                   splitStringAtWordBoundaries("Restore last working directory of the Interactions pane on start up",
+                                                               33, "<br>", SEPS), this,
+                                 "<html>Whether to restore the last working directory of the Interaction pane on start up,<br>" +
+                                 "or to always use the value of the \"user.home\" Java property<br>"+
+                                 "(currently "+System.getProperty("user.home")+").");
+    addOptionComponent(panel, stickyComponent);
+    
+//    OptionComponent.ChangeListener wdListener = new OptionComponent.ChangeListener() {
+//      public Object value(Object oc) {
+//        File f = wdComponent.getComponent().getFileFromField();
+//        boolean enabled = (f == null) || (f.equals(FileOps.NULL_FILE));
+//        stickyComponent.getComponent().setEnabled(enabled);
+//        return null;
+//      }
+//    };
+//    wdListener.value(wdComponent);
+    
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
+      
     addOptionComponent(panel, new IntegerOptionComponent(OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions History", this,
                                                   "The number of interactions to remember in the history."));
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DIALOG_AUTOIMPORT_ENABLED, 
@@ -1458,15 +1489,6 @@ public class ConfigFrame extends SwingFrame {
       }
     };
     addOptionComponent(panel, autoImportClasses);
-    addOptionComponent(panel, 
-                       new BooleanOptionComponent(OptionConstants.STICKY_INTERACTIONS_DIRECTORY,
-                                                  "<html><p align=\"right\">" + 
-                                                  StringOps.
-                                                    splitStringAtWordBoundaries("Restore last working directory of the Interactions pane on start up",
-                                                                                33, "<br>", SEPS), this,
-                                                  "<html>Whether to restore the last working directory of the Interaction pane on start up,<br>" +
-                                                  "or to always use the value of the \"user.home\" Java property<br>"+
-                                                  "(currently "+System.getProperty("user.home")+")."));
 
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));

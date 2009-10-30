@@ -919,6 +919,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File getBuildDirectory() { return FileOps.NULL_FILE; }
     public File getProjectRoot() { return getWorkingDirectory(); }
     public File getWorkingDirectory() {
+      System.out.println("foo");
       Iterable<File> roots = getSourceRootSet();
       if (!IterUtil.isEmpty(roots)) { return IterUtil.first(roots); }
       else {
