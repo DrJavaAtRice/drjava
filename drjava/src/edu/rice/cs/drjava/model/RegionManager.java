@@ -105,6 +105,12 @@ public interface RegionManager<R extends IDocumentRegion> {
   
   /** @return a Vector<R> containing all the DocumentRegion objects in this mangager. */
   public ArrayList<R> getRegions();
+
+  /** @return the number if regions contained in this manager. */
+  public int getRegionCount();
+  
+  /** Gets the sorted set of regions less than r. */
+  public SortedSet<R> getHeadSet(R r);
   
   /** Gets the sorted set of regions greater than or equal to r. */
   public SortedSet<R> getTailSet(R r);

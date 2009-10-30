@@ -528,6 +528,16 @@ public interface OptionConstants {
   public static final VectorOption<KeyStroke> KEY_BROWSE_BACK =
     new VectorOption<KeyStroke>("key.browse.back", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, ALT_MASK|SHIFT_MASK)));
   
+  /** The key binding for going to the next region in the tabbed pane */
+  public static final VectorOption<KeyStroke> KEY_TABBED_NEXT_REGION =
+    new VectorOption<KeyStroke>("key.tabbed.next.region", new KeyStrokeOption("",null),
+                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, ALT_MASK|SHIFT_MASK)));
+  
+  /** The key binding for going to the previous region in the tabbed pane */
+  public static final VectorOption<KeyStroke> KEY_TABBED_PREV_REGION =
+    new VectorOption<KeyStroke>("key.tabbed.prev.region", new KeyStrokeOption("",null),
+                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_UP, ALT_MASK|SHIFT_MASK)));
+  
   /** The key binding for openning the preferences dialog */
   public static final VectorOption<KeyStroke> KEY_PREFERENCES =
     new VectorOption<KeyStroke>("key.preferences", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_SEMICOLON, MASK)));

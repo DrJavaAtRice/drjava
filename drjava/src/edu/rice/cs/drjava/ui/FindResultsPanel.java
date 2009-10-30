@@ -280,6 +280,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       _docToTreeNode.clear();
       _regionToTreeNode.clear();
       _regTreeModel.nodeStructureChanged(_rootNode);
+      _lastSelectedRegion = null;
 //      _requestFocusInWindow();
 //      System.err.println("Root has been cleared; child count = " + _rootNode.getChildCount());
       _findReplace.findAll(_searchString, _searchAll, _searchSelectionOnly, _matchCase, _wholeWord, _noComments, _noTestCases, odd, 

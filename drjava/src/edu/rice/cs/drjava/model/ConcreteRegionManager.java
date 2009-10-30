@@ -363,6 +363,12 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
   /** @return a Vector<R> containing the DocumentRegion objects for document odd in this mangager. */
   public SortedSet<R> getRegions(OpenDefinitionsDocument odd) { return _regions.get(odd); }
   
+  public int getRegionCount() {
+    int regions = 0;
+    for (OpenDefinitionsDocument odd: _documents) regions += _regions.get(odd).size();
+    return regions;
+  }
+  
   public ArrayList<R> getRegions() {
     ArrayList<R> regions = new ArrayList<R>();
     for (OpenDefinitionsDocument odd: _documents) regions.addAll(_regions.get(odd));

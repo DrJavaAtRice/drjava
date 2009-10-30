@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.SortedSet;
+import java.util.NoSuchElementException;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -82,6 +83,14 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   
   protected DefaultTreeCellRenderer dtcr;
   
+  protected boolean _hasNextPrevButtons = true;
+  /** button to go to the previous region (or null if _hasNextPrevButtons==false). */
+  protected JButton _prevButton;
+  /** button to go to the next region (or null if _hasNextPrevButtons==false). */
+  protected JButton _nextButton;
+  /** the region that was last selected (may be null). */ 
+  protected R _lastSelectedRegion = null;
+  
   /* _ */
   
 //  /** Cached values from last region insertion. _cachedDoc is non-null iff the last added region occurred at the end of
@@ -114,12 +123,28 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     * from the event thread.
     * @param frame the MainFrame
     * @param title title of the pane
+    * @param regionManager the region manager associated with this panel
     */
   public RegionsTreePanel(MainFrame frame, String title, RegionManager<R> regionManager) {
+    this(frame, title, regionManager, true);
+  }
+  
+  /** Constructs a new panel to display regions in a tree. This is swing view class and hence should only be accessed 
+    * from the event thread.
+    * @param frame the MainFrame
+    * @param title title of the pane
+    * @param regionManager the region manager associated with this panel
+    * @param hasNextPrevButtons whether this panel should have next/previous buttons
+    */
+  public RegionsTreePanel(MainFrame frame, String title, RegionManager<R> regionManager,
+                          boolean hasNextPrevButtons) {
     super(frame, title);
     _title = title;
     _regionManager = regionManager;
+    _hasNextPrevButtons = hasNextPrevButtons;
     setLayout(new BorderLayout());
+    
+    _lastSelectedRegion = null;
     
     _frame = frame;
     _model = frame.getModel();
@@ -459,14 +484,32 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     
     JComponent[] buts = makeButtons();
     
-    closeButtonPanel.add(_closeButton, BorderLayout.NORTH);    
-    for (JComponent b: buts) { mainButtons.add(b); }
-    mainButtons.add(emptyPanel);
+    closeButtonPanel.add(_closeButton, BorderLayout.NORTH);
     
     c.fill = GridBagConstraints.HORIZONTAL;
     c.anchor = GridBagConstraints.NORTH;
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.weightx = 1.0;
+    
+    if (_hasNextPrevButtons) {
+      _prevButton = new JButton(new AbstractAction("Previous") {
+        public void actionPerformed(ActionEvent ae) {
+          goToPreviousRegion();
+        }
+      });
+      _nextButton = new JButton(new AbstractAction("Next") {
+        public void actionPerformed(ActionEvent ae) {
+          goToNextRegion();
+        }
+      });
+      mainButtons.add(_prevButton);
+      gbLayout.setConstraints(_prevButton, c);
+      mainButtons.add(_nextButton);
+      gbLayout.setConstraints(_nextButton, c);
+      updateNextPreviousRegionButtons(null);
+    }
+    for (JComponent b: buts) { mainButtons.add(b); }
+    mainButtons.add(emptyPanel);
     
     for (JComponent b: buts) { gbLayout.setConstraints(b, c); }
     
@@ -525,7 +568,179 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   /** Go to region. */
   protected void goToRegion() {
     ArrayList<R> r = getSelectedRegions();
-    if (r.size() == 1) _frame.scrollToDocumentAndOffset(r.get(0).getDocument(), r.get(0).getStartOffset(), false);
+    if (r.size() == 1) {
+      updateNextPreviousRegionButtons(r.get(0));
+      _frame.scrollToDocumentAndOffset(_lastSelectedRegion.getDocument(), _lastSelectedRegion.getStartOffset(), false);
+    }
+  }
+  
+  /** Update the enabled/disabled state of the next/previous region buttons.
+    * Doesn't change _lastSelectedRegion.
+    * Safe to call even if _hasNextPrevButtons==false. */
+  protected void updateNextPreviousRegionButtons() {
+    updateNextPreviousRegionButtons(_lastSelectedRegion);
+  }
+  
+  /** Update the enabled/disabled state of the next/previous region buttons.
+    * Safe to call even if _hasNextPrevButtons==false.
+    * @param lastSelectedRegion new region selected */
+  protected void updateNextPreviousRegionButtons(R lastSelectedRegion) {
+    _lastSelectedRegion = lastSelectedRegion;
+    if (_hasNextPrevButtons) {
+      int count = _regionManager.getRegionCount();
+      if (count>0) {
+        if (_lastSelectedRegion==null) {
+          // nothing selected, but we have at least one region
+          _prevButton.setEnabled(false); // no "prev"
+          _nextButton.setEnabled(true); // "next" will go to the first region
+        }
+        else {
+          // a region was selected
+          _prevButton.setEnabled(getPrevRegionInTree(_lastSelectedRegion)!=null);
+          _nextButton.setEnabled(getNextRegionInTree(_lastSelectedRegion)!=null);
+        }
+      }
+    }
+  }
+
+  /** Go to previous region. Must be run in event thread. */
+  public void goToPreviousRegion() {
+    assert EventQueue.isDispatchThread();
+    
+    int count = _regionManager.getRegionCount();
+    if (count>0) {
+      R newRegion = null; // initially not set
+      if (_lastSelectedRegion!=null) {
+        // there are elements and something was selected
+        newRegion = getPrevRegionInTree(_lastSelectedRegion);
+      }
+      else {
+        // nothing selected, go to first region
+        newRegion = _regionManager.getRegions().get(0);
+      }
+      if (newRegion!=null) {
+        // a new region was found, select it
+        updateNextPreviousRegionButtons(newRegion);
+        selectRegion(_lastSelectedRegion);
+        _frame.scrollToDocumentAndOffset(_lastSelectedRegion.getDocument(),
+                                         _lastSelectedRegion.getStartOffset(), false);
+      }
+    }
+  }
+  
+  /** Return the region preceding r in the tree, or null if there isn't one. */
+  protected R getPrevRegionInTree(R r) {
+    DefaultMutableTreeNode regionNode = _regionToTreeNode.get(r);
+    if (regionNode != null) {
+      DefaultMutableTreeNode prevSibling = regionNode.getPreviousSibling();
+      if (prevSibling!=null) {
+        // there is a previous sibling, go there
+        // root--+
+        //       +--doc1--+
+        //       |        +---foo
+        //       +--doc2--+
+        //                +---prevSibling
+        //                +---_lastSelectedRegion
+        @SuppressWarnings("unchecked")
+        RegionTreeUserObj<R> userObject = (RegionTreeUserObj<R>) prevSibling.getUserObject();
+        return userObject.region();
+      }
+      else {
+        // no previous sibling, go to the parent's previous sibling's last child (olderCousin)
+        // root--+
+        //       +--doc1--+
+        //       |        +---olderCousin
+        //       +--doc2--+
+        //                +---_lastSelectedRegion
+        DefaultMutableTreeNode parent = (DefaultMutableTreeNode)regionNode.getParent();
+        if (parent!=null) {
+          DefaultMutableTreeNode parentsPrevSibling = parent.getPreviousSibling();
+          if (parentsPrevSibling!=null) {
+            try {
+              DefaultMutableTreeNode olderCousin = (DefaultMutableTreeNode)parentsPrevSibling.getLastChild();
+              if (olderCousin!=null) {
+                @SuppressWarnings("unchecked")
+                RegionTreeUserObj<R> userObject = (RegionTreeUserObj<R>) olderCousin.getUserObject();
+                return userObject.region();
+              }
+            }
+            catch(NoSuchElementException nsee) {
+              throw new UnexpectedException(nsee, "Document node without children, shouldn't exist");
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /** Go to next region. */
+  public void goToNextRegion() {
+    int count = _regionManager.getRegionCount();
+    if (count>0) {
+      R newRegion = null; // initially not set
+      if (_lastSelectedRegion!=null) {
+        // there are elements and something was selected
+        newRegion = getNextRegionInTree(_lastSelectedRegion);
+      }
+      else {
+        // nothing selected, go to first region
+        newRegion = _regionManager.getRegions().get(0);
+      }
+      if (newRegion!=null) {
+        // a new region was found, select it
+        updateNextPreviousRegionButtons(newRegion);
+        selectRegion(_lastSelectedRegion);
+        _frame.scrollToDocumentAndOffset(_lastSelectedRegion.getDocument(),
+                                         _lastSelectedRegion.getStartOffset(), false);
+      }
+    }
+  }
+  
+  /** Return the region following r in the tree, or null if there isn't one. */
+  protected R getNextRegionInTree(R r) {
+    DefaultMutableTreeNode regionNode = _regionToTreeNode.get(r);
+    if (regionNode != null) {
+      DefaultMutableTreeNode nextSibling = regionNode.getNextSibling();
+      if (nextSibling!=null) {
+        // there is a previous sibling, go there
+        // root--+
+        //       +--doc1--+
+        //       |        +---_lastSelectedRegion
+        //       |        +---nextSibling
+        //       +--doc2--+
+        //                +---foo
+        @SuppressWarnings("unchecked")
+        RegionTreeUserObj<R> userObject = (RegionTreeUserObj<R>) nextSibling.getUserObject();
+        return userObject.region();
+      }
+      else {
+        // no next sibling, go to the parent's next sibling's first child (youngerCousin)
+        // root--+
+        //       +--doc1--+
+        //       |        +---_lastSelectedRegion
+        //       +--doc2--+
+        //                +---youngerCousin
+        DefaultMutableTreeNode parent = (DefaultMutableTreeNode)regionNode.getParent();
+        if (parent!=null) {
+          DefaultMutableTreeNode parentsNextSibling = parent.getNextSibling();
+          if (parentsNextSibling!=null) {
+            try {
+              DefaultMutableTreeNode youngerCousin = (DefaultMutableTreeNode)parentsNextSibling.getFirstChild();
+              if (youngerCousin!=null) {
+                @SuppressWarnings("unchecked")
+                RegionTreeUserObj<R> userObject = (RegionTreeUserObj<R>) youngerCousin.getUserObject();
+                return userObject.region();
+              }
+            }
+            catch(NoSuchElementException nsee) {
+              throw new UnexpectedException(nsee, "Document node without children, shouldn't exist");
+            }
+          }
+        }
+      }
+    }
+    return null;
   }
   
   /** Add a region to the tree. Must be executed in event thread.
@@ -534,9 +749,9 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   public void addRegion(final R r) {
     try {
 //    System.err.println("Adding region '" + r + "'");
-    DefaultMutableTreeNode docNode;
-    OpenDefinitionsDocument doc = r.getDocument();
-    
+      DefaultMutableTreeNode docNode;
+      OpenDefinitionsDocument doc = r.getDocument();
+      
 //    if (doc == _cachedDoc) docNode = _cachedDocNode;
 //    else {
       docNode = _docToTreeNode.get(doc);
@@ -552,7 +767,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
 //        _cachedRegionIndex = -1;  // The next region in this document will have index 0
       }
 //    }
-    
+      
 //    if (doc == _cachedDoc & r.getStartOffset() >= _cachedStartOffset) { // insert new region after previous insert
 //      _cachedRegionIndex++;
 //      _cachedStartOffset = r.getStartOffset();
@@ -603,9 +818,9 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
         }
       }
 //    }
-    _changeState.updateButtons();
-  }
-  catch(Exception e) { DrJavaErrorHandler.record(e); throw new UnexpectedException(e); }
+      _changeState.updateButtons();
+    }
+    catch(Exception e) { DrJavaErrorHandler.record(e); throw new UnexpectedException(e); }
   }
 
   private void insertNewRegionNode(R r, DefaultMutableTreeNode docNode, int pos) {
@@ -635,6 +850,17 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
 //    System.err.println("RegionsTreePanel.removeRegion(" + r + ") called");
     assert EventQueue.isDispatchThread();
     _changeState.setLastAdded(null);
+    
+    if ((_lastSelectedRegion!=null) && (_lastSelectedRegion.equals(r))) {
+      // we need to change the _lastSelectedRegion
+      R newLast = getPrevRegionInTree(_lastSelectedRegion);
+      if (newLast==null) newLast = getNextRegionInTree(_lastSelectedRegion);
+      _lastSelectedRegion = newLast;
+      if (_lastSelectedRegion!=null) {
+        selectRegion(_lastSelectedRegion);
+      }
+    }
+    
     DefaultMutableTreeNode regionNode = _regionToTreeNode.get(r);
 //    if (regionNode == null) throw new UnexpectedException("Region node for region " + r + " is null");  // should not happen but it does
     if (regionNode != null) {
@@ -659,6 +885,17 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     _changeState.updateButtons();
 //    System.err.println("_regionManager.getDocuments() = " + _regionManager.getDocuments());
     closeIfEmpty();
+  }
+  
+  /** Select a region in this panel. Must be executed in event thread.
+    * @param r the region
+    */
+  protected void selectRegion(final R r) {
+    assert EventQueue.isDispatchThread();
+    DefaultMutableTreeNode regionNode = _regionToTreeNode.get(r);
+    if (regionNode != null) {
+      _regTree.setSelectionPath(new TreePath(regionNode.getPath()));
+    }
   }
   
   /** Close the panel if the tree becomes empty. */
@@ -775,6 +1012,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     }
     public void updateButtons() {
       RegionsTreePanel.this.updateButtons();
+      RegionsTreePanel.this.updateNextPreviousRegionButtons();
     }
     public void setLastAdded(DefaultMutableTreeNode node) { }
     public void switchStateTo(IChangeState newState) {

@@ -2353,6 +2353,28 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //      MainFrame.MFLOG.log("browseForward: "+rm);
     }
   };
+
+  /** Jump to the next region in the tabbed pane. */
+  private final Action _nextRegionAction = new AbstractAction("Next Region") {
+    public void actionPerformed(ActionEvent ae) {
+      Component c = _tabbedPane.getComponentAt(_tabbedPane.getSelectedIndex());
+      if (c instanceof RegionsTreePanel) {
+        RegionsTreePanel<?> rtp = (RegionsTreePanel<?>)c;
+        rtp.goToNextRegion();
+      }
+    }
+  };
+  
+  /** Jump to the previous region in the tabbed pane. */
+  private final Action _prevRegionAction = new AbstractAction("Previous Region") {
+    public void actionPerformed(ActionEvent ae) {
+      Component c = _tabbedPane.getComponentAt(_tabbedPane.getSelectedIndex());
+      if (c instanceof RegionsTreePanel) {
+        RegionsTreePanel<?> rtp = (RegionsTreePanel<?>)c;
+        rtp.goToPreviousRegion();
+      }
+    }
+  };
   
   /** Switches focus to previous pane. */
   private final Action _switchToPreviousPaneAction =  new AbstractAction("Previous Pane") {
@@ -6191,6 +6213,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_browseBackAction, "Back", "Back", "Move back in the browser history");
     _setUpAction(_browseForwardAction, "Forward", "Forward", "Move forward in the browser history");    
     
+    _setUpAction(_prevRegionAction, "Previous Region", "Move to previous region in tabbed pane");
+    _setUpAction(_nextRegionAction, "Next Region", "Move to next region in tabbed pane");
+
     _setUpAction(_switchToPreviousPaneAction, "Previous Pane", "Switch focus to the previous pane");
     _setUpAction(_switchToNextPaneAction, "Next Pane", "Switch focus to the next pane");
     _setUpAction(_gotoOpeningBraceAction, "Go to Opening Brace", 
@@ -6428,6 +6453,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     final JMenu panesMenu = new JMenu("Tabbed Panes");
     _addMenuItem(panesMenu, _switchToPreviousPaneAction, KEY_PREVIOUS_PANE);
     _addMenuItem(panesMenu, _switchToNextPaneAction, KEY_NEXT_PANE);
+    panesMenu.addSeparator();
+    _addMenuItem(panesMenu, _prevRegionAction, KEY_TABBED_PREV_REGION);
+    _addMenuItem(panesMenu, _nextRegionAction, KEY_TABBED_NEXT_REGION);
+    panesMenu.addSeparator();
     _detachTabbedPanesMenuItem = _newCheckBoxMenuItem(_detachTabbedPanesAction);
     _detachTabbedPanesMenuItem.setSelected(DrJava.getConfig().getSetting(DETACH_TABBEDPANES));
     _setMenuShortcut(_detachTabbedPanesMenuItem, _detachTabbedPanesAction, KEY_DETACH_TABBEDPANES);
