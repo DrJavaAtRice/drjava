@@ -687,10 +687,23 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File getWorkingDirectory() {
       try {
         if (_workDir == null || _workDir == FileOps.NULL_FILE) {
+          // if no project working directory is set, check preferences working directory
+          File prefWorkDir = DrJava.getConfig().getSetting(FIXED_INTERACTIONS_DIRECTORY);
+          if ((prefWorkDir != null) && (prefWorkDir != FileOps.NULL_FILE)) {
+            try {
+              // make sure it's a valid directory
+              prefWorkDir = FileOps.getValidDirectory(prefWorkDir);
+            }
+            catch (RuntimeException e) { prefWorkDir = FileOps.NULL_FILE; }
+          }
+          if ((prefWorkDir != null) && (prefWorkDir != FileOps.NULL_FILE)) { return prefWorkDir; }
+
+          // if there is no fixed working directory in the preferences, use the directory
+          // containing the project file
           File parentDir = _projectFile.getParentFile();
           if (parentDir != null) {
             return parentDir.getCanonicalFile(); // default is project root
-          }
+          } // or if all else fails, user.dir
           else return new File(System.getProperty("user.dir"));
         }
         return _workDir.getCanonicalFile();
@@ -919,11 +932,38 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File getBuildDirectory() { return FileOps.NULL_FILE; }
     public File getProjectRoot() { return getWorkingDirectory(); }
     public File getWorkingDirectory() {
+      // if a fixed working directory has been set in the Preferences, use it
+      File prefWorkDir = DrJava.getConfig().getSetting(FIXED_INTERACTIONS_DIRECTORY);
+      if ((prefWorkDir != null) && (prefWorkDir != FileOps.NULL_FILE)) {
+        try {
+          // make sure it's a valid directory
+          prefWorkDir = FileOps.getValidDirectory(prefWorkDir);
+        }
+        catch (RuntimeException e) { prefWorkDir = FileOps.NULL_FILE; }
+      }
+      if ((prefWorkDir != null) && (prefWorkDir != FileOps.NULL_FILE)) {
+        // update the setting and return it
+        DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, prefWorkDir);
+        return prefWorkDir;
+      }
+      
+      // otherwise determine the working directory based on the source root
+      File file = FileOps.NULL_FILE;
+      try {
+        file = getActiveDocument().getSourceRoot(); // source root of the current document
+      }
+      catch(InvalidPackageException ipe) { file = FileOps.NULL_FILE; }
+      if ((file != null) && (file != FileOps.NULL_FILE)) {
+        // update the setting and return it
+        DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, file);
+        return file;
+      }
+      
+      // if we can't get the source root of the current document, use the first document
       Iterable<File> roots = getSourceRootSet();
       if (!IterUtil.isEmpty(roots)) { return IterUtil.first(roots); }
       else {
         // use the last directory saved to the configuration
-        File file = FileOps.NULL_FILE;
         if (DrJava.getConfig().getSetting(STICKY_INTERACTIONS_DIRECTORY)) {
           try {
             // restore the path from the configuration

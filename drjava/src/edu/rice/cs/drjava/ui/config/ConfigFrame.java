@@ -1443,15 +1443,16 @@ public class ConfigFrame extends SwingFrame {
                                  "(currently "+System.getProperty("user.home")+").");
     addOptionComponent(panel, stickyComponent);
     
-//    OptionComponent.ChangeListener wdListener = new OptionComponent.ChangeListener() {
-//      public Object value(Object oc) {
-//        File f = wdComponent.getComponent().getFileFromField();
-//        boolean enabled = (f == null) || (f.equals(FileOps.NULL_FILE));
-//        stickyComponent.getComponent().setEnabled(enabled);
-//        return null;
-//      }
-//    };
-//    wdListener.value(wdComponent);
+    OptionComponent.ChangeListener wdListener = new OptionComponent.ChangeListener() {
+      public Object value(Object oc) {
+        File f = wdComponent.getComponent().getFileFromField();
+        boolean enabled = (f == null) || (f.equals(FileOps.NULL_FILE));
+        stickyComponent.getComponent().setEnabled(enabled);
+        return null;
+      }
+    };
+    wdComponent.addChangeListener(wdListener);
+    wdListener.value(wdComponent);
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));

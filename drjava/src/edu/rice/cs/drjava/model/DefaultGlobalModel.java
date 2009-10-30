@@ -540,17 +540,14 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         }
       };
       
+      File oldWorkDir = _interactionsModel.getWorkingDirectory();
       _interactionsModel.addListener(_runMain);
       
       File workDir;
-      if (isProjectActive()) workDir = getWorkingDirectory(); // use working directory for project
-      else {
-        // use source root of current document
-        try { workDir = getSourceRoot(); }
-        catch (InvalidPackageException e) { workDir = FileOps.NULL_FILE; }
-      }
-      // Reset interactions to the soure root for this document; class will be executed when new interpreter is ready
-      resetInteractions(workDir);  
+      workDir = getWorkingDirectory();
+      
+      // Reset interactions to the working directory
+      resetInteractions(workDir, !workDir.equals(oldWorkDir));
     }
     
     /** Runs the main method in this document in the interactions pane after resetting interactions with the source
