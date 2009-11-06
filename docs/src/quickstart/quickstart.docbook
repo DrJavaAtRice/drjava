@@ -51,7 +51,7 @@ introduce you to some of its key features.</para>
 	Click on the link to download the JDK.
     	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="JDKDownload.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="JDKDownload.jpg" format="jpg" scalefit="1"/>
        		</imageobject>
      	</mediaobject>
 	</para></listitem>
@@ -74,7 +74,7 @@ introduce you to some of its key features.</para>
 Development Build jar instead. To do so, click on the "more download options" link.
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="CurrentStableRelease.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="CurrentStableRelease.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 
@@ -83,7 +83,7 @@ Development Build jar instead. To do so, click on the "more download options" li
 	Click on one of the Download buttons to go to the download server.  Choose a site to download the file from, and then click on the corresponding icon in the "Download" column on the far right to start the download.
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="DownloadServer.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="DownloadServer.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 	</para></listitem>
@@ -112,14 +112,14 @@ Development Build jar instead. To do so, click on the "more download options" li
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="OpenDialog.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="OpenDialog.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 	
       <para>Once you have opened an existing file or created a new file, you will notice that the names of all open files are listed on the left of the screen, and the text of one file is displayed on the right.  Select a file name on the left to have the file's text display on the right.  The right pane is called the Definitions Pane.  It is where you edit your files.</para>
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="PlainOldDrJavaDefault.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="PlainOldDrJavaDefault.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
     </section>
@@ -132,7 +132,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="SaveDialog.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="SaveDialog.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
     </section>
@@ -144,7 +144,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="CompilerErrors.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="CompilerErrors.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
     </section>
@@ -154,7 +154,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="InteractionsPaneFull.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="InteractionsPaneFull.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>	
 
@@ -163,7 +163,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="InteractionsPane1Plus1.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="InteractionsPane1Plus1.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 
@@ -171,14 +171,14 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="InteractionsPaneTom.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="InteractionsPaneTom.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 
 	<para>3. In addition, you can define classes and interfaces in the Interactions Pane, and then instantiate these classes and test them.  This example shows how to create a class and call one of its methods:</para>
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="InteractionsPaneTryMe.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="InteractionsPaneTryMe.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 
@@ -186,7 +186,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="InteractionsPanePackageImport.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="InteractionsPanePackageImport.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 	</section>
@@ -199,7 +199,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="SystemInInput.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="SystemInInput.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 
@@ -207,7 +207,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="SystemInInputInteractionsPane.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="SystemInInputInteractionsPane.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>	
 	
@@ -242,7 +242,7 @@ read -1, indicating of the end of the stream.</para>
 	
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="FindReplace.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="FindReplace.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>	
 	<para> The Find and Replace menu is a useful way to search for specific text in your files, and replace it, if you so choose. To launch the Find/Replace tab, either use the keyboard shortcut Ctrl-F or choose "Edit, Find and Replace" from the menu at the top of the DrJava window. Once you do this, the Find/Replace tab will appear at the bottom of the screen. Type the text you want to search for in the "Find Next" box, and if you want to replace it with anything, type that in the "Replace With" box. Then, chose which of the four options to the right of those text boxes that you want to use, and press one of the buttons at the bottom, or the Enter key. The direction of the search executed by pressing the Enter key depends on the direction of the last search. (The last direction is indicated by the label of the Find box: "Find Next" or "Find Prev").</para>
@@ -285,7 +285,7 @@ read -1, indicating of the end of the stream.</para>
 	<title>Find All:</title> <para>Find all occurrences of the search string. This opens a new "Find: word" pane, where "word" is replaced with the search string. In this pane, view all found instances and jump to their locations in the text. You can have as many "Find All" panes as you like open concurrently. The "Find All" tool also automatically underlines the occurrences. In the screenshot below, the user searched for the word "System":
         <mediaobject>
        		<imageobject>
-       		<imagedata fileref="FindAll.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="FindAll.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject></para>
 	</formalpara></listitem>
@@ -311,7 +311,7 @@ read -1, indicating of the end of the stream.</para>
 
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="FindReplaceTwoLines.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="FindReplaceTwoLines.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 
@@ -331,7 +331,7 @@ read -1, indicating of the end of the stream.</para>
 
 <mediaobject>
        		<imageobject>
-       		<imagedata fileref="TestsPassed.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="TestsPassed.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>	
 
@@ -339,7 +339,7 @@ read -1, indicating of the end of the stream.</para>
 
 <mediaobject>
        		<imageobject>
-       		<imagedata fileref="TestFails.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="TestFails.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>	
   
@@ -353,7 +353,7 @@ read -1, indicating of the end of the stream.</para>
 
 <mediaobject>
        		<imageobject>
-       		<imagedata fileref="JavaDocMenu.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="JavaDocMenu.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 	
@@ -361,7 +361,7 @@ read -1, indicating of the end of the stream.</para>
 
 <mediaobject>
        		<imageobject>
-       		<imagedata fileref="Javadoc.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="Javadoc.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>	
 
@@ -375,7 +375,7 @@ read -1, indicating of the end of the stream.</para>
 
 <mediaobject>
        		<imageobject>
-       		<imagedata fileref="EnableDebugger.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="EnableDebugger.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 
@@ -390,7 +390,7 @@ read -1, indicating of the end of the stream.</para>
 		<para> This is a table that displays the instantaneous values of specified fields and variables given the current line that the debugger is on.  To add a watch, click in the leftmost column on the first empty row.  A cursor should appear and you can type in the name of the field or variable.  You can also put in expressions that require evaluation such as x + 1 or array accesses.</para> </formalpara>
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="VariableWatch2.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="VariableWatch2.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 	</listitem>
@@ -402,7 +402,7 @@ read -1, indicating of the end of the stream.</para>
 
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="StackStuff.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="StackStuff.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 	</listitem>
@@ -414,7 +414,7 @@ read -1, indicating of the end of the stream.</para>
 		</formalpara>
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="Threads.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="Threads.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 	</listitem>
@@ -429,7 +429,7 @@ read -1, indicating of the end of the stream.</para>
 
  	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="BreakpointsPanel.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="BreakpointsPanel.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 	</section>
@@ -440,14 +440,14 @@ read -1, indicating of the end of the stream.</para>
 
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="ToggleBreakpoint.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="ToggleBreakpoint.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 
 <para>Once a breakpoint is set, it is highlighted in red, like this:</para>
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="BreakpointSet.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="BreakpointSet.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 
@@ -455,7 +455,7 @@ read -1, indicating of the end of the stream.</para>
 
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="EnableDebugMode.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="EnableDebugMode.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 
@@ -463,7 +463,7 @@ read -1, indicating of the end of the stream.</para>
 
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="HitBreakpoint.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="HitBreakpoint.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 
@@ -519,7 +519,7 @@ read -1, indicating of the end of the stream.</para>
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="FullTreeView.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="FullTreeView.jpg" format="jpg" scalefit="1" />
        		</imageobject>
 		</mediaobject>
 
@@ -551,7 +551,7 @@ read -1, indicating of the end of the stream.</para>
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="ProjectFolderOptions.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="ProjectFolderOptions.jpg" format="jpg" scalefit="1" />
        		</imageobject>
 		</mediaobject>
 
@@ -564,7 +564,7 @@ read -1, indicating of the end of the stream.</para>
 
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="NewProjectSaveDialog.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="NewProjectSaveDialog.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 
@@ -572,7 +572,7 @@ read -1, indicating of the end of the stream.</para>
 	
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="ProjectSaveDialogFromFiles.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="ProjectSaveDialogFromFiles.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 
@@ -595,7 +595,7 @@ read -1, indicating of the end of the stream.</para>
 	
 	<mediaobject>
       	<imageobject>
-     	<imagedata fileref="ProjectOpen.jpg" format="jpg" width="80%" />
+     	<imagedata fileref="ProjectOpen.jpg" format="jpg" scalefit="1" />
        	</imageobject>
      	</mediaobject>
 	</section>
@@ -612,7 +612,7 @@ read -1, indicating of the end of the stream.</para>
 	
 	<mediaobject>
       	<imageobject>
-     	<imagedata fileref="ProjectCompileFromTopMenu.jpg" format="jpg" width="80%" />
+     	<imagedata fileref="ProjectCompileFromTopMenu.jpg" format="jpg" scalefit="1" />
        	</imageobject>
      	</mediaobject>
 
@@ -621,7 +621,7 @@ read -1, indicating of the end of the stream.</para>
 	
 	<mediaobject>
       	<imageobject>
-     	<imagedata fileref="ProjectCompileFromSideMenu.jpg" format="jpg" width="80%" />
+     	<imagedata fileref="ProjectCompileFromSideMenu.jpg" format="jpg" scalefit="1" />
        	</imageobject>
      	</mediaobject>
 
@@ -636,7 +636,7 @@ read -1, indicating of the end of the stream.</para>
 	
 	<mediaobject>
       	<imageobject>
-     	<imagedata fileref="ProjectTest.jpg" format="jpg" width="80%" />
+     	<imagedata fileref="ProjectTest.jpg" format="jpg" scalefit="1" />
        	</imageobject>
      	</mediaobject>
 
@@ -649,7 +649,7 @@ read -1, indicating of the end of the stream.</para>
 
 	<mediaobject>
       	<imageobject>
-     	<imagedata fileref="ProjectRunMainDocument.jpg" format="jpg" width="80%" />
+     	<imagedata fileref="ProjectRunMainDocument.jpg" format="jpg" scalefit="1" />
        	</imageobject>
      	</mediaobject>
 
@@ -664,7 +664,7 @@ read -1, indicating of the end of the stream.</para>
 
 	<mediaobject>
       	<imageobject>
-     	<imagedata fileref="ProjectCleanBuildDirectory.jpg" format="jpg" width="80%" />
+     	<imagedata fileref="ProjectCleanBuildDirectory.jpg" format="jpg" scalefit="1" />
        	</imageobject>
      	</mediaobject>
 	</section>
@@ -700,7 +700,7 @@ read -1, indicating of the end of the stream.</para>
 
 	<mediaobject>
       	<imageobject>
-     	<imagedata fileref="ProjectProperties.jpg" format="jpg" width="80%" />
+     	<imagedata fileref="ProjectProperties.jpg" format="jpg" scalefit="1" />
        	</imageobject>
      	</mediaobject>
 	</section>
@@ -742,7 +742,7 @@ read -1, indicating of the end of the stream.</para>
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="ResourceLocation.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="ResourceLocation.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>	
 
@@ -816,7 +816,7 @@ read -1, indicating of the end of the stream.</para>
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="DisplayOptions.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="DisplayOptions.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>	
 
@@ -853,7 +853,7 @@ read -1, indicating of the end of the stream.</para>
 	
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="DisplayOptionsFonts.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="DisplayOptionsFonts.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>	
 
@@ -866,7 +866,7 @@ read -1, indicating of the end of the stream.</para>
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="DisplayOptionsColors.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="DisplayOptionsColors.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 
@@ -913,7 +913,7 @@ read -1, indicating of the end of the stream.</para>
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="KeyBindings.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="KeyBindings.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 
@@ -926,7 +926,7 @@ read -1, indicating of the end of the stream.</para>
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="CompilerOptions.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="CompilerOptions.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>
 
@@ -1009,7 +1009,7 @@ read -1, indicating of the end of the stream.</para>
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="DebuggerPreferences.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="DebuggerPreferences.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>	
 
@@ -1060,7 +1060,7 @@ read -1, indicating of the end of the stream.</para>
 	
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="JavadocPreferences.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="JavadocPreferences.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>	
 
@@ -1072,7 +1072,7 @@ read -1, indicating of the end of the stream.</para>
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="Notifications.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="Notifications.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>	
 
@@ -1172,7 +1172,7 @@ read -1, indicating of the end of the stream.</para>
 
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="Miscellaneous.jpg" format="jpg" width="80%" />
+       		<imagedata fileref="Miscellaneous.jpg" format="jpg" scalefit="1" />
        		</imageobject>
      	</mediaobject>	
 
