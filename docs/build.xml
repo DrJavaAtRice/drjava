@@ -155,6 +155,15 @@
   <target name="generate-html" depends="assert-docbook-xsl-exists">
     <mkdir dir="docs/${docbook-dir}" />
     <exec executable="xsltproc" failonerror="yes" dir="src/${docbook-dir}">
+      <arg value="--stringparam" />
+      <!-- ignore image scaling in HTML to avoid bug
+           [ drjava-Bugs-2892129 ] Squished Images in Included Documentation
+	   according to
+	   http://www.sagehill.net/docbookxsl/ImageSizing.html#DiffImageSizes 
+	   and
+	   http://www.sagehill.net/docbookxsl/Parameters.html#ParameterSyntax -->
+      <arg value="ignore.image.scaling" />
+      <arg value="1" />
       <arg value="-o" />
       <arg value="../../docs/${docbook-dir}/" />
       <arg file="${docbook-xsl-home}/html/chunk.xsl" />

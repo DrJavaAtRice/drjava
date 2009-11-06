@@ -742,14 +742,14 @@ learning tool.</para>
 
      <mediaobject>
        <imageobject>
-       <imagedata fileref="LanguageLevelFeatures.jpg" format="JPG" scalefit="1" />
+       <imagedata fileref="LanguageLevelFeatures.jpg" format="JPG" width="80%" />
        </imageobject>
      </mediaobject>
 
 	<para>And here is a summary of the code augmentation performed at each level.</para>
 	<mediaobject>
 	  <imageobject>
-	  <imagedata fileref="LanguageLevelAugmentation.jpg" format="JPG" scalefit="1" />
+	  <imagedata fileref="LanguageLevelAugmentation.jpg" format="JPG" width="80%" />
 	  </imageobject>
 	</mediaobject>
 
