@@ -42,6 +42,7 @@ import java.net.SocketException;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import edu.rice.cs.drjava.DrJava;
@@ -725,7 +726,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     jvmb = jvmb.classPath(edu.rice.cs.plt.iter.IterUtil.asSizedIterable(extendedClassPath));
     
     // add Java properties controlling ConcJUnit
-    java.util.Properties props = jvmb.propertiesCopy();
+    Map<String, String> props = jvmb.propertiesCopy();
     
     // settings are mutually exclusive
     boolean all = DrJava.getConfig().getSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED).
@@ -737,14 +738,14 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     boolean none = DrJava.getConfig().getSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED).
       equals(OptionConstants.ConcJUnitCheckChoices.NONE);
     // "threads" is enabled as long as the setting isn't NONE
-    props.setProperty("edu.rice.cs.cunit.concJUnit.check.threads.enabled",
-                      new Boolean(!none).toString());
+    props.put("edu.rice.cs.cunit.concJUnit.check.threads.enabled",
+              new Boolean(!none).toString());
     // "join" is enabled for ALL and NO_LUCKY
-    props.setProperty("edu.rice.cs.cunit.concJUnit.check.join.enabled",
-                      new Boolean(all || noLucky).toString());
+    props.put("edu.rice.cs.cunit.concJUnit.check.join.enabled",
+              new Boolean(all || noLucky).toString());
     // "lucky" is enabled only for ALL
-    props.setProperty("edu.rice.cs.cunit.concJUnit.check.lucky.enabled",
-                      new Boolean(all).toString());
+    props.put("edu.rice.cs.cunit.concJUnit.check.lucky.enabled",
+              new Boolean(all).toString());
     
     jvmb = jvmb.properties(props);
     

@@ -150,7 +150,6 @@ public abstract class AbstractMasterJVM implements MasterRemote {
 
     // update jvmBuilder with any special properties
     Map<String, String> props = ConcurrentUtil.getPropertiesAsMap("plt.", "drjava.", "edu.rice.cs.");
-    props.put("java.rmi.server.hostname", "127.0.0.1"); // Make sure RMI doesn't use an IP address that might change
     if (!props.containsKey("plt.log.working.dir") && // Set plt.log.working.dir, in case the working dir changes
         (props.containsKey("plt.debug.log") || props.containsKey("plt.error.log") || 
             props.containsKey("plt.log.factory"))) {
