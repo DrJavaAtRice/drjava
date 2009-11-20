@@ -45,6 +45,8 @@ import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.WrappedException;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 /**
  * A TaskController that executes a simple task in another Java process.  The task and its result must 
  * be serializable.  If the task completes successfully, the remote process is allowed to run indefinitely
@@ -194,6 +196,7 @@ public class ProcessTaskController<R> extends TaskController<R> {
     public static final byte[] PREFIX = { 0x00, 0x03, 0x7f, -0x80 };
     
     public static void main(String... args) {
+      debug.logStart();
       OutputStream out = System.out;
       IOUtil.attemptClose(System.err); // in case other objects already have a handle on it, try to close the stream
       IOUtil.ignoreSystemOut();
@@ -225,6 +228,7 @@ public class ProcessTaskController<R> extends TaskController<R> {
         finally { objOut.close(); }
       }
       catch (IOException e) { error.log("Error writing to System.out", e); }
+      finally { debug.logEnd(); }
     }
   }
 

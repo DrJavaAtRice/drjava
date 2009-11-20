@@ -38,7 +38,9 @@ import java.io.*;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -77,11 +79,13 @@ public final class ConcurrentUtil {
   public static final Runnable1<Long> WORKING_RUNNABLE = new WorkingRunnable();
   
   private static final class WorkingRunnable implements Runnable1<Long>, Serializable {
+    private long junk = 1;
     public void run(Long delay) {
       long finished = System.currentTimeMillis() + delay;
       while (System.currentTimeMillis() < finished) {
         if (Thread.interrupted()) break;
-        for (int i = 0; i < 1000; i++) { @SuppressWarnings("unused") long junk = delay * (delay - i); }
+        // if the bound on i is too small, strange JIT effects seem to mess up interrupt detection...
+        for (int i = 0; i < 10000; i++) { junk = junk * (delay+1); }
       }
     }
   }
@@ -407,7 +411,9 @@ public final class ConcurrentUtil {
    * 
    * @param task  A task to perform.  Will be abruptly terminated with the process if canceled while running.
    * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
-   *                    the task's class, ConcurrentUtil, and their dependencies.
+   *                    the task's class, ConcurrentUtil, and their dependencies.  If the current JVM has
+   *                    property values for {@code plt.*}, those values will be added to {@code jvmBuilder}
+   *                    (unless they're already set to something else).
    * @see ProcessTaskController
    */
   public static <R> TaskController<R> computeInProcess(Thunk<? extends R> task, JVMBuilder jvmBuilder) {
@@ -423,13 +429,16 @@ public final class ConcurrentUtil {
    * 
    * @param task  A task to perform.  Will be abruptly terminated with the process if canceled while running.
    * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
-   *                    the task's class, ConcurrentUtil, and their dependencies.
+   *                    the task's class, ConcurrentUtil, and their dependencies.  If the current JVM has
+   *                    property values for {@code plt.*}, those values will be added to {@code jvmBuilder}
+   *                    (unless they're already set to something else).
    * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
    *               {@link TaskController#start} on the returned controller.
    * @see ProcessTaskController
    */
-  public static <R> TaskController<R> computeInProcess(final Thunk<? extends R> task, final JVMBuilder jvmBuilder,
+  public static <R> TaskController<R> computeInProcess(Thunk<? extends R> task, JVMBuilder jvmBuilder,
                                                        boolean start) {
+    jvmBuilder = jvmBuilder.addDefaultProperties(getProperties("plt."));
     ProcessTaskController<R> controller = new ProcessTaskController<R>(jvmBuilder, THREAD_EXECUTOR, task);
     if (start) { controller.start(); }
     return controller;
@@ -488,7 +497,9 @@ public final class ConcurrentUtil {
    * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
    *              wrapped in a {@link WrappedException}.
    * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
-   *                    the task's class, ConcurrentUtil, and their dependencies.
+   *                    the task's class, ConcurrentUtil, and their dependencies.  If the current JVM has
+   *                    property values for {@code plt.*}, those values will be added to {@code jvmBuilder}
+   *                    (unless they're already set to something else).
    * @see ProcessIncrementalTaskController
    */
   public static <I, R>
@@ -509,7 +520,9 @@ public final class ConcurrentUtil {
    * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
    *              wrapped in a {@link WrappedException}.
    * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
-   *                    the task's class, ConcurrentUtil, and their dependencies.
+   *                    the task's class, ConcurrentUtil, and their dependencies.  If the current JVM has
+   *                    property values for {@code plt.*}, those values will be added to {@code jvmBuilder}
+   *                    (unless they're already set to something else).
    * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
    *               {@link TaskController#start} on the returned controller.
    * @see ProcessIncrementalTaskController
@@ -530,7 +543,9 @@ public final class ConcurrentUtil {
    * @param task  A task to perform.  Should respond to an interrupt by throwing an {@link InterruptedException}
    *              wrapped in a {@link WrappedException}.
    * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
-   *                    the task's class, ConcurrentUtil, and their dependencies.
+   *                    the task's class, ConcurrentUtil, and their dependencies.  If the current JVM has
+   *                    property values for {@code plt.*}, those values will be added to {@code jvmBuilder}
+   *                    (unless they're already set to something else).
    * @param start  If {@code true}, the task will be started before returning; otherwise, the client should invoke
    *               {@link TaskController#start} on the returned controller.
    * @param ignoreIntermediate  If {@code true}, all intermediate results will be immediately discarded.
@@ -540,6 +555,7 @@ public final class ConcurrentUtil {
       IncrementalTaskController<I, R> computeInProcess(IncrementalTask<? extends I, ? extends R> task,
                                                        JVMBuilder jvmBuilder, boolean start,
                                                        boolean ignoreIntermediate) {
+    jvmBuilder = jvmBuilder.addDefaultProperties(getProperties("plt."));
     ProcessIncrementalTaskController<I, R> controller =
       new ProcessIncrementalTaskController<I, R>(jvmBuilder, THREAD_EXECUTOR, task, ignoreIntermediate);
     if (start) { controller.start(); }
@@ -588,7 +604,9 @@ public final class ConcurrentUtil {
    * @param factory  A thunk to evaluate in the remote JVM, producing an object that can be exported via
    *                 {@link UnicastRemoteObject#exportObject(Remote, int)}.  The factory must be serializable.
    * @param jvmBuilder  A JVMBuilder set up with the necessary subprocess parameters.  The class path must include
-   *                    the factory's class, ConcurrentUtil, and their dependencies.
+   *                    the factory's class, ConcurrentUtil, and their dependencies.  If the current JVM has
+   *                    property values for {@code plt.*}, those values will be added to {@code jvmBuilder}
+   *                    (unless they're already set to something else).
    * @param onExit  Code to execute when the process exits, assuming a result is successfully returned.  May be
    *                {@code null}, indicating that nothing should be run.  If an exception occurs here, the process is
    *                destroyed immediately and this listener will not be invoked.
@@ -604,6 +622,9 @@ public final class ConcurrentUtil {
     Thunk<Remote> task = new ExportRemoteTask(factory);
     // no need to spawn a thread if we don't need to wait for the process to quit
     Executor exec = (onExit == null) ? DIRECT_EXECUTOR : THREAD_EXECUTOR;
+    // use localhost to avoid issues with changing IPs and firewalls
+    jvmBuilder = jvmBuilder.addDefaultProperty("java.rmi.server.hostname", "127.0.0.1");
+    jvmBuilder = jvmBuilder.addDefaultProperties(getProperties("plt."));
     try { return new ProcessTaskController<Remote>(jvmBuilder, exec, task, onExit).get(); }
     // an interrupt on this thread translates into a "cancel" because DIRECT_EXECUTOR runs the task on this thread
     catch (CancellationException e) { throw new InterruptedException(); }
@@ -615,9 +636,13 @@ public final class ConcurrentUtil {
   
   private static class ExportRemoteTask implements Thunk<Remote>, Serializable {
     private final Thunk<? extends Remote> _factory;
+    // The result must be stored statically to prevent garbage-collection.  (It's not clear whether
+    // the lack of a strong reference from the RMI code is specified behavior or a bug...)
+    private static final List<Remote> _cache = new ArrayList<Remote>(1);
     public ExportRemoteTask(Thunk<? extends Remote> factory) { _factory = factory; }
     public Remote value() {
       Remote server = _factory.value();
+      _cache.add(server);
       try { return UnicastRemoteObject.exportObject(server, 0); }
       catch (RemoteException e) { throw new WrappedException(e); }
     }

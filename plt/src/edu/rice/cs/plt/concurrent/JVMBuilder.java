@@ -36,6 +36,9 @@ package edu.rice.cs.plt.concurrent;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +83,7 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
   private static final SizedIterable<String> DEFAULT_JVM_ARGS = IterUtil.empty();
   private static final SizedIterable<File> DEFAULT_CLASS_PATH = attemptAbsoluteFiles(ReflectUtil.SYSTEM_CLASS_PATH);
   private static final File DEFAULT_DIR = IOUtil.WORKING_DIRECTORY;
-  private static final Properties DEFAULT_PROPERTIES = new Properties();
+  private static final Map<String, String> DEFAULT_PROPERTIES = Collections.emptyMap();
   private static final Map<String, String> DEFAULT_ENVIRONMENT = null;
   
   public static final JVMBuilder DEFAULT = new JVMBuilder();
@@ -89,7 +92,7 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
   private final SizedIterable<String> _jvmArgs;
   private final SizedIterable<File> _classPath;
   private final File _dir;
-  private final Properties _properties;
+  private final Map<String, String> _properties;
   private final Map<String, String> _environment;
   
   private JVMBuilder() {
@@ -117,25 +120,11 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
          DEFAULT_ENVIRONMENT, true);
   }
   
-  public JVMBuilder(Properties properties) {
-    this(DEFAULT_JAVA_COMMAND, DEFAULT_JVM_ARGS, DEFAULT_CLASS_PATH, DEFAULT_DIR,
-         copyProps(properties), DEFAULT_ENVIRONMENT, true);
-  }
-  
-  public JVMBuilder(Iterable<? extends File> classPath, File dir, Properties properties) {
-    this(DEFAULT_JAVA_COMMAND, DEFAULT_JVM_ARGS, attemptAbsoluteFiles(classPath), dir,
-         copyProps(properties), DEFAULT_ENVIRONMENT, true);
-  }
-  
-  public JVMBuilder(Map<? extends String, ? extends String> environment) {
-    this(DEFAULT_JAVA_COMMAND, DEFAULT_JVM_ARGS, DEFAULT_CLASS_PATH, DEFAULT_DIR, DEFAULT_PROPERTIES,
-         (environment == null) ? null : snapshot(environment), true);
-  }
-  
   public JVMBuilder(String javaCommand, Iterable<? extends String> jvmArgs, Iterable<? extends File> classPath,
-                    File dir, Properties properties, Map<? extends String, ? extends String> environment) {
+                    File dir, Map<? extends String, ? extends String> properties,
+                    Map<? extends String, ? extends String> environment) {
     this(findJavaCommand(javaCommand), snapshot(jvmArgs), attemptAbsoluteFiles(classPath), dir,
-         copyProps(properties), (environment == null) ? null : snapshot(environment), true);
+         snapshot(properties), (environment == null) ? null : snapshot(environment), true);
   }
   
   /**
@@ -143,7 +132,7 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
    * mutated.  dummy parameter is to distinguish this constructor from other overloads.
    */
   private JVMBuilder(String javaCommand, SizedIterable<String> jvmArgs, SizedIterable<File> classPath,
-                     File dir, Properties properties, Map<String, String> environment, boolean dummy) {
+                     File dir, Map<String, String> properties, Map<String, String> environment, boolean dummy) {
     _javaCommand = javaCommand;
     _jvmArgs = jvmArgs;
     _classPath = classPath;
@@ -201,28 +190,63 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
     return new JVMBuilder(_javaCommand, _jvmArgs, _classPath, new File(dir), _properties, _environment, true);
   }
   
-  /**
-   * Get an immutable view of the properties.  All keys and values are strings (the Properties class doesn't
-   * make this guarantee or provide this type signature).
-   */
-  public Map<String, String> properties() {
-    // cast is safe because we've guaranteed that all keys and values are strings
-    @SuppressWarnings("unchecked") Map<String, String> strings = (Map<String, String>) (Map<?, ?>) _properties;
-    return CollectUtil.immutable(strings);
-  }
+  /** Get an immutable view of the properties. */
+  public Map<String, String> properties() { return CollectUtil.immutable(_properties); }
   
   /**
    * Return a mutable copy of the properties.  Changes to the result do not affect this JVMBuilder,
-   * but a modified Properties map can be used to create another JVMBuilder.
+   * but a modified map can be used to create another JVMBuilder.
    */
-  public Properties propertiesCopy() { return copyProps(_properties); }
+  public Map<String, String> propertiesCopy() { return snapshot(_properties); }
   
-  public JVMBuilder properties(Properties properties) {
-    return new JVMBuilder(_javaCommand, _jvmArgs, _classPath, _dir, copyProps(properties), _environment, true);
+  /**
+   * Produce a JVMBuilder setting the JVM properties to the given mapping (including keys that appear
+   * only as defaults in the Properties object).
+   */
+  public JVMBuilder properties(Properties ps) {
+    return new JVMBuilder(_javaCommand, _jvmArgs, _classPath, _dir, copyProps(ps), _environment, true);
   }
   
-  public JVMBuilder properties(Map<? extends String, ? extends String> properties) {
-    return new JVMBuilder(_javaCommand, _jvmArgs, _classPath, _dir, copyProps(properties), _environment, true);
+  /** Produce a JVMBuilder setting the JVM properties to the given mapping. */
+  public JVMBuilder properties(Map<? extends String, ? extends String> ps) {
+    return new JVMBuilder(_javaCommand, _jvmArgs, _classPath, _dir, snapshot(ps), _environment, true);
+  }
+  
+  /** Produce a JVMBuilder including the given JVM property mapping, in addition to those currently set. */
+  public JVMBuilder addProperty(String key, String value) {
+    Map<String, String> newProps = propertiesCopy();
+    newProps.put(key, value);
+    return properties(newProps);
+  }
+  
+  /**
+   * Produce a JVMBuilder where, for each key in the given Properties object (including those designated in
+   * the Properties object as defaults), if the property is undefined in this JVMBuilder, it will map to
+   * the given value.  All current property mappings remain identical in the result.
+   */
+  public JVMBuilder addDefaultProperties(Properties ps) { return addDefaultProperties(copyProps(ps)); }
+  
+  /**
+   * Produce a JVMBuilder where, for each key in the given Map, if the property is undefined in this
+   * JVMBuilder, it will map to the given value.  All current property mappings remain identical in the result.
+   */
+  public JVMBuilder addDefaultProperties(Map<? extends String, ? extends String> ps) {
+    if (_properties.keySet().containsAll(ps.keySet())) { return this; }
+    else {
+      Map<String, String> newProps = propertiesCopy();
+      for (Map.Entry<? extends String, ? extends String> entry : ps.entrySet()) {
+        if (!newProps.containsKey(entry.getKey())) { newProps.put(entry.getKey(), entry.getValue()); }
+      }
+      return properties(newProps);
+    }
+  }
+  
+  /**
+   * If the current JVM properties do not contain {@code key}, produce a new JVMBuilder including the
+   * mapping, in addition to those currently set.  Otherwise, return {@code this}.
+   */
+  public JVMBuilder addDefaultProperty(String key, String value) {
+    return _properties.containsKey(key) ? this : addProperty(key, value);
   }
   
   /** Get an immutable view of the environment, or {@code null} if the current process's environment is used. */
@@ -240,9 +264,44 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
     return snapshot((_environment == null) ? System.getenv() : _environment);
   }
   
-  public JVMBuilder environment(Map<? extends String, ? extends String> environment) {
+  /**
+   * Produce a JVMBuilder setting the environment to the given mapping (may be {@code null}, meaning
+   * the current process's environment will be duplicated.
+   */
+  public JVMBuilder environment(Map<? extends String, ? extends String> env) {
     return new JVMBuilder(_javaCommand, _jvmArgs, _classPath, _dir, _properties,
-                          (_environment == null) ? null : snapshot(environment), true);
+                          (_environment == null) ? null : snapshot(env), true);
+  }
+  
+  /** Produce a JVMBuilder including the given environment mapping, in addition to those currently set. */
+  public JVMBuilder addEnvironmentVar(String key, String value) {
+    Map<String, String> newEnv = environmentCopy();
+    newEnv.put(key, value);
+    return environment(newEnv);
+  }
+  
+  /**
+   * Produce a JVMBuilder where, for each key in the given Map, if the environment variable is undefined in this
+   * JVMBuilder, it will map to the given value.  All current environment mappings remain identical in the result.
+   */
+  public JVMBuilder addDefaultEnvironmentVars(Map<? extends String, ? extends String> env) {
+    if (_environment != null && _environment.keySet().containsAll(env.keySet())) { return this; }
+    else {
+      Map<String, String> newEnv = environmentCopy();
+      for (Map.Entry<? extends String, ? extends String> entry : env.entrySet()) {
+        if (!newEnv.containsKey(entry.getKey())) { newEnv.put(entry.getKey(), entry.getValue()); }
+      }
+      return environment(newEnv);
+    }
+  }
+  
+  /**
+   * If the current environment mappings do not contain {@code key}, produce a new JVMBuilder including the
+   * mapping, in addition to those currently set.  Otherwise, return {@code this}.
+   */
+  public JVMBuilder AddDefaultEnvironmentVar(String key, String value) {
+    if (_environment != null && _environment.containsKey(key)) { return this; }
+    else { return addEnvironmentVar(key, value); }
   }
   
   
@@ -268,7 +327,7 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
     CollectUtil.addAll(commandL, _jvmArgs);
     commandL.add("-classpath");
     commandL.add(IOUtil.pathToString(_classPath));
-    for (Map.Entry<Object, Object> prop : _properties.entrySet()) {
+    for (Map.Entry<String, String> prop : _properties.entrySet()) {
       commandL.add("-D" + prop.getKey() + "=" + prop.getValue());
     }
     commandL.add(mainClass);
@@ -331,14 +390,16 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
   
   
   /**
-   * Make a copy of the given Properties.  Like {code Properties.clone()}, makes an independent copy.
-   * Additionally, guarantees that all keys and values in the result are strings.  (Also avoids the need for 
-   * cooperation from {@code p}'s class, which might produce a clone that isn't independent.) 
+   * Copy the give Properties into a properly-typed Map.  Guarantees that all entries are strings
+   * (an exception should occur in the Properties API otherwise).  Includes both defined and default
+   * values appearing in the Properties objecty (see {@link Properties#Properties(Properties)}). 
    */
-  private static Properties copyProps(Map<?, ?> p) {
-    Properties result = new Properties();
-    for (Map.Entry<?, ?> e : p.entrySet()) {
-      result.setProperty(e.getKey().toString(), e.getValue().toString());
+  private static Map<String, String> copyProps(Properties p) {
+    Map<String, String> result = new HashMap<String, String>();
+    @SuppressWarnings("unchecked") Enumeration<String> names = (Enumeration<String>) p.propertyNames();
+    while (names.hasMoreElements()) {
+      String name = names.nextElement();
+      result.put(name, p.getProperty(name));
     }
     return result;
   }

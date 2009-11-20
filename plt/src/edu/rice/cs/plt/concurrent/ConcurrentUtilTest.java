@@ -34,8 +34,13 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.concurrent;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.io.NotSerializableException;
+import java.rmi.NoSuchObjectException;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 import java.lang.reflect.InvocationTargetException;
@@ -53,8 +58,8 @@ public class ConcurrentUtilTest extends TestCase {
   private static volatile Object _obj; // used to communicate between threads
   
   private void assertInRange(long lower, long higher, long actual) {
-    assertTrue(lower <= actual);
-    assertTrue(higher >= actual);
+    assertTrue("value is too small (expected: >= " + lower + "; actual: " + actual + ")", lower <= actual);
+    assertTrue("value is too large (expected: <= " + higher + "; actual: " + actual + ")", higher >= actual);
   }
   
   public void testSleep() {
@@ -67,8 +72,9 @@ public class ConcurrentUtilTest extends TestCase {
     
     new DelayedInterrupter(500);
     w.start();
-    sleep(1000);
+    sleep(4000);
     time = w.stop();
+    assertFalse("Interrupt was not detected", Thread.interrupted());
     assertInRange(300, 700, time);
 
     debug.logEnd();
@@ -84,8 +90,9 @@ public class ConcurrentUtilTest extends TestCase {
     
     new DelayedInterrupter(500);
     w.start();
-    work(1000);
+    work(4000);
     time = w.stop();
+    assertFalse("Interrupt was not detected", Thread.interrupted());
     assertInRange(300, 700, time);
     
     debug.logEnd();
@@ -281,6 +288,50 @@ public class ConcurrentUtilTest extends TestCase {
       _obj = "should not be visible in parent process";
       return "done";
     }
+  }
+  
+  public void testExportInProcess() throws InterruptedException, IOException, ExecutionException {
+    debug.logStart();
+    
+    RemoteCounter c = (RemoteCounter) exportInProcess(new CounterFactory());
+    debug.logValue("exportInProcess result", c);
+    assertEquals(0, c.current());
+    assertEquals(0, Counter.TOTAL);
+    c.increment();
+    c.increment();
+    assertEquals(2, c.current());
+    assertEquals(0, Counter.TOTAL); // should be untouched in this process
+    
+    Counter c2 = new Counter();
+    c2.increment();
+    assertEquals(2, c.current());
+    assertEquals(1, c2.current());
+    assertEquals(1, Counter.TOTAL); // verify that it changes by counter in this process
+    
+    c.exit();
+    
+    debug.logEnd();
+  }
+  
+  private interface RemoteCounter extends Remote {
+    public void increment() throws RemoteException;
+    public int current() throws RemoteException;
+    public void exit() throws RemoteException;
+  }
+  
+  private static class Counter implements RemoteCounter {
+    public static int TOTAL = 0;
+    private int _x = 0;
+    public void increment() { _x++; TOTAL++; }
+    public int current() { return _x; }
+    public void exit() throws NoSuchObjectException {
+      debug.log();
+      UnicastRemoteObject.unexportObject(this, true);
+    }
+  }
+  
+  private static class CounterFactory implements Thunk<Counter>, Serializable {
+    public Counter value() { debug.log(); return new Counter(); }
   }
   
   
