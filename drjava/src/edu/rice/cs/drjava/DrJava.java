@@ -63,6 +63,42 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * (i) the location of tools.jar in the Java JDK installed on this machine (so DrJava can invoke the javac compiler
   *     stored in tools.jar)
   * (ii) the argument string for invoking the main JVM (notably -X options used to determine maximum heap size, etc.)
+  * 
+  * Here is a summary of the launch mechanism of DrJava:
+  * 
+  * 1. DrJava.main will be started.
+  *
+  * 2. DrJava.handleCommandLineArgs scans the command line arguments.
+  * 2.1. This involves determining if the -new parameter forces a new instance.
+  * 
+  * 3. DrJava.configureAndLoadDrJavaRoot determines if remote control should be used:
+  * 3.1. If -new doesn't force a new instance
+  * 3.2. and REMOTE_CONTROL_ENABLED
+  * 3.3. and files have been specified on the command line
+  * 3.4. and the remote control server can be contacted
+  * 3.5. then DrJava will open the files in an existing instance and quit
+  * 
+  * 4. DrJava.configureAndLoadDrJavaRoot determines if a restart is necessary:
+  * 4.1. If MASTER_JVM_XMX is set
+  * 4.2. or MASTER_JVM_ARGS is set
+  * 4.3. then DrJava will attempt to restart itself with the specified JVM arguments
+  * 4.4. Files that have arrived via Mac OS X's handleOpenFile event up to this point
+  *      are included in the main arguments for the restarted DrJava.
+  * 4.5. If that fails, DrJava will ask if the user wants to delete the settings in the .drjava file
+  * 4.5.1. If the user says "yes", DrJava will attempt another restart. If that fails, DrJava gives up.
+  * 4.5.2. If the user says "no", DrJava gives up.
+  * 4.6. If additional files arrive via the handleOpenFile event, DrJava will
+  *      attempt to use the remote control to open the files in the restarted DrJava.
+  * 4.6.1. DrJava will perform NUM_REMOTE_CONTROL_RETRIES attempts to contact the
+  *        remote control server, with WAIT_BEFORE_REMOTE_CONTROL_RETRY ms of sleep time in between.
+  * 
+  * 5. If neither the remote control was used nor a restart was necessary, DrJava will
+  *    call DrJavaRoot.main.
+  * 5.1. Files that have arrived via Mac OS X's handleOpenFile event up to this point
+  *      are included in the arguments for DrJavaRoot.main.
+  * 5.2. If additional files arrive via the handleOpenFile event, DrJava will
+  *      MainFrame.handleRemoteOpenFile.
+  * 
   * @version $Id$
   */
 public class DrJava {
@@ -79,8 +115,24 @@ public class DrJava {
     * connecting to an already running instance. */
   static volatile boolean _forceNewInstance = false;
   
+  /** true if a new DrJava needs to be restarted to adjust parameters. */
+  static volatile boolean _doRestart = false;
+  
+  /** true if DrJava has already launched the new instance. */
+  static volatile boolean _alreadyRestarted = false;
+  
+  /** true if the restarted DrJava will use remote control, and we can try to
+    * pass along files to open that arrived too late. */
+  static volatile boolean _restartedDrJavaUsesRemoteControl = true;
+  
   /** Time in millisecond before restarting DrJava to change the heap size, etc. is deemed a success. */
   private static final int WAIT_BEFORE_DECLARING_SUCCESS = 5000;
+
+  /** Number of times we retry opening with the remote control. */
+  private static final int NUM_REMOTE_CONTROL_RETRIES = 15;
+
+  /** Time in millisecond that we wait before making another remote control attempt. */
+  private static final int WAIT_BEFORE_REMOTE_CONTROL_RETRY = 500;
 
   /* Config objects can't be public static final, since we have to delay construction until we know the 
    * config file's location.  (Might be specified on command line.) Instead, use accessor methods to 
@@ -102,16 +154,72 @@ public class DrJava {
   public static FileConfiguration getConfig() { return _config; }
   
   /** @return an array of the files that were passed on the command line. */
-  public static String[] getFilesToOpen() { return _filesToOpen.toArray(new String[0]); }
+  public static synchronized String[] getFilesToOpen() { return _filesToOpen.toArray(new String[0]); }
   
   /** Add a file to the list of files to open. */
-  public static void addFileToOpen(String s) {
+  public static synchronized void addFileToOpen(String s) {
     _filesToOpen.add(s);
     boolean isProjectFile =
       s.endsWith(OptionConstants.PROJECT_FILE_EXTENSION) ||
       s.endsWith(OptionConstants.PROJECT_FILE_EXTENSION2) ||
       s.endsWith(OptionConstants.OLD_PROJECT_FILE_EXTENSION);
     _forceNewInstance |= isProjectFile;
+    if (_doRestart && _alreadyRestarted) {
+      _log.log("addFileToOpen: already done the restart, trying to use remote control");
+      // we already did the restart, try to use the remote control to open the file
+      if (DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED)) {
+        _log.log("\tremote control...");
+        openWithRemoteControl(_filesToOpen,NUM_REMOTE_CONTROL_RETRIES );
+        _log.log("\tclearing _filesToOpen");
+        clearFilesToOpen();
+      }
+    }
+  }
+  
+  /** Clear the list of files to open. */
+  public static synchronized void clearFilesToOpen() {
+    _filesToOpen.clear();
+  }
+  
+  /** Open the specified files using the remote control. If the remote control server is not
+    * running, numAttempts attempts will be made, with WAIT_BEFORE_REMOTE_CONTROL_RETRY
+    * ms of sleep time in between.
+    * @param files files to open with remote control
+    * @param number of attempts to be made
+    * @return true if successful
+    */
+  public static synchronized boolean openWithRemoteControl(ArrayList<String> files, int numAttempts) {
+    if (!DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED) ||
+        !_restartedDrJavaUsesRemoteControl ||
+        (files.size()==0)) return false;
+    
+    ArrayList<String> fs = new ArrayList<String>(files);
+    int failCount = 0;
+    while(failCount<numAttempts) {
+      try {
+        RemoteControlClient.openFile(null);
+        if (RemoteControlClient.isServerRunning()) {
+          // existing instance is running and responding
+          for (int i = 0; i < fs.size(); ++i) {
+            _log.log("opening with remote control "+fs.get(i));
+            RemoteControlClient.openFile(new File(fs.get(i)));
+            files.remove(fs.get(i));
+          }
+          return true; // success
+        }
+        else {
+          ++failCount;
+          _log.log("Failed to open with remote control, attempt "+failCount+" of "+NUM_REMOTE_CONTROL_RETRIES);
+          if (failCount>=numAttempts) return false; // failure
+          try { Thread.sleep(WAIT_BEFORE_REMOTE_CONTROL_RETRY); }
+          catch(InterruptedException ie) { /* just try again now */ }
+        }
+      }
+      catch(IOException ioe) {
+        ioe.printStackTrace();
+      }
+    }
+    return false; // failure
   }
   
   /** @return true if the debug console should be enabled */
@@ -138,20 +246,7 @@ public class DrJava {
       if (!_forceNewInstance &&
           DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED) &&
           (_filesToOpen.size() > 0)) {
-        try {
-          RemoteControlClient.openFile(null);
-          if (RemoteControlClient.isServerRunning()) {
-            // existing instance is running and responding
-            for (int i = 0; i < _filesToOpen.size(); ++i) {
-              RemoteControlClient.openFile(new File(_filesToOpen.get(i)));
-            }
-            // files opened in existing instance, quit
-            System.exit(0);
-          }
-        }
-        catch(IOException ioe) {
-          ioe.printStackTrace();
-        }      
+        if (openWithRemoteControl(_filesToOpen,1)) System.exit(0); // files opened in existing instance, quit
       }
       
       // The code below is in a loop so that DrJava can retry launching itself
@@ -162,12 +257,11 @@ public class DrJava {
       while(failCount < 2) {
         // Restart if there are custom JVM args
         String masterMemory = getConfig().getSetting(MASTER_JVM_XMX).trim();
-        boolean restart = (getConfig().getSetting(MASTER_JVM_ARGS).length() > 0)
+        boolean _doRestart = (getConfig().getSetting(MASTER_JVM_ARGS).length() > 0)
           || (!"".equals(masterMemory) && !OptionConstants.heapSizeChoices.get(0).equals(masterMemory));
-        _log.log("restart: "+restart);
+        _log.log("_doRestart: "+_doRestart);
         
         LinkedList<String> classArgs = new LinkedList<String>();
-        classArgs.addAll(_filesToOpen);
         
         // Add the parameters "-debugConsole" to classArgsList if _showDebugConsole is true
         if (_showDebugConsole) { classArgs.addFirst("-debugConsole"); }
@@ -178,7 +272,21 @@ public class DrJava {
           classArgs.addFirst("-config");
         }
         
-        if (restart) {
+        synchronized(DrJava.class) {
+          classArgs.addAll(_filesToOpen);
+          clearFilesToOpen();
+          _log.log("_filesToOpen copied into class arguments, clearing _filesToOpen");
+        }
+        
+        if (_doRestart) {
+          if (DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED)) {
+            // at this time, OUR remote control server hasn't been started yet
+            // if one is running, then we won't be able to contact the restarted DrJava
+           _restartedDrJavaUsesRemoteControl = !RemoteControlClient.isServerRunning();
+          } else {
+            // no remote control
+            _restartedDrJavaUsesRemoteControl = false;
+          }
           
           // Run a new copy of DrJava and exit
           try {
@@ -193,9 +301,12 @@ public class DrJava {
             jvmb = jvmb.classPath(edu.rice.cs.plt.iter.IterUtil.asSizedIterable(extendedClassPath));
             _log.log("JVMBuilder: jvmArguments = "+jvmb.jvmArguments());
             _log.log("JVMBuilder: classPath = "+jvmb.classPath());
+            _log.log("JVMBuilder: mainParams = "+classArgs);
             
             // start new DrJava
             Process p = jvmb.start(DrJavaRoot.class.getName(), classArgs);
+            _alreadyRestarted = true;
+            _log.log("_alreadyRestarted = true");
             DelayedInterrupter timeout = new DelayedInterrupter(WAIT_BEFORE_DECLARING_SUCCESS);
             try {
               int exitValue = p.waitFor();
@@ -203,6 +314,7 @@ public class DrJava {
               failed = (exitValue != 0);
             }
             catch(InterruptedException e) { /* timeout was reached */ }
+            _log.log("failed = "+failed);
             if (failed) {
               if (failCount > 0) {
                 // 2nd time that spawning has failed, give up
@@ -212,7 +324,7 @@ public class DrJava {
                                               "https://sourceforge.net/projects/drjava/",
                                               "Could Not Start DrJava",
                                               JOptionPane.ERROR_MESSAGE);
-                System.exit(0);
+                System.exit(1);
               }
               else {
                 // 1st time that spawning has failed, offer to reset configuration
@@ -230,6 +342,11 @@ public class DrJava {
                 continue;
               }
             }
+            else {
+              // check if there are any files left in _filesToOpen
+              _log.log("not failed, send remaining files via remote control: "+_filesToOpen);
+              openWithRemoteControl(_filesToOpen, NUM_REMOTE_CONTROL_RETRIES);
+            }
           }
           catch (IOException ioe) {
             // Display error
@@ -246,6 +363,13 @@ public class DrJava {
         else {
           // No restart -- just invoke DrJavaRoot.main.
           DrJavaRoot.main(classArgs.toArray(new String[0]));
+          // when we return from here, DrJavaRoot._mainFrame has been initialized
+          // but we may still have files in _filesToOpen that were not processed
+          // do that now
+          ArrayList<String> fs = new ArrayList<String>(_filesToOpen);
+          for(String f: fs) {
+            DrJavaRoot.handleRemoteOpenFile(new File(f), -1);
+          }
         }
         break;
       }
@@ -268,8 +392,6 @@ public class DrJava {
     int argIndex = 0;
     int len = args.length;
     _log.log("handleCommandLineArgs. _filesToOpen: " + _filesToOpen);
-    _log.log("\t_filesToOpen cleared");
-    _filesToOpen.clear();
     
     while(argIndex < len) {
       String arg = args[argIndex++];
@@ -444,7 +566,7 @@ public class DrJava {
   /* Erase all non-final bindings created in this class.  Only used in testing. */
   public static void cleanUp() {
     _log.log("cleanUp. _filesToOpen: " + _filesToOpen);
-    _filesToOpen.clear();
+    clearFilesToOpen();
     _log.log("\t_filesToOpen cleared");
     _jvmArgs.clear();
     // Do not set _config or _propertiesFile to null because THEY ARE static

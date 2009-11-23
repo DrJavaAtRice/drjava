@@ -9950,7 +9950,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       openExtProcessFile(f);
     }
     else {
-      FileOpenSelector openSelector = new FileOpenSelector() {
+      final FileOpenSelector openSelector = new FileOpenSelector() {
         public File[] getFiles() throws OperationCanceledException {
           return new File[] { f };
         }
@@ -9959,16 +9959,22 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION) ||
           currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION2) ||
           currFileName.endsWith(OptionConstants.OLD_PROJECT_FILE_EXTENSION)) {
-        openProject(openSelector);
+        Utilities.invokeLater(new Runnable() { 
+          public void run() {
+            openProject(openSelector);
+          }
+        });
       }
       else {
-        open(openSelector);
-        if (lineNo>=0) {
-          final int l = lineNo;
-          Utilities.invokeLater(new Runnable() { 
-            public void run() { _jumpToLine(l); }
-          });
-        }
+        final int l = lineNo;
+        Utilities.invokeLater(new Runnable() { 
+          public void run() {
+            open(openSelector);
+            if (l>=0) {                
+              _jumpToLine(l);
+            }
+          }
+        });
       }
     }
   }

@@ -38,6 +38,8 @@ package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.util.StringOps;
+import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.util.swing.ConfirmCheckBoxDialog;
 import java.awt.EventQueue;
 import javax.swing.*;
@@ -57,6 +59,7 @@ public class ConfigOptionListeners implements OptionConstants {
     public SlaveJVMArgsListener(JFrame parent) { _parent = parent; }
     public void optionChanged(OptionEvent<String> oe) {
 //      final OptionListener<String> slaveJvmArgsListener = this;
+      DrJava.getConfig().removeOptionListener(SLAVE_JVM_ARGS, this);
       if (!oe.value.equals("")) {
         int result = JOptionPane.
           showConfirmDialog(_parent,
@@ -71,6 +74,7 @@ public class ConfigOptionListeners implements OptionConstants {
           sanitizeSlaveJVMArgs(_parent, oe.value, this);
         }
       }
+      DrJava.getConfig().addOptionListener(SLAVE_JVM_ARGS, this);
     }
   }
 
@@ -183,7 +187,9 @@ public class ConfigOptionListeners implements OptionConstants {
     protected JFrame _parent;
     public SlaveJVMXMXListener(JFrame parent) { _parent = parent; }
     public void optionChanged(OptionEvent<String> oe) {
+      DrJava.getConfig().removeOptionListener(SLAVE_JVM_XMX, this);
       sanitizeSlaveJVMXMX(_parent, oe.value);
+      DrJava.getConfig().addOptionListener(SLAVE_JVM_XMX, this);
       JOptionPane.showMessageDialog(_parent,
                                     "You will have to reset the interactions pane before changes take effect.");
     }
@@ -218,6 +224,18 @@ public class ConfigOptionListeners implements OptionConstants {
           DrJava.getConfig().setSetting(SLAVE_JVM_XMX, OptionConstants.heapSizeChoices.get(0));
         }
       }
+      else if (heapSize > 0) {
+        if (!checkHeapSize(heapSize)) {
+          JOptionPane.
+            showMessageDialog(parent,
+                              "The \"Maximum Heap Memory for Interactions JVM\" setting is too big: \"" + size + "\"\n" + 
+                              "DrJava has reset the heap size to the default. You should choose something smaller.",
+                              "Maximum Heap Size Too Big",
+                              JOptionPane.ERROR_MESSAGE);
+          // clean up
+          DrJava.getConfig().setSetting(SLAVE_JVM_XMX, OptionConstants.heapSizeChoices.get(0));
+        }
+      }
     }
   }
   
@@ -243,6 +261,7 @@ public class ConfigOptionListeners implements OptionConstants {
     protected JFrame _parent;
     public MasterJVMArgsListener(JFrame parent) { _parent = parent; }
     public void optionChanged(OptionEvent<String> oe) {
+      DrJava.getConfig().removeOptionListener(MASTER_JVM_ARGS, this);
 //      final OptionListener<String> masterJvmArgsListener = this;
       if (!oe.value.equals("")) {
         int result = JOptionPane.
@@ -259,6 +278,7 @@ public class ConfigOptionListeners implements OptionConstants {
           sanitizeMasterJVMArgs(_parent, oe.value, this);
         }
       }
+      DrJava.getConfig().addOptionListener(MASTER_JVM_ARGS, this);
     }
   }
   
@@ -355,8 +375,10 @@ public class ConfigOptionListeners implements OptionConstants {
     protected JFrame _parent;
     public MasterJVMXMXListener(JFrame parent) { _parent = parent; }
     public void optionChanged(OptionEvent<String> oe) {
+      DrJava.getConfig().removeOptionListener(MASTER_JVM_XMX, this);
       sanitizeMasterJVMXMX(_parent, oe.value);
       JOptionPane.showMessageDialog(_parent, "You will have to restart DrJava before the change takes effect.");
+      DrJava.getConfig().addOptionListener(MASTER_JVM_XMX, this);
     }
   }
   
@@ -389,6 +411,51 @@ public class ConfigOptionListeners implements OptionConstants {
           DrJava.getConfig().setSetting(MASTER_JVM_XMX, OptionConstants.heapSizeChoices.get(0));
         }
       }
+      else if (heapSize > 0) {
+        if (!checkHeapSize(heapSize)) {
+          JOptionPane.
+            showMessageDialog(parent,
+                              "The \"Maximum Heap Memory for Main JVM\" setting is too big: \"" + size + "\"\n" + 
+                              "DrJava has reset the heap size to the default. You should choose something smaller.",
+                              "Maximum Heap Size Too Big",
+                              JOptionPane.ERROR_MESSAGE);
+          // clean up
+          DrJava.getConfig().setSetting(MASTER_JVM_XMX, OptionConstants.heapSizeChoices.get(0));
+        }
+      }
+    }
+  }
+  
+  /** @return true if a JVM can be created with the specified heap size (in MB) */
+  public static boolean checkHeapSize(long heapSize) {
+    int exitValue = 1;
+    try {
+      JVMBuilder jvmb = JVMBuilder.DEFAULT.jvmArguments("-Xmx"+heapSize+"M");
+      Process p = jvmb.start(MemoryCheckDummy.class.getName());
+      exitValue = p.waitFor();
+    }
+    catch(java.io.IOException e) { exitValue = 1; }
+    catch(InterruptedException e) { exitValue = 1; }
+    return (exitValue==0);
+  }
+  
+  /** Class that gets executed to check if the selected heap size is possible. */
+  public static class MemoryCheckDummy {
+    public static void main(String[] args) {
+      final StringBuilder sb = new StringBuilder("DrJava Version : ");
+      sb.append(edu.rice.cs.drjava.Version.getVersionString());
+      sb.append("\nDrJava Build Time: ");
+      sb.append(edu.rice.cs.drjava.Version.getBuildTimeString());
+      sb.append("\n\nUsed memory: about ");
+      sb.append(StringOps.memSizeToString(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()));
+      sb.append("\nFree memory: about ");
+      sb.append(StringOps.memSizeToString(Runtime.getRuntime().freeMemory()));
+      sb.append("\nTotal memory: about ");
+      sb.append(StringOps.memSizeToString(Runtime.getRuntime().totalMemory()));
+      sb.append("\nTotal memory can expand to: about ");
+      sb.append(StringOps.memSizeToString(Runtime.getRuntime().maxMemory()));
+      System.out.println(sb.toString());
+      System.exit(0);
     }
   }
   
