@@ -100,6 +100,7 @@ class MacPlatform extends DefaultPlatform {
       public void handleOpenFile(ApplicationEvent event) {
         if (event.getFilename()!=null) {
           edu.rice.cs.drjava.DrJavaRoot.handleRemoteOpenFile(new java.io.File(event.getFilename()), -1);
+          event.setHandled(true);
         }
       }
     };
