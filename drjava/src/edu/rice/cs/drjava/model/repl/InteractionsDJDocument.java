@@ -80,6 +80,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   public InteractionsDJDocument() { 
     super(); 
     _hasPrompt = false;
+    _notifier = new GlobalEventNotifier(); // so this isn't null
   } 
    
 
