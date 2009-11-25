@@ -209,7 +209,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
 //    AbstractMasterJVM._log.log(this + " has created a new MainJVM");
     _compilerModel = new DefaultCompilerModel(this, compilers);
     _junitModel = new DefaultJUnitModel(_jvm, _compilerModel, this);
-    _interactionsDocument = new InteractionsDJDocument();
+    _interactionsDocument = new InteractionsDJDocument(_notifier);
     
     _interactionsModel = new DefaultInteractionsModel(this, _jvm, _interactionsDocument, workDir);
     _interactionsModel.addListener(_interactionsListener);

@@ -1273,7 +1273,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   /** Informs this document's undo manager that the document has been saved. */
   public void documentSaved() { _undoManager.documentSaved(); }
-  
+
   protected int startCompoundEdit() { return _undoManager.startCompoundEdit(); }
   
   protected void endCompoundEdit(int key) { _undoManager.endCompoundEdit(key); }

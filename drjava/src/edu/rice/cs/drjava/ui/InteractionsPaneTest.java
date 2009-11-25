@@ -349,6 +349,56 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     }
   }
   
+  /**
+   * Tests basic functionality of undo/redo
+   */
+  public void testUndoRedoWorks() {
+    final String oldText = _doc.getText();
+    final InteractionsDJDocument doc = (InteractionsDJDocument)_pane.getDJDocument();
+    Utilities.invokeAndWait(new Runnable(){
+      public void run(){
+        _doc.append("Undo test text 1",InteractionsDocument.DEFAULT_STYLE);
+        String newText = _doc.getText();
+        doc.getUndoManager().undo();
+        assertEquals("Undo did not remove added text",_doc.getText(),oldText);
+        doc.getUndoManager().redo();
+        assertEquals("Redo did not add back the added text",newText,_doc.getText());
+        doc.getUndoManager().undo();
+        assertEquals("Undo did not remove added text after redo",_doc.getText(),oldText);
+      }
+    });
+  }
+ 
+  /**
+   *Tests to see if SHIFT_ENTER starts a new undo action 
+   */
+  public void testUndoRedoNewLine(){
+    final String oldText = _doc.getText();
+    final InteractionsDJDocument doc = (InteractionsDJDocument)_pane.getDJDocument();
+    
+    Utilities.invokeAndWait(new Runnable(){
+      public void run(){
+        _doc.append("Undo test text",InteractionsDocument.DEFAULT_STYLE);
+        
+        
+        _pane.processKeyEvent(new KeyEvent(_pane, PRESSED, (new Date()).getTime(), KeyEvent.SHIFT_DOWN_MASK, KeyEvent.VK_ENTER, UNDEFINED));
+        _pane.processKeyEvent(new KeyEvent(_pane, RELEASED, (new Date()).getTime(), SHIFT, KeyEvent.VK_ENTER, UNDEFINED));
+        
+        String newOldText = _doc.getText();
+        
+        _doc.append("More text",InteractionsDocument.DEFAULT_STYLE);
+        
+        doc.getUndoManager().undo();
+        
+        assertEquals("Undo did not remove added text after line change", newOldText, _doc.getText());
+        
+        doc.getUndoManager().undo();
+        doc.getUndoManager().undo();
+        
+        assertEquals("Didn't Undo original typing and SHIFT_ENTER call", oldText, _doc.getText());
+      }
+    });
+  }                
   // NOT USED
 //  /** Fields used in a closure in testPromptList */
 //  private volatile int _firstPrompt, _secondPrompt, _size;

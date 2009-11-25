@@ -51,6 +51,8 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
   */
 public class CompoundUndoManager extends UndoManager {
   
+  static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("CompoundUndoManager.txt", false);
+  
   private static volatile int counter = 0;
   
   private final int id;

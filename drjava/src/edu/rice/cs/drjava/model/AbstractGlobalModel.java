@@ -282,7 +282,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public AbstractGlobalModel() {
     _cache = new DocumentCache();
     
-    _consoleDocAdapter = new InteractionsDJDocument();
+    _consoleDocAdapter = new InteractionsDJDocument(_notifier);
     _consoleDoc = new ConsoleDocument(_consoleDocAdapter);
     
     _bookmarkManager = new ConcreteRegionManager<MovingDocumentRegion>();

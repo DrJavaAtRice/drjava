@@ -38,17 +38,21 @@ package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
+import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
+import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
+import edu.rice.cs.util.swing.Utilities;
 
 import java.awt.*;
 import java.util.List;
 import java.util.LinkedList;
 import javax.swing.text.AbstractDocument;
+import javax.swing.undo.*;
 
 import static edu.rice.cs.drjava.model.definitions.ColoringView.*;
 
@@ -66,11 +70,25 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     */
   private volatile boolean _toClear = false;
   
+ // fields for use by undo/redo functionality
+  private volatile CompoundUndoManager _undoManager;
+  private static final int UNDO_LIMIT = 100;
+  private volatile boolean _isModifiedSinceSave = false;
+  private GlobalEventNotifier _notifier;
+  
   /** Standard constructor. */
   public InteractionsDJDocument() { 
     super(); 
     _hasPrompt = false;
   } 
+   
+
+  public InteractionsDJDocument(GlobalEventNotifier notifier){
+   super();
+   _hasPrompt = false;
+   _notifier=notifier;
+   resetUndoManager();
+  }
   
   public boolean hasPrompt() { return _hasPrompt; }
   
@@ -81,11 +99,106 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     _hasPrompt = val;
   }
   
-  protected int startCompoundEdit() { return 0; /* Do nothing */ }
-  protected void endCompoundEdit(int key) { /* Do nothing */ }
-  protected void endLastCompoundEdit() { /* Do nothing */ }
-  protected void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand) { }
+// old undo/redo functionality (i.e do nothing)
+//  protected int startCompoundEdit() { return 0; /* Do nothing */ }
+//  protected void endCompoundEdit(int key) { /* Do nothing */ }
+//  protected void endLastCompoundEdit() { /* Do nothing */ }
+//  protected void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand) { }
   protected void _styleChanged() { /* Do nothing */ }
+ 
+ //-------------Undo/Redo Functionality---------------------// 
+/** Appending any information for the reduced model from each undo command */
+  private static class CommandUndoableEdit extends AbstractUndoableEdit {
+    private final Runnable _undoCommand;
+    private final Runnable _redoCommand;
+    
+    public CommandUndoableEdit(final Runnable undoCommand, final Runnable redoCommand) {
+      _undoCommand = undoCommand;
+      _redoCommand = redoCommand;
+    }
+    
+    public void undo() throws CannotUndoException {
+      super.undo();
+      _undoCommand.run();
+    }
+    
+    public void redo() throws CannotRedoException {
+      super.redo();
+      _redoCommand.run();
+    }
+    
+    public boolean isSignificant() { return false; }
+  }
+  
+/** Getter method for CompoundUndoManager
+    * @return _undoManager
+    */
+  public CompoundUndoManager getUndoManager() { return _undoManager; }
+  
+  /** Resets the undo manager. */
+  public void resetUndoManager() {
+    _undoManager = new CompoundUndoManager(_notifier);
+    _undoManager.setLimit(UNDO_LIMIT);
+  }
+  
+  /** Public accessor for the next undo action. */
+  public UndoableEdit getNextUndo() { return _undoManager.getNextUndo(); }
+  
+  /** Public accessor for the next undo action. */
+  public UndoableEdit getNextRedo() { return _undoManager.getNextRedo(); }
+  
+  /** Informs this document's undo manager that the document has been saved. */
+  public void documentSaved() { _undoManager.documentSaved(); }
+ 
+  protected int startCompoundEdit() { return _undoManager.startCompoundEdit(); }
+  
+  protected void endCompoundEdit(int key) { _undoManager.endCompoundEdit(key); }
+  
+  //This method added for FrenchKeyBoardFix
+  protected void endLastCompoundEdit() { _undoManager.endLastCompoundEdit(); }
+  
+  protected void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand) {
+    chng.addEdit(new CommandUndoableEdit(undoCommand, doCommand));    
+  }
+  
+  public boolean undoManagerCanUndo() {
+   return _undoManager.canUndo();
+  }
+  
+  public boolean undoManagerCanRedo(){
+    return _undoManager.canRedo();
+  }
+  
+  public void updateModifiedSinceSave() {
+    _isModifiedSinceSave = _undoManager.isModified();
+   // if (_odd != null) _odd.documentReset();
+  }
+  
+  /** Sets the modification state of this document to true and updates the state of the associated _odd. 
+    * Assumes that write lock is already held. 
+    */
+  private void _setModifiedSinceSave() {
+/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    if (! _isModifiedSinceSave) {
+      _isModifiedSinceSave = true;
+      //if (_odd != null) _odd.documentModified();  // null test required for some unit tests
+    }    
+  }
+  
+  /** Resets the modification state of this document.  Used after a document has been saved or reverted. */
+  public void resetModification() {
+    _isModifiedSinceSave = false;
+    _undoManager.documentSaved();
+   // if (_odd != null) _odd.documentReset();  // null test required for some unit tests
+  }
+  
+  /** Determines if the document has been modified since the last save.
+    * @return true if the document has been modified
+    */
+  public boolean isModifiedSinceSave() { return  _isModifiedSinceSave; }
+  
+  //-------------end Undo/Redo Functionality---------------------// 
+  
   
   /** Returns a new indenter. Eventually to be used to return an interactions indenter */
   protected Indenter makeNewIndenter(int indentLevel) { return new Indenter(indentLevel); }

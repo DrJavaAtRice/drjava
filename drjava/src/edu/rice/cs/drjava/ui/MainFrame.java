@@ -975,7 +975,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _currentDefPane.endCompoundEdit(); // replaced line below for French keyboard fix
 //        undoMan.endCompoundEdit(key);                                              // French keyboard fix
       }
-      else super.actionPerformed(e);
+      else if(_interactionsPane.hasFocus()){
+       _interactionsPane.endCompoundEdit();
+       super.actionPerformed(e);
+       _interactionsPane.endCompoundEdit();
+      }
+        
+        else super.actionPerformed(e);
       
       if (c != null) c.requestFocusInWindow();      
     }
@@ -1061,16 +1067,28 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     };*/
   
+  
   /** Undoes the last change to the active definitions document. */
   private final DelegatingAction _undoAction = new DelegatingAction() {
     public void actionPerformed(ActionEvent e) {
-      _currentDefPane.endCompoundEdit();
+      if(_interactionsPane.hasFocus()){
+        _interactionsPane.endCompoundEdit();
+      }
+      else{
+        _currentDefPane.endCompoundEdit();  
+      }
       super.actionPerformed(e);
-      _currentDefPane.requestFocusInWindow();
-      OpenDefinitionsDocument doc = _model.getActiveDocument();
+      if(_interactionsPane.hasFocus()){
+        _interactionsPane.requestFocusInWindow();
+      }
+      else{
+        _currentDefPane.requestFocusInWindow();
+        
+        OpenDefinitionsDocument doc = _model.getActiveDocument();
 //      Utilities.showDebug("isModifiedSinceSave() = " + doc.isModifiedSinceSave());
-      _saveAction.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
+        _saveAction.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
 //      Utilities.showDebug("check status");
+      }
     }
   };
   
@@ -1078,9 +1096,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final DelegatingAction _redoAction = new DelegatingAction() {
     public void actionPerformed(ActionEvent e) {
       super.actionPerformed(e);
-      _currentDefPane.requestFocusInWindow();
-      OpenDefinitionsDocument doc = _model.getActiveDocument();
-      _saveAction.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
+      if(_interactionsPane.hasFocus())
+      {
+        _interactionsPane.requestFocusInWindow();
+      }
+      else{
+        _currentDefPane.requestFocusInWindow();
+        OpenDefinitionsDocument doc = _model.getActiveDocument();
+        _saveAction.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
+      }
     }
   };
   
@@ -2172,6 +2196,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) {
       if (! DrJava.getConfig().getSetting(INTERACTIONS_RESET_PROMPT).booleanValue()) {
         _doResetInteractions();
+        
         return;
       }
       
@@ -2194,6 +2219,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
     updateStatusField("Resetting Interactions");
     // Lots of work, so use another thread
+    _interactionsPane.discardUndoEdits();
     new Thread(new Runnable() { 
       public void run() {
         _model.resetInteractions(_model.getWorkingDirectory(), true);
@@ -3009,6 +3035,18 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void focusGained(FocusEvent e) { }
   };
   
+  // adds Listener for undo/redo action for the interactions pane
+  public FocusListener _undoRedoInteractionFocusListener = new FocusListener() {
+    public void focusLost(FocusEvent e) {      
+      _undoAction.setDelegatee(_currentDefPane.getUndoAction());
+      _redoAction.setDelegatee(_currentDefPane.getRedoAction());   
+    }
+    public void focusGained(FocusEvent e){ 
+    _undoAction.setDelegatee(_interactionsPane.getUndoAction()); 
+      _redoAction.setDelegatee(_interactionsPane.getRedoAction());  
+    }
+  };
+  
   public static DJFileDisplayManager getFileDisplayManager20() { return _djFileDisplayManager20; }
   public static DJFileDisplayManager getFileDisplayManager30() { return _djFileDisplayManager30; }
   public static OddDisplayManager getOddDisplayManager20() { return _oddDisplayManager20; }
@@ -3247,7 +3285,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       // Need to set undo/redo actions to point to the initial def pane
       // on switching documents later these pointers will also switch
       _undoAction.setDelegatee(_currentDefPane.getUndoAction());
-      _redoAction.setDelegatee(_currentDefPane.getRedoAction());
+      _redoAction.setDelegatee(_currentDefPane.getRedoAction());  
       
       _compilerErrorPanel.reset();
       _junitPanel.reset();
@@ -7205,6 +7243,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     _interactionsPane.addKeyListener(_historyListener);
     _interactionsPane.addFocusListener(_focusListenerForRecentDocs);
+     _interactionsPane.addFocusListener(_undoRedoInteractionFocusListener);
     
     _consoleScroll.addKeyListener(_historyListener);
     _consoleScroll.addFocusListener(_focusListenerForRecentDocs);
@@ -7617,6 +7656,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _interactionsPane.addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
         _interactionsPane.requestFocusInWindow();
+        _interactionsPane.endCompoundEdit();
         _interactionsPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
       }
     });
@@ -8878,6 +8918,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     public void interactionStarted() {
+      _interactionsPane.endCompoundEdit();
       _disableInteractionsPane();
       _runAction.setEnabled(false);
       _runAppletAction.setEnabled(false);
@@ -8909,11 +8950,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       }
       else im.resetLastErrors(); // reset the last errors, so the dialog works again if it is re-enabled
-      
       _enableInteractionsPane();
       _runAction.setEnabled(true);
       _runAppletAction.setEnabled(true);
       _runProjectAction.setEnabled(_model.isProjectActive());
+      _interactionsPane.discardUndoEdits();
+      
     }
     
     public void interactionErrorOccurred(final int offset, final int length) {
