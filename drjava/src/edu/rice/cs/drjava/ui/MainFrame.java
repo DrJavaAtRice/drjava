@@ -4350,6 +4350,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (! fileName.equals(_fileTitle)) {
       _fileTitle = fileName;
       setTitle(fileName);
+      _tabbedPanesFrame.setTitle("Tabbed Panes - "+fileName);
+      if (_debugFrame!=null) _debugFrame.setTitle("Debugger - "+fileName);
       _model.getDocCollectionWidget().repaint();
     }
     String path = doc.getCompletePath();
