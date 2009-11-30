@@ -686,7 +686,22 @@ public class ExpressionEvaluator extends AbstractVisitor<Object> implements Lamb
   };
   
   public static final Lambda2<Object, Object, Object> PRIMITIVE_EQUAL = new Lambda2<Object, Object, Object>() {
-    public Object value(Object left, Object right) { return left.equals(right); }
+    public Object value(Object left, Object right) { 
+      // we have special cases for float and double so
+      // that 0.0==-0.0 and Double.NaN==Double.NaN get
+      // treated correctly
+      if ((left instanceof Float) && (right instanceof Float)) {
+        float l = ((Float)left).floatValue();
+        float r = ((Float)right).floatValue();
+        return l==r;
+      }
+      else if ((left instanceof Double) && (right instanceof Double)) {
+        double l = ((Double)left).doubleValue();
+        double r = ((Double)right).doubleValue();
+        return l==r;
+      }
+      else return left.equals(right);
+    }
   };
   
   public static final Lambda2<Object, Object, Object> OBJECT_NOT_EQUAL = new Lambda2<Object, Object, Object>() {
@@ -694,7 +709,9 @@ public class ExpressionEvaluator extends AbstractVisitor<Object> implements Lamb
   };
   
   public static final Lambda2<Object, Object, Object> PRIMITIVE_NOT_EQUAL = new Lambda2<Object, Object, Object>() {
-    public Object value(Object left, Object right) { return !left.equals(right); }
+    public Object value(Object left, Object right) {
+      return !((Boolean)PRIMITIVE_EQUAL.value(left, right));
+    }
   };
   
   public static final Lambda2<Object, Object, Object> CONCATENATE = new Lambda2<Object, Object, Object>() {
