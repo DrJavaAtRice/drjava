@@ -101,7 +101,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   /** Determine if {@code t} is a primitive. */
   public boolean isPrimitive(Type t) { return t.apply(IS_PRIMITIVE); }
   
-  private static final TypeVisitorLambda<Boolean> IS_PRIMITIVE = new TypeAbstractVisitor<Boolean>() {
+  protected static final TypeVisitorLambda<Boolean> IS_PRIMITIVE = new TypeAbstractVisitor<Boolean>() {
     public Boolean defaultCase(Type t) { return false; }
     @Override public Boolean forPrimitiveType(PrimitiveType t) { return true; }
   };
@@ -109,7 +109,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   /** Determine if {@code t} is a reference. */
   public boolean isReference(Type t) { return t.apply(IS_REFERENCE); }
   
-  private static final TypeVisitorLambda<Boolean> IS_REFERENCE = new TypeAbstractVisitor<Boolean>() {
+  protected static final TypeVisitorLambda<Boolean> IS_REFERENCE = new TypeAbstractVisitor<Boolean>() {
     public Boolean defaultCase(Type t) { return false; }
     @Override public Boolean forReferenceType(ReferenceType t) { return true; }
     @Override public Boolean forVariableType(VariableType t) { return true; }
@@ -120,7 +120,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
   /** Determine if {@code t} is an array. */
   public boolean isArray(Type t) { return t.apply(IS_ARRAY); }
   
-  private static final TypeVisitorLambda<Boolean> IS_ARRAY = new TypeAbstractVisitor<Boolean>() {
+  protected static final TypeVisitorLambda<Boolean> IS_ARRAY = new TypeAbstractVisitor<Boolean>() {
     private final Predicate<Type> PRED = LambdaUtil.asPredicate(this);
     public Boolean defaultCase(Type t) { return false; }
     @Override public Boolean forArrayType(ArrayType t) { return true; }

@@ -5,6 +5,7 @@ import java.util.*;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.tuple.Triple;
 import edu.rice.cs.plt.tuple.Option;
+import edu.rice.cs.plt.tuple.Wrapper;
 import edu.rice.cs.plt.recur.*;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -32,13 +33,38 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 public class JLSTypeSystem extends StandardTypeSystem {
   
-  public JLSTypeSystem(Options opt) { super(opt); }
+  /**
+   * Whether the inference algorithm and "join" should attempt to pack capture variables.
+   * JLS does not specify this, but javac and Eclipse both do it.
+   */
+  private final boolean _packCaptureVars;
+  /**
+   * Whether the inference algorithm should use constraints inferred from arguments in all cases.
+   * JLS is unclear, but the most straightforward interpretation is for this to be false.  javac uses true (?
+   * I initially thought it used false, for some reason); Eclipse uses true. 
+   */ 
+  private final boolean _alwaysUseArgumentConstraints;
+  /**
+   * Whether the inference algorithm should only use declared parameter bounds as a last option (where
+   * arguments and return type produce nothing).  JLS does not do this, but javac does.
+   */
+  private final boolean _waitToUseDeclaredBounds;
+
+  public JLSTypeSystem(Options opt) { this(opt, true, true, true); }
+  
+  public JLSTypeSystem(Options opt, boolean packCaptureVars, boolean alwaysUseArgumentConstraints,
+                        boolean waitToUseDeclaredBounds) {
+    super(opt);
+    _packCaptureVars = packCaptureVars;
+    _alwaysUseArgumentConstraints = alwaysUseArgumentConstraints;
+    _waitToUseDeclaredBounds = waitToUseDeclaredBounds;
+  }
   
   /** Determine if the type is well-formed. */
   public boolean isWellFormed(Type t) { return t.apply(new WellFormedTester()); }
   
   private class WellFormedTester extends TypeAbstractVisitor<Boolean> implements Predicate<Type> {
-    final RecursionStack<Wildcard> _wildcards = new RecursionStack<Wildcard>();
+    final RecursionStack<Type> _stack = new RecursionStack<Type>(Wrapper.<Type>factory());
     Set<Wildcard> _visibleWildcards = new HashSet<Wildcard>();
     
     private Set<Wildcard> resetVisibleWildcards() {
@@ -80,7 +106,17 @@ public class JLSTypeSystem extends StandardTypeSystem {
       if (sizeOf(params) == sizeOf(args)) {
         Iterable<Type> captArgs = captureTypeArgs(args, params);
         for (Pair<Type, Type> pair : zip(args, captArgs)) {
-          if (pair.first() != pair.second() && !pair.second().apply(this)) { return false; }
+          if (pair.first() != pair.second()) {
+            // must be a capture variable, so should be a VariableType
+            // We can assume the bounds are well-formed  -- otherwise, the redundant well-formed check
+            // may require a further capture, and never terminate (this implies the relevant class
+            // declaration is assumed to be well-formed).
+            // We can also assume that containsVar(lower, cvar) is false.
+            VariableType cvar = (VariableType) pair.second();
+            Type lower = cvar.symbol().lowerBound();
+            Type upper = cvar.symbol().upperBound();
+            if (!isSubtype(lower, upper)) { return false; }
+          }
         }
         return inBounds(params, captArgs);
       }
@@ -93,12 +129,19 @@ public class JLSTypeSystem extends StandardTypeSystem {
     
     @Override public Boolean forUnionType(UnionType t) { return false; }
     
-    @Override public Boolean forVariableType(VariableType t) {
+    @Override public Boolean forVariableType(final VariableType t) {
       Set<Wildcard> old = resetVisibleWildcards();
       try {
-        Type lower = t.symbol().lowerBound();
-        Type upper = t.symbol().upperBound();
-        return lower.apply(this) && upper.apply(this) && isSubtype(lower, upper) && !containsVar(lower, t);
+        Thunk<Boolean> recur = new Thunk<Boolean>() {
+          public Boolean value() {
+            Type lower = t.symbol().lowerBound();
+            Type upper = t.symbol().upperBound();
+            return lower.apply(WellFormedTester.this) && upper.apply(WellFormedTester.this) &&
+                    isSubtype(lower, upper) && !containsVar(lower, t);
+          }
+        };
+        // assume it's well-formed if we're already checking it
+        return _stack.apply(recur, true, t);
       }
       finally { _visibleWildcards = old; }
     }
@@ -123,7 +166,7 @@ public class JLSTypeSystem extends StandardTypeSystem {
           }
         };
         // if we encounter a wildcard we've seen before that isn't visible, it's malformed
-        return _wildcards.apply(recur, false, w);
+        return _stack.apply(recur, false, w);
       }
     }
   }
@@ -136,7 +179,7 @@ public class JLSTypeSystem extends StandardTypeSystem {
   /** Test whether any of the given variables is reachable from a type. */
   private boolean containsAnyVar(Type t, final Set<? extends VariableType> vars) {
     return t.apply(new TypeAbstractVisitor<Boolean>() {
-      private final RecursionStack<Type> _stack = new RecursionStack<Type>();
+      private final RecursionStack<Type> _stack = new RecursionStack<Type>(Wrapper.<Type>factory());
       public Boolean defaultCase(Type t) { return false; }
       @Override public Boolean forArrayType(ArrayType t) { return t.ofType().apply(this); }
       @Override public Boolean forParameterizedClassType(ParameterizedClassType t) {
@@ -175,7 +218,7 @@ public class JLSTypeSystem extends StandardTypeSystem {
   }
   
   private class IsEqualTester implements Order<Type>, Lambda2<Type, Type, Boolean> {
-    RecursionStack2<Type, Type> _stack = new RecursionStack2<Type, Type>();
+    RecursionStack2<Type, Type> _stack = new RecursionStack2<Type, Type>(Pair.<Type, Type>factory());
     
     public Boolean value(Type subT, Type superT) { return contains(subT, superT); }
     
@@ -234,7 +277,7 @@ public class JLSTypeSystem extends StandardTypeSystem {
    * invocations should use distinct instances.
    */
   private class Subtyper implements Order<Type>, Lambda2<Type, Type, Boolean> {
-    RecursionStack2<Type, Type> _stack = new RecursionStack2<Type, Type>();
+    RecursionStack2<Type, Type> _stack = new RecursionStack2<Type, Type>(Pair.<Type, Type>factory());
     
     public Boolean value(Type subT, Type superT) { return contains(subT, superT); }
     
@@ -243,7 +286,7 @@ public class JLSTypeSystem extends StandardTypeSystem {
     public Predicate<Type> subtypes(Type sup) { return bindSecond((Order<Type>) this, sup); }
     
     public boolean contains(final Type subT, final Type superT) {
-      //debug.logStart(new String[]{"subT", "superT"}, subT, superT); try {
+      debug.logStart(new String[]{"subT", "superT"}, wrap(subT), wrap(superT)); try {
               
       if (subT.equals(superT)) { return true; } // what follows assumes the types are not syntactically equal
       
@@ -361,9 +404,9 @@ public class JLSTypeSystem extends StandardTypeSystem {
           });
         }
         
-        public Boolean forClassType(final ClassType subT) {
+        @Override public Boolean forSimpleClassType(final SimpleClassType subT) {
           return superT.apply(new TypeAbstractVisitor<Boolean>() {
-            public Boolean defaultCase(Type superT) { return false; }
+            @Override public Boolean defaultCase(Type superT) { return false; }
             @Override public Boolean forClassType(ClassType superT) {
               Type newSub = immediateSupertype(subT);
               if (newSub == null) { return false; }
@@ -372,55 +415,70 @@ public class JLSTypeSystem extends StandardTypeSystem {
           });
         }
         
-        public Boolean forParameterizedClassType(final ParameterizedClassType subT) {
+        @Override public Boolean forRawClassType(final RawClassType subT) {
           return superT.apply(new TypeAbstractVisitor<Boolean>() {
-            public Boolean defaultCase(Type superT) { return false; }
-            
+            @Override public Boolean defaultCase(Type superT) { return false; }
+            @Override public Boolean forClassType(final ClassType superT) {
+              Type newSub = immediateSupertype(subT);
+              if (newSub == null) { return false; }
+              else { return Subtyper.this.contains(newSub, superT); }
+            }
             @Override public Boolean forParameterizedClassType(final ParameterizedClassType superT) {
               if (subT.ofClass().equals(superT.ofClass())) {
-                
-                Thunk<Boolean> containedArgs = new Thunk<Boolean>() {
-                  public Boolean value() {
-                    boolean result = true;
-                    ParameterizedClassType subCapT = capture(subT);
-                    for (final Triple<Type, Type, Type> args : zip(subT.typeArguments(),
-                                                                   subCapT.typeArguments(), 
-                                                                   superT.typeArguments())) {
-                      result &= args.third().apply(new TypeAbstractVisitor<Boolean>() {
-                        public Boolean defaultCase(Type superArg) {
-                          return isEqual(args.second(), superArg);
-                        }
-                        @Override public Boolean forWildcard(final Wildcard superArg) {
-                          Thunk<Boolean> inBounds = new Thunk<Boolean>() {
-                            public Boolean value() {
-                              Type subArg = args.second();
-                              return Subtyper.this.contains(superArg.symbol().lowerBound(), subArg) &&
-                                     Subtyper.this.contains(subArg, superArg.symbol().upperBound());
-                            }
-                          };
-                          // if we've seen this sub arg/super arg combo before, we can prove subtyping inductively
-                          // (assuming superArg appears in a valid context -- checked by isWellFormed)
-                          // Put the pre-capture sub arg on the stack, because post-capture it may be a fresh var
-                          return _stack.apply(inBounds, true, args.first(), superArg);
-                        }
-                      });
-                      if (!result) { break; }
-                    }
-                    return result;
-                  }
-                };
-                
-                return _stack.apply(containedArgs, false, subT, superT) || forClassType(superT);
+                return Subtyper.this.contains(parameterize(subT), superT) || forClassType(superT);
               }
               else { return forClassType(superT); }
             }
+          });
+        }
+        
+        public Boolean forParameterizedClassType(final ParameterizedClassType subT) {
+          return superT.apply(new TypeAbstractVisitor<Boolean>() {
+            @Override public Boolean defaultCase(Type superT) { return false; }
             
             @Override public Boolean forClassType(ClassType superT) {
               Type newSub = immediateSupertype(subT);
               if (newSub == null) { return false; }
-              else {
-                return Subtyper.this.contains(newSub, superT) || Subtyper.this.contains(erase(subT), superT);
+              else { return Subtyper.this.contains(newSub, superT); }
+            }
+            
+            @Override public Boolean forParameterizedClassType(final ParameterizedClassType superT) {
+              if (subT.ofClass().equals(superT.ofClass())) {
+                boolean result = true;
+                ParameterizedClassType subCapT = capture(subT);
+                for (final Triple<Type, Type, Type> args : zip(subT.typeArguments(),
+                                                               subCapT.typeArguments(), 
+                                                               superT.typeArguments())) {
+                  result &= args.third().apply(new TypeAbstractVisitor<Boolean>() {
+                    public Boolean defaultCase(Type superArg) {
+                      return isEqual(args.second(), superArg);
+                    }
+                    @Override public Boolean forWildcard(final Wildcard superArg) {
+                      Thunk<Boolean> inBounds = new Thunk<Boolean>() {
+                        public Boolean value() {
+                          Type subArg = args.second();
+                          return Subtyper.this.contains(superArg.symbol().lowerBound(), subArg) &&
+                                 Subtyper.this.contains(subArg, superArg.symbol().upperBound());
+                        }
+                      };
+                      // if we've seen this sub arg/super arg combo before, we can prove subtyping inductively
+                      // (assuming superArg appears in a valid context -- checked by isWellFormed)
+                      // Put the pre-capture sub arg on the stack, because post-capture it may be a fresh var
+                      return _stack.apply(inBounds, true, args.first(), superArg);
+                    }
+                  });
+                  if (!result) { break; }
+                }
+                return result || forClassType(superT);
               }
+              else { return forClassType(superT); }
+            }
+            
+            @Override public Boolean forRawClassType(RawClassType superT) {
+              if (subT.ofClass().equals(superT.ofClass())) {
+                return Subtyper.this.contains(erase(subT), superT);
+              }
+              else { return forClassType(superT); }
             }
             
           });
@@ -444,37 +502,62 @@ public class JLSTypeSystem extends StandardTypeSystem {
         
         public Boolean forBottomType(BottomType subT) { return true; }
       });
-      //} finally { debug.logEnd(); }
+      } finally { debug.logEnd(); }
     }
   };
   
   
   /** Join implementation based on the JLS specification (15.12.2.7). */
   public Type join(Iterable<? extends Type> ts) {
-    return join(ts, new PrecomputedRecursionStack<Set<Type>, Wildcard>());
+    return join(ts, new PrecomputedRecursionStack<Set<Type>, Wildcard>(Wrapper.<Set<Type>>factory()));
   }
   
-  private Type join(final Iterable<? extends Type> ts, final PrecomputedRecursionStack<Set<Type>, Wildcard> joinStack) {
+  private Type join(Iterable<? extends Type> ts, final PrecomputedRecursionStack<Set<Type>, Wildcard> joinStack) {
+    if (_packCaptureVars) {
+      ts = IterUtil.mapSnapshot(ts, new Lambda<Type, Type>() {
+        public Type value(Type t) {
+          while (t instanceof VariableType && ((VariableType) t).symbol().generated()) {
+            t = ((VariableType) t).symbol().upperBound();
+          }
+          return t;
+        }
+      });
+    }
     switch (sizeOf(ts, 2)) {
       case 0: return BOTTOM;
       case 1: return IterUtil.first(ts);
       default:
-        Set<Type> erasedTypes = IterUtil.first(ts).apply(new ErasedSuperAccumulator()).result();
-        for (Type t : IterUtil.skipFirst(ts)) {
-          erasedTypes.retainAll(t.apply(new ErasedSuperAccumulator()).result());
+        boolean hasNonReference = false;
+        boolean hasReference = false;
+        for (Type t : ts) {
+          if (isReference(t)) { hasReference = true; }
+          else { hasNonReference = true; }
         }
-        List<Type> minimalSupers = minList(erasedTypes, new Subtyper());
-        Iterable<Type> conjuncts = mapSnapshot(minimalSupers, new Lambda<Type, Type>() {
-          public Type value(Type erasedT) {
-            if (erasedT instanceof RawClassType) {
-              TypeArgumentMerger merger = new TypeArgumentMerger((RawClassType) erasedT);
-              IterUtil.run(ts, asRunnable(merger));
-              return merger.result(joinStack);
-            }
-            else { return erasedT; }
+        if (hasNonReference && hasReference) { return TOP; }
+        else {
+          final Set<Type> toJoin = CollectUtil.asSet(filter(ts, bindFirst(LambdaUtil.NOT_EQUAL, NULL)));
+          switch (toJoin.size()) {
+            case 0: return NULL;
+            case 1: return IterUtil.first(toJoin);
+            default:
+              Set<Type> erasedTypes = IterUtil.first(toJoin).apply(new ErasedSuperAccumulator()).result();
+              for (Type t : IterUtil.skipFirst(toJoin)) {
+                erasedTypes.retainAll(t.apply(new ErasedSuperAccumulator()).result());
+              }
+              List<Type> minimalSupers = minList(erasedTypes, new Subtyper());
+              Iterable<Type> conjuncts = mapSnapshot(minimalSupers, new Lambda<Type, Type>() {
+                public Type value(Type erasedT) {
+                  if (erasedT instanceof RawClassType) {
+                    TypeArgumentMerger merger = new TypeArgumentMerger((RawClassType) erasedT);
+                    IterUtil.run(toJoin, asRunnable(merger));
+                    return merger.result(joinStack);
+                  }
+                  else { return erasedT; }
+                }
+              });
+              return meet(conjuncts);
           }
-        });
-        return meet(conjuncts);
+        }
     }
   }
   
@@ -485,13 +568,43 @@ public class JLSTypeSystem extends StandardTypeSystem {
     
     public ErasedSuperAccumulator() {
       _result = new LinkedHashSet<Type>();
-      _stack = new RecursionStack<Type>();
+      _stack = new RecursionStack<Type>(Wrapper.<Type>factory());
     }
     
     public Set<Type> result() { return _result; }
     
     @Override public ErasedSuperAccumulator forPrimitiveType(PrimitiveType t) {
       _result.add(t);
+      return this;
+    }
+    
+    @Override public ErasedSuperAccumulator forCharType(CharType t) {
+      _result.addAll(Arrays.asList(CHAR, INT, LONG, FLOAT, DOUBLE));
+      return this;
+    }
+    
+    @Override public ErasedSuperAccumulator forByteType(ByteType t) {
+      _result.addAll(Arrays.asList(BYTE, SHORT, INT, LONG, FLOAT, DOUBLE));
+      return this;
+    }
+    
+    @Override public ErasedSuperAccumulator forShortType(ShortType t) {
+      _result.addAll(Arrays.asList(SHORT, INT, LONG, FLOAT, DOUBLE));
+      return this;
+    }
+    
+    @Override public ErasedSuperAccumulator forIntType(IntType t) {
+      _result.addAll(Arrays.asList(INT, LONG, FLOAT, DOUBLE));
+      return this;
+    }
+    
+    @Override public ErasedSuperAccumulator forLongType(LongType t) {
+      _result.addAll(Arrays.asList(LONG, FLOAT, DOUBLE));
+      return this;
+    }
+    
+    @Override public ErasedSuperAccumulator forFloatType(FloatType t) {
+      _result.addAll(Arrays.asList(FLOAT, DOUBLE));
       return this;
     }
     
@@ -542,7 +655,7 @@ public class JLSTypeSystem extends StandardTypeSystem {
     
     public TypeArgumentMerger(RawClassType erased) {
       _c = erased.ofClass();
-      _stack = new RecursionStack<Type>();
+      _stack = new RecursionStack<Type>(Wrapper.<Type>factory());
       int params = sizeOf(SymbolUtil.allTypeParameters(_c)); 
       _args = new ArrayList<ArgSet>(params);
       for (int i = 0; i < params; i++) { _args.add(new ArgSet()); }
@@ -622,7 +735,7 @@ public class JLSTypeSystem extends StandardTypeSystem {
         else { _types.add(t); }
       }
       
-      public Type merge(PrecomputedRecursionStack<Set<Type>, Wildcard> joinStack) {
+      public Type merge(final PrecomputedRecursionStack<Set<Type>, Wildcard> joinStack) {
         if (_types.isEmpty() || (_wildcardUpper && _wildcardLower)) {
           return new Wildcard(new BoundedSymbol(new Object(), OBJECT, NULL));
         }
@@ -630,14 +743,15 @@ public class JLSTypeSystem extends StandardTypeSystem {
           return new Wildcard(new BoundedSymbol(new Object(), OBJECT, meet(_types)));
         }
         else if (_wildcardUpper || _types.size() > 1) {
-          Wildcard result = new Wildcard(new BoundedSymbol(new Object()));
-          result.symbol().initializeLowerBound(NULL);
-          if (!joinStack.contains(_types)) {
-            joinStack.push(_types, result);
-            try { result.symbol().initializeUpperBound(join(_types, joinStack)); }
-            finally { joinStack.pop(_types); }
-          }
-          return result;
+          final Wildcard result = new Wildcard(new BoundedSymbol(new Object()));
+          Thunk<Wildcard> recur = new Thunk<Wildcard>() {
+            public Wildcard value() {
+              result.symbol().initializeLowerBound(NULL);
+              result.symbol().initializeUpperBound(join(_types, joinStack));
+              return result;
+            }
+          };
+          return joinStack.apply(recur, result, _types);
         }
         else { // no wildcards, size is 1
           return IterUtil.first(_types);
@@ -650,10 +764,11 @@ public class JLSTypeSystem extends StandardTypeSystem {
   
   /** Simple meet implementation: construct an intersection if there are more than two. */
   public Type meet(Iterable<? extends Type> ts) {
-    switch (sizeOf(ts)) {
+    Set<? extends Type> toMeet = CollectUtil.asSet(ts);
+    switch (toMeet.size()) {
       case 0: return TOP;
-      case 1: return IterUtil.first(ts);
-      default: return new IntersectionType(ts);
+      case 1: return IterUtil.first(toMeet);
+      default: return new IntersectionType(IterUtil.snapshot(toMeet));
     }
   }
   
@@ -671,7 +786,8 @@ public class JLSTypeSystem extends StandardTypeSystem {
     }
     
     final SubstitutionMap sigma = new SubstitutionMap(params, newArgs);
-    Set<VariableType> remainingParams = CollectUtil.makeSet(params);
+    Set<VariableType> remainingParams = new HashSet<VariableType>();
+    CollectUtil.addAll(remainingParams, params);
     while (!remainingParams.isEmpty()) {
       boolean changed = false;
       for (Triple<BoundedSymbol, Type, VariableType> triple : zip(captureVars, targs, params)) {
@@ -685,8 +801,9 @@ public class JLSTypeSystem extends StandardTypeSystem {
             Type wildL = argW.symbol().lowerBound();
             Type paramL = substitute(param.symbol().lowerBound(), sigma);
             
-            triple.first().initializeUpperBound(wildU.equals(OBJECT) ? paramU :
-                                                  new IntersectionType(IterUtil.make(wildU, paramU)));
+            Type captU = wildU.equals(OBJECT) ? paramU :
+                         paramU.equals(OBJECT) ? wildU : new IntersectionType(IterUtil.make(wildU, paramU));
+            triple.first().initializeUpperBound(captU);
             triple.first().initializeLowerBound(join(wildL, paramL));
           }
           remainingParams.remove(param);
@@ -714,7 +831,6 @@ public class JLSTypeSystem extends StandardTypeSystem {
     //debug.logValues("Beginning inferTypeArguments",
     //                new String[]{ "tparams", "params", "returned", "args", "expected" },
     //                wrap(tparams), wrap(params), wrap(returned), wrap(args), wrap(expected));
-    
     Inferencer inf = new Inferencer(CollectUtil.makeSet(tparams));
     
     // perform inference for args
@@ -738,23 +854,49 @@ public class JLSTypeSystem extends StandardTypeSystem {
       if (!lowerBounds.isEmpty()) { instantiations.put(var, join(lowerBounds)); }
     }
     
-    // perform inference for expected type (JLS is not clear on whether these should be combined with
-    // previous bounds; Eclipse does use the previous bounds)
-    SubstitutionMap firstPhaseSigma = new SubstitutionMap(instantiations);
-    if (expected.isSome()) {
-      inf.supertype(expected.unwrap(), substitute(returned, firstPhaseSigma));
+    if (!_alwaysUseArgumentConstraints) {
+      inf = new Inferencer(CollectUtil.makeSet(toInfer));
+      constraints = inf.constraints();
     }
     
-    // handle upper bounds
-    for (VariableType var : toInfer) {
-      Set<Type> upperBounds = union(constraints.upperBounds(var),
-                                    substitute(var.symbol().upperBound(), firstPhaseSigma));
-      instantiations.put(var, meet(upperBounds));
+    // perform inference for expected type
+    if (expected.isSome()) {
+      inf.supertype(expected.unwrap(), substitute(returned, new SubstitutionMap(instantiations)));
+      for (VariableType var : toInfer) {
+        Set<Type> eqBounds = constraints.equalBounds(var);
+        if (!eqBounds.isEmpty()) { instantiations.put(var, IterUtil.first(eqBounds)); }
+      }
+    }
+    
+    // use upper bounds (may be inferred from args or expected, and may be declared)
+    if (_waitToUseDeclaredBounds) {
+      for (VariableType var : toInfer) {
+        Set<Type> upperBounds = constraints.upperBounds(var);
+        if (!upperBounds.isEmpty()) { instantiations.put(var, meet(upperBounds)); }
+      }
+      for (VariableType var : toInfer) {
+        instantiations.put(var, substitute(var.symbol().upperBound(), new SubstitutionMap(instantiations)));
+      }
+    }
+    else {
+      for (VariableType var : toInfer) {
+        Set<Type> upperBounds = constraints.upperBounds(var);
+        Type declared = var.symbol().upperBound();
+        if (!declared.equals(OBJECT)) {
+          upperBounds = union(upperBounds, substitute(declared, new SubstitutionMap(instantiations)));
+        }
+        instantiations.put(var, meet(upperBounds));
+      }
     }
     
     Iterable<Type> result = mapSnapshot(tparams, asLambdaMap(instantiations));
-    if (inBounds(tparams, result)) { return result; }
-    else { return null; }
+    SubstitutionMap sigma = new SubstitutionMap(tparams, result);
+    boolean valid = inBounds(tparams, result);
+    for (Pair<Type, Type> pair : zip(args, params)) {
+      if (!valid) { break; }
+      valid &= isSubtype(pair.first(), substitute(pair.second(), sigma));
+    }
+    return valid ? result : null;
   }
   
   private class ConstraintSet {
@@ -771,8 +913,12 @@ public class JLSTypeSystem extends StandardTypeSystem {
     }
     
     public void addEqualBound(VariableType var, Type t) { _equalBounds.add(var, t); }
-    public void addUpperBound(VariableType var, Type t) { _upperBounds.add(var, t); }
-    public void addLowerBound(VariableType var, Type t) { _lowerBounds.add(var, t); }
+    public void addUpperBound(VariableType var, Type t) {
+      _upperBounds.add(var, t);
+    }
+    public void addLowerBound(VariableType var, Type t) {
+      _lowerBounds.add(var, t);
+    }
     
     public Set<Type> equalBounds(VariableType var) { return _equalBounds.matchFirst(var); }
     public Set<Type> upperBounds(VariableType var) { return _upperBounds.matchFirst(var); }
@@ -788,8 +934,8 @@ public class JLSTypeSystem extends StandardTypeSystem {
     public Inferencer(Set<? extends VariableType> vars) {
       _vars = vars;
       _constraints = new ConstraintSet();
-      _subStack = new RecursionStack2<Type, Type>();
-      _supStack = new RecursionStack2<Type, Type>();
+      _subStack = new RecursionStack2<Type, Type>(Pair.<Type, Type>factory());
+      _supStack = new RecursionStack2<Type, Type>(Pair.<Type, Type>factory());
     }
     
     public ConstraintSet constraints() { return _constraints; }
@@ -814,7 +960,7 @@ public class JLSTypeSystem extends StandardTypeSystem {
           }
           
           @Override public void forParameterizedClassType(final ParameterizedClassType param) {
-            TypeVisitorRunnable1 argVisitor = new TypeAbstractVisitor_void() {
+            arg.apply(new TypeAbstractVisitor_void() {
               @Override public void forArrayType(ArrayType arg) { CLONEABLE_AND_SERIALIZABLE.apply(this); }
               @Override public void forClassType(ClassType arg) {
                 Type argSup = immediateSupertype(arg);
@@ -828,26 +974,31 @@ public class JLSTypeSystem extends StandardTypeSystem {
                         if (pair.first() instanceof ValidType) { equal(pair.first(), param); }
                       }
                       @Override public void forWildcard(final Wildcard param) {
-                        final Type paramUpper = param.symbol().upperBound();
-                        final Type paramLower = param.symbol().lowerBound();
-                        if (!paramUpper.equals(OBJECT)) {
-                          pair.first().apply(new TypeAbstractVisitor_void() {
-                            @Override public void forValidType(ValidType arg) { subtype(arg, paramUpper); }
-                            @Override public void forWildcard(Wildcard arg) {
-                              Type argUpper = arg.symbol().upperBound();
-                              if (!argUpper.equals(OBJECT)) { subtype(argUpper, paramUpper); }
+                        Runnable recurOnWildcard = new Runnable() {
+                          public void run() {
+                            final Type paramUpper = param.symbol().upperBound();
+                            final Type paramLower = param.symbol().lowerBound();
+                            if (!paramUpper.equals(OBJECT)) {
+                              pair.first().apply(new TypeAbstractVisitor_void() {
+                                @Override public void forValidType(ValidType arg) { subtype(arg, paramUpper); }
+                                @Override public void forWildcard(Wildcard arg) {
+                                  Type argUpper = arg.symbol().upperBound();
+                                  if (!argUpper.equals(OBJECT)) { subtype(argUpper, paramUpper); }
+                                }
+                              });
                             }
-                          });
-                        }
-                        if (!paramLower.equals(NULL)) {
-                          pair.first().apply(new TypeAbstractVisitor_void() {
-                            @Override public void forValidType(ValidType arg) { supertype(arg, paramLower); }
-                            @Override public void forWildcard(Wildcard arg) {
-                              Type argLower = arg.symbol().lowerBound();
-                              if (!argLower.equals(NULL)) { supertype(argLower, paramLower); }
+                            if (!paramLower.equals(NULL)) {
+                              pair.first().apply(new TypeAbstractVisitor_void() {
+                                @Override public void forValidType(ValidType arg) { supertype(arg, paramLower); }
+                                @Override public void forWildcard(Wildcard arg) {
+                                  Type argLower = arg.symbol().lowerBound();
+                                  if (!argLower.equals(NULL)) { supertype(argLower, paramLower); }
+                                }
+                              });
                             }
-                          });
-                        }
+                          }
+                        };
+                        _subStack.run(recurOnWildcard, pair.first(), param);
                       }
                     });
                   }
@@ -862,9 +1013,7 @@ public class JLSTypeSystem extends StandardTypeSystem {
                 Runnable recurOnObject = bindFirst(this, OBJECT);
                 _subStack.run(recurOnSuper, recurOnObject, arg, param);
               }
-            };
-            // avoid infinite recursion on recursive wildcards
-            _subStack.run(bindFirst(argVisitor, arg), arg, param);
+            });
           }
           
         });
@@ -973,7 +1122,7 @@ public class JLSTypeSystem extends StandardTypeSystem {
     }
      
     private final TypeVisitorLambda<Boolean> _containsVar = new TypeAbstractVisitor<Boolean>() {
-      private final RecursionStack<Type> _stack = new RecursionStack<Type>();
+      private final RecursionStack<Type> _stack = new RecursionStack<Type>(Wrapper.<Type>factory());
       public Boolean defaultCase(Type t) { return false; }
       @Override public Boolean forArrayType(ArrayType t) { return t.ofType().apply(this); }
       @Override public Boolean forParameterizedClassType(ParameterizedClassType t) {

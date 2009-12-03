@@ -7,9 +7,15 @@ import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import koala.dynamicjava.interpreter.NodeProperties;
@@ -17,18 +23,23 @@ import koala.dynamicjava.interpreter.error.ExecutionError;
 import koala.dynamicjava.parser.wrapper.JavaCCParser;
 import koala.dynamicjava.parser.wrapper.ParseError;
 import koala.dynamicjava.tree.CompilationUnit;
+import koala.dynamicjava.tree.IdentifierToken;
 import koala.dynamicjava.tree.Node;
 import koala.dynamicjava.tree.SourceInfo;
 import koala.dynamicjava.tree.TypeDeclaration;
 import koala.dynamicjava.tree.visitor.DepthFirstVisitor;
 import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.interpreter.*;
+import edu.rice.cs.dynamicjava.symbol.DJClass;
 import edu.rice.cs.dynamicjava.symbol.ExtendedTypeSystem;
+import edu.rice.cs.dynamicjava.symbol.Function;
 import edu.rice.cs.dynamicjava.symbol.JLSTypeSystem;
 import edu.rice.cs.dynamicjava.symbol.Library;
 import edu.rice.cs.dynamicjava.symbol.SymbolUtil;
 import edu.rice.cs.dynamicjava.symbol.TreeLibrary;
 import edu.rice.cs.dynamicjava.symbol.TypeSystem;
+import edu.rice.cs.dynamicjava.symbol.Variable;
+import edu.rice.cs.dynamicjava.symbol.type.Type;
 import edu.rice.cs.plt.collect.UnindexedRelation;
 import edu.rice.cs.plt.collect.Relation;
 import edu.rice.cs.plt.io.IOUtil;
@@ -39,6 +50,7 @@ import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.reflect.PathClassLoader;
 import edu.rice.cs.plt.text.ArgumentParser;
 import edu.rice.cs.plt.text.TextUtil;
+import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.Pair;
 
 public class SourceChecker {
@@ -46,12 +58,16 @@ public class SourceChecker {
   private final Options _opt;
   private final boolean _quiet;
   private int _statusCount;
+  private Iterable<CompilationUnit> _processed;
   
   public SourceChecker(Options opt, boolean quiet) {
     _opt = opt;
     _quiet = quiet;
     _statusCount = 0;
+    _processed = IterUtil.empty();
   }
+  
+  public Iterable<CompilationUnit> processed() { return _processed; }
   
   public void check(File... sources) throws InterpreterException {
     check(IterUtil.asIterable(sources), IterUtil.<File>empty());
@@ -64,6 +80,7 @@ public class SourceChecker {
   public void check(Iterable<? extends File> sources, Iterable<? extends File> classPath)
                       throws InterpreterException {
     Iterable<CompilationUnit> tree = parse(sources);
+    _processed = IterUtil.compose(_processed, tree);
     TypeContext context = makeContext(tree, classPath);
     Relation<TypeDeclaration, ClassChecker> decls = extractDeclarations(tree, context);
     initializeClassSignatures(decls);
@@ -204,20 +221,6 @@ public class SourceChecker {
   }
   
   /**
-   * Append the given prefix to all properties of the given AST (the root node and its children),
-   * effectively hiding them so that the program can be re-processed. 
-   */
-  private static void archiveProperties(Node ast, final String prefix) {
-    new DepthFirstVisitor() {
-      public void run(Node node) {
-        node.archiveProperties(prefix);
-        super.run(node);
-      }
-    }.run(ast);
-  }
-  
-  
-  /**
    * A DepthFirstVisitor extension that recurs on Node-typed properties.  Note that this may lead to
    * multiple invocations of the same node (because the properties are often used to create DAGs).
    */
@@ -230,36 +233,216 @@ public class SourceChecker {
         if (NodeProperties.hasStatementTranslation(node)) { recur(NodeProperties.getTranslation(node)); }
     }
   }
-  
-  
-    
-  public static void main(String... args) {
-    ArgumentParser argParser = new ArgumentParser();
-    argParser.supportOption("classpath", "");
-    argParser.supportAlias("cp", "classpath");
-    argParser.supportOption("jls");
-    argParser.requireParams(1);
-    final ArgumentParser.Result parsedArgs = argParser.parse(args);
-    
-    Options opt = new Options() {
+ 
+  private static final Map<String, Options> _options;
+  static {
+    _options = new LinkedHashMap<String, Options>();
+    _options.put("jls", new Options() {
       @Override protected Thunk<? extends TypeSystem> typeSystemFactory() {
-        TypeSystem result = parsedArgs.hasOption("jls") ? new JLSTypeSystem(this) : new ExtendedTypeSystem(this);
+        TypeSystem result = new JLSTypeSystem(this);
         return LambdaUtil.valueLambda(result);
       }
       @Override public boolean enforceAllAccess() { return true; }
       @Override public boolean prohibitUncheckedCasts() { return false; }
-    };
+    });
+    _options.put("ext", new Options() {
+      @Override protected Thunk<? extends TypeSystem> typeSystemFactory() {
+        TypeSystem result = new ExtendedTypeSystem(this);
+        return LambdaUtil.valueLambda(result);
+      }
+      @Override public boolean enforceAllAccess() { return true; }
+      @Override public boolean prohibitUncheckedCasts() { return false; }
+    });
+  }
+  
+  public static void main(String... args) {
+    debug.logStart();
+
+    ArgumentParser argParser = new ArgumentParser();
+    argParser.supportOption("classpath", "");
+    argParser.supportAlias("cp", "classpath");
+    argParser.supportOption("opt", 1);
+    argParser.requireParams(1);
+    final ArgumentParser.Result parsedArgs = argParser.parse(args);
     Iterable<File> cp = IOUtil.parsePath(parsedArgs.getUnaryOption("classpath"));
     Iterable<File> sources = IterUtil.map(parsedArgs.params(), IOUtil.FILE_FACTORY);
     
+    if (parsedArgs.hasOption("opt")) {
+      Options opt = _options.get(parsedArgs.getUnaryOption("opt"));
+      if (opt == null) { System.out.println("Unrecognized options name: " + parsedArgs.getUnaryOption("opt")); }
+      else { processFiles(sources, cp, opt); }
+    }
+      
+    else {
+      Iterator<String> optNames = _options.keySet().iterator();
+      String canonicalName = optNames.next();
+      Iterable<CompilationUnit> canonical = processFiles(sources, cp, _options.get(canonicalName));
+      Map<String, Iterable<CompilationUnit>> others = new LinkedHashMap<String, Iterable<CompilationUnit>>();
+      while (optNames.hasNext()) {
+        String n = optNames.next();
+        others.put(n, processFiles(sources, cp, _options.get(n)));
+      }
+      NodeDiff diff = new NodeDiff();
+      for (Map.Entry<String, Iterable<CompilationUnit>> e : others.entrySet()) {
+        diff.compare(canonicalName, canonical, e.getKey(), e.getValue());
+      }
+    }
+    
+    debug.logEnd();
+  }
+  
+  
+  private static Iterable<CompilationUnit> processFiles(Iterable<File> sources, Iterable<File> cp, Options opt) {
+    SourceChecker checker = new SourceChecker(opt, false);
     try {
-      new SourceChecker(opt, false).check(sources, cp);
+      checker.check(sources, cp);
       System.out.println("Completed checking successfully.");
     }
     catch (InterpreterException e) {
       debug.log(e);
       e.printUserMessage(new PrintWriter(System.out, true));
     }
+    return checker.processed();
+  }
+  
+  
+  static class NodeDiff {
+    
+    public void compare(String leftName, Iterable<CompilationUnit> left,
+                          String rightName, Iterable<CompilationUnit> right) {
+      System.out.println("\n**********************************************************");
+      System.out.println("Comparing " + leftName + " with " + rightName);
+      System.out.println("**********************************************************");
+      if (IterUtil.sizeOf(left) != IterUtil.sizeOf(right)) {
+        System.out.println("Can't compare results: mismatched CompilationUnit lists");
+      }
+      else {
+        for (Pair<CompilationUnit, CompilationUnit> p : IterUtil.zip(left, right)) {
+          compare(p.first(), p.second());
+        }
+      }
+    }
+    
+    private void compare(Node left, Node right) {
+      if (left.getClass().equals(right.getClass())) {
+        Class<?> c = left.getClass();
+        while (!c.equals(Node.class)) {
+          compareDeclaredFields(c, left, right);
+          c = c.getSuperclass();
+        }
+      }
+      else {
+        mismatch("Different node classes", left.getClass().getName(), left, right.getClass().getName(), right);
+      }
+      Field props;
+      try { props = Node.class.getDeclaredField("properties"); }
+      catch (NoSuchFieldException e) { throw new RuntimeException(e); }
+      compareProperties((Map<?,?>) fieldValue(props, left), left, (Map<?,?>) fieldValue(props, right), right);
+    }
+    
+    private void compareDeclaredFields(Class<?> c, Node left, Node right) {
+      for (Field f : c.getDeclaredFields()) {
+        String name = "field " + c.getName() + "." + f.getName();
+        compareObjects(name, fieldValue(f, left), left, fieldValue(f, right), right);
+      }
+    }
+    
+    private void compareProperties(Map<?,?> leftProps, SourceInfo.Wrapper left,
+                                     Map<?,?> rightProps, SourceInfo.Wrapper right) {
+      Set<Object> keys = new HashSet<Object>(leftProps.keySet());
+      keys.retainAll(rightProps.keySet());
+      Set<Object> leftKeys = new HashSet<Object>(leftProps.keySet());
+      leftKeys.removeAll(keys);
+      Set<Object> rightKeys = new HashSet<Object>(rightProps.keySet());
+      rightKeys.removeAll(keys);
+      if (!leftKeys.isEmpty() || !rightKeys.isEmpty()) {
+        mismatch("Extra properties", leftKeys.toString(), left, rightKeys.toString(), right);
+      }
+      for (Object k : keys) {
+        compareObjects("property " + k, leftProps.get(k), left, rightProps.get(k), right);
+      }
+    }
+    
+    private void compareObjects(String name, Object leftVal, SourceInfo.Wrapper left,
+                                 Object rightVal, SourceInfo.Wrapper right) {
+      
+      if (leftVal == null || rightVal == null) {
+        if (leftVal != null || rightVal != null) {
+          mismatch("Different " + name, ""+leftVal, left, ""+rightVal, right);
+        }
+      }
+      
+      else if (leftVal instanceof IdentifierToken && rightVal instanceof IdentifierToken) {
+        String leftName = ((IdentifierToken) leftVal).image();
+        String rightName = ((IdentifierToken) rightVal).image();
+        if (!leftName.equals(rightName)) {
+          mismatch("Different " + name, leftName, left, rightName, right);
+        }
+      }
+      
+      else if (leftVal instanceof Node && rightVal instanceof Node) {
+        compare((Node) leftVal, (Node) rightVal);
+      }
+      
+      else if (leftVal instanceof List<?> && rightVal instanceof List<?>) {
+        List<?> leftList = (List<?>) leftVal;
+        List<?> rightList = (List<?>) rightVal;
+        if (leftList.size() == rightList.size()) {
+          for (Pair<Object, Object> p : IterUtil.zip(leftList, rightList)) {
+            compareObjects("element of " + name, p.first(), left, p.second(), right);
+          }
+        }
+        else {
+          mismatch("Different lengths of " + name, ""+leftList.size(), left, ""+rightList.size(), right);
+        }
+      }
+      
+      else if (leftVal instanceof Option<?> && rightVal instanceof Option<?>) {
+        Option<?> leftOpt = (Option<?>) leftVal;
+        Option<?> rightOpt = (Option<?>) rightVal;
+        if (leftOpt.isSome() && rightOpt.isSome()) {
+          compareObjects(name, leftOpt.unwrap(), left, rightOpt.unwrap(), right);
+        }
+        else if (!leftOpt.isNone() || !rightOpt.isNone()) {
+          mismatch("Different " + name, leftVal.toString(), left, rightVal.toString(), right);
+        }
+      }
+      
+      else if (supportedObject(leftVal) && supportedObject(rightVal)) {
+        if (!leftVal.equals(rightVal)) {
+          mismatch("Different " + name, leftVal.toString(), left, rightVal.toString(), right);
+        }
+      }
+      
+      else {
+        mismatch("Unsupported object type in " + name,
+                 leftVal.getClass().getName(), left, rightVal.getClass().getName(), right);
+      }
+    }
+    
+    private boolean supportedObject(Object val) {
+      return val instanceof String || val instanceof Number || val instanceof Boolean ||
+              val instanceof Class<?> || val instanceof EnumSet<?> || val instanceof Enum<?> ||
+              val instanceof DJClass || val instanceof Variable || val instanceof Function ||
+              val instanceof Type;
+    }
+    
+    private Object fieldValue(Field f, Object receiver) {
+      try { f.setAccessible(true); }
+      catch (SecurityException e) { /* ignore -- we can't relax accessibility */ }
+      try { return f.get(receiver); }
+      catch (IllegalAccessException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    
+    private void mismatch(String description, String leftData, SourceInfo.Wrapper left,
+                           String rightData, SourceInfo.Wrapper right) {
+      System.out.println("*** " + description);
+      System.out.println("Left (" + left.getSourceInfo() + "): " + leftData);
+      System.out.println("Right (" + right.getSourceInfo() + "): " + rightData);
+    }
+    
   }
   
 }
