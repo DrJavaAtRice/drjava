@@ -187,8 +187,8 @@ public class JoinInputStream extends InputStream {
 }
 
 class ReaderThread extends Thread { 
-  volatile int             available;
-  volatile int             pos;
+  volatile int    available;
+  volatile int    pos;
   byte[]          buffer; 
   InputStream     stream;
   IOException     exception;
