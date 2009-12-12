@@ -696,7 +696,7 @@ public class BalancingStreamTokenizerTest extends TestCase {
     tok.defaultThreeQuoteDollarCurlySetup();
     try{
       tok.addQuotes("'","#");
-    } catch (Exception e) {}
+    } catch (Exception e) { }
     
     String s = tok.getNextToken();
     // System.err.println(s);

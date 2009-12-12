@@ -138,7 +138,7 @@ public class DrJavaRoot {
       if(Utilities.isPlasticLaf(configLAFName)) {
         String themeName = PLASTIC_THEMES_PACKAGE + "." + DrJava.getConfig().getSetting(PLASTIC_THEMES);
         try {
-          PlasticTheme theme = (PlasticTheme) Class.forName(themeName).getConstructor(new Class<?>[]{}).newInstance();
+          PlasticTheme theme = (PlasticTheme) Class.forName(themeName).getConstructor(new Class<?>[]{ }).newInstance();
           PlasticLookAndFeel.setPlasticTheme(theme);
           PlasticLookAndFeel.setTabStyle(PlasticLookAndFeel.TAB_STYLE_METAL_VALUE);
           com.jgoodies.looks.Options.setPopupDropShadowEnabled(true);

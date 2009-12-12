@@ -57,7 +57,7 @@ public class NoDebuggerAvailable implements Debugger {
     */
   public boolean isAvailable() { return false; }
   
-  public DebugModelCallback callback() { return new DebugModelCallback() {}; }
+  public DebugModelCallback callback() { return new DebugModelCallback() { }; }
   
   /** Attaches the debugger to the Interactions JVM to prepare for debugging. */
   public void startUp() throws DebugException { }

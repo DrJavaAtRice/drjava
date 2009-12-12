@@ -39,6 +39,7 @@ package edu.rice.cs.util;
 import java.io.*;
 
 import java.util.Date;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
@@ -61,11 +62,7 @@ public class Log {
   /** PrintWriter to print messages to a file. */
   protected volatile PrintWriter _writer;
   
-  public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("d MMM yyyy H:mm:ss z");
-  static {
-    DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
-    DATE_FORMAT.setLenient(false);
-  }
+  public final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("d MMM yyyy H:mm:ss z");
   
   /** Creates a new Log with the given name.  If enabled is true, a file is created in the current directory with the
     * given name.
@@ -78,6 +75,8 @@ public class Log {
     _file = f;
     _name = f.getName();
     _isEnabled = isEnabled;
+    DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
+    DATE_FORMAT.setLenient(false);
     _init();
   }
   
@@ -150,5 +149,15 @@ public class Log {
   public void close() {
     _writer.close();
     _writer = null;
+  }
+  
+  /** Parses a date printed by Date.toString(); returns null if there is a parse error or if there is no date. */
+  public synchronized Date parse(String s) {
+    int pos = s.indexOf("GMT: ");
+    if (pos == -1) { return null; }
+    try {
+      return DATE_FORMAT.parse(s.substring(0,pos+3));
+    }
+    catch(ParseException pe) { return null; }
   }
 }

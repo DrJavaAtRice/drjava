@@ -893,12 +893,12 @@ public class XMLConfigTest extends TestCase {
       xc.getInt("concutest/class.name");
       Assert.fail("Should have thrown exception");
     }
-    catch(IllegalArgumentException e){}
+    catch(IllegalArgumentException e){ }
     
     try{
       xc.getInt("doesNotExitPath/subPath");
       Assert.fail("Should have thrown exception");
-    }catch(XMLConfig.XMLConfigException e){}
+    }catch(XMLConfig.XMLConfigException e){ }
     
     //Test for getInt(String path, Node root)
     n = xc.getInt("name.value", xc.getNodes("concutest").get(0));
@@ -907,12 +907,12 @@ public class XMLConfigTest extends TestCase {
       xc.getInt("class.name", xc.getNodes("concutest").get(0));
       Assert.fail("Should have thrown exception");
     }
-    catch(IllegalArgumentException e){}
+    catch(IllegalArgumentException e){ }
     
     try{
       xc.getInt("doesNotExitPath/subPath", xc.getNodes("concutest").get(0));
       Assert.fail("Should have thrown exception");
-    }catch(XMLConfig.XMLConfigException e){}
+    }catch(XMLConfig.XMLConfigException e){ }
     
     //Test for getInt(String path, int default)
     n = xc.getInt("concutest/name.value", 10);
@@ -994,7 +994,7 @@ public class XMLConfigTest extends TestCase {
       xc.getBool("concutest/class.name");
       Assert.fail("Should have thrown exception");
     }
-    catch(IllegalArgumentException e){}
+    catch(IllegalArgumentException e){ }
     
     
     //Test for getBool(String path, Node root)
@@ -1006,7 +1006,7 @@ public class XMLConfigTest extends TestCase {
       xc.getBool("class.name", root);
       Assert.fail("Should have thrown exception");
     }
-    catch(IllegalArgumentException e){}
+    catch(IllegalArgumentException e){ }
     
     //getBool(String path, boolean defaultVal)
     b = xc.getBool("concutest/name.name",true);
@@ -1078,7 +1078,7 @@ public class XMLConfigTest extends TestCase {
       char c = File.separatorChar;
       xc.save(new File("." + c + "does" + c + "not" + c + "exist" + c + "file.xml"));
       Assert.fail("Should not have succeeded in saving to non-existant path");
-    }catch(XMLConfig.XMLConfigException e){}
+    }catch(XMLConfig.XMLConfigException e){ }
     
     File saveTo = File.createTempFile("drjava_test", "xml");
     xc.save(saveTo);
@@ -1090,13 +1090,13 @@ public class XMLConfigTest extends TestCase {
       char c = File.separatorChar;
       XMLConfig failCopy = new XMLConfig("." + c + "does" + c + "not" + c + "exist" + c + "file.xml");
       Assert.fail("Should not succeed in load from non-existant file");
-    }catch(XMLConfig.XMLConfigException e){}
+    }catch(XMLConfig.XMLConfigException e){ }
     
     try{
       char c = File.separatorChar;
       XMLConfig failCopy = new XMLConfig(new File("." + c + "does" + c + "not" + c + "exist" + c + "file.xml"));
       Assert.fail("Should not succeed in load from non-existant file");
-    }catch(XMLConfig.XMLConfigException e){}
+    }catch(XMLConfig.XMLConfigException e){ }
     
     saveTo.delete();
   }
@@ -1121,13 +1121,13 @@ public class XMLConfigTest extends TestCase {
       XMLConfig xc2 = new XMLConfig(null, nd);
       Assert.fail("Should not have been able to make new XMLConfig with null parent");
     }
-    catch(XMLConfig.XMLConfigException e){}
+    catch(XMLConfig.XMLConfigException e){ }
     
     try{
       XMLConfig xc2 = new XMLConfig(xc, null);
       Assert.fail("Should not have been able to make ne XMLConfig with null node");
     }
-    catch(XMLConfig.XMLConfigException e){}
+    catch(XMLConfig.XMLConfigException e){ }
   }
   
   
@@ -1152,7 +1152,7 @@ public class XMLConfigTest extends TestCase {
     try{
       XMLConfig xc2 = new XMLConfig("badfileName");
     }
-    catch(XMLConfig.XMLConfigException e){}
+    catch(XMLConfig.XMLConfigException e){ }
     
     XMLConfig xc2 = new XMLConfig(saveTo.getAbsolutePath());
     

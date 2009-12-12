@@ -72,7 +72,7 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
   /** Constructor with flag for move buttons. */
   public VectorKeyStrokeOptionComponent (VectorOption<KeyStroke> opt, String text, SwingFrame parent,
                                          String description, boolean moveButtonEnabled) {
-    super(opt, text, parent, new String[] {}, description, moveButtonEnabled);  // creates all four buttons
+    super(opt, text, parent, new String[] { }, description, moveButtonEnabled);  // creates all four buttons
     for(KeyStroke k: getKeyStrokes()) _keyToKSOC.put(k, this);
   }
   

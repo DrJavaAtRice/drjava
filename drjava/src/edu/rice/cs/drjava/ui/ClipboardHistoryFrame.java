@@ -57,7 +57,7 @@ public class ClipboardHistoryFrame extends SwingFrame {
   /** Interface for an action to be performed when the user closes the frame,
    *  either by using "OK" or "Cancel".
    */
-  public static interface CloseAction extends Lambda<String, Object> {}
+  public static interface CloseAction extends Lambda<String, Object> { }
   
   /** Class to save the frame state, i.e. location and dimensions.*/
   public static class FrameState {

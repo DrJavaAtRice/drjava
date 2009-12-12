@@ -186,7 +186,7 @@ public class JPDADebugger implements Debugger {
     */
   public boolean isAvailable() { return true; }
   
-  public DebugModelCallback callback() { return new DebugModelCallback() {}; }
+  public DebugModelCallback callback() { return new DebugModelCallback() { }; }
   
   /** Returns whether the debugger is currently enabled. */
   public boolean isReady() { return _vm != null; }

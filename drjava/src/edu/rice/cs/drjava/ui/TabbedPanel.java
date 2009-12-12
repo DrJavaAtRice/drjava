@@ -136,9 +136,9 @@ public abstract class TabbedPanel extends JPanel
     DrJavaRoot.dragEnter(dropTargetDragEvent);
   }
   
-  public void dragExit(DropTargetEvent dropTargetEvent) {}
-  public void dragOver(DropTargetDragEvent dropTargetDragEvent) {}
-  public void dropActionChanged(DropTargetDragEvent dropTargetDragEvent){}
+  public void dragExit(DropTargetEvent dropTargetEvent) { }
+  public void dragOver(DropTargetDragEvent dropTargetDragEvent) { }
+  public void dropActionChanged(DropTargetDragEvent dropTargetDragEvent){ }
   
   /** User dropped something on the component. */
   public synchronized void drop(DropTargetDropEvent dropTargetDropEvent) {

@@ -426,7 +426,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     protected volatile int currThreadSetCount = 0;
     protected volatile int nonCurrThreadDiedCount = 0;
     
-    public DebugTestListener() {}
+    public DebugTestListener() { }
     
     public void assertDebuggerStartedCount(int i) {
       assertEquals("number of times debuggerStarted fired", i, debuggerStartedCount);
@@ -537,7 +537,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
   /** DebugTestListener for all tests starting the debugger. */
   protected class DebugStartAndStopListener extends DebugTestListener {
     
-    public DebugStartAndStopListener() {}
+    public DebugStartAndStopListener() { }
     
     public void debuggerStarted() {
       // EventHandler's thread: test should wait
@@ -629,7 +629,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
   /** DebugTestListener for all tests using the stepper. */
   protected class StepTestListener extends BreakpointTestListener {
     
-    public StepTestListener() {}
+    public StepTestListener() { }
     
     public void stepRequested() {
       // Manager's thread: test shouldn't wait
@@ -642,7 +642,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     * (Necessary to prevent tests from overlapping.) */
   protected class InterpretListener extends TestListener {
     
-    public InterpretListener() {}
+    public InterpretListener() { }
     
     public void interactionStarted() {
       synchronized(_notifierLock) {

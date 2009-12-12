@@ -211,7 +211,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
         if (p0 != -1) {
           try {
             safeDamageRange(p0, p1);
-          } catch (BadLocationException e) {}
+          } catch (BadLocationException e) { }
         }
         _highlights.clear();
       }
@@ -228,7 +228,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
         }
         try {
           safeDamageRange(p0, p1);
-        } catch (BadLocationException e) {}
+        } catch (BadLocationException e) { }
         
         _highlights.clear();
       }

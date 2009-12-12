@@ -423,19 +423,17 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     * regions.  Removes empty regions.  firstRegion and lastRegion are not necessarily regions in this manager.  
     */
   public void updateLines(R firstRegion, R lastRegion) { 
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
-    /* Get the tailSet consisting of the ordered set of regions >= r. */
+    /* Get the tailSet consisting of the ordered set of regions >= firstRegion. */
     SortedSet<R> tail = getTailSet(firstRegion);
-    if (tail.size() == 0) return;
+    if (tail.size() == 0) return; // tail can be empty if firstRegion is a constructed DocumentRegion
 
     List<R> toBeRemoved = new ArrayList<R>();  // nonsense to avoid concurrent modification exception
-    // tail can be empty if r is a constructed DocumentRegion
     for (R region: tail) {
       if (region.compareTo(lastRegion) > 0) break;
+      region.update();  // The bounds of this region must be recomputed.
       if (region.getStartOffset() == region.getEndOffset()) toBeRemoved.add(region); 
-      else region.update();  // The bounds of this region must be recomputed.
-
     }
     removeRegions(toBeRemoved);
   }

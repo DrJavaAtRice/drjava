@@ -56,6 +56,8 @@ import java.util.jar.JarEntry;
 
 import javax.swing.JOptionPane;
 
+import edu.rice.cs.drjava.config.BooleanOption;
+
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -130,7 +132,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     _compilerModel = compilerModel;
     _model = model;
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], _model, false);
-    _forceTestSuffix = edu.rice.cs.drjava.DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.FORCE_TEST_SUFFIX).booleanValue();
+    BooleanOption suffixOption = edu.rice.cs.drjava.config.OptionConstants.FORCE_TEST_SUFFIX;
+    _forceTestSuffix = edu.rice.cs.drjava.DrJava.getConfig().getSetting(suffixOption).booleanValue();
   }
   
   //-------------------------- Field Setters --------------------------------//
@@ -337,7 +340,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           File classFileDir = new File(IOUtil.attemptCanonicalFile(buildRoot), packagePath);
           
           File sourceDir = 
-            (buildDir == FileOps.NULL_FILE) ? classFileDir : new File(IOUtil.attemptCanonicalFile(sourceRoot), packagePath);
+            (buildDir == FileOps.NULL_FILE) ? classFileDir : 
+                                              new File(IOUtil.attemptCanonicalFile(sourceRoot), packagePath);
           
           if (! classDirsAndRoots.containsKey(classFileDir)) {
             classDirsAndRoots.put(classFileDir, sourceDir);
@@ -410,13 +414,13 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
                 public void visitSource(String source, String debug) {
                   sourceName.set(source);
                 }
-                public void visitOuterClass(String owner, String name, String desc) {}
+                public void visitOuterClass(String owner, String name, String desc) { }
                 public AnnotationVisitor visitAnnotation(String desc, boolean visible) { return null; }
-                public void visitAttribute(Attribute attr) {}
-                public void visitInnerClass(String name, String out, String in, int access) {}
+                public void visitAttribute(Attribute attr) { }
+                public void visitInnerClass(String name, String out, String in, int access) { }
                 public FieldVisitor visitField(int a, String n, String d, String s, Object v) { return null; }
                 public MethodVisitor visitMethod(int a, String n, String d, String s, String[] e) { return null; }
-                public void visitEnd() {}
+                public void visitEnd() { }
               }, 0);
               
               File rootDir = classDirsAndRoots.get(dir);
@@ -446,7 +450,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               File sourceFile = new File(sourceFileName);
               classNames.add(className.value());
               files.add(sourceFile);
-//              System.err.println("Class " + className + "added to classNames.   File " + sourceFileName + " added to files.");
+//              System.err.println("Class " + className + "added to classNames.   File " + sourceFileName + 
+//                                 " added to files.");
             }
             catch(IOException e) { /* ignore it; can't read class file */ }
           }
@@ -512,8 +517,11 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   }
   
   /** Helper method to notify JUnitModel listeners that all open files must be compiled before JUnit is run. */
-  private void _notifyCompileBeforeJUnit(final CompilerListener testAfterCompile, final List<OpenDefinitionsDocument> outOfSync) { 
-    Utilities.invokeLater(new Runnable() { public void run() { _notifier.compileBeforeJUnit(testAfterCompile, outOfSync); } });
+  private void _notifyCompileBeforeJUnit(final CompilerListener testAfterCompile, 
+                                         final List<OpenDefinitionsDocument> outOfSync) { 
+    Utilities.invokeLater(new Runnable() { 
+      public void run() { _notifier.compileBeforeJUnit(testAfterCompile, outOfSync); } 
+    });
   }
   
   /** Helper method to notify JUnitModel listeners that JUnit aborted before any tests could be run. */
@@ -532,9 +540,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   public JUnitErrorModel getJUnitErrorModel() { return _junitErrorModel; }
   
   /** Resets the junit error state to have no errors. */
-  public void resetJUnitErrors() {
-    _junitErrorModel = new JUnitErrorModel(new JUnitError[0], _model, false);
-  }
+  public void resetJUnitErrors() { _junitErrorModel = new JUnitErrorModel(new JUnitError[0], _model, false); }
   
   //---------------------------- Model Callbacks ----------------------------//
   

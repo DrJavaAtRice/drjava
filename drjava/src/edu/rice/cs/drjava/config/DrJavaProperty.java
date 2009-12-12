@@ -164,9 +164,10 @@ public abstract class DrJavaProperty implements Cloneable {
   public DrJavaProperty listenToInvalidatesOf(DrJavaProperty other) {
     if (other == this) {
       DEACTIVATED_DUE_TO_ERROR = true;
-      RuntimeException e = new IllegalArgumentException("Property cannot listen for invalidation of itself. " + 
-                                                        "Variables for external processes will not function correctly anymore. " + 
-                                                        "This is a SERIOUS programming error. Please notify the DrJava team.");
+      RuntimeException e = 
+        new IllegalArgumentException("Property cannot listen for invalidation of itself. " + 
+                                     "Variables for external processes will not function correctly anymore. " + 
+                                     "This is a SERIOUS programming error. Please notify the DrJava team.");
       edu.rice.cs.drjava.ui.DrJavaErrorHandler.record(e);
       throw e;
     }

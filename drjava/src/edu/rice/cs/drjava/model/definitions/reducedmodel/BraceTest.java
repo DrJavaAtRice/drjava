@@ -154,7 +154,7 @@ public final class BraceTest extends DrJavaTestCase implements ReducedModelState
     try{
      lparen.setType("a");
      fail("Expected BraceException");
-    }catch(BraceException b){};
+    }catch(BraceException b){ };
   }
   
   public void testIsSlashStar(){
@@ -170,14 +170,14 @@ public final class BraceTest extends DrJavaTestCase implements ReducedModelState
     try{
      lparen.grow(5);
      fail("Expected BraceException");
-    }catch(BraceException b){};
+    }catch(BraceException b){ };
   }
   
   public void testShrinkFail() {
     try{
      lparen.shrink(5);
      fail("Expected BraceException");
-    }catch(BraceException b){};
+    }catch(BraceException b){ };
   }
 }
 

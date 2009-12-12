@@ -58,7 +58,7 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
   
   public static final DrJavaErrorHandler INSTANCE = new DrJavaErrorHandler();
   
-  private DrJavaErrorHandler() {}
+  private DrJavaErrorHandler() { }
   
   /** Handles an uncaught exception. This gets called automatically by AWT. */
   public void uncaughtException(Thread t, Throwable thrown) {

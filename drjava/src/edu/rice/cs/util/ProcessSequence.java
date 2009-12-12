@@ -353,7 +353,7 @@ public class ProcessSequence extends Process {
 
   /** A process that does nothing. */
   protected static final Process DUMMY_PROCESS = new Process() {
-    public void destroy() {}
+    public void destroy() { }
     public int exitValue() { return -1; }
     public InputStream getErrorStream() { return new InputStream() {
       public int read() { return -1; }

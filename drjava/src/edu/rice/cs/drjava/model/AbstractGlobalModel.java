@@ -751,7 +751,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
               setProjectChanged(true);
             }
           }
-          catch(IOException e) {}
+          catch(IOException e) { }
         }
       }
     }
@@ -1005,18 +1005,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean isAuxiliaryFile(File f) { return false; }
     public boolean isExcludedFile(File f) { return false; }
     public File[] getExclFiles() { return null; }
-    public void addExcludedFile(File f) {}
-    public void removeExcludedFile(File f) {}
-    public void setExcludedFiles(File[] fs) {}
+    public void addExcludedFile(File f) { }
+    public void removeExcludedFile(File f) { }
+    public void setExcludedFiles(File[] fs) { }
     public boolean getAutoRefreshStatus() {return false;}
-    public void setAutoRefreshStatus(boolean b) {}
+    public void setAutoRefreshStatus(boolean b) { }
     
     public void cleanBuildDirectory() { }
     
     public List<File> getClassFiles() { return new LinkedList<File>(); }
     
     public String getCustomManifest(){ return null; }
-    public void setCustomManifest(String manifest) {}
+    public void setCustomManifest(String manifest) { }
   }
   
   /** Gives the title of the source bin for the navigator.
@@ -1440,7 +1440,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     File[] newFiles = getNewFilesInProject();
     if (newFiles == null) return;
     try { _openFiles(newFiles); }
-    catch(Exception e) {}
+    catch(Exception e) { }
   }
   
   

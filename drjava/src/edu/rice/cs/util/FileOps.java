@@ -74,7 +74,7 @@ public abstract class FileOps {
     public int compareTo(File f) { return (f == this) ? 0 : -1; }
     public boolean createNewFile() { return false; }
     public boolean delete() { return false; }
-    public void deleteOnExit() {}
+    public void deleteOnExit() { }
     public boolean equals(Object o) { return o == this; }
     public boolean exists() { return false; }
     public int hashCode() { return getClass().hashCode(); }

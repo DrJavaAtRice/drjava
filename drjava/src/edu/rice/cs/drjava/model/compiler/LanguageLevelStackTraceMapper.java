@@ -201,15 +201,15 @@ public class LanguageLevelStackTraceMapper {
     BufferedReader BReader = null;
     String ReadLine = "";
     
-    try{  BReader = new BufferedReader(new FileReader(LLFile));  } catch(java.io.FileNotFoundException e){}
+    try{  BReader = new BufferedReader(new FileReader(LLFile));  } catch(java.io.FileNotFoundException e){ }
     
-    try{  ReadLine = BReader.readLine();  }  catch(java.io.IOException e){}
+    try{  ReadLine = BReader.readLine();  }  catch(java.io.IOException e){ }
     
     LOG.log("ReadLine = '" + ReadLine + "'");
     LOG.log("\tlastIndex = " + ReadLine.lastIndexOf(" "));
     Integer MapSize = new Integer (ReadLine.substring(ReadLine.lastIndexOf(" ")+1));
     
-    try{  ReadLine = BReader.readLine();  }  catch(java.io.IOException e){}
+    try{  ReadLine = BReader.readLine();  }  catch(java.io.IOException e){ }
     
     if(ReadLine.indexOf("//") != 0) MapSize=0;  //Kills the for loop if read line is not of correct format
     
@@ -250,15 +250,15 @@ public class LanguageLevelStackTraceMapper {
     BufferedReader BReader = null;
     String ReadLine = "";
     
-    try{  BReader = new BufferedReader(new FileReader(LLFile));  } catch(java.io.FileNotFoundException e){}
+    try{  BReader = new BufferedReader(new FileReader(LLFile));  } catch(java.io.FileNotFoundException e){ }
     
-    try{  ReadLine = BReader.readLine();  }  catch(java.io.IOException e){}
+    try{  ReadLine = BReader.readLine();  }  catch(java.io.IOException e){ }
     
     LOG.log("ReadLine = '" + ReadLine + "'");
     LOG.log("\tlastIndex = " + ReadLine.lastIndexOf(" "));
     Integer MapSize = new Integer (ReadLine.substring(ReadLine.lastIndexOf(" ")+1));
     
-    try{  ReadLine = BReader.readLine();  }  catch(java.io.IOException e){}
+    try{  ReadLine = BReader.readLine();  }  catch(java.io.IOException e){ }
     
     if(ReadLine.indexOf("//") != 0) MapSize=0;  //Kills the for loop if read line is not of correct format
     
@@ -295,7 +295,7 @@ public class LanguageLevelStackTraceMapper {
    */
   private String ReadLanguageLevelLineBlockHelper(BufferedReader BR) {
     String line = "";
-    try{  line = BR.readLine(); } catch(java.io.IOException e){}
+    try{  line = BR.readLine(); } catch(java.io.IOException e){ }
     
     if(line.indexOf("//") != 0) return null;
     line = line.substring(2).trim();

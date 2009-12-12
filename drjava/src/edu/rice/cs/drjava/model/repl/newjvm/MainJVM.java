@@ -811,7 +811,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       if (_state.compareAndSet(this, new StartingState())) { _doStartup(); }
       else { _state.value().start(); }
     }
-    public void stop() {}
+    public void stop() { }
     public void restart(boolean force) { start(); }
     public void dispose() {
       if (_state.compareAndSet(this, new DisposedState())) { MainJVM.super.dispose(); }
@@ -831,7 +831,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       catch (InterruptedException e) { throw new UnexpectedException(e); }
     }
     
-    public void start() {}
+    public void start() { }
     
     public void restart(boolean force) {
       try { _state.ensureNotState(this, STARTUP_TIMEOUT).restart(force); }
@@ -891,7 +891,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     protected final InterpreterJVMRemoteI _interpreter;
     public RunningState(InterpreterJVMRemoteI interpreter) { _interpreter = interpreter; }
     public InterpreterJVMRemoteI interpreter(boolean used) { return _interpreter; }
-    public void start() {}
+    public void start() { }
     
     public void stop() {
       if (_state.compareAndSet(this, new StoppingState())) { quitSlave(); }
@@ -945,13 +945,13 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       catch (InterruptedException e) { throw new UnexpectedException(e); }
     }
 
-    public void start() {}
+    public void start() { }
 
     public void stop() {
       if (!_state.compareAndSet(this, new StoppingState())) { _state.value().stop(); }
     }
 
-    public void restart(boolean force) {}
+    public void restart(boolean force) { }
 
     public void dispose() {
       if (_state.compareAndSet(this, new DisposedState())) { MainJVM.super.dispose(); }
@@ -973,7 +973,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       catch (Exception e) { throw new UnexpectedException(e); }
     }
 
-    public void stop() {}
+    public void stop() { }
 
     public void restart(boolean force) {
       if (!_state.compareAndSet(this, new RestartingState())) { _state.value().restart(force); }
@@ -994,7 +994,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public void start() { throw new IllegalStateException("MainJVM is disposed"); }
     public void stop() { throw new IllegalStateException("MainJVM is disposed"); }
     public void restart(boolean force) { throw new IllegalStateException("MainJVM is disposed"); }
-    public void dispose() {}
+    public void dispose() { }
     public void stopped() { /* may occur if transitioned here from Restarting or Stopping */ }
   }
 

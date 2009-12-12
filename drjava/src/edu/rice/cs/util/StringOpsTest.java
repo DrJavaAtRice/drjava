@@ -460,7 +460,7 @@ public class StringOpsTest extends DrJavaTestCase {
   public void testToStringLong() {
     long[] a = null;
     assertEquals("null", StringOps.toString(a));
-    assertEquals("[]", StringOps.toString(new long[] {}));
+    assertEquals("[]", StringOps.toString(new long[] { }));
     assertEquals("[1]", StringOps.toString(new long[] {1}));
     assertEquals("[1, 2]", StringOps.toString(new long[] {1, 2}));
   }
@@ -468,7 +468,7 @@ public class StringOpsTest extends DrJavaTestCase {
   public void testToStringInt() {
     int[] a = null;
     assertEquals("null", StringOps.toString(a));
-    assertEquals("[]", StringOps.toString(new int[] {}));
+    assertEquals("[]", StringOps.toString(new int[] { }));
     assertEquals("[1]", StringOps.toString(new int[] {1}));
     assertEquals("[1, 2]", StringOps.toString(new int[] {1, 2}));
   }
@@ -476,7 +476,7 @@ public class StringOpsTest extends DrJavaTestCase {
   public void testToStringShort() {
     short[] a = null;
     assertEquals("null", StringOps.toString(a));
-    assertEquals("[]", StringOps.toString(new short[] {}));
+    assertEquals("[]", StringOps.toString(new short[] { }));
     assertEquals("[1]", StringOps.toString(new short[] {1}));
     assertEquals("[1, 2]", StringOps.toString(new short[] {1, 2}));
   }
@@ -484,7 +484,7 @@ public class StringOpsTest extends DrJavaTestCase {
   public void testToStringChar() {
     char[] a = null;
     assertEquals("null", StringOps.toString(a));
-    assertEquals("[]", StringOps.toString(new char[] {}));
+    assertEquals("[]", StringOps.toString(new char[] { }));
     assertEquals("[a]", StringOps.toString(new char[] {'a'}));
     assertEquals("[a, b]", StringOps.toString(new char[] {'a', 'b'}));
   }
@@ -492,7 +492,7 @@ public class StringOpsTest extends DrJavaTestCase {
   public void testToStringByte() {
     byte[] a = null;
     assertEquals("null", StringOps.toString(a));
-    assertEquals("[]", StringOps.toString(new byte[] {}));
+    assertEquals("[]", StringOps.toString(new byte[] { }));
     assertEquals("[1]", StringOps.toString(new byte[] {1}));
     assertEquals("[1, 2]", StringOps.toString(new byte[] {1, 2}));
   }
@@ -500,7 +500,7 @@ public class StringOpsTest extends DrJavaTestCase {
   public void testToStringBoolean() {
     boolean[] a = null;
     assertEquals("null", StringOps.toString(a));
-    assertEquals("[]", StringOps.toString(new boolean[] {}));
+    assertEquals("[]", StringOps.toString(new boolean[] { }));
     assertEquals("[true]", StringOps.toString(new boolean[] {true}));
     assertEquals("[true, false]", StringOps.toString(new boolean[] {true, false}));
   }
@@ -508,7 +508,7 @@ public class StringOpsTest extends DrJavaTestCase {
   public void testToStringFloat() {
     float[] a = null;
     assertEquals("null", StringOps.toString(a));
-    assertEquals("[]", StringOps.toString(new float[] {}));
+    assertEquals("[]", StringOps.toString(new float[] { }));
     assertEquals("[1.23]", StringOps.toString(new float[] {1.23f}));
     assertEquals("[1.23, 4.56]", StringOps.toString(new float[] {1.23f, 4.56f}));
   }
@@ -516,7 +516,7 @@ public class StringOpsTest extends DrJavaTestCase {
   public void testToStringDouble() {
     double[] a = null;
     assertEquals("null", StringOps.toString(a));
-    assertEquals("[]", StringOps.toString(new double[] {}));
+    assertEquals("[]", StringOps.toString(new double[] { }));
     assertEquals("[1.23]", StringOps.toString(new double[] {1.23}));
     assertEquals("[1.23, 4.56]", StringOps.toString(new double[] {1.23, 4.56}));
   }
@@ -524,7 +524,7 @@ public class StringOpsTest extends DrJavaTestCase {
   public void testToStringObject() {
     Object[] a = null;
     assertEquals("null", StringOps.toString(a));
-    assertEquals("[]", StringOps.toString(new Object[] {}));
+    assertEquals("[]", StringOps.toString(new Object[] { }));
     assertEquals("[123]", StringOps.toString(new Object[] {"123"}));
     assertEquals("[123, 123]", StringOps.toString(new Object[] {"123", Integer.valueOf(123)}));
   }

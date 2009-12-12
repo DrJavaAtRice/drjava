@@ -60,7 +60,7 @@ import edu.rice.cs.drjava.DrJavaRoot;
 public class PredictiveInputFrame<T extends Comparable<? super T>> extends SwingFrame {
   
   /** Interface that is used to generate additional information about an item. */
-  public static interface InfoSupplier<X> extends Lambda<X,String> {}
+  public static interface InfoSupplier<X> extends Lambda<X,String> { }
 
 //  /** General information supplier that just uses toString(). */
 //  public static final InfoSupplier<Object> GET_LAZY_SUPPLIER = new InfoSupplier<Object>() {

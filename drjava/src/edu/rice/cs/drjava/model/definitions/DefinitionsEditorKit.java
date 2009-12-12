@@ -36,6 +36,7 @@
 
 package edu.rice.cs.drjava.model.definitions;
 
+import edu.rice.cs.drjava.ui.AbstractDJPane;
 import edu.rice.cs.util.UnexpectedException;
 
 import javax.swing.text.*;
@@ -44,7 +45,9 @@ import java.awt.event.ActionEvent;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
 /** The editor kit class for editing Java source files. It functions as the controller in an MVC hierarchy.  It also
-  * implements a factory for new documents and a factory for Views (the things that render the document).
+  * implements a factory for new documents and a factory for Views (the things that render the document).  May only be
+  * used as the EditorKit for panes extending AbstractDJPane.  In fact, only used as the EditorKit for DefintionsPanes.
+  * Stored as a field of DefinitionsPane.
   * @version $Id$
   */
 public class DefinitionsEditorKit extends StyledEditorKit {
@@ -135,7 +138,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     }
     
     public void actionPerformed(ActionEvent e) {
-      JTextComponent target = getTextComponent(e);
+      AbstractDJPane target = (AbstractDJPane) getTextComponent(e);
       if (target != null) {
         try {
           int offs = target.getCaretPosition();
@@ -175,7 +178,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     }
     
     public void actionPerformed(ActionEvent e) {
-      JTextComponent target = getTextComponent(e);
+      AbstractDJPane target = (AbstractDJPane) getTextComponent(e);
       if (target != null) {
         try {
           int offs = target.getCaretPosition();
@@ -212,7 +215,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     }
     
     public void actionPerformed(ActionEvent e) {
-      JTextComponent target = getTextComponent(e);
+      AbstractDJPane target = (AbstractDJPane) getTextComponent(e);
       if (target != null) {
         try {
           int offs = target.getCaretPosition();
@@ -260,7 +263,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     }
     
     public void actionPerformed(ActionEvent e) {
-      JTextComponent target = getTextComponent(e);
+      AbstractDJPane target = (AbstractDJPane) getTextComponent(e);
       if (target != null) {
         try {
           int offs = target.getCaretPosition();

@@ -504,8 +504,8 @@ public class DrJavaPropertySetup implements OptionConstants {
     });
     
     String msg12 = 
-      "Remove the specified file or directory, recursively if desired. Evaluates to the empty string \"\" if successful.\n" +
-      "Required attributes:\n" +
+      "Remove the specified file or directory, recursively if desired. Evaluates to the empty string \"\" " + 
+      "if successful.\n" + "Required attributes:\n" +
       "\tfile=\"<file or directory to remove>\"\n" +
       "Optional attributes:\n" +
       "\trec=\"<true for recursive removal>\"\n" +
@@ -604,8 +604,8 @@ public class DrJavaPropertySetup implements OptionConstants {
     });
     
     String msg14 = 
-      "Returns the current time in milliseconds since 01/01/1970, unless other format is specified by the fmt attribute.\n" +
-      "Optional attributes:\n" +
+      "Returns the current time in milliseconds since 01/01/1970, " + 
+      "unless other format is specified by the fmt attribute.\n" + "Optional attributes:\n" + 
       "\tfmt=\"full\" or \"long\" or \"medium\" or \"short\"";
     
     PropertyMaps.TEMPLATE.setProperty("DrJava", new DrJavaProperty("drjava.current.time.millis", msg14) {
@@ -879,16 +879,17 @@ public class DrJavaPropertySetup implements OptionConstants {
       public Double value(Double op1, Double op2) { return op1 - op2; }
     };
        
-    PropertyMaps.TEMPLATE.setProperty("Misc", new BinaryOpProperty
-                                        <Double,Double,Double>("sub",
-                                                               "Returns the difference between the two operands (op1-op2).\n" +
-                                                               "Required attributes:\n" +
-                                                               "\top1=\"<string evaluating to a number>\"\n" +
-                                                               "\top2=\"<string evaluating to a number>\"",
-                                                               lam27,
-                                                               UnaryOpProperty.PARSE_DOUBLE,
-                                                               UnaryOpProperty.PARSE_DOUBLE,
-                                                               UnaryOpProperty.FORMAT_DOUBLE));
+    PropertyMaps.TEMPLATE.
+      setProperty("Misc", new BinaryOpProperty
+                    <Double,Double,Double>("sub",
+                                           "Returns the difference between the two operands (op1-op2).\n" +
+                                           "Required attributes:\n" +
+                                           "\top1=\"<string evaluating to a number>\"\n" +
+                                           "\top2=\"<string evaluating to a number>\"",
+                                           lam27,
+                                           UnaryOpProperty.PARSE_DOUBLE,
+                                           UnaryOpProperty.PARSE_DOUBLE,
+                                           UnaryOpProperty.FORMAT_DOUBLE));
     
     Lambda2<Double,Double,Double> lam28 =  new Lambda2<Double,Double,Double>() {
       public Double value(Double op1, Double op2) { return op1 * op2; }

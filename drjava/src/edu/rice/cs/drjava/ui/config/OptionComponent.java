@@ -140,7 +140,7 @@ public abstract class OptionComponent<T> implements Serializable {
   }
   
   /** Interface for change listener. */
-  public static interface ChangeListener extends Lambda<Object, Object> {}
+  public static interface ChangeListener extends Lambda<Object, Object> { }
   
   /** Adds a change listener to this component.
     * @param listener listener to add
