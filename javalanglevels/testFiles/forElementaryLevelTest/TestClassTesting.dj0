@@ -1,4 +1,0 @@
-class TestClassTesting extends TestCase {
-  void testMethod() {
-  }
-}

@@ -1,9 +1,0 @@
-class UsesStaticFields {
-  static int j = 5;
-}
-
-class Whatever {
-  int myCrazyMethod() {
-    return UsesStaticFields.j;
-  }
-}

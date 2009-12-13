@@ -1,6 +1,0 @@
-package listFW;
-
-public interface IList {
-  int getLength();
-  
-}

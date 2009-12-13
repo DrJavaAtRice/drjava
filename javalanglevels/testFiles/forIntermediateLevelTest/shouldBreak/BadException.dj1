@@ -1,7 +1,0 @@
-class BadException {
-  
-  public int get(int i) {
-    throw new AnExceptionnnn();
-    throw anexception;
-  }
-}

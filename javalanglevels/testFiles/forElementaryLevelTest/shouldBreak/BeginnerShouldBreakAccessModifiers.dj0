@@ -1,7 +1,0 @@
-/*!DrJava Beginner Level*/
-
-class BeginnerShouldBreakAccessModifiers extends Object{
-  public int i;
-  private int j;
-  protected char c;
-}
