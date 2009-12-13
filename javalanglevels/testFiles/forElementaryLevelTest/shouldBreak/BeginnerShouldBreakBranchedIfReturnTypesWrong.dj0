@@ -1,0 +1,15 @@
+/*!DrJava Beginner Level*/
+
+class BeginnerShouldBreakBranchedIfReturnTypesWrong extends Object {
+  int gonnaBreak() {
+    if (1 < 2) {
+      return 5;
+    }
+    
+    if (1>2) {
+      return "Woah";
+    }
+
+    return 9;
+  }
+}

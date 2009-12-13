@@ -1,0 +1,5 @@
+// Relies on NonEmpty, which doesn't compile correctly.
+
+class Empty extends List {
+  List insert(Comparable o) { return new NonEmpty(o, this); }
+}

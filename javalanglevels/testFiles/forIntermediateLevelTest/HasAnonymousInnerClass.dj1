@@ -1,0 +1,23 @@
+class MyThing {
+  int i;
+  int j;
+  
+  MyThing(int one, int two) {
+    i=one;
+    j=two;
+  }
+}
+
+class HasAnonymousInnerClass {
+  HasAnonymousInnerClass() {
+  }
+  
+  int myMethod() {
+    return (new MyThing(1, 2) {
+      int yourMethod() {
+        return j();
+      }
+    }).yourMethod();
+  }
+  
+}

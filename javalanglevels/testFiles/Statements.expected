@@ -1,0 +1,451 @@
+SourceFile:
+  sourceInfo = [Statements.test: (1,1)-(50,1)]
+  packageStatements = {
+    #0: PackageStatement:
+      sourceInfo = [Statements.test: (1,1)-(1,16)]
+      cWord = CompoundWord:
+        sourceInfo = [Statements.test: (1,9)-(1,15)]
+        words = {
+          #0: Word:
+            sourceInfo = [Statements.test: (1,9)-(1,11)]
+            text = foo
+          #1: Word:
+            sourceInfo = [Statements.test: (1,13)-(1,15)]
+            text = bar
+        }
+  }
+  importStatements = {
+    #0: ClassImportStatement:
+      sourceInfo = [Statements.test: (2,1)-(2,19)]
+      cWord = CompoundWord:
+        sourceInfo = [Statements.test: (2,8)-(2,18)]
+        words = {
+          #0: Word:
+            sourceInfo = [Statements.test: (2,8)-(2,10)]
+            text = foo
+          #1: Word:
+            sourceInfo = [Statements.test: (2,12)-(2,14)]
+            text = bar
+          #2: Word:
+            sourceInfo = [Statements.test: (2,16)-(2,18)]
+            text = baz
+        }
+    #1: PackageImportStatement:
+      sourceInfo = [Statements.test: (3,1)-(3,13)]
+      cWord = CompoundWord:
+        sourceInfo = [Statements.test: (3,8)-(3,10)]
+        words = {
+          #0: Word:
+            sourceInfo = [Statements.test: (3,8)-(3,10)]
+            text = foo
+        }
+  }
+  types = {
+    #0: ClassDef:
+      sourceInfo = [Statements.test: (5,1)-(50,1)]
+      mav = ModifiersAndVisibility:
+        sourceInfo = [Statements.test: (5,1)-(5,6)]
+        modifiers = {
+          #0: public
+        }
+      name = Word:
+        sourceInfo = [Statements.test: (5,14)-(5,23)]
+        text = Statements
+      typeParameters = {}
+      superclass = ClassOrInterfaceType:
+        sourceInfo = [(no file): (-1,-1)-(-1,-1)]
+        name = Object
+        typeArguments = {}
+      interfaces = {}
+      body = BracedBody:
+        sourceInfo = [Statements.test: (5,25)-(50,1)]
+        statements = {
+          #0: InstanceInitializer:
+            sourceInfo = [Statements.test: (6,3)-(18,3)]
+            code = Block:
+              sourceInfo = [Statements.test: (6,3)-(18,3)]
+              statements = BracedBody:
+                sourceInfo = [Statements.test: (6,3)-(18,3)]
+                statements = {
+                  #0: VariableDeclaration:
+                    sourceInfo = [Statements.test: (7,5)-(7,13)]
+                    mav = ModifiersAndVisibility:
+                      sourceInfo = [Statements.test: (7,5)-(7,5)]
+                      modifiers = {}
+                    declarators = {
+                      #0: InitializedVariableDeclarator:
+                        sourceInfo = [Statements.test: (7,9)-(7,13)]
+                        type = PrimitiveType:
+                          sourceInfo = [Statements.test: (7,5)-(7,7)]
+                          name = int
+                        name = Word:
+                          sourceInfo = [Statements.test: (7,9)-(7,9)]
+                          text = i
+                        initializer = IntegerLiteral:
+                          sourceInfo = [Statements.test: (7,13)-(7,13)]
+                          value = 0
+                    }
+                  #1: IfThenStatement:
+                    sourceInfo = [Statements.test: (8,5)-(10,5)]
+                    testExpression = LessThanExpression:
+                      sourceInfo = [Statements.test: (8,9)-(8,13)]
+                      left = SimpleNameReference:
+                        sourceInfo = [Statements.test: (8,9)-(8,9)]
+                        name = Word:
+                          sourceInfo = [Statements.test: (8,9)-(8,9)]
+                          text = i
+                      right = IntegerLiteral:
+                        sourceInfo = [Statements.test: (8,13)-(8,13)]
+                        value = 5
+                    thenStatement = Block:
+                      sourceInfo = [Statements.test: (8,16)-(10,5)]
+                      statements = BracedBody:
+                        sourceInfo = [Statements.test: (8,16)-(10,5)]
+                        statements = {
+                          #0: ExpressionStatement:
+                            sourceInfo = [Statements.test: (9,7)-(9,12)]
+                            expression = SimpleAssignmentExpression:
+                              sourceInfo = [Statements.test: (9,7)-(9,11)]
+                              name = SimpleNameReference:
+                                sourceInfo = [Statements.test: (9,7)-(9,7)]
+                                name = Word:
+                                  sourceInfo = [Statements.test: (9,7)-(9,7)]
+                                  text = i
+                              value = IntegerLiteral:
+                                sourceInfo = [Statements.test: (9,11)-(9,11)]
+                                value = 6
+                        }
+                  #2: IfThenElseStatement:
+                    sourceInfo = [Statements.test: (11,5)-(15,5)]
+                    testExpression = LessThanExpression:
+                      sourceInfo = [Statements.test: (11,9)-(11,13)]
+                      left = SimpleNameReference:
+                        sourceInfo = [Statements.test: (11,9)-(11,9)]
+                        name = Word:
+                          sourceInfo = [Statements.test: (11,9)-(11,9)]
+                          text = i
+                      right = IntegerLiteral:
+                        sourceInfo = [Statements.test: (11,13)-(11,13)]
+                        value = 7
+                    thenStatement = Block:
+                      sourceInfo = [Statements.test: (11,16)-(13,5)]
+                      statements = BracedBody:
+                        sourceInfo = [Statements.test: (11,16)-(13,5)]
+                        statements = {
+                          #0: UnlabeledBreakStatement: sourceInfo = [Statements.test: (12,7)-(12,12)]
+                        }
+                    elseStatement = Block:
+                      sourceInfo = [Statements.test: (14,10)-(15,5)]
+                      statements = BracedBody:
+                        sourceInfo = [Statements.test: (14,10)-(15,5)]
+                        statements = {}
+                  #3: IfThenStatement:
+                    sourceInfo = [Statements.test: (16,5)-(17,26)]
+                    testExpression = EqualsExpression:
+                      sourceInfo = [Statements.test: (16,9)-(16,15)]
+                      left = SimpleNameReference:
+                        sourceInfo = [Statements.test: (16,9)-(16,9)]
+                        name = Word:
+                          sourceInfo = [Statements.test: (16,9)-(16,9)]
+                          text = i
+                      right = IntegerLiteral:
+                        sourceInfo = [Statements.test: (16,14)-(16,15)]
+                        value = 10
+                    thenStatement = ExpressionStatement:
+                      sourceInfo = [Statements.test: (17,5)-(17,26)]
+                      expression = ComplexMethodInvocation:
+                        sourceInfo = [Statements.test: (17,5)-(17,25)]
+                        enclosing = ComplexNameReference:
+                          sourceInfo = [Statements.test: (17,5)-(17,14)]
+                          enclosing = SimpleNameReference:
+                            sourceInfo = [Statements.test: (17,5)-(17,10)]
+                            name = Word:
+                              sourceInfo = [Statements.test: (17,5)-(17,10)]
+                              text = System
+                          name = Word:
+                            sourceInfo = [Statements.test: (17,12)-(17,14)]
+                            text = out
+                        name = Word:
+                          sourceInfo = [Statements.test: (17,16)-(17,22)]
+                          text = println
+                        arguments = ParenthesizedExpressionList:
+                          sourceInfo = [Statements.test: (17,23)-(17,25)]
+                          expressions = {
+                            #0: SimpleNameReference:
+                              sourceInfo = [Statements.test: (17,24)-(17,24)]
+                              name = Word:
+                                sourceInfo = [Statements.test: (17,24)-(17,24)]
+                                text = i
+                          }
+                }
+          #1: ConcreteMethodDef:
+            sourceInfo = [Statements.test: (20,3)-(49,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [Statements.test: (20,3)-(20,15)]
+              modifiers = {
+                #0: public
+                #1: static
+              }
+            typeParams = {}
+            result = VoidReturn:
+              sourceInfo = [Statements.test: (20,17)-(20,20)]
+              name = void
+            name = Word:
+              sourceInfo = [Statements.test: (20,22)-(20,25)]
+              text = main
+            params = {
+              #0: FormalParameter:
+                sourceInfo = [Statements.test: (20,27)-(20,39)]
+                declarator = UninitializedVariableDeclarator:
+                  sourceInfo = [Statements.test: (20,36)-(20,39)]
+                  type = ArrayType:
+                    sourceInfo = [Statements.test: (20,27)-(20,34)]
+                    name = String[]
+                    elementType = ClassOrInterfaceType:
+                      sourceInfo = [Statements.test: (20,27)-(20,32)]
+                      name = String
+                      typeArguments = {}
+                  name = Word:
+                    sourceInfo = [Statements.test: (20,36)-(20,39)]
+                    text = args
+                isFinal = false
+            }
+            throws = {}
+            body = BracedBody:
+              sourceInfo = [Statements.test: (20,42)-(49,3)]
+              statements = {
+                #0: LabeledStatement:
+                  sourceInfo = [Statements.test: (21,5)-(48,5)]
+                  label = Word:
+                    sourceInfo = [Statements.test: (21,5)-(21,9)]
+                    text = label
+                  statement = ForStatement:
+                    sourceInfo = [Statements.test: (21,12)-(48,5)]
+                    init = UnparenthesizedExpressionList:
+                      sourceInfo = [Statements.test: (21,17)-(21,21)]
+                      expressions = {
+                        #0: SimpleAssignmentExpression:
+                          sourceInfo = [Statements.test: (21,17)-(21,21)]
+                          name = SimpleNameReference:
+                            sourceInfo = [Statements.test: (21,17)-(21,17)]
+                            name = Word:
+                              sourceInfo = [Statements.test: (21,17)-(21,17)]
+                              text = i
+                          value = IntegerLiteral:
+                            sourceInfo = [Statements.test: (21,21)-(21,21)]
+                            value = 5
+                      }
+                    condition = NotEqualExpression:
+                      sourceInfo = [Statements.test: (21,24)-(21,29)]
+                      left = SimpleNameReference:
+                        sourceInfo = [Statements.test: (21,24)-(21,24)]
+                        name = Word:
+                          sourceInfo = [Statements.test: (21,24)-(21,24)]
+                          text = i
+                      right = IntegerLiteral:
+                        sourceInfo = [Statements.test: (21,29)-(21,29)]
+                        value = 3
+                    update = UnparenthesizedExpressionList:
+                      sourceInfo = [Statements.test: (21,32)-(21,34)]
+                      expressions = {
+                        #0: PositivePostfixIncrementExpression:
+                          sourceInfo = [Statements.test: (21,32)-(21,34)]
+                          value = SimpleNameReference:
+                            sourceInfo = [Statements.test: (21,32)-(21,32)]
+                            name = Word:
+                              sourceInfo = [Statements.test: (21,32)-(21,32)]
+                              text = i
+                      }
+                    code = Block:
+                      sourceInfo = [Statements.test: (21,37)-(48,5)]
+                      statements = BracedBody:
+                        sourceInfo = [Statements.test: (21,37)-(48,5)]
+                        statements = {
+                          #0: WhileStatement:
+                            sourceInfo = [Statements.test: (22,7)-(24,7)]
+                            condition = EqualsExpression:
+                              sourceInfo = [Statements.test: (22,14)-(22,19)]
+                              left = SimpleNameReference:
+                                sourceInfo = [Statements.test: (22,14)-(22,14)]
+                                name = Word:
+                                  sourceInfo = [Statements.test: (22,14)-(22,14)]
+                                  text = i
+                              right = IntegerLiteral:
+                                sourceInfo = [Statements.test: (22,19)-(22,19)]
+                                value = 1
+                            code = Block:
+                              sourceInfo = [Statements.test: (22,22)-(24,7)]
+                              statements = BracedBody:
+                                sourceInfo = [Statements.test: (22,22)-(24,7)]
+                                statements = {
+                                  #0: UnlabeledContinueStatement: sourceInfo = [Statements.test: (23,9)-(23,17)]
+                                }
+                          #1: VoidReturnStatement: sourceInfo = [Statements.test: (25,7)-(25,13)]
+                          #2: DoStatement:
+                            sourceInfo = [Statements.test: (27,7)-(29,19)]
+                            code = ExpressionStatement:
+                              sourceInfo = [Statements.test: (28,9)-(28,14)]
+                              expression = SimpleAssignmentExpression:
+                                sourceInfo = [Statements.test: (28,9)-(28,13)]
+                                name = SimpleNameReference:
+                                  sourceInfo = [Statements.test: (28,9)-(28,9)]
+                                  name = Word:
+                                    sourceInfo = [Statements.test: (28,9)-(28,9)]
+                                    text = i
+                                value = IntegerLiteral:
+                                  sourceInfo = [Statements.test: (28,13)-(28,13)]
+                                  value = 1
+                            condition = BooleanLiteral:
+                              sourceInfo = [Statements.test: (29,14)-(29,17)]
+                              value = true
+                          #3: EmptyStatement: sourceInfo = [Statements.test: (30,7)-(30,7)]
+                          #4: EmptyStatement: sourceInfo = [Statements.test: (30,8)-(30,8)]
+                          #5: EmptyStatement: sourceInfo = [Statements.test: (31,7)-(31,7)]
+                          #6: SwitchStatement:
+                            sourceInfo = [Statements.test: (32,7)-(37,7)]
+                            test = SimpleNameReference:
+                              sourceInfo = [Statements.test: (32,15)-(32,19)]
+                              name = Word:
+                                sourceInfo = [Statements.test: (32,15)-(32,19)]
+                                text = kdfjd
+                            cases = {
+                              #0: LabeledCase:
+                                sourceInfo = [Statements.test: (33,9)-(34,14)]
+                                label = Parenthesized:
+                                  sourceInfo = [Statements.test: (33,14)-(33,16)]
+                                  value = IntegerLiteral:
+                                    sourceInfo = [Statements.test: (33,15)-(33,15)]
+                                    value = 1
+                                code = UnbracedBody:
+                                  sourceInfo = [Statements.test: (33,20)-(34,14)]
+                                  statements = {
+                                    #0: ThrowStatement:
+                                      sourceInfo = [Statements.test: (33,20)-(33,37)]
+                                      thrown = SimpleNamedClassInstantiation:
+                                        sourceInfo = [Statements.test: (33,26)-(33,36)]
+                                        type = ClassOrInterfaceType:
+                                          sourceInfo = [Statements.test: (33,30)-(33,34)]
+                                          name = Error
+                                          typeArguments = {}
+                                        arguments = ParenthesizedExpressionList:
+                                          sourceInfo = [Statements.test: (33,35)-(33,36)]
+                                          expressions = {}
+                                    #1: UnlabeledBreakStatement: sourceInfo = [Statements.test: (34,9)-(34,14)]
+                                  }
+                              #1: LabeledCase:
+                                sourceInfo = [Statements.test: (35,9)-(35,28)]
+                                label = Parenthesized:
+                                  sourceInfo = [Statements.test: (35,14)-(35,16)]
+                                  value = IntegerLiteral:
+                                    sourceInfo = [Statements.test: (35,15)-(35,15)]
+                                    value = 2
+                                code = UnbracedBody:
+                                  sourceInfo = [Statements.test: (35,20)-(35,28)]
+                                  statements = {
+                                    #0: ValueReturnStatement:
+                                      sourceInfo = [Statements.test: (35,20)-(35,28)]
+                                      value = SimpleNameReference:
+                                        sourceInfo = [Statements.test: (35,27)-(35,27)]
+                                        name = Word:
+                                          sourceInfo = [Statements.test: (35,27)-(35,27)]
+                                          text = i
+                                  }
+                              #2: DefaultCase:
+                                sourceInfo = [Statements.test: (36,9)-(36,33)]
+                                code = UnbracedBody:
+                                  sourceInfo = [Statements.test: (36,19)-(36,33)]
+                                  statements = {
+                                    #0: LabeledContinueStatement:
+                                      sourceInfo = [Statements.test: (36,19)-(36,33)]
+                                      label = Word:
+                                        sourceInfo = [Statements.test: (36,28)-(36,32)]
+                                        text = label
+                                  }
+                            }
+                          #7: SynchronizedStatement:
+                            sourceInfo = [Statements.test: (38,7)-(47,7)]
+                            lockExpr = SimpleNamedClassInstantiation:
+                              sourceInfo = [Statements.test: (38,20)-(38,31)]
+                              type = ClassOrInterfaceType:
+                                sourceInfo = [Statements.test: (38,24)-(38,29)]
+                                name = Object
+                                typeArguments = {}
+                              arguments = ParenthesizedExpressionList:
+                                sourceInfo = [Statements.test: (38,30)-(38,31)]
+                                expressions = {}
+                            block = Block:
+                              sourceInfo = [Statements.test: (38,34)-(47,7)]
+                              statements = BracedBody:
+                                sourceInfo = [Statements.test: (38,34)-(47,7)]
+                                statements = {
+                                  #0: TryCatchFinallyStatement:
+                                    sourceInfo = [Statements.test: (39,9)-(46,9)]
+                                    tryBlock = Block:
+                                      sourceInfo = [Statements.test: (39,13)-(41,9)]
+                                      statements = BracedBody:
+                                        sourceInfo = [Statements.test: (39,13)-(41,9)]
+                                        statements = {
+                                          #0: LabeledBreakStatement:
+                                            sourceInfo = [Statements.test: (40,11)-(40,22)]
+                                            label = Word:
+                                              sourceInfo = [Statements.test: (40,17)-(40,21)]
+                                              text = label
+                                        }
+                                    catchBlocks = {
+                                      #0: CatchBlock:
+                                        sourceInfo = [Statements.test: (42,9)-(43,9)]
+                                        exception = FormalParameter:
+                                          sourceInfo = [Statements.test: (42,16)-(42,26)]
+                                          declarator = UninitializedVariableDeclarator:
+                                            sourceInfo = [Statements.test: (42,26)-(42,26)]
+                                            type = ClassOrInterfaceType:
+                                              sourceInfo = [Statements.test: (42,16)-(42,24)]
+                                              name = Exception
+                                              typeArguments = {}
+                                            name = Word:
+                                              sourceInfo = [Statements.test: (42,26)-(42,26)]
+                                              text = e
+                                          isFinal = false
+                                        block = Block:
+                                          sourceInfo = [Statements.test: (42,29)-(43,9)]
+                                          statements = BracedBody:
+                                            sourceInfo = [Statements.test: (42,29)-(43,9)]
+                                            statements = {}
+                                    }
+                                    finallyBlock = Block:
+                                      sourceInfo = [Statements.test: (44,17)-(46,9)]
+                                      statements = BracedBody:
+                                        sourceInfo = [Statements.test: (44,17)-(46,9)]
+                                        statements = {
+                                          #0: ExpressionStatement:
+                                            sourceInfo = [Statements.test: (45,11)-(45,32)]
+                                            expression = ComplexMethodInvocation:
+                                              sourceInfo = [Statements.test: (45,11)-(45,31)]
+                                              enclosing = ComplexNameReference:
+                                                sourceInfo = [Statements.test: (45,11)-(45,20)]
+                                                enclosing = SimpleNameReference:
+                                                  sourceInfo = [Statements.test: (45,11)-(45,16)]
+                                                  name = Word:
+                                                    sourceInfo = [Statements.test: (45,11)-(45,16)]
+                                                    text = System
+                                                name = Word:
+                                                  sourceInfo = [Statements.test: (45,18)-(45,20)]
+                                                  text = out
+                                              name = Word:
+                                                sourceInfo = [Statements.test: (45,22)-(45,28)]
+                                                text = println
+                                              arguments = ParenthesizedExpressionList:
+                                                sourceInfo = [Statements.test: (45,29)-(45,31)]
+                                                expressions = {
+                                                  #0: SimpleNameReference:
+                                                    sourceInfo = [Statements.test: (45,30)-(45,30)]
+                                                    name = Word:
+                                                      sourceInfo = [Statements.test: (45,30)-(45,30)]
+                                                      text = i
+                                                }
+                                        }
+                                }
+                        }
+              }
+        }
+  }

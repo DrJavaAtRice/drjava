@@ -1,0 +1,10 @@
+/**A return in a do loop is not guaranteed to have happened*/
+
+class ReturnInDoLoop {
+  int myMethod(int j) {
+    do {
+      return 5;
+    } while (j<5);
+
+  }
+}

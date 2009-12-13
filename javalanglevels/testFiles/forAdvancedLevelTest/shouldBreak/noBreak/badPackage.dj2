@@ -1,0 +1,5 @@
+//this should break because there is a class of the same name in the above package.
+package shouldBreak.noBreak;
+
+class MyClass {
+}

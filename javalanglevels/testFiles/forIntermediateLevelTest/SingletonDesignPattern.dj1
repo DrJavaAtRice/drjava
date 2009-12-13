@@ -1,0 +1,12 @@
+class SingletonDesignPattern {
+  static SingletonDesignPattern sdp = new SingletonDesignPattern();
+  
+  private SingletonDesignPattern() {
+  }
+}
+
+class useSingleton {
+  SingletonDesignPattern myMethod() {
+    return SingletonDesignPattern.sdp;
+  }
+}

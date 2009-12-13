@@ -1,0 +1,10 @@
+/* Make sure that variables declared within blocks are handled correctly. */
+
+class myClass {
+  int myMethod() {
+    if (1 < 2) {
+      int k = 5;
+    }
+    return 34;
+  }
+}

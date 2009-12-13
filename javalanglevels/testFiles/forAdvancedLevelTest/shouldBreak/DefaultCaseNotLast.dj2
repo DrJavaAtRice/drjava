@@ -1,0 +1,11 @@
+/** This tests that if the default case is not the last case in a switch statement, an error is given at the advanced level*/
+
+class DefaultCaseNotLast {
+  void myCrazyMethod(int i) {
+    switch (i) {
+      case 2: return;
+      default: return;
+      case 3: return;
+    }
+  }
+}

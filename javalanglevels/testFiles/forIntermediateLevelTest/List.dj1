@@ -1,0 +1,7 @@
+interface List {
+  abstract boolean member(int i);
+  abstract OrdList createList();
+  abstract OrdList createList(int i);
+  abstract List add(int i);
+}
+

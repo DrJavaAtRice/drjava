@@ -1,0 +1,8 @@
+//Here, the user has a method in their test class that returns "void" but does not start with "test".
+public class TestClassTestingNonVoidMethod extends TestCase {
+  void testMethod() {
+  }
+  
+  void nontestMethod() {
+  }
+}

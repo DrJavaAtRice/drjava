@@ -1,0 +1,7 @@
+
+
+class UncaughtException {
+  UncaughtException () {
+    throw new ClassNotFoundException("This should have been caught!  Oh no!");
+  }
+}

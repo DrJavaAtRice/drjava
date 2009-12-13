@@ -1,0 +1,7 @@
+//this class should break because explicit package statements are no longer allowed at the Intermediate Level.
+
+package forIntermediateLevelTest;
+
+class PackagedClass {
+ static Hashtable ht = new Hashtable(); 
+}

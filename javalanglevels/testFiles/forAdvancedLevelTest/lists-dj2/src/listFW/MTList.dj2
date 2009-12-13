@@ -1,0 +1,12 @@
+package listFW;
+
+public class MTList implements IList {
+  static MTList Singleton = new MTList();
+  private MTList() {
+  }
+
+  public int getLength() {
+    return 0;
+  }
+  
+}

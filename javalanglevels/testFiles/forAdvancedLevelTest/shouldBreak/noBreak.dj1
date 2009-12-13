@@ -1,0 +1,5 @@
+package shouldBreak;
+
+//This class shouldn't actually break...just here to be combined with test in shouldBreak.
+class noBreak {
+}

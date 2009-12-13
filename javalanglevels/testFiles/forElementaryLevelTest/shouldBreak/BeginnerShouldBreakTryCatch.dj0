@@ -1,0 +1,8 @@
+/*!DrJava Beginner Level*/
+
+class BeginnerShouldBreakTryCatch extends Object {
+  int whatever() {
+    try 
+    {int t=1 + 1;}
+    catch (Exception e) {
+      System.out.println ("Uh oh!");}}}

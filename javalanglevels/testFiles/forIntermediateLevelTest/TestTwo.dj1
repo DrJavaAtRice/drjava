@@ -1,0 +1,7 @@
+import junit.framework.TestCase;
+
+public class TestTwo extends TestOne {
+  public void testTwo() {
+    assertTrue(true);
+  }
+}

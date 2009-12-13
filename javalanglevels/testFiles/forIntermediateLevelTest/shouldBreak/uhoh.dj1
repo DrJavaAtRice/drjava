@@ -1,0 +1,23 @@
+//this class was throwing an unsupported operation exception, but it should not do this anymore.
+
+abstract class IntList {
+ IntList add(int i) { return new NonEmpty(i, this); }
+ abstract IntList insert(int i);
+ abstract IntList sort();
+}
+
+class Empty extends IntList {
+ static IntList ONLY = new Empty();
+ IntList insert(int i) { return new NonEmpty(i, ONLY); }
+ IntList sort() { return ONLY; }
+}
+
+class NonEmpty extends IntList {
+ int first;
+ IntList rest;
+ IntList insert(int i) {
+   if (i <= first) return new NonEmpty(i, this);
+   return new NonEmpty(first, rest.insert(i));
+ }
+ IntList sort() { return rest.sort().insert(i); }
+}

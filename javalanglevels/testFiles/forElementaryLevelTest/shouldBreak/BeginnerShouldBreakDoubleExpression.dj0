@@ -1,0 +1,28 @@
+class Testing8 extends Object{
+ double j;
+ 
+ double cannotBitwiseAnd() {
+   double i = 5;
+   return j&i;
+//   return i;
+ }
+ 
+ double cannotBitwiseOr() {
+   double i = 4.2;
+   return j|i;
+//   return j;
+ }
+ 
+ double cannotBitwiseAndAssign() {
+   double i = 4.2;
+//   i &= 5.2;
+   return i;
+ }
+ 
+ double cannotBitwiseOrAssign() {
+   double i = 4.1;
+//   i |= 2.3;
+   return i;
+
+ }
+}

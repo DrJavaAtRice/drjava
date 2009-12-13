@@ -1,0 +1,4 @@
+class ShouldBreakInnerInterface extends Object {
+  interface InnerInterface{
+  }
+}

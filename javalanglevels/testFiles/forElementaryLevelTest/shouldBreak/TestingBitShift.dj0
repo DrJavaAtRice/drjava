@@ -1,0 +1,7 @@
+class TestingBitShift extends Object{
+ 
+ double cannotBitShift() {
+   int i = 5;
+   i<<2;
+ }
+}

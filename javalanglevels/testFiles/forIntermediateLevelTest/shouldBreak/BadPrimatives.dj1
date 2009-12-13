@@ -1,0 +1,4 @@
+class BadPrimatives {
+ long l;
+ float f;
+}

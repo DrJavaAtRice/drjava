@@ -1,0 +1,14 @@
+/* Test that no error is given with implicit call to super constructor */
+
+class MyParent {
+  MyParent() {
+  }
+
+}
+
+class ChildWithImplicitConstructorCall extends MyParent {
+  ChildWithImplicitConstructorCall() {
+    System.out.println("Made my child");
+  }
+ 
+}

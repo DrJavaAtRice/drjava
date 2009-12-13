@@ -1,0 +1,20 @@
+class TryCatchFinally {
+  public int booyah() throws ClassNotFoundException{
+    int i = 0,c = 6,j = 7;
+    if (i+c < j) {
+      throw new ClassNotFoundException("Someone had better catch me!");
+    }
+    try {
+      if (c < j) {
+        throw new CloneNotSupportedException("And someone had better catch me too!");
+      }
+      else throw new RuntimeException("No one needs to catch me");
+    }
+    catch (RuntimeException e) {
+    }
+    
+    finally {
+      return 5;
+    }
+  }
+}

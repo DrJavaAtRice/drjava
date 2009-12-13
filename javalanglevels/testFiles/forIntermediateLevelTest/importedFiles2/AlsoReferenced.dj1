@@ -1,0 +1,4 @@
+package forIntermediateLevelTest.importedFiles2;
+
+public class AlsoReferenced {
+}

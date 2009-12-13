@@ -1,0 +1,9 @@
+/**This file tests that a value can be assigned to an element in an array.*/
+
+class TestArrayAssignment {
+  int[] i = new int[5];
+  
+  void assignValue() {
+    i[4]=2+5;
+  }
+}

@@ -1,0 +1,12 @@
+//can assign an int array to an Object.
+
+class testArraysObject {
+//  Integer[][] i = {{1, 2, 3}};
+  Object o = new int[] {1, 2, 3};
+  int j;
+  void myMethod() {
+    
+    java.lang.Integer[] i2 = {j = 5};
+  }
+
+}

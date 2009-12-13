@@ -1,0 +1,10 @@
+/* Test that super fields are treated correctly in generated constructors. */
+
+class Super {
+  int x = 3;
+}
+class Bob extends Super {
+
+
+}
+

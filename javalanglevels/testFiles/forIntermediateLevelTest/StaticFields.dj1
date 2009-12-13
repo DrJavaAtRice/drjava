@@ -1,0 +1,13 @@
+class StaticFields {
+  static int i=2;
+  static int j=5;
+ 
+  StaticFields() {
+  }
+}
+
+class UseStaticFields {
+  int myMethod() {
+    return StaticFields.j;
+  }
+}

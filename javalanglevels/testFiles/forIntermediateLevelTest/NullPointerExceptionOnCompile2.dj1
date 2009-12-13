@@ -1,0 +1,22 @@
+//This should also not throw a null pointer exception on compile: it was before, because we weren't handling the ordering of interfaces and classes correctly.
+
+interface TestI2 {
+  int silly();
+}
+
+
+class TestYeah2 implements TestI2 {
+  int myMethod() { 
+    return 5;
+  }
+  public int silly() {
+    return 6; 
+  }
+}
+
+
+class TestYou2 {
+  int brokenMethod() {
+    return 4;//myMethod();
+  }
+}

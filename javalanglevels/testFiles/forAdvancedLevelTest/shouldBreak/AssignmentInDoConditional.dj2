@@ -1,0 +1,10 @@
+/** cannot have an assignment in the conditional expression of a do loop */
+class AssignmentInDoConditional {
+  void myMethod() {
+    int i = 23;
+    do {
+      System.out.println("oh dear!");
+    }
+    while (i=42);
+  }
+}

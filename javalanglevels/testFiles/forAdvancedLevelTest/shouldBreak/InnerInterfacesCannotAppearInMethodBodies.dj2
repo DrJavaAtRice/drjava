@@ -1,0 +1,7 @@
+//According to the behavior of the javac compiler, interfaces cannot appear in method bodies.
+class InnerInterfacesCannotAppearInMethodBodies {
+  void myMethod() {
+    interface InnerInterface {
+    }
+  }
+}

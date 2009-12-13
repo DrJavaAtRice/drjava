@@ -1,0 +1,14 @@
+//Instantiating a SimpleAnonymousInnerClass that extends an Interface should not give an error
+
+interface MyInterface {
+  int myMethod();
+}
+
+class TestClass {
+  MyInterface i = new MyInterface() {
+    public int myMethod() {
+      return 42;
+    }
+  };
+} 
+  

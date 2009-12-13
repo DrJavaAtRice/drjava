@@ -1,0 +1,19 @@
+//This makes sure that you can use an unqualified name to reference an inner  class, 
+//after the local class has been defined.
+
+class RefInnerClass {
+  
+  class MyInnerClass {
+    
+  }
+  
+  MyInnerClass c;
+ 
+
+}
+
+    
+
+  
+
+  

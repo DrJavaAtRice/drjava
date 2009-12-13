@@ -1,0 +1,8 @@
+// Since this doesn't compile and Empty references NonEmpty,
+// Empty must not assume that NonEmpty has successfully compiled.
+
+class NonEmpty extends List {
+  Comparable first;
+  List rest;
+  boolean method() { return f;}
+}

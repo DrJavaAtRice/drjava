@@ -1,0 +1,10 @@
+class BeginnerShouldBreakNull {
+  
+  int i;
+  int j;
+  
+  public int doSomething(char c String s) {
+    if (s != null) { /**null is not allowed at beginner level:*/
+      System.out.println(c);
+    }
+  }

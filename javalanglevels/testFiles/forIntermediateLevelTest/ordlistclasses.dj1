@@ -1,0 +1,48 @@
+class Empty implements OrdList {
+  
+  public OrdList createList() { return new Empty(); }
+
+  public OrdList createList(int i) { return new OrdNonEmpty(i); }
+  
+  public List add(int i) { return new NonEmpty(i, this); }
+  
+   public OrdList insert(int i) { return new OrdNonEmpty(i, this); }
+   
+   public boolean member(int i) { return false; }
+}
+
+class NonEmpty implements List {
+  int first;
+  List rest;
+  
+//  NonEmpty(int i, List l) { 
+//    first = i;
+//    rest = l;
+//  }
+//  
+  public OrdList createList() { return new Empty(); }
+  
+  public OrdList createList(int i) { return new OrdNonEmpty(i); }
+  
+  public List add(int i) { return new NonEmpty(i, this); }
+  
+  public boolean member(int i) {
+    if (i == first) return true;
+    else return rest.member(i);
+  }
+}
+
+class OrdNonEmpty extends NonEmpty implements OrdList {
+  
+  //private OrdNonEmpty(int i, List l) { super(i, l); }
+    
+  OrdNonEmpty(int i) { super(i, new Empty()); }
+//  public OrdList createList() {  return super.createList(); }
+//  public OrdList createList(int i) { return super.createList(i); }
+  public OrdList insert(int i) {  /* return type should be OrdList */
+    if (i <= first()) return new OrdNonEmpty(i, this);
+    else return new OrdNonEmpty(first(), ((OrdList) rest()).insert(i));
+  }
+  
+  public boolean member(int i) { return super.member(i); }
+}

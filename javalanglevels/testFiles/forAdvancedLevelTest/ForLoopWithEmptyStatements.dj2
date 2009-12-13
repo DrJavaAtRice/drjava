@@ -1,0 +1,10 @@
+//tests that empty statements in for loops are okay
+class ForLoopWithEmptyStatements {
+  int myMethod(int j) {
+    for (; j<24 ; ) {
+      System.out.println("I am running infinitely!");
+    }
+  return 245;
+  }
+}
+  

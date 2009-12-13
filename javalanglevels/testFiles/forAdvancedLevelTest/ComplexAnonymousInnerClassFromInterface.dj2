@@ -1,0 +1,18 @@
+//Instantiating a ComplexAnonymousInnerClass that extends an Interface should not give an error
+
+
+
+interface MyInterface2 {
+  interface MyInnerInterface {
+    int myMethod();
+  }
+}
+
+class TestClass2 {
+  MyInterface2.MyInnerInterface i = new MyInterface2.MyInnerInterface() {
+    public int myMethod() {
+      return 42;
+    }
+  };
+} 
+  

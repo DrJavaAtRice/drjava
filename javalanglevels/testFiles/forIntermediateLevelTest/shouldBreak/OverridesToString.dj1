@@ -1,0 +1,14 @@
+/**
+ * This overrides toString
+ */
+
+class OverridesToString {
+  int i;
+  char c;
+  
+  
+  public String toString() {
+    return "My toString";
+  }
+  
+}

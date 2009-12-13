@@ -1,0 +1,20 @@
+//this makes sure that autoboxing is correctly done in the case where the object type corresponding to the
+//primitive is not in the symbol table.
+
+abstract class AList {
+}
+
+class Empty extends AList {
+}
+
+class NonEmpty extends AList {
+  Object first;
+  AList rest;
+}
+
+class UseLists {
+  int myMethod() { 
+    AList a = new NonEmpty(2, new Empty());
+    return 5;
+  }
+}

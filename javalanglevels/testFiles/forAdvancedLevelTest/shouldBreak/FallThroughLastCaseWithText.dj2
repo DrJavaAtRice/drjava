@@ -1,0 +1,10 @@
+/** This tests that if the last case falls through, but has an expression in it, an error is thrown*/
+
+class FallThroughLastCaseWithText {
+  void myCrazyMethod(int i) {
+    switch (i) {
+      case 2: return;
+      default: int j = 23;
+    }
+  }
+}

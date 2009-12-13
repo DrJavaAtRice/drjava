@@ -1,0 +1,4 @@
+//Here, we see that the methods of interfaces are not allowed to be private.
+interface MyInterfaceYeah {
+  private boolean yeah(Object o);
+}

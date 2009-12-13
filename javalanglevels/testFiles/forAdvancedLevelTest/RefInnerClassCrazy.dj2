@@ -1,0 +1,26 @@
+//This makes sure that you can use an unqualified name to reference an inner  class, 
+//before the local class has been defined.
+
+class RefInnerClassCrazy {
+  
+  class MyInnerClass {
+    
+  }
+  
+  void myMethod() {
+    class YourClass {
+      void myMethod2() {
+        class AnotherClass {
+          MyInnerClass c;
+        }
+      }
+    }
+  }
+
+}
+
+    
+
+  
+
+  

@@ -1,0 +1,53 @@
+//This file contains an ambiguous reference on lines 45 and 49, because we are generating a second default constructor.
+//Right now, this breaks.  However, if we stop generating the 2nd constructor (which I think maybe we should), then this
+//will not be breaking.
+
+interface OrdList{
+  OrdList createOrdList(int i);
+  OrdList insert(int i);
+  boolean member(int i);
+}
+
+abstract class List {
+  abstract boolean member(int i);
+}
+
+class Empty extends List implements OrdList {
+
+  public OrdList createOrdList(int i) { return new OrdNonEmpty(i); }
+  
+  public OrdList insert(int i) { return new OrdNonEmpty(i); }
+  
+  public boolean member(int i) { return false; }
+}
+
+class NonEmpty extends List {
+  int first;
+  List rest;
+  
+  NonEmpty(int i, List L) { 
+    first = i;
+    rest = L;
+  }
+  
+  public boolean member(int i) {
+    if (i == first) return true;
+    else return rest.member(i);
+  }
+}
+
+class OrdNonEmpty extends NonEmpty implements OrdList {
+  
+  OrdNonEmpty(int i, OrdList L) { super(i, (List) L); }
+    
+  OrdNonEmpty(int i) { super(i, new Empty()); }
+  
+  public OrdList createOrdList(int i) { return new OrdNonEmpty(i, this); }
+  
+  public OrdList insert(int i) {
+    if (i <= first()) return new OrdNonEmpty(i, this);
+    else return new OrdNonEmpty(first(), ((OrdList) rest).insert(i));
+  }
+  
+  public boolean member(int i) { return super.member(i); }
+}

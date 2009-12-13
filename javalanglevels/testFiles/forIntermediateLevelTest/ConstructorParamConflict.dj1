@@ -1,0 +1,15 @@
+/* Test that Child's constructor correctly uses super_x and super_x0 */
+
+class Parent {
+
+  int x;
+  int y;
+  
+
+}
+
+class Child extends Parent {
+  
+  int super_x;
+ 
+}

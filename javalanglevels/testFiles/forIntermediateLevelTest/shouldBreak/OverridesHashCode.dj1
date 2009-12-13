@@ -1,0 +1,13 @@
+/**
+ * This overrides hashCode
+ */
+
+class OverridesHashCode {
+  int i;
+  char c;
+  
+  public int hashCode() {
+    return i;
+  }
+  
+}

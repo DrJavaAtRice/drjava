@@ -1,0 +1,16 @@
+class NoNeedToCatchRuntimeException {
+  int i;
+  
+  /**
+   * This method throws 2 runtime exceptions, so it should be okay.
+   */
+  int myMethod() {
+    if (i<5) {
+      throw new RuntimeException();
+    }
+    else {
+      throw new NullPointerException();
+    }
+  }
+  
+}

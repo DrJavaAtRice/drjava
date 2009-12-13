@@ -1,0 +1,7 @@
+/*!DrJava Beginner Level*/
+
+class BeginnerShouldBreakAnonClass extends Object{
+  int i;
+  int j;
+  String s = new String() { public String toString() { return "BogusName"; } };
+}

@@ -1,0 +1,11 @@
+class NonStaticMethodInvocation {
+  int myMethod() {
+    return 5;
+  }
+}
+
+class UseNonStaticMethodInvocation {
+  int myOtherMethod() {
+    return NonStaticMethodInvocation.myMethod();
+  }
+}

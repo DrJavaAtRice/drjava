@@ -1,0 +1,6 @@
+class Maggie extends Object { int i, j;
+  int foo() {
+    System.out.println("Hello World.");
+    return i;
+  }
+}

@@ -1,0 +1,5 @@
+class Mycroft extends AFriend {
+  String getName() {
+    return "Mycroft";
+  }
+}

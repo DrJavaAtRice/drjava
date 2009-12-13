@@ -1,0 +1,1 @@
+class A extends Object {char c;} /**This ends class A.  Now class B is starting*/ class B extends A {}//isn't the end of a line fun?

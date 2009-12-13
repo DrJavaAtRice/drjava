@@ -1,0 +1,42 @@
+public class NEList implements IList2 {
+
+   Object _first;
+   IList2 _rest;
+
+   
+   public NEList() {
+     _first = new Integer(1);
+     _rest = MTList.Singleton;
+   }
+   
+   public int sum() {
+
+     return ((Integer)_first) + _rest.sum();
+
+   }
+
+   public String toString2() {
+
+    return "(" + _first + "," + _rest.toStringHelp() + ")";
+
+   }
+
+   
+
+   public String toStringHelp() {
+
+     return " ," + _first + _rest.toStringHelp();
+
+   }
+
+   public int getlength(){
+
+    return _rest.getlengthHelp(1); 
+
+}
+
+   public int getlengthHelp(int acc){
+
+     return _rest.getlengthHelp(acc + 1);}
+
+}

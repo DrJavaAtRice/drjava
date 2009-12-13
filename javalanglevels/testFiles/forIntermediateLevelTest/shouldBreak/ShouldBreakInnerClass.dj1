@@ -1,0 +1,6 @@
+class ShouldBreakInnerClass extends Object {
+  class InnerClass extends Object{
+    int j;
+    int k;
+  }
+}

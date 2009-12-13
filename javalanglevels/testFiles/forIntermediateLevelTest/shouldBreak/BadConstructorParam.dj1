@@ -1,0 +1,5 @@
+class Abstract {
+  Abstract(MyObj arg) {
+    return 3;
+  }
+}
