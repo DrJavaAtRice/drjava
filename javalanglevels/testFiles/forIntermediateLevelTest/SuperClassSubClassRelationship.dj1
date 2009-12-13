@@ -1,7 +1,0 @@
-class SuperClass {
-  
-}
-
-class SubClass extends SuperClass {
- SuperClass s; 
-}

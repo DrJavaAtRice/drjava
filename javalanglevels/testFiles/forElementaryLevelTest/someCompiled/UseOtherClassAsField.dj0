@@ -1,3 +1,0 @@
-class UseOtherClassAsField {
-  ClassAsField caf;
-}

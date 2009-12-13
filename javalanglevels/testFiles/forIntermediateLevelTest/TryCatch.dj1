@@ -1,6 +1,0 @@
-class TryCatch {
-  public RuntimeException method() {
-    try { return null; }
-    catch (RuntimeException e) {  return e; }
-  }
-}

@@ -1,4 +1,0 @@
-class Recompile{
-  int j;
-  int k;
-}

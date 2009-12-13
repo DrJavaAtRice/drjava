@@ -1,5 +1,0 @@
-//Here, the user left off the import statement.
-public class TestClassTesting extends TestCase {
-  void testMethod() {
-  }
-}

@@ -1,3 +1,0 @@
-abstract class NewTest2 extends Object{
-  abstract int toExtend(int k, int e);
-}

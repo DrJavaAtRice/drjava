@@ -1,5 +1,0 @@
-/*!DrJava Beginner Level*/
-
-class BeginnerShouldBreakStatic extends Object{
-  static int i;
-}

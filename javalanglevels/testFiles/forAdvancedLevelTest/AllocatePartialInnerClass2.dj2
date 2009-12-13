@@ -1,7 +1,0 @@
-class AllocatePartialInnerClass2 {
-  class MyInnerClass2 {
-  }
-  
-  MyInnerClass2 c = new MyInnerClass2();
-  
-}

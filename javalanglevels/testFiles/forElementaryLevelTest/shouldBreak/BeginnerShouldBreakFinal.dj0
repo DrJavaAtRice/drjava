@@ -1,5 +1,0 @@
-/*!DrJava Beginner Level*/
-
-class BeginnerShouldBreakFinal extends Object {
-  final int j;
-}
