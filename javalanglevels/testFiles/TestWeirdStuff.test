@@ -1,0 +1,207 @@
+import java.util.*;
+import java.lang.*;
+//import drjava.testsrc.*;
+
+public class TestWeirdStuff <T> extends Outer {
+  {
+    float f = j;
+    System.out.println(f);
+    ints = new int[5];
+  }
+//public private int bar = 5;
+//private protected public int foo() {
+//return bar;
+//}
+//  private public static void main(String[] a) {
+//  }
+  private float priv = 7;
+  static int j = 5;
+  static int Blah = 5;
+  TestWeirdStuff tws;
+  int [] ints;
+  int[] getS () {
+    {
+      int klj = 0;
+    }
+//    System.out.println(klj);
+    int x, y[];
+    System.out.println(3+ + + - -4);
+//    System.out.println(true? "asdf" : 1.0);
+    System.out.println((double)j);
+    System.out.println(super.foo());
+//    System.out.println(~false);
+    return ints = new int[] {1};
+  }
+  
+  int[] getInts() {
+    return ints;
+  }
+  
+  public void tryThis() throws IllegalArgumentException {
+    int i = j;
+    int j = 0;
+    int x[], y[][], z[][];
+    x = new int[5];
+    y = new int[5][];
+    z = new int[5][6];
+    System.out.println(Blah);
+    System.out.println(new Object());//new Event(new Object()));
+    class ABC {
+      public String toString() {
+        return "an ABC";
+      }
+    }
+//    System.out.println("lskj = " + lskj.toSing());// + " " + new lskj().toSing());
+  }
+  
+  int i = foo();
+  public int foo() {
+    return (int)3.8;
+  }
+  
+  public Vector xyz() {
+    super.xyz();
+    return null;
+  }
+  
+  public <T> T getFirst(Vector<T> v) {
+    return v.elementAt(0);
+  }
+  
+  private void doReplaceAll() {
+    for (ints = new int[3], ints[1]++; ints[0] < 3; ints[0] = ints[0] + 2, ints[0]++, ints[0]--) {System.out.println(ints[0]);}
+    String left = "(";
+    String newString = left.replaceAll("\\(", "");
+    {
+      final float fl = 5;
+      {
+        System.out.println("WOO");
+        System.out.println("HOO");
+      }
+      class aselijeij {
+        public aselijeij() {
+          System.out.println(fl);
+        }
+      }
+    }
+//    System.out.println(fl);
+    { System.out.println("Yabber");
+    }
+    System.out.println("Jabber");
+    TestWeirdStuff<Integer> t = new TestWeirdStuff<Integer>(new Integer[0]);
+    Vector<Integer> v = new Vector<Integer>();
+    v.add(new Integer(5));
+    int[][] stuff = new int[][]{{1,2,3},
+      {4,5,6},
+      {7,8,9}};
+    System.out.println("getFirst(v).class = " + t.getFirst(v).getClass() + " getFirst(v) = " + t.getFirst(v));
+    int x = (-       3);
+    System.out.println((x) + +7);
+    boolean b = ((Boolean) new Boolean(true)).booleanValue();
+    int y = (x) + 3;
+    int z = (int) + 3;
+//    TestWeirdStuff tws = this();
+  }
+  
+  TestWeirdStuff() {
+    boolean b = false;
+    System.out.println((false? false? new Integer(5) : new Integer(153) : new Integer(34)) instanceof Integer);
+    System.out.println(void.class);
+  }
+  
+  TestWeirdStuff(int a, int b, String s, String c) {}
+  
+  public static TestWeirdStuff callConstructor () {
+    TestWeirdStuff tws = new TestWeirdStuff(5,
+                                            8,
+                                            "abc",
+                                            "xyz");
+    return tws;
+  }
+  
+  public static void main(String[] args) {
+    new TestWeirdStuff();
+  }
+  
+  TestWeirdStuff(Integer[] ints) {
+    System.out.println("In constructor");
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+    ;
+  }
+  
+  TestWeirdStuff(TestWeirdStuff t) {
+    tws = t;
+  }
+  
+  interface InnerInterface {
+    int bar();
+    class DEF {}
+  }
+  
+  class Blah extends Outer implements InnerInterface, WeirdInterface {
+    protected int i = 5;
+    public int foo() {
+      System.out.println("In Blah.foo()" + ints);
+      return i;
+    }
+    public int bar() {
+      final int z, y;
+      z = 7;
+      System.out.println("In Blah.bar()");
+      return z;
+    }
+  }
+}
+
+interface WeirdInterface {
+//  int ints = 2;
+  abstract int foo();
+}
+
+class Aiya extends TestWeirdStuff.Blah {
+  protected int i = 7;
+  Aiya() {
+    (new TestWeirdStuff()).super();
+  }
+  
+  static class alskfj {}
+}
+
+abstract class Outer implements WeirdInterface {
+//  public Integer lskj = new Integer(0);
+  abstract int dk();
+  
+  public int foo() {
+    return 3;
+  }
+  
+  public Collection xyz() {
+    System.out.println("In Collection xyz");
+    return null;
+  }
+}
+
+class Foo extends Aiya.alskfj {
+  static class Bar {}
+  
+  void test(String s) {}
+  void tester() {
+    test(new Object().toString());
+  }
+}
+
+//
+//class Object {
+//}
+//class Vector {
+//  Vector() {
+//    System.out.println("making vector");
+//  }
+//}

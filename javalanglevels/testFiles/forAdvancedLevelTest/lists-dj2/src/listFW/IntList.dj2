@@ -1,0 +1,47 @@
+abstract class IntList {
+  public abstract int sum();
+}
+
+class Empty extends IntList {
+  static Empty singleton = new Empty();
+  
+  private Empty() {}
+  
+  public int sum() {return 0; }
+  
+  //public java.lang.String toString() { return "Empty ()"; }
+  
+  //public boolean equals(Object o) {return !((o == null) || (o.getClass() != getClass()));}
+}
+
+class NonEmpty extends IntList {
+  int first;
+  IntList rest;
+  
+//  public NonEmpty(int first, IntList rest) {
+//    this.first = first;
+//    this.rest = rest;
+//  }
+  
+  public int sum() {return first + rest.sum(); }
+  
+
+
+//  public int first() { return first; }
+//
+//  public IntList rest() { return rest; }
+//
+//  public java.lang.String toString() {return "NonEmpty(" + first() + ", " + rest() + ")"; }
+
+  public boolean equals2(Object o) {
+    if ((o == null) || (! o.getClass().equals(getClass()))) {
+      return false;
+    }
+    else {
+      NonEmpty cast = ((NonEmpty) o);
+      return (first() == cast.first()) && 
+          (rest() != null && rest().equals(cast.rest()));
+    }
+  }
+
+}

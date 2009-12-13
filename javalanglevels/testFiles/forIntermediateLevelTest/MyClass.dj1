@@ -1,0 +1,13 @@
+//This test makes sure that we allow narrowing of method return types in 1.5
+
+class MyClass {
+  Object myField() {
+    return new Object();
+  }
+}
+
+class MyIntegerClass extends MyClass{
+  Integer myField() {
+    return new Integer(42);
+  }
+}

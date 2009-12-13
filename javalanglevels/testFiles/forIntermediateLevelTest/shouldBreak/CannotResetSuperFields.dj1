@@ -1,0 +1,29 @@
+class Yay extends Hah{
+  int i;
+  
+  Yay() {
+    super(42);
+    i = 12;
+    j=23;  //This is bad!  You can't reset a super class's fields.  They are final, and already set!
+  }
+  
+  Yay(int i) {
+    this.i = i;
+  }
+  
+  int myMethod() {
+    return j;
+  }
+}
+
+class Hah { 
+  int j;
+  
+  Hah(int k) {
+    j=k;
+  }
+  
+  Hah() {
+    j=42;
+  }
+}

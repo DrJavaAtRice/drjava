@@ -1,0 +1,13 @@
+/**An assignment in a while loop is not guaranteed to have happened*/
+
+class AssignmentInWhileLoop {
+  
+  int myMethod(int j) {
+    int q;
+    while (j<254) {
+      q = j + 24;
+    }
+    
+    return q += 23;
+  }
+}

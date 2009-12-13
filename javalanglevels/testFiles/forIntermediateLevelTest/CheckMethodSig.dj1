@@ -1,0 +1,11 @@
+class CheckMethodSig {
+  int myMethod(double d) {
+    return (int) d;
+  }
+  
+  int myOtherMethod(int i) {
+    return myMethod(i);
+  }
+}
+  
+  

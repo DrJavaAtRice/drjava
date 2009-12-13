@@ -1,0 +1,23 @@
+//This makes sure that you can use an unqualified name to reference an InnerClass from within a method.
+// (when the class is defined after the method)
+
+class FormalParamPartialReference {
+
+  void myMethod(MyInnerClass a) {
+    MyInnerClass c = a;
+  }
+
+  
+  class MyInnerClass {
+    
+  }
+
+  
+    
+}
+
+    
+
+  
+
+  

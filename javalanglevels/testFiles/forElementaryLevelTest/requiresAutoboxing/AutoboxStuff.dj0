@@ -1,0 +1,10 @@
+class AutoboxStuff {
+
+  int method() {
+    Integer i = 3;
+    double d = i;
+    Object o = 6;
+    return i;
+  }
+
+}

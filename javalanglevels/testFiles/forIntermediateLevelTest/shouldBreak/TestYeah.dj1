@@ -1,0 +1,16 @@
+//This makes sure that if a class implements an interface, but doesn't overwrite one of the interface's methods, an error is thrown.
+class TestYeah implements TestI {
+  int myMethod() { 
+    return 5;
+  }
+}
+
+class TestYou {
+  int brokenMethod() {
+    return 4;//myMethod();
+  }
+}
+
+interface TestI {
+  int silly();
+}

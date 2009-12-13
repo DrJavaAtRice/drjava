@@ -1,0 +1,15 @@
+//makes sure that if method uses final field before constructor that assigns it a value, no error is given
+
+class TheCoolestClassEver {
+  final String sunglasses;
+  final int goldChain;
+  
+  void stare() {
+    System.out.println(sunglasses);
+  }
+  
+  public TheCoolestClassEver() {
+    sunglasses = "dark shades stare back at you";
+    goldChain = 42;
+  }
+}

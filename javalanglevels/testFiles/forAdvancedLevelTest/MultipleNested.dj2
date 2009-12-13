@@ -1,0 +1,21 @@
+class A {
+  int afield;
+  
+  class B {
+    int bfield;
+  }
+  
+  class C {
+    int cfield;
+    
+    void method() {
+      class D {
+        class E {
+          int efield;
+        }
+      }
+//      B b = new B(2);
+    }
+  }
+  
+}

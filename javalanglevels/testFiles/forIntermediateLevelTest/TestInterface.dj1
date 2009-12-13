@@ -1,0 +1,7 @@
+interface TestInterface1 {
+  abstract int myMethod(); 
+}
+
+interface TestInterface2 extends TestInterface1 {
+  
+}

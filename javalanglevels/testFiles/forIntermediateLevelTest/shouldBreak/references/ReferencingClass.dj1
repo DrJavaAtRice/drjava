@@ -1,0 +1,6 @@
+/** Exposes a bug in case-insensitive file systems, in which the same
+ * file might be processed repeatedly.
+ */
+class ReferencingClass {
+  Referencedclass r;
+}

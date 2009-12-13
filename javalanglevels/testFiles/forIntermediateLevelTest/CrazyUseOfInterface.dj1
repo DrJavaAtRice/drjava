@@ -1,0 +1,12 @@
+//This test makes sure that we know that user defined interfaces have the methods defined on Object
+
+class CrazyUseOfInterface {
+  MyInterface i;
+  
+  String iString() {
+    return i.toString();
+  }
+}
+
+interface MyInterface {
+}

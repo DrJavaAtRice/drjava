@@ -1,0 +1,13 @@
+class ExtraParensOk extends Object{
+  int i;
+  int j;
+  
+  Object myMethod(int q) {
+    if (i==q) {
+      return (new Object());
+    }
+    else {
+      return (null);
+    }
+  }
+}

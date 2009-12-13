@@ -1,0 +1,7 @@
+//Overwrites ToString method, which is not allowed since it is automatically generated
+
+class OverwritesToString {
+  String toString() {
+    return "myClass";
+  }
+}

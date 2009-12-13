@@ -1,0 +1,4 @@
+class InnerClassesInClassesCanBePrivate {
+  private class InnerClass { 
+  }
+}

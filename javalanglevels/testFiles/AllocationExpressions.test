@@ -1,0 +1,12 @@
+public class AllocationExpressions {
+  public void myMethod() { 
+    Object o = new Object();
+    Integer i = new Integer(5);
+    int[] ai = new int[5];
+    char [][]dac = new char[5][16];
+    int[] fai = {1, 2, 3};
+    boolean b = i.equals(new Integer(5));
+    Double d = a.b.new Double(5); 
+    d.b.newMethod(o,i , new Object());
+  }
+}

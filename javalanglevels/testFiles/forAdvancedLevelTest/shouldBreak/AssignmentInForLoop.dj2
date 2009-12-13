@@ -1,0 +1,13 @@
+/**An assignment in a for loop is not guaranteed to have happened*/
+
+class AssignmentInForLoop {
+  
+  int myMethod(int j) {
+    int q;
+    for (int i = 0; i<5; i++) {
+      q = i;
+    }
+    
+    return q += 23;
+  }
+}

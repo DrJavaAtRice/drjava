@@ -1,0 +1,8 @@
+class LegalCatchExceptions {
+  int method() {
+    try { return 3; }
+    catch (RuntimeException e) { return 7; }
+    catch (Exception e) { return 6; }
+    catch (Throwable e) { return 4; }
+  }
+}

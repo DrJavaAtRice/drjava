@@ -1,0 +1,8 @@
+class Z {
+  int x;
+  
+  int add(int x) {
+    z = 0;   // intentional error
+    return x + 1;
+  }
+}

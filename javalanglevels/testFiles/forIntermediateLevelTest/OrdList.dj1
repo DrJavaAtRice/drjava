@@ -1,0 +1,4 @@
+interface OrdList extends List {
+//  OrdList insert(int i);t
+  OrdList insert(int i); 
+}

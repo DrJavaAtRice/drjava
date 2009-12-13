@@ -1,0 +1,327 @@
+SourceFile:
+  sourceInfo = [AllocationExpressions.test: (1,1)-(12,1)]
+  packageStatements = {}
+  importStatements = {}
+  types = {
+    #0: ClassDef:
+      sourceInfo = [AllocationExpressions.test: (1,1)-(12,1)]
+      mav = ModifiersAndVisibility:
+        sourceInfo = [AllocationExpressions.test: (1,1)-(1,6)]
+        modifiers = {
+          #0: public
+        }
+      name = Word:
+        sourceInfo = [AllocationExpressions.test: (1,14)-(1,34)]
+        text = AllocationExpressions
+      typeParameters = {}
+      superclass = ClassOrInterfaceType:
+        sourceInfo = [(no file): (-1,-1)-(-1,-1)]
+        name = Object
+        typeArguments = {}
+      interfaces = {}
+      body = BracedBody:
+        sourceInfo = [AllocationExpressions.test: (1,36)-(12,1)]
+        statements = {
+          #0: ConcreteMethodDef:
+            sourceInfo = [AllocationExpressions.test: (2,3)-(11,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [AllocationExpressions.test: (2,3)-(2,8)]
+              modifiers = {
+                #0: public
+              }
+            typeParams = {}
+            result = VoidReturn:
+              sourceInfo = [AllocationExpressions.test: (2,10)-(2,13)]
+              name = void
+            name = Word:
+              sourceInfo = [AllocationExpressions.test: (2,15)-(2,22)]
+              text = myMethod
+            params = {}
+            throws = {}
+            body = BracedBody:
+              sourceInfo = [AllocationExpressions.test: (2,26)-(11,3)]
+              statements = {
+                #0: VariableDeclaration:
+                  sourceInfo = [AllocationExpressions.test: (3,5)-(3,27)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [AllocationExpressions.test: (3,5)-(3,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [AllocationExpressions.test: (3,12)-(3,27)]
+                      type = ClassOrInterfaceType:
+                        sourceInfo = [AllocationExpressions.test: (3,5)-(3,10)]
+                        name = Object
+                        typeArguments = {}
+                      name = Word:
+                        sourceInfo = [AllocationExpressions.test: (3,12)-(3,12)]
+                        text = o
+                      initializer = SimpleNamedClassInstantiation:
+                        sourceInfo = [AllocationExpressions.test: (3,16)-(3,27)]
+                        type = ClassOrInterfaceType:
+                          sourceInfo = [AllocationExpressions.test: (3,20)-(3,25)]
+                          name = Object
+                          typeArguments = {}
+                        arguments = ParenthesizedExpressionList:
+                          sourceInfo = [AllocationExpressions.test: (3,26)-(3,27)]
+                          expressions = {}
+                  }
+                #1: VariableDeclaration:
+                  sourceInfo = [AllocationExpressions.test: (4,5)-(4,30)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [AllocationExpressions.test: (4,5)-(4,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [AllocationExpressions.test: (4,13)-(4,30)]
+                      type = ClassOrInterfaceType:
+                        sourceInfo = [AllocationExpressions.test: (4,5)-(4,11)]
+                        name = Integer
+                        typeArguments = {}
+                      name = Word:
+                        sourceInfo = [AllocationExpressions.test: (4,13)-(4,13)]
+                        text = i
+                      initializer = SimpleNamedClassInstantiation:
+                        sourceInfo = [AllocationExpressions.test: (4,17)-(4,30)]
+                        type = ClassOrInterfaceType:
+                          sourceInfo = [AllocationExpressions.test: (4,21)-(4,27)]
+                          name = Integer
+                          typeArguments = {}
+                        arguments = ParenthesizedExpressionList:
+                          sourceInfo = [AllocationExpressions.test: (4,28)-(4,30)]
+                          expressions = {
+                            #0: IntegerLiteral:
+                              sourceInfo = [AllocationExpressions.test: (4,29)-(4,29)]
+                              value = 5
+                          }
+                  }
+                #2: VariableDeclaration:
+                  sourceInfo = [AllocationExpressions.test: (5,5)-(5,25)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [AllocationExpressions.test: (5,5)-(5,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [AllocationExpressions.test: (5,11)-(5,25)]
+                      type = ArrayType:
+                        sourceInfo = [AllocationExpressions.test: (5,5)-(5,9)]
+                        name = int[]
+                        elementType = PrimitiveType:
+                          sourceInfo = [AllocationExpressions.test: (5,5)-(5,7)]
+                          name = int
+                      name = Word:
+                        sourceInfo = [AllocationExpressions.test: (5,11)-(5,12)]
+                        text = ai
+                      initializer = SimpleUninitializedArrayInstantiation:
+                        sourceInfo = [AllocationExpressions.test: (5,20)-(5,25)]
+                        type = ArrayType:
+                          sourceInfo = [AllocationExpressions.test: (5,20)-(5,25)]
+                          name = int[]
+                          elementType = PrimitiveType:
+                            sourceInfo = [AllocationExpressions.test: (5,20)-(5,22)]
+                            name = int
+                        dimensionSizes = DimensionExpressionList:
+                          sourceInfo = [AllocationExpressions.test: (5,23)-(5,25)]
+                          expressions = {
+                            #0: IntegerLiteral:
+                              sourceInfo = [AllocationExpressions.test: (5,24)-(5,24)]
+                              value = 5
+                          }
+                  }
+                #3: VariableDeclaration:
+                  sourceInfo = [AllocationExpressions.test: (6,5)-(6,34)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [AllocationExpressions.test: (6,5)-(6,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [AllocationExpressions.test: (6,14)-(6,34)]
+                      type = ArrayType:
+                        sourceInfo = [AllocationExpressions.test: (6,5)-(6,13)]
+                        name = char[][]
+                        elementType = ArrayType:
+                          sourceInfo = [AllocationExpressions.test: (6,5)-(6,11)]
+                          name = char[]
+                          elementType = PrimitiveType:
+                            sourceInfo = [AllocationExpressions.test: (6,5)-(6,8)]
+                            name = char
+                      name = Word:
+                        sourceInfo = [AllocationExpressions.test: (6,14)-(6,16)]
+                        text = dac
+                      initializer = SimpleUninitializedArrayInstantiation:
+                        sourceInfo = [AllocationExpressions.test: (6,24)-(6,34)]
+                        type = ArrayType:
+                          sourceInfo = [AllocationExpressions.test: (6,24)-(6,34)]
+                          name = char[][]
+                          elementType = ArrayType:
+                            sourceInfo = [AllocationExpressions.test: (6,24)-(6,30)]
+                            name = char[]
+                            elementType = PrimitiveType:
+                              sourceInfo = [AllocationExpressions.test: (6,24)-(6,27)]
+                              name = char
+                        dimensionSizes = DimensionExpressionList:
+                          sourceInfo = [AllocationExpressions.test: (6,28)-(6,34)]
+                          expressions = {
+                            #0: IntegerLiteral:
+                              sourceInfo = [AllocationExpressions.test: (6,29)-(6,29)]
+                              value = 5
+                            #1: IntegerLiteral:
+                              sourceInfo = [AllocationExpressions.test: (6,32)-(6,33)]
+                              value = 16
+                          }
+                  }
+                #4: VariableDeclaration:
+                  sourceInfo = [AllocationExpressions.test: (7,5)-(7,25)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [AllocationExpressions.test: (7,5)-(7,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [AllocationExpressions.test: (7,11)-(7,25)]
+                      type = ArrayType:
+                        sourceInfo = [AllocationExpressions.test: (7,5)-(7,9)]
+                        name = int[]
+                        elementType = PrimitiveType:
+                          sourceInfo = [AllocationExpressions.test: (7,5)-(7,7)]
+                          name = int
+                      name = Word:
+                        sourceInfo = [AllocationExpressions.test: (7,11)-(7,13)]
+                        text = fai
+                      initializer = ArrayInitializer:
+                        sourceInfo = [AllocationExpressions.test: (7,17)-(7,25)]
+                        items = {
+                          #0: IntegerLiteral:
+                            sourceInfo = [AllocationExpressions.test: (7,18)-(7,18)]
+                            value = 1
+                          #1: IntegerLiteral:
+                            sourceInfo = [AllocationExpressions.test: (7,21)-(7,21)]
+                            value = 2
+                          #2: IntegerLiteral:
+                            sourceInfo = [AllocationExpressions.test: (7,24)-(7,24)]
+                            value = 3
+                        }
+                  }
+                #5: VariableDeclaration:
+                  sourceInfo = [AllocationExpressions.test: (8,5)-(8,40)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [AllocationExpressions.test: (8,5)-(8,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [AllocationExpressions.test: (8,13)-(8,40)]
+                      type = PrimitiveType:
+                        sourceInfo = [AllocationExpressions.test: (8,5)-(8,11)]
+                        name = boolean
+                      name = Word:
+                        sourceInfo = [AllocationExpressions.test: (8,13)-(8,13)]
+                        text = b
+                      initializer = ComplexMethodInvocation:
+                        sourceInfo = [AllocationExpressions.test: (8,17)-(8,40)]
+                        enclosing = SimpleNameReference:
+                          sourceInfo = [AllocationExpressions.test: (8,17)-(8,17)]
+                          name = Word:
+                            sourceInfo = [AllocationExpressions.test: (8,17)-(8,17)]
+                            text = i
+                        name = Word:
+                          sourceInfo = [AllocationExpressions.test: (8,19)-(8,24)]
+                          text = equals
+                        arguments = ParenthesizedExpressionList:
+                          sourceInfo = [AllocationExpressions.test: (8,25)-(8,40)]
+                          expressions = {
+                            #0: SimpleNamedClassInstantiation:
+                              sourceInfo = [AllocationExpressions.test: (8,26)-(8,39)]
+                              type = ClassOrInterfaceType:
+                                sourceInfo = [AllocationExpressions.test: (8,30)-(8,36)]
+                                name = Integer
+                                typeArguments = {}
+                              arguments = ParenthesizedExpressionList:
+                                sourceInfo = [AllocationExpressions.test: (8,37)-(8,39)]
+                                expressions = {
+                                  #0: IntegerLiteral:
+                                    sourceInfo = [AllocationExpressions.test: (8,38)-(8,38)]
+                                    value = 5
+                                }
+                          }
+                  }
+                #6: VariableDeclaration:
+                  sourceInfo = [AllocationExpressions.test: (9,5)-(9,32)]
+                  mav = ModifiersAndVisibility:
+                    sourceInfo = [AllocationExpressions.test: (9,5)-(9,5)]
+                    modifiers = {}
+                  declarators = {
+                    #0: InitializedVariableDeclarator:
+                      sourceInfo = [AllocationExpressions.test: (9,12)-(9,32)]
+                      type = ClassOrInterfaceType:
+                        sourceInfo = [AllocationExpressions.test: (9,5)-(9,10)]
+                        name = Double
+                        typeArguments = {}
+                      name = Word:
+                        sourceInfo = [AllocationExpressions.test: (9,12)-(9,12)]
+                        text = d
+                      initializer = ComplexNamedClassInstantiation:
+                        sourceInfo = [AllocationExpressions.test: (9,16)-(9,32)]
+                        enclosing = ComplexNameReference:
+                          sourceInfo = [AllocationExpressions.test: (9,16)-(9,18)]
+                          enclosing = SimpleNameReference:
+                            sourceInfo = [AllocationExpressions.test: (9,16)-(9,16)]
+                            name = Word:
+                              sourceInfo = [AllocationExpressions.test: (9,16)-(9,16)]
+                              text = a
+                          name = Word:
+                            sourceInfo = [AllocationExpressions.test: (9,18)-(9,18)]
+                            text = b
+                        type = ClassOrInterfaceType:
+                          sourceInfo = [AllocationExpressions.test: (9,24)-(9,29)]
+                          name = Double
+                          typeArguments = {}
+                        arguments = ParenthesizedExpressionList:
+                          sourceInfo = [AllocationExpressions.test: (9,30)-(9,32)]
+                          expressions = {
+                            #0: IntegerLiteral:
+                              sourceInfo = [AllocationExpressions.test: (9,31)-(9,31)]
+                              value = 5
+                          }
+                  }
+                #7: ExpressionStatement:
+                  sourceInfo = [AllocationExpressions.test: (10,5)-(10,38)]
+                  expression = ComplexMethodInvocation:
+                    sourceInfo = [AllocationExpressions.test: (10,5)-(10,37)]
+                    enclosing = ComplexNameReference:
+                      sourceInfo = [AllocationExpressions.test: (10,5)-(10,7)]
+                      enclosing = SimpleNameReference:
+                        sourceInfo = [AllocationExpressions.test: (10,5)-(10,5)]
+                        name = Word:
+                          sourceInfo = [AllocationExpressions.test: (10,5)-(10,5)]
+                          text = d
+                      name = Word:
+                        sourceInfo = [AllocationExpressions.test: (10,7)-(10,7)]
+                        text = b
+                    name = Word:
+                      sourceInfo = [AllocationExpressions.test: (10,9)-(10,17)]
+                      text = newMethod
+                    arguments = ParenthesizedExpressionList:
+                      sourceInfo = [AllocationExpressions.test: (10,18)-(10,37)]
+                      expressions = {
+                        #0: SimpleNameReference:
+                          sourceInfo = [AllocationExpressions.test: (10,19)-(10,19)]
+                          name = Word:
+                            sourceInfo = [AllocationExpressions.test: (10,19)-(10,19)]
+                            text = o
+                        #1: SimpleNameReference:
+                          sourceInfo = [AllocationExpressions.test: (10,21)-(10,21)]
+                          name = Word:
+                            sourceInfo = [AllocationExpressions.test: (10,21)-(10,21)]
+                            text = i
+                        #2: SimpleNamedClassInstantiation:
+                          sourceInfo = [AllocationExpressions.test: (10,25)-(10,36)]
+                          type = ClassOrInterfaceType:
+                            sourceInfo = [AllocationExpressions.test: (10,29)-(10,34)]
+                            name = Object
+                            typeArguments = {}
+                          arguments = ParenthesizedExpressionList:
+                            sourceInfo = [AllocationExpressions.test: (10,35)-(10,36)]
+                            expressions = {}
+                      }
+              }
+        }
+  }

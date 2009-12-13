@@ -1,0 +1,12 @@
+class NoLabels {
+  int i;
+  
+  NoLabels(int q) {
+    myLabel: {i = q;
+    
+      if (q<5) {
+        break myLabel;
+      }
+    }
+  }
+}

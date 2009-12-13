@@ -1,0 +1,3 @@
+class UnsetStaticField {
+  static int i;
+}

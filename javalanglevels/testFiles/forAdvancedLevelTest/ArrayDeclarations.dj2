@@ -1,0 +1,25 @@
+class ArrayDeclarations {
+  Integer[] iArray = new Integer[5];
+  
+  char c[];
+  
+  char initializedC[] = new char[] {'e', 'j', 's'};
+  
+  double[][] d = new double[5][5];
+  
+  Object[][][] o = new Object[2][][];
+  
+  int i, crazyArray[];
+  
+  double[] noNew = {1.2, 3.4, 5.2};
+  
+//  String[][][] definitelyIllegal = new String[4][][3];
+  
+  int nestedInitializer[][] = new int[][] { {1,2}, null};
+  
+  int myMethod() {
+    return iArray[0];
+    
+//    o.field().field = value;
+  } 
+}

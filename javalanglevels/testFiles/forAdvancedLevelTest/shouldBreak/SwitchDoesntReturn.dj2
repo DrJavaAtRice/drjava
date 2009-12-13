@@ -1,0 +1,26 @@
+// Test that a switch statement that doesn't return in every case won't compile.
+
+class SwitchDoesntReturn {
+
+  boolean method(int x, char y) {
+  
+    switch(x) {
+      case 0:
+        return true;
+        
+      case 1:
+        boolean result = x + y * 3 > 27;
+        return result;
+        
+      case 'q':
+        break;
+    
+      default:
+        return false;
+        
+    }
+  }
+   
+
+}
+

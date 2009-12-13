@@ -1,0 +1,12 @@
+//here, the interface is referenced and we try to instantiate it before it is actually defined
+class PartialReferenceInnerInterface2 {
+
+  MyInterface mi = new MyInterface();
+
+  
+  interface MyInterface {
+  }
+  
+
+  
+}

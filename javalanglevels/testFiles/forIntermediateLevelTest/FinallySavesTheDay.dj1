@@ -1,0 +1,27 @@
+class FinallySavesTheDay {
+  
+  int myMethod(int i, int j, char c) {
+    try {
+      if (i+c < j) {
+        throw new ClassNotFoundException("Someone had better catch me!");
+      }
+      try {
+        if (c < j) {
+          throw new CloneNotSupportedException("And someone had better catch me too!");
+        }
+        else throw new RuntimeException("No one needs to catch me");
+      }
+      catch (RuntimeException e) {
+      }
+      
+      finally {
+        return 5;
+      }
+    }
+    
+    catch (ClassNotFoundException e) {
+      throw new RuntimeException("I caught your exception, but you don't have to catch me.");
+//      return 7;
+    }
+  }
+}

@@ -1,0 +1,11 @@
+package shouldBreak;
+
+class BeginnerShouldBreakPackageStmt {
+  int i;
+  String love;
+  char java;
+  
+  int thisMethodShouldWork() {
+    return i/((int)java);
+  }
+}

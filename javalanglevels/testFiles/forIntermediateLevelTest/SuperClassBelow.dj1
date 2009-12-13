@@ -1,0 +1,7 @@
+class SuperClassBelow extends LowerClass {
+  
+}
+
+class LowerClass {
+  int field;
+}

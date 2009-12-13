@@ -1,0 +1,13 @@
+class Parenthesized
+{
+  String name;
+  
+  String toString2()
+  {
+    return "This Entry is [ " + name + " ] ";
+  }
+  boolean match(String input)
+  {
+    return (name.equals(input));
+  }
+}

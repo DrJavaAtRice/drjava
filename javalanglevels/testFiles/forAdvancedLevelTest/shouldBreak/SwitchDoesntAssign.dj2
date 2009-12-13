@@ -1,0 +1,30 @@
+// Test that a switch statement that doesn't return in every case won't compile.
+
+class SwitchDoesntAssign {
+
+  void method(int x) {
+  
+    int i;
+    
+    switch(x) {
+      case 0:
+      case 1:
+        i = 3;
+        break;
+        
+      case 'q':
+        break;
+    
+      default:
+        i = 15;
+        break;
+        
+    }
+    
+    i = i + 3;
+    
+  }
+   
+
+}
+

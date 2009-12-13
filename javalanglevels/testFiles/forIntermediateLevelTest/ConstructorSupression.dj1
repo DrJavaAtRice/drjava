@@ -1,0 +1,12 @@
+class ConstructorSupression {
+  int i;
+  int j;
+  static char c = 'e';
+  
+  public ConstructorSupression(int mi, int mj) {
+    i=mi;
+    j=mj;
+  }
+ 
+}
+  

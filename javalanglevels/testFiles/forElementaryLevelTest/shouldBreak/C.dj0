@@ -1,0 +1,9 @@
+class C {
+  int i;
+  
+  //void incI() { i = i + 1; }
+}
+
+class D {
+  int test() { return new C(4).i; }
+}

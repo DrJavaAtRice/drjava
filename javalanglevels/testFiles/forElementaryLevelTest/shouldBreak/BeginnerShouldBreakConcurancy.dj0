@@ -1,0 +1,7 @@
+/*!DrJava Beginner Level*/
+
+class BeginnerShouldBreakConcurancy extends Object {
+  synchronized int getGoing() {
+    return 5;
+  }
+}

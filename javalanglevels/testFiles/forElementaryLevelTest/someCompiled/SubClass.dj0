@@ -1,0 +1,4 @@
+class SubClass extends SuperClass {
+  int i;
+  int j;
+}

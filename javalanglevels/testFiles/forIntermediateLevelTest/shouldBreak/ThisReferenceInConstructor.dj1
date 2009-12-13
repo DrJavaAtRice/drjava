@@ -1,0 +1,15 @@
+/**
+ * This references this in a constructor, which should throw an error.
+ */
+
+class ThisReferenceInConstructor {
+  int i;
+  char c;
+  
+  private ThisReferenceInConstructor(int i, char cd) {
+    this.i = i;
+    c = cd;
+  }
+  
+  
+}

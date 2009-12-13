@@ -1,0 +1,7 @@
+public class ClassWithClassInMethod {
+  void myMethod(int i, int j) {
+    class ThisIsMyInnerClass {
+      int j;
+    }
+  }
+}

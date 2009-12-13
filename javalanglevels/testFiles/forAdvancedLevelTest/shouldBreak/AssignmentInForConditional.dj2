@@ -1,0 +1,9 @@
+/** cannot have an assignment in the conditional expression of a for loop */
+class AssignmentInForConditional {
+  void myMethod() {
+    for (int i = 10; i += 5; i+=5) {
+      ;
+    }
+  }
+}
+  

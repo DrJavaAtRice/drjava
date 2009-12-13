@@ -1,0 +1,13 @@
+//This tests that multiple classes can be defined in one file at the Elementary level.
+
+class OneClass {
+  int i;
+}
+
+class TwoClass {
+  int ii;
+}
+
+class ThreeClass {
+  int iii;
+}

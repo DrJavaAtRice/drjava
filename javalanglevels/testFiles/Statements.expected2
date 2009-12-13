@@ -1,0 +1,581 @@
+SourceFile:
+  sourceInfo = [Statements.correct: (1,1)-(50,1)]
+  packageStatements = {
+    #0: PackageStatement:
+      sourceInfo = [Statements.correct: (1,1)-(1,16)]
+      cWord = CompoundWord:
+        sourceInfo = [Statements.correct: (1,9)-(1,15)]
+        words = {
+          #0: Word:
+            sourceInfo = [Statements.correct: (1,9)-(1,11)]
+            text = foo
+          #1: Word:
+            sourceInfo = [Statements.correct: (1,13)-(1,15)]
+            text = bar
+        }
+  }
+  importStatements = {
+    #0: ClassImportStatement:
+      sourceInfo = [Statements.correct: (2,1)-(2,19)]
+      cWord = CompoundWord:
+        sourceInfo = [Statements.correct: (2,8)-(2,18)]
+        words = {
+          #0: Word:
+            sourceInfo = [Statements.correct: (2,8)-(2,10)]
+            text = foo
+          #1: Word:
+            sourceInfo = [Statements.correct: (2,12)-(2,14)]
+            text = bar
+          #2: Word:
+            sourceInfo = [Statements.correct: (2,16)-(2,18)]
+            text = baz
+        }
+    #1: PackageImportStatement:
+      sourceInfo = [Statements.correct: (3,1)-(3,13)]
+      cWord = CompoundWord:
+        sourceInfo = [Statements.correct: (3,8)-(3,10)]
+        words = {
+          #0: Word:
+            sourceInfo = [Statements.correct: (3,8)-(3,10)]
+            text = foo
+        }
+  }
+  classes = {
+    #0: ClassDef:
+      sourceInfo = [Statements.correct: (5,1)-(50,1)]
+      mav = ModifiersAndVisibility:
+        sourceInfo = [Statements.correct: (5,1)-(5,6)]
+        modifiers = {
+          #0: public
+        }
+      name = Word:
+        sourceInfo = [Statements.correct: (5,14)-(5,23)]
+        text = Statements
+      typeParameters = {}
+      superclass = ClassOrInterfaceType:
+        sourceInfo = [(no file): (-1,-1)-(-1,-1)]
+        name = Object
+        typeArguments = {}
+      interfaces = {}
+      body = BracedBody:
+        sourceInfo = [Statements.correct: (6,3)-(49,3)]
+        items = {
+          #0: InstanceInitializer:
+            sourceInfo = [Statements.correct: (6,3)-(18,3)]
+            code = Block:
+              sourceInfo = [Statements.correct: (6,3)-(18,3)]
+              statements = BracedBody:
+                sourceInfo = [Statements.correct: (7,5)-(17,26)]
+                items = {
+                  #0: VariableDeclaration:
+                    sourceInfo = [Statements.correct: (7,5)-(7,13)]
+                    mav = ModifiersAndVisibility:
+                      sourceInfo = [Statements.correct: (7,5)-(7,5)]
+                      modifiers = {}
+                    declarators = {
+                      #0: InitializedVariableDeclarator:
+                        sourceInfo = [Statements.correct: (7,9)-(7,13)]
+                        type = PrimitiveType:
+                          sourceInfo = [Statements.correct: (7,5)-(7,7)]
+                          name = int
+                        name = Word:
+                          sourceInfo = [Statements.correct: (7,9)-(7,9)]
+                          text = i
+                        initializer = Expression:
+                          sourceInfo = [Statements.correct: (7,13)-(7,13)]
+                          pieces = {
+                            #0: OtherExpression:
+                              sourceInfo = [Statements.correct: (7,13)-(7,13)]
+                              exprPiece = IntegerLiteral:
+                                sourceInfo = [Statements.correct: (7,13)-(7,13)]
+                                value = 0
+                          }
+                    }
+                  #1: IfThenStatement:
+                    sourceInfo = [Statements.correct: (8,5)-(10,5)]
+                    testExpression = Expression:
+                      sourceInfo = [Statements.correct: (8,9)-(8,13)]
+                      pieces = {
+                        #0: OtherExpression:
+                          sourceInfo = [Statements.correct: (8,9)-(8,9)]
+                          exprPiece = Word:
+                            sourceInfo = [Statements.correct: (8,9)-(8,9)]
+                            text = i
+                        #1: OtherExpression:
+                          sourceInfo = [Statements.correct: (8,11)-(8,11)]
+                          exprPiece = Operator:
+                            sourceInfo = [Statements.correct: (8,11)-(8,11)]
+                            kind = <
+                        #2: OtherExpression:
+                          sourceInfo = [Statements.correct: (8,13)-(8,13)]
+                          exprPiece = IntegerLiteral:
+                            sourceInfo = [Statements.correct: (8,13)-(8,13)]
+                            value = 5
+                      }
+                    thenStatement = Block:
+                      sourceInfo = [Statements.correct: (8,16)-(10,5)]
+                      statements = BracedBody:
+                        sourceInfo = [Statements.correct: (9,7)-(9,12)]
+                        items = {
+                          #0: StatementExpression:
+                            sourceInfo = [Statements.correct: (9,7)-(9,12)]
+                            expression = Expression:
+                              sourceInfo = [Statements.correct: (9,7)-(9,11)]
+                              pieces = {
+                                #0: OtherExpression:
+                                  sourceInfo = [Statements.correct: (9,7)-(9,7)]
+                                  exprPiece = Word:
+                                    sourceInfo = [Statements.correct: (9,7)-(9,7)]
+                                    text = i
+                                #1: OtherExpression:
+                                  sourceInfo = [Statements.correct: (9,9)-(9,9)]
+                                  exprPiece = Operator:
+                                    sourceInfo = [Statements.correct: (9,9)-(9,9)]
+                                    kind = =
+                                #2: OtherExpression:
+                                  sourceInfo = [Statements.correct: (9,11)-(9,11)]
+                                  exprPiece = IntegerLiteral:
+                                    sourceInfo = [Statements.correct: (9,11)-(9,11)]
+                                    value = 6
+                              }
+                        }
+                  #2: IfThenElseStatement:
+                    sourceInfo = [Statements.correct: (11,5)-(15,5)]
+                    testExpression = Expression:
+                      sourceInfo = [Statements.correct: (11,9)-(11,13)]
+                      pieces = {
+                        #0: OtherExpression:
+                          sourceInfo = [Statements.correct: (11,9)-(11,9)]
+                          exprPiece = Word:
+                            sourceInfo = [Statements.correct: (11,9)-(11,9)]
+                            text = i
+                        #1: OtherExpression:
+                          sourceInfo = [Statements.correct: (11,11)-(11,11)]
+                          exprPiece = Operator:
+                            sourceInfo = [Statements.correct: (11,11)-(11,11)]
+                            kind = <
+                        #2: OtherExpression:
+                          sourceInfo = [Statements.correct: (11,13)-(11,13)]
+                          exprPiece = IntegerLiteral:
+                            sourceInfo = [Statements.correct: (11,13)-(11,13)]
+                            value = 7
+                      }
+                    thenStatement = Block:
+                      sourceInfo = [Statements.correct: (11,16)-(13,5)]
+                      statements = BracedBody:
+                        sourceInfo = [Statements.correct: (12,7)-(12,12)]
+                        items = {
+                          #0: UnlabeledBreakStatement: sourceInfo = [Statements.correct: (12,7)-(12,12)]
+                        }
+                    elseStatement = Block:
+                      sourceInfo = [Statements.correct: (14,10)-(15,5)]
+                      statements = BracedBody:
+                        sourceInfo = [Statements.correct: (14,10)-(14,10)]
+                        items = {}
+                  #3: IfThenStatement:
+                    sourceInfo = [Statements.correct: (16,5)-(17,26)]
+                    testExpression = Expression:
+                      sourceInfo = [Statements.correct: (16,9)-(16,15)]
+                      pieces = {
+                        #0: OtherExpression:
+                          sourceInfo = [Statements.correct: (16,9)-(16,9)]
+                          exprPiece = Word:
+                            sourceInfo = [Statements.correct: (16,9)-(16,9)]
+                            text = i
+                        #1: OtherExpression:
+                          sourceInfo = [Statements.correct: (16,11)-(16,12)]
+                          exprPiece = Operator:
+                            sourceInfo = [Statements.correct: (16,11)-(16,12)]
+                            kind = ==
+                        #2: OtherExpression:
+                          sourceInfo = [Statements.correct: (16,14)-(16,15)]
+                          exprPiece = IntegerLiteral:
+                            sourceInfo = [Statements.correct: (16,14)-(16,15)]
+                            value = 10
+                      }
+                    thenStatement = StatementExpression:
+                      sourceInfo = [Statements.correct: (17,5)-(17,26)]
+                      expression = Expression:
+                        sourceInfo = [Statements.correct: (17,5)-(17,25)]
+                        pieces = {
+                          #0: OtherExpression:
+                            sourceInfo = [Statements.correct: (17,5)-(17,10)]
+                            exprPiece = Word:
+                              sourceInfo = [Statements.correct: (17,5)-(17,10)]
+                              text = System
+                          #1: Word:
+                            sourceInfo = [Statements.correct: (17,12)-(17,14)]
+                            text = out
+                          #2: MethodInvocationExpression:
+                            sourceInfo = [Statements.correct: (17,16)-(17,25)]
+                            methodName = Word:
+                              sourceInfo = [Statements.correct: (17,16)-(17,22)]
+                              text = println
+                            arguments = {
+                              #0: Expression:
+                                sourceInfo = [Statements.correct: (17,24)-(17,24)]
+                                pieces = {
+                                  #0: OtherExpression:
+                                    sourceInfo = [Statements.correct: (17,24)-(17,24)]
+                                    exprPiece = Word:
+                                      sourceInfo = [Statements.correct: (17,24)-(17,24)]
+                                      text = i
+                                }
+                            }
+                        }
+                }
+          #1: ConcreteMethodDef:
+            sourceInfo = [Statements.correct: (20,3)-(49,3)]
+            mav = ModifiersAndVisibility:
+              sourceInfo = [Statements.correct: (20,3)-(20,15)]
+              modifiers = {
+                #0: public
+                #1: static
+              }
+            typeParams = {}
+            result = VoidReturn:
+              sourceInfo = [Statements.correct: (20,17)-(20,20)]
+              name = void
+            name = Word:
+              sourceInfo = [Statements.correct: (20,22)-(20,25)]
+              text = main
+            params = {
+              #0: FormalParameter:
+                sourceInfo = [Statements.correct: (20,27)-(20,39)]
+                declarator = UninitializedVariableDeclarator:
+                  sourceInfo = [Statements.correct: (20,36)-(20,39)]
+                  type = ArrayType:
+                    sourceInfo = [Statements.correct: (20,27)-(20,34)]
+                    name = String[]
+                    elementType = ClassOrInterfaceType:
+                      sourceInfo = [Statements.correct: (20,27)-(20,32)]
+                      name = String
+                      typeArguments = {}
+                  name = Word:
+                    sourceInfo = [Statements.correct: (20,36)-(20,39)]
+                    text = args
+                isFinal = false
+            }
+            throws = {}
+            body = BracedBody:
+              sourceInfo = [Statements.correct: (21,5)-(48,5)]
+              items = {
+                #0: LabeledStatement:
+                  sourceInfo = [Statements.correct: (21,5)-(48,5)]
+                  label = label
+                  statement = ForStatement:
+                    sourceInfo = [Statements.correct: (21,12)-(48,5)]
+                    init = StatementExpressionList:
+                      sourceInfo = [Statements.correct: (21,17)-(21,21)]
+                      expressions = {
+                        #0: Expression:
+                          sourceInfo = [Statements.correct: (21,17)-(21,21)]
+                          pieces = {
+                            #0: OtherExpression:
+                              sourceInfo = [Statements.correct: (21,17)-(21,17)]
+                              exprPiece = Word:
+                                sourceInfo = [Statements.correct: (21,17)-(21,17)]
+                                text = i
+                            #1: OtherExpression:
+                              sourceInfo = [Statements.correct: (21,19)-(21,19)]
+                              exprPiece = Operator:
+                                sourceInfo = [Statements.correct: (21,19)-(21,19)]
+                                kind = =
+                            #2: OtherExpression:
+                              sourceInfo = [Statements.correct: (21,21)-(21,21)]
+                              exprPiece = IntegerLiteral:
+                                sourceInfo = [Statements.correct: (21,21)-(21,21)]
+                                value = 5
+                          }
+                      }
+                    condition = Expression:
+                      sourceInfo = [Statements.correct: (21,24)-(21,29)]
+                      pieces = {
+                        #0: OtherExpression:
+                          sourceInfo = [Statements.correct: (21,24)-(21,24)]
+                          exprPiece = Word:
+                            sourceInfo = [Statements.correct: (21,24)-(21,24)]
+                            text = i
+                        #1: OtherExpression:
+                          sourceInfo = [Statements.correct: (21,26)-(21,27)]
+                          exprPiece = Operator:
+                            sourceInfo = [Statements.correct: (21,26)-(21,27)]
+                            kind = !=
+                        #2: OtherExpression:
+                          sourceInfo = [Statements.correct: (21,29)-(21,29)]
+                          exprPiece = IntegerLiteral:
+                            sourceInfo = [Statements.correct: (21,29)-(21,29)]
+                            value = 3
+                      }
+                    update = StatementExpressionList:
+                      sourceInfo = [Statements.correct: (21,32)-(21,34)]
+                      expressions = {
+                        #0: Expression:
+                          sourceInfo = [Statements.correct: (21,32)-(21,34)]
+                          pieces = {
+                            #0: OtherExpression:
+                              sourceInfo = [Statements.correct: (21,32)-(21,32)]
+                              exprPiece = Word:
+                                sourceInfo = [Statements.correct: (21,32)-(21,32)]
+                                text = i
+                            #1: OtherExpression:
+                              sourceInfo = [Statements.correct: (21,33)-(21,34)]
+                              exprPiece = Operator:
+                                sourceInfo = [Statements.correct: (21,33)-(21,34)]
+                                kind = ++
+                          }
+                      }
+                    code = Block:
+                      sourceInfo = [Statements.correct: (21,37)-(48,5)]
+                      statements = BracedBody:
+                        sourceInfo = [Statements.correct: (22,7)-(47,7)]
+                        items = {
+                          #0: WhileStatement:
+                            sourceInfo = [Statements.correct: (22,7)-(24,7)]
+                            condition = Expression:
+                              sourceInfo = [Statements.correct: (22,14)-(22,19)]
+                              pieces = {
+                                #0: OtherExpression:
+                                  sourceInfo = [Statements.correct: (22,14)-(22,14)]
+                                  exprPiece = Word:
+                                    sourceInfo = [Statements.correct: (22,14)-(22,14)]
+                                    text = i
+                                #1: OtherExpression:
+                                  sourceInfo = [Statements.correct: (22,16)-(22,17)]
+                                  exprPiece = Operator:
+                                    sourceInfo = [Statements.correct: (22,16)-(22,17)]
+                                    kind = ==
+                                #2: OtherExpression:
+                                  sourceInfo = [Statements.correct: (22,19)-(22,19)]
+                                  exprPiece = IntegerLiteral:
+                                    sourceInfo = [Statements.correct: (22,19)-(22,19)]
+                                    value = 1
+                              }
+                            code = Block:
+                              sourceInfo = [Statements.correct: (22,22)-(24,7)]
+                              statements = BracedBody:
+                                sourceInfo = [Statements.correct: (23,9)-(23,17)]
+                                items = {
+                                  #0: UnlabeledContinueStatement: sourceInfo = [Statements.correct: (23,9)-(23,17)]
+                                }
+                          #1: VoidReturnStatement: sourceInfo = [Statements.correct: (25,7)-(25,13)]
+                          #2: DoStatement:
+                            sourceInfo = [Statements.correct: (27,7)-(29,19)]
+                            code = StatementExpression:
+                              sourceInfo = [Statements.correct: (28,9)-(28,14)]
+                              expression = Expression:
+                                sourceInfo = [Statements.correct: (28,9)-(28,13)]
+                                pieces = {
+                                  #0: OtherExpression:
+                                    sourceInfo = [Statements.correct: (28,9)-(28,9)]
+                                    exprPiece = Word:
+                                      sourceInfo = [Statements.correct: (28,9)-(28,9)]
+                                      text = i
+                                  #1: OtherExpression:
+                                    sourceInfo = [Statements.correct: (28,11)-(28,11)]
+                                    exprPiece = Operator:
+                                      sourceInfo = [Statements.correct: (28,11)-(28,11)]
+                                      kind = =
+                                  #2: OtherExpression:
+                                    sourceInfo = [Statements.correct: (28,13)-(28,13)]
+                                    exprPiece = IntegerLiteral:
+                                      sourceInfo = [Statements.correct: (28,13)-(28,13)]
+                                      value = 1
+                                }
+                            condition = Expression:
+                              sourceInfo = [Statements.correct: (29,14)-(29,17)]
+                              pieces = {
+                                #0: OtherExpression:
+                                  sourceInfo = [Statements.correct: (29,14)-(29,17)]
+                                  exprPiece = BooleanLiteral:
+                                    sourceInfo = [Statements.correct: (29,14)-(29,17)]
+                                    value = true
+                              }
+                          #3: EmptyStatement: sourceInfo = [Statements.correct: (30,7)-(30,7)]
+                          #4: EmptyStatement: sourceInfo = [Statements.correct: (30,8)-(30,8)]
+                          #5: EmptyStatement: sourceInfo = [Statements.correct: (31,7)-(31,7)]
+                          #6: SwitchStatement:
+                            sourceInfo = [Statements.correct: (32,7)-(37,7)]
+                            test = Expression:
+                              sourceInfo = [Statements.correct: (32,15)-(32,19)]
+                              pieces = {
+                                #0: OtherExpression:
+                                  sourceInfo = [Statements.correct: (32,15)-(32,19)]
+                                  exprPiece = Word:
+                                    sourceInfo = [Statements.correct: (32,15)-(32,19)]
+                                    text = kdfjd
+                              }
+                            cases = {
+                              #0: LabeledCase:
+                                sourceInfo = [Statements.correct: (33,9)-(34,14)]
+                                code = BracedBody:
+                                  sourceInfo = [Statements.correct: (33,20)-(34,14)]
+                                  items = {
+                                    #0: ThrowStatement:
+                                      sourceInfo = [Statements.correct: (33,20)-(33,37)]
+                                      thrown = Expression:
+                                        sourceInfo = [Statements.correct: (33,26)-(33,36)]
+                                        pieces = {
+                                          #0: InstanceAllocationExpression:
+                                            sourceInfo = [Statements.correct: (33,26)-(33,36)]
+                                            type = ClassOrInterfaceType:
+                                              sourceInfo = [Statements.correct: (33,30)-(33,34)]
+                                              name = Error
+                                              typeArguments = {}
+                                            arguments = {}
+                                        }
+                                    #1: UnlabeledBreakStatement: sourceInfo = [Statements.correct: (34,9)-(34,14)]
+                                  }
+                                label = Expression:
+                                  sourceInfo = [Statements.correct: (33,14)-(33,16)]
+                                  pieces = {
+                                    #0: OtherExpression:
+                                      sourceInfo = [Statements.correct: (33,14)-(33,16)]
+                                      exprPiece = Parenthesized:
+                                        sourceInfo = [Statements.correct: (33,14)-(33,16)]
+                                        expr = Expression:
+                                          sourceInfo = [Statements.correct: (33,15)-(33,15)]
+                                          pieces = {
+                                            #0: OtherExpression:
+                                              sourceInfo = [Statements.correct: (33,15)-(33,15)]
+                                              exprPiece = IntegerLiteral:
+                                                sourceInfo = [Statements.correct: (33,15)-(33,15)]
+                                                value = 1
+                                          }
+                                  }
+                              #1: LabeledCase:
+                                sourceInfo = [Statements.correct: (35,9)-(35,28)]
+                                code = BracedBody:
+                                  sourceInfo = [Statements.correct: (35,20)-(35,28)]
+                                  items = {
+                                    #0: ValueReturnStatement:
+                                      sourceInfo = [Statements.correct: (35,20)-(35,28)]
+                                      value = Expression:
+                                        sourceInfo = [Statements.correct: (35,27)-(35,27)]
+                                        pieces = {
+                                          #0: OtherExpression:
+                                            sourceInfo = [Statements.correct: (35,27)-(35,27)]
+                                            exprPiece = Word:
+                                              sourceInfo = [Statements.correct: (35,27)-(35,27)]
+                                              text = i
+                                        }
+                                  }
+                                label = Expression:
+                                  sourceInfo = [Statements.correct: (35,14)-(35,16)]
+                                  pieces = {
+                                    #0: OtherExpression:
+                                      sourceInfo = [Statements.correct: (35,14)-(35,16)]
+                                      exprPiece = Parenthesized:
+                                        sourceInfo = [Statements.correct: (35,14)-(35,16)]
+                                        expr = Expression:
+                                          sourceInfo = [Statements.correct: (35,15)-(35,15)]
+                                          pieces = {
+                                            #0: OtherExpression:
+                                              sourceInfo = [Statements.correct: (35,15)-(35,15)]
+                                              exprPiece = IntegerLiteral:
+                                                sourceInfo = [Statements.correct: (35,15)-(35,15)]
+                                                value = 2
+                                          }
+                                  }
+                              #2: DefaultCase:
+                                sourceInfo = [Statements.correct: (36,9)-(36,33)]
+                                code = BracedBody:
+                                  sourceInfo = [Statements.correct: (36,19)-(36,33)]
+                                  items = {
+                                    #0: LabeledContinueStatement:
+                                      sourceInfo = [Statements.correct: (36,19)-(36,33)]
+                                      label = label
+                                  }
+                            }
+                          #7: SynchronizedStatement:
+                            sourceInfo = [Statements.correct: (38,7)-(47,7)]
+                            lockExpr = Expression:
+                              sourceInfo = [Statements.correct: (38,20)-(38,31)]
+                              pieces = {
+                                #0: InstanceAllocationExpression:
+                                  sourceInfo = [Statements.correct: (38,20)-(38,31)]
+                                  type = ClassOrInterfaceType:
+                                    sourceInfo = [Statements.correct: (38,24)-(38,29)]
+                                    name = Object
+                                    typeArguments = {}
+                                  arguments = {}
+                              }
+                            block = Block:
+                              sourceInfo = [Statements.correct: (38,34)-(47,7)]
+                              statements = BracedBody:
+                                sourceInfo = [Statements.correct: (39,9)-(46,9)]
+                                items = {
+                                  #0: TryCatchFinallyStatement:
+                                    sourceInfo = [Statements.correct: (39,9)-(46,9)]
+                                    tryBlock = Block:
+                                      sourceInfo = [Statements.correct: (39,13)-(41,9)]
+                                      statements = BracedBody:
+                                        sourceInfo = [Statements.correct: (40,11)-(40,22)]
+                                        items = {
+                                          #0: LabeledBreakStatement:
+                                            sourceInfo = [Statements.correct: (40,11)-(40,22)]
+                                            label = label
+                                        }
+                                    catchBlocks = {
+                                      #0: CatchBlock:
+                                        sourceInfo = [Statements.correct: (39,9)-(43,9)]
+                                        exception = FormalParameter:
+                                          sourceInfo = [Statements.correct: (42,16)-(42,26)]
+                                          declarator = UninitializedVariableDeclarator:
+                                            sourceInfo = [Statements.correct: (42,26)-(42,26)]
+                                            type = ClassOrInterfaceType:
+                                              sourceInfo = [Statements.correct: (42,16)-(42,24)]
+                                              name = Exception
+                                              typeArguments = {}
+                                            name = Word:
+                                              sourceInfo = [Statements.correct: (42,26)-(42,26)]
+                                              text = e
+                                          isFinal = false
+                                        block = Block:
+                                          sourceInfo = [Statements.correct: (42,29)-(43,9)]
+                                          statements = BracedBody:
+                                            sourceInfo = [Statements.correct: (42,29)-(42,29)]
+                                            items = {}
+                                    }
+                                    finallyBlock = Block:
+                                      sourceInfo = [Statements.correct: (44,17)-(46,9)]
+                                      statements = BracedBody:
+                                        sourceInfo = [Statements.correct: (45,11)-(45,32)]
+                                        items = {
+                                          #0: StatementExpression:
+                                            sourceInfo = [Statements.correct: (45,11)-(45,32)]
+                                            expression = Expression:
+                                              sourceInfo = [Statements.correct: (45,11)-(45,31)]
+                                              pieces = {
+                                                #0: OtherExpression:
+                                                  sourceInfo = [Statements.correct: (45,11)-(45,16)]
+                                                  exprPiece = Word:
+                                                    sourceInfo = [Statements.correct: (45,11)-(45,16)]
+                                                    text = System
+                                                #1: Word:
+                                                  sourceInfo = [Statements.correct: (45,18)-(45,20)]
+                                                  text = out
+                                                #2: MethodInvocationExpression:
+                                                  sourceInfo = [Statements.correct: (45,22)-(45,31)]
+                                                  methodName = Word:
+                                                    sourceInfo = [Statements.correct: (45,22)-(45,28)]
+                                                    text = println
+                                                  arguments = {
+                                                    #0: Expression:
+                                                      sourceInfo = [Statements.correct: (45,30)-(45,30)]
+                                                      pieces = {
+                                                        #0: OtherExpression:
+                                                          sourceInfo = [Statements.correct: (45,30)-(45,30)]
+                                                          exprPiece = Word:
+                                                            sourceInfo = [Statements.correct: (45,30)-(45,30)]
+                                                            text = i
+                                                      }
+                                                  }
+                                              }
+                                        }
+                                }
+                        }
+              }
+        }
+  }
+  interfaces = {}

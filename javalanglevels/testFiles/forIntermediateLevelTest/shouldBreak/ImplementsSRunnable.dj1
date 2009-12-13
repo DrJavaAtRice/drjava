@@ -1,0 +1,3 @@
+class ImplementsSRunnable implements Runnable {
+ /**Yikes!  You tried to extend Runnable...if this didn't break, it should have!*/ 
+}

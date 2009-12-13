@@ -1,0 +1,19 @@
+//This makes sure that you can use an unqualified name to reference an InnerClass from within a method.
+
+class RefInnerClassWithinMethod {
+  
+  void myMethod() {
+    MyInnerClass c;
+  }
+    
+  class MyInnerClass {
+    
+  }
+
+}
+
+    
+
+  
+
+  

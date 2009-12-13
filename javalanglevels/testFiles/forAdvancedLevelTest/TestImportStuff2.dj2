@@ -1,0 +1,19 @@
+package forAdvancedLevelTest;
+import forAdvancedLevelTest.importedFiles.ToReference;
+import forAdvancedLevelTest.importedFiles2.*;
+
+//this tests that if you have specifically imported a file, but you have a file in your package and have generally imported the same class name,
+//the specifically imported one is used.
+class TestImportStuff2 {
+  ToReference tr;
+  
+  
+  String printField() {
+    return tr.toString();
+  }
+  
+  int callMethod() { 
+    return tr.yourMethod();
+  }
+  
+}

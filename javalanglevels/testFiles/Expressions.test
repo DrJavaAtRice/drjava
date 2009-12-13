@@ -1,0 +1,70 @@
+import java.lang.*;
+
+public class Expressions {
+  
+  public void testNamedExpressions() {
+    if (true) {
+      int x = 5;
+    }
+    else {
+      int x = 6;
+    }
+    
+    Object o = "abcde";
+    String s = (String) o; 
+    
+    System.out.println(o.toString());
+  }
+  
+  public void testAllocationExpressions() {
+    Object o = new Object();
+    Integer i = new Integer(5);
+    int[] ai = new int[5];
+    char [][]dac = new char[5][16];
+    int[] fai = {1, 2, 3};
+  }
+  
+  public void testOtherExpressions() {
+    int i = 5;
+    int j = 8;
+    boolean b = i>j;
+    b = i<j;
+    boolean c = !b;
+    j = ~i;
+    int k = (j==i? 1:2);
+    b = i<=k;
+    c = i>=k;
+    b = b != c;
+    boolean a = b || c;
+    c = a&&b;
+    j++;
+    i--;
+    k = i + j;
+    i = j - k;
+    j = i * k;
+    k = i/j;
+    i = j&k;
+    k = i|k;
+    j = k^i;
+    k = i%j;
+    k = k<<2;
+    k = k>>2;
+    i+=2;
+    j-=4;
+    k*=5;
+    i/=10;
+    i&=12;
+    j|=1;
+//    k!=0; Not a statement
+    k^=13;
+    k%=5;
+    i<<=2;
+    i>>=2;
+    i>>>=2;
+//    k>>>2; Not a statement
+    
+  }
+}
+  
+
+  

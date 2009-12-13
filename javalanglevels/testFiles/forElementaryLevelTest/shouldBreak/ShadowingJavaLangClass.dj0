@@ -1,0 +1,5 @@
+//This file tests that at the Elementary Level, it is not okay to shadow a class from java.lang
+
+class Exception {
+ //This should have broken, since java.lang.Exception is a valid class 
+}

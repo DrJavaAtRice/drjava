@@ -1,0 +1,50 @@
+package foo.bar;
+import foo.bar.baz;
+import foo.*;
+
+public class Statements {
+  {
+    int i = 0;
+    if (i < 5) {
+      i = 6;
+    }
+    if (i < 7) {
+      break;
+    }
+    else {      
+    }
+    if (i == 10)
+    System.out.println(i);
+  }
+  
+  public static void main(String[] args) {
+    label: for (i = 5; i != 3; i++) {
+      while (i == 1) {
+        continue;
+      }
+      return;
+      
+      do 
+        i = 1;
+      while (true);
+      ;;
+      ;
+      switch( kdfjd) {
+        case (1) : throw new Error();
+        break;
+        case (2) : return i;
+        default : continue label;
+      }
+      synchronized(new Object()) {
+        try {
+          break label;
+        }
+        catch (Exception e) {
+        }
+        finally {
+          System.out.println(i);
+        }
+      }
+    }
+  }
+}

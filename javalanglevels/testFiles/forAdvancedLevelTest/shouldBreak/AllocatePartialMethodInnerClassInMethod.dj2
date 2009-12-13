@@ -1,0 +1,12 @@
+class AllocatePartialInnerClassInMethod {
+  void myMethod() {
+    MyInnerClass2 c = new MyInnerClass2();
+    
+    class MyInnerClass2 {
+      int a = 5;
+    }
+  
+    System.out.println(c.a());
+  }
+  
+}

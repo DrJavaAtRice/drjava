@@ -1,0 +1,3 @@
+class ThisWithBadReturn {
+  ThisWithBadReturnn foo(String s) { return this; }
+}

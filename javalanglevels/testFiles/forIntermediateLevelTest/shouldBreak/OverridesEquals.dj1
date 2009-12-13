@@ -1,0 +1,14 @@
+/**
+ * This overrides equals
+ */
+
+class OverridesEquals {
+  int i;
+  char c;
+  
+  public boolean equals(Object o) {
+    return false;
+  }
+  
+  
+}

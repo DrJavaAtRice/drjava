@@ -1,0 +1,16 @@
+package listFW;
+
+public class NEList implements IList {
+  Object _first;
+  IList _rest;
+  
+  public NEList(Object first, IList rest) {
+    _first = first;
+    _rest = rest;
+  }
+
+  public int getLength() {
+    return 1 + _rest.getLength();
+  }
+  
+}
