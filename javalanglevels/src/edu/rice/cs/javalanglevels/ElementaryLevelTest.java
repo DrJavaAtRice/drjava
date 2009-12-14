@@ -88,8 +88,8 @@ public class ElementaryLevelTest extends TestCase {
       if (correctFile.exists()) {
         try {
           assertEquals("File " + currFile.getName() + " should have been parsed and augmented correctly.",
-                       IOUtil.toString(correctFile),
-                       IOUtil.toString(resultingFile));
+                       lf(IOUtil.toString(correctFile)),
+                       lf(IOUtil.toString(resultingFile)));
         }
         catch (IOException ioe) {
           fail(ioe.getMessage());
@@ -144,8 +144,8 @@ public class ElementaryLevelTest extends TestCase {
       
       try {
         assertEquals("File " + currFile.getName() + " should have been handled correctly",
-                     IOUtil.toString(correctFile),
-                     IOUtil.toString(resultingFile));
+                     lf(IOUtil.toString(correctFile)),
+                     lf(IOUtil.toString(resultingFile)));
       }
       catch (IOException ioe) {
         fail(ioe.getMessage());
@@ -219,13 +219,18 @@ public class ElementaryLevelTest extends TestCase {
       
       try {
         assertEquals("File " + currFile.getName() + " should have been parsed and augmented correctly.",
-                     IOUtil.toString(correctFile),
-                     IOUtil.toString(resultingFile));
+                     lf(IOUtil.toString(correctFile)),
+                     lf(IOUtil.toString(resultingFile)));
       }
       catch (IOException ioe) {
         fail(ioe.getMessage());
         // let JUnit throw the exception
       }
     }
+  }
+
+  /** Convert whatever line feeds (\n, \r, \r\n) are in the string to just \n, ignoring trailing whitespace. */
+  public static String lf(String s) {
+      return s.trim().replaceAll(edu.rice.cs.plt.text.TextUtil.NEWLINE_PATTERN,"\n");
   }
 }

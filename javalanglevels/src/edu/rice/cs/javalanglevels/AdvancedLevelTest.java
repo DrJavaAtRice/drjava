@@ -45,6 +45,8 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
 
+import static edu.rice.cs.javalanglevels.ElementaryLevelTest.lf;
+
 /** This is a high-level test to make sure that taking an Advanced Level file from
   * source file to augmented file has the correct behavior, does not throw errors when
   * it should not, throws errors when it should, and results in the correct augmented code.
@@ -119,8 +121,8 @@ public class AdvancedLevelTest extends TestCase {
       if (correctFile.exists()) {
         try {
           assertEquals("File " + currFile.getName() + " should have been parsed and augmented correctly.",
-                       IOUtil.toString(correctFile),
-                       IOUtil.toString(resultingFile));
+                       lf(IOUtil.toString(correctFile)),
+                       lf(IOUtil.toString(resultingFile)));
         }
         catch (IOException ioe) {
           fail(ioe.getMessage());
@@ -148,8 +150,8 @@ public class AdvancedLevelTest extends TestCase {
         if (correctFile.exists()) {
           try {
             assertEquals("File " + currFile.getName() + " should have been parsed and augmented correctly.",
-                         IOUtil.toString(correctFile),
-                         IOUtil.toString(resultingFile));
+                         lf(IOUtil.toString(correctFile)),
+                         lf(IOUtil.toString(resultingFile)));
           }
           catch (IOException ioe) {
             fail(ioe.getMessage());
@@ -181,8 +183,8 @@ public class AdvancedLevelTest extends TestCase {
           if (correctFile.exists()) {
             try {
               assertEquals("File " + currFile.getName() + " should have been parsed and augmented correctly.",
-                           IOUtil.toString(correctFile),
-                           IOUtil.toString(resultingFile));
+                           lf(IOUtil.toString(correctFile)),
+                           lf(IOUtil.toString(resultingFile)));
             }
             catch (IOException ioe) {
               fail(ioe.getMessage());
@@ -290,5 +292,4 @@ public class AdvancedLevelTest extends TestCase {
     
     //don't worry about checking the .java files for correctness...just make sure there weren't any exceptions
   }
-  
 }

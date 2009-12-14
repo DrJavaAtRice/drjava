@@ -44,6 +44,8 @@ import edu.rice.cs.javalanglevels.parser.*;
 import junit.framework.TestCase;
 import edu.rice.cs.plt.io.IOUtil;
 
+import static edu.rice.cs.javalanglevels.ElementaryLevelTest.lf;
+
 /**
  * Test the JExprParser by trying to parse all files in the testFiles directory that end in .test,
  * writing the output to a file of the same name ending in .actual, and comparing that file to 
@@ -87,8 +89,9 @@ public class JExprParserTest extends TestCase {
       String newPath = path.substring(0, indexOfLastDot) + ".expected";
       File f = new File(newPath);
       String text = IOUtil.toString(f);
-      assertEquals("The resulting SourceFile generated from " + currFile + " is not correct.", text, sf.toString());
+      assertEquals("The resulting SourceFile generated from " + currFile + " is not correct.",
+                   lf(text),
+                   lf(sf.toString()));
     }
   }
-
 }
