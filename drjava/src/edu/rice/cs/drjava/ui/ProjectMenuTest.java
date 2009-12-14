@@ -83,11 +83,11 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     */
   public void setUp() throws Exception {
     // Perform Swing setup in event thread because the event thread is ALREADY running
+    superSetUp(); // super.setUp() should be called first; contains an embedded invokeAndWait
+
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
         try {
-   superSetUp(); // super.setUp() should be called first
-
           // create temp directory for this test
           _base = new File(System.getProperty("java.io.tmpdir")).getCanonicalFile();
           _parent = IOUtil.createAndMarkTempDirectory("proj", "", _base);
@@ -117,7 +117,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
           _frame.pack();
           _model = _frame.getModel();
           _model.ensureJVMStarterFinished();
-          superSetUp();
+//          superSetUp();
         }
         // Exception e is either an IOException from a file operation or an Exception thrown by superSetUp(). 
         catch(Exception e) { throw new UnexpectedException(e); }

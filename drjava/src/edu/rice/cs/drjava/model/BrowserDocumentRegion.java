@@ -41,8 +41,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.File;
 
 /** Class for document regions that totally ordered by allocation chronology.  They do not conform to the invariants
-  * required for OrderedDocumentRegions.  TODO: Use a simple stack rather than a TreeSet to represent the collection 
-  * of accumulated regions.
+  * required for OrderedDocumentRegions.
+  * Warning: this class defines compareTo which implicits defines a coarser equality relation than equals
   * @version $Id$
   */
 public class BrowserDocumentRegion implements IDocumentRegion, Comparable<BrowserDocumentRegion> {
@@ -76,7 +76,7 @@ public class BrowserDocumentRegion implements IDocumentRegion, Comparable<Browse
   /** This hash function is consistent with equals. */
   public int hashCode() { return _index; }
   
-  /** This relation is consistent with equals. */
+  /** This relation is coarset than equals. */
   public int compareTo(BrowserDocumentRegion r) { return _index - r._index; }
   
   public int getIndex() { return _index; }

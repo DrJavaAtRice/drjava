@@ -44,7 +44,7 @@ import java.util.*;
   * can be inserted as variables in external processes.
   * @version $Id$
   */
-public class PropertyMaps implements Cloneable {
+public final class PropertyMaps implements Cloneable {
   /** Map of property sets. */
   protected Map<String,Map<String,DrJavaProperty>> _props = new TreeMap<String,Map<String,DrJavaProperty>>();
   
