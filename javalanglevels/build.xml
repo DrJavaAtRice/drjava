@@ -398,6 +398,15 @@
   
   
   <target name="do-test" depends="resolve-jvm-args">
+    <!-- touch the class files in testFiles to make sure they have
+         a more recent time stamp than their source files;
+         otherwise, the unit tests will fail with a confusing
+         "should not be null" failure -->
+    <touch>
+        <fileset dir="testFiles">
+          <filename name="**/*.class" />
+        </fileset>
+    </touch>
     <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}'" />
     <junit haltonfailure="${test-halt}" failureproperty="test-failed"
            fork="yes" forkmode="perTest" maxmemory="512M" jvm="${test-jvm}" dir="${basedir}">
