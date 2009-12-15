@@ -100,7 +100,8 @@ public class CompilerErrorPanel extends ErrorPanel {
         if (e.getStateChange() == ItemEvent.SELECTED) {
           CompilerInterface compiler = (CompilerInterface) _compilerChoiceBox.getSelectedItem();
           compilerModel.setActiveCompiler(compiler);
-          
+         
+          DrJava.getConfig().setSetting(OptionConstants.COMPILER_DEFAULT, compiler.getName());
           compilerModel.resetCompilerErrors();
           _compileHasOccurred = false;
           reset();

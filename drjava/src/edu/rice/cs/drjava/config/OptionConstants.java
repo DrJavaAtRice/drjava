@@ -106,7 +106,7 @@ public interface OptionConstants {
   /** Whether to display all versions of the compilers (even if they have the same major version). */
   public static final BooleanOption DISPLAY_ALL_COMPILER_VERSIONS = 
     new BooleanOption("all.compiler.versions", Boolean.FALSE);
-  
+ 
  
   /* ---------- Color Options ---------- */
   
@@ -1316,6 +1316,12 @@ public interface OptionConstants {
   /** Whether to show serial warnings */
   public static final BooleanOption SHOW_PATH_WARNINGS = 
     new BooleanOption("show.path.warnings", Boolean.FALSE);
+  
+    /** Default compiler to use - changes everytime compiler is changed - no way of changing in preferences at this time */
+  /** default value is "", but this changes as soon as DrJava starts up */
+  public static final StringOption COMPILER_DEFAULT = 
+    new StringOption("compiler.default", "");
+    
   
   /* ---------- UNDISPLAYED OPTIONS ---------- */
   

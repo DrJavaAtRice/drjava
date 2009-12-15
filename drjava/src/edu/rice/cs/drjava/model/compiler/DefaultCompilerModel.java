@@ -47,6 +47,7 @@ import java.util.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -70,6 +71,9 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * @version $Id$
   */
 public class DefaultCompilerModel implements CompilerModel {
+  
+  /** for logging debug info */
+  private static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("DefaultCompilerModel.txt", false);
   
   /** The available compilers */
   private final List<CompilerInterface> _compilers;
@@ -100,10 +104,25 @@ public class DefaultCompilerModel implements CompilerModel {
     *                   to be available.  An empty list is acceptable.
     */
   public DefaultCompilerModel(GlobalModel m, Iterable<? extends CompilerInterface> compilers) {
+    
     _compilers = new ArrayList<CompilerInterface>();
-    for (CompilerInterface i : compilers) { _compilers.add(i); }
-    if (_compilers.size() > 0) { _active = _compilers.get(0); }
-    else { _active = NoCompilerAvailable.ONLY; }
+    List<String> compilerNames = new ArrayList<String>();
+    
+    String dCompName = DrJava.getConfig().getSetting(OptionConstants.COMPILER_DEFAULT);
+    
+    for (CompilerInterface i : compilers) { _compilers.add(i); compilerNames.add(i.getName());}
+    if (_compilers.size() > 0) { 
+      if(dCompName!="" && compilerNames.contains(dCompName)) {
+        _active = _compilers.get(compilerNames.indexOf(dCompName));
+      }
+      else {
+        _active = _compilers.get(0);
+        DrJava.getConfig().setSetting(OptionConstants.COMPILER_DEFAULT, _active.getName());
+      }
+    }
+    else { 
+      _active = NoCompilerAvailable.ONLY; 
+    }
     
     _model = m;
     _compilerErrorModel = new CompilerErrorModel(new DJError[0], _model);
@@ -274,7 +293,7 @@ public class DefaultCompilerModel implements CompilerModel {
     while (iter.hasNext()) {
       JExprParseException pe = iter.next();
       errors.addLast(new DJError(pe.getFile(), pe.currentToken.beginLine-1, pe.currentToken.beginColumn-1, 
-                                       pe.getMessage(), false));
+                                 pe.getMessage(), false));
     }
     return errors;
   }
@@ -355,20 +374,20 @@ public class DefaultCompilerModel implements CompilerModel {
     otherFiles.addAll(testFiles);
     return otherFiles;
   }
-    
+  
   /** Compiles the language levels files in the list.  Adds any errors to the given error list.
     * @return  An updated list for compilation containing no Language Levels files, or @code{null}
     *          if there were no Language Levels files to process.
     */
   private List<File> _compileLanguageLevelsFiles(List<File> files, List<DJError> errors,
-                                                           Iterable<File> classPath, Iterable<File> bootClassPath) {
+                                                 Iterable<File> classPath, Iterable<File> bootClassPath) {
     /* Construct the collection of files to be compild by javac, renaming any language levels (.dj*) files to the 
      * corresponding java (.java) files.  By using a HashSet, we avoid creating duplicates in this collection.
      */
     HashSet<File> javaFileSet = new HashSet<File>();
     LinkedList<File> newFiles = new LinkedList<File>();  // Used to record the LL files that must be converted
     final LinkedList<File> filesToBeClosed = new LinkedList<File>();  // Used to record .java files that are open at 
-                                                                      // the same time as their .dj? files.
+    // the same time as their .dj? files.
     boolean containsLanguageLevels = false;
     for (File f : files) {
       File canonicalFile = IOUtil.attemptCanonicalFile(f);
@@ -429,8 +448,8 @@ public class DefaultCompilerModel implements CompilerModel {
       ScrollableListDialog<File> dialog = new ScrollableListDialog.Builder<File>()
         .setTitle("Java File" + (filesToBeClosed.size() == 1?"":"s") + " Need to Be Closed")
         .setText("The following .java " + (filesToBeClosed.size() == 1?
-                                           "file has a matching .dj? file":
-                                           "files have matching .dj? files") + " open.\n" + 
+                                             "file has a matching .dj? file":
+                                             "files have matching .dj? files") + " open.\n" + 
                  (filesToBeClosed.size() == 1?
                     "This .java file needs":
                     "These .java files need") + " to be closed for proper compiling.")
@@ -482,7 +501,7 @@ public class DefaultCompilerModel implements CompilerModel {
         }
         
         if (DrJava.getConfig().getSetting(OptionConstants.DELETE_LL_CLASS_FILES)
-            .equals(OptionConstants.DELETE_LL_CLASS_FILES_CHOICES.get(1))) {
+              .equals(OptionConstants.DELETE_LL_CLASS_FILES_CHOICES.get(1))) {
           // "ask me"
           final JButton deleteButton = new JButton(new AbstractAction("Delete Class Files") {
             public void actionPerformed(ActionEvent e) {
@@ -586,26 +605,26 @@ public class DefaultCompilerModel implements CompilerModel {
   //-------------------------- Compiler Management --------------------------//
   
   /** Returns all registered compilers that are actually available.  If there are none,
-   * the result is {@link NoCompilerAvailable#ONLY}.
-   */
+    * the result is {@link NoCompilerAvailable#ONLY}.
+    */
   public Iterable<CompilerInterface> getAvailableCompilers() {
     if (_compilers.isEmpty()) { return IterUtil.singleton(NoCompilerAvailable.ONLY); }
     else { return IterUtil.snapshot(_compilers); }
   }
   
   /** Gets the compiler that is the "active" compiler.
-   *
-   * @see #setActiveCompiler
-   */
+    *
+    * @see #setActiveCompiler
+    */
   public CompilerInterface getActiveCompiler() { return _active; }
   
   /** Sets which compiler is the "active" compiler.
-   *
-   * @param compiler Compiler to set active.
-   * @throws IllegalArgumentException  If the compiler is not in the list of available compilers
-   *
-   * @see #getActiveCompiler
-   */
+    *
+    * @param compiler Compiler to set active.
+    * @throws IllegalArgumentException  If the compiler is not in the list of available compilers
+    *
+    * @see #getActiveCompiler
+    */
   public void setActiveCompiler(CompilerInterface compiler) {
     if (_compilers.isEmpty() && compiler.equals(NoCompilerAvailable.ONLY)) {
       // _active should be set correctly already
