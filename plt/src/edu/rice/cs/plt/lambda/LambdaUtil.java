@@ -1892,7 +1892,7 @@ public final class LambdaUtil {
   }
   
   /** Produce the conjunction ({@code &&}) of the given conditions. */
-  public static Condition and(Iterable<? extends Condition> conds) {
+  public static Condition and0(Iterable<? extends Condition> conds) {
     return new AndCondition(conds);
   }
   
@@ -2051,7 +2051,7 @@ public final class LambdaUtil {
   }
   
   /** Produce the disjunction ({@code ||}) of the given conditions. */
-  public static Condition or(Iterable<? extends Condition> conds) {
+  public static Condition or0(Iterable<? extends Condition> conds) {
     return new OrCondition(conds);
   }
   

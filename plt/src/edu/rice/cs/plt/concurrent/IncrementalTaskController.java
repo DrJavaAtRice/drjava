@@ -117,17 +117,18 @@ public abstract class IncrementalTaskController<I, R> extends TaskController<R> 
     boolean success = false;
     do {
       State s = state.get();
-      if (s instanceof TaskController.RunningState) {
+      Object sObj = s; // workaround for Eclipse compiler limitations
+      if (sObj instanceof TaskController.RunningState) {
         success = state.compareAndSet(s, new FreshPausingState());
         if (success) { doPause(); }
       }
-      else if (s instanceof TaskController.FreshStartingState) {
+      else if (sObj instanceof TaskController.FreshStartingState) {
         success = state.compareAndSet(s, new PausedStartingState());
       }
-      else if (s instanceof IncrementalTaskController.StartedPausingState) {
+      else if (sObj instanceof IncrementalTaskController.StartedPausingState) {
         success = state.compareAndSet(s, new FreshPausingState());
       }
-      else if (s instanceof TaskController.CanceledState) {
+      else if (sObj instanceof TaskController.CanceledState) {
         throw new CancellationException("Task is canceled");
       }
       else { // ignore other fresh, paused, finished, pausing, or canceling states
@@ -155,7 +156,8 @@ public abstract class IncrementalTaskController<I, R> extends TaskController<R> 
     boolean kept = false;
     State current = state.get();
     State next = new PausedState();
-    while (current instanceof IncrementalTaskController.PausingState && !kept) {
+    // cast to Object as workaround for Eclipse compiler limitation
+    while (((Object) current) instanceof IncrementalTaskController.PausingState && !kept) {
       // must loop because a transition between PausingStates could occur concurrently
       // can use weakCompareAndSet since we're already in a while loop
       kept = state.weakCompareAndSet(current, next);

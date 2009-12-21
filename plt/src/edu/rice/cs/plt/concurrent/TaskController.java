@@ -87,7 +87,10 @@ public abstract class TaskController<R> implements ResolvingThunk<R>, Future<R> 
    * Returns {@code true} if the status is {@code FINISHED} <em>and</em> {@code value()} will return a result
    * (rather than throwing an exception).
    */
-  public boolean isResolved() { return state.get() instanceof TaskController.CleanlyFinishedState; }
+  public boolean isResolved() {
+    // cast to workaround limitation in Eclipse compiler
+    return ((Object) state.get()) instanceof TaskController.CleanlyFinishedState;
+  }
   
   /**
    * Request that the task be run.  If the task is {@code RUNNING} or {@code FINISHED}, has no effect.
@@ -236,7 +239,8 @@ public abstract class TaskController<R> implements ResolvingThunk<R>, Future<R> 
     boolean kept = false;
     State current = state.get();
     State next = runningState();
-    while (current instanceof TaskController.StartingState && !kept) {
+    // cast to workaround limitation in Eclipse compiler
+    while (((Object) current) instanceof TaskController.StartingState && !kept) {
       // must loop because a FreshStartingState->CanceledStartingState transition could occur concurrently
       // can use weakCompareAndSet since we're already in a while loop
       kept = state.weakCompareAndSet(current, next);
