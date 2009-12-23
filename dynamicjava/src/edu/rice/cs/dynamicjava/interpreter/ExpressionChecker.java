@@ -440,7 +440,6 @@ public class ExpressionChecker {
             // TODO: Improve error when memberName is a non-static class
           }
           else {
-            System.out.println("hi");
             setErrorStrings(node, ts.typePrinter().print(classType), memberName.image());
             throw new ExecutionError("no.such.member", node);
           }

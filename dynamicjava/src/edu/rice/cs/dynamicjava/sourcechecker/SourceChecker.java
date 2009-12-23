@@ -227,7 +227,7 @@ public class SourceChecker {
         catch (IllegalArgumentException e) { /* thrown by "empty" stub nodes -- ignore */ }
         if (NodeProperties.hasLeftExpression(node)) { recur(NodeProperties.getLeftExpression(node)); }
         if (NodeProperties.hasTranslation(node)) { recur(NodeProperties.getTranslation(node)); }
-        if (NodeProperties.hasStatementTranslation(node)) { recur(NodeProperties.getTranslation(node)); }
+        if (NodeProperties.hasStatementTranslation(node)) { recur(NodeProperties.getStatementTranslation(node)); }
     }
   }
  
