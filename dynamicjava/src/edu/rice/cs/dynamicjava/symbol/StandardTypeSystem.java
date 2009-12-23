@@ -1795,6 +1795,12 @@ public abstract class StandardTypeSystem extends TypeSystem {
           return m.declaredName().equals(_name) && !(_onlyStatic && !m.isStatic()) && accessible(m, _accessModule);
         }
         @Override public Iterable<DJMethod> defaultCase(Type t) { return IterUtil.empty(); }
+        @Override public Iterable<DJMethod> forArrayType(ArrayType t) {
+          if (_name.equals("clone") && !_onlyStatic) {
+            return IterUtil.<DJMethod>make(new ArrayCloneMethod(t));
+          }
+          else { return IterUtil.empty(); }
+        }
         @Override public Iterable<DJMethod> forClassType(ClassType t) {
           List<DJMethod> result = new LinkedList<DJMethod>();
           for (DJMethod m : t.ofClass().declaredMethods()) {
