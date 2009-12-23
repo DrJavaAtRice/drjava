@@ -355,7 +355,7 @@ public class TreeClass implements DJClass {
       _outerClass = SymbolUtil.dynamicOuterClass(TreeClass.this);
     }
     
-    public String declaredName() { return TreeClass.this.declaredName(); }
+    public String declaredName() { return isAnonymous() ? "<anonymous>" : TreeClass.this.declaredName(); }
     public DJClass declaringClass() { return TreeClass.this; }
     public Access.Module accessModule() { return _accessModule; }
     public Type returnType() { return SymbolUtil.thisType(TreeClass.this); }

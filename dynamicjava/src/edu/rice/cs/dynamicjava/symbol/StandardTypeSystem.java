@@ -980,7 +980,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
       @Override public Boolean forParameterizedClassType(ParameterizedClassType target) {
         if (isReifiable(target)) { return true; }
         else if (isSubtype(target, source)) {
-          // Verify that that, given a value of type source & erase(target), it must have type target.
+          // Verify that, given a value of type source & erase(target), it must have type target.
           // Must show, where target=Target<T1..Tn>, forall X1..Xn, Target<X1..Xn> <: source implies Xi=Ti.
           ParameterizedClassType wildCapt = capture(parameterize(new RawClassType(target.ofClass())));
           Iterable<VariableType> unboundArgs =
@@ -2264,6 +2264,10 @@ public abstract class StandardTypeSystem extends TypeSystem {
     public Iterable<? extends Type> parameterTypes() {
       return substitute(SymbolUtil.parameterTypes(_delegate), _sigma);
     }
+    public String toString() {
+      TypePrinter p = typePrinter();
+      return "InstantiatedMethod(" + p.print(this) + ")";
+    }
   }
   
   private static abstract class DelegatingConstructor extends DelegatingFunction<DJConstructor>
@@ -2287,6 +2291,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
     protected Iterable<Type> parameterTypes() {
       return IterUtil.mapSnapshot(SymbolUtil.parameterTypes(_delegate), ERASE);
     }
+    public String toString() { return "ErasedConstructor(" + declaredName() + ")"; }
   }
   
   private class InstantiatedConstructor extends DelegatingConstructor {
@@ -2305,6 +2310,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
     public Iterable<? extends Type> parameterTypes() {
       return substitute(SymbolUtil.parameterTypes(_delegate), _sigma);
     }
+    public String toString() { return "InstantiatedConstructor(" + declaredName() + ")"; }
   }
   
   /** Create new type parameters for function {@code f} with bounds instantiated by the given substitution. */

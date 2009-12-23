@@ -356,10 +356,20 @@ public class ClassChecker {
       TypeContext bodyContext = new FunctionContext(sigContext, k);
       ExpressionChecker callChecker = new ExpressionChecker(bodyContext, _opt);
       ConstructorCall call = node.getConstructorCall();
-      if (call != null) { callChecker.checkConstructorCall(call); }
-      new StatementChecker(bodyContext, _opt).checkList(node.getStatements());
-      // if the call is implicit, check it *after* checking the body (better error messages this way) 
-      if (call == null) { callChecker.checkConstructorCall(new ConstructorCall(null, null, true)); }
+      ExecutionError error = null;
+      if (call != null) {
+        try { callChecker.checkConstructorCall(call); }
+        catch (ExecutionError e) { error = e; }
+      }
+      try { new StatementChecker(bodyContext, _opt).checkList(node.getStatements()); }
+      catch (ExecutionError e) {
+        if (error != null) { error = e; }
+      }
+      // if the call is implicit, only check it if there are no errors (avoids redundant errors)
+      if (call == null && error == null) {
+        callChecker.checkConstructorCall(new ConstructorCall(null, null, true));
+      }
+      if (error != null) { throw error; }
       return null;
     }
     

@@ -62,72 +62,28 @@
  *
  */
 
-// Commented code below belonged to DynamicJava that got overriden by code
-// imported from the earlier DrJava's Interactions preprocessor
-
-///**
-// * To represent the source code informations
-// */
-//public static class SourceInformation {
-//  // The fields
-//  private String filename;
-//  private int    line;
-//  private int    column;
-//  
-//  /**
-//   * Creates a source information
-//   */
-//  public SourceInformation(String filename, int line, int column) {
-//    this.filename = filename;
-//    this.line     = line;
-//    this.column   = column;
-//  }
-//  
-//  /**
-//   * Returns the filename
-//   */
-//  public String getFilename() {
-//    return filename;
-//  }
-//  
-//  /**
-//   * Returns the line where the error occurs
-//   */
-//  public int getLine() {
-//    return line;
-//  }
-//  
-//  /**
-//   * Returns the column where the error occurs
-//   */
-//  public int getColumn() {
-//    return column;
-//  }
-//}
-
-
-// Code below imported from the earlier DrJava's Interactions preprocessor
 package koala.dynamicjava.tree;
 
 import java.io.*;
 
 import edu.rice.cs.plt.object.ObjectUtil;
+import edu.rice.cs.plt.tuple.Option;
 
 /** A simple tuple class to represent source location. */
-public final class SourceInfo {
+public final class SourceInfo implements Comparable<SourceInfo> {
   
   public interface Wrapper {
     SourceInfo getSourceInfo();
   }
   
-  public static final SourceInfo NONE = new SourceInfo(null, 0, 0, 0, 0);
+  public static final SourceInfo NONE = new SourceInfo(Option.<File>none(), 0, 0, 0, 0);
   
   public static SourceInfo point(File f, int line, int column) {
-    return new SourceInfo(f, line, column, line, column);
+    return new SourceInfo(Option.wrap(f), line, column, line, column);
   }
   
   public static SourceInfo range(File f, int startLine, int startColumn, int endLine, int endColumn) {
-    return new SourceInfo(f, startLine, startColumn, endLine, endColumn);
+    return new SourceInfo(Option.wrap(f), startLine, startColumn, endLine, endColumn);
   }
   
   public static SourceInfo extend(SourceInfo si, int endLine, int endColumn) {
@@ -164,9 +120,9 @@ public final class SourceInfo {
   }
   
   /**
-   * The source file.  May be null.
+   * The source file.
    */
-  private final File _file;
+  private final Option<File> _file;
   
   /**
    * The starting line of the source location
@@ -188,20 +144,7 @@ public final class SourceInfo {
    */
   private final int _endColumn;
 
-  /**
-   * Constructs a SourceInfo.
-   * @param file  The source file.  May be null, indicating no source file.
-   * @param startLine Starting line
-   * @param startColumn Starting column
-   * @param endLine Ending line
-   * @param endColumn Ending column
-   */
-  private SourceInfo(File file,
-                     int startLine,
-                     int startColumn,
-                     int endLine,
-                     int endColumn)
-  {
+  private SourceInfo(Option<File> file, int startLine, int startColumn, int endLine, int endColumn) {
     _file = file;
     _startLine = startLine;
     _startColumn = startColumn;
@@ -209,11 +152,11 @@ public final class SourceInfo {
     _endColumn = endColumn;
   }
   
-  /** May be null, if the source file is unknown. */
-  public File getFile() { return _file; }
+  /** May be null, if the source file is unknown. TODO: Change this interface to Option<File>.  */
+  public File getFile() { return _file.unwrap(null); }
   
   /** Get the file's name, or {@code "(no file)"}. */
-  public String getFilename() { return _file == null ? "(no file)" : _file.getPath(); }
+  public String getFilename() { return _file.isNone() ? "(no file)" : _file.unwrap().getPath(); }
   
   public int getStartLine() { return _startLine; }
   public int getStartColumn() { return _startColumn; }
@@ -247,7 +190,7 @@ public final class SourceInfo {
     else {
       SourceInfo casted = (SourceInfo) obj;
       return
-        ObjectUtil.equal(this._file, casted._file) &&
+        this._file.equals(casted._file) &&
         this._startLine == casted._startLine &&
         this._startColumn == casted._startColumn &&
         this._endLine == casted._endLine &&
@@ -257,6 +200,17 @@ public final class SourceInfo {
 
   @Override public int hashCode() {
     return ObjectUtil.hash(getClass(), _file, _startLine, _startColumn, _endLine, _endColumn);
+  }
+  
+  public int compareTo(SourceInfo that) {
+    int result = Option.<File>comparator().compare(this._file, that._file);
+    if (result == 0) {
+      result = ObjectUtil.compare(this._startLine, that._startLine,
+                                  this._startColumn, that._startColumn,
+                                  this._endLine, that._endLine,
+                                  this._endColumn, that._endColumn);
+    }
+    return result;
   }
   
 }

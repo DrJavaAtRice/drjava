@@ -87,7 +87,6 @@ import edu.rice.cs.dynamicjava.symbol.TypeSystem.*;
 import edu.rice.cs.dynamicjava.symbol.type.*;
 
 import koala.dynamicjava.tree.*;
-import koala.dynamicjava.tree.tiger.*;
 import koala.dynamicjava.tree.visitor.*;
 import koala.dynamicjava.interpreter.error.ExecutionError;
 import koala.dynamicjava.interpreter.TypeUtil;
