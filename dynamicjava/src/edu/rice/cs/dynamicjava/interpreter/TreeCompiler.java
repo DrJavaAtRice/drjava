@@ -626,7 +626,7 @@ public class TreeCompiler {
     final MethodVisitor mv = _classWriter.visitMethod(access, ast.getName(), methodDescriptor,
                                                       methodSig, extractClassNames(exceptions));
     
-    if (!Modifier.isAbstract(access)) {
+    if (!Modifier.isAbstract(access) && !Modifier.isNative(access)) {
       String key = ast.getName() + methodDescriptor;
       _methods.put(key, ast);
       

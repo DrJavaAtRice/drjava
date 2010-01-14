@@ -30,10 +30,10 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
   /** Whether the inference algorithm should attempt to pack capture variables that appear as inference results. */
   private final boolean _packCaptureVars;
   
-  public ExtendedTypeSystem(Options opt) { this(opt, true); }
+  public ExtendedTypeSystem(Options opt) { this(opt, true, true); }
   
-  public ExtendedTypeSystem(Options opt, boolean packCaptureVars) {
-    super(opt);
+  public ExtendedTypeSystem(Options opt, boolean packCaptureVars, boolean boxingInMostSpecific) {
+    super(opt, boxingInMostSpecific);
     _packCaptureVars = packCaptureVars;
   }
   

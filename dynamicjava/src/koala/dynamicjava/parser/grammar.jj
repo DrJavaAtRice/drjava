@@ -1082,7 +1082,7 @@ PARSER_END(Parser)
     try {
       (
         LOOKAHEAD(2) node = keywordStatement(false) // lookahead distinguishes synchronized modifier from statement
-      | mods = modifiers()
+      | LOOKAHEAD(2) mods = modifiers()
         (
           node = unmodifiedPackageDeclaration(mods, DeclType.REPL)
         | node = unmodifiedTypeDeclaration(mods, DeclType.REPL)
@@ -1174,7 +1174,7 @@ PARSER_END(Parser)
     Token first = getToken(1);
   }
   {
-    (
+    ( LOOKAHEAD(2) (
       "abstract"
       {
         if (flags.contains(Modifier.ABSTRACT)) {
@@ -1295,7 +1295,7 @@ PARSER_END(Parser)
     | 
       ann = annotation()
       { annots.add(ann); }
-    )+
+    ))+
     { return new ModifierSet(flags, annots, _range(first, token)); }
   }
   
@@ -1894,6 +1894,7 @@ PARSER_END(Parser)
   InterfaceDeclaration unmodifiedInterfaceDeclaration(ModifierSet mods, DeclType level) :
   {
     Token id;
+    Token isAnnotation = null;
     List<TypeParameter> typeParameters = null;
     List<? extends ReferenceTypeName> impl = null;
     List<Node> list = new LinkedList<Node>();
@@ -1901,7 +1902,7 @@ PARSER_END(Parser)
   }
   {
     try {
-      "interface" id=<IDENTIFIER>
+      [ isAnnotation="@"] "interface" id=<IDENTIFIER>
         [ typeParameters = typeParameters() ]
         [ "extends" impl=ReferenceTypeNameList() ]
         "{"
@@ -1918,7 +1919,8 @@ PARSER_END(Parser)
             case REPL: checkModifiers(mods, Modifier.PUBLIC, Modifier.ABSTRACT, Modifier.STRICT); break;
           }
       
-        return new InterfaceDeclaration(mods, id.image, Option.wrap(typeParameters), impl, list, _range(mods, token));
+        return new InterfaceDeclaration(mods, isAnnotation != null, id.image, Option.wrap(typeParameters), impl, list,
+                                        _range(mods, token));
       }
     }
     catch(ParseException pe) {
@@ -2135,7 +2137,7 @@ PARSER_END(Parser)
       (
         LOOKAHEAD(2) node = keywordStatement(true) // lookahead distinguishes synchronized modifier from statement
       |
-        mods = modifiers()
+        LOOKAHEAD(2) mods = modifiers()
         (
           node = unmodifiedTypeDeclaration(mods, DeclType.LOCAL)
         | LOOKAHEAD(variableLookahead()) nodes = unmodifiedVariableDeclaration(mods, DeclType.LOCAL)

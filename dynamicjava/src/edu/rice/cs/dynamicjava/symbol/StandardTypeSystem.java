@@ -32,7 +32,16 @@ public abstract class StandardTypeSystem extends TypeSystem {
   
   private final Options _opt;
   
-  protected StandardTypeSystem(Options opt) { _opt  = opt; }
+  /**
+   * Whether the most specific method test can use boxing to match parameters' types.  This contradicts
+   * the JLS, but matches javac.
+   */
+  private final boolean _boxingInMostSpecific;
+  
+  protected StandardTypeSystem(Options opt, boolean boxingInMostSpecific) {
+    _opt  = opt;
+    _boxingInMostSpecific = boxingInMostSpecific;
+  }
   
   /** Determine if the type is well-formed. */
   public abstract boolean isWellFormed(Type t);
@@ -2127,7 +2136,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
       SignatureMatcher m = makeMatcher(c._f.typeParameters(), EMPTY_TYPE_ITERABLE, supParams, 
                                        IterUtil.mapSnapshot(subParams, EMPTY_EXPRESSION_FOR_TYPE),
                                        BOTTOM, NONE_TYPE_OPTION);
-      return m.matches();
+      return m.matches() || _boxingInMostSpecific && m.matchesWithBoxing();
     }
     
   }

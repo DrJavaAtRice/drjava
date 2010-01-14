@@ -134,7 +134,7 @@ public class ParserTest extends TestCase {
   
   public void testInterfaceDeclaration() throws ParseException {
     List<Node> body = new LinkedList<Node>();
-    expectedAST.add(new InterfaceDeclaration(ModifierSet.make(), "i", null, body, SourceInfo.NONE));
+    expectedAST.add(new InterfaceDeclaration(ModifierSet.make(), false, "i", null, body, SourceInfo.NONE));
     verifyOutput("interface i{}", expectedAST);
   }
   

@@ -50,11 +50,11 @@ public class JLSTypeSystem extends StandardTypeSystem {
    */
   private final boolean _waitToUseDeclaredBounds;
 
-  public JLSTypeSystem(Options opt) { this(opt, true, true, true); }
+  public JLSTypeSystem(Options opt) { this(opt, true, true, true, true); }
   
   public JLSTypeSystem(Options opt, boolean packCaptureVars, boolean alwaysUseArgumentConstraints,
-                        boolean waitToUseDeclaredBounds) {
-    super(opt);
+                        boolean waitToUseDeclaredBounds, boolean boxingInMostSpecific) {
+    super(opt, boxingInMostSpecific);
     _packCaptureVars = packCaptureVars;
     _alwaysUseArgumentConstraints = alwaysUseArgumentConstraints;
     _waitToUseDeclaredBounds = waitToUseDeclaredBounds;

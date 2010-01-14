@@ -251,7 +251,7 @@ public class ClassChecker {
         setErrorStrings(node, node.getName());
         throw new ExecutionError("abstract.method.body", node);
       }
-      else if (!mods.isAbstract() && node.getBody() == null) {
+      else if (!mods.isAbstract() && !mods.isNative() && node.getBody() == null) {
         setErrorStrings(node, node.getName());
         throw new ExecutionError("missing.method.body", node);
       }

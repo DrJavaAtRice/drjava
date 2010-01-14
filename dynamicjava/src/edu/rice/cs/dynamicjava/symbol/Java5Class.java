@@ -9,6 +9,7 @@ import edu.rice.cs.plt.lambda.LazyThunk;
 import edu.rice.cs.plt.lambda.Predicate;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.recur.PrecomputedRecursionStack;
+import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.tuple.Wrapper;
 
 import edu.rice.cs.dynamicjava.symbol.type.*;
@@ -23,6 +24,13 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public class Java5Class extends JavaClass {
   
   public Java5Class(Class<?> c) { super(c); }
+  
+  @Override public String declaredName() {
+    if (_c.isAnonymousClass()) {
+      throw new IllegalArgumentException("Anonymous class has no declared name");
+    }
+    else { return _c.getSimpleName(); }
+  }
   
   @Override public Access.Module accessModule() {
     Class<?> result = _c;

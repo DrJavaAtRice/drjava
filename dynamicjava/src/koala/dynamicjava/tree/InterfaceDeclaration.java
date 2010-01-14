@@ -43,54 +43,79 @@ import koala.dynamicjava.tree.visitor.*;
  */
 
 public class InterfaceDeclaration extends TypeDeclaration {
+
+  private boolean annotation;
+  
   /**
    * Creates a new interface declaration
    * @param mods    the modifiers
+   * @param ann     whether this is an annotation
    * @param name    the name of the interface to declare
    * @param tparams type parameters
    * @param impl    the list of implemented interfaces. Can be null.
    * @param body    the list of fields declarations
    */
-  public InterfaceDeclaration(ModifierSet mods, String name, Option<List<TypeParameter>> tparams,
+  public InterfaceDeclaration(ModifierSet mods, boolean ann, String name, Option<List<TypeParameter>> tparams,
                                List<? extends ReferenceTypeName> impl, List<Node> body) {
-    this(mods, name, tparams, impl, body, SourceInfo.NONE);
+    this(mods, ann, name, tparams, impl, body, SourceInfo.NONE);
   }
 
   /**
    * Creates a new interface declaration
    * @param mods  the modifiers
+   * @param ann     whether this is an annotation
    * @param name  the name of the interface to declare
    * @param impl  the list of implemented interfaces. Can be null.
    * @param body  the list of fields declarations
    */
-  public InterfaceDeclaration(ModifierSet mods, String name, List<? extends ReferenceTypeName> impl, List<Node> body) {
-    this(mods, name, Option.<List<TypeParameter>>none(), impl, body, SourceInfo.NONE);
+  public InterfaceDeclaration(ModifierSet mods, boolean ann, String name,
+                               List<? extends ReferenceTypeName> impl, List<Node> body) {
+    this(mods, ann, name, Option.<List<TypeParameter>>none(), impl, body, SourceInfo.NONE);
   }
 
   /**
    * Creates a new interface declaration
    * @param mods    the modifiers
+   * @param ann     whether this is an annotation
    * @param name    the name of the interface to declare
    * @param tparams type parameters
    * @param impl    the list of implemented interfaces. Can be null.
    * @param body    the list of fields declarations
    */
-  public InterfaceDeclaration(ModifierSet mods, String name, Option<List<TypeParameter>> tparams,
+  public InterfaceDeclaration(ModifierSet mods, boolean ann, String name, Option<List<TypeParameter>> tparams,
                                List<? extends ReferenceTypeName> impl, List<Node> body, SourceInfo si) {
     super(mods, name, tparams, impl, body, si);
+    annotation = ann;
   }
 
   /**
    * Creates a new interface declaration
    * @param mods  the modifiers
+   * @param ann     whether this is an annotation
    * @param name  the name of the interface to declare
    * @param impl  the list of implemented interfaces. Can be null.
    * @param body  the list of fields declarations
    */
-  public InterfaceDeclaration(ModifierSet mods, String name, List<? extends ReferenceTypeName> impl, List<Node> body,
-                              SourceInfo si) {
-    this(mods, name, Option.<List<TypeParameter>>none(), impl, body, si);
+  public InterfaceDeclaration(ModifierSet mods, boolean ann, String name,
+                               List<? extends ReferenceTypeName> impl, List<Node> body, SourceInfo si) {
+    this(mods, ann, name, Option.<List<TypeParameter>>none(), impl, body, si);
   }
+  
+  /**
+   * Whether this is an annotation declaration.
+   */
+  public boolean isAnnotation() {
+    return annotation;
+  }
+
+  /**
+   * Sets whether this is an annotation declaration.
+   * @exception IllegalArgumentException if s is null
+   */
+  public void setIsAnnotation(boolean ann) {
+    annotation = ann;
+  }
+
 
   /**
    * Allows a visitor to traverse the tree
@@ -107,6 +132,6 @@ public class InterfaceDeclaration extends TypeDeclaration {
   }
 
   protected String toStringHelper() {
-    return getModifiers()+" "+getName()+" "+getTypeParams()+" "+getInterfaces()+" "+getMembers();
+    return getModifiers()+" "+isAnnotation()+" "+getName()+" "+getTypeParams()+" "+getInterfaces()+" "+getMembers();
   }
 }
