@@ -142,7 +142,9 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
         if (_tabbedPane.getSelectedIndex() < 0) { return; }
         String category = _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex());
         Map<String, DrJavaProperty> properties = PropertyMaps.TEMPLATE.getProperties(category);
-        String key = _varTableModel.get(category).getValueAt(_varTable.get(category).getSelectedRow(),0).toString();
+        int row = _varTable.get(category).getSelectedRow();
+        if (row < 0) { return; }
+        String key = _varTableModel.get(category).getValueAt(row,0).toString();
         DrJavaProperty value = properties.get(key);
         _varValueField.setText(value.toString());
         _helpPane.setText(value.getHelp());
@@ -226,7 +228,9 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
     ListSelectionModel lsm = _varTable.get(category).getSelectionModel();
     lsm.addListSelectionListener(new ListSelectionListener() {
       public void valueChanged(ListSelectionEvent e) {
-        String key = _varTableModel.get(category).getValueAt(_varTable.get(category).getSelectedRow(),0).toString();
+        int row = _varTable.get(category).getSelectedRow();
+        if (row < 0) { return; }
+        String key = _varTableModel.get(category).getValueAt(row,0).toString();
         DrJavaProperty value = PropertyMaps.TEMPLATE.getProperty(category,key);
         _selected = Pair.make(key, value);
         _varValueField.setText(value.getLazy(PropertyMaps.TEMPLATE));
@@ -307,12 +311,15 @@ public class InsertVariableDialog extends SwingFrame implements OptionConstants 
       String category = _tabbedPane.getTitleAt(_tabbedPane.getSelectedIndex());
       Map<String, DrJavaProperty> properties = PropertyMaps.TEMPLATE.getProperties(category);
       _varTable.get(category).getSelectionModel().setSelectionInterval(0,0);
-      String key = _varTableModel.get(category).getValueAt(_varTable.get(category).getSelectedRow(),0).toString();
-      DrJavaProperty value = properties.get(key);
-      _varValueField.setText(value.toString());
-      _helpPane.setText(value.getHelp());
-      _helpPane.setCaretPosition(0);
-      _selected = Pair.make(key, value);
+      int row = _varTable.get(category).getSelectedRow();
+      if (row >= 0) {
+        String key = _varTableModel.get(category).getValueAt(row,0).toString();
+        DrJavaProperty value = properties.get(key);
+        _varValueField.setText(value.toString());
+        _helpPane.setText(value.getHelp());
+        _helpPane.setCaretPosition(0);
+        _selected = Pair.make(key, value);
+      }
     }
   }
 
