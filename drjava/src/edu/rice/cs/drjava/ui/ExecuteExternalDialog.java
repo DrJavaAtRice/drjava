@@ -314,7 +314,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     
     // set up "Command Line" panel
     
-    EventQueue.invokeLater(new Runnable() {
+    Utilities.invokeAndWait(new Runnable() {
       public void run() {
         _commandPanel = makeCommandPane(); 
         
@@ -835,7 +835,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     panel.setVisible(true);
     _mainFrame.showTab(panel, true);
     _mainFrame._tabbedPane.setSelectedComponent(panel);
-    // Use SwingUtilties.invokeLater to ensure that focus is set AFTER the panel has been selected
+    // Use EventQueue.invokeLater to ensure that focus is set AFTER the panel has been selected
     EventQueue.invokeLater(new Runnable() { public void run() { panel.requestFocusInWindow(); } });
     return panel;
   }
