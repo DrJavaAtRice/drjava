@@ -353,6 +353,10 @@ public interface OptionConstants {
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_N, MASK)));
 
+  /** The key binding for creating a new java class file */
+  public static final VectorOption<KeyStroke> KEY_NEW_CLASS_FILE =
+    new VectorOption<KeyStroke>("key.new.javafile", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_N, MASK|SHIFT_MASK))); 
+
   /** The key binding for opening an entire project.  I is right next to O, so
     * it seemed logical that ctrl-I would open a project and ctrl-O open a file */
   public static final VectorOption<KeyStroke> KEY_OPEN_PROJECT =

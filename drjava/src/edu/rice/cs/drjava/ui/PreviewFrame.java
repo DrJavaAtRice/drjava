@@ -45,6 +45,7 @@ import java.awt.*;
 import java.awt.print.*;
 import java.awt.image.*;
 import java.net.*;
+import java.util.Hashtable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -60,6 +61,15 @@ public abstract class PreviewFrame extends SwingFrame {
   protected final MainFrame _mainFrame;
   protected final Pageable _print;
   protected volatile int _pageNumber;
+  
+  //zooming modification
+  //this is to get the size of the screen
+  int cycle;
+  JSlider zoomSlider = new JSlider(JSlider.HORIZONTAL, 0, 200, 0);
+  Toolkit toolkit = Toolkit.getDefaultToolkit();  
+  Dimension screenSize = toolkit.getScreenSize(); 
+  //zooming modification
+  private JScrollPane _previewScroll;
   
 //  private JTextField _pageTextField = new JTextField("" + (_pageNumber + 1), 2) {
 //    public Dimension getMaximumSize() {
@@ -154,6 +164,8 @@ public abstract class PreviewFrame extends SwingFrame {
     _pageChanger = createPageChanger();
     
     /* Initialize constants. */
+    //zooming modification
+    cycle = 0;
     PageFormat first = _print.getPageFormat(0);
     
     PREVIEW_PAGE_WIDTH = (int) (PAGE_ZOOM * first.getWidth());
@@ -168,30 +180,68 @@ public abstract class PreviewFrame extends SwingFrame {
     _pagePreview = new PagePreview(PREVIEW_PAGE_WIDTH, PREVIEW_PAGE_HEIGHT);
     _pageNumber = 0;
     
-    
-    PagePreviewContainer ppc = new PagePreviewContainer();
-    ppc.add(_pagePreview);
+    //zooming modification
+    //PagePreviewContainer ppc = new PagePreviewContainer();
+    //ppc.add(_pagePreview);
+    JPanel previewHolder = new JPanel(new BorderLayout());
     JPanel tbCont = new JPanel(new BorderLayout());
     JPanel cp = new JPanel(new BorderLayout());
+    //zooming modification
+    _previewScroll = new JScrollPane(previewHolder);
+    //_previewScroll = new JScrollPane(cp);
+    _previewScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    _previewScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
     tbCont.add(_toolBar,BorderLayout.NORTH);
     tbCont.add(Box.createVerticalStrut(10),BorderLayout.SOUTH);
     tbCont.setBorder(new EmptyBorder(0,0,5,0));
+    
+    //zooming modification
+    previewHolder.add(_pagePreview, BorderLayout.CENTER);
+    cp.add(_previewScroll);
+    
     setContentPane(cp);
+    //setContentPane(_previewScroll);
+    //cp.add(_pagePreview, BorderLayout.CENTER);
     cp.setBorder(new EmptyBorder(5,5,5,5));
     cp.add(tbCont, BorderLayout.NORTH);
-    cp.add(ppc, BorderLayout.SOUTH);
-    
+    //zooming modification
+    //cp.add(ppc, BorderLayout.SOUTH);
     addWindowListener(_windowCloseListener);
     
     showPage();
     _updateActions();
-    
-    setSize(PREVIEW_WIDTH, PREVIEW_HEIGHT);
+    //zooming modification
+    setExtendedState(Frame.MAXIMIZED_BOTH);
+    //setSize(screenSize.width, screenSize.height);
+    //setSize(PREVIEW_WIDTH, PREVIEW_HEIGHT);
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     
     initDone(); // call mandated by SwingFrame contract
     
     setVisible(true);
+  }
+  
+  //zooming modification
+  public void fastZoom(int percent){
+    int h = (int)((PREVIEW_PAGE_HEIGHT *  percent) / 100.0);
+    int w = (int)((PREVIEW_PAGE_WIDTH *  percent) / 100.0);
+    _pagePreview.updateScaledFast(PREVIEW_PAGE_WIDTH + w, PREVIEW_PAGE_HEIGHT + h);
+    repaint();
+  }
+  
+  public void smoothZoom(int percent){
+    int h = (int)((PREVIEW_PAGE_HEIGHT *  percent) / 100.0);
+    int w = (int)((PREVIEW_PAGE_WIDTH *  percent) / 100.0);
+    _pagePreview.updateScaledSmooth(PREVIEW_PAGE_WIDTH + w, PREVIEW_PAGE_HEIGHT + h);
+    repaint();
+    refreshScreen();
+  }
+  public void refreshScreen() {
+    cycle = 1 - cycle;
+    if(cycle == 0)
+      setSize(screenSize.width + cycle, screenSize.height + cycle);
+    else
+      setSize(screenSize.width - cycle, screenSize.height - cycle);
   }
   
   /** Prints the document being previewed */
@@ -203,6 +253,14 @@ public abstract class PreviewFrame extends SwingFrame {
     * @return a Pageable object that allows the document to be displayed by pages
     */
   abstract protected Pageable setUpDocument(SingleDisplayModel model, boolean interactions);
+  
+  //zooming modification
+  public int getImageHeight(){
+    return _pagePreview._height;
+  }
+  public int getImageWidth(){
+    return _pagePreview._width;
+  }
   
   private void _close() {
     dispose();
@@ -243,6 +301,10 @@ public abstract class PreviewFrame extends SwingFrame {
   private void _setUpActions() {
     //_printAction.putValue(Action.SHORT_DESCRIPTION, "Print");
     _closeAction.putValue(Action.SHORT_DESCRIPTION, "Close");
+    //zooming modification
+    //_zoomInAction.putValue(Action.SHORT_DESCRIPTION, "Zoom In");
+    //_zoomOutAction.putValue(Action.SHORT_DESCRIPTION, "Zoom Out");
+    //_zoomOutAction.setEnabled(false);
     //    _printAction.putValue(Action.SMALL_ICON, _getIcon("Print16.gif"));
     _nextPageAction.putValue(Action.SMALL_ICON, _getIcon("Forward16.gif"));
     _nextPageAction.putValue(Action.SHORT_DESCRIPTION, "Next Page");
@@ -323,6 +385,37 @@ public abstract class PreviewFrame extends SwingFrame {
     // Horizontal Gap
     _toolBar.add(Box.createHorizontalGlue());
     
+    //zooming modification
+    //_toolBar.add(_zoomOutAction);
+    //_toolBar.add(_zoomInAction);
+    //zoomSlider.setMajorTickSpacing(10);
+    //zoomSlider.setSnapToTicks(true);
+    zoomSlider.setPaintLabels(true);
+    
+    Hashtable<Integer, JLabel> table = new Hashtable<Integer, JLabel>();
+    table.put (  0, new JLabel("0"));
+    table.put ( 25, new JLabel("25"));
+    table.put ( 50, new JLabel("50"));
+    table.put ( 75, new JLabel("75"));
+    table.put (100, new JLabel("100"));
+    table.put (125, new JLabel("125"));
+    table.put (150, new JLabel("150"));
+    table.put (175, new JLabel("175"));
+    table.put (200, new JLabel("200"));
+    zoomSlider.setLabelTable (table);
+    
+    zoomSlider.addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent evt) {
+        JSlider slider = (JSlider) evt.getSource();
+        if (!slider.getValueIsAdjusting()) {
+          smoothZoom(slider.getValue());
+        } else {
+          fastZoom(slider.getValue());
+        }
+      }
+    });
+    _toolBar.add(zoomSlider);
+    
     // Navigation components
     _toolBar.add(_prevPageAction);
     _toolBar.add(_nextPageAction);
@@ -378,8 +471,12 @@ public abstract class PreviewFrame extends SwingFrame {
   
   /** Static inner class which displays the image on the screen, and holds the Image object. */
   static class PagePreview extends JPanel {
-    protected final int _width;
-    protected final int _height;
+//    protected final int _width;
+//    protected final int _height;
+    //zooming modification
+    //we need to change the variables from final to non-final because we need to enlarge the page preview area when we zoom in
+    protected int _width;
+    protected int _height;   
     protected volatile Image _source;
     protected volatile Image _image;
     
@@ -398,6 +495,21 @@ public abstract class PreviewFrame extends SwingFrame {
       _image.flush();
     }
     
+    //zooming modification
+    protected void updateScaledFast(int newWidth, int newHeight ) {
+      _width = newWidth;
+      _height = newHeight;
+      _image = _source.getScaledInstance(newWidth, newHeight, Image.SCALE_FAST);
+      _image.flush();
+    }
+    protected void updateScaledSmooth(int newWidth, int newHeight ) {
+      _width = newWidth;
+      _height = newHeight;
+      _image = _source.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
+      _image.flush();
+    }
+    
+    
     /** Updates the image of this PagePreview.
       * @param i The Image to place and show.
       */
@@ -405,6 +517,13 @@ public abstract class PreviewFrame extends SwingFrame {
       _source = i;
       updateScaled();
       repaint();
+    }
+    //zooming modification
+    public int getHeight(){
+      return _height;
+    }
+    public int getWidth(){
+      return _width;
     }
     
     public Dimension getPreferredSize() { return new Dimension(_width, _height); }

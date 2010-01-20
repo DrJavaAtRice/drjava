@@ -1128,7 +1128,9 @@ public abstract class FileOps {
             
             File shortF = null;
             // if the line ends with the file name we are looking for...
-            if (line.equals(f.getName())) {
+            // do a case-insensitive comparison here to accomodate Windows
+            // we later check if it's the same file
+            if (line.toLowerCase().equals(f.getName().toLowerCase())) {
               // short file name only
               shortF = new File(parent, line);
 //              LOG.log("\t[3] shortF = "+shortF);
@@ -1138,7 +1140,7 @@ public abstract class FileOps {
                 found = true;
               }
             }
-            else if (line.startsWith(f.getName()) && f.getName().contains("~")) {
+            else if (line.toLowerCase().startsWith(f.getName().toLowerCase()) && f.getName().contains("~")) {
               // perhaps already short file name of a long file name
               shortF = new File(parent, f.getName());
 //              LOG.log("\t[4] shortF = "+shortF);
@@ -1148,7 +1150,7 @@ public abstract class FileOps {
                 found = true;
               }
             }
-            else if (line.endsWith(" "+f.getName())) {
+            else if (line.toLowerCase().endsWith(" "+f.getName().toLowerCase())) {
               // remove the long file name at the end and trim off whitespace
               // DOCUME~1
               // LONGFI~1

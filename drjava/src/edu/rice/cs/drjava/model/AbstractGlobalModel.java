@@ -118,6 +118,7 @@ import edu.rice.cs.drjava.project.ProjectFileIR;
 import edu.rice.cs.drjava.project.ProjectFileParserFacade;
 import edu.rice.cs.drjava.project.ProjectProfile;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
+import edu.rice.cs.drjava.ui.NewJavaClass;
 
 import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.tuple.Pair;
@@ -1161,6 +1162,26 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return doc;
   }
   
+//newClass addition
+
+  public OpenDefinitionsDocument newClass(String methodName, String modifier, String className, boolean mainMethod, boolean classConstructor, String inheritance, String interfaces) {
+    
+  	NewJavaClass javaClass = new NewJavaClass();
+  	String classContent = javaClass.createClassContent(methodName, modifier, className, mainMethod, classConstructor, inheritance, interfaces);
+    OpenDefinitionsDocument openDoc = newFile();
+    
+    try {
+      openDoc.insertString(0, classContent, null);
+      openDoc.indentLines(0, classContent.length());
+    }
+    catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
+    }
+    
+    return openDoc;
+  }
+  
+
   /** Creates a new junit test case.
     * @param name the name of the new test case
     * @param makeSetUp true iff an empty setUp() method should be included

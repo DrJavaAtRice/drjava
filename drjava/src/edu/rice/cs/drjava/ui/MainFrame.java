@@ -51,6 +51,7 @@ import java.io.*;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -108,6 +109,7 @@ import edu.rice.cs.util.docnavigation.*;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.swing.*;
 
+import static edu.rice.cs.drjava.config.OptionConstants.KEY_NEW_CLASS_FILE;
 import static edu.rice.cs.drjava.ui.RecentFileManager.*;
 import static edu.rice.cs.drjava.ui.predictive.PredictiveInputModel.*;
 import static edu.rice.cs.util.XMLConfig.XMLConfigException;
@@ -426,6 +428,141 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
   
+  
+  //newclass addition
+  /** Creates a new Java class file. */
+  private final Action _newClassAction = new AbstractAction("New Java Class") {
+ 	  public void actionPerformed(ActionEvent ae) {	        
+ 		  _newClassFileGUI();
+    }
+  };
+  
+	//newclass addition
+	public void _newClassFileGUI(){
+ 
+	   	final JFrame frame = new JFrame("New Java Class");
+		final JButton createClass = new JButton("Create");
+		final JTextField className = new JTextField(20);
+		final JTextField interfaces = new JTextField(20);
+		final JTextField superClass = new JTextField(20);
+		final JLabel classNameLable = new JLabel("Class Name: ");
+		final JLabel superClassLabel = new JLabel("SuperClass: ");
+		final JLabel interfacesLabel = new JLabel("InterFaces: ");
+		final JLabel modifierLabel = new JLabel("Modifier: ");
+		final JLabel blankLabel = new JLabel("                ");
+		
+
+		final JLabel errorMessage = new JLabel();
+		final JRadioButton defaultRadio= new JRadioButton("default", false);
+		final JRadioButton publicRadio= new JRadioButton("public", true);
+		final JRadioButton abstractRadio= new JRadioButton("abstract", false);
+		final JRadioButton finalRadio= new JRadioButton("final", false);
+		final ButtonGroup group1 = new ButtonGroup();
+		final ButtonGroup group2 = new ButtonGroup();
+		final JCheckBox mainMethod = new JCheckBox("Include main method");
+		final JCheckBox classConstructor = new JCheckBox("Include class constructor");
+		
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE );
+		frame.setSize(250, 350);
+		frame.setLocationRelativeTo(null);
+		frame.setVisible(true);
+	
+		frame.setLayout(new FlowLayout());
+		//the modifiers
+		frame.add(modifierLabel);
+		frame.add(publicRadio);
+		frame.add(defaultRadio);
+		
+		//blankLabel.setSize(150,2);
+		frame.add(blankLabel);
+		frame.add(abstractRadio);
+		frame.add(finalRadio);
+		
+		//grouping the modifiers
+		group1.add(publicRadio);
+		group1.add(defaultRadio);
+		
+		group2.add(abstractRadio);
+		group2.add(finalRadio);
+	
+		frame.add(classNameLable);
+		frame.add(className);
+		frame.add(superClassLabel);
+		frame.add(superClass);
+		frame.add(interfacesLabel);
+		frame.add(interfaces);
+		
+		frame.add(errorMessage);
+		frame.add(mainMethod);
+		frame.add(classConstructor);
+		frame.add(createClass);
+		//listen to the button when it is pressed
+		//createClass.addActionListener(this);
+	
+		createClass.addActionListener( 
+	        new ActionListener() { 
+	            public void actionPerformed(ActionEvent e) { 
+	        		JRadioButton selectedRadioButton1 = new JRadioButton();
+	        		JRadioButton selectedRadioButton2 = new JRadioButton();
+	        		//to check which radio buttom has been choosen
+					for (Enumeration enu = group1.getElements(); enu.hasMoreElements(); ) {
+			            JRadioButton b = (JRadioButton)enu.nextElement();
+			            if (b.getModel() == group1.getSelection())
+			               selectedRadioButton1 = b;
+			        }//for
+
+					for (Enumeration enu = group2.getElements(); enu.hasMoreElements(); ) {
+			            JRadioButton b = (JRadioButton)enu.nextElement();
+			            if (b.getModel() == group2.getSelection())
+			               selectedRadioButton2 = b;
+			        }//for
+
+					NewJavaClass javaClass = new NewJavaClass();
+					boolean sc = false;
+					boolean in = false;
+					
+					// probability of entering the 3 variables
+					String msg = "";
+					
+					if(javaClass.classNameMeetsNamingConvention(className.getText())){
+
+						if(superClass.getText().length() != 0)
+							if(javaClass.classNameMeetsNamingConvention(superClass.getText())) 
+								sc = true;
+							else
+								msg += "<html>Enter correct superclass name.<br></html>";
+													
+						if(interfaces.getText().length() != 0)
+							if(javaClass.interfacesNameMeetsNamingConvention(interfaces.getText()))
+								in = true;
+							else
+								msg += "Enter correct interfaces name.";
+
+						if( ((superClass.getText().length() == 0 && interfaces.getText().length() == 0)) || 
+							((superClass.getText().length() != 0 && sc == true) && (interfaces.getText().length() != 0 && in == true)) ||
+							((superClass.getText().length() != 0 && sc == true) && (interfaces.getText().length() == 0)) ||
+							((superClass.getText().length() == 0) && (interfaces.getText().length() != 0 && in == true))
+						) {
+							_model.newClass(selectedRadioButton1.getText(), selectedRadioButton2.getText() ,className.getText(), mainMethod.isSelected(), classConstructor.isSelected(), superClass.getText(), interfaces.getText());
+					        frame.setVisible(false);
+					        _save();
+						} else {
+							errorMessage.setForeground(Color.RED);
+							errorMessage.setText(msg);
+						}
+
+					} else {
+						msg += "Enter correct class name. ";
+						errorMessage.setForeground(Color.RED);
+						errorMessage.setText(msg);
+					}
+	            }
+	        } 
+	    ); 
+	} 
+	  
+
+  
   private final Action _newProjectAction = new AbstractAction("New") {
     public void actionPerformed(ActionEvent ae) { _newProject(); }
   };
@@ -662,6 +799,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Supports MainFrameTest.*/
   public boolean isSaveEnabled() { return _saveAction.isEnabled(); }
+  
+  //newclass addition
+  /** Creates a new Java Class File in the current folder. */
+  public final Action _newClassFileFolderAction = new AbstractAction("Create New Java Class in Folder") {
+    public void actionPerformed(ActionEvent ae)  {
+    	_newClassFileGUI();
+      _findReplace.updateFirstDocInSearch();
+    }
+  };
   
   /** Asks the user for a file name and saves the active document (in the definitions pane) to that file. */
   private final Action _saveAsAction = new AbstractAction("Save As...") {
@@ -6145,6 +6291,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     */
   private void _setUpActions() {
     _setUpAction(_newAction, "New", "Create a new document");
+    _setUpAction(_newClassAction, "New", "Create a new Java Class");
     _setUpAction(_newJUnitTestAction, "New", "Create a new JUnit test case class");
     _setUpAction(_newProjectAction, "New", "Make a new project");
     _setUpAction(_openAction, "Open", "Open an existing file");
@@ -6403,6 +6550,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     PlatformFactory.ONLY.setMnemonic(fileMenu,KeyEvent.VK_F);
     // New, open
     _addMenuItem(fileMenu, _newAction, KEY_NEW_FILE);
+    _addMenuItem(fileMenu, _newClassAction, KEY_NEW_CLASS_FILE);
+
     _addMenuItem(fileMenu, _newJUnitTestAction, KEY_NEW_TEST);
     _addMenuItem(fileMenu, _openAction, KEY_OPEN_FILE);
     _addMenuItem(fileMenu, _openFolderAction, KEY_OPEN_FOLDER);
@@ -7510,6 +7659,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               // "New File in Folder" and "Open File in Folder" only work if exactly
               // one folder is selected
               m.add(_newFileFolderAction);
+              m.add(_newClassFileFolderAction);
               m.add(_openOneFolderAction);
               
               // get singular/plural right
