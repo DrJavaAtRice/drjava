@@ -45,7 +45,6 @@ import java.awt.*;
 import java.awt.print.*;
 import java.awt.image.*;
 import java.net.*;
-import java.util.Hashtable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -63,11 +62,8 @@ public abstract class PreviewFrame extends SwingFrame {
   protected volatile int _pageNumber;
   
   //zooming modification
-  //this is to get the size of the screen
-  int cycle;
-  JSlider zoomSlider = new JSlider(JSlider.HORIZONTAL, 0, 200, 0);
-  Toolkit toolkit = Toolkit.getDefaultToolkit();  
-  Dimension screenSize = toolkit.getScreenSize(); 
+  Dimension _screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+  JSlider _zoomSlider = new JSlider(JSlider.HORIZONTAL, 100, 300, 100);
   //zooming modification
   private JScrollPane _previewScroll;
   
@@ -114,7 +110,7 @@ public abstract class PreviewFrame extends SwingFrame {
   
   private static final double PAGE_ZOOM = 0.7;
   private static final int PAGE_BORDER = 20;
-  private static final int TOOLBAR_HEIGHT = 35;
+  private static final int TOOLBAR_HEIGHT = 65;
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
   
   // Components
@@ -165,7 +161,6 @@ public abstract class PreviewFrame extends SwingFrame {
     
     /* Initialize constants. */
     //zooming modification
-    cycle = 0;
     PageFormat first = _print.getPageFormat(0);
     
     PREVIEW_PAGE_WIDTH = (int) (PAGE_ZOOM * first.getWidth());
@@ -211,9 +206,9 @@ public abstract class PreviewFrame extends SwingFrame {
     showPage();
     _updateActions();
     //zooming modification
-    setExtendedState(Frame.MAXIMIZED_BOTH);
+//    setExtendedState(Frame.MAXIMIZED_BOTH);
     //setSize(screenSize.width, screenSize.height);
-    //setSize(PREVIEW_WIDTH, PREVIEW_HEIGHT);
+    setSize(PREVIEW_WIDTH, PREVIEW_HEIGHT);
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     
     initDone(); // call mandated by SwingFrame contract
@@ -222,26 +217,22 @@ public abstract class PreviewFrame extends SwingFrame {
   }
   
   //zooming modification
-  public void fastZoom(int percent){
+  public void setZoom(int percent, boolean fast){
     int h = (int)((PREVIEW_PAGE_HEIGHT *  percent) / 100.0);
     int w = (int)((PREVIEW_PAGE_WIDTH *  percent) / 100.0);
-    _pagePreview.updateScaledFast(PREVIEW_PAGE_WIDTH + w, PREVIEW_PAGE_HEIGHT + h);
+    _pagePreview.updateScaled(w, h, fast);
     repaint();
+    if (!fast) {
+      refreshScreen();
+    }
   }
   
-  public void smoothZoom(int percent){
-    int h = (int)((PREVIEW_PAGE_HEIGHT *  percent) / 100.0);
-    int w = (int)((PREVIEW_PAGE_WIDTH *  percent) / 100.0);
-    _pagePreview.updateScaledSmooth(PREVIEW_PAGE_WIDTH + w, PREVIEW_PAGE_HEIGHT + h);
-    repaint();
-    refreshScreen();
-  }
   public void refreshScreen() {
-    cycle = 1 - cycle;
-    if(cycle == 0)
-      setSize(screenSize.width + cycle, screenSize.height + cycle);
-    else
-      setSize(screenSize.width - cycle, screenSize.height - cycle);
+    int previewWidth = _pagePreview.getPreferredSize().width + (2 * PAGE_BORDER);
+    int previewHeight = _pagePreview.getPreferredSize().height + (2 * PAGE_BORDER) + TOOLBAR_HEIGHT;
+    if (previewWidth > _screenSize.width - TOOLBAR_HEIGHT) previewWidth = _screenSize.width - TOOLBAR_HEIGHT; 
+    if (previewHeight > _screenSize.height - TOOLBAR_HEIGHT) previewHeight = _screenSize.height - TOOLBAR_HEIGHT; 
+    setSize(previewWidth, previewHeight);
   }
   
   /** Prints the document being previewed */
@@ -253,14 +244,6 @@ public abstract class PreviewFrame extends SwingFrame {
     * @return a Pageable object that allows the document to be displayed by pages
     */
   abstract protected Pageable setUpDocument(SingleDisplayModel model, boolean interactions);
-  
-  //zooming modification
-  public int getImageHeight(){
-    return _pagePreview._height;
-  }
-  public int getImageWidth(){
-    return _pagePreview._width;
-  }
   
   private void _close() {
     dispose();
@@ -390,31 +373,16 @@ public abstract class PreviewFrame extends SwingFrame {
     //_toolBar.add(_zoomInAction);
     //zoomSlider.setMajorTickSpacing(10);
     //zoomSlider.setSnapToTicks(true);
-    zoomSlider.setPaintLabels(true);
+    _zoomSlider.setPaintLabels(true);
+    _zoomSlider.setLabelTable(_zoomSlider.createStandardLabels(100));
     
-    Hashtable<Integer, JLabel> table = new Hashtable<Integer, JLabel>();
-    table.put (  0, new JLabel("0"));
-    table.put ( 25, new JLabel("25"));
-    table.put ( 50, new JLabel("50"));
-    table.put ( 75, new JLabel("75"));
-    table.put (100, new JLabel("100"));
-    table.put (125, new JLabel("125"));
-    table.put (150, new JLabel("150"));
-    table.put (175, new JLabel("175"));
-    table.put (200, new JLabel("200"));
-    zoomSlider.setLabelTable (table);
-    
-    zoomSlider.addChangeListener(new ChangeListener() {
+    _zoomSlider.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent evt) {
         JSlider slider = (JSlider) evt.getSource();
-        if (!slider.getValueIsAdjusting()) {
-          smoothZoom(slider.getValue());
-        } else {
-          fastZoom(slider.getValue());
-        }
+        setZoom(slider.getValue(), slider.getValueIsAdjusting());
       }
     });
-    _toolBar.add(zoomSlider);
+    _toolBar.add(_zoomSlider);
     
     // Navigation components
     _toolBar.add(_prevPageAction);
@@ -496,19 +464,12 @@ public abstract class PreviewFrame extends SwingFrame {
     }
     
     //zooming modification
-    protected void updateScaledFast(int newWidth, int newHeight ) {
+    protected void updateScaled(int newWidth, int newHeight, boolean fast) {
       _width = newWidth;
       _height = newHeight;
-      _image = _source.getScaledInstance(newWidth, newHeight, Image.SCALE_FAST);
+      _image = _source.getScaledInstance(newWidth, newHeight, fast?Image.SCALE_FAST:Image.SCALE_SMOOTH);
       _image.flush();
-    }
-    protected void updateScaledSmooth(int newWidth, int newHeight ) {
-      _width = newWidth;
-      _height = newHeight;
-      _image = _source.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
-      _image.flush();
-    }
-    
+    }    
     
     /** Updates the image of this PagePreview.
       * @param i The Image to place and show.
@@ -518,11 +479,12 @@ public abstract class PreviewFrame extends SwingFrame {
       updateScaled();
       repaint();
     }
+    
     //zooming modification
-    public int getHeight(){
+    public int getHeight() {
       return _height;
     }
-    public int getWidth(){
+    public int getWidth() {
       return _width;
     }
     
