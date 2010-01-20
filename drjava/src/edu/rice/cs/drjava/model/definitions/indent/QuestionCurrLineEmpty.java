@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2009, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
-/** @version $Id: QuestionCurrLineEmptyOrEnterPress.java 3901 2006-06-30 05:28:11Z rcartwright $
+/** @version $Id$
   * Asks whether the current line is empty (contains only whitespace), or indentation was
   * spawned by pressing enter
   */

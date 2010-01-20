@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2008, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ import java.util.TimeZone;
 
 /** Logging class to record errors or unexpected behavior to a file.  The file is created in the current directory,
   * and is only used if the log is enabled.  All logs can be enabled at once with the ENABLE_ALL field.
-  * @version $Id: Log.java 4691 2008-12-02 23:33:27Z dlsmith $
+  * @version $Id$
   */
 public class Log {
   public static final boolean ENABLE_ALL = false;

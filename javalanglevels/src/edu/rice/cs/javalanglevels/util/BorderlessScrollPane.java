@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2008, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ import java.awt.*;
  * A JScrollPane without a traditional Swing border.  Uses its own
  * EtchedBorder instead, which improves the appearance of nested panes
  * on Mac OS X.
- * @version $Id: BorderlessScrollPane.java 4447 2008-04-18 16:06:34Z rcartwright $
+ * @version $Id$
  */
 public class BorderlessScrollPane extends JScrollPane {
   /** The default border for a "borderless" scroll pane.

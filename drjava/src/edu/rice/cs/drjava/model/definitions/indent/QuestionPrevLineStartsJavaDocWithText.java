@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2009, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 
 /** Question rule in the indentation decision tree.  Determines if the 
   * line previous to the current position starts with the specified character.
-  * @version $Id: QuestionPrevLineStartsWith.java 3490 2006-01-07 19:22:33Z dlsmith $
+  * @version $Id$
   */
 public class QuestionPrevLineStartsJavaDocWithText extends IndentRuleQuestion {
   

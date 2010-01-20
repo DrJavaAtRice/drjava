@@ -5,7 +5,7 @@
 // *
 // * DrJava Open Source License
 // * 
-// * Copyright (C) 2001-2008 JavaPLT group at Rice University (drjava@rice.edu)
+// * Copyright (C) 2001-2010 JavaPLT group at Rice University (drjava@rice.edu)
 // * All rights reserved.
 // *
 // * Developed by:   Java Programming Languages Team

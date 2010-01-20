@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2009, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
 package edu.rice.cs.util.text;
 
 /** A GUI-toolkit agnostic extension of EditDocumentInterface that adds a console input state property.
-  * @version $Id: ConsoleDocumentInterface.java 4157 2007-02-14 21:39:26Z rcartwright $
+  * @version $Id$
   */
 public interface ConsoleDocumentInterface extends EditDocumentInterface {
   

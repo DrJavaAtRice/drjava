@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2009, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 
 /** Test class for the IndentInfo class.
-  * @version $Id: IndentInfoTest.java 4519 2008-06-15 07:14:29Z rcartwright $
+  * @version $Id$
   */
 public final class BraceInfoTest extends DrJavaTestCase {
   private String _text;

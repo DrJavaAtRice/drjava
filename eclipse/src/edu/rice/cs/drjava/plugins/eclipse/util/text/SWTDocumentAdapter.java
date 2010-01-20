@@ -2,7 +2,7 @@
 
 DrJava Eclipse Plug-in BSD License
 
-Copyright (c) 2007-2008 JavaPLT group at Rice University
+Copyright (c) 2007-2010 JavaPLT group at Rice University
 All rights reserved.
 
 Developed by:   Java Programming Languages Team
@@ -63,9 +63,9 @@ public class SWTDocumentAdapter implements EditDocumentInterface, ConsoleDocumen
   //  - Test multithreaded support
 
   /**
-	 * 
-	 */
-	private static final long serialVersionUID = 5467877329916880674L;
+  * 
+  */
+ private static final long serialVersionUID = 5467877329916880674L;
 
 /** StyledText widget containing the view. */
   protected StyledText _pane;

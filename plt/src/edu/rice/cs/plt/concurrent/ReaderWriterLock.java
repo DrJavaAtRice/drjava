@@ -2,7 +2,7 @@
 
 PLT Utilities BSD License
 
-Copyright (c) 2007-2008 JavaPLT group at Rice University
+Copyright (c) 2007-2010 JavaPLT group at Rice University
 All rights reserved.
 
 Developed by:   Java Programming Languages Team
@@ -78,7 +78,7 @@ import java.util.LinkedList;
  * using an ordered queue.
  * </p>
  * 
- * @version $Id: ReaderWriterLock.java 4031 2006-11-15 22:09:06Z rcartwright $
+ * @version $Id$
  */
 public class ReaderWriterLock {
   /** The number of readers currently reading. */

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2009, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.config;
 
 /** Class defining all configuration options with values of type Long.
-  * @version $Id: LongOption.java 4419 2008-03-27 06:58:07Z rcartwright $
+  * @version $Id$
   */
 public class LongOption extends Option<Long> {
   

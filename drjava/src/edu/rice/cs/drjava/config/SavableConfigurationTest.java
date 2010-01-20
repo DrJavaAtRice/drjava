@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2009, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@ import java.util.Date;
 
 /** JUnit test class for testing SavableConfiguration.
   * @author <a href="mailto:chrisw@rice.edu">Chris Warrington</a>
-  * @version $Id: $
+  * @version $Id$
   */
 public class SavableConfigurationTest extends DrJavaTestCase {
   /** This is the date format the Date.toString() uses.

@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2009, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model.repl;
 import java.io.File;
 
 /** A dummy InteractionsListener that does nothing.
- *  @version $Id: InteractionsListener.java 3808 2006-04-19 19:28:49Z jon-lugo $
+ *  @version $Id$
  */
 public class DummyInteractionsListener implements InteractionsListener {
   

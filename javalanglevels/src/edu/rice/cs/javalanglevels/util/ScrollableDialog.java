@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2008, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ import javax.swing.border.*;
 //import java.io.Serializable;
 
 /** Manages a JDialog with a scrollable text area and a button panel.
-  * @version $Id: ScrollableDialog.java 4512 2008-06-10 20:37:43Z mgricken $
+  * @version $Id$
   */
 public class ScrollableDialog /* implements Serializable */ {
   /** Default width for all ScrollableDialogs. */

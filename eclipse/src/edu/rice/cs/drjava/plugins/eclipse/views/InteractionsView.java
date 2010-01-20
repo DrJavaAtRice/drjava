@@ -2,7 +2,7 @@
 
 DrJava Eclipse Plug-in BSD License
 
-Copyright (c) 2007-2008 JavaPLT group at Rice University
+Copyright (c) 2007-2010 JavaPLT group at Rice University
 All rights reserved.
 
 Developed by:   Java Programming Languages Team
@@ -180,7 +180,7 @@ public class InteractionsView extends ViewPart {
     /*
     bars.setGlobalActionHandler(
          IWorkbenchActionConstants.CUT, 
-	 new CutAction(_styledText, _clipboard));
+  new CutAction(_styledText, _clipboard));
     */
 
     _toolbar = _bars.getToolBarManager();
@@ -294,9 +294,9 @@ public class InteractionsView extends ViewPart {
   }
   
   public void addAction(String op, IAction action) {
-	  _bars.setGlobalActionHandler(op, action); 
-	  addToolbarMenuItem(action);
-	  addContextMenuItem(action);
+   _bars.setGlobalActionHandler(op, action); 
+   addToolbarMenuItem(action);
+   addContextMenuItem(action);
   }
   
   /**
@@ -323,5 +323,5 @@ public class InteractionsView extends ViewPart {
   public void addToolbarItem(IAction action) {
     _toolbar.add(action);
   }
-    	    
+         
 }

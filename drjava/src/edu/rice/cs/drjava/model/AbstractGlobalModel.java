@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2009, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -1166,8 +1166,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 
   public OpenDefinitionsDocument newClass(String methodName, String modifier, String className, boolean mainMethod, boolean classConstructor, String inheritance, String interfaces) {
     
-  	NewJavaClass javaClass = new NewJavaClass();
-  	String classContent = javaClass.createClassContent(methodName, modifier, className, mainMethod, classConstructor, inheritance, interfaces);
+    NewJavaClass javaClass = new NewJavaClass();
+    String classContent = javaClass.createClassContent(methodName, modifier, className, mainMethod, classConstructor, inheritance, interfaces);
     OpenDefinitionsDocument openDoc = newFile();
     
     try {

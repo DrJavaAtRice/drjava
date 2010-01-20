@@ -2,7 +2,7 @@
 
 PLT Utilities BSD License
 
-Copyright (c) 2007-2008 JavaPLT group at Rice University
+Copyright (c) 2007-2010 JavaPLT group at Rice University
 All rights reserved.
 
 Developed by:   Java Programming Languages Team

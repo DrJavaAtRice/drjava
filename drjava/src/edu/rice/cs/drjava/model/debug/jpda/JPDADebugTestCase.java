@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2009, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model.debug.jpda;
 import edu.rice.cs.drjava.model.debug.DebugTestCase;
 
 /** A DebugTestCase whose debugger is a {@code JPDADebugger}.
- *  @version $Id: DebugTestCase.java 4069 2007-01-18 17:11:59Z dlsmith $
+ *  @version $Id$
  */
 public abstract class JPDADebugTestCase extends DebugTestCase {
 

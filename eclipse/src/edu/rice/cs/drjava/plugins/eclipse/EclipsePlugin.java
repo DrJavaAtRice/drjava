@@ -2,7 +2,7 @@
 
 DrJava Eclipse Plug-in BSD License
 
-Copyright (c) 2007-2008 JavaPLT group at Rice University
+Copyright (c) 2007-2010 JavaPLT group at Rice University
 All rights reserved.
 
 Developed by:   Java Programming Languages Team
@@ -69,7 +69,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public class EclipsePlugin extends AbstractUIPlugin {
 
   public static final String PLUGIN_ID = "edu.rice.cs.drjava";
-	
+ 
   /**
    * The shared instance of the plugin.
    */
@@ -100,26 +100,26 @@ public class EclipsePlugin extends AbstractUIPlugin {
    * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
    */
   public void start(BundleContext context) throws Exception {
-	  super.start(context);
-	  _context = context;
-	  _plugin = this;
+   super.start(context);
+   _context = context;
+   _plugin = this;
   }
   
   public void log(String msg) {
-	  log(msg, null);
+   log(msg, null);
   }
 
   public void log(String msg, Exception e) {
-	  getLog().log(new Status(Status.INFO, PLUGIN_ID, Status.OK, msg, e));
+   getLog().log(new Status(Status.INFO, PLUGIN_ID, Status.OK, msg, e));
   }
   /*
    * (non-Javadoc)
    * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
    */
   public void stop(BundleContext context) throws Exception {
-	  _plugin = null;
-	  _context = null;
-	  super.stop(context);
+   _plugin = null;
+   _context = null;
+   super.stop(context);
   }
 
   /**
@@ -144,7 +144,7 @@ public class EclipsePlugin extends AbstractUIPlugin {
    * @return the image descriptor
    */
   public static ImageDescriptor getImageDescriptor(String path) {
-	  return imageDescriptorFromPlugin(PLUGIN_ID, path);
+   return imageDescriptorFromPlugin(PLUGIN_ID, path);
   }
   
   /**
