@@ -146,6 +146,13 @@ public interface GlobalModel extends ILoadDocuments {
     * @return The new open document
     */
   public OpenDefinitionsDocument newFile();
+
+  /** Creates a new document in the definitions pane, containing the specified text, and
+    * adds it to the list of open documents.
+    * @param text for the new document
+    * @return The new open document
+    */
+  public OpenDefinitionsDocument newFile(String text);
   
   /** Creates a new junit test case.
    * TODO: Move to JUnitModel?

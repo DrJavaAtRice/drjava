@@ -118,7 +118,6 @@ import edu.rice.cs.drjava.project.ProjectFileIR;
 import edu.rice.cs.drjava.project.ProjectFileParserFacade;
 import edu.rice.cs.drjava.project.ProjectProfile;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
-import edu.rice.cs.drjava.ui.NewJavaClass;
 
 import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.tuple.Pair;
@@ -1140,47 +1139,52 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** Creates a new open definitions document and adds it to the list.  Public for testing purposes.  Only runs in 
     * the event thread.
+    * @param parentDir directory in which the document should be located
     * @return The new open document
     */
-  public OpenDefinitionsDocument newFile(File parentDir) {
+  public OpenDefinitionsDocument newFile(File parentDir) { return newFile(parentDir, ""); }
+  
+  /** Creates a new open definitions document and adds it to the list.  Public for testing purposes.  Only runs in 
+    * the event thread.
+    * @param parentDir directory in which the document should be located
+    * @param text text for the new document
+    * @return The new open document
+    */
+  public OpenDefinitionsDocument newFile(File parentDir, String text) {
 ///* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     final ConcreteOpenDefDoc doc = _createOpenDefinitionsDocument(new NullFile());
-    doc.setParentDirectory(parentDir);
-    addDocToNavigator(doc);
-    _notifier.newFileCreated(doc);
+    try {
+      if (text.length() > 0) {
+        doc.insertString(0, text, null);
+        doc.indentLines(0, text.length());
+      }
+    }
+    catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
+    }
+    finally {
+      doc.setParentDirectory(parentDir);
+      addDocToNavigator(doc);
+      _notifier.newFileCreated(doc);
+    }
     return doc;
   }
   
   /** Creates a new document, adds it to the list of open documents, and sets it to be active.  
     * @return The new open document
     */
-  public OpenDefinitionsDocument newFile() {
+  public OpenDefinitionsDocument newFile(String text) {
     File dir = _activeDirectory;
     if (dir == null) dir = getMasterWorkingDirectory();
-    OpenDefinitionsDocument doc = newFile(dir);
+    OpenDefinitionsDocument doc = newFile(dir, text);
     setActiveDocument(doc);
     return doc;
   }
   
-//newClass addition
-
-  public OpenDefinitionsDocument newClass(String methodName, String modifier, String className, boolean mainMethod, boolean classConstructor, String inheritance, String interfaces) {
-    
-    NewJavaClass javaClass = new NewJavaClass();
-    String classContent = javaClass.createClassContent(methodName, modifier, className, mainMethod, classConstructor, inheritance, interfaces);
-    OpenDefinitionsDocument openDoc = newFile();
-    
-    try {
-      openDoc.insertString(0, classContent, null);
-      openDoc.indentLines(0, classContent.length());
-    }
-    catch (BadLocationException ble) {
-      throw new UnexpectedException(ble);
-    }
-    
-    return openDoc;
-  }
-  
+  /** Creates a new document, adds it to the list of open documents, and sets it to be active.  
+    * @return The new open document
+    */
+  public OpenDefinitionsDocument newFile() { return newFile(""); }  
 
   /** Creates a new junit test case.
     * @param name the name of the new test case

@@ -144,6 +144,10 @@ public class DummyGlobalModel implements GlobalModel {
   public OpenDefinitionsDocument newFile() {
     throw new UnsupportedOperationException("Tried to call newFile on a Dummy");
   }
+
+  public OpenDefinitionsDocument newFile(String text) {
+    throw new UnsupportedOperationException("Tried to call newFile on a Dummy");
+  }
   
   public OpenDefinitionsDocument newTestCase(String name, boolean makeSetUp, boolean makeTearDown) {
     throw new UnsupportedOperationException("Tried to call newTest on a Dummy");
