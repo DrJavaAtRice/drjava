@@ -43,7 +43,6 @@ import java.io.Serializable;
 
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.tuple.*;
-import edu.rice.cs.plt.recur.RecurUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.collect.ConsList;
 import edu.rice.cs.plt.text.TextUtil;
@@ -206,7 +205,7 @@ public final class IterUtil {
   /** 
    * Generate a string representation of the given iterable, matching the {@link Collection}
    * conventions (results like {@code "[foo, bar, baz]"}).  Invokes 
-   * {@link RecurUtil#safeToString(Object)} on each element.  If the iterable is known to be
+   * {@link TextUtil#toString(Object)} on each element.  If the iterable is known to be
    * infinite ({@link #isInfinite}), the string contains a few elements followed by {@code "..."}.
    */
   public static String toString(Iterable<?> iter) {
@@ -215,7 +214,7 @@ public final class IterUtil {
   
   /** 
    * Generate a string representation of the given iterable where each element is listed on a
-   * separate line.  Invokes {@link RecurUtil#safeToString(Object)} on each element.  If the iterable 
+   * separate line.  Invokes {@link TextUtil#toString(Object)} on each element.  If the iterable 
    * is known to be infinite ({@link #isInfinite}), the string contains a few elements followed by 
    * {@code "..."}.
    */
@@ -225,7 +224,7 @@ public final class IterUtil {
   
   /** 
    * Generate a string representation of the given iterable beginning with {@code prefix}, ending with
-   * {@code suffix}, and delimited by {@code delimiter}.  Invokes {@link RecurUtil#safeToString(Object)} 
+   * {@code suffix}, and delimited by {@code delimiter}.  Invokes {@link TextUtil#toString(Object)} 
    * on each element.  If the iterable is known to be infinite ({@link #isInfinite}), the string contains 
    * a few elements followed by {@code "..."}.
    */
@@ -237,7 +236,7 @@ public final class IterUtil {
     for (Object obj : iter) {
       if (first) { first = false; }
       else { result.append(delimiter); }
-      result.append(RecurUtil.safeToString(obj));
+      result.append(TextUtil.toString(obj));
     }
     result.append(suffix);
     return result.toString();
@@ -255,19 +254,14 @@ public final class IterUtil {
   }
   
   /**
-   * Return a hash code computed by xoring shifted copies of each element's hash code;
-   * the result is consistent with {@link #isEqual}, but may not be consistent with
-   * the input's {@code equals} and {@code hashCode} methods; invokes 
-   * {@code RecurUtil#safeHashCode(Object)} on each element. Assumes the iterable is finite.
+   * Return a hash code computed based on the hashes of each element.  The result is consistent
+   * with {@link #isEqual}, but may not be consistent with the input's {@code equals} and
+   * {@code hashCode} methods. Assumes the iterable is finite.  Implemented with
+   * {@link ObjectUtil#hash(Iterable)}.
    */
   public static int hashCode(Iterable<?> iter) {
-    int result = Iterable.class.hashCode();
-    int shift = 0;
-    // So that values in long lists don't get ignored, we mask shift to be < 16
-    for (Object obj : iter) { result ^= RecurUtil.safeHashCode(obj) << (shift & 0xF); shift++; }
-    return result;
+    return ObjectUtil.hash(iter);
   }
-  
   
   /**
    * Make an iterator based on a (legacy-style) {@link Enumeration}.  If an {@code Iterable} is
