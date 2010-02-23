@@ -236,11 +236,25 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     * an empty array corresponds to "none," and a singleton array corresponds to a "some."
     */
   public Object[] getVariable(String var) {
-    Pair<TypeContext, RuntimeBindings> env = _environments.get(_activeInterpreter.first());
-    if (env == null) { return new Object[0]; }
-    LocalVariable lv = env.first().getLocalVariable(var, _interpreterOptions.typeSystem());
-    if (lv == null) { return new Object[0]; }
-    return new Object[]{ env.second().get(lv) };
+//    Pair<TypeContext, RuntimeBindings> env = _environments.get(_activeInterpreter.first());
+//    if (env == null) { return new Object[0]; }
+//    LocalVariable lv = env.first().getLocalVariable(var, _interpreterOptions.typeSystem());
+//    if (lv == null) { 
+        InterpretResult ir = interpret(var);
+        return ir.apply(new InterpretResult.Visitor<Object[]>() {
+            public Object[] forNoValue() { return new Object[0]; }
+            public Object[] forStringValue(String val) { return new Object[] { val }; }
+            public Object[] forCharValue(Character val) { return new Object[] { val }; }
+            public Object[] forNumberValue(Number val) { return new Object[] { val }; }
+            public Object[] forBooleanValue(Boolean val) { return new Object[] { val }; }
+            public Object[] forObjectValue(String valString) { return new Object[] { valString }; }
+            public Object[] forException(String message) { return new Object[0]; }
+            public Object[] forEvalException(String message, StackTraceElement[] stackTrace) { return new Object[0]; }
+            public Object[] forUnexpectedException(Throwable t) { return new Object[0]; }
+            public Object[] forBusy() { return new Object[0]; }
+        });
+//    }
+//    return new Object[]{ env.second().get(lv) };
   }
 
   /** Gets the string representation of the value of a variable in the current interpreter.
@@ -268,17 +282,28 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     * @param indices varargs with the values for the indices in arrays; only the number of arguments matters here
     */
   public String getVariableType(String var, int... indices) {
-    Pair<TypeContext, RuntimeBindings> env = _environments.get(_activeInterpreter.first());
-    if (env == null) { return null; }
-    LocalVariable lv = env.first().getLocalVariable(var, _interpreterOptions.typeSystem());
-    if (lv == null) { return null; }
+//    Pair<TypeContext, RuntimeBindings> env = _environments.get(_activeInterpreter.first());
+//    if (env == null) { return null; }
+//    LocalVariable lv = env.first().getLocalVariable(var, _interpreterOptions.typeSystem());
+//    if (lv == null) { return null; }
+//    else {
+//      Type t = lv.type();
+//      for(int i = 0; i < indices.length; ++i) {
+//        if (!_interpreterOptions.typeSystem().isArray(t)) { return "<error: value is not an array>"; }
+//        t = _interpreterOptions.typeSystem().arrayElementType(t);
+//      }
+//      return _interpreterOptions.typeSystem().typePrinter().print(t);
+//    }
+    Object[] val = getVariable(var);
+    if (val.length == 0) { return null; }
     else {
-      Type t = lv.type();
+      Object o = val[0];
+      Class<?> c = o.getClass();
       for(int i = 0; i < indices.length; ++i) {
-        if (!_interpreterOptions.typeSystem().isArray(t)) { return "<error: value is not an array>"; }
-        t = _interpreterOptions.typeSystem().arrayElementType(t);
+        if (!c.isArray()) { return "<error: value is not an array>"; }
+        c = c.getComponentType();;
       }
-      return _interpreterOptions.typeSystem().typePrinter().print(t);
+      return c.getName();
     }
   }
   
