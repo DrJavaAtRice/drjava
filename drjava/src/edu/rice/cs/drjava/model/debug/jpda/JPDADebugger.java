@@ -419,12 +419,80 @@ public class JPDADebugger implements Debugger {
     _stepHelper(type, true);
   }
   
+  /** Checks whether the argument is a valid variable or field access.   
+      * @param var the name of the field   
+      * @return true if the argument is a valid variable or field access */   
+  public static boolean isSimpleVariableOrFieldAccess(String var) {
+    // only allow these formats:   
+    // f   
+    // f[1]   
+    // f[1][2]   
+    // f[1] [2]   
+    // o.f   
+    // o[1].f   
+    // o[1][2].f   
+    // o[1] [2].f
+    String[] parts = var.split("\\.",-1);   
+    String name, indexPart;   
+    for(String part: parts) {   
+      // System.out.println("part: "+part);   
+      int bracketPos = part.indexOf('[');   
+      if (bracketPos >=0) {   
+        name = part.substring(0, bracketPos).trim();   
+        indexPart = part.substring(bracketPos).trim();   
+        // System.out.println("\tindexPart: "+indexPart);   
+        if (!indexPart.startsWith("[") ||   
+            !indexPart.endsWith("]")) return false;   
+        indexPart = indexPart.substring(1, indexPart.length()-1).trim();   
+        // indexPart now is "1" or "1][2" or "1] [2"   
+        String[] indices = indexPart.split("\\]\\s*\\[",-1);   
+        if (indices.length==0) return false;   
+        for(String indexStr: indices) {   
+          indexStr = indexStr.trim();   
+          // System.out.println("\t\tindexStr: "+indexStr);   
+          try {   
+            Integer index = new Integer(indexStr);   
+            // System.out.println("\t\tindex: "+index);   
+          }   
+          catch(NumberFormatException nfe) { return false; }   
+        }   
+      }   
+      else {   
+        name = part.trim();   
+      }   
+      // System.out.println("\tname: "+name);   
+      if (!isJavaIdentifier(name)) return false;
+    }
+    return true;
+  }
+  
+  /** @return true if s is a valid Java identifier. */
+  public static boolean isJavaIdentifier(String s) {
+    if (s.length() == 0 || !Character.isJavaIdentifierStart(s.charAt(0))) {
+      return false;
+    }
+    for (int i=1; i<s.length(); ++i) {
+      if (!Character.isJavaIdentifierPart(s.charAt(i))) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
   /** Adds a watch on the given field or variable.
     * @param field the name of the field we will watch
     */
   public /* synchronized */ void addWatch(String field) throws DebugException {
     // _ensureReady();
     assert EventQueue.isDispatchThread();
+    if (!(DrJava.getConfig().getSetting(OptionConstants.DEBUG_EXPRESSIONS_AND_METHODS_IN_WATCHES).booleanValue()) &&
+        !isSimpleVariableOrFieldAccess(field)) {
+      Utilities.showMessageBox("Expressions and method calls are not allowed.\n"+
+                               "See the 'Debugger' category in the Preferences.",
+                               "Error Adding Watch");
+      return;
+    }
+    
     final DebugWatchData w = new DebugWatchData(field);
     _watches.add(w);
     _updateWatches();

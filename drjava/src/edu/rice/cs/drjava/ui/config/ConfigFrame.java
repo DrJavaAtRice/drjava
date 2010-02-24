@@ -888,6 +888,11 @@ public class ConfigFrame extends SwingFrame {
                                                          this,
                                                          "<html>A defined rate in ms at which the debugger automatically steps into/over each line of code.<br>" +
                                                          "Value entered must be an integer value. </html>"));                                                            
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.DEBUG_EXPRESSIONS_AND_METHODS_IN_WATCHES,
+                                                         "Allow Expressions and Method Calls in Watches", this,
+                                                         "<html>Whether the Debugger should allow expressions and method<br>"+
+                                                         "calls in watches. These may have side effects and can cause<br>"+
+                                                         "delays during the debug process.</html>"));
     panel.displayComponents();
   }
 

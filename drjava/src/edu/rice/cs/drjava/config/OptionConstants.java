@@ -1100,6 +1100,10 @@ public interface OptionConstants {
   public static final BooleanOption DEBUG_AUTO_IMPORT =
     new BooleanOption("debug.auto.import", Boolean.TRUE);
   
+  /** Whether we want to allow expressions and method calls in watches. */
+  public static final BooleanOption DEBUG_EXPRESSIONS_AND_METHODS_IN_WATCHES =
+    new BooleanOption("debug.expressions.and.methods.in.watches", Boolean.FALSE);
+  
   
   /* ---------- Javadoc Options ---------- */
   
