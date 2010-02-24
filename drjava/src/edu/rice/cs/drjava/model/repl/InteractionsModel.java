@@ -299,16 +299,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Gets the string representation of the value of a variable in the current interpreter.
     * @param var the name of the variable
-    * @param indices varargs with the values for the indices in arrays
     * @return A string representation of the value, or {@code null} if the variable is not defined.
     */
-  public abstract String getVariableToString(String var, int... indices);
+  public abstract String getVariableToString(String var);
   
   /** Gets the class name of a variable in the current interpreter.
-    * @param indices varargs with the values for the indices in arrays; only the number of arguments matters here
     * @param var the name of the variable
     */
-  public abstract String getVariableType(String var, int... indices);
+  public abstract String getVariableType(String var);
   
   /** Resets the Java interpreter with working directory wd. */
   public final void resetInterpreter(File wd, boolean force) {

@@ -361,10 +361,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * if the remote JVM is unavailable or an error occurs.  Blocks until the interpreter is connected.
    * @param var the name of the variable
    */
-  public Option<String> getVariableToString(String var, int... indices) {
+  public Option<String> getVariableToString(String var) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return Option.none(); }
-    try { return Option.some(remote.getVariableToString(var,indices)); }
+    try { return Option.some(remote.getVariableToString(var)); }
     catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
   }
   
@@ -373,10 +373,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * if the remote JVM is unavailable or an error occurs.  Blocks until the interpreter is connected.
    * @param var the name of the variable
    */
-  public Option<String> getVariableType(String var, int... indices) {
+  public Option<String> getVariableType(String var) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return Option.none(); }
-    try { return Option.some(remote.getVariableType(var,indices)); }
+    try { return Option.some(remote.getVariableType(var)); }
     catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
   }
   

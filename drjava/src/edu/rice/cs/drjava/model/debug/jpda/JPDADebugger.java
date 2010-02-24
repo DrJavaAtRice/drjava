@@ -1310,29 +1310,29 @@ public class JPDADebugger implements Debugger {
       String name = w.getName();
       String val = "";
       String type = "";
-      ArrayList<Integer> arr_index = new ArrayList<Integer>();
-      
-      if(name.indexOf("[") != -1 && name.indexOf("]") != -1) {
-        name = name.substring(0, name.indexOf("["));
-        arr_index.add(Integer.parseInt(w.getName().substring(w.getName().indexOf("[")+1, w.getName().indexOf("]"))));      
-        if(w.getName().indexOf("]")<(w.getName().length()-1)) {
-          String iter = w.getName().substring(w.getName().indexOf("]")+1, w.getName().length());
-          while(iter.indexOf("[") != -1 && iter.indexOf("]") != -1) {
-            arr_index.add(Integer.parseInt(iter.substring(iter.indexOf("[")+1, iter.indexOf("]"))));      
-            if(iter.indexOf("]")<(iter.length()-1))
-              iter = iter.substring(iter.indexOf("]")+1, iter.length());
-            else 
-              iter = "";
-          }
-        }
-      }
-     
-      int [] indices = new int[arr_index.size()];
-      for (int i = 0; i < arr_index.size(); i++) {
-        indices[i] = arr_index.get(i);
-      }
-      val = _model.getInteractionsModel().getVariableToString(name, indices);
-      type = _model.getInteractionsModel().getVariableType(name, indices);
+//      ArrayList<Integer> arr_index = new ArrayList<Integer>();
+//      
+//      if(name.indexOf("[") != -1 && name.indexOf("]") != -1) {
+//        name = name.substring(0, name.indexOf("["));
+//        arr_index.add(Integer.parseInt(w.getName().substring(w.getName().indexOf("[")+1, w.getName().indexOf("]"))));      
+//        if(w.getName().indexOf("]")<(w.getName().length()-1)) {
+//          String iter = w.getName().substring(w.getName().indexOf("]")+1, w.getName().length());
+//          while(iter.indexOf("[") != -1 && iter.indexOf("]") != -1) {
+//            arr_index.add(Integer.parseInt(iter.substring(iter.indexOf("[")+1, iter.indexOf("]"))));      
+//            if(iter.indexOf("]")<(iter.length()-1))
+//              iter = iter.substring(iter.indexOf("]")+1, iter.length());
+//            else 
+//              iter = "";
+//          }
+//        }
+//      }
+//     
+//      int [] indices = new int[arr_index.size()];
+//      for (int i = 0; i < arr_index.size(); i++) {
+//        indices[i] = arr_index.get(i);
+//      }
+      val = _model.getInteractionsModel().getVariableToString(name);
+      type = _model.getInteractionsModel().getVariableType(name);
       
       if (val == null) { w.setNoValue(); }
       else { w.setValue(val); }
