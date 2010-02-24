@@ -79,17 +79,13 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   /** Gets the string representation of the value of a variable in the current interpreter.
     * @param var the name of the variable
     */
-  public String getVariableToString(String var) {
-    Option<String> result = _jvm.getVariableToString(var);
-    return result.unwrap("");
-  }
-  
-  /** Gets the class name of a variable in the current interpreter.
-   * @param var the name of the variable
-   */
-  public String getVariableType(String var) {
-    Option<String> result = _jvm.getVariableType(var);
-    return result.unwrap("");
+  public Pair<String,String> getVariableToString(String var) {
+    System.out.println("getVariableToString: "+var);
+    Option<Pair<String,String>> result = _jvm.getVariableToString(var);
+    System.out.println("\tresult.isNone? "+result.isNone());
+    Pair<String,String> retval = result.unwrap(new Pair<String,String>("",""));
+    System.out.println("\tretval: "+retval);
+    return retval;
   }
   
   /** Adds the given path to the interpreter's class path.

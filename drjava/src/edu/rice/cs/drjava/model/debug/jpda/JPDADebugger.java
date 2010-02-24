@@ -64,7 +64,7 @@ import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
-
+import edu.rice.cs.plt.tuple.Pair;
 
 import com.sun.jdi.*;
 import com.sun.jdi.connect.*;
@@ -90,11 +90,19 @@ public class JPDADebugger implements Debugger {
   
   private static final int OBJECT_COLLECTED_TRIES = 5;
   
+  /** Signature of the InterpreterJVM.addInterpreter method.
+    * @see edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM#addInterpreter
+    * @see #_dumpVariablesIntoInterpreterAndSwitch
+    */
   private static final String ADD_INTERPRETER_SIG =
     "(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Class;" +
     "[Ljava/lang/Object;[Ljava/lang/String;[Ljava/lang/Class;)V";
   
-  private static final String GET_VARIABLE_SIG = "(Ljava/lang/String;)[Ljava/lang/Object;";
+  /** Signature of the InterpreterJVM.getVariableValue method.
+    * @see edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM#getVariableValue
+    * @see #_copyVariablesFromInterpreter
+    */
+  private static final String GET_VARIABLE_VALUE_SIG = "(Ljava/lang/String;)[Ljava/lang/Object;";
   
   private static final String NEW_INSTANCE_SIG = "(Ljava/lang/Class;I)Ljava/lang/Object;";
   
@@ -1331,8 +1339,10 @@ public class JPDADebugger implements Debugger {
 //      for (int i = 0; i < arr_index.size(); i++) {
 //        indices[i] = arr_index.get(i);
 //      }
-      val = _model.getInteractionsModel().getVariableToString(name);
-      type = _model.getInteractionsModel().getVariableType(name);
+      Pair<String,String> pair = _model.getInteractionsModel().getVariableToString(name);
+      System.out.println("pair==null? "+(pair==null));
+      val = pair.first();
+      type = pair.second();
       
       if (val == null) { w.setNoValue(); }
       else { w.setValue(val); }
@@ -1619,7 +1629,10 @@ public class JPDADebugger implements Debugger {
     return Long.toString(thread.uniqueID());
   }
   
-  /** Assumes lock is already held. */
+  /** Assumes lock is already held.
+    * @see edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM#getVariableValue()
+    * @see #GET_VARIABLE_VALUE_SIG
+    * */
   private void _copyVariablesFromInterpreter() throws DebugException {
     // copy variables' values out of interpreter's environment and
     // into the relevant stack frame
@@ -1631,8 +1644,8 @@ public class JPDADebugger implements Debugger {
         Value oldVal = _runningThread.frame(0).getValue(var);
         StringReference name = _mirrorString(var.name(), toRelease);
         ArrayReference wrappedVal =
-          (ArrayReference) _invokeMethod(_runningThread, _interpreterJVM, "getVariable",
-                                         GET_VARIABLE_SIG, name);
+          (ArrayReference) _invokeMethod(_runningThread, _interpreterJVM, "getVariableValue",
+                                         GET_VARIABLE_VALUE_SIG, name);
         if ((wrappedVal != null) && (wrappedVal.length() == 1)) { // if it can't be found (length is 0), just ignore it
           try {
             Value val = wrappedVal.getValue(0);

@@ -50,6 +50,8 @@ import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.tuple.Option;
+import edu.rice.cs.plt.tuple.OptionVisitor;
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.text.TextUtil;
 
 import edu.rice.cs.dynamicjava.Options;
@@ -109,22 +111,22 @@ public class SimpleInteractionsModel extends InteractionsModel {
   /** Gets the string representation of the value of a variable in the current interpreter.
    * @param var the name of the variable
    */
-  public String getVariableToString(String var) {
+  public Pair<String,String> getVariableToString(String var) {
     try {
       Option<Object> value = _interpreter.interpret(var);
-      try { return TextUtil.toString(value.unwrap("")); }
+      try {
+          return value.apply(new OptionVisitor<Object,Pair<String,String>>() {
+              public Pair<String,String> forNone() {
+                  return new Pair<String,String>("","");
+              }
+              public Pair<String,String> forSome(Object value) {
+                  return new Pair<String,String>(TextUtil.toString(value),value.getClass().getName());
+              }
+          });
+      }
       catch (Throwable t) { throw new EvaluatorException(t); }
     }
-    catch (InterpreterException e) { return ""; }
-  }
-  
-  /** Gets the class name of a variable in the current interpreter.
-   * @param var the name of the variable
-   */
-  public String getVariableType(String var) {
-    return null; // TODO: implement
-//    Class c = _interpreter.getVariableClass(var);
-//    return c.getName();
+    catch (InterpreterException e) { return new Pair<String,String>("",""); }
   }
   
   /** Adds the given path to the interpreter's classpath.

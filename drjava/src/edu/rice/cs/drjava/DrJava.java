@@ -185,7 +185,7 @@ public class DrJava {
     * running, numAttempts attempts will be made, with WAIT_BEFORE_REMOTE_CONTROL_RETRY
     * ms of sleep time in between.
     * @param files files to open with remote control
-    * @param number of attempts to be made
+    * @param numAttempts of attempts to be made
     * @return true if successful
     */
   public static synchronized boolean openWithRemoteControl(ArrayList<String> files, int numAttempts) {

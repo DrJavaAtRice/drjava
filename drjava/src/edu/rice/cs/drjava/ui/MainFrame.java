@@ -6022,8 +6022,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     JOptionPane.showMessageDialog(this, message, "JUnit Testing Interrupted", JOptionPane.WARNING_MESSAGE);
   }
   
-  private void _showError(Throwable e, String title, String message) {
-    JOptionPane.showMessageDialog(this, message + "\n" + e, title, JOptionPane.ERROR_MESSAGE);
+  private void _showError(Throwable e, String title, String message) {    
+    JOptionPane.showMessageDialog(this, message + "\n" + e + "\n"+ StringOps.getStackTrace(e),
+                                  title, JOptionPane.ERROR_MESSAGE);
   }
   
   private void _showWarning(Throwable e, String title, String message) {

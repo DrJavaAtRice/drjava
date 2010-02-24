@@ -284,7 +284,7 @@ public final class NewJVMTest extends DrJavaTestCase {
       public Void forCharValue(Character c) { handleValueResult("'" + c + "'"); return null; }
       public Void forNumberValue(Number n) { handleValueResult(n.toString()); return null; }
       public Void forBooleanValue(Boolean b) { handleValueResult(b.toString()); return null; }
-      public Void forObjectValue(String objString) { handleValueResult(objString); return null; }
+      public Void forObjectValue(String objString, String objTypeString) { handleValueResult(objString); return null; }
       
       private void handleValueResult(String s) {
         debug.log();

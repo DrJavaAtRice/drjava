@@ -301,12 +301,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     * @param var the name of the variable
     * @return A string representation of the value, or {@code null} if the variable is not defined.
     */
-  public abstract String getVariableToString(String var);
-  
-  /** Gets the class name of a variable in the current interpreter.
-    * @param var the name of the variable
-    */
-  public abstract String getVariableType(String var);
+  public abstract Pair<String,String> getVariableToString(String var);
   
   /** Resets the Java interpreter with working directory wd. */
   public final void resetInterpreter(File wd, boolean force) {

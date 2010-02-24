@@ -216,9 +216,12 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
         else if (obj instanceof Boolean) { debug.logEnd(); return InterpretResult.booleanValue((Boolean) obj); }
         else {
           try {
-            String resultString = TextUtil.toString(obj);
+            String resultString = TextUtil.toString(obj);            
+            Class<?> c = obj.getClass();            
+            String resultTypeStr = getClassName(c);
+            
             debug.logEnd();
-            return InterpretResult.objectValue(resultString);
+            return InterpretResult.objectValue(resultString,resultTypeStr);
           }
           catch (Throwable t) {
             // an exception occurred during toString
@@ -230,231 +233,90 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     });
   }
   
-  // Returns true if s is a legal Java identifier.
-  public static boolean isJavaIdentifier(String s) {
-    if (s.length() == 0 || !Character.isJavaIdentifierStart(s.charAt(0))) { return false; }
-    for (int i=1; i<s.length(); i++) {
-      if (!Character.isJavaIdentifierPart(s.charAt(i))) { return false; }
-    }
-    return true;
-  }   
-  
-  /** @return true if the argument is a valid field */
-  public static boolean isValidFieldName(String var) {
-    return getValidFieldType(var, null, null).first();
-  }
-  
-  /** Checks whether the argument is a valid field. This is based
-    * both on the string and on the fields in the 'this' object, if specified.
-    * @param var the name of the field
-    * @param thisC the type of the 'this' object, or null
-    * @param thisO the 'this' object, or null
-    * @return the first part of the pair is true if the argument is a valid field name,
-    *         the second part is the type of the object, if thisC and thisO were specified */
-  public static Pair<Boolean,Class<?>> getValidFieldType(String var,
-                                                         Class<?> thisC,
-                                                         Object thisO) {
-    // only allow these formats:
-    // f
-    // f[1]
-    // f[1][2]
-    // f[1] [2]
-    // o.f
-    // o[1].f
-    // o[1][2].f
-    // o[1] [2].f
-    final Pair<Boolean,Class<?>> fail = new Pair<Boolean,Class<?>>(false,null);
-    
-    String[] parts = var.split("\\.",-1);
-    String name, indexPart;
-    ArrayList<Integer> arrIndices = new ArrayList<Integer>();
-    Field fld;
-    for(String part: parts) {
-      // System.out.println("part: "+part);
-      arrIndices.clear();
-      int bracketPos = part.indexOf('[');
-      if (bracketPos >=0) {
-        name = part.substring(0, bracketPos).trim();
-        indexPart = part.substring(bracketPos).trim();
-        // System.out.println("\tindexPart: "+indexPart);
-        if (!indexPart.startsWith("[") ||
-            !indexPart.endsWith("]")) return fail;
-        indexPart = indexPart.substring(1, indexPart.length()-1).trim();
-        // indexPart now is "1" or "1][2" or "1] [2"
-        String[] indices = indexPart.split("\\]\\s*\\[",-1);
-        if (indices.length==0) return fail;
-        for(String indexStr: indices) {
-          indexStr = indexStr.trim();
-          // System.out.println("\t\tindexStr: "+indexStr);
-          try {
-            Integer index = new Integer(indexStr);
-            // System.out.println("\t\tindex: "+index);
-            arrIndices.add(index);
-          }
-          catch(NumberFormatException nfe) { return fail; }
-        }
-      }
-      else {
-        name = part.trim();
-      }
-      // System.out.println("\tname: "+name);
-      if (!isJavaIdentifier(name)) return fail;
-      
-      if (thisC != null) {
-        if (thisO != null) {
-          // object is non-null, use runtime type
-          // System.out.println("\truntime type "+thisO.getClass());
-          fld = getFieldRecursive(thisO.getClass(), name);
-        }
-        else {
-          // object is null, use static type
-          // System.out.println("\tstatic type "+thisC);
-          fld = getFieldRecursive(thisC, name);
-        }
-        // System.out.println("\tfld: "+fld);
-        if (fld == null) return fail; // not found
-        fld.setAccessible(true);
-        
-        Class<?> fldC = fld.getType();
-        Object fldO = null;
-        if (thisO != null) {
-          try {
-            fldO = fld.get(thisO);
-          }
-          catch(Exception e) { return fail; }
-        }
-        // System.out.println("\tfldO: "+fldO);
-        // System.out.println("\tarrIndices.size: "+arrIndices.size());
-        if (arrIndices.size()>0) {
-          for(int arrI: arrIndices) {
-            // System.out.println("\t\tarrI: "+arrI);
-            // System.out.println("\t\tisArray? "+fldC.isArray());
-            if (!fldC.isArray()) return fail; // indexing into non-array
-            if (fldO != null) {
-              int len = Array.getLength(fldO);
-              if (len <= arrI) return fail; // index out of range
-              fldO = Array.get(fldO, arrI);
-              if (fldO != null) {
-                // use runtime type
-                fldC = fldO.getClass();
-              }
-              else {
-                // use static type
-                fldC = fldC.getComponentType();
-              }
-            }
-            else {
-                fldC = fldC.getComponentType();
-            }
-          }
-        }
-        
-        thisC = fldC;
-        thisO = fldO;
-      }
-    }
-    if (thisO != null) thisC = thisO.getClass();
-    return new Pair<Boolean,Class<?>>(true, thisC);
-  }
-  
-  protected static Field getFieldRecursive(Class<?> thisC, String name) {
-    Field fld;
-    try {
-      fld = thisC.getDeclaredField(name);
-    }
-    catch(NoSuchFieldException nsfe) { fld = null; }
-    catch(SecurityException se) { fld = null; }
-    
-    if (fld != null) return fld;
-    
-    Class<?> superC = thisC.getSuperclass();
-    if (superC != null) {
-      fld = getFieldRecursive(superC, name);
-      if (fld != null) return fld;
-    }
-    
-    for(Class<?> interfC: thisC.getInterfaces()) {
-      fld = getFieldRecursive(interfC, name);
-      if (fld != null) return fld;
-    }
-    return null;
-  }
-  
   /** Gets the value of the variable with the given name in the current interpreter.
     * Invoked reflectively by the debugger.  To simplify the inter-process exchange,
     * an array here is used as the return type rather than an {@code Option<Object>} --
     * an empty array corresponds to "none," and a singleton array corresponds to a "some."
+    * @param var name of the variable to look up
+    * @return empty array for "none", singleton array for "some" value
+    * @see edu.rice.cs.drjava.model.debug.jpda.JPDADebugger#GET_VARIABLE_VALUE_SIG
+    * @see edu.rice.cs.drjava.model.debug.jpda.JPDADebugger#_copyVariablesFromInterpreter()
     */
-  public Object[] getVariable(String var) {
+  public Object[] getVariableValue(String var) {
+    Pair<Object,String>[] arr = getVariable(var);
+    if (arr.length==0) return new Object[0];
+    else return new Object[] { arr[0].first() };
+  }
+  
+  /** Gets the value and type string of the variable with the given name in the current interpreter.
+    * Invoked reflectively by the debugger.  To simplify the inter-process exchange,
+    * an array here is used as the return type rather than an {@code Option<Object>} --
+    * an empty array corresponds to "none," and a singleton array corresponds to a "some."
+    */
+  @SuppressWarnings("unchecked")
+  public Pair<Object,String>[] getVariable(String var) {
     InterpretResult ir = interpret(var);
-    return ir.apply(new InterpretResult.Visitor<Object[]>() {
-      public Object[] forNoValue() { return new Object[0]; }
-      public Object[] forStringValue(String val) { return new Object[] { val }; }
-      public Object[] forCharValue(Character val) { return new Object[] { val }; }
-      public Object[] forNumberValue(Number val) { return new Object[] { val }; }
-      public Object[] forBooleanValue(Boolean val) { return new Object[] { val }; }
-      public Object[] forObjectValue(String valString) { return new Object[] { valString }; }
-      public Object[] forException(String message) { return new Object[0]; }
-      public Object[] forEvalException(String message, StackTraceElement[] stackTrace) { return new Object[0]; }
-      public Object[] forUnexpectedException(Throwable t) { return new Object[0]; }
-      public Object[] forBusy() { return new Object[0]; }
+    return ir.apply(new InterpretResult.Visitor<Pair<Object,String>[]>() {
+        public Pair<Object,String>[] fail() { return new Pair[0]; }
+        public Pair<Object,String>[] value(Object val) {
+          return new Pair[] { new Pair<Object,String>(val, getClassName(val.getClass())) };
+        }
+        public Pair<Object,String>[] forNoValue() { return fail(); }
+        public Pair<Object,String>[] forStringValue(String val) { return value(val); }
+        public Pair<Object,String>[] forCharValue(Character val) { return value(val); }
+        public Pair<Object,String>[] forNumberValue(Number val) { return value(val); }
+        public Pair<Object,String>[] forBooleanValue(Boolean val) { return value(val); }
+        public Pair<Object,String>[] forObjectValue(String valString, String objTypeString) {
+            return new Pair[] { new Pair<Object,String>(valString, objTypeString) }; }
+        public Pair<Object,String>[] forException(String message) { return fail(); }
+        public Pair<Object,String>[] forEvalException(String message, StackTraceElement[] stackTrace) { return fail(); }
+        public Pair<Object,String>[] forUnexpectedException(Throwable t) { return fail(); }
+        public Pair<Object,String>[] forBusy() { return fail(); }
     });
   }
 
   /** Gets the string representation of the value of a variable in the current interpreter.
     * @param var the name of the variable
-    * @return null if the variable is not defined, "null" if the value is null; otherwise,
-    * its string representation
+    * @return null if the variable is not defined; the first part of the pair is "null" if the value is null,
+    * otherwise its string representation; the second part is the string representation of the variable's type
     */
-  public String getVariableToString(String var) {
-    if (!isValidFieldName(var)) { return "<error in watch name>"; }
-    Object[] val = getVariable(var);
-    if (val.length == 0) { return null; }
+  public Pair<String,String> getVariableToString(String var) {
+//    if (!isValidFieldName(var)) { return "<error in watch name>"; }
+    Pair<Object,String>[] val = getVariable(var);
+    if (val.length == 0) { return new Pair<String,String>(null,null); }
     else {
-      Object o = val[0];
-      try { return TextUtil.toString(o); }
-      catch (Throwable t) { return "<error in toString()>"; }
+      Object o = val[0].first();
+      try { return new Pair<String,String>(TextUtil.toString(o),val[0].second()); }
+      catch (Throwable t) { return new Pair<String,String>("<error in toString()>",""); }
     }
   }
-  
-  /** Gets the type of a variable in the current interpreter. We have to do this
-    * the complicated way because Objects aren't passed as objects, but rather as
-    * Strings to forObjectValue.
-    * @param var the name of the variable
-    */
-  public String getVariableType(String var) {
-    Pair<TypeContext, RuntimeBindings> env = _environments.get(_activeInterpreter.first());
-    if (env == null) { return ""; }
-    DJClass djThis = env.first().getThis();
-    if (djThis == null) { return "<unknown>"; }
-    Class<?> thisC = djThis.load();
-    Object thisO = env.second().getThis(djThis);
-    Pair<Boolean,Class<?>> validAndType = getValidFieldType(var, thisC, thisO);
 
-    if (!validAndType.first()) {
-      // not a field, may be a local variable
-      // TODO: implement this
-      return "";
-    }
-    Class<?> c = validAndType.second();
-    
-    // print the right number of [] for each level of arrays
+  /** @return the name of the class, with the right number of array suffixes "[]" and while being ambiguous
+    * about boxed and primitive types. */
+  protected static String getClassName(Class<?> c) {
     StringBuilder sb = new StringBuilder();
+    boolean isArray = c.isArray();
     while(c.isArray()) {
       sb.append("[]");
       c = c.getComponentType();
     }
     
-    // we can't distinguish primitive types from their boxed types right now
-    if (c.equals(Byte.class))      { return "byte"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); } 
-    if (c.equals(Short.class))     { return "short"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
-    if (c.equals(Integer.class))   { return "int"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
-    if (c.equals(Long.class))      { return "long"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
-    if (c.equals(Float.class))     { return "float"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
-    if (c.equals(Double.class))    { return "double"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
-    if (c.equals(Boolean.class))   { return "boolean"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
-    if (c.equals(Character.class)) { return "char"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
-    else return c.getName()+sb.toString();
+    if (!isArray) {
+      // we can't distinguish primitive types from their boxed types right now
+      if (c.equals(Byte.class))      { return "byte"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); } 
+      if (c.equals(Short.class))     { return "short"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
+      if (c.equals(Integer.class))   { return "int"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
+      if (c.equals(Long.class))      { return "long"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
+      if (c.equals(Float.class))     { return "float"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
+      if (c.equals(Double.class))    { return "double"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
+      if (c.equals(Boolean.class))   { return "boolean"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
+      if (c.equals(Character.class)) { return "char"+sb.toString()+" or "+c.getSimpleName()+sb.toString(); }
+      else return c.getName()+sb.toString();
+    }
+    else {
+      // if it's an array, we can distinguish boxed types and primitive types
+      return c.getName()+sb.toString();
+    }
   }
   
   /** Adds a named Interpreter to the list.
@@ -480,6 +342,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     *                         do, a value with a primitive type may have a {@code null} entry here.
     * @throws IllegalArgumentException if the name is not unique, or if the local var arrays
     *                                  are not all of the same length
+    * @see edu.rice.cs.drjava.model.debug.jpda.JPDADebugger#ADD_INTERPRETER_SIG
+    * @see edu.rice.cs.drjava.model.debug.jpda.JPDADebugger#_dumpVariablesIntoInterpreterAndSwitch
     */
   public void addInterpreter(String name, Object thisVal, Class<?> thisClass, Object[] localVars,
                              String[] localVarNames, Class<?>[] localVarClasses) {

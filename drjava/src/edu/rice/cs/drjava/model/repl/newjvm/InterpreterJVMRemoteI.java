@@ -99,12 +99,7 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
     * @return null if the variable is not defined, "null" if the value is null; otherwise,
     *         its string representation
     */
-  public String getVariableToString(String var) throws RemoteException;
-  
-  /** Gets the type of a variable in the current interpreter.
-    * @param var the name of the variable
-    */
-  public String getVariableType(String var) throws RemoteException;
+  public Pair<String,String> getVariableToString(String var) throws RemoteException;
   
   /** Returns the current class path. */
   public Iterable<File> getClassPath() throws RemoteException;  

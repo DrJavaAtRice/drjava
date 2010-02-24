@@ -56,7 +56,7 @@ public abstract class InterpretResult implements Serializable {
     public T forCharValue(Character val);
     public T forNumberValue(Number val);
     public T forBooleanValue(Boolean val);
-    public T forObjectValue(String valString);
+    public T forObjectValue(String valString, String objTypeStr);
     public T forException(String message);
     public T forEvalException(String message, StackTraceElement[] stackTrace);
     public T forUnexpectedException(Throwable t);
@@ -156,12 +156,16 @@ public abstract class InterpretResult implements Serializable {
   }
   
 
-  public static InterpretResult objectValue(String objS) { return new ObjectValueResult(objS); }
+  public static InterpretResult objectValue(String objS, String objTS) { return new ObjectValueResult(objS, objTS); }
 
   private static class ObjectValueResult extends InterpretResult {
     private final String _objString;
-    public ObjectValueResult(String objString) { _objString = objString; }
-    public <T> T apply(Visitor<T> v) { return v.forObjectValue(_objString); }
+    private final String _objTypeStr;
+    public ObjectValueResult(String objString, String objTypeStr) {
+        _objString = objString;
+        _objTypeStr = objTypeStr;
+    }
+    public <T> T apply(Visitor<T> v) { return v.forObjectValue(_objString, _objTypeStr); }
   } 
   
 }

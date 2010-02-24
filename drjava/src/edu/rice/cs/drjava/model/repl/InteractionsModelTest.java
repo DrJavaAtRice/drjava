@@ -46,6 +46,7 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
+import edu.rice.cs.plt.tuple.Pair;
 
 import java.io.File;
 import java.io.IOException;
@@ -683,12 +684,8 @@ public final class InteractionsModelTest extends DrJavaTestCase {
       }
     }
         
-    public String getVariableToString(String var) {
+    public Pair<String,String> getVariableToString(String var) {
       fail("cannot getVariableToString in a test");
-      return null;
-    }
-    public String getVariableType(String var) {
-      fail("cannot getVariableClassName in a test");
       return null;
     }
     
