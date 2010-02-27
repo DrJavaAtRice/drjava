@@ -197,7 +197,7 @@ public abstract class FileOps {
     * @return A new file whose path is relative to the base file while the value of <code>getCanonicalPath()</code> 
     *         for the returned file is the same as the result of <code>getCanonicalPath()</code> for the given file.
     */
-  public static String stringMakeRelativeTo(File f, File b) throws IOException, SecurityException {
+  public static String stringMakeRelativeTo(File f, File b) throws IOException /*, SecurityException */ {
     try {
       
       File[] roots = File.listRoots();

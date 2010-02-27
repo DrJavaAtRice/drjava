@@ -450,7 +450,7 @@ public class DrJavaPropertySetup implements OptionConstants {
             sb.append(File.pathSeparator);
             sb.append(StringOps.escapeFileName(s));
           }
-          catch(Exception e) {
+          catch(IOException e) {
             _value = "(file.rel I/O Error...)";
             return;
           }

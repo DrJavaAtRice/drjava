@@ -275,7 +275,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
       fail("Open was unexpectedly canceled!");
     }
     
-    assertEquals("non-existant file", doc, null);
+    assertEquals("doc file should be non-existent", doc, null);
     
     _log.log("testOpenNonexistentFile completed");
   }
@@ -514,7 +514,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     catch (IOException e) { /* As we expected, the file was not found. */ }
     catch (Exception e) { fail("Unexpectedly exception caught!"); }
     
-    assertTrue("non-existent file", docs == null);
+    assertEquals("no doc files should be open", null, docs);
     
     _log.log("testOpenMultipleFilesError completed");
   }

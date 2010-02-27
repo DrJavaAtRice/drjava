@@ -44,18 +44,17 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Test the comment lines / uncomment lines functionality.
- * @version $Id$
- */
+/** Test the comment lines / uncomment lines functionality.
+  * @version $Id$
+  */
 public final class CommentTest extends DrJavaTestCase {
   protected DefinitionsDocument doc;
   private Integer _indentLevel = Integer.valueOf(2);
   private GlobalEventNotifier _notifier;
 
   /** Resents configuration settings and sets up the indent level so that we
-   * can predict the correct behavior for indenting.
-   */
+    * can predict the correct behavior for indenting.
+    */
   public void setUp() throws Exception {
     super.setUp();
     DrJava.getConfig().resetToDefaults();
@@ -64,8 +63,7 @@ public final class CommentTest extends DrJavaTestCase {
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,_indentLevel);
   }
 
-  /** Tests the Comment Out Line(s) command with a single line.
-   */
+  /** Tests the Comment Out Line(s) command with a single line. */
   public void testCommentOutSingleLine() throws BadLocationException {
     String text =
       "Here is some abritrary text that should be commented.\n" +
@@ -83,8 +81,7 @@ public final class CommentTest extends DrJavaTestCase {
     _assertContents("Only the second line should be wing-commented!", commented, doc);
   }
 
-  /** Tests the Comment Out Line(s) command with multiple lines.
-   */
+  /** Tests the Comment Out Line(s) command with multiple lines. */
   public void testCommentOutMultipleLines() throws BadLocationException {
     String text =
       "Here is some abritrary text that should be commented.\n" +
@@ -103,10 +100,13 @@ public final class CommentTest extends DrJavaTestCase {
   }
 
   /** Tests the Uncomment Line(s) command with a single line.
-   * These sample lines should be ignored by the algorithm.
-   */
+    * These sample lines should be ignored by the algorithm.
+    */
   public void testUncommentIgnoreSingleLine() throws BadLocationException {
-    String text =
+    doc.uncommentLines(0,0);
+    _assertContents("Uncommenting an empty document should not cause an error", "", doc);
+    
+    String text = 
       "Here is some abritrary text that should not be uncommented.\n" +
       "/* It is on multiple lines, and contains slashes // and other\n" +
       "* various */ obnoxious characters,\n" +
@@ -114,6 +114,8 @@ public final class CommentTest extends DrJavaTestCase {
 
     doc.insertString(0, text, null);
     _assertContents("Sample text is inserted improperly.", text, doc);
+    doc.uncommentLines(0,0);
+    _assertContents("Uncommenting an uncommented line should not cause an error or modify the text", text, doc);
     doc.uncommentLines(70, 75);
     _assertContents("These lines should be unchanged by uncomment!", text, doc);
   }

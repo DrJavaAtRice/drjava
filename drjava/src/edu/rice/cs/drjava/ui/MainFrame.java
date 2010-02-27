@@ -1272,7 +1272,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               catch(IOException e) { sb.append(entry.doc.getFile()); }
             }
             catch(edu.rice.cs.drjava.model.FileMovedException e) { sb.append(entry + " was moved"); }
-            catch(java.lang.IllegalStateException e) { sb.append(entry); }
+//            catch(java.lang.IllegalStateException e) { sb.append(entry); }
             catch(InvalidPackageException e) { sb.append(entry); }
           } 
           else sb.append(entry);
