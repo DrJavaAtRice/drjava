@@ -1015,6 +1015,17 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("redo uncommenting",text, _doc.getText());
   }
   
+  /** Verify that uncommenting an empty document does not crash
+    * @throws BadLocationException
+    */
+  public void testUncommentEmpty()
+    throws BadLocationException {
+    String text = "";
+    
+    _doc.uncommentLines(0,_doc.getLength());
+    assertEquals("uncommenting",text, _doc.getText());
+  }
+  
   /** Test method for CompoundUndoManager.  Tests that the nested compound edit functionality works correctly.
     * @throws BadLocationException
     */
