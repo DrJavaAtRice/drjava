@@ -628,4 +628,23 @@ public class ConfigOptionListeners implements OptionConstants {
       }
     }
   }
+  
+   public static class DefaultCompilerListener implements OptionListener<String> {
+    protected JFrame _parent;
+    public DefaultCompilerListener(JFrame parent) { _parent = parent; }
+    public void optionChanged(OptionEvent<String> oe) {      
+      String title = "Apply Default Compiler Preference Change";
+      String msg = "Default Compiler Preference will take effect when you restart DrJava.";
+      if (DrJava.getConfig().getSetting(WARN_CHANGE_DCP).booleanValue()) {
+        ConfirmCheckBoxDialog dialog =
+          new ConfirmCheckBoxDialog(_parent, title, msg,
+                                    "Do not show this message again",
+                                    JOptionPane.INFORMATION_MESSAGE,
+                                    JOptionPane.DEFAULT_OPTION);
+        if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue()) {
+          DrJava.getConfig().setSetting(WARN_CHANGE_DCP, Boolean.FALSE);
+        }
+      }
+    }
+  }
 }

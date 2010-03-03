@@ -84,6 +84,7 @@ public class CompilerErrorPanel extends ErrorPanel {
     _errorListPane = new CompilerErrorListPane();
     setErrorListPane(_errorListPane);
     
+    
     /******** Initialize the drop-down compiler menu ********/
     // Limitation: Only compiler choices are those that were available
     // at the time this box was created.
@@ -100,15 +101,13 @@ public class CompilerErrorPanel extends ErrorPanel {
         if (e.getStateChange() == ItemEvent.SELECTED) {
           CompilerInterface compiler = (CompilerInterface) _compilerChoiceBox.getSelectedItem();
           compilerModel.setActiveCompiler(compiler);
-         
-          DrJava.getConfig().setSetting(OptionConstants.COMPILER_DEFAULT, compiler.getName());
           compilerModel.resetCompilerErrors();
           _compileHasOccurred = false;
           reset();
         }
       }
     });
-    
+
     customPanel.add(_compilerChoiceBox, BorderLayout.NORTH);
     
     DrJava.getConfig().addOptionListener(OptionConstants.JAVAC_LOCATION, new CompilerLocationOptionListener<File>());

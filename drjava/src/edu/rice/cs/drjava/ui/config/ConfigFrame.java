@@ -1146,6 +1146,14 @@ public class ConfigFrame extends SwingFrame {
                                                   "Compiz and Java Swing are incompatible and can lead to crashes.</html>",
                                                   false)
                          .setEntireColumn(true));
+    addOptionComponent(panel, 
+                       new BooleanOptionComponent(OptionConstants.WARN_CHANGE_DCP,
+                                                  "Warn to Restart to Change Default Compiler Preference", 
+                                                  this,
+                                                  "<html>Whether DrJava should warn the user that default compiler preference<br>" +
+                                                  "changes will not be applied until DrJava is restarted.</html>.", 
+                                                  false)
+                         .setEntireColumn(true));
     
     
     addOptionComponent(panel, 
@@ -1421,6 +1429,36 @@ public class ConfigFrame extends SwingFrame {
                                                   "<html>Warn about <code>switch</code> block cases that fall through to the next case.</html>", 
                                                   false)
                          .setEntireColumn(true));
+    /*
+     * The drop down box containing the compiler names
+     */
+    final ForcedChoiceOptionComponent CPC = new ForcedChoiceOptionComponent(OptionConstants.COMPILER_PREFERENCE_CONTROL.evaluate(), "Compiler Preference", 
+                         this,
+                         "Which compiler is prefered?");
+    
+    /*
+     * Action listener that saves the selected compiler name into the DEFAULT_COMPILER_PREFERENCE setting
+     */
+    ActionListener CPCActionListener = new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if(!edu.rice.cs.drjava.DrJava.getConfig().getSetting(OptionConstants.DEFAULT_COMPILER_PREFERENCE).equals(CPC.getCurrentComboBoxValue())){
+          edu.rice.cs.drjava.DrJava.getConfig().setSetting(OptionConstants.DEFAULT_COMPILER_PREFERENCE,CPC.getCurrentComboBoxValue());
+        }
+      }
+    };
+   
+    /*
+     * insures that the change is made only when the apply or ok button is hit
+     */
+    _applyButton.addActionListener(CPCActionListener);
+    _okButton.addActionListener(CPCActionListener);
+    
+    /*
+     * adds the drop down box to the panel
+     */
+    addOptionComponent(panel, 
+                       CPC.setEntireColumn(false)
+                      );
     
     addOptionComponent(panel, 
                        new LabelComponent("<html><br><br>Note: Compiler warnings not shown if compiling any Java language level files.</html>", 

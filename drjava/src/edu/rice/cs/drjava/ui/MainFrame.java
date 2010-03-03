@@ -3560,7 +3560,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                  RequiresDrJavaRestartListener<Boolean>(_configFrame, "Remote Control"));
       config.addOptionListener(REMOTE_CONTROL_PORT, new ConfigOptionListeners.
                                  RequiresDrJavaRestartListener<Integer>(_configFrame, "Remote Control Port"));
-      
+      config.addOptionListener(DEFAULT_COMPILER_PREFERENCE, new ConfigOptionListeners.DefaultCompilerListener(_configFrame));
       // If any errors occurred while parsing config file, show them
       _showConfigException();
       

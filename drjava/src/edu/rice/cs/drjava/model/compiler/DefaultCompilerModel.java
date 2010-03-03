@@ -97,7 +97,6 @@ public class DefaultCompilerModel implements CompilerModel {
     * numbers to .dj* line numbers when an error is thrown */
   public LanguageLevelStackTraceMapper _LLSTM;
   
-  
   /** Main constructor.  
     * @param m the GlobalModel that is the source of documents for this CompilerModel
     * @param compilers  The compilers to use.  The first will be made active; all are assumed
@@ -106,28 +105,29 @@ public class DefaultCompilerModel implements CompilerModel {
   public DefaultCompilerModel(GlobalModel m, Iterable<? extends CompilerInterface> compilers) {
     
     _compilers = new ArrayList<CompilerInterface>();
-    List<String> compilerNames = new ArrayList<String>();
-    
-    String dCompName = DrJava.getConfig().getSetting(OptionConstants.COMPILER_DEFAULT);
+    ArrayList<String> compilerNames = new ArrayList<String>();
     
     for (CompilerInterface i : compilers) { _compilers.add(i); compilerNames.add(i.getName());}
-    if (_compilers.size() > 0) { 
-      if(dCompName!="" && compilerNames.contains(dCompName)) {
+    
+    OptionConstants.COMPILER_PREFERENCE_CONTROL.setList(compilerNames); //populates the compiler list for preference panel
+    
+    String dCompName = DrJava.getConfig().getSetting(OptionConstants.DEFAULT_COMPILER_PREFERENCE);
+    
+    if (_compilers.size() > 0) {
+      if(!dCompName.equals(OptionConstants.COMPILER_PREFERENCE_CONTROL.NO_PREFERENCE) && compilerNames.contains(dCompName))
         _active = _compilers.get(compilerNames.indexOf(dCompName));
-      }
-      else {
+      else 
         _active = _compilers.get(0);
-        DrJava.getConfig().setSetting(OptionConstants.COMPILER_DEFAULT, _active.getName());
-      }
     }
-    else { 
-      _active = NoCompilerAvailable.ONLY; 
-    }
+    else
+      _active = NoCompilerAvailable.ONLY;
+    
     
     _model = m;
     _compilerErrorModel = new CompilerErrorModel(new DJError[0], _model);
     _LLSTM = new LanguageLevelStackTraceMapper(m);
   }
+  
   
   //--------------------------------- Locking -------------------------------//
   

@@ -81,16 +81,16 @@ public interface OptionConstants {
   
   /** The extension for an old DrJava project file */
   public static final String OLD_PROJECT_FILE_EXTENSION = ".pjt";
-
+  
   /** The extension for a DrJava project file */
   public static final String PROJECT_FILE_EXTENSION = ".drjava";
-
+  
   /** The alternative extension for a DrJava project file */
   public static final String PROJECT_FILE_EXTENSION2 = ".xml";
-
+  
   /** The extension for stand-alone DrJava external process file. */
   public static final String EXTPROCESS_FILE_EXTENSION = ".djapp";
-
+  
   /** The configuration XML file that DrJava looks for inside a .djapp file */
   public static final String EXTPROCESS_FILE_NAME_INSIDE_JAR = "process" + EXTPROCESS_FILE_EXTENSION;
   
@@ -102,12 +102,12 @@ public interface OptionConstants {
   
   public static final VectorOption<String> EXTRA_COMPILERS =
     new VectorOption<String>("extra.compilers", new StringOption("",""), new Vector<String>());
-
+  
   /** Whether to display all versions of the compilers (even if they have the same major version). */
   public static final BooleanOption DISPLAY_ALL_COMPILER_VERSIONS = 
     new BooleanOption("all.compiler.versions", Boolean.FALSE);
- 
- 
+  
+  
   /* ---------- Color Options ---------- */
   
   public static final ColorOption DEFINITIONS_NORMAL_COLOR = new ColorOption("definitions.normal.color", Color.black);
@@ -132,11 +132,11 @@ public interface OptionConstants {
   /** Color for background of definitions pane. */
   public static final ColorOption DEFINITIONS_BACKGROUND_COLOR =
     new ColorOption("definitions.background.color", Color.white);
-
+  
   /** Color for background of line numbers in definitions pane. */
   public static final ColorOption DEFINITIONS_LINE_NUMBER_BACKGROUND_COLOR =
     new ColorOption("definitions.line.number.background.color",new Color(250, 250, 250));
-
+  
   /** Color for background of line numbers in definitions pane. */
   public static final ColorOption DEFINITIONS_LINE_NUMBER_COLOR =
     new ColorOption("definitions.line.number.color", Color.black);
@@ -320,10 +320,10 @@ public interface OptionConstants {
       ArrayList<String> al = new ArrayList<String>();
       String[] themes = new String[] {
         "BrownSugar", "DarkStar",
-        "SkyBlue", "SkyGreen", "SkyKrupp", "SkyPink", "SkyRed", "SkyYellow",
-        "DesertBluer", "DesertBlue", "DesertGreen", "DesertRed", "DesertYellow",
-        "ExperienceBlue", "ExperienceGreen", "LightGray", "Silver",
-        "ExperienceRoyale"
+          "SkyBlue", "SkyGreen", "SkyKrupp", "SkyPink", "SkyRed", "SkyYellow",
+          "DesertBluer", "DesertBlue", "DesertGreen", "DesertRed", "DesertYellow",
+          "ExperienceBlue", "ExperienceGreen", "LightGray", "Silver",
+          "ExperienceRoyale"
       };
       for(String theme : themes) {
         al.add(theme);
@@ -338,7 +338,7 @@ public interface OptionConstants {
   
   /* ---------- Key Binding Options ----------- */
   public static int MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-
+  
   static class to {
     public static Vector<KeyStroke> vector(KeyStroke... ks) {
       Vector<KeyStroke> v = new Vector<KeyStroke>();
@@ -352,11 +352,11 @@ public interface OptionConstants {
     new VectorOption<KeyStroke>("key.new.file", 
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_N, MASK)));
-
+  
   /** The key binding for creating a new java class file */
   public static final VectorOption<KeyStroke> KEY_NEW_CLASS_FILE =
     new VectorOption<KeyStroke>("key.new.javafile", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_N, MASK|SHIFT_MASK))); 
-
+  
   /** The key binding for opening an entire project.  I is right next to O, so
     * it seemed logical that ctrl-I would open a project and ctrl-O open a file */
   public static final VectorOption<KeyStroke> KEY_OPEN_PROJECT =
@@ -401,7 +401,7 @@ public interface OptionConstants {
   /** The key binding for exporting in the old project file format */
   public static final VectorOption<KeyStroke> KEY_EXPORT_OLD = 
     new VectorOption<KeyStroke>("key.export.old", new KeyStrokeOption("",null), to.vector());
-
+  
   /** The key binding for renaming a file. */
   public static final VectorOption<KeyStroke> KEY_RENAME_FILE = 
     new VectorOption<KeyStroke>("key.rename.file", 
@@ -722,7 +722,7 @@ public interface OptionConstants {
 //   new VectorOption<KeyStroke>("key.toggle.multiline.interaction", 
 //                               new KeyStrokeOption("",null), 
 //                               to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_M, MASK)));
-
+  
   /** The key binding for clearing the console. */
   public static final VectorOption<KeyStroke> KEY_CLEAR_CONSOLE =
     new VectorOption<KeyStroke>("key.clear.console", new KeyStrokeOption("",null), to.vector());
@@ -736,7 +736,7 @@ public interface OptionConstants {
     new VectorOption<KeyStroke>("key.backward", 
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0)));
-
+  
   /** The key binding for moving the cursor backwards with selection */
   public static final VectorOption<KeyStroke> KEY_BACKWARD_SELECT =
     new VectorOption<KeyStroke>("key.backward.select", 
@@ -744,12 +744,12 @@ public interface OptionConstants {
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, SHIFT_MASK)));
   
   /** The key binding for moving the cursor to the beginning of the document
-   */
+    */
   public static final VectorOption<KeyStroke> KEY_BEGIN_DOCUMENT =
     new VectorOption<KeyStroke>("key.begin.document",
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, MASK)));
-
+  
   /** The key binding for moving the cursor to the beginning of the document */
   public static final VectorOption<KeyStroke> KEY_BEGIN_DOCUMENT_SELECT =
     new VectorOption<KeyStroke>("key.begin.document.select", 
@@ -761,7 +761,7 @@ public interface OptionConstants {
     new VectorOption<KeyStroke>("key.begin.line",
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0)));
-
+  
   /** The key binding for moving the cursor to the beginning of the current line. */
   public static final VectorOption<KeyStroke> KEY_BEGIN_LINE_SELECT =
     new VectorOption<KeyStroke>("key.begin.line.select", 
@@ -779,7 +779,7 @@ public interface OptionConstants {
     new VectorOption<KeyStroke>("key.previous.word", 
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, MASK)));
-
+  
   /** The key binding for moving the cursor to the beginning of the previous word. */
   public static final VectorOption<KeyStroke> KEY_PREVIOUS_WORD_SELECT =
     new VectorOption<KeyStroke>("key.previous.word.select", 
@@ -815,7 +815,7 @@ public interface OptionConstants {
     new VectorOption<KeyStroke>("key.down", 
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0)));
-
+  
   /** The key binding for moving the cursor down. */
   public static final VectorOption<KeyStroke> KEY_DOWN_SELECT =
     new VectorOption<KeyStroke>("key.down.select", 
@@ -839,19 +839,19 @@ public interface OptionConstants {
     new VectorOption<KeyStroke>("key.end.document", 
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_END, MASK)));
-
+  
   /** The key binding for moving the cursor to the end of the document. */
   public static final VectorOption<KeyStroke> KEY_END_DOCUMENT_SELECT =
     new VectorOption<KeyStroke>("key.end.document.select", 
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_END, SHIFT_MASK|MASK)));
-
+  
   /** The key binding for moving the cursor to the end of the current line. */
   public static final VectorOption<KeyStroke> KEY_END_LINE =
     new VectorOption<KeyStroke>("key.end.line", 
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_END, 0)));
-
+  
   /** The key binding for moving the cursor to the end of the current line. */
   public static final VectorOption<KeyStroke> KEY_END_LINE_SELECT =
     new VectorOption<KeyStroke>("key.end.line.select", 
@@ -869,7 +869,7 @@ public interface OptionConstants {
     new VectorOption<KeyStroke>("key.next.word", 
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, MASK)));
-
+  
   /** The key binding for moving the cursor to the beginning of the next word. */
   public static final VectorOption<KeyStroke> KEY_NEXT_WORD_SELECT =
     new VectorOption<KeyStroke>("key.next.word.select",
@@ -881,7 +881,7 @@ public interface OptionConstants {
     new VectorOption<KeyStroke>("key.forward", 
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0)));
-
+  
   /** The key binding for moving the cursor forwards. */
   public static final VectorOption<KeyStroke> KEY_FORWARD_SELECT =
     new VectorOption<KeyStroke>("key.forward.select", 
@@ -940,7 +940,7 @@ public interface OptionConstants {
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0)));
   
-    /** The key binding for automatically tracing through each line of a program*/
+  /** The key binding for automatically tracing through each line of a program*/
   public static final VectorOption<KeyStroke> KEY_DEBUG_AUTOMATIC_TRACE = 
     new VectorOption<KeyStroke>("key.debug.automatic.trace", 
                                 new KeyStrokeOption("",null), 
@@ -1035,7 +1035,7 @@ public interface OptionConstants {
   /** The key binding to detach/re-attach the tabbed panes. */
   public static final VectorOption<KeyStroke> KEY_DETACH_TABBEDPANES = 
     new VectorOption<KeyStroke>("key.detach.tabbedpanes", new KeyStrokeOption("",null), to.vector());
-
+  
   /** The key binding to detach/re-attach the debugger panel. */
   public static final VectorOption<KeyStroke> KEY_DETACH_DEBUGGER = 
     new VectorOption<KeyStroke>("key.detach.debugger", new KeyStrokeOption("",null), to.vector());
@@ -1047,7 +1047,7 @@ public interface OptionConstants {
     new VectorOption<KeyStroke>("key.close.system.in", 
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_D, CTRL_MASK)));
-
+  
   /** Keystroke option for KeyStrokeOptionComponentTest. */
   public static final KeyStrokeOption KEY_FOR_UNIT_TESTS_ONLY = 
     new KeyStrokeOption("key.for.unit.tests.only", KeyStroke.getKeyStroke(KeyEvent.VK_N, CTRL_MASK|SHIFT_MASK|MASK));
@@ -1161,20 +1161,20 @@ public interface OptionConstants {
                                  (System.getProperty("java.specification.version").startsWith("1.5") ? JAVADOC_1_5_TEXT : 
                                     JAVADOC_1_6_TEXT))),
                            linkVersionChoices);
-                           
+  
   static final String[] apiJavadocChoices = new String[] {
     JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT, JAVADOC_1_5_TEXT, JAVADOC_1_6_TEXT, JAVADOC_AUTO_TEXT};
   
   static final ArrayList<String> apiJavadocVersionChoices = new ArrayList<String>(Arrays.asList(apiJavadocChoices));
-
+  
   /** The version of Java to use for the "Open Java API Javadoc" feature. */
   public static final ForcedChoiceOption JAVADOC_API_REF_VERSION =
     new ForcedChoiceOption("javadoc.api.ref.version", JAVADOC_AUTO_TEXT, apiJavadocVersionChoices);
-
+  
   /** URL for JUnit javadocs. */
   public static final StringOption JUNIT_LINK =
     new StringOption("junit.link", "http://www.cs.rice.edu/~javaplt/javadoc/concjunit4.7");
-
+  
   /** Additional Javadoc URLs. */
   public static final VectorOption<String> JAVADOC_ADDITIONAL_LINKS =
     new VectorOption<String>("javadoc.additional.links", new StringOption("",null), new Vector<String>());
@@ -1241,7 +1241,7 @@ public interface OptionConstants {
   
   /** Whether to warn that a restart is necessary before the theme will change. */
   public static final BooleanOption WARN_CHANGE_THEME = new BooleanOption("warn.change.theme", Boolean.TRUE);
-
+  
   /** Whether to warn that a restart is necessary before these miscellaneous preferences will change. */
   public static final BooleanOption WARN_CHANGE_MISC = new BooleanOption("warn.change.misc", Boolean.TRUE);
   
@@ -1251,6 +1251,9 @@ public interface OptionConstants {
   /** Whether to warn that a file's path contains a "#' symbol. */
   public static final BooleanOption WARN_PATH_CONTAINS_POUND =
     new BooleanOption("warn.path.contains.pound", Boolean.TRUE);
+  
+  /** Whether to warn that a restart is necessary before the default compiler preference will change. */
+  public static final BooleanOption WARN_CHANGE_DCP = new BooleanOption("warn.change.dcp", Boolean.TRUE);
   
   /* ---------- MISC OPTIONS ---------- */
   
@@ -1296,7 +1299,7 @@ public interface OptionConstants {
   
   /** The port where DrJava will listen for remote control requests. */
   public static final IntegerOption REMOTE_CONTROL_PORT = new IntegerOption("remote.control.port", Integer.valueOf(4444));
-
+  
   /** Whether to warn if Compiz is being used */
   public static final BooleanOption WARN_IF_COMPIZ = new BooleanOption("warn.if.compiz", Boolean.TRUE);
   
@@ -1325,11 +1328,47 @@ public interface OptionConstants {
   public static final BooleanOption SHOW_PATH_WARNINGS = 
     new BooleanOption("show.path.warnings", Boolean.FALSE);
   
-    /** Default compiler to use - changes everytime compiler is changed - no way of changing in preferences at this time */
-  /** default value is "", but this changes as soon as DrJava starts up */
-  public static final StringOption COMPILER_DEFAULT = 
-    new StringOption("compiler.default", "");
+  /**
+   * Default compiler to use
+   * Stores the name of the compiler to use, set by changing the selection in
+   * the ForcedChoiceOption created by COMPILER_PREFERENCE_CONTROL.evaluate()
+   */
+  public static final StringOption DEFAULT_COMPILER_PREFERENCE = 
+    new StringOption("default.compiler.preference", COMPILER_PREFERENCE_CONTROL.NO_PREFERENCE);
+  
+  /**
+   * Class that is used to dynamically populate the ForcedChoiceOption.
+   * setList method is used by DefaultCompilerModel to set the available
+   * compilers that it has
+   * Must store the selected name into DEFAULT_COMPILER_PREFERENCE to save the setting
+   */
+  public static final class COMPILER_PREFERENCE_CONTROL
+  {
+    public static final String NO_PREFERENCE = "No Preference";
+    public static ArrayList<String> _list = new ArrayList<String>();
     
+    public static void setList(ArrayList<String> list) {_list = list;}
+    public static ForcedChoiceOption evaluate() 
+    {
+      _list.add(NO_PREFERENCE);
+      
+      ForcedChoiceOption fco;
+      String defaultC = edu.rice.cs.drjava.DrJava.getConfig().getSetting(DEFAULT_COMPILER_PREFERENCE);
+ 
+      if(_list.contains(defaultC)) 
+      {
+        fco = new ForcedChoiceOption("default.compiler.preference.control", defaultC, _list);
+      }
+      else
+      {
+        fco = new ForcedChoiceOption("compiler.preference.control", NO_PREFERENCE, _list);
+        edu.rice.cs.drjava.DrJava.getConfig().setSetting(DEFAULT_COMPILER_PREFERENCE,NO_PREFERENCE);
+      }
+      
+      edu.rice.cs.drjava.DrJava.getConfig().setSetting(fco, edu.rice.cs.drjava.DrJava.getConfig().getSetting(DEFAULT_COMPILER_PREFERENCE));
+      return fco;
+    }
+  }
   
   /* ---------- UNDISPLAYED OPTIONS ---------- */
   
@@ -1409,6 +1448,7 @@ public interface OptionConstants {
   public static final BooleanOption DYNAMICJAVA_REQUIRE_VARIABLE_TYPE =
     new BooleanOption("dynamicjava.require.variable.type", Boolean.TRUE);
   
+  
   /** Dynamic Java access control. */
   public static final ArrayList<String> DYNAMICJAVA_ACCESS_CONTROL_CHOICES =
     DynamicJavaAccessControlChoices.evaluate();
@@ -1420,7 +1460,7 @@ public interface OptionConstants {
       ArrayList<String> aList = new ArrayList<String>(4);
       aList.add(DISABLED);
       aList.add(PRIVATE);
-
+      
       // NOTE: this sets the enforceAllAccess option in InteractionsPaneOptions, but since that is not fully
       // implemented, this description is better.
       aList.add(PRIVATE_AND_PACKAGE); 
@@ -1432,7 +1472,7 @@ public interface OptionConstants {
   public static final ForcedChoiceOption DYNAMICJAVA_ACCESS_CONTROL =
     new ForcedChoiceOption("dynamicjava.access.control", DynamicJavaAccessControlChoices.PRIVATE_AND_PACKAGE,
                            DYNAMICJAVA_ACCESS_CONTROL_CHOICES);
-
+  
   /** The command-line arguments to be passed to the Master JVM. */
   public static final StringOption MASTER_JVM_ARGS = new StringOption("master.jvm.args", "");
   
@@ -1506,7 +1546,7 @@ public interface OptionConstants {
     new NonNegativeIntegerOption("browser.history.max.size", Integer.valueOf(50));
   
   /** Whether to also list files with fully qualified paths.
-   */
+    */
   public static final BooleanOption DIALOG_GOTOFILE_FULLY_QUALIFIED =
     new BooleanOption("dialog.gotofile.fully.qualified", Boolean.FALSE);
   
@@ -1544,7 +1584,7 @@ public interface OptionConstants {
   /** Whether the tabbed pane is detached from the MainFrame. */
   public static final BooleanOption DETACH_TABBEDPANES =
     new BooleanOption("tabbedpanes.detach", Boolean.FALSE);
-
+  
   /** The last state of the "Debugger" frame. */
   public static final StringOption DIALOG_DEBUGFRAME_STATE = new StringOption("debugger.state", "default");
   
@@ -1584,7 +1624,7 @@ public interface OptionConstants {
   /** Whether to show a notification popup when the first DrJava error occurs. */
   public static final BooleanOption DIALOG_DRJAVA_ERROR_POPUP_ENABLED =
     new BooleanOption("dialog.drjava.error.popup.enabled", Boolean.TRUE);
-
+  
   /** Whether to ask the user if DrJava may send system information to the DrJava developers. */
   public static final BooleanOption DIALOG_DRJAVA_SURVEY_ENABLED =
     new BooleanOption("dialog.drjava.survey.enabled", Boolean.TRUE);
@@ -1664,7 +1704,7 @@ public interface OptionConstants {
   /** The lowest access level of classes and members to include in the javadoc. */
   public static final ForcedChoiceOption NEW_VERSION_NOTIFICATION =
     new ForcedChoiceOption("new.version.notification", VersionNotificationChoices.BETA, NEW_VERSION_NOTIFICATION_CHOICES);
-
+  
   /** The last time we checked for a new version. */
   public static final LongOption LAST_NEW_VERSION_NOTIFICATION = new LongOption("new.version.notification.last", (long)0);  
   
@@ -1675,10 +1715,10 @@ public interface OptionConstants {
   /** The number of days that have to pass before we ask and allow the user to participate in the DrJava survey again. */
   public static final NonNegativeIntegerOption DRJAVA_SURVEY_DAYS =
     new NonNegativeIntegerOption("drjava.survey.days", 91); // every three month  
-
+  
   /** The last time we asked the user to participate in the DrJava survey. */
   public static final LongOption LAST_DRJAVA_SURVEY = new LongOption("drjava.survey.notification.last", (long)0);  
-
+  
   /** The request URL that the user generated the last time the DrJava survey was taken. */
   public static final StringOption LAST_DRJAVA_SURVEY_RESULT = new StringOption("drjava.survey.result.last", "");
   
@@ -1722,18 +1762,18 @@ public interface OptionConstants {
   public static final ForcedChoiceOption FILE_EXT_REGISTRATION =
     new ForcedChoiceOption("file.ext.registration", FileExtRegistrationChoices.ASK_ME,
                            FILE_EXT_REGISTRATION_CHOICES);
- 
+  
   /** JUnit/ConcJUnit. */
-
+  
   /** junitrt.jar/concutest-junit-3.8.2-withrt.jar location, or NULL_FILE if not specified. */
   public static final FileOption JUNIT_LOCATION = new FileOption("junit.location", FileOps.NULL_FILE);
-
+  
   /** True if the JUnit jar in JUNIT_LOCATION should be used. */
   public static final BooleanOption JUNIT_LOCATION_ENABLED = new BooleanOption("junit.location.enabled", Boolean.FALSE);
   
   /** ConcJUnit processed Java Runtime (rt.concjunit.jar) location, or NULL_FILE if not specified. */
   public static final FileOption RT_CONCJUNIT_LOCATION = new FileOption("rt.concjunit.location", FileOps.NULL_FILE);
-
+  
   /** Possible options for Javadoc access levels. */
   static final ArrayList<String> concJUnitCheckChoices =
     ConcJUnitCheckChoices.evaluate();

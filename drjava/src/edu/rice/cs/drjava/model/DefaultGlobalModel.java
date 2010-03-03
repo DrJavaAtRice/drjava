@@ -186,7 +186,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   private volatile Debugger _debugger;
   
   /* CONSTRUCTORS */
-  
   /** Constructs a new GlobalModel. Creates a new MainJVM and starts its Interpreter JVM. */
   public DefaultGlobalModel() {
     Iterable<? extends JDKToolsLibrary> tools = findLibraries();
@@ -747,5 +746,5 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     _interactionsModel.addProjectFilesClassPath(getProjectRoot());  // is sync advisable here?
     setClassPathChanged(false);  // reset classPathChanged state
-  }
+  }  
 }
