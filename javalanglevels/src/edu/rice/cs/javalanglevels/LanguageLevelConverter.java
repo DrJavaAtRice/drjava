@@ -45,6 +45,7 @@ import edu.rice.cs.javalanglevels.util.Utilities;
 import java.io.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.io.IOUtil;
 
 /** This class represents the mechanism by which we convert a language level file to a .java file of the same name by
   * first visiting the file to error-check it, and then augment the file.  This class is tested at the top level in the
@@ -444,13 +445,23 @@ public class LanguageLevelConverter {
   /**Do a conversion from the command line, to allow quick testing*/
   public static void main(String[] args) {
     LanguageLevelConverter llc = new LanguageLevelConverter();
+    
+    if (args.length==0) {
+      System.out.println("Java Language Level Converter");
+      System.out.println("Please pass file names (*.dj0, *.dj1, *.dj2) as arguments.");
+      System.out.println("Note: The converter will use Java's classpath to resolve classes.");
+      System.out.println("      If classes are not found, use java -cp <classpath> to set the classpath.");
+      return;
+    }
+    
     File[] files = new File[args.length];
     for (int i = 0; i < args.length; i++) {
       files[i] = new File(args[i]);
     }
     
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result = 
-      llc.convert(files, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
+      llc.convert(files, new Options(JavaVersion.JAVA_5,
+                                     IOUtil.parsePath(System.getProperty("java.class.path", ""))));
     System.out.println(result.getFirst().size() + result.getSecond().size() + " errors.");
     for(JExprParseException p : result.getFirst()) {
       System.out.println(p);

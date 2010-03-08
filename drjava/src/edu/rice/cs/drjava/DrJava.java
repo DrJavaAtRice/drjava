@@ -145,7 +145,7 @@ public class DrJava {
   private static volatile File _propertiesFile = DEFAULT_PROPERTIES_FILE;
   
   /** Configuration object with all customized and default values.  Initialized from _propertiesFile.  */
-  private static volatile FileConfiguration _config = _initConfig();
+  private static volatile FileConfiguration _config;
   
   /** Returns the properties file used by the configuration object. */
   public static File getPropertiesFile() { return _propertiesFile; }
@@ -403,7 +403,6 @@ public class DrJava {
         }
         // arg.length > i+1 implying args list incudes config file name and perhaps files to open
         setPropertiesFile(args[argIndex++]);
-        _config = _initConfig();  // read specified .djrava file into _config
       }
       
       else if (arg.startsWith("-X") || arg.startsWith("-D")) {
@@ -420,6 +419,13 @@ public class DrJava {
         deleteAfterRestart.delete();
       }
       
+      else if (arg.equals("-jll")) {
+        String[] argsForJLL = new String[args.length-argIndex];
+        System.arraycopy(args, argIndex, argsForJLL, 0, argsForJLL.length);
+        edu.rice.cs.javalanglevels.LanguageLevelConverter.main(argsForJLL);
+        System.exit(0);
+      }
+      
       else if (arg.equals("-help") || arg.equals("-?")) {
         displayUsage();
         return false;
@@ -430,6 +436,8 @@ public class DrJava {
         break;
       }
     }
+    
+    _config = _initConfig();  // read specified .djrava file into _config
     
     if ((!("".equals(getConfig().getSetting(MASTER_JVM_XMX)))) &&
         (!(edu.rice.cs.drjava.config.OptionConstants.heapSizeChoices.get(0).equals(getConfig().getSetting(MASTER_JVM_XMX))))) { 
@@ -472,6 +480,7 @@ public class DrJava {
     System.out.println("  -help | -?            print this help message");
     System.out.println("  -X<jvmOption>         specify a JVM configuration option for the master DrJava JVM");      
     System.out.println("  -D<name>[=<value>]    set a Java property for the master DrJava JVM");
+    System.out.println("  -jll [ARGS]           invoke the Java Language Level converter, specify files in ARGS");
   }
   
   /** Switches the config object to use a custom config file. Ensures that Java source files aren't 
