@@ -144,14 +144,20 @@ public class DrJava {
   /** Properties file used by the configuration object. Defaults to DEFAULT_PROPERTIES_FILE. */
   private static volatile File _propertiesFile = DEFAULT_PROPERTIES_FILE;
   
-  /** Configuration object with all customized and default values.  Initialized from _propertiesFile.  */
+  /** Configuration object with all customized and default values. 
+    * Lazily initialized from _propertiesFile in getConfig() or handleCommandLineArgs(). */
   private static volatile FileConfiguration _config;
   
   /** Returns the properties file used by the configuration object. */
   public static File getPropertiesFile() { return _propertiesFile; }
   
   /** Returns the configuration object with all customized and default values. */
-  public static FileConfiguration getConfig() { return _config; }
+  public static synchronized FileConfiguration getConfig() {
+    if (_config==null) {
+      _config = _initConfig();  // read specified .djrava file into _config
+    }
+    return _config;
+  }
   
   /** @return an array of the files that were passed on the command line. */
   public static synchronized String[] getFilesToOpen() { return _filesToOpen.toArray(new String[0]); }
@@ -437,7 +443,9 @@ public class DrJava {
       }
     }
     
-    _config = _initConfig();  // read specified .djrava file into _config
+    synchronized(DrJava.class) {
+      _config = _initConfig();  // read specified .djrava file into _config
+    }
     
     if ((!("".equals(getConfig().getSetting(MASTER_JVM_XMX)))) &&
         (!(edu.rice.cs.drjava.config.OptionConstants.heapSizeChoices.get(0).equals(getConfig().getSetting(MASTER_JVM_XMX))))) { 
