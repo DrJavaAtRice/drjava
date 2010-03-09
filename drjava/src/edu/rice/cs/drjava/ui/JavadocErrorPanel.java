@@ -98,6 +98,8 @@ public class JavadocErrorPanel extends ErrorPanel {
    * selects an item) but items can each wrap, etc.
    */
   public class JavadocErrorListPane extends ErrorPanel.ErrorListPane {
+    protected boolean _wasSuccessful = false;
+    
 //    private final JLabel _errorLabel = new JLabel();
 //    private final JLabel _testLabel = new JLabel();
 //    private final JLabel _fileLabel = new JLabel();
@@ -110,7 +112,10 @@ public class JavadocErrorPanel extends ErrorPanel {
       doc.append("Generating Javadoc.  Please wait...\n", NORMAL_ATTRIBUTES);
       setDocument(doc);
       selectNothing();
+      _wasSuccessful = false;
     }
+    
+    public void setJavadocEnded(boolean success) { _wasSuccessful = success; }
 
     /** Used to show that the last javadoc command was unsuccessful. */
     protected void _updateWithErrors() throws BadLocationException {
@@ -123,7 +128,11 @@ public class JavadocErrorPanel extends ErrorPanel {
     /** Used to show that the last compile was successful. */
     protected void _updateNoErrors(boolean done) throws BadLocationException {
       SwingDocument doc = new SwingDocument();
-      String msg = (done) ? "Javadoc generated successfully." : "";
+      String msg = "";
+      if (done) {
+        if (_wasSuccessful) msg = "Javadoc generated successfully.";
+        else msg = "Javadoc generation failed.";
+      }
       doc.append(msg, NORMAL_ATTRIBUTES);
       setDocument(doc);
       selectNothing();

@@ -1223,6 +1223,10 @@ public interface OptionConstants {
   /** Whether to prompt to save before compiling. */
   public static final BooleanOption ALWAYS_SAVE_BEFORE_JAVADOC =
     new BooleanOption("save.before.javadoc", Boolean.FALSE);
+
+  /** Whether to prompt to compile before compiling. */
+  public static final BooleanOption ALWAYS_COMPILE_BEFORE_JAVADOC =
+    new BooleanOption("compile.before.javadoc", Boolean.FALSE);
   
   /** Whether to prompt to save before compiling. */
   public static final BooleanOption ALWAYS_SAVE_BEFORE_DEBUG =

@@ -2252,7 +2252,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** @return true if all open documents are in sync with their primary class files. */
   public boolean hasOutOfSyncDocuments() { return getOutOfSyncDocuments().size() > 0; }
   
-  public boolean hasOutOfSyncDocuments(List<OpenDefinitionsDocument> lod) { return getOutOfSyncDocuments().size() > 0; }
+  public boolean hasOutOfSyncDocuments(List<OpenDefinitionsDocument> lod) {
+    List<OpenDefinitionsDocument> oos = getOutOfSyncDocuments();
+    for(OpenDefinitionsDocument doc: lod) {
+      if (oos.contains(doc)) return true;
+    }
+    return false;
+  }
   
   /** @return true if all open documents are in sync with their primary class files. */
   public List<OpenDefinitionsDocument> getOutOfSyncDocuments() { return getOutOfSyncDocuments(getOpenDefinitionsDocuments()); }

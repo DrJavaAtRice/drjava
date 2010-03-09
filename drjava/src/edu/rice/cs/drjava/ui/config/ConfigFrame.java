@@ -1053,6 +1053,12 @@ public class ConfigFrame extends SwingFrame {
                                                          "<html>Whether DrJava should automatically save before<br>" +
                                                          "generating Javadoc or ask the user each time.</html>", false)
                          .setEntireColumn(true));
+    
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.ALWAYS_COMPILE_BEFORE_JAVADOC,
+                                                         "Automatically Compile Before Generating Javadoc", this,
+                                                         "<html>Whether DrJava should automatically compile before<br>" +
+                                                         "generating Javadoc or ask the user each time.</html>", false)
+                         .setEntireColumn(true));
 
 
     // These are very problematic features, and so are disabled for the forseeable future.

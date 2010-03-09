@@ -43,6 +43,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.awt.EventQueue;
 
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.io.IOUtil;
@@ -61,7 +62,10 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.Configuration;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
+import edu.rice.cs.drjava.model.compiler.CompilerListener;
+import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
 
+import edu.rice.cs.util.swing.Utilities;
 
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.DirectorySelector;
@@ -204,17 +208,28 @@ public class DefaultJavadocModel implements JavadocModel {
     * @param destDirFile the destination directory for the doc files
     * @param saver a command object for saving a document (if it moved/changed)
     */
-  private void _javadocAllWorker(File destDirFile, FileSaveSelector saver) {
+  private void _javadocAllWorker(final File destDirFile, FileSaveSelector saver) {
     // Note: JAVADOC_FROM_ROOTS is intended to set the -subpackages flag, but I don't think that's something
     // we should support -- in general, we only support performing operations on the files that are open.
     
-    List<String> docFiles = new ArrayList<String>(); // files to send to Javadoc
-    
+    final List<String> docFiles = new ArrayList<String>(); // files to send to Javadoc
+
+    final List<OpenDefinitionsDocument> llDocs = new ArrayList<OpenDefinitionsDocument>();
     for (OpenDefinitionsDocument doc: _model.getOpenDefinitionsDocuments()) {
       try {
         // This will throw an IllegalStateException if no file can be found
-        File file = _getFileFromDocument(doc, saver);
-        docFiles.add(file.getPath());
+        File docFile = _getFileFromDocument(doc, saver);
+        final File file = IOUtil.attemptCanonicalFile(docFile);
+
+        // If this is a language level file, make sure it has been compiled
+        if (isLLFile(file)) {
+          // Utilities.showDebug("isLLFile=true: "+file);
+          llDocs.add(doc);
+          docFiles.add(getJavaForLLFile(file).getPath());
+        }
+        else {
+          docFiles.add(file.getPath());
+        }
       }
       catch (IllegalStateException e) {
         // Something wrong with _getFileFromDocument; ignore
@@ -225,10 +240,63 @@ public class DefaultJavadocModel implements JavadocModel {
     }
     
     // Don't attempt to create Javadoc if no files are open, or if open file is unnamed.
-    if (docFiles.size() == 0) return;
+    if (docFiles.size() == 0) {
+      // Use EventQueue.invokeLater so that notification is deferred when running in the event thread.
+      EventQueue.invokeLater(new Runnable() { public void run() { _notifier.javadocEnded(false, destDirFile, true); } });
+      return;
+    }
     
-    // Run the actual Javadoc process
-    _runJavadoc(docFiles, destDirFile, IterUtil.<String>empty(), true);
+    Utilities.invokeLater(new Runnable() { public void run() {
+      if (_model.hasOutOfSyncDocuments(llDocs)) {
+        // Utilities.showDebug("out of date");
+        CompilerListener javadocAfterCompile = new DummyCompilerListener() {
+          @Override public void compileAborted(Exception e) {
+            // gets called if there are modified files and the user chooses NOT to save the files
+            // see bug report 2582488: Hangs If Testing Modified File, But Choose "No" for Saving
+            final CompilerListener listenerThis = this;
+            // Utilities.showDebug("compile aborted");
+            // always remove this listener after its first execution
+            EventQueue.invokeLater(new Runnable() { 
+              public void run() {
+                _model.getCompilerModel().removeListener(listenerThis);
+                // fail Javadoc
+                _notifier.javadocEnded(false, destDirFile, true);
+              }
+            });
+          }
+          @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
+            final CompilerListener listenerThis = this;
+            try {
+              // Utilities.showDebug("compile ended");
+              if (_model.hasOutOfSyncDocuments(llDocs) || _model.getNumCompErrors() > 0) {
+                // Utilities.showDebug("still out of date, fail");
+                // fail Javadoc
+                EventQueue.invokeLater(new Runnable() { public void run() { _notifier.javadocEnded(false, destDirFile, true); } });
+                return;
+              }
+              EventQueue.invokeLater(new Runnable() {  // defer running this code; would prefer to waitForInterpreter
+                public void run() {
+                  // Utilities.showDebug("running Javadoc");
+                  // Run the actual Javadoc process
+                  _runJavadoc(docFiles, destDirFile, IterUtil.<String>empty(), true);
+                }
+              });
+            }
+            finally {  // always remove this listener after its first execution
+              EventQueue.invokeLater(new Runnable() { 
+                public void run() { _model.getCompilerModel().removeListener(listenerThis); }
+              });
+            }
+          }
+        };
+        
+        _notifyCompileBeforeJavadoc(javadocAfterCompile);
+        return;
+      }
+      
+      // Run the actual Javadoc process
+      _runJavadoc(docFiles, destDirFile, IterUtil.<String>empty(), true);
+    } });
   }
   
   
@@ -250,8 +318,78 @@ public class DefaultJavadocModel implements JavadocModel {
     if (doc.isUntitled() || doc.isModifiedSinceSave()) return;  // The user didn't save, so don't generate Javadoc
     
     // Try to get the file from the document
-    final File file = _getFileFromDocument(doc, saver);
+    File docFile = _getFileFromDocument(doc, saver);
+    final File file = IOUtil.attemptCanonicalFile(docFile);
+    final File javaFile = getJavaForLLFile(file);
+
+    Utilities.invokeLater(new Runnable() { public void run() {
+      // If this is a language level file, make sure it has been compiled
+      if (isLLFile(file)) {
+        // Utilities.showDebug("isLLFile = true");
+        final List<OpenDefinitionsDocument> singleton = new ArrayList<OpenDefinitionsDocument>();
+        singleton.add(doc);
+        if (_model.hasOutOfSyncDocuments(singleton)) {
+          // Utilities.showDebug("out of date");
+          CompilerListener javadocAfterCompile = new DummyCompilerListener() {
+            @Override public void compileAborted(Exception e) {
+              // gets called if there are modified files and the user chooses NOT to save the files
+              // see bug report 2582488: Hangs If Testing Modified File, But Choose "No" for Saving
+              final CompilerListener listenerThis = this;
+              // always remove this listener after its first execution
+              EventQueue.invokeLater(new Runnable() { 
+                public void run() { 
+                  _model.getCompilerModel().removeListener(listenerThis);
+                  // fail Javadoc
+                  _notifier.javadocEnded(false, null, false);
+                }
+              });
+            }
+            @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
+              final CompilerListener listenerThis = this;
+              try {
+                // Utilities.showDebug("compile ended");
+                if (_model.hasOutOfSyncDocuments(singleton) || _model.getNumCompErrors() > 0) {
+                  // Utilities.showDebug("still out of date, fail");
+                  // fail Javadoc
+                  EventQueue.invokeLater(new Runnable() { public void run() { _notifier.javadocEnded(false, null, false); } });
+                  return;
+                }
+                EventQueue.invokeLater(new Runnable() {  // defer running this code; would prefer to waitForInterpreter
+                  public void run() {
+                    try {
+                      // Utilities.showDebug("running Javadoc");
+                      _rawJavadocDocument(javaFile);
+                    }
+                    catch(IOException ioe) {
+                      // fail Javadoc
+                      EventQueue.invokeLater(new Runnable() { public void run() { _notifier.javadocEnded(false, null, false); } });
+                    }
+                  }
+                });
+              }
+              finally {  // always remove this listener after its first execution
+                EventQueue.invokeLater(new Runnable() { 
+                  public void run() { _model.getCompilerModel().removeListener(listenerThis); }
+                });
+              }
+            }
+          };
+          
+          _notifyCompileBeforeJavadoc(javadocAfterCompile);
+          return;
+        }
+      }
+      try {
+        _rawJavadocDocument(javaFile);
+      }
+      catch(IOException ioe) {
+        // fail Javadoc
+        EventQueue.invokeLater(new Runnable() { public void run() { _notifier.javadocEnded(false, null, false); } });
+      }
+    } });
+  }
     
+  private void _rawJavadocDocument(final File file) throws IOException {
     // Generate to a temporary directory
     final File destDir = IOUtil.createAndMarkTempDirectory("DrJava-javadoc", "");
     
@@ -266,6 +404,34 @@ public class DefaultJavadocModel implements JavadocModel {
   }
   
   // -------------------- Helper Methods --------------------
+
+  /** Helper method to notify JavadocModel listeners that all open files must be compiled before Javadoc is run. */
+  private void _notifyCompileBeforeJavadoc(final CompilerListener afterCompile) { 
+    Utilities.invokeLater(new Runnable() { 
+      public void run() { _notifier.compileBeforeJavadoc(afterCompile); } 
+    });
+  }
+
+  /** @return true if the file is a language level file. */
+  private static boolean isLLFile(File f) {
+    File canonicalFile = IOUtil.attemptCanonicalFile(f);
+    String fileName = canonicalFile.getPath();
+    int lastIndex = fileName.lastIndexOf(".dj");
+    return (lastIndex != -1);
+  }
+
+  /** @return true if the file is a language level file. */
+  private static File getJavaForLLFile(File f) {
+    File canonicalFile = IOUtil.attemptCanonicalFile(f);
+    String fileName = canonicalFile.getPath();
+    int lastIndex = fileName.lastIndexOf(".dj");
+    if (lastIndex != -1) {
+      return new File(fileName.substring(0, lastIndex) + ".java");
+    }
+    else {
+      return f;
+    }
+  }
   
   /** Suggests a default location for generating Javadoc, based on the given document's source root.  (Appends 
     * JavadocModel.SUGGESTED_DIR_NAME to the sourceroot.) Ensures that the document is saved first, or else no 
@@ -301,7 +467,7 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param extraArgs  List of additional arguments to use with javadoc (besides those gathered from config settings)
    * @param allDocs  Whether this is running on all documents. If Javadoc is not run on all documents, the target directory will be deleted when DrJava exits
    */
-  private void _runJavadoc(Iterable<String> files, File destDir, Iterable<String> extraArgs, boolean allDocs) {
+  private void _runJavadoc(Iterable<String> files, final File destDir, Iterable<String> extraArgs, final boolean allDocs) {    
     Iterable<String> args = IterUtil.empty();
     args = IterUtil.compose(args, IterUtil.make("-d", destDir.getPath()));
     args = IterUtil.compose(args, IterUtil.make("-classpath", IOUtil.pathToString(_model.getClassPath())));
@@ -331,9 +497,10 @@ public class DefaultJavadocModel implements JavadocModel {
     _javadocErrorModel = new CompilerErrorModel(IterUtil.toArray(errors, DJError.class), _model);
     
     // waitFor() exit value is 1 for both errors and warnings, so it's no use
-    boolean success = _javadocErrorModel.hasOnlyWarnings();
+    final boolean success = _javadocErrorModel.hasOnlyWarnings();
     if (!allDocs) { IOUtil.deleteOnExitRecursively(destDir); }
-    _notifier.javadocEnded(success, destDir, allDocs);
+    // Use EventQueue.invokeLater so that notification is deferred when running in the event thread.
+    EventQueue.invokeLater(new Runnable() { public void run() { _notifier.javadocEnded(success, destDir, allDocs); } });
   }
   
   private Iterable<String> _getLinkArgs() {

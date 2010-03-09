@@ -38,6 +38,7 @@ package edu.rice.cs.drjava.model.javadoc;
 
 import java.io.File;
 import edu.rice.cs.drjava.model.EventNotifier;
+import edu.rice.cs.drjava.model.compiler.CompilerListener;
 
 /**
  * Keeps track of all listeners to a JavadocModel, and has the ability
@@ -98,6 +99,15 @@ class JavadocEventNotifier extends EventNotifier<JavadocListener>
   public void saveBeforeJavadoc() {
     _lock.startRead();
     try { for (JavadocListener jl: _listeners) { jl.saveBeforeJavadoc(); } }
+    finally { _lock.endRead(); }
+  }
+  
+  /** Asks the user if all files should be compiled before running javadoc (assuming the proper listener has been 
+    * installed). Does not continue with javadoc if the user fails to save!
+    */
+  public void compileBeforeJavadoc(final CompilerListener afterCompile) {
+    _lock.startRead();
+    try { for (JavadocListener jl: _listeners) { jl.compileBeforeJavadoc(afterCompile); } }
     finally { _lock.endRead(); }
   }
 }

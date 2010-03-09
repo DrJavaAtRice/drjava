@@ -144,6 +144,10 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
     * check if the documents have been saved, using IGetDocuments.hasModifiedDocuments().
     */
   public void saveBeforeJavadoc() { }
+
+  /** Called to demand that all files be compiled before generating Javadoc.
+    */
+  public void compileBeforeJavadoc(final CompilerListener afterCompile) { }
   
   /** Called to demand that all files be saved before starting the debugger. It is up to the caller of this method 
     * to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments().

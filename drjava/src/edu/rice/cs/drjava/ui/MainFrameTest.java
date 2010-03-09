@@ -59,6 +59,7 @@ import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.text.*;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.drjava.model.compiler.CompilerListener;
 
 /** Test functions of MainFrame.
   * @version $Id$

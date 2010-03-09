@@ -579,6 +579,15 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     try { for (GlobalModelListener l : _listeners) { l.saveBeforeJavadoc(); } }
     finally { _lock.endRead(); }
   }
+
+  /** Called before attempting Javadoc, to give the user a chance to compile. Do not continue with Javadoc if the
+    * user doesn't comoile!
+    */
+  public void compileBeforeJavadoc(final CompilerListener afterCompile) {
+    _lock.startRead();
+    try { for (GlobalModelListener l : _listeners) { l.compileBeforeJavadoc(afterCompile); } }
+    finally { _lock.endRead(); }
+  }
   
 //  /** Called to demand that all files be saved before starting the debugger. It is up to the caller of this method
 //    * to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments(). This is not used 

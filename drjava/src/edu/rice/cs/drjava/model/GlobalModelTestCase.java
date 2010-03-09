@@ -581,6 +581,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     //protected int saveBeforeRunCount;
     protected volatile int compileBeforeJUnitCount;
     protected volatile int saveBeforeJavadocCount;
+    protected volatile int compileBeforeJavadocCount;
     //protected int saveBeforeDebugCount;
     protected volatile int nonTestCaseCount;
     protected volatile int lastExitStatus;
@@ -627,6 +628,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       //saveBeforeRunCount = 0;
       compileBeforeJUnitCount = 0;
       saveBeforeJavadocCount = 0;
+      compileBeforeJavadocCount = 0;
       //saveBeforeDebugCount = 0;
       nonTestCaseCount = 0;
       lastExitStatus = 0;
@@ -807,6 +809,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertEquals("number of times saveBeforeJavadoc fired", i, saveBeforeJavadocCount);
     }
 
+    public void assertCompileBeforeJavadocCount(int i) {
+      assertEquals("number of times compileBeforeJavadoc fired", i, compileBeforeJavadocCount);
+    }
+
 //    /** Not used. */
 //    public void assertSaveBeforeDebugCount(int i) {
 //      assertEquals("number of times saveBeforeDebug fired",
@@ -902,6 +908,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void compileBeforeJUnit(CompilerListener cl, List<OpenDefinitionsDocument> outOfSync) { compileBeforeJUnitCount++; }
 
     public void saveBeforeJavadoc() { listenerFail("saveBeforeJavadoc fired unexpectedly"); }
+    public void compileBeforeJavadoc(final CompilerListener afterCompile) {
+      listenerFail("compileBeforeJavadoc fired unexpectedly");
+    }
     public void nonTestCase(boolean isTestAll, boolean didCompileFail) { listenerFail("nonTestCase fired unexpectedly"); }
 
     public boolean canAbandonFile(OpenDefinitionsDocument doc) {

@@ -9117,11 +9117,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void javadocEnded(final boolean success, final File destDir, final boolean allDocs) {
       // Only change GUI from event-dispatching thread
       assert EventQueue.isDispatchThread();
+      // Utilities.showDebug("javadocEnded: success="+success);
       try {
+        _javadocErrorPanel.getErrorListPane().setJavadocEnded(success);
         showTab(_javadocErrorPanel, true);
+        _javadocErrorPanel.reset();
         _javadocAllAction.setEnabled(true);
         _javadocCurrentAction.setEnabled(true);
-        _javadocErrorPanel.reset();
         _model.refreshActiveDocument();
       }
       finally { hourglassOff(); }
@@ -9310,6 +9312,51 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           }
         }
         else _saveAll();
+      }
+    }
+
+    public void compileBeforeJavadoc(final CompilerListener afterCompile) {
+      // Utilities.showDebug("compileBeforeJavadoc");
+      _compileBeforeProceeding
+        ("To run Javadoc, you must first compile all files.\n" +
+         "Would you like to compile and then run Javadoc?", ALWAYS_COMPILE_BEFORE_JAVADOC,
+         "Always save before running Javadoc", afterCompile);
+    }    
+    
+    /** Helper method shared by all "compileBeforeX" methods.
+      * @param message a prompt message to be displayed to the user
+      * @param option the BooleanOption for the prompt dialog checkbox
+      * @param checkMsg the description of the checkbox ("Always compile before X")
+      */
+    private void _compileBeforeProceeding(String message, BooleanOption option, String checkMsg,
+                                          final CompilerListener afterCompile) {
+//      new ScrollableDialog(null, "saveBeforeProceeding called in MainFrame", "", "").show();
+      if (_model.hasOutOfSyncDocuments()) {
+        if (! DrJava.getConfig().getSetting(option).booleanValue() && ! Utilities.TEST_MODE) {
+          ConfirmCheckBoxDialog dialog =
+            new ConfirmCheckBoxDialog(MainFrame.this, "Must Compile Files to Continue", message, checkMsg);
+          int rc = dialog.show();
+          
+          switch (rc) {
+            case JOptionPane.YES_OPTION:
+              _model.getCompilerModel().addListener(afterCompile);  // listener removes itself
+              _compileAll();
+              // Only remember checkbox if they say yes
+              if (dialog.getCheckBoxValue())  DrJava.getConfig().setSetting(option, Boolean.TRUE);
+              break;
+            case JOptionPane.NO_OPTION:
+            case JOptionPane.CANCEL_OPTION:
+            case JOptionPane.CLOSED_OPTION:
+              afterCompile.compileAborted(new RuntimeException("Not compiled."));
+              break;
+            default:
+              throw new RuntimeException("Invalid rc from showConfirmDialog: " + rc);
+          }
+        }
+        else {
+          _model.getCompilerModel().addListener(afterCompile);  // listener removes itself
+          _compileAll();
+        }
       }
     }
     

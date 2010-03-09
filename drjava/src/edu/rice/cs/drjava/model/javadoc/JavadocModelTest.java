@@ -42,6 +42,7 @@ import edu.rice.cs.drjava.model.DummyGlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.DummyOpenDefDoc;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
+import edu.rice.cs.drjava.model.compiler.CompilerListener;
 
 import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.util.FileOps;
@@ -96,6 +97,7 @@ public class JavadocModelTest extends DrJavaTestCase {
     // Make sure it doesn't return a file until it's saved.
     JavadocListener listener = new JavadocListener() {
       public void saveBeforeJavadoc() { _storedFile = file; }
+      public void compileBeforeJavadoc(final CompilerListener afterCompile) { }
       public void javadocStarted() { }
       public void javadocEnded(boolean success, File destDir, boolean allDocs) { }
     };
