@@ -66,6 +66,7 @@ import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
+import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -78,6 +79,7 @@ import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.Log;
+
 
 import org.objectweb.asm.*;
 
@@ -596,10 +598,13 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
     List<File> files = new ArrayList<File>();
     for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()){ files.add(odd.getRawFile()); }
+//    Utilities.show("errors.length = " + errors.length + " files = " + files);
     for(JUnitError e: errors){
-      e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
+      try {
+        e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
+      } catch(Exception ex) { DrJavaErrorHandler.record(ex); }
       File f = e.file();
-      if ((f!=null) && (LanguageLevelStackTraceMapper.isLLFile(f))) {
+      if ((f != null) && (LanguageLevelStackTraceMapper.isLLFile(f))) {
         String dn = f.getName();
         dn = dn.substring(0, dn.lastIndexOf('.')) + ".java";
         StackTraceElement ste = new StackTraceElement(e.className(), "", dn, e.lineNumber());

@@ -42,10 +42,12 @@ import java.io.File;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.lambda.Lambda;
@@ -155,19 +157,24 @@ public class JUnitTestManager {
       Enumeration<TestFailure> errEnum = result.errors();
       
       int i = 0;
-      
+
       while (errEnum.hasMoreElements()) {
         TestFailure tErr = errEnum.nextElement();
+//        Utilities.show("Processing error " + tErr);
         errors[i] = _makeJUnitError(tErr, _testClassNames, true, _testFiles);
         i++;
       }
-      
+//      Utilities.show("Finished processing errors");
       while (failures.hasMoreElements()) {
         TestFailure tFail = failures.nextElement();
+//        Utilities.show("Processing failure " + tFail);
         errors[i] = _makeJUnitError(tFail, _testClassNames, false, _testFiles);
         i++;
       }
 //      new ScrollableDialog(null, "Slave JVM: testSuite ended with errors", "", Arrays.toString(errors)).show();
+//      Utilities.show("Finished processing failures");
+//      Utilities.show("errors = " + Arrays.toString(errors));
+       
       _reset();
       _jmc.testSuiteEnded(errors);
     }
@@ -212,7 +219,8 @@ public class JUnitTestManager {
     * @return JUnitError
     */
   private JUnitError _makeJUnitError(TestFailure failure, List<String> classNames, boolean isError, List<File> files) {
- 
+    
+//    Utilities.show("_makeJUnitError called with failure " + failure + " failedTest = " + failure.failedTest());
     Test failedTest = failure.failedTest();
     String testName;
     /*if (failedTest instanceof TestCase) testName = ((TestCase)failedTest).getName();
@@ -235,7 +243,9 @@ public class JUnitTestManager {
     else
       className = testString.substring(0, firstIndex-1);
     
+
     String classNameAndTest = className + "." + testName;
+//    Utilities.show("classNameAndTest = " + classNameAndTest);
     String exception = failure.thrownException().toString();
     StackTraceElement[] stackTrace = failure.thrownException().getStackTrace();
     
@@ -253,6 +263,7 @@ public class JUnitTestManager {
     }
     String combined = sb.toString();
     int lineNum = -1;
+    
     if (combined.indexOf(classNameAndTest) == -1) {
       /* get the stack trace of the junit error */
       String trace = failure.trace();
@@ -293,7 +304,7 @@ public class JUnitTestManager {
         catch (NumberFormatException e) { lineNum = 0; } // may be native method
       }      
     }
-    
+
     if (lineNum < 0) {
       lineNum = _lineNumber(combined, classNameAndTest);
     }
@@ -371,5 +382,4 @@ public class JUnitTestManager {
     ClassLoader parent = ShadowingClassLoader.whiteList(current, "junit", "org.junit");
     return new JUnitTestRunner(_jmc, _loaderFactory.value(parent));
   }
-  
 }

@@ -50,10 +50,10 @@ import java.util.TreeMap;
 
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.util.swing.Utilities;
 
 
-/* Class used to get TreeMaps with dj* to java line number (and vise versa) conversions */
-
+/** Class used to get TreeMaps with dj* to java line number (and vise versa) conversions */
 public class LanguageLevelStackTraceMapper {
   
   /** logging information */
@@ -63,45 +63,42 @@ public class LanguageLevelStackTraceMapper {
   private HashMap<String,TreeMap<Integer,Integer>> cache;
   
   /** model used to get the OpenDefinitionsDocuments from files */
-  private GlobalModel AGmodel;
+  private GlobalModel aGModel;
   
   /* constructor */
-  public LanguageLevelStackTraceMapper(GlobalModel AGM){
-    AGmodel = AGM;
+  public LanguageLevelStackTraceMapper(GlobalModel aGM){
+    aGModel = aGM;
     cache = new HashMap<String,TreeMap<Integer,Integer>>();
   }
   
   
-  public StackTraceElement replaceStackTraceElement(StackTraceElement s,
-                                                    File d, TreeMap<Integer,Integer> m) {
-    if(!matches(d,s)) return s;
+  public StackTraceElement replaceStackTraceElement(StackTraceElement s, File d, TreeMap<Integer,Integer> m) {
+    if (! matches(d,s)) return s;
     
-    StackTraceElement NewS = new StackTraceElement(s.getClassName(),s.getMethodName(),d.getName(),m.get(s.getLineNumber()));
+    StackTraceElement NewS = 
+      new StackTraceElement(s.getClassName(), s.getMethodName(),d.getName(), m.get(s.getLineNumber()));
     
     return NewS;
-    
-    
   }
   
   
-  /** 
-   * method to replace the dj* file name and line number in a given stacktrace element.
-   * @param s the StackTraceElement to do the replacing in
-   * @param d the dj* file whose name and line numbers need replacing in the StackTraceElement
-   */
+  /** Replaces the dj* file name and line number in a given stacktrace element.
+    * @param s the StackTraceElement to do the replacing in
+    * @param d the dj* file whose name and line numbers need replacing in the StackTraceElement
+    */
   public StackTraceElement replaceStackTraceElement(StackTraceElement s,
                                                     File d) {
-    if(!matches(d,s)) return s;
-    String FileName = d.getAbsolutePath();
-    if(cache.containsKey(FileName)) return replaceStackTraceElement(s,d,cache.get(FileName));
+    if (! matches(d, s)) return s;
+    String fileName = d.getAbsolutePath();
+    if (cache.containsKey(fileName)) return replaceStackTraceElement(s, d, cache.get(fileName));
     
     String dn = d.getName();
     dn = dn.substring(0, dn.lastIndexOf('.')) + ".java";
     File javaFile = new File(d.getParentFile(), dn);
     
-    cache.put(FileName,ReadLanguageLevelLineBlock(javaFile));  
+    cache.put(fileName, readLLLineBlock(javaFile));  
     
-    return replaceStackTraceElement(s,d,cache.get(FileName));
+    return replaceStackTraceElement(s,d,cache.get(fileName));
     
     
   }
@@ -112,32 +109,26 @@ public class LanguageLevelStackTraceMapper {
 // If the file name does not match, just return s
   
   
-  /**
-   * method to replace the dj* file name and line numbers in a given stacktrace element.
-   * @param s the StackTraceElement to do the replacing in
-   * @param ds a list of the dj* file whose names and line numbers need replacing in the StackTraceElement
-   */
-  public StackTraceElement replaceStackTraceElement(StackTraceElement s,
-                                                    List</**OpenDefinitionsDocument*/ File> ds) {
+  /** Replaces the dj* file name and line numbers in a given stacktrace element.
+    * @param s the StackTraceElement to do the replacing in
+    * @param ds a list of the dj* file whose names and line numbers need replacing in the StackTraceElement
+    */
+  public StackTraceElement replaceStackTraceElement(StackTraceElement s, List<File> ds) {
     for(int i = 0; i < ds.size(); i++) {
-      s = replaceStackTraceElement(s,ds.get(i)); 
+      s = replaceStackTraceElement(s, ds.get(i)); 
     }
     return s;
   }
 // Call replaceStackTraceElement(s, f.get(i), cache) for all i to replace the
 // file name and map the numbers for all files
   
-  
-  
-  /** 
-   * method to replace the dj* file names and line numbers in the given stacktrace elements.
-   * @param ss an array of StackTraceElement to do the replacing in
-   * @param ds a list of the dj* file whose names and line numbers need replacing in the StackTraceElement
-   */
-  public StackTraceElement[] replaceStackTrace(StackTraceElement[] ss,
-                                               List</**OpenDefinitionsDocument*/ File> ds){
-    for(int i = 0; i < ss.length; i++){
-      ss[i]=replaceStackTraceElement(ss[i],ds);
+  /** Replaces the dj* file names and line numbers in the given stacktrace elements.
+    * @param ss an array of StackTraceElement to do the replacing in
+    * @param ds a list of the dj* file whose names and line numbers need replacing in the StackTraceElement
+    */
+  public StackTraceElement[] replaceStackTrace(StackTraceElement[] ss, List<File> ds){
+    for(int i = 0; i < ss.length; i++) {
+      ss[i] = replaceStackTraceElement(ss[i], ds);
     }
     return ss;
   }
@@ -145,32 +136,27 @@ public class LanguageLevelStackTraceMapper {
 // elements in the array.
   
   
-  /**
-   * clears the TreeMap cache
-   */
+  /** Clears the TreeMap cache */
   public void clearCache(){
     cache = new HashMap<String,TreeMap<Integer,Integer>>();
   }
   
   
-  /**
-   * method to make sure the given file and StackTraceElement match
-   * @param f the file
-   * @param s the StackTraceElement
-   */
+  /** Ensures the given file and StackTraceElement match
+    * @param f the file
+    * @param s the StackTraceElement
+    */
   private boolean matches(File f, StackTraceElement s) {
     LOG.log("matches(" + f + ", " + s + ")");
     if (s.getFileName() == null) return false;
     OpenDefinitionsDocument d;      
-    try{
-      d = AGmodel.getDocumentForFile(f);}
-    
-    catch(java.io.IOException e){return false;}
+    try { d = aGModel.getDocumentForFile(f); }
+    catch(java.io.IOException e){ return false; }
     
     String dn = d.getRawFile().getName();
     
 // make sure that the document is a LL document
-    if (!isLLFileName(dn)) return false;
+    if (! isLLFileName(dn)) return false;
     
 // replace suffix with ".java"
     dn = dn.substring(0, dn.lastIndexOf('.')) + ".java";
@@ -181,10 +167,8 @@ public class LanguageLevelStackTraceMapper {
     if ((dp.length() == 0) && (dotPos >= 0)) return false; // d in default package, s not
     if ((dp.length() > 0) && (dotPos < 0)) return false; // s in default package, d not
     String sp = "";
-    if (dotPos >= 0) {
-      sp = s.getClassName().substring(0, dotPos);
-    }
-    if (!dp.equals(sp)) return false; // packages do not match
+    if (dotPos >= 0) sp = s.getClassName().substring(0, dotPos);
+    if (! dp.equals(sp)) return false; // packages do not match
     
 // make sure the file names match
     return s.getFileName().equals(dn);
@@ -192,121 +176,111 @@ public class LanguageLevelStackTraceMapper {
   
   
   
-  /**
-   * Reads the LanguageLevel header from a LL file and pulls the line number conversion map out.
-   * @return <java line, dj* line>
-   */
-  public TreeMap<Integer, Integer> ReadLanguageLevelLineBlock(File LLFile){
+  /** Reads the LanguageLevel header from a LL file and pulls the line number conversion map out.
+    * @return <java line, dj* line>
+    */
+  public TreeMap<Integer, Integer> readLLLineBlock(File LLFile){
     
-    BufferedReader BReader = null;
-    String ReadLine = "";
+    BufferedReader bufReader = null;
+    String rdLine = "";
     
-    try{  BReader = new BufferedReader(new FileReader(LLFile));  } catch(java.io.FileNotFoundException e){ }
+    try { bufReader = new BufferedReader(new FileReader(LLFile));  } catch(java.io.FileNotFoundException e){ }
     
-    try{  ReadLine = BReader.readLine();  }  catch(java.io.IOException e){ }
+    try { rdLine = bufReader.readLine();  }  catch(java.io.IOException e){ }
     
-    LOG.log("ReadLine = '" + ReadLine + "'");
-    LOG.log("\tlastIndex = " + ReadLine.lastIndexOf(" "));
-    Integer MapSize = new Integer (ReadLine.substring(ReadLine.lastIndexOf(" ")+1));
+    LOG.log("rdLine = '" + rdLine + "'");
+    LOG.log("\tlastIndex = " + rdLine.lastIndexOf(" "));
+    Integer mapSize = new Integer (rdLine.substring(rdLine.lastIndexOf(" ") + 1));
     
-    try{  ReadLine = BReader.readLine();  }  catch(java.io.IOException e){ }
+    try { rdLine = bufReader.readLine();  }  catch(java.io.IOException e){ }
     
-    if(ReadLine.indexOf("//") != 0) MapSize=0;  //Kills the for loop if read line is not of correct format
-    
+    if (rdLine.indexOf("//") != 0) mapSize = 0;  //Kills the for loop if read line is not of correct format
     
     String temp = "";
     String numRnum = "";
-    TreeMap<Integer,Integer> JavaDjMap = new TreeMap<Integer,Integer>();
+    TreeMap<Integer,Integer> javaDJMap = new TreeMap<Integer,Integer>();
     
-    temp = ReadLine.substring(2);
-    temp = temp.trim() + " ";
+    temp = rdLine.substring(2).trim() + " ";
     
     Integer djNum;
     Integer javaNum;
     
-    for(int i = 0; i < MapSize; i++){
-      if(temp.length()<2)  temp = ReadLanguageLevelLineBlockHelper(BReader);
-      if(temp == null) break;
+//    Utilities.show("read " + mapSize + " entries from bufReader");
+    for (int i = 0; i < mapSize; i++) {
+      if (temp.length() < 2)  temp = readLLLineBlockHelper(bufReader);
+      if (temp == null) break;
+//      Utilities.show("i = " + i + "     temp = '" + temp + "'");
+      numRnum = temp.substring(0, temp.indexOf(" "));
       
-      numRnum = temp.substring(0,temp.indexOf(" "));
+      djNum = new Integer(numRnum.substring(0, numRnum.indexOf("->")));
+      javaNum = new Integer(numRnum.substring(numRnum.indexOf("->") + 2));
       
-      djNum = new Integer(numRnum.substring(0,numRnum.indexOf("->")));
-      javaNum = new Integer(numRnum.substring(numRnum.indexOf("->")+2));
-      
-      JavaDjMap.put(javaNum,djNum);
+      javaDJMap.put(javaNum,djNum);
       temp = temp.substring(temp.indexOf(" ")).trim() + " ";
     }
-    return JavaDjMap;
+    return javaDJMap;
   }
   
   
   
-  /**
-   * Reads the LanguageLevel header from a LL file and pulls the line number conversion map out.
-   * @return <dj* line, java line>
-   */
-  public TreeMap<Integer, Integer> ReadLanguageLevelLineBlockRev(File LLFile){
+  /** Reads the LanguageLevel header from a LL file and pulls the line number conversion map out.
+    * @return <dj* line, java line>
+    */
+  public TreeMap<Integer, Integer> ReadLanguageLevelLineBlockRev(File LLFile) {
     
-    BufferedReader BReader = null;
-    String ReadLine = "";
+    BufferedReader bufReader = null;
+    String rdLine = "";
     
-    try{  BReader = new BufferedReader(new FileReader(LLFile));  } catch(java.io.FileNotFoundException e){ }
+    try { bufReader = new BufferedReader(new FileReader(LLFile)); } catch(java.io.FileNotFoundException e){ }
     
-    try{  ReadLine = BReader.readLine();  }  catch(java.io.IOException e){ }
+    try { rdLine = bufReader.readLine(); } catch(java.io.IOException e){ }
     
-    LOG.log("ReadLine = '" + ReadLine + "'");
-    LOG.log("\tlastIndex = " + ReadLine.lastIndexOf(" "));
-    Integer MapSize = new Integer (ReadLine.substring(ReadLine.lastIndexOf(" ")+1));
+    LOG.log("rdLine = '" + rdLine + "'");
+    LOG.log("\tlastIndex = " + rdLine.lastIndexOf(" "));
+    Integer mapSize = new Integer (rdLine.substring(rdLine.lastIndexOf(" ") + 1));
     
-    try{  ReadLine = BReader.readLine();  }  catch(java.io.IOException e){ }
+    try{ rdLine = bufReader.readLine(); } catch(java.io.IOException e){ }
     
-    if(ReadLine.indexOf("//") != 0) MapSize=0;  //Kills the for loop if read line is not of correct format
+    if(rdLine.indexOf("//") != 0) mapSize = 0;  // Kills the for loop if read line is not of correct format
+
+    TreeMap<Integer,Integer> map = new TreeMap<Integer,Integer>();
     
-    
-    String temp = "";
+    String temp = rdLine.substring(2).trim() + " ";  // invariant: temp has no leading spaces and a single trailing space
     String numRnum = "";
-    TreeMap<Integer,Integer> DjJavaMap = new TreeMap<Integer,Integer>();
     
-    temp = ReadLine.substring(2);
-    temp = temp.trim() + " ";
-    
-    Integer djNum;
-    Integer javaNum;
-    
-    for(int i = 0; i < MapSize; i++){
-      if(temp.length()<2)  temp = ReadLanguageLevelLineBlockHelper(BReader);
-      if(temp == null) break;
+    int djNum;
+    int javaNum;
+
+    for(int i = 0; i < mapSize; i++){
+      if (temp.length() < 2)  temp = readLLLineBlockHelper(bufReader);
+      if (temp == null) break;
       
-      numRnum = temp.substring(0,temp.indexOf(" "));
+      numRnum = temp.substring(0, temp.indexOf(" "));
       
-      djNum = new Integer(numRnum.substring(0,numRnum.indexOf("->")));
-      javaNum = new Integer(numRnum.substring(numRnum.indexOf("->")+2));
+      djNum = Integer.parseInt(numRnum.substring(0, numRnum.indexOf("->")), 10);
+      javaNum = Integer.parseInt(numRnum.substring(numRnum.indexOf("->") + 2), 10);
       
-      DjJavaMap.put(djNum,javaNum);
-      temp = temp.substring(temp.indexOf(" ")).trim() + " ";
+      map.put(djNum, javaNum);
+      temp = temp.substring(temp.indexOf(" ")).trim() + " ";  // slices off first non-blank section
+      // NOTE: it would more efficient to simply remove all leading whitespace instead of trimming and adding a space.
     }
-    return DjJavaMap;
+    return map;
   }
   
-  
-  
-  /**
-   * Helper method to read the next line in a file
-   */
-  private String ReadLanguageLevelLineBlockHelper(BufferedReader BR) {
+  /** Helper method to read the next comment line in a file.  Returns null if no new comment line exists. 
+    * Line is trimmed and padded by a single blank on the end. */
+  private String readLLLineBlockHelper(BufferedReader br) {
     String line = "";
-    try{  line = BR.readLine(); } catch(java.io.IOException e){ }
+    try { line = br.readLine(); } catch(java.io.IOException e){ }
     
-    if(line.indexOf("//") != 0) return null;
-    line = line.substring(2).trim();
+    if (line.indexOf("//") != 0) return null;
+    line = line.substring(2).trim() + " ";
     return line;
   }
   
   /** Return true if the file name ends with .dj0, .dj1 or .dj2. */
   public static boolean isLLFileName(String s) {
-    return (s.endsWith(".dj0") ||
-            s.endsWith(".dj1") ||
-            s.endsWith(".dj2"));
+    return (s.endsWith(".dj0") || s.endsWith(".dj1") || s.endsWith(".dj2"));
   }
   
   /** Return true if the file name ends with .dj0, .dj1 or .dj2. */
@@ -316,7 +290,7 @@ public class LanguageLevelStackTraceMapper {
   
   /** Change a language level extension into a .java extension. */
   public static File getJavaFileForLLFile(File llFile) {
-    if (!isLLFile(llFile)) throw new AssertionError("File is not a language level file: " + llFile);
+    if (! isLLFile(llFile)) throw new AssertionError("File is not a language level file: " + llFile);
     String dn = llFile.getPath();
     dn = dn.substring(0, dn.lastIndexOf('.')) + ".java";
     return new File(dn);
