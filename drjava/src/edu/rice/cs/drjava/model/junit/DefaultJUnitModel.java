@@ -57,7 +57,6 @@ import java.util.jar.JarEntry;
 import javax.swing.JOptionPane;
 
 import edu.rice.cs.drjava.config.BooleanOption;
-
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -79,7 +78,6 @@ import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.Log;
-
 
 import org.objectweb.asm.*;
 
@@ -162,8 +160,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** Removes all JUnitListeners from this model. */
   public void removeAllListeners() { _notifier.removeAllListeners(); }
   
-  
-  
   //-------------------------------- Triggers --------------------------------//
   
   /** Used only for testing. */
@@ -182,7 +178,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     LinkedList<OpenDefinitionsDocument> lod = new LinkedList<OpenDefinitionsDocument>();
     
     for (OpenDefinitionsDocument doc : _model.getOpenDefinitionsDocuments()) { 
-      if (doc.inProjectPath())  lod.add(doc);
+      if (doc.inProjectPath()) lod.add(doc);
     }
     junitOpenDefDocs(lod, true);
   }
@@ -223,7 +219,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   public void junitDocs(List<OpenDefinitionsDocument> lod) { junitOpenDefDocs(lod, true); }
   
-  /** Runs JUnit on the current document.  Forces the user to compile all open source documents before proceeding. */
+  /** Runs JUnit on the current document.  Forces the user to compile all open documents before proceeding. */
   public void junit(OpenDefinitionsDocument doc) throws ClassNotFoundException, IOException {
     debug.logStart("junit(doc)");
 //    new ScrollableDialog(null, "junit(" + doc + ") called in DefaultJunitModel", "", "").show();
@@ -278,6 +274,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
             });
           }
         }
+        
         @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
           final CompilerListener listenerThis = this;
           try {
@@ -387,7 +384,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
             /* ignore non-class files */
             String name = entry.getName();
             if (! name.endsWith(".class")) continue;
-            
             
             /* Ignore class names that do not end in "Test" if FORCE_TEST_SUFFIX option is set */
             if (_forceTestSuffix) {

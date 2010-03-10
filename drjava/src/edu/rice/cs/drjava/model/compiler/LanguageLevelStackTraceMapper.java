@@ -52,7 +52,6 @@ import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.swing.Utilities;
 
-
 /** Class used to get TreeMaps with dj* to java line number (and vise versa) conversions */
 public class LanguageLevelStackTraceMapper {
   
