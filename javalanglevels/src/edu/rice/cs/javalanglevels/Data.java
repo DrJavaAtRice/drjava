@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2008, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -240,12 +240,14 @@ public abstract class Data {
     * @param outerData  The Data that encloses this data.
     */
   public void setOuterData(Data outerData) {
+    if (outerData == null) return;  // Throwing an exception is another option but why abort this translation?
     if (_outerData == null) {
       _outerData = outerData;
       _enclosingData.addLast(_outerData);
     }
     else {
-      throw new RuntimeException("Internal Program Error: Trying to reset an outer data to " + outerData.getName() +  " for " + this.getName() + " that has already been set.  Please report this bug.");
+      throw new RuntimeException("Internal Program Error: Trying to reset an outer data to " + outerData.getName() +  
+                                 " for " + getName() + " that has already been set.  Please report this bug.");
     }
   }
   
