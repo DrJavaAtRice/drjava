@@ -250,6 +250,8 @@ public class JUnitPanel extends ErrorPanel {
     
     /** Provides the ability to display the name of the test being run. */
     public void testStarted(String name) {
+      if (name.indexOf('(')<0) return;
+      
       String testName = _getTestFromName(name);
       String className = _getClassFromName(name);
       String fullName = className + "." + testName;
@@ -280,6 +282,8 @@ public class JUnitPanel extends ErrorPanel {
     
     /** Displays the results of a test that has finished. */
     public void testEnded(String name, boolean wasSuccessful, boolean causedError) {
+      if (name.indexOf('(')<0) return;
+
       String testName = _getTestFromName(name);
       String fullName = _getClassFromName(name) + "." + testName;
       if (fullName.equals(JUNIT_WARNING)) return;

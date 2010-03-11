@@ -902,30 +902,28 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };
   
   /** Runs Javadoc on all open documents (and the files in their packages). */
-  private final Action _javadocAllAction = new AbstractAction("Javadoc All Documents") {
+  private volatile AbstractAction _javadocAllAction = new AbstractAction("Javadoc All Documents") {
     public void actionPerformed(ActionEvent ae) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
       try {
-        // hourglassOn();
         JavadocModel jm = _model.getJavadocModel();
         File suggestedDir = jm.suggestJavadocDestination(_model.getActiveDocument());
         _javadocSelector.setSuggestedDir(suggestedDir);
         jm.javadocAll(_javadocSelector, _saveSelector);
       }
       catch (IOException ioe) { _showIOError(ioe); }
-      finally {
-        // hourglassOff();
-      }
     }
   };
   
   /** Runs Javadoc on the current document. */
-  private final Action _javadocCurrentAction = new AbstractAction("Preview Javadoc for Current Document") {
+  private volatile AbstractAction _javadocCurrentAction = new AbstractAction("Preview Javadoc for Current Document") {
     public void actionPerformed(ActionEvent ae) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
-      try { _model.getActiveDocument().generateJavadoc(_saveSelector); }
+      try {
+        _model.getActiveDocument().generateJavadoc(_saveSelector);
+      }
       catch (IOException ioe) { _showIOError(ioe); }
     }
   };
@@ -5716,6 +5714,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private volatile DecoratedAction _junit_runProjectDecoratedAction;
   private volatile DecoratedAction _junit_runDecoratedAction;
   private volatile DecoratedAction _junit_runAppletDecoratedAction;
+  private volatile DecoratedAction _junit_javadocAllAction;
+  private volatile DecoratedAction _junit_javadocCurrentAction;
   
   /** An AbstractAction that prevents changes to the decoree's enabled flag. */
   private static class DecoratedAction extends AbstractAction {
@@ -5729,6 +5729,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _decoree = a;
       _shallowEnabled = _decoree.isEnabled();
       _decoree.setEnabled(b);
+      super.setEnabled(b);
     }
     public void actionPerformed(ActionEvent ae) { _decoree.actionPerformed(ae); }
     /** Do not change the decoree's enabled flag, but cache this value in the shallow enabled flag. */
@@ -5737,33 +5738,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public AbstractAction getUpdatedDecoree() { _decoree.setEnabled(_shallowEnabled); return _decoree; }
   }
   
-  /** Sets the enabled status to false of all actions that  could conflict with JUnit while its is running a test.
+  /** Sets the enabled status to false of all actions that could conflict with JUnit while its is running a test.
+    * Also used when running Javadoc, since Javadoc may invoke the compiler.
     * This method saves aside the previous enable state of each action so that when the test is finished, any action
     * disabled before the test will remain disabled afterward.
     */
-  private void _disableJUnitActions() {
-    // _compileProjectActionEnabled = _compileProjectAction.isEnabled();
-    // _compileAllActionEnabled = _compileAllAction.isEnabled();
-    //_compileFolderActionEnabled = _compileFolderAction.isEnabled();
-    //_junitFolderActionEnabled = _junitFolderAction.isEnabled();
-    //_junitAllActionEnabled = _junitAllAction.isEnabled();
-    //_junitActionEnabled = _junitAction.isEnabled();
-    //_junitProjectActionEnabled = _junitProjectAction.isEnabled();
-    //_cleanActionEnabled = _cleanAction.isEnabled();
-    //_projectPropertiesActionEnabled = _projectPropertiesAction.isEnabled();
-    //_runProjectActionEnabled = _runProjectAction.isEnabled();
-    
-    // _compileProjectAction.setEnabled(false);
-    //_compileAllAction.setEnabled(false);
-    //_compileFolderAction.setEnabled(false);
-    //_junitFolderAction.setEnabled(false);
-    //_junitAllAction.setEnabled(false);
-    //_junitAction.setEnabled(false);
-    //_junitProjectAction.setEnabled(false);
-    //_cleanAction.setEnabled(false);
-    //_projectPropertiesAction.setEnabled(false);
-    //_runProjectAction.setEnabled(false);
-    
+  private void _disableJUnitActions() {    
     _compileProjectAction = _junit_compileProjectDecoratedAction = new DecoratedAction(_compileProjectAction, false);
     _compileAllAction = _junit_compileAllDecoratedAction = new DecoratedAction(_compileAllAction, false);
     _compileFolderAction = _junit_compileFolderDecoratedAction = new DecoratedAction(_compileFolderAction, false);
@@ -5778,21 +5758,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _runProjectAction = _junit_runProjectDecoratedAction = new DecoratedAction(_runProjectAction, false);
     _runAction = _junit_runDecoratedAction = new DecoratedAction(_runAction, false);
     _runAppletAction = _junit_runAppletDecoratedAction = new DecoratedAction(_runAppletAction, false);
+    _javadocCurrentAction = _junit_javadocCurrentAction = new DecoratedAction(_javadocCurrentAction, false);
+    _javadocAllAction = _junit_javadocAllAction = new DecoratedAction(_javadocAllAction, false);
   }
+  
   private void _restoreJUnitActionsEnabled() {
-//    _compileProjectAction.setEnabled(_compileProjectActionEnabled);
-//    _compileAllAction.setEnabled(_compileAllActionEnabled);
-//    //_compileOpenProjectAction.setEnabled(_compileOpenProjectActionEnabled);
-//    _compileFolderAction.setEnabled(_compileFolderActionEnabled);
-//    _junitFolderAction.setEnabled(_junitFolderActionEnabled);
-//    _junitAllAction.setEnabled(_junitAllActionEnabled);
-//    _junitAction.setEnabled(_junitActionEnabled);
-//    _junitProjectAction.setEnabled(_junitProjectActionEnabled);
-//    //_junitProjectAction.setEnabled(_junitProjectActionEnabled);
-//    _cleanAction.setEnabled(_cleanActionEnabled);
-//    _projectPropertiesAction.setEnabled(_projectPropertiesActionEnabled);
-//    _runProjectAction.setEnabled(_runProjectActionEnabled);
-    
     _compileProjectAction = _junit_compileProjectDecoratedAction.getUpdatedDecoree();
     _compileAllAction = _junit_compileAllDecoratedAction.getUpdatedDecoree();
     _compileFolderAction = _junit_compileFolderDecoratedAction.getUpdatedDecoree();
@@ -5806,6 +5776,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _runProjectAction = _junit_runProjectDecoratedAction.getUpdatedDecoree();
     _runAction = _junit_runDecoratedAction.getUpdatedDecoree();
     _runAppletAction = _junit_runAppletDecoratedAction.getUpdatedDecoree();
+    _javadocCurrentAction = _junit_javadocCurrentAction.getUpdatedDecoree();
+    _javadocAllAction = _junit_javadocAllAction.getUpdatedDecoree();
   }
   
 //  /**
@@ -7345,85 +7317,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Sets up the context menu to show in the document pane. */
   private void _setUpContextMenus() {      
-    // pop-up menu for a folder in tree view
-//    _navPaneFolderPopupMenu = new JPopupMenu();
-    /*
-     * Phil Repicky -smallproj
-     * 2/14/2005
-     * Make these do something:
-     * _navPaneFolderPopupMenu.add("Open a File in this Folder Action");
-     * _navPaneFolderPopupMenu.add("Make a New File in this Folder Action");
-     */
-//    _navPaneFolderPopupMenu.add(_newFileFolderAction);
-//    _navPaneFolderPopupMenu.add(_openOneFolderAction);
-//    _navPaneFolderPopupMenu.add(_openAllFolderAction);
-//    _navPaneFolderPopupMenu.add(_closeFolderAction);
-//    _navPaneFolderPopupMenu.add(_compileFolderAction);
-//    _navPaneFolderPopupMenu.add(_junitFolderAction);
-    
-//    _navPanePopupMenuForRoot = new JPopupMenu();
-//    _navPanePopupMenuForRoot.add(_saveProjectAction);
-//    _navPanePopupMenuForRoot.add(_closeProjectAction);
-//    _navPanePopupMenuForRoot.addSeparator();
-//    _navPanePopupMenuForRoot.add(_compileProjectAction);
-//    _navPanePopupMenuForRoot.add(_runProjectAction);
-//    _navPanePopupMenuForRoot.add(_junitProjectAction);
-//    _navPanePopupMenuForRoot.addSeparator();
-//    _navPanePopupMenuForRoot.add(_projectPropertiesAction);
-    
-//    _navPanePopupMenuForExternal = new JPopupMenu();
-//    _navPanePopupMenuForExternal.add(_saveAction);
-//    _navPanePopupMenuForExternal.add(_saveAsAction);
-//    _navPanePopupMenuForExternal.add(_renameAction);
-//    _navPanePopupMenuForExternal.add(_revertAction);
-//    _navPanePopupMenuForExternal.addSeparator();
-//    _navPanePopupMenuForExternal.add(_closeAction);
-//    _navPanePopupMenuForExternal.addSeparator();
-//    _navPanePopupMenuForExternal.add(_printDefDocAction);
-//    _navPanePopupMenuForExternal.add(_printDefDocPreviewAction);
-//    _navPanePopupMenuForExternal.addSeparator();
-//    _navPanePopupMenuForExternal.add(_compileAction);
-//    _navPanePopupMenuForExternal.add(_junitAction);
-//    _navPanePopupMenuForExternal.add(_javadocCurrentAction);
-//    _navPanePopupMenuForExternal.add(_runAction);
-//    _navPanePopupMenuForExternal.addSeparator();
-//    _navPanePopupMenuForExternal.add(_moveToAuxiliaryAction);
-    
-//    _navPanePopupMenuForAuxiliary = new JPopupMenu();
-//    _navPanePopupMenuForAuxiliary.add(_saveAction);
-//    _navPanePopupMenuForAuxiliary.add(_saveAsAction);
-//    _navPanePopupMenuForAuxiliary.add(_renameAction);
-//    _navPanePopupMenuForAuxiliary.add(_revertAction);
-//    _navPanePopupMenuForAuxiliary.addSeparator();
-//    _navPanePopupMenuForAuxiliary.add(_closeAction);
-//    _navPanePopupMenuForAuxiliary.addSeparator();
-//    _navPanePopupMenuForAuxiliary.add(_printDefDocAction);
-//    _navPanePopupMenuForAuxiliary.add(_printDefDocPreviewAction);
-//    _navPanePopupMenuForAuxiliary.addSeparator();
-//    _navPanePopupMenuForAuxiliary.add(_compileAction);
-//    _navPanePopupMenuForAuxiliary.add(_junitAction);
-//    _navPanePopupMenuForAuxiliary.add(_javadocCurrentAction);
-//    _navPanePopupMenuForAuxiliary.add(_runAction);
-//    _navPanePopupMenuForAuxiliary.addSeparator();
-//    _navPanePopupMenuForAuxiliary.add(_removeAuxiliaryAction);
-    
-    // NavPane menu
-//    _navPanePopupMenu = new JPopupMenu();
-//    _navPanePopupMenu.add(_saveAction);
-//    _navPanePopupMenu.add(_saveAsAction);
-//    _navPanePopupMenu.add(_renameAction);
-//    _navPanePopupMenu.add(_revertAction);
-//    _navPanePopupMenu.addSeparator();
-//    _navPanePopupMenu.add(_closeAction);
-//    _navPanePopupMenu.addSeparator();
-//    _navPanePopupMenu.add(_printDefDocAction);
-//    _navPanePopupMenu.add(_printDefDocPreviewAction);
-//    _navPanePopupMenu.addSeparator();
-//    _navPanePopupMenu.add(_compileAction);
-//    _navPanePopupMenu.add(_junitAction);
-//    _navPanePopupMenu.add(_javadocCurrentAction);
-//    _navPanePopupMenu.add(_runAction);
-    
     _model.getDocCollectionWidget().addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
         boolean showContextMenu = true;
@@ -9120,11 +9013,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
       
       hourglassOn();
-      
+      _disableJUnitActions();
+
       showTab(_javadocErrorPanel, true);
       _javadocErrorPanel.setJavadocInProgress();
-      _javadocAllAction.setEnabled(false);
-      _javadocCurrentAction.setEnabled(false);
     }
     
     public void javadocEnded(final boolean success, final File destDir, final boolean allDocs) {
@@ -9135,8 +9027,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _javadocErrorPanel.getErrorListPane().setJavadocEnded(success);
         showTab(_javadocErrorPanel, true);
         _javadocErrorPanel.reset();
-        _javadocAllAction.setEnabled(true);
-        _javadocCurrentAction.setEnabled(true);
+        _restoreJUnitActionsEnabled();
         _model.refreshActiveDocument();
       }
       finally { hourglassOff(); }
