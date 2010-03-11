@@ -8966,6 +8966,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               String undefinedClassName = lastError.substring(lastError.indexOf('\'') + 1, lastError.lastIndexOf('\''));
               _showAutoImportDialog(undefinedClassName);
             }
+            else if (lastError.startsWith("Static Error: Undefined name '") && lastError.endsWith("'")) {
+              // it was an "undefined name" exception
+              String undefinedName = lastError.substring(lastError.indexOf('\'') + 1, lastError.lastIndexOf('\''));
+              
+              if ((undefinedName.length() > 0) &&
+                  (Character.isUpperCase(undefinedName.charAt(0))) &&
+                  (undefinedName.indexOf('.') >= 0)) {
+                // the undefined name starts with a capital letter and contains a dot
+                // show auto-import dialog
+                String undefinedClassName = undefinedName.substring(0, undefinedName.indexOf('.'));
+                _showAutoImportDialog(undefinedClassName);
+              }
+            }
             else if (lastError.startsWith("java.lang.OutOfMemoryError")) {
               askToIncreaseSlaveMaxHeap();
             }
