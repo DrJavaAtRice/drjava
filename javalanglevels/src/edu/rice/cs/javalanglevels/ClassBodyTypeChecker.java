@@ -552,8 +552,9 @@ public class ClassBodyTypeChecker extends Bob {
       _cbbtc = new ClassBodyTypeChecker(_sd1, _cbbtc._file, _cbbtc._package, _cbbtc._importedFiles, _cbbtc._importedPackages, new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
       cmd1.visit(_cbbtc);
       
-      assertEquals("There should be 2 errors", 2, errors.size());
-      assertEquals("The error message should be correct", "You cannot use i because it may not have been given a value", errors.get(1).getFirst());
+      assertEquals("There should still be 1 error", 1, errors.size());  // Generated error is duplicate
+      assertEquals("The error message should be correct", "You cannot use i because it may not have been given a value", 
+                   errors.get(0).getFirst());
       
       //Check that a final variable cannot be reassigned to
       s = new ValueReturnStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")));
@@ -576,8 +577,10 @@ public class ClassBodyTypeChecker extends Bob {
 
       _cbbtc = new ClassBodyTypeChecker(_sd1, _cbbtc._file, _cbbtc._package, _cbbtc._importedFiles, _cbbtc._importedPackages, new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
       cmd2.visit(_cbbtc);
-      assertEquals("There should be 3 errors", 3, errors.size());
-      assertEquals("The error message should be correct", "You cannot assign a value to i because it is immutable and has already been given a value", errors.get(2).getFirst());
+      assertEquals("There should now be 2 error2", 2, errors.size());
+      assertEquals("The error message should be correct", 
+                   "You cannot assign a value to i because it is immutable and has already been given a value", 
+                   errors.get(1).getFirst());
  
        
       //test that if a variable is assigned in a branch of the if, and then returned, it is okay.
@@ -614,7 +617,7 @@ public class ClassBodyTypeChecker extends Bob {
 
       md1.addBlock(new BlockData(md1));
       cmd4.visit(_cbbtc);
-      assertEquals("There should be 3 errors", 3, errors.size());
+      assertEquals("There should still be 2 errors", 2, errors.size());
     }
     
     public void testCheckDifferentReturnTypes() {

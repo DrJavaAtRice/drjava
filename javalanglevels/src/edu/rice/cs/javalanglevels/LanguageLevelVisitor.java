@@ -53,7 +53,6 @@ import edu.rice.cs.plt.reflect.EmptyClassLoader;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
 
-
 import junit.framework.TestCase;
 
 /** Top-level Language Level Visitor that represents what is common between all Language Levels.  Enforces constraints
@@ -143,7 +142,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   }
   
   /** This is a special constructor called from the TypeChecker that sets classesToBeParsed.
-    * Normally, classesToBeParsed is set by the concrete instantiation of the LangaugeLevelVisitor,
+    * Normally, classesToBeParsed is set by the concrete instantiation of the LanguageLevelVisitor,
     * but in the case of the TypeChecker, we just create a LangaugeLevelVisitor so we can use its
     * getSymbolData code.  Thus, we must give it a classesToBeParsed to avoid a null pointer exception.
     */
@@ -166,17 +165,13 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     _classNamesInThisFile = new LinkedList<String>();
   }
   
-  /** Originally wanted to take parameter name and return getName, but this faces
-    * problems if there are two fields with the same name but one is uppercase and
-    * one is lower or if one starts with an underscore and the other doesn't.
-    * So we just return name for now.
-    */
+  /** @return the accessor name corresponding to given field name. */
   public static String getFieldAccessorName(String name) { return name; }
   
   /**@return the source file*/
   public File getFile() { return _file; }
   
-  /** Returns true if this data is a constructor. It is considered to be a constructor if it is a method data,
+  /** @return true if this data is a constructor, i.e., it is a method data,
     * its name and return type are the same, and its return type matches its enclosing sd.
     */
   protected boolean isConstructor(Data d) {
@@ -344,10 +339,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return sd;
   }
   
-  /**
-   * Build a SourceInfo corresponding to the specified class name, with -1 as the
-   * value for row and column of the start and finish.
-   */
+  /** Build a SourceInfo corresponding to the specified class name, with -1 as the
+    * value for row and column of the start and finish.
+    */
   protected SourceInfo _makeSourceInfo(String qualifiedClassName) {
     return new SourceInfo(new File(qualifiedClassName), -1, -1, -1, -1);
   }
@@ -1358,7 +1352,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   protected static void _addError(String message, JExpressionIF that) {
 //    Utilities.show("_addError(" + message + ", " + that + ") called");
     _errorAdded = true;
-    errors.addLast(new Pair<String, JExpressionIF>(message, that));
+    Pair<String, JExpressionIF> p = new Pair<String, JExpressionIF>(message, that);
+    if (! errors.contains(p)) errors.addLast(p);
   }
   
   /** This method is called when an error should be added, but tree-walking should continue
@@ -2023,11 +2018,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     }
   }
   
-  
-  
-  /**
-   * Test the methods defined in the above class.
-   */
+  /** Test the methods defined in the above class.*/
   public static class LanguageLevelVisitorTest extends TestCase {
     
     private LanguageLevelVisitor _llv;
@@ -2681,22 +2672,22 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       // Test "final", "abstract"
       testMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final", "abstract"});
       _llv.forModifiersAndVisibility(testMav);
-      assertEquals("There should be two errors.", 3, errors.size());
+      assertEquals("There should still be two errors.", 2, errors.size());  // Generated error is duplicate
       assertEquals("The error message should be correct.", "Illegal combination of modifiers." + 
-                   " Can't use final and abstract together.", errors.get(2).getFirst());
+                   " Can't use final and abstract together.", errors.get(1).getFirst());
       
       // Test "volatile", "final"
       testMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"volatile", "final"});
       _llv.forModifiersAndVisibility(testMav);
-      assertEquals("There should be two errors.", 4, errors.size());
+      assertEquals("There should be three errors.", 3, errors.size());  // Generated one new error
       assertEquals("The error message should be correct.", "Illegal combination of modifiers." + 
-                   " Can't use final and volatile together.", errors.get(3).getFirst());
+                   " Can't use final and volatile together.", errors.get(2).getFirst());
       
       // Test "static", "final", "static"
       testMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"static", "final", "static"});
       _llv.forModifiersAndVisibility(testMav);
-      assertEquals("There should be two errors.", 5, errors.size());
-      assertEquals("The error message should be correct.", "Duplicate modifier: static", errors.get(4).getFirst());
+      assertEquals("There should be four errors.", 4, errors.size());  // Generated one new error
+      assertEquals("The error message should be correct.", "Duplicate modifier: static", errors.get(3).getFirst());
     }
     
     public void testGetQualifiedClassName() {

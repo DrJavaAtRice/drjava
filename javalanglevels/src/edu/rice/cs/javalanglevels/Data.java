@@ -51,7 +51,7 @@ public abstract class Data {
   /**The vars defined in the lexical scope of this data.*/
   protected LinkedList<VariableData> _vars;
   
-  /**All enclosing data are in this list */
+  /**All enclosing data are in this list. */
   protected LinkedList<Data> _enclosingData;
   
   /**The modifiers and visibility of this data.*/
@@ -95,9 +95,24 @@ public abstract class Data {
     _name = name;
   }
   
+  public Boolean isAnonymousClass() {
+    int lastIndex = _name.lastIndexOf("$");
+    try { return (lastIndex < 0) && Integer.parseInt(_name.substring(lastIndex+1)) >= 0; }
+    catch(NumberFormatException e) { return false; /* suffix is not an anonymous class index */ }
+  }
+  
+  public Boolean isDoublyAnonymous() {
+    if (! isAnonymousClass()) return false;
+    for (Data d: getEnclosingData()) {
+      if (d.isAnonymousClass()) return true;
+    }
+    return false;
+  }
+
+     
   /** Set the vars list to the specified linked list of vars.
-   *  These are the variables that are defined in the scope of this data.
-   */
+    * These are the variables that are defined in the scope of this data.
+    */
   void setVars(LinkedList<VariableData> vars) {
     _vars = vars;
   }
@@ -240,7 +255,10 @@ public abstract class Data {
     * @param outerData  The Data that encloses this data.
     */
   public void setOuterData(Data outerData) {
-    if (outerData == null) return;  // Throwing an exception is another option but why abort this translation?
+    if (outerData == null) {
+      assert _outerData == null; // Client code should not try to nullify a defined outerData value
+      return;
+    }
     if (_outerData == null) {
       _outerData = outerData;
       _enclosingData.addLast(_outerData);
@@ -264,28 +282,26 @@ public abstract class Data {
   }
   
   
-  /**
-   * Loop over the specified string, and replace any '$' with '.'  This is used
-   * to change an inner class name to a standard format.
-   * @param s  The String to change.
-   * @return  The converted string.
-   */
+  /** Loop over the specified string, and replace any '$' with '.'  This is used
+    * to change an inner class name to a standard format.
+    * @param s  The String to change.
+    * @return  The converted string.
+    */
   public static String dollarSignsToDots(String s) {
     return s.replace('$', '.');
   }
   
-  /**
-   * Determine the name of the next anonymous inner class (the enclosing class name, followed by '$' followed by a number).
-   * Look through the list of inner classes of this data to see if you can match it.  (You should be able to).  Return
-   * the matching SymbolData or null if you could not find it.
-   * @return the next anonymous inner class of this data.
-   */
+  /** Determine the name of the next anonymous inner class (the enclosing class name, followed by '$' followed by a number).
+    * Look through the list of inner classes of this data to see if you can match it.  (You should be able to).  Return
+    * the matching SymbolData or null if you could not find it.
+    * @return the next anonymous inner class of this data.
+    */
   public SymbolData getNextAnonymousInnerClass() {
     String name = getSymbolData().getName() + "$" + getSymbolData().preincrementAnonymousInnerClassNum();
     LinkedList<SymbolData> myDatas = getInnerClasses();
     SymbolData myData = null;
     //look through the inner classes for the data
-    for (int i = 0; i<myDatas.size(); i++) {
+    for (int i = 0; i < myDatas.size(); i++) {
       if (myDatas.get(i).getName().equals(name)) {
         myData = myDatas.get(i);
         break;

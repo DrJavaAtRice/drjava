@@ -80,15 +80,15 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
     return forBracedBodyOnly(that, items_result);
   }
   
-  /**
-   * Make sure that every Exception in thrown is either in caught or in the list of what can be thrown from where we are.
-   * Also make sure that every Exception that is declared to be thrown or caught is actually thrown.
-   * Overrides the same method in BodyTypeChecker.
-   * @param that  The TryCatchStatement we are currently working with
-   * @param caught_array  The SymbolData[] of exceptions that are explicitely caught.
-   * @param thrown  The LinkedList of SymbolData of exceptions that are thrown.  This will be modified.
-   */
-  protected void compareThrownAndCaught(TryCatchStatement that, SymbolData[] caught_array, LinkedList<Pair<SymbolData, JExpression>> thrown) {
+  /** Make sure that every Exception in thrown is either in caught or in the list of what can be thrown from where we are.
+    * Also make sure that every Exception that is declared to be thrown or caught is actually thrown.
+    * Overrides the same method in BodyTypeChecker.
+    * @param that  The TryCatchStatement we are currently working with
+    * @param caught_array  The SymbolData[] of exceptions that are explicitely caught.
+    * @param thrown  The LinkedList of SymbolData of exceptions that are thrown.  This will be modified.
+    */
+  protected void compareThrownAndCaught(TryCatchStatement that, SymbolData[] caught_array, 
+                                        LinkedList<Pair<SymbolData, JExpression>> thrown) {
     LinkedList<Pair<SymbolData, JExpression>> copyOfThrown = new LinkedList<Pair<SymbolData, JExpression>>();
     for (Pair<SymbolData, JExpression> p : thrown) {
       copyOfThrown.addLast(p);
@@ -224,7 +224,9 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
       thrown.addLast(new Pair<SymbolData, JExpression>(exception3, ntcs));
       
       _tcbtc.compareThrownAndCaught(ntcs, caught_array, thrown);
+      System.err.println("thrown = " + thrown);
       assertTrue("Thrown should have no elements", thrown.isEmpty());
+
       
       _tcbtc.compareThrownAndCaught(ntcs, new SymbolData[] {exception2}, thrown);
       assertEquals("There should be one error", 1, errors.size());

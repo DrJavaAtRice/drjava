@@ -36,9 +36,7 @@
 
 package edu.rice.cs.javalanglevels;
 
-/**
- * Utility class, allows us to store two things as a single object.
- */
+/** Utility class, allows us to store two things as a single object. */
 public class Pair<T,U> {
   T _first;
   U _second;
@@ -56,18 +54,12 @@ public class Pair<T,U> {
     return _second;
   }
   
-  public boolean equals(Object obj) {
-    if (obj == null) return false;
-    if ((obj.getClass() != this.getClass())) { //|| (obj.hashCode() != this.hashCode())) {
-      return false;
-    }
-    
-    return (this.getFirst().equals(((Pair) obj).getFirst()) && this.getSecond().equals(((Pair) obj).getSecond()));
+  public boolean equals(Object o) {
+    return  (o != null) && (o.getClass() == this.getClass()) &&
+      getFirst().equals(((Pair) o).getFirst()) && getSecond().equals(((Pair) o).getSecond());
   }
   
-  /**
-   * Define a hash code based on the first and second's hash code
-   */
+  /** Define a hash code based on the first and second's hash code */
   public int hashCode() {
     return _first.hashCode() ^ _second.hashCode();
   }

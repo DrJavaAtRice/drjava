@@ -658,28 +658,26 @@ public class BodyTypeChecker extends Bob {
     return null;
   }
   
-  /**
-   * Makes sure that no super class of any exception is caught before the current exception's catch block.
-   */
+  /** Makes sure that no super class of any exception is caught before the current exception's catch block. */
   protected void checkDuplicateExceptions(TryCatchStatement that) {
     // Make sure that the user isn't throwing duplicate exceptions
     LinkedList<SymbolData> catchBlockExceptions = new LinkedList<SymbolData>();
     CatchBlock[] catchBlocks = that.getCatchBlocks();
     for (int i = 0; i < catchBlocks.length; i++) {
-      catchBlockExceptions.addLast(getSymbolData(catchBlocks[i].getException().getDeclarator().getType().getName(), _data, catchBlocks[i].getException()));
+      catchBlockExceptions.addLast(getSymbolData(catchBlocks[i].getException().getDeclarator().getType().getName(),
+                                                 _data, catchBlocks[i].getException()));
     }
     for (int i = 0; i < catchBlockExceptions.size(); i++) {
       for (int j = i+1; j < catchBlockExceptions.size(); j++) {
         if (catchBlockExceptions.get(j) != null && catchBlockExceptions.get(j).isSubClassOf(catchBlockExceptions.get(i))) {
-          _addError("Exception " + catchBlockExceptions.get(j).getName() + " has already been caught", catchBlocks[j].getException());
+          _addError("Exception " + catchBlockExceptions.get(j).getName() + 
+                    " has already been caught", catchBlocks[j].getException());
         }
       }
     }
   }
   
-  /**
-   * Check if the two given SymbolDatas have a common super type.  If so, return it, else return null.
-   */
+  /** Check if the two given SymbolDatas have a common super type.  If so, return it, else return null. */
   protected SymbolData getCommonSuperType(SymbolData s1, SymbolData s2) {
     if ((s1 == null) && (s2 == null)) {
       return null;
@@ -2517,16 +2515,26 @@ public class BodyTypeChecker extends Bob {
       _bbtc.checkDuplicateExceptions(tcfs);
       assertEquals("Should be no errors", 0, errors.size());
       
-      UninitializedVariableDeclarator uvd1 = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Exception", new Type[0]), new Word(SourceInfo.NO_INFO, "e"));
-      UninitializedVariableDeclarator uvd2 = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "RuntimeException", new Type[0]), new Word(SourceInfo.NO_INFO, "e"));
-      UninitializedVariableDeclarator uvd3 = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "IOException", new Type[0]), new Word(SourceInfo.NO_INFO, "e"));
+      UninitializedVariableDeclarator uvd1 = 
+        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                            new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Exception", new Type[0]), 
+                                            new Word(SourceInfo.NO_INFO, "e"));
+      UninitializedVariableDeclarator uvd2 = 
+        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                            new ClassOrInterfaceType(SourceInfo.NO_INFO, "RuntimeException", new Type[0]), 
+                                            new Word(SourceInfo.NO_INFO, "e"));
+      UninitializedVariableDeclarator uvd3 =
+        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                            new ClassOrInterfaceType(SourceInfo.NO_INFO, "IOException", new Type[0]), 
+                                            new Word(SourceInfo.NO_INFO, "e"));
 
       FormalParameter fp1 = new FormalParameter(SourceInfo.NO_INFO, uvd1, false);
       FormalParameter fp2 = new FormalParameter(SourceInfo.NO_INFO, uvd2, false);
       FormalParameter fp3 = new FormalParameter(SourceInfo.NO_INFO, uvd3, false);
 
-      LanguageLevelVisitor llv = new LanguageLevelVisitor(new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
-                                      new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+      LanguageLevelVisitor llv = 
+        new LanguageLevelVisitor(new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
+                                 new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded=false;
@@ -2551,33 +2559,35 @@ public class BodyTypeChecker extends Bob {
       CatchBlock c3 = new CatchBlock(SourceInfo.NO_INFO, fp3, b);
       _bbtc._importedFiles.addLast("java.io.IOException");
       
-      //just one exception, no error
+      // Just one exception, no error
       ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[] {c1});
       _bbtc.checkDuplicateExceptions(ntcs);
       assertEquals("Should be no errors", 0, errors.size());
       
-      //2nd exception is subclass of 1st exception: should throw error
+      // Second exception is subclass of 1st exception: should throw error
       ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[]{c1, c2});
       _bbtc.checkDuplicateExceptions(ntcs);
+//      System.out.println("First error is: " + errors.get(0));
       assertEquals("Should be one error", 1, errors.size());
       assertEquals("Error message should be correct", "Exception java.lang.RuntimeException has already been caught", errors.get(0).getFirst());
 
-      //two exceptions, unrelated.  no error
+      // Two exceptions, unrelated.  no error
       ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[]{c2, c3});
       _bbtc.checkDuplicateExceptions(ntcs);
       assertEquals("Should still be one error", 1, errors.size());
-
-      //2nd and 3rd exceptions subclasses of 1st exception: should throw 2 errors
+      
+      // 2nd and 3rd exceptions subclasses of 1st exception: should throw 2 errors, but one is a duplicate 
       ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[]{c1, c2, c3});
       _bbtc.checkDuplicateExceptions(ntcs);
-      assertEquals("Should be three errors", 3, errors.size());
-      assertEquals("2nd Error message should be correct", "Exception java.lang.RuntimeException has already been caught", errors.get(1).getFirst());
-      assertEquals("3rd Error message should be correct", "Exception java.io.IOException has already been caught", errors.get(2).getFirst());
+
+      assertEquals("Should be two errors", 2, errors.size());
+      assertEquals("2nd Error message should be correct", "Exception java.lang.RuntimeException has already been caught", errors.get(0).getFirst());
+      assertEquals("3rd Error message should be correct", "Exception java.io.IOException has already been caught", errors.get(1).getFirst());
       
-      //1st exception subclass of 2nd exception: should be no error
+      // 1st exception subclass of 2nd exception: should be no error
       ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[]{c2, c1});
       _bbtc.checkDuplicateExceptions(ntcs);
-      assertEquals("Should still be three errors", 3, errors.size());
+      assertEquals("Should still be two errors", 2, errors.size());
     }
     
     public void testTryCatchLeastRestrictiveType() {
@@ -3009,10 +3019,13 @@ public class BodyTypeChecker extends Bob {
       _bbtc._bodyData.addBlock(new BlockData(_bbtc._bodyData));
       _bbtc._bodyData.resetBlockIterator();
       
-      TypeData result = tcfs2.visit(_bbtc);
+      TypeData result = tcfs2.visit(_bbtc);  // Duplicates previous error
       assertEquals("Should return Exception", SymbolData.EXCEPTION.getInstanceData(), result);
-      assertEquals("Should be 2 errors", 2, errors.size());
-      assertEquals("Error message should be correct", "This statement throws the exception java.util.prefs.BackingStoreException which needs to be caught or declared to be thrown", errors.get(1).getFirst());
+      assertEquals("Should still be 1 error", 1, errors.size());
+      assertEquals("Error message should be correct", 
+                   "This statement throws the exception java.util.prefs.BackingStoreException " +
+                   "which needs to be caught or declared to be thrown", 
+                   errors.get(0).getFirst());
                                       
       //Test that a finally block where both branches end abruptly acts as expected (break)
       IfThenElseStatement ites2 = new IfThenElseStatement(SourceInfo.NO_INFO,
@@ -3029,7 +3042,7 @@ public class BodyTypeChecker extends Bob {
       _bbtc._bodyData.resetBlockIterator();
 
       assertEquals("Should return Exception", SymbolData.EXCEPTION.getInstanceData(), tcfs3.visit(_bbtc));
-      assertEquals("Should still be 2 errors", 2, errors.size());
+      assertEquals("Should still be 1 error", 1, errors.size());
       
 
       //Test that a finally block where both branches end abruptly acts as expected (void return)
@@ -3049,7 +3062,7 @@ public class BodyTypeChecker extends Bob {
       result = tcfs4.visit(_bbtc);
       assertEquals("Should return SymbolData.VOID_TYPE", SymbolData.VOID_TYPE.getInstanceData(), result);
       
-      assertEquals("Should still still be 2 errors", 2, errors.size());
+      assertEquals("Should still still be 1 error", 1, errors.size());
 
       _bbtc._bodyData.getMethodData().setReturnType(SymbolData.INT_TYPE);
 
@@ -3075,9 +3088,10 @@ public class BodyTypeChecker extends Bob {
       
       _bbtc._bodyData.resetBlockIterator();
       
-      nested.visit(_bbtc);
-      assertEquals("There should now be 3 errors", 3, errors.size());
-      assertEquals("Error message should be correct", "This statement throws the exception java.util.prefs.BackingStoreException which needs to be caught or declared to be thrown", errors.get(2).getFirst());
+      nested.visit(_bbtc);  // Duplicates existing error
+      assertEquals("There should still be 1 errors", 1, errors.size());
+      assertEquals("Error message should be correct", "This statement throws the exception java.util.prefs.BackingStoreException " +
+                   "which needs to be caught or declared to be thrown", errors.get(0).getFirst());
                                       
       //Test that no error is thrown if the exception is caught
       UninitializedVariableDeclarator uvd1 = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.util.prefs.BackingStoreException", new Type[0]), new Word(SourceInfo.NO_INFO, "e"));
@@ -3096,7 +3110,7 @@ public class BodyTypeChecker extends Bob {
       _bbtc._bodyData.resetBlockIterator();
 
       nested2.visit(_bbtc);
-      assertEquals("There should still be 3 errors", 3, errors.size());
+      assertEquals("There should still be 1 error", 1, errors.size());
       
       //Test that no error is thrown if it is a runtime exception
       BracedBody reb = new BracedBody(SourceInfo.NO_INFO, 
@@ -3131,14 +3145,14 @@ public class BodyTypeChecker extends Bob {
       _bbtc._bodyData.resetBlockIterator();
 
       nested3.visit(_bbtc);
-      assertEquals("There should still be 3 errors", 3, errors.size());
+      assertEquals("There should still be 1 errors", 1, errors.size());
       
       //Test that no error is thrown if the method is declared to throw it
       _bbtc._bodyData.getMethodData().setThrown(new String[]{"java.util.prefs.BackingStoreException"});
       innerBD.resetBlockIterator();
       _bbtc._bodyData.resetBlockIterator();
       nested.visit(_bbtc);
-      assertEquals("There should still be 3 errors!", 3, errors.size());
+      assertEquals("There should still be 1 error!", 1, errors.size());
     }
 
     public void testForNormalTryCatchStatement() {
@@ -3193,8 +3207,11 @@ public class BodyTypeChecker extends Bob {
       _bbtc._bodyData.resetBlockIterator();
 
       nested.visit(_bbtc);
-      assertEquals("There should now be 2 errors", 2, errors.size());
-      assertEquals("Error message should be correct", "This statement throws the exception java.util.prefs.BackingStoreException which needs to be caught or declared to be thrown", errors.get(1).getFirst());
+      assertEquals("There should still be be 1 error", 1, errors.size());  // Generated error is a duplicate!
+      assertEquals("Error message should be correct", 
+                   "This statement throws the exception java.util.prefs.BackingStoreException " + 
+                   "which needs to be caught or declared to be thrown", 
+                   errors.get(0).getFirst());
                                       
 //      Test that no error is thrown if the exception is caught
       UninitializedVariableDeclarator uvd1 = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.util.prefs.BackingStoreException", new Type[0]), new Word(SourceInfo.NO_INFO, "e"));
@@ -3215,7 +3232,7 @@ public class BodyTypeChecker extends Bob {
       _bbtc._bodyData.resetBlockIterator();
 
       nested2.visit(_bbtc);
-      assertEquals("There should still be 2 errors", 2, errors.size());
+      assertEquals("There should still be 1 error", 1, errors.size());
       
 //      Test that no error is thrown if it is a runtime exception
       BracedBody reb = new BracedBody(SourceInfo.NO_INFO, 
@@ -3239,7 +3256,7 @@ public class BodyTypeChecker extends Bob {
 
       
       nested3.visit(_bbtc);
-      assertEquals("There should still be 2 errors", 2, errors.size());
+      assertEquals("There should still be 1 error", 1, errors.size());
       
       // Test that no error is thrown if the method is declared to throw it
       _bbtc._bodyData.getMethodData().setThrown(new String[]{"java.util.prefs.BackingStoreException"});
@@ -3251,7 +3268,7 @@ public class BodyTypeChecker extends Bob {
       _bbtc._bodyData.resetBlockIterator();
 
       nested.visit(_bbtc);
-      assertEquals("There should still be 2 errors!", 2, errors.size());
+      assertEquals("There should still be 1 error!", 1, errors.size());
     }
   }
 }

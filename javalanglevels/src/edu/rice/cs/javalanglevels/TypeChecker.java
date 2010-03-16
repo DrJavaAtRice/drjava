@@ -692,7 +692,8 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
    */
   protected static void _addError(String message, JExpressionIF that) {
     _errorAdded = true;
-    errors.addLast(new Pair<String, JExpressionIF>(message, that));
+    Pair<String, JExpressionIF> p = new Pair<String, JExpressionIF>(message, that);
+    if (! errors.contains(p)) errors.addLast(p);
   }
   
   /** Return a TypeData array of the specified size. */
@@ -978,22 +979,22 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       return null;
     }
     
-    //See if sd is public.  If so, the filename must match sd's name.
+    // See if sd is public.  If so, the filename must match sd's name.
     if (sd.hasModifier("public")) {
       String fileName = className.replace('.', System.getProperty("file.separator").charAt(0));
       if (!_file.getAbsolutePath().endsWith(fileName + ".dj0") && !_file.getAbsolutePath().endsWith(fileName + ".dj1") && !_file.getAbsolutePath().endsWith(fileName + ".dj2")) {_addError(className + " is public thus must be defined in a file with the same name.", that.getName());}
     }
 
-    //Reset sd's anonymous inner class count so we can count again during this second pass.
+    // Reset sd's anonymous inner class count so we can count again during this second pass.
     sd.setAnonymousInnerClassNum(0);
 
-    //Make sure this class does not implement the Runnable interface
+    // Make sure this class does not implement the Runnable interface
     if (sd.hasInterface(getSymbolData("java.lang.Runnable", that, false, false))) {
       _addError(sd.getName() + " implements the Runnable interface, which is not allowed at any language level", that);
     }
 
     SymbolData superClass = sd.getSuperClass();
-    //make sure this class can see its super class
+    // make sure this class can see its super class
     if (superClass != null) {
       checkAccessibility(that.getSuperclass(), superClass.getMav(), superClass.getName(), superClass, sd, "class");
       //Also make sure that the superClass is not an interface!
@@ -2042,8 +2043,13 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       cd7.visit(_btc);
 
       assertEquals("There should now be 11 errors", 11, errors.size());
-      assertEquals("The tenth error message should be correct", "Hspia extends TestCase and thus must be explicitly declared public" , errors.get(9).getFirst());
-      assertEquals("The eleventh error message should be correct", "Class Hspia does not have any valid test methods.  Test methods must be declared public, must return void, and must start with the word \"test\"" , errors.get(10).getFirst());
+      assertEquals("The tenth error message should be correct", 
+                   "Hspia extends TestCase and thus must be explicitly declared public" , 
+                   errors.get(9).getFirst());
+      assertEquals("The eleventh error message should be correct", 
+                   "Class Hspia does not have any valid test methods.  Test methods must be declared public, " +
+                   "must return void, and must start with the word \"test\"" , 
+                   errors.get(10).getFirst());
       
       //Test that if a class that is not public extends test case, an error is thrown.
       //Also check that if a test class doesn't have any test methods, an error is thrown.
@@ -2060,8 +2066,11 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       sd.setSuperClass(t);
       cd7.visit(_btc);
       
-      assertEquals("There should now be 12 errors", 12, errors.size());
-      assertEquals("The 12th error message should be correct", "Class Hspia does not have any valid test methods.  Test methods must be declared public, must return void, and must start with the word \"test\"" , errors.get(11).getFirst());
+      assertEquals("There should still be 11 errors", 11, errors.size());  // Generated duplicate error message
+      assertEquals("The 12th error message should be correct", 
+                   "Class Hspia does not have any valid test methods.  Test methods must be declared public, " +
+                   "must return void, and must start with the word \"test\"" , 
+                   errors.get(10).getFirst());
 
     }
     
@@ -2344,7 +2353,10 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       b.visit(new ClassBodyTypeChecker(_sd1, _btc._file, "", new LinkedList<String>(), new LinkedList<String>(), _sd1.getVars(), new LinkedList<Pair<SymbolData, JExpression>>()));
       
       assertEquals("There should be one error", 1, errors.size());
-      assertEquals("The error message should be correct", "myMethod2(int, java.lang.Short) is an ambiguous invocation.  It matches both myMethod2(int, short) and myMethod2(java.lang.Integer, java.lang.Short)", errors.get(0).getFirst());
+      assertEquals("The error message should be correct", 
+                   "myMethod2(int, java.lang.Short) is an ambiguous invocation.  " +
+                   "It matches both myMethod2(int, short) and myMethod2(java.lang.Integer, java.lang.Short)", 
+                   errors.get(0).getFirst());
       
       // test that if a method is overridden that it still works
       SymbolData subSd = new SymbolData("sub");
@@ -2353,16 +2365,22 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       
       _sd1.setMethods(new LinkedList<MethodData>());
       _sd1.addMethod(md1);      
-      MethodData md3 = new MethodData("myMethod2", _publicMav, new TypeParameter[0], SymbolData.BOOLEAN_TYPE, new VariableData[] {vd1Prim, vd2Prim}, new String[0], _sd1, new NullLiteral(SourceInfo.NO_INFO));
-      b.visit(new ClassBodyTypeChecker(subSd, _btc._file, "", new LinkedList<String>(), new LinkedList<String>(), _sd1.getVars(), new LinkedList<Pair<SymbolData, JExpression>>()));
-      assertEquals("There should still be one error", 1, errors.size());
+      MethodData md3 = new MethodData("myMethod2", _publicMav, new TypeParameter[0], SymbolData.BOOLEAN_TYPE, 
+                                      new VariableData[] {vd1Prim, vd2Prim}, new String[0], _sd1, 
+                                      new NullLiteral(SourceInfo.NO_INFO));
+      b.visit(new ClassBodyTypeChecker(subSd, _btc._file, "", new LinkedList<String>(), new LinkedList<String>(), 
+                                       _sd1.getVars(), new LinkedList<Pair<SymbolData, JExpression>>()));
+      assertEquals("There should still be one error", 1, errors.size());  // Generated a duplicate error
       
       // test that if a sd1 has something that's ambiguous, so the superclass is ambiguous, the error is only thrown once when calling the method in the subclass.
       subSd.setMethods(new LinkedList<MethodData>());
       _sd1.addMethod(md2);
       b.visit(new ClassBodyTypeChecker(subSd, _btc._file, "", new LinkedList<String>(), new LinkedList<String>(), _sd1.getVars(), new LinkedList<Pair<SymbolData, JExpression>>()));
-      assertEquals("There should now be two errors", 2, errors.size());
-      assertEquals("The error message should be correct", "myMethod2(int, java.lang.Short) is an ambiguous invocation.  It matches both myMethod2(int, short) and myMethod2(java.lang.Integer, java.lang.Short)", errors.get(1).getFirst());
+      assertEquals("There should still be one error", 1, errors.size());
+      assertEquals("The error message should be correct", 
+                   "myMethod2(int, java.lang.Short) is an ambiguous invocation.  It matches both " +
+                   "myMethod2(int, short) and myMethod2(java.lang.Integer, java.lang.Short)", 
+                   errors.get(0).getFirst());
     }
     
     public void testForInnerClassDef() {

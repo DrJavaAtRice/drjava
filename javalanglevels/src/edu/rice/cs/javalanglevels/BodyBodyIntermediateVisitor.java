@@ -97,7 +97,8 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     BlockData bd = new BlockData(_bodyData);
     _bodyData.addBlock(bd);
     that.getStatements().visit(new BodyBodyIntermediateVisitor(bd, _file, _package, _importedFiles, _importedPackages,
-                                                               _classNamesInThisFile, continuations, _innerClassesToBeParsed));
+                                                               _classNamesInThisFile, continuations, 
+                                                               _innerClassesToBeParsed));
     return forBlockOnly(that);
   }
   
@@ -133,7 +134,6 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
   
   /**Override method in IntermediateVisitor that throws an error here.*/
   public Void forTryCatchStatementDoFirst(TryCatchStatement that) { return null; /*  No errors to throw here. */ }
-    
   
   /* Make sure that no modifiers appear before the InnerClassDef, and then delegate.*/
 //  public void forInnerClassDef(InnerClassDef that) {
@@ -159,7 +159,7 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
   
   /** If this is the body of a constructor, referencing 'this' is illegal. So, check to see if this is a constructor,
     * and if so, throw an error. This should catch both the ComplexThisReference and the SimpleThisReference case.
-   */
+    */
   //TODO: Long term, it might be nice to create a ConstructorBodyIntermediateVisitor, so this check is not necessary here.
   public Void forThisReferenceDoFirst(ThisReference that) {
     if (isConstructor(_bodyData)) {
@@ -168,11 +168,10 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     return null;
   }
 
-  /**
-   * Call the super method to convert these to a VariableData array, then make sure that
-   * each VariableData is set to be final, as required at the Intermediate level.
-   * @param enclosingData  The Data which contains the variables
-   */
+  /** Call the super method to convert these to a VariableData array, then make sure that
+    * each VariableData is set to be final, as required at the Intermediate level.
+    * @param enclosingData  The Data which contains the variables
+    */
   protected VariableData[] _variableDeclaration2VariableData(VariableDeclaration vd, Data enclosingData) {
     VariableData[] vds = llVariableDeclaration2VariableData(vd, enclosingData);
     for (int i = 0; i < vds.length; i++) {

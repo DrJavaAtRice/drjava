@@ -97,7 +97,7 @@ public class BodyBodyAdvancedVisitor extends AdvancedVisitor {
     if (prune(that)) return null;
     BlockData bd = new BlockData(_bodyData);
     _bodyData.addBlock(bd);
-    that.getStatements().visit(new BodyBodyAdvancedVisitor(bd, _file, _package, _importedFiles, _importedPackages, 
+    that.getStatements().visit(new BodyBodyAdvancedVisitor(bd, _file, _package, _importedFiles, _importedPackages,
                                                            _classNamesInThisFile, continuations, 
                                                            _innerClassesToBeParsed));
     return forBlockOnly(that);

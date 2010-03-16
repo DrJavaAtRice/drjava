@@ -1009,11 +1009,11 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     }
     
     public void testSimpleAnonymousClassInstantiationHelper() {
-     SimpleAnonymousClassInstantiation basic = new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), 
-                                                                        new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
-                                                                        new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
-    
-
+     SimpleAnonymousClassInstantiation basic = 
+       new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, 
+                                             new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), 
+                                             new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
+                                             new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
      _iv._package = "i.like";
      _iv.simpleAnonymousClassInstantiationHelper(basic, _sd1);
      assertEquals("There should be no errors", 0, errors.size());

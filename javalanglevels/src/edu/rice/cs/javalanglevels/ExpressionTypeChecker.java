@@ -45,24 +45,20 @@ import edu.rice.cs.plt.iter.IterUtil;
 
 import junit.framework.TestCase;
 
-/**
- * This is a TypeChecker for all Expressions used in the students files.  It is
- * used with every LanguageLevel.
- */
+/** This is a TypeChecker for all Expressions used in the students files.  It is used with every LanguageLevel. */
 public class ExpressionTypeChecker extends Bob {
   
   public final JavaVersion JAVA_VERSION = LanguageLevelConverter.OPT.javaVersion();
   
-  /**
-   * Simply pass the necessary information on to superclass constructor.
-   * @param data  The data that represents the context.
-   * @param file  The file that corresponds to the source file
-   * @param packageName  The string representing the package name
-   * @param importedFiles  The list of file names that have been specifically imported
-   * @param importedPackages  The list of package names that have been specifically imported
-   * @param vars  The list of fields that have been assigned up to the point where Bob is called.
-   * @param thrown  The list of exceptions that the context is declared to throw
-   */
+  /** Simply pass the necessary information on to superclass constructor.
+    * @param data  The data that represents the context.
+    * @param file  The file that corresponds to the source file
+    * @param packageName  The string representing the package name
+    * @param importedFiles  The list of file names that have been specifically imported
+    * @param importedPackages  The list of package names that have been specifically imported
+    * @param vars  The list of fields that have been assigned up to the point where Bob is called.
+    * @param thrown  The list of exceptions that the context is declared to throw
+    */
   public ExpressionTypeChecker(Data data, File file, String packageName, LinkedList<String> importedFiles, 
                                LinkedList<String> importedPackages, LinkedList<VariableData> vars, 
                                LinkedList<Pair<SymbolData, JExpression>> thrown) {
@@ -793,8 +789,10 @@ public class ExpressionTypeChecker extends Bob {
   public SymbolData handleAnonymousClassInstantiation(AnonymousClassInstantiation that, SymbolData superC) {
     SymbolData sd = _data.getNextAnonymousInnerClass();
     if (sd == null) {
-      throw new RuntimeException("Internal Program Error: Couldn't find the SymbolData for the anonymous inner class." + 
-                                 "  Please report this bug.");
+      _addError("Nested anonymous classes are not supported at any language lavel", that);
+      return sd;
+//      throw new RuntimeException("Internal Program Error: Couldn't find the SymbolData for the anonymous inner class." + 
+//                                 "  Please report this bug.");
     }
     if (sd.getSuperClass() == null) {
       if (superC == null) {
@@ -812,18 +810,23 @@ public class ExpressionTypeChecker extends Bob {
     return sd;
   }
  
-  /**
-   * Resolve the type of this anonymous class.  Look it up in the enclosing data, check that
-   * it is using a valid constructor through the classInstantiationHelper and visit the body.
-   * Make sure that all abstract methods are overwritten.
-   * @param that  The SimpleAnonymousClassInstantiation being type-checked
-   * @return  The result of type checking the class instantiation.
-   */
+  /** Resolve the type of this anonymous class.  Look it up in the enclosing data, check that
+    * it is using a valid constructor through the classInstantiationHelper and visit the body.
+    * Make sure that all abstract methods are overwritten.
+    * @param that  The SimpleAnonymousClassInstantiation being type-checked
+    * @return  The result of type checking the class instantiation.
+    */
   public TypeData forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
+    if (_data.isDoublyAnonymous()) {
+      _addError(_data + "is a nested anonymous class, which is not supported at any language level", that);
+      return null;
+    }
+      
     final SymbolData superclass_result = getSymbolData(that.getType().getName(), _data, that); // resolve super class
 
     // Get this anonymous inner class's SymbolData, and finish resolving it.
     SymbolData myData = handleAnonymousClassInstantiation(that, superclass_result);
+    if (myData == null) return null;
       
     // Cannot instantiate a non-static inner class from a static context (i.e. new A.B() where B is dynamic).
     // Here, we make sure that if B is non-static, it is not an inner class of anything.
@@ -849,7 +852,7 @@ public class ExpressionTypeChecker extends Bob {
                   expr.length + " arguments", that);}
     }
     
-    else {classInstantiationHelper(that, superclass_result);} //use super class here, since it has constructors in it
+    else classInstantiationHelper(that, superclass_result); //use super class here, since it has constructors in it
     
     
     //clone the variables and visit the body.
@@ -871,8 +874,12 @@ public class ExpressionTypeChecker extends Bob {
     * @return  The result of type checking the class instantiation.
     */
   public TypeData forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
+    if (_data.isDoublyAnonymous()) {
+      _addError(_data + "is a nested anonymous class, which is not supported at any language level", that);
+      return null;
+    }
     TypeData enclosingType = that.getEnclosing().visit(this);
-    if ((enclosingType == null) || !assertFound(enclosingType, that.getEnclosing())) {return null; }
+    if ((enclosingType == null) || ! assertFound(enclosingType, that.getEnclosing())) { return null; }
     
     //make sure we can see enclosingType
     checkAccessibility(that, enclosingType.getSymbolData().getMav(), enclosingType.getSymbolData().getName(), 
@@ -885,8 +892,8 @@ public class ExpressionTypeChecker extends Bob {
     
     // Get this anonymous inner class's SymbolData
     SymbolData myData = handleAnonymousClassInstantiation(that, superclass_result);
+    if (myData == null) return null;
       
-
     // TODO: will getSymbolData correctly handle all cases here?
     //TODO: We still do not handle static fields on the lhs correctly.  I think.
     
@@ -935,9 +942,7 @@ public class ExpressionTypeChecker extends Bob {
   }
   
 
-  /**
-   * SimpleThisConstructorInvocations are not allowed outside of the first line of a constructor.
-   */
+  /** SimpleThisConstructorInvocations are not allowed outside of the first line of a constructor. */
   public TypeData forSimpleThisConstructorInvocation(SimpleThisConstructorInvocation that) {
     _addError("This constructor invocations are only allowed as the first statement of a constructor body", that);
     return null;
@@ -1267,15 +1272,14 @@ public class ExpressionTypeChecker extends Bob {
   
   
   
-  /**
-   * Look up the method called in the method invocation within the context of the context TypeData.
-   * Resolve all arguments to the method, and make sure they are instance datas.
-   * If an argument is a type, the method cannot be found, or the method is called from a static context but is
-   * not static, give appropriate error.
-   * If the method is declared to throw any exceptions, add them to the thrown list.
-   * @param that  The MethodInvocation we are type checking
-   * @param context  The TypeData that should contain the method being invoked.
-   */
+  /** Look up the method called in the method invocation within the context of the context TypeData.
+    * Resolve all arguments to the method, and make sure they are instance datas.
+    * If an argument is a type, the method cannot be found, or the method is called from a static context but is
+    * not static, give appropriate error.
+    * If the method is declared to throw any exceptions, add them to the thrown list.
+    * @param that  The MethodInvocation we are type checking
+    * @param context  The TypeData that should contain the method being invoked.
+    */
   public TypeData methodInvocationHelper(MethodInvocation that, TypeData context) {
     Expression[] exprs = that.getArguments().getExpressions();
     TypeData[] args = new TypeData[exprs.length];
@@ -1313,7 +1317,13 @@ public class ExpressionTypeChecker extends Bob {
       _thrown.addLast(new Pair<SymbolData, JExpression>(getSymbolData(thrown[i], _getData(), that), that));
     }
 
-    return md.getReturnType().getInstanceData();
+    SymbolData returnType = md.getReturnType();
+    if (returnType == null) {
+      _addError("Internal error: returnType is null", that);
+      return null;
+    }
+                
+    return returnType.getInstanceData();
   }
   
   /** Tries to match this method invocation to a method in the context.  Here, the context is the enclosing data for
@@ -2041,33 +2051,54 @@ public class ExpressionTypeChecker extends Bob {
       PackageData pd = new PackageData("bad_reference");
       assertEquals("Should return null", null, _etc.forSimpleAssignmentExpressionOnly(sae, pd, SymbolData.INT_TYPE));
       assertEquals("Should be 1 error", 1, errors.size());
-      assertEquals("Error message should be correct", "Could not resolve symbol bad_reference", errors.getLast().getFirst());
+      assertEquals("Error message should be correct", "Could not resolve symbol bad_reference", errors.get(0).getFirst());
       
       
       //if rhs is a PackageData, give an error and return null
       assertEquals("Should return null", null, _etc.forSimpleAssignmentExpressionOnly(sae, SymbolData.INT_TYPE, pd));
-      assertEquals("Should be 2 errors", 2, errors.size());
-      assertEquals("Error message should be correct", "Could not resolve symbol bad_reference", errors.getLast().getFirst());
+      assertEquals("Should only be 1 error", 1, errors.size());  // Generated error is duplicate
+      assertEquals("Error message should be correct", "Could not resolve symbol bad_reference", errors.get(0).getFirst());
 
       //if rhs or lhs are not instance datas, give appropriate errors
-      assertEquals("Should return double instance", SymbolData.DOUBLE_TYPE.getInstanceData(), _etc.forSimpleAssignmentExpressionOnly(sae, SymbolData.DOUBLE_TYPE, SymbolData.INT_TYPE.getInstanceData()));
-      assertEquals("Should be 3 errors", 3, errors.size());
-      assertEquals("Error message should be correct", "You cannot assign a value to the type double.  Perhaps you meant to create a new instance of double", errors.get(2).getFirst());
+      assertEquals("Should return double instance", 
+                   SymbolData.DOUBLE_TYPE.getInstanceData(), 
+                   _etc.forSimpleAssignmentExpressionOnly(sae, 
+                                                          SymbolData.DOUBLE_TYPE, 
+                                                          SymbolData.INT_TYPE.getInstanceData()));
+      assertEquals("Should now be 2 errors", 2, errors.size());  // Generated one new error; one duplicate
+      assertEquals("Error message should be correct", 
+                   "You cannot assign a value to the type double.  Perhaps you meant to create a new instance of double", 
+                   errors.get(1).getFirst());
       
-      assertEquals("Should return double instance", SymbolData.DOUBLE_TYPE.getInstanceData(), _etc.forSimpleAssignmentExpressionOnly(sae, SymbolData.DOUBLE_TYPE.getInstanceData(), SymbolData.INT_TYPE));
-      assertEquals("Should be 4 errors", 4, errors.size());
-      assertEquals("Error message should be correct", "You cannot use the type name int on the right hand side of an assignment.  Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
+      assertEquals("Should return double instance", 
+                   SymbolData.DOUBLE_TYPE.getInstanceData(), 
+                   _etc.forSimpleAssignmentExpressionOnly(sae, 
+                                                          SymbolData.DOUBLE_TYPE.getInstanceData(), 
+                                                          SymbolData.INT_TYPE));
+      assertEquals("Should now be 3 errors", 3, errors.size());
+      assertEquals("Error message should be correct", 
+                   "You cannot use the type name int on the right hand side of an assignment.  " +
+                   "Perhaps you meant to create a new instance of int", 
+                   errors.get(2).getFirst());
 
       //if rhs cannot be assigned to lhs, give error
-      assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), _etc.forSimpleAssignmentExpressionOnly(sae, SymbolData.INT_TYPE.getInstanceData(), SymbolData.DOUBLE_TYPE.getInstanceData()));
-      assertEquals("Should now be 5 errors", 5, errors.size());
-      assertEquals("Error message should be correct", "You cannot assign something of type double to something of type int", errors.getLast().getFirst());
+      assertEquals("Should return int instance", 
+                   SymbolData.INT_TYPE.getInstanceData(), 
+                   _etc.forSimpleAssignmentExpressionOnly(sae, 
+                                                          SymbolData.INT_TYPE.getInstanceData(), 
+                                                          SymbolData.DOUBLE_TYPE.getInstanceData()));
+      assertEquals("Should now be 4 errors", 4, errors.size());
+      assertEquals("Error message should be correct", 
+                   "You cannot assign something of type double to something of type int", 
+                   errors.get(3).getFirst());
       
     }
 
     
     public void testForPlusAssignmentExpressionOnly() {
-      PlusAssignmentExpression pae = new PlusAssignmentExpression(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5), new IntegerLiteral(SourceInfo.NO_INFO, 6));
+      PlusAssignmentExpression pae = 
+        new PlusAssignmentExpression(SourceInfo.NO_INFO, 
+                                     new IntegerLiteral(SourceInfo.NO_INFO, 5), new IntegerLiteral(SourceInfo.NO_INFO, 6));
       
       //if lhs is a string, and lhs and rhs both instances, no errors
       SymbolData string = new SymbolData("java.lang.String");
@@ -2076,11 +2107,18 @@ public class ExpressionTypeChecker extends Bob {
       string.setMav(_publicMav);
       symbolTable.put("java.lang.String", string);
       
-      assertEquals("Should return string instance", string.getInstanceData(), _etc.forPlusAssignmentExpressionOnly(pae, string.getInstanceData(), SymbolData.INT_TYPE.getInstanceData()));
+      assertEquals("Should return string instance", 
+                   string.getInstanceData(), 
+                   _etc.forPlusAssignmentExpressionOnly(pae, string.getInstanceData(), 
+                                                        SymbolData.INT_TYPE.getInstanceData()));
       assertEquals("Should be no errors", 0, errors.size());
       
       //if both number instances, no errors
-      assertEquals("Should return double instance", SymbolData.DOUBLE_TYPE.getInstanceData(), _etc.forPlusAssignmentExpressionOnly(pae, SymbolData.DOUBLE_TYPE.getInstanceData(), SymbolData.INT_TYPE.getInstanceData()));
+      assertEquals("Should return double instance", 
+                   SymbolData.DOUBLE_TYPE.getInstanceData(), 
+                   _etc.forPlusAssignmentExpressionOnly(pae, 
+                                                        SymbolData.DOUBLE_TYPE.getInstanceData(), 
+                                                        SymbolData.INT_TYPE.getInstanceData()));
       assertEquals("Should be no errors", 0, errors.size());
       
       //if either input is null, return null
@@ -2097,45 +2135,79 @@ public class ExpressionTypeChecker extends Bob {
       
       //if rhs is a PackageData, give an error and return null
       assertEquals("Should return null", null, _etc.forPlusAssignmentExpressionOnly(pae, SymbolData.INT_TYPE, pd));
-      assertEquals("Should be 2 errors", 2, errors.size());
-      assertEquals("Error message should be correct", "Could not resolve symbol bad_reference", errors.getLast().getFirst());
+      assertEquals("Should be 1 error", 1, errors.size());  // Generated duplicate error message
+      assertEquals("Error message should be correct", "Could not resolve symbol bad_reference", errors.get(0).getFirst());
       
       //if lhs is a string, but not an instance data, give error
-      assertEquals("Should return string instance", string.getInstanceData(), _etc.forPlusAssignmentExpressionOnly(pae, string, SymbolData.INT_TYPE.getInstanceData()));
-      assertEquals("Should be 3 errors", 3, errors.size());
-      assertEquals("Error message should be correct","The arguments to a Plus Assignment Operator (+=) must both be instances, but you have specified a type name.  Perhaps you meant to create a new instance of java.lang.String" , errors.getLast().getFirst());
+      assertEquals("Should return string instance", 
+                   string.getInstanceData(), 
+                   _etc.forPlusAssignmentExpressionOnly(pae, string, 
+                                                        SymbolData.INT_TYPE.getInstanceData()));
+      assertEquals("Should now be 2 errors", 2, errors.size());
+      assertEquals("Error message should be correct",
+                   "The arguments to a Plus Assignment Operator (+=) must both be instances, but you have specified " +
+                   "a type name.  Perhaps you meant to create a new instance of java.lang.String", 
+                   errors.get(1).getFirst());
       
       //if lhs is a string, but rhs is not an instance, give error
-      assertEquals("Should return string instance", string.getInstanceData(), _etc.forPlusAssignmentExpressionOnly(pae, string.getInstanceData(), SymbolData.INT_TYPE));
-      assertEquals("Should be 4 errors", 4, errors.size());
-      assertEquals("Error message should be correct","The arguments to a Plus Assignment Operator (+=) must both be instances, but you have specified a type name.  Perhaps you meant to create a new instance of int" , errors.getLast().getFirst());
+      assertEquals("Should return string instance", string.getInstanceData(), 
+                   _etc.forPlusAssignmentExpressionOnly(pae, string.getInstanceData(), 
+                                                        SymbolData.INT_TYPE));
+      assertEquals("Should now be 3 errors", 3, errors.size());
+      assertEquals("Error message should be correct",
+                   "The arguments to a Plus Assignment Operator (+=) must both be instances, " +
+                   "but you have specified a type name.  Perhaps you meant to create a new instance of int" , 
+                   errors.get(2).getFirst());
 
-      //if rhs is not a number or string, give error
-      assertEquals("Should return string, by default", string.getInstanceData(), _etc.forPlusAssignmentExpressionOnly(pae, _sd2.getInstanceData(), SymbolData.INT_TYPE.getInstanceData()));
-      assertEquals("Should be 5 errors", 5, errors.size());
-      assertEquals("Error message should be correct", "The arguments to the Plus Assignment Operator (+=) must either include an instance of a String or both be numbers.  You have specified arguments of type " + _sd2.getName() + " and int", errors.getLast().getFirst());
+      // if rhs is not a number or string, give error
+      assertEquals("Should return string, by default", string.getInstanceData(), 
+                   _etc.forPlusAssignmentExpressionOnly(pae, _sd2.getInstanceData(), 
+                                                        SymbolData.INT_TYPE.getInstanceData()));
+      assertEquals("Should now be 4 errors", 4, errors.size());
+      assertEquals("Error message should be correct", 
+                   "The arguments to the Plus Assignment Operator (+=) must either include an instance of a String " +
+                   "or both be numbers.  You have specified arguments of type " + _sd2.getName() + " and int", 
+                   errors.get(3).getFirst());
       
-      //if rhs is number but lhs is not, give error
-      assertEquals("should return string, by default", string.getInstanceData(), _etc.forPlusAssignmentExpressionOnly(pae, SymbolData.INT_TYPE.getInstanceData(), _sd2.getInstanceData()));
-      assertEquals("Should be 6 errors", 6, errors.size());
-      assertEquals("Error message should be correct", "The arguments to the Plus Assignment Operator (+=) must either include an instance of a String or both be numbers.  You have specified arguments of type int and " + _sd2.getName(), errors.getLast().getFirst());
+      // if rhs is number but lhs is not, give error
+      assertEquals("should return string, by default", string.getInstanceData(),
+                   _etc.forPlusAssignmentExpressionOnly(pae, SymbolData.INT_TYPE.getInstanceData(),
+                                                        _sd2.getInstanceData()));
+      assertEquals("Should now be 5 errors", 5, errors.size());  // Generated slightly different error message
+      assertEquals("Error message should be correct", 
+                   "The arguments to the Plus Assignment Operator (+=) must either include an instance of a String " +
+                   "or both be numbers.  You have specified arguments of type int and " + _sd2.getName(), 
+                   errors.get(4).getFirst());
       
-
-      assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), _etc.forPlusAssignmentExpressionOnly(pae, SymbolData.INT_TYPE.getInstanceData(), SymbolData.DOUBLE_TYPE.getInstanceData()));
-      assertEquals("Should be 7 errors", 7, errors.size());
-      assertEquals("Error message should be correct", "You cannot increment something of type int with something of type double", errors.getLast().getFirst());
+      assertEquals("Should return int instance", 
+                   SymbolData.INT_TYPE.getInstanceData(), 
+                   _etc.forPlusAssignmentExpressionOnly(pae, SymbolData.INT_TYPE.getInstanceData(), 
+                                                        SymbolData.DOUBLE_TYPE.getInstanceData()));
+      assertEquals("Should now be 6 errors", 6, errors.size());
+      assertEquals("Error message should be correct", 
+                   "You cannot increment something of type int with something of type double", 
+                   errors.get(5).getFirst());
 
       //if both numbers, but not instances, give errors
-      assertEquals("Should return double instance", SymbolData.DOUBLE_TYPE.getInstanceData(), _etc.forPlusAssignmentExpressionOnly(pae, SymbolData.DOUBLE_TYPE, SymbolData.INT_TYPE));
-      assertEquals("Should be 9 errors", 9, errors.size());
-      assertEquals("Second error message should be correct", "The arguments to the Plus Assignment Operator (+=) must both be instances, but you have specified a type name.  Perhaps you meant to create a new instance of double", errors.get(7).getFirst());
-      assertEquals("First error message should be correct", "The arguments to the Plus Assignment Operator (+=) must both be instances, but you have specified a type name.  Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
+      assertEquals("Should return double instance", 
+                   SymbolData.DOUBLE_TYPE.getInstanceData(), 
+                   _etc.forPlusAssignmentExpressionOnly(pae, SymbolData.DOUBLE_TYPE, SymbolData.INT_TYPE));
+      assertEquals("Should now be 8 errors", 8, errors.size());
+      assertEquals("Second error message should be new", 
+                   "The arguments to the Plus Assignment Operator (+=) must both be instances, but you have specified " +
+                   "a type name.  Perhaps you meant to create a new instance of double", 
+                   errors.get(6).getFirst());
+      assertEquals("First error message should be new", 
+                   "The arguments to the Plus Assignment Operator (+=) must both be instances, but you have specified " +
+                   "a type name.  Perhaps you meant to create a new instance of int", 
+                   errors.get(7).getFirst());
     }
-    
-    
 
     public void testForNumericAssignmentExpressionOnly() {
-      NumericAssignmentExpression nae = new MinusAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 5));
+      NumericAssignmentExpression nae = 
+        new MinusAssignmentExpression(SourceInfo.NO_INFO, 
+                                      new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")),
+                                      new IntegerLiteral(SourceInfo.NO_INFO, 5));
 
       //if both lhs and rhs are instances of numbers, and lhs is assignable to rhs, should be no errors
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), _etc.forNumericAssignmentExpressionOnly(nae, SymbolData.INT_TYPE.getInstanceData(), SymbolData.CHAR_TYPE.getInstanceData()));
@@ -2152,39 +2224,61 @@ public class ExpressionTypeChecker extends Bob {
       PackageData pd = new PackageData("bad_reference");
       assertEquals("Should return null", null, _etc.forNumericAssignmentExpressionOnly(nae, pd, SymbolData.INT_TYPE));
       assertEquals("Should be 1 error", 1, errors.size());
-      assertEquals("Error message should be correct", "Could not resolve symbol bad_reference", errors.getLast().getFirst());
-      
+      assertEquals("Error message should be correct", "Could not resolve symbol bad_reference", errors.get(0).getFirst());
       
       //if rhs is a PackageData, give an error and return null
       assertEquals("Should return null", null, _etc.forNumericAssignmentExpressionOnly(nae, SymbolData.INT_TYPE, pd));
-      assertEquals("Should be 2 errors", 2, errors.size());
-      assertEquals("Error message should be correct", "Could not resolve symbol bad_reference", errors.getLast().getFirst());
+      assertEquals("Should still be 1 error", 1, errors.size());  // Generated duplicate error message
+      assertEquals("Error message should be correct", "Could not resolve symbol bad_reference", errors.get(0).getFirst());
 
       //if lhs not an instance data, give error
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), _etc.forNumericAssignmentExpressionOnly(nae, SymbolData.INT_TYPE, SymbolData.CHAR_TYPE.getInstanceData()));
-      assertEquals("Should be 3 errors", 3, errors.size());
-      assertEquals("Error message should be correct", "You cannot use a numeric assignment (-=, %=, *=, /=) on the type int.  Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
-      
-      //if rhs not instance data, give error
+      assertEquals("Should be 2 errors", 2, errors.size());  // Generated a duplicate error message
+      assertEquals("Error message should be correct", 
+                   "You cannot use a numeric assignment (-=, %=, *=, /=) on the type int.  Perhaps you meant to create " +
+                   "a new instance of int", 
+                   errors.get(1).getFirst());
+      // if rhs not instance data, give error
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), _etc.forNumericAssignmentExpressionOnly(nae, SymbolData.INT_TYPE.getInstanceData(), SymbolData.CHAR_TYPE));
-      assertEquals("Should be 4 errors", 4, errors.size());
-      assertEquals("Error message should be correct", "You cannot use the type name char on the left hand side of a numeric assignment (-=, %=, *=, /=).  Perhaps you meant to create a new instance of char", errors.getLast().getFirst());
+      assertEquals("Should now be 3 errors", 3, errors.size());
+      assertEquals("Error message should be correct", 
+                   "You cannot use the type name char on the left hand side of a numeric assignment (-=, %=, *=, /=)." +
+                   "  Perhaps you meant to create a new instance of char", 
+                   errors.get(2).getFirst());
       
       //if lhs not a number type, give error
-      assertEquals("Should return sd2 instance", _sd2.getInstanceData(), _etc.forNumericAssignmentExpressionOnly(nae, _sd2.getInstanceData(), SymbolData.CHAR_TYPE.getInstanceData()));
-      assertEquals("Should be 5 errors", 5, errors.size());
-      assertEquals("Error message should be correct", "The left side of this expression is not a number.  Therefore, you cannot apply a numeric assignment (-=, %=, *=, /=) to it", errors.getLast().getFirst());
+      assertEquals("Should return sd2 instance", _sd2.getInstanceData(), 
+                   _etc.forNumericAssignmentExpressionOnly(nae, _sd2.getInstanceData(), 
+                                                           SymbolData.CHAR_TYPE.getInstanceData()));
+      assertEquals("Should now be 4 errors", 4, errors.size());
+      assertEquals("Error message should be correct", 
+                   "The left side of this expression is not a number.  Therefore, you cannot apply " + 
+                   "a numeric assignment (-=, %=, *=, /=) to it", 
+                   errors.get(3).getFirst());
       
       //if rhs is not a number type, give error
-      assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), _etc.forNumericAssignmentExpressionOnly(nae, SymbolData.INT_TYPE.getInstanceData(), _sd2.getInstanceData()));
-      assertEquals("Should be 6 errors", 6, errors.size());
-      assertEquals("Error message should be correct", "The right side of this expression is not a number.  Therefore, you cannot apply a numeric assignment (-=, %=, *=, /=) to it", errors.getLast().getFirst());
-      
+      assertEquals("Should return int instance", 
+                   SymbolData.INT_TYPE.getInstanceData(), 
+                   _etc.forNumericAssignmentExpressionOnly(nae, 
+                                                           SymbolData.INT_TYPE.getInstanceData(), 
+                                                           _sd2.getInstanceData()));
+      assertEquals("Should still be 5 errors", 5, errors.size());  // Generated a duplicate error message
+      assertEquals("Error message should be correct", 
+                   "The right side of this expression is not a number.  Therefore, you cannot apply " +
+                   "a numeric assignment (-=, %=, *=, /=) to it", 
+                   errors.get(4).getFirst());
 
       //if rhs is not assignable to lhs, give error
-      assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), _etc.forNumericAssignmentExpressionOnly(nae, SymbolData.INT_TYPE.getInstanceData(), SymbolData.DOUBLE_TYPE.getInstanceData()));
-      assertEquals("Should be 7 errors", 7, errors.size());
-      assertEquals("Error message should be correct", "You cannot use a numeric assignment (-=, %=, *=, /=) on something of type int with something of type double", errors.getLast().getFirst());
+      assertEquals("Should return int instance", 
+                   SymbolData.INT_TYPE.getInstanceData(), 
+                   _etc.forNumericAssignmentExpressionOnly(nae, 
+                                                           SymbolData.INT_TYPE.getInstanceData(), 
+                                                           SymbolData.DOUBLE_TYPE.getInstanceData()));
+      assertEquals("Should be 6 errors", 6, errors.size());
+      assertEquals("Error message should be correct", 
+                   "You cannot use a numeric assignment (-=, %=, *=, /=) on something of type int with something of " +
+                   "type double", 
+                   errors.get(5).getFirst());
     }
     
 
@@ -3303,36 +3397,49 @@ public class ExpressionTypeChecker extends Bob {
       PackageData pd = new PackageData("bad_reference");
       assertEquals("Should return null", null, _etc.forArrayAccessOnly(aa, pd, SymbolData.INT_TYPE));
       assertEquals("Should be 1 error", 1, errors.size());
-      assertEquals("Error message should be correct", "Could not resolve symbol bad_reference", errors.getLast().getFirst());
+      assertEquals("Error message should be correct", 
+                   "Could not resolve symbol bad_reference", 
+                   errors.getLast().getFirst());
       
       
       //if rhs is a PackageData, give an error and return null
       assertEquals("Should return null", null, _etc.forArrayAccessOnly(aa, SymbolData.INT_TYPE, pd));
-      assertEquals("Should be 2 errors", 2, errors.size());
-      assertEquals("Error message should be correct", "Could not resolve symbol bad_reference", errors.getLast().getFirst());
+      assertEquals("Should still be 1 error", 1, errors.size());  // Generated a duplicate error
+      assertEquals("Error message should be correct", 
+                   "Could not resolve symbol bad_reference", 
+                   errors.getLast().getFirst());
       
       //if array type is not an instance data, give appropriate error:
-      assertEquals("Should return int", SymbolData.INT_TYPE.getInstanceData(), _etc.forArrayAccessOnly(aa, ad, SymbolData.INT_TYPE.getInstanceData()));
-      assertEquals("Should be 3 errors", 3, errors.size());
-      assertEquals("Error message should be correct", "You cannot access an array element of a type name.  Perhaps you meant to create a new instance of int[]", errors.getLast().getFirst());
+      assertEquals("Should return int", 
+                   SymbolData.INT_TYPE.getInstanceData(), 
+                   _etc.forArrayAccessOnly(aa, ad, SymbolData.INT_TYPE.getInstanceData()));
+      assertEquals("Should now be 2 errors", 2, errors.size());
+      assertEquals("Error message should be correct", 
+                   "You cannot access an array element of a type name.  Perhaps you meant to create " +
+                   "a new instance of int[]", 
+                   errors.get(1).getFirst());
       
       //if type is not an array data, give appropriate error:
       assertEquals("Should return char", SymbolData.CHAR_TYPE.getInstanceData(), _etc.forArrayAccessOnly(aa, SymbolData.CHAR_TYPE.getInstanceData(), SymbolData.INT_TYPE.getInstanceData()));
-      assertEquals("Should be 4 errors", 4, errors.size());
-      assertEquals("Error message should be correct", "The variable referred to by this array access is a char, not an array", errors.getLast().getFirst());
+      assertEquals("Should now be 3 errors", 3, errors.size());
+      assertEquals("Error message should be correct", 
+                   "The variable referred to by this array access is a char, not an array", 
+                   errors.get(2).getFirst());
       
       //If the array index is not an instance type, give error
       assertEquals("should return int", SymbolData.INT_TYPE.getInstanceData(), _etc.forArrayAccessOnly(aa, ad.getInstanceData(), SymbolData.INT_TYPE));
-      assertEquals("Should be 5 errors", 5, errors.size());
-      assertEquals("Error message should be correct", "You have used a type name in place of an array index.  Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
-
+      assertEquals("Should now be 4 errors", 4, errors.size());
+      assertEquals("Error message should be correct", 
+                   "You have used a type name in place of an array index.  Perhaps you meant to create " +
+                   "a new instance of int", 
+                   errors.get(3).getFirst());
 
       //If the array index is not an int, give error
       assertEquals("should return int", SymbolData.INT_TYPE.getInstanceData(), _etc.forArrayAccessOnly(aa, ad.getInstanceData(), SymbolData.DOUBLE_TYPE.getInstanceData()));
-      assertEquals("Should be 6 errors", 6, errors.size());
-      assertEquals("Error message should be correct", "You cannot reference an array element with an index of type double.  Instead, you must use an int", errors.getLast().getFirst());
-
-      
+      assertEquals("Should now be 5 errors", 5, errors.size());
+      assertEquals("Error message should be correct", 
+                   "You cannot reference an array element with an index of type double.  Instead, you must use an int",
+                   errors.get(4).getFirst());   
     }
     
     
@@ -3640,7 +3747,7 @@ public class ExpressionTypeChecker extends Bob {
       _etc._vars.add(vd5);
       _etc._data = _sd5;
 
-      //Plus Assignment with numbers:
+      // Plus Assignment with numbers:
       // test that other assignment operators work correctly
       ComplexNameReference nf = new ComplexNameReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "Ned")), new Word(SourceInfo.NO_INFO, "Flanders"));
       PlusAssignmentExpression pa = new PlusAssignmentExpression(SourceInfo.NO_INFO, nf, new IntegerLiteral(SourceInfo.NO_INFO, 5));
@@ -3648,37 +3755,37 @@ public class ExpressionTypeChecker extends Bob {
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), pa.visit(_etc));
       assertEquals("Should be 0 errors", 0, errors.size());
       
-      //if variable does not have value, cannot be plus assigned
+      // if variable does not have value, cannot be plus assigned
       vd4.lostValue();
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), pa.visit(_etc));
       assertEquals("Should now be 1 error", 1, errors.size());
-      assertEquals("Error message should be correct", "You cannot use Flanders here, because it may not have been given a value",
-                   errors.getLast().getFirst());
+      assertEquals("Error message should be correct", 
+                   "You cannot use Flanders here, because it may not have been given a value",
+                   errors.get(0).getFirst());
       
-      //if variable is final, with a value cannot be reassigned
+      // if variable is final, with a value cannot be reassigned
       vd4.gotValue();
       vd4.setMav(_finalPublicMav);
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), pa.visit(_etc));
       assertEquals("Should now be 2 errors", 2, errors.size());
-      assertEquals("Error message should be correct", "You cannot assign a new value to Flanders because it is immutable and has already been given a value",
-                   errors.getLast().getFirst());
+      assertEquals("Error message should be correct", 
+                   "You cannot assign a new value to Flanders because it is immutable and has already been given a value",
+                   errors.get(1).getFirst());
 
       // Test that an initialized value can be assigned to itself
       vd4.setMav(_publicMav);
       _sd4.setMav(_publicMav);
       PlusAssignmentExpression pa2 = new PlusAssignmentExpression(SourceInfo.NO_INFO, nf, nf);
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), pa2.visit(_etc));
-      assertEquals("There should be 2 errors", 2, errors.size());
+      assertEquals("There should still be 2 errors", 2, errors.size());
 
       // Test that an uninitialized value cannot be assigned to itself as an initialization
       vd4.lostValue();
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), pa2.visit(_etc));
-      assertEquals("There should be 4 errors", 4, errors.size());
-      assertEquals("The first error message should be correct", "You cannot use Flanders here, because it may not have been given a value", errors.get(2).getFirst());
-      assertEquals("The second error message should be correct", "You cannot use Flanders here, because it may not have been given a value", errors.getLast().getFirst());
-
-      
-      
+      assertEquals("There should still be 2 errors", 2, errors.size());  // Generated two duplicate messages.
+      assertEquals("The first error message should be correct", 
+                   "You cannot use Flanders here, because it may not have been given a value", 
+                   errors.get(0).getFirst());
       
       //test Plus Assignment for String concatanation
       SymbolData stringSD = new SymbolData("java.lang.String");
@@ -3691,25 +3798,33 @@ public class ExpressionTypeChecker extends Bob {
       
       SimpleNameReference sRef = new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "s"));
       //test string concatenation, where the string is first.
-      PlusAssignmentExpression pa3 = new PlusAssignmentExpression(SourceInfo.NO_INFO, sRef, new BooleanLiteral(SourceInfo.NO_INFO, true));
+      PlusAssignmentExpression pa3 = 
+        new PlusAssignmentExpression(SourceInfo.NO_INFO, sRef, new BooleanLiteral(SourceInfo.NO_INFO, true));
       TypeData result =  pa3.visit(_etc);
-      assertEquals("string concatenation with string at the front.  Should return String type", stringSD.getInstanceData(), pa3.visit(_etc));
-      assertEquals("Should be 4 errors", 4, errors.size());
+      assertEquals("string concatenation with string at the front.  Should return String type", 
+                   stringSD.getInstanceData(), 
+                   pa3.visit(_etc));
+      assertEquals("Should still be 2 errors", 2, errors.size());
       
-      //when both sides are strings
-      PlusAssignmentExpression pa4 = new PlusAssignmentExpression(SourceInfo.NO_INFO, sRef, new StringLiteral(SourceInfo.NO_INFO, "cat"));
-      assertEquals("string concatenation with string on both sides.  Should return String type", stringSD.getInstanceData(), pa4.visit(_etc));
-      assertEquals("Should be 4 errors", 4, errors.size());
+      // when both sides are strings
+      PlusAssignmentExpression pa4 = 
+        new PlusAssignmentExpression(SourceInfo.NO_INFO, sRef, new StringLiteral(SourceInfo.NO_INFO, "cat"));
+      assertEquals("string concatenation with string on both sides.  Should return String type", 
+                   stringSD.getInstanceData(), pa4.visit(_etc));
+      assertEquals("Should still be 2 errors", 2, errors.size());
       
-      //when string is second
+      // when string is second
       vd4.gotValue();
-      PlusAssignmentExpression pa5 = new PlusAssignmentExpression(SourceInfo.NO_INFO, nf, new StringLiteral(SourceInfo.NO_INFO, "house "));
-      assertEquals("string + concatenation with string at back.  Should give error", stringSD.getInstanceData(), pa5.visit(_etc));
-      assertEquals("Should be 5 errors", 5, errors.size());
-      assertEquals("Error message should be correct", "The arguments to the Plus Assignment Operator (+=) must either include an instance of a String or both be numbers.  You have specified arguments of type int and java.lang.String", errors.getLast().getFirst());
-      
-
-      
+      PlusAssignmentExpression pa5 = 
+        new PlusAssignmentExpression(SourceInfo.NO_INFO, nf, new StringLiteral(SourceInfo.NO_INFO, "house "));
+      assertEquals("string + concatenation with string at back.  Should give error", 
+                   stringSD.getInstanceData(), 
+                   pa5.visit(_etc));
+      assertEquals("Should now be 3 errors", 3, errors.size());
+      assertEquals("Error message should be correct", 
+                   "The arguments to the Plus Assignment Operator (+=) must either include an instance of a String " + 
+                   "or both be numbers.  You have specified arguments of type int and java.lang.String", 
+                   errors.get(2).getFirst());
     }
     
     public void testForNumericAssignmentExpression() {
@@ -3731,16 +3846,18 @@ public class ExpressionTypeChecker extends Bob {
       vd4.lostValue();
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), na.visit(_etc));
       assertEquals("Should now be 1 error", 1, errors.size());
-      assertEquals("Error message should be correct", "You cannot use Flanders here, because it may not have been given a value",
-                   errors.getLast().getFirst());
+      assertEquals("Error message should be correct", 
+                   "You cannot use Flanders here, because it may not have been given a value",
+                   errors.get(0).getFirst());
       
       //if variable is final, cannot be reassigned
       vd4.gotValue();
       vd4.setMav(_finalPublicMav);
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), na.visit(_etc));
       assertEquals("Should now be 2 errors", 2, errors.size());
-      assertEquals("Error message should be correct", "You cannot assign a new value to Flanders because it is immutable and has already been given a value",
-                   errors.getLast().getFirst());
+      assertEquals("Error message should be correct", 
+                   "You cannot assign a new value to Flanders because it is immutable and has already been given a value",
+                   errors.get(1).getFirst());
       
       // Test that an initialized value can be assigned to itself
       vd4.setMav(_publicMav);
@@ -3752,11 +3869,10 @@ public class ExpressionTypeChecker extends Bob {
       // Test that an uninitialized value cannot be assigned to itself as an initialization
       vd4.lostValue();
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), na2.visit(_etc));
-      assertEquals("There should be 4 errors", 4, errors.size());
-      assertEquals("The first error message should be correct", "You cannot use Flanders here, because it may not have been given a value", errors.get(2).getFirst());
-      assertEquals("The second error message should be correct", "You cannot use Flanders here, because it may not have been given a value", errors.getLast().getFirst());
-
-      
+      assertEquals("There should still be 2 errors", 2, errors.size());  // Generated duplicate error message
+      assertEquals("The new error message should be correct", 
+                   "You cannot use Flanders here, because it may not have been given a value", 
+                   errors.get(0).getFirst()); 
     }
 
     public void testForIncrementExpression() {
@@ -3778,29 +3894,37 @@ public class ExpressionTypeChecker extends Bob {
       vd4.lostValue();
       assertEquals("Should return int instance.", SymbolData.INT_TYPE.getInstanceData(), ppi.visit(_etc));
       assertEquals("Should now be 1 errors", 1, errors.size());
-      assertEquals("Error message should be correct", "You cannot use Flanders here, because it may not have been given a value",
-                   errors.getLast().getFirst());
+      assertEquals("Error message should be correct", 
+                   "You cannot use Flanders here, because it may not have been given a value",
+                   errors.get(0).getFirst());
 
       // test that attempting to increment the value of a final field will throw an error
       vd4.gotValue();
       vd4.setMav(_finalPublicMav);
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), ppi.visit(_etc));
       assertEquals("Should now be 2 errors", 2, errors.size());
-      assertEquals("Error message should be correct", "You cannot assign a new value to Flanders because it is immutable and has already been given a value",
-                   errors.getLast().getFirst());
+      assertEquals("Error message should be correct", 
+                   "You cannot assign a new value to Flanders because it is immutable and has already been given a value",
+                   errors.get(1).getFirst());
       
       // Check that ++int doesn't work
       PositivePrefixIncrementExpression ppi2 = new PositivePrefixIncrementExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "int")));
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), ppi2.visit(_etc));
-      assertEquals("There should be 3 errors", 3, errors.size());
-      assertEquals("The error message should be correct", "You cannot increment or decrement int, because it is a class name not an instance.  Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
+      assertEquals("There should now be 3 errors", 3, errors.size());
+      assertEquals("The error message should be correct", 
+                   "You cannot increment or decrement int, because it is a class name not an instance.  " +
+                   "Perhaps you meant to create a new instance of int", 
+                   errors.get(2).getFirst());
 
 
       // Check that ++(int) doesn't work
       PositivePrefixIncrementExpression ppi3 = new PositivePrefixIncrementExpression(SourceInfo.NO_INFO, new Parenthesized(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "int"))));
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), ppi3.visit(_etc));
-      assertEquals("There should be 4 errors", 4, errors.size());
-      assertEquals("The error message should be correct", "You cannot increment or decrement int, because it is a class name not an instance.  Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
+      assertEquals("There should now be 4 errors", 4, errors.size());  // For some reason, generated error is not a duplicate
+      assertEquals("The error message should be correct", 
+                   "You cannot increment or decrement int, because it is a class name not an instance.  " +
+                   "Perhaps you meant to create a new instance of int",
+                   errors.get(3).getFirst());
 
       
       //test that words with a post-decrement operator afterwards only work if they already have a value and aren't final.
@@ -3812,53 +3936,76 @@ public class ExpressionTypeChecker extends Bob {
       // test that attempting to decrement the value of a field that doesn't have a value will throw an error
       vd4.lostValue();
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), npi.visit(_etc));
-      assertEquals("Should now be 5 errors", 5, errors.size());
-      assertEquals("Error message should be correct", "You cannot use Flanders here, because it may not have been given a value",
-                   errors.getLast().getFirst());      
+      assertEquals("Should still be 4 errors", 4, errors.size());
+      assertEquals("Error message should be correct", 
+                   "You cannot use Flanders here, because it may not have been given a value",
+                   errors.get(0).getFirst());      
       
       // test that attempting to increment the value of a final field will throw an error
       vd4.gotValue();
       vd4.setMav(_finalPublicMav);
       assertEquals("Should return int instance.", SymbolData.INT_TYPE.getInstanceData(), npi.visit(_etc));
-      assertEquals("Should now be 6 errors", 6, errors.size());
-      assertEquals("Error message should be correct", "You cannot assign a new value to Flanders because it is immutable and has already been given a value",
-                   errors.getLast().getFirst());
+      assertEquals("Should still be 4 errors", 4, errors.size());
+      assertEquals("Error message should be correct", 
+                   "You cannot assign a new value to Flanders because it is immutable and has already been given a value",
+                   errors.get(1).getFirst());
       
 
       // Check that int-- doesn't work
-      NegativePostfixIncrementExpression npi2 = new NegativePostfixIncrementExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "int")));
+      NegativePostfixIncrementExpression npi2 = 
+        new NegativePostfixIncrementExpression(SourceInfo.NO_INFO, 
+                                               new SimpleNameReference(SourceInfo.NO_INFO, 
+                                                                       new Word(SourceInfo.NO_INFO, "int")));
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), npi2.visit(_etc));
-      assertEquals("There should be 7 errors", 7, errors.size());
-      assertEquals("The error message should be correct", "You cannot increment or decrement int, because it is a class name not an instance.  Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
+      assertEquals("There should be 5 errors", 5, errors.size());
+      assertEquals("The error message should be correct", 
+                   "You cannot increment or decrement int, because it is a class name not an instance.  Perhaps you " + 
+                   "meant to create a new instance of int", 
+                   errors.get(4).getFirst());
       
       // Check that (int)-- doesn't work
-      NegativePostfixIncrementExpression npi3 = new NegativePostfixIncrementExpression(SourceInfo.NO_INFO, new Parenthesized(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "int"))));
+      NegativePostfixIncrementExpression npi3 = 
+        new NegativePostfixIncrementExpression(SourceInfo.NO_INFO, 
+                                               new Parenthesized(SourceInfo.NO_INFO, 
+                                                                 new SimpleNameReference(SourceInfo.NO_INFO, 
+                                                                                         new Word(SourceInfo.NO_INFO, "int"))));
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), npi3.visit(_etc));
-      assertEquals("There should be 8 errors", 8, errors.size());
-      assertEquals("The error message should be correct", "You cannot increment or decrement int, because it is a class name not an instance.  Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
+      assertEquals("There should be 6 errors", 6, errors.size());  // Wny isn't this a duplicate of error #4?
+      assertEquals("The error message should be correct", 
+                   "You cannot increment or decrement int, because it is a class name not an instance.  " + 
+                   "Perhaps you meant to create a new instance of int", 
+                   errors.get(5).getFirst());
       
       
       //should break: double increment/decrement ++(--Ned.Flanders)
       vd4.setMav(_publicMav);
-      PositivePrefixIncrementExpression ppi4 = new PositivePrefixIncrementExpression(SourceInfo.NO_INFO, new Parenthesized(SourceInfo.NO_INFO, new NegativePrefixIncrementExpression(SourceInfo.NO_INFO, nf)));
+      PositivePrefixIncrementExpression ppi4 = 
+        new PositivePrefixIncrementExpression(SourceInfo.NO_INFO, 
+                                              new Parenthesized(SourceInfo.NO_INFO, 
+                                                                new NegativePrefixIncrementExpression(SourceInfo.NO_INFO, nf)));
       assertEquals("Should return null", null, ppi4.visit(_etc));
-      assertEquals("Should have added 1 error", 9, errors.size());
-      assertEquals("Should have correct error message","You cannot assign a value to an increment expression", errors.getLast().getFirst());
+      assertEquals("Should have added 1 error", 7, errors.size());
+      assertEquals("Should have correct error message",
+                   "You cannot assign a value to an increment expression", 
+                   errors.getLast().getFirst());
       
 //      //should break: non number being incremented
       VariableData s = new VariableData("s", _publicMav, SymbolData.BOOLEAN_TYPE, true, _etc._data);
       _etc._vars.addLast(s);
-      PositivePrefixIncrementExpression ppi5 = new PositivePrefixIncrementExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "s")));
+      PositivePrefixIncrementExpression ppi5 = 
+        new PositivePrefixIncrementExpression(SourceInfo.NO_INFO, 
+                                              new SimpleNameReference(SourceInfo.NO_INFO, 
+                                                                      new Word(SourceInfo.NO_INFO, "s")));
       assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), ppi5.visit(_etc));
-      assertEquals("Should have added 1 error", 10, errors.size());
-      assertEquals("Should have correct error message", "You cannot increment or decrement something that is not a number type.  You have specified something of type boolean", errors.getLast().getFirst());
+      assertEquals("Should have added 1 error", 8, errors.size());
+      assertEquals("Should have correct error message", 
+                   "You cannot increment or decrement something that is not a number type.  You have specified " +
+                   "something of type boolean", errors.get(7).getFirst());
       
       //nested parentheses...should work
       PositivePrefixIncrementExpression ppi6 = new PositivePrefixIncrementExpression(SourceInfo.NO_INFO, new Parenthesized(SourceInfo.NO_INFO, new Parenthesized(SourceInfo.NO_INFO, nf)));
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), ppi6.visit(_etc));
-      assertEquals("Should still be 10 errors", 10, errors.size());
-      
-      
+      assertEquals("Should still be 8 errors", 8, errors.size());
     }
 
 
@@ -3872,20 +4019,22 @@ public class ExpressionTypeChecker extends Bob {
      object.setIsContinuation(false);
      object.setPackage("java.lang");
      object.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
-     MethodData cdObj = new MethodData("Object", _publicMav, new TypeParameter[0], object, new VariableData[0], new String[0], object, basic);
+     MethodData cdObj = 
+       new MethodData("Object", _publicMav, new TypeParameter[0], object, new VariableData[0], new String[0], object, basic);
      object.addMethod(cdObj);
 
      
      symbolTable.put("java.lang.Object", object);
      
-     //if our enclosing data does not have any anonymous inner classes, throw runtime exception:
-     try {
-       basic.visit(_etc);
-       fail("Should have thrown runtime exception");
-     }
-     catch(RuntimeException e) {
-       assertEquals("Should throw correct exception", "Internal Program Error: Couldn't find the SymbolData for the anonymous inner class.  Please report this bug.", e.getMessage());
-     }
+     /* This erroneous configuration now throws an error message asserting anonymous inner classes cannot be nested in LL. */
+//     // if our enclosing data does not have any anonymous inner classes, throw runtime exception:
+//     try {
+//       basic.visit(_etc);
+//       fail("Should have thrown runtime exception");
+//     }
+//     catch(RuntimeException e) {
+//       assertEquals("Should throw correct exception", "Internal Program Error: Couldn't find the SymbolData for the anonymous inner class.  Please report this bug.", e.getMessage());
+//     }
      
      _sd1.setAnonymousInnerClassNum(0);
      
@@ -4024,13 +4173,14 @@ public class ExpressionTypeChecker extends Bob {
     
     }
     
-    
     public void testForComplexAnonymousClassInstantiation() {
-     AnonymousClassInstantiation basic = new ComplexAnonymousClassInstantiation(SourceInfo.NO_INFO, 
-                                                                                new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "bob")),
-                                                                                new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), 
-                                                                        new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
-                                                                        new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+     AnonymousClassInstantiation basic = 
+       new ComplexAnonymousClassInstantiation(SourceInfo.NO_INFO, 
+                                              new SimpleNameReference(SourceInfo.NO_INFO, 
+                                                                      new Word(SourceInfo.NO_INFO, "bob")),
+                                              new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), 
+                                              new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
+                                              new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
      
      VariableData bob = new VariableData("bob", _publicMav, _sd2, true, _sd1);
      _etc._vars.add(bob);
@@ -4039,20 +4189,23 @@ public class ExpressionTypeChecker extends Bob {
      object.setIsContinuation(false);
      object.setPackage("java.lang");
      object.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
-     MethodData cdObj = new MethodData("Object", _publicMav, new TypeParameter[0], object, new VariableData[0], new String[0], object, basic);
+     MethodData cdObj = 
+       new MethodData("Object", _publicMav, new TypeParameter[0], object, new VariableData[0], new String[0], object, basic);
      object.addMethod(cdObj);
 
      _sd2.addInnerClass(object);
      object.setOuterData(_sd2);
-     
-     //if our enclosing data does not have any anonymous inner classes, throw runtime exception:
-     try {
-       basic.visit(_etc);
-       fail("Should have thrown runtime exception");
-     }
-     catch(RuntimeException e) {
-       assertEquals("Should throw correct exception", "Internal Program Error: Couldn't find the SymbolData for the anonymous inner class.  Please report this bug.", e.getMessage());
-     }
+ 
+     /* The code base now interprets the following situation as nesting an anonymous class in an anonymous class and 
+      * classifies it as a LL syntax error. */
+//     // if our enclosing data does not have any anonymous inner classes, throw runtime exception:
+//     try {
+//       basic.visit(_etc);
+//       fail("Should have thrown runtime exception");
+//     }
+//     catch(RuntimeException e) {
+//       assertEquals("Should throw correct exception", "Internal Program Error: Couldn't find the SymbolData for the anonymous inner class.  Please report this bug.", e.getMessage());
+//     }
      
      _sd1.setAnonymousInnerClassNum(0);
      
