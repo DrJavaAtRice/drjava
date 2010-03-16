@@ -226,17 +226,26 @@ public class DefinitionsEditorKit extends StyledEditorKit {
               break;
             char ch = text.charAt(offs);
             char chPrev = text.charAt(offs - 1);
-            if (Character.isWhitespace(ch) && Character.isWhitespace(chPrev)){
+            if (Character.isWhitespace(ch) && Character.isWhitespace(chPrev) && ch!='\n'){
               continue;
             }
             else if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch) >= 0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev) >= 0) || 
-                     ((offs>=2) && Character.isWhitespace(chPrev) && !Character.isWhitespace(text.charAt(offs - 2)))) {
+                     ((offs>=2) && Character.isWhitespace(chPrev) && !Character.isWhitespace(text.charAt(offs - 2)) && ch!='\n')) {
               break;
             }
             else if (Character.isWhitespace(chPrev) && !Character.isWhitespace(ch)){
               break;
             }
             else if (!Character.isWhitespace(chPrev) && ch == '\n'){
+              break;
+            }
+            //used to fix incorrect behavior when a space is at the end of a line
+            else if (Character.isWhitespace(chPrev) && ch=='\n'){
+              while(Character.isWhitespace(chPrev)){
+                --offs;
+                ch = text.charAt(offs);
+                chPrev = text.charAt(offs - 1);
+              }            
               break;
             }
           }
@@ -291,6 +300,20 @@ public class DefinitionsEditorKit extends StyledEditorKit {
               else
                 break;
             }
+            //used to fix incorrect behavior when a space is at the end of a line
+            if (!Character.isWhitespace(chPrev) && Character.isWhitespace(ch)){
+              int offs0 = offs;
+              while((offs-iOffs)<len && ch!='\n' && Character.isWhitespace(ch)){
+                ++offs; 
+                ch = text.charAt(offs-iOffs);
+                chPrev = text.charAt(offs-iOffs - 1);               
+              }
+              offs = offs0;
+              if(ch=='\n')
+                break;
+              else
+                continue;
+            }   
           }
           if (_select) {
             target.moveCaretPosition(offs);
