@@ -236,7 +236,7 @@ public class JUnitPanel extends ErrorPanel {
     private String _getTestFromName(String name) {
       int paren = name.indexOf('(');
       
-      if ((paren > -1) && (paren < name.length())) return name.substring(0, paren);
+      if (paren > 0) return name.substring(0, paren);
       
       else throw new IllegalArgumentException("Name does not contain any parens: " + name);
     }
@@ -250,7 +250,7 @@ public class JUnitPanel extends ErrorPanel {
     
     /** Provides the ability to display the name of the test being run. */
     public void testStarted(String name) {
-      if (name.indexOf('(')<0) return;
+      if (name.indexOf('(') < 0) return;
       
       String testName = _getTestFromName(name);
       String className = _getClassFromName(name);
