@@ -293,7 +293,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
 
   /** @return the name of the class, with the right number of array suffixes "[]" and while being ambiguous
     * about boxed and primitive types. */
-  protected static String getClassName(Class<?> c) {
+  public static String getClassName(Class<?> c) {
     StringBuilder sb = new StringBuilder();
     boolean isArray = c.isArray();
     while(c.isArray()) {

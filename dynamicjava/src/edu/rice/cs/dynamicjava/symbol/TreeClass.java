@@ -14,6 +14,7 @@ import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.tiger.*;
 import koala.dynamicjava.tree.visitor.*;
 import koala.dynamicjava.interpreter.NodeProperties;
+import koala.dynamicjava.interpreter.error.ExecutionError;
 
 import edu.rice.cs.dynamicjava.symbol.type.Type;
 import edu.rice.cs.dynamicjava.symbol.type.ClassType;
@@ -23,6 +24,8 @@ import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.interpreter.TreeClassLoader;
 import edu.rice.cs.dynamicjava.interpreter.RuntimeBindings;
 import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
+import edu.rice.cs.dynamicjava.interpreter.CheckerException;
+import edu.rice.cs.plt.lambda.WrappedException;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -67,7 +70,7 @@ public class TreeClass implements DJClass {
    * @param loader  A class loader for compiling and loading this class.  Note that the loader must
    *                be defined to allow transitive loading of all referenced classes.
    */
-  public TreeClass(String fullName, DJClass declaring, Access.Module accessModule, Node ast,
+  public TreeClass(String fullName, DJClass declaring, Access.Module accessModule, final Node ast,
                    final TreeClassLoader loader, Options opt) {
     _fullName = fullName;
     _declaring = declaring;
@@ -80,7 +83,33 @@ public class TreeClass implements DJClass {
         try { return loader.loadClass(_fullName); }
         catch (ClassNotFoundException e) { throw new RuntimeException("Error loading class", e); }
         // LinkageError indicates there's something wrong with the compiled class
-        catch (LinkageError e) { throw new RuntimeException("Error loading class", e); }
+        catch (LinkageError e) {
+          // bugfix for bug 2674112: Error loading class in Interpreter
+          // maybe this isn't the best place
+          if (e instanceof IllegalAccessError) {
+            // catch this particular error and provide a better error message
+            String msg = e.getMessage();
+            final String PREFIX = "class ";
+            final String[] INFIX = new String[] { " cannot access its superclass ",
+              " cannot access its superinterface " };
+            final String[] ERROR_MSGS = new String[] { "class.cannot.access.superclass",
+              "class.cannot.access.superinterface" };
+            if (msg.startsWith(PREFIX)) {
+              for (int i=0; i<INFIX.length; ++i) {
+                final String infix = INFIX[i];
+                int infixPos = msg.indexOf(infix);
+                if ((infixPos>=0) && (infixPos>=PREFIX.length())) {
+                  String className0 = msg.substring(PREFIX.length(), infixPos).trim();
+                  String className1 = msg.substring(infixPos+infix.length()).trim();
+                  koala.dynamicjava.interpreter.NodeProperties.setErrorStrings(ast, className0, className1);
+                  ExecutionError ee = new ExecutionError(ERROR_MSGS[i], ast);
+                  throw new WrappedException(new CheckerException(ee));
+                }
+              }
+            }
+          }
+          throw new RuntimeException("Error loading class", e);
+        }
       }
     });
     _constructors = new LinkedList<TreeConstructor>();

@@ -648,7 +648,8 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     _log.log("testInteractionsHistoryStoredCorrectly ended");
   }
   
-  /** A generic InteractionsModel for testing purposes.  (Used here and in InteractionsPaneTest.) */
+  /** A generic InteractionsModel for testing purposes.  (Used here, in InteractionsPaneTest,
+    * and in InteractionsModelErrorTest.) */
   public static class TestInteractionsModel extends InteractionsModel {
     String toEval = null;
     String addedClass = null;
@@ -745,7 +746,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   /** This test model includes a slave JVM, just like a DefaultGlobalModel.  It must be disposed before it is
     * deallocated to kill the slave JVM.   TODO: the mutation in this class is disgusting -- Corky  2 June 06.
     */
-  private static class IncompleteInputInteractionsModel extends RMIInteractionsModel {
+  public static class IncompleteInputInteractionsModel extends RMIInteractionsModel {
     boolean continuationException;  // This appears to be the negation of syntaxException making it redundant!
     boolean syntaxException;
     
