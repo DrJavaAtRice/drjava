@@ -107,15 +107,17 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
               mf.askToIncreaseMasterMaxHeap();
             }
           }
-          else {
-            if (thrown.toString().startsWith("com.sun.jdi.VMOutOfMemoryException")) {
-              // if this is an VMOutOfMemoryException, suggest to increase Interaction JVM's max heap
-              JFrame f = DrJavaErrorWindow.getFrame();
-              if (f instanceof MainFrame) {
-                MainFrame mf = (MainFrame)f;
-                mf.askToIncreaseSlaveMaxHeap();
-              }
+          else if (thrown.toString().startsWith("com.sun.jdi.VMOutOfMemoryException")) {
+            // if this is an VMOutOfMemoryException, suggest to increase Interaction JVM's max heap
+            JFrame f = DrJavaErrorWindow.getFrame();
+            if (f instanceof MainFrame) {
+              MainFrame mf = (MainFrame)f;
+              mf.askToIncreaseSlaveMaxHeap();
             }
+          }
+          else if (isSwingBugArrayIndexOufOfBoundsExceptionInCharWidth(thrown)) {
+            // we just ignore this exception
+            return;
           }
           _errors.add(thrown);
           if (_errorsButton != null) {
@@ -132,7 +134,84 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
       }
     });
   }
-  
+
+  /** Return true if this is an exception thrown because of the Swing bug:
+    * https://sourceforge.net/tracker/?func=detail&atid=438935&aid=2831821&group_id=44253
+    * @return true if this is the Swing bug */
+  public static boolean isSwingBugArrayIndexOufOfBoundsExceptionInCharWidth(Throwable thrown) {
+    // only ignore on Sun JVMs
+    if (!edu.rice.cs.plt.reflect.JavaVersion.CURRENT_FULL.vendor().
+          equals(edu.rice.cs.plt.reflect.JavaVersion.VendorType.SUN)) return false;
+    
+    // only ignore if current version is older than 6.0_18 (6.0_18 > JavaVersion.CURRENT_FULL)
+    if (edu.rice.cs.plt.reflect.JavaVersion.parseFullVersion("6.0_18","Sun","Sun").
+          compareTo(edu.rice.cs.plt.reflect.JavaVersion.CURRENT_FULL)<=0) return false;
+    
+    if (!(thrown instanceof ArrayIndexOutOfBoundsException)) return false;
+    
+    StackTraceElement[] stes = new StackTraceElement[] {
+      new StackTraceElement("sun.font.FontDesignMetrics","charsWidth",null,-1),
+      new StackTraceElement("javax.swing.text.Utilities","getTabbedTextOffset",null,-1),
+      new StackTraceElement("javax.swing.text.Utilities","getTabbedTextOffset",null,-1),
+      new StackTraceElement("javax.swing.text.Utilities","getTabbedTextOffset",null,-1),
+      new StackTraceElement("javax.swing.text.PlainView","viewToModel",null,-1),
+      new StackTraceElement("javax.swing.plaf.basic.BasicTextUI$RootView","viewToModel",null,-1),
+      new StackTraceElement("javax.swing.plaf.basic.BasicTextUI","viewToModel",null,-1)
+    };
+    
+    StackTraceElement[] stesBottom = new StackTraceElement[] {
+      new StackTraceElement("java.awt.EventQueue","dispatchEvent",null,-1),
+      new StackTraceElement("java.awt.EventDispatchThread","pumpOneEventForFilters",null,-1),
+      new StackTraceElement("java.awt.EventDispatchThread","pumpEventsForFilter",null,-1),
+      new StackTraceElement("java.awt.EventDispatchThread","pumpEventsForHierarchy",null,-1),
+      new StackTraceElement("java.awt.EventDispatchThread","pumpEvents",null,-1),
+      new StackTraceElement("java.awt.EventDispatchThread","pumpEvents",null,-1),
+      new StackTraceElement("java.awt.EventDispatchThread","run",null,-1)
+    };
+
+    StackTraceElement[] tst = thrown.getStackTrace();
+    
+    if (tst.length<stes.length+stesBottom.length) return false;
+    
+    for(int i=0; i<stes.length; ++i) {
+      if (!stes[i].equals(tst[i])) return false;
+    }
+
+    for(int i=0; i<stesBottom.length; ++i) {
+      if (!stesBottom[stesBottom.length-i-1].equals(tst[tst.length-i-1])) return false;
+    }
+    
+    return true;
+  }
+
+  /** Simulate the Swing bug's exception stack trace. */
+  public static void simulateSwingBugArrayIndexOufOfBoundsExceptionInCharWidth() {      
+    StackTraceElement[] stes = new StackTraceElement[] {
+      new StackTraceElement("sun.font.FontDesignMetrics","charsWidth",null,-1),
+        new StackTraceElement("javax.swing.text.Utilities","getTabbedTextOffset",null,-1),
+        new StackTraceElement("javax.swing.text.Utilities","getTabbedTextOffset",null,-1),
+        new StackTraceElement("javax.swing.text.Utilities","getTabbedTextOffset",null,-1),
+        new StackTraceElement("javax.swing.text.PlainView","viewToModel",null,-1),
+        new StackTraceElement("javax.swing.plaf.basic.BasicTextUI$RootView","viewToModel",null,-1),
+        new StackTraceElement("javax.swing.plaf.basic.BasicTextUI","viewToModel",null,-1),
+        
+        new StackTraceElement("foo","bar",null,-1),
+        new StackTraceElement("foo","bar",null,-1),
+        
+        new StackTraceElement("java.awt.EventQueue","dispatchEvent",null,-1),
+        new StackTraceElement("java.awt.EventDispatchThread","pumpOneEventForFilters",null,-1),
+        new StackTraceElement("java.awt.EventDispatchThread","pumpEventsForFilter",null,-1),
+        new StackTraceElement("java.awt.EventDispatchThread","pumpEventsForHierarchy",null,-1),
+        new StackTraceElement("java.awt.EventDispatchThread","pumpEvents",null,-1),
+        new StackTraceElement("java.awt.EventDispatchThread","pumpEvents",null,-1),
+        new StackTraceElement("java.awt.EventDispatchThread","run",null,-1)
+    };
+    ArrayIndexOutOfBoundsException t = new ArrayIndexOutOfBoundsException(63);
+    t.setStackTrace(stes);
+    t.printStackTrace(System.out);
+    throw t;     
+  }
+
   /** Log an unexpected situation. */
   public static void log(String message) { record(new LoggedCondition(message)); }
   
