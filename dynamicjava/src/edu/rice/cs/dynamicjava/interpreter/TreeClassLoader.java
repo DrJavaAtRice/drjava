@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.HashMap;
 import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.symbol.TreeClass;
+import edu.rice.cs.plt.reflect.AbstractClassLoader;
 import edu.rice.cs.plt.reflect.ShadowingClassLoader;
 import edu.rice.cs.plt.reflect.ComposedClassLoader;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -12,7 +13,7 @@ import edu.rice.cs.plt.iter.IterUtil;
  * A class loader with the additional ability of loading classes from their (type-checked)
  * AST representations.
  */
-public class TreeClassLoader extends ClassLoader {
+public class TreeClassLoader extends AbstractClassLoader {
   
   private final Options _opt;
   // trees that have been declared but not yet loaded
@@ -62,6 +63,10 @@ public class TreeClassLoader extends ClassLoader {
       TreeCompiler compiler = new TreeCompiler(treeClass, _opt);
       byte[] bytes = compiler.bytecode();
       _adapters.put(name, compiler.evaluationAdapter());
+      
+      // define package
+      definePackageForClass(name);
+      
       Class<?> result = defineClass(name, bytes, 0, bytes.length);
       return result;
     }

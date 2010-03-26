@@ -57,7 +57,7 @@ import edu.rice.cs.plt.io.IOUtil;
  * only if a resource with the appropriate class file name exists.  But there is no guarantee that all 
  * class loaders (such as those that generate class definitions on the fly) will follow this convention.</p>  
  */
-public class PreemptingClassLoader extends ClassLoader {
+public class PreemptingClassLoader extends AbstractClassLoader {
   
   private Iterable<String> _prefixes;
   
@@ -98,6 +98,10 @@ public class PreemptingClassLoader extends ClassLoader {
         if (in == null) { throw new ClassNotFoundException("Resource not found: " + filename); }
         try {
           byte[] data = IOUtil.toByteArray(in);
+
+          // define package
+          definePackageForClass(name);
+          
           result = defineClass(name, data, 0, data.length);
         }
         catch (IOException e) {
@@ -125,5 +129,4 @@ public class PreemptingClassLoader extends ClassLoader {
     }
     return false;
   }
-  
 }

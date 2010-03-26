@@ -62,7 +62,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  * shadowed.  This is not a unique problem, however -- the standard system class loader is
  * based on an underlying file system that may also change in arbitrary ways at any time.
  */
-public class PathClassLoader extends ClassLoader {
+public class PathClassLoader extends AbstractClassLoader {
   
   /**
    * Locate a resource in the given path.  Returns {@code null} if the resource is not found.
@@ -149,6 +149,10 @@ public class PathClassLoader extends ClassLoader {
     else {
       try {
         byte[] bytes = IOUtil.toByteArray(resource.openStream());
+        
+        // define package
+        definePackageForClass(name);
+      
         return defineClass(name, bytes, 0, bytes.length);
       }
       catch (IOException e) { throw new ClassNotFoundException(); }

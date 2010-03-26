@@ -96,6 +96,11 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     "public abstract class UnaryFun {\n"+
     "  public abstract Object apply(final Object arg);\n"+
     "}";
+  protected static final String CLASS_IN_PACKAGE_CLASS_TEXT = 
+    "package foo;\n"+
+    "public class Bar {\n"+
+    "  public void run() { }\n"+
+    "}";
 
   private volatile InteractionsPaneOptions _interpreterOptions;
   private volatile Interpreter _interpreter;  
@@ -259,5 +264,51 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     _classPathManager.addBuildDirectoryCP(compiled.getParentFile());
     
     _interpreter.interpret("UnaryFun f = new UnaryFun() { public Object apply(Object arg) { return (Integer)arg * (Integer)arg; }}");
+  }
+  
+  /** Test that we get the right package using getPackage(). */
+  @SuppressWarnings("unchecked")
+  public void testInterpretGetPackageClass()
+    throws BadLocationException, IOException, InterruptedException, InterpreterException {
+    _log.log("testInterpretGetPackageClass started");
+    
+    OpenDefinitionsDocument doc = setupDocument(CLASS_IN_PACKAGE_CLASS_TEXT);
+
+    final File dir = tempDirectory();
+    final File packDir = new File(dir, "foo");
+    packDir.mkdir();
+    final File file = new File(packDir, "Bar.java");
+    saveFile(doc, new FileSelector(file));
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
+    _model.addListener(listener);
+    listener.compile(doc);
+    if (_model.getCompilerModel().getNumErrors() > 0) {
+      fail("compile failed: " + getCompilerErrorString());
+    }
+    listener.checkCompileOccurred();
+    _model.removeListener(listener);
+    assertCompileErrorsPresent(_name(), false);
+    
+    // Make sure .class exists
+    File compiled = classForJava(file, "Bar");
+    assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
+    
+    _classPathManager.addBuildDirectoryCP(compiled.getParentFile().getParentFile());
+    
+    Object out = interpretDirectly("new foo.Bar().getClass().getPackage().getName()");
+    assertEquals("Package of foo.Bar should be foo", "foo", out);
+  }
+  
+  /** Test that we get the right package using getPackage() with anonymous inner classes defined in the Interactions Pane. */
+  @SuppressWarnings("unchecked")
+  public void testInterpretGetPackageAnonymous()
+    throws BadLocationException, IOException, InterruptedException, InterpreterException {
+    _log.log("testInterpretGetPackageAnonymous started");
+
+    Object out = interpretDirectly("new Runnable() { public void run() { } }.getClass().getPackage()");
+    assertEquals("Package of $1 should be null", null, out);
+    
+    out = interpretDirectly("package foo; new Runnable() { public void run() { } }.getClass().getPackage().getName()");
+    assertEquals("Package of foo.$1 should be foo", "foo", out);
   }
 }
