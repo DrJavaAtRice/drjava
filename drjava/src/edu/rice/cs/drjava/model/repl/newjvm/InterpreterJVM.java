@@ -216,10 +216,12 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
         else if (obj instanceof Boolean) { debug.logEnd(); return InterpretResult.booleanValue((Boolean) obj); }
         else {
           try {
-            String resultString = TextUtil.toString(obj);            
-            Class<?> c = obj.getClass();            
-            String resultTypeStr = getClassName(c);
-            
+            String resultString = TextUtil.toString(obj);
+            String resultTypeStr = null;
+            if (obj!=null) {
+                Class<?> c = obj.getClass();
+                resultTypeStr = getClassName(c);
+            }
             debug.logEnd();
             return InterpretResult.objectValue(resultString,resultTypeStr);
           }
