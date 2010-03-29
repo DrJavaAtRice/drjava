@@ -64,4 +64,8 @@ public interface FileSaveSelector {
     */
   public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile);
   
+  /** Return true if saving should update the document's state (i.e. new file name and reset
+    * modification status). Save/save as = true. Save copy = false.
+    * @return true to update document state */
+  public boolean shouldUpdateDocumentState();
 }

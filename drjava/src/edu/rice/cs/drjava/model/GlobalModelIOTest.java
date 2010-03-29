@@ -606,6 +606,35 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _log.log("testRealSaveFirstSave completed");
   }
   
+  /** Makes a first save-copy of the current document, ensures that it's still modified. */
+  public void testRealSaveFirstSaveCopy() throws BadLocationException, IOException {
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final File file = tempFile();
+    
+    TestListener listener = new TestListener() {
+      public void fileSaved(OpenDefinitionsDocument doc) {
+        File f = null;
+        try { f = doc.getFile(); }
+        catch (FileMovedException fme) { fail("file does not exist"); }   // We know file should exist
+        try {
+          assertEquals("saved file name", file.getCanonicalFile(), f.getCanonicalFile());
+          synchronized(this) { saveCount++; }
+        }
+        catch (IOException ioe) { fail("could not get canonical file"); }
+      }
+    };
+    
+    _model.addListener(listener);
+    saveFileCopy(doc, new SaveCopyFileSelector(file));
+    listener.assertSaveCount(0); // not "saved" because it doesn't change the state
+    assertModified(true, doc); // still modified
+    assertContents(FOO_TEXT, doc);
+    
+    assertEquals("contents of saved file", FOO_TEXT, IOUtil.toString(file));
+    
+    _log.log("testRealSaveFirstSaveCopy completed");
+  }
+  
   /** Saves a file already saved and overwrites its contents. */
   public void testSaveAlreadySaved() throws Exception {
     //disable file backups, remember original setting

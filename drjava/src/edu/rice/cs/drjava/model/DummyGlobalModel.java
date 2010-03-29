@@ -329,6 +329,10 @@ public class DummyGlobalModel implements GlobalModel {
   public void clearHistory() {
     throw new UnsupportedOperationException("Tried to call clearHistory on a Dummy");
   }
+
+  public void saveConsoleCopy(ConsoleDocument doc, FileSaveSelector selector) throws IOException {
+    throw new UnsupportedOperationException("Tried to call saveConsoleCopy on a Dummy");
+  }    
   
   public void saveHistory(FileSaveSelector selector) throws IOException {
     throw new UnsupportedOperationException("Tried to call saveHistory on a Dummy");

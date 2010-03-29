@@ -731,6 +731,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
         public boolean warnFileOpen(File f) { return false; }
         public boolean verifyOverwrite() { return true; }
         public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return false; }
+        public boolean shouldUpdateDocumentState() { return true; }
       });
     }
     public void fileSaved(OpenDefinitionsDocument doc) { }

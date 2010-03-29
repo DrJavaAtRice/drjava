@@ -350,6 +350,9 @@ public interface GlobalModel extends ILoadDocuments {
   
   /** Clears the interactions history. */
   public void clearHistory();
+
+  /** Save copy of Console or Interactions Pane to text file. */
+  public void saveConsoleCopy(ConsoleDocument doc, FileSaveSelector selector) throws IOException;
   
   /** Saves the unedited version of the current history to a file
     * @param selector File to save to

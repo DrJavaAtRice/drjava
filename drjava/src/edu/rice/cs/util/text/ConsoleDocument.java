@@ -36,16 +36,21 @@
 
 package edu.rice.cs.util.text;
 
+import java.io.*;
 import java.awt.EventQueue;
 import java.awt.print.*;
+import java.awt.EventQueue;
 
 import edu.rice.cs.drjava.model.print.DrJavaBook;
 
+import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
 import edu.rice.cs.util.text.DocumentEditCondition;
 import edu.rice.cs.util.text.EditDocumentException;
+import edu.rice.cs.util.FileOps;
 
 /** A GUI-toolkit agnostic interface to a console document.  This class assumes that the embedded document supports 
   * readers/writers locking and uses that locking protocol to ensure the integrity of the data added in this class
@@ -341,6 +346,32 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
         return false;
       }
       return true;
+    }
+  }
+  
+  /** Saves the contents of the document to a file.
+    * @param selector File to save to
+    */
+  public void saveCopy(FileSaveSelector selector) throws IOException {
+    assert EventQueue.isDispatchThread();
+    try {
+      final File file = selector.getFile().getCanonicalFile();
+      if (! file.exists() || selector.verifyOverwrite()) {  // confirm that existing file can be overwritten        
+        FileOps.saveFile(new FileOps.DefaultFileSaver(file) {
+          /** Only runs in event thread so no read lock is necessary. */
+          public void saveTo(OutputStream os) throws IOException {
+            final String text = getDocText(0, getLength());
+            OutputStreamWriter osw = new OutputStreamWriter(os);
+            osw.write(text,0,text.length());
+            osw.flush();
+          }
+        });
+      }
+    }
+    catch (OperationCanceledException oce) {
+      // Thrown by selector.getFile() if the user cancels.
+      // We don't do anything if this happens.
+      return;
     }
   }
 }

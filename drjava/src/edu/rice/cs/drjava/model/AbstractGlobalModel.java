@@ -2329,6 +2329,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** throws UnsupportedOperationException */
+  public void saveConsoleCopy(ConsoleDocument doc, FileSaveSelector selector) throws IOException {
+    throw new UnsupportedOperationException("AbstractGlobalModel does not support interactions");
+  }
+  
+  /** throws UnsupportedOperationException */
   public void saveHistory(FileSaveSelector selector) throws IOException {
     throw new UnsupportedOperationException("AbstractGlobalModel does not support interactions");
   }
@@ -3128,46 +3133,49 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
               catch (BadLocationException docFailed) { throw new UnexpectedException(docFailed); }
             }
           });
-          resetModification();
-          if (! oldFile.equals(file)) {
-            /* remove regions for this document */
-            removeFromDebugger();
-            _breakpointManager.removeRegions(this);
-            _bookmarkManager.removeRegions(this);
-            for (RegionManager<MovingDocumentRegion> rm: getFindResultsManagers()) rm.removeRegions(this);
-            clearBrowserRegions();
-          }
-          synchronized(_documentsRepos) {
-            File f = getRawFile();
-//            OpenDefinitionsDocument d = _documentsRepos.get(f);
-            // d == this except in some unit tests where documents are not entered in _documentsRepos
-//            assert d == this;
-            _documentsRepos.remove(f);
-            _documentsRepos.put(file, this);
-          }
-          setFile(file);
           
-          // this.getPackageName does not return "" if this is untitled and contains a legal package declaration     
+          if (com.shouldUpdateDocumentState()) {
+            resetModification();
+            if (! oldFile.equals(file)) {
+              /* remove regions for this document */
+              removeFromDebugger();
+              _breakpointManager.removeRegions(this);
+              _bookmarkManager.removeRegions(this);
+              for (RegionManager<MovingDocumentRegion> rm: getFindResultsManagers()) rm.removeRegions(this);
+              clearBrowserRegions();
+            }
+            synchronized(_documentsRepos) {
+              File f = getRawFile();
+//            OpenDefinitionsDocument d = _documentsRepos.get(f);
+              // d == this except in some unit tests where documents are not entered in _documentsRepos
+//            assert d == this;
+              _documentsRepos.remove(f);
+              _documentsRepos.put(file, this);
+            }
+            setFile(file);
+            
+            // this.getPackageName does not return "" if this is untitled and contains a legal package declaration     
 //          try {
 //            // This calls getDocument().getPackageName() because this may be untitled and this.getPackageName()
 //            // returns "" if it's untitled.  Right here we are interested in parsing the DefinitionsDocument's text
 //            _packageName = getDocument().getPackageName();
 //          }
 //          catch(InvalidPackageException e) { _packageName = null; }
-          setCachedClassFile(FileOps.NULL_FILE);
-          checkIfClassFileInSync();
-          
+            setCachedClassFile(FileOps.NULL_FILE);
+            checkIfClassFileInSync();
+            
 //          Utilities.showDebug("ready to fire fileSaved for " + this);
-          _notifier.fileSaved(openDoc);
-          
-          // Make sure this file is on the appropriate classpaths (does nothing in AbstractGlobalModel)
-          addDocToClassPath(this);
-          
-          /* update the navigator */
-          _documentNavigator.refreshDocument(this, fixPathForNavigator(file.getCanonicalPath()));
-          
-          /* set project changed flag */
-          setProjectChanged(true);          
+            _notifier.fileSaved(openDoc);
+            
+            // Make sure this file is on the appropriate classpaths (does nothing in AbstractGlobalModel)
+            addDocToClassPath(this);
+            
+            /* update the navigator */
+            _documentNavigator.refreshDocument(this, fixPathForNavigator(file.getCanonicalPath()));
+            
+            /* set project changed flag */
+            setProjectChanged(true);          
+          }
         }
         return true;
       }
@@ -3875,6 +3883,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean warnFileOpen(File f) { return true; }
     public boolean verifyOverwrite() { return true; }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
+    public boolean shouldUpdateDocumentState() { return true; }
   }
   
   /** Creates a ConcreteOpenDefDoc for a NullFile object f (corresponding to a new empty document)

@@ -473,6 +473,15 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       } });
   }
   
+  /** Invokes doc.saveFileCopy from within the event thread. */
+  protected void saveFileCopy(final OpenDefinitionsDocument doc, final FileSaveSelector fss) {
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        try { doc.saveFileAs(fss); }
+        catch(Exception e) { throw new UnexpectedException(e); }
+      } });
+  }
+  
   protected void saveAllFiles(final GlobalModel model, final FileSaveSelector fs) {
     Utilities.invokeAndWait(new Runnable() {
       public void run() { 
@@ -507,6 +516,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {
       throw new FileMovedWarningException();
     }
+    public boolean shouldUpdateDocumentState() { return true; }
   }
 
   /** This class is used by several test cases in Compile Tests that expect incorrect behavior concerning the saving 
@@ -532,6 +542,13 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public boolean warnFileOpen(File f) { return true; }
     public boolean verifyOverwrite() { return true; }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
+    public boolean shouldUpdateDocumentState() { return true; }
+  }
+
+  public static class SaveCopyFileSelector extends FileSelector {
+    public SaveCopyFileSelector(File f) { super(f); }
+    public SaveCopyFileSelector(File f1, File f2) { super(f1, f2); }
+    public boolean shouldUpdateDocumentState() { return false; }
   }
 
   public static class CancelingSelector implements FileOpenSelector, FileSaveSelector {
@@ -540,6 +557,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public boolean warnFileOpen(File f) { return true; }
     public boolean verifyOverwrite() {return true; }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {  return true; }
+    public boolean shouldUpdateDocumentState() { return true; }
   }
 
   /** A GlobalModelListener for testing. By default it expects no events to be fired. To customize,

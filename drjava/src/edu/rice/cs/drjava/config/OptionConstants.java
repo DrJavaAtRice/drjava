@@ -93,6 +93,9 @@ public interface OptionConstants {
   
   /** The configuration XML file that DrJava looks for inside a .djapp file */
   public static final String EXTPROCESS_FILE_NAME_INSIDE_JAR = "process" + EXTPROCESS_FILE_EXTENSION;
+
+  /** The extension for a text file */
+  public static final String TEXT_FILE_EXTENSION = ".txt";
   
   /** tools.jar location, or NULL_FILE if not specified. */
   public static final FileOption JAVAC_LOCATION = new FileOption("javac.location", FileOps.NULL_FILE);
@@ -392,6 +395,12 @@ public interface OptionConstants {
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_S, MASK | SHIFT_MASK)));
   
+  /** The key binding for saving a file copy */
+  public static final VectorOption<KeyStroke> KEY_SAVE_FILE_COPY =
+    new VectorOption<KeyStroke>("key.save.file.copy", 
+                                new KeyStrokeOption("",null), 
+                                to.vector());
+  
   /** The key binding for saving all files. */
   public static final VectorOption<KeyStroke> KEY_SAVE_ALL_FILES =
     new VectorOption<KeyStroke>("key.save.all.files", 
@@ -685,6 +694,10 @@ public interface OptionConstants {
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_J, MASK | SHIFT_MASK)));
   
+  /** The key binding for saving the interactions copy to a file. */
+  public static final VectorOption<KeyStroke> KEY_SAVE_INTERACTIONS_COPY =
+    new VectorOption<KeyStroke>("key.save.interactions.copy", new KeyStrokeOption("",null), to.vector());
+  
   /** The key binding for executing an interactions history. */
   public static final VectorOption<KeyStroke> KEY_EXECUTE_HISTORY =
     new VectorOption<KeyStroke>("key.execute.history", new KeyStrokeOption("",null), to.vector());
@@ -723,6 +736,10 @@ public interface OptionConstants {
 //                               new KeyStrokeOption("",null), 
 //                               to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_M, MASK)));
   
+  /** The key binding for saving the console copy to a file. */
+  public static final VectorOption<KeyStroke> KEY_SAVE_CONSOLE_COPY =
+    new VectorOption<KeyStroke>("key.save.console.copy", new KeyStrokeOption("",null), to.vector());
+
   /** The key binding for clearing the console. */
   public static final VectorOption<KeyStroke> KEY_CLEAR_CONSOLE =
     new VectorOption<KeyStroke>("key.clear.console", new KeyStrokeOption("",null), to.vector());

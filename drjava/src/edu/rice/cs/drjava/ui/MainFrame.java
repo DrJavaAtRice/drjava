@@ -108,6 +108,7 @@ import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.docnavigation.*;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.swing.*;
+import edu.rice.cs.util.text.ConsoleDocument;
 
 import static edu.rice.cs.drjava.config.OptionConstants.KEY_NEW_CLASS_FILE;
 import static edu.rice.cs.drjava.ui.RecentFileManager.*;
@@ -308,6 +309,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
   
+  /** Filter for text files (.txt) */
+  private final javax.swing.filechooser.FileFilter _txtFileFilter = new javax.swing.filechooser.FileFilter() {
+    public boolean accept(File f) {
+      return f.isDirectory() || 
+        f.getPath().endsWith(TEXT_FILE_EXTENSION);
+    }
+    public String getDescription() { 
+      return "Text Files (*"+TEXT_FILE_EXTENSION+")";
+    }
+  };
+  
   /** Filter for any files (*.*) */
   private final javax.swing.filechooser.FileFilter _anyFileFilter = new javax.swing.filechooser.FileFilter() {
     public boolean accept(File f) { return true; }
@@ -373,6 +385,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       int rc = JOptionPane.showConfirmDialog(MainFrame.this, text, "File Moved or Deleted", JOptionPane.YES_NO_OPTION);
       return (rc == JOptionPane.YES_OPTION);
     }
+    public boolean shouldUpdateDocumentState() { return true; }
   };
   
   /** Returns the file to save to the model (command pattern). */
@@ -381,6 +394,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public boolean warnFileOpen(File f) { return _warnFileOpen(f); }
     public boolean verifyOverwrite() { return _verifyOverwrite(); }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
+    public boolean shouldUpdateDocumentState() { return true; }
+  };
+  
+  /** Returns the file to save to the model (command pattern) without updating the document state. */
+  private final FileSaveSelector _saveCopySelector = new FileSaveSelector() {
+    public File getFile() throws OperationCanceledException { return getSaveFile(_saveChooser); }
+    public boolean warnFileOpen(File f) { return _warnFileOpen(f); }
+    public boolean verifyOverwrite() { return _verifyOverwrite(); }
+    public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
+    public boolean shouldUpdateDocumentState() { return false; }
   };
   
   /** Provides the view's contribution to the Javadoc interaction. */
@@ -683,6 +706,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Asks the user for a file name and saves the active document (in the definitions pane) to that file. */
   private final Action _saveAsAction = new AbstractAction("Save As...") {
     public void actionPerformed(ActionEvent ae) { _saveAs(); }
+  };
+  
+  /** Asks the user for a file name and saves a copy of the active document (in the definitions pane) to
+    * that file. DrJava's state is not modified (i.e. it does not set the document to 'unchanged'). */
+  private final Action _saveCopyAction = new AbstractAction("Save Copy...") {
+    public void actionPerformed(ActionEvent ae) { _saveCopy(); }
   };
   
   /** Asks the user for a file name and renames and saves the active document (in the definitions pane) to that file. */
@@ -2192,6 +2221,61 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       finally{ hourglassOff(); }
     }
   };
+
+  /** Saves a copy of DrJava's output console to a file. */
+  private final Action _saveConsoleCopyAction = new AbstractAction("Save Copy of Console...") {
+    public void actionPerformed(ActionEvent ae) {
+      updateStatusField("Saving Copy of Console");
+      _saveConsoleCopy(_model.getConsoleDocument());
+      _consolePane.requestFocusInWindow();
+    }
+  };
+  
+  /** Saves a copy of either the console or the interactions pane to a file. */
+  public void _saveConsoleCopy(ConsoleDocument doc) {
+    _saveChooser.removeChoosableFileFilter(_projectFilter);
+    _saveChooser.removeChoosableFileFilter(_javaSourceFilter);
+    _saveChooser.setFileFilter(_txtFileFilter);    
+    _saveChooser.setMultiSelectionEnabled(false);
+    _saveChooser.setSelectedFile(new File(""));
+    try {
+      _model.saveConsoleCopy(doc, new FileSaveSelector() {
+        public File getFile() throws OperationCanceledException {
+          int rc = _saveChooser.showSaveDialog(MainFrame.this);
+          switch (rc) {
+            case JFileChooser.CANCEL_OPTION:
+            case JFileChooser.ERROR_OPTION:
+              throw new OperationCanceledException();
+            case JFileChooser.APPROVE_OPTION:
+              File chosen = _saveChooser.getSelectedFile();
+              if (chosen != null) {
+                // append the .txt extension if no . written by user
+                if (chosen.getName().indexOf(".") == -1)
+                  return new File(chosen.getAbsolutePath() + TEXT_FILE_EXTENSION);
+                return chosen;
+              }
+              else
+                throw new RuntimeException("Filechooser returned null file");
+          }
+          // impossible since rc must be one of these
+          throw new RuntimeException("Filechooser returned bad rc " + rc);
+        }
+        public boolean warnFileOpen(File f) { return _warnFileOpen(f); }
+        public boolean verifyOverwrite() { return _verifyOverwrite(); }
+        public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
+        public boolean shouldUpdateDocumentState() { return false; }
+      });
+    }
+    catch (IOException ioe) {
+      _showIOError(new IOException("An error occured writing the contents to a file"));
+    }
+    finally {
+      _saveChooser.removeChoosableFileFilter(_projectFilter);
+      _saveChooser.removeChoosableFileFilter(_javaSourceFilter);
+      _saveChooser.removeChoosableFileFilter(_txtFileFilter);
+      _saveChooser.setFileFilter(_javaSourceFilter);
+    }
+  }
   
   /** Clears DrJava's output console. */
   private final Action _clearConsoleAction = new AbstractAction("Clear Console") {
@@ -2806,6 +2890,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
   
+  /** Save the contents of the interactions window to a file. */
+  private final Action _saveInteractionsCopyAction = new AbstractAction("Save Copy of Interactions...") {
+    public void actionPerformed(ActionEvent ae) {
+      updateStatusField("Saving Copy of Interactions");
+      _saveConsoleCopy(_model.getInteractionsDocument());
+      _interactionsPane.requestFocusInWindow();
+    }
+  };
+    
   /** Save the commands in the interactions window's history to a file */
   private final Action _saveHistoryAction = new AbstractAction("Save Interactions History...") {
     public void actionPerformed(ActionEvent ae) {
@@ -2858,6 +2951,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {
           return true;
         }
+        public boolean shouldUpdateDocumentState() { return true; }
       };
       
       try { _model.saveHistory(selector, history);}
@@ -5036,6 +5130,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
+  private boolean _saveCopy() {
+    updateStatusField("Saving Copy of File");
+    try {
+      boolean toReturn = _model.getActiveDocument().saveFileAs(_saveCopySelector);
+      _model.refreshActiveDocument();  // highlights the document in the navigator
+      return toReturn;
+    }
+    catch (IOException ioe) {
+      _showIOError(ioe);
+      return false;
+    }
+  }
+  
   private boolean _rename() {
     try {
       if (!_model.getActiveDocument().fileExists()) return _saveAs();
@@ -6144,6 +6251,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_openProjectAction, "Open", "Open an existing project");
     _setUpAction(_saveAction, "Save", "Save the current document");
     _setUpAction(_saveAsAction, "Save As", "SaveAs", "Save the current document with a new name");
+    _setUpAction(_saveCopyAction, "Save Copy", "SaveAs", "Save a copy of the current document");
     _setUpAction(_renameAction, "Rename", "Rename", "Rename the current document");
     _setUpAction(_saveProjectAction, "Save", "Save", "Save the current project");
     _saveProjectAction.setEnabled(false);
@@ -6267,6 +6375,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_openJavadocUnderCursorAction, "Open Java API Javadoc for Word Under Cursor...", "Open the Java API " +
                  "Javadoc Web page for the word under the cursor");
     
+    _setUpAction(_saveInteractionsCopyAction, "Save Copy of Interactions...",
+                 "SaveAs", "Save copy of interactions contents to a file");
     _setUpAction(_executeHistoryAction, "Execute History", "Load and execute a history of interactions from a file");
     _setUpAction(_loadHistoryScriptAction, "Load History as Script", 
                  "Load a history from a file as a series of interactions");
@@ -6283,6 +6393,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_copyInteractionToDefinitionsAction, "Lift Current Interaction", 
                  "Copy the current interaction into the Definitions Pane");
     
+    _setUpAction(_saveConsoleCopyAction, "Save Copy of Console...",
+                 "SaveAs", "Save copy of console contents to a file");
     _setUpAction(_clearConsoleAction, "Clear Console", "Clear all text in the Console Pane");
     _setUpAction(_showDebugConsoleAction, "Show DrJava Debug Console", "<html>Show a console for debugging DrJava<br>" +
                  "(with \"mainFrame\", \"model\", and \"config\" variables defined)</html>");
@@ -6406,6 +6518,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(fileMenu, _saveAction, KEY_SAVE_FILE);
     _saveAction.setEnabled(true);
     _addMenuItem(fileMenu, _saveAsAction, KEY_SAVE_FILE_AS);
+    _addMenuItem(fileMenu, _saveCopyAction, KEY_SAVE_FILE_COPY);
     _addMenuItem(fileMenu, _saveAllAction, KEY_SAVE_ALL_FILES);
     _addMenuItem(fileMenu, _renameAction, KEY_RENAME_FILE);
     _renameAction.setEnabled(false);
@@ -6544,11 +6657,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
      _addMenuItem(toolsMenu, _abortInteractionAction, KEY_ABORT_INTERACTION);
      */
     final JMenu interMenu = new JMenu("Interactions & Console");    
+    _addMenuItem(interMenu, _saveInteractionsCopyAction, KEY_SAVE_INTERACTIONS_COPY);
     _addMenuItem(interMenu, _viewInteractionsClassPathAction, KEY_VIEW_INTERACTIONS_CLASSPATH);
     _addMenuItem(interMenu, _copyInteractionToDefinitionsAction, KEY_LIFT_CURRENT_INTERACTION);
     _addMenuItem(interMenu, _printInteractionsAction, KEY_PRINT_INTERACTIONS);
     interMenu.addSeparator();
     _addMenuItem(interMenu, _clearConsoleAction, KEY_CLEAR_CONSOLE);
+    _addMenuItem(interMenu, _saveConsoleCopyAction, KEY_SAVE_CONSOLE_COPY);
     _addMenuItem(interMenu, _printConsoleAction, KEY_PRINT_CONSOLE);
     _addMenuItem(interMenu, _closeSystemInAction, KEY_CLOSE_SYSTEM_IN);
     if (DrJava.getConfig().getSetting(SHOW_DEBUG_CONSOLE).booleanValue()) {
@@ -7454,6 +7569,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             if (docSelectedCount==1) {
               m.add(Utilities.createDelegateAction("Save File", _saveAction));
               m.add(Utilities.createDelegateAction("Save File As...", _saveAsAction));
+              m.add(Utilities.createDelegateAction("Save File Copy...", _saveCopyAction));
               m.add(Utilities.createDelegateAction("Rename File", _renameAction));
               m.add(Utilities.createDelegateAction("Revert File to Saved", _revertAction));
               m.add(Utilities.createDelegateAction("Close File", _closeAction));
@@ -7561,6 +7677,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _interactionsPanePopupMenu.add(_printInteractionsAction);
     _interactionsPanePopupMenu.add(_printInteractionsPreviewAction);
     _interactionsPanePopupMenu.addSeparator();
+    _interactionsPanePopupMenu.add(_saveInteractionsCopyAction);
+    _interactionsPanePopupMenu.addSeparator();
     _interactionsPanePopupMenu.add(_executeHistoryAction);
     _interactionsPanePopupMenu.add(_loadHistoryScriptAction);
     _interactionsPanePopupMenu.add(_saveHistoryAction);
@@ -7585,6 +7703,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //    });
     _consolePanePopupMenu = new JPopupMenu();
     _consolePanePopupMenu.add(_clearConsoleAction);
+    _consolePanePopupMenu.add(_saveConsoleCopyAction);
     _consolePanePopupMenu.addSeparator();
     _consolePanePopupMenu.add(_printConsoleAction);
     _consolePanePopupMenu.add(_printConsolePreviewAction);

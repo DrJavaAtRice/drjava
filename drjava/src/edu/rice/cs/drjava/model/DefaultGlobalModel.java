@@ -76,6 +76,7 @@ import edu.rice.cs.drjava.model.compiler.DefaultCompilerModel;
 import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.junit.DefaultJUnitModel;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
+import edu.rice.cs.util.text.ConsoleDocument;
 
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.reflect.ReflectUtil;
@@ -397,6 +398,14 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     */
   public void saveHistory(FileSaveSelector selector) throws IOException {
     _interactionsModel.getDocument().saveHistory(selector);
+  }
+
+  /** Saves the unedited version of the current history to a file
+    * @param doc Document to save
+    * @param selector File to save to
+    */
+  public void saveConsoleCopy(ConsoleDocument doc, FileSaveSelector selector) throws IOException {
+    doc.saveCopy(selector);
   }
   
   /** Saves the edited version of the current history to a file
