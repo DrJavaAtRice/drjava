@@ -268,17 +268,19 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     }
     else { JarJDKToolsLibrary.msg("From config: not set"); }
     
-    JDKToolsLibrary fromRuntime = JDKToolsLibrary.makeFromRuntime(this);
+    Iterable<JDKToolsLibrary> allFromRuntime = JDKToolsLibrary.makeFromRuntime(this);
 
-    JavaVersion.FullVersion runtimeVersion = fromRuntime.version();
-    if (fromRuntime.isValid()) {
-      if (!results.containsKey(coarsenVersion(runtimeVersion))) {
-        JarJDKToolsLibrary.msg("From runtime: "+fromRuntime);
-        results.put(coarsenVersion(runtimeVersion), fromRuntime);
+    for(JDKToolsLibrary fromRuntime: allFromRuntime) {
+      JavaVersion.FullVersion runtimeVersion = fromRuntime.version();
+      if (fromRuntime.isValid()) {
+        if (!results.containsKey(coarsenVersion(runtimeVersion))) {
+          JarJDKToolsLibrary.msg("From runtime: "+fromRuntime);
+          results.put(coarsenVersion(runtimeVersion), fromRuntime);
+        }
+        else { JarJDKToolsLibrary.msg("From runtime: duplicate "+fromRuntime); }
       }
-      else { JarJDKToolsLibrary.msg("From runtime: duplicate "+fromRuntime); }
+      else { JarJDKToolsLibrary.msg("From runtime: invalid "+fromRuntime); }
     }
-    else { JarJDKToolsLibrary.msg("From runtime: invalid "+fromRuntime); }
     
     Iterable<JarJDKToolsLibrary> fromSearch = JarJDKToolsLibrary.search(this);
     for (JDKToolsLibrary t : fromSearch) {

@@ -182,7 +182,7 @@ public class MintCompiler extends JavacCompiler {
 
   public boolean isAvailable() {
     try {
-      // Diagnostic was intruced in the Java 1.6 compiler
+      // Diagnostic was introduced in the Java 1.6 compiler
       Class<?> diagnostic = Class.forName("javax.tools.Diagnostic");
       diagnostic.getMethod("getKind");
       // javax.tools.Diagnostic is also found in rt.jar; to test if tools.jar

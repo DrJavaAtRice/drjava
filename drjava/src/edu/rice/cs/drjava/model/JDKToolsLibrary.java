@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.model;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.io.File;
 
 import edu.rice.cs.plt.reflect.ReflectUtil;
@@ -110,28 +111,35 @@ public class JDKToolsLibrary {
       default: return null;
     }
   }
-  
-  /** Create a JDKToolsLibrary from the runtime class path (or, more accurately, from the class
-   * loader that loaded this class.
-   */
-  public static JDKToolsLibrary makeFromRuntime(GlobalModel model) {
-    FullVersion version = JavaVersion.CURRENT_FULL;
 
-    CompilerInterface compiler = NoCompilerAvailable.ONLY;
-    String compilerAdapter = adapterForCompiler(version);
-    if (compilerAdapter != null) {
+  protected static CompilerInterface getCompilerInterface(String className, FullVersion version) {
+    if (className != null) {
       List<File> bootClassPath = null;
       String bootProp = System.getProperty("sun.boot.class.path");
       if (bootProp != null) { bootClassPath = CollectUtil.makeList(IOUtil.parsePath(bootProp)); }
       try {
         Class<?>[] sig = { FullVersion.class, String.class, List.class };
         Object[] args = { version, "the runtime class path", bootClassPath };
-        CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadObject(compilerAdapter, sig, args);
-        if (attempt.isAvailable()) { compiler = attempt; }
+        CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadObject(className, sig, args);
+        msg("                 attempt = "+attempt+", isAvailable() = "+attempt.isAvailable());
+        if (attempt.isAvailable()) { return attempt; }
       }
       catch (ReflectException e) { /* can't load */ }
       catch (LinkageError e) { /* can't load */ }
     }
+    return NoCompilerAvailable.ONLY;
+  }
+  
+  /** Create a JDKToolsLibrary from the runtime class path (or, more accurately, from the class
+   * loader that loaded this class.
+   */
+  public static Iterable<JDKToolsLibrary> makeFromRuntime(GlobalModel model) {
+    FullVersion version = JavaVersion.CURRENT_FULL;
+
+    String compilerAdapter = adapterForCompiler(version);
+    msg("makeFromRuntime: compilerAdapter="+compilerAdapter);
+    CompilerInterface compiler = getCompilerInterface(compilerAdapter, version);
+    msg("                 compiler="+compiler.getClass().getName());
     
     Debugger debugger = NoDebuggerAvailable.ONLY;
     String debuggerAdapter = adapterForDebugger(version);
@@ -151,8 +159,52 @@ public class JDKToolsLibrary {
     }
     catch (ClassNotFoundException e) { /* can't load */ }
     catch (LinkageError e) { /* can't load (probably not necessary, but might as well catch it) */ }
+
+    List<JDKToolsLibrary> list = new ArrayList<JDKToolsLibrary>();
     
-    return new JDKToolsLibrary(version, compiler, debugger, javadoc);
-  }
+    if (compiler!=NoCompilerAvailable.ONLY) {
+      // if we have found a compiler, add it
+      msg("                 compiler found");
+      list.add(new JDKToolsLibrary(version, compiler, debugger, javadoc));
+    }
+      
+    if (JavaVersion.JAVA_6.compareTo(version.majorVersion())>=0) {
+      // at least Java 6, try Eclipse compiler
+      msg("                 at least Java 6, try EclipseCompiler");
+      // provide "UNKNOWN 6.0" as version
+      FullVersion eclipseVersion = JavaVersion.parseFullVersion(JavaVersion.JAVA_6.fullVersion().versionString(),
+                                                                "Eclipse","");
+      msg("                 version for Eclipse: "+eclipseVersion);
+      compiler = getCompilerInterface("edu.rice.cs.drjava.model.compiler.EclipseCompiler", eclipseVersion);
+      msg("                 compiler="+compiler.getClass().getName());
+      if (compiler!=NoCompilerAvailable.ONLY) {
+        // if we have found a compiler, add it
+        msg("                 compiler found");
+        list.add(new JDKToolsLibrary(eclipseVersion, compiler, debugger, javadoc));
+      }
+    }
+    msg("                 compilers found: "+list.size());
+    
+    if (list.size()==0) {
+      // no compiler found, i.e. compiler == NoCompilerAvailable.ONLY
+      msg("                 no compilers found, adding NoCompilerAvailable library");
+      list.add(new JDKToolsLibrary(version, NoCompilerAvailable.ONLY, debugger, javadoc));
+    }
+    
+    return list;
+  }  
   
+  public static final java.io.StringWriter LOG_STRINGWRITER = new java.io.StringWriter();
+  protected static final java.io.PrintWriter LOG_PW = new java.io.PrintWriter(LOG_STRINGWRITER);
+  
+  public static void msg(String s) {   
+//    try {   
+//      java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(new File(new File(System.getProperty("user.home")),   
+//                                                                                       "mintcompiler.txt").getAbsolutePath(),true));   
+//      pw.println(s);
+      LOG_PW.println(s);
+//      pw.close();   
+//    }   
+//    catch(java.io.IOException ioe) { }   
+  }
 }

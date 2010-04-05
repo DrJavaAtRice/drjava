@@ -138,12 +138,9 @@ public class EclipseCompiler extends JavacCompiler {
   
   public boolean isAvailable() {
     try {
-      // Diagnostic was intruced in the Java 1.6 compiler
+      // Diagnostic was introduced in the Java 1.6 compiler
       Class<?> diagnostic = Class.forName("javax.tools.Diagnostic");
       diagnostic.getMethod("getKind");
-      // javax.tools.Diagnostic is also found in rt.jar; to test if tools.jar
-      // is availble, we need to test for a class only found in tools.jar
-      Class.forName("com.sun.tools.javac.main.JavaCompiler");
       // and check for Eclipse compiler
       Class.forName("org.eclipse.jdt.internal.compiler.tool.EclipseCompiler");
       return true;
@@ -192,19 +189,17 @@ public class EclipseCompiler extends JavacCompiler {
     CompilerErrorListener diagnosticListener = new CompilerErrorListener(errors);
     StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnosticListener, null, null);
     Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromFiles(files);
+//    Writer out = new OutputStreamWriter(new OutputStream() { // silent
+//      public void write(int b) { }
+//    });
     Writer out = null;
-//    try {
-//      PrintWriter pw = new PrintWriter(new FileWriter("/home/mgricken/eclipse.txt",true));      
-//      out = pw;
-//      pw.println("JavacCompiler: "+getName());
-//    }
-//    catch(IOException ioe) { throw new RuntimeException("Unexpected", ioe); }
     Iterable<String> classes = null; // no classes for annotation processing  
     Iterable<String> options = _getOptions(filteredClassPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
      
     try {
       JavaCompiler.CompilationTask task = compiler.getTask(out, fileManager, diagnosticListener, options, classes, compilationUnits);
       boolean res = task.call();
+      if (!res && (errors.size()==0)) throw new AssertionError("Compile failed. There should be compiler errors, but there aren't.");
     }
     catch(Throwable t) {  // compiler threw an exception/error (typically out of memory error)
       errors.addFirst(new DJError("Compile exception: " + t, false));
@@ -268,8 +263,6 @@ public class EclipseCompiler extends JavacCompiler {
       addOption(options,"-nowarn");
     }
 
-    System.err.println(options);
-    
     return options;
   }
   
@@ -283,6 +276,7 @@ public class EclipseCompiler extends JavacCompiler {
     }
     
     public void report(Diagnostic<? extends JavaFileObject> d) {
+      System.err.println("report: "+d);
       
       Diagnostic.Kind dt = d.getKind();
       boolean isWarning = false;  // init required by javac
