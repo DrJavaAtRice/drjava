@@ -187,6 +187,16 @@
       <param name="extra-classpath" value="${mint-tools}" />
     </antcall>
   </target>
+
+  <target name="compile-eclipse" depends="resolve-java6-runtime, resolve-java6-tools, unjar-libs" 
+          description="Compile the 'eclipse' sources">
+    <antcall target="do-compile">
+      <param name="platform-tag" value="eclipse" />
+      <param name="source-version" value="1.6" />
+      <param name="runtime-jar" value="${java6-runtime}" />
+      <param name="extra-classpath" value="${java6-tools}" />
+    </antcall>
+  </target>
   
   <target name="compile-mac" depends="resolve-java5-runtime" 
           description="Compile the 'mac' sources">
@@ -337,6 +347,15 @@
       <param name="platform-tag" value="mint" />
       <param name="extra-classpath" value="${mint-tools}" />
       <param name="test-jvm" value="${mint-exec}" />
+    </antcall>
+  </target>
+
+  <target name="test-eclipse" depends="compile-eclipse, resolve-java6-exec, resolve-java6-tools" 
+          description="Run all 'eclipse' tests (after compiling); use -Dtest-spec=... to filter">
+    <antcall target="iterate-tests">
+      <param name="platform-tag" value="eclipse" />
+      <param name="extra-classpath" value="${java6-tools}" />
+      <param name="test-jvm" value="${java6-exec}" />
     </antcall>
   </target>
 
@@ -492,6 +511,7 @@
       <fileset dir="classes/base-jdk6" />
       <fileset dir="classes/base-openjdk6" />
       <fileset dir="classes/base-mint" />
+      <fileset dir="classes/base-eclipse" />
       <fileset dir="classes/base-mac" />
       <fileset dir="classes/base-windows" />
       <!-- Additional platform types should be listed here -->
@@ -508,6 +528,7 @@
       <fileset dir="classes/base-jdk6" />
       <fileset dir="classes/base-openjdk6" />
       <fileset dir="classes/base-mint" />
+      <fileset dir="classes/base-eclipse" />
       <fileset dir="classes/base-mac" />
       <fileset dir="classes/base-windows" />
       <!-- Additional platform types should be listed here -->
@@ -531,6 +552,7 @@
     <delete dir="classes/test-jdk6" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-openjdk6" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-mint" failonerror="${clean-can-fail}" />
+    <delete dir="classes/test-eclipse" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-mac" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-windows" failonerror="${clean-can-fail}" />
     
