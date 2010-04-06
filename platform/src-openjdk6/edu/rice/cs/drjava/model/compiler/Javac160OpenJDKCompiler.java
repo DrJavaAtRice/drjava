@@ -166,11 +166,16 @@ public class Javac160OpenJDKCompiler extends JavacCompiler {
          * non-existent path--the name of the test file (allocated as a TEMP file) appended to the source root for 
          * DrJava--in GlobalModelCompileErrorsTest.testCompileFailsCorrectLineNumbers().  The expression 
          * d.getSource().toUri().getPath() returns the correct result as does ((JCDiagnostic) d).getSourceName(). */
-        errors.add(new DJError(new File(d.getSource().toUri().getPath()), // d.getSource().getName() fails! 
-                               ((int) d.getLineNumber()) - 1,  // javac starts counting at 1
-                               ((int) d.getColumnNumber()) - 1, 
-                               d.getMessage(null),    // null is the locale
-                               isWarning));
+        if (d.getSource()!=null) {
+          errors.add(new DJError(new File(d.getSource().toUri().getPath()), // d.getSource().getName() fails! 
+                                 ((int) d.getLineNumber()) - 1,  // javac starts counting at 1
+                                 ((int) d.getColumnNumber()) - 1, 
+                                 d.getMessage(null),    // null is the locale
+                                 isWarning));
+        }
+        else {
+          errors.add(new DJError(d.getMessage(null), isWarning));
+        }
       }
       fileManager.close();
     }

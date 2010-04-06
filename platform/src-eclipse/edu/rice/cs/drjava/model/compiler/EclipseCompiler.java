@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.ResourceBundle;
+import java.util.Locale;
 
 // Uses JDK 1.6.0 tools classes
 import javax.tools.JavaFileManager;
@@ -189,10 +190,10 @@ public class EclipseCompiler extends JavacCompiler {
     CompilerErrorListener diagnosticListener = new CompilerErrorListener(errors);
     StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnosticListener, null, null);
     Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromFiles(files);
-//    Writer out = new OutputStreamWriter(new OutputStream() { // silent
-//      public void write(int b) { }
-//    });
-    Writer out = null;
+    Writer out = new OutputStreamWriter(new OutputStream() { // silent
+      public void write(int b) { }
+    });
+//    Writer out = null;
     Iterable<String> classes = null; // no classes for annotation processing  
     Iterable<String> options = _getOptions(filteredClassPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
      
@@ -276,8 +277,6 @@ public class EclipseCompiler extends JavacCompiler {
     }
     
     public void report(Diagnostic<? extends JavaFileObject> d) {
-      System.err.println("report: "+d);
-      
       Diagnostic.Kind dt = d.getKind();
       boolean isWarning = false;  // init required by javac
       
@@ -294,12 +293,16 @@ public class EclipseCompiler extends JavacCompiler {
         * DrJava--in GlobalModelCompileErrorsTest.testCompileFailsCorrectLineNumbers().  The expression 
         * d.getSource().toUri().getPath() returns the correct result as does ((JCDiagnostic) d).getSourceName(). */
       
-      
-      _errors.add(new DJError(new File(d.getSource().toUri().getPath()), // d.getSource().getName() fails! 
-                                    ((int) d.getLineNumber()) - 1,  // javac starts counting at 1
-                                    ((int) d.getColumnNumber()) - 1, 
-                                    d.getMessage(null),    // null is the locale
-                                    isWarning));
+      if (d.getSource()!=null) {
+          _errors.add(new DJError(new File(d.getSource().toUri().getPath()), // d.getSource().getName() fails! 
+                                  ((int) d.getLineNumber()) - 1,  // javac starts counting at 1
+                                  ((int) d.getColumnNumber()) - 1, 
+                                  d.getMessage(Locale.getDefault()),    // JVM default locale
+                                  isWarning));
+      }
+      else {
+          _errors.add(new DJError(d.getMessage(Locale.getDefault()), isWarning));
+      }
     }
   }
   

@@ -304,12 +304,17 @@ public class Javac150Compiler extends JavacCompiler {
       //System.out.println("warning: pos = " + pos);
 
       String msg = getText("compiler.warn." + key, args);
-
-      _errors.addLast(new DJError(new File(currentSource().toString()),
-                                        Position.line(pos) - 1, // gj is 1 based
-                                        Position.column(pos) - 1,
-                                        msg,
-                                        true));
+      
+      if (currentSource()!=null) {
+        _errors.addLast(new DJError(new File(currentSource().toString()),
+                                    Position.line(pos) - 1, // gj is 1 based
+                                    Position.column(pos) - 1,
+                                    msg,
+                                    true));
+      }
+      else {
+        _errors.addLast(new DJError(msg, true));
+      }
     }
 
     /** "Mandatory warnings" were added at some point in the development of JDK 5 */
@@ -319,11 +324,16 @@ public class Javac150Compiler extends JavacCompiler {
       
       String msg = getText("compiler.warn." + key, args);
       
-      _errors.addLast(new DJError(new File(currentSource().toString()),
-                                        Position.line(pos) - 1, // gj is 1 based
-                                        Position.column(pos) - 1,
-                                        msg,
-                                        true));
+      if (currentSource()!=null) {
+        _errors.addLast(new DJError(new File(currentSource().toString()),
+                                    Position.line(pos) - 1, // gj is 1 based
+                                    Position.column(pos) - 1,
+                                    msg,
+                                    true));
+      }
+      else {
+        _errors.addLast(new DJError(msg, true));
+      }
     }
     
     /** JSR14 uses this crazy signature on error method because it localizes the error message. */
@@ -333,11 +343,16 @@ public class Javac150Compiler extends JavacCompiler {
 
       String msg = getText("compiler.err." + key, args);
 
-      _errors.addLast(new DJError(new File(currentSource().toString()),
-                                        Position.line(pos) - 1, // gj is 1 based
-                                        Position.column(pos) - 1,
-                                        msg,
-                                        false));
+      if (currentSource()!=null) {
+        _errors.addLast(new DJError(new File(currentSource().toString()),
+                                    Position.line(pos) - 1, // gj is 1 based
+                                    Position.column(pos) - 1,
+                                    msg,
+                                    false));
+      }
+      else {
+        _errors.addLast(new DJError(msg, false));
+      }
     }
 
     public void note(String key, Object ... args) {

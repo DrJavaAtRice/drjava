@@ -265,12 +265,16 @@ public class Javac160Compiler extends JavacCompiler {
         * DrJava--in GlobalModelCompileErrorsTest.testCompileFailsCorrectLineNumbers().  The expression 
         * d.getSource().toUri().getPath() returns the correct result as does ((JCDiagnostic) d).getSourceName(). */
       
-      
-      _errors.add(new DJError(new File(d.getSource().toUri().getPath()), // d.getSource().getName() fails! 
-                                    ((int) d.getLineNumber()) - 1,  // javac starts counting at 1
-                                    ((int) d.getColumnNumber()) - 1, 
-                                    d.getMessage(null),    // null is the locale
-                                    isWarning));
+      if (d.getSource()!=null) {
+        _errors.add(new DJError(new File(d.getSource().toUri().getPath()), // d.getSource().getName() fails! 
+                                ((int) d.getLineNumber()) - 1,  // javac starts counting at 1
+                                ((int) d.getColumnNumber()) - 1, 
+                                d.getMessage(null),    // null is the locale
+                                isWarning));
+      }
+      else {
+        _errors.add(new DJError(d.getMessage(null), isWarning));
+      }
     }
   }
   
