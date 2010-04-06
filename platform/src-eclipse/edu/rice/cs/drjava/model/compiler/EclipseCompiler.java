@@ -1,35 +1,35 @@
 /*BEGIN_COPYRIGHT_BLOCK
-*
-* This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/
-* or http://sourceforge.net/projects/drjava/
-*
-* DrJava Open Source License
-* 
-* Copyright (C) 2001-2010 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
-*
-* Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
-* 
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
-* documentation files (the "Software"), to deal with the Software without restriction, including without limitation
-* the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and 
-* to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-* 
-*     - Redistributions of source code must retain the above copyright notice, this list of conditions and the 
-*       following disclaimers.
-*     - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
-*       following disclaimers in the documentation and/or other materials provided with the distribution.
-*     - Neither the names of DrJava, the JavaPLT, Rice University, nor the names of its contributors may be used to 
-*       endorse or promote products derived from this Software without specific prior written permission.
-*     - Products derived from this software may not be called "DrJava" nor use the term "DrJava" as part of their 
-*       names without prior written permission from the JavaPLT group.  For permission, write to javaplt@rice.edu.
-* 
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
-* THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
-* WITH THE SOFTWARE.
-* 
-*END_COPYRIGHT_BLOCK*/
+ *
+ * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/
+ * or http://sourceforge.net/projects/drjava/
+ *
+ * DrJava Open Source License
+ * 
+ * Copyright (C) 2001-2010 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
+ *
+ * Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+ * documentation files (the "Software"), to deal with the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and 
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ *     - Redistributions of source code must retain the above copyright notice, this list of conditions and the 
+ *       following disclaimers.
+ *     - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *       following disclaimers in the documentation and/or other materials provided with the distribution.
+ *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the names of its contributors may be used to 
+ *       endorse or promote products derived from this Software without specific prior written permission.
+ *     - Products derived from this software may not be called "DrJava" nor use the term "DrJava" as part of their 
+ *       names without prior written permission from the JavaPLT group.  For permission, write to javaplt@rice.edu.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * WITH THE SOFTWARE.
+ * 
+ *END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.compiler;
 
@@ -53,29 +53,31 @@ import javax.tools.Diagnostic;
 import javax.tools.DiagnosticListener;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.JavaCompiler;
+import javax.tools.StandardLocation;
 
 // DJError class is not in the same package as this
 import edu.rice.cs.drjava.model.DJError;
 
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.iter.IterUtil;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
 /** An implementation of JavacCompiler that supports compiling with the Eclipse compiler.  Must be compiled
- *  using javac 1.6.0.
- *
- *  @version $Id$
- */
+  *  using javac 1.6.0.
+  *
+  *  @version $Id$
+  */
 public class EclipseCompiler extends JavacCompiler {
-
+  
   // TODO: figure out if this is necessary with the Eclipse compiler
   private final boolean _filterExe;
   private File _tempJUnit = null;
   private final String PREFIX = "drjava-junit";
   private final String SUFFIX = ".jar";  
-
+  
   public EclipseCompiler(JavaVersion.FullVersion version, String location, List<? extends File> defaultBootClassPath) {
     super(version, location, defaultBootClassPath);
     _filterExe = version.compareTo(JavaVersion.parseFullVersion("1.6.0_04")) >= 0;
@@ -150,7 +152,7 @@ public class EclipseCompiler extends JavacCompiler {
     catch (LinkageError e) { return false; }
   }
   
-
+  
   /** Compile the given files.
     *  @param files  Source files to compile.
     *  @param classPath  Support jars or directories that should be on the classpath.  If @code{null}, the default is used.
@@ -164,12 +166,12 @@ public class EclipseCompiler extends JavacCompiler {
     *  @return Errors that occurred. If no errors, should be zero length (not null).
     */
   public List<? extends DJError> compile(List<? extends File> files, List<? extends File> classPath, 
-                                               List<? extends File> sourcePath, File destination, 
-                                               List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
+                                         List<? extends File> sourcePath, File destination, 
+                                         List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
     debug.logStart("compile()");
     debug.logValues(new String[]{ "this", "files", "classPath", "sourcePath", "destination", "bootClassPath", 
-                                  "sourceVersion", "showWarnings" },
-                              this, files, classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
+      "sourceVersion", "showWarnings" },
+                    this, files, classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
     List<File> filteredClassPath = null;
     if (classPath!=null) {
       filteredClassPath = new LinkedList<File>(classPath);
@@ -183,7 +185,7 @@ public class EclipseCompiler extends JavacCompiler {
         if (_tempJUnit!=null) { filteredClassPath.add(_tempJUnit); }
       }
     }
-
+    
     LinkedList<DJError> errors = new LinkedList<DJError>();
     
     JavaCompiler compiler = new org.eclipse.jdt.internal.compiler.tool.EclipseCompiler();
@@ -195,8 +197,10 @@ public class EclipseCompiler extends JavacCompiler {
     });
 //    Writer out = null;
     Iterable<String> classes = null; // no classes for annotation processing  
-    Iterable<String> options = _getOptions(filteredClassPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
-     
+    Iterable<String> options = _getOptions(fileManager,
+                                           filteredClassPath, sourcePath, destination,
+                                           bootClassPath, sourceVersion, showWarnings);
+    
     try {
       JavaCompiler.CompilationTask task = compiler.getTask(out, fileManager, diagnosticListener, options, classes, compilationUnits);
       boolean res = task.call();
@@ -220,15 +224,21 @@ public class EclipseCompiler extends JavacCompiler {
       return "Eclipse Compiler for Java " + _version.versionString();
     }
   }
-    
+  
   // add an option if it is not an empty string
   private static void addOption(List<String> options, String s) {
     if (s.length()>0) options.add(s);
   }
   
-  private Iterable<String> _getOptions(List<? extends File> classPath, List<? extends File> sourcePath, File destination, 
+  private Iterable<String> _getOptions(StandardJavaFileManager fileManager,
+                                       List<? extends File> classPath, List<? extends File> sourcePath, File destination, 
                                        List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
-
+    
+//    System.err.println("classPath: "+classPath);
+//    System.err.println("sourcePath: "+sourcePath);
+//    System.err.println("destination: "+destination);
+//    System.err.println("bootClassPath: "+bootClassPath);
+    
     if (bootClassPath == null) { bootClassPath = _defaultBootClassPath; }
     
     List<String> options = new ArrayList<String>();
@@ -243,18 +253,34 @@ public class EclipseCompiler extends JavacCompiler {
     if (classPath != null) {
       addOption(options,"-classpath");
       addOption(options,IOUtil.pathToString(classPath));
+      try {
+        fileManager.setLocation(StandardLocation.CLASS_PATH, classPath);
+      }
+      catch(IOException ioe) { /* ignore, just don't set the path */ }
     }
     if (sourcePath != null) {
       addOption(options,"-sourcepath");
       addOption(options,IOUtil.pathToString(sourcePath));
+      try {
+        fileManager.setLocation(StandardLocation.SOURCE_PATH, sourcePath);
+      }
+      catch(IOException ioe) { /* ignore, just don't set the path */ }        
     }
     if (destination != null) {
       addOption(options,"-d");
       addOption(options,destination.getPath());
+      try {
+        fileManager.setLocation(StandardLocation.CLASS_OUTPUT, IterUtil.asIterable(destination));
+      }
+      catch(IOException ioe) { /* ignore, just don't set the path */ }
     }
     if (bootClassPath != null) {
       addOption(options,"-bootclasspath");
       addOption(options,IOUtil.pathToString(bootClassPath));
+      try {
+        fileManager.setLocation(StandardLocation.PLATFORM_CLASS_PATH, bootClassPath);
+      }
+      catch(IOException ioe) { /* ignore, just don't set the path */ }
     }
     if (sourceVersion != null) {
       addOption(options,"-source");
@@ -263,7 +289,7 @@ public class EclipseCompiler extends JavacCompiler {
     if (!showWarnings) {
       addOption(options,"-nowarn");
     }
-
+    
     return options;
   }
   
@@ -289,19 +315,19 @@ public class EclipseCompiler extends JavacCompiler {
       }
       
       /* The new Java 6.0 Diagnostic interface appears to be broken.  The expression d.getSource().getName() returns a 
-        * non-existent path--the name of the test file (allocated as a TEMP file) appended to the source root for 
-        * DrJava--in GlobalModelCompileErrorsTest.testCompileFailsCorrectLineNumbers().  The expression 
-        * d.getSource().toUri().getPath() returns the correct result as does ((JCDiagnostic) d).getSourceName(). */
+       * non-existent path--the name of the test file (allocated as a TEMP file) appended to the source root for 
+       * DrJava--in GlobalModelCompileErrorsTest.testCompileFailsCorrectLineNumbers().  The expression 
+       * d.getSource().toUri().getPath() returns the correct result as does ((JCDiagnostic) d).getSourceName(). */
       
       if (d.getSource()!=null) {
-          _errors.add(new DJError(new File(d.getSource().toUri().getPath()), // d.getSource().getName() fails! 
-                                  ((int) d.getLineNumber()) - 1,  // javac starts counting at 1
-                                  ((int) d.getColumnNumber()) - 1, 
-                                  d.getMessage(Locale.getDefault()),    // JVM default locale
-                                  isWarning));
+        _errors.add(new DJError(new File(d.getSource().toUri().getPath()), // d.getSource().getName() fails! 
+                                ((int) d.getLineNumber()) - 1,  // javac starts counting at 1
+                                ((int) d.getColumnNumber()) - 1, 
+                                d.getMessage(Locale.getDefault()),    // JVM default locale
+                                isWarning));
       }
       else {
-          _errors.add(new DJError(d.getMessage(Locale.getDefault()), isWarning));
+        _errors.add(new DJError(d.getMessage(Locale.getDefault()), isWarning));
       }
     }
   }
