@@ -218,10 +218,13 @@ public class EclipseCompiler extends JavacCompiler {
   public String getName() {
     try {
       ResourceBundle bundle = ResourceBundle.getBundle("org.eclipse.jdt.internal.compiler.batch.messages");
-      return bundle.getString("compiler.name")+" "+bundle.getString("compiler.version");
+      String ecjVersion = bundle.getString("compiler.version");
+      int commaPos = ecjVersion.indexOf(',');
+      if (commaPos>=0) { ecjVersion = ecjVersion.substring(0, commaPos); }
+      return "Eclipse Compiler "+ecjVersion;
     }
     catch(Throwable t) {
-      return "Eclipse Compiler for Java " + _version.versionString();
+      return "Eclipse Compiler " + _version.versionString();
     }
   }
   
