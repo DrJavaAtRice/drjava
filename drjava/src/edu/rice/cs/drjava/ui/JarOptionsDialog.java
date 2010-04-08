@@ -338,6 +338,7 @@ public class JarOptionsDialog extends SwingFrame {
     c.fill = GridBagConstraints.HORIZONTAL;
     gridbag.setConstraints(jarClassesPanel, c);
     panel.add(_cantJarClassesLabel);
+    _toggleClassOptions();
      
     // Output file
     c.gridx = 0;
@@ -637,6 +638,12 @@ public class JarOptionsDialog extends SwingFrame {
   private void _toggleClassOptions() {
     _setEnableExecutable(_jarClasses.isSelected() || _jarAll.isSelected());
     _setEnableCustomManifest(_jarClasses.isSelected() || _jarAll.isSelected());
+    if (_jarClasses.isSelected() || _jarAll.isSelected()) {
+      _cantJarClassesLabel.setForeground(javax.swing.UIManager.getColor("Label.foreground"));
+    }
+    else {
+      _cantJarClassesLabel.setForeground(javax.swing.UIManager.getColor("Label.disabledForeground"));
+    }
   }
   
   /** Method to call when the 'Make Executable' check box is clicked. */

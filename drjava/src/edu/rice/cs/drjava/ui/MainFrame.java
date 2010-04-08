@@ -3165,7 +3165,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /* ----------------------- Constructor is here! --------------------------- */
   
   /** Creates the main window, and shows it. */ 
-  public MainFrame() {
+  public MainFrame() {    
     Utilities.invokeAndWait(new Runnable() { public void run() {
       // Cache the config object, since we use it many, many times.
       final Configuration config = DrJava.getConfig(); 
@@ -6366,8 +6366,18 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     _setUpAction(_junitAction, "Test Current", "Run JUnit over the current document");
     _setUpAction(_junitAllAction, "Test", "Run JUnit over all open JUnit tests");
-    _setUpAction(_javadocAllAction, "Javadoc", "Create and save Javadoc for the packages of all open documents");
-    _setUpAction(_javadocCurrentAction, "Preview Javadoc Current", "Preview the Javadoc for the current document");
+    if (_model.getJavadocModel().isAvailable()) {
+      _setUpAction(_javadocAllAction, "Javadoc", "Create and save Javadoc for the packages of all open documents");
+      _setUpAction(_javadocCurrentAction, "Preview Javadoc Current", "Preview the Javadoc for the current document");
+    }
+    else {
+      _javadocAllAction.setEnabled(false);
+      _setUpAction(_javadocAllAction, "Javadoc",
+                   "Note: DrJava cannot run Javadoc because no JDK was found. Please install a JDK.");
+      _javadocCurrentAction.setEnabled(false);
+      _setUpAction(_javadocCurrentAction, "Preview Javadoc Current",
+                   "Note: DrJava cannot run Javadoc because no JDK was found.  Please install a JDK.");
+    }
     _setUpAction(_runAction, "Run", "Run the main method of the current document");
     _setUpAction(_runAppletAction, "Run", "Run the current document as applet");
     
