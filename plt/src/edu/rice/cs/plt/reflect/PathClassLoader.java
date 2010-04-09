@@ -148,14 +148,16 @@ public class PathClassLoader extends AbstractClassLoader {
     if (resource == null) { throw new ClassNotFoundException(); }
     else {
       try {
-        byte[] bytes = IOUtil.toByteArray(resource.openStream());
-        
-        // define package
-        definePackageForClass(name);
-      
-        return defineClass(name, bytes, 0, bytes.length);
+        InputStream stream = resource.openStream();
+        try {
+          byte[] bytes = IOUtil.toByteArray(stream);
+          Class<?> result = defineClass(name, bytes, 0, bytes.length);
+          definePackageForClass(name);
+          return result;
+        }
+        finally { stream.close(); }
       }
-      catch (IOException e) { throw new ClassNotFoundException(); }
+      catch (IOException e) { throw new ClassNotFoundException("Can't access class file", e); }
     }
   }
   
