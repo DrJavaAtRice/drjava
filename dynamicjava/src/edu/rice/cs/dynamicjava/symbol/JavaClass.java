@@ -198,6 +198,10 @@ public class JavaClass implements DJClass {
             // may be ExceptionInInitializerError, NoClassDefFoundError, etc.
             throw new WrappedException(new EvaluatorException(e, FIELD_GET_EXTRA_STACK));
           }
+          catch (Throwable t) {
+            // Errors, etc., can be thrown and not caught during a class's static initialization
+            throw new WrappedException(new EvaluatorException(t, FIELD_GET_EXTRA_STACK));
+          }
         }
         
         public void set(Object o) {
@@ -214,6 +218,10 @@ public class JavaClass implements DJClass {
           catch (LinkageError e) {
             // may be ExceptionInInitializerError, NoClassDefFoundError, etc.
             throw new WrappedException(new EvaluatorException(e, FIELD_SET_EXTRA_STACK));
+          }
+          catch (Throwable t) {
+            // Errors, etc., can be thrown and not caught during a class's static initialization
+            throw new WrappedException(new EvaluatorException(t, FIELD_SET_EXTRA_STACK));
           }
         }
         
@@ -285,8 +293,9 @@ public class JavaClass implements DJClass {
       try { _k.setAccessible(true); }
       catch (SecurityException e) { debug.log(e); /* ignore -- we can't relax accessibility */ }
       
+      Object[] argsArray = IterUtil.toArray(args, Object.class);
       try {
-        return _k.newInstance(IterUtil.toArray(args, Object.class));
+        return _k.newInstance(argsArray);
       }
       catch (InvocationTargetException e) {
         throw new EvaluatorException(e.getCause(), CONSTRUCTOR_EXTRA_STACK);
@@ -302,6 +311,10 @@ public class JavaClass implements DJClass {
       catch (InstantiationException e) {
         // This should have been caught by static analysis
         throw new RuntimeException(e);
+      }
+      catch (Throwable t) {
+        // Errors, etc., can be thrown and not caught during a class's static initialization
+        throw new EvaluatorException(t, METHOD_EXTRA_STACK);
       }
     }
     
@@ -344,8 +357,9 @@ public class JavaClass implements DJClass {
       try { _m.setAccessible(true); }
       catch (SecurityException e) { debug.log(e); /* ignore -- we can't relax accessibility */ }
       
+      Object[] argsArray = IterUtil.toArray(args, Object.class);
       try {
-        return _m.invoke(receiver, IterUtil.toArray(args, Object.class));
+        return _m.invoke(receiver, argsArray);
       }
       catch (InvocationTargetException e) {
         throw new EvaluatorException(e.getCause(), METHOD_EXTRA_STACK);
@@ -357,6 +371,10 @@ public class JavaClass implements DJClass {
       catch (IllegalAccessException e) {
         // This should have been caught by static analysis
         throw new RuntimeException(e);
+      }
+      catch (Throwable t) {
+        // Errors, etc., can be thrown and not caught during a class's static initialization
+        throw new EvaluatorException(t, METHOD_EXTRA_STACK);
       }
     }
     

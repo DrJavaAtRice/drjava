@@ -50,11 +50,12 @@ public class JLSTypeSystem extends StandardTypeSystem {
    */
   private final boolean _waitToUseDeclaredBounds;
 
-  public JLSTypeSystem(Options opt) { this(opt, true, true, true, true); }
+  public JLSTypeSystem(Options opt) { this(opt, true, true, true, true, true, true); }
   
   public JLSTypeSystem(Options opt, boolean packCaptureVars, boolean alwaysUseArgumentConstraints,
-                        boolean waitToUseDeclaredBounds, boolean boxingInMostSpecific) {
-    super(opt, boxingInMostSpecific);
+                        boolean waitToUseDeclaredBounds, boolean boxingInMostSpecific,
+                        boolean useExplicitTypeArgs, boolean strictClassEquality) {
+    super(opt, boxingInMostSpecific, useExplicitTypeArgs, strictClassEquality);
     _packCaptureVars = packCaptureVars;
     _alwaysUseArgumentConstraints = alwaysUseArgumentConstraints;
     _waitToUseDeclaredBounds = waitToUseDeclaredBounds;
@@ -171,47 +172,7 @@ public class JLSTypeSystem extends StandardTypeSystem {
     }
   }
   
-  /** Test whether a variable is reachable from a type. */
-  private boolean containsVar(Type t, final VariableType var) {
-    return containsAnyVar(t, Collections.singleton(var));
-  }
-  
-  /** Test whether any of the given variables is reachable from a type. */
-  private boolean containsAnyVar(Type t, final Set<? extends VariableType> vars) {
-    return t.apply(new TypeAbstractVisitor<Boolean>() {
-      private final RecursionStack<Type> _stack = new RecursionStack<Type>(Wrapper.<Type>factory());
-      public Boolean defaultCase(Type t) { return false; }
-      @Override public Boolean forArrayType(ArrayType t) { return t.ofType().apply(this); }
-      @Override public Boolean forParameterizedClassType(ParameterizedClassType t) {
-        return checkList(t.typeArguments());
-      }
-      @Override public Boolean forBoundType(BoundType t) {  return checkList(t.ofTypes()); }
-      @Override public Boolean forVariableType(VariableType t) {
-        return vars.contains(t) || checkBoundedSymbol(t, t.symbol());
-      }
-      @Override public Boolean forWildcard(Wildcard w) { return checkBoundedSymbol(w, w.symbol()); } 
-      
-      private Boolean checkList(Iterable<? extends Type> types) {
-        for (Type t : types) { 
-          if (t.apply(this)) { return true; }
-        }
-        return false;
-      }
-      
-      private Boolean checkBoundedSymbol(Type t, final BoundedSymbol s) {
-        final TypeVisitor<Boolean> visitor = this; // handles this shadowing
-        Thunk<Boolean> handleBounds = new Thunk<Boolean>() {
-          public Boolean value() {
-            return s.lowerBound().apply(visitor) || s.upperBound().apply(visitor);
-          }
-        };
-        return _stack.apply(handleBounds, false, t);
-      }
-      
-    });
-  }
-  
-  
+
   /** Determine if the given types may be treated as equal.  This is recursive, transitive, and symmetric. */
   public boolean isEqual(Type t1, Type t2) {
     return new IsEqualTester().contains(t1, t2);
@@ -230,10 +191,18 @@ public class JLSTypeSystem extends StandardTypeSystem {
           return (t2 instanceof ArrayType) && contains(t1.ofType(), ((ArrayType) t2).ofType());
         }
         
+        @Override public Boolean forSimpleClassType(SimpleClassType t1) {
+          return (t2 instanceof SimpleClassType) && sameClass(t1, (ClassType) t2);
+        }
+        
+        @Override public Boolean forRawClassType(RawClassType t1) {
+          return (t2 instanceof RawClassType) && sameClass(t1, (ClassType) t2);
+        }
+        
         @Override public Boolean forParameterizedClassType(ParameterizedClassType t1) {
           if (t2 instanceof ParameterizedClassType) {
             ParameterizedClassType t2Cast = (ParameterizedClassType) t2;
-            if (t1.ofClass().equals(t2Cast.ofClass())) {
+            if (sameClass(t1, t2Cast)) {
               if (sizeOf(t1.typeArguments()) == sizeOf(t2Cast.typeArguments())) {
                 return IterUtil.and(t1.typeArguments(), t2Cast.typeArguments(), IsEqualTester.this);
               }
@@ -412,6 +381,9 @@ public class JLSTypeSystem extends StandardTypeSystem {
               if (newSub == null) { return false; }
               else { return Subtyper.this.contains(newSub, superT); }
             }
+            @Override public Boolean forSimpleClassType(SimpleClassType superT) {
+              return sameClass(subT, superT) || forClassType(superT);
+            }
           });
         }
         
@@ -423,8 +395,11 @@ public class JLSTypeSystem extends StandardTypeSystem {
               if (newSub == null) { return false; }
               else { return Subtyper.this.contains(newSub, superT); }
             }
+            @Override public Boolean forRawClassType(final RawClassType superT) {
+              return sameClass(subT, superT) || forClassType(superT);
+            }
             @Override public Boolean forParameterizedClassType(final ParameterizedClassType superT) {
-              if (subT.ofClass().equals(superT.ofClass())) {
+              if (sameClass(subT, superT)) {
                 return Subtyper.this.contains(parameterize(subT), superT) || forClassType(superT);
               }
               else { return forClassType(superT); }
@@ -443,7 +418,7 @@ public class JLSTypeSystem extends StandardTypeSystem {
             }
             
             @Override public Boolean forParameterizedClassType(final ParameterizedClassType superT) {
-              if (subT.ofClass().equals(superT.ofClass())) {
+              if (sameClass(subT, superT)) {
                 boolean result = true;
                 ParameterizedClassType subCapT = capture(subT);
                 for (final Triple<Type, Type, Type> args : zip(subT.typeArguments(),
@@ -475,7 +450,7 @@ public class JLSTypeSystem extends StandardTypeSystem {
             }
             
             @Override public Boolean forRawClassType(RawClassType superT) {
-              if (subT.ofClass().equals(superT.ofClass())) {
+              if (sameClass(subT, superT)) {
                 return Subtyper.this.contains(erase(subT), superT);
               }
               else { return forClassType(superT); }
@@ -855,6 +830,7 @@ public class JLSTypeSystem extends StandardTypeSystem {
     }
     
     if (!_alwaysUseArgumentConstraints) {
+      // throw away inferred bounds from arguments
       inf = new Inferencer(CollectUtil.makeSet(toInfer));
       constraints = inf.constraints();
     }
@@ -967,7 +943,7 @@ public class JLSTypeSystem extends StandardTypeSystem {
                 if (argSup != null) { argSup.apply(this); }
               }
               @Override public void forParameterizedClassType(ParameterizedClassType arg) {
-                if (arg.ofClass().equals(param.ofClass())) {
+                if (sameClass(arg, param)) {
                   for (final Pair<Type, Type> pair : zip(arg.typeArguments(), param.typeArguments())) {
                     pair.second().apply(new TypeAbstractVisitor_void() {
                       @Override public void forValidType(ValidType param) {
@@ -1035,7 +1011,7 @@ public class JLSTypeSystem extends StandardTypeSystem {
           @Override public void forParameterizedClassType(final ParameterizedClassType param) {
             TypeVisitorRunnable1 argVisitor = new TypeAbstractVisitor_void() {
               @Override public void forParameterizedClassType(ParameterizedClassType arg) {
-                if (arg.ofClass().equals(param.ofClass())) {
+                if (sameClass(arg, param)) {
                   for (final Pair<Type, Type> pair : zip(arg.typeArguments(), param.typeArguments())) {
                     pair.first().apply(new TypeAbstractVisitor_void() {
                       @Override public void forValidType(ValidType arg) {

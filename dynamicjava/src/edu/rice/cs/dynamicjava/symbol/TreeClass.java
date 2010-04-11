@@ -221,7 +221,9 @@ public class TreeClass implements DJClass {
   }
   public boolean isAbstract() { return _mods.isAbstract(); }
   public boolean isFinal() { return _mods.isFinal(); }
-  public Access accessibility() { return extractAccessibility(_mods); }
+  public Access accessibility() {
+    return (_declaring != null && _declaring.isInterface()) ? Access.PUBLIC : extractAccessibility(_mods);
+  }
   public Access.Module accessModule() { return _accessModule; }
   public boolean hasRuntimeBindingsParams() { return true; }
   

@@ -2,6 +2,8 @@ package edu.rice.cs.dynamicjava.symbol;
 
 import edu.rice.cs.plt.iter.IterUtil;
 
+import static edu.rice.cs.plt.debug.DebugUtil.debug;
+
 public class Java5Library implements Library {
   
   private final ClassLoader _loader;

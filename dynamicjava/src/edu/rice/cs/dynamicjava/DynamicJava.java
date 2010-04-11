@@ -4,6 +4,9 @@ import java.io.*;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.OptionVisitor;
 import edu.rice.cs.plt.text.TextUtil;
+import edu.rice.cs.plt.text.ArgumentParser;
+import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.reflect.PathClassLoader;
 import edu.rice.cs.dynamicjava.interpreter.Interpreter;
 import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
 
@@ -15,14 +18,29 @@ public final class DynamicJava {
   
   public static void main(String... args) throws IOException {
     debug.log();
-    Interpreter i = new Interpreter(Options.DEFAULT);
+
+    ArgumentParser argParser = new ArgumentParser();
+    argParser.supportOption("classpath", IOUtil.WORKING_DIRECTORY.toString());
+    argParser.supportAlias("cp", "classpath");
+    ArgumentParser.Result parsedArgs = argParser.parse(args);
+    Iterable<File> cp = IOUtil.parsePath(parsedArgs.getUnaryOption("classpath"));
+
+    Interpreter i = new Interpreter(Options.DEFAULT, new PathClassLoader(cp));
     BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+    String prev = null;
+    boolean blank = false;
     String input;
     do {
       System.out.print("> ");
       System.out.flush();
       input = in.readLine();
       if (input != null) {
+        // two blank lines trigger a recompute
+        if (input.equals("")) {
+          if (blank == true) { input = prev; blank = false; }
+          else { blank = true; }
+        }
+        else { prev = input; blank = false; }
         try {
           Option<Object> result = i.interpret(input);
           result.apply(new OptionVisitor<Object, Void>() {

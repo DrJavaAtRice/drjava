@@ -85,6 +85,9 @@ public class LocalizedMessageReader {
               numb += c;
             } while (++i < rawMessage.length());
             int n = Integer.parseInt(numb);
+            if (n >= strings.length) {
+              throw new IllegalArgumentException("Missing argument " + n + " for error code " + key);
+            }
             result += strings[n];
           }
         } else {

@@ -223,8 +223,8 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
               return context.importMemberClass(t.ofClass(), split.second());
             }
             else {
-              setErrorStrings(node, split.second());
-              throw new ExecutionError("undefined.class", node);
+              setErrorStrings(node, ts.typePrinter().print(t), split.second());
+              throw new ExecutionError("no.such.inner.class", node);
             }
           }
         }
@@ -267,7 +267,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
         try { result = ts.lookupClass(result, piece, IterUtil.<Type>empty(), context.accessModule()); }
         catch (InvalidTypeArgumentException e) { throw new RuntimeException("can't create raw type"); }
         catch (UnmatchedLookupException e) {
-          setErrorStrings(node, piece);
+          setErrorStrings(node, ts.typePrinter().print(result), piece);
           if (e.matches() > 1) { throw new ExecutionError("ambiguous.inner.class", node); }
           else { throw new ExecutionError("no.such.inner.class", node); }
         }
@@ -572,7 +572,7 @@ public class StatementChecker extends AbstractVisitor<TypeContext> implements La
           throw new ExecutionError("invalid.constant", exp);
         }
         if (!ts.isAssignable(t, getType(exp), getValue(exp))) {
-          setErrorStrings(node, ts.typePrinter().print(getType(exp)));
+          setErrorStrings(exp, ts.typePrinter().print(getType(exp)));
           throw new ExecutionError("switch.label.type", exp);
         }
         if (values.contains(getValue(exp))) { 

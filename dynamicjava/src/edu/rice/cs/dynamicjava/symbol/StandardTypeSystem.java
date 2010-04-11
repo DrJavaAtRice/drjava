@@ -4,6 +4,7 @@ import java.util.*;
 
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.tuple.Option;
+import edu.rice.cs.plt.tuple.Wrapper;
 import edu.rice.cs.plt.recur.*;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -38,9 +39,25 @@ public abstract class StandardTypeSystem extends TypeSystem {
    */
   private final boolean _boxingInMostSpecific;
   
-  protected StandardTypeSystem(Options opt, boolean boxingInMostSpecific) {
+  /**
+   * Whether explicit type arguments (provided by the programmer) should be used if available.  If not,
+   * inference always occurs, ignoring the explicit type arguments.
+   */
+  private final boolean _useExplicitTypeArgs;
+  
+  /**
+   * Whether two classes should be considered equal only if they have they are represented by the same
+   * object.  The alternative is to compare full names.  (Permissive equality allows for interdependencies,
+   * for example, between already-compiled classes and source classes.)
+   */
+  private final boolean _strictClassEquality;
+  
+  protected StandardTypeSystem(Options opt, boolean boxingInMostSpecific, boolean useExplicitTypeArgs,
+                                boolean strictClassEquality) {
     _opt  = opt;
     _boxingInMostSpecific = boxingInMostSpecific;
+    _useExplicitTypeArgs = useExplicitTypeArgs;
+    _strictClassEquality = strictClassEquality;
   }
   
   /** Determine if the type is well-formed. */
@@ -79,6 +96,11 @@ public abstract class StandardTypeSystem extends TypeSystem {
                                                        Iterable<? extends Type> args, Option<Type> expected);
 
 
+  protected boolean sameClass(ClassType c1, ClassType c2) {
+    if (_strictClassEquality) { return c1.ofClass().equals(c2.ofClass()); }
+    else { return c1.ofClass().fullName().equals(c2.ofClass().fullName()); }
+  }
+        
   protected static final Type CLONEABLE_AND_SERIALIZABLE = 
     new IntersectionType(IterUtil.make(CLONEABLE, SERIALIZABLE));
   
@@ -240,6 +262,47 @@ public abstract class StandardTypeSystem extends TypeSystem {
     public Boolean defaultCase(Type t) { return false; }
     @Override public Boolean forClassType(ClassType t) { return t.ofClass().isInterface(); }
   };
+  
+
+  /** Test whether a variable is reachable from a type. */
+  protected boolean containsVar(Type t, final VariableType var) {
+    return containsAnyVar(t, Collections.singleton(var));
+  }
+  
+  /** Test whether any of the given variables is reachable from a type. */
+  protected boolean containsAnyVar(Type t, final Set<? extends VariableType> vars) {
+    return t.apply(new TypeAbstractVisitor<Boolean>() {
+      private final RecursionStack<Type> _stack = new RecursionStack<Type>(Wrapper.<Type>factory());
+      public Boolean defaultCase(Type t) { return false; }
+      @Override public Boolean forArrayType(ArrayType t) { return t.ofType().apply(this); }
+      @Override public Boolean forParameterizedClassType(ParameterizedClassType t) {
+        return checkList(t.typeArguments());
+      }
+      @Override public Boolean forBoundType(BoundType t) {  return checkList(t.ofTypes()); }
+      @Override public Boolean forVariableType(VariableType t) {
+        return vars.contains(t) || checkBoundedSymbol(t, t.symbol());
+      }
+      @Override public Boolean forWildcard(Wildcard w) { return checkBoundedSymbol(w, w.symbol()); } 
+      
+      private Boolean checkList(Iterable<? extends Type> types) {
+        for (Type t : types) { 
+          if (t.apply(this)) { return true; }
+        }
+        return false;
+      }
+      
+      private Boolean checkBoundedSymbol(Type t, final BoundedSymbol s) {
+        final TypeVisitor<Boolean> visitor = this; // handles this shadowing
+        Thunk<Boolean> handleBounds = new Thunk<Boolean>() {
+          public Boolean value() {
+            return s.lowerBound().apply(visitor) || s.upperBound().apply(visitor);
+          }
+        };
+        return _stack.apply(handleBounds, false, t);
+      }
+      
+    });
+  }
   
   
   /** Whether two types are known to be disjoint.  (Standard version is implicitly defined in JLS 5.5.)  */
@@ -799,51 +862,30 @@ public abstract class StandardTypeSystem extends TypeSystem {
     // Note: Variables with primitive bounds are not fully supported
     final Type t1 = NodeProperties.getType(e1);
     final Type t2 = NodeProperties.getType(e2);
-    Pair<Expression, Expression> result =
-      join(t1, t2).apply(new TypeAbstractVisitor<Pair<Expression, Expression>>() {
-      public Pair<Expression, Expression> defaultCase(Type commonT) {
-        if (!(t1 instanceof NumericType) || !(t2 instanceof NumericType)) {
-          return null;
-        }
-        else { throw new IllegalArgumentException("Unexpected join result"); }
+    final Type t1Promoted = t1.apply(new TypeAbstractVisitor<Type>() {
+      @Override public Type defaultCase(Type t) { return null; }
+      @Override public Type forNumericType(NumericType t) { return INT; }
+      @Override public Type forFloatingPointType(FloatingPointType t) { return t; }
+      @Override public Type forLongType(LongType t) { return t; }
+    });
+    if (t1Promoted == null) { throw new UnsupportedConversionException(); }
+    final Type promoted = t2.apply(new TypeAbstractVisitor<Type>() {
+      @Override public Type defaultCase(Type t) { return null; }
+      @Override public Type forNumericType(NumericType t) { return t1Promoted; }
+      @Override public Type forDoubleType(DoubleType t) { return t; }
+      @Override public Type forFloatType(FloatType t) {
+        return (t1Promoted instanceof DoubleType) ? t1Promoted : t;
       }
-      
-      @Override public Pair<Expression, Expression> forDoubleType(DoubleType commonT) {
-        return Pair.make(t1 instanceof DoubleType ? e1 :makeCast(DOUBLE, e1),
-                         t2 instanceof DoubleType ? e2 : makeCast(DOUBLE, e2));
-      }
-      
-      @Override public Pair<Expression, Expression> forFloatType(FloatType commonT) {
-        return Pair.make(t1 instanceof FloatType ? e1 : makeCast(FLOAT, e1),
-                         t2 instanceof FloatType ? e2 : makeCast(FLOAT, e2));
-      }
-      
-      @Override public Pair<Expression, Expression> forLongType(LongType commonT) {
-        return Pair.make(t1 instanceof LongType ? e1 : makeCast(LONG, e1),
-                         t2 instanceof LongType ? e2 : makeCast(LONG, e2));
-      }
-      
-      @Override public Pair<Expression, Expression> forIntType(IntType commonT) {
-        return Pair.make(t1 instanceof IntType ? e1 : makeCast(INT, e1),
-                         t2 instanceof IntType ? e2 : makeCast(INT, e2));
-      }
-      
-      @Override public Pair<Expression, Expression> forShortType(ShortType commonT) {
-        return Pair.make(makeCast(INT, e1), makeCast(INT, e2));
-      }
-      
-      @Override public Pair<Expression, Expression> forByteType(ByteType commonT) {
-        return Pair.make(makeCast(INT, e1), makeCast(INT, e2));
-      }
-      
-      @Override public Pair<Expression, Expression> forCharType(CharType commonT) {
-        return Pair.make(makeCast(INT, e1), makeCast(INT, e2));
+      @Override public Type forLongType(LongType t) {
+        return (t1Promoted instanceof FloatingPointType) ? t1Promoted : t;
       }
     });
-    if (result == null) { throw new UnsupportedConversionException(); }
-    else { return result; }
+    if (promoted == null) { throw new UnsupportedConversionException(); }
+    
+    return Pair.make(t1.equals(promoted) ? e1 : makeCast(promoted, e1),
+                     t2.equals(promoted) ? e2 : makeCast(promoted, e2));
   }
-  
+    
   /**
    * Perform a join (as defined for the ? : operator) on a pair of expressions.  The resulting pair
    * of expressions are guaranteed to have the same type.  That type may contain non-captured wildcards.
@@ -941,8 +983,8 @@ public abstract class StandardTypeSystem extends TypeSystem {
   }
   
   /**
-   * Perform a cast on the given expression.  Any necessary conversions are performed.  If necessary,
-   * the {@code CHECKED_TYPE} and {@code CONVERTED_TYPE} properties are set on the result.
+   * Perform a cast on the given expression.  Any necessary conversions are performed.  One of
+   * {@code CHECKED_TYPE}, {@code CONVERTED_TYPE}, or {@code ASSERTED_TYPE} is set on the result.
    * 
    * @return  An expression equivalent to {@code e}, wrapped in any necessary conversions
    * @throws  UnsupportedConversionException  If the cast is to an incompatible type.
@@ -964,7 +1006,10 @@ public abstract class StandardTypeSystem extends TypeSystem {
         try {
           Expression result = makeReference(e);
           Type source = NodeProperties.getType(result);
-          if (!isSubtype(source, target)) {
+          if (isSubtype(source, target)) {
+            NodeProperties.setAssertedType(result, erasedClass(target));
+          }
+          else {
             if (!isDisjoint(source, target) && (!_opt.prohibitUncheckedCasts() || validCheckedCast(target, source))) {
               NodeProperties.setCheckedType(result, erasedClass(target));
             }
@@ -1117,7 +1162,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
           try {
             Expression unboxed = makePrimitive(exp);
             Type t = NodeProperties.getType(unboxed);
-            if (NodeProperties.hasValue(unboxed) && t instanceof IntType && 
+            if (NodeProperties.hasValue(unboxed) && t instanceof IntegralType && !(t instanceof LongType) &&
                 inRange(NodeProperties.getValue(unboxed), target)) { return makeCast(target, unboxed); }
             else if (isEqual(t, target)) { return unboxed; }
             else if (isSubtype(t, target)) { return makeCast(target, unboxed); }
@@ -1200,6 +1245,10 @@ public abstract class StandardTypeSystem extends TypeSystem {
       private Boolean checkNumber(long lowerBound, long upperBound) {
         if (value instanceof Number && !(value instanceof Float) && !(value instanceof Double)) {
           long val = ((Number) value).longValue();
+          return lowerBound <= val && val <= upperBound;
+        }
+        else if (value instanceof Character) {
+          long val = ((Character) value).charValue();
           return lowerBound <= val && val <= upperBound;
         }
         else { return false; }
@@ -1815,6 +1864,19 @@ public abstract class StandardTypeSystem extends TypeSystem {
           for (DJMethod m : t.ofClass().declaredMethods()) {
             if (matches(m)) { result.add(instantiateMethod(m, t)); }
           }
+          if (!_onlyStatic && _name.equals("getClass")) {
+            // remove Object.getClass(), if it appears, and add a GetClassMethod instance
+            Iterator<DJMethod> i = result.iterator();
+            while (i.hasNext()) {
+              DJMethod m = i.next();
+              if (!m.isStatic() && m.declaredName().equals("getClass") &&
+                  OBJECT.ofClass().equals(m.declaringClass()) && IterUtil.isEmpty(m.parameters())) {
+                i.remove();
+                break;
+              }
+            }
+            result.add(new GetClassMethod(t, StandardTypeSystem.this));
+          }
           return result;
         }
       });
@@ -2056,7 +2118,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
         if (IterUtil.isEmpty(tparams)) {
           return new EmptyVarargMatcher(params, args, tparams, EMPTY_TYPE_ITERABLE);
         }
-        else if (IterUtil.isEmpty(targs)) {
+        else if (IterUtil.isEmpty(targs) || !_useExplicitTypeArgs) {
           return new EmptyVarargInferenceMatcher(params, args, tparams, returned, expected);
         }
         else if (IterUtil.sizeOf(tparams) == IterUtil.sizeOf(targs) && inBounds(tparams, targs)) {
@@ -2068,7 +2130,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
         if (IterUtil.isEmpty(tparams)) { 
           return new SimpleMatcher(params, args, tparams, EMPTY_TYPE_ITERABLE);
         }
-        else if (IterUtil.isEmpty(targs)) {
+        else if (IterUtil.isEmpty(targs) || !_useExplicitTypeArgs) {
           return new InferenceMatcher(params, args, tparams, returned, expected);
         }
         else if (IterUtil.sizeOf(tparams) == IterUtil.sizeOf(targs) && inBounds(tparams, targs)) { 
@@ -2080,7 +2142,7 @@ public abstract class StandardTypeSystem extends TypeSystem {
         if (IterUtil.isEmpty(tparams)) { 
           return new MultiVarargMatcher(params, args, tparams, EMPTY_TYPE_ITERABLE);
         }
-        else if (IterUtil.isEmpty(targs)) {
+        else if (IterUtil.isEmpty(targs) || !_useExplicitTypeArgs) {
           return new MultiVarargInferenceMatcher(params, args, tparams, returned, expected);
         }
         else if (IterUtil.sizeOf(tparams) == IterUtil.sizeOf(targs) && inBounds(tparams, targs)) {

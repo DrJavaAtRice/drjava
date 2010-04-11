@@ -30,10 +30,11 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
   /** Whether the inference algorithm should attempt to pack capture variables that appear as inference results. */
   private final boolean _packCaptureVars;
   
-  public ExtendedTypeSystem(Options opt) { this(opt, true, true); }
+  public ExtendedTypeSystem(Options opt) { this(opt, true, true, true, true); }
   
-  public ExtendedTypeSystem(Options opt, boolean packCaptureVars, boolean boxingInMostSpecific) {
-    super(opt, boxingInMostSpecific);
+  public ExtendedTypeSystem(Options opt, boolean packCaptureVars, boolean boxingInMostSpecific,
+                             boolean useExplicitTypeArgs, boolean strictClassEquality) {
+    super(opt, boxingInMostSpecific, useExplicitTypeArgs, strictClassEquality);
     _packCaptureVars = packCaptureVars;
   }
   
@@ -291,6 +292,9 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
             @Override public Boolean forClassType(final ClassType superT) {
               return recurOnClassParent(immediateSupertype(subT));
             }
+            @Override public Boolean forSimpleClassType(final SimpleClassType superT) {
+              return sameClass(subT, superT) || forClassType(superT);
+            }
           });
         }
         
@@ -300,8 +304,11 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
             @Override public Boolean forClassType(final ClassType superT) {
               return recurOnClassParent(immediateSupertype(subT));
             }
+            @Override public Boolean forRawClassType(final RawClassType superT) {
+              return sameClass(subT, superT) || forClassType(superT);
+            }
             @Override public Boolean forParameterizedClassType(final ParameterizedClassType superT) {
-              if (subT.ofClass().equals(superT.ofClass())) {
+              if (sameClass(subT, superT)) {
                 return recurOnClassParent(parameterize(subT)) || forClassType(superT);
               }
               else { return forClassType(superT); }
@@ -316,7 +323,7 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
               return recurOnClassParent(immediateSupertype(subT)) || recurOnClassParent(erase(subT));
             }
             @Override public Boolean forParameterizedClassType(final ParameterizedClassType superT) {
-              if (subT.ofClass().equals(superT.ofClass())) {
+              if (sameClass(subT, superT)) {
                 boolean containedArgs = true;
                 ParameterizedClassType subCapT = capture(subT);
                 for (final Pair<Type, Type> args : IterUtil.zip(subCapT.typeArguments(), 
@@ -778,15 +785,31 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
     
     //debug.logValue("constraints", constraints);
     if (!transConstraints.isSatisfiable()) { return null; }
+    
+    final Set<VariableType> inputTParams = new HashSet<VariableType>();
+    for (VariableType tparam : tparams) {
+      for (Type t : params) {
+        if (containsVar(t, tparam)) { inputTParams.add(tparam); break; }
+      }
+    }
 
-    // try to use packed lower bounds
+    // try to use packed bounds
     if (_packCaptureVars) {
       for (final ConstraintScenario s : transConstraints.scenarios()) {
         Iterable<Type> result = IterUtil.mapSnapshot(tparams, new Lambda<VariableType, Type>() {
           public Type value(VariableType param) {
             Type result = s.lowerBound(param);
-            while (result instanceof VariableType && ((VariableType) result).symbol().generated()) {
-              result = ((VariableType) result).symbol().upperBound();
+            // use upper bound for input variables with a null lower bound
+            if (result.equals(NULL) && inputTParams.contains(param)) {
+              result = s.upperBound(param);
+              while (result instanceof VariableType && ((VariableType) result).symbol().generated()) {
+                result = ((VariableType) result).symbol().lowerBound();
+              }
+            }
+            else {
+              while (result instanceof VariableType && ((VariableType) result).symbol().generated()) {
+                result = ((VariableType) result).symbol().upperBound();
+              }
             }
             return result;
           }
@@ -795,15 +818,20 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
       }
     }
     
-    // packed lower bounds don't work, try to use lower bounds
+    // packed bounds don't work, try to use bounds
     for (final ConstraintScenario s : transConstraints.scenarios()) {
       Iterable<Type> result = IterUtil.mapSnapshot(tparams, new Lambda<VariableType, Type>() {
-        public Type value(VariableType param) { return s.lowerBound(param); }
+        public Type value(VariableType param) {
+          Type result = s.lowerBound(param);
+          // use upper bound for input variables with a null lower bound
+          if (result.equals(NULL) && inputTParams.contains(param)) { result = s.upperBound(param); }
+          return result;
+        }
       });
       if (inBounds(tparams, result)) { return result; }
     }
     
-    // lower bounds don't work, try to use capture variables
+    // bounds don't work, try to use capture variables
     for (ConstraintScenario s : transConstraints.scenarios()) {
       List<Wildcard> constraintWs = new LinkedList<Wildcard>();
       for (VariableType param : tparams) {
@@ -897,9 +925,14 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
                 else { return subtypeNorm(argSuper, param); }
               }
               
+              @Override public ConstraintFormula forRawClassType(RawClassType arg) {
+                if (sameClass(arg, param)) { return subtypeNorm(parameterize(arg), param); }
+                else { return forClassType(arg); }
+              }
+              
               @Override public ConstraintFormula forParameterizedClassType(final ParameterizedClassType arg) {
                 ConstraintFormula cf = FALSE;
-                if (param.ofClass().equals(arg.ofClass())) {
+                if (sameClass(param, arg)) {
                   Thunk<ConstraintFormula> recurOnTargs = new Thunk<ConstraintFormula>() {
                     public ConstraintFormula value() {
                       ParameterizedClassType argCap = capture(arg);
@@ -1068,9 +1101,14 @@ public class ExtendedTypeSystem extends StandardTypeSystem {
                 else { return supertypeNorm(arg, paramSuper); }
               }
               
+              @Override public ConstraintFormula forRawClassType(RawClassType arg) {
+                if (sameClass(arg, param)) { return TRUE; }
+                else { return forClassType(arg); }
+              }
+              
               @Override public ConstraintFormula forParameterizedClassType(final ParameterizedClassType arg) {
                 ConstraintFormula cf = FALSE;
-                if (param.ofClass().equals(arg.ofClass())) {
+                if (sameClass(param, arg)) {
                   Thunk<ConstraintFormula> recurOnTargs = new Thunk<ConstraintFormula>() {
                     public ConstraintFormula value() {
                       ParameterizedClassType paramCap = capture(param);

@@ -84,8 +84,15 @@ public class InterfaceDeclaration extends TypeDeclaration {
    */
   public InterfaceDeclaration(ModifierSet mods, boolean ann, String name, Option<List<TypeParameter>> tparams,
                                List<? extends ReferenceTypeName> impl, List<Node> body, SourceInfo si) {
-    super(mods, name, tparams, impl, body, si);
+    super(mods, name, tparams, ann ? addAnnotationType(impl, si) : impl, body, si);
     annotation = ann;
+  }
+  
+  private static List<ReferenceTypeName> addAnnotationType(List<? extends ReferenceTypeName> impl, SourceInfo si) {
+    List<ReferenceTypeName> result = new ArrayList<ReferenceTypeName>();
+    result.add(new ReferenceTypeName(new String[]{ "java", "lang", "annotation", "Annotation" }, si));
+    if (impl != null) { result.addAll(impl); }
+    return result;
   }
 
   /**

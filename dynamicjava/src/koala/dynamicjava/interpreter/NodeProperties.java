@@ -123,6 +123,24 @@ public class NodeProperties {
     }
     
 
+    /** A Thunk<Class<?>> representing the asserted type of an upcast (for diagnostic purposes). */
+    public final static String ASSERTED_TYPE = "assertedType";
+
+    @SuppressWarnings("unchecked")
+    public static Thunk<Class<?>> getAssertedType(Node n) {
+        return (Thunk<Class<?>>) n.getProperty(ASSERTED_TYPE);
+    }
+    
+    public static Thunk<Class<?>> setAssertedType(Node n, Thunk<Class<?>> c) {
+      n.setProperty(ASSERTED_TYPE, c);
+      return c;
+    }
+    
+    public static boolean hasAssertedType(Node n) {
+      return n.hasProperty(ASSERTED_TYPE);
+    }
+    
+
     /** A Thunk<Class<?>> representing the checked cast type of a cast, method, or field */
     public final static String CHECKED_TYPE = "checkedType";
 

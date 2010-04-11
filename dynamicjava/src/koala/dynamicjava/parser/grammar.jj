@@ -108,6 +108,9 @@ public class Parser {
     if (pe.expectedTokenSequences == null) { // has custom message
       message = pe.getMessage();
     }
+    else {
+      edu.rice.cs.plt.debug.DebugUtil.debug.log("Raw parse exception", pe);
+    }
     if(pe.getMessage().indexOf("<EOF>\"") != -1) {
       message = "Encountered Unexpected \"<EOF>\"";
     }
@@ -2029,7 +2032,8 @@ PARSER_END(Parser)
   }
   {
     c = enumConstant() { list.add(c); }
-    ( LOOKAHEAD(2) "," c = enumConstant() { list.add(c); } )*
+    // don't know why, but a LOOKAHEAD(2) here won't parse "enum Foo {A,B,}" ...
+    ( LOOKAHEAD(3) "," c = enumConstant() { list.add(c); } )*
     [ "," ]
     { return list; }
   }

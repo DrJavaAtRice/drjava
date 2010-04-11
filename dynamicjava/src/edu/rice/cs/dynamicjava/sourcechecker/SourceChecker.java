@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -24,6 +23,7 @@ import koala.dynamicjava.interpreter.error.ExecutionError;
 import koala.dynamicjava.parser.wrapper.JavaCCParser;
 import koala.dynamicjava.parser.wrapper.ParseError;
 import koala.dynamicjava.tree.*;
+import koala.dynamicjava.tree.tiger.HookTypeName;
 import koala.dynamicjava.tree.visitor.DepthFirstVisitor;
 import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.interpreter.*;
@@ -233,22 +233,27 @@ public class SourceChecker {
  
   private static final Map<String, Options> _options;
   static {
+    abstract class SourceCheckerOptions extends Options {
+      protected abstract TypeSystem makeTypeSystem();
+      @Override protected Thunk<? extends TypeSystem> typeSystemFactory() {
+        return LambdaUtil.valueLambda(makeTypeSystem());
+      }
+      @Override public boolean enforceAllAccess() { return true; }
+      @Override public boolean prohibitUncheckedCasts() { return false; }
+    }
+    
     _options = new LinkedHashMap<String, Options>();
-    _options.put("jls", new Options() {
-      @Override protected Thunk<? extends TypeSystem> typeSystemFactory() {
-        TypeSystem result = new JLSTypeSystem(this);
-        return LambdaUtil.valueLambda(result);
-      }
-      @Override public boolean enforceAllAccess() { return true; }
-      @Override public boolean prohibitUncheckedCasts() { return false; }
+    _options.put("jls", new SourceCheckerOptions() {
+      public TypeSystem makeTypeSystem() { return new JLSTypeSystem(this, true, true, true, true, true, false); }
     });
-    _options.put("ext", new Options() {
-      @Override protected Thunk<? extends TypeSystem> typeSystemFactory() {
-        TypeSystem result = new ExtendedTypeSystem(this);
-        return LambdaUtil.valueLambda(result);
-      }
-      @Override public boolean enforceAllAccess() { return true; }
-      @Override public boolean prohibitUncheckedCasts() { return false; }
+    _options.put("ext", new SourceCheckerOptions() {
+      public TypeSystem makeTypeSystem() { return new ExtendedTypeSystem(this, true, true, true, false); }
+    });
+    _options.put("jls-inferred", new SourceCheckerOptions() {
+      public TypeSystem makeTypeSystem() { return new JLSTypeSystem(this, true, true, true, true, false, false); }
+    });
+    _options.put("ext-inferred", new SourceCheckerOptions() {
+      public TypeSystem makeTypeSystem() { return new ExtendedTypeSystem(this, true, true, false, false); }
     });
   }
   
@@ -273,18 +278,31 @@ public class SourceChecker {
     }
       
     else {
-      Iterator<String> optNames = _options.keySet().iterator();
-      String canonicalName = optNames.next();
-      Iterable<CompilationUnit> canonical = processFiles(sources, cp, _options.get(canonicalName));
-      Map<String, Iterable<CompilationUnit>> others = new LinkedHashMap<String, Iterable<CompilationUnit>>();
-      while (optNames.hasNext()) {
-        String n = optNames.next();
-        others.put(n, processFiles(sources, cp, _options.get(n)));
+      String canonical = IterUtil.first(_options.keySet());
+      Map<String, Iterable<CompilationUnit>> results = new LinkedHashMap<String, Iterable<CompilationUnit>>();
+      for (String n : _options.keySet()) {
+        System.out.println("============ Checking with type system " + n + " ============");
+        results.put(n, processFiles(sources, cp, _options.get(n)));
       }
-      for (Map.Entry<String, Iterable<CompilationUnit>> e : others.entrySet()) {
-        NodeDiffLog log = new NodeDiffLog(canonicalName, _options.get(canonicalName).typeSystem(),
+      for (Map.Entry<String, Iterable<CompilationUnit>> e : results.entrySet()) {
+        if (e.getKey().equals(canonical)) continue;
+        String compareTo;
+        if (e.getKey().endsWith("-inferred")) {
+          compareTo = e.getKey().substring(0, e.getKey().length() - "-inferred".length());
+        }
+        else { compareTo = canonical; }
+        
+        NodeDiffLog log = new NodeDiffLog(compareTo, _options.get(compareTo).typeSystem(),
                                           e.getKey(), _options.get(e.getKey()).typeSystem(), verbose);
-        new NodeDiff(log).compare(canonical, e.getValue());
+        new NodeDiff(log).compare(results.get(compareTo), e.getValue());
+        
+        String firstInferred = compareTo + "-inferred";
+        String secondInferred = e.getKey() + "-inferred";
+        if (results.containsKey(firstInferred) && results.containsKey(secondInferred)) {
+          NodeDiffLog log2 = new NodeDiffLog(firstInferred, _options.get(firstInferred).typeSystem(),
+                                             secondInferred, _options.get(secondInferred).typeSystem(), verbose);
+          new NodeDiff(log2).compare(results.get(firstInferred), results.get(secondInferred));
+        }
       }
     }
     
@@ -313,12 +331,18 @@ public class SourceChecker {
     private final TypeSystem _rightTS;
     private final boolean _verbose;
     
-    private final Relation<SourceInfo, Location> _errors;
+    private final Relation<SourceInfo, Location> _commonErrors;
+    private final Relation<SourceInfo, Location> _leftErrors;
+    private final Relation<SourceInfo, Location> _rightErrors;
+    private final Relation<SourceInfo, Location> _polymorphicDeclarations;
     private final Relation<SourceInfo, Location> _inferredInvocations;
     private final Relation<SourceInfo, Location> _explicitInvocations;
+    private final Relation<SourceInfo, Location> _simpleWildcards;
+    private final Relation<SourceInfo, Location> _extendsWildcards;
+    private final Relation<SourceInfo, Location> _superWildcards;
     private final Relation<SourceInfo, MismatchedType> _mismatchedTypes;
-    private final Relation<SourceInfo, Location> _leftCasts;
-    private final Relation<SourceInfo, Location> _rightCasts;
+    private final Relation<SourceInfo, Cast> _leftCasts;
+    private final Relation<SourceInfo, Cast> _rightCasts;
     
     public NodeDiffLog(String leftName, TypeSystem leftTS, String rightName, TypeSystem rightTS, boolean verbose) {
       _leftName = leftName;
@@ -329,14 +353,22 @@ public class SourceChecker {
       // we use relations because two AST nodes may have the same SourceInfo
       Thunk<Map<SourceInfo, PredicateSet<MismatchedType>>> mapFactory1 = CollectUtil.treeMapFactory();
       Thunk<Map<SourceInfo, PredicateSet<Location>>> mapFactory2 = CollectUtil.treeMapFactory();
+      Thunk<Map<SourceInfo, PredicateSet<Cast>>> mapFactory3 = CollectUtil.treeMapFactory();
       Thunk<Set<MismatchedType>> setFactory1 = CollectUtil.hashSetFactory();
       Thunk<Set<Location>> setFactory2 = CollectUtil.hashSetFactory();
-      _errors = new IndexedRelation<SourceInfo, Location>(mapFactory2, setFactory2);
+      Thunk<Set<Cast>> setFactory3 = CollectUtil.hashSetFactory();
+      _commonErrors = new IndexedRelation<SourceInfo, Location>(mapFactory2, setFactory2);
+      _leftErrors = new IndexedRelation<SourceInfo, Location>(mapFactory2, setFactory2);
+      _rightErrors = new IndexedRelation<SourceInfo, Location>(mapFactory2, setFactory2);
+      _polymorphicDeclarations = new IndexedRelation<SourceInfo, Location>(mapFactory2, setFactory2);
       _inferredInvocations = new IndexedRelation<SourceInfo, Location>(mapFactory2, setFactory2);
       _explicitInvocations = new IndexedRelation<SourceInfo, Location>(mapFactory2, setFactory2);
+      _simpleWildcards = new IndexedRelation<SourceInfo, Location>(mapFactory2, setFactory2);
+      _extendsWildcards = new IndexedRelation<SourceInfo, Location>(mapFactory2, setFactory2);
+      _superWildcards = new IndexedRelation<SourceInfo, Location>(mapFactory2, setFactory2);
       _mismatchedTypes = new IndexedRelation<SourceInfo, MismatchedType>(mapFactory1, setFactory1);
-      _leftCasts = new IndexedRelation<SourceInfo, Location>(mapFactory2, setFactory2);
-      _rightCasts = new IndexedRelation<SourceInfo, Location>(mapFactory2, setFactory2);
+      _leftCasts = new IndexedRelation<SourceInfo, Cast>(mapFactory3, setFactory3);
+      _rightCasts = new IndexedRelation<SourceInfo, Cast>(mapFactory3, setFactory3);
     }
     
     public void start() {
@@ -347,12 +379,24 @@ public class SourceChecker {
     
     public void end() {
       System.out.println();
-      System.out.println("Statements with errors: " + sizeString(_errors));
-      if (_verbose) { dump(_errors.secondSet()); }
+      System.out.println("Common statements with errors: " + sizeString(_commonErrors));
+      if (_verbose) { dump(_commonErrors.secondSet()); }
+      System.out.println("Left statements with errors: " + sizeString(_leftErrors));
+      if (_verbose) { dump(_leftErrors.secondSet()); }
+      System.out.println("Right statements with errors: " + sizeString(_rightErrors));
+      if (_verbose) { dump(_rightErrors.secondSet()); }
+      System.out.println("Polymorphic declarations: " + sizeString(_polymorphicDeclarations));
+      if (_verbose) { dump(_polymorphicDeclarations.secondSet()); }
       System.out.println("Inferred polymorphic invocations: " + sizeString(_inferredInvocations));
       if (_verbose) { dump(_inferredInvocations.secondSet()); }
       System.out.println("Explicit polymorphic invocations: " + sizeString(_explicitInvocations));
       if (_verbose) { dump(_explicitInvocations.secondSet()); }
+      System.out.println("Simple wildcards: " + sizeString(_simpleWildcards));
+      if (_verbose) { dump(_simpleWildcards.secondSet()); }
+      System.out.println("Upper-bounded wildcards: " + sizeString(_extendsWildcards));
+      if (_verbose) { dump(_extendsWildcards.secondSet()); }
+      System.out.println("Lower-bounded wildcards: " + sizeString(_superWildcards));
+      if (_verbose) { dump(_superWildcards.secondSet()); }
       System.out.println("Mismatched types: " + sizeString(_mismatchedTypes));
       if (_verbose) { dump(_mismatchedTypes.secondSet()); }
       System.out.println("Left extra casts: " + sizeString(_leftCasts));
@@ -370,15 +414,32 @@ public class SourceChecker {
     }
     
     private void dump(Set<?> s) {
-      for (Object obj: s) { System.out.println(obj.toString()); }
+      int counter = 0;
+      for (Object obj: s) {
+        counter++;
+        if (counter > 100) { System.out.println("..."); break; }
+        else { System.out.println(obj.toString()); }
+      }
     }
     
     public void mismatchedCompilationUnits() {
       System.out.println("Can't compare results: mismatched CompilationUnit lists");
     }
     
-    public void statementWithError(String context, SourceInfo.Wrapper left, SourceInfo.Wrapper right) {
-      _errors.add(left.getSourceInfo(), new Location(context, left, right));
+    public void commonErrorStatement(String context, SourceInfo.Wrapper left, SourceInfo.Wrapper right) {
+      _commonErrors.add(left.getSourceInfo(), new Location(context, left, right));
+    }
+    
+    public void leftErrorStatement(String context, SourceInfo.Wrapper left, SourceInfo.Wrapper right) {
+      _leftErrors.add(left.getSourceInfo(), new Location(context, left, right));
+    }
+    
+    public void rightErrorStatement(String context, SourceInfo.Wrapper left, SourceInfo.Wrapper right) {
+      _rightErrors.add(left.getSourceInfo(), new Location(context, left, right));
+    }
+    
+    public void polymorphicDeclaration(String context, SourceInfo.Wrapper left, SourceInfo.Wrapper right) {
+      _polymorphicDeclarations.add(left.getSourceInfo(), new Location(context, left, right));
     }
     
     public void polymorphicInvocation(String context, SourceInfo.Wrapper left, SourceInfo.Wrapper right,
@@ -387,12 +448,19 @@ public class SourceChecker {
       else { _explicitInvocations.add(left.getSourceInfo(), new Location(context, left, right)); }
     }
     
-    public void extraLeftCast(String context, SourceInfo.Wrapper left, SourceInfo.Wrapper right) {
-      _leftCasts.add(left.getSourceInfo(), new Location(context, left, right));
+    public void wildcard(String context, SourceInfo.Wrapper left, SourceInfo.Wrapper right,
+                          boolean upper, boolean lower) {
+      if (lower) { _superWildcards.add(left.getSourceInfo(), new Location(context, left, right)); }
+      else if (upper) { _extendsWildcards.add(left.getSourceInfo(), new Location(context, left, right)); }
+      else { _simpleWildcards.add(left.getSourceInfo(), new Location(context, left, right)); }
+    }
+    
+    public void extraLeftCast(String context, Class<?> target, SourceInfo.Wrapper left, SourceInfo.Wrapper right) {
+      _leftCasts.add(left.getSourceInfo(), new Cast(context, target, left, right));
     }
 
-    public void extraRightCast(String context, SourceInfo.Wrapper left, SourceInfo.Wrapper right) {
-      _rightCasts.add(left.getSourceInfo(), new Location(context, left, right));
+    public void extraRightCast(String context, Class<?> target, SourceInfo.Wrapper left, SourceInfo.Wrapper right) {
+      _rightCasts.add(left.getSourceInfo(), new Cast(context, target, left, right));
     }
     
     public void mismatchedType(String context, Type leftType, SourceInfo.Wrapper left,
@@ -437,6 +505,18 @@ public class SourceChecker {
       }
     }
     
+    private class Cast {
+      private final Location _location;
+      private final Class<?> _target;
+      public Cast(String context, Class<?> target, SourceInfo.Wrapper left, SourceInfo.Wrapper right) {
+        _location = new Location(context, left, right);
+        _target = target;
+      }
+      public String toString() {
+        return _location + " cast to " + _target.getName();
+      }
+    }
+    
   }
   
   static class NodeDiff {
@@ -460,9 +540,17 @@ public class SourceChecker {
     
     private void compare(String context, Node left, Node right) {
       if (left.getClass().equals(right.getClass())) {
-        if (left instanceof Statement || left instanceof VariableDeclaration || left instanceof Expression) {
-          if (hasNestedError(left) || hasNestedError(right)) {
-            _log.statementWithError(context, left, right);
+        if ((left instanceof Statement && !(left instanceof BlockStatement)) ||
+             left instanceof VariableDeclaration ||
+             left instanceof FieldDeclaration ||
+             left instanceof Expression) {
+          if (hasNestedError(left)) {
+            if (hasNestedError(right)) { _log.commonErrorStatement(context, left, right); }
+            else { _log.leftErrorStatement(context, left, right); }
+            return;
+          }
+          else if (hasNestedError(right)) {
+            _log.rightErrorStatement(context, left, right);
             return;
           }
         }
@@ -470,6 +558,9 @@ public class SourceChecker {
           DJMethod m = NodeProperties.getMethod(left);
           if (left instanceof MethodCall && !IterUtil.isEmpty(m.typeParameters())) {
             _log.polymorphicInvocation(context, left, right, ((MethodCall) left).getTypeArgs().isNone());
+          }
+          else if (left instanceof MethodDeclaration && !IterUtil.isEmpty(m.typeParameters())) {
+            _log.polymorphicDeclaration(context, left, right);
           }
         }
         if (NodeProperties.hasConstructor(left)) {
@@ -480,7 +571,12 @@ public class SourceChecker {
             else if (left instanceof SimpleAllocation) { inferred = ((SimpleAllocation) left).getTypeArgs().isNone(); }
             else if (left instanceof InnerAllocation) { inferred = ((InnerAllocation) left).getTypeArgs().isNone(); }
             if (inferred != null) { _log.polymorphicInvocation(context, left, right, inferred); }
+            if (left instanceof ConstructorDeclaration) { _log.polymorphicDeclaration(context, left, right); }
           }
+        }
+        if (left instanceof HookTypeName) {
+          HookTypeName t = (HookTypeName) left;
+          _log.wildcard(context, left, right, t.getUpperBound().isSome(), t.getLowerBound().isSome());
         }
         Class<?> c = left.getClass();
         while (!c.equals(Node.class)) {
@@ -545,12 +641,24 @@ public class SourceChecker {
       for (Object k : keys) {
         compareObjects("property " + k + " of " + c.getName(), leftProps.get(k), left, rightProps.get(k), right);
       }
+      if (leftKeys.contains("assertedType")) {
+        // asserted on left, checked on right
+        _log.extraRightCast(c.getName(), (Class<?>) ((Thunk<?>) leftProps.get("assertedType")).value(), left, right);
+        leftKeys.remove("assertedType");
+        rightKeys.remove("checkedType");
+      }
+      if (rightKeys.contains("assertedType")) {
+        // asserted on right, checked on left
+        _log.extraLeftCast(c.getName(), (Class<?>) ((Thunk<?>) rightProps.get("assertedType")).value(), left, right);
+        leftKeys.remove("checkedType");
+        rightKeys.remove("assertedType");
+      }
       if (leftKeys.contains("checkedType")) {
-        _log.extraLeftCast(c.getName(), left, right);
+        // incidental internal conversion
         leftKeys.remove("checkedType");
       }
       if (rightKeys.contains("checkedType")) {
-        _log.extraRightCast(c.getName(), left, right);
+        // incidental internal conversion
         rightKeys.remove("checkedType");
       }
       if (!leftKeys.isEmpty() || !rightKeys.isEmpty()) {

@@ -71,6 +71,10 @@ public class ReferenceTypeName extends TypeName {
     this(stringsToIdentifiers(names));
   }
   
+  public ReferenceTypeName(String[] names, SourceInfo si) {
+    this(Arrays.asList(stringsToIdentifiers(names)), si);
+  }
+
   private static IdentifierToken[] stringsToIdentifiers(String[] names) {
     IdentifierToken[] ids = new IdentifierToken[names.length];
     for (int i = 0; i < names.length; i++) {
@@ -78,7 +82,7 @@ public class ReferenceTypeName extends TypeName {
     }
     return ids;
   }
-
+  
   /**
    * Initializes the type
    * @param ids   the list of the tokens that compose the type name

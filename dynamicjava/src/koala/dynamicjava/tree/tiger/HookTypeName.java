@@ -69,7 +69,7 @@ public class HookTypeName extends ReferenceTypeName {
    */
   public HookTypeName(Option<TypeName> up, Option<TypeName> low,
                       SourceInfo si) {
-    super("?");
+    super(new String[]{"?"}, si);
 
     if (up == null) throw new IllegalArgumentException("up == null");
     if (low == null) throw new IllegalArgumentException("low == null");
