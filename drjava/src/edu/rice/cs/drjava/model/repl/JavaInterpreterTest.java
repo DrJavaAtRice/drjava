@@ -142,12 +142,11 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   }
 
   /** Tests short circuiting */
-  // BUG: TODO: [ drjava-Bugs-2974931 ] Boolean Short-Circuiting Doesn't Work
   @SuppressWarnings("unchecked")
   public void testShortCircuit() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
-//      Pair.make("false && (3 == 1/0)", Boolean.FALSE),
-//      Pair.make("true || (1/0 != 43)", Boolean.TRUE)
+      Pair.make("false && (3 == 1/0)", Boolean.FALSE),
+      Pair.make("true || (1/0 != 43)", Boolean.TRUE)
     };
     tester(cases);
   }
@@ -419,24 +418,23 @@ public class JavaInterpreterTest extends DrJavaTestCase {
     _interpreter.interpret("Object o = new Integer(3)");
   }
 
-  // BUG: TODO: [ drjava-Bugs-2974931 ] Boolean Short-Circuiting Doesn't Work
  /** Test the operation of the TypeCheckerExtension by performing the operations ((false) ? 2/0 : 1) and 
    * ((false) ? 2%0 : 1), which should not throw Exceptions in the Java interpreter.
    */
   public void testTypeCheckerExtension() {
-//    try { _interpreter.interpret("(false) ? 2/0 : 1 "); }
-//    catch(InterpreterException e) {
-//      if ( e.getCause() instanceof ArithmeticException ) {
-//        fail("testTypeCheckerExtension failed to prevent short circuit DivideByZeroException");
-//      }
-//    }
-//
-//    try { _interpreter.interpret("(false) ? 2%0 : 1 "); }
-//    catch(InterpreterException e) {
-//      if ( e.getCause() instanceof ArithmeticException ) {
-//        fail("testTypeCheckerExtension failed to prevent short circuit DivideByZeroException");
-//      }
-//    }
+    try { _interpreter.interpret("(false) ? 2/0 : 1 "); }
+    catch(InterpreterException e) {
+      if ( e.getCause() instanceof ArithmeticException ) {
+        fail("testTypeCheckerExtension failed to prevent short circuit DivideByZeroException");
+      }
+    }
+
+    try { _interpreter.interpret("(false) ? 2%0 : 1 "); }
+    catch(InterpreterException e) {
+      if ( e.getCause() instanceof ArithmeticException ) {
+        fail("testTypeCheckerExtension failed to prevent short circuit DivideByZeroException");
+      }
+    }
   }
 
   /** Test the operation of the EvaluationVisitorExtension by performing a computation with no results (interpreter
