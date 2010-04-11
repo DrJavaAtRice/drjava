@@ -1226,6 +1226,7 @@ public class ExpressionChecker {
       if (ts.isEqual(leftT, TypeSystem.STRING)) {
         try {
           Expression right = ts.makeReference(node.getRightExpression());
+          setLeftExpression(node, node.getLeftExpression()); // not to be confused with node.setLeftExpression(...)
           node.setRightExpression(right);
           setOperation(node, ExpressionEvaluator.CONCATENATE);
         }
