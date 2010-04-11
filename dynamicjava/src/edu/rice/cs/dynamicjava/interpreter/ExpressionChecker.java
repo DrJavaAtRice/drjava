@@ -80,6 +80,7 @@ import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Lambda2;
+import edu.rice.cs.plt.lambda.WrappedException;
 
 import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.symbol.*;
@@ -1583,13 +1584,21 @@ public class ExpressionChecker {
     
     private void evaluateConstantExpression(BinaryExpression node) {
       if (hasValue(node.getLeftExpression()) && hasValue(node.getRightExpression())) {
-        setValue(node, new ExpressionEvaluator(RuntimeBindings.EMPTY, opt).value(node));
+        try {
+          Object val = new ExpressionEvaluator(RuntimeBindings.EMPTY, opt).value(node);
+          setValue(node, val);
+        }
+        catch (WrappedException e) { /* failed to evaluate -- just ignore */ }
       }
     }
     
     private void evaluateConstantExpression(UnaryExpression node) {
       if (hasValue(node.getExpression())) {
-        setValue(node, new ExpressionEvaluator(RuntimeBindings.EMPTY, opt).value(node));
+        try {
+          Object val = new ExpressionEvaluator(RuntimeBindings.EMPTY, opt).value(node);
+          setValue(node, val);
+        }
+        catch (WrappedException e) { /* failed to evaluate -- just ignore */ }
       }
     }
     
