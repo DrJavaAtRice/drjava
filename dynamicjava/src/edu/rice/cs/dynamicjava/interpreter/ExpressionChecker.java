@@ -837,7 +837,11 @@ public class ExpressionChecker {
       // (and that can be turned on or off depending on preferences),
       // the stated element type is always required and checked
       // TODO: Store the *Type* as an attribute on the initializer, instead of a *TypeName*?
-      Type elementType = checkTypeName(node.getElementType());
+      TypeName elementTypeName = node.getElementType();
+      if (elementTypeName == null) {
+        throw new ExecutionError("array.initializer.type", node);
+      }
+      Type elementType = checkTypeName(elementTypeName);
       if (expected.isSome() && ts.isArray(expected.unwrap())) {
         checkList(node.getCells(), ts.arrayElementType(expected.unwrap()));
       }
