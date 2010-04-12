@@ -99,11 +99,17 @@ public class CompilerErrorPanel extends ErrorPanel {
     _compilerChoiceBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         if (e.getStateChange() == ItemEvent.SELECTED) {
-          CompilerInterface compiler = (CompilerInterface) _compilerChoiceBox.getSelectedItem();
-          compilerModel.setActiveCompiler(compiler);
+          final CompilerInterface compiler = (CompilerInterface) _compilerChoiceBox.getSelectedItem();
           compilerModel.resetCompilerErrors();
           _compileHasOccurred = false;
-          reset();
+          // set the new compiler (and reset the interactions pane) in a separate thread
+          // to address [ drjava-Bugs-2985291 ] Delay in GUI when selecting compiler
+          new Thread(new Runnable() {
+            public void run() {
+              compilerModel.setActiveCompiler(compiler);
+              reset();
+            }
+          }).start();
         }
       }
     });
