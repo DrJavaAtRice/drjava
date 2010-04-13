@@ -521,7 +521,7 @@
 	<!-- put the right version stamp into the jar file -->
 	<attribute name="Created-By" value="${java.version}"/>
       </manifest>
-      <fileset dir="classes/lib" />
+      <fileset dir="classes/lib" excludes="about.html"/>
       <fileset dir="classes/base" />
       <fileset file="lib/junit.jar" />
     </jar>
