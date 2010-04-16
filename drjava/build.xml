@@ -8,6 +8,7 @@
 
   <property name="readable-project-name" value="DrJava" />
   <property name="src-working-dir" value="src/edu/rice/cs/drjava" />
+  <property name="junit-jar-to-include" value="lib/concutest-junit-4.7-withrt-nodep.jar" />
   <property name="main-class" value="edu.rice.cs.drjava.DrJava" />
   <property name="svn-repository" value="https://drjava.svn.sourceforge.net/svnroot/drjava" />
 
@@ -513,6 +514,9 @@
        
   <target name="jar" depends="compile, resolve-version-tag" 
           description="Create the jar file with all classes and libs (compiling first)">
+    <available property="junit-jar-to-include-exists" file="${junit-jar-to-include}" />
+    <fail message="Can't find ${junit-jar-to-include}"
+	  unless="junit-jar-to-include-exists" />
     <jar jarfile="${ant.project.name}.jar">
       <manifest>
         <attribute name="Main-Class" value="${main-class}" />
@@ -523,7 +527,8 @@
       </manifest>
       <fileset dir="classes/lib" excludes="about.html"/>
       <fileset dir="classes/base" />
-      <fileset file="lib/junit.jar" />
+      <!-- Include the specified version of JUnit and rename it to junit.jar -->
+      <zipfileset dir="." includes="${junit-jar-to-include}" fullpath="junit.jar" />
     </jar>
   </target>
 
