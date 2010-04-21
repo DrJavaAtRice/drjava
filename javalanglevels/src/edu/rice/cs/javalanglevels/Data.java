@@ -189,7 +189,7 @@ public abstract class Data {
   public boolean addVars(VariableData[] vars) {
     boolean success = true;
     for (int i = 0; i < vars.length; i++) {
-      if (vars[i] == null) {System.out.println("Var " + i + " was null!");}
+//      if (vars[i] == null) {System.out.println("Var " + i + " was null!");}
       if (!_repeatedName(vars[i])) {
         _vars.addLast(vars[i]);
       }

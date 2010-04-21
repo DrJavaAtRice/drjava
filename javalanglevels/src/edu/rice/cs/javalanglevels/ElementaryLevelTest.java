@@ -112,7 +112,7 @@ public class ElementaryLevelTest extends TestCase {
     for (int i = 0; i < testFiles.length; i++) {
       LanguageLevelConverter llc = new LanguageLevelConverter();
       result = llc.convert(new File[]{ testFiles[i] }, new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make()));
-      System.out.println("Test result = " + result);
+//      System.out.println("Test result = " + result);
       assertTrue("should be parse exceptions or visitor exceptions in file " + testFiles[i].getName(),
                  ! result.getFirst().isEmpty() || ! result.getSecond().isEmpty());
     }

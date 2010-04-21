@@ -236,7 +236,7 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
       thrown.addLast(new Pair<SymbolData, JExpression>(exception3, ntcs));
       
       _tcbtc.compareThrownAndCaught(ntcs, caught_array, thrown);
-      System.out.println("thrown = " + thrown);
+//      System.err.println("thrown = " + thrown);
       assertTrue("Thrown should have no elements", thrown.isEmpty());
 
       

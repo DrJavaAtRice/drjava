@@ -132,7 +132,7 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     * variables have the same name.*/
   public Void forVariableDeclarationOnly(VariableDeclaration that) {
     if (! _bodyData.addFinalVars(_variableDeclaration2VariableData(that, _bodyData))) {
-      System.err.println("Generating duplicate variable error");
+//      System.err.println("Generating duplicate variable error");
       _addAndIgnoreError("You cannot have two variables with the same name.", that);
     }
     return null;
@@ -143,7 +143,7 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
   
   /** Process a local inner class definition */
   public Void forInnerClassDef(InnerClassDef that) {
-    System.err.println("BBIV.forInnerClassDef called on " + that.getName());
+//    System.err.println("BBIV.forInnerClassDef called on " + that.getName());
     handleInnerClassDef(that, _bodyData, getQualifiedClassName(_bodyData.getSymbolData().getName()) + "." + 
                         _bodyData.getSymbolData().preincrementLocalClassNum() + that.getName().getText());
     return null;

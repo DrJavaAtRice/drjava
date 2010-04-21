@@ -70,7 +70,7 @@ public class IntermediateLevelTest extends TestCase {
   public void testSuccessful() {
     File[] testFiles = directory.listFiles(new FileFilter() {
       public boolean accept(File pathName) {
-        System.err.println("Testing " + pathName + " ; should be successful");
+//        System.err.println("Testing " + pathName + " ; should be successful");
         return pathName.getAbsolutePath().endsWith(".dj1") && ! pathName.getAbsolutePath().endsWith("Yay.dj1");  
         // we will check Yay.dj1 for 1.4 augmentation
       }
@@ -87,7 +87,7 @@ public class IntermediateLevelTest extends TestCase {
     assertEquals("should be no visitor exceptions", new LinkedList<Pair<String, JExpressionIF>>(), result.getSecond());
     
     /**Now make sure that the resulting java files are correct.*/
-    System.err.println("Ensuring that generated .java files are correct.");
+//    System.err.println("Ensuring that generated .java files are correct.");
     
     for(int i = 0; i < testFiles.length; i++) {
       File currFile = testFiles[i];
@@ -97,7 +97,7 @@ public class IntermediateLevelTest extends TestCase {
       File correctFile = new File(fileName + ".expected");
       if (correctFile.exists()) {
         try {
-          System.err.println("Checking " + currFile);
+//          System.err.println("Checking " + currFile);
           assertEquals("File " + currFile.getName() + " should have been parsed and augmented correctly.",
                        lf(IOUtil.toString(correctFile)),
                        lf(IOUtil.toString(resultingFile)));
@@ -117,7 +117,7 @@ public class IntermediateLevelTest extends TestCase {
     
     File[] testFiles = directory.listFiles(new FileFilter() {
       public boolean accept(File pathName) {
-        System.err.println("Testing " + pathName + " should break");
+//        System.err.println("Testing " + pathName + " should break");
 //        return pathName.getAbsolutePath().endsWith(".dj1");
         return pathName.getAbsolutePath().endsWith("BadClass.dj1");
       }});
@@ -127,7 +127,7 @@ public class IntermediateLevelTest extends TestCase {
     for (int i = 0; i < testFiles.length; i++) {
 //      System.err.println("TESTING " + testFiles[i]);
       LanguageLevelConverter llc1 = new LanguageLevelConverter();
-      System.err.println("Checking " + testFiles[i]);
+//      System.err.println("Checking " + testFiles[i]);
       result = llc1.convert(new File[] {testFiles[i]}, new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make()));
       assertTrue("should be parse exceptions or visitor exceptions in file " + testFiles[i].getName(), 
                  ! result.getFirst().isEmpty() || ! result.getSecond().isEmpty());

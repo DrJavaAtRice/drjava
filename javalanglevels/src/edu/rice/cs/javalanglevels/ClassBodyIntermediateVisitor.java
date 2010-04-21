@@ -155,7 +155,7 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
 
   /** Process a local inner class definition */
   public Void forInnerClassDef(InnerClassDef that) {
-    System.err.println("CBIV.forInnerClassDef called on " + that.getName());
+//    System.err.println("CBIV.forInnerClassDef called on " + that.getName());
     String innerClassName = getQualifiedClassName(_classData.getName()) + "." + that.getName().getText();
     handleInnerClassDef(that, _classData, innerClassName);
     return null;

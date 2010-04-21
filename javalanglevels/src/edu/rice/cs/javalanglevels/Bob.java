@@ -431,7 +431,7 @@ public class Bob extends TypeChecker {
   public TypeData forInnerInterfaceDef(InnerInterfaceDef that) {
     String className = that.getName().getText();
     SymbolData sd = _data.getInnerClassOrInterface(className); // This works because className will never be a qualified name
-    if (sd == null) { System.out.println("I tried to look up " + className + " in " + _data.getName() + " but I got back null");}
+//    if (sd == null) { System.out.println("I tried to look up " + className + " in " + _data.getName() + " but I got back null");}
 
     // Check for cyclic inheritance
     if (checkForCyclicInheritance(sd, new LinkedList<SymbolData>(), that)) {

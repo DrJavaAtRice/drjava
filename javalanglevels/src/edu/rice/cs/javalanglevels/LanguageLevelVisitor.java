@@ -875,7 +875,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     
     String name = null; // name of the SymbolData to be returned
     String qualifiedClassName = getQualifiedClassName(className);
-    if (className.equals("MyInnerClass")) System.err.println("QualifiedClassName for MyInnerClass = " + qualifiedClassName);
+//    if (className.equals("MyInnerClass")) System.err.println("QualifiedClassName for MyInnerClass = " + qualifiedClassName);
 //    System.err.println("qualifiedClassName for " + className + " is " + qualifiedClassName);
     // Check if className is defined in this file.
     if (_classNamesInThisFile.contains(qualifiedClassName)) {
@@ -893,7 +893,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
           // All imported files should be in the symbol table.
           SymbolData tempSd = symbolTable.get(s);
           // Only need to fully resolve if resolve is on and the imported file is a continuation.
-          if (tempSd == null) System.err.println("Symbol lookup failed for " + s);
+//          if (tempSd == null) System.err.println("Symbol lookup failed for " + s);
           if (resolve && tempSd != null && tempSd.isContinuation()) {
 //            if (className.equals("Woah")) System.err.println("Calling getSymbolData for Woah");
             return getSymbolData(s, si, resolve, fromClassFile, addError, false);  // POTENTIAL INFINITE RECURSION!

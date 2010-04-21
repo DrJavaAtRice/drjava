@@ -199,8 +199,6 @@ public class AdvancedLevelTest extends TestCase {
 //        fail("Ensure that System.err is dumped");
         
   }
-
-
   
   /** This file used to have a NullPointer Exception in it because of a bug in the code.  Leave the test in so that the bug
     * never gets reintroduced.

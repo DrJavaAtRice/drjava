@@ -233,7 +233,7 @@ public class LanguageLevelConverter {
         _log.log("Attempting to resolve " + className + "\n  Result = " + returnedSd);
 //        System.err.println("Attempting to resolve " + className + "\n  Result = " + returnedSd);
         if (returnedSd == null) {
-          System.err.println("Could not find SymbolData for '" + className + "'");
+//          System.err.println("Could not find SymbolData for '" + className + "'");
           LanguageLevelVisitor.errors.add(new Pair<String, JExpressionIF>("Converter could not resolve " + className, 
                                                                           new NullLiteral(pair.getFirst())));
         }
@@ -288,7 +288,7 @@ public class LanguageLevelConverter {
         // Type check.
         TypeChecker btc = 
           new TypeChecker(llv._file, llv._package, llv.errors, symbolTable, llv._importedFiles, llv._importedPackages);
-        System.err.println("Visiting source file " + sf.getSourceInfo ());
+//        System.err.println("Visiting source file " + sf.getSourceInfo ());
         sf.visit(btc);
         if (btc.errors.size() > 0) _visitorErrors.addAll(btc.errors);
       }

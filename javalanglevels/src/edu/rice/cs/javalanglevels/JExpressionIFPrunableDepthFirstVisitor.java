@@ -73,7 +73,7 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forClassDefDoFirst(ClassDef that) { return forTypeDefBaseDoFirst(that); }
   public Void forClassDefOnly(ClassDef that) { return forTypeDefBaseOnly(that); }
   public Void forInnerClassDefDoFirst(InnerClassDef that) { 
-    System.err.println("JEIFPDFV.forInnerClassDefDoFirst called for " + that.getName());
+//    System.err.println("JEIFPDFV.forInnerClassDefDoFirst called for " + that.getName());
     return forClassDefDoFirst(that); 
   }
   public Void forInnerClassDefOnly(InnerClassDef that) { return forClassDefOnly(that); }
@@ -685,10 +685,10 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   }
   
   public Void forInnerClassDef(InnerClassDef that) {
-    System.err.println("Visiting inner class " + that.getName() + " in JExpIfPrunDFV from " + this);
+//    System.err.println("Visiting inner class " + that.getName() + " in JExpIfPrunDFV from " + this);
     forInnerClassDefDoFirst(that);
     if (prune(that)) return null;
-    System.err.println("Passed the prune control point in JEIFPDFV.forInnerClassDef for " + that.getName());
+//    System.err.println("Passed the prune control point in JEIFPDFV.forInnerClassDef for " + that.getName());
     that.getMav().visit(this);
     that.getName().visit(this);
     
