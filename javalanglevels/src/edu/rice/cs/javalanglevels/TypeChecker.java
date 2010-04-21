@@ -42,7 +42,7 @@ import edu.rice.cs.javalanglevels.util.Log;
 import java.util.*;
 import java.io.File;
 import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.iter.*;
 
 import junit.framework.TestCase;
 
@@ -56,7 +56,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   static LinkedList<Pair<String, JExpressionIF>> errors;
   
   /**Holds the information about any classes/interfaces that have been resolved*/
-  static Symboltable symbolTable;
+  static final Symboltable symbolTable = LanguageLevelConverter.symbolTable;
   
   /**True if we have an error we can't recover from*/
   static boolean _errorAdded;
@@ -87,18 +87,17 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     _file = file;
     _package = packageName;
     this.errors = errors;
-    LanguageLevelConverter.symbolTable = this.symbolTable = symbolTable;
+//    this.symbolTable = symbolTable;
     this._importedFiles = importedFiles;
     this._importedPackages = importedPackages;
   }
   
-  /**
-   * Called by the subclasses.
-   * @param file  The Source File being checked
-   * @param packageName  The package the source file is in
-   * @param importedFiles  The specific classes imported in the source file
-   * @param importedPackages  The list of package names that are imported
-   */
+  /** Called by the subclasses.
+    * @param file  The Source File being checked
+    * @param packageName  The package the source file is in
+    * @param importedFiles  The specific classes imported in the source file
+    * @param importedPackages  The list of package names that are imported
+    */
   public TypeChecker(File file, String packageName, LinkedList<String> importedFiles, LinkedList<String> importedPackages) {
     _file = file;
     _package = packageName;
@@ -176,15 +175,19 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   public SymbolData getSymbolData(String className, JExpression jexpr, boolean giveException, boolean runnableNotOkay) {
     // Check qualified class name (which is no different at elementary level)
     SourceInfo si = jexpr.getSourceInfo();
-    LanguageLevelVisitor llv = new LanguageLevelVisitor(_file, _package, _importedFiles, 
-                                                        _importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
-                                                        new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-    LanguageLevelConverter.symbolTable = llv.symbolTable = this.symbolTable;
+    LanguageLevelVisitor llv = 
+      new LanguageLevelVisitor(_file, 
+                               _package, 
+                               _importedFiles, 
+                               _importedPackages, 
+                               new LinkedList<String>(), 
+                               new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
+                               new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+//    LanguageLevelConverter.symbolTable = llv.symbolTable = this.symbolTable;
+    LanguageLevelConverter._newSDs.clear();
     SymbolData sd = llv.getSymbolData(className, si, false, false, false, true); // TODO: Is this right?
     if (sd == null || sd.isContinuation()) {
-      if (giveException) {
-        _addError("Class or variable " + className + " not found.", jexpr);
-      }
+      if (giveException) { _addError("Class or variable " + className + " not found.", jexpr); }
       return null;
     }
     else {
@@ -362,8 +365,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     
     //if this is not a constructor, matching and matchingWithAutoBoxing are both empty, and there is a outer data, then look at outer data
     SymbolData currData = enclosingSD;
-    while (!isConstructor && matching.isEmpty() && 
-           matchingWithAutoBoxing.isEmpty() && 
+    while (!isConstructor && matching.isEmpty() && matchingWithAutoBoxing.isEmpty() && 
            currData.getOuterData() != null) {
       currData = currData.getOuterData().getSymbolData();
       p = _getMatchingMethods(methodName, currData, arguments, jexpr, isConstructor, thisSD);
@@ -1047,24 +1049,24 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
           break;
         }
       }
-      if (!foundOne) {
+      if (! foundOne) {
         _addError("Class " + sd.getName() + " does not have any valid test methods.  Test methods must be declared public, must return void, and must start with the word \"test\"", that); 
       }
     }
     
-    //This is bad because it means that in this instance, the type checker is not language independent.
-    //However, until we get to this point, it is impossible to tell if the class is a subclass of
-    //TestCase that does not directly extend test case.  For instance, if class A extends
-    //class B and class B extends TestCase, we would not know until this pass that class A also extends
-    //test case.
-    else {//if it is not a test class, and we are at the intermediate or elementary level, void is not allowed
-      if (LanguageLevelConverter.isElementaryFile(_file)) {  
-        cbtc = new VoidMethodsNotAllowedClassBodyTypeChecker(sd, _file, _package, _importedFiles, _importedPackages, new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>(), "Elementary");
-      }
-      else if (LanguageLevelConverter.isIntermediateFile(_file)) {
-        cbtc = new VoidMethodsNotAllowedClassBodyTypeChecker(sd, _file, _package, _importedFiles, _importedPackages, new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>(), "Intermediate");
-      }
-    } 
+//    //This is bad because it means that in this instance, the type checker is not language independent.
+//    //However, until we get to this point, it is impossible to tell if the class is a subclass of
+//    //TestCase that does not directly extend test case.  For instance, if class A extends
+//    //class B and class B extends TestCase, we would not know until this pass that class A also extends
+//    //test case.
+//    else {//if it is not a test class, and we are at the intermediate or elementary level, void is not allowed
+//      if (LanguageLevelConverter.isElementaryFile(_file)) {  
+//        cbtc = new VoidMethodsNotAllowedClassBodyTypeChecker(sd, _file, _package, _importedFiles, _importedPackages, new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>(), "Elementary");
+//      }
+//      else if (LanguageLevelConverter.isIntermediateFile(_file)) {
+//        cbtc = new VoidMethodsNotAllowedClassBodyTypeChecker(sd, _file, _package, _importedFiles, _importedPackages, new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>(), "Intermediate");
+//      }
+//    } 
     
     if (cbtc == null) {
       cbtc = new ClassBodyTypeChecker(sd, _file, _package, _importedFiles, _importedPackages, new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
@@ -1145,9 +1147,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     return forInterfaceDefOnly(that, mav_result, name_result, typeParameters_result, interfaces_result, body_result);
   }
   
-  /**
-   * Retrieve the class being imported from the Symbol table, and make sure it is public.s
-   */
+  /** Retrieve the class being imported from the Symbol table, and make sure it is public. */
   public TypeData forClassImportStatement(ClassImportStatement that) {
     CompoundWord cWord = that.getCWord();
     Word[] words = cWord.getWords();
@@ -1157,7 +1157,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     //This makes sure the class can be imported and is in the right package.
     final TypeData cWord_result = getSymbolData(name.toString(), that, true, true);
     if (cWord_result != null) { 
-      if (!cWord_result.hasModifier("public")) {
+      if (! cWord_result.hasModifier("public")) {
         _addError(cWord_result.getName() + " is not public, and thus cannot be seen here", that);
       }
     }
@@ -1246,9 +1246,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     }
   }
   
-   /**
-    * Test the methods defined in the above class.
-   */
+   /** Test the methods defined in the above class. */
   public static class TypeCheckerTest extends TestCase {
     
     private TypeChecker _btc;
@@ -1259,12 +1257,12 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     private SymbolData _sd4;
     private SymbolData _sd5;
     private SymbolData _sd6;
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _publicMav    = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
     private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _privateMav   = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav   = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    private ModifiersAndVisibility _abstractMav  = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav     = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
     
     
     public TypeCheckerTest() { this(""); }
@@ -1272,10 +1270,10 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     
     public void setUp() {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable.clear();
 
       _btc = new TypeChecker(new File(""), "", new LinkedList<String>(), new LinkedList<String>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
       _btc._importedPackages.addFirst("java.lang");
       _errorAdded = false;
       _sd1 = new SymbolData("i.like.monkey");
@@ -1741,10 +1739,17 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       assertFalse("Should not be assignable.", _btc._isAssignableFrom(symbolTable.get("java.lang.Integer"), symbolTable.get("java.lang.Character")));
       assertTrue("Should be assignable.", _btc._isAssignableFrom(symbolTable.get("java.lang.Object"), SymbolData.INT_TYPE));
       
-      LanguageLevelVisitor llv = new LanguageLevelVisitor(_btc._file, _btc._package, _btc._importedFiles, 
-                                                        _btc._importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
-                                                        new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-      LanguageLevelConverter.symbolTable = llv.symbolTable = _btc.symbolTable;
+      LanguageLevelVisitor llv = 
+        new LanguageLevelVisitor(_btc._file, 
+                                 _btc._package, 
+                                 _btc._importedFiles, 
+                                 _btc._importedPackages, 
+                                 new LinkedList<String>(), 
+                                 new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
+                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+      
+//      LanguageLevelConverter.symbolTable = llv.symbolTable = _btc.symbolTable;
+      LanguageLevelConverter._newSDs.clear();
       
       SourceInfo si = SourceInfo.NO_INFO;
       
@@ -1762,7 +1767,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
 
       
       //System.setProperty("java.specification.version", "1.4");
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_1_4, IterUtil.<File>empty());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_1_4, EmptyIterable.<File>make());
       assertFalse("Should not be assignable.", _btc._isAssignableFrom(symbolTable.get("java.lang.Double"), SymbolData.INT_TYPE));
       assertFalse("Should not be assignable.", _btc._isAssignableFrom(SymbolData.DOUBLE_TYPE, symbolTable.get("java.lang.Short")));
       assertFalse("Should not be assignable.", _btc._isAssignableFrom(symbolTable.get("java.lang.Double"), symbolTable.get("java.lang.Character")));

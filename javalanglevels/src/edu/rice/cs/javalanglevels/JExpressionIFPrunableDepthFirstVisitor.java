@@ -72,7 +72,10 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forTypeDefBaseOnly(TypeDefBase that) { return forJExpressionOnly(that); }
   public Void forClassDefDoFirst(ClassDef that) { return forTypeDefBaseDoFirst(that); }
   public Void forClassDefOnly(ClassDef that) { return forTypeDefBaseOnly(that); }
-  public Void forInnerClassDefDoFirst(InnerClassDef that) { return forClassDefDoFirst(that); }
+  public Void forInnerClassDefDoFirst(InnerClassDef that) { 
+    System.err.println("JEIFPDFV.forInnerClassDefDoFirst called for " + that.getName());
+    return forClassDefDoFirst(that); 
+  }
   public Void forInnerClassDefOnly(InnerClassDef that) { return forClassDefOnly(that); }
   public Void forInterfaceDefDoFirst(InterfaceDef that) { return forTypeDefBaseDoFirst(that);  }
   public Void forInterfaceDefOnly(InterfaceDef that) { return forTypeDefBaseOnly(that); }
@@ -665,25 +668,39 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
     forWordDoFirst(that);
     if (prune(that)) return null; return forWordOnly(that);
   }
+  
   public Void forClassDef(ClassDef that) {
     forClassDefDoFirst(that);
     if (prune(that)) return null;    
     that.getMav().visit(this);
     that.getName().visit(this);
     for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
+    
     that.getSuperclass().visit(this);
+    
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
-    that.getBody().visit(this); return forClassDefOnly(that);
+    
+    that.getBody().visit(this); 
+    return forClassDefOnly(that);
   }
+  
   public Void forInnerClassDef(InnerClassDef that) {
+    System.err.println("Visiting inner class " + that.getName() + " in JExpIfPrunDFV from " + this);
     forInnerClassDefDoFirst(that);
     if (prune(that)) return null;
+    System.err.println("Passed the prune control point in JEIFPDFV.forInnerClassDef for " + that.getName());
     that.getMav().visit(this);
     that.getName().visit(this);
+    
     for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
     that.getSuperclass().visit(this);
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
-    that.getBody().visit(this); return forInnerClassDefOnly(that); }  public Void forInterfaceDef(InterfaceDef that) {
+    
+    that.getBody().visit(this); 
+    return forInnerClassDefOnly(that); 
+  }  
+  
+  public Void forInterfaceDef(InterfaceDef that) {
       forInterfaceDefDoFirst(that);
       if (prune(that)) return null;
       that.getMav().visit(this);

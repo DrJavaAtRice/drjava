@@ -41,16 +41,38 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.awt.datatransfer.*;
-import java.io.StringWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.PrintWriter;
-import java.text.DecimalFormat;
 import java.io.StringReader;
+import java.io.StringWriter;
+import java.nio.channels.FileChannel;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.io.IOException;
 
 public class Utilities {
+  
+  /** A file copy method taken from the web. */
+  public static void copyFile(File sourceFile, File destFile) throws IOException {
+    if(! destFile.exists()) destFile.createNewFile();
+    
+    FileChannel source = null;
+    FileChannel destination = null;
+    try {
+      source = new FileInputStream(sourceFile).getChannel();
+      destination = new FileOutputStream(destFile).getChannel();
+      destination.transferFrom(source, 0, source.size());
+    }
+    finally {
+      if (source != null) source.close();
+      if (destination != null) destination.close();
+    }
+  }
+
   
   /** Runs the task synchronously if the current thread is the event thread; otherwise passes it to the
     * event thread to be run asynchronously after all events already on the queue have been processed.
@@ -159,4 +181,28 @@ public class Utilities {
       return sw.toString();
     }
   }
+  
+  /** The standard java.util contains method on arrays of reference type.
+    * @return true iff the value elt appears in a. */
+  public static boolean contains(Object[] a, Object elt) {
+    for (Object o: a) { if (o.equals(elt)) return true; }
+    return false;
+  }
+  
+  /** @return true iff that has a visibility modifier. */
+  public static boolean hasVisibilityModifier(String[] modifiers) {
+    for (String s: modifiers) {
+      if (s.equals("private") || s.equals("public") || s.equals("protected")) return true;
+    }
+    return false;
+  }
+  
+  /** @return true iff that has "final" as a modifier. */
+  public static boolean isFinal(String[] modifiers) { return contains(modifiers, "final"); }
+   
+  /** @return true iff that has "final" as a modifier. */
+  public static boolean isStatic(String[] modifiers) { return contains(modifiers, "static"); }
+  
+  /** @return true iff that has "public" as a modifier. */
+  public static boolean isPublic(String[] modifiers) { return contains(modifiers, "public"); }
 }

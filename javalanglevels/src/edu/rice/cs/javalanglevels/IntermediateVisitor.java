@@ -41,7 +41,7 @@ import edu.rice.cs.javalanglevels.parser.*;
 import java.util.*;
 import java.io.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.iter.*;
 
 import junit.framework.TestCase;
 
@@ -57,43 +57,42 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
   /** This constructor is called when creating a new instance of IntermediateVisitor.  The default value for className
     * is the empty string.
     */
-  public IntermediateVisitor(File file, String packageName, LinkedList<String> importedFiles, 
-                         LinkedList<String> importedPackages,LinkedList<String> classNamesInThisFile, 
+  public IntermediateVisitor(File file, 
+                             String packageName, 
+                             LinkedList<String> importedFiles, 
+                             LinkedList<String> importedPackages,
+                             LinkedList<String> classNamesInThisFile, 
                              Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
     super(file, packageName, importedFiles, importedPackages, classNamesInThisFile, continuations);
   }
   
   /** This constructor is called when testing.  It initializes all of the static fields of LanguageLevelVisitor. */
   public IntermediateVisitor(File file) {
-    this(file, new LinkedList<Pair<String, JExpressionIF>>(), new Symboltable(), 
+    this(file, new LinkedList<Pair<String, JExpressionIF>>(),
          new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
-         new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
-         new Hashtable<SymbolData, LanguageLevelVisitor>());
+         new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>());
   }
-    
+  
   /** This constructor is called from LanguageLevelVisitor and LanguageLevelConverter when they are instantiating a new
     * IntermediateVisitor to visit a new file with.  Package is set to "" by default.
     * @param file  The File corresponding to the source file we are visiting
     * @param errors  The list of errors that have been encountered so far.
-    * @param symbolTable  The table of classes (types) that we have encountered
     * @param continuations  The table of classes we have encountered but still need to resolve
     * @param visitedFiles  The list of files we have visited
     * @param newSDs  The new symbol datas we have created (that will need to have constructors created for them after 
     *                this pass is finished)
     */
-  public IntermediateVisitor(File file, LinkedList<Pair<String, JExpressionIF>> errors, Symboltable symbolTable,
+  public IntermediateVisitor(File file, LinkedList<Pair<String, JExpressionIF>> errors,
                              Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations,
-                             LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visitedFiles,
-                             Hashtable<SymbolData, LanguageLevelVisitor> newSDs) {
+                             LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visitedFiles) {
     super(file, "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<String>(), continuations);
     this.errors = errors;
-    this.symbolTable = symbolTable;
+//    this.symbolTable = symbolTable;
     this.visitedFiles= visitedFiles;
-    this._newSDs = newSDs;
-    _hierarchy = new Hashtable<String, TypeDefBase>();//hierarchy;
+    _hierarchy = new Hashtable<String, TypeDefBase>(); //hierarchy;
   }
   
-  /**Only abstract, public, private, protected, and static are allowed at this level.*/
+  /**Only abstract, public, private, protected, static and final are allowed in language levels.*/
   public Void forModifiersAndVisibilityDoFirst(ModifiersAndVisibility that) {
     String[] modifiersAndVisibility = that.getModifiers();
     StringBuffer sb = new StringBuffer();
@@ -101,8 +100,8 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     int count = 0;    
     for(int i = 0; i < modifiersAndVisibility.length; i++) {
       temp = modifiersAndVisibility[i];
-      if (! (temp.equals("abstract") || temp.equals("public") || temp.equals("private") || temp.equals("protected") || 
-             temp.equals("static"))) {
+      if (! temp.equals("final") && ! temp.equals("abstract") && ! temp.equals("public") && ! temp.equals("private") && 
+          ! temp.equals("protected") && ! temp.equals("static")) {
         sb.append(" \"" + temp + "\"");
         count++;
       }
@@ -116,134 +115,208 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     }
     return super.forModifiersAndVisibilityDoFirst(that);
   }
-
   
-  /** Do not allow explicit Package Statements at the Intermediate Level. */
-  public Void forPackageStatementDoFirst(PackageStatement that) {
-    _addError("Package statements cannot be used at the Intermediate level.  " +
-              "All Intermediate level classes and interfaces are assumed to be in the default package", that);
-    return null;
+  /** Check to make sure the inner class def is well-formed, resolve it, and store the resulting symbol in the outer 
+    * class's list of inner classes.  This method is used in InterfaceBodyIntermediateVisitor but needs the correct 
+    * Data so we pass it in.  This method is tested in those files.  We use the fully qualified name so that we 
+    * don't accidentally conflict with another class in the symbol table.
+    * @param that  AST Node for the inner class def
+    * @param data  Data that encloses this inner class; the inner class can be in a class or a method.
+    * @param name  Qualified name of the inner class. For a local class, we construct the same name as the Java
+    *   compiler (??), which inserts "$<seq#>" as the delimiter preceding the raw class name. For example, if class A 
+    *   has a method B with a local class C, then qualified name for this class is "A$1C", provided the class is the
+    *   first local class (including anonymous classes) in the enclosing class.
+    */
+  protected void handleInnerClassDef(InnerClassDef that, Data data, String name) {
+    System.err.println("Processing InnerClassDef for " + name);
+    forInnerClassDefDoFirst(that);
+    if (prune(that)) return;
+    
+    that.getMav().visit(this);
+    that.getName().visit(this);
+    for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
+//    that.getSuperclass().visit(this);
+    for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
+    
+    SymbolData sd = defineInnerSymbolData(that, name, data);
+    
+    if (sd != null) { // We have a symbol data to work with, so visit the body and augment
+      that.getBody().visit(new ClassBodyIntermediateVisitor(sd, 
+                                                            _file, 
+                                                            _package,
+                                                            _importedFiles, 
+                                                            _importedPackages, 
+                                                            _classNamesInThisFile, 
+                                                            continuations));
+      
+      createAccessors(sd, _file);
+      createToString(sd);
+      createHashCode(sd);
+      createEquals(sd);
+    }
+    // IMPORTANT: error message if sd is null?
+    // Inner classes are not entered in _classesToBeParsed since they are parsed when their outer classes are parsed.
+    
+    forInnerClassDefOnly(that);
   }
   
-  /**Do not allow inner classes at the Intermediate Level.*/
-  public Void forInnerClassDefDoFirst(InnerClassDef that) {
-    _addError("Inner classes cannot be used at the Intermediate level", that);
-    return null;
+  /** Check to make sure that the inner interface is okay, and resolve it and store it in the
+    * outer class's list of inner classes.  This method is common to both ClassBodyIntermediateVisitor
+    * and InterfaceBodyIntermediateVisitor but needs the correct SymbolData so we pass it in.  This method is tested
+    * in those files.
+    */
+  protected void handleInnerInterfaceDef(InnerInterfaceDef that, Data data, String name) {
+    System.err.println("Processing InnerInterfaceDef for " + name);
+    forInnerInterfaceDefDoFirst(that);
+    if (prune(that)) return;
+    
+    that.getMav().visit(this);
+    that.getName().visit(this);
+    for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
+    for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
+    
+    SymbolData sd = defineInnerSymbolData(that, name, data);
+    if (sd != null) {
+      
+      that.getBody().visit(new InterfaceBodyIntermediateVisitor(sd, 
+                                                                _file, 
+                                                                _package,
+                                                                _importedFiles, 
+                                                                _importedPackages,
+                                                                _classNamesInThisFile, 
+                                                                continuations));
+    }
+    
+    forInnerInterfaceDefOnly(that);
   }
-
-  /**Do not allow inner interfaces at the Intermediate Level.*/
-    public Void forInnerInterfaceDefDoFirst(InnerInterfaceDef that) {
-    _addError("Nested interfaces cannot be used at the Intermediate level", that);
-    return null;
-  }
-
-  /**Do not allow static intiializers at the Intermediate Level.*/
-  public Void forStaticInitializerDoFirst(StaticInitializer that) {
-    _addError("Static initializers cannot be used at the Intermediate level", that);
-    return null;
-  }
-
-  /**Do not allow labeled statements at the Intermediate Level.*/
-  public Void forLabeledStatementDoFirst(LabeledStatement that) {
-    _addError("Labeled statements cannot be used at the Intermediate level", that);
-    return null;
-  }
-
-  /**Do not allow switch statements at the Intermediate Level.*/
-  public Void forSwitchStatementDoFirst(SwitchStatement that) {
-    _addError("Switch statements cannot be used at the Intermediate level", that);
-    return null;
-  }
-
-  /**Do not allow while statements at the Intermediate Level.*/
-  public Void forWhileStatementDoFirst(WhileStatement that) {
-    _addError("While statements cannot be used at the Intermediate level", that);
-    return null;
-  }
-
-  /**Do not allow do statements at the Intermediate Level.*/
-  public Void forDoStatementDoFirst(DoStatement that) {
-    _addError("Do statements cannot be used at the Intermediate level", that);
-    return null;
-  }
-
-  /**Do not allow for statements at the Intermediate Level.*/
-  public Void forForStatementDoFirst(ForStatement that) {
-    _addError("For statements cannot be used at the Intermediate level", that);
-    return null;
-  }
-
-  /**Do not allow break statements at the Intermediate Level.*/
-  public Void forBreakStatementDoFirst(BreakStatement that) {
-    _addError("Break statements cannot be used at the Intermediate level", that);
-    return null;
-  }
-
-  /**Do not allow continue statements at the Intermediate Level.*/
-  public Void forContinueStatementDoFirst(ContinueStatement that) {
-    _addError("Continue statements cannot be used at the Intermediate level", that);
-    return null;
-  }
-
+  
+  
+//  /** Do not allow explicit Package Statements at the Intermediate Level. */
+//  public Void forPackageStatementDoFirst(PackageStatement that) {
+////    _addError("Package statements cannot be used at the Intermediate level.  " +
+////              "All Intermediate level classes and interfaces are assumed to be in the default package", that);
+//    return null;
+//  }
+//  
+//  /**Do not allow inner classes at the Intermediate Level.*/
+//  public Void forInnerClassDefDoFirst(InnerClassDef that) {
+////    _addError("Inner classes cannot be used at the Intermediate level", that);
+//    return null;
+//  }
+  
+//  /**Do not allow inner interfaces at the Intermediate Level.*/
+//    public Void forInnerInterfaceDefDoFirst(InnerInterfaceDef that) {
+//    _addError("Nested interfaces cannot be used at the Intermediate level", that);
+//    return null;
+//  }
+  
+//  /**Do not allow static intiializers at the Intermediate Level.*/
+//  public Void forStaticInitializerDoFirst(StaticInitializer that) {
+//    _addError("Static initializers cannot be used at the Intermediate level", that);
+//    return null;
+//  }
+  
+//  /**Do not allow labeled statements at the Intermediate Level.*/
+//  public Void forLabeledStatementDoFirst(LabeledStatement that) {
+//    _addError("Labeled statements cannot be used at the Intermediate level", that);
+//    return null;
+//  }
+  
+//  /**Do not allow switch statements at the Intermediate Level.*/
+//  public Void forSwitchStatementDoFirst(SwitchStatement that) {
+//    _addError("Switch statements cannot be used at the Intermediate level", that);
+//    return null;
+//  }
+  
+//  /**Do not allow while statements at the Intermediate Level.*/
+//  public Void forWhileStatementDoFirst(WhileStatement that) {
+//    _addError("While statements cannot be used at the Intermediate level", that);
+//    return null;
+//  }
+  
+//  /**Do not allow do statements at the Intermediate Level.*/
+//  public Void forDoStatementDoFirst(DoStatement that) {
+//    _addError("Do statements cannot be used at the Intermediate level", that);
+//    return null;
+//  }
+  
+//  /**Do not allow for statements at the Intermediate Level.*/
+//  public Void forForStatementDoFirst(ForStatement that) {
+//    _addError("For statements cannot be used at the Intermediate level", that);
+//    return null;
+//  }
+  
+//  /**Do not allow break statements at the Intermediate Level.*/
+//  public Void forBreakStatementDoFirst(BreakStatement that) {
+//    _addError("Break statements cannot be used at the Intermediate level", that);
+//    return null;
+//  }
+  
+//  /**Do not allow continue statements at the Intermediate Level.*/
+//  public Void forContinueStatementDoFirst(ContinueStatement that) {
+//    _addError("Continue statements cannot be used at the Intermediate level", that);
+//    return null;
+//  }
+  
   /**Do not allow synchronized statements at the Intermediate Level.*/
   public Void forSynchronizedStatementDoFirst(SynchronizedStatement that) {
     _addError("Synchronized statements cannot be used at the Intermediate level", that);
     return null;
   }
-
-  /**Do not allow try-catch statements at the Intermediate Level.*/
-  public Void forTryCatchStatementDoFirst(TryCatchStatement that) {
-    _addAndIgnoreError("A try-catch statement cannot appear here", that);
-    return null;
-  }
-
-  /**Make sure that the formal parameter is not final*/
-  public Void forFormalParameterDoFirst(FormalParameter that) {
-    if (that.isIsFinal()) {
-      _addError("The keyword \"final\" cannot be used at the Intermediate level", that);
-    return null;
-    }
-    else {
-      return forJExpressionDoFirst(that);
-    }
-  }
-
+  
+//  /**Do not allow try-catch statements at the Intermediate Level.*/
+//  public Void forTryCatchStatementDoFirst(TryCatchStatement that) {
+//    _addAndIgnoreError("A try-catch statement cannot appear here", that);
+//    return null;
+//  }
+  
+//  /**Make sure that the formal parameter is not final*/
+//  public Void forFormalParameterDoFirst(FormalParameter that) {
+//    if (that.isIsFinal()) {
+//      _addError("The keyword \"final\" cannot be used at the Intermediate level", that);
+//    return null;
+//    }
+//    else {
+//      return forJExpressionDoFirst(that);
+//    }
+//  }
+  
   /**Do not allow type parameters (generics) at the Intermediate level*/
   public Void forTypeParameterDoFirst(TypeParameter that) {
     _addError("Type Parameters cannot be used at the Intermediate level", that);
     return null;
   }
-
-  /**Only allow the 4 basic primitives: int, double, boolean, and char*/
-  public Void forPrimitiveTypeDoFirst(PrimitiveType that) {
-    String name = that.getName();
-    if (!(name.equals("int") || name.equals("double") || name.equals("boolean") || name.equals("char"))) {
-      _addError("Only the primitive types \"int\", \"double\", \"boolean\", and \"char\" can be used " +
-                "at the Intermediate level", that);
-    return null;
-    }
-    else {
-      return forTypeDoFirst(that);
-    }
-  }
-
-  /**Do not allow arrays at the Intermediate Level*/
-  public Void forArrayTypeDoFirst(ArrayType that) {
-    _addError("Arrays cannot be used at the Intermediate level", that);
-    return null;
-  }
-
-  /**Do not allow conditional expressions at the Intermediate Level*/
-  public Void forConditionalExpressionDoFirst(ConditionalExpression that) {
-    _addError("Conditional expressions cannot be used at the Intermediate level", that);
-    return null;
-  }
-
-  /**Do not allow instanceof expressions at the Intermediate Level*/
-  public Void forInstanceofExpressionDoFirst(InstanceofExpression that) {
-    _addError("Instanceof expressions cannot be used at the Intermediate level", that);
-    return null;
-  }
+  
+//  /**Only allow the 4 basic primitives: int, double, boolean, and char*/
+//  public Void forPrimitiveTypeDoFirst(PrimitiveType that) {
+//    String name = that.getName();
+//    if (!(name.equals("int") || name.equals("double") || name.equals("boolean") || name.equals("char"))) {
+//      _addError("Only the primitive types \"int\", \"double\", \"boolean\", and \"char\" can be used " +
+//                "at the Intermediate level", that);
+//    return null;
+//    }
+//    else {
+//      return forTypeDoFirst(that);
+//    }
+//  }
+  
+//  /**Do not allow arrays at the Intermediate Level*/
+//  public Void forArrayTypeDoFirst(ArrayType that) {
+//    _addError("Arrays cannot be used at the Intermediate level", that);
+//    return null;
+//  }
+  
+//  /**Do not allow conditional expressions at the Intermediate Level*/
+//  public Void forConditionalExpressionDoFirst(ConditionalExpression that) {
+//    _addError("Conditional expressions cannot be used at the Intermediate level", that);
+//    return null;
+//  }
+  
+//  /**Do not allow instanceof expressions at the Intermediate Level*/
+//  public Void forInstanceofExpressionDoFirst(InstanceofExpression that) {
+//    _addError("Instanceof expressions cannot be used at the Intermediate level", that);
+//    return null;
+//  }
   
   
   /*Check to see if className is one of the classes declared in the current source file,
@@ -259,22 +332,42 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     return false;   
   }  
   
-  /** Use the doFirst method to make sure there aren't any errors with the declaration.  Then, 
-    * use addSymbolData to create the appropriate symbol data, and then visit the class body.  
-    * Finally, autogenerate the toString, equals, hashCode, and accessor
-    * methods.  The constructor will be autogenerated right before the TypeChecking pass starts.
+  /** Use the doFirst method to make sure there aren't any errors with the declaration.  Then, use defineSymbolData to 
+    * create the appropriate symbol data, and then visit the class body.  Finally, autogenerate the toString, equals, 
+    * hashCode, and accessor methods.  The constructor will be autogenerated right before the TypeChecking pass starts.
     * Once the class def has been handled, remove it from classesToBeParsed.
     */
   public Void forClassDef(ClassDef that) {    
     forClassDefDoFirst(that);
     if (prune(that)) return null;
-
+    
+    boolean isTestCase = false;  // flag to support automatic importing of junit.framework.*;
     String className = getQualifiedClassName(that.getName().getText());
-    SymbolData sd = addSymbolData(that, className);
-   
+    SymbolData sd = defineSymbolData(that, className);
+    
+    if (sd != null) {
+    
+      String superName = that.getSuperclass().getName();
+      if (superName.equals("TestCase") || superName.equals("junit.framework.TestCase")) {
+        isTestCase = true;
+        if (! _importedPackages.contains("junit.framework") && ! _importedFiles.contains("junit.framework.TestCase")) {
+          System.err.println("importing junit.framework.TestCase in file " + that.getSourceInfo());
+          _importedFiles.addLast("junit.framework.TestCase");
+          sd.setHasAutoGeneratedJunitImport(true);
+        }
+        // add to symbol table
+        getSymbolData("junit.framework.TestCase", that.getSourceInfo(), true, false, true, false); 
+//        assert getSymbolData("junit.framework.TestCase", that.getSourceInfo()) != null;
+      }
+    }
+    
     that.getMav().visit(this);
     that.getName().visit(this);
     that.getSuperclass().visit(this);
+    
+    // Test cases are automatically public
+    if (isTestCase) sd.addModifier("public");
+    
     for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
     
@@ -290,57 +383,54 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     _classesToBeParsed.remove(className);
     return null;
   }
-
-   /**
-    * Use the doFirst method to make sure that there aren't any errors with the declaration.
-    * Create a SymbolData corresponding to this interface and add it appropriately.
-    * Then visit the body to handle anything defined inside the interface.
+  
+  /** Use the doFirst method to make sure that there aren't any errors with the declaration.  Define a SymbolData 
+    * corresponding to this interface definition. Then visit the body to handle anything defined inside the interfac
     * Once the interface has been resolved, remove it from _classesToBeParsed.
     */
   public Void forInterfaceDef(InterfaceDef that) {
     forInterfaceDefDoFirst(that);
     if (prune(that)) return null;
-    String className = that.getName().getText();
-    that.getMav().visit(this);
-    that.getName().visit(this);
-    for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
-    SymbolData sd = addSymbolData(that, getQualifiedClassName(className));
+    String className = getQualifiedClassName(that.getName().getText());
+    // The following for loop should be no-op because interfaces can't have fields!
+    assert that.getTypeParameters().length == 0;
+//    for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
+    SymbolData sd = defineSymbolData(that, className);
     if (sd != null) {
       sd.setInterface(true);
       that.getBody().visit(new InterfaceBodyIntermediateVisitor(sd, _file, _package, _importedFiles, _importedPackages, 
                                                                 _classNamesInThisFile, continuations));
     }
-      
+    that.getMav().visit(this);
+    that.getName().visit(this);
     forInterfaceDefOnly(that);
-    _classesToBeParsed.remove(getQualifiedClassName(className));
+    _classesToBeParsed.remove(className);
     return null;
-  }  
-  
-  
-    /**
-   * Call the super method to convert these to a VariableData array, then make sure that
-   * each VariableData is final, as required at the Intermediate level.
-   * @param enclosingData  The Data which contains the variables
-   */
-  protected VariableData[] _variableDeclaration2VariableData(VariableDeclaration vd, Data enclosingData) {
-    VariableData[] vds = super._variableDeclaration2VariableData(vd, enclosingData);
-    for (int i = 0; i < vds.length; i++) {
-      if ((vds[i].hasModifier("static") && vds[i].getMav().getModifiers().length > 1) || 
-          (! vds[i].hasModifier("static") && vds[i].getMav().getModifiers().length > 0)) {
-        StringBuffer s = new StringBuffer("the keyword(s) ");
-        String[] modifiers = vds[i].getMav().getModifiers();
-        for (int j = 0; j<modifiers.length; j++) {
-          if (! modifiers[j].equals("static")) {s.append("\"" + modifiers[j] + "\" ");}
-        }
-        _addAndIgnoreError("You cannot use " + s.toString() + "to declare a field at the Intermediate level.  " + 
-                           "Only the keyword 'static' is allowed", vd);
-      }
-      if (vds[i].hasModifier("static")) vds[i].addModifier("public");
-      else vds[i].addModifier("private"); 
-      vds[i].setFinal();
-    }
-    return vds;
   }
+  
+//  /** Call the super method to convert these to a VariableData array, then make sure that
+//    * each VariableData is final, as required at the Intermediate level.
+//    * @param enclosingData  The Data which contains the variables
+//     */
+//  protected VariableData[] _variableDeclaration2VariableData(VariableDeclaration vd, Data enclosingData) {
+//    VariableData[] vds = super._variableDeclaration2VariableData(vd, enclosingData);
+//    for (int i = 0; i < vds.length; i++) {
+//      if ((vds[i].hasModifier("static") && vds[i].getMav().getModifiers().length > 1) || 
+//          (! vds[i].hasModifier("static") && vds[i].getMav().getModifiers().length > 0)) {
+//        StringBuffer s = new StringBuffer("the keyword(s) ");
+//        String[] modifiers = vds[i].getMav().getModifiers();
+//        for (int j = 0; j<modifiers.length; j++) {
+//          if (! modifiers[j].equals("static")) {s.append("\"" + modifiers[j] + "\" ");}
+//        }
+//        _addAndIgnoreError("You cannot use " + s.toString() + "to declare a field at the Intermediate level.  " + 
+//                           "Only the keyword 'static' is allowed", vd);
+//      }
+//      if (vds[i].hasModifier("static")) vds[i].addModifier("public");
+//      else vds[i].addModifier("private"); 
+//      vds[i].setFinal();
+//    }
+//    return vds;
+//  }
   
   /** Pass this call directly onto the language level visitor.  This is a hack to bypass the privateAndFinal setting 
     * when we are dealing with local variables.
@@ -348,8 +438,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
   protected VariableData[] llVariableDeclaration2VariableData(VariableDeclaration vd, Data enclosingData) {
     return super._variableDeclaration2VariableData(vd, enclosingData);
   }
-
- 
+  
   /** Do the work that is shared between SimpleAnonymousClassInstantiations and ComplexAnonymousClassInstantiations.  Do
     * not generate automatic accessors for the anonymous class--this will be done in type checker pass.
     * @param that  The AnonymousClassInstantiation being visited
@@ -386,12 +475,12 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
   public void simpleAnonymousClassInstantiationHelper(SimpleAnonymousClassInstantiation that, Data data) {
     forSimpleAnonymousClassInstantiationDoFirst(that);
     if (prune(that)) return;
-
+    
     //resolve the super class and make sure it will be in the SymbolTable.
     SymbolData superC = getSymbolData(that.getType().getName(), that.getSourceInfo());
     
     anonymousClassInstantiationHelper(that, data, superC);
-
+    
     forSimpleAnonymousClassInstantiationOnly(that);
   }
   
@@ -418,7 +507,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     forComplexAnonymousClassInstantiationOnly(that);
   }
   
-
+  
   /** Test the methods declared in the above class. */
   public static class IntermediateVisitorTest extends TestCase {
     
@@ -439,32 +528,33 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
     private ModifiersAndVisibility _abstractMav = 
       new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _privateAbstractMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract", "private"});  // illegal
     private ModifiersAndVisibility _staticMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"static"});
     private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
     
-    
-    public IntermediateVisitorTest() {
-      this("");
-    }
+    public IntermediateVisitorTest() { this(""); }
     public IntermediateVisitorTest(String name) {
       super(name);
 //      _file = File.createTempFile("DrJava-test", ".java");
 //      _iv = new ElementaryVisitor(new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
 //                                 new LinkedList<String>());
-          }
+    }
     
     public void setUp() {
-
+      
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable.clear();
+      LanguageLevelConverter._newSDs.clear();
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.make(new File("lib/buildlib/junit.jar")));
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();      
       _hierarchy = new Hashtable<String, TypeDefBase>();
+      
       _iv = new IntermediateVisitor(new File(""),
                                     errors,
-                                    symbolTable,
                                     continuations, 
                                     new LinkedList<Pair<LanguageLevelVisitor, 
-                                    SourceFile>>(), new Hashtable<SymbolData, LanguageLevelVisitor>());
+                                    SourceFile>>());
       LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.make(new File("lib/buildlib/junit.jar")));
       _iv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
       _iv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
@@ -481,7 +571,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     
     public void testForModifiersAndVisibilityDoFirst() {
       
-      //Check that the proper modifiers are allowed:
+      // Check that the proper modifiers are allowed:
       _iv.forModifiersAndVisibilityDoFirst(_abstractMav);
       _iv.forModifiersAndVisibilityDoFirst(_publicMav);
       _iv.forModifiersAndVisibilityDoFirst(_privateMav);
@@ -489,35 +579,31 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       _iv.forModifiersAndVisibilityDoFirst(_staticMav);
       
       ModifiersAndVisibility mavs = new ModifiersAndVisibility(SourceInfo.NO_INFO, 
-                                                                new String[] {"private", "static"});
-       _iv.forModifiersAndVisibilityDoFirst(mavs);
+                                                               new String[] {"private", "static"});
+      _iv.forModifiersAndVisibilityDoFirst(mavs);
       assertEquals("there should still be 0 errors", 0, errors.size());
-
+      
       //check errors:
       
       _iv.forModifiersAndVisibilityDoFirst(_finalMav);
-      assertEquals("there should now be 1 errors", 1, errors.size());
-      assertEquals("The error message should be correct for private modifier:", 
-                   "The keyword \"final\" cannot be used at the Intermediate level", errors.get(0).getFirst());
-
+//      assertEquals("there should now be 1 errors", 1, errors.size());
+//      assertEquals("The error message should be correct for private modifier:", 
+//                   "The keyword \"final\" cannot be used at the Intermediate level", errors.get(0).getFirst());
+      
       ModifiersAndVisibility mavs2 = new ModifiersAndVisibility(SourceInfo.NO_INFO, 
                                                                 new String[] {"private", "final"});
-     
+      
       _iv.forModifiersAndVisibilityDoFirst(mavs2);
-      assertEquals("There should now be 2 errors", 2, errors.size());
-      assertEquals("The error message should be correct for 1 bad, 1 good modifier:", 
-                   "The keyword \"final\" cannot be used at the Intermediate level", errors.get(1).getFirst());
-
+      assertEquals("There should still be 0 errors", 0, errors.size());
+      
       ModifiersAndVisibility mavs3 = new ModifiersAndVisibility(SourceInfo.NO_INFO, 
                                                                 new String[] {"final", "native"});
-     
-      _iv.forModifiersAndVisibilityDoFirst(mavs3);
-      assertEquals("There should now be 3 errors", 3, errors.size());
-      assertEquals("The error message should be correct for 2 bad modifiers:",
-                   "The keywords \"final\" \"native\" cannot be used at the Intermediate level", 
-                   errors.get(2).getFirst());
-
       
+      _iv.forModifiersAndVisibilityDoFirst(mavs3);
+      assertEquals("There should now be 1 errors", 1, errors.size());
+      assertEquals("The error message should be correct for 1 bad modifier:",
+                   "The keyword \"native\" cannot be used at the Intermediate level", 
+                   errors.get(0).getFirst());
     }
     
     public void testForClassDefDoFirst() {
@@ -535,19 +621,19 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       ClassDef cd1 = new ClassDef(SourceInfo.NO_INFO, _publicMav, 
                                   new Word(SourceInfo.NO_INFO, "Test"), new TypeParameter[0], JExprParser.NO_TYPE,
                                   new ReferenceType[0], new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
-
+      
       _iv.forClassDefDoFirst(cd1);
       assertEquals("there should still be 0 errors", 0, errors.size());
-       
-       //check that an error is not thrown if a class implements any interfaces.
-       ClassDef cd2 = 
-         new ClassDef(SourceInfo.NO_INFO, _publicMav, 
-                      new Word(SourceInfo.NO_INFO, "Test"), new TypeParameter[0],
-                      new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
-                      new ReferenceType[] {new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0])}, 
-                      new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
-
-                                 
+      
+      //check that an error is not thrown if a class implements any interfaces.
+      ClassDef cd2 = 
+        new ClassDef(SourceInfo.NO_INFO, _publicMav, 
+                     new Word(SourceInfo.NO_INFO, "Test"), new TypeParameter[0],
+                     new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+                     new ReferenceType[] {new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0])}, 
+                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+      
+      
       _iv.forClassDefDoFirst(cd2);
       assertEquals("there should still be 0 errors", 0, errors.size());
     }
@@ -565,10 +651,10 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       // check that an error is thrown if the FormalParameter is final
       FormalParameter fp2 = new FormalParameter(SourceInfo.NO_INFO, uvd, true);  
       _iv.forFormalParameterDoFirst(fp2);
-      assertEquals("should be one error", 1, errors.size());
-      assertEquals("The error message should be correct for a final parameter.", 
-                   "The keyword \"final\" cannot be used at the Intermediate level", 
-                   errors.getLast().getFirst());
+      assertEquals("should be no errors", 0, errors.size());
+//      assertEquals("The error message should be correct for a final parameter.", 
+//                   "The keyword \"final\" cannot be used at the Intermediate level", 
+//                   errors.getLast().getFirst());
     }
     
     public void test_NotAllowed() {
@@ -607,65 +693,67 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       ConditionalExpression ce = new ConditionalExpression(noInfo, e, e, e);
       
       BracedBody hasBitOperator = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new ExpressionStatement(SourceInfo.NO_INFO, 
-                                                                                                                      new BitwiseOrAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 5)))});
-
-      TryCatchStatement tcs = new NormalTryCatchStatement(noInfo, b, new CatchBlock[0]);
-
-     
-     si.visit(_iv);
-     assertEquals("StaticInitializer is not allowed", "Static initializers cannot be used at the Intermediate level", errors.getLast().getFirst());
-
-     ii.visit(_iv);
-     assertEquals("InnerInterfaceDef is not allowed", "Nested interfaces cannot be used at the Intermediate level", errors.getLast().getFirst());
-     
-     ic.visit(_iv);
-     assertEquals("InnerClassDef is not allowed", "Inner classes cannot be used at the Intermediate level", errors.getLast().getFirst());
-     
-     ls.visit(_iv);
-     assertEquals("Labeled Statement is not allowed", "Labeled statements cannot be used at the Intermediate level", errors.getLast().getFirst());
-
-     ss.visit(_iv);
-     assertEquals("SwitchStatement is not allowed", "Switch statements cannot be used at the Intermediate level", errors.getLast().getFirst());
-
-     ws.visit(_iv);
-     assertEquals("WhileStatement is not allowed", "While statements cannot be used at the Intermediate level", errors.getLast().getFirst());
-
-     ds.visit(_iv);
-     assertEquals("DoStatement is not allowed", "Do statements cannot be used at the Intermediate level", errors.getLast().getFirst());
-
-     fs.visit(_iv);
-     assertEquals("ForStatement is not allowed", "For statements cannot be used at the Intermediate level", errors.getLast().getFirst());
-     
-     bs.visit(_iv);
-     assertEquals("BreakStatement is not allowed", "Break statements cannot be used at the Intermediate level", errors.getLast().getFirst());
-
-     cs.visit(_iv);
-     assertEquals("ContinueStatement is not allowed", "Continue statements cannot be used at the Intermediate level", errors.getLast().getFirst());
-   
-     syncs.visit(_iv);
-     assertEquals("SynchronizedStatement is not allowed", "Synchronized statements cannot be used at the Intermediate level", errors.getLast().getFirst());
-    
-     tp.visit(_iv);
-     assertEquals("TypeParameters is not allowed", "Type Parameters cannot be used at the Intermediate level", errors.getLast().getFirst());
-
-     at.visit(_iv);
-     assertEquals("ArrayTypes is not allowed", "Arrays cannot be used at the Intermediate level", errors.getLast().getFirst());
-
-     ce.visit(_iv);
-     assertEquals("ConditionalExpression is not allowed", "Conditional expressions cannot be used at the Intermediate level", errors.getLast().getFirst());
-     
-     hasBitOperator.visit(_iv);
-      assertEquals("Bitwise operators are not allowed", "Bitwise operators cannot be used at any language level", errors.getLast().getFirst());
+                                                                                                              new BitwiseOrAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 5)))});
       
-     tcs.visit(_iv);
-     assertEquals("try-catch statements are not allowed", "A try-catch statement cannot appear here", errors.getLast().getFirst());
+      TryCatchStatement tcs = new NormalTryCatchStatement(noInfo, b, new CatchBlock[0]);
+      
+      
+      si.visit(_iv);
+      assertEquals("After visiting static initializer, errors should still be 0", 0, errors.size());
+      
+      ii.visit(_iv);
+      assertEquals("After visiting inner interface, errors should still be 0", 0, errors.size());
+      
+      ic.visit(_iv);
+      assertEquals("After visiting inner class, errors should still be 0", 0, errors.size());
+      
+      ls.visit(_iv);
+      assertEquals("After visiting labeled statment, errors should still be 0", 0, errors.size());
+      
+      ss.visit(_iv);
+      assertEquals("After visiting switch statment, errors should still be 0", 0, errors.size());
+      
+      ws.visit(_iv);
+      assertEquals("After visiting while statment, errors should still be 0", 0, errors.size());
+      
+      ds.visit(_iv);
+      assertEquals("After visiting do statment, errors should still be 0", 0, errors.size());
+      
+      fs.visit(_iv);
+      assertEquals("After visiting for statment, errors should still be 0", 0, errors.size());
+      
+      bs.visit(_iv);
+      assertEquals("After visiting break statment, errors should still be 0", 0, errors.size());
+      
+      cs.visit(_iv);
+      assertEquals("After visiting continue statment, errors should still be 0", 0, errors.size());
+      
+      syncs.visit(_iv);
+      assertEquals("After visiting synchronized statment, errors should now be 1", 1, errors.size());
+      assertEquals("SynchronizedStatement is not allowed", "Synchronized statements cannot be used at the Intermediate level", errors.getLast().getFirst());
+      
+      tp.visit(_iv);
+      assertEquals("After visiting type parameter, errors should now be 2", 2, errors.size());
+      assertEquals("TypeParameters is not allowed", "Type Parameters cannot be used at the Intermediate level", errors.getLast().getFirst());
+      
+//     at.visit(_iv);
+//     assertEquals("ArrayTypes is not allowed", "Arrays cannot be used at the Intermediate level", errors.getLast().getFirst());
+      
+//     ce.visit(_iv);
+//     assertEquals("ConditionalExpression is not allowed", "Conditional expressions cannot be used at the Intermediate level", errors.getLast().getFirst());
+      
+//     hasBitOperator.visit(_iv);
+//     assertEquals("Bitwise operators are not allowed", "Bitwise operators cannot be used at any language level", errors.getLast().getFirst());
+      
+//     tcs.visit(_iv);
+//     assertEquals("try-catch statements are not allowed", "A try-catch statement cannot appear here", errors.getLast().getFirst());
     }
     
     public void testForPrimitiveTypeDoFirst() {
       
       SourceInfo noInfo = SourceInfo.NO_INFO;
       
-     //only primative types boolean, char, int, and double are allowed at Intermediate level. 
+      //only primative types boolean, char, int, and double are allowed at Intermediate level. 
       PrimitiveType i = new PrimitiveType(noInfo, "int");
       PrimitiveType c = new PrimitiveType(noInfo, "char");
       PrimitiveType d = new PrimitiveType(noInfo, "double");
@@ -673,13 +761,13 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       
       i.visit(_iv);
       assertEquals("After visiting int, errors should still be 0", 0, errors.size());
-
+      
       c.visit(_iv);
       assertEquals("After visiting char, errors should still be 0", 0, errors.size());
-            
+      
       d.visit(_iv);
       assertEquals("After visiting double, errors should still be 0", 0, errors.size());
-
+      
       b.visit(_iv);
       assertEquals("After visiting boolean, errors should still be 0", 0, errors.size());
       
@@ -691,30 +779,26 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       PrimitiveType f = new PrimitiveType(noInfo, "float");
       
       byt.visit(_iv);
-      assertEquals("After visiting byte, errors should be 1", 1, errors.size());
-      assertEquals("After byte, error message is correct", "Only the primitive types \"int\", \"double\", \"boolean\", and \"char\" can be used at the Intermediate level", errors.getLast().getFirst());
-
+      assertEquals("After visiting byte, errors should be 0", 0, errors.size());
+      
       s.visit(_iv);
-      assertEquals("After visiting short, errors should be 2", 2, errors.size());
-      assertEquals("After short, error message is correct", "Only the primitive types \"int\", \"double\", \"boolean\", and \"char\" can be used at the Intermediate level", errors.getLast().getFirst());
-
+      assertEquals("After visiting short, errors should be 0", 0, errors.size());
+      
       l.visit(_iv);
-      assertEquals("After visiting long, errors should be 3", 3, errors.size());
-      assertEquals("After long, error message is correct", "Only the primitive types \"int\", \"double\", \"boolean\", and \"char\" can be used at the Intermediate level", errors.getLast().getFirst());
-
+      assertEquals("After visiting long, errors should be 0", 0, errors.size());
+      
       f.visit(_iv);
-      assertEquals("After visiting float, errors should be 4", 4, errors.size());
-      assertEquals("After float, error message is correct", "Only the primitive types \"int\", \"double\", \"boolean\", and \"char\" can be used at the Intermediate level", errors.getLast().getFirst());
+      assertEquals("After visiting float, errors should be 0", 0, errors.size());
     }
     
     public void test_isClassInCurrentFile() {
-     assertFalse("class not in file should return false", _iv._isClassInCurrentFile("NotInFile"));
-     _iv._classNamesInThisFile.addLast("package.MyClass");
-     assertTrue("full class name in file should return true", _iv._isClassInCurrentFile("package.MyClass"));
-     assertTrue("unqualified class name in file should return true", _iv._isClassInCurrentFile("MyClass"));
-     
-     assertFalse("partial name in file, not same class, should return false", _iv._isClassInCurrentFile("Class"));
-                
+      assertFalse("class not in file should return false", _iv._isClassInCurrentFile("NotInFile"));
+      _iv._classNamesInThisFile.addLast("package.MyClass");
+      assertTrue("full class name in file should return true", _iv._isClassInCurrentFile("package.MyClass"));
+      assertTrue("unqualified class name in file should return true", _iv._isClassInCurrentFile("MyClass"));
+      
+      assertFalse("partial name in file, not same class, should return false", _iv._isClassInCurrentFile("Class"));
+      
     }
     
     public void testCreateConstructor() {
@@ -727,10 +811,10 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       sd.setSuperClass(_sd1);
       
       MethodData md = new MethodData("ClassName", _publicMav, new TypeParameter[0], sd, 
-                                   sd.getVars().toArray(new VariableData[0]), 
-                                   new String[0], 
-                                   sd,
-                                   null);
+                                     sd.getVars().toArray(new VariableData[0]), 
+                                     new String[0], 
+                                     sd,
+                                     null);
       md.addVars(md.getParams());
       _iv.createConstructor(sd);
       
@@ -739,25 +823,25 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       //since this is the only constructor in the symbol data, all the fields should be assigned to have a value after visiting sd.
       v1 = new VariableData("i", _publicMav, SymbolData.INT_TYPE, true, sd);
       v2 = new VariableData("j", _publicMav, SymbolData.CHAR_TYPE, true, sd);
-
+      
       // We no longer do this in createConstructor
 //      assertTrue("v1 should be correct--set to true", sd.getVars().contains(v1));
 //      assertTrue("v2 should be correct--set to true", sd.getVars().contains(v2));
-                 
-
+      
+      
       
       //now test a subclass of sd:
       SymbolData subSd = new SymbolData("Subclass",_publicMav, new TypeParameter[0], null, new LinkedList<SymbolData>(), null);
       subSd.addVar(v3);
       subSd.setSuperClass(sd);
-
+      
       VariableData v1Param = new VariableData("super_i", _packageMav, SymbolData.INT_TYPE, true, null);
       VariableData v2Param = new VariableData("super_j", _packageMav, SymbolData.CHAR_TYPE, true, null);
       VariableData[] vars = {v1Param, v2Param, v3};
       MethodData md2 = new MethodData("Subclass", _publicMav, new TypeParameter[0], subSd,
                                       vars, new String[0], subSd, null);
       md2.addVars(md2.getParams());
-                
+      
       _iv.createConstructor(subSd);
       v1Param.setEnclosingData(subSd.getMethods().getFirst());
       v2Param.setEnclosingData(subSd.getMethods().getFirst());
@@ -787,13 +871,13 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     public void testCreateHashCode() {
       SymbolData sd = new SymbolData("ClassName", _publicMav, new TypeParameter[0], null, new LinkedList<SymbolData>(), null);      
       MethodData md = new MethodData("hashCode",
-                                   _publicMav, 
-                                   new TypeParameter[0], 
-                                   SymbolData.INT_TYPE, 
-                                   new VariableData[0],
-                                   new String[0], 
-                                   sd,
-                                   null);
+                                     _publicMav, 
+                                     new TypeParameter[0], 
+                                     SymbolData.INT_TYPE, 
+                                     new VariableData[0],
+                                     new String[0], 
+                                     sd,
+                                     null);
       _iv.createHashCode(sd);
       assertEquals("sd should have 1 method: hashCode()", md, sd.getMethods().getFirst());
     }
@@ -808,8 +892,8 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
                                      new String[0], 
                                      sd,
                                      null);
-                                     
-
+      
+      
       _iv.createEquals(sd);
       md.getParams()[0].setEnclosingData(sd.getMethods().getFirst());                               
       assertEquals("sd should have 1 method: equals()", md, sd.getMethods().getFirst());
@@ -819,28 +903,31 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       //check an example that's not abstract
       _iv._package = "myPackage";
       ClassDef cd0 = new ClassDef(SourceInfo.NO_INFO, _packageMav, new Word(SourceInfo.NO_INFO, "Lisa"),
-                                 new TypeParameter[0], 
+                                  new TypeParameter[0], 
                                   new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), new ReferenceType[0], 
                                   new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0])); 
       
-      
       cd0.visit(_iv);
       assertEquals("There should be no errors", 0, errors.size());
-      assertTrue("Should have resolved java.lang.Object", symbolTable.containsKey("java.lang.Object"));
-      assertFalse("Should not be a continuation", symbolTable.get("java.lang.Object").isContinuation());
-      SymbolData sd = symbolTable.get("myPackage.Lisa");
-      assertTrue("Lisa should be in _newSDs", _newSDs.containsKey(sd));
-      MethodData md2 = new MethodData("equals",
-                                   _publicMav, 
-                                   new TypeParameter[0], 
-                                   SymbolData.BOOLEAN_TYPE, 
-                                     new VariableData[] { new VariableData(_iv.getSymbolData("Object", _iv._makeSourceInfo("java.lang.Object"))) },
-                                   new String[0], 
-                                   sd,
-                                   null);
-                                   
+      assertTrue("Should have resolved java.lang.Object", 
+                 LanguageLevelConverter.symbolTable.containsKey("java.lang.Object"));
+      assertFalse("Should not be a continuation", 
+                  LanguageLevelConverter.symbolTable.get("java.lang.Object").isContinuation());
+      SymbolData sd = LanguageLevelConverter.symbolTable.get("myPackage.Lisa");
+      assertTrue("Lisa should be in _newSDs", LanguageLevelConverter._newSDs.containsKey(sd));
+      MethodData md2 = 
+        new MethodData("equals",
+                       _publicMav, 
+                       new TypeParameter[0], 
+                       SymbolData.BOOLEAN_TYPE, 
+                       new VariableData[] { new VariableData(_iv.getSymbolData("Object", 
+                                                                               _iv._makeSourceInfo("java.lang.Object"))) },
+                       new String[0], 
+                       sd,
+                       null);
+      
       md2.getParams()[0].setEnclosingData(sd.getMethods().getLast());  
-                             
+      
       assertEquals("sd's last method should be equals()", md2, sd.getMethods().getLast());
       assertEquals("sd's package should be correct", "myPackage", sd.getPackage());
       
@@ -851,9 +938,9 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
                                   new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       cd1.visit(_iv);
       assertEquals("There should be no errors", 0, errors.size());
-      assertTrue("Should have resolved java.lang.System", symbolTable.containsKey("java.lang.System"));
-      assertFalse("Should not be a continuation", symbolTable.get("java.lang.System").isContinuation());
-      sd = symbolTable.get("Bart");
+      assertTrue("Should have resolved java.lang.System", LanguageLevelConverter.symbolTable.containsKey("java.lang.System"));
+      assertFalse("Should not be a continuation", LanguageLevelConverter.symbolTable.get("java.lang.System").isContinuation());
+      sd = LanguageLevelConverter.symbolTable.get("Bart");
       
       assertEquals("There should be 3 methods", 3, sd.getMethods().size());
       
@@ -867,60 +954,58 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
                                                     new FormalParameter[0],
                                                     new ReferenceType[0], 
                                                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
-
+      
       ClassDef cd3 = new ClassDef(SourceInfo.NO_INFO, _abstractMav, new Word(SourceInfo.NO_INFO, "TestSuper2"),
                                   new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "TestCase", new Type[0]), new ReferenceType[0], 
                                   new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {cmd}));
-
-
+      
       _iv._file=new File("TestSuper2.dj0");
       _iv._importedFiles.addLast("junit.framework.TestCase");
-      symbolTable.put("junit.framework.TestCase", new SymbolData("junit.framework.TestCase"));
+      LanguageLevelConverter.symbolTable.put("junit.framework.TestCase", new SymbolData("junit.framework.TestCase"));
       cd3.visit(_iv);
       assertEquals("There should still just be no errors", 0, errors.size());
-      assertNotNull("Should have looked up TestSuper2", symbolTable.get("TestSuper2"));
+      assertNotNull("Should have looked up TestSuper2", LanguageLevelConverter.symbolTable.get("TestSuper2"));
       
-      //Check a method with void return, but name not starting with test, so it's not okay.
+      // Check a method with void return, but name not starting with test, but it's still okay.
       //This is now checked in the type checker!
       ConcreteMethodDef cmd2 = new ConcreteMethodDef(SourceInfo.NO_INFO, 
-                                                    _packageMav, 
-                                                    new TypeParameter[0], 
-                                                    new VoidReturn(SourceInfo.NO_INFO, "void"), 
-                                                    new Word(SourceInfo.NO_INFO, "uhOh"),
-                                                    new FormalParameter[0],
-                                                    new ReferenceType[0], 
-                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
-
+                                                     _packageMav, 
+                                                     new TypeParameter[0], 
+                                                     new VoidReturn(SourceInfo.NO_INFO, "void"), 
+                                                     new Word(SourceInfo.NO_INFO, "uhOh"),
+                                                     new FormalParameter[0],
+                                                     new ReferenceType[0], 
+                                                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+      
       ClassDef cd4 = new ClassDef(SourceInfo.NO_INFO, _abstractMav, new Word(SourceInfo.NO_INFO, "TestVoidNoTestMethod"),
                                   new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "junit.framework.TestCase", new Type[0]), new ReferenceType[0], 
                                   new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {cmd2}));
-
-
-
+      
+      
+      
       _iv._file=new File("TestVoidNoTestMethod.dj0");
       cd4.visit(_iv);
-
+      
       assertEquals("There should still be 0 errors", 0, errors.size());
       _iv._importedFiles.remove("junit.framework.TestCase");
       
     }
     
-    
     public void testForInterfaceDef() {
       AbstractMethodDef amd = new AbstractMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], new PrimitiveType(SourceInfo.NO_INFO, "int"),
-                                                                                               new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[0], new ReferenceType[0]);
+                                                    new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[0], new ReferenceType[0]);
       AbstractMethodDef amd2 = new AbstractMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], new PrimitiveType(SourceInfo.NO_INFO, "int"),
-                                                                                               new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[0], new ReferenceType[0]);
+                                                     new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[0], new ReferenceType[0]);
       InterfaceDef id = new InterfaceDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "id"), new TypeParameter[0], new ReferenceType[0], 
                                          new BracedBody(SourceInfo.NO_INFO, 
                                                         new BodyItemI[] {amd}));
       InterfaceDef id2 = new InterfaceDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "id2"), new TypeParameter[0], new ReferenceType[] {new ClassOrInterfaceType(SourceInfo.NO_INFO, "id", new Type[0])}, 
-                                         new BracedBody(SourceInfo.NO_INFO, 
-                                                        new BodyItemI[] {amd2}));
+                                          new BracedBody(SourceInfo.NO_INFO, 
+                                                         new BodyItemI[] {amd2}));
       SymbolData sd = new SymbolData("id", _publicMav, new TypeParameter[0], new LinkedList<SymbolData>(), null);
       sd.setIsContinuation(true);
       MethodData md = new MethodData("myMethod", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[0], new String[0], sd, amd);
-
+      
       LinkedList<SymbolData> interfaces = new LinkedList<SymbolData>();
       interfaces.addLast(sd);
       SymbolData sd2 = new SymbolData("id2", _publicMav, new TypeParameter[0], interfaces, null);
@@ -929,152 +1014,159 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       
       _iv.symbolTable.put("id", sd);
       _iv.symbolTable.put("id2", sd2);
-
+      
       id.visit(_iv);
       id2.visit(_iv);
-
+      
       assertEquals("Should be no errors", 0, errors.size());
-      assertEquals("Should return the same symbol datas: id", sd, symbolTable.get("id"));
-      assertEquals("Should return the same symbol datas:id2 ", sd2, symbolTable.get("id2"));
+      assertEquals("Should return the same symbol datas: id", sd, LanguageLevelConverter.symbolTable.get("id"));
+      assertEquals("Should return the same symbol datas:id2 ", sd2, LanguageLevelConverter.symbolTable.get("id2"));
     }
-   
-
+    
+    
     
     public void testCreateMethodData() {
       // Test one that doesn't work.
-      MethodDef mdef = new ConcreteMethodDef(SourceInfo.NO_INFO, 
-                                                    _finalMav, 
-                                                    new TypeParameter[0], 
-                                                    new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                                    new Word(SourceInfo.NO_INFO, "methodName"),
-                                                    new FormalParameter[0],
-                                                    new ReferenceType[0], 
-                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+      MethodDef mdef = new AbstractMethodDef(SourceInfo.NO_INFO, 
+                                             _privateAbstractMav, 
+                                             new TypeParameter[0], 
+                                             new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                             new Word(SourceInfo.NO_INFO, "methodName"),
+                                             new FormalParameter[0],
+                                             new ReferenceType[0]); 
       
-      MethodData mdata = new MethodData("methodName", _finalMav, new TypeParameter[0], SymbolData.INT_TYPE, 
-                                   new VariableData[0], 
-                                   new String[0],
-                                   _sd1,
-                                   null);
+      MethodData mdata = new MethodData("methodName", _privateAbstractMav, new TypeParameter[0], SymbolData.INT_TYPE, 
+                                        new VariableData[0], 
+                                        new String[0],
+                                        _sd1,
+                                        null);
       assertEquals("Should return the correct MethodData", mdata, _iv.createMethodData(mdef, _sd1));
-      assertEquals("There should be one error.", 1, errors.size());
-      assertEquals("The error message should be correct.", "The keyword \"final\" cannot be used at the Intermediate level", errors.get(0).getFirst());
+      assertEquals("There should be one errors.", 1, errors.size());
+//      assertEquals("The error message should be correct.", "The keyword \"final\" cannot be used at the Intermediate level", errors.get(0).getFirst());
       
       // Test one that does work.
-      mdef = new AbstractMethodDef(SourceInfo.NO_INFO, 
-                                   _abstractMav, 
-                                   new TypeParameter[] { new TypeParameter(SourceInfo.NO_INFO,
-                                                                           new TypeVariable(SourceInfo.NO_INFO, "T"),
-                                                                           new TypeVariable(SourceInfo.NO_INFO, "U"))},
-                                   new VoidReturn(SourceInfo.NO_INFO, "void"), 
-                                   new Word(SourceInfo.NO_INFO, "methodName"),
-                                   new FormalParameter[] {
-                                     new FormalParameter(SourceInfo.NO_INFO, 
-                                                         new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                                                             new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                                                                             new Word (SourceInfo.NO_INFO, "field1")),
-                                                         false
-                                                           ),
-                                     new FormalParameter(SourceInfo.NO_INFO, 
-                                                         new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                                                             new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                                                                             new Word (SourceInfo.NO_INFO, "field1")),
-                                                         false
-                                                           )},
-                                   new ReferenceType[] { new TypeVariable(SourceInfo.NO_INFO, "X") }
-                                   );
-       mdata = new MethodData("methodName", 
+      mdef = 
+        new AbstractMethodDef(SourceInfo.NO_INFO, 
                               _abstractMav, 
                               new TypeParameter[] { new TypeParameter(SourceInfo.NO_INFO,
                                                                       new TypeVariable(SourceInfo.NO_INFO, "T"),
-                                                                      new TypeVariable(SourceInfo.NO_INFO, "U"))}, 
-                              SymbolData.VOID_TYPE, 
-                              new VariableData[] { new VariableData("field1", _finalMav, SymbolData.DOUBLE_TYPE, true, null),
-                                new VariableData("field1", _finalMav, SymbolData.INT_TYPE, true, null) }, 
-                              new String[] { "X" },
-                              _sd1,
-                              null);
-       
-                              
-       MethodData result = _iv.createMethodData(mdef, _sd1);
-       mdata.getParams()[0].setEnclosingData(result);
-       mdata.getParams()[1].setEnclosingData(result);
-       // have to add the parameters to the vars manually
-       mdata.addVars(new VariableData[] { new VariableData("field1", _finalMav, SymbolData.DOUBLE_TYPE, true, result) });                                                          
-       assertEquals("Should return the correct MethodData", mdata, result);
-       assertEquals("There should be 2 errors.", 2, errors.size());
-       //This is now caught in the type checker.
-       //assertEquals("The second error message should be correct.", "The keyword \"void\" cannot be used at the Intermediate level", errors.get(1).getFirst());
-       assertEquals("The second error message should be correct.", "You cannot have two method parameters with the same name", errors.get(1).getFirst());
+                                                                      new TypeVariable(SourceInfo.NO_INFO, "U"))},
+                              new VoidReturn(SourceInfo.NO_INFO, "void"), 
+                              new Word(SourceInfo.NO_INFO, "methodName"),
+                              new FormalParameter[] {
+                                new FormalParameter(SourceInfo.NO_INFO, 
+                                                    new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                                                                        new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                                                                                        new Word (SourceInfo.NO_INFO, "field1")),
+                                                    false
+                                                   ),
+                                  new FormalParameter(SourceInfo.NO_INFO, 
+                                                      new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                                                                          new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                                                                          new Word (SourceInfo.NO_INFO, "field1")),
+                                                      false
+                                                     )},
+                              new ReferenceType[] { new TypeVariable(SourceInfo.NO_INFO, "X") }
+                              );
+      mdata = 
+        new MethodData("methodName", 
+                       _abstractMav, 
+                       new TypeParameter[] { new TypeParameter(SourceInfo.NO_INFO,
+                                                               new TypeVariable(SourceInfo.NO_INFO, "T"),
+                                                               new TypeVariable(SourceInfo.NO_INFO, "U"))}, 
+                       SymbolData.VOID_TYPE, 
+                       new VariableData[] { new VariableData("field1", _finalMav, SymbolData.DOUBLE_TYPE, true, null),
+                         new VariableData("field1", _finalMav, SymbolData.INT_TYPE, true, null) }, 
+                       new String[] { "X" },
+                       _sd1,
+                       null);
+      
+      
+      MethodData result = _iv.createMethodData(mdef, _sd1);
+      mdata.getParams()[0].setEnclosingData(result);
+      mdata.getParams()[1].setEnclosingData(result);
+      // have to add the parameters to the vars manually
+      mdata.addVars(new VariableData[] { new VariableData("field1", _finalMav, SymbolData.DOUBLE_TYPE, true, result) });                                                          
+      assertEquals("Should return the correct MethodData", mdata, result);
+      assertEquals("There should be 2 errors.", 2, errors.size());
+      //This is now caught in the type checker.
+      //assertEquals("The second error message should be correct.", "The keyword \"void\" cannot be used at the Intermediate level", errors.get(1).getFirst());
+      assertEquals("The second error message should be correct.", "You cannot have two method parameters with the same name", errors.get(1).getFirst());
     }
     
     public void testSimpleAnonymousClassInstantiationHelper() {
-     SimpleAnonymousClassInstantiation basic = 
-       new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, 
-                                             new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), 
-                                             new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
-                                             new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
-     _iv._package = "i.like";
-     _iv.simpleAnonymousClassInstantiationHelper(basic, _sd1);
-     assertEquals("There should be no errors", 0, errors.size());
-     SymbolData obj = symbolTable.get("java.lang.Object");
-     assertNotNull("Object should be in the symbol table", obj);
-     assertEquals("sd1 should have one inner class", 1, _sd1.getInnerClasses().size());
-     SymbolData inner = _sd1.getInnerClasses().get(0);
-     assertEquals("The inner class should have the proper name", "i.like.monkey$1", inner.getName());
-     assertEquals("The inner class should have proper outer data", _sd1, inner.getOuterData());
-     assertEquals("The inner class should have proper super class", obj, inner.getSuperClass());
-     assertEquals("The inner class should have the right package", "i.like", inner.getPackage());
-     assertEquals("The inner class should have 3 methods", 3, inner.getMethods().size());
+      SimpleAnonymousClassInstantiation basic = 
+        new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, 
+                                              new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), 
+                                              new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
+                                              new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+      _iv._package = "i.like";
+      _iv.simpleAnonymousClassInstantiationHelper(basic, _sd1);
+      assertEquals("There should be no errors", 0, errors.size());
+      SymbolData obj = LanguageLevelConverter.symbolTable.get("java.lang.Object");
+      assertNotNull("Object should be in the symbol table", obj);
+      assertEquals("sd1 should have one inner class", 1, _sd1.getInnerClasses().size());
+      SymbolData inner = _sd1.getInnerClasses().get(0);
+      assertEquals("The inner class should have the proper name", "i.like.monkey$1", inner.getName());
+      assertEquals("The inner class should have proper outer data", _sd1, inner.getOuterData());
+      assertEquals("The inner class should have proper super class", obj, inner.getSuperClass());
+      assertEquals("The inner class should have the right package", "i.like", inner.getPackage());
+      assertEquals("The inner class should have 3 methods", 3, inner.getMethods().size());
     }
-
+    
     
     public void testComplexAnonymousClassInstantiationHelper() {
-     ComplexAnonymousClassInstantiation basic = new ComplexAnonymousClassInstantiation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "java.lang.Object")),
-                                                                                new ClassOrInterfaceType(SourceInfo.NO_INFO, "Inner", new Type[0]), 
-                                                                                new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
-                                                                                new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
-
-     _iv._package = "i.like";
-     _iv.complexAnonymousClassInstantiationHelper(basic, _sd1);
-     assertEquals("There should be no errors", 0, errors.size());
-     SymbolData obj = symbolTable.get("java.lang.Object");
-     assertNotNull("Object should be in the symbol table", obj);
-     SymbolData objInner = symbolTable.get("java.lang.Object.Inner");
-     assertEquals("sd1 should have one inner class", 1, _sd1.getInnerClasses().size());
-     SymbolData inner = _sd1.getInnerClasses().get(0);
-     assertEquals("The inner class should have the proper name", "i.like.monkey$1", inner.getName());
-     assertEquals("The inner class should have proper outer data", _sd1, inner.getOuterData());
-     assertEquals("The inner class should have null as its super class", null, inner.getSuperClass());
-     assertEquals("The inner class should have the right package", "i.like", inner.getPackage());
-     assertEquals("The inner class should have 3 methods", 3, inner.getMethods().size());
+      ComplexAnonymousClassInstantiation basic = new ComplexAnonymousClassInstantiation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "java.lang.Object")),
+                                                                                        new ClassOrInterfaceType(SourceInfo.NO_INFO, "Inner", new Type[0]), 
+                                                                                        new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
+                                                                                        new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+      
+      _iv._package = "i.like";
+      _iv.complexAnonymousClassInstantiationHelper(basic, _sd1);
+      assertEquals("There should be no errors", 0, errors.size());
+      SymbolData obj = LanguageLevelConverter.symbolTable.get("java.lang.Object");
+      assertNotNull("Object should be in the symbol table", obj);
+      SymbolData objInner = LanguageLevelConverter.symbolTable.get("java.lang.Object.Inner");
+      assertEquals("sd1 should have one inner class", 1, _sd1.getInnerClasses().size());
+      SymbolData inner = _sd1.getInnerClasses().get(0);
+      assertEquals("The inner class should have the proper name", "i.like.monkey$1", inner.getName());
+      assertEquals("The inner class should have proper outer data", _sd1, inner.getOuterData());
+      assertEquals("The inner class should have null as its super class", null, inner.getSuperClass());
+      assertEquals("The inner class should have the right package", "i.like", inner.getPackage());
+      assertEquals("The inner class should have 3 methods", 3, inner.getMethods().size());
     }
     
     public void testForVariableDeclaration() {
       //make sure that if forVariableDeclaration is called with a AnonymousClassInstantiation, the symboldata is only added once.
       //this is to make sure an old bug stays fixed.
-     SimpleAnonymousClassInstantiation basic = new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), 
-                                                                        new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
-                                                                        new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
-    
-
-     
-     VariableDeclarator[] d1 = {new InitializedVariableDeclarator(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), new Word(SourceInfo.NO_INFO, "b"), basic)};
-     VariableDeclaration vd1 = new VariableDeclaration(SourceInfo.NO_INFO,_publicMav, d1); 
-     
-     ClassBodyIntermediateVisitor cbiv = new ClassBodyIntermediateVisitor(_sd1, _iv._file, _iv._package, _iv._importedFiles, _iv._importedPackages, _iv._classNamesInThisFile, _iv.continuations);
-     
-     vd1.visit(cbiv);
-     assertEquals("Should be 1 inner class of _sd1", 1, _sd1.getInnerClasses().size());
-     
+      SimpleAnonymousClassInstantiation basic = new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), 
+                                                                                      new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
+                                                                                      new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+      
+      
+      
+      VariableDeclarator[] d1 = {new InitializedVariableDeclarator(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), new Word(SourceInfo.NO_INFO, "b"), basic)};
+      VariableDeclaration vd1 = new VariableDeclaration(SourceInfo.NO_INFO,_publicMav, d1); 
+      
+      ClassBodyIntermediateVisitor cbiv = 
+        new ClassBodyIntermediateVisitor(_sd1, 
+                                         _iv._file, 
+                                         _iv._package,
+                                         _iv._importedFiles, 
+                                         _iv._importedPackages, 
+                                         _iv._classNamesInThisFile, 
+                                         _iv.continuations);
+      
+      vd1.visit(cbiv);
+      assertEquals("Should be 1 inner class of _sd1", 1, _sd1.getInnerClasses().size());
+      
     }
     
     public void testForPackageStatementDoFirst() {
       PackageStatement ps = new PackageStatement(SourceInfo.NO_INFO, new CompoundWord(SourceInfo.NO_INFO, new Word[0]));
       ps.visit(_iv);
-      assertEquals("Should be 1 error", 1, errors.size());
-      assertEquals("Error message should be correct", "Package statements cannot be used at the Intermediate level.  All Intermediate level classes and interfaces are assumed to be in the default package", errors.getLast().getFirst());
-  }
-    
+      assertEquals("Should be no errors", 0, errors.size());
+//      assertEquals("Error message should be correct", "Package statements cannot be used at the Intermediate level.  All Intermediate level classes and interfaces are assumed to be in the default package", errors.getLast().getFirst());
+    }
   }
 }

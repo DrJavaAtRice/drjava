@@ -78,14 +78,10 @@ public class ArrayData extends SymbolData {
     
     //All arrays implement java.lang.Cloneable and java.io.Serializable
     SymbolData result = llv.getSymbolData("java.lang.Cloneable", si);
-    if (result != null) {
-      addInterface(result);
-    }
+    if (result != null) { addInterface(result); }
     
     result = llv.getSymbolData("java.io.Serializable", si);
-    if (result != null) {
-      addInterface(result);
-    }
+    if (result != null) { addInterface(result); }
     
     //And, since they implement Cloneable, all arrays overwrite the clone method so that it does not throw exceptions
     addMethod(new MethodData("clone", 
@@ -95,16 +91,12 @@ public class ArrayData extends SymbolData {
                              new VariableData[0],
                              new String[0], //Doesn't throw any exceptions!
                              this,
-                             null));
-                             
+                             null));                        
     setIsContinuation(false);
-
   }
 
   /*@return the package of the element type*/
-  public String getPackage() {
-    return _elementType.getPackage();
-  }
+  public String getPackage() { return _elementType.getPackage(); }
   
   /*Set the package of the element type to be the specified package:
    * @param s  The package to use*/
@@ -255,19 +247,19 @@ public class ArrayData extends SymbolData {
     private LanguageLevelVisitor llv;
     private SourceInfo si;
     
-    public ArrayDataTest() {
-      this("");
-    }
-    public ArrayDataTest(String name) {
-      super(name);
-    }
+    public ArrayDataTest() { this(""); }
+    public ArrayDataTest(String name) { super(name); }
     
     public void setUp() {
-      llv = new LanguageLevelVisitor(new File(""), "", new LinkedList<String>(), new LinkedList<String>(),
-                                                          new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
-                                                          new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+      llv = new LanguageLevelVisitor(new File(""), 
+                                     "", 
+                                     new LinkedList<String>(), 
+                                     new LinkedList<String>(),
+                                     new LinkedList<String>(), 
+                                     new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       
-      LanguageLevelConverter.symbolTable = llv.symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable.clear();
+      LanguageLevelConverter._newSDs.clear();
       si = SourceInfo.NO_INFO;
       SymbolData e = new SymbolData("elementType");
       e.setIsContinuation(false);

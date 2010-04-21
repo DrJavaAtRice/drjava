@@ -41,7 +41,7 @@ import edu.rice.cs.javalanglevels.parser.JExprParser;
 import java.util.*;
 import java.io.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.iter.*;
 
 import junit.framework.TestCase;
 
@@ -69,10 +69,14 @@ public class ClassBodyTypeChecker extends Bob {
    * @param vars  A list of the variable datas that can be seen and have been given a value before this context
    * @param thrown  The exceptions that are thrown
    */
-  public ClassBodyTypeChecker(SymbolData sd, File file, String packageName, LinkedList<String> importedFiles, LinkedList<String> importedPackages, LinkedList<VariableData> vars, LinkedList<Pair<SymbolData, JExpression>> thrown) {
+  public ClassBodyTypeChecker(SymbolData sd, File file, String packageName, LinkedList<String> importedFiles, 
+                              LinkedList<String> importedPackages, LinkedList<VariableData> vars, 
+                              LinkedList<Pair<SymbolData, JExpression>> thrown) {
     super(sd, file, packageName, importedFiles, importedPackages, vars, thrown);
+    if (sd == null) throw new RuntimeException("SymbolData is null in new ClassBodyTypeChecker operation");
     _symbolData = sd;
     hasConstructor = false;
+    assert _vars == vars;
     
     _vars.addAll(sd.getVars());
     
@@ -392,9 +396,12 @@ public class ClassBodyTypeChecker extends Bob {
       _sd5 = new SymbolData("");
       _sd6 = new SymbolData("cebu");
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
-      _cbbtc = new ClassBodyTypeChecker(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
+      LanguageLevelConverter.symbolTable.clear();
+      LanguageLevelConverter._newSDs.clear();
+      _cbbtc = 
+        new ClassBodyTypeChecker(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
+                                 new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
       _cbbtc._importedPackages.addFirst("java.lang");
     }
     

@@ -41,7 +41,7 @@ import edu.rice.cs.javalanglevels.parser.JExprParser;
 import java.util.*;
 import java.io.File;
 import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.iter.*;
 
 import junit.framework.TestCase;
 
@@ -262,8 +262,8 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
       _lvtc = new LValueWithValueTypeChecker(new Bob(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>()));
       _ta = _lvtc._testAssignableInstance;
       _lvtc._bob.errors = new LinkedList<Pair<String, JExpressionIF>>();
-      LanguageLevelConverter.symbolTable = _lvtc._bob.symbolTable = new Symboltable();
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
+      LanguageLevelConverter.symbolTable.clear();
+//      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
       _lvtc._bob._importedPackages.addFirst("java.lang");
     }
     
@@ -567,9 +567,16 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
       
     
     public void testForArrayAccess() {
-      ArrayData intArray = new ArrayData(SymbolData.INT_TYPE, 
-                                   new LanguageLevelVisitor(_lvtc._bob._file, _lvtc._bob._package, _lvtc._bob._importedFiles, _lvtc._bob._importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>()),
-                                   SourceInfo.NO_INFO);
+      ArrayData intArray = 
+        new ArrayData(SymbolData.INT_TYPE, 
+                      new LanguageLevelVisitor(_lvtc._bob._file,
+                                               _lvtc._bob._package, 
+                                               _lvtc._bob._importedFiles, 
+                                               _lvtc._bob._importedPackages, 
+                                               new LinkedList<String>(), 
+                                               new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
+                                               new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>()),
+                      SourceInfo.NO_INFO);
       VariableData variable1 = new VariableData("variable1", _publicMav, intArray, true, _ta._data);
       _ta._vars.add(variable1);
       

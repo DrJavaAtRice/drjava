@@ -48,7 +48,7 @@ public class Symboltable extends Hashtable<String, SymbolData> {
   /** Overrides put function of hash table.  If the specified SymbolData is already in
     * the table, simply update its fields.  Otherwise, do a normal put operation.
     */
-  public SymbolData put (String name, SymbolData sd) {
+  public SymbolData put(String name, SymbolData sd) {
     SymbolData inTable = this.get(sd.getName());
     if (inTable != null) {
       /**Replace all its fields with those of sd.*/
@@ -67,7 +67,5 @@ public class Symboltable extends Hashtable<String, SymbolData> {
     return sd;
   }
   
-  public SymbolData get (String name) {
-    return super.get(name);
-  }
+  public SymbolData get (String name) { return super.get(name); }
 }

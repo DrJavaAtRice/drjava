@@ -200,54 +200,7 @@ public class AdvancedLevelTest extends TestCase {
         
   }
 
-  /** Test that if a package and a class have the same name, an error is given. */
-  public void testPackageError() {
-    _log.log("Running testPackageError");
-    String base = dir1.getAbsolutePath();
-    dir1 = new File(base + "/shouldBreak/noBreak");
-    dir2 = new File(base + "/shouldBreak");
-        
-    File[] files1 = dir1.listFiles(dj2Filter);
-    File[] files2 = dir2.listFiles(dj2Filter);
-    
-    int len1 = files1.length;
-    int len2 = files2.length;
-    File[] testFiles = new File[len1 + len2];
-    for (int i = 0; i < len1; i++) { testFiles[i] = files1[i]; }
-    for (int i = 0; i < len2; i++) { testFiles[len1 + i] = files2[i]; }
 
-    LanguageLevelConverter llc = new LanguageLevelConverter();
-    Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-    result = llc.convert(testFiles, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
-    assertTrue("should be parse exceptions or visitor exceptions", !result.getFirst().isEmpty() || !result.getSecond().isEmpty());
-  }
-
-  /** Test a set of files that have various Advanced Level errors.  See the files themselves for a description of the errors. */
-  public void testShouldBeErrors() { 
-    _log.log("Running testShouldBeErrors");
-    dir1 = new File(dir1.getAbsolutePath() + "/shouldBreak");
-    File[] testFiles = dir1.listFiles(new FileFilter() {
-      public boolean accept(File pathName) {
-        return pathName.getAbsolutePath().endsWith(".dj2");
-      }});
-    
-    Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-    boolean accum = true;
-    for (int i = 0; i<testFiles.length; i++) {
-      // need to create a new LLC for every file we compile as a test
-      // otherwise the failures from the previous file will count towards the current
-      LanguageLevelConverter llc = new LanguageLevelConverter();
-      LanguageLevelVisitor._errorAdded = false;
-      result = llc.convert(new File[]{testFiles[i]}, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
-      boolean err = !result.getFirst().isEmpty() || !result.getSecond().isEmpty();
-      if (!err) {
-        System.out.println("Unexpectedly converted without errors: "+testFiles[i]);
-      }
-      accum &= err;
-    }
-    assertTrue("should be parse exceptions or visitor exceptions", accum);
-  }
-  
   
   /** This file used to have a NullPointer Exception in it because of a bug in the code.  Leave the test in so that the bug
     * never gets reintroduced.

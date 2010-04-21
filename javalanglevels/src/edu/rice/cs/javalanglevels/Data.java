@@ -110,18 +110,13 @@ public abstract class Data {
   }
 
      
-  /** Set the vars list to the specified linked list of vars.
-    * These are the variables that are defined in the scope of this data.
-    */
-  void setVars(LinkedList<VariableData> vars) {
-    _vars = vars;
-  }
+  /** Set vars to the specified linked list of vars, the variables that are defined in the scope of this data. */
+  void setVars(LinkedList<VariableData> vars) { _vars = vars; }
   
-  /** 
-   * Finds and returns the particular VariableData declared in this Data's context.
-   * @param name  Name of the variable
-   * @return  The VariableData with the matching name or null if it was not found.
-   */
+  /**  Finds and returns the particular VariableData declared in this Data's context.
+    * @param name  Name of the variable
+    * @return  The VariableData with the matching name or null if it was not found.
+    */
   public VariableData getVar(String name) {
     Iterator<VariableData> iter = _vars.iterator();
     while (iter.hasNext()) {
@@ -134,18 +129,12 @@ public abstract class Data {
   }
   
   /**@return the list of variables declared in the scope of this data.*/
-  public LinkedList<VariableData> getVars() {
-    return _vars;
-  }
+  public LinkedList<VariableData> getVars() { return _vars; }
   
   /** @return the list of enclosing data. */
-  public LinkedList<Data> getEnclosingData() {
-    return _enclosingData;
-  }
+  public LinkedList<Data> getEnclosingData() { return _enclosingData; }
   
-  /** Add to the front because we want the outer data
-   *  to be the last thing in the list.
-   */
+  /** Add to the front because we want the outer data to be the last thing in the list. */
   public void addEnclosingData(Data enclosingData) {
     if (!_enclosingData.contains(enclosingData)) {
       _enclosingData.addFirst(enclosingData);
@@ -192,23 +181,19 @@ public abstract class Data {
     }
   }
   
-  /**
-   * Add the array of variable datas to the list of variables defined in this scope, unless
-   * a name has already been used.  Return true if all variables were added successfully, 
-   * false otherwise.
-   * @param vars  The VariableData[] that we want to add.
-   * @return  true if all VariableDatas were added successfully, false otherwise.
-   */
+  /** Add the array of variable datas to the list of variables defined in this scope, unless a name has already been
+    * used.  Return true if all variables were added successfully, false otherwise.
+    * @param vars  The VariableData[] that we want to add.
+    * @return  true if all VariableDatas were added successfully, false otherwise.
+    */
   public boolean addVars(VariableData[] vars) {
     boolean success = true;
     for (int i = 0; i < vars.length; i++) {
-      if (vars[i]==null) {System.out.println("Var " + i + " was null!");}
+      if (vars[i] == null) {System.out.println("Var " + i + " was null!");}
       if (!_repeatedName(vars[i])) {
         _vars.addLast(vars[i]);
       }
-      else {
-        success = false;
-      }
+      else success = false;
     }
     return success;
   }
@@ -341,7 +326,7 @@ public abstract class Data {
     * visibile inner classes or interfaces are found, but one or more that are not visible are found, one of the
     * non-visibile ones will be returned. This means that checkAccessibility should be called after this method.
     * @param name  The name of the inner class or interface to find.
-    * @return  The SymbolData for the matching inner class or interface or null if there isn't one.
+    * @return  The SymbolData for the matching inner class or interface is null if there isn't one.
     */
   public SymbolData getInnerClassOrInterface(String name) {
     int firstIndexOfDot = name.indexOf(".");
@@ -367,9 +352,8 @@ public abstract class Data {
       else {privateResult = result; result = null;}
     }
     
-    
-    //call this method recursively on the outer data
-    //anything our outer class can see we can see, so there is no reason to check accessibility here
+    // Call this method recursively on the outer data
+    // anything our outer class can see we can see, so there is no reason to check accessibility here
     if (_outerData != null) {
       result = _outerData.getInnerClassOrInterface(name);
       if (result != null) {return result;}
@@ -378,15 +362,12 @@ public abstract class Data {
     return privateResult;
   }
   
-  
-  /**
-   * Takes in a name and tries to match it with one of this Data's inner classes or
-   * inner interfaces.  The input string is a name relative to this SymbolData
-   * (such as B.C to request the class A.B.C from class A) and may be delimited by '.' or '$'.
-   * This method is overwritten in SymbolData to handle the fact that classes must check their super classes and interfaces and
-   * interfaces must check their super interfaces.
-   * @return  The SymbolData for the matching inner class or interface or null if there isn't one.
-   */
+  /** Takes in a name and tries to match it with one of this Data's inner classes or inner interfaces.  The input string
+    * is a name relative to this SymbolData (such as B.C to request the class A.B.C from class A) and may be delimited 
+    * by '.' or '$'. This method is overridden in SymbolData (but not other concrete Data classes) to handle the fact 
+    * that classes must check their super classes and interfaces and interfaces must check their super interfaces.
+    * @return  The SymbolData for the matching inner class or interface or null if there isn't one.
+    */
   protected SymbolData getInnerClassOrInterfaceHelper(String nameToMatch, int firstIndexOfDot) {
     Iterator<SymbolData> iter = innerClassesAndInterfacesIterator();
     while (iter.hasNext()) {
@@ -395,8 +376,7 @@ public abstract class Data {
 
       sdName = LanguageLevelVisitor.getUnqualifiedClassName(sdName);
       if (firstIndexOfDot == -1) {
-        if (sdName.equals(nameToMatch))
-          return sd;
+        if (sdName.equals(nameToMatch)) return sd;
       }
       else {
         if (sdName.equals(nameToMatch.substring(0, firstIndexOfDot))) {

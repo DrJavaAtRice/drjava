@@ -41,7 +41,7 @@ import edu.rice.cs.javalanglevels.parser.JExprParser;
 import java.util.*;
 import java.io.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.iter.*;
 
 import junit.framework.TestCase;
 
@@ -175,31 +175,37 @@ public class InterfaceBodyTypeChecker extends Bob {
       _sd5 = new SymbolData("");
       _sd6 = new SymbolData("cebu");
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
-      _ibbtc = new InterfaceBodyTypeChecker(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
+      LanguageLevelConverter.symbolTable.clear();
+      LanguageLevelConverter._newSDs.clear();
+      _ibbtc = 
+        new InterfaceBodyTypeChecker(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(),
+                                     new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
       _ibbtc._importedPackages.addFirst("java.lang");
     }
     
     public void testForUninitializedVariableDeclaratorOnly() {
       VariableData vd1 = new VariableData("Mojo", _publicMav, SymbolData.INT_TYPE, false, _sd1);
       _sd1.addVar(vd1);
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                                                new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                                                                new Word(SourceInfo.NO_INFO, "Mojo"));
+      UninitializedVariableDeclarator uvd = 
+        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                            new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                            new Word(SourceInfo.NO_INFO, "Mojo"));
       uvd.visit(_ibbtc);
       _ibbtc.forUninitializedVariableDeclaratorOnly(uvd, SymbolData.INT_TYPE, null);
       assertEquals("There should be one error", 1, errors.size());
-      assertEquals("The error message should be correct", "All fields in interfaces must be initialized", errors.get(0).getFirst());
+      assertEquals("The error message should be correct", "All fields in interfaces must be initialized", 
+                   errors.get(0).getFirst());
     }
     
     public void testForInitializedVariableDeclaratorOnly() {
       VariableData vd1 = new VariableData("Mojo", _publicMav, SymbolData.INT_TYPE, false, _sd1);
       _sd1.addVar(vd1);
-      InitializedVariableDeclarator ivd = new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                                            new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                                                            new Word(SourceInfo.NO_INFO, "Mojo"), 
-                                                                            new IntegerLiteral(SourceInfo.NO_INFO, 1));
+      InitializedVariableDeclarator ivd = 
+        new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                          new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                          new Word(SourceInfo.NO_INFO, "Mojo"), 
+                                          new IntegerLiteral(SourceInfo.NO_INFO, 1));
       ivd.visit(_ibbtc);
       assertEquals("There should be no errors.", 0, errors.size());
       assertTrue("_vars should contain Mojo.", _ibbtc._vars.contains(vd1));
@@ -212,7 +218,8 @@ public class InterfaceBodyTypeChecker extends Bob {
         fail("Should have thrown a RuntimeException because there's no field named Santa's Little Helper.");
       }
       catch (RuntimeException re) {
-        assertEquals("The error message should be correct.", "Internal Program Error: The field or variable Santa's Little Helper was not found in this block.  Please report this bug.", re.getMessage());
+        assertEquals("The error message should be correct.", 
+                     "Internal Program Error: The field or variable Santa's Little Helper was not found in this block.  Please report this bug.", re.getMessage());
       }
     }
     
@@ -220,24 +227,27 @@ public class InterfaceBodyTypeChecker extends Bob {
       FormalParameter[] fps = new FormalParameter[] {
         new FormalParameter(SourceInfo.NO_INFO, 
                             new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                              new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                                              new Word (SourceInfo.NO_INFO, "field1")),
+                                                                new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                                                                new Word (SourceInfo.NO_INFO, "field1")),
                             false),
         new FormalParameter(SourceInfo.NO_INFO, 
                             new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                              new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
-                                                              new Word (SourceInfo.NO_INFO, "field2")),
+                                                                new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
+                                                                new Word (SourceInfo.NO_INFO, "field2")),
                             false)};
-      ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NO_INFO, 
-                                                    _packageMav, 
-                                                    new TypeParameter[0], 
-                                                    new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                                    new Word(SourceInfo.NO_INFO, "methodName"),
-                                                    fps,
-                                                    new ReferenceType[0], 
-                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {
+      
+      ConcreteMethodDef cmd = 
+        new ConcreteMethodDef(SourceInfo.NO_INFO, 
+                              _packageMav, 
+                              new TypeParameter[0], 
+                              new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                              new Word(SourceInfo.NO_INFO, "methodName"),
+                              fps,
+                              new ReferenceType[0], 
+                              new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {
         new ValueReturnStatement(SourceInfo.NO_INFO, 
                                  new IntegerLiteral(SourceInfo.NO_INFO, 5))}));
+      
       MethodData md = new MethodData("methodName", 
                                      _packageMav, 
                                      new TypeParameter[0], 
@@ -256,8 +266,6 @@ public class InterfaceBodyTypeChecker extends Bob {
       assertEquals("There should be one error.", 1, errors.size());
       assertEquals("The error message should be correct", "Concrete method definitions cannot appear in interfaces", errors.get(0).getFirst());
     }
-    
-
     
     public void testForTypeOnly() {
       Type t = new PrimitiveType(SourceInfo.NO_INFO, "double");
@@ -286,7 +294,9 @@ public class InterfaceBodyTypeChecker extends Bob {
       t = new ClassOrInterfaceType(SourceInfo.NO_INFO, "Adam.Wulf", new Type[0]);
       t.visit(_ibbtc);
       assertEquals("There should be one error", 1, errors.size());
-      assertEquals("The error message should be correct", "The class or interface Adam.Wulf is private and cannot be accessed from " + _ibbtc._symbolData.getName(),
+      assertEquals("The error message should be correct", 
+                   "The class or interface Adam.Wulf is private and cannot be accessed from " + 
+                     _ibbtc._symbolData.getName(),
                    errors.get(0).getFirst());
       
       sd.setMav(_privateMav);
@@ -294,7 +304,8 @@ public class InterfaceBodyTypeChecker extends Bob {
       t = new ClassOrInterfaceType(SourceInfo.NO_INFO, "Adam.Wulf", new Type[0]);
       t.visit(_ibbtc);
       assertEquals("There should be two errors", 2, errors.size());
-      assertEquals("The error message should be correct", "The class or interface Adam is private and cannot be accessed from " + _ibbtc._symbolData.getName(),
+      assertEquals("The error message should be correct", 
+                   "The class or interface Adam is private and cannot be accessed from " + _ibbtc._symbolData.getName(),
                    errors.get(1).getFirst());
     }
   }

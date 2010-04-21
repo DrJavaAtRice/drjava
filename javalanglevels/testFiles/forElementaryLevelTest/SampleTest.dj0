@@ -1,0 +1,12 @@
+import junit.framework.TestCase;
+/** Sampe TestCase class. */
+class SampleTest extends TestCase {
+  
+  /** Tests the insert method. */
+  void testJUnitLibraryCalls() {
+    
+    assertEquals("String test", "foo", "foo");
+    assertEquals("int test", 5, 5);
+    assertTrue("true test", true);
+  }
+}

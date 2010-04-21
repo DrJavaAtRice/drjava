@@ -38,6 +38,8 @@ package edu.rice.cs.javalanglevels;
 
 import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.parser.*;
+import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.iter.IterUtil;
 import java.util.*;
 import java.io.*;
 
@@ -61,7 +63,9 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
     * @param classDefsInThisFile  A list of the classes that are defined in the source file
     * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need to be resolved
     */
-  public InterfaceBodyIntermediateVisitor(SymbolData sd, File file, String packageName, 
+  public InterfaceBodyIntermediateVisitor(SymbolData sd, 
+                                          File file, 
+                                          String packageName, 
                                           LinkedList<String> importedFiles, 
                                           LinkedList<String> importedPackages, 
                                           LinkedList<String> classDefsInThisFile, 
@@ -191,10 +195,18 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
       _sd1 = new SymbolData("i.like.monkey");
 
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable.clear();
+      LanguageLevelConverter._newSDs.clear();
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.make(new File("lib/buildlib/junit.jar")));
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       _hierarchy = new Hashtable<String, TypeDefBase>();
-      _ibiv = new InterfaceBodyIntermediateVisitor(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+      _ibiv = 
+        new InterfaceBodyIntermediateVisitor(_sd1, 
+                                             new File(""), 
+                                             "", 
+                                             new LinkedList<String>(), 
+                                             new LinkedList<String>(), new LinkedList<String>(), 
+                                             new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       _ibiv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
       _ibiv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       _ibiv._resetNonStaticFields();

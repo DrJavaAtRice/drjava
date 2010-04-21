@@ -44,7 +44,7 @@ import java.io.*;
 import junit.framework.TestCase;
 
 /** Language Level Visitor that represents the Intermediate Language Level.  Enforces constraints during the
-  * first walk of the AST (checking for langauge specific errors and building the symbol table).
+  * first walk of the AST (checking for language specific errors and building the symbol table).
   * This class enforces things that are common to all contexts reachable within a method body or other body 
   * (not class or interface body) at the Intermediate Language Level). 
   */
@@ -70,7 +70,12 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
                                      LinkedList<String> classDefsInThisFile, 
                                      Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations,
                                      LinkedList<String> innerClassesToBeParsed) {
-    super(file, packageName, importedFiles, importedPackages, classDefsInThisFile, continuations);
+    super(file, 
+          packageName, 
+          importedFiles, 
+          importedPackages, 
+          classDefsInThisFile, 
+          continuations);
     _bodyData = bodyData;
     _innerClassesToBeParsed = innerClassesToBeParsed;
   }
@@ -123,27 +128,33 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     return forCatchBlockOnly(that);
   }
   
-  /*Add the variables that were declared to the body data and make sure that no two
-   * variables have the same name.*/
+  /** Adds the variables that were declared to the body data and make sure that no two
+    * variables have the same name.*/
   public Void forVariableDeclarationOnly(VariableDeclaration that) {
-    if (!_bodyData.addFinalVars(_variableDeclaration2VariableData(that, _bodyData))) {
+    if (! _bodyData.addFinalVars(_variableDeclaration2VariableData(that, _bodyData))) {
+      System.err.println("Generating duplicate variable error");
       _addAndIgnoreError("You cannot have two variables with the same name.", that);
     }
     return null;
   }
   
-  /**Override method in IntermediateVisitor that throws an error here.*/
+  /** Override method in IntermediateVisitor that throws an error here.*/
   public Void forTryCatchStatementDoFirst(TryCatchStatement that) { return null; /*  No errors to throw here. */ }
   
-  /* Make sure that no modifiers appear before the InnerClassDef, and then delegate.*/
-//  public void forInnerClassDef(InnerClassDef that) {
-//    if (_bodyData.hasModifier("static")) {
-//      _addError("Static classes can not be declared inside of methods", that);
-//    }
-//    else {
-//      handleInnerClassDef(that, _bodyData, getQualifiedClassName(_bodyData.getSymbolData().getName()) + "." + _bodyData.getSymbolData().preincrementLocalClassNum() + that.getName().getText());
-//    }
-//  }
+  /** Process a local inner class definition */
+  public Void forInnerClassDef(InnerClassDef that) {
+    System.err.println("BBIV.forInnerClassDef called on " + that.getName());
+    handleInnerClassDef(that, _bodyData, getQualifiedClassName(_bodyData.getSymbolData().getName()) + "." + 
+                        _bodyData.getSymbolData().preincrementLocalClassNum() + that.getName().getText());
+    return null;
+  }
+  
+   /** Process a local inner interface definition */
+  public Void forInnerInterfaceDef(InnerInterfaceDef that) {
+    handleInnerInterfaceDef(that, _bodyData, getQualifiedClassName(_bodyData.getSymbolData().getName()) + "." + 
+                        _bodyData.getSymbolData().preincrementLocalClassNum() + that.getName().getText());
+    return null;
+  }
 
   /** Delegate to method in LLV. */
   public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
@@ -176,14 +187,14 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     VariableData[] vds = llVariableDeclaration2VariableData(vd, enclosingData);
     for (int i = 0; i < vds.length; i++) {
       if (vds[i].getMav().getModifiers().length > 0) {
-        StringBuffer s = new StringBuffer("the keyword(s) ");
+        StringBuilder s = new StringBuilder("the keyword(s) ");
         String[] modifiers = vds[i].getMav().getModifiers();
-        for (int j = 0; j<modifiers.length; j++) {s.append("\"" + modifiers[j] + "\" ");}
-        _addAndIgnoreError("You cannot use " + s + "to declare a local variable at the Intermediate level", vd);
+        for (String m: modifiers) { if (! m.equals("final")) s.append("\"" + m + "\" ");}
+        _addAndIgnoreError("You cannot use " + s + "to declare a local variable", vd);
       }
       vds[i].setFinal();
-
     }
+//    System.err.println("Return VariableDatas " + vds);
     return vds;
   }
   
@@ -215,7 +226,8 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
                                    null);
 
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable.clear();
+      LanguageLevelConverter._newSDs.clear();
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       _hierarchy = new Hashtable<String, TypeDefBase>();
       _bbv = 

@@ -64,9 +64,19 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
    * @param classDefsInThisFile  A list of the classes that are defined in the source file
    * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need to be resolved
    */
-  public ClassBodyIntermediateVisitor(SymbolData sd, File file, String packageName, LinkedList<String> importedFiles, 
-                                  LinkedList<String> importedPackages, LinkedList<String> classDefsInThisFile, Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
-    super(file, packageName, importedFiles, importedPackages, classDefsInThisFile, continuations);    
+  public ClassBodyIntermediateVisitor(SymbolData sd, 
+                                      File file, 
+                                      String packageName, 
+                                      LinkedList<String> importedFiles, 
+                                      LinkedList<String> importedPackages, 
+                                      LinkedList<String> classDefsInThisFile, 
+                                      Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
+    super(file, 
+          packageName, 
+          importedFiles, 
+          importedPackages, 
+          classDefsInThisFile, 
+          continuations);    
     _classData = sd;
   }
   
@@ -75,7 +85,6 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     _addError("Statements cannot appear outside of method bodies", that);
     return null;
   }
-  
   
   /* Make sure that this concrete method def is not declared to be abstract or static. */
   public Void forConcreteMethodDefDoFirst(ConcreteMethodDef that) {
@@ -87,28 +96,28 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
         _addError("Methods that have a braced body cannot be declared \"abstract\"", that);
         break;
       }
-      else if (modifiers[i].equals("static")) {
-        _addError("Static methods cannot be used at the Intermediate level", that);
-        break;
-      }
+//      else if (modifiers[i].equals("static")) {
+//        _addError("Static methods cannot be used at the Intermediate level", that);
+//        break;
+//      }
     }
     return super.forConcreteMethodDefDoFirst(that);
   }
   
-  /*Make sure that this abstract method def is declared to be abstract*/
+  /* Make sure that this abstract method def is declared to be abstract*/
   public Void forAbstractMethodDefDoFirst(AbstractMethodDef that) {
-    if (!_classData.hasModifier("abstract")) {
+    if (! _classData.hasModifier("abstract")) {
       _addError("Abstract methods can only be declared in abstract classes", that);
     }
-    ModifiersAndVisibility mav = that.getMav();
-    String[] modifiers = mav.getModifiers();
-    // Concrete methods can now be public, private, protected at the Intermediate level.  They still cannot be static.
-    for (int i = 0; i < modifiers.length; i++) {
-      if (modifiers[i].equals("static")) {
-        _addError("Static methods cannot be used at the Intermediate level", that);
-        break;
-      }
-    }
+//    ModifiersAndVisibility mav = that.getMav();
+//    String[] modifiers = mav.getModifiers();
+//    // Concrete methods can now be public, private, protected at the Intermediate level.  They still cannot be static.
+//    for (int i = 0; i < modifiers.length; i++) {
+//      if (modifiers[i].equals("static")) {
+//        _addError("Static methods cannot be used at the Intermediate level", that);
+//        break;
+//      }
+//    }
     return super.forAbstractMethodDefDoFirst(that);
   }
 
@@ -118,32 +127,39 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     return null;
   }
     
-  /* Convert the Variable declartaion to variable datas.  Then, make sure that all
-   * static fields are initialized and that no fields are declared to be abstract.
-   * Finally, add the variable datas to the symbol data, and give an error if
+  /* Convert the Variable declartaion to variable datas.  Then, make sure that all static fields are initialized and 
+   * that no fields are declared to be abstract. Finally, add the variable datas to the symbol data, and give an error if
    * two fields have the same names */
   public Void forVariableDeclarationOnly(VariableDeclaration that) {
     VariableData[] vds = _variableDeclaration2VariableData(that, _classData);
-    //make sure that none of the static fields are uninitialized:
+    // make sure that every non-static field is private and no static field are uninitialized:
     LinkedList<VariableData> vdsList = new LinkedList<VariableData>();
-    for (int i = 0; i<vds.length; i++) {
-      if (vds[i].hasModifier("static") && (that.getDeclarators()[i] instanceof UninitializedVariableDeclarator)) {
+    for (int i = 0; i < vds.length; i++) {
+      if (! vds[i].isStatic()) vds[i].setPrivate();
+      else if (that.getDeclarators()[i] instanceof UninitializedVariableDeclarator) {  
         _addAndIgnoreError("All static fields must be initialized", that);
       }
-      else if (!vds[i].hasModifier("static") && (that.getDeclarators()[i] instanceof InitializedVariableDeclarator)) {
-        _addAndIgnoreError("Only static fields may be initialized outside of a constructor at the Intermediate level", that);
-      }
+//      else if (!vds[i].hasModifier("static") && (that.getDeclarators()[i] instanceof InitializedVariableDeclarator)) {
+//        _addAndIgnoreError("Only static fields may be initialized outside of a constructor at the Intermediate level", that);
+//      }
       
-      else {
-        vdsList.addLast(vds[i]);
-      }
+      vdsList.addLast(vds[i]);
     }
-    if(!_classData.addFinalVars(vdsList.toArray(new VariableData[vdsList.size()]))) {
+//    System.err.println("Constructed vdslist = " + vdsList);
+    if (! _classData.addFinalVars(vdsList.toArray(new VariableData[vdsList.size()]))) {
+//      System.err.println("Duplicate variable declaration found");
       _addAndIgnoreError("You cannot have two fields with the same name.  Either you already have a field by that name in this class, or one of your superclasses or interfaces has a field by that name", that);
     }
     return null;
   }
 
+  /** Process a local inner class definition */
+  public Void forInnerClassDef(InnerClassDef that) {
+    System.err.println("CBIV.forInnerClassDef called on " + that.getName());
+    String innerClassName = getQualifiedClassName(_classData.getName()) + "." + that.getName().getText();
+    handleInnerClassDef(that, _classData, innerClassName);
+    return null;
+  }
   /* Create a method data corresponding to this method declaration, and then visit the concrete method def with a new bodybody 
    * visitor, passing it the enclosing method data. Methods are still public by default, but this can be overridden by the user.
    * Make sure the method name is different from the class name.
@@ -196,9 +212,6 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     return null;
   }
   
- 
-  
-
   /** Create a constructor corresponding to the specifications in the ConstructorDef.  */
   public Void forConstructorDef(ConstructorDef that) {
     forConstructorDefDoFirst(that);
@@ -269,24 +282,27 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     private ModifiersAndVisibility _abstractStaticMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract", "static"});
     private ModifiersAndVisibility _privateAbstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private", "abstract"});
     private ModifiersAndVisibility _finalStaticMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"static", "final"});
-    private ModifiersAndVisibility _finalPrivateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final", "private"});
+    private ModifiersAndVisibility _privateFinalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final", "private"});
     
     
-    public ClassBodyIntermediateVisitorTest() {
-      this("");
-    }
-    public ClassBodyIntermediateVisitorTest(String name) {
-      super(name);
-    }
+    public ClassBodyIntermediateVisitorTest() { this(""); }
+    public ClassBodyIntermediateVisitorTest(String name) { super(name); }
     
     public void setUp() {
       _sd1 = new SymbolData("i.like.monkey");
 
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable.clear();
+      LanguageLevelConverter._newSDs.clear();
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       _hierarchy = new Hashtable<String, TypeDefBase>();
-      _cbiv = new ClassBodyIntermediateVisitor(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+      _cbiv = new ClassBodyIntermediateVisitor(_sd1, 
+                                               new File(""), 
+                                               "", 
+                                               new LinkedList<String>(), 
+                                               new LinkedList<String>(), 
+                                               new LinkedList<String>(), 
+                                               new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       _cbiv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       _cbiv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
       _cbiv._resetNonStaticFields();
@@ -322,19 +338,19 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
       assertEquals("There should be one error", 1, errors.size());
       assertEquals("The error message should be correct", "Methods that have a braced body cannot be declared \"abstract\"", errors.get(0).getFirst());
       
-      // Check one that doesn't work because it is static
-      ConcreteMethodDef cmd3 = new ConcreteMethodDef(SourceInfo.NO_INFO, 
-                                                     _staticMav, 
-                                                     new TypeParameter[0], 
-                                                     new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                                     new Word(SourceInfo.NO_INFO, "methodName"),
-                                                     new FormalParameter[0],
-                                                     new ReferenceType[0], 
-                                                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
-      cmd3.visit(_cbiv);
-      assertEquals("There should be two errors", 2, errors.size());
-      assertEquals("The error message should be correct", "Static methods cannot be used at the Intermediate level", errors.get(1).getFirst());
-      
+//      // Check one that doesn't work because it is static
+//      ConcreteMethodDef cmd3 = new ConcreteMethodDef(SourceInfo.NO_INFO, 
+//                                                     _staticMav, 
+//                                                     new TypeParameter[0], 
+//                                                     new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+//                                                     new Word(SourceInfo.NO_INFO, "methodName"),
+//                                                     new FormalParameter[0],
+//                                                     new ReferenceType[0], 
+//                                                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+//      cmd3.visit(_cbiv);
+//      assertEquals("There should be two errors", 2, errors.size());
+//      assertEquals("The error message should be correct", "Static methods cannot be used at the Intermediate level", errors.get(1).getFirst());
+//      
       
     }
     
@@ -364,17 +380,17 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
       amd2.visit(_cbiv);
       assertEquals("There should still be one error", 1, errors.size());
       
-      // Check one that doesn't work because it is static
-      AbstractMethodDef amd3 = new AbstractMethodDef(SourceInfo.NO_INFO, 
-                                                     _abstractStaticMav, 
-                                                     new TypeParameter[0], 
-                                                     new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                                     new Word(SourceInfo.NO_INFO, "methodName"),
-                                                     new FormalParameter[0],
-                                                     new ReferenceType[0]);
-      amd3.visit(_cbiv);
-      assertEquals("There should be two errors", 2, errors.size());
-      assertEquals("The error message should be correct", "Static methods cannot be used at the Intermediate level", errors.get(1).getFirst());
+//      // Check one that doesn't work because it is static
+//      AbstractMethodDef amd3 = new AbstractMethodDef(SourceInfo.NO_INFO, 
+//                                                     _abstractStaticMav, 
+//                                                     new TypeParameter[0], 
+//                                                     new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+//                                                     new Word(SourceInfo.NO_INFO, "methodName"),
+//                                                     new FormalParameter[0],
+//                                                     new ReferenceType[0]);
+//      amd3.visit(_cbiv);
+//      assertEquals("There should be two errors", 2, errors.size());
+//      assertEquals("The error message should be correct", "Static methods cannot be used at the Intermediate level", errors.get(1).getFirst());
     }
 
     public void testForInstanceInitializerDoFirst() {
@@ -392,19 +408,30 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     public void testForVariableDeclarationOnly() {
       // Check one that works
       VariableDeclaration vdecl = new VariableDeclaration(SourceInfo.NO_INFO,
-                                                       _packageMav,
-                                                       new VariableDeclarator[] {
+                                                          _packageMav,
+                                                          new VariableDeclarator[] {
         new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                               new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                               new Word (SourceInfo.NO_INFO, "field1")),
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                               new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
-                               new Word (SourceInfo.NO_INFO, "field2"))});
-      VariableData vd1 = new VariableData("field1", _finalPrivateMav, SymbolData.DOUBLE_TYPE, false, _cbiv._classData);
-      VariableData vd2 = new VariableData("field2", _finalPrivateMav, SymbolData.BOOLEAN_TYPE, false, _cbiv._classData);
+                                            new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                                            new Word (SourceInfo.NO_INFO, "field1")),
+          new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                              new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
+                                              new Word (SourceInfo.NO_INFO, "field2"))});
+      VariableData vd1 = new VariableData("field1", _privateFinalMav, SymbolData.DOUBLE_TYPE, false, _cbiv._classData);
+      VariableData vd2 = new VariableData("field2", _privateFinalMav, SymbolData.BOOLEAN_TYPE, false, _cbiv._classData);
       vdecl.visit(_cbiv);
       
+//      VariableData vd0 = _sd1.getVars().get(0);
+//      System.err.println("Errors were: " + errors);
       assertEquals("There should not be any errors.", 0, errors.size());
+//      System.err.println("_sd1.getVars() = " + _sd1.getVars());
+//      
+//      System.err.println("vd1 = " + vd1);
+//      System.err.println("vd1.getMav() = " + vd1.getMav());
+//      System.err.println("vd1.getType() = " + vd1.getType());
+//      System.err.println("vd1.getMav().getModifiers() = " + vd1.getMav().getModifiers());
+//      assertEquals("enclosingData are equal", vd1.getEnclosingData(), vd0.getEnclosingData());
+//      assertEquals("mavs are equal", vd1.getMav(), vd0.getMav());
+//      assertEquals("vd1.equals(vd0)", vd1, vd0);
       assertTrue("field1 was added.", _sd1.getVars().contains(vd1));
       assertTrue("field2 was added.", _sd1.getVars().contains(vd2));
       
@@ -420,7 +447,7 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
         new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
                                             new PrimitiveType(SourceInfo.NO_INFO, "int"), 
                                             new Word (SourceInfo.NO_INFO, "field3"))});
-      VariableData vd3 = new VariableData("field3", _finalPrivateMav, SymbolData.DOUBLE_TYPE, false, _cbiv._classData);
+      VariableData vd3 = new VariableData("field3", _privateFinalMav, SymbolData.DOUBLE_TYPE, false, _cbiv._classData);
       vdecl2.visit(_cbiv);
       assertEquals("There should be one error.", 1, errors.size());
       assertEquals("The error message should be correct", "You cannot have two fields with the same name.  Either you already have a field by that name in this class, or one of your superclasses or interfaces has a field by that name", errors.get(0).getFirst());
@@ -440,7 +467,7 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
         assertFalse("field4 was not added.", _sd1.getVars().contains(vd4));
         
       
-      //Check a non-static field that has been assigned.  (won't work);
+      // Check a non-static field that has been assigned.
       VariableDeclaration vdecl5 = new VariableDeclaration(SourceInfo.NO_INFO,
                                                         _packageMav,
                                                         new VariableDeclarator[] {
@@ -448,10 +475,19 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
                                             new PrimitiveType(SourceInfo.NO_INFO, "double"), 
                                             new Word (SourceInfo.NO_INFO, "field5"), new DoubleLiteral(SourceInfo.NO_INFO, 2.4))});
       vdecl5.visit(_cbiv);
-      VariableData vd5 = new VariableData("field5", _publicFinalMav, SymbolData.DOUBLE_TYPE, true, _cbiv._classData);
-      assertEquals("There should be three errors", 3, errors.size());
-      assertEquals("The new error message should be correct", "Only static fields may be initialized outside of a constructor at the Intermediate level", errors.get(2).getFirst());
-      assertFalse("Field 5 was not added.", _sd1.getVars().contains(vd5));
+      VariableData vd5 = new VariableData("field5", _privateFinalMav, SymbolData.DOUBLE_TYPE, true, _cbiv._classData);
+      vd5.setHasInitializer(true);
+//      VariableData vd0 = _sd1.getVars().get(4);
+//      System.err.println("vd5 = " + vd5);
+//      System.err.println("vd0 = " + vd0);
+//      System.err.println("vd5.getMav() = " + vd5.getMav());
+//      System.err.println("vd5.getType() = " + vd5.getType());
+//      System.err.println("vd0.getMav() = " + vd0.getMav());
+//      System.err.println("vd0.getType() = " + vd0.getType());
+//      assertEquals("mavs are equal", vd5.getMav(), vd0.getMav());
+//      assertEquals("enclosingData are equal", vd5.getEnclosingData(), vd0.getEnclosingData());
+//      assertEquals("vd5.equals(vd0)", vd5, vd0);
+      assertTrue("Field 5 was added.", _sd1.getVars().contains(vd5));
       
       //check one that overrides the super class's field
       VariableDeclaration vdecl6 = new VariableDeclaration(SourceInfo.NO_INFO,
@@ -462,13 +498,16 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
                                             new Word (SourceInfo.NO_INFO, "field6"))});
       
       
-      VariableData vd6 = new VariableData("field6", _finalPrivateMav, SymbolData.DOUBLE_TYPE, false, _cbiv._classData);
+      VariableData vd6 = new VariableData("field6", _privateFinalMav, SymbolData.DOUBLE_TYPE, false, _cbiv._classData);
       SymbolData myData = new SymbolData("myData");
       myData.addVar(vd6);
       _cbiv._classData.setSuperClass(myData);
       vdecl6.visit(_cbiv);
-      assertEquals("There should be four errors.", 4, errors.size());
-      assertEquals("The error message should be correct", "You cannot have two fields with the same name.  Either you already have a field by that name in this class, or one of your superclasses or interfaces has a field by that name", errors.get(3).getFirst());
+      assertEquals("There should be three errors.", 3, errors.size());
+      assertEquals("The error message should be correct", "You cannot have two fields with the same name.  Either you" +
+                   " already have a field by that name in this class, or one of your superclasses or interfaces has a" +
+                   " field by that name", 
+                   errors.get(2).getFirst());
 
     }
     
@@ -612,7 +651,7 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
 
     public void testForInnerInterfaceDef() {
       SymbolData obj = new SymbolData("java.lang.Object");
-      symbolTable.put("java.lang.Object", obj);
+      LanguageLevelConverter.symbolTable.put("java.lang.Object", obj);
       InnerInterfaceDef cd1 = new InnerInterfaceDef(SourceInfo.NO_INFO, _packageMav, 
                                                     new Word(SourceInfo.NO_INFO, "Bart"),
                                        new TypeParameter[0], new ReferenceType[0], 
@@ -631,17 +670,16 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
       sd0.setIsContinuation(true);
       sd1.setIsContinuation(true);
       
-      symbolTable.put(_cbiv._classData.getName() + "$Lisa", sd0);
-      symbolTable.put(_cbiv._classData.getName() + "$Lisa$Bart", sd1);
+      LanguageLevelConverter.symbolTable.put(_cbiv._classData.getName() + "$Lisa", sd0);
+      LanguageLevelConverter.symbolTable.put(_cbiv._classData.getName() + "$Lisa$Bart", sd1);
 
       cd0.visit(_cbiv);
 
       SymbolData sd = _cbiv._classData.getInnerClassOrInterface("Lisa");
 
       // NOTE: No longer allowing inner interfaces at the intermediate level
-      assertEquals("There should be one error", 1, errors.size());
-      assertEquals("The error message should be correct", 
-                   "Nested interfaces cannot be used at the Intermediate level", errors.get(0).getFirst());
+      assertEquals("There should be no errors", 0, errors.size());
+      // Nested interfaces now work
     }
     
     public void testForConstructorDef() {

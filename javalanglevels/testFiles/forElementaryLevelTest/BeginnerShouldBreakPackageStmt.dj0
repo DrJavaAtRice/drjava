@@ -1,4 +1,4 @@
-package shouldBreak;
+package forElementaryLevelTest;
 
 class BeginnerShouldBreakPackageStmt {
   int i;

@@ -44,7 +44,7 @@ import edu.rice.cs.javalanglevels.util.Log;
 import edu.rice.cs.javalanglevels.util.Utilities;
 import java.io.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.iter.*;
 import edu.rice.cs.plt.io.IOUtil;
 
 /** This class represents the mechanism by which we convert a language level file to a .java file of the same name by
@@ -56,8 +56,9 @@ public class LanguageLevelConverter {
   public static final Log _log = new Log("LLConverter.txt", false);
   
   /** Hashtable for a shared symbolTable.  Since this field is static, only one instance of
-    * LanguageLevelConverter should exist at a time. */
-  static Symboltable symbolTable = new Symboltable();
+    * LanguageLevelConverter should exist at a time.  If we create a
+    * LanguageLevelConverter instance for each translation, we must drop the static attribute. */
+  public static final Symboltable symbolTable = new Symboltable();
   
   public static Options OPT = Options.DEFAULT;
   
@@ -67,7 +68,11 @@ public class LanguageLevelConverter {
   
   /**Number of line number mappings (from dj* to java) per line. */
   public static final int LINE_NUM_MAPPINGS_PER_LINE = 8;
-    
+  
+  /** Stores all the SymbolDatas (and corresponding visitors) created as in course of conversion.  If we create a
+    * LanguageLevelConverter instance for each translation, we must drop the static attribute. */
+  public static final Hashtable<SymbolData, LanguageLevelVisitor> _newSDs = new Hashtable<SymbolData, LanguageLevelVisitor>();
+  
   /**Holds any parse exceptions that are encountered*/
   private LinkedList<JExprParseException> _parseExceptions = new LinkedList<JExprParseException>();
   
@@ -99,62 +104,74 @@ public class LanguageLevelConverter {
   // "Visit" is an extremely vague notion; I presume it means construct a symbol table for the file.
   public Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>>
     convert(File[] files, Options options, Map<File,Set<String>> sourceToTopLevelClassMap) {
-    OPT = options;
     
-    LanguageLevelVisitor.symbolTable = symbolTable = new Symboltable();  // redundant?
-    LanguageLevelVisitor._newSDs = new Hashtable<SymbolData, LanguageLevelVisitor>(); /**initialize so we don't get null pointer exception*/
+    _log.log("LanguageLevelConverter.convert called on files:  " + Arrays.toString(files));
+    OPT = options;
+    assert symbolTable != null;
+    symbolTable.clear();
+    _newSDs.clear();
+    
+    /**initialize so we don't get null pointer exception*/
     // We need a LinkedList for errors to be shared by the visitors to each file.
     LinkedList<Pair<String, JExpressionIF>> languageLevelVisitorErrors = new LinkedList<Pair<String, JExpressionIF>>();
     
     //keep track of the continuations to resolve  // What precisely is a continuation?
-    Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
-    
-    //and the new SDs (symbol table entries) we've created
-    Hashtable<SymbolData, LanguageLevelVisitor> languageLevelNewSDs = new Hashtable<SymbolData, LanguageLevelVisitor>();
+    Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations = 
+      new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
     
     // And a linked list to share visited files.
-    LinkedList<Pair<LanguageLevelVisitor, SourceFile>> languageLevelVisitedFiles = new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();
+    LinkedList<Pair<LanguageLevelVisitor, SourceFile>> languageLevelVisitedFiles =  
+      new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();
     
     /* We are doing two passes on the files, and the second pass needs the first's corresponding
-       SourceFile and LanguageLevelVisitor so we'll keep them around in a Hashtable. */
-    Hashtable<Integer, Pair<SourceFile, LanguageLevelVisitor>> mediator = new Hashtable<Integer, Pair<SourceFile, LanguageLevelVisitor>>();
+     SourceFile and LanguageLevelVisitor so we'll keep them around in a Hashtable. */
+    Hashtable<Integer, Pair<SourceFile, LanguageLevelVisitor>> mediator = 
+      new Hashtable<Integer, Pair<SourceFile, LanguageLevelVisitor>>();
     
     /* The visitedFiles returned by any pass may include another file which is already scheduled for compilation.
-       In this case, we don't want to reparse, or perform either the first pass or the type check since it has
-       already been done.  (An error is thrown if we do since it thinks the class has already been defined). */
+     In this case, we don't want to reparse, or perform either the first pass or the type check since it has
+     already been done.  (An error is thrown if we do since it thinks the class has already been defined). */
     // WHAT visitedFiles are RETURNED?  HOW?  The return type is a Pair containing NO files!  I SMELL GLOBAL VARIABLES!
     LinkedList<File> filesNotToCheck = new LinkedList<File>();
     
     /* The number of files to compile may change if one file references another one.
-       We don't want to visit these newly referenced files because they've already
-       been visited. */
+     We don't want to visit these newly referenced files because they've already
+     been visited. */
     // WHAT DOES VISIT MEAN?
     int originalNumOfFiles = files.length;
     
-    /* Find the ones (of what?) that are LL files.
-       Do the passes first for ALL files before proceeding to code augmentation.
-       Otherwise if one class' superclass get augmented first, then it sees a lot
-       of illegal constructs (e.g. public and constructors). */
+    /* Find the files in the File[] array files that are LL files. Do the parsing, conformance checking, and 
+     * type-checking passes first for ALL files before proceeding to code augmentation.  Otherwise if one class's
+     * superclass get augmented first, then it sees a lot of illegal constructs (e.g. public and constructors). */
     
-    /* will maintain the files we visit along with their visitors (for type checking step). */
-    LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visited = new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();
+    /* Maintains the files we visit along with their visitors (for type checking step). */
+    LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visited = 
+      new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();
+    
+    /* Maintains the list of advanced files, which are no longer parsed and checked; they are simply converted to .java
+     * files unchanged and unchecked (except for nullity). */
+    LinkedList<File> advanced = new LinkedList<File>();
     
     for (File f : files) {
       
       try {
-        if (filesNotToCheck.contains(f)) continue;  // Detects equal files; earlier code versions claimed it failed
+        if (filesNotToCheck.contains(f)) continue;  // Detects equal Files objects
+        
         // Check for a null file
         BufferedReader tempBr = new BufferedReader(new FileReader(f));
         String firstLine = tempBr.readLine();
         tempBr.close();
         if (firstLine == null) continue;
         
-        if (_isLanguageLevelFile(f)) {
+        if (isAdvancedFile(f)) advanced.addLast(f);
+        
+        else if (_isLanguageLevelFile(f)) {  /* a .dj0 or .dj1 file */  // WARNING: no support for .dj files here
           System.out.flush();
           SourceFile sf;
           JExprParser jep = new JExprParser(f);
           try { 
 //            System.err.println("Parsing " + f);
+            _log.log("Parsing " + f);
             sf = jep.SourceFile();
 //            System.err.println("Completed parsing " + f);
             final Set<String> topLevelClasses = new HashSet<String>();
@@ -174,28 +191,9 @@ public class LanguageLevelConverter {
           }
           
           // Now create a LanguageLevelVisitor to do the first pass over the file.
-          LanguageLevelVisitor llv = null;
-          if (isElementaryFile(f)) {
-            llv = 
-              new ElementaryVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), symbolTable, 
-                                    new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
-                                    languageLevelVisitedFiles, languageLevelNewSDs);
-          }
-          else if (isIntermediateFile(f)) {
-            llv = 
-              new IntermediateVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), symbolTable,
-                                      new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
-                                      languageLevelVisitedFiles, languageLevelNewSDs);
-          }
-          else if (isAdvancedFile(f)) {
-            llv = 
-              new AdvancedVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(), symbolTable, 
-                                  new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
-                                  languageLevelVisitedFiles, languageLevelNewSDs);
-          }
-          else {
-            throw new RuntimeException("Internal Bug: Invalid file format not caught initially.  Please report this bug.");
-          }
+          LanguageLevelVisitor llv = new IntermediateVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(),
+                                                             new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+                                                             languageLevelVisitedFiles);
           
           // First pass
           sf.visit(llv);
@@ -221,7 +219,7 @@ public class LanguageLevelConverter {
     
     //Resolve continuations
     //Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations = llv.continuations;
- 
+    
     _log.log("\nDUMPING SYMBOLTABLE BEFORE CONTINUATION RESOLUTION\n\n" + symbolTable + "\n");
 //    System.err.println("Resolving continuations " + continuations);
     _log.log("Resolving continuations: " + continuations + "\n");
@@ -235,23 +233,24 @@ public class LanguageLevelConverter {
         _log.log("Attempting to resolve " + className + "\n  Result = " + returnedSd);
 //        System.err.println("Attempting to resolve " + className + "\n  Result = " + returnedSd);
         if (returnedSd == null) {
+          System.err.println("Could not find SymbolData for '" + className + "'");
           LanguageLevelVisitor.errors.add(new Pair<String, JExpressionIF>("Converter could not resolve " + className, 
                                                                           new NullLiteral(pair.getFirst())));
         }
       }
     }
-     
+    
     _log.log("\nDUMPING SYMBOLTABLE AFTER PASS 1\n\n" + symbolTable + "\n");
-
+    
     // Create any constructors.
-    Hashtable<SymbolData, LanguageLevelVisitor> newSDs = LanguageLevelVisitor._newSDs;
-    Enumeration<SymbolData> keys = newSDs.keys();
+    Enumeration<SymbolData> keys = _newSDs.keys();
     while (keys.hasMoreElements()) {
       SymbolData key = keys.nextElement();
-      LanguageLevelVisitor sdlv = newSDs.get(key);    // Can return null because of silly side effects!
+      LanguageLevelVisitor sdlv = _newSDs.get(key);   // Can return null because of silly side effects!
       if (sdlv != null) sdlv.createConstructor(key);  // Bug fix is a kludge! Deletes (key,sdlv) from _newSDs!
     }
-    assert LanguageLevelVisitor._newSDs.isEmpty();
+    
+//    assert _newSDs.isEmpty();
     
     languageLevelVisitorErrors.addAll(LanguageLevelVisitor.errors); //add any errors that accumulated during the continuation resolving/constructor generation
     
@@ -267,31 +266,36 @@ public class LanguageLevelConverter {
         LanguageLevelVisitor llv = visited.get(ind).getFirst();
         SourceFile sf = visited.get(ind).getSecond();
         
+        
         //TODO: This is a terrible hack to get around the following problem.  Basically, when we autobox in isAssignableTo in SymbolData, 
         //we look through the object hierarchy for the primitive.  If its corresponding boxed object isn't in the symboltable, we're in trouble.
         //So, for those special cases, go ahead and make sure the object types are in the symbol table before we start type checking.
         //I'd like to make this better, but at least it works for now.
         
+        // Note: "llv." formerly preceded symbolTable and getSymbolData
         
         //Before you type check, make sure that all boxed types of primitives are in the symbol table
-        if (llv.symbolTable.get("java.lang.Integer") == null) {llv.getSymbolData("java.lang.Integer", SourceInfo.NO_INFO);}
-        if (llv.symbolTable.get("java.lang.Double")==null) {llv.getSymbolData("java.lang.Double", SourceInfo.NO_INFO);}
-        if (llv.symbolTable.get("java.lang.Character")==null) {llv.getSymbolData("java.lang.Character", SourceInfo.NO_INFO);}
-        if (llv.symbolTable.get("java.lang.Boolean")==null) {llv.getSymbolData("java.lang.Boolean", SourceInfo.NO_INFO);}
-        if (llv.symbolTable.get("java.lang.Long")==null) {llv.getSymbolData("java.lang.Long", SourceInfo.NO_INFO);}
-        if (llv.symbolTable.get("java.lang.Byte")==null) {llv.getSymbolData("java.lang.Byte", SourceInfo.NO_INFO);}
-        if (llv.symbolTable.get("java.lang.Short")==null) {llv.getSymbolData("java.lang.Short", SourceInfo.NO_INFO);}
-        if (llv.symbolTable.get("java.lang.Float")==null) {llv.getSymbolData("java.lang.Float", SourceInfo.NO_INFO);}
+        if (symbolTable.get("java.lang.Integer") == null)   { llv.getSymbolData("java.lang.Integer", SourceInfo.NO_INFO);}
+        if (symbolTable.get("java.lang.Double") == null)    { llv.getSymbolData("java.lang.Double", SourceInfo.NO_INFO);}
+        if (symbolTable.get("java.lang.Character") == null) { llv.getSymbolData("java.lang.Character", SourceInfo.NO_INFO);}
+        if (symbolTable.get("java.lang.Boolean") == null)   { llv.getSymbolData("java.lang.Boolean", SourceInfo.NO_INFO);}
+        if (symbolTable.get("java.lang.Long") == null)      { llv.getSymbolData("java.lang.Long", SourceInfo.NO_INFO);}
+        if (symbolTable.get("java.lang.Byte") == null)      { llv.getSymbolData("java.lang.Byte", SourceInfo.NO_INFO);}
+        if (symbolTable.get("java.lang.Short") == null)     { llv.getSymbolData("java.lang.Short", SourceInfo.NO_INFO);}
+        if (symbolTable.get("java.lang.Float") == null)     { llv.getSymbolData("java.lang.Float", SourceInfo.NO_INFO);}
         
         
         // Type check.
-        TypeChecker btc = new TypeChecker(llv._file, llv._package, llv.errors, symbolTable, llv._importedFiles, llv._importedPackages);
+        TypeChecker btc = 
+          new TypeChecker(llv._file, llv._package, llv.errors, symbolTable, llv._importedFiles, llv._importedPackages);
+        System.err.println("Visiting source file " + sf.getSourceInfo ());
         sf.visit(btc);
         if (btc.errors.size() > 0) _visitorErrors.addAll(btc.errors);
       }
       
-      // Set up code augmentation.  We will NOT try to augment files unless they appear in the visited List.  Unlisted LL files cannot be found
-      // reliably during type checking because there is no naming convention that tells the type checker what files to look for.
+      /* Set up code augmentation.  We will NOT try to augment files unless they appear in the visited List.  Unlisted
+       * LL files cannot be found reliably during type checking because there is no naming convention that tells the 
+       * type checker what files to look for. */
       
       Iterator<Pair<LanguageLevelVisitor, SourceFile>> iter = visited.iterator();
       LinkedList<File> newFiles = new LinkedList<File>();
@@ -309,7 +313,9 @@ public class LanguageLevelConverter {
         // We only want to perform code augmentation since these files have already been visited.
         if (! filesNotToCheck.contains(fileToAdd)) filesNotToCheck.addLast(fileToAdd);
       }
-      files = newFiles.toArray(new File[newFiles.size()]);
+      
+      newFiles.addAll(advanced);
+      files = newFiles.toArray(new File[newFiles.size()]);  // include advanced files
 //      Utilities.show("Created files array: " + Arrays.toString(files));
     }
     
@@ -317,8 +323,7 @@ public class LanguageLevelConverter {
 //      }
 //  }
     
-    
-    //If there were any errors in the llv pass or the type checking pass, just return them.
+    // If there were any errors in the llv pass or the type checking pass, just return them.
     if (_parseExceptions.size() > 0 || _visitorErrors.size() > 0) {
       return new Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>>(_parseExceptions, _visitorErrors);
     }
@@ -328,62 +333,71 @@ public class LanguageLevelConverter {
     for (int ind = 0; ind < files.length; ind++) {
       File f = files[ind];
       try {
-//        Utilities.show("File is: " + f + " mediator is: " + mediator.get(ind));
-        BufferedReader tempBr = new BufferedReader(new FileReader(f));
-        String firstLine = tempBr.readLine();
-        tempBr.close(); // Important to close the reader, otherwise Windows will not allow the renameTo call later.
-        if (firstLine == null) continue;
         
-        // If the file has an appropriate LL extension, then parse it.
-        if (_isLanguageLevelFile(f)) {
-          Pair<SourceFile, LanguageLevelVisitor> pair = mediator.get(new Integer(ind));
-          if (pair == null) {
-     // _log.log("Not augmenting " + f + " no mediator");
-//            Utilities.show("Not augmenting " + f + " no mediator");
-          }
+        // Set up augmented file  WARNING: DOES NOT WORK FOR .DJ EXTENSION
+        String augmentedFilePath = f.getAbsolutePath();
+        augmentedFilePath = augmentedFilePath.substring(0, augmentedFilePath.length() - 4); //remove the .dj# extension
+        
+        File augmentedFile = new File(augmentedFilePath + ".java"); //replace it with .java
+        
+        if (isAdvancedFile(f)) {
+          Utilities.copyFile(f, augmentedFile);
+        }
+        else {
+//        Utilities.show("File is: " + f + " mediator is: " + mediator.get(ind));
+          BufferedReader tempBr = new BufferedReader(new FileReader(f));
+          String firstLine = tempBr.readLine();
+          tempBr.close(); // Important to close the reader, otherwise Windows will not allow the renameTo call later.
+          if (firstLine == null) continue;
           
-          if (pair != null) { //if pair is null, we do not actually need to augment this file--it wasn't visited.  Maybe we used the class file?
-            SourceFile sf = pair.getFirst();
-            LanguageLevelVisitor llv = pair.getSecond();
-//            File f = files[ind];
-            
-            // Do code augmentation.  This will involve a line-by-line copy, editing lines as appropriate.
-            String augmentedFilePath = f.getAbsolutePath();
-            augmentedFilePath = augmentedFilePath.substring(0, augmentedFilePath.length() - 4); //remove the .dj# extension
-            File augmentedFile = new File(augmentedFilePath + ".java"); //replace it with .java
-            BufferedReader br = new BufferedReader(new FileReader(f), INPUT_BUFFER_SIZE);
-            StringWriter sw = new StringWriter();
-            BufferedWriter bw = new BufferedWriter(sw);
-            
-            // _log.log("Augmenting the source file " + sf);
-//            Utilities.show("Augmenting the source file " + sf.getSourceInfo().getFile());
-            Augmentor a = new Augmentor(SAFE_SUPPORT_CODE, br, bw, llv);
-            sf.visit(a);
-            
-            br.close();
-            bw.close();
-            
-            // write out the line number map and the augmented java file
-            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(augmentedFile)));
-            SortedMap<Integer,Integer> lineNumberMap = a.getLineNumberMap();
-            pw.println("// Language Level Converter line number map: dj*->java. Entries: "+lineNumberMap.size());
-            // We print out LINE_NUM_MAPPINGS_PER_LINE mappings per line, so we need numLines
-            // at the top of the file, and one more for a descriptive comment.
-            // That means we need to increase the line numbers in the generated java file by numLines+1
-            int numLines = (int)Math.ceil(((double)lineNumberMap.size())/LINE_NUM_MAPPINGS_PER_LINE);
-            int mapCount = 0;
-            for(Map.Entry<Integer,Integer> e: lineNumberMap.entrySet()) {
-              // e.getKey(): dj* line number; e.getValue(): java line number (must be increased by numLines)
-              if (mapCount%LINE_NUM_MAPPINGS_PER_LINE==0) pw.print("//");
-              pw.printf(" %5d->%-5d", e.getKey(), (e.getValue()+numLines+1));
-              if (mapCount%LINE_NUM_MAPPINGS_PER_LINE==LINE_NUM_MAPPINGS_PER_LINE-1) pw.println();
-              ++mapCount;
+          // If the file has an appropriate LL extension, then parse it.
+          if (_isLanguageLevelFile(f)) {
+            Pair<SourceFile, LanguageLevelVisitor> pair = mediator.get(new Integer(ind));
+            if (pair == null) {
+              // _log.log("Not augmenting " + f + " no mediator");
+//            Utilities.show("Not augmenting " + f + " no mediator");
             }
-            if (mapCount%LINE_NUM_MAPPINGS_PER_LINE!=0) pw.println(); // print a newline unless we just printed one
             
-            String augmented = sw.toString();
-            pw.write(augmented, 0, augmented.length());
-            pw.close();
+            if (pair != null) { //if pair is null, we do not actually need to augment this file--it wasn't visited.  Maybe we used the class file?
+              SourceFile sf = pair.getFirst();
+              LanguageLevelVisitor llv = pair.getSecond();
+//            File f = files[ind];
+              
+              // Do code augmentation
+              BufferedReader br = new BufferedReader(new FileReader(f), INPUT_BUFFER_SIZE);
+              StringWriter sw = new StringWriter();
+              BufferedWriter bw = new BufferedWriter(sw);
+              
+              // _log.log("Augmenting the source file " + sf);
+//            Utilities.show("Augmenting the source file " + sf.getSourceInfo().getFile());
+              Augmentor a = new Augmentor(SAFE_SUPPORT_CODE, br, bw, llv);
+              sf.visit(a);
+              
+              br.close();
+              bw.close();
+              
+              // write out the line number map and the augmented java file
+              PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(augmentedFile)));
+              SortedMap<Integer,Integer> lineNumberMap = a.getLineNumberMap();
+              pw.println("// Language Level Converter line number map: dj*->java. Entries: "+lineNumberMap.size());
+              // We print out LINE_NUM_MAPPINGS_PER_LINE mappings per line, so we need numLines
+              // at the top of the file, and one more for a descriptive comment.
+              // That means we need to increase the line numbers in the generated java file by numLines+1
+              int numLines = (int)Math.ceil(((double)lineNumberMap.size())/LINE_NUM_MAPPINGS_PER_LINE);
+              int mapCount = 0;
+              for(Map.Entry<Integer,Integer> e: lineNumberMap.entrySet()) {
+                // e.getKey(): dj* line number; e.getValue(): java line number (must be increased by numLines)
+                if (mapCount%LINE_NUM_MAPPINGS_PER_LINE==0) pw.print("//");
+                pw.printf(" %5d->%-5d", e.getKey(), (e.getValue()+numLines+1));
+                if (mapCount%LINE_NUM_MAPPINGS_PER_LINE==LINE_NUM_MAPPINGS_PER_LINE-1) pw.println();
+                ++mapCount;
+              }
+              if (mapCount%LINE_NUM_MAPPINGS_PER_LINE!=0) pw.println(); // print a newline unless we just printed one
+              
+              String augmented = sw.toString();
+              pw.write(augmented, 0, augmented.length());
+              pw.close();
+            }
           }
         }
       }
@@ -400,24 +414,16 @@ public class LanguageLevelConverter {
                                                                                               _visitorErrors);
   }
   
-  /**If a file name ends with .dj0, it is an Elementary File*/
-  public static boolean isElementaryFile(File f) {
-    return f.getPath().endsWith(".dj0");
-  }
+  /** If a file name ends with .dj0, it is an Elementary File*/
+  public static boolean isElementaryFile(File f) { return f.getPath().endsWith(".dj0"); } 
+  /** If a file name ends with .dj1, it is an Intermediate File*/
+  public static boolean isIntermediateFile(File f) { return f.getPath().endsWith(".dj1"); }
+  /** If a file name ends with .dj2, it is an Advanced File, which is a legacy notion. */
+  public static boolean isAdvancedFile(File f) { return f.getPath().endsWith(".dj2"); }
   
-  /**If a file name ends with .dj1, it is an Intermediate File*/
-  public static boolean isIntermediateFile(File f) {
-    return f.getPath().endsWith(".dj1");
-  }
-  
-  /**If a file name ends with .dj2, it is an Advanced File*/
-  public static boolean isAdvancedFile(File f) {
-    return f.getPath().endsWith(".dj2");
-  }
-  
-  /**If a file is an Elementary, Intermediate, or Advanced file, then it is a language level file*/
-  public static boolean _isLanguageLevelFile(File f) {
-    return isElementaryFile(f) || isIntermediateFile(f) || isAdvancedFile(f);
+  /**If a file is an Elementary orIntermediate file, then it is a language level file. */
+  private static boolean _isLanguageLevelFile(File f) {
+    return isElementaryFile(f) || isIntermediateFile(f);  // WARNING: DOES NOT INCLUDE .dj
   }
   
   /**Only certain versions of the java compiler support autoboxing*/
@@ -438,15 +444,13 @@ public class LanguageLevelConverter {
   }
   
   /* @return true if the compiler version is 1.5 */
-  public static boolean versionIs15(JavaVersion version) {
-    return version.supports(JavaVersion.JAVA_5);
-  }
+  public static boolean versionIs15(JavaVersion version) { return version.supports(JavaVersion.JAVA_5); }
   
   /**Do a conversion from the command line, to allow quick testing*/
   public static void main(String[] args) {
     LanguageLevelConverter llc = new LanguageLevelConverter();
     
-    if (args.length==0) {
+    if (args.length == 0) {
       System.out.println("Java Language Level Converter");
       System.out.println("Please pass file names (*.dj0, *.dj1, *.dj2) as arguments.");
       System.out.println("Note: The converter will use Java's classpath to resolve classes.");
@@ -470,5 +474,4 @@ public class LanguageLevelConverter {
       System.out.println(p.getFirst() + " " + p.getSecond().getSourceInfo());
     }
   }
-  
 }

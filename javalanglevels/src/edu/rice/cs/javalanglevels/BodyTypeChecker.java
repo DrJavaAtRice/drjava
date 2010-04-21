@@ -41,7 +41,7 @@ import edu.rice.cs.javalanglevels.parser.JExprParser;
 import java.util.*;
 import java.io.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.iter.*;
 
 import junit.framework.TestCase;
 
@@ -62,15 +62,15 @@ public class BodyTypeChecker extends Bob {
    * @param vars  The list of VariableData that have already been defined (used so we can make sure we don't use a variable before it has been defined).
    * @param thrown  The list of exceptions thrown in this body
    */
-  public BodyTypeChecker(BodyData bodyData, File file, String packageName, LinkedList<String> importedFiles, LinkedList<String> importedPackages, LinkedList<VariableData> vars, LinkedList<Pair<SymbolData, JExpression>> thrown) {
+  public BodyTypeChecker(BodyData bodyData, File file, String packageName, LinkedList<String> importedFiles, 
+                         LinkedList<String> importedPackages, LinkedList<VariableData> vars, 
+                         LinkedList<Pair<SymbolData, JExpression>> thrown) {
     super(bodyData, file, packageName, importedFiles, importedPackages, vars, thrown);
     _bodyData = bodyData;
   }
   
    /*@return the bodyData (enclosing data) for this context.*/
-  protected Data _getData() {
-    return _bodyData;
-  }
+  protected Data _getData() { return _bodyData; }
   
   /*@return the instance data of the class/interface enclosing this body data*/
   public TypeData forSimpleThisReferenceOnly(SimpleThisReference that) {
@@ -88,9 +88,6 @@ public class BodyTypeChecker extends Bob {
   protected BodyTypeChecker createANewInstanceOfMe(BodyData bodyData, File file, String pakage, LinkedList<String> importedFiles, LinkedList<String> importedPackages, LinkedList<VariableData> vars, LinkedList<Pair<SymbolData, JExpression>> thrown) {
     return new BodyTypeChecker(bodyData, file, pakage, importedFiles, importedPackages, vars, thrown);
   }
-
-  
-
   
   /* There is currently no way to differentiate between a block statement and
    * an instance initializer in a braced body given the general nature of a 
@@ -107,9 +104,9 @@ public class BodyTypeChecker extends Bob {
    * datas that are declared in this declarator to the list of variables that are visibile from where we are.
    */
   public TypeData forUninitializedVariableDeclaratorOnly(UninitializedVariableDeclarator that, 
-                                                            TypeData type_result, 
-                                                            TypeData name_result) {
-      _vars.addLast(_bodyData.getVar(that.getName().getText()));
+                                                         TypeData type_result, 
+                                                         TypeData name_result) {
+    _vars.addLast(_bodyData.getVar(that.getName().getText()));
     return null;
   }
 
@@ -976,21 +973,15 @@ public class BodyTypeChecker extends Bob {
   }
   
   
-   /*A special visitor that does not allow assignment in any expressions*/
+  /*A special visitor that does not allow assignment in any expressions*/
   private class NoAssignmentAllowedInExpression extends JExpressionIFAbstractVisitor<Boolean> {
     String _location;
-    private NoAssignmentAllowedInExpression(String location) {
-      _location = location;
-    }
+    private NoAssignmentAllowedInExpression(String location) { _location = location; }
   
-    /**
-     * Most expressions do not involve assignment
-     */
-    public Boolean defaultCase(JExpressionIF that) {
-      return Boolean.TRUE;
-    }
+    /** Most expressions do not involve assignment */
+    public Boolean defaultCase(JExpressionIF that) { return Boolean.TRUE; }
   
-    /*Throw an appropriate error*/
+    /* Throw an appropriate error*/
     public Boolean forIncrementExpression(IncrementExpression that) {
       _addError("You cannot use an increment or decrement expression in " + _location +  " at any language level", that);
       return Boolean.FALSE;
@@ -1010,11 +1001,7 @@ public class BodyTypeChecker extends Bob {
 
   }
   
-  
-  
-   /**
-    * Test the methods in the above class.
-    */
+   /** Test the methods in the above class. */
   public static class BodyTypeCheckerTest extends TestCase {
     
     private BodyTypeChecker _bbtc;
@@ -1073,12 +1060,14 @@ public class BodyTypeChecker extends Bob {
        ((MethodData)_bd2).getParams()[0].setEnclosingData(_bd2);
                             
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable.clear();
+      LanguageLevelConverter._newSDs.clear();
       _bd1.addEnclosingData(_sd1);
       _bd1.addVars(((MethodData)_bd1).getParams());
       _bd2.addVars(((MethodData)_bd2).getParams());
-      _bbtc = new BodyTypeChecker(_bd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData,JExpression>>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
+      _bbtc = new BodyTypeChecker(_bd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
+                                  new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData,JExpression>>());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
       _bbtc._importedPackages.addFirst("java.lang");
     }
     
@@ -2531,14 +2520,18 @@ public class BodyTypeChecker extends Bob {
       FormalParameter fp1 = new FormalParameter(SourceInfo.NO_INFO, uvd1, false);
       FormalParameter fp2 = new FormalParameter(SourceInfo.NO_INFO, uvd2, false);
       FormalParameter fp3 = new FormalParameter(SourceInfo.NO_INFO, uvd3, false);
-
+      
       LanguageLevelVisitor llv = 
-        new LanguageLevelVisitor(new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
-                                 new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+        new LanguageLevelVisitor(new File(""), 
+                                 "", 
+                                 new LinkedList<String>(), 
+                                 new LinkedList<String>(), 
+                                 new LinkedList<String>(), 
+                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded=false;
-      LanguageLevelConverter.symbolTable = llv.symbolTable = new Symboltable();
+//      LanguageLevelConverter.symbolTable = llv.symbolTable = new Symboltable();
       llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       llv._hierarchy = new Hashtable<String, TypeDefBase>();
@@ -2633,12 +2626,14 @@ public class BodyTypeChecker extends Bob {
 
       _bbtc._importedFiles.addLast("java.io.IOException");
       
-      LanguageLevelVisitor llv = new LanguageLevelVisitor(new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
-                                      new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+      LanguageLevelVisitor llv = 
+        new LanguageLevelVisitor(new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
+                                 new LinkedList<String>(), 
+                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
-      llv._errorAdded=false;
-      LanguageLevelConverter.symbolTable = llv.symbolTable = new Symboltable();
+      llv._errorAdded = false;
+//      LanguageLevelConverter.symbolTable.clear();  // done in setUp()
       llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       llv._hierarchy = new Hashtable<String, TypeDefBase>();
@@ -2664,12 +2659,17 @@ public class BodyTypeChecker extends Bob {
     }
     
     public void testForThrowStatement() {
-      LanguageLevelVisitor llv = new LanguageLevelVisitor(new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
-                                      new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+      LanguageLevelVisitor llv = 
+        new LanguageLevelVisitor(new File(""), 
+                                 "", 
+                                 new LinkedList<String>(), 
+                                 new LinkedList<String>(), 
+                                 new LinkedList<String>(), 
+                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded=false;
-      LanguageLevelConverter.symbolTable = llv.symbolTable = new Symboltable();
+//      LanguageLevelConverter.symbolTable = llv.symbolTable = new Symboltable();
       llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       llv._hierarchy = new Hashtable<String, TypeDefBase>();
@@ -2856,11 +2856,16 @@ public class BodyTypeChecker extends Bob {
     }
     
     public void testForBracedBody() {
-      LanguageLevelVisitor llv = new LanguageLevelVisitor(new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
-                                      new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+      LanguageLevelVisitor llv = 
+        new LanguageLevelVisitor(new File(""), 
+                                 "", 
+                                 new LinkedList<String>(), 
+                                 new LinkedList<String>(), 
+                                 new LinkedList<String>(), 
+                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded=false;
-      LanguageLevelConverter.symbolTable = llv.symbolTable = new Symboltable();
+//      LanguageLevelConverter.symbolTable = llv.symbolTable = new Symboltable();
       llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       llv._hierarchy = new Hashtable<String, TypeDefBase>();
@@ -2868,7 +2873,7 @@ public class BodyTypeChecker extends Bob {
 
       SymbolData eb = llv.getSymbolData("java.util.prefs.BackingStoreException", SourceInfo.NO_INFO, true);
       SymbolData re = llv.getSymbolData("java.lang.RuntimeException", SourceInfo.NO_INFO, true);
-      LanguageLevelConverter.symbolTable = symbolTable = llv.symbolTable;
+//      LanguageLevelConverter.symbolTable = symbolTable = llv.symbolTable;
 
       
       //Make sure it is okay to have something else other than an uncaught exception in a braced body.
@@ -2968,11 +2973,17 @@ public class BodyTypeChecker extends Bob {
     }
     
     public void testForTryCatchFinallyStatement() {
-      LanguageLevelVisitor llv = new LanguageLevelVisitor(new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
-                                      new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+      LanguageLevelVisitor llv = 
+        new LanguageLevelVisitor(new File(""), 
+                                 "", 
+                                 new LinkedList<String>(), 
+                                 new LinkedList<String>(), 
+                                 new LinkedList<String>(), 
+                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
-      llv._errorAdded=false;
-      LanguageLevelConverter.symbolTable = llv.symbolTable = symbolTable;
+      llv._errorAdded = false;
+//      LanguageLevelConverter.symbolTable = llv.symbolTable = symbolTable;
+//      LanguageLevelConverter._newSDs = new Hashtable<SymbolData, LanguageLevelVisitor>();
       llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       llv._hierarchy = new Hashtable<String, TypeDefBase>();
@@ -3156,11 +3167,17 @@ public class BodyTypeChecker extends Bob {
     }
 
     public void testForNormalTryCatchStatement() {
-      LanguageLevelVisitor llv = new LanguageLevelVisitor(new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
-                                                          new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+      LanguageLevelVisitor llv = 
+        new LanguageLevelVisitor(new File(""), 
+                                 "", 
+                                 new LinkedList<String>(), 
+                                 new LinkedList<String>(), 
+                                 new LinkedList<String>(), 
+                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded=false;
-      LanguageLevelConverter.symbolTable = llv.symbolTable = symbolTable;
+//      LanguageLevelConverter.symbolTable = llv.symbolTable = symbolTable;
+//      LanguageLevelConverter._newSDs = new Hashtable<SymbolData, LanguageLevelVisitor>();
       llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       llv._hierarchy = new Hashtable<String, TypeDefBase>();

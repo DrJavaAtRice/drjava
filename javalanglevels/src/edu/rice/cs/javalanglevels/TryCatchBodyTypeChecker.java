@@ -41,7 +41,7 @@ import edu.rice.cs.javalanglevels.parser.JExprParser;
 import java.util.*;
 import java.io.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.iter.*;
 
 import junit.framework.TestCase;
 
@@ -157,11 +157,11 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
       ((MethodData) _bd1).getParams()[1].setEnclosingData(_bd1);
                             
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable.clear();
       _bd1.addEnclosingData(_sd1);
       _bd1.addFinalVars(((MethodData)_bd1).getParams());
       _tcbtc = new TryCatchBodyTypeChecker(_bd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
       _tcbtc._importedPackages.addFirst("java.lang");
     }
     
@@ -183,11 +183,17 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
                                                                  new Type[0]), 
                                                              new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new StringLiteral(SourceInfo.NO_INFO, "arg")})))});
       
-      LanguageLevelVisitor llv = new LanguageLevelVisitor(new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
-                                      new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+      LanguageLevelVisitor llv = 
+        new LanguageLevelVisitor(new File(""), 
+                                 "",
+                                 new LinkedList<String>(), 
+                                 new LinkedList<String>(), 
+                                 new LinkedList<String>(), 
+                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded=false;
-      LanguageLevelConverter.symbolTable = llv.symbolTable = symbolTable;
+      LanguageLevelConverter.symbolTable.clear();
+      LanguageLevelConverter._newSDs.clear();
       llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
       llv._hierarchy = new Hashtable<String, TypeDefBase>();
@@ -196,7 +202,9 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
       SymbolData e = llv.getSymbolData("java.util.prefs.BackingStoreException", SourceInfo.NO_INFO, true);
       
       bb.visit(_tcbtc);
-      assertEquals("There should be no errors because it's ok to have uncaught exceptions in this visitor", 0, errors.size());
+      assertEquals("There should be no errors because it's ok to have uncaught exceptions in this visitor", 
+                   0, 
+                   errors.size());
     }
     
     public void testCompareThrownAndCaught() {
@@ -204,8 +212,12 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
       Block b = new Block(SourceInfo.NO_INFO, emptyBody);
 
       PrimitiveType intt = new PrimitiveType(SourceInfo.NO_INFO, "int");
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "i"));
-      FormalParameter param = new FormalParameter(SourceInfo.NO_INFO, new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "j")), false);
+      UninitializedVariableDeclarator uvd = 
+        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "i"));
+      FormalParameter param = 
+        new FormalParameter(SourceInfo.NO_INFO, 
+                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "j")), 
+                            false);
 
       NormalTryCatchStatement ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[] {new CatchBlock(SourceInfo.NO_INFO,  param, b)});
 
@@ -224,7 +236,7 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
       thrown.addLast(new Pair<SymbolData, JExpression>(exception3, ntcs));
       
       _tcbtc.compareThrownAndCaught(ntcs, caught_array, thrown);
-      System.err.println("thrown = " + thrown);
+      System.out.println("thrown = " + thrown);
       assertTrue("Thrown should have no elements", thrown.isEmpty());
 
       

@@ -62,17 +62,16 @@ public class VariableData {
   /**The data that this variable belongs to*/
   private Data _enclosingData;
   
-  /**True if this is a field we had generated*/
+  /** True if this is a field we had generated. */
   private boolean _generated;
   
-  /**
-   * Constructor for VariableData.  hasInitializer and generated are set to {@code false}.
-   * @param name  The name of the variable
-   * @param modifiersAndVisibility  The modifiersAndVisibility
-   * @param type  The SymbolData type of the variable.
-   * @param hasBeenAssigned  true if this variable has a value
-   * @param enclosingData  the enclosing data
-   */
+  /** Constructor for VariableData.  hasInitializer and generated are set to {@code false}.
+    * @param name  The name of the variable
+    * @param modifiersAndVisibility  The modifiersAndVisibility
+    * @param type  The SymbolData type of the variable.
+    * @param hasBeenAssigned  true if this variable has a value
+    * @param enclosingData  the enclosing data
+    */
   public VariableData(String name, ModifiersAndVisibility modifiersAndVisibility, SymbolData type, 
                       boolean hasBeenAssigned, Data enclosingData) {
     _name = name;
@@ -93,22 +92,54 @@ public class VariableData {
     _type = type.getInstanceData();
     _hasBeenAssigned = false;
   }
-
+  
   /** Checks the values of the fields*/
   public boolean equals(Object obj) { 
     if (obj == null) return false;
-    if ((obj.getClass() != this.getClass())) {
-      return false;
+    else if (obj.getClass() != this.getClass()) { 
+//      System.err.println("VariableData.equals: Class equality failure");
+      return false; 
     }
     
     VariableData vd = (VariableData)obj;
-   
-    return _name.equals(vd.getName()) &&
-      _modifiersAndVisibility.equals(vd.getMav()) &&
-      _type.equals(vd.getType()) &&
-      (_hasBeenAssigned==vd.hasValue()) &&
-      _hasInitializer==vd._hasInitializer && 
-      _enclosingData == vd.getEnclosingData();
+    
+    if (! _name.equals(vd.getName())) {
+//      System.err.println("VariableData.equals: name equality failure");
+      return false;
+    }
+    if (! _modifiersAndVisibility.equals(vd.getMav())) {
+//      System.err.println("VariableData.equals: modifiersAndVisibility equality failure");
+      return false;
+    }
+    
+    if (! _type.equals(vd.getType())) {
+//      System.err.println("VariableData.equals: type equality failure");
+      return false;
+    }
+    
+    if (_hasBeenAssigned != vd.hasValue()) {
+//      System.err.println("VariableData.equals: hasBeenAssigned equality failure");
+      return false;
+    }
+    if (_hasInitializer != vd._hasInitializer) {
+//      System.err.println("VariableData.equals: hasInitializer equality failure");
+      return false;
+    }
+    Data otherEnclosingData = vd.getEnclosingData();
+    
+    if (_enclosingData == null) {
+      if (otherEnclosingData == null) return true;
+      else {
+//      System.err.println("VariableData.equals: enclosingData failure");
+        return false; 
+      }
+    }
+    else if (! _enclosingData.equals(otherEnclosingData)) {
+//      System.err.println("VariableData.equals: enclosingData failure");
+      return false; 
+    }
+    
+    return true;
   }
   
   /**Hash on the name and enclosing data, since within each enclosing data, the variable name should be unique*/
@@ -152,7 +183,7 @@ public class VariableData {
       _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NO_INFO, newModifiers);
     }
   }
-
+  
   /** Add "private" to the modifiers and visibility for this class, if it is not already there. */
   public void setPrivate() {
     if (! hasModifier("private")) {
@@ -178,21 +209,27 @@ public class VariableData {
       _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NO_INFO, newModifiers);
     }
   }
-
+  
   /** Adds "private" and "final" to the modifiers and visibility for this class, if it is not already there. */
   public void setPrivateAndFinal() {
-   setPrivate();
-   setFinal();
+    setPrivate();
+    setFinal();
   }
   
   /** Adds "final" and "static" to the modifiers and visibility for this class, if it is not already there. */
   public void setFinalAndStatic() {
-   setFinal();
-   addModifier("static");
+    setFinal();
+    addModifier("static");
   }
   
   /** Returns true if this VariableData is final. */
   public boolean isFinal() { return hasModifier("final"); }
+  
+  /** Returns true if this VariableData is private. */
+  public boolean isPrivate() { return hasModifier("private"); }
+  
+  /** Returns true if this VariableData is static. */
+  public boolean isStatic() { return hasModifier("static"); }
   
   /** Returns true if this variable has the modifier specified*/
   public boolean hasModifier(String modifier) {
@@ -206,47 +243,29 @@ public class VariableData {
   }
   
   /**Set the generated flag to the specified value*/
-  public void setGenerated(boolean value) {
-    _generated = value;
-  }
+  public void setGenerated(boolean value) { _generated = value; }
   
   /**@return the generated flag*/
-  public boolean isGenerated() {
-    return _generated;
-  }
+  public boolean isGenerated() { return _generated;  }
   
   /** Returns true iff this variable was declared with an initial value */
-  public boolean hasInitializer() {
-    return _hasInitializer;
-  }
+  public boolean hasInitializer() { return _hasInitializer; }
   
   /** Set the "hasInitializer" flag */
-  public void setHasInitializer(boolean value) {
-    _hasInitializer = value;
-  }
+  public void setHasInitializer(boolean value) { _hasInitializer = value; }
   
   /** Returns true if this VariableData has been given a value. */
-  public boolean hasValue() {
-    return _hasBeenAssigned;
-  }
+  public boolean hasValue() { return _hasBeenAssigned; }
   
-  /**
-   * If this VariableData has not been given a value, set _hasBeenAssigned to true, and
-   * return true.  Otherwise, return false to indicate it already has a value and should not be
-   * reassigned.
-   */
+  /** If this VariableData has not been given a value, set _hasBeenAssigned to true, and return true.  Otherwise, 
+    * return false to indicate it already has a value and should not be reassigned. */
   public boolean gotValue() {
-    if (hasValue()) {
-      return false;
-    }
+    if (hasValue()) { return false; }
     _hasBeenAssigned = true;
     return true;
   }
   
-  /**
-   * If this VariableData has been given a value, set _hasBeenAssigned to false, and
-   * return true.  Otherwise, return false.
-   */
+  /** If this VariableData has a value, set _hasBeenAssigned to false, and return true.  Otherwise, return false. */
   public boolean lostValue() {
     if (hasValue()) {
       _hasBeenAssigned = false;
@@ -255,26 +274,20 @@ public class VariableData {
     return false;
   }
   
-  
-  
-  /**
-   * Test the methods defined in the above class.
-   */
+  /** Test the methods defined in the above class. */
   public static class VariableDataTest extends TestCase {
     
     private VariableData _vd;
     private VariableData _vd2;
     
     private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _publicMav2 = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _publicMav2 = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
     
-    public VariableDataTest() {
-      this("");
-    }
-    public VariableDataTest(String name) {
-      super(name);
-    }
+    public VariableDataTest() { this(""); }
+    public VariableDataTest(String name) { super(name); }
     
     public void testEquals() {
       _vd = new VariableData("v", _publicMav, SymbolData.INT_TYPE, true, null);
@@ -283,11 +296,11 @@ public class VariableData {
       _vd2 = new VariableData("v", _publicMav2, SymbolData.INT_TYPE, true, null);
       assertTrue("Equals should return true if two VariableDatas are equal", _vd.equals(_vd2));
       assertTrue("Equals should return true in opposite direction as well", _vd2.equals(_vd));
-
+      
       //comparison to null
       _vd2 = null;
       assertFalse("Equals should return false if VariableData is compared to null",_vd.equals(null));   
-    
+      
       //different names
       _vd2 = new VariableData("q", _publicMav, SymbolData.INT_TYPE, true, null);
       assertFalse("Equals should return false if variable names are different", _vd.equals(_vd2));

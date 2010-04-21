@@ -1,0 +1,6 @@
+class ContainsAnInnerClass extends Object {
+  class InnerClass extends Object{
+    int j;
+    int k;
+  }
+}

@@ -41,7 +41,7 @@ import edu.rice.cs.javalanglevels.parser.JExprParser;
 import java.util.*;
 import java.io.File;
 import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.iter.*;
 
 import junit.framework.TestCase;
 
@@ -64,21 +64,20 @@ public class Bob extends TypeChecker {
   /**The list of SymbolDatas corresponding to exceptions thrown in this body. */
   protected LinkedList<Pair<SymbolData, JExpression>> _thrown;
 
-
-  /**
-   * Constructor for Bob.
-   * @param data  The data that represents the context.
-   * @param file  The file that corresponds to the source file
-   * @param packageName  The string representing the package name
-   * @param importedFiles  The list of file names that have been specifically imported
-   * @param importedPackages  The list of package names that have been specifically imported
-   * @param vars  The list of fields that have been assigned up to the point where Bob is called.
-   * @param thrown  The list of exceptions that the context is declared to throw
-   */
+  /** Constructor for Bob.
+    * @param data  The data that represents the context.
+    * @param file  The file that corresponds to the source file
+    * @param packageName  The string representing the package name
+    * @param importedFiles  The list of file names that have been specifically imported
+    * @param importedPackages  The list of package names that have been specifically imported
+    * @param vars  The list of fields that have been assigned up to the point where Bob is called.
+    * @param thrown  The list of exceptions that the context is declared to throw
+    */
   public Bob(Data data, File file, String packageName, LinkedList<String> importedFiles, 
              LinkedList<String> importedPackages, LinkedList<VariableData> vars, 
              LinkedList<Pair<SymbolData, JExpression>> thrown) {
     super(file, packageName, importedFiles, importedPackages);
+    if (vars == null) throw new RuntimeException("Bob called with _vars = null!");
     _data = data;
     _vars = vars;
 
@@ -291,8 +290,7 @@ public class Bob extends TypeChecker {
   }
 
 
-  /*
-   * Visit the declarator of this formal parameter and return its result.
+  /* Visit the declarator of this formal parameter and return its result.
    * @param that  The Formal Parameter we are visiting.
    */
   public TypeData forFormalParameter(FormalParameter that) {
@@ -394,8 +392,7 @@ public class Bob extends TypeChecker {
     }
     return type.getInstanceData();
   }
-  
-  
+ 
   /** Look up the SymbolData for this InnerClass within the enclosing data, check for cyclic inheritance,
     * and then visit everything inside the inner class.
     * @param that  The InnerClassDef we're visiting
@@ -405,6 +402,8 @@ public class Bob extends TypeChecker {
     
     // This works because className will never be a qualified name
     SymbolData sd = _data.getInnerClassOrInterface(className);
+    
+    if (sd == null) throw new RuntimeException("SymbolData is null for class name = " + className);
 
     // Check for cyclic inheritance
     if (checkForCyclicInheritance(sd, new LinkedList<SymbolData>(), that)) { return null; }
@@ -432,7 +431,7 @@ public class Bob extends TypeChecker {
   public TypeData forInnerInterfaceDef(InnerInterfaceDef that) {
     String className = that.getName().getText();
     SymbolData sd = _data.getInnerClassOrInterface(className); // This works because className will never be a qualified name
-    if (sd==null) {System.out.println("I tried to look up " + className + " in " + _data.getName() + " but I got back null");}
+    if (sd == null) { System.out.println("I tried to look up " + className + " in " + _data.getName() + " but I got back null");}
 
     // Check for cyclic inheritance
     if (checkForCyclicInheritance(sd, new LinkedList<SymbolData>(), that)) {
@@ -552,7 +551,7 @@ public class Bob extends TypeChecker {
     for (int i = 0; i < that.getStatements().length; i++) {
       items_result[i] = that.getStatements()[i].visit(this);
       //walk over what has been thrown and throw an error if it contains an unchecked exception
-      for (int j = 0; j<this._thrown.size(); j++) {
+      for (int j = 0; j < this._thrown.size(); j++) {
         if (isUncaughtCheckedException(this._thrown.get(j).getFirst(), that)) {
           handleUncheckedException(this._thrown.get(j).getFirst(), this._thrown.get(j).getSecond());
         }
@@ -603,10 +602,10 @@ public class Bob extends TypeChecker {
     
     public void setUp() {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
+      LanguageLevelConverter.symbolTable.clear();
       _b = new Bob(null, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
                    new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
         _b._importedPackages.addFirst("java.lang");
       _sd1 = new SymbolData("i.like.monkey");
       _sd2 = new SymbolData("i.like.giraffe");
@@ -619,11 +618,14 @@ public class Bob extends TypeChecker {
     
     public void testForInitializedVariableDeclarator() {
       LanguageLevelVisitor llv =
-        new LanguageLevelVisitor(_b._file, _b._package, _b._importedFiles, 
+        new LanguageLevelVisitor(_b._file, 
+                                 _b._package, 
+                                 _b._importedFiles, 
                                  _b._importedPackages, new LinkedList<String>(), 
                                  new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
                                  new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-      LanguageLevelConverter.symbolTable = llv.symbolTable = _b.symbolTable;
+      
+//      LanguageLevelConverter.symbolTable.clear();
       
       SourceInfo si = SourceInfo.NO_INFO;
       Expression e1 = new IntegerLiteral(si, 1);
@@ -715,7 +717,7 @@ public class Bob extends TypeChecker {
                                  _b._importedPackages, new LinkedList<String>(), 
                                  new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
                                  new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-      LanguageLevelConverter.symbolTable = llv.symbolTable = _b.symbolTable;
+//      LanguageLevelConverter.symbolTable = llv.symbolTable = _b.symbolTable;
       
       SourceInfo si = SourceInfo.NO_INFO;
       

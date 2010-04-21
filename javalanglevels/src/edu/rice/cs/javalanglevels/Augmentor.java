@@ -39,11 +39,12 @@ package edu.rice.cs.javalanglevels;
 import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.util.Log;
+import edu.rice.cs.javalanglevels.util.Utilities;
 import java.io.*;
 import java.util.*;
 import junit.framework.TestCase;
 import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.iter.*;
 
 import static edu.rice.cs.javalanglevels.SourceInfo.NO_INFO;
 
@@ -53,6 +54,10 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
   private static final String newLine = System.getProperty("line.separator");
   private static final int indentWidth = 2; // TODO: get this from DrJava?
 
+  
+  /** IDIOCY Pointer:  Why are all these private fields static?  They are set in the constructor.  Was this design 
+    * choice made to ensure only one Augmentor exists at a time by clobbering fields.  Stupid, stupid, stupid. */
+  
   /** The original source file to be augmented. */
   static private BufferedReader _fileIn;
   
@@ -120,26 +125,26 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
   /** Return a Void array of the specified size. */
   protected Void[] makeArrayOfRetType(int len) { return new Void[len]; }
   
-  /** Writes out implicit variableDeclarationModfiers that must be added to augmented file. */
+  /** Writes out implicit variableDeclarationModfiers that must be added to augmented file.  If no visibility modifier
+    * is present, this method makes static fields "public final" and instance fields "private final".  If a visibility
+    * modifier is present, it overrides this default.  But all fields are forced to be "final".
+    * @param that is the field declaration being augmented
+    */
   protected void augmentVariableDeclarationModifiers(VariableDeclaration that) {
-    String variableDeclarationModifiers = "";
-    if (_isElementaryFile()) { variableDeclarationModifiers = "private final "; }
-    else if (_isIntermediateFile()) { 
-      //make static fields public final, make instance fields private final
-      variableDeclarationModifiers = "private final ";
-      String[] mavs = that.getMav().getModifiers();
-      for (int i = 0; i<mavs.length; i++) {
-        if (mavs[i].equals("static")) { variableDeclarationModifiers = "public final "; break; }
-      }
-    }
-      
-    _writeToFileOut(variableDeclarationModifiers);
+    
+    // make static fields public final, make instance fields private final
+    StringBuilder modifierString = new StringBuilder();
+    String[] modifiers = that.getMav().getModifiers();
+    if (! Utilities.hasVisibilityModifier(modifiers)) {
+      if (Utilities.isStatic(modifiers)) modifierString.append("public ");
+      else modifierString.append("private ");
+    }                                
+    if (! Utilities.isFinal(modifiers)) modifierString.append("final "); 
+    _writeToFileOut(modifierString.toString());
   }
   
-  /** Do the augmenting appropriate for a Variable Declaration:  At the Elementary Level, all class-level Variable 
-    * Declarations should be augmented with "private final".  At the IntermediateLevel, all Variable Declarations should
-    * be augmented with "final".  No augmentation is necessary at the Advanced level. Always read up to the start of the
-    * VariableDeclaration before beginning augmentation.
+  /** Do the augmenting appropriate for a Variable Declaration: all Variable Declarations should
+    * be augmented with "final" if such a modifier is not already present.
     * @param that  The VariableDeclaration we are augmenting.
     */
   public Void forVariableDeclaration(VariableDeclaration that) {
@@ -149,79 +154,47 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     return null;
   }
   
-  /** All formal parameters at the Elementary and Intermediate level (parameters to a method or in a catch clause) are
-    * augmented to be final.
+  /** All formal parameters (parameters to a method or in a catch clause) are augmented to be "final".
     * Always read up to the start of the FormalParameter before beginning augmentation.
     * @param that  The FormalParameter we are augmenting.
     */
   public Void forFormalParameter(FormalParameter that) {
     _readAndWriteThroughIndex(that.getSourceInfo().getStartLine(), that.getSourceInfo().getStartColumn() - 1);
-    if (_isElementaryFile() || _isIntermediateFile()) {
-      _writeToFileOut("final ");
-    }
+    if (! that.isIsFinal()) _writeToFileOut("final ");
+      
     // We don't bother to visit the declarator, since it does not need to be augmented.
     return null;
   }
   
-  /** Do the augmentation necessary for a ConstructorDef.  Not allowed at the Elementary level, so don't worry
-    * about that.  At the Intermediate Level, augment with public by default.  At all levels, the Formal Parameters
-    * to the MethodDef need to be visited so that they can be augmented with final.   
+  /** Do the augmentation necessary for a ConstructorDef.  If no visibility modifier is present, augment with "public"
+    * by default.  The Formal Parameters to the MethodDef need to be visited so that they can be augmented with "final".   
     * Always read up to the start of the ConstructorDef before beginning augmentation.
     * @param that  The ConstructorDef we are augmenting.
     */
   public Void forConstructorDef(ConstructorDef that) {
     _readAndWriteThroughIndex(that.getSourceInfo().getStartLine(), that.getSourceInfo().getStartColumn() - 1);
     
-    if (_isIntermediateFile()) { //if this is an Intermediate level file, want to check and see if the constructor has
-    //   modifiers.  If not, make it public by default
-      String[] modifiers = that.getMav().getModifiers();
-      boolean hasVisibilityModifier = false;
-      for (int i = 0; i<modifiers.length; i++) {
-        if ((modifiers[i].equals("private")) || (modifiers[i].equals("public")) || (modifiers[i].equals("protected"))) {
-          hasVisibilityModifier = true;
-          break;
-        }
-      }
-      
-      if (! hasVisibilityModifier) _writeToFileOut("public ");
-    }
+    // Check and see if the constructor has modifiers.  If not, make it public by default
+    String[] modifiers = that.getMav().getModifiers();
+    if (! Utilities.hasVisibilityModifier(modifiers)) _writeToFileOut("public ");
+
     for (FormalParameter fp : that.getParameters()) { fp.visit(this); }
     // We don't bother visiting the rest of the method declaration
     return null;
   }
   
-  /** Do the augmentation necessary for a MethodDef.  At the Elementary level, all methods are automatically
-    * augmented to be "public".  At the IntermediateLevel, if the user did not specify a visibility level,
+  /** Do the augmentation necessary for a MethodDef.  If the user did not specify a visibility level,
     * the method is automatically augmented to be "public".  Otherwise, the user's modifier is left unchanged.
     * At all levels, the Formal Parameters to the MethodDef need to be visited so that
-    * they can be augmented with final.   
+    * they can be augmented with "final" if "final" is not already present. 
     * Always read up to the start of the MethodDef before beginning augmentation.
     * @param that  The MethodDef being visited.
     */
   public Void forMethodDef(MethodDef that) {
     SourceInfo mdSourceInfo = that.getSourceInfo();
     _readAndWriteThroughIndex(mdSourceInfo.getStartLine(), mdSourceInfo.getStartColumn() - 1);
-    
-    if (_isElementaryFile()) _writeToFileOut("public ");
-    
-    if (_isIntermediateFile()) { 
-      /* Check if the method has explicit modifiers.  Unfortunately, the information in that.getMav().getModifiers() 
-       * is not reliable regarding what modifiers EXPLICITLY appear in a .dj1 file, so we have to do additional work. */
       
-      String[] modifiers = that.getMav().getModifiers();
-      String visibilityModifier = null;
-      for (int i = 0; i < modifiers.length; i++) {
-        if (modifiers[i].equals("private") || modifiers[i].equals("public") || modifiers[i].equals("protected")) {
-          visibilityModifier = modifiers[i];
-          break;
-        }
-      }
-      
-      if (visibilityModifier == null) {
-        _writeToFileOut("public ");
-      }
-        
-    }
+    if (! Utilities.hasVisibilityModifier(that.getMav().getModifiers())) _writeToFileOut("public ");
     
     for (FormalParameter fp : that.getParams()) { fp.visit(this); }
     // We don't bother visiting the rest of the method declaration
@@ -252,10 +225,9 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     return null;
   }
   
-  /** Class Defs can only appear at the top level of a source file.  If this ClassDef appears in an Elementary Level
-    * file and is specified to be public, then it needs to be augmented with public.  Visit the body of the class 
-    * definition with a new Augmentor.  Then, (so that this appears after the rest of the class body) add any necessary
-    * augmented methods.
+  /** Class Defs can only appear at the top level of a source file.  If the class type is public but "public" does
+    * not appear as a visibility modifier, add it.  Visit the body of the class definition with a new Augmentor.  
+    * Then, (so that this appears after the rest of the class body) add any necessary augmented methods.
     * @param cd  The ClassDef we're augmenting.
     */
   public Void forClassDef(ClassDef cd) {
@@ -263,16 +235,26 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     SymbolData sd = _llv.symbolTable.get(_llv.getQualifiedClassName(className));
     if (sd == null) { throw new RuntimeException("Internal Program Error: Can't find SymbolData for " + 
                                                  cd.getName().getText() + " Please report this bug."); }
-
-    ModifiersAndVisibility m = cd.getMav();
     
-    if (_isElementaryFile() && sd.hasModifier("public")) { 
-      // If this is an Elementary level file that we augmented with "public", then we need to
-      // augment the .java file with "public".  We should do this for all TestCase files.
+    ModifiersAndVisibility m = cd.getMav();
+    String[] modifiers = m.getModifiers();
+    
+    /* Support legacy Elementary level (dj0) files by generating a Junit import statement if this import has
+     * been auto-generated. */
+
+    if (sd.hasAutoGeneratedJunitImport()) {
+      // import statement should be OK here because language level test files can only contain one class. */
+      _writeToFileOut("import junit.framework.TestCase;" + newLine);  
+    }
+    
+    /* Support legacy Elementary level (dj0) files by add "public " prefix to classes that must be public (TestCase 
+     * files). */
+    if (sd.hasModifier("public") && (! Utilities.isPublic(m.getModifiers()))) {
+      assert ! Utilities.hasVisibilityModifier(modifiers);
       _readAndWriteThroughIndex(m.getSourceInfo().getStartLine(), m.getSourceInfo().getStartColumn() - 1);
       _writeToFileOut("public ");
     }
-
+    
     BracedBody bb = cd.getBody();
     sd.setAnonymousInnerClassNum(0);
     bb.visit(new Augmentor(sd));
@@ -281,40 +263,35 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     className = LanguageLevelVisitor.getUnqualifiedClassName(sd.getName());
     _readAndWriteThroughIndex(cd.getSourceInfo().getEndLine(), cd.getSourceInfo().getEndColumn() - 1);
     
-    // Do all that crazy augmentation stuff.
-    if (_isElementaryFile() || _isIntermediateFile()) {
-      writeConstructor(className, sd, baseIndent);
-      writeAccessors(sd, baseIndent);
-      String valueToStringName = writeValueToString(sd, baseIndent);
-      String valueEqualsName = writeValueEquals(sd, baseIndent);
-      String valueHashCodeName = writeValueHashCode(sd, baseIndent, valueEqualsName);
-      writeToString(sd, baseIndent, valueToStringName);
-      writeEquals(className, sd, baseIndent, valueEqualsName);
-      writeHashCode(className, sd, baseIndent, false, valueHashCodeName);
-      for (String s : _endOfClassVarDefs) {
-        _writeToFileOut(newLine + indentString(baseIndent, 1) + s);
-      }
-      if (_endOfClassVarDefs.size() > 0) {
+    // Augment this class declaration
+    writeConstructor(className, sd, baseIndent);
+    writeAccessors(sd, baseIndent);
+    String valueToStringName = writeValueToString(sd, baseIndent);
+    String valueEqualsName = writeValueEquals(sd, baseIndent);
+    String valueHashCodeName = writeValueHashCode(sd, baseIndent, valueEqualsName);
+    writeToString(sd, baseIndent, valueToStringName);
+    writeEquals(className, sd, baseIndent, valueEqualsName);
+    writeHashCode(className, sd, baseIndent, false, valueHashCodeName);
+    for (String s : _endOfClassVarDefs) {
+      _writeToFileOut(newLine + indentString(baseIndent, 1) + s);
+    }
+    if (_endOfClassVarDefs.size() > 0) {
       _writeToFileOut(newLine);
       _endOfClassVarDefs.clear();
-      }
-      _writeToFileOut(indentString(baseIndent, 0));
-
     }
+    _writeToFileOut(indentString(baseIndent, 0));
     
-
     // We don't bother visiting any of the signature nodes -- parameters, type, name, etc.
     return null;
   }
 
-  /**
-   * Look up this inner class in the enclosing data, and then visits its body.
-   * InnerClassDefs can appear inside method or class or interface bodies.
-   * No augmentation is done, because an InnerClass can only appear at the AdvancedLevel,
-   * and we do not do augmentation at the Advanced Level.  If this were to change, we would need to
-   * add the Augmentation back in.
-   * @param cd  The InnerClassDef we are augmenting.
-   */
+  /** Look up this inner class in the enclosing data, and then visits its body. InnerClassDefs can appear inside method
+    * or class or interface bodies.  No augmentation is done, because an InnerClass can only appear at the 
+    * AdvancedLevel,
+    * and we do not do augmentation at the Advanced Level.  If this were to change, we would need to
+    * add the Augmentation back in.
+    * @param cd  The InnerClassDef we are augmenting.
+    */
   public Void forInnerClassDef(InnerClassDef cd) {
     String className = cd.getName().getText();
     if (_enclosingData == null) {
@@ -325,24 +302,56 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
       throw new RuntimeException("Internal Program Error: Can't find SymbolData for " + cd.getName().getText() + 
                                  ". Please report this bug.");
     }
-
+    
+    /** WARNING: the code suffix copied from ClassDef; it it works it should be refactored. */
     BracedBody bb = cd.getBody();
     sd.setAnonymousInnerClassNum(0);
     bb.visit(new Augmentor(sd));
-
-    _readAndWriteThroughIndex(cd.getSourceInfo().getEndLine(), cd.getSourceInfo().getEndColumn() - 1);;
-
-    // We don't bother visiting any of the signature nodes -- parameters, type, name, etc.
+    
+    int baseIndent = cd.getSourceInfo().getStartColumn() - 1;
+    className = LanguageLevelVisitor.getUnqualifiedClassName(sd.getName());
+    _readAndWriteThroughIndex(cd.getSourceInfo().getEndLine(), cd.getSourceInfo().getEndColumn() - 1);
+    
+    // Augment this class declaration
+    writeConstructor(className, sd, baseIndent);
+    writeAccessors(sd, baseIndent);
+    String valueToStringName = writeValueToString(sd, baseIndent);
+    String valueEqualsName = writeValueEquals(sd, baseIndent);
+    String valueHashCodeName = writeValueHashCode(sd, baseIndent, valueEqualsName);
+    writeToString(sd, baseIndent, valueToStringName);
+    writeEquals(className, sd, baseIndent, valueEqualsName);
+    writeHashCode(className, sd, baseIndent, false, valueHashCodeName);
+    for (String s : _endOfClassVarDefs) {
+      _writeToFileOut(newLine + indentString(baseIndent, 1) + s);
+    }
+    if (_endOfClassVarDefs.size() > 0) {
+      _writeToFileOut(newLine);
+      _endOfClassVarDefs.clear();
+    }
+    _writeToFileOut(indentString(baseIndent, 0));
+    
+    
+// We don't bother visiting any of the signature nodes -- parameters, type, name, etc.
     return null;
-}
-
+  }
   
-  /**
-   * Look up this top level interface in the symbolTable, and then visit its body.
-   * Write any necessary extra variable definitions at the end of the file.
-   * InterfaceDefs can only appear at the top level of a source file.
-   * @param cd  The InterfaceDef being augmented.
-   */
+  /* Old suffix */
+  
+//    BracedBody bb = cd.getBody();
+//    sd.setAnonymousInnerClassNum(0);
+//    bb.visit(new Augmentor(sd));
+//
+//    _readAndWriteThroughIndex(cd.getSourceInfo().getEndLine(), cd.getSourceInfo().getEndColumn() - 1);;
+//
+//    // We don't bother visiting any of the signature nodes -- parameters, type, name, etc.
+//    return null;
+//  }
+  
+  /** Look up this top level interface in the symbolTable, and then visit its body.
+    * Write any necessary extra variable definitions at the end of the file.
+    * InterfaceDefs can only appear at the top level of a source file.
+    * @param cd  The InterfaceDef being augmented.
+    */
   public Void forInterfaceDef(InterfaceDef cd) {
     String interfaceName = cd.getName().getText();
     SymbolData sd = _llv.symbolTable.get(_llv.getQualifiedClassName(interfaceName));
@@ -351,10 +360,11 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
 
     ModifiersAndVisibility m = cd.getMav();
     
-    if (_isElementaryFile()) { 
-      _readAndWriteThroughIndex(m.getSourceInfo().getStartLine(), m.getSourceInfo().getStartColumn() - 1);
-      _writeToFileOut("public ");
-    }
+    /* Make interfaces public by default? */
+//    if (! Utilities.hasVisibilityModifier(m.getModifiers()) { 
+//      _readAndWriteThroughIndex(m.getSourceInfo().getStartLine(), m.getSourceInfo().getStartColumn() - 1);
+//      _writeToFileOut("public ");
+//    }
 
     BracedBody bb = cd.getBody();
     sd.setAnonymousInnerClassNum(0);
@@ -417,19 +427,19 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     
     int baseIndent = e.getSourceInfo().getStartColumn() - 1;
     _readAndWriteThroughIndex(e.getSourceInfo().getEndLine(), e.getSourceInfo().getEndColumn() - 1);
-    if (_isElementaryFile() || _isIntermediateFile()) {
-      String className = Data.dollarSignsToDots(e.getType().getName());
-      writeAccessors(sd, baseIndent);
-      String valueToStringName = writeValueToString(sd, baseIndent);
-      String valueEqualsName = writeValueEquals(sd, baseIndent);
-      String valueHashCodeName = writeValueHashCode(sd, baseIndent, valueEqualsName);
-      writeToString(sd, baseIndent, valueToStringName);
-      if (!_safeSupportCode) { writeAnonEquals(baseIndent);}
-      else { writeEquals(className, sd, baseIndent, valueEqualsName); }
-      writeHashCode(className, sd, baseIndent, true, valueHashCodeName);
-      _writeToFileOut(indentString(baseIndent, 0));
-
-    }
+//    if (_isElementaryFile() || _isIntermediateFile()) {
+    String className = Data.dollarSignsToDots(e.getType().getName());
+    writeAccessors(sd, baseIndent);
+    String valueToStringName = writeValueToString(sd, baseIndent);
+    String valueEqualsName = writeValueEquals(sd, baseIndent);
+    String valueHashCodeName = writeValueHashCode(sd, baseIndent, valueEqualsName);
+    writeToString(sd, baseIndent, valueToStringName);
+    if (!_safeSupportCode) { writeAnonEquals(baseIndent);}
+    else { writeEquals(className, sd, baseIndent, valueEqualsName); }
+    writeHashCode(className, sd, baseIndent, true, valueHashCodeName);
+    _writeToFileOut(indentString(baseIndent, 0));
+    
+//    }
     return null;
   }
   
@@ -456,13 +466,6 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     TypeDefBase[] cds = sf.getTypes();
     
     // We intentionally neglect to visit the package and import statements
-    
-      
-    /* If importedPackages contains "junit.framework", then we had to import it while type checking this file.  Because
-     * we assumed it was imported, the generated java file needs to import it as well. */
-    if (_isElementaryFile() && _llv._importedPackages.contains("junit.framework")) { // Assumes no package statements
-      _writeToFileOut("import junit.framework.*;" + newLine);
-    }
 
     //Visit each class and interface def in turn.
     for (TypeDefBase cd : cds) { cd.visit(this); }
@@ -1508,17 +1511,9 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     return result.toString();
   }
   
-  private static boolean _isElementaryFile() {
-    return LanguageLevelConverter.isElementaryFile(_llv._file);
-  }
-  
-  private static boolean _isIntermediateFile() {
-    return LanguageLevelConverter.isIntermediateFile(_llv._file);
-  }
-  
-  private static boolean _isAdvancedFile() {
-    return LanguageLevelConverter.isAdvancedFile(_llv._file);
-  }
+//  private static boolean _isElementaryFile()   { return LanguageLevelConverter.isElementaryFile(_llv._file); }
+//  private static boolean _isIntermediateFile() { return LanguageLevelConverter.isIntermediateFile(_llv._file); }
+//  private static boolean _isAdvancedFile()     { return LanguageLevelConverter.isAdvancedFile(_llv._file); }
   
   private static LinkedList<MethodData> _getVariableAccessorListHelper(SymbolData currClass) {
     List<Pair<VariableData, MethodData>> accessorMappings = new Vector<Pair<VariableData, MethodData>>();
@@ -1682,15 +1677,11 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     protected MethodBodyAugmentor(Data enclosing) { super(enclosing); }
     
     /** Writes out implicit variableDeclarationModfiers that must be added to augmented file. */
-    protected void augmentVariableDeclarationModifiers(VariableDeclaration that) {
-      if (! _isAdvancedFile()) _writeToFileOut("final ");
-    }
+    protected void augmentVariableDeclarationModifiers(VariableDeclaration that) { _writeToFileOut("final "); }
   }
   
   public static class Exception extends RuntimeException {
-    public Exception(java.lang.Exception nested) {
-      super(nested);
-    }
+    public Exception(java.lang.Exception nested) { super(nested); }
   }
   
   /** Test class for the Augmentor class. */
@@ -1704,17 +1695,18 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     }
     
     private Augmentor _a;
+    private Symboltable _s = LanguageLevelConverter.symbolTable; // Define a short synonym
     private File _f = new File("");
-    private Symboltable _s = new Symboltable();
     
     public void setUp() {
       LanguageLevelVisitor llv =
-        new ElementaryVisitor(_f, new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+        new IntermediateVisitor(_f, new LinkedList<Pair<String, JExpressionIF>>(), 
                               new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
-                              new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
-                              new Hashtable<SymbolData, LanguageLevelVisitor>());
+                              new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>());
       _a = new Augmentor(true, null, null, llv);
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_1_4, IterUtil.<File>empty());
+      LanguageLevelConverter.symbolTable.clear();
+      Symboltable _s = LanguageLevelConverter.symbolTable;   
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_1_4, EmptyIterable.<File>make());
     }
 
     public void testFormalParameters2TypeDatas() {
@@ -1765,86 +1757,86 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
       assertEquals("Should return a string of 6 tabs", "            ", indentString(2, 5));
     }
 
-    public void testIsElementaryFile() {
-      _llv = new ElementaryVisitor(new File("elementary.dj0"), new LinkedList<Pair<String, JExpressionIF>>(), _s, 
-                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
-                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
-                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
-      assertTrue("This is an elementary file", _isElementaryFile());
-      _llv = new IntermediateVisitor(new File("intermediate.dj1"), 
-                                     new LinkedList<Pair<String, JExpressionIF>>(), _s, 
-                                     new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
-                                     new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
-                                     new Hashtable<SymbolData, LanguageLevelVisitor>());
-      assertFalse("This is an intermediate file", _isElementaryFile());
-      _llv = new AdvancedVisitor(new File("advanced.dj2"),
-                                 new LinkedList<Pair<String, JExpressionIF>>(), _s, 
-                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
-                                 new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
-                                 new Hashtable<SymbolData, LanguageLevelVisitor>());
-      assertFalse("This is an advanced file", _isElementaryFile());
-      _llv = new ElementaryVisitor(new File("full.java"), 
-                                   new LinkedList<Pair<String, JExpressionIF>>(), _s, 
-                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
-                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
-                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
-      assertFalse("This is a full file", _isElementaryFile());
-    }
+//    public void testIsElementaryFile() {
+//      _llv = new ElementaryVisitor(new File("elementary.dj0"), new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+//                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+//                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
+//                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
+//      assertTrue("This is an elementary file", _isElementaryFile());
+//      _llv = new IntermediateVisitor(new File("intermediate.dj1"), 
+//                                     new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+//                                     new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+//                                     new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
+//                                     new Hashtable<SymbolData, LanguageLevelVisitor>());
+//      assertFalse("This is an intermediate file", _isElementaryFile());
+//      _llv = new AdvancedVisitor(new File("advanced.dj2"),
+//                                 new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+//                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+//                                 new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
+//                                 new Hashtable<SymbolData, LanguageLevelVisitor>());
+//      assertFalse("This is an advanced file", _isElementaryFile());
+//      _llv = new ElementaryVisitor(new File("full.java"), 
+//                                   new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+//                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+//                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
+//                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
+//      assertFalse("This is a full file", _isElementaryFile());
+//    }
 
-    public void testIsIntermediateFile() {
-      _llv = new ElementaryVisitor(new File("elementary.dj0"), 
-                                   new LinkedList<Pair<String, JExpressionIF>>(), _s,
-                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
-                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
-                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
-      assertFalse("This is an elementary file", _isIntermediateFile());
-      _llv = new IntermediateVisitor(new File("intermediate.dj1"),
-                                     new LinkedList<Pair<String, JExpressionIF>>(), _s,
-                                     new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
-                                     new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
-                                     new Hashtable<SymbolData, LanguageLevelVisitor>());
-      assertTrue("This is an intermediate file", _isIntermediateFile());
-      _llv = new AdvancedVisitor(new File("advanced.dj2"),
-                                 new LinkedList<Pair<String, JExpressionIF>>(), _s, 
-                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
-                                 new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
-                                 new Hashtable<SymbolData, LanguageLevelVisitor>());
-      assertFalse("This is an advanced file", _isIntermediateFile());
-      _llv = new ElementaryVisitor(new File("full.java"),
-                                   new LinkedList<Pair<String, JExpressionIF>>(), _s,
-                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
-                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
-                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
-      assertFalse("This is a full file", _isIntermediateFile());
-    }
-
-    public void testIsAdvancedFile() {
-      _llv = new ElementaryVisitor(new File("elementary.dj0"),
-                                   new LinkedList<Pair<String, JExpressionIF>>(), _s, 
-                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
-                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
-                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
-      assertFalse("This is an elementary file", _isAdvancedFile());
-      _llv = new IntermediateVisitor(new File("intermediate.dj1"), 
-                                     new LinkedList<Pair<String, JExpressionIF>>(), _s, 
-                                     new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
-                                     new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
-                                     new Hashtable<SymbolData, LanguageLevelVisitor>());
-      assertFalse("This is an intermediate file", _isAdvancedFile());
-      _llv = new AdvancedVisitor(new File("advanced.dj2"), 
-                                 new LinkedList<Pair<String, JExpressionIF>>(), _s, 
-                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
-                                 new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
-                                 new Hashtable<SymbolData, LanguageLevelVisitor>());
-      assertTrue("This is an advanced file", _isAdvancedFile());
-      _llv = new ElementaryVisitor(new File("full.java"), 
-                                   new LinkedList<Pair<String, JExpressionIF>>(), _s, 
-                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
-                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
-                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
-      assertFalse("This is a full file", _isAdvancedFile());
-    }
-    
+//    public void testIsIntermediateFile() {
+//      _llv = new ElementaryVisitor(new File("elementary.dj0"), 
+//                                   new LinkedList<Pair<String, JExpressionIF>>(), _s,
+//                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+//                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
+//                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
+//      assertFalse("This is an elementary file", _isIntermediateFile());
+//      _llv = new IntermediateVisitor(new File("intermediate.dj1"),
+//                                     new LinkedList<Pair<String, JExpressionIF>>(), _s,
+//                                     new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+//                                     new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
+//                                     new Hashtable<SymbolData, LanguageLevelVisitor>());
+//      assertTrue("This is an intermediate file", _isIntermediateFile());
+//      _llv = new AdvancedVisitor(new File("advanced.dj2"),
+//                                 new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+//                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+//                                 new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
+//                                 new Hashtable<SymbolData, LanguageLevelVisitor>());
+//      assertFalse("This is an advanced file", _isIntermediateFile());
+//      _llv = new ElementaryVisitor(new File("full.java"),
+//                                   new LinkedList<Pair<String, JExpressionIF>>(), _s,
+//                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+//                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
+//                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
+//      assertFalse("This is a full file", _isIntermediateFile());
+//    }
+//
+//    public void testIsAdvancedFile() {
+//      _llv = new ElementaryVisitor(new File("elementary.dj0"),
+//                                   new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+//                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+//                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
+//                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
+//      assertFalse("This is an elementary file", _isAdvancedFile());
+//      _llv = new IntermediateVisitor(new File("intermediate.dj1"), 
+//                                     new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+//                                     new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+//                                     new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
+//                                     new Hashtable<SymbolData, LanguageLevelVisitor>());
+//      assertFalse("This is an intermediate file", _isAdvancedFile());
+//      _llv = new AdvancedVisitor(new File("advanced.dj2"), 
+//                                 new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+//                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+//                                 new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
+//                                 new Hashtable<SymbolData, LanguageLevelVisitor>());
+//      assertTrue("This is an advanced file", _isAdvancedFile());
+//      _llv = new ElementaryVisitor(new File("full.java"), 
+//                                   new LinkedList<Pair<String, JExpressionIF>>(), _s, 
+//                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+//                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
+//                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
+//      assertFalse("This is a full file", _isAdvancedFile());
+//    }
+//    
     public void testGetVariableAccessorListHelper() {
       ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
       ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});

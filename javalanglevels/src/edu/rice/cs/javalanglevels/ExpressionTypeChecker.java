@@ -41,7 +41,7 @@ import edu.rice.cs.javalanglevels.parser.JExprParser;
 import java.util.*;
 import java.io.File;
 import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.iter.*;
 
 import junit.framework.TestCase;
 
@@ -63,6 +63,7 @@ public class ExpressionTypeChecker extends Bob {
                                LinkedList<String> importedPackages, LinkedList<VariableData> vars, 
                                LinkedList<Pair<SymbolData, JExpression>> thrown) {
     super(data, file, packageName, importedFiles, importedPackages, vars, thrown);
+    if (vars == null) throw new RuntimeException("vars == null in new ExpressionTypeChecker operation");
   }
 
 
@@ -186,36 +187,26 @@ public class ExpressionTypeChecker extends Bob {
     return forNumericAssignmentExpressionOnly(that, name_result, value_result);
   }
   
-
-  /**
-   * Delegate to method for super class.
-   */
+  /** Delegate to method for super class. */
   public TypeData forMinusAssignmentExpression(MinusAssignmentExpression that) {
     return forNumericAssignmentExpression(that);
   }
 
-  /**
-   * Delegate to method for super class.
-   */
+  /** Delegate to method for super class. */
   public TypeData forMultiplyAssignmentExpression(MultiplyAssignmentExpression that) {
     return forNumericAssignmentExpression(that);
   }
   
-  /**
-   * Delegate to method for super class.
-   */
+  /** Delegate to method for super class. */
   public TypeData forDivideAssignmentExpression(DivideAssignmentExpression that) {
     return forNumericAssignmentExpression(that);
   }
 
-  /**
-   * Delegate to method for super class.
-   */ 
+  /** Delegate to method for super class. */ 
   public TypeData forModAssignmentExpression(ModAssignmentExpression that) {
     return forNumericAssignmentExpression(that);
   }
 
-    
   /** A NumericAssignmentExpression is okay if both the lhs and the rhs are instances, both are numbers, and the rhs
     * is assignable to the lhs. Return the lhs, or null
     * @param that  The SimpleAssignmentExpression being typechecked
@@ -262,18 +253,14 @@ public class ExpressionTypeChecker extends Bob {
     return name_result.getInstanceData();  
   }
 
-  /**
-   * Not currently supported.
-   */
+  /** Not currently supported. */
   public TypeData forShiftAssignmentExpressionOnly(ShiftAssignmentExpression that, TypeData name_result, 
                                                    TypeData value_result) {
     throw new RuntimeException ("Internal Program Error: Shift assignment operators are not supported.  " + 
                                 "This should have been caught before the TypeChecker.  Please report this bug.");
   }
 
-  /**
-   * Not currently supported.
-   */
+  /** Not currently supported. */
   public TypeData forBitwiseAssignmentExpressionOnly(BitwiseAssignmentExpression that, TypeData name_result, TypeData value_result) {
     throw new RuntimeException ("Internal Program Error: Bitwise assignment operators are not supported.  " + 
                                 "This should have been caught before the TypeChecker.  Please report this bug.");
@@ -1270,8 +1257,6 @@ public class ExpressionTypeChecker extends Bob {
     return value_result.getInstanceData();
   }
   
-  
-  
   /** Look up the method called in the method invocation within the context of the context TypeData.
     * Resolve all arguments to the method, and make sure they are instance datas.
     * If an argument is a type, the method cannot be found, or the method is called from a static context but is
@@ -1702,9 +1687,12 @@ public class ExpressionTypeChecker extends Bob {
     
     public void setUp() {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      LanguageLevelConverter.symbolTable = symbolTable = new Symboltable();
-      _etc = new ExpressionTypeChecker(null, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.<File>empty());
+      LanguageLevelConverter.symbolTable.clear();
+      LanguageLevelConverter._newSDs.clear();
+      _etc = 
+        new ExpressionTypeChecker(null, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
+                                  new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
       _etc._importedPackages.addFirst("java.lang");
       _sd1 = new SymbolData("i.like.monkey");
       _sd2 = new SymbolData("i.like.giraffe");
@@ -1819,10 +1807,16 @@ public class ExpressionTypeChecker extends Bob {
     }
    
     public void testForSimpleUninitializedArrayInstantiation() {
-      LanguageLevelVisitor llv = new LanguageLevelVisitor(_etc._file, _etc._package, _etc._importedFiles, 
-                                                          _etc._importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
-                                                          new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-      LanguageLevelConverter.symbolTable = llv.symbolTable = _etc.symbolTable;
+      LanguageLevelVisitor llv = 
+        new LanguageLevelVisitor(_etc._file, 
+                                 _etc._package, 
+                                 _etc._importedFiles, 
+                                 _etc._importedPackages, 
+                                 new LinkedList<String>(), 
+                                 new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
+                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+//      LanguageLevelConverter.symbolTable = llv.symbolTable = _etc.symbolTable;
+//      LanguageLevelConverter._newSDs = new Hashtable<SymbolData, LanguageLevelVisitor>();
       
       SourceInfo si = SourceInfo.NO_INFO;
       
@@ -1911,10 +1905,17 @@ public class ExpressionTypeChecker extends Bob {
     }    
     
     public void testForUninitializedArrayInstantiationOnly() {
-      LanguageLevelVisitor llv = new LanguageLevelVisitor(_etc._file, _etc._package, _etc._importedFiles, 
-                                                          _etc._importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
-                                                          new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-      LanguageLevelConverter.symbolTable = llv.symbolTable = _etc.symbolTable;
+      LanguageLevelVisitor llv = 
+        new LanguageLevelVisitor(_etc._file, 
+                                 _etc._package, 
+                                 _etc._importedFiles, 
+                                 _etc._importedPackages, 
+                                 new LinkedList<String>(), 
+                                 new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
+                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+      
+//      LanguageLevelConverter.symbolTable = llv.symbolTable = _etc.symbolTable;
+//      LanguageLevelConverter._newSDs = new Hashtable<SymbolData, LanguageLevelVisitor>();
       
       SourceInfo si = SourceInfo.NO_INFO;
       
@@ -1978,10 +1979,14 @@ public class ExpressionTypeChecker extends Bob {
       
       ArrayType intArrayType = new ArrayType(SourceInfo.NO_INFO, "int[]", new PrimitiveType(SourceInfo.NO_INFO, "int"));
 
-      LanguageLevelVisitor llv = new LanguageLevelVisitor(_etc._file, _etc._package, _etc._importedFiles, 
-                                                          _etc._importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
-                                                          new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-      
+      LanguageLevelVisitor llv = 
+        new LanguageLevelVisitor(_etc._file, 
+                                 _etc._package, 
+                                 _etc._importedFiles, 
+                                 _etc._importedPackages, 
+                                 new LinkedList<String>(), 
+                                 new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
+                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
       
       ArrayData intArray = new ArrayData(SymbolData.INT_TYPE, llv, SourceInfo.NO_INFO);
       intArray.setIsContinuation(false);
@@ -2669,7 +2674,7 @@ public class ExpressionTypeChecker extends Bob {
 
     public void testForInstanceOfExpressionOnly() {
       InstanceofExpression ioe = new InstanceofExpression(SourceInfo.NO_INFO, 
-                                                           new BooleanLiteral(SourceInfo.NO_INFO, true),
+                                                          new BooleanLiteral(SourceInfo.NO_INFO, true),
                                                           new PrimitiveType(SourceInfo.NO_INFO, "int"));
       try {
         _etc.forInstanceofExpressionOnly(ioe, SymbolData.BOOLEAN_TYPE.getInstanceData(), SymbolData.INT_TYPE.getInstanceData());
@@ -2820,13 +2825,20 @@ public class ExpressionTypeChecker extends Bob {
  
     }
     
-    
     public void testForComplexNamedClassInstantiation() {
-      ComplexNamedClassInstantiation ci1 = new ComplexNamedClassInstantiation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "o")), new ClassOrInterfaceType(SourceInfo.NO_INFO, "innerClass", new Type[0]), 
-                                                                            new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new IntegerLiteral(SourceInfo.NO_INFO, 5)}));
+      ComplexNamedClassInstantiation ci1 = 
+        new ComplexNamedClassInstantiation(SourceInfo.NO_INFO, 
+                                           new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "o")), 
+                                           new ClassOrInterfaceType(SourceInfo.NO_INFO, "innerClass", new Type[0]),                                  
+                                           new ParenthesizedExpressionList(SourceInfo.NO_INFO, 
+                                                                           new Expression[] { new IntegerLiteral(SourceInfo.NO_INFO, 5)}));
 
-      ComplexNamedClassInstantiation ci2 = new ComplexNamedClassInstantiation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "o")), new ClassOrInterfaceType(SourceInfo.NO_INFO, "innerClass", new Type[0]), 
-                                                                            new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
+      ComplexNamedClassInstantiation ci2 = 
+        new ComplexNamedClassInstantiation(SourceInfo.NO_INFO, 
+                                           new SimpleNameReference(SourceInfo.NO_INFO, 
+                                                                   new Word(SourceInfo.NO_INFO, "o")), 
+                                           new ClassOrInterfaceType(SourceInfo.NO_INFO, "innerClass", new Type[0]), 
+                                           new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
       
       //if outer type is not in vars list, give appropriate error
       assertEquals("Should return null", null, ci1.visit(_etc));
@@ -2865,20 +2877,15 @@ public class ExpressionTypeChecker extends Bob {
     assertEquals("Should return innerClass", innerClass.getInstanceData(), ci1.visit(_etc));
     assertEquals("Should still be 2 errors", 2, errors.size());
     
-    
     //if class is abstract, cannot be instantiated
     innerClass.addModifier("abstract");
     assertEquals("Should return innerClass even though it cannot really be instantiated", innerClass.getInstanceData(), ci1.visit(_etc));
     assertEquals("Should be 3 errors", 3, errors.size());
-    assertEquals("Error message should be correct", "outer.innerClass is abstract and thus cannot be instantiated", errors.getLast().getFirst());
-    
-                   
+    assertEquals("Error message should be correct", "outer.innerClass is abstract and thus cannot be instantiated", errors.getLast().getFirst());              
                    
     //if enclosingType is not an instance, and result is not static, give error
     ComplexNamedClassInstantiation ci3 = new ComplexNamedClassInstantiation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "outer")), new ClassOrInterfaceType(SourceInfo.NO_INFO, "innerClass", new Type[0]), 
-                                                                            new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
-    
-                   
+                                                                            new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));             
     outerClass.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
     innerClass.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
     assertEquals("Should return innerClass even though the syntax was wrong", innerClass.getInstanceData(), ci3.visit(_etc));
@@ -2886,13 +2893,10 @@ public class ExpressionTypeChecker extends Bob {
     assertEquals("Error message should be correct", 
                  "The constructor of a non-static inner class can only be called on an instance of its containing class (e.g. new outer().new innerClass())", errors.getLast().getFirst());
     
-
-    
     //if result is static, give appropriate error:
     innerClass.addModifier("static");
     assertEquals("Should return innerClass even though the syntax was wrong", innerClass.getInstanceData(), ci1.visit(_etc));
     assertEquals("Should be 5 errors", 5, errors.size());
-
 
     assertEquals("Error message should be correct", 
                  "You cannot instantiate a static inner class or interface with this syntax.  Instead, try new outer.innerClass()",
@@ -2921,17 +2925,18 @@ public class ExpressionTypeChecker extends Bob {
     assertEquals("Should be 8 errors", 8, errors.size());
     assertEquals("Error message should be correct", "The class or interface outer is private and cannot be accessed from i.like.monkey", errors.getLast().getFirst());
     }
-    
-
-    
   
     public void testForSimpleThisConstructorInvocation() {
       //this should always add an error:
-      SimpleThisConstructorInvocation stci = new SimpleThisConstructorInvocation(SourceInfo.NO_INFO, new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
+      SimpleThisConstructorInvocation stci = 
+        new SimpleThisConstructorInvocation(SourceInfo.NO_INFO, 
+                                            new ParenthesizedExpressionList(SourceInfo.NO_INFO, 
+                                                                                                new Expression[0]));
       assertEquals("Should return null", null, stci.visit(_etc));
       assertEquals("Should be 1 error", 1, errors.size());
-      assertEquals("Error message should be correct", "This constructor invocations are only allowed as the first statement of a constructor body", errors.getLast().getFirst());
-      
+      assertEquals("Error message should be correct", 
+                   "This constructor invocations are only allowed as the first statement of a constructor body", 
+                   errors.getLast().getFirst());
     }
 
     public void testForComplexThisConstructorInvocation() {
@@ -2941,11 +2946,6 @@ public class ExpressionTypeChecker extends Bob {
       assertEquals("Should be 1 error", 1, errors.size());
       assertEquals("Error message should be correct", "Constructor invocations of this form are never allowed", errors.getLast().getFirst());
     }
-  
-    
-
-    
-    
 
     public void testForSimpleNameReference() {
       //first, consider the case where what we have is a variable reference:
@@ -3257,19 +3257,16 @@ public class ExpressionTypeChecker extends Bob {
      contextClass.setIsContinuation(false);
      contextClass.setMav(_publicMav);
 
-     
      assertEquals("Should return instance of this", contextClass.getInstanceData(), _etc.forComplexThisReferenceOnly(ctr, contextClass));
      assertEquals("Should be 2 errors", 2, errors.size());
      assertEquals("The error message should be correct", "You cannot reference context.this from here, because context is not an outer class of i.like.monkey", errors.getLast().getFirst());
 
-
      //if enclosing_result is an outer data of current context, everything is peachy
-      _etc._data.setOuterData(contextClass);
-      contextClass.addInnerClass(_etc._data.getSymbolData());
-      
-      assertEquals("Should return instance of this", contextClass.getInstanceData(), _etc.forComplexThisReferenceOnly(ctr, contextClass));
-      assertEquals("Should still be 2 errors", 2, errors.size());
-
+     _etc._data.setOuterData(contextClass);
+     contextClass.addInnerClass(_etc._data.getSymbolData());
+     
+     assertEquals("Should return instance of this", contextClass.getInstanceData(), _etc.forComplexThisReferenceOnly(ctr, contextClass));
+     assertEquals("Should still be 2 errors", 2, errors.size());
      
      //if we are in a static method, throw appropriate error
      MethodData sm = new MethodData("staticMethod", new VariableData[0]);
@@ -3376,18 +3373,26 @@ public class ExpressionTypeChecker extends Bob {
     }
 
     public void testForArrayAccessOnly() {
-      ArrayAccess aa = new ArrayAccess(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), new NullLiteral(SourceInfo.NO_INFO));
+      ArrayAccess aa = 
+        new ArrayAccess(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), new NullLiteral(SourceInfo.NO_INFO));
+      
+      Hashtable<SymbolData, LanguageLevelVisitor> testNewSDs = LanguageLevelConverter._newSDs;
+      LanguageLevelVisitor testLLVisitor = 
+        new LanguageLevelVisitor(_etc._file, 
+                                 _etc._package, 
+                                 _etc._importedFiles, 
+                                 _etc._importedPackages, 
+                                 new LinkedList<String>(), 
+                                 new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
+                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
 
       //if lhs is an array, and index is an int instance, no errors
-      ArrayData ad = new ArrayData(SymbolData.INT_TYPE, 
-                                   new LanguageLevelVisitor(_etc._file, _etc._package, _etc._importedFiles, _etc._importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>()),
-                                   SourceInfo.NO_INFO);
+      ArrayData ad = new ArrayData(SymbolData.INT_TYPE, testLLVisitor, SourceInfo.NO_INFO);             
 
       assertEquals("should return int", SymbolData.INT_TYPE.getInstanceData(), _etc.forArrayAccessOnly(aa, ad.getInstanceData(), SymbolData.INT_TYPE.getInstanceData()));
       assertEquals("should return int", SymbolData.INT_TYPE.getInstanceData(), _etc.forArrayAccessOnly(aa, ad.getInstanceData(), SymbolData.CHAR_TYPE.getInstanceData()));
       assertEquals("Should be no errors", 0, errors.size());
 
-      
       //if either input is null, return null
       assertEquals("Should return null", null, _etc.forArrayAccessOnly(aa, null, SymbolData.INT_TYPE));
       assertEquals("Should return null", null, _etc.forArrayAccessOnly(aa, SymbolData.INT_TYPE, null));
@@ -3720,10 +3725,16 @@ public class ExpressionTypeChecker extends Bob {
       assertEquals("Error message should be correct", "You cannot use the type name int on the right hand side of an assignment.  Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
 
       //test that we can assign to an array element
-      LanguageLevelVisitor llv = new LanguageLevelVisitor(_etc._file, _etc._package, _etc._importedFiles, 
-                                                          _etc._importedPackages, new LinkedList<String>(), new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
-                                                          new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-      LanguageLevelConverter.symbolTable = llv.symbolTable = _etc.symbolTable;
+      LanguageLevelVisitor llv = 
+        new LanguageLevelVisitor(_etc._file, 
+                                 _etc._package, 
+                                 _etc._importedFiles, 
+                                 _etc._importedPackages, 
+                                 new LinkedList<String>(), 
+                                 new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
+                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+//      LanguageLevelConverter.symbolTable = llv.symbolTable = _etc.symbolTable;
+//      LanguageLevelConverter._newSDs = new Hashtable<SymbolData, LanguageLevelVisitor>();
       ArrayData boolArray = new ArrayData(SymbolData.BOOLEAN_TYPE, llv, SourceInfo.NO_INFO);
       boolArray.setIsContinuation(false);
       symbolTable.remove("boolean[]");

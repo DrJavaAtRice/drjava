@@ -1,0 +1,15 @@
+class ClassWithSwitchStatement extends Object {
+  int i = 10;
+  
+  int switchMethod() {
+    switch (i) {
+      case 1:
+        break;
+      case 2:
+        break;
+      default:
+        break;
+    }
+    return i;
+  }
+}
