@@ -36,6 +36,8 @@
 
 package edu.rice.cs.drjava.config;
 
+import java.io.StringWriter;
+import java.io.PrintWriter;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Class to store and retrieve all configurable options.
@@ -73,6 +75,9 @@ public class Configuration {
   /** Gets the current value of the given Option. */
   public <T> T getSetting(Option<T> op) { return map.getOption(op); }
   
+  /** By default, all options are editable. */
+  public <T> boolean isEditable(Option<T> op) { return true; }
+  
   /** Adds an OptionListener to the given Option, to be notified each time the option changes.
     * @param op Option to listen for changes on
     * @param l OptionListener wishing to listen
@@ -97,7 +102,25 @@ public class Configuration {
   public void storeStartupException(Exception e) { _startupException = e; }
   
   /** Returns a string representation of the contents of the OptionMap. */
-  public String toString() { return map.toString(); }
+  public String toString() {
+    StringWriter sw = new StringWriter();
+    PrintWriter w = new PrintWriter(sw);
+
+    // Write each option
+    for (OptionParser<?> key : map.keys()) {
+      if (!key.getDefault().equals(map.getOption(key))) {
+        String tmpString = map.getString(key);
+        
+        // This replaces all backslashes with two backslashes for windows
+        tmpString = tmpString.replaceAll("\\\\", "\\\\\\\\");
+        
+        w.println(key.getName()+" = "+tmpString);
+      }
+    }
+    w.close();
+    
+    return sw.toString();
+  }
   
   /** Return OptionMap. */
   public OptionMap getOptionMap() { return map; }

@@ -59,7 +59,7 @@ import java.util.ArrayList;
 /** Graphical form of a VectorOption for the Extra Classpath option. Uses a file chooser for each String element.
  *  @version $Id$
  */
-public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>> implements OptionConstants {
+public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>,JComponent> implements OptionConstants {
   protected JScrollPane _tableScrollPane;
   protected JPanel _panel;
   protected JTable _table;
@@ -69,6 +69,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   protected boolean _moveButtonEnabled = false;
   protected AbstractTableModel _tableModel;
   protected JButton _addButton;
+  protected JButton _removeButton;
   protected JTable _buttonTable;
   protected AbstractTableModel _buttonTableModel;
   protected Vector<T> _data;
@@ -146,9 +147,9 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     _table.getTableHeader().setReorderingAllowed(false);
     
     // create the remove button
-    final JButton removeButton = new CommonCloseButton();
-    ButtonEditor buttonEditor = new ButtonEditor(removeButton);
-    removeButton.addActionListener(new ActionListener() {
+    _removeButton = new CommonCloseButton();
+    ButtonEditor buttonEditor = new ButtonEditor(_removeButton);
+    _removeButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         _removeAction();
       }
@@ -232,6 +233,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     setDescription(description);
     updateButtons();
     resizeTable();
+    setComponent(_panel);
   }
 
   /** Returns the decorated table model. This adds another column to it with remove buttons. */
@@ -492,14 +494,18 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   
   /** Enable and disable buttons. */
   protected void updateButtons() {
+    boolean editable = DrJava.getConfig().isEditable(_option);
     if (_moveButtonEnabled) {
       int[] rows = _table.getSelectedRows();
-      boolean enable = (rows.length > 0) && (_data.size()>1);
+      boolean enable = (rows.length > 0) && (_data.size()>1) && editable;
       _moveUpButton.setEnabled(enable);
       _moveDownButton.setEnabled(enable);
       _buttonTableModel.setValueAt(null, 0, 1);
       _buttonTableModel.setValueAt(null, 0, 2);
     }
+    _addButton.setEnabled(editable);
+    _removeButton.setEnabled(editable);
+    _table.setEnabled(editable);
   }
 
   /** Sets the tooltip description text for this option.
@@ -573,9 +579,6 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     _tableScrollPane.setPreferredSize(new Dimension(0, getTableHeight()));
     _parent.validate();
   }
-
-  /** Return's this OptionComponent's configurable component. */
-  public JComponent getComponent() { return _panel; }
 
   /** Gets an action that adds a component to the set of options. */
   protected abstract Action _getAddAction();

@@ -51,7 +51,7 @@ import java.util.Vector;
 public class ConfigPanel extends JPanel {
 
   protected final String _title;
-  protected final Vector<OptionComponent<?>> _components;
+  protected final Vector<OptionComponent<?,?>> _components;
 
   /** Constructor for this ConfigPanel
    *  @param title the title for this panel
@@ -59,7 +59,7 @@ public class ConfigPanel extends JPanel {
   public ConfigPanel(String title) {
     //_title = new JLabel(title);
     _title = title;
-    _components = new Vector<OptionComponent<?>>();
+    _components = new Vector<OptionComponent<?,?>>();
   }
 
   public String getTitle() { return _title; }
@@ -67,7 +67,7 @@ public class ConfigPanel extends JPanel {
   /** The method for adding new OptionComponents to this ConfigPanel
    *  @param oc the OptionComponent to be added
    */
-  public void addComponent( OptionComponent<?> oc) { _components.add(oc); }
+  public void addComponent(OptionComponent<?,?> oc) { _components.add(oc); }
 
   public void displayComponents() {
     this.setLayout(new BorderLayout());
@@ -93,7 +93,7 @@ public class ConfigPanel extends JPanel {
     Insets labelInsets = new Insets(0, 10, 0, 10);
     Insets compInsets  = new Insets(0, 0, 0, 0);
     for (int i = 0; i < _components.size(); i++) {
-      OptionComponent<?> comp = _components.get(i);
+      OptionComponent<?,?> comp = _components.get(i);
 
       if (!comp.useEntireColumn()) {
         c.anchor = GridBagConstraints.CENTER;

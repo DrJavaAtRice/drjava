@@ -41,7 +41,7 @@ import javax.swing.*;
 import edu.rice.cs.util.swing.SwingFrame;
 
 /** Displays a label in the form of an option component, to be displayed in a config panel. */
-public class LabelComponent extends OptionComponent<Object> {
+public class LabelComponent extends OptionComponent<Object,JTextArea> {
   private JTextArea _text;
 
   public LabelComponent(String text, SwingFrame parent, boolean left) {

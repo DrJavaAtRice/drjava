@@ -1068,6 +1068,10 @@ public interface OptionConstants {
   /** Keystroke option for KeyStrokeOptionComponentTest. */
   public static final KeyStrokeOption KEY_FOR_UNIT_TESTS_ONLY = 
     new KeyStrokeOption("key.for.unit.tests.only", KeyStroke.getKeyStroke(KeyEvent.VK_N, CTRL_MASK|SHIFT_MASK|MASK));
+
+  /** The key binding for the GenerateCustomDrJavaJarFrame. */
+  public static final VectorOption<KeyStroke> KEY_GENERATE_CUSTOM_DRJAVA = 
+    new VectorOption<KeyStroke>("key.generate.custom.drjava", new KeyStrokeOption("",null), to.vector());
   
   /* ---------- Find Replace Options ---------- */
   
@@ -1722,9 +1726,12 @@ public interface OptionConstants {
     }
   }
   
-  /** The lowest access level of classes and members to include in the javadoc. */
+  /** The kind of version DrJava should be looking for. */
   public static final ForcedChoiceOption NEW_VERSION_NOTIFICATION =
     new ForcedChoiceOption("new.version.notification", VersionNotificationChoices.BETA, NEW_VERSION_NOTIFICATION_CHOICES);
+
+  /** Whether the new version feature may be used at all. */
+  public static final BooleanOption NEW_VERSION_ALLOWED = new BooleanOption("new.version.allowed", Boolean.TRUE);
   
   /** The last time we checked for a new version. */
   public static final LongOption LAST_NEW_VERSION_NOTIFICATION = new LongOption("new.version.notification.last", (long)0);  
@@ -1816,4 +1823,7 @@ public interface OptionConstants {
   /** The concurrent test checks that ConcJUnit should perform. */
   public static final ForcedChoiceOption CONCJUNIT_CHECKS_ENABLED =
     new ForcedChoiceOption("concjunit.checks.enabled", ConcJUnitCheckChoices.NONE, concJUnitCheckChoices);
+
+  /** A version suffix that describes custom additions to DrJava. */
+  public static final StringOption CUSTOM_DRJAVA_JAR_VERSION_SUFFIX = new StringOption("custom.drjava.jar.version.suffix", "");
 }

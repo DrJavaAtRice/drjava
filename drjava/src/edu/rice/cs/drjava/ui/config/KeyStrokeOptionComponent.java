@@ -50,7 +50,7 @@ import javax.swing.*;
  * Graphical form of a KeyStrokeOption.
  * @version $Id$
  */
-public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
+public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke,JPanel>
                                       implements Comparable<KeyStrokeOptionComponent> {
   private static final int DIALOG_HEIGHT = 185;
 
@@ -86,6 +86,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
     GridLayout gl = new GridLayout(1,0);
     gl.setHgap(15);
     _keyToKSOC.put(_key, this);
+    setComponent(_panel);
   }
 
   /** Constructor that allows for a tooltip description. */
@@ -146,10 +147,6 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
   public KeyStroke getConfigKeyStroke() {
     return DrJava.getConfig().getSetting(_option);
   }
-
-  /** Return's this OptionComponent's configurable component.
-   */
-  public JComponent getComponent() { return _panel; }
 
   /** A dialog that allows the user to type in a keystroke to be bound
    * to the action that was clicked. If the user types a keystroke that

@@ -9,6 +9,8 @@
   <property name="readable-project-name" value="DrJava" />
   <property name="src-working-dir" value="src/edu/rice/cs/drjava" />
   <property name="junit-jar-to-include" value="lib/concutest-junit-4.7-withrt-nodep.jar" />
+  <property name="md5-temp-name" value="classes/md5.properties" />
+  <property name="md5-properties-path" value="edu/rice/cs/drjava/md5.properties" />
   <property name="main-class" value="edu.rice.cs.drjava.DrJava" />
   <property name="svn-repository" value="https://drjava.svn.sourceforge.net/svnroot/drjava" />
 
@@ -529,6 +531,8 @@
       <fileset dir="classes/base" />
       <!-- Include the specified version of JUnit and rename it to junit.jar -->
       <zipfileset dir="." includes="${junit-jar-to-include}" fullpath="junit.jar" />
+      <zipfileset dir="." includes="${md5-temp-name}"
+		  fullpath="${md5-properties-path}" />
     </jar>
   </target>
 
@@ -1111,7 +1115,91 @@
     </replaceregexp>
   </target>
 
-  
+  <!-- This generates a file md5.properties that contains
+       MD5 checksums for all files contained in the drjava.jar file -->
+  <target name="generate-md5-properties" depends="compile, resolve-version-tag">
+    <delete file="${basedir}/${md5-temp-name}"/>
+
+    <!-- Generate MD5 checksums for classes/lib -->
+    <fileset id="classes.lib.fileset" dir="classes/lib" excludes="about.html"/>
+
+    <!-- Make file names relative to classes/lib -->
+    <pathconvert property="classes.lib.relative" refid="classes.lib.fileset"
+		 targetos="unix">
+      <map from="${basedir}/classes/lib/" to=""/>
+    </pathconvert>
+
+    <!-- Print file names to a text file -->
+    <tempfile property="classes.lib.tempfile"
+	      suffix=".txt" prefix="classes.lib." deleteonexit="true"/>
+    <for list="${classes.lib.relative}" delimiter=":" param="file">
+      <sequential>
+	<echo file="${classes.lib.tempfile}" append="true"
+	      message="@{file}${line.separator}"/>
+      </sequential>
+    </for>
+
+    <!-- Run generation program, using text file as input -->
+    <java classname="edu.rice.cs.util.MD5ChecksumProperties"
+	  dir="classes/lib" fork="true">
+      <classpath>
+        <pathelement location="classes/base" />
+        <pathelement location="classes/lib" />
+      </classpath>
+      <redirector input="${classes.lib.tempfile}"/>
+      <arg value="${basedir}/${md5-temp-name}"/>
+    </java>
+    <delete file="${classes.lib.tempfile}"/>
+
+    <!-- Generate MD5 checksums for classes/base -->
+    <fileset id="classes.base.fileset" dir="classes/base"/>
+
+    <pathconvert property="classes.base.relative" refid="classes.base.fileset"
+		 targetos="unix">
+      <map from="${basedir}/classes/base/" to=""/>
+    </pathconvert>
+
+    <tempfile property="classes.base.tempfile"
+	      suffix=".txt" prefix="classes.base." deleteonexit="true"/>
+    <for list="${classes.base.relative}" delimiter=":" param="file">
+      <sequential>
+	<echo file="${classes.base.tempfile}" append="true"
+	      message="@{file}${line.separator}"/>
+      </sequential>
+    </for>
+    <java classname="edu.rice.cs.util.MD5ChecksumProperties"
+	  dir="classes/base" fork="true">
+      <classpath>
+        <pathelement location="classes/base" />
+        <pathelement location="classes/lib" />
+      </classpath>
+      <redirector input="${classes.base.tempfile}"/>
+      <arg value="${basedir}/${md5-temp-name}"/>
+    </java>
+    <delete file="${classes.base.tempfile}"/>
+
+    <!-- Generate MD5 checksums for lib/junit.jar -->
+    <tempfile property="junit.jar.tempfile"
+	      suffix=".txt" prefix="junit.jar." deleteonexit="true"/>
+
+    <echo file="${junit.jar.tempfile}"
+	  message="${junit-jar-to-include}"/>
+    <java classname="edu.rice.cs.util.MD5ChecksumProperties"
+	  dir="${basedir}" fork="true">
+      <classpath>
+        <pathelement location="classes/base" />
+        <pathelement location="classes/lib" />
+      </classpath>
+      <redirector input="${junit.jar.tempfile}"/>
+      <arg value="${basedir}/${md5-temp-name}"/>
+    </java>
+    <delete file="${junit.jar.tempfile}"/>
+
+    <!-- rename the line in md5.properties to junit.jar=... -->
+    <replace file="${basedir}/${md5-temp-name}"
+	     token="${junit-jar-to-include}"
+	     value="junit.jar"/>
+  </target>  
   
   <!-- ***************************
        Property-resolution Targets 

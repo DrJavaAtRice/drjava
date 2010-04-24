@@ -48,7 +48,7 @@ import java.awt.event.*;
 /** The Graphical form of a FontOption.
   * @version $Id$
   */ 
-public class FontOptionComponent extends OptionComponent<Font> {
+public class FontOptionComponent extends OptionComponent<Font,JPanel> {
   
   private final JButton _button;
   private final JTextField _fontField;
@@ -75,6 +75,7 @@ public class FontOptionComponent extends OptionComponent<Font> {
 
     _font = DrJava.getConfig().getSetting(_option);
     _updateField(_font);
+    setComponent(_panel);
   }
   
   /** Constructor that allows for a tooltip description. */
@@ -97,9 +98,6 @@ public class FontOptionComponent extends OptionComponent<Font> {
     _fontField.setFont(f);
     _fontField.setText(_option.format(f));
   }
-    
-  /** Return's this OptionComponent's configurable component. */
-  public JComponent getComponent() { return _panel; }
   
   /** Shows a custom font chooser dialog to pick a new font. */
   public void chooseFont() {

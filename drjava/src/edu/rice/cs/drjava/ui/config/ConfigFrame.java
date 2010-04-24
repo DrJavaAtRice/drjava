@@ -462,7 +462,7 @@ public class ConfigFrame extends SwingFrame {
     //_tree.expandPath(new TreePath(jvmsNode.getPath()));
   }
 
-  public <X> void addOptionComponent(ConfigPanel panel, OptionComponent<X> oc) {
+  public <X,C extends JComponent> void addOptionComponent(ConfigPanel panel, OptionComponent<X,C> oc) {
     panel.addComponent(oc);
     oc.addChangeListener(_changeListener);
   }

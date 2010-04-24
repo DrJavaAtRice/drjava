@@ -52,12 +52,13 @@ import edu.rice.cs.util.swing.Utilities;
   * updating of Options.
   * @version $Id$
   */
-public abstract class OptionComponent<T> implements Serializable {
+public abstract class OptionComponent<T,C extends JComponent> implements Serializable {
   protected final Option<T> _option;
   protected final JLabel _label;
   protected final SwingFrame _parent;
   protected volatile boolean _entireColumn;
   protected volatile String _labelText;
+  protected volatile C _guiComponent;
     
   public OptionComponent(Option<T> option, String labelText, SwingFrame parent) {
     _option = option;
@@ -87,7 +88,20 @@ public abstract class OptionComponent<T> implements Serializable {
   public boolean useEntireColumn() { return _entireColumn; }
   
   /** Returns the JComponent to display for this OptionComponent. */
-  public abstract JComponent getComponent();
+  public C getComponent() { return _guiComponent; }
+  
+  /** Set the JComponent to display for this OptionComponent.
+    * @param component GUI component */
+  public void setComponent(C component) {
+    _guiComponent = component;
+    if ((_guiComponent!=null) && (_option!=null)) {
+      _guiComponent.setEnabled(DrJava.getConfig().isEditable(_option));
+      // also enable/disable all subcomponents (see Java bug 4177727)
+      for (Component subComponent: _guiComponent.getComponents()) {
+        subComponent.setEnabled(DrJava.getConfig().isEditable(_option));
+      }
+    }
+  }
 
   /** Sets the detailed description text for all components in this OptionComponent.
    *  Should be called by subclasses that wish to display a description.
@@ -96,7 +110,7 @@ public abstract class OptionComponent<T> implements Serializable {
   public abstract void setDescription(String description);
 
   /** Whether the component should occupy the entire column. */
-  public OptionComponent<T> setEntireColumn(boolean entireColumn) { 
+  public OptionComponent<T,C> setEntireColumn(boolean entireColumn) { 
     _entireColumn = entireColumn; 
     return this; 
   }

@@ -46,7 +46,7 @@ import edu.rice.cs.util.swing.SwingFrame;
 /** Graphical form of a ColorOption.
  *  @version $Id$
  */
-public class ColorOptionComponent extends OptionComponent<Color> {
+public class ColorOptionComponent extends OptionComponent<Color,JPanel> {
   private JButton _button;
   private JTextField _colorField;
   private JPanel _panel;
@@ -112,6 +112,7 @@ public class ColorOptionComponent extends OptionComponent<Color> {
     }
     _color = DrJava.getConfig().getSetting(_option);
     _updateField(_color);
+    setComponent(_panel);
   }
   
   /** Constructor that allows for a tooltip description. */
@@ -164,9 +165,6 @@ public class ColorOptionComponent extends OptionComponent<Color> {
     else _colorField.setForeground(c);
     _colorField.setText(getLabelText() + " (" + _option.format(c) + ")");
   }
-  
-  /** Return's this OptionComponent's configurable component. */
-  public JComponent getComponent() { return _panel; }
   
   /** Shows a color chooser dialog for picking a new color. */
   public void chooseColor() {

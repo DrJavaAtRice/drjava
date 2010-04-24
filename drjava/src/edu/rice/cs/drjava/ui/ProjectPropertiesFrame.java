@@ -87,9 +87,6 @@ public class ProjectPropertiesFrame extends SwingFrame {
   
   private JCheckBox _autoRefreshComponent;
 
-  private FileSelectorComponent _jarFileSelector;
-  private FileSelectorComponent _manifestFileSelector;
-
   private VectorAbsRelFileOptionComponent _extraClassPathList;
   private VectorFileOptionComponent _excludedFilesList;
   
@@ -656,37 +653,6 @@ public class ProjectPropertiesFrame extends SwingFrame {
     toRet.add(selectFile);
     
     return toRet;
-  }
-
-  public JPanel _manifestFileSelector() {
-    JFileChooser fileChooser = new JFileChooser(_getProjRoot().getParentFile());
-    fileChooser.setDialogTitle("Select Output jar File");
-    fileChooser.setApproveButtonText("Select");
-    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-    fileChooser.setMultiSelectionEnabled(false);
-    _manifestFileSelector = new FileSelectorComponent(this, fileChooser, 20, 12f);
-
-    _manifestFileSelector.setFileFilter(new FileFilter() {
-      public boolean accept(File f) { return f.getName().endsWith(".jar") || f.isDirectory(); }
-      public String getDescription() { return "Java Archive Files (*.jar)"; }
-    });
-    //toReturn.add(_buildDirSelector, BorderLayout.EAST);
-    return _manifestFileSelector;
-  }
-
-  public JPanel _jarFileSelector() {
-    JFileChooser fileChooser = new JFileChooser(_getProjRoot());
-    fileChooser.setDialogTitle("Select Manifest File");
-    fileChooser.setApproveButtonText("Select");
-    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-    fileChooser.setMultiSelectionEnabled(false);
-    _jarFileSelector = new FileSelectorComponent(this, fileChooser, 20, 12f);
-    _jarFileSelector.setFileFilter(new FileFilter() {
-      public boolean accept(File f) { return f.getName().endsWith(".jar") || f.isDirectory(); }
-      public String getDescription() { return "Java Archive Files (*.jar)"; }
-    });
-    //toReturn.add(_buildDirSelector, BorderLayout.EAST);
-    return _jarFileSelector;
   }
 
   /** Runnable that calls _cancel. */

@@ -44,7 +44,7 @@ import edu.rice.cs.util.swing.SwingFrame;
 /**
  * Button component to perform some action. Nothing gets saved.
  */
-public class ButtonComponent extends OptionComponent<Object> {
+public class ButtonComponent extends OptionComponent<Object,JButton> {
   protected JButton _jb;
 
   /** Constructs a new ButtonComponent.
@@ -59,6 +59,7 @@ public class ButtonComponent extends OptionComponent<Object> {
     _jb.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) { notifyChangeListeners(); }
     });
+    setComponent(_jb);
   }
 
   /** Constructs a new ButtonComponent with a tooltip description.
@@ -87,7 +88,4 @@ public class ButtonComponent extends OptionComponent<Object> {
   
   /** Displays the given value. */
   public void setValue(Object value) { /* nothing to do */ }
-  
-  /** Return's this OptionComponent's configurable component. */
-  public JComponent getComponent() { return _jb; }
 }

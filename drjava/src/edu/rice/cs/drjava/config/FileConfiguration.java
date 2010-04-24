@@ -43,7 +43,7 @@ import edu.rice.cs.util.FileOps;
   */
 public class FileConfiguration extends SavableConfiguration {  
   
-  public final File file;
+  protected final File file;
   
   /** Creates a new Configuration object using the values stored in file f.  Any values not specified by f will be 
     * set to defaults from OptionConstants.
@@ -53,6 +53,9 @@ public class FileConfiguration extends SavableConfiguration {
     super(new DefaultOptionMap());
     file = f.getAbsoluteFile();
   }
+  
+  /** Returns the file that this configuration is backed by. */
+  public File getFile() { return file; }
   
   /** Calls SavableConfiguration.loadConfiguration, which loads all values from the file, based on the defaults in
     * OptionConstants.

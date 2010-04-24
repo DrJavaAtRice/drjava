@@ -49,7 +49,7 @@ import javax.swing.filechooser.FileFilter;
 /** Graphical form of a FileOption.
  *  @version $Id$
  */
-public class FileOptionComponent extends OptionComponent<File> implements OptionConstants {
+public class FileOptionComponent extends OptionComponent<File,FileSelectorComponent> implements OptionConstants {
 
   private volatile FileSelectorComponent _component;
 
@@ -63,6 +63,7 @@ public class FileOptionComponent extends OptionComponent<File> implements Option
       public void removeUpdate(DocumentEvent e) { notifyChangeListeners(); }
       public void changedUpdate(DocumentEvent e) { notifyChangeListeners(); }
     });
+    setComponent(_component);
   }
 
   /** Constructor that allows for a tooltip description. */
@@ -82,6 +83,7 @@ public class FileOptionComponent extends OptionComponent<File> implements Option
       public void removeUpdate(DocumentEvent e) { notifyChangeListeners(); }
       public void changedUpdate(DocumentEvent e) { notifyChangeListeners(); }
     });
+    setComponent(_component);
   }
   
   /** Constructor that allows for a user-supplied FileSelectorComponent and a tooltip. */
@@ -120,8 +122,8 @@ public class FileOptionComponent extends OptionComponent<File> implements Option
   /** Displays the given value. Spawns an event queue task! */
   public void setValue(File value) { _component.setFileField(value); }
 
-  /** Return's this OptionComponent's configurable component.  */
-  public FileSelectorComponent getComponent() { return _component; }
+//  /** Return's this OptionComponent's configurable component.  */
+//  public FileSelectorComponent getComponent() { return _component; }
   
   /** Set the file filter for this file option component */
   public void setFileFilter(FileFilter fileFilter) { _component.setFileFilter(fileFilter); }

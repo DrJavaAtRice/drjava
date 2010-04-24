@@ -60,7 +60,6 @@ import java.util.Vector;
   * @version $Id$
   */
 public abstract class Option<T> extends OptionParser<T> implements FormatStrategy<T> {
-  
   /** A hashtable that maps Configuration objects to a list of listeners for this particular option.  Part of the magic
     * inner workings of this package.
     */

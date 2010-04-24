@@ -53,7 +53,7 @@ import edu.rice.cs.util.swing.SwingFrame;
  * their setting.
  * @version $Id$
  */
-public class ToolbarOptionComponent extends OptionComponent<Boolean> {
+public class ToolbarOptionComponent extends OptionComponent<Boolean,JComponent> {
 
   private JRadioButton _noneButton;
   private JRadioButton _textButton;
@@ -130,6 +130,7 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
       public void optionChanged(OptionEvent<Boolean> oe) { resetToCurrent(); }
     });
       
+    setComponent(_buttonPanel);
   }
 
   /** Constructor that allows for a tooltip description. */
@@ -177,9 +178,6 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
     }
   }
 
-  /** Return's this OptionComponent's configurable component. */
-  public JComponent getComponent() { return _buttonPanel; }
-
   /** Updates the config object with the new setting.  Should run in event thread.
     * @return true if the new value is set successfully
     */
@@ -219,5 +217,21 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
   public void setValue(Boolean value) {
     resetToCurrent();
   }
-
+  
+  /** Set the JComponent to display for this OptionComponent.
+    * @param component GUI component */
+  public void setComponent(JComponent component) {
+    _guiComponent = component;
+    if (_guiComponent!=null) {
+      boolean wasEditable = DrJava.getConfig().isEditable(OptionConstants.TOOLBAR_TEXT_ENABLED);
+      wasEditable = wasEditable && DrJava.getConfig().isEditable(OptionConstants.TOOLBAR_ICONS_ENABLED);
+      wasEditable = wasEditable && DrJava.getConfig().isEditable(OptionConstants.TOOLBAR_ENABLED);
+      
+      _guiComponent.setEnabled(wasEditable);
+      // also enable/disable all subcomponents (see Java bug 4177727)
+      for (Component subComponent: _guiComponent.getComponents()) {
+        subComponent.setEnabled(wasEditable);
+      }
+    }
+  }
 }

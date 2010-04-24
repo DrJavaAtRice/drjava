@@ -2397,6 +2397,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
   
+  /** Action that pops up the dialog to generate a custom drjava.jar file. 
+    * Only runs in the event thread. */
+  private final Action _generateCustomDrJavaJarAction = new AbstractAction("Generate Custom drjava.jar...") {
+    public void actionPerformed(ActionEvent ae) {
+      GenerateCustomDrJavaJarFrame popup = new GenerateCustomDrJavaJarFrame(MainFrame.this);
+      popup.setVisible(true);
+    }
+  };
+  
   /** Action that switches to next document.  Only runs in the event thread. */
   private final Action _switchToNextAction = new AbstractAction("Next Document") {
     public void actionPerformed(ActionEvent ae) {
@@ -3767,7 +3776,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         // check for new version if desired by user
         // but only if we haven't just asked if the user wants to download a new version
         // two dialogs on program start is too much clutter    
-        if (!DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
+        if (DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_ALLOWED) &&
+            !DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
               .equals(OptionConstants.VersionNotificationChoices.DISABLED) &&
             !edu.rice.cs.util.swing.Utilities.TEST_MODE) {
           int days = DrJava.getConfig().getSetting(NEW_VERSION_NOTIFICATION_DAYS);
@@ -4424,6 +4434,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   private void _showDebuggerPanel() {
+    if (_debugFrame == null) return; // debugger isn't used
     if (_detachDebugFrameMenuItem.isSelected()) {
       _debugFrame.setDisplayInFrame(true);
     }
@@ -4436,6 +4447,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   private void _hideDebuggerPanel() {
+    if (_debugFrame == null) return; // debugger isn't used
     if (_detachDebugFrameMenuItem.isSelected()) {
       _debugFrame.setVisible(false);
     }
@@ -6425,10 +6437,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_quickStartAction, "Help", "View Quick Start Guide for DrJava");
     _setUpAction(_aboutAction, "About", "About DrJava");
     _setUpAction(_checkNewVersionAction, "Check for New Version", "Find", "Check for New Version");
+    _checkNewVersionAction.setEnabled(DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_ALLOWED));
     _setUpAction(_drjavaSurveyAction, "Send System Information", "About", 
                  "Send anonymous system information to DrJava developers");
     _setUpAction(_errorsAction, "DrJava Errors", "drjavaerror", "Show a window with internal DrJava errors");
     _setUpAction(_forceQuitAction, "Force Quit", "Stop", "Force DrJava to quit without cleaning up");
+    _setUpAction(_generateCustomDrJavaJarAction, "Generate Custom drjava.jar...",
+                 "<html>Generate a custom drjava.jar file that includes additional files,<br>"+
+                 "e.g. libraries or resources.</html>");
   }
   
   private void _setUpAction(Action a, String name, String icon, String shortDesc) {
@@ -6742,7 +6758,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     externalSavedCountListener.
       optionChanged(new OptionEvent<Integer>(OptionConstants.EXTERNAL_SAVED_COUNT,
                                              DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)));
-    toolsMenu.addSeparator();
+    final JMenu advancedMenu = new JMenu("Advanced");
+    _addMenuItem(advancedMenu, _generateCustomDrJavaJarAction, KEY_GENERATE_CUSTOM_DRJAVA);
+    toolsMenu.add(advancedMenu);
+
+    toolsMenu.addSeparator();    
     
     _addMenuItem(toolsMenu, _bookmarksPanelAction, KEY_BOOKMARKS_PANEL);
     _addMenuItem(toolsMenu, _toggleBookmarkAction, KEY_BOOKMARKS_TOGGLE);
@@ -10394,7 +10414,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             // remove from the three windows this is installed on
             MainFrame.this.removeWindowListener(this);
             _tabbedPanesFrame.removeWindowListener(this);
-            _debugFrame.removeWindowListener(this);
+            if (_debugFrame != null) _debugFrame.removeWindowListener(this);
             // if the window that lost focus because of a native application window
             // is still the modal window adapter owner, put it back in front
             if (_modalWindowAdapterOwner==w) {
@@ -10418,7 +10438,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             // windows are the biggest windows.
             MainFrame.this.addWindowListener(regainFrontAfterNative);
             _tabbedPanesFrame.addWindowListener(regainFrontAfterNative);
-            _debugFrame.addWindowListener(regainFrontAfterNative);
+            if (_debugFrame != null) _debugFrame.addWindowListener(regainFrontAfterNative);
             return;
           }
           if (opposite instanceof Dialog) {

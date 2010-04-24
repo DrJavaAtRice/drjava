@@ -49,7 +49,7 @@ import java.util.Iterator;
   * with the OptionComponent's label.
   * @version $Id$
   */
-public class ForcedChoiceOptionComponent extends OptionComponent<String> {
+public class ForcedChoiceOptionComponent extends OptionComponent<String,JComboBox> {
   private volatile JComboBox _comboBox;
 
   /** Main constructor builds a panel containing a set of radio buttons for the
@@ -72,6 +72,7 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
     }
 
     resetToCurrent(DrJava.getConfig().getSetting(_option));
+    setComponent(_comboBox);
   }
 
   /** Constructor that allows for a tooltip description. */
@@ -90,6 +91,7 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
 
   /** Selects the radio button corresponding to the current config options. */
   public void resetToCurrent(String current) {
+//    _comboBox.setEnabled(DrJava.getConfig().isOptionEditable(_option));
     _comboBox.setSelectedItem(current);
     
 //    String current = DrJava.getConfig().getSetting(_option);
@@ -104,9 +106,6 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
 //      i++;
 //    }
   }
-
-  /** Return's this OptionComponent's configurable component. */
-  public JComponent getComponent() { return _comboBox; }
 
   /** Updates the config object with the new setting.  Should run in event thread.
     * @return true if the new value is set successfully

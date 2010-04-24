@@ -63,7 +63,7 @@ public class SavableConfiguration extends Configuration {
    * Values equal to their defaults are not written to disk.
    */
   public void saveConfiguration(OutputStream os, String header) throws IOException {
-    Writer w = new BufferedWriter(new OutputStreamWriter(os));
+    PrintWriter w = new PrintWriter(new BufferedWriter(new OutputStreamWriter(os)));
     //Properties p = new Properties();
 //    String tmpString;
 //    StringBuffer buff;
@@ -71,44 +71,9 @@ public class SavableConfiguration extends Configuration {
     
     // Write the header
     Date date = new Date();
-    w.write('#');
-    w.write(header, 0, header.length());
-    w.write('\n');
-    w.write('#');
-    w.write(date.toString(), 0, date.toString().length());
-    w.write('\n');
-
-    // Write each option
-    for (OptionParser<?> key : map.keys()) {
-
-      if (!key.getDefault().equals(map.getOption(key))) {
-
-        // Write name
-        String tmpString = key.getName();
-        w.write(tmpString, 0, tmpString.length());
-
-        // Write equals sign
-        tmpString = " = ";
-        w.write(tmpString, 0, 3);
-
-        // Write value
-        tmpString = map.getString(key);
-        // This replaces all backslashes with two backslashes for windows
-        int index = 0;
-        int pos;
-        while (index < tmpString.length() &&
-               ((pos = tmpString.indexOf('\\', index)) >= 0)) {
-          final StringBuilder buff = new StringBuilder(tmpString);  // should use StringBuilder, but not 1.4 compatible
-          buff.insert(pos, '\\');
-          index = pos + 2;
-          tmpString = buff.toString();
-        }
-        w.write(tmpString, 0, tmpString.length());
-        w.write('\n');
-
-        // p.setProperty(key.getName(),map.getString(key));
-      }
-    }
+    w.println("#"+header);
+    w.println("#"+date.toString());
+    w.print(toString());
     w.close();
     //p.store(os,header)
   }

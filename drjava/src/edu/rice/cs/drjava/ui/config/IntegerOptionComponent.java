@@ -46,7 +46,7 @@ import edu.rice.cs.util.swing.SwingFrame;
 /** Graphical form of an IntegerOption.
   * @version $Id$
   */
-public class IntegerOptionComponent extends OptionComponent<Integer> {
+public class IntegerOptionComponent extends OptionComponent<Integer,JTextField> {
   private volatile JTextField _jtf;
   
   public IntegerOptionComponent (IntegerOption opt, String text, SwingFrame parent) {
@@ -58,6 +58,7 @@ public class IntegerOptionComponent extends OptionComponent<Integer> {
       public void removeUpdate(DocumentEvent e) { notifyChangeListeners(); }
       public void changedUpdate(DocumentEvent e) { notifyChangeListeners(); }
     });
+    setComponent(_jtf);
   }
   
   /** Constructor that allows for a tooltip description. */
@@ -98,9 +99,5 @@ public class IntegerOptionComponent extends OptionComponent<Integer> {
   /** Displays the given value. */
   public void setValue(Integer value) {
     _jtf.setText(_option.format(value));
-  }
-  
-  /** Return's this OptionComponent's configurable component. */
-  public JComponent getComponent() { return _jtf; }
-    
+  }    
 }

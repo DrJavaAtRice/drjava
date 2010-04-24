@@ -45,6 +45,7 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import edu.rice.cs.drjava.config.ResourceBundleConfiguration;
 import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.platform.PlatformFactory;
@@ -147,6 +148,9 @@ public class DrJava {
   /** Configuration object with all customized and default values. 
     * Lazily initialized from _propertiesFile in getConfig() or handleCommandLineArgs(). */
   private static volatile FileConfiguration _config;
+  
+  /** Name of the resource bundle that controls whether options are editable or not. */
+  public static final String RESOURCE_BUNDLE_NAME = "edu.rice.cs.drjava.config.options";
   
   /** Returns the properties file used by the configuration object. */
   public static File getPropertiesFile() { return _propertiesFile; }
@@ -518,8 +522,8 @@ public class DrJava {
       // Problem parsing the config file.  Use defaults and remember what happened (for the UI).
       config.storeStartupException(e);
     }
-    _config = config; // required to support calls on DrJava._initConfig() in unit tests
-    return config;
+    _config = new ResourceBundleConfiguration(RESOURCE_BUNDLE_NAME,config);
+    return _config;
   }
   
   /** Saves the contents of the config file. TO DO: log any IOExceptions that occur. */

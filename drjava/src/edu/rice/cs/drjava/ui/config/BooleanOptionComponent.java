@@ -45,7 +45,7 @@ import edu.rice.cs.util.swing.SwingFrame;
 /** Graphical form of a BooleanOption.
   * @version $Id$
   */
-public class BooleanOptionComponent extends OptionComponent<Boolean> {
+public class BooleanOptionComponent extends OptionComponent<Boolean,JCheckBox> {
   protected JCheckBox _jcb;
 
   /** Constructs a new BooleanOptionComponent.
@@ -63,6 +63,7 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
     });
     
     _jcb.setSelected(DrJava.getConfig().getSetting(_option).booleanValue());
+    setComponent(_jcb);
   }
 
   /** Constructs a new BooleanOptionComponent with a tooltip description.
@@ -119,8 +120,8 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
   /** Displays the given value. */
   public void setValue(Boolean value) { _jcb.setSelected(value.booleanValue()); }
   
-  /** Return's this OptionComponent's configurable component. */
-  public JCheckBox getComponent() { return _jcb; }
+//  /** Return's this OptionComponent's configurable component. */
+//  public JCheckBox getComponent() { return _jcb; }
   
   /** Whether the component should occupy the entire column. */
   public BooleanOptionComponent setEntireColumn(boolean entireColumn) {

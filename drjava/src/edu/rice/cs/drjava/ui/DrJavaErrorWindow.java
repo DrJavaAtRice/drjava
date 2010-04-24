@@ -42,7 +42,6 @@ import javax.swing.text.*;
 import javax.swing.border.*;
 import java.awt.event.*;
 import java.awt.*;
-import java.io.ByteArrayOutputStream;
 import java.util.Map;
 
 import edu.rice.cs.drjava.DrJava;
@@ -52,6 +51,8 @@ import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.FileConfiguration;
 
 /** Displays uncaught exceptions and logged conditions.
  *  This window is not automatically updated when new errors occur. In the case of errors, we want to
@@ -303,6 +304,14 @@ public class DrJavaErrorWindow extends JDialog {
     b.append("System Properties:\n");
     b.append("DrJava Version ");
     b.append(edu.rice.cs.drjava.Version.getVersionString());
+    FileConfiguration config = DrJava.getConfig();
+    if (config!=null) {
+      String customDrJavaJarVersionSuffix = config.getSetting(OptionConstants.CUSTOM_DRJAVA_JAR_VERSION_SUFFIX);
+      if (customDrJavaJarVersionSuffix.length()>0)  {
+        b.append(" with ");
+        b.append(customDrJavaJarVersionSuffix);
+      }
+    }
     b.append('\n');
     b.append("DrJava Build Time ");
     b.append(edu.rice.cs.drjava.Version.getBuildTimeString());
@@ -329,14 +338,8 @@ public class DrJavaErrorWindow extends JDialog {
       b.append('\n');
     }
     b.append('\n');
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try {
-      DrJava.getConfig().saveConfiguration(baos, "DrJava configuration file");
-      b.append(baos.toString());
-    }
-    catch(java.io.IOException ioe) {
-      b.append("IOException when trying to print DrJava configuration file");
-    }
+    b.append("DrJava configuration file\n");
+    b.append(DrJava.getConfig().toString());
     
     b.append("\n\nUsed memory: about ");
     b.append(StringOps.memSizeToString(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()));

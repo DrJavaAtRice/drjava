@@ -46,7 +46,7 @@ import edu.rice.cs.util.swing.SwingFrame;
 /** Graphical form of a StringOption.
  *  @version $Id$
  */
-public class StringOptionComponent extends OptionComponent<String> {
+public class StringOptionComponent extends OptionComponent<String,JTextField> {
   private JTextField _jtf;
 
   public StringOptionComponent(StringOption opt, String text, SwingFrame parent) {
@@ -58,6 +58,7 @@ public class StringOptionComponent extends OptionComponent<String> {
       public void removeUpdate(DocumentEvent e) { notifyChangeListeners(); }
       public void changedUpdate(DocumentEvent e) { notifyChangeListeners(); }
     });
+    setComponent(_jtf);
   }
 
   /** Constructor that allows for a tooltip description. */
@@ -87,7 +88,4 @@ public class StringOptionComponent extends OptionComponent<String> {
 
   /** Displays the given value. */
   public void setValue(String value) { _jtf.setText(value); }
-
-  /** Return's this OptionComponent's configurable component. */
-  public JComponent getComponent() { return _jtf; }
 }

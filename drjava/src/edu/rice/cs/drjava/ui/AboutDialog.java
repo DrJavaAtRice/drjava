@@ -42,6 +42,8 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.Version;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.FileConfiguration;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.ChangeListener;
@@ -183,6 +185,14 @@ public class AboutDialog extends JDialog implements ActionListener {
 
     final StringBuilder sb = new StringBuilder("DrJava Version : ");
     sb.append(Version.getVersionString());
+    FileConfiguration config = DrJava.getConfig();
+    if (config!=null) {
+      String customDrJavaJarVersionSuffix = config.getSetting(OptionConstants.CUSTOM_DRJAVA_JAR_VERSION_SUFFIX);
+      if (customDrJavaJarVersionSuffix.length()>0)  {
+        sb.append(" with ");
+        sb.append(customDrJavaJarVersionSuffix);
+      }
+    }
     sb.append("\nDrJava Build Time: ");
     sb.append(Version.getBuildTimeString());
     sb.append("\n\nDrJava Configuration File: ");
@@ -301,13 +311,15 @@ public class AboutDialog extends JDialog implements ActionListener {
         cb.setContents(contents, null);
       }
     });
-    _tabs.addChangeListener(new ChangeListener() {
-      // This method is called whenever the selected tab changes
-      public void stateChanged(ChangeEvent evt) {
-        _copyButton.setVisible(_tabs.getSelectedIndex() == _propertiesTabIndex);
-      }
-    });
-    _copyButton.setVisible(_tabs.getSelectedIndex() == _propertiesTabIndex);
+    _copyButton.setToolTipText("Copy information about your computer into the clipboard so it can be pasted.");
+    // button always visible
+//    _tabs.addChangeListener(new ChangeListener() {
+//      // This method is called whenever the selected tab changes
+//      public void stateChanged(ChangeEvent evt) {
+//        _copyButton.setVisible(_tabs.getSelectedIndex() == _propertiesTabIndex);
+//      }
+//    });
+//    _copyButton.setVisible(_tabs.getSelectedIndex() == _propertiesTabIndex);
     _okButton.addActionListener(this);
     buttonPanel.add(_copyButton);
     buttonPanel.add(_okButton);

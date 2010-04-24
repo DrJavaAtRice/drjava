@@ -51,7 +51,7 @@ import edu.rice.cs.util.swing.SwingFrame;
  *
  *  @version $Id$
  */
-public class DirectoryOptionComponent extends OptionComponent<File> implements OptionConstants {
+public class DirectoryOptionComponent extends OptionComponent<File,DirectorySelectorComponent> implements OptionConstants {
 
   private DirectorySelectorComponent _component;
 
@@ -65,6 +65,8 @@ public class DirectoryOptionComponent extends OptionComponent<File> implements O
       public void removeUpdate(DocumentEvent e) { notifyChangeListeners(); }
       public void changedUpdate(DocumentEvent e) { notifyChangeListeners(); }
     });
+    
+    setComponent(_component);
   }
 
   /** Constructor that allows for a tooltip description. */
@@ -98,8 +100,8 @@ public class DirectoryOptionComponent extends OptionComponent<File> implements O
   /** Displays the given value. */
   public void setValue(File value) { _component.setFileField(value); }
 
-  /** Return's this OptionComponent's configurable component. */
-  public DirectorySelectorComponent getComponent() { return _component; }
+//  /** Return's this OptionComponent's configurable component. */
+//  public DirectorySelectorComponent getComponent() { return _component; }
 
   /** Adds a filter to decide if a directory can be chosen. */
   public void addChoosableFileFilter(FileFilter filter) { _component.addChoosableFileFilter(filter); }
