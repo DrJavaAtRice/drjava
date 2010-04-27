@@ -56,6 +56,7 @@ import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.drjava.model.DrJavaFileUtils;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -499,7 +500,7 @@ public class DrJava {
     * accidentally used.
     */
   static void setPropertiesFile(String fileName) {
-    if (! fileName.endsWith(".java"))  _propertiesFile = new File(fileName);
+    if (!DrJavaFileUtils.isSourceFile(fileName))  _propertiesFile = new File(fileName);
   }
   
   /** Initializes the configuration object with the current notion of the properties file.

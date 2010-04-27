@@ -987,12 +987,12 @@ public final class IndentTest extends DrJavaTestCase {
   public void testParenthesizedAnonymousInnerClass() throws BadLocationException {
     String text = "addActionListener(new ActionListener() {\n" +
       "public void actionPerformed(ActionEvent e) {\n" +
-        "config.setSetting(LANGUAGE_LEVEL, DrJavaRoot.FULL_JAVA);\n" +
+        "config.setSetting(LANGUAGE_LEVEL, edu.rice.cs.drjava.config.OptionConstants.FULL_JAVA);\n" +
       "}});\n" +
       "group.add(rbMenuItem);\n";
     String indented = "addActionListener(new ActionListener() {\n" +
       "  public void actionPerformed(ActionEvent e) {\n" +
-       "    config.setSetting(LANGUAGE_LEVEL, DrJavaRoot.FULL_JAVA);\n" +
+       "    config.setSetting(LANGUAGE_LEVEL, edu.rice.cs.drjava.config.OptionConstants.FULL_JAVA);\n" +
       "  }});\n" +
       "group.add(rbMenuItem);\n";
     _doc.insertString(0, text, null);

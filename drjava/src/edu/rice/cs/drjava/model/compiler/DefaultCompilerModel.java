@@ -51,6 +51,7 @@ import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -392,10 +393,9 @@ public class DefaultCompilerModel implements CompilerModel {
     for (File f : files) {
       File canonicalFile = IOUtil.attemptCanonicalFile(f);
       String fileName = canonicalFile.getPath();
-      int lastIndex = fileName.lastIndexOf(".dj");
-      if (lastIndex != -1) {
+      if (DrJavaFileUtils.isLLFile(fileName)) {
         containsLanguageLevels = true;
-        File javaFile = new File(fileName.substring(0, lastIndex) + ".java");
+        File javaFile = new File(DrJavaFileUtils.getJavaForLLFile(fileName));
         
         //checks if .dj? file has a matching .java file open in project. Eventually warns user (later on in code)
         if(files.contains(javaFile)){          
@@ -415,18 +415,12 @@ public class DefaultCompilerModel implements CompilerModel {
     }
     
     for(File f: filesToBeClosed) {
-      
-      File canonicalFile = IOUtil.attemptCanonicalFile(f);
-      String fileName = canonicalFile.getPath();
-      
-      if(files.contains(new File(fileName.substring(0,fileName.lastIndexOf(".java")) + ".dj0")) ||
-         files.contains(new File(fileName.substring(0,fileName.lastIndexOf(".java")) + ".dj1")) ||
-         files.contains(new File(fileName.substring(0,fileName.lastIndexOf(".java")) + ".dj2"))
-        ) {
-        files.remove(new File(fileName));
+      if (files.contains(DrJavaFileUtils.getDJForJavaFile(f)) ||
+          files.contains(DrJavaFileUtils.getDJ0ForJavaFile(f)) ||
+          files.contains(DrJavaFileUtils.getDJ1ForJavaFile(f)) ||
+          files.contains(DrJavaFileUtils.getDJ2ForJavaFile(f))) {
+        files.remove(f);
       }
-      
-      
     }
     
     if(!filesToBeClosed.isEmpty()){
@@ -441,10 +435,6 @@ public class DefaultCompilerModel implements CompilerModel {
           filesToBeClosed.clear();
         }
       });
-//      new edu.rice.cs.drjava.ui.DrJavaScrollableDialog(null, "Warning: Files need to be closed",
-//                                                       "The following files have matching .dj? files open.", 
-//                                                       "These .java files need to be closed for proper compiling. \n \n \n"
-//                                                       + filesToBeClosed.toString().replace(", ","\n"),true).show();
       ScrollableListDialog<File> dialog = new ScrollableListDialog.Builder<File>()
         .setTitle("Java File" + (filesToBeClosed.size() == 1?"":"s") + " Need to Be Closed")
         .setText("The following .java " + (filesToBeClosed.size() == 1?

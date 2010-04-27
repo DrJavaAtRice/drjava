@@ -54,7 +54,6 @@ import edu.rice.cs.util.swing.SwingFrame;
  *  @version $Id$
  */
 public class VectorFileOptionComponent extends VectorOptionComponent<File> implements OptionConstants {
-  private FileFilter _fileFilter;
   private JFileChooser _jfc;
   protected File _baseDir = null;
   
@@ -80,14 +79,9 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
     _jfc.setApproveButtonText("Select");
     _jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     _jfc.setMultiSelectionEnabled(true);
-    _fileFilter = ClassPathFilter.ONLY;    
+    _jfc.setFileFilter(ClassPathFilter.ONLY);
   }
-  
-  /** Set the file filter for this vector option component. */
-  public void setFileFilter(FileFilter fileFilter) {
-    _fileFilter = fileFilter;
-  }
-  
+
   /** Sets the directory where the chooser will start if no file is selected. */
   public void setBaseDir(File f) {
     if (f.isDirectory()) { _baseDir = f; }
@@ -107,8 +101,6 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
       if (_baseDir != null) { _jfc.setCurrentDirectory(_baseDir); }
     }
 
-    _jfc.setFileFilter(_fileFilter);
-
     File[] c = null;
     int returnValue = _jfc.showDialog(_parent, null);
     if (returnValue == JFileChooser.APPROVE_OPTION) {
@@ -120,6 +112,11 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
         _addValue(c[i]);
       }
     }
+  }
+  
+  /**@ @return the file chooser */
+  public JFileChooser getFileChooser() {
+    return _jfc;
   }
   
   protected Action _getAddAction() {

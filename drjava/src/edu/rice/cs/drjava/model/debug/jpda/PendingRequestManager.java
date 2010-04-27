@@ -47,6 +47,7 @@ import java.util.TreeMap;
 
 import java.io.File;
 
+import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
 
@@ -130,8 +131,8 @@ public class PendingRequestManager {
     int line = dda.getLineNumber();
     File f = dda.getFile();
     
-    if (LanguageLevelStackTraceMapper.isLLFile(f)) {
-      f = LanguageLevelStackTraceMapper.getJavaFileForLLFile(f);
+    if (DrJavaFileUtils.isLLFile(f)) {
+      f = DrJavaFileUtils.getJavaForLLFile(f);
       TreeMap<Integer, Integer> tM = _manager.getLLSTM().ReadLanguageLevelLineBlockRev(f);
       line = tM.get(dda.getLineNumber());
     }

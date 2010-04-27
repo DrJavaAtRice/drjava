@@ -48,6 +48,7 @@ import java.io.*;
 import org.w3c.dom.Node;
 import edu.rice.cs.plt.tuple.Pair;
 
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.AbsRelFile;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.drjava.Version;
@@ -158,14 +159,14 @@ public class ProjectProfile implements ProjectFileIR {
     DocFile[] possibleContainers = getSourceFiles();
     
     String main = getMainClass();
-    if(main.toLowerCase().endsWith(".java")){
-      main = main.substring(0, main.length()-5);
+    if(main.toLowerCase().endsWith(OptionConstants.JAVA_FILE_EXTENSION)){
+      main = main.substring(0, main.length()-OptionConstants.JAVA_FILE_EXTENSION.length());
       main = main.replace(File.separatorChar,'.');
     }
     
     for(int i = 0; i < possibleContainers.length; i++){
       String toMatch = possibleContainers[i].getAbsolutePath();
-      toMatch = toMatch.substring(0, toMatch.lastIndexOf(".java"));
+      toMatch = toMatch.substring(0, toMatch.lastIndexOf(OptionConstants.JAVA_FILE_EXTENSION));
       toMatch = toMatch.replace(File.separatorChar,'.');
       
       if(toMatch.endsWith(main))
@@ -173,7 +174,7 @@ public class ProjectProfile implements ProjectFileIR {
     }
     
     //Return a guess at the main class if its not in a source file
-    File toRet = new File(main.replace('.',File.separatorChar) + ".java");
+    File toRet = new File(main.replace('.',File.separatorChar) + OptionConstants.JAVA_FILE_EXTENSION);
     
     return toRet;
   }

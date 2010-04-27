@@ -512,7 +512,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public File getFile() throws OperationCanceledException { return _file; }
     public File[] getFiles() throws OperationCanceledException { return new File[] {_file}; }
     public boolean warnFileOpen(File f) { throw new OpenWarningException(); }
-    public boolean verifyOverwrite() { throw new OverwriteException(); }
+    public boolean verifyOverwrite(File f) { throw new OverwriteException(); }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {
       throw new FileMovedWarningException();
     }
@@ -540,7 +540,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       else return new File[] {_file1};
     }
     public boolean warnFileOpen(File f) { return true; }
-    public boolean verifyOverwrite() { return true; }
+    public boolean verifyOverwrite(File f) { return true; }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
     public boolean shouldUpdateDocumentState() { return true; }
   }
@@ -555,7 +555,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public File getFile() throws OperationCanceledException { throw new OperationCanceledException(); }
     public File[] getFiles() throws OperationCanceledException { throw new OperationCanceledException(); }
     public boolean warnFileOpen(File f) { return true; }
-    public boolean verifyOverwrite() {return true; }
+    public boolean verifyOverwrite(File f) {return true; }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {  return true; }
     public boolean shouldUpdateDocumentState() { return true; }
   }

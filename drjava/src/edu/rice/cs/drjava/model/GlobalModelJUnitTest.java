@@ -729,7 +729,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
       saveAllFiles(_model, new FileSaveSelector() {
         public File getFile() { throw new UnexpectedException ("Test should not ask for save file name"); }
         public boolean warnFileOpen(File f) { return false; }
-        public boolean verifyOverwrite() { return true; }
+        public boolean verifyOverwrite(File f) { return true; }
         public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return false; }
         public boolean shouldUpdateDocumentState() { return true; }
       });

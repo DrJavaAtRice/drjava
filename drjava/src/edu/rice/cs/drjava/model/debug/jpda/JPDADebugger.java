@@ -53,6 +53,7 @@ import java.util.Vector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.model.GlobalModel;
+import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
 import edu.rice.cs.drjava.model.repl.DummyInteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
@@ -612,8 +613,8 @@ public class JPDADebugger implements Debugger {
     int line = breakpoint.getLineNumber();
     File f = breakpoint.getFile();
     
-    if (LanguageLevelStackTraceMapper.isLLFile(f)) {
-      f = LanguageLevelStackTraceMapper.getJavaFileForLLFile(f);
+    if (DrJavaFileUtils.isLLFile(f)) {
+      f = DrJavaFileUtils.getJavaForLLFile(f);
       TreeMap<Integer, Integer> tM = getLLSTM().ReadLanguageLevelLineBlockRev(f);
       line = tM.get(breakpoint.getLineNumber());
     }
@@ -786,7 +787,7 @@ public class JPDADebugger implements Debugger {
 
       ReferenceType rt = location.declaringType();
       fileName = null;
-      try { fileName = getPackageDir(rt.name()) + rt.sourceName(); }
+      try { fileName = DrJavaFileUtils.getPackageDir(rt.name()) + rt.sourceName(); }
       catch (AbsentInformationException aie) {
         // Don't know real source name:
         //   assume source name is same as file name
@@ -800,16 +801,17 @@ public class JPDADebugger implements Debugger {
         }
         
         for(File f: files) {
-          if (f.getName().equals(className + ".java") ||
-              f.getName().equals(className + ".dj0") ||
-              f.getName().equals(className + ".dj1") ||
-              f.getName().equals(className + ".dj2")) {
+          if (f.getName().equals(className + OptionConstants.JAVA_FILE_EXTENSION) ||
+              f.getName().equals(className + OptionConstants.DJ_FILE_EXTENSION) ||
+              f.getName().equals(className + OptionConstants.OLD_DJ0_FILE_EXTENSION) ||
+              f.getName().equals(className + OptionConstants.OLD_DJ1_FILE_EXTENSION) ||
+              f.getName().equals(className + OptionConstants.OLD_DJ2_FILE_EXTENSION)) {
             fileName = f.getName();
             break;
           }
         }
         if (fileName == null) {
-          fileName = className + ".java";
+          fileName = className + OptionConstants.JAVA_FILE_EXTENSION;
         }
       }
       
@@ -1326,7 +1328,7 @@ public class JPDADebugger implements Debugger {
     // Open and scroll if doc was found
     if (doc != null) { 
       doc.checkIfClassFileInSync();
-      if (LanguageLevelStackTraceMapper.isLLFile(doc.getRawFile())) {
+      if (DrJavaFileUtils.isLLFile(doc.getRawFile())) {
         // map J
       }
       final int llLine = line;
@@ -1338,25 +1340,6 @@ public class JPDADebugger implements Debugger {
       });
     }
     else printMessage("  (Source for " + className + " not found.)");
-  }
-  
-  /** Returns the relative directory (from the source root) that the source file with this qualifed name will be in, 
-    * given its package. Returns the empty string for classes without packages.
-    * TO DO: Move this to a static utility class
-    * @param className The fully qualified class name
-    */
-  static String getPackageDir(String className) {
-    // Only keep up to the last dot
-    int lastDotIndex = className.lastIndexOf(".");
-    if (lastDotIndex == -1) {
-      // No dots, so no package
-      return "";
-    }
-    else {
-      String packageName = className.substring(0, lastDotIndex);
-      packageName = packageName.replace('.', File.separatorChar);
-      return packageName + File.separatorChar;
-    }
   }
   
   /** Prints a message in the Interactions Pane.  Not synchronized on this on this because no local state is accessed.

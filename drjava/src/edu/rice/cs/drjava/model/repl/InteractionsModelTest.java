@@ -457,7 +457,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     history.writeToFile(new FileSaveSelector() {
       public File getFile() { return temp; }
       public boolean warnFileOpen(File f) { return true; }
-      public boolean verifyOverwrite() { return true; }
+      public boolean verifyOverwrite(File f) { return true; }
       public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
       public boolean shouldUpdateDocumentState() { return true; }
     });

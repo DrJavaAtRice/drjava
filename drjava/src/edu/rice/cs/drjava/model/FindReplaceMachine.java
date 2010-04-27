@@ -42,6 +42,7 @@ import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.drjava.config.OptionConstants;
 
 import java.awt.EventQueue;
 
@@ -530,7 +531,10 @@ public class FindReplaceMachine {
                                            final boolean wrapped, final boolean allWrapped) {  
 //    Utilities.show("called _findNextInDocSegment(" + doc.getText() + ",\n" + start + ", " + len + ", " + wrapped +
 //      " ...)");
-    boolean inTestCase = (doc.getFileName().endsWith("Test.java"));
+    boolean inTestCase = false;
+    for(String ext: OptionConstants.LANGUAGE_LEVEL_EXTENSIONS) {
+      inTestCase |= doc.getFileName().endsWith("Test"+ext);
+    }
     
     if (!_ignoreTestCases || ! inTestCase) {
       final int docLen = doc.getLength();;     // The length of the segment to be searched

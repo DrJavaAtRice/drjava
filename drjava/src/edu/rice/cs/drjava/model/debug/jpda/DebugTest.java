@@ -42,10 +42,12 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.debug.*;
 
+import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Tests the JPDA-based debugger.
+  * TODO: Why are these tests commented out?!
   * @version $Id$
   */
 public final class DebugTest extends JPDADebugTestCase implements OptionConstants {
@@ -785,10 +787,10 @@ public final class DebugTest extends JPDADebugTestCase implements OptionConstant
     assertEquals("package dir with package",
                  "edu" + sep + "rice" + sep + "cs" + sep +
                  "drjava" + sep + "model" + sep,
-                 JPDADebugger.getPackageDir(class1));
+                 DrJavaFileUtils.getPackageDir(class1));
     assertEquals("package dir without package",
                  "",
-                 JPDADebugger.getPackageDir(class2));
+                 DrJavaFileUtils.getPackageDir(class2));
   }
 }
 

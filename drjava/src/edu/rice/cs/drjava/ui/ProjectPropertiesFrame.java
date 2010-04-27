@@ -47,6 +47,7 @@ import javax.swing.event.*;
 import javax.swing.border.EmptyBorder;
 
 import edu.rice.cs.drjava.model.SingleDisplayModel;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.ui.config.*;
 
 import edu.rice.cs.plt.iter.IterUtil;
@@ -561,7 +562,9 @@ public class ProjectPropertiesFrame extends SwingFrame {
       }
     };
     _excludedFilesList.setRows(5,5);
-    _excludedFilesList.setFileFilter(new JavaSourceFilter());
+    _excludedFilesList.getFileChooser().resetChoosableFileFilters();
+    _excludedFilesList.getFileChooser().addChoosableFileFilter(new JavaSourceFilter());
+    _excludedFilesList.getFileChooser().setFileFilter(new SmartSourceFilter());
     _excludedFilesList.addChangeListener(new OptionComponent.ChangeListener() {
       public Object value(Object oc) {
         _applyButton.setEnabled(true);
@@ -590,6 +593,8 @@ public class ProjectPropertiesFrame extends SwingFrame {
 
     chooser.setApproveButtonText("Select");
 
+    chooser.resetChoosableFileFilters();
+    chooser.addChoosableFileFilter(new SmartSourceFilter());
     chooser.addChoosableFileFilter(new JavaSourceFilter());
     _mainDocumentSelector = new JTextField(20){
       public Dimension getMaximumSize() {
@@ -634,7 +639,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
           qualifiedName = qualifiedName.substring(1);
         
         //Remove the .java extension if it exists
-        if(qualifiedName.toLowerCase().endsWith(".java"))
+        if(qualifiedName.toLowerCase().endsWith(OptionConstants.JAVA_FILE_EXTENSION))
           qualifiedName = qualifiedName.substring(0, qualifiedName.length() - 5);
           
         //Replace path seperators with java standard '.' package seperators.

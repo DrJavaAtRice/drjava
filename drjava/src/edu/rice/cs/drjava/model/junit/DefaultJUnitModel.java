@@ -60,12 +60,14 @@ import edu.rice.cs.drjava.config.BooleanOption;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
+import edu.rice.cs.drjava.config.OptionConstants;
 
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -132,7 +134,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     _compilerModel = compilerModel;
     _model = model;
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], _model, false);
-    BooleanOption suffixOption = edu.rice.cs.drjava.config.OptionConstants.FORCE_TEST_SUFFIX;
+    BooleanOption suffixOption = OptionConstants.FORCE_TEST_SUFFIX;
     _forceTestSuffix = edu.rice.cs.drjava.DrJava.getConfig().getSetting(suffixOption).booleanValue();
   }
   
@@ -427,7 +429,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               String javaSourceFileName = getCanonicalPath(rootDir) + File.separator + sourceName.value();
 //              System.err.println("Full java source fileName = " + javaSourceFileName);
               
-              /* The index in fileName of the dot preceding the extension ".java", ".dj0*, ".dj1", or ".dj2" */
+              /* The index in fileName of the dot preceding the extension ".java", ".dj", ".dj0*, ".dj1", or ".dj2" */
               int indexOfExtDot = javaSourceFileName.lastIndexOf('.');
 //              System.err.println("indexOfExtDot = " + indexOfExtDot);
               if (indexOfExtDot == -1) continue;  // RMI stub class files return source file names without extensions
@@ -440,9 +442,14 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               String sourceFileName;
               
               if (openDocFiles.contains(javaSourceFileName)) sourceFileName = javaSourceFileName;
-              else if (openDocFiles.contains(strippedName + ".dj0")) sourceFileName = strippedName + ".dj0";
-              else if (openDocFiles.contains(strippedName + ".dj1")) sourceFileName = strippedName + ".dj1";
-              else if (openDocFiles.contains(strippedName + ".dj2")) sourceFileName = strippedName + ".dj2";
+              else if (openDocFiles.contains(strippedName + OptionConstants.DJ_FILE_EXTENSION))
+                sourceFileName = strippedName + OptionConstants.DJ_FILE_EXTENSION;
+              else if (openDocFiles.contains(strippedName + OptionConstants.OLD_DJ0_FILE_EXTENSION))
+                sourceFileName = strippedName + OptionConstants.OLD_DJ0_FILE_EXTENSION;
+              else if (openDocFiles.contains(strippedName + OptionConstants.OLD_DJ1_FILE_EXTENSION))
+                sourceFileName = strippedName + OptionConstants.OLD_DJ1_FILE_EXTENSION;
+              else if (openDocFiles.contains(strippedName + OptionConstants.OLD_DJ2_FILE_EXTENSION))
+                sourceFileName = strippedName + OptionConstants.OLD_DJ2_FILE_EXTENSION;
               else continue; // no matching source file is open
               
               File sourceFile = new File(sourceFileName);
@@ -600,9 +607,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
       } catch(Exception ex) { DrJavaErrorHandler.record(ex); }
       File f = e.file();
-      if ((f != null) && (LanguageLevelStackTraceMapper.isLLFile(f))) {
-        String dn = f.getName();
-        dn = dn.substring(0, dn.lastIndexOf('.')) + ".java";
+      if ((f != null) && (DrJavaFileUtils.isLLFile(f))) {
+        String dn = DrJavaFileUtils.getJavaForLLFile(f.getName());
         StackTraceElement ste = new StackTraceElement(e.className(), "", dn, e.lineNumber());
         ste = _compilerModel.getLLSTM().replaceStackTraceElement(ste, f);
         e.setLineNumber(ste.getLineNumber());
@@ -618,7 +624,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     * @param className the name of the class for which we want to find the file
     * @return the file associated with the given class
     */
-  public File getFileForClassName(String className) { return _model.getSourceFile(className + ".java"); }
+  public File getFileForClassName(String className) {
+    return _model.getSourceFile(className + OptionConstants.JAVA_FILE_EXTENSION);
+  }
   
   /** Returns the current classpath in use by the JUnit JVM. */
   public Iterable<File> getClassPath() {  return _jvm.getClassPath().unwrap(IterUtil.<File>empty()); }

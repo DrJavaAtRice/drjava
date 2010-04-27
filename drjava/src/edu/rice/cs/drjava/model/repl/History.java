@@ -234,7 +234,7 @@ public class History implements OptionConstants, Serializable {
     
     // Make sure we ask before overwriting
     if (c != null) {
-      if (! c.exists() || selector.verifyOverwrite()) {
+      if (! c.exists() || selector.verifyOverwrite(c)) {
         FileOps.DefaultFileSaver saver = new FileOps.DefaultFileSaver(c) {
           public void saveTo(OutputStream os) throws IOException {
 

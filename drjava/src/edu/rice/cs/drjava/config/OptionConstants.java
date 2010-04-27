@@ -90,6 +90,34 @@ public interface OptionConstants {
   
   /** The extension for stand-alone DrJava external process file. */
   public static final String EXTPROCESS_FILE_EXTENSION = ".djapp";
+
+  /** The extension for a Java source file */
+  public static final String JAVA_FILE_EXTENSION = ".java";
+
+  /** The extension for a language level source file */
+  public static final String DJ_FILE_EXTENSION = ".dj";
+
+  /** The old extension for an elementary language level source file */
+  public static final String OLD_DJ0_FILE_EXTENSION = ".dj0";
+
+  /** The old extension for an intermediate language level source file */
+  public static final String OLD_DJ1_FILE_EXTENSION = ".dj1";
+
+  /** The old extension for an advanced language level source file */
+  public static final String OLD_DJ2_FILE_EXTENSION = ".dj2";
+    
+  /* Constants for language levels */
+  public static final int FULL_JAVA = 0;
+  public static final int ELEMENTARY_LEVEL = 1;
+  public static final int INTERMEDIATE_LEVEL = 2;
+  public static final int ADVANCED_LEVEL = 3;
+  public static final int FUNCTIONAL_JAVA_LEVEL = 4;
+  public static final String[] LANGUAGE_LEVEL_EXTENSIONS = new String[] {
+    JAVA_FILE_EXTENSION, // = .java, do not include the dot
+      OLD_DJ0_FILE_EXTENSION, // = .dj0
+      OLD_DJ1_FILE_EXTENSION, // = .dj1
+      OLD_DJ2_FILE_EXTENSION, // = .dj2
+      DJ_FILE_EXTENSION }; // = .dj
   
   /** The configuration XML file that DrJava looks for inside a .djapp file */
   public static final String EXTPROCESS_FILE_NAME_INSIDE_JAR = "process" + EXTPROCESS_FILE_EXTENSION;

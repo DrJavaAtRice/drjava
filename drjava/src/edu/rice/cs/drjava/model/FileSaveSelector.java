@@ -56,8 +56,11 @@ public interface FileSaveSelector {
     */
   public boolean warnFileOpen(File f);
   
-  /** Confirms whether the existing chosen file should be overwritten. */
-  public boolean verifyOverwrite();
+  /** Confirms whether the existing chosen file should be overwritten.
+    * @param f the file being saved
+    * @return true iff the user wants to overwrite
+    */
+  public boolean verifyOverwrite(File f);
   
   /** Confirms whether a new file should be selected since the previously chosen file has been deleted or moved.
     * @param oldFile The file that was moved or deleted.

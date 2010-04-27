@@ -71,15 +71,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 /** Main class for DrJava.
   * @version $Id$
   */
-public class DrJavaRoot {
-  
-  /* Constants for language levels */
-  public static final int FULL_JAVA = 0;
-  public static final int ELEMENTARY_LEVEL = 1;
-  public static final int INTERMEDIATE_LEVEL = 2;
-  public static final int ADVANCED_LEVEL = 3;
-  public static final String[] LANGUAGE_LEVEL_EXTENSIONS = new String[] {"java", "dj0", "dj1", "dj2"};
-  
+public class DrJavaRoot {  
   /** Class to probe to see if the debugger is available */
   public static final String TEST_DEBUGGER_CLASS = "com.sun.jdi.Bootstrap";
   

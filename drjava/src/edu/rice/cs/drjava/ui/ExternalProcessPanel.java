@@ -48,6 +48,7 @@ import edu.rice.cs.util.ProcessCreator;
 import edu.rice.cs.drjava.ui.predictive.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
+import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import static edu.rice.cs.drjava.ui.MainFrame.GoToFileListEntry;
 
 /** Panel for displaying some component with buttons, one of which is an "Abort" button.
@@ -341,11 +342,7 @@ public class ExternalProcessPanel extends AbortablePanel {
         if ((name.length() > 0) && (! Character.isJavaIdentifierPart(name.charAt(0)))) { name = name.substring(1); }
         if (simpleName == null) { simpleName = name; }
         if (name.equals(oldName)) { break; }
-        if ((name.indexOf(".java") >= 0) ||
-            (name.indexOf(".j") >= 0) ||
-            (name.indexOf(".dj0") >= 0) ||
-            (name.indexOf(".dj1") >= 0) ||
-            (name.indexOf(".dj2") >= 0)) {
+        if (DrJavaFileUtils.isSourceFile(name)) {
           // LOG.log("\t--> '" + name + "'");
           uniqueMatch = getUniqueMatch(name, pim);
           if (uniqueMatch != null) {

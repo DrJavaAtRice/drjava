@@ -36,41 +36,48 @@
 
 package edu.rice.cs.drjava.ui;
 
-import java.awt.print.*;
+import java.io.File;
+import javax.swing.filechooser.FileFilter;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrJavaRoot;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.model.DrJavaFileUtils;
 
-import edu.rice.cs.drjava.model.*;
-
-import edu.rice.cs.util.text.EditDocumentInterface;
-
-/** DrJava's print preview window for a console document (interactions or console)
-  * @version $Id$
-  */
-public class PreviewConsoleFrame extends PreviewFrame {
+/** A file filter for all source files. If a ".dj?" file exists, the corresponding ".java" file is not
+  * shown. 
+ *  @version $Id$
+ */
+public class SmartSourceFilter extends JavaSourceFilter {
   
-  private volatile EditDocumentInterface _document;
-  
-  /** Contructs a new PreviewConsoleFrame using a parent model and a MainFrame. The boolean determines whether
-    * the document to be printed is an interactions document.  Should be called in event thread.
-    */
-  public PreviewConsoleFrame(SingleDisplayModel model, MainFrame mainFrame, boolean interactions)
-    throws IllegalStateException {
-    super(model, mainFrame, interactions);
+  /** Returns true if the file's extension matches ".java" or ".dj?". */
+  public boolean accept(File f) {
+    if (f.isDirectory()) {
+      return true;
+    }
+    
+    String name = f.getName();
+    if (DrJavaFileUtils.isLLFile(name)) { return true; }
+    if (!name.endsWith(OptionConstants.JAVA_FILE_EXTENSION)) { return false; }
+
+    // this is a ".java" file
+    File parent = f.getParentFile();
+    if (parent==null) {
+      // can't do the smart thing; but since this is a ".java" file, accept it
+      return true;
+    }
+    
+    if (new File(parent,DrJavaFileUtils.getDJForJavaFile(name)).exists()) return false;
+    if (new File(parent,DrJavaFileUtils.getDJ0ForJavaFile(name)).exists()) return false;
+    if (new File(parent,DrJavaFileUtils.getDJ1ForJavaFile(name)).exists()) return false;
+    if (new File(parent,DrJavaFileUtils.getDJ2ForJavaFile(name)).exists()) return false;
+
+    return true; // ".java" and no matching ".dj?"
   }
-  
-  
-  /** Sets up the document to be displayed and returns the Pageable object that allows display by pages
-    * @param model the current display model
-    * @param interactions whether the document is an interactions document
-    * @return a Pageable object that allows the document to be displayed by pages
-    */
-  protected Pageable setUpDocument(SingleDisplayModel model, boolean interactions) {
-    if (interactions) _document = model.getInteractionsDocument();
-    else _document = model.getConsoleDocument();
-    return _document.getPageable();
-  }
-  
-  protected void _print() {
-    try { _document.print(); }
-    catch (PrinterException e) { _showError(e, "Print Error", "An error occured while printing."); }
+
+  /** @return A description of this filter to display. */
+  public String getDescription() {
+    return "DrJava source files (*"+OptionConstants.JAVA_FILE_EXTENSION+", *"+
+      OptionConstants.DJ_FILE_EXTENSION+", *"+OptionConstants.OLD_DJ0_FILE_EXTENSION+", *"+
+      OptionConstants.OLD_DJ1_FILE_EXTENSION+", *"+OptionConstants.OLD_DJ2_FILE_EXTENSION+")";
   }
 }

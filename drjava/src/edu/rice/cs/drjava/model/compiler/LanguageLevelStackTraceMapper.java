@@ -50,6 +50,7 @@ import java.util.TreeMap;
 
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Class used to get TreeMaps with dj* to java line number (and vise versa) conversions */
@@ -92,7 +93,7 @@ public class LanguageLevelStackTraceMapper {
     if (cache.containsKey(fileName)) return replaceStackTraceElement(s, d, cache.get(fileName));
     
     String dn = d.getName();
-    dn = dn.substring(0, dn.lastIndexOf('.')) + ".java";
+    dn = dn.substring(0, dn.lastIndexOf('.')) + edu.rice.cs.drjava.config.OptionConstants.JAVA_FILE_EXTENSION;
     File javaFile = new File(d.getParentFile(), dn);
     
     cache.put(fileName, readLLLineBlock(javaFile));  
@@ -155,10 +156,10 @@ public class LanguageLevelStackTraceMapper {
     String dn = d.getRawFile().getName();
     
 // make sure that the document is a LL document
-    if (! isLLFileName(dn)) return false;
+    if (!DrJavaFileUtils.isLLFile(dn)) return false;
     
 // replace suffix with ".java"
-    dn = dn.substring(0, dn.lastIndexOf('.')) + ".java";
+    dn = DrJavaFileUtils.getJavaForLLFile(dn);
     
 // make sure packages match
     String dp = d.getPackageName();
@@ -275,23 +276,5 @@ public class LanguageLevelStackTraceMapper {
     if (line.indexOf("//") != 0) return null;
     line = line.substring(2).trim() + " ";
     return line;
-  }
-  
-  /** Return true if the file name ends with .dj0, .dj1 or .dj2. */
-  public static boolean isLLFileName(String s) {
-    return (s.endsWith(".dj0") || s.endsWith(".dj1") || s.endsWith(".dj2"));
-  }
-  
-  /** Return true if the file name ends with .dj0, .dj1 or .dj2. */
-  public static boolean isLLFile(File f) {
-    return isLLFileName(f.getName());
-  }
-  
-  /** Change a language level extension into a .java extension. */
-  public static File getJavaFileForLLFile(File llFile) {
-    if (! isLLFile(llFile)) throw new AssertionError("File is not a language level file: " + llFile);
-    String dn = llFile.getPath();
-    dn = dn.substring(0, dn.lastIndexOf('.')) + ".java";
-    return new File(dn);
   }
 }

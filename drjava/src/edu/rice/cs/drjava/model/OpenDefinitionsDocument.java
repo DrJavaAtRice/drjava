@@ -132,7 +132,7 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   /** @return true if the document's file is a project auxiliary file. */
   public boolean isAuxiliaryFile();
   
-  /** @return true if the document's filename ends with the extension ".java", ".dj0", "dj1", or "dj2". */
+  /** @return true if the document's filename ends with the extension ".java", ".dj", ".dj0", "dj1", or "dj2". */
   public boolean isSourceFile();
   
   /** @return true if the documents file is saved in the current project file. */

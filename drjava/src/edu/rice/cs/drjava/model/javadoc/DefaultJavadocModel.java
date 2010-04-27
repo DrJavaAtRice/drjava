@@ -416,7 +416,7 @@ public class DefaultJavadocModel implements JavadocModel {
   private static boolean isLLFile(File f) {
     File canonicalFile = IOUtil.attemptCanonicalFile(f);
     String fileName = canonicalFile.getPath();
-    int lastIndex = fileName.lastIndexOf(".dj");
+    int lastIndex = fileName.lastIndexOf(OptionConstants.DJ_FILE_EXTENSION);
     return (lastIndex != -1);
   }
 
@@ -424,9 +424,9 @@ public class DefaultJavadocModel implements JavadocModel {
   private static File getJavaForLLFile(File f) {
     File canonicalFile = IOUtil.attemptCanonicalFile(f);
     String fileName = canonicalFile.getPath();
-    int lastIndex = fileName.lastIndexOf(".dj");
+    int lastIndex = fileName.lastIndexOf(OptionConstants.DJ_FILE_EXTENSION);
     if (lastIndex != -1) {
-      return new File(fileName.substring(0, lastIndex) + ".java");
+      return new File(fileName.substring(0, lastIndex) + OptionConstants.JAVA_FILE_EXTENSION);
     }
     else {
       return f;

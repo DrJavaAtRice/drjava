@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.project;
 
 import java.io.*;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
 
 /** Abstract project file parser. */
@@ -126,8 +127,9 @@ public class ProjectFileParserFacade {
       qualifiedName = qualifiedName.substring(1);
     
     //Remove the .java extension if it exists
-    if(qualifiedName.toLowerCase().endsWith(".java"))
-      qualifiedName = qualifiedName.substring(0, qualifiedName.length() - 5);
+    if(qualifiedName.toLowerCase().endsWith(OptionConstants.JAVA_FILE_EXTENSION))
+      qualifiedName = qualifiedName.substring(0, qualifiedName.length() -
+                                              OptionConstants.JAVA_FILE_EXTENSION.length());
     
     LOG.log("\tsetMainClass = \"" + qualifiedName + "\"");
     

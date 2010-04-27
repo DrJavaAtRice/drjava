@@ -851,7 +851,7 @@ public class ConfigFrame extends SwingFrame {
                                     "<html>Any directories in which to search for source<br>" +
                                     "files when stepping in the Debugger.</html>", true);
     // Source path can only include directories
-    sourcePath.setFileFilter(new DirectoryFilter("Source Directories"));
+    sourcePath.getFileChooser().setFileFilter(new DirectoryFilter("Source Directories"));
     addOptionComponent(panel, sourcePath);
     addOptionComponent(panel, 
                        new BooleanOptionComponent(OptionConstants.DEBUG_STEP_JAVA,

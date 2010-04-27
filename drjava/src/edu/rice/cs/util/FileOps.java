@@ -337,8 +337,6 @@ public abstract class FileOps {
   /** This filter checks for files with names that end in ".java".  (Note that while this filter was <em>intended</em>
     * to be a {@code javax.swing.filechooser.FileFilter}, it actually implements a {@code java.io.FileFilter}, because
     * that is what {@code FileFilter} means in the context of this source file.)
-    * @deprecated  Use {@link edu.rice.cs.plt.io.IOUtil#extensionFilePredicate} instead.  Example:
-    *              {@code IOUtil.extensionFileFilter("java")}.  
     */
   @Deprecated public static final FileFilter JAVA_FILE_FILTER = new FileFilter() {
     public boolean accept(File f){

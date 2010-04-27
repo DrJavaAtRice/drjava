@@ -468,13 +468,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public File getMainClassContainingFile(){
     String path = getMainClass();
     
-    if(path == null){
+    if (path == null){
       return null;
     }
     
-    if(path.toLowerCase().endsWith(".java")){
+    if (path.toLowerCase().endsWith(OptionConstants.JAVA_FILE_EXTENSION)){
       return new File(getProjectFile().getParent(), path);
-    }//if
+    } //if
     
     // maybe we have an inner class; remove names from the end and see if we find
     // a file for it that way.
@@ -483,7 +483,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // some/package/SomeClass/Inner.java (not found)
     // some/package/SomeClass.java (not found)
     path = path.replace('.', File.separatorChar);
-    File tempFile = new File(getProjectRoot(), path+".java");
+    File tempFile = new File(getProjectRoot(), path+OptionConstants.JAVA_FILE_EXTENSION);
     while (path.length() > 0){
       if (tempFile.exists()){
         return tempFile;
@@ -493,7 +493,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         break;
       
       path = path.substring(0, path.lastIndexOf(File.separatorChar));
-      tempFile = new File(getProjectRoot(), path + ".java");
+      tempFile = new File(getProjectRoot(), path + OptionConstants.JAVA_FILE_EXTENSION);
     }
     
     return null;
@@ -1408,7 +1408,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     Iterable<File> filesIterable;
     
-    String extension = DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)];
+    String extension = OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]
+      .substring(1); // do not include the dot ("java", not ".java")
     
     Predicate<File> match = LambdaUtil.and(IOUtil.IS_FILE, IOUtil.extensionFilePredicate(extension));
     if (rec) { filesIterable = IOUtil.listFilesRecursively(dir, match); }
@@ -2238,9 +2239,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       ArrayList<OpenDefinitionsDocument> docs = new ArrayList<OpenDefinitionsDocument>(_documentsRepos.size());
       for (OpenDefinitionsDocument doc: _documentsRepos.values()) {
         File f = doc.getRawFile();
-        if (f.getName().endsWith(".dj0") ||
-            f.getName().endsWith(".dj1") ||
-            f.getName().endsWith(".dj2")) docs.add(doc);
+        if (DrJavaFileUtils.isLLFile(f.getName())) docs.add(doc);
       }
       return docs;
     }
@@ -2888,9 +2887,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** @return true if this has a legal source file name (ends in extension ".java", ".dj0", ".dj1", or ".dj2". */
     public boolean isSourceFile() {
       if (isUntitled()) return false;  // assert _file != null
-      String name = _file.getName();
-      for (String ext: CompilerModel.EXTENSIONS) { if (name.endsWith(ext)) return true; }
-      return false;
+      return DrJavaFileUtils.isSourceFile(_file.getName());
     }
     
     /** Returns whether this document is currently untitled (indicating whether it has a file yet or not).
@@ -3100,7 +3097,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           if (! shouldOverwrite) return true; // operation not cancelled?  Strange
         }
         
-        if (! file.exists() || com.verifyOverwrite()) {  // confirm that existing file can be overwritten
+        if (! file.exists() || com.verifyOverwrite(file)) {  // confirm that existing file can be overwritten
           
 //          System.err.println("Writing file " + file);
           
@@ -3881,7 +3878,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     private TrivialFSS(File file) { _file = file; }
     public File getFile() throws OperationCanceledException { return _file; }
     public boolean warnFileOpen(File f) { return true; }
-    public boolean verifyOverwrite() { return true; }
+    public boolean verifyOverwrite(File f) { return true; }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
     public boolean shouldUpdateDocumentState() { return true; }
   }

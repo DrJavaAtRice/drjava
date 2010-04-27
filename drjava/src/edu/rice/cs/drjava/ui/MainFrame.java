@@ -293,8 +293,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** For saving files. We have a persistent dialog to keep track of the last directory from which we saved. */
   private volatile JFileChooser _saveChooser;
   
-  /** Filter for regular java files (.java and .j). */
-  private final javax.swing.filechooser.FileFilter _javaSourceFilter = new JavaSourceFilter();
+  /** Filter for source files (.java and .dj?). */
+  private final javax.swing.filechooser.FileFilter _javaSourceFilter = new SmartSourceFilter();
+  
+  /** Filter for source files (.java and .dj?). */
+  private final javax.swing.filechooser.FileFilter _unfilteredJavaSourceFilter = new JavaSourceFilter();
   
   /** Filter for drjava project files (.drjava and .xml and .pjt) */
   private final javax.swing.filechooser.FileFilter _projectFilter = new javax.swing.filechooser.FileFilter() {
@@ -338,6 +341,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       //_openChooser.removeChoosableFileFilter(_projectFilter);
       _openChooser.resetChoosableFileFilters();
       
+      _openChooser.addChoosableFileFilter(_unfilteredJavaSourceFilter);
       _openChooser.setFileFilter(_javaSourceFilter);
       return getOpenFiles(_openChooser);
     }
@@ -349,6 +353,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       //_openChooser.removeChoosableFileFilter(_projectFilter);
       _openChooser.resetChoosableFileFilters();
       
+      _openChooser.addChoosableFileFilter(_unfilteredJavaSourceFilter);
       _openChooser.addChoosableFileFilter(_projectFilter);
       _openChooser.setFileFilter(_javaSourceFilter);
       return getOpenFiles(_openChooser);
@@ -376,7 +381,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final FileSaveSelector _saveSelector = new FileSaveSelector() {
     public File getFile() throws OperationCanceledException { return getSaveFile(_saveChooser); }
     public boolean warnFileOpen(File f) { return _warnFileOpen(f); }
-    public boolean verifyOverwrite() { return _verifyOverwrite(); }
+    public boolean verifyOverwrite(File f) { return _verifyOverwrite(f); }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {
       _model.setActiveDocument(doc);
       String text = "File " + oldFile.getAbsolutePath() +
@@ -392,7 +397,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final FileSaveSelector _saveAsSelector = new FileSaveSelector() {
     public File getFile() throws OperationCanceledException { return getSaveFile(_saveChooser); }
     public boolean warnFileOpen(File f) { return _warnFileOpen(f); }
-    public boolean verifyOverwrite() { return _verifyOverwrite(); }
+    public boolean verifyOverwrite(File f) { return _verifyOverwrite(f); }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
     public boolean shouldUpdateDocumentState() { return true; }
   };
@@ -401,7 +406,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final FileSaveSelector _saveCopySelector = new FileSaveSelector() {
     public File getFile() throws OperationCanceledException { return getSaveFile(_saveChooser); }
     public boolean warnFileOpen(File f) { return _warnFileOpen(f); }
-    public boolean verifyOverwrite() { return _verifyOverwrite(); }
+    public boolean verifyOverwrite(File f) { return _verifyOverwrite(f); }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
     public boolean shouldUpdateDocumentState() { return false; }
   };
@@ -562,8 +567,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                     JOptionPane.QUESTION_MESSAGE);
       if (testName != null) {
         String ext;
-        for(int i = 0; i < DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS.length; i++) {
-          ext = "." + DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[i];
+        for(int i = 0; i < OptionConstants.LANGUAGE_LEVEL_EXTENSIONS.length; i++) {
+          ext = OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[i];
           if (testName.endsWith(ext)) testName = testName.substring(0, testName.length() - ext.length());
         }
         // For now, don't include setUp and tearDown
@@ -1495,20 +1500,26 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
     }
     else {
-      // try appending ".java" and see if it's unique
-      pim.extendMask(".java");
-      if (pim.getMatchingItems().size() == 1) {
-        // exactly one match with ".java" appended, go to file
-        if (pim.getCurrentItem() != null) {
-          boolean docChanged = !pim.getCurrentItem().doc.equals(_model.getActiveDocument());
+      // try appending ".java" and the other file extensions and see if it's unique
+      boolean exact = false;
+      for(String attemptedExt: OptionConstants.LANGUAGE_LEVEL_EXTENSIONS) {
+        pim.setMask(mask);
+        pim.extendMask(attemptedExt);
+        if (pim.getMatchingItems().size() == 1) {
+          exact = true;
+          // exactly one match with ".java" appended, go to file
+          if (pim.getCurrentItem() != null) {
+            boolean docChanged = !pim.getCurrentItem().doc.equals(_model.getActiveDocument());
 //          if (docChanged) { addToBrowserHistory(); }
-          _model.setActiveDocument(pim.getCurrentItem().doc);
-          if (docChanged) { // defer executing this code until after active document switch is complete
-            addToBrowserHistory();
+            _model.setActiveDocument(pim.getCurrentItem().doc);
+            if (docChanged) { // defer executing this code until after active document switch is complete
+              addToBrowserHistory();
+            }
           }
+          break;
         }
       }
-      else {
+      if (!exact) {
         // not exactly one match
         pim.setMask(mask);
         if (pim.getMatchingItems().size() == 0) {
@@ -1831,15 +1842,21 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
     }
     else {
-      // try appending ".java" and see if it's unique
-      pim.extendMask(".java");
-      if (pim.getMatchingItems().size() == 1) {
-        // exactly one match with ".java" appended, go to file
-        if (pim.getCurrentItem() != null) {
-          PlatformFactory.ONLY.openURL(pim.getCurrentItem().getURL());
+      // try appending ".java" and the other file extensions and see if it's unique
+      boolean exact = false;
+      for(String attemptedExt: OptionConstants.LANGUAGE_LEVEL_EXTENSIONS) {
+        pim.setMask(mask);
+        pim.extendMask(attemptedExt);
+        if (pim.getMatchingItems().size() == 1) {
+          // exactly one match with ".java" appended, go to file
+          exact = true;
+          if (pim.getCurrentItem() != null) {
+            PlatformFactory.ONLY.openURL(pim.getCurrentItem().getURL());
+          }
+          break;
         }
       }
-      else {
+      if (!exact) {
         // not exactly one match
         pim.setMask(mask);
         int found = 0;
@@ -2235,6 +2252,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public void _saveConsoleCopy(ConsoleDocument doc) {
     _saveChooser.removeChoosableFileFilter(_projectFilter);
     _saveChooser.removeChoosableFileFilter(_javaSourceFilter);
+    _saveChooser.removeChoosableFileFilter(_unfilteredJavaSourceFilter);
     _saveChooser.setFileFilter(_txtFileFilter);    
     _saveChooser.setMultiSelectionEnabled(false);
     _saveChooser.setSelectedFile(new File(""));
@@ -2261,7 +2279,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           throw new RuntimeException("Filechooser returned bad rc " + rc);
         }
         public boolean warnFileOpen(File f) { return _warnFileOpen(f); }
-        public boolean verifyOverwrite() { return _verifyOverwrite(); }
+        public boolean verifyOverwrite(File f) { return _verifyOverwrite(f); }
         public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
         public boolean shouldUpdateDocumentState() { return false; }
       });
@@ -2272,6 +2290,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     finally {
       _saveChooser.removeChoosableFileFilter(_projectFilter);
       _saveChooser.removeChoosableFileFilter(_javaSourceFilter);
+      _saveChooser.removeChoosableFileFilter(_unfilteredJavaSourceFilter);
       _saveChooser.removeChoosableFileFilter(_txtFileFilter);
       _saveChooser.setFileFilter(_javaSourceFilter);
     }
@@ -2956,7 +2975,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           return c;
         }
         public boolean warnFileOpen(File f) { return true; }
-        public boolean verifyOverwrite() { return _verifyOverwrite(); }
+        public boolean verifyOverwrite(File f) { return _verifyOverwrite(f); }
         public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {
           return true;
         }
@@ -3012,21 +3031,23 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private static final Icon _djProjectIcon;
   
   static {
-    Icon java, dj0, dj1, dj2, other, star, jup, juf;
+    Icon java, dj0, dj1, dj2, dj, other, star, jup, juf;
     
     java = MainFrame.getIcon("JavaIcon20.gif");
     dj0 = MainFrame.getIcon("ElementaryIcon20.gif");
     dj1 = MainFrame.getIcon("IntermediateIcon20.gif");
     dj2 = MainFrame.getIcon("AdvancedIcon20.gif");
+    dj = MainFrame.getIcon("FunctionalIcon20.gif");
     other = MainFrame.getIcon("OtherIcon20.gif");
-    _djFileDisplayManager20 = new DJFileDisplayManager(java,dj0,dj1,dj2,other);
+    _djFileDisplayManager20 = new DJFileDisplayManager(java,dj0,dj1,dj2,dj,other);
     
     java = MainFrame.getIcon("JavaIcon30.gif");
     dj0 = MainFrame.getIcon("ElementaryIcon30.gif");
     dj1 = MainFrame.getIcon("IntermediateIcon30.gif");
     dj2 = MainFrame.getIcon("AdvancedIcon30.gif");
+    dj = MainFrame.getIcon("FunctionalIcon30.gif");
     other = MainFrame.getIcon("OtherIcon30.gif");
-    _djFileDisplayManager30 = new DJFileDisplayManager(java,dj0,dj1,dj2,other);
+    _djFileDisplayManager30 = new DJFileDisplayManager(java,dj0,dj1,dj2,dj,other);
     
     star = MainFrame.getIcon("ModStar20.gif");
     jup = MainFrame.getIcon("JUnitPass20.gif");
@@ -3043,7 +3064,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   
   /** This manager is meant to retrieve the correct icons for the given filename. The only files recognized 
-    * are the files obviously listed below in the function (.java, .dj0, .dj1, .dj2). The icons that represent 
+    * are the files obviously listed below in the function (.java, .dj0, .dj1, .dj2, .dj). The icons that represent 
     * each filetype are given into the managers constructor upon instantiation.  This class is static since
     * it currently does not depend of the main frame for information.
     */
@@ -3052,13 +3073,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     private final Icon _dj0;
     private final Icon _dj1;
     private final Icon _dj2;
+    private final Icon _dj;
     private final Icon _other;
     
-    public DJFileDisplayManager(Icon java, Icon dj0, Icon dj1, Icon dj2, Icon other) {
+    public DJFileDisplayManager(Icon java, Icon dj0, Icon dj1, Icon dj2, Icon dj, Icon other) {
       _java = java;
       _dj0 = dj0;
       _dj1 = dj1;
       _dj2 = dj2;
+      _dj = dj;
       _other = other;
     }
     /** This method chooses the custom icon only for the known filetypes. If these filetypes are not receiving 
@@ -3070,10 +3093,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       Icon ret = null;
       if (! f.isDirectory()) {
         String name = f.getName().toLowerCase();
-        if (name.endsWith(".java")) ret = _java;
-        if (name.endsWith(".dj0")) ret = _dj0;
-        if (name.endsWith(".dj1")) ret = _dj1;
-        if (name.endsWith(".dj2")) ret = _dj2;
+        if (name.endsWith(OptionConstants.JAVA_FILE_EXTENSION)) ret = _java;
+        else if (name.endsWith(OptionConstants.DJ_FILE_EXTENSION)) ret = _dj;
+        else if (name.endsWith(OptionConstants.OLD_DJ0_FILE_EXTENSION)) ret = _dj0;
+        else if (name.endsWith(OptionConstants.OLD_DJ1_FILE_EXTENSION)) ret = _dj1;
+        else if (name.endsWith(OptionConstants.OLD_DJ2_FILE_EXTENSION)) ret = _dj2;
       }
       if (ret == null) {
         ret = super.getIcon(f);
@@ -4526,10 +4550,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       // Don't set selected file
     }
     
-    // TODO: Why are we working with _saveChooser first, then call jfc.showSaveDialog(this)? (mgricken)
-    _saveChooser.removeChoosableFileFilter(_projectFilter);
-    _saveChooser.removeChoosableFileFilter(_javaSourceFilter);
-    _saveChooser.setFileFilter(_javaSourceFilter);
+    jfc.removeChoosableFileFilter(_projectFilter);
+    jfc.removeChoosableFileFilter(_javaSourceFilter);
+    jfc.removeChoosableFileFilter(_unfilteredJavaSourceFilter);
+    jfc.setFileFilter(_javaSourceFilter);
     jfc.setMultiSelectionEnabled(false);
     int rc = jfc.showSaveDialog(this);
     return getChosenFile(jfc, rc);
@@ -4924,7 +4948,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * TODO: change the dialog title to give the current path rather than "..."
     */
   public void openFolder(DirectoryChooser chooser) {
-    String type = "'." + DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)] + "' ";
+    String type = "'" + OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)] + "' ";
     chooser.setDialogTitle("Open All " + type + "Files in ...");
     
     File openDir = FileOps.NULL_FILE;
@@ -5240,7 +5264,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       if (projectFile == null ||
           projectFile.getParentFile() == null ||
-          (projectFile.exists() && ! _verifyOverwrite())) { return; }
+          (projectFile.exists() && ! _verifyOverwrite(projectFile))) { return; }
       
       _model.createNewProject(projectFile); // sets model to a new FileGroupingState for project file pf
 //      ProjectPropertiesFrame ppf = new ProjectPropertiesFrame(MainFrame.this, file);
@@ -5261,6 +5285,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //    // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
     _saveChooser.removeChoosableFileFilter(_projectFilter);
     _saveChooser.removeChoosableFileFilter(_javaSourceFilter);
+    _saveChooser.removeChoosableFileFilter(_unfilteredJavaSourceFilter);
     _saveChooser.setFileFilter(_projectFilter);
 //    File selection = _saveChooser.getSelectedFile();
 //    if (selection != null) {  // what is this block of commands for?
@@ -5274,7 +5299,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {
       File file = _saveChooser.getSelectedFile();
-      if ((file != null) && (! file.exists() || _verifyOverwrite())) { 
+      if ((file != null) && (! file.exists() || _verifyOverwrite(file))) { 
         _model.setProjectFile(file);
         _currentProjFile = file;
       }
@@ -5327,7 +5352,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           fileName = fileName.substring(0,fileName.length() - OLD_PROJECT_FILE_EXTENSION.length()) + 
             PROJECT_FILE_EXTENSION;
           file = new File(fileName);
-          if (! file.exists() || _verifyOverwrite()) { 
+          if (! file.exists() || _verifyOverwrite(file)) { 
             _model.setProjectFile(file);
             _currentProjFile = file;
           }
@@ -6155,8 +6180,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           //append the appropriate language level extension if not written by user
           if (fc.getFileFilter() instanceof JavaSourceFilter) {
             if (chosen.getName().indexOf(".") == -1)
-              return new File(chosen.getAbsolutePath() + "." + 
-                              DrJavaRoot.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
+              return new File(chosen.getAbsolutePath() +
+                              OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
           }
           return chosen;
         }
@@ -6890,41 +6915,51 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     JRadioButtonMenuItem rbMenuItem;
     rbMenuItem = new JRadioButtonMenuItem("Full Java");
     rbMenuItem.setToolTipText("Use full Java syntax");
-    if (currentLanguageLevel == DrJavaRoot.FULL_JAVA) { rbMenuItem.setSelected(true); }
+    rbMenuItem.setSelected(true); // by default select Full Java
     rbMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        config.setSetting(LANGUAGE_LEVEL, DrJavaRoot.FULL_JAVA);
+        config.setSetting(LANGUAGE_LEVEL, OptionConstants.FULL_JAVA);
       }});
     group.add(rbMenuItem);
     languageLevelMenu.add(rbMenuItem);
     languageLevelMenu.addSeparator();
     
-    rbMenuItem = new JRadioButtonMenuItem("Elementary");
-    rbMenuItem.setToolTipText("Use Elementary language-level features");
-    if (currentLanguageLevel == DrJavaRoot.ELEMENTARY_LEVEL) { rbMenuItem.setSelected(true); }
-    rbMenuItem.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        config.setSetting(LANGUAGE_LEVEL, DrJavaRoot.ELEMENTARY_LEVEL);
-      }});
-    group.add(rbMenuItem);
-    languageLevelMenu.add(rbMenuItem);
+//    rbMenuItem = new JRadioButtonMenuItem("Elementary");
+//    rbMenuItem.setToolTipText("Use Elementary language-level features");
+//    if (currentLanguageLevel == OptionConstants.ELEMENTARY_LEVEL) { rbMenuItem.setSelected(true); }
+//    rbMenuItem.addActionListener(new ActionListener() {
+//      public void actionPerformed(ActionEvent e) {
+//        config.setSetting(LANGUAGE_LEVEL, OptionConstants.ELEMENTARY_LEVEL);
+//      }});
+//    group.add(rbMenuItem);
+//    languageLevelMenu.add(rbMenuItem);
+//    
+//    rbMenuItem = new JRadioButtonMenuItem("Intermediate");
+//    rbMenuItem.setToolTipText("Use Intermediate language-level features");
+//    if (currentLanguageLevel == OptionConstants.INTERMEDIATE_LEVEL) { rbMenuItem.setSelected(true); }
+//    rbMenuItem.addActionListener(new ActionListener() {
+//      public void actionPerformed(ActionEvent e) {
+//        config.setSetting(LANGUAGE_LEVEL, OptionConstants.INTERMEDIATE_LEVEL);
+//      }});
+//    group.add(rbMenuItem);
+//    languageLevelMenu.add(rbMenuItem);
+//    
+//    rbMenuItem = new JRadioButtonMenuItem("Advanced");
+//    rbMenuItem.setToolTipText("Use Advanced language-level features");
+//    if (currentLanguageLevel == OptionConstants.ADVANCED_LEVEL) { rbMenuItem.setSelected(true); }
+//    rbMenuItem.addActionListener(new ActionListener() {
+//      public void actionPerformed(ActionEvent e) {
+//        config.setSetting(LANGUAGE_LEVEL, OptionConstants.ADVANCED_LEVEL);
+//      }});
+//    group.add(rbMenuItem);
+//    languageLevelMenu.add(rbMenuItem);
     
-    rbMenuItem = new JRadioButtonMenuItem("Intermediate");
-    rbMenuItem.setToolTipText("Use Intermediate language-level features");
-    if (currentLanguageLevel == DrJavaRoot.INTERMEDIATE_LEVEL) { rbMenuItem.setSelected(true); }
+    rbMenuItem = new JRadioButtonMenuItem("Functional Java");
+    rbMenuItem.setToolTipText("Use Functional Java language-level features");
+    if (currentLanguageLevel == OptionConstants.FUNCTIONAL_JAVA_LEVEL) { rbMenuItem.setSelected(true); }
     rbMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        config.setSetting(LANGUAGE_LEVEL, DrJavaRoot.INTERMEDIATE_LEVEL);
-      }});
-    group.add(rbMenuItem);
-    languageLevelMenu.add(rbMenuItem);
-    
-    rbMenuItem = new JRadioButtonMenuItem("Advanced");
-    rbMenuItem.setToolTipText("Use Advanced language-level features");
-    if (currentLanguageLevel == DrJavaRoot.ADVANCED_LEVEL) { rbMenuItem.setSelected(true); }
-    rbMenuItem.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        config.setSetting(LANGUAGE_LEVEL, DrJavaRoot.ADVANCED_LEVEL);
+        config.setSetting(LANGUAGE_LEVEL, OptionConstants.FUNCTIONAL_JAVA_LEVEL);
       }});
     group.add(rbMenuItem);
     languageLevelMenu.add(rbMenuItem);
@@ -9771,12 +9806,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Confirms with the user that the file should be overwritten.
+    * @param f file to overwrite
     * @return <code>true</code> iff the user accepts overwriting.
     */
-  private boolean _verifyOverwrite() {
+  private boolean _verifyOverwrite(File f) {
     Object[] options = {"Yes","No"};
     int n = JOptionPane.showOptionDialog(MainFrame.this,
-                                         "This file already exists.  Do you wish to overwrite the file?",
+                                         "<html>This file already exists.  Do you wish to overwrite the file?<br>"+
+                                         f.getPath()+"<html>",
                                          "Confirm Overwrite",
                                          JOptionPane.YES_NO_OPTION,
                                          JOptionPane.QUESTION_MESSAGE,
@@ -10016,9 +10053,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         List<File> filteredFileList = new java.util.ArrayList<File>();
         while (iterator.hasNext()) {
           File file = iterator.next();
-          if (file.isFile() && (file.getName().endsWith(".java") || file.getName().endsWith(".dj0") || 
-                                file.getName().endsWith(".dj1") || file.getName().endsWith(".dj2") || 
-                                file.getName().endsWith(".dj0") || file.getName().endsWith(".txt"))) {
+          if (file.isFile() && (DrJavaFileUtils.isSourceFile(file) || file.getName().endsWith(".txt"))) {
             filteredFileList.add(file);
           }
           else if (file.isFile() && file.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {

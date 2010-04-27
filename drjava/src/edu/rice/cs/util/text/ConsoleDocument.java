@@ -356,7 +356,7 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     assert EventQueue.isDispatchThread();
     try {
       final File file = selector.getFile().getCanonicalFile();
-      if (! file.exists() || selector.verifyOverwrite()) {  // confirm that existing file can be overwritten        
+      if (! file.exists() || selector.verifyOverwrite(file)) {  // confirm that existing file can be overwritten        
         FileOps.saveFile(new FileOps.DefaultFileSaver(file) {
           /** Only runs in event thread so no read lock is necessary. */
           public void saveTo(OutputStream os) throws IOException {
