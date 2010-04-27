@@ -1034,6 +1034,12 @@ public class ConfigFrame extends SwingFrame {
                                                          "build directory of a project</html>", false)
                          .setEntireColumn(true));
 
+    // Prompt to change the language level extensions (.dj0/.dj1->.dj, .dj2->.java)
+    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.PROMPT_RENAME_LL_FILES, "Prompt to Rename Old Language Level Files When Saving", this,
+                                                         "<html>Whether DrJava should prompt the user to rename old language level files.<br>"+
+                                                         "DrJava suggests to rename .dj0 and .dj1 files to .dj, and .dj2 files to .java.</html>", false)
+                         .setEntireColumn(true));
+
     
     // Save before X
     addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_COMPILE,

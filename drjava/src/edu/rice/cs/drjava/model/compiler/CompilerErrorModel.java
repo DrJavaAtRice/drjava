@@ -43,12 +43,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.DummyGlobalModel;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FileMovedException;
+import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.StringOps;
@@ -132,6 +134,36 @@ public class CompilerErrorModel {
     
 //    System.err.println("Constructing CompilerErrorModel for errors: " + Arrays.toString(errors));
     _model = model;
+       
+    // legacy support for old .dj2 language level files:
+    // see DrJava feature request 2990660
+    // As of revisions 5225-5227, .dj2 files aren't converted by the LanguageLevelConverter anymore,
+    // they are just copied. That means the compiler errors now happen in the .java file, not in the
+    // .dj2 file anymore. When we get a compiler error in a .java file, and we have a corresponding
+    // .dj2 file open, but not the .java file, then we change the error to refer to the .dj2 file
+    // instead.
+    if (model!=null) {
+      HashSet<File> odds = new HashSet<File>();
+      for(OpenDefinitionsDocument odd: model.getOpenDefinitionsDocuments()) {
+        odds.add(odd.getRawFile());
+      }
+      for(int i=0; i<errors.length; ++i) {
+        DJError e = errors[i];
+        if (e.fileName().endsWith(edu.rice.cs.drjava.config.OptionConstants.JAVA_FILE_EXTENSION)) {
+          // only needs to be done for .java files
+          File javaFile = e.file();
+          if (!odds.contains(javaFile)) {
+            // .java file is not open
+            File dj2File = DrJavaFileUtils.getDJ2ForJavaFile(javaFile);
+            if (odds.contains(dj2File)) {
+              // but corresponding .dj2 file is open, change error to refer to .dj2 file
+              errors[i] = new DJError(dj2File, e.lineNumber(), e.startColumn(), e.message(), e.isWarning());
+            }
+          }
+        }
+      }
+    }
+
     
     // TODO: If we move to NextGen-style generics, ensure _errors is non-null.
     _errors = errors;

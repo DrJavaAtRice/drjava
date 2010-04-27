@@ -379,7 +379,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 
   /** @return possibly renamed file, if it used an old LL extension and the user wanted it. */
   private File proposeBetterFileName(File f) {
-    if (DrJavaFileUtils.isOldLLFile(f)) {
+    if (DrJavaFileUtils.isOldLLFile(f) && DrJava.getConfig().getSetting(PROMPT_RENAME_LL_FILES)) {
       File newFile = DrJavaFileUtils.getNewLLForOldLLFile(f);
       String newExt = DrJavaFileUtils.getExtension(newFile.getName());
       return edu.rice.cs.drjava.ui.MainFrameUtils.
@@ -402,7 +402,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       return proposeBetterFileName(getSaveFile(_saveChooser));
     }
     public boolean warnFileOpen(File f) { return _warnFileOpen(f); }
-    public boolean verifyOverwrite(File f) { return _verifyOverwrite(f); }
+    public boolean verifyOverwrite(File f) { return MainFrameUtils.verifyOverwrite(MainFrame.this, f); }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {
       _model.setActiveDocument(doc);
       String text = "File " + oldFile.getAbsolutePath() +
@@ -420,7 +420,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       return proposeBetterFileName(getSaveFile(_saveChooser));
     }
     public boolean warnFileOpen(File f) { return _warnFileOpen(f); }
-    public boolean verifyOverwrite(File f) { return _verifyOverwrite(f); }
+    public boolean verifyOverwrite(File f) { return MainFrameUtils.verifyOverwrite(MainFrame.this, f); }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
     public boolean shouldUpdateDocumentState() { return true; }
   };
@@ -431,7 +431,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       return proposeBetterFileName(getSaveFile(_saveChooser));
     }
     public boolean warnFileOpen(File f) { return _warnFileOpen(f); }
-    public boolean verifyOverwrite(File f) { return _verifyOverwrite(f); }
+    public boolean verifyOverwrite(File f) { return MainFrameUtils.verifyOverwrite(MainFrame.this, f); }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
     public boolean shouldUpdateDocumentState() { return false; }
   };
@@ -971,7 +971,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _javadocSelector.setSuggestedDir(suggestedDir);
         jm.javadocAll(_javadocSelector, _saveSelector);
       }
-      catch (IOException ioe) { _showIOError(ioe); }
+      catch (IOException ioe) { MainFrameUtils.showIOError(MainFrame.this, ioe); }
     }
   };
   
@@ -983,7 +983,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       try {
         _model.getActiveDocument().generateJavadoc(_saveSelector);
       }
-      catch (IOException ioe) { _showIOError(ioe); }
+      catch (IOException ioe) { MainFrameUtils.showIOError(MainFrame.this, ioe); }
     }
   };
   
@@ -2304,13 +2304,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           throw new RuntimeException("Filechooser returned bad rc " + rc);
         }
         public boolean warnFileOpen(File f) { return _warnFileOpen(f); }
-        public boolean verifyOverwrite(File f) { return _verifyOverwrite(f); }
+        public boolean verifyOverwrite(File f) { return MainFrameUtils.verifyOverwrite(MainFrame.this, f); }
         public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
         public boolean shouldUpdateDocumentState() { return false; }
       });
     }
     catch (IOException ioe) {
-      _showIOError(new IOException("An error occured writing the contents to a file"));
+      MainFrameUtils.showIOError(MainFrame.this, new IOException("An error occured writing the contents to a file"));
     }
     finally {
       _saveChooser.removeChoosableFileFilter(_projectFilter);
@@ -2639,7 +2639,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _resumeDebugAction = new AbstractAction("Resume Debugger") {
     public void actionPerformed(ActionEvent ae) {
       try { debuggerResume(); }
-      catch (DebugException de) { _showDebugError(de); }
+      catch (DebugException de) { MainFrameUtils.showDebugError(MainFrame.this, de); }
     }
   };
   
@@ -2902,8 +2902,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       _interactionsHistoryChooser.setDialogTitle("Execute Interactions History");
       try { _model.loadHistory(_interactionsHistoryFileSelector); }
-      catch (FileNotFoundException fnf) { _showFileNotFoundError(fnf); }
-      catch (IOException ioe) { _showIOError(ioe); }
+      catch (FileNotFoundException fnf) { MainFrameUtils.showFileNotFoundError(MainFrame.this, fnf); }
+      catch (IOException ioe) { MainFrameUtils.showIOError(MainFrame.this, ioe); }
       _interactionsPane.requestFocusInWindow();
     }
   };
@@ -2936,8 +2936,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _tabbedPane.invalidate();
         _tabbedPane.repaint();
       }
-      catch (FileNotFoundException fnf) { _showFileNotFoundError(fnf); }
-      catch (IOException ioe) { _showIOError(ioe); }
+      catch (FileNotFoundException fnf) { MainFrameUtils.showFileNotFoundError(MainFrame.this, fnf); }
+      catch (IOException ioe) { MainFrameUtils.showIOError(MainFrame.this, ioe); }
       catch (OperationCanceledException oce) {
       }
     }
@@ -3000,7 +3000,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           return c;
         }
         public boolean warnFileOpen(File f) { return true; }
-        public boolean verifyOverwrite(File f) { return _verifyOverwrite(f); }
+        public boolean verifyOverwrite(File f) { return MainFrameUtils.verifyOverwrite(MainFrame.this, f); }
         public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {
           return true;
         }
@@ -3009,7 +3009,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       try { _model.saveHistory(selector, history);}
       catch (IOException ioe) {
-        _showIOError(new IOException("An error occured writing the history to a file"));
+        MainFrameUtils.showIOError(MainFrame.this, new IOException("An error occured writing the history to a file"));
       }
       _interactionsPane.requestFocusInWindow();
     }
@@ -3032,7 +3032,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void windowDeiconified(WindowEvent ev) {
       try { _model.getActiveDocument().revertIfModifiedOnDisk(); }
       catch (FileMovedException fme) { _showFileMovedError(fme); }
-      catch (IOException e) { _showIOError(e);}
+      catch (IOException e) { MainFrameUtils.showIOError(MainFrame.this, e);}
     }
     public void windowIconified(WindowEvent ev) { }
     public void windowOpened(WindowEvent ev) { _currentDefPane.requestFocusInWindow(); }
@@ -4459,12 +4459,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         finally { hourglassOff(); }
       }
     }
-    catch (DebugException de) { _showError(de, "Debugger Error", "Could not start the debugger."); }
+    catch (DebugException de) { MainFrameUtils.showError(MainFrame.this, de, "Debugger Error", "Could not start the debugger."); }
     catch (NoClassDefFoundError err) {
-      _showError(err, "Debugger Error",
-                 "Unable to find the JPDA package for the debugger.\n" +
-                 "Please make sure either tools.jar or jpda.jar is\n" +
-                 "in your classpath when you start DrJava.");
+      MainFrameUtils.showError(MainFrame.this, err, "Debugger Error",
+                               "Unable to find the JPDA package for the debugger.\n" +
+                               "Please make sure either tools.jar or jpda.jar is\n" +
+                               "in your classpath when you start DrJava.");
       _setDebugMenuItemsEnabled(false);
     }
   }
@@ -4801,15 +4801,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       addToBrowserHistory();
     }
     catch(MalformedProjectFileException e) {
-      _showProjectFileParseError(e); // add to an error adapter
+      MainFrameUtils.showProjectFileParseError(MainFrame.this, e); // add to an error adapter
       return;
     }
     catch(FileNotFoundException e) {
-      _showFileNotFoundError(e); // add to an error adapter
+      MainFrameUtils.showFileNotFoundError(MainFrame.this, e); // add to an error adapter
       return;
     }
     catch(IOException e) {
-      _showIOError(e); // add to an error adapter
+      MainFrameUtils.showIOError(MainFrame.this, e); // add to an error adapter
       return;
     }
   }
@@ -4962,9 +4962,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }  
     catch (OperationCanceledException oce) { /* do not open file */ }
     catch (FileNotFoundException fnf) { 
-      _showFileNotFoundError(fnf); 
+      MainFrameUtils.showFileNotFoundError(MainFrame.this, fnf); 
     }
-    catch (IOException ioe) { _showIOError(ioe); }
+    catch (IOException ioe) { MainFrameUtils.showIOError(MainFrame.this, ioe); }
     finally { hourglassOff(); }
   }
   
@@ -5002,7 +5002,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     hourglassOn();
     try { _model.openFolder(dir, rec); }
     catch(AlreadyOpenException e) { /* do nothing */ }
-    catch(IOException e) { _showIOError(e); }
+    catch(IOException e) { MainFrameUtils.showIOError(MainFrame.this, e); }
     catch(OperationCanceledException oce) { /* do nothing */ }
     finally { hourglassOff(); }
   }
@@ -5080,10 +5080,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _showFileMovedError(fme);
     }
     catch (PrinterException e) {
-      _showError(e, "Print Error", "An error occured while printing.");
+      MainFrameUtils.showError(MainFrame.this, e, "Print Error", "An error occured while printing.");
     }
     catch (BadLocationException e) {
-      _showError(e, "Print Error", "An error occured while printing.");
+      MainFrameUtils.showError(MainFrame.this, e, "Print Error", "An error occured while printing.");
     }
   }
   
@@ -5092,7 +5092,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _model.getConsoleDocument().print();
     }
     catch (PrinterException e) {
-      _showError(e, "Print Error", "An error occured while printing.");
+      MainFrameUtils.showError(MainFrame.this, e, "Print Error", "An error occured while printing.");
     }
   }
   
@@ -5101,7 +5101,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _model.getInteractionsDocument().print();
     }
     catch (PrinterException e) {
-      _showError(e, "Print Error", "An error occured while printing.");
+      MainFrameUtils.showError(MainFrame.this, e, "Print Error", "An error occured while printing.");
     }
   }
   
@@ -5115,10 +5115,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _showFileMovedError(fme);
     }
     catch (BadLocationException e) {
-      _showError(e, "Print Error", "An error occured while preparing the print preview.");
+      MainFrameUtils.showError(MainFrame.this, e, "Print Error", "An error occured while preparing the print preview.");
     }
     catch (IllegalStateException e) {
-      _showError(e, "Print Error", "An error occured while preparing the print preview.");
+      MainFrameUtils.showError(MainFrame.this, e, "Print Error", "An error occured while preparing the print preview.");
     }
   }
   
@@ -5128,7 +5128,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       new PreviewConsoleFrame(_model, this, false);
     }
     catch (IllegalStateException e) {
-      _showError(e, "Print Error", "An error occured while preparing the print preview.");
+      MainFrameUtils.showError(MainFrame.this, e, "Print Error", "An error occured while preparing the print preview.");
     }
   }
   
@@ -5138,7 +5138,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       new PreviewConsoleFrame(_model, this, true);
     }
     catch (IllegalStateException e) {
-      _showError(e, "Print Error", "An error occured while preparing the print preview.");
+      MainFrameUtils.showError(MainFrame.this, e, "Print Error", "An error occured while preparing the print preview.");
     }
   }
   
@@ -5173,7 +5173,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       return success;
     }
     catch (IOException ioe) { 
-      _showIOError(ioe);
+      MainFrameUtils.showIOError(MainFrame.this, ioe);
       return false;
     }
   }
@@ -5186,7 +5186,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       return toReturn;
     }
     catch (IOException ioe) {
-      _showIOError(ioe);
+      MainFrameUtils.showIOError(MainFrame.this, ioe);
       return false;
     }
   }
@@ -5199,7 +5199,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       return toReturn;
     }
     catch (IOException ioe) {
-      _showIOError(ioe);
+      MainFrameUtils.showIOError(MainFrame.this, ioe);
       return false;
     }
   }
@@ -5221,7 +5221,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
     }
     catch (IOException ioe) {
-      _showIOError(ioe);
+      MainFrameUtils.showIOError(MainFrame.this, ioe);
       return false;
     }
   }  
@@ -5233,7 +5233,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (_model.isProjectActive()) _saveProject();
       _model.saveAllFiles(_saveSelector);
     }
-    catch (IOException ioe) { _showIOError(ioe); }
+    catch (IOException ioe) { MainFrameUtils.showIOError(MainFrame.this, ioe); }
     finally { hourglassOff(); }
   }
   
@@ -5247,7 +5247,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       _model.saveAllFiles(_saveSelector);
     }
-    catch (IOException ioe) { _showIOError(ioe); }
+    catch (IOException ioe) { MainFrameUtils.showIOError(MainFrame.this, ioe); }
     finally { hourglassOff(); }
   }
   
@@ -5289,7 +5289,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       if (projectFile == null ||
           projectFile.getParentFile() == null ||
-          (projectFile.exists() && ! _verifyOverwrite(projectFile))) { return; }
+          (projectFile.exists() && ! MainFrameUtils.verifyOverwrite(MainFrame.this, projectFile))) { return; }
       
       _model.createNewProject(projectFile); // sets model to a new FileGroupingState for project file pf
 //      ProjectPropertiesFrame ppf = new ProjectPropertiesFrame(MainFrame.this, file);
@@ -5324,7 +5324,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {
       File file = _saveChooser.getSelectedFile();
-      if ((file != null) && (! file.exists() || _verifyOverwrite(file))) { 
+      if ((file != null) && (! file.exists() || MainFrameUtils.verifyOverwrite(MainFrame.this, file))) { 
         _model.setProjectFile(file);
         _currentProjFile = file;
       }
@@ -5379,7 +5379,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //        _openProjectHelper(file);
 //      }    
     }
-    catch(IOException ioe) { _showIOError(ioe); }
+    catch(IOException ioe) { MainFrameUtils.showIOError(MainFrame.this, ioe); }
     _recentProjectManager.updateOpenFiles(file);
     _model.setProjectChanged(false);
   }
@@ -5438,7 +5438,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _showFileMovedError(fme);
     }
     catch (IOException ioe) {
-      _showIOError(ioe);
+      MainFrameUtils.showIOError(MainFrame.this, ioe);
     }
   }
   
@@ -5451,7 +5451,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
    _showFileMovedError(fme);
    }
    catch (IOException ioe) {
-   _showIOError(ioe);
+   MainFrameUtils.showIOError(MainFrame.this, ioe);
    }
    }
    */
@@ -5486,7 +5486,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // (Don't want to overwrite a custom config file with a simple typo.)
     if (! DrJava.getConfig().hadStartupException()) {
       try { DrJava.getConfig().saveConfiguration(); }
-      catch (IOException ioe) { _showIOError(ioe); }
+      catch (IOException ioe) { MainFrameUtils.showIOError(MainFrame.this, ioe); }
     }
     //DrJava.consoleOut().println("Quitting DrJava...");
     dispose();    // Free GUI elements of this frame
@@ -5597,7 +5597,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //      final OpenDefinitionsDocument doc = _model.getActiveDocument();
       try { _model.getCompilerModel().compile(_model.getDocumentNavigator().getSelectedDocuments()); }
       catch (FileMovedException fme) { _showFileMovedError(fme); }
-      catch (IOException ioe) { _showIOError(ioe); }
+      catch (IOException ioe) { MainFrameUtils.showIOError(MainFrame.this, ioe); }
     }
     finally { hourglassOff();}
 //    update(getGraphics());
@@ -5618,7 +5618,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //          public void run() {
         try { _model.getCompilerModel().compile(l); }
         catch (FileMovedException fme) { _showFileMovedError(fme); }
-        catch (IOException ioe) { _showIOError(ioe); }
+        catch (IOException ioe) { MainFrameUtils.showIOError(MainFrame.this, ioe); }
 //          }
 //        }.start();
       }
@@ -5634,7 +5634,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     hourglassOn();
     try { _model.getCompilerModel().compileProject(); }
     catch (FileMovedException fme) { _showFileMovedError(fme); }
-    catch (IOException ioe) { _showIOError(ioe); }
+    catch (IOException ioe) { MainFrameUtils.showIOError(MainFrame.this, ioe); }
     finally { hourglassOff(); }
 //      }
 //    }.start();
@@ -5646,7 +5646,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     hourglassOn();
     try { _model.getCompilerModel().compileAll(); }
     catch (FileMovedException fme) { _showFileMovedError(fme); }
-    catch (IOException ioe) { _showIOError(ioe); }
+    catch (IOException ioe) { MainFrameUtils.showIOError(MainFrame.this, ioe); }
     finally{ hourglassOff(); }
   }
   
@@ -5762,7 +5762,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         JOptionPane.showMessageDialog(MainFrame.this, msg, "No Class Found", JOptionPane.ERROR_MESSAGE);
       }
       catch (FileMovedException fme) { _showFileMovedError(fme); }
-      catch (IOException ioe) { _showIOError(ioe); }
+      catch (IOException ioe) { MainFrameUtils.showIOError(MainFrame.this, ioe); }
     }
     else _runMain();
   }
@@ -5783,7 +5783,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       JOptionPane.showMessageDialog(MainFrame.this, msg, "No Class Found", JOptionPane.ERROR_MESSAGE);
     }
     catch (FileMovedException fme) { _showFileMovedError(fme); }
-    catch (IOException ioe) { _showIOError(ioe); }
+    catch (IOException ioe) { MainFrameUtils.showIOError(MainFrame.this, ioe); }
   }
   
   /** Internal helper method to run the current document as applet in the interactions pane. */
@@ -5802,7 +5802,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       JOptionPane.showMessageDialog(MainFrame.this, msg, "No Class Found", JOptionPane.ERROR_MESSAGE);
     }
     catch (FileMovedException fme) { _showFileMovedError(fme); }
-    catch (IOException ioe) { _showIOError(ioe); }
+    catch (IOException ioe) { MainFrameUtils.showIOError(MainFrame.this, ioe); }
   }
   
   private void _junit() {
@@ -6006,8 +6006,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         // suspended threads.
       }
       catch (DebugException de) {
-        _showError(de, "Debugger Error",
-                   "Could not create a step request.");
+        MainFrameUtils.showError(MainFrame.this, de, "Debugger Error",
+                                 "Could not create a step request.");
       }
     }
   }
@@ -6069,7 +6069,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (breakpointSet) showBreakpoints();
     }
     catch (DebugException de) {
-      _showError(de, "Debugger Error", "Could not set a breakpoint at the current line.");
+      MainFrameUtils.showError(MainFrame.this, de, "Debugger Error", "Could not set a breakpoint at the current line.");
     }
   }
   
@@ -6117,46 +6117,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     catch (IOException ioe) { /* Couldn't find the document, so ignore the FME */ }
   }
   
-  void _showProjectFileParseError(MalformedProjectFileException mpfe) {
-    MainFrameUtils.showProjectFileParseError(this, mpfe);
-  }
-  
-  void _showFileNotFoundError(FileNotFoundException fnf) {
-    MainFrameUtils.showFileNotFoundError(this, fnf);
-  }
-  
-  void _showIOError(IOException ioe) {
-    MainFrameUtils.showIOError(this, ioe);
-  }
-  
-  void _showClassNotFoundError(ClassNotFoundException cnfe) {
-    MainFrameUtils.showClassNotFoundError(this, cnfe);
-  }
-  
-  void _showNoClassDefError(NoClassDefFoundError ncde) {
-    MainFrameUtils.showNoClassDefError(this, ncde);
-  }
-  
-  void _showDebugError(DebugException de) {
-    MainFrameUtils.showDebugError(this, de);
-  }
-  
-  void _showJUnitInterrupted(UnexpectedException e) {
-    MainFrameUtils.showJUnitInterrupted(this, e);
-  }
-
-  void _showJUnitInterrupted(String message) {
-    MainFrameUtils.showJUnitInterrupted(this, message);
-  }
-  
-  void _showError(Throwable e, String title, String message) {    
-    MainFrameUtils.showError(this, e, title, message);
-  }
-  
-  void _showWarning(Throwable e, String title, String message) {
-    MainFrameUtils.showWarning(this, e, title, message);
-  }
-  
   /** Check if any errors occurred while parsing the config file, and display a message if necessary. */
   private void _showConfigException() {
     if (DrJava.getConfig().hadStartupException()) {
@@ -6165,10 +6125,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       catch(IOException ioe) { /* ignore */ }
       Exception e = DrJava.getConfig().getStartupException();
-      _showError(e, "Error in Config File",
-                 "Could not read the '.drjava' configuration file\n" +
-                 "in your home directory.  Starting with default\n" +
-                 "values instead.\n\n" + "The problem was:\n");
+      MainFrameUtils.showError(this, e, "Error in Config File",
+                               "Could not read the '.drjava' configuration file\n" +
+                               "in your home directory.  Starting with default\n" +
+                               "values instead.\n\n" + "The problem was:\n");
     }
   }
   
@@ -8638,7 +8598,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           }
         }
         catch (DebugException de) {
-          _showError(de, "Debugger Error", "Error with a thread in the debugger.");
+          MainFrameUtils.showError(MainFrame.this, de, "Debugger Error", "Error with a thread in the debugger.");
         }
       }
     }
@@ -8997,7 +8957,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       try { active.revertIfModifiedOnDisk(); }
       catch (FileMovedException fme) { _showFileMovedError(fme); }
-      catch (IOException e) { _showIOError(e); }
+      catch (IOException e) { MainFrameUtils.showIOError(MainFrame.this, e); }
       
       // Change Find/Replace to the new defpane
       if (isDisplayed(_findReplace)) {
@@ -9815,14 +9775,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     return false;
   }
   
-  /** Confirms with the user that the file should be overwritten.
-    * @param f file to overwrite
-    * @return <code>true</code> iff the user accepts overwriting.
-    */
-  private boolean _verifyOverwrite(File f) {
-    return MainFrameUtils.verifyOverwrite(MainFrame.this, f);
-  }
-  
   /* Resets the JUnit functions in main frame. */
   private void _resetJUnit() {
     _junitAction.setEnabled(true);
@@ -9834,7 +9786,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /* Pops up a message and cleans up after unit testing has been interrupted. */
   private void _junitInterrupted(final UnexpectedException e) {
     try {
-      _showJUnitInterrupted(e);
+      MainFrameUtils.showJUnitInterrupted(MainFrame.this, e);
       removeTab(_junitPanel);
       _resetJUnit(); 
       _restoreJUnitActionsEnabled();
@@ -9846,7 +9798,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /* Pops up a message and cleans up after unit testing has been interrupted. */
   private void _junitInterrupted(String message) {
     try {
-      _showJUnitInterrupted(message);
+      MainFrameUtils.showJUnitInterrupted(MainFrame.this, message);
       removeTab(_junitPanel);
       _resetJUnit(); 
       _restoreJUnitActionsEnabled();

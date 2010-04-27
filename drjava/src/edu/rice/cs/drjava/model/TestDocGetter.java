@@ -40,7 +40,9 @@ import java.util.HashMap;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.text.BadLocationException;
-
+import java.util.List;
+import java.util.ArrayList;
+  
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
@@ -81,6 +83,10 @@ public class TestDocGetter extends DummyGlobalModel {
     // Try to find the key in docs.
     if (docs.containsKey(file)) return docs.get(file);
     else throw new IllegalStateException("TestDocGetter can't open new files!");
+  }
+  
+  public List<OpenDefinitionsDocument> getOpenDefinitionsDocuments() {
+    return new ArrayList<OpenDefinitionsDocument>(docs.values());
   }
 
   /** Test implementation of OpenDefinitionsDocument interface. */

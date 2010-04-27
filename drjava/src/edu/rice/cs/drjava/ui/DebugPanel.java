@@ -159,7 +159,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       }
       catch (DebugException de) {
         // Thrown if
-        _frame._showDebugError(de);
+        MainFrameUtils.showDebugError(_frame, de);
       }
     }
     else {
@@ -342,7 +342,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
         //fireTableCellUpdated(row, col);
         fireTableRowsUpdated(row, _watches.size()-1);
       }
-      catch (DebugException de) { _frame._showDebugError(de); }
+      catch (DebugException de) { MainFrameUtils.showDebugError(_frame, de); }
     }
   }
 
@@ -413,7 +413,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     Action resumeAction = new AbstractAction("Resume") {
       public void actionPerformed(ActionEvent ae) {
         try { _frame.debuggerResume(); }
-        catch (DebugException de) { _frame._showDebugError(de); }
+        catch (DebugException de) { MainFrameUtils.showDebugError(_frame, de); }
       }
     };
     _resumeButton = new JButton(resumeAction);
@@ -520,7 +520,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
         try {
           if (_threadInPopup.isSuspended()) _debugger.resume(_threadInPopup);
         }
-        catch (DebugException dbe) { _frame._showDebugError(dbe); }
+        catch (DebugException dbe) { MainFrameUtils.showDebugError(_frame, dbe); }
       }
     });
 
@@ -530,7 +530,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
         try {
           _debugger.scrollToSource(getSelectedStackItem());
         }
-        catch (DebugException de) { _frame._showDebugError(de); }
+        catch (DebugException de) { MainFrameUtils.showDebugError(_frame, de); }
       }
     });
 
@@ -542,7 +542,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
           _watchTable.revalidate();
           _watchTable.repaint();
         }
-        catch (DebugException de) { _frame._showDebugError(de); }
+        catch (DebugException de) { MainFrameUtils.showDebugError(_frame, de); }
       }
     });
     _watchTable.addMouseListener(new DebugTableMouseAdapter(_watchTable) {
@@ -561,7 +561,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private void _selectCurrentThread() {
     if (_threadInPopup.isSuspended()) {
       try { _debugger.setCurrentThread(_threadInPopup); }
-      catch(DebugException de) { _frame._showDebugError(de); }
+      catch(DebugException de) { MainFrameUtils.showDebugError(_frame, de); }
     }
   }
 
@@ -723,7 +723,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
         _debugger.scrollToSource(_stackFrames.get(_lastRow));
       }
       catch (DebugException de) {
-        _frame._showDebugError(de);
+        MainFrameUtils.showDebugError(_frame, de);
       }
     }
   }

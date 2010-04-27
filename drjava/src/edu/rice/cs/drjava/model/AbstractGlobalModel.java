@@ -3880,7 +3880,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
     public boolean shouldUpdateDocumentState() { return true; }
     private File proposeBetterFileName(File f) {
-      if (DrJavaFileUtils.isOldLLFile(f)) {
+      if (DrJavaFileUtils.isOldLLFile(f) && DrJava.getConfig().getSetting(OptionConstants.PROMPT_RENAME_LL_FILES)) {
         File newFile = DrJavaFileUtils.getNewLLForOldLLFile(f);
         String newExt = DrJavaFileUtils.getExtension(newFile.getName());
         return edu.rice.cs.drjava.ui.MainFrameUtils.proposeToChangeExtension

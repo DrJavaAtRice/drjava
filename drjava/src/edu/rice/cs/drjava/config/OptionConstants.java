@@ -1307,6 +1307,9 @@ public interface OptionConstants {
   
   /** Whether to warn that a restart is necessary before the default compiler preference will change. */
   public static final BooleanOption WARN_CHANGE_DCP = new BooleanOption("warn.change.dcp", Boolean.TRUE);
+
+  /** Whether to prompt to change the language level extensions (.dj0/.dj1->.dj, .dj2->.java). */
+  public static final BooleanOption PROMPT_RENAME_LL_FILES = new BooleanOption("prompt.rename.ll.files", Boolean.TRUE);
   
   /* ---------- MISC OPTIONS ---------- */
   
