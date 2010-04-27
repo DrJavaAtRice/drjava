@@ -984,7 +984,12 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     // See if sd is public.  If so, the filename must match sd's name.
     if (sd.hasModifier("public")) {
       String fileName = className.replace('.', System.getProperty("file.separator").charAt(0));
-      if (!_file.getAbsolutePath().endsWith(fileName + ".dj0") && !_file.getAbsolutePath().endsWith(fileName + ".dj1") && !_file.getAbsolutePath().endsWith(fileName + ".dj2")) {_addError(className + " is public thus must be defined in a file with the same name.", that.getName());}
+      if (!_file.getAbsolutePath().endsWith(fileName + ".dj") && 
+          !_file.getAbsolutePath().endsWith(fileName + ".dj0") && 
+          !_file.getAbsolutePath().endsWith(fileName + ".dj1") && 
+          !_file.getAbsolutePath().endsWith(fileName + ".dj2")) {
+        _addError(className + " is public thus must be defined in a file with the same name.", that.getName());
+      }
     }
 
     // Reset sd's anonymous inner class count so we can count again during this second pass.
@@ -1105,7 +1110,12 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
 //    //See if sd is public.  If so, the filename must match sd's name.
     if (sd.hasModifier("public")) {
       String fileName = interfaceName.replace('.', System.getProperty("file.separator").charAt(0));
-      if (!_file.getAbsolutePath().endsWith(fileName + ".dj0") && !_file.getAbsolutePath().endsWith(fileName + ".dj1") && !_file.getAbsolutePath().endsWith(fileName + ".dj2")) {_addError(interfaceName + " is public thus must be defined in a file with the same name.", that.getName());}
+      if (!_file.getAbsolutePath().endsWith(fileName + ".dj") &&
+          !_file.getAbsolutePath().endsWith(fileName + ".dj0") &&
+          !_file.getAbsolutePath().endsWith(fileName + ".dj1") &&
+          !_file.getAbsolutePath().endsWith(fileName + ".dj2")) {
+        _addError(interfaceName + " is public thus must be defined in a file with the same name.", that.getName());
+      }
     }
     
 

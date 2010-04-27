@@ -165,7 +165,7 @@ public class LanguageLevelConverter {
         
         if (isAdvancedFile(f)) advanced.addLast(f);
         
-        else if (_isLanguageLevelFile(f)) {  /* a .dj0 or .dj1 file */  // WARNING: no support for .dj files here
+        else if (_isLanguageLevelFile(f)) {  /* a .dj0 or .dj1 or .dj file */
           System.out.flush();
           SourceFile sf;
           JExprParser jep = new JExprParser(f);
@@ -334,11 +334,8 @@ public class LanguageLevelConverter {
       File f = files[ind];
       try {
         
-        // Set up augmented file  WARNING: DOES NOT WORK FOR .DJ EXTENSION
-        String augmentedFilePath = f.getAbsolutePath();
-        augmentedFilePath = augmentedFilePath.substring(0, augmentedFilePath.length() - 4); //remove the .dj# extension
-        
-        File augmentedFile = new File(augmentedFilePath + ".java"); //replace it with .java
+        // Set up augmented file
+        File augmentedFile = getJavaForLLFile(f); //replace .dj? with .java
         
         if (isAdvancedFile(f)) {
           Utilities.copyFile(f, augmentedFile);
@@ -420,10 +417,19 @@ public class LanguageLevelConverter {
   public static boolean isIntermediateFile(File f) { return f.getPath().endsWith(".dj1"); }
   /** If a file name ends with .dj2, it is an Advanced File, which is a legacy notion. */
   public static boolean isAdvancedFile(File f) { return f.getPath().endsWith(".dj2"); }
+  /** If a file name ends with .dj, it is a Functional Java File */
+  public static boolean isFunctionalJavaFile(File f) { return f.getPath().endsWith(".dj"); }
   
   /**If a file is an Elementary orIntermediate file, then it is a language level file. */
   private static boolean _isLanguageLevelFile(File f) {
-    return isElementaryFile(f) || isIntermediateFile(f);  // WARNING: DOES NOT INCLUDE .dj
+    return isElementaryFile(f) || isIntermediateFile(f) || isFunctionalJavaFile(f);
+  }
+  
+  private static File getJavaForLLFile(File f) {
+    String augmentedFilePath = f.getAbsolutePath();
+    int dotPos = augmentedFilePath.lastIndexOf('.');
+    augmentedFilePath = augmentedFilePath.substring(0, dotPos); //remove the extension
+    return new File(augmentedFilePath + ".java"); //replace it with .java
   }
   
   /**Only certain versions of the java compiler support autoboxing*/
@@ -452,7 +458,7 @@ public class LanguageLevelConverter {
     
     if (args.length == 0) {
       System.out.println("Java Language Level Converter");
-      System.out.println("Please pass file names (*.dj0, *.dj1, *.dj2) as arguments.");
+      System.out.println("Please pass file names (*.dj, *.dj0, *.dj1, *.dj2) as arguments.");
       System.out.println("Note: The converter will use Java's classpath to resolve classes.");
       System.out.println("      If classes are not found, use java -cp <classpath> to set the classpath.");
       return;
