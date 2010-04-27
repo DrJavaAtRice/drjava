@@ -196,11 +196,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** The document adapter used in the console document. */
   protected final InteractionsDJDocument _consoleDocAdapter;
   
-  /** Number of milliseconds to wait after each println, to prevent the JVM from being flooded with print calls.
-    * TODO: why is this here, and why is it public?
-    */
-  public static final int WRITE_DELAY = 50;
-  
   /** A PageFormat object for printing to paper. */
   protected volatile PageFormat _pageFormat = new PageFormat();
   
@@ -2388,7 +2383,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Appends a string to the given document using a particular attribute set.
-    * Also waits for a small amount of time (WRITE_DELAY) to prevent any one
+    * Also waits for a small amount of time (InteractionsModel.WRITE_DELAY) to prevent any one
     * writer from flooding the model with print calls to the point that the
     * user interface could become unresponsive. 
     * Only runs in event thread.
@@ -3083,6 +3078,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       try {
         final OpenDefinitionsDocument openDoc = this;
         final File file = com.getFile().getCanonicalFile();
+        
         _log.log("saveFileAs called on " + file);
         OpenDefinitionsDocument otherDoc = _getOpenDocument(file);
         
@@ -3876,11 +3872,30 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   private static class TrivialFSS implements FileSaveSelector {
     private File _file;
     private TrivialFSS(File file) { _file = file; }
-    public File getFile() throws OperationCanceledException { return _file; }
+    public File getFile() throws OperationCanceledException {
+      return proposeBetterFileName(_file);
+    }
     public boolean warnFileOpen(File f) { return true; }
     public boolean verifyOverwrite(File f) { return true; }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
     public boolean shouldUpdateDocumentState() { return true; }
+    private File proposeBetterFileName(File f) {
+      if (DrJavaFileUtils.isOldLLFile(f)) {
+        File newFile = DrJavaFileUtils.getNewLLForOldLLFile(f);
+        String newExt = DrJavaFileUtils.getExtension(newFile.getName());
+        return edu.rice.cs.drjava.ui.MainFrameUtils.proposeToChangeExtension
+          (null, // TODO: better parent component
+           f,
+           "Change Extension?",
+           f.getPath() + "\nThis file still has an old Language Level extension."
+             + "\nDo you want to change the file's extension to \""
+             + newExt + "\"?",
+           "Change to \"" + newExt + "\"",
+           "Keep \"" + DrJavaFileUtils.getExtension(f.getName()) + "\"",
+           newExt);
+      }
+      else return f;
+    }
   }
   
   /** Creates a ConcreteOpenDefDoc for a NullFile object f (corresponding to a new empty document)

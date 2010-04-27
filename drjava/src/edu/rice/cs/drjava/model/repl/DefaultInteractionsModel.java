@@ -73,7 +73,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     */
   public DefaultInteractionsModel(DefaultGlobalModel model, MainJVM jvm, ConsoleDocumentInterface cDoc, File wd) {
     super(jvm, cDoc, wd, DrJava.getConfig().getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue(),
-          DefaultGlobalModel.WRITE_DELAY);
+          WRITE_DELAY);
     _model = model;
     // Set whether to allow "assert" statements to be run in the remote JVM.
     Boolean allow = DrJava.getConfig().getSetting(OptionConstants.RUN_WITH_ASSERT);

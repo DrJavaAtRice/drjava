@@ -63,12 +63,7 @@ import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
   * interpret code.  It can be used in a standalone interface, such as edu.rice.cs.drjava.ui.SimpleInteractionsWindow.
   * @version $Id$
   */
-public class SimpleInteractionsModel extends InteractionsModel {
-  
-  // Elided in favor of same constant in AbstractGlobalModel
-//  /** Milliseconds to wait after each println */
-//  protected static final int WRITE_DELAY = 30;
-  
+public class SimpleInteractionsModel extends InteractionsModel {  
   protected ClassPathManager _classPathManager;
   protected Interpreter _interpreter;
   protected final InteractionsPaneOptions _interpreterOptions;
@@ -80,7 +75,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
     * @param document Toolkit-independent document adapter
     */
   public SimpleInteractionsModel(InteractionsDJDocument document) {
-    super(document, new File(System.getProperty("user.dir")), 1000, AbstractGlobalModel.WRITE_DELAY);
+    super(document, new File(System.getProperty("user.dir")), 1000, WRITE_DELAY);
     _classPathManager = new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
     _interpreterOptions = new InteractionsPaneOptions();
     _interpreter = new Interpreter(_interpreterOptions, _classPathManager.makeClassLoader(null));

@@ -376,10 +376,31 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       return getOpenFiles(_openChooser);
     }
   };
+
+  /** @return possibly renamed file, if it used an old LL extension and the user wanted it. */
+  private File proposeBetterFileName(File f) {
+    if (DrJavaFileUtils.isOldLLFile(f)) {
+      File newFile = DrJavaFileUtils.getNewLLForOldLLFile(f);
+      String newExt = DrJavaFileUtils.getExtension(newFile.getName());
+      return edu.rice.cs.drjava.ui.MainFrameUtils.
+        proposeToChangeExtension(this,
+                                 f,
+                                 "Change Extension?",
+                                 f.getPath() + "\nThis file still has an old Language Level extension."
+                                   + "\nDo you want to change the file's extension to \""
+                                   + newExt + "\"?",
+                                 "Change to \"" + newExt + "\"",
+                                 "Keep \"" + DrJavaFileUtils.getExtension(f.getName()) + "\"",
+                                 newExt);
+    }
+    else return f;
+  }
   
   /** Returns the file to save to the model (command pattern).  */
   private final FileSaveSelector _saveSelector = new FileSaveSelector() {
-    public File getFile() throws OperationCanceledException { return getSaveFile(_saveChooser); }
+    public File getFile() throws OperationCanceledException {
+      return proposeBetterFileName(getSaveFile(_saveChooser));
+    }
     public boolean warnFileOpen(File f) { return _warnFileOpen(f); }
     public boolean verifyOverwrite(File f) { return _verifyOverwrite(f); }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {
@@ -395,7 +416,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Returns the file to save to the model (command pattern). */
   private final FileSaveSelector _saveAsSelector = new FileSaveSelector() {
-    public File getFile() throws OperationCanceledException { return getSaveFile(_saveChooser); }
+    public File getFile() throws OperationCanceledException {
+      return proposeBetterFileName(getSaveFile(_saveChooser));
+    }
     public boolean warnFileOpen(File f) { return _warnFileOpen(f); }
     public boolean verifyOverwrite(File f) { return _verifyOverwrite(f); }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
@@ -404,7 +427,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Returns the file to save to the model (command pattern) without updating the document state. */
   private final FileSaveSelector _saveCopySelector = new FileSaveSelector() {
-    public File getFile() throws OperationCanceledException { return getSaveFile(_saveChooser); }
+    public File getFile() throws OperationCanceledException {
+      return proposeBetterFileName(getSaveFile(_saveChooser));
+    }
     public boolean warnFileOpen(File f) { return _warnFileOpen(f); }
     public boolean verifyOverwrite(File f) { return _verifyOverwrite(f); }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
@@ -5338,25 +5363,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       fileName = file.getCanonicalPath();
       if (fileName.endsWith(OLD_PROJECT_FILE_EXTENSION)) {
-        String text = "The project will be saved in XML format." + 
-          "\nDo you want to change the project file's extension to "+PROJECT_FILE_EXTENSION+"?";
-        
-        Object[] options = {"Change to "+PROJECT_FILE_EXTENSION+"", "Keep \"" + 
-          fileName.substring(fileName.lastIndexOf('.'))+"\""};  
-        int rc = 1;
-        if (!Utilities.TEST_MODE) {
-          rc = JOptionPane.showOptionDialog(MainFrame.this, text, "Change Extension?", JOptionPane.YES_NO_OPTION,
-                                            JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-        }
-        if (rc == 0) {
-          fileName = fileName.substring(0,fileName.length() - OLD_PROJECT_FILE_EXTENSION.length()) + 
-            PROJECT_FILE_EXTENSION;
-          file = new File(fileName);
-          if (! file.exists() || _verifyOverwrite(file)) { 
-            _model.setProjectFile(file);
-            _currentProjFile = file;
-          }
-        }
+        file = MainFrameUtils.proposeToChangeExtension(MainFrame.this, file,
+                                                       "Change Extension?",
+                                                       "The project will be saved in XML format."
+                                                         + "\nDo you want to change the project file's extension to \""
+                                                         + PROJECT_FILE_EXTENSION+ "\"?",
+                                                       "Change to \"" + PROJECT_FILE_EXTENSION + "\"",
+                                                       "Keep \"" + DrJavaFileUtils.getExtension(fileName) + "\"",
+                                                       PROJECT_FILE_EXTENSION);
+        _model.setProjectFile(file);
+        _currentProjFile = file;
       }
       _model.saveProject(file, gatherProjectDocInfo());
 //      if (!(_model.getDocumentNavigator() instanceof JTreeSortNavigator)) {
@@ -6102,49 +6118,43 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   void _showProjectFileParseError(MalformedProjectFileException mpfe) {
-    _showError(mpfe, "Invalid Project File", "DrJava could not read the given project file.");
+    MainFrameUtils.showProjectFileParseError(this, mpfe);
   }
   
   void _showFileNotFoundError(FileNotFoundException fnf) {
-    _showError(fnf, "File Not Found", "The specified file was not found on disk.");
+    MainFrameUtils.showFileNotFoundError(this, fnf);
   }
   
   void _showIOError(IOException ioe) {
-    _showError(ioe, "Input/output error", "An I/O exception occurred during the last operation.");
+    MainFrameUtils.showIOError(this, ioe);
   }
   
   void _showClassNotFoundError(ClassNotFoundException cnfe) {
-    _showError(cnfe, "Class Not Found",
-               "A ClassNotFound exception occurred during the last operation.\n" +
-               "Please check that your classpath includes all relevant directories.\n\n");
+    MainFrameUtils.showClassNotFoundError(this, cnfe);
   }
   
   void _showNoClassDefError(NoClassDefFoundError ncde) {
-    _showError(ncde, "No Class Def",
-               "A NoClassDefFoundError occurred during the last operation.\n" +
-               "Please check that your classpath includes all relevant paths.\n\n");
+    MainFrameUtils.showNoClassDefError(this, ncde);
   }
   
   void _showDebugError(DebugException de) {
-    _showError(de, "Debug Error", "A Debugger error occurred in the last operation.\n\n");
+    MainFrameUtils.showDebugError(this, de);
   }
   
   void _showJUnitInterrupted(UnexpectedException e) {
-    _showWarning(e.getCause(), "JUnit Testing Interrupted", 
-                 "The slave JVM has thrown a RemoteException probably indicating that it has been reset.\n\n");
+    MainFrameUtils.showJUnitInterrupted(this, e);
   }
-  
+
   void _showJUnitInterrupted(String message) {
-    JOptionPane.showMessageDialog(this, message, "JUnit Testing Interrupted", JOptionPane.WARNING_MESSAGE);
+    MainFrameUtils.showJUnitInterrupted(this, message);
   }
   
-  private void _showError(Throwable e, String title, String message) {    
-    JOptionPane.showMessageDialog(this, message + "\n" + e + "\n"+ StringOps.getStackTrace(e),
-                                  title, JOptionPane.ERROR_MESSAGE);
+  void _showError(Throwable e, String title, String message) {    
+    MainFrameUtils.showError(this, e, title, message);
   }
   
-  private void _showWarning(Throwable e, String title, String message) {
-    JOptionPane.showMessageDialog(this, message + "\n" + e, title, JOptionPane.WARNING_MESSAGE);
+  void _showWarning(Throwable e, String title, String message) {
+    MainFrameUtils.showWarning(this, e, title, message);
   }
   
   /** Check if any errors occurred while parsing the config file, and display a message if necessary. */
@@ -9810,18 +9820,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @return <code>true</code> iff the user accepts overwriting.
     */
   private boolean _verifyOverwrite(File f) {
-    Object[] options = {"Yes","No"};
-    int n = JOptionPane.showOptionDialog(MainFrame.this,
-                                         "<html>This file already exists.  Do you wish to overwrite the file?<br>"+
-                                         f.getPath()+"<html>",
-                                         "Confirm Overwrite",
-                                         JOptionPane.YES_NO_OPTION,
-                                         JOptionPane.QUESTION_MESSAGE,
-                                         null,
-                                         options,
-                                         options[1]);
-    return (n == JOptionPane.YES_OPTION);
+    return MainFrameUtils.verifyOverwrite(MainFrame.this, f);
   }
+  
   /* Resets the JUnit functions in main frame. */
   private void _resetJUnit() {
     _junitAction.setEnabled(true);

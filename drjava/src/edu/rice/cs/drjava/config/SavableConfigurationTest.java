@@ -68,7 +68,7 @@ public class SavableConfigurationTest extends DrJavaTestCase {
     emptyConfig.saveConfiguration(outputBytes, "header");
     
     String outputString = outputBytes.toString();
-    String[] lines = outputString.split("\n");
+    String[] lines = outputString.split(System.getProperty("line.separator"));
     
     assertTrue("Data exists", outputString.length() > 0);
     assertEquals("Number of lines", 2, lines.length);
@@ -98,7 +98,7 @@ public class SavableConfigurationTest extends DrJavaTestCase {
     nonEmptyConfig.saveConfiguration(outputBytes, "header");                 
     
     String outputString = outputBytes.toString();
-    String[] lines = outputString.split("\n");
+    String[] lines = outputString.split(System.getProperty("line.separator"));
 
     assertTrue("Data exists", outputString.length() > 0);
     assertEquals("Number of lines", 5, lines.length);

@@ -288,4 +288,25 @@ public class DrJavaFileUtils  {
       return packageName + File.separatorChar;
     }
   }
+  
+  /** @return the file without the extension; the dot is removed too. */
+  public static String removeExtension(String fileName) {
+    int lastDotIndex = fileName.lastIndexOf(".");
+    if (lastDotIndex == -1) {
+      // No dots, so no package
+      return fileName;
+    }
+    return fileName.substring(0, lastDotIndex);
+  }
+  
+  /** @return the extension, including the dot. */
+  public static String getExtension(String fileName) {
+    int lastDotIndex = fileName.lastIndexOf(".");
+    if (lastDotIndex == -1) {
+      // No dots, so no package
+      return "";
+    }
+    return fileName.substring(lastDotIndex);
+  }
+
 }

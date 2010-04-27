@@ -71,6 +71,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Banner prefix. */
   public static final String BANNER_PREFIX = "Welcome to DrJava.";
+
+  /** Number of milliseconds to wait after each println, to prevent the JVM from being flooded
+    * with print calls. */
+  public static final int WRITE_DELAY = 50;
   
 //  public static final String _newLine = "\n"; // was StringOps.EOL; but Swing uses '\n' for newLine
   
