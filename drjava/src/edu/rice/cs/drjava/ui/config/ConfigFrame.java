@@ -1115,6 +1115,14 @@ public class ConfigFrame extends SwingFrame {
                                                   false)
                          .setEntireColumn(true));
     addOptionComponent(panel, 
+                       new BooleanOptionComponent(OptionConstants.WARN_CHANGE_DCP,
+                                                  "Warn to Restart to Change Default Compiler Preference", 
+                                                  this,
+                                                  "<html>Whether DrJava should warn the user that default compiler preference<br>" +
+                                                  "changes will not be applied until DrJava is restarted.</html>.", 
+                                                  false)
+                         .setEntireColumn(true));
+    addOptionComponent(panel, 
                        new BooleanOptionComponent(OptionConstants.WARN_CHANGE_MISC,
                                                   "Warn to Restart to Change Preferences (other)", 
                                                   this,
@@ -1156,14 +1164,6 @@ public class ConfigFrame extends SwingFrame {
                                                   this,
                                                   "<html>Whether DrJava should warn the user if Compiz is running.<br>"+
                                                   "Compiz and Java Swing are incompatible and can lead to crashes.</html>",
-                                                  false)
-                         .setEntireColumn(true));
-    addOptionComponent(panel, 
-                       new BooleanOptionComponent(OptionConstants.WARN_CHANGE_DCP,
-                                                  "Warn to Restart to Change Default Compiler Preference", 
-                                                  this,
-                                                  "<html>Whether DrJava should warn the user that default compiler preference<br>" +
-                                                  "changes will not be applied until DrJava is restarted.</html>.", 
                                                   false)
                          .setEntireColumn(true));
     

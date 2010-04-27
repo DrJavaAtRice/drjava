@@ -70,7 +70,7 @@
 
     <section id="gs-requirements">
       <title>System Requirements</title>
-      <para>DrJava requires Java version 5 or later. Note that you will need to have the JDK (not the JRE) installed if you wish to use the compiler or debugger within DrJava.</para>
+      <para>DrJava requires Java version 5 or later. Note that you will need to have the JDK (not the JRE) installed if you wish to use the debugger or create Javadoc within DrJava.</para>
       <para>We recommend downloading and using Sun's JDK 6 (from <ulink url="http://java.sun.com">http://java.sun.com</ulink>) for Solaris, Linux, and Windows.  Other users should use the Java virtual machine that comes with their operating system (including Mac OS X).</para>
       <para>DrJava uses two Java Virtual Machines (one for the main program, and one for the Interactions Pane) that use Java's Remote Method Invocation (RMI) to communicate with each other. RMI uses TCP/IP as the default transport mechanism, so you must have those drivers installed. Without TCP/IP, DrJava will not start properly.</para>
       <para>Note that there is an incompatibility between Java's Swing
@@ -546,10 +546,11 @@ File f
 
     <section id="compiling-selecting">
       <title>Selecting a Compiler</title>
-      <para>DrJava supports the use of different Java compilers, such as different versions of the "Javac" compiler supplied with the JDK.  DrJava will attempt to locate the your Java compiler on startup by searching for standard installation directories, but sometimes it is unable to find a compiler.  In this case, it will prompt you to specify the location of a compiler, or allow you to continue using DrJava without any compiler.  Note that the location of the compiler can be specified in the Preferences (see <link linkend="configuration">Configuring DrJava</link>).  If more than one compiler is specified, the active compiler can be selected from a menu on the Compiler Output tab itself.
+      <para>DrJava supports the use of different Java compilers, such as different versions of the "Javac" compiler supplied with the JDK.  DrJava will attempt to locate the your Java compiler on startup by searching for standard installation directories, but sometimes it is unable to find a compiler.  In this case, it will use the included Eclipse compiler instead.  Note that the location of the compiler can be specified in the Preferences (see <link linkend="configuration">Configuring DrJava</link>).  If more than one compiler is specified, the active compiler can be selected from a menu on the Compiler Output tab itself.
 <!-- You may notice that the same compiler may appear multiple times in the menu.  This happens because DrJava looks for compilers in three different places: on the user classpath, the user specified location in Preferences, and in the usual locations that the compiler can be found (the default installation directory, where java is located, etc.). -->
 </para>
       <para>DrJava will only display one compiler for each major version even though you have more than one update the JDK installed (Example: you have JDK 6 Updates 10 and 14 installed; DrJava will only display JDK 6 Update 14). If you want to display all compiler versions that were found, enable "Show all compiler versions" in the Preferences (see <link linkend="configuration">Configuring DrJava</link>).</para>
+	<para>The preferred compiler can also be selected permanently by setting the <link linkend="config-options-compiler">Compiler Preference</link> in the Compiler Options category of the Preferences. DrJava will then choose the selected compiler at startup.</para>
     </section>
   </chapter>
 
@@ -1180,6 +1181,63 @@ start DrJava nonetheless. The dialog has three buttons.</para>
 DrJava</link>).</para>
     </section>
 
+    <section id="other-dialogs-generate-custom-drjava">
+      <title>Generate Custom drjava.jar File</title>
+      <para>This dialog can be found in the Tools, Advanced menu. This
+dialog lets you generate a custom drjava.jar file based on the
+currently running version of DrJava, and you can include additional
+jar files, zip files or directories. These additional files are added
+to the drjava.jar and are immediately available in the generated
+DrJava application without having to set up extra classpaths.</para>
+
+	<para>If a file is contained in more than one source, the file
+contained in the first source will be included; conflicting files from
+sources further down the list will be skipped.  Files belonging to
+DrJava always take precedence.</para>
+
+        <para>Note: This implies that DrJava's manifest file will be used.</para>
+
+	<para>Please note that the added files may produce a copy of
+DrJava does not work as intended, and that it will be more difficult
+for us to help you with these problems. YOU ARE USING THE CUSTOM
+DRJAVA.JAR FILE AT YOUR OWN RISK.</para>
+
+	<para>The dialog contains the following components:</para>
+
+      <formalpara>
+        <title>Output Jar File</title>
+        <para>The file that the custom drjava.jar should be written to.</para>
+        </formalpara>
+
+      <formalpara>
+        <title>Additional Sources</title>
+        <para>The list of additional jar or zip files or directories
+that should be added to the custom drjava.jar file. If a file is
+contained in more than one source, the file contained in the first
+source will be included; conflicting files from sources further down
+the list will be skipped. Files belonging to DrJava always take
+precedence.The file that the custom drjava.jar should be written
+to.</para>
+        </formalpara>
+
+      <formalpara>
+        <title>Check Conflicts</title>
+        <para>Pressing this button causes DrJava to scan itself and the additional sources to identify conflicts. If any conflicts are found, they are listed in a dialog.</para>
+        </formalpara>
+
+      <formalpara>
+        <title>Generate</title>
+        <para>Pressing this button lets DrJava generate the specified output file. It first checks for conflicts, though, and if conflicts are found they are displayed;
+	the user then has the option of aborting the generation or generating anyway.</para>
+        </formalpara>
+
+      <formalpara>
+        <title>Close</title>
+        <para>This closes the dialog.</para>
+        </formalpara>
+
+    </section>
+
   </chapter>
 
 
@@ -1684,6 +1742,13 @@ DrJava</link>).</para>
   <term>Fall-through Warnings (<varname>show.fallthrough.warnings = false</varname>)</term>
   <listitem>
    <para>Passes the "-Xlint:fallthrough" warning to javac. According to the JLS, this will check switch blocks for fall-through cases and provide a warning message for any that are found. Fall-through cases are cases in a switch block, other than the last case in the block, whose code does not include a break statement, allowing code execution to "fall through" from that case to the next case.</para>
+  </listitem>
+</varlistentry>
+
+<varlistentry>
+  <term>Compiler Preference (<varname>default.compiler.preference = No Preference</varname>)</term>
+  <listitem>
+   <para>Controls which compiler DrJava should choose when it starts. If no preference is set, DrJava will choose the newest compiler it can find.</para>
   </listitem>
 </varlistentry>
 
@@ -2358,7 +2423,7 @@ url="http://drjava.org/compiz/">http://drjava.org/compiz/</ulink>.</para>
      <listitem><para>Please enter a short description in the "Summary" field, and a more detailed description that includes the information from the "DrJava Errors" window in the "Detailed Description" field. Try to be as specific as you can. Here's a list of questions you might want to consider in your description:</para>
        <itemizedlist>
          <listitem><para>What operating system are you using?</para></listitem>
-         <listitem><para>What version of the Java JDK are you using (1.4.2, 1.5.0, etc.)? Do you have multiple versions of the JDK (or maybe the JRE) installed? </para></listitem>
+         <listitem><para>What version of the Java JDK are you using (1.5, 6, etc.)? Do you have multiple versions of the JDK (or maybe the JRE) installed? </para></listitem>
          <listitem><para>Did you have a project open, or where you using just a bunch of files not part of a project?</para></listitem>
          <listitem><para>What were you doing just before the error occurred? Were you compiling, saving a file, debugging, using find/replace, etc.?</para></listitem>
          <listitem><para>What happened after the error occurred? Could you continue with your work, or was it so bad that you had to quit DrJava?</para></listitem>
