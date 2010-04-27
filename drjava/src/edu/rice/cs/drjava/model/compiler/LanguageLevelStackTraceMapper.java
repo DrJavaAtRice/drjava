@@ -174,6 +174,26 @@ public class LanguageLevelStackTraceMapper {
     return s.getFileName().equals(dn);
   }
   
+  private TreeMap<Integer, Integer> createOneToOneMap(BufferedReader bufReader) {
+    // legacy support for old .dj2 language level files:
+    // see DrJava feature request 2990660
+    // As of revisions 5225-5227, .dj2 files aren't converted by the LanguageLevelConverter anymore,
+    // they are just copied. That means the debugger and JUnit test errors cannot translate their line
+    // numbers in .java files back to the .dj2 line numbers. Since the .dj2 file and the .java file
+    // are identical, we just create a 1-to-1 map that maps a line number to itself.
+    TreeMap<Integer, Integer> oneToOne = new TreeMap<Integer, Integer>();
+    int lineNo = 1;
+    oneToOne.put(lineNo,lineNo);
+    try {
+      String rdLine;
+      while((rdLine = bufReader.readLine()) != null) {
+        ++lineNo;
+        oneToOne.put(lineNo,lineNo);
+      }
+    }
+    catch(java.io.IOException e) { /* ignore, just return incomplete map */ }
+    return oneToOne;
+  }
   
   
   /** Reads the LanguageLevel header from a LL file and pulls the line number conversion map out.
@@ -187,6 +207,11 @@ public class LanguageLevelStackTraceMapper {
     try { bufReader = new BufferedReader(new FileReader(LLFile));  } catch(java.io.FileNotFoundException e){ }
     
     try { rdLine = bufReader.readLine();  }  catch(java.io.IOException e){ }
+    
+    if (!rdLine.startsWith("// Language Level Converter line number map: dj*->java. Entries:")) {
+      // no language level header, create a 1-to-1 mapping
+      return createOneToOneMap(bufReader);
+    }
     
     LOG.log("rdLine = '" + rdLine + "'");
     LOG.log("\tlastIndex = " + rdLine.lastIndexOf(" "));
@@ -234,6 +259,11 @@ public class LanguageLevelStackTraceMapper {
     try { bufReader = new BufferedReader(new FileReader(LLFile)); } catch(java.io.FileNotFoundException e){ }
     
     try { rdLine = bufReader.readLine(); } catch(java.io.IOException e){ }
+    
+    if (!rdLine.startsWith("// Language Level Converter line number map: dj*->java. Entries:")) {
+      // no language level header, create a 1-to-1 mapping
+      return createOneToOneMap(bufReader);
+    }
     
     LOG.log("rdLine = '" + rdLine + "'");
     LOG.log("\tlastIndex = " + rdLine.lastIndexOf(" "));
