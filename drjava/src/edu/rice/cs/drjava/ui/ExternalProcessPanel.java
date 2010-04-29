@@ -49,7 +49,7 @@ import edu.rice.cs.drjava.ui.predictive.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
-import static edu.rice.cs.drjava.ui.MainFrame.GoToFileListEntry;
+import static edu.rice.cs.drjava.ui.MainFrameStatics.GoToFileListEntry;
 
 /** Panel for displaying some component with buttons, one of which is an "Abort" button.
   * This should be used to display the output of an external process.

@@ -278,7 +278,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
       int ys = (int) parentDim.getHeight()/4;
       // in line below, parentDim was _owner.getSize(); changed because former could generate NullPointerException
       setSize(new Dimension((int)getSize().getWidth(), (int) Math.min(parentDim.getHeight(), Math.max(ys, 300))));
-      setLocationRelativeTo(_owner);
+      if (_owner!=null) { setLocationRelativeTo(_owner); }
       _currentStrategy = _strategies.get(0);
       _strategyBox.setSelectedIndex(0);
       selectStrategy();
@@ -626,12 +626,12 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     contentPane.add(buttonPanel, c);
 
     pack();
-    Dimension parentDim = (_owner != null) ? _owner.getSize() : getToolkit().getScreenSize();
-    //int xs = (int) parentDim.getWidth()/3;
-    int ys = (int) parentDim.getHeight()/4;
-    // in line below, parentDim was _owner.getSize(); changed because former could generate NullPointerException
-    setSize(new Dimension((int) getSize().getWidth(), (int)Math.min(parentDim.getHeight(), Math.max(ys, 300)))); 
-    setLocationRelativeTo(_owner);
+//    Dimension parentDim = (_owner != null) ? _owner.getSize() : getToolkit().getScreenSize();
+//    //int xs = (int) parentDim.getWidth()/3;
+//    int ys = (int) parentDim.getHeight()/4;
+//    // in line below, parentDim was _owner.getSize(); changed because former could generate NullPointerException
+//    setSize(new Dimension((int) getSize().getWidth(), (int)Math.min(parentDim.getHeight(), Math.max(ys, 300)))); 
+    if (_owner!=null) { setLocationRelativeTo(_owner); }
 
     removeListener();
     updateTextField();
@@ -693,7 +693,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     else {
       DrJavaRoot.removeModalWindowAdapter(this);
       setOwnerEnabled(true);
-      _owner.toFront();
+      if (_owner!=null) { _owner.toFront(); }
     }
     super.setVisible(vis);
   }

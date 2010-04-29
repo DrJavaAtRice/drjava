@@ -49,7 +49,7 @@ public class ProcessingDialog extends JDialog {
     setResizable(false);    
     _parent = parent;
     setSize(350, 150);
-    Utilities.setPopupLoc(this, parent);
+    if (_parent!=null) { Utilities.setPopupLoc(this, _parent); }
     JLabel waitLabel = new JLabel(label, SwingConstants.CENTER);
     getRootPane().setLayout(new BorderLayout());
     getRootPane().add(waitLabel, BorderLayout.CENTER);
@@ -63,7 +63,7 @@ public class ProcessingDialog extends JDialog {
   public JProgressBar getProgressBar() { return _pb; }
   
   public void setVisible(boolean vis) {
-    Utilities.setPopupLoc(this, _parent);
+    if (_parent!=null) { Utilities.setPopupLoc(this, _parent); }
     super.setVisible(vis);
   }
 }

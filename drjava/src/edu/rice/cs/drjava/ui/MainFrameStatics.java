@@ -43,12 +43,17 @@ import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.net.URL;
+
+import static edu.rice.cs.plt.object.ObjectUtil.hash;
 
 /** Utilities for DrJava's main window. */
-public class MainFrameUtils {
+public class MainFrameStatics {
   
   /** Propose to the user to change the extension of the file.
     * @param parent parent GUI component
@@ -146,5 +151,75 @@ public class MainFrameUtils {
   
   public static void showWarning(Component parent, Throwable e, String title, String message) {
     JOptionPane.showMessageDialog(parent, message + "\n" + e, title, JOptionPane.WARNING_MESSAGE);
+  }
+  
+  public static abstract class ClassNameAndPackageEntry implements Comparable<ClassNameAndPackageEntry> {
+    /** Return the simple class name, e.g. "Integer". */
+    public abstract String getClassName();
+    /** Return the full package including the last period, e.g. "java.lang.". */
+    public abstract String getFullPackage();
+    
+    public int compareTo(ClassNameAndPackageEntry other) {
+      int res = getClassName().toLowerCase().compareTo(other.getClassName().toLowerCase());
+      if (res != 0) { return res; }
+      return getFullPackage().toLowerCase().compareTo(other.getFullPackage().toLowerCase());
+    }
+    // WARNING: this relation is finer grained that the equivalance relation induced by compareTo above
+    public boolean equals(Object other) {
+      if (other == null || ! (other instanceof ClassNameAndPackageEntry)) return false;  // multiple subclasses defined
+      ClassNameAndPackageEntry o = (ClassNameAndPackageEntry) other;
+      return (getClassName().equals(o.getClassName()) && getFullPackage().equals(o.getFullPackage()));
+    }
+    public int hashCode() { return hash(getClassName(), getFullPackage()); }
+  }
+  
+  /** Wrapper class for the "Go to File" and "Auto-Complete" dialog list entries.
+    * Provides the ability to have the same OpenDefinitionsDocument in there multiple
+    * times with different toString() results.
+    */
+  public static class GoToFileListEntry extends ClassNameAndPackageEntry {
+    public final OpenDefinitionsDocument doc;
+    protected String fullPackage = null;
+    protected final String str;
+    public GoToFileListEntry(OpenDefinitionsDocument d, String s) {
+      doc = d;
+      str = s;
+    }
+    public String getFullPackage() {
+      if (fullPackage != null) { return fullPackage; }
+      fullPackage = "";
+      if (doc != null) {
+        try {
+          fullPackage = doc.getPackageName();
+          if (fullPackage.length() > 0) { fullPackage += '.'; }
+        }
+        catch(Exception e) { fullPackage = ""; }
+      }
+      return fullPackage;
+    }
+    public String getClassName() { return str; }
+    public String toString() { return str; }
+  }
+  
+  /** Wrapper class for the "Open Javadoc" and "Auto Import" dialog list entries.
+    * Provides the ability to have the same class name in there multiple times in different packages.
+    */
+  public static class JavaAPIListEntry extends ClassNameAndPackageEntry {
+    private final String str, fullStr;
+    private final URL url;
+    public JavaAPIListEntry(String s, String full, URL u) {
+      str = s;
+      fullStr = full;
+      url = u;
+    }
+    public String toString() { return str; }
+    public String getFullString() { return fullStr; }
+    public URL getURL() { return url; }
+    public String getClassName() { return str; }
+    public String getFullPackage() {
+      int pos = fullStr.lastIndexOf('.');
+      if (pos>=0) { return fullStr.substring(0,pos+1); }
+      return "";
+    }
   }
 }

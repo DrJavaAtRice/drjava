@@ -10,138 +10,190 @@ import junit.framework.TestSuite;
   * @version $Id$
   */
 public class NewJavaClassTest extends TestCase {
-  public void testClassNameMeetsNamingConventionGoodNames(){
-    assertTrue("wrong class name", NewJavaClassDialog.classNameMeetsNamingConvention("Abcd"));
-    assertTrue("wrong class name", NewJavaClassDialog.classNameMeetsNamingConvention("abcd"));
-    assertTrue("wrong class name", NewJavaClassDialog.classNameMeetsNamingConvention("_abcd"));
+  public void testcheckClassNameGoodNames(){
+    assertTrue("wrong class name", NewJavaClassDialog.checkClassName("Abcd"));
+    assertTrue("wrong class name", NewJavaClassDialog.checkClassName("abcd"));
+    assertTrue("wrong class name", NewJavaClassDialog.checkClassName("_abcd"));
     //if the space is at the beginning or at the end, it will trim it, so, it is good name
-    assertTrue("wrong class name", NewJavaClassDialog.classNameMeetsNamingConvention(" abcd"));  
-    assertTrue("wrong class name", NewJavaClassDialog.classNameMeetsNamingConvention(" abcd "));  
+    assertTrue("wrong class name", NewJavaClassDialog.checkClassName(" abcd"));  
+    assertTrue("wrong class name", NewJavaClassDialog.checkClassName(" abcd "));  
   }
   
-  public void testClassNameMeetsNamingConventionBadNames(){
-    assertFalse("wrong class name", NewJavaClassDialog.classNameMeetsNamingConvention("(Abcd"));
-    assertFalse("wrong class name", NewJavaClassDialog.classNameMeetsNamingConvention("%Abcd"));
-    assertFalse("wrong class name", NewJavaClassDialog.classNameMeetsNamingConvention("^Abcd"));
-    assertFalse("wrong class name", NewJavaClassDialog.classNameMeetsNamingConvention("#Abcd"));
-    assertFalse("wrong class name", NewJavaClassDialog.classNameMeetsNamingConvention("_Ab%cd"));
-    assertFalse("wrong class name", NewJavaClassDialog.classNameMeetsNamingConvention("_Abc d"));
-    assertFalse("wrong class name", NewJavaClassDialog.classNameMeetsNamingConvention("5Abcd"));
-    assertFalse("wrong class name", NewJavaClassDialog.classNameMeetsNamingConvention("$Abc d"));
-    assertFalse("wrong class name", NewJavaClassDialog.classNameMeetsNamingConvention(""));
-    assertFalse("wrong class name", NewJavaClassDialog.classNameMeetsNamingConvention(null));
+  public void testcheckClassNameBadNames(){
+    assertFalse("wrong class name", NewJavaClassDialog.checkClassName("(Abcd"));
+    assertFalse("wrong class name", NewJavaClassDialog.checkClassName("%Abcd"));
+    assertFalse("wrong class name", NewJavaClassDialog.checkClassName("^Abcd"));
+    assertFalse("wrong class name", NewJavaClassDialog.checkClassName("#Abcd"));
+    assertFalse("wrong class name", NewJavaClassDialog.checkClassName("_Ab%cd"));
+    assertFalse("wrong class name", NewJavaClassDialog.checkClassName("_Abc d"));
+    assertFalse("wrong class name", NewJavaClassDialog.checkClassName("5Abcd"));
+    assertFalse("wrong class name", NewJavaClassDialog.checkClassName("$Abc d"));
+    assertFalse("wrong class name", NewJavaClassDialog.checkClassName("Abc.d"));
+    assertFalse("wrong class name", NewJavaClassDialog.checkClassName("Abc.d.Ef"));
+    assertFalse("wrong class name", NewJavaClassDialog.checkClassName(""));
+    assertFalse("wrong class name", NewJavaClassDialog.checkClassName(null));
+  }
+  
+  public void testcheckSuperClassNameGoodNames(){
+    assertTrue("wrong class name", NewJavaClassDialog.checkSuperClassName("Abcd"));
+    assertTrue("wrong class name", NewJavaClassDialog.checkSuperClassName("abcd"));
+    assertTrue("wrong class name", NewJavaClassDialog.checkSuperClassName("_abcd"));
+    //if the space is at the beginning or at the end, it will trim it, so, it is good name
+    assertTrue("wrong class name", NewJavaClassDialog.checkSuperClassName(" abcd"));  
+    assertTrue("wrong class name", NewJavaClassDialog.checkSuperClassName(" abcd "));
+    assertTrue("wrong class name", NewJavaClassDialog.checkSuperClassName(" ab.cd "));
+    assertTrue("wrong class name", NewJavaClassDialog.checkSuperClassName(" ab.cd.ef "));
+  }
+  
+  public void testcheckSuperClassNameBadNames(){
+    assertFalse("wrong class name", NewJavaClassDialog.checkSuperClassName("(Abcd"));
+    assertFalse("wrong class name", NewJavaClassDialog.checkSuperClassName("%Abcd"));
+    assertFalse("wrong class name", NewJavaClassDialog.checkSuperClassName("^Abcd"));
+    assertFalse("wrong class name", NewJavaClassDialog.checkSuperClassName("#Abcd"));
+    assertFalse("wrong class name", NewJavaClassDialog.checkSuperClassName("_Ab%cd"));
+    assertFalse("wrong class name", NewJavaClassDialog.checkSuperClassName("_Abc d"));
+    assertFalse("wrong class name", NewJavaClassDialog.checkSuperClassName("5Abcd"));
+    assertFalse("wrong class name", NewJavaClassDialog.checkSuperClassName("$Abc d"));
+    assertFalse("wrong class name", NewJavaClassDialog.checkSuperClassName(""));
+    assertFalse("wrong class name", NewJavaClassDialog.checkSuperClassName(null));
   }
   
   public void testInterfacesNamingConventionsCorrectNames() {
     assertTrue("Correct Interfaces Name", 
-               NewJavaClassDialog.interfacesNameMeetsNamingConvention("interfaces"));
+               NewJavaClassDialog.checkInterfaceNames("interfaces"));
     assertTrue("Correct Interfaces Name", 
-               NewJavaClassDialog.interfacesNameMeetsNamingConvention("interfaces, interfaceme"));
+               NewJavaClassDialog.checkInterfaceNames("interfaces, interfaceme"));
     assertTrue("Correct Interfaces Name", 
-               NewJavaClassDialog.interfacesNameMeetsNamingConvention("interfaces1, interfaceme123"));
+               NewJavaClassDialog.checkInterfaceNames("interfaces1, interfaceme123"));
     assertTrue("Correct Interfaces Name", 
-               NewJavaClassDialog.interfacesNameMeetsNamingConvention("int12erfaces1 , interfaceme123 , goodName"));
+               NewJavaClassDialog.checkInterfaceNames("int12erfaces1 , interfaceme123 , goodName"));
     assertTrue("Correct Interfaces Name", 
-               NewJavaClassDialog.interfacesNameMeetsNamingConvention("int12erfaces1 ,interfaceme123,goodName"));
+               NewJavaClassDialog.checkInterfaceNames("int12erfaces1 ,interfaceme123,goodName"));
+    assertTrue("Correct Interfaces Name", 
+               NewJavaClassDialog.checkInterfaceNames("inter.faces"));
+    assertTrue("Correct Interfaces Name", 
+               NewJavaClassDialog.checkInterfaceNames("interfaces, interf.aceme"));
+    assertTrue("Correct Interfaces Name", 
+               NewJavaClassDialog.checkInterfaceNames("interfaces1, interf.ace.me123"));
+    assertTrue("Correct Interfaces Name", 
+               NewJavaClassDialog.checkInterfaceNames("int12erfaces1 , interfaceme123 , good.Name"));
+    assertTrue("Correct Interfaces Name", 
+               NewJavaClassDialog.checkInterfaceNames("int12.erfaces1 ,interf.aceme123,good.Name"));
   }
   
   public void testInterfacesNamingConventionsWrongNames() {
     assertFalse("Wrong Interfaces Name", 
-                NewJavaClassDialog.interfacesNameMeetsNamingConvention("interf aces")); 
+                NewJavaClassDialog.checkInterfaceNames("interf aces")); 
     assertFalse("Wrong Interfaces Name", 
-                NewJavaClassDialog.interfacesNameMeetsNamingConvention("interfaces; inter"));
+                NewJavaClassDialog.checkInterfaceNames("interfaces; inter"));
     assertFalse("Wrong Interfaces Name", 
-                NewJavaClassDialog.interfacesNameMeetsNamingConvention("interfaces, &inter"));
-    assertFalse("Correct Interfaces Name", 
-                NewJavaClassDialog.interfacesNameMeetsNamingConvention("interfaces1, interfaceme123 , "));
+                NewJavaClassDialog.checkInterfaceNames("interfaces, &inter"));
+    assertFalse("Wrong Interfaces Name", 
+                NewJavaClassDialog.checkInterfaceNames("interfaces1, interfaceme123 , "));
   }
   
-  public void testCapitalizeClassNameUpperCase() {
-    String name = NewJavaClassDialog.capitalizeClassName("Abcd");
+  public void testgetCapitalizedClassNameUpperCase() {
+    String name = NewJavaClassDialog.getCapitalizedClassName("Abcd");
     assertEquals(name, "Abcd");
   }
   
-  public void testCapitalizeClassNameLowerCase() {
-    String name = NewJavaClassDialog.capitalizeClassName("abcd");
+  public void testgetCapitalizedClassNameLowerCase() {
+    String name = NewJavaClassDialog.getCapitalizedClassName("abcd");
     assertEquals(name, "Abcd");
   }
   
-  public void testClassDeclerationPublic(){ //public class <name>
-    String classLine = NewJavaClassDialog.createClassNameDecleration("public", "", "abcd", "", "");
+  public void testgetCapitalizedSuperClassNameUpperCase() {
+    String name = NewJavaClassDialog.getCapitalizedSuperClassName("abcd.Abcd");
+    assertEquals(name, "abcd.Abcd");
+    name = NewJavaClassDialog.getCapitalizedSuperClassName("xyz.abcd.Abcd");
+    assertEquals(name, "xyz.abcd.Abcd");
+  }
+  
+  public void testgetCapitalizedSuperClassNameLowerCase() {
+    String name = NewJavaClassDialog.getCapitalizedSuperClassName("abcd.abcd");
+    assertEquals(name, "abcd.Abcd");
+    name = NewJavaClassDialog.getCapitalizedSuperClassName("xyz.abcd.abcd");
+    assertEquals(name, "xyz.abcd.Abcd");
+  }
+  
+  public void testClassDeclarationPublic(){ //public class <name>
+    String classLine = NewJavaClassDialog.getClassDeclaration("public", "", "abcd", "", "", false);
     assertEquals("public class Abcd", classLine);
   }
-  public void testClassDeclerationAbstract(){ //abstract class <name>
-    String classLine = NewJavaClassDialog.createClassNameDecleration("abstract", "", "abcd", "", "");
+  public void testClassDeclarationAbstract(){ //abstract class <name>
+    String classLine = NewJavaClassDialog.getClassDeclaration("abstract", "", "abcd", "", "", false);
     assertEquals("abstract class Abcd", classLine);
   }
-  public void testClassDeclerationFinal(){ //final class <name>
-    String classLine = NewJavaClassDialog.createClassNameDecleration("final", "", "abcd", "", "");
+  public void testClassDeclarationFinal(){ //final class <name>
+    String classLine = NewJavaClassDialog.getClassDeclaration("final", "", "abcd", "", "", false);
     assertEquals("final class Abcd", classLine);
   }
   
   public void testDeclarationPublicFinal() {
-    String classLine = NewJavaClassDialog.createClassNameDecleration("public", "final", "abcd", "", "");
+    String classLine = NewJavaClassDialog.getClassDeclaration("public", "final", "abcd", "", "", false);
     assertEquals("public final class Abcd", classLine); 
   }
   
   public void testDeclarationPublicAbstract() {
-    String classLine = NewJavaClassDialog.createClassNameDecleration("public", "abstract", "abcd", "", "");
+    String classLine = NewJavaClassDialog.getClassDeclaration("public", "abstract", "abcd", "", "", false);
     assertEquals("public abstract class Abcd", classLine); 
   }
   
-  public void testClassDeclerationDefaultFinal(){ //final class <name>
-    String classLine = NewJavaClassDialog.createClassNameDecleration("", "final", "abcd", "", "");
+  public void testClassDeclarationDefaultFinal(){ //final class <name>
+    String classLine = NewJavaClassDialog.getClassDeclaration("", "final", "abcd", "", "", false);
     assertEquals("final class Abcd", classLine);
   }
   
-  public void testClassDeclerationDefault(){ //final class <name>
-    String classLine = NewJavaClassDialog.createClassNameDecleration("", "", "abcd", "", "");
+  public void testClassDeclarationDefault(){ //final class <name>
+    String classLine = NewJavaClassDialog.getClassDeclaration("", "", "abcd", "", "", false);
     assertEquals("class Abcd", classLine);
   }
   
-  public void testClassDeclerationInheritance(){ 
-    String classLine = NewJavaClassDialog.createClassNameDecleration("public", "", "abcd", "parentClass", "");
+  public void testClassDeclarationInheritance(){ 
+    String classLine = NewJavaClassDialog.getClassDeclaration("public", "", "abcd", "parentClass", "", false);
     assertEquals("public class Abcd extends ParentClass", classLine);
   }
   
-  public void testClassDeclerationManyInterfaces(){ 
-    String classLine = NewJavaClassDialog.createClassNameDecleration("public", "", "abcd", "", "interface1, interface2");  
+  public void testClassDeclarationManyInterfaces(){ 
+    String classLine = NewJavaClassDialog.getClassDeclaration("public", "", "abcd", "",
+                                                              "interface1, interface2", false);
     assertEquals("public class Abcd implements Interface1, Interface2", classLine);
   }
   
-  public void testClassDeclerationInterface(){ 
-    String classLine = NewJavaClassDialog.createClassNameDecleration("public", "", "abcd", "", "interface1");  
+  public void testClassDeclarationInterface(){ 
+    String classLine = NewJavaClassDialog.getClassDeclaration("public", "", "abcd", "", "interface1", false);
     assertEquals("public class Abcd implements Interface1", classLine);
   }
-  public void testClassDeclerationInheritanceAndInterface(){ 
-    String classLine = NewJavaClassDialog.createClassNameDecleration("public", "final", "abcd", "superClass", "interface1");  
+  public void testClassDeclarationInheritanceAndInterface(){ 
+    String classLine = NewJavaClassDialog.getClassDeclaration("public", "final", "abcd",
+                                                              "superClass", "interface1", false);
     assertEquals("public final class Abcd extends SuperClass implements Interface1", classLine);
   }
   
-  public void testClassDeclerationInheritanceAndInterfaceNotWellStructured(){ 
-    String classLine = NewJavaClassDialog.createClassNameDecleration("public", "abstract", "abcd", 
-                                                            "superClass ", " interface1 ,inter , inm");  
+  public void testClassDeclarationInheritanceAndInterfaceNotWellStructured(){ 
+    String classLine = NewJavaClassDialog.getClassDeclaration("public", "abstract", "abcd", 
+                                                              "superClass ", " interface1 ,inter , inm", false);  
     assertEquals("public abstract class Abcd extends SuperClass implements Interface1, Inter, Inm", classLine);
   }
   
   
-  public void testClassDeclerationFinalNullMethod(){ //final class <name>
-    String classLine = NewJavaClassDialog.createClassNameDecleration(null, "", "abcd", "", "");
+  public void testClassDeclarationFinalNullMethod(){ //final class <name>
+    String classLine = NewJavaClassDialog.getClassDeclaration(null, "", "abcd", "", "", false);
     assertEquals("class Abcd", classLine);
   }
   
-  public void testClassDeclerationWrongMethodName(){ //final class <name>
-    String classLine = NewJavaClassDialog.createClassNameDecleration("sdkjfh", "final", "abcd", "", "");
+  public void testClassDeclarationWrongMethodName(){ //final class <name>
+    String classLine = NewJavaClassDialog.getClassDeclaration("sdkjfh", "final", "abcd", "", "", false);
     assertEquals("final class Abcd", classLine);
   }
   
-  public void testClassDeclerationFinalNullName(){ //final class <name>
-    String classLine = NewJavaClassDialog.createClassNameDecleration("public","", null, "", "");
+  public void testClassDeclarationFinalNullName(){ //final class <name>
+    String classLine = NewJavaClassDialog.getClassDeclaration("public","", null, "", "", false);
     assertEquals("public class", classLine);
   }
   
   
-  public void testClassDeclerationMainMethodSelection(){
+  public void testClassDeclarationMainMethodSelection(){
     String content = "";
     content += "/**\n";
     content += "* Auto Generated Java Class.\n";
@@ -153,10 +205,11 @@ public class NewJavaClassTest extends TestCase {
     content += "/* ADD YOUR CODE HERE */\n";
     content += "\n";
     content += "}\n";
-    assertEquals(content, NewJavaClassDialog.createClassContent("public", "abstract", "abcd", true, false, "", ""));
+    assertEquals(content, NewJavaClassDialog.getClassContent("public", "abstract", "abcd", true, false,
+                                                             "", "", false));
   }
   
-  public void testClassDeclerationConstructorSelection(){ 
+  public void testClassDeclarationConstructorSelection(){ 
     String content = "";
     content += "/**\n";
     content += "* Auto Generated Java Class.\n";
@@ -169,7 +222,8 @@ public class NewJavaClassTest extends TestCase {
     content += "/* ADD YOUR CODE HERE */\n";
     content += "\n";
     content += "}\n";
-    assertEquals(content, NewJavaClassDialog.createClassContent("", "final", "abcd", false, true, "", ""));
+    assertEquals(content, NewJavaClassDialog.getClassContent("", "final", "abcd", false, true,
+                                                             "", "", false));
   }
   
   public void testClassDeclarationOnly(){
@@ -182,7 +236,8 @@ public class NewJavaClassTest extends TestCase {
     content += "/* ADD YOUR CODE HERE */\n";
     content += "\n";
     content += "}\n";
-    assertEquals(content, NewJavaClassDialog.createClassContent("abstract", "", "Abcd", false, false, "", ""));
+    assertEquals(content, NewJavaClassDialog.getClassContent("abstract", "", "Abcd", false, false,
+                                                             "", "", false));
   }
   
   public void testJavaClassFull(){
@@ -200,6 +255,7 @@ public class NewJavaClassTest extends TestCase {
     content += "/* ADD YOUR CODE HERE */\n";
     content += "\n";
     content += "}\n";
-    assertEquals(content, NewJavaClassDialog.createClassContent("public", "", "Abcd", true, true, "mySuperClass","myInterface"));
+    assertEquals(content, NewJavaClassDialog.getClassContent("public", "", "Abcd", true, true,
+                                                             "mySuperClass","myInterface", false));
   }
 }

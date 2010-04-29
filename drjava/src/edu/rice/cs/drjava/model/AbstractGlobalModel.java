@@ -1188,7 +1188,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @return the new open test case
     */
   public OpenDefinitionsDocument newTestCase(String name, boolean makeSetUp, boolean makeTearDown) {
-    boolean elementary = (DrJava.getConfig().getSetting(LANGUAGE_LEVEL) == 1);
+    boolean elementary = 
+      (DrJava.getConfig().getSetting(LANGUAGE_LEVEL) == OptionConstants.ELEMENTARY_LEVEL) ||
+      (DrJava.getConfig().getSetting(LANGUAGE_LEVEL) == OptionConstants.FUNCTIONAL_JAVA_LEVEL);
     
     final StringBuilder buf = new StringBuilder();
     if (! elementary) buf.append("import junit.framework.TestCase;\n\n");
@@ -3883,7 +3885,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       if (DrJavaFileUtils.isOldLLFile(f) && DrJava.getConfig().getSetting(OptionConstants.PROMPT_RENAME_LL_FILES)) {
         File newFile = DrJavaFileUtils.getNewLLForOldLLFile(f);
         String newExt = DrJavaFileUtils.getExtension(newFile.getName());
-        return edu.rice.cs.drjava.ui.MainFrameUtils.proposeToChangeExtension
+        return edu.rice.cs.drjava.ui.MainFrameStatics.proposeToChangeExtension
           (null, // TODO: better parent component
            f,
            "Change Extension?",

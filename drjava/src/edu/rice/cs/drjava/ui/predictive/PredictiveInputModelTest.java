@@ -1099,9 +1099,10 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
       getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.JAVADOC_1_5_LINK) + "/";
     final String stripPrefix = ""; // nothing needs to be stripped, links in 1.4 Javadoc are relative
     final String suffix = "/allclasses-1.5.html";
-    Set<edu.rice.cs.drjava.ui.MainFrame.JavaAPIListEntry> l = edu.rice.cs.drjava.ui.MainFrame._generateJavaAPISet(base,
-                                                                                                                  stripPrefix,
-                                                                                                                  suffix);
+    Set<edu.rice.cs.drjava.ui.MainFrameStatics.JavaAPIListEntry> l = 
+      edu.rice.cs.drjava.ui.MainFrame._generateJavaAPISet(base,
+                                                          stripPrefix,
+                                                          suffix);
     assertTrue(l.size() > 0);
   }
 }
