@@ -108,6 +108,9 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   private DefinitionsPane _defPane = null;
   private boolean _caretChanged;
   
+  private boolean _isFindReplaceActive = false;
+  public boolean isFindReplaceActive() {return _isFindReplaceActive;}
+  
   /** Listens for changes to the cursor position in order to reset the start position */
   private CaretListener _caretListener = new CaretListener() {
     public void caretUpdate(CaretEvent e) {
@@ -135,7 +138,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   };
   
   private Action _findAllAction =  new AbstractAction("Find All") {
-    public void actionPerformed(final ActionEvent e) { _findAll(); }
+    public void actionPerformed(final ActionEvent e) { _isFindReplaceActive = true; _findAll(); _isFindReplaceActive = false;}
   };
   
   private Action _doFindAction = new AbstractAction("Do Find") {
@@ -193,7 +196,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   public FindReplacePanel(MainFrame frame, SingleDisplayModel model) {
     super(frame, "Find/Replace");
     _model = model;
-    _machine = new FindReplaceMachine(_model, _model.getDocumentIterator());
+    _machine = new FindReplaceMachine(_model, _model.getDocumentIterator(), frame);
 //    _updateMachine();
     
     

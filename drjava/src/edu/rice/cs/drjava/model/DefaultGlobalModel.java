@@ -757,5 +757,5 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     _interactionsModel.addProjectFilesClassPath(getProjectRoot());  // is sync advisable here?
     setClassPathChanged(false);  // reset classPathChanged state
-  }  
+  } 
 }

@@ -9437,7 +9437,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       String text = "File " + f.getAbsolutePath() +
         "\ncould not be found on disk!  It was probably moved\n" +
         "or deleted.  Would you like to try to find it?";
+      
       int rc = JOptionPane.showConfirmDialog(MainFrame.this, text, "File Moved or Deleted", JOptionPane.YES_NO_OPTION);
+      
       if (rc == JOptionPane.NO_OPTION) return;
       if (rc == JOptionPane.YES_OPTION) {
         try {

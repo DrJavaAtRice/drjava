@@ -106,7 +106,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
     _doc = _model.newFile(_tempDir);
     _docNext = _model.newFile(_tempDir);
     
-    _frm = new FindReplaceMachine(_model, _model.getDocumentIterator());
+    _frm = new FindReplaceMachine(_model, _model.getDocumentIterator(), null);
     _frm.setDocument(_doc);
   }  
   

@@ -45,6 +45,7 @@ import java.awt.print.PageFormat;
 import java.awt.print.Pageable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
+import java.awt.Component;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -68,6 +69,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
+import javax.swing.*;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.AttributeSet;
@@ -260,7 +262,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** @return manager for browser history regions. */
   public BrowserHistoryManager getBrowserHistoryManager() { return _browserHistoryManager; }
-  
+
 //  /** Completion monitor for loading the files of a project (as OpenDefinitionsDocuments). */
 //  public final CompletionMonitor projectLoading = new CompletionMonitor();
   
@@ -297,7 +299,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //        return false;
 //      }
 //    };
-    
     _registerOptionListeners();
     
     setFileGroupingState(makeFlatFileGroupingState());
@@ -2169,25 +2170,32 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @param d the current Document
     * @return the next Document
     */
-  public OpenDefinitionsDocument getNextDocument(OpenDefinitionsDocument d) {
+  public OpenDefinitionsDocument getNextDocument(OpenDefinitionsDocument d)
+  {
+    return getNextDocument(d, null);
+  }
+  
+  public OpenDefinitionsDocument getNextDocument(OpenDefinitionsDocument d, Component frame) {
     OpenDefinitionsDocument nextdoc = null; // irrelevant initialization required by javac
 //    try {
     OpenDefinitionsDocument doc = getODDForDocument(d);
     nextdoc = _documentNavigator.getNext(doc);
     if (nextdoc == doc) nextdoc = _documentNavigator.getFirst();  // wrap around if necessary
-    OpenDefinitionsDocument res = getNextDocHelper(nextdoc);
+    OpenDefinitionsDocument res = getNextDocHelper(nextdoc, frame);
 //      Utilities.showDebug("nextDocument(" + d + ") = " + res);
     return res;
 //    }
 //    catch(DocumentClosedException dce) { return getNextDocument(nextdoc); }
   }
   
-  private OpenDefinitionsDocument getNextDocHelper(OpenDefinitionsDocument nextdoc) {
+  private OpenDefinitionsDocument getNextDocHelper(OpenDefinitionsDocument nextdoc, Component frame) {
     if ( nextdoc.isUntitled() || nextdoc.verifyExists()) return nextdoc;
     // Note: verifyExists prompts user for location of the file if it is not found
-    
+    int rc = JOptionPane.showConfirmDialog(frame, "Files not found, continue to next document?", "Continue?", JOptionPane.YES_NO_OPTION); 
+    if(rc==JOptionPane.NO_OPTION)
+      return null;
     // cannot find nextdoc; move on to next document
-    return getNextDocument(nextdoc);
+    return getNextDocument(nextdoc, frame);
   }
   
   /** Returns the ODD preceding the given document in the document list.

@@ -46,6 +46,12 @@ public interface DocumentIterator {
     */
   OpenDefinitionsDocument getNextDocument(OpenDefinitionsDocument doc);
   
+    /** Gets the next document.
+    * @param doc the current document.
+    * @param frame a frame for use with dialog popups
+    * @return the next document.
+    */
+   OpenDefinitionsDocument getNextDocument(OpenDefinitionsDocument d, java.awt.Component frame);
   /** Gets the previous document.
     * @param doc the current document.
     * @return the previous document.

@@ -47,6 +47,8 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import java.awt.EventQueue;
 
 import javax.swing.text.BadLocationException;
+import javax.swing.JOptionPane;
+import java.awt.Component;
 
 /** Implementation of logic of find/replace over a document.
   * @version $Id$
@@ -75,16 +77,18 @@ public class FindReplaceMachine {
   private boolean _skipText;                 // Whether to skip over the current match if direction is reversed
   private DocumentIterator _docIterator;     // An iterator of open documents; _doc is current
   private SingleDisplayModel _model;
+  private Component _frame;  
   
   /** Standard Constructor.
     * Creates new machine to perform find/replace operations on a particular document starting from a given position.
     * @param docIterator an object that allows navigation through open Swing documents (it is DefaultGlobalModel)
     */
-  public FindReplaceMachine(SingleDisplayModel model, DocumentIterator docIterator) {    
+  public FindReplaceMachine(SingleDisplayModel model, DocumentIterator docIterator, Component frame) {    
     _skipText = false;
 //    _checkAllDocsWrapped = false;
 //    _allDocsWrapped = false;
     _model = model;
+    _frame = frame;
     _docIterator = docIterator;
     _current = -1;
     setFindAnyOccurrence();
@@ -275,7 +279,12 @@ public class FindReplaceMachine {
       for (int i = 0; i < n; i++) {
         // replace all in the rest of the documents
         count += _replaceAllInCurrentDoc(false);
-        _doc = _docIterator.getNextDocument(_doc);
+        _doc = _docIterator.getNextDocument(_doc, _frame);
+        
+        if(_doc==null)
+        {
+            i=n;
+        }
       }
       
       // update display (adding "*") in navigatgorPane
@@ -356,7 +365,12 @@ public class FindReplaceMachine {
       for (int i = 0; i < n; i++) {
         // process all in the rest of the documents
         count += _processAllInCurrentDoc(findAction, false);
-        _doc = _docIterator.getNextDocument(_doc);
+        _doc = _docIterator.getNextDocument(_doc, _frame);
+        
+        if(_doc==null)
+        {
+            i=n;
+        }
       }
       
       // update display (perhaps adding "*") in navigatgorPane
