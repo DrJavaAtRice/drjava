@@ -114,7 +114,7 @@ public class VectorFileOptionComponent extends VectorOptionComponent<File> imple
     }
   }
   
-  /**@ @return the file chooser */
+  /** @return the file chooser */
   public JFileChooser getFileChooser() {
     return _jfc;
   }

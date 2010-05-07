@@ -1744,21 +1744,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         stripPrefix = ""; // nothing needs to be stripped, links in 1.6 Javadoc are relative
         suffix = "/allclasses-1.6.html";
       }
+      
+      if (!suffix.equals("")) {
+        _javaAPISet.addAll(_generateJavaAPISet(base, stripPrefix, suffix));
+      }
       else {
         // no valid Javadoc URL
-        return;
       }
-      _javaAPISet.addAll(_generateJavaAPISet(base, stripPrefix, suffix));
       
       // add JUnit
-      try {
-        Set<JavaAPIListEntry> junitAPIList = _generateJavaAPISet(DrJava.getConfig().getSetting(JUNIT_LINK) + "/",
-                                                                 "", // relative links
-                                                                 new URL(DrJava.getConfig().getSetting(JUNIT_LINK)+
-                                                                         "/allclasses-frame.html"));
-        _javaAPISet.addAll(junitAPIList);
-      }
-      catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
+      Set<JavaAPIListEntry> junitAPIList = _generateJavaAPISet(DrJava.getConfig().getSetting(JUNIT_LINK) + "/",
+                                                               "", // relative links
+                                                               "/allclasses-concjunit4.7.html");
+      _javaAPISet.addAll(junitAPIList);
       
       // add additional Javadoc libraries
       for(String url: DrJava.getConfig().getSetting(JAVADOC_ADDITIONAL_LINKS)) {

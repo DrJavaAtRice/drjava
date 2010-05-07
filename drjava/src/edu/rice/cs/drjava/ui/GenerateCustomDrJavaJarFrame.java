@@ -348,7 +348,6 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
     * @param message message to display while working
     * @param yesRunnable code to execute if the jar files are conflict free
     * @param noRunnable code to execute if the jar files are NOT conflict free
-    * @return false if there are conflicts
     */
   public void checkConflictFree(StringBuilder sb, ZipOutputStream zos,
                                 String message,
@@ -524,9 +523,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
     return result;
   }
   
-  /** Verify that the jar files don't conflict.
-    * @return true if this jar can be generated
-    */
+  /** Verify that the jar files don't conflict. */
   public void checkConflicts() {
     new Thread() {
       public void run() {

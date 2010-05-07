@@ -242,7 +242,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   
   /** Updates match highlights.  Only runs in the event thread. 
     * @param offset   caret position immediately following some form of brace; hence offset > 0. 
-    * @param forward  true if the the preceding brace is "opening" 
+    * @param opening  true if the the preceding brace is "opening" 
     */
   protected void matchUpdate(int offset, boolean opening) {
     if (! _doc.hasPrompt()) return;

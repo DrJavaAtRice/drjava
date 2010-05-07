@@ -35,6 +35,7 @@
  * END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -48,14 +49,26 @@ import java.util.Iterator;
 public class ForcedChoiceOption extends Option<String>
 {
   private Collection<String> _choices;
+  private Collection<String> _deprecated; // these will automatically be changed to the default
 
   /** @param key The name of this option.
    * @param def The default value of the option.
    * @param choices A collection of all possible values of this Option, as Strings.
    */
   public ForcedChoiceOption(String key, String def, Collection<String> choices) {
+    this(key, def, choices, Arrays.asList(new String[0]));
+  }
+
+  /** @param key The name of this option.
+   * @param def The default value of the option.
+   * @param choices A collection of all possible values of this Option, as Strings.
+   * @param deprecated A collection of values that are deprecated and that should be changed to the default.
+   */
+  public ForcedChoiceOption(String key, String def, Collection<String> choices,
+                            Collection<String> deprecated) {
     super(key,def);
     _choices = choices;
+    _deprecated = deprecated;
   }
 
   /** Checks whether the parameter String is a legal value for this option.
@@ -68,6 +81,16 @@ public class ForcedChoiceOption extends Option<String>
     return _choices.contains(s);
   }
 
+  /** Checks whether the parameter String is a deprecated value for this option.
+   * The input String must be formatted exactly like the original, as defined
+   * by String.equals(String).
+   * @param s the value to check
+   * @return true if s is deprecated, false otherwise
+   */
+  public boolean isDeprecated(String s) {
+    return _deprecated.contains(s);
+  }
+
   /** Gets all legal values of this option.
    * @return an Iterator containing the set of all Strings for which isLegal returns true.
    */
@@ -75,6 +98,13 @@ public class ForcedChoiceOption extends Option<String>
     return _choices.iterator();
   }
 
+  /** Gets all deprecated values of this option.
+   * @return an Iterator containing the set of all Strings for which isDeprecated returns true.
+   */
+  public Iterator<String> getDeprecatedValues() {
+    return _deprecated.iterator();
+  }
+  
   /** Gets the number of legal values for this option.
    * @return an int indicating the number of legal values.
    */
@@ -91,6 +121,9 @@ public class ForcedChoiceOption extends Option<String>
   {
     if (isLegal(s)) {
       return s;
+    }
+    else if (isDeprecated(s)) {
+      return defaultValue;
     }
     else {
       throw new OptionParseException(name, s, "Value is not an acceptable choice for this option.");

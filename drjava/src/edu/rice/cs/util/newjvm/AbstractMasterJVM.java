@@ -65,7 +65,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
  * running.  Only one thread may change the state at a time.  Thus, clients should be careful
  * to only invoke state-changing methods when they are guaranteed to succeed (only invoking
  * {@code quitSlave()}, for example, when it is known to have been matched by a successful
- * {@code invokeSlave()} invocation).
+ * {@code invokeSlave} invocation).
  *  
  * @version $Id$
  */

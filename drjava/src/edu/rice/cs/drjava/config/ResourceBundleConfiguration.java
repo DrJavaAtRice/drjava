@@ -58,7 +58,7 @@ public class ResourceBundleConfiguration extends FileConfiguration {
   
   /** Initializes this Configuration object with the given OptionMap.
     * @param resourceBundleName name of the resource bundle
-    * @param other configuration that should be used if the resource bundle does not define an option.
+    * @param shadowed configuration that should be used if the resource bundle does not define an option.
     */
   public ResourceBundleConfiguration(String resourceBundleName, FileConfiguration shadowed) {
     super(shadowed.getFile());

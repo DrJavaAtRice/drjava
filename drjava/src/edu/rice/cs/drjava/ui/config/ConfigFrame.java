@@ -551,7 +551,7 @@ public class ConfigFrame extends SwingFrame {
                                  "<html><p align=\"right\">" + 
                                  StringOps.
                                    splitStringAtWordBoundaries("Display Fully-Qualified Class Names in \"Go to File\" Dialog",
-                                                               27, "<br>", SEPS)+"</p></html>", this,
+                                                               40, "<br>", SEPS)+"</p></html>", this,
                                  "<html>Whether to also display fully-qualified class names in the \"Go to File\" dialog.<br>"+
                                  "Enabling this option on network drives might cause the dialog to display after a slight delay.</html>");
     addOptionComponent(panel, checkbox);
@@ -561,7 +561,7 @@ public class ConfigFrame extends SwingFrame {
                                  "<html><p align=\"right\">" + 
                                  StringOps.
                                    splitStringAtWordBoundaries("Scan Class Files After Each Compile for Auto-Completion and Auto-Import",
-                                                               27, "<br>", SEPS)+"</p></html>", this,
+                                                               40, "<br>", SEPS)+"</p></html>", this,
                                  "<html>Whether to scan the class files after a compile to generate class names<br>"+
                                  "used for auto-completion and auto-import.<br>"+
                                  "Enabling this option will slow compiles down.</html>");
@@ -572,7 +572,7 @@ public class ConfigFrame extends SwingFrame {
                                  "<html><p align=\"right\">" + 
                                  StringOps.
                                    splitStringAtWordBoundaries("Consider Java API Classes for Auto-Completion",
-                                                               27, "<br>", SEPS)+"</p></html>", this,
+                                                               40, "<br>", SEPS)+"</p></html>", this,
                                  "Whether to use the names of the Java API classes for auto-completion as well.");
     addOptionComponent(panel, checkbox);
     panel.displayComponents();
@@ -914,15 +914,6 @@ public class ConfigFrame extends SwingFrame {
                                                        "Java Version for Javadoc Links", 
                                                        this,
                                                        "Version of Java for generating links to online Javadoc documentation."));
-    addOptionComponent(panel, 
-                       new StringOptionComponent(OptionConstants.JAVADOC_1_3_LINK,
-                                                 "Javadoc 1.3 URL", 
-                                                 this,
-                                                 "URL for the Java 1.3 API, for generating links to library classes."));
-    addOptionComponent(panel, 
-                       new StringOptionComponent(OptionConstants.JAVADOC_1_4_LINK,
-                                                 "Javadoc 1.4 URL", this,
-                                                 "URL for the Java 1.4 API, for generating links to library classes."));
     addOptionComponent(panel, 
                        new StringOptionComponent(OptionConstants.JAVADOC_1_5_LINK,
                                                  "Javadoc 1.5 URL", this,

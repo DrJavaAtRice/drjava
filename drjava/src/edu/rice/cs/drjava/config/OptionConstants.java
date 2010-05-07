@@ -1186,11 +1186,13 @@ public interface OptionConstants {
   static final String JAVADOC_1_6_TEXT = "1.6";
   static final String JAVADOC_AUTO_TEXT = "use compiler version"; // for "Open Java API Javadoc"
   
-  static final String[] choices = new String[]{
-    JAVADOC_NONE_TEXT, JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT,
-      JAVADOC_1_5_TEXT, JAVADOC_1_6_TEXT };
-  
-  static final ArrayList<String> linkVersionChoices = new ArrayList<String>(Arrays.asList(choices));
+  static final String[] linkChoices = new String[]{
+    JAVADOC_NONE_TEXT, JAVADOC_1_5_TEXT, JAVADOC_1_6_TEXT };
+  static final ArrayList<String> linkVersionChoices = new ArrayList<String>(Arrays.asList(linkChoices));
+
+  static final String[] linkDeprecated = new String[]{
+    JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT };
+  static final ArrayList<String> linkVersionDeprecated = new ArrayList<String>(Arrays.asList(linkDeprecated));  
   
   /** Constants for the URLs of Sun's system class documentation for different versions of Java. */
   public static final StringOption JAVADOC_1_3_LINK =
@@ -1205,20 +1207,22 @@ public interface OptionConstants {
   /** The version of Java to use for links to Javadoc for system classes. */
   public static final ForcedChoiceOption JAVADOC_LINK_VERSION =
     new ForcedChoiceOption("javadoc.link.version",
-                           (System.getProperty("java.specification.version").startsWith("1.3") ? JAVADOC_1_3_TEXT :
-                              (System.getProperty("java.specification.version").startsWith("1.4") ? JAVADOC_1_4_TEXT : 
-                                 (System.getProperty("java.specification.version").startsWith("1.5") ? JAVADOC_1_5_TEXT : 
-                                    JAVADOC_1_6_TEXT))),
-                           linkVersionChoices);
+                           (System.getProperty("java.specification.version").startsWith("1.5") ? JAVADOC_1_5_TEXT : 
+                              JAVADOC_1_6_TEXT),
+                           linkVersionChoices, linkVersionDeprecated);
   
   static final String[] apiJavadocChoices = new String[] {
-    JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT, JAVADOC_1_5_TEXT, JAVADOC_1_6_TEXT, JAVADOC_AUTO_TEXT};
-  
+    JAVADOC_1_5_TEXT, JAVADOC_1_6_TEXT, JAVADOC_AUTO_TEXT};
   static final ArrayList<String> apiJavadocVersionChoices = new ArrayList<String>(Arrays.asList(apiJavadocChoices));
+
+  static final String[] apiJavadocDeprecated = new String[] {
+    JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT}; // deprecated, will be changed to JAVADOC_AUTO_TEXT
+  static final ArrayList<String> apiJavadocVersionDeprecated = new ArrayList<String>(Arrays.asList(apiJavadocDeprecated));  
   
   /** The version of Java to use for the "Open Java API Javadoc" feature. */
   public static final ForcedChoiceOption JAVADOC_API_REF_VERSION =
-    new ForcedChoiceOption("javadoc.api.ref.version", JAVADOC_AUTO_TEXT, apiJavadocVersionChoices);
+    new ForcedChoiceOption("javadoc.api.ref.version", JAVADOC_AUTO_TEXT,
+                           apiJavadocVersionChoices, apiJavadocVersionDeprecated);
   
   /** URL for JUnit javadocs. */
   public static final StringOption JUNIT_LINK =

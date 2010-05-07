@@ -1681,7 +1681,7 @@ public class JPDADebugger implements Debugger {
   }
   
   /** Assumes lock is already held.
-    * @see edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM#getVariableValue()
+    * @see edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM#getVariableValue
     * @see #GET_VARIABLE_VALUE_SIG
     * */
   private void _copyVariablesFromInterpreter() throws DebugException {
