@@ -153,34 +153,36 @@ public class MainFrameStatics {
     JOptionPane.showMessageDialog(parent, message + "\n" + e, title, JOptionPane.WARNING_MESSAGE);
   }
   
-  public static abstract class ClassNameAndPackageEntry implements Comparable<ClassNameAndPackageEntry> {
+  public static abstract class AutoCompletePopupEntry implements Comparable<AutoCompletePopupEntry> {
     /** Return the simple class name, e.g. "Integer". */
     public abstract String getClassName();
     /** Return the full package including the last period, e.g. "java.lang.". */
     public abstract String getFullPackage();
+    /** Return the OpenDefinitionsDocument associated with this entry, or null if none. */
+    public abstract OpenDefinitionsDocument getOpenDefinitionsDocument();
     
-    public int compareTo(ClassNameAndPackageEntry other) {
+    public int compareTo(AutoCompletePopupEntry other) {
       int res = getClassName().toLowerCase().compareTo(other.getClassName().toLowerCase());
       if (res != 0) { return res; }
       return getFullPackage().toLowerCase().compareTo(other.getFullPackage().toLowerCase());
     }
     // WARNING: this relation is finer grained that the equivalance relation induced by compareTo above
     public boolean equals(Object other) {
-      if (other == null || ! (other instanceof ClassNameAndPackageEntry)) return false;  // multiple subclasses defined
-      ClassNameAndPackageEntry o = (ClassNameAndPackageEntry) other;
+      if (other == null || ! (other instanceof AutoCompletePopupEntry)) return false;  // multiple subclasses defined
+      AutoCompletePopupEntry o = (AutoCompletePopupEntry) other;
       return (getClassName().equals(o.getClassName()) && getFullPackage().equals(o.getFullPackage()));
     }
     public int hashCode() { return hash(getClassName(), getFullPackage()); }
   }
   
-  /** Wrapper class for the "Go to File" and "Auto-Complete" dialog list entries.
+  /** Wrapper class for the "Go to File" dialog list entries.
     * Provides the ability to have the same OpenDefinitionsDocument in there multiple
     * times with different toString() results.
     */
-  public static class GoToFileListEntry extends ClassNameAndPackageEntry {
-    public final OpenDefinitionsDocument doc;
-    protected String fullPackage = null;
-    protected final String str;
+  public static class GoToFileListEntry extends AutoCompletePopupEntry {
+    private final OpenDefinitionsDocument doc;
+    private String fullPackage = null;
+    private final String str;
     public GoToFileListEntry(OpenDefinitionsDocument d, String s) {
       doc = d;
       str = s;
@@ -199,12 +201,13 @@ public class MainFrameStatics {
     }
     public String getClassName() { return str; }
     public String toString() { return str; }
+    public OpenDefinitionsDocument getOpenDefinitionsDocument() { return doc; }
   }
   
   /** Wrapper class for the "Open Javadoc" and "Auto Import" dialog list entries.
     * Provides the ability to have the same class name in there multiple times in different packages.
     */
-  public static class JavaAPIListEntry extends ClassNameAndPackageEntry {
+  public static class JavaAPIListEntry extends AutoCompletePopupEntry {
     private final String str, fullStr;
     private final URL url;
     public JavaAPIListEntry(String s, String full, URL u) {
@@ -221,5 +224,6 @@ public class MainFrameStatics {
       if (pos>=0) { return fullStr.substring(0,pos+1); }
       return "";
     }
+    public OpenDefinitionsDocument getOpenDefinitionsDocument() { return null; }
   }
 }

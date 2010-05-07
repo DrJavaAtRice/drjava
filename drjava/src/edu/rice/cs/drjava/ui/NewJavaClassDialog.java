@@ -65,7 +65,7 @@ import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
 import edu.rice.cs.plt.lambda.Runnable1;
-import edu.rice.cs.plt.lambda.Runnable4;
+import edu.rice.cs.plt.lambda.Runnable3;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 
 import edu.rice.cs.util.swing.SwingFrame;
@@ -593,12 +593,12 @@ public class NewJavaClassDialog extends SwingFrame {
         NewJavaClassDialog.this.toFront();
       }
     },
-                            new Runnable4<String,String,Integer,Integer>() {
-                              public void run(String className,
-                                              String fullName,
+                            new Runnable3<AutoCompletePopupEntry,Integer,Integer>() {
+                              public void run(AutoCompletePopupEntry entry,
                                               Integer from,
                                               Integer to) {
                                 // accepted
+                                String fullName = entry.getFullPackage()+entry.getClassName();
                                 component.setText(fullName);
                                 component.setCaretPosition(fullName.length());
                                 NewJavaClassDialog.this.setEnabled(true);
@@ -607,55 +607,4 @@ public class NewJavaClassDialog extends SwingFrame {
                               }
                             });
   }
-  
-//  private void _autoComplete(final JTextComponent component) {
-//    _mainFrame.removeModalWindowAdapter(NewJavaClassDialog.this);
-//    setEnabled(false);
-//    final String initial = component.getText();
-//    final int loc = initial.length();
-//    _autoCompletePopup.show(this,
-//                            "Select Class",
-//                            initial,
-//                            loc,
-//                            edu.rice.cs.plt.iter.IterUtil.make("OK","Simple"),
-//                            new Runnable() {
-//      public void run() {
-//        // canceled
-//        new RuntimeException("cancelled").printStackTrace();
-//        NewJavaClassDialog.this.setEnabled(true);
-//        _mainFrame.installModalWindowAdapter(NewJavaClassDialog.this, LambdaUtil.NO_OP, CANCEL);
-//        NewJavaClassDialog.this.toFront();
-//      }
-//    },
-//                            edu.rice.cs.plt.iter.IterUtil.
-//                              make(new Runnable4<String,String,Integer,Integer>() {
-//                              public void run(String className,
-//                                              String fullName,
-//                                              Integer from,
-//                                              Integer to) {
-//                                // accepted
-//                                System.out.println("Accepted '"+className+"', "+fullName+", "+from+", "+to);
-//                                new RuntimeException("accepted").printStackTrace();
-//                                component.setText(fullName);
-//                                component.setCaretPosition(fullName.length());
-//                                NewJavaClassDialog.this.setEnabled(true);
-//                                _mainFrame.installModalWindowAdapter(NewJavaClassDialog.this, LambdaUtil.NO_OP, CANCEL);
-//                                NewJavaClassDialog.this.toFront();
-//                              }
-//                            }, new Runnable4<String,String,Integer,Integer>() {
-//                              public void run(String className,
-//                                              String fullName,
-//                                              Integer from,
-//                                              Integer to) {
-//                                // accepted
-//                                System.out.println("Accepted 2 '"+className+"', "+fullName+", "+from+", "+to);
-//                                new RuntimeException("accepted 2").printStackTrace();
-//                                component.setText(className);
-//                                component.setCaretPosition(className.length());
-//                                NewJavaClassDialog.this.setEnabled(true);
-//                                _mainFrame.installModalWindowAdapter(NewJavaClassDialog.this, LambdaUtil.NO_OP, CANCEL);
-//                                NewJavaClassDialog.this.toFront();
-//                              }
-//                            }));
-//  }  
 }

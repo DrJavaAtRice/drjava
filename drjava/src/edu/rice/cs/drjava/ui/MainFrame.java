@@ -1274,10 +1274,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public String value(GoToFileListEntry entry) {
           final StringBuilder sb = new StringBuilder();
           
-          if (entry.doc != null) {
+          final OpenDefinitionsDocument doc = entry.getOpenDefinitionsDocument();
+          if (doc != null) {
             try {
-              try { sb.append(FileOps.stringMakeRelativeTo(entry.doc.getRawFile(), entry.doc.getSourceRoot())); }
-              catch(IOException e) { sb.append(entry.doc.getFile()); }
+              try { sb.append(FileOps.stringMakeRelativeTo(doc.getRawFile(), doc.getSourceRoot())); }
+              catch(IOException e) { sb.append(doc.getFile()); }
             }
             catch(edu.rice.cs.drjava.model.FileMovedException e) { sb.append(entry + " was moved"); }
 //            catch(java.lang.IllegalStateException e) { sb.append(entry); }
@@ -1294,36 +1295,38 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public String getToolTipText() { return null; }
         public Object value(PredictiveInputFrame<GoToFileListEntry> p) {
           if (p.getItem() != null) {
-            final OpenDefinitionsDocument newDoc = p.getItem().doc;
-            final boolean docChanged = ! newDoc.equals(_model.getActiveDocument());
-            final boolean docSwitch = _model.getActiveDocument() != newDoc;
-            if (docSwitch) _model.setActiveDocument(newDoc);
-            final int curLine = newDoc.getCurrentLine();
-            final String t = p.getText();
-            final int last = t.lastIndexOf(':');
-            if (last >= 0) {
-              try {
-                String end = t.substring(last + 1);
-                int val = Integer.parseInt(end);
-                
-                final int lineNum = Math.max(1, val);
-                Runnable command = new Runnable() {
-                  public void run() {
-                    try { _jumpToLine(lineNum); }  // adds this region to browser history
-                    catch (RuntimeException e) { _jumpToLine(curLine); }
+            final OpenDefinitionsDocument newDoc = p.getItem().getOpenDefinitionsDocument();
+            if (newDoc != null) {
+              final boolean docChanged = ! newDoc.equals(_model.getActiveDocument());
+              final boolean docSwitch = _model.getActiveDocument() != newDoc;
+              if (docSwitch) _model.setActiveDocument(newDoc);
+              final int curLine = newDoc.getCurrentLine();
+              final String t = p.getText();
+              final int last = t.lastIndexOf(':');
+              if (last >= 0) {
+                try {
+                  String end = t.substring(last + 1);
+                  int val = Integer.parseInt(end);
+                  
+                  final int lineNum = Math.max(1, val);
+                  Runnable command = new Runnable() {
+                    public void run() {
+                      try { _jumpToLine(lineNum); }  // adds this region to browser history
+                      catch (RuntimeException e) { _jumpToLine(curLine); }
+                    }
+                  };
+                  if (docSwitch) {
+                    // postpone running command until after document switch, which is pending in the event queue
+                    EventQueue.invokeLater(command);
                   }
-                };
-                if (docSwitch) {
-                  // postpone running command until after document switch, which is pending in the event queue
-                  EventQueue.invokeLater(command);
+                  else command.run();
                 }
-                else command.run();
+                catch(RuntimeException e) { /* ignore */ }
               }
-              catch(RuntimeException e) { /* ignore */ }
-            }
-            else if (docChanged) {
-              // defer executing this code until after active document switch (if any) is complete
-              addToBrowserHistory();
+              else if (docChanged) {
+                // defer executing this code until after active document switch (if any) is complete
+                addToBrowserHistory();
+              }
             }
           }
           hourglassOff();
@@ -1467,11 +1470,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (pim.getMatchingItems().size() == 1) {
       // exactly one match, go to file
       if (pim.getCurrentItem() != null) {
-        boolean docChanged = ! pim.getCurrentItem().doc.equals(_model.getActiveDocument());
+        final OpenDefinitionsDocument newDoc = pim.getCurrentItem().getOpenDefinitionsDocument();
+        if (newDoc != null) {
+          boolean docChanged = ! newDoc.equals(_model.getActiveDocument());
 //        if (docChanged) { addToBrowserHistory(); }
-        _model.setActiveDocument(pim.getCurrentItem().doc);
-        if (docChanged) { // defer executing this code until after active document switch is complete
-          addToBrowserHistory();
+          _model.setActiveDocument(newDoc);
+          if (docChanged) { // defer executing this code until after active document switch is complete
+            addToBrowserHistory();
+          }
         }
       }
     }
@@ -1485,11 +1491,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           exact = true;
           // exactly one match with ".java" appended, go to file
           if (pim.getCurrentItem() != null) {
-            boolean docChanged = !pim.getCurrentItem().doc.equals(_model.getActiveDocument());
+            final OpenDefinitionsDocument newDoc = pim.getCurrentItem().getOpenDefinitionsDocument();
+            if (newDoc != null) {
+              boolean docChanged = !newDoc.equals(_model.getActiveDocument());
 //          if (docChanged) { addToBrowserHistory(); }
-            _model.setActiveDocument(pim.getCurrentItem().doc);
-            if (docChanged) { // defer executing this code until after active document switch is complete
-              addToBrowserHistory();
+              _model.setActiveDocument(newDoc);
+              if (docChanged) { // defer executing this code until after active document switch is complete
+                addToBrowserHistory();
+              }
             }
           }
           break;
@@ -1533,7 +1542,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
-  /** Initialize dialog if necessary. */
+  /** Initialize dialog if necessary.
+    * Should NOT be called in the event thread. */
   void initOpenJavadocDialog() {
     if (_openJavadocDialog == null) {
       PredictiveInputFrame.InfoSupplier<JavaAPIListEntry> info = 
@@ -1602,7 +1612,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public static Set<JavaAPIListEntry> _generateJavaAPISet(String base,
                                                           String stripPrefix,
                                                           String suffix) {
-    // TODO: put this in an AsyncTask
     URL url = MainFrame.class.getResource("/edu/rice/cs/drjava/docs/javaapi"+suffix);
     return _generateJavaAPISet(base, stripPrefix, url);
   }
@@ -1611,7 +1620,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public static Set<JavaAPIListEntry> _generateJavaAPISet(String base,
                                                           String stripPrefix,
                                                           URL url) {
-    // TODO: put this in an AsyncTask
     Set<JavaAPIListEntry> s = new HashSet<JavaAPIListEntry>();
     if (url==null) return s;
     try {
@@ -1655,10 +1663,20 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public Set<GoToFileListEntry> getCompleteClassSet() {
     return _completeClassSet;
   }
+
+  /** Clear the set of all classes. */
+  public void clearCompleteClassSet() {
+    _completeClassSet.clear();
+  }
+  
+  /** Clears the Java API class set. */
+  public void clearJavaAPISet() {
+    _javaAPISet.clear(); 
+  }
   
   /** @return the Java API class set. */
   public Set<JavaAPIListEntry> getJavaAPISet() {
-    if (_javaAPISet == null) {
+    if (_javaAPISet.size() == 0) {
       generateJavaAPISet();
     }
     return _javaAPISet;
@@ -1669,9 +1687,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // should NOT be called in the event thread
     // otherwise the processing frame will not work correctly and the event thread will block
     // assert (!EventQueue.isDispatchThread());
-    if (_javaAPISet == null) {
+    if (_javaAPISet.size() == 0) {
       final edu.rice.cs.util.swing.ProcessingDialog pd =
-        new edu.rice.cs.util.swing.ProcessingDialog(this, "Java API Classes", "Loading, please wait.");
+        new edu.rice.cs.util.swing.ProcessingDialog(this, "Java API Classes", "Loading, please wait.", false);
       if (!EventQueue.isDispatchThread()) { pd.setVisible(true); }
       // generate list
       String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
@@ -1730,7 +1748,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         // no valid Javadoc URL
         return;
       }
-      _javaAPISet = _generateJavaAPISet(base, stripPrefix, suffix);
+      _javaAPISet.addAll(_generateJavaAPISet(base, stripPrefix, suffix));
       
       // add JUnit
       try {
@@ -1753,7 +1771,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
       }
       
-      if (_javaAPISet.size() == 0) { _javaAPISet = null; }
+      if (_javaAPISet.size() == 0) { clearJavaAPISet(); }
       
       // finished
       if (!EventQueue.isDispatchThread()) {
@@ -1767,108 +1785,131 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   PredictiveInputFrame<JavaAPIListEntry> _openJavadocDialog = null;
   
   /** The list of Java API classes. */
-  Set<JavaAPIListEntry> _javaAPISet = null;
+  Set<JavaAPIListEntry> _javaAPISet = new HashSet<JavaAPIListEntry>();
   
   /** Action that asks the user for a file name and goes there.  Only executes in the event thread. */
   private Action _openJavadocAction = new AbstractAction("Open Java API Javadoc...") {
     public void actionPerformed(ActionEvent ae) {
-      initOpenJavadocDialog();     
-      _openJavadocDialog.setItems(true, getJavaAPISet()); // ignore case
       hourglassOn();
-      _openJavadocDialog.setVisible(true);
+      new Thread() {
+        public void run() {
+        // run this in a thread other than the main thread
+          initOpenJavadocDialog();
+          Utilities.invokeLater(new Runnable() {
+            public void run() {
+              // but now run this in the event thread again
+              _openJavadocDialog.setItems(true, getJavaAPISet()); // ignore case
+              _openJavadocDialog.setVisible(true);
+            }
+          });
+        }
+      }.start();
     }
   };
   
   /** Opens the Javadoc specified by the word the cursor is on.  Only executes in the event thread. */
   private void _openJavadocUnderCursor() {
-    generateJavaAPISet();
-    Set<JavaAPIListEntry> apiSet = getJavaAPISet();
-    if (apiSet == null) {
-//      Utilities.show("Cannot load Java API class list. No network connectivity?");
-      return;
-    }
-    PredictiveInputModel<JavaAPIListEntry> pim =
-      new PredictiveInputModel<JavaAPIListEntry>(true, new PrefixStrategy<JavaAPIListEntry>(), apiSet);
-    OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
-    String mask = "";
-    int loc = getCurrentDefPane().getCaretPosition();
-    String s = odd.getText();
-    // find start
-    int start = loc;
-    while(start > 0) {
-      if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
-      --start;
-    }
-    while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start<loc)) {
-      ++start;
-    }
-    // find end
-    int end = loc-1;
-    while(end<s.length()-1) {
-      if (!Character.isJavaIdentifierPart(s.charAt(end+1))) { break; }
-      ++end;
-    }
-    if ((start>=0) && (end<s.length())) {
-      mask = s.substring(start, end + 1);
-      pim.setMask(mask);
-    }
-    
+    hourglassOn();
+    new Thread() {
+      public void run() {
+        // run this in a thread other than the main thread
+        final Set<JavaAPIListEntry> apiSet = getJavaAPISet();
+        if (apiSet == null) {
+//        Utilities.show("Cannot load Java API class list. No network connectivity?");
+          hourglassOff();
+          return;
+        }
+        Utilities.invokeLater(new Runnable() {
+          public void run() {
+            // but now run this in the event thread again
+            PredictiveInputModel<JavaAPIListEntry> pim =
+              new PredictiveInputModel<JavaAPIListEntry>(true, new PrefixStrategy<JavaAPIListEntry>(), apiSet);
+            OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
+            String mask = "";
+            int loc = getCurrentDefPane().getCaretPosition();
+            String s = odd.getText();
+            // find start
+            int start = loc;
+            while(start > 0) {
+              if (!Character.isJavaIdentifierPart(s.charAt(start-1))) { break; }
+              --start;
+            }
+            while((start<s.length()) && (!Character.isJavaIdentifierStart(s.charAt(start))) && (start<loc)) {
+              ++start;
+            }
+            // find end
+            int end = loc-1;
+            while(end<s.length()-1) {
+              if (!Character.isJavaIdentifierPart(s.charAt(end+1))) { break; }
+              ++end;
+            }
+            if ((start>=0) && (end<s.length())) {
+              mask = s.substring(start, end + 1);
+              pim.setMask(mask);
+            }
+            
 //    Utilities.show("Matching items are: " + pim.getMatchingItems());
-    
-    if (pim.getMatchingItems().size() == 1) {
-      // exactly one match, go to file
-      if (pim.getCurrentItem() != null) {
-        PlatformFactory.ONLY.openURL(pim.getCurrentItem().getURL());
-      }
-    }
-    else {
-      // try appending ".java" and the other file extensions and see if it's unique
-      boolean exact = false;
-      for(String attemptedExt: OptionConstants.LANGUAGE_LEVEL_EXTENSIONS) {
-        pim.setMask(mask);
-        pim.extendMask(attemptedExt);
-        if (pim.getMatchingItems().size() == 1) {
-          // exactly one match with ".java" appended, go to file
-          exact = true;
-          if (pim.getCurrentItem() != null) {
-            PlatformFactory.ONLY.openURL(pim.getCurrentItem().getURL());
-          }
-          break;
-        }
-      }
-      if (!exact) {
-        // not exactly one match
-        pim.setMask(mask);
-        int found = 0;
-        if (pim.getMatchingItems().size() == 0) {
-          // if there are no matches, shorten the mask until there is at least one
-          mask = pim.getMask();
-          while(mask.length() > 0) {
-            mask = mask.substring(0, mask.length() - 1);
-            pim.setMask(mask);
-            if (pim.getMatchingItems().size() > 0) { break; }
-          }
-        }
-        else {
-          // there are several matches, see if there is an exact match
-          for(JavaAPIListEntry e: pim.getMatchingItems()) {
-            if (e.toString().equalsIgnoreCase(mask)) {
-              ++found;
+            
+            if (pim.getMatchingItems().size() == 1) {
+              // exactly one match, go to file
+              if (pim.getCurrentItem() != null) {
+                PlatformFactory.ONLY.openURL(pim.getCurrentItem().getURL());
+                hourglassOff();
+              }
+            }
+            else {
+              // try appending ".java" and the other file extensions and see if it's unique
+              boolean exact = false;
+              for(String attemptedExt: OptionConstants.LANGUAGE_LEVEL_EXTENSIONS) {
+                pim.setMask(mask);
+                pim.extendMask(attemptedExt);
+                if (pim.getMatchingItems().size() == 1) {
+                  // exactly one match with ".java" appended, go to file
+                  exact = true;
+                  if (pim.getCurrentItem() != null) {
+                    PlatformFactory.ONLY.openURL(pim.getCurrentItem().getURL());
+                    hourglassOff();
+                  }
+                  break;
+                }
+              }
+              if (!exact) {
+                // not exactly one match
+                pim.setMask(mask);
+                int found = 0;
+                if (pim.getMatchingItems().size() == 0) {
+                  // if there are no matches, shorten the mask until there is at least one
+                  mask = pim.getMask();
+                  while(mask.length() > 0) {
+                    mask = mask.substring(0, mask.length() - 1);
+                    pim.setMask(mask);
+                    if (pim.getMatchingItems().size() > 0) { break; }
+                  }
+                }
+                else {
+                  // there are several matches, see if there is an exact match
+                  for(JavaAPIListEntry e: pim.getMatchingItems()) {
+                    if (e.toString().equalsIgnoreCase(mask)) {
+                      ++found;
+                    }
+                  }
+                }
+                if (found==1) {
+                  // open unique item and return
+                  PlatformFactory.ONLY.openURL(pim.getCurrentItem().getURL());
+                  hourglassOff();
+                }
+                else {
+                  initOpenJavadocDialog();
+                  _openJavadocDialog.setModel(true, pim); // ignore case
+                  _openJavadocDialog.setVisible(true);
+                }
+              }
             }
           }
-        }
-        if (found==1) {
-          // open unique item and return
-          PlatformFactory.ONLY.openURL(pim.getCurrentItem().getURL());
-        }
-        else {
-          initOpenJavadocDialog();
-          _openJavadocDialog.setModel(true, pim); // ignore case
-          hourglassOn();
-          _openJavadocDialog.setVisible(true);
-        }
+        });
       }
-    }
+    }.start();
   }
   
   /** Open Javadoc page specified by the word the cursor is on. */
@@ -1888,12 +1929,18 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** The "Complete Word" dialog instance. */
   private volatile AutoCompletePopup _completeWordDialog = null;
-  
-  /** Complete the word the cursor is on.  Only executes in the event thread. */
-  private void _completeWordUnderCursor() {
+
+  /** Initialize the "Complete Word" dialog. */
+  private void initCompleteWordDialog() {
     if (_completeWordDialog==null) {
       _completeWordDialog = new AutoCompletePopup(this);
     }
+  }
+    
+  
+  /** Complete the word the cursor is on.  Only executes in the event thread. */
+  private void _completeWordUnderCursor() {
+    initCompleteWordDialog();
     
     hourglassOn();
     
@@ -1918,30 +1965,28 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       },
                                edu.rice.cs.plt.iter.IterUtil.
-                                 make(new Runnable4<String,String,Integer,Integer>() {
-                                 public void run(String className,
-                                                 String fullName,
+                                 make(new Runnable3<AutoCompletePopupEntry,Integer,Integer>() {
+                                 public void run(AutoCompletePopupEntry entry,
                                                  Integer from,
                                                  Integer to) {
                                    // accepted
                                    try {
                                      odd.remove(from, to-from);
-                                     odd.insertString(from, className, null);
+                                     odd.insertString(from, entry.getClassName(), null);
                                    }
                                    catch(BadLocationException ble) { /* just don't complete */ }
                                    
                                    hourglassOff();
                                    MainFrame.this.toFront();
                                  }
-                               }, new Runnable4<String,String,Integer,Integer>() {
-                                 public void run(String className,
-                                                 String fullName,
+                               }, new Runnable3<AutoCompletePopupEntry,Integer,Integer>() {
+                                 public void run(AutoCompletePopupEntry entry,
                                                  Integer from,
                                                  Integer to) {
                                    // accepted
                                    try {
                                      odd.remove(from, to-from);
-                                     odd.insertString(from, fullName, null);
+                                     odd.insertString(from, entry.getFullPackage()+entry.getClassName(), null);
                                    }
                                    catch(BadLocationException ble) { /* just don't complete */ }
                                    
@@ -1954,12 +1999,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   public void resetCompleteWordDialogPosition() {
-    // TODO: restore ability to restore position and size of "Complete Word under Cursor" dialog
-//    initCompleteWordDialog();
-//    _completeWordDialog.setFrameState("default");
-//    if (DrJava.getConfig().getSetting(DIALOG_COMPLETE_WORD_STORE_POSITION).booleanValue()
-//      DrJava.getConfig().setSetting(DIALOG_COMPLETE_WORD_STATE, "default");
-//    }
+    initCompleteWordDialog();
+    _completeWordDialog.setFrameState("default");
+    if (DrJava.getConfig().getSetting(DIALOG_COMPLETE_WORD_STORE_POSITION).booleanValue()) {
+      DrJava.getConfig().setSetting(DIALOG_COMPLETE_WORD_STATE, "default");
+    }
   }
   
   /** Auto-completes word the cursor is on. */
@@ -3354,7 +3398,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       // The OptionListener for JAVADOC_API_REF_VERSION.
       OptionListener<String> choiceOptionListener = new OptionListener<String>() {
         public void optionChanged(OptionEvent<String> oce) {
-          _javaAPISet = null;
+          clearJavaAPISet();
         }
       };
       DrJava.getConfig().addOptionListener(JAVADOC_API_REF_VERSION, choiceOptionListener);
@@ -3364,7 +3408,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public void optionChanged(OptionEvent<String> oce) {
           String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
           if (linkVersion.equals(JAVADOC_1_3_TEXT)) {
-            _javaAPISet = null;
+            clearJavaAPISet();
           }
         }
       };
@@ -3373,7 +3417,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public void optionChanged(OptionEvent<String> oce) {
           String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
           if (linkVersion.equals(JAVADOC_1_4_TEXT)) {
-            _javaAPISet = null;
+            clearJavaAPISet();
           }
         }
       };
@@ -3382,7 +3426,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public void optionChanged(OptionEvent<String> oce) {
           String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
           if (linkVersion.equals(JAVADOC_1_5_TEXT)) {
-            _javaAPISet = null;
+            clearJavaAPISet();
           }
         }
       };
@@ -3391,23 +3435,29 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public void optionChanged(OptionEvent<String> oce) {
           String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
           if (linkVersion.equals(JAVADOC_1_6_TEXT)) {
-            _javaAPISet = null;
+            clearJavaAPISet();
           }
         }
       };
       DrJava.getConfig().addOptionListener(JAVADOC_1_6_LINK, link16OptionListener);
       OptionListener<String> linkJUnitOptionListener = new OptionListener<String>() {
         public void optionChanged(OptionEvent<String> oce) {
-          _javaAPISet = null;
+          clearJavaAPISet();
         }
       };
       DrJava.getConfig().addOptionListener(JUNIT_LINK, linkJUnitOptionListener);
       OptionListener<Vector<String>> additionalLinkOptionListener = new OptionListener<Vector<String>>() {
         public void optionChanged(OptionEvent<Vector<String>> oce) {
-          _javaAPISet = null;
+          clearJavaAPISet();
         }
       };
       DrJava.getConfig().addOptionListener(JAVADOC_ADDITIONAL_LINKS, additionalLinkOptionListener);
+      OptionListener<Boolean> scanClassesOptionListener = new OptionListener<Boolean>() {
+        public void optionChanged(OptionEvent<Boolean> oce) {
+          clearCompleteClassSet();
+        }
+      };
+      DrJava.getConfig().addOptionListener(DIALOG_COMPLETE_SCAN_CLASS_FILES, scanClassesOptionListener);
       
       // Initialize cached frames and dialogs 
       _configFrame = new ConfigFrame(MainFrame.this);
@@ -4150,6 +4200,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       getGlassPane().setVisible(true);
       _currentDefPane.setEditable(false);
       setAllowKeyEvents(false); 
+      _menuBar.setEnabled(false);
+      _interactionsPane.setEnabled(false);
     }
   }
   
@@ -4161,6 +4213,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       getGlassPane().setVisible(false);
       _currentDefPane.setEditable(true);
       setAllowKeyEvents(true);
+      _menuBar.setEnabled(true);
+      _interactionsPane.setEnabled(true);
     }
   }
   
@@ -4533,7 +4587,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _openProjectUpdate();
       
       if (_mainListener.someFilesNotFound()) _model.setProjectChanged(true);
-      _completeClassSet = new HashSet<GoToFileListEntry>(); // reset auto-completion list
+      clearCompleteClassSet(); // reset auto-completion list
       addToBrowserHistory();
     }
     catch(MalformedProjectFileException e) {
@@ -4598,7 +4652,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   boolean _closeProject(boolean quitting) {
     // TODO: in some cases, it is possible to see the documents being removed in the navigation pane
     //       this can cause errors. fix this.
-    _completeClassSet = new HashSet<GoToFileListEntry>(); // reset auto-completion list
+    clearCompleteClassSet(); // reset auto-completion list
     _autoImportClassSet = new HashSet<JavaAPIListEntry>(); // reset auto-import list
     
     if (_checkProjectClose()) {
@@ -5276,16 +5330,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       config.setSetting(DIALOG_OPENJAVADOC_STATE, DIALOG_OPENJAVADOC_STATE.getDefault());
     }    
     
-    // TODO: restore ability to restore position and size of "Complete Word under Cursor" dialog
-//    // "Complete Word" dialog position and size.
-//    if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_WORD_STORE_POSITION).booleanValue())
-//          && (_completeWordDialog != null) && (_completeWordDialog.getFrameState() != null)) {
-//      config.setSetting(DIALOG_COMPLETE_WORD_STATE, (_completeWordDialog.getFrameState().toString()));
-//    }
-//    else {
-//      // Reset to defaults to restore pristine behavior.
-//      config.setSetting(DIALOG_COMPLETE_WORD_STATE, DIALOG_COMPLETE_WORD_STATE.getDefault());
-//    }
+    // "Complete Word" dialog position and size.
+    if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_WORD_STORE_POSITION).booleanValue())
+          && (_completeWordDialog != null) && (_completeWordDialog.getFrameState() != null)) {
+      config.setSetting(DIALOG_COMPLETE_WORD_STATE, (_completeWordDialog.getFrameState().toString()));
+    }
+    else {
+      // Reset to defaults to restore pristine behavior.
+      config.setSetting(DIALOG_COMPLETE_WORD_STATE, DIALOG_COMPLETE_WORD_STATE.getDefault());
+    }
     
     // "Create Jar from Project" dialog position and size.   
     if ((DrJava.getConfig().getSetting(DIALOG_JAROPTIONS_STORE_POSITION).booleanValue())
@@ -5471,7 +5524,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             }
           }
         }
-        _completeClassSet = new HashSet<GoToFileListEntry>(hs);
+        clearCompleteClassSet();
+        _completeClassSet.addAll(hs);
         _autoImportClassSet = new HashSet<JavaAPIListEntry>(hs2);
       }
     });
@@ -8866,8 +8920,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
       if (linkVersion.equals(JAVADOC_AUTO_TEXT)) {
         // The Java API Javadoc version must match the compiler.  Since compiler was changed, we rebuild the API list
-        _javaAPISet = null;
-        generateJavaAPISet();
+        clearJavaAPISet();
       }
     }
     
@@ -10020,49 +10073,62 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   JCheckBox _autoImportPackageCheckbox;
   
   /** Imports a class. */
-  private void _showAutoImportDialog(String s) {
-    Set<JavaAPIListEntry> apiSet = getJavaAPISet();
-    if (apiSet == null) return;
+  private void _showAutoImportDialog(final String s) {
+    hourglassOn();
+    new Thread() {
+      public void run() {
+        // run this in a thread other than the main thread        
+        final Set<JavaAPIListEntry> apiSet = getJavaAPISet();
+        if (apiSet == null) {
+          hourglassOff();
+          return;
+        }
     
-    List<JavaAPIListEntry> autoImportList = new ArrayList<JavaAPIListEntry>(apiSet);
-    if (DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue() &&
-        _autoImportClassSet.size() > 0) {
-      autoImportList.addAll(_autoImportClassSet);
-    }
-    else {
-      File projectRoot = _model.getProjectRoot();
-      List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
-      if (docs != null) {
-        for (OpenDefinitionsDocument d: docs) {
-          if (d.isUntitled()) continue;
-          try {
-            String rel = FileOps.stringMakeRelativeTo(d.getRawFile(), projectRoot);
-            String full = rel.replace(File.separatorChar, '.');
-            for (String ext: edu.rice.cs.drjava.model.compiler.CompilerModel.EXTENSIONS) {
-              if (full.endsWith(ext)) {
-                full = full.substring(0, full.lastIndexOf(ext));
-                break;
+        Utilities.invokeLater(new Runnable() {
+          public void run() {
+            // but now run this in the event thread again
+            List<JavaAPIListEntry> autoImportList = new ArrayList<JavaAPIListEntry>(apiSet);
+            if (DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue() &&
+                _autoImportClassSet.size() > 0) {
+              autoImportList.addAll(_autoImportClassSet);
+            }
+            else {
+              File projectRoot = _model.getProjectRoot();
+              List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+              if (docs != null) {
+                for (OpenDefinitionsDocument d: docs) {
+                  if (d.isUntitled()) continue;
+                  try {
+                    String rel = FileOps.stringMakeRelativeTo(d.getRawFile(), projectRoot);
+                    String full = rel.replace(File.separatorChar, '.');
+                    for (String ext: edu.rice.cs.drjava.model.compiler.CompilerModel.EXTENSIONS) {
+                      if (full.endsWith(ext)) {
+                        full = full.substring(0, full.lastIndexOf(ext));
+                        break;
+                      }
+                    }
+                    String simple = full;
+                    if (simple.lastIndexOf('.') >= 0) simple = simple.substring(simple.lastIndexOf('.') + 1);
+                    
+                    JavaAPIListEntry entry = new JavaAPIListEntry(simple, full, null);
+                    if (! autoImportList.contains(entry)) { autoImportList.add(entry); }
+                  }
+                  catch(IOException ioe) { /* ignore, just don't add this one */ }
+                  catch(SecurityException se) { /* ignore, just don't add this one */ }
+                }
               }
             }
-            String simple = full;
-            if (simple.lastIndexOf('.') >= 0) simple = simple.substring(simple.lastIndexOf('.') + 1);
-            
-            JavaAPIListEntry entry = new JavaAPIListEntry(simple, full, null);
-            if (! autoImportList.contains(entry)) { autoImportList.add(entry); }
+            PredictiveInputModel<JavaAPIListEntry> pim =
+              new PredictiveInputModel<JavaAPIListEntry>(true, new PrefixStrategy<JavaAPIListEntry>(), autoImportList);
+            pim.setMask(s);
+            _initAutoImportDialog();
+            _autoImportDialog.setModel(true, pim); // ignore case
+            _autoImportPackageCheckbox.setSelected(false);
+            _autoImportDialog.setVisible(true);
           }
-          catch(IOException ioe) { /* ignore, just don't add this one */ }
-          catch(SecurityException se) { /* ignore, just don't add this one */ }
-        }
+        });
       }
-    }
-    PredictiveInputModel<JavaAPIListEntry> pim =
-      new PredictiveInputModel<JavaAPIListEntry>(true, new PrefixStrategy<JavaAPIListEntry>(), autoImportList);
-    pim.setMask(s);
-    _initAutoImportDialog();
-    _autoImportDialog.setModel(true, pim); // ignore case
-    hourglassOn();
-    _autoImportPackageCheckbox.setSelected(false);
-    _autoImportDialog.setVisible(true);
+    }.start();
   }
   
   /** Follow a file. */

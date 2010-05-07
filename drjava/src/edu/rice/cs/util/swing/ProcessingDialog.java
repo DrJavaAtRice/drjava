@@ -45,7 +45,12 @@ public class ProcessingDialog extends JDialog {
   private JProgressBar _pb;
   
   public ProcessingDialog(Frame parent, String title, String label) {
-    super(parent, title);
+    this(parent, title, label, false);
+  }
+
+  public ProcessingDialog(Frame parent, String title, String label,
+                          boolean modal) {
+    super(parent, title, modal);
     setResizable(false);    
     _parent = parent;
     setSize(350, 150);

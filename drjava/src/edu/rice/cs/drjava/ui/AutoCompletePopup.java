@@ -66,25 +66,53 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.iter.*;
+import edu.rice.cs.plt.collect.UnionSet;
 
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 import static edu.rice.cs.drjava.ui.MainFrameStatics.*;
 import static edu.rice.cs.drjava.ui.predictive.PredictiveInputModel.*;
+import static edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame.FrameState;
 
 /** Autocomplete support.
   * @version $Id$
   */
 public class AutoCompletePopup {
-  JCheckBox _completeJavaAPICheckbox = new JCheckBox("Java API");
   /** Main frame. */
-  final MainFrame _mainFrame;
+  final protected MainFrame _mainFrame;
     
+  /** Checkbox that controls whether Java API classes are included. */
+  JCheckBox _completeJavaAPICheckbox = new JCheckBox("Java API");
+  
+  /** Frame state. */
+  protected FrameState _lastState = null;
+  
+  /** Complete set of entries. */
+  final protected Set<AutoCompletePopupEntry> _allEntries;  
+  
+  /** Set of the document entries. */
+  final protected Set<AutoCompletePopupEntry> _docEntries;
+  
+  /** Set of all the Java API classes. */
+  final protected Set<AutoCompletePopupEntry> _apiEntries;
+  
   /** Constructor for an auto-complete popup that uses the MainFrame for information.
     * @param mf main frame of DrJava */
-  public AutoCompletePopup(MainFrame mf) {
+  public AutoCompletePopup(MainFrame mf) { this(mf, null); }
+
+  /** Constructor for an auto-complete popup that uses the MainFrame for information.
+    * @param mf main frame of DrJava
+    * @param frameState position and size of the dialog
+    */
+  public AutoCompletePopup(MainFrame mf, String frameState) {
     _mainFrame = mf;
+    if (frameState!=null) _lastState = new FrameState(frameState);
+    _docEntries = new HashSet<AutoCompletePopupEntry>();
+    _apiEntries = new HashSet<AutoCompletePopupEntry>();
+    _allEntries = new UnionSet<AutoCompletePopupEntry>(_apiEntries,
+                                                       new UnionSet<AutoCompletePopupEntry>(mf.getCompleteClassSet(),
+                                                                                            _docEntries));
   }
   
   /** Display an auto-complete popup with the specified window title centered around
@@ -102,7 +130,7 @@ public class AutoCompletePopup {
                    final String initial,
                    final int loc,
                    final Runnable canceledAction,
-                   final Runnable4<String,String,Integer,Integer> acceptedAction) {
+                   final Runnable3<AutoCompletePopupEntry,Integer,Integer> acceptedAction) {
     show(parent, title, initial, loc, IterUtil.make("OK"), 
          IterUtil.make(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)), 0, canceledAction, IterUtil.make(acceptedAction));
   }
@@ -124,7 +152,7 @@ public class AutoCompletePopup {
                    final int loc,
                    final SizedIterable<String> actionNames,
                    final Runnable canceledAction,
-                   final SizedIterable<Runnable4<String,String,Integer,Integer>> acceptedActions) {
+                   final SizedIterable<Runnable3<AutoCompletePopupEntry,Integer,Integer>> acceptedActions) {
     SizedIterable<KeyStroke> actionKeyStrokes = 
       IterUtil.compose(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
                        IterUtil.copy((KeyStroke)null, acceptedActions.size()-1));
@@ -153,7 +181,7 @@ public class AutoCompletePopup {
                    final SizedIterable<KeyStroke> actionKeyStrokes,
                    final int oneMatchActionIndex,
                    final Runnable canceledAction,
-                   final SizedIterable<Runnable4<String,String,Integer,Integer>> acceptedActions) {
+                   final SizedIterable<Runnable3<AutoCompletePopupEntry,Integer,Integer>> acceptedActions) {
     assert actionNames.size() == acceptedActions.size();
     assert actionNames.size() == actionKeyStrokes.size();
     
@@ -168,32 +196,25 @@ public class AutoCompletePopup {
           return; // do nothing
         }
         
-        ClassNameAndPackageEntry currentEntry = null;
-        HashSet<ClassNameAndPackageEntry> set;
-        if ((DrJava.getConfig().getSetting(OptionConstants.DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) &&
-            (_mainFrame.getCompleteClassSet().size() > 0)) {
-          set = new HashSet<ClassNameAndPackageEntry>(_mainFrame.getCompleteClassSet());
-        }
-        else {
-          set = new HashSet<ClassNameAndPackageEntry>(docs.size());
-          for(OpenDefinitionsDocument d: docs) {
-            if (d.isUntitled()) continue;
-            String str = d.toString();
-            if (str.lastIndexOf('.')>=0) {
-              str = str.substring(0, str.lastIndexOf('.'));
-            }
-            GoToFileListEntry entry = new GoToFileListEntry(d, str);
-            if (d.equals(_mainFrame.getModel().getActiveDocument())) currentEntry = entry;
-            set.add(entry);
+        AutoCompletePopupEntry currentEntry = null;
+        _docEntries.clear();
+        for(OpenDefinitionsDocument d: docs) {
+          if (d.isUntitled()) continue;
+          String str = d.toString();
+          if (str.lastIndexOf('.')>=0) {
+            str = str.substring(0, str.lastIndexOf('.'));
           }
+          GoToFileListEntry entry = new GoToFileListEntry(d, str);
+          if (d.equals(_mainFrame.getModel().getActiveDocument())) currentEntry = entry;
+          _docEntries.add(entry);
         }
         
         if (DrJava.getConfig().getSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI)) {
-          addJavaAPIToSet(set);
+          addJavaAPI();
         }
         
-        final PredictiveInputModel<ClassNameAndPackageEntry> pim = 
-          new PredictiveInputModel<ClassNameAndPackageEntry>(true, new PrefixStrategy<ClassNameAndPackageEntry>(), set);
+        final PredictiveInputModel<AutoCompletePopupEntry> pim = 
+          new PredictiveInputModel<AutoCompletePopupEntry>(true, new PrefixStrategy<AutoCompletePopupEntry>(), _allEntries);
         String mask = "";
         String s = initial;
         
@@ -228,16 +249,14 @@ public class AutoCompletePopup {
             final int finalStart = start;
             Utilities.invokeAndWait(new Runnable() {
               public void run() {
-                Iterator<Runnable4<String,String,Integer,Integer>> actionIt =
+                Iterator<Runnable3<AutoCompletePopupEntry,Integer,Integer>> actionIt =
                   acceptedActions.iterator();
-                Runnable4<String,String,Integer,Integer> action;
+                Runnable3<AutoCompletePopupEntry,Integer,Integer> action;
                 int i = oneMatchActionIndex;
                 do {
                   action = actionIt.next();
                 } while(i<0);
-                action.run(pim.getCurrentItem().getClassName(),
-                           pim.getCurrentItem().getFullPackage()+pim.getCurrentItem().getClassName(),
-                           finalStart, loc);
+                action.run(pim.getCurrentItem(), finalStart, loc);
               }
             });
             return;
@@ -255,10 +274,10 @@ public class AutoCompletePopup {
             if (pim.getMatchingItems().size() > 0) { break; }
           }
         }       
-        final PredictiveInputFrame<ClassNameAndPackageEntry> completeWordDialog = 
+        final PredictiveInputFrame<AutoCompletePopupEntry> completeWordDialog = 
           createCompleteWordDialog(title, start, loc, actionNames, actionKeyStrokes,
                                    canceledAction, acceptedActions);
-        final ClassNameAndPackageEntry finalCurrentEntry = currentEntry;
+        final AutoCompletePopupEntry finalCurrentEntry = currentEntry;
         Utilities.invokeLater(new Runnable() {
           public void run() {
             completeWordDialog.setModel(true, pim); // ignore case
@@ -267,6 +286,11 @@ public class AutoCompletePopup {
               completeWordDialog.setCurrentItem(finalCurrentEntry);
             }
             completeWordDialog.setLocationRelativeTo(parent);
+            
+            if (_lastState != null) {
+              completeWordDialog.setFrameState(_lastState);
+            }
+            
             completeWordDialog.setVisible(true);
           }
         });
@@ -274,40 +298,51 @@ public class AutoCompletePopup {
     }.start();
   }
   
-  PredictiveInputFrame<ClassNameAndPackageEntry>
+  /** Returns the last state of the frame, i.e. the location and dimension.
+   *  @return frame state
+   */
+  public FrameState getFrameState() { return _lastState; }
+  
+  /** Sets state of the frame, i.e. the location and dimension of the frame for the next use.
+   *  @param ds  State to update to, or {@code null} to reset
+   */
+  public void setFrameState(FrameState ds) {
+    _lastState = ds;
+  }  
+  
+  /** Sets state of the frame, i.e. the location and dimension of the frame for the next use.
+   *  @param s  State to update to, or {@code null} to reset
+   */
+  public void setFrameState(String s) {
+    try { _lastState = new FrameState(s); }
+    catch(IllegalArgumentException e) { _lastState = null; }
+  }
+  
+  protected PredictiveInputFrame<AutoCompletePopupEntry>
     createCompleteWordDialog(final String title,
                              final int start,
                              final int loc,
                              final SizedIterable<String> actionNames,
                              final SizedIterable<KeyStroke> actionKeyStrokes,
                              final Runnable canceledAction,
-                             final SizedIterable<Runnable4<String,String,Integer,Integer>> acceptedActions) {
-    final SimpleBox<PredictiveInputFrame<ClassNameAndPackageEntry>> dialogThunk =
-      new SimpleBox<PredictiveInputFrame<ClassNameAndPackageEntry>>();
+                             final SizedIterable<Runnable3<AutoCompletePopupEntry,Integer,Integer>> acceptedActions) {
+    final SimpleBox<PredictiveInputFrame<AutoCompletePopupEntry>> dialogThunk =
+      new SimpleBox<PredictiveInputFrame<AutoCompletePopupEntry>>();
     // checkbox whether Java API classes should be completed as well
     _completeJavaAPICheckbox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         String curMask = dialogThunk.value().getMask();
-        Set<ClassNameAndPackageEntry> s = new HashSet<ClassNameAndPackageEntry>(dialogThunk.value().getItems());
-        if (_completeJavaAPICheckbox.isSelected()) {
-          DrJava.getConfig().setSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI, Boolean.TRUE);
-          addJavaAPIToSet(s);
-          dialogThunk.value().setItems(true,s);
-        }
-        else {
-          // unselected, remove Java API classes from list
-          DrJava.getConfig().setSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI, Boolean.FALSE);
-          removeJavaAPIFromSet(s);
-          dialogThunk.value().setItems(true,s);
-        }
+        DrJava.getConfig().setSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI, _completeJavaAPICheckbox.isSelected());
+        if (_completeJavaAPICheckbox.isSelected()) addJavaAPI(); else removeJavaAPI();
+        dialogThunk.value().setItems(true,_allEntries);
         dialogThunk.value().setMask(curMask);
         dialogThunk.value().resetFocus();
       }
     });
     PlatformFactory.ONLY.setMnemonic(_completeJavaAPICheckbox,'j');
-    PredictiveInputFrame.InfoSupplier<ClassNameAndPackageEntry> info = 
-      new PredictiveInputFrame.InfoSupplier<ClassNameAndPackageEntry>() {
-      public String value(ClassNameAndPackageEntry entry) {
+    PredictiveInputFrame.InfoSupplier<AutoCompletePopupEntry> info = 
+      new PredictiveInputFrame.InfoSupplier<AutoCompletePopupEntry>() {
+      public String value(AutoCompletePopupEntry entry) {
         // show full class name as information
         StringBuilder sb = new StringBuilder();
         sb.append(entry.getFullPackage());
@@ -316,31 +351,30 @@ public class AutoCompletePopup {
       }
     };
     
-    List<PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry>> actions
-      = new ArrayList<PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry>>();
+    List<PredictiveInputFrame.CloseAction<AutoCompletePopupEntry>> actions
+      = new ArrayList<PredictiveInputFrame.CloseAction<AutoCompletePopupEntry>>();
 
     Iterator<String> nameIt = actionNames.iterator();
-    Iterator<Runnable4<String,String,Integer,Integer>> actionIt =
+    Iterator<Runnable3<AutoCompletePopupEntry,Integer,Integer>> actionIt =
       acceptedActions.iterator();
     Iterator<KeyStroke> ksIt = actionKeyStrokes.iterator();
     for(int i=0; i<acceptedActions.size(); ++i) {
       final int acceptedActionIndex = i;
       final String name = nameIt.next();
-      final Runnable4<String,String,Integer,Integer> runnable = actionIt.next();
+      final Runnable3<AutoCompletePopupEntry,Integer,Integer> runnable = actionIt.next();
       final KeyStroke ks = ksIt.next();
       
-      PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry> okAction =
-        new PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry>() {
+      PredictiveInputFrame.CloseAction<AutoCompletePopupEntry> okAction =
+        new PredictiveInputFrame.CloseAction<AutoCompletePopupEntry>() {
         public String getName() { return name; }
         public KeyStroke getKeyStroke() { return ks; }
         public String getToolTipText() { return "Complete the identifier"; }
-        public Object value(final PredictiveInputFrame<ClassNameAndPackageEntry> p) {
+        public Object value(final PredictiveInputFrame<AutoCompletePopupEntry> p) {
+          _lastState = p.getFrameState();
           if (p.getItem() != null) {
             Utilities.invokeAndWait(new Runnable() {
               public void run() {
-                runnable.run(p.getItem().getClassName(),
-                             p.getItem().getFullPackage()+p.getItem().getClassName(),
-                             start, loc);
+                runnable.run(p.getItem(), start, loc);
               }
             });
           }
@@ -353,12 +387,13 @@ public class AutoCompletePopup {
       actions.add(okAction);
     }
 
-    PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry> cancelAction = 
-      new PredictiveInputFrame.CloseAction<ClassNameAndPackageEntry>() {
+    PredictiveInputFrame.CloseAction<AutoCompletePopupEntry> cancelAction = 
+      new PredictiveInputFrame.CloseAction<AutoCompletePopupEntry>() {
       public String getName() { return "Cancel"; }
       public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0); }
       public String getToolTipText() { return null; }
-      public Object value(PredictiveInputFrame<ClassNameAndPackageEntry> p) {
+      public Object value(PredictiveInputFrame<AutoCompletePopupEntry> p) {
+        _lastState = p.getFrameState();
         Utilities.invokeAndWait(canceledAction);
         return null;
       }
@@ -366,24 +401,24 @@ public class AutoCompletePopup {
     actions.add(cancelAction);
 
     // Note: PredictiveInputModel.* is statically imported
-    java.util.ArrayList<MatchingStrategy<ClassNameAndPackageEntry>> strategies =
-      new java.util.ArrayList<MatchingStrategy<ClassNameAndPackageEntry>>();
-    strategies.add(new FragmentStrategy<ClassNameAndPackageEntry>());
-    strategies.add(new PrefixStrategy<ClassNameAndPackageEntry>());
-    strategies.add(new RegExStrategy<ClassNameAndPackageEntry>());
+    java.util.ArrayList<MatchingStrategy<AutoCompletePopupEntry>> strategies =
+      new java.util.ArrayList<MatchingStrategy<AutoCompletePopupEntry>>();
+    strategies.add(new FragmentStrategy<AutoCompletePopupEntry>());
+    strategies.add(new PrefixStrategy<AutoCompletePopupEntry>());
+    strategies.add(new RegExStrategy<AutoCompletePopupEntry>());
     
     GoToFileListEntry entry = new GoToFileListEntry(new DummyOpenDefDoc() {
       public String getPackageNameFromDocument() { return ""; }
     }, "dummyComplete");
-    dialogThunk.set(new PredictiveInputFrame<ClassNameAndPackageEntry>(null,
-                                                                       title,
-                                                                       true, // force
-                                                                       true, // ignore case
-                                                                       info,
-                                                                       strategies,
-                                                                       actions,
-                                                                       actions.size()-1, // cancel is last
-                                                                       entry) {
+    dialogThunk.set(new PredictiveInputFrame<AutoCompletePopupEntry>(null,
+                                                                     title,
+                                                                     true, // force
+                                                                     true, // ignore case
+                                                                     info,
+                                                                     strategies,
+                                                                     actions,
+                                                                     actions.size()-1, // cancel is last
+                                                                     entry) {
       protected JComponent[] makeOptions() {
         return new JComponent[] { _completeJavaAPICheckbox };
       }
@@ -393,7 +428,7 @@ public class AutoCompletePopup {
     return dialogThunk.value();
   }
   
-  private void addJavaAPIToSet(Set<ClassNameAndPackageEntry> s) {
+  private void addJavaAPI() {
     Set<JavaAPIListEntry> apiSet = _mainFrame.getJavaAPISet();
     if (apiSet == null) {
       DrJava.getConfig().setSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI, Boolean.FALSE);
@@ -401,24 +436,12 @@ public class AutoCompletePopup {
       _completeJavaAPICheckbox.setEnabled(false);
     }
     else {
-      s.addAll(apiSet);
+      _apiEntries.clear();
+      _apiEntries.addAll(apiSet);
     }
   }
   
-  private void removeJavaAPIFromSet(Set<ClassNameAndPackageEntry> s) {
-    Set<JavaAPIListEntry> apiSet = _mainFrame.getJavaAPISet();
-    if (apiSet == null) {
-      DrJava.getConfig().setSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI, Boolean.FALSE);
-      _completeJavaAPICheckbox.setSelected(false);
-      _completeJavaAPICheckbox.setEnabled(false);
-      Set<ClassNameAndPackageEntry> n = new HashSet<ClassNameAndPackageEntry>();
-      for(ClassNameAndPackageEntry entry: s) {
-        if (entry instanceof JavaAPIListEntry) { n.add(entry); }
-      }
-      s.removeAll(n);
-    }
-    else {
-      for(JavaAPIListEntry entry: apiSet) { s.remove(entry); }
-    }
+  private void removeJavaAPI() {
+    _apiEntries.clear();
   }
 }

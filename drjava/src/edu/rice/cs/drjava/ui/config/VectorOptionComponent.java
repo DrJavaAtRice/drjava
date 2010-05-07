@@ -522,9 +522,14 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     * @return true if the new value is set successfully
     */
   public boolean updateConfig() {
-    Vector<T> current = getValue();
-    DrJava.getConfig().setSetting(_option, current);
-    resetToCurrent();
+    Vector<T> oldValue = DrJava.getConfig().getSetting(_option);
+    Vector<T> newValue = getValue();
+
+    if ((oldValue.size() != newValue.size()) || // allow cheap short-circuiting
+        (!oldValue.equals(newValue))) { 
+      DrJava.getConfig().setSetting(_option, newValue);
+      resetToCurrent();
+    }
     return true;
   }
   

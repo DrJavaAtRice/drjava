@@ -348,35 +348,37 @@ public class ExternalProcessPanel extends AbortablePanel {
           if (uniqueMatch != null) {
             // unique match found, go there
             // LOG.log("\t     ^^^^^^^^^^ unique match found");
-            final OpenDefinitionsDocument newDoc = pim.getCurrentItem().doc;
-            final boolean docChanged = ! newDoc.equals(_model.getActiveDocument());
-            final boolean docSwitch = _model.getActiveDocument() != newDoc;
-            if (docSwitch) _model.setActiveDocument(newDoc);
-            final int curLine = newDoc.getCurrentLine();
-            final int last = name.lastIndexOf(':');
-            if (last >= 0) {
-              try {
-                String nend = name.substring(last + 1);
-                int val = Integer.parseInt(nend);
-                
-                final int lineNum = Math.max(1, val);
-                Runnable command = new Runnable() {
-                  public void run() {
-                    try { _frame._jumpToLine(lineNum); }  // adds this region to browser history
-                    catch (RuntimeException ex) { _frame._jumpToLine(curLine); }
+            final OpenDefinitionsDocument newDoc = pim.getCurrentItem().getOpenDefinitionsDocument();
+            if (newDoc != null) {
+              final boolean docChanged = ! newDoc.equals(_model.getActiveDocument());
+              final boolean docSwitch = _model.getActiveDocument() != newDoc;
+              if (docSwitch) _model.setActiveDocument(newDoc);
+              final int curLine = newDoc.getCurrentLine();
+              final int last = name.lastIndexOf(':');
+              if (last >= 0) {
+                try {
+                  String nend = name.substring(last + 1);
+                  int val = Integer.parseInt(nend);
+                  
+                  final int lineNum = Math.max(1, val);
+                  Runnable command = new Runnable() {
+                    public void run() {
+                      try { _frame._jumpToLine(lineNum); }  // adds this region to browser history
+                      catch (RuntimeException ex) { _frame._jumpToLine(curLine); }
+                    }
+                  };
+                  if (docSwitch) {
+                    // postpone running command until after document switch, which is pending in the event queue
+                    EventQueue.invokeLater(command);
                   }
-                };
-                if (docSwitch) {
-                  // postpone running command until after document switch, which is pending in the event queue
-                  EventQueue.invokeLater(command);
+                  else command.run();
                 }
-                else command.run();
+                catch(RuntimeException ex) { /* ignore */ }
               }
-              catch(RuntimeException ex) { /* ignore */ }
-            }
-            else if (docChanged) {
-              // defer executing this code until after active document switch (if any) is complete
-              EventQueue.invokeLater(new Runnable() { public void run() { _frame.addToBrowserHistory(); } });
+              else if (docChanged) {
+                // defer executing this code until after active document switch (if any) is complete
+                EventQueue.invokeLater(new Runnable() { public void run() { _frame.addToBrowserHistory(); } });
+              }
             }
             break;
           }

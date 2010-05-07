@@ -98,6 +98,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
         _loc = new Point(x, y);
         _currentStrategyIndex = Integer.valueOf(tok.nextToken());
       }
+      catch(NullPointerException npe) {
+        throw new IllegalArgumentException("Wrong FrameState string: " + npe);
+      }
       catch(NoSuchElementException nsee) {
         throw new IllegalArgumentException("Wrong FrameState string: " + nsee);
       }
