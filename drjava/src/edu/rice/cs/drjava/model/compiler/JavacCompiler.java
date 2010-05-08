@@ -39,6 +39,8 @@ package edu.rice.cs.drjava.model.compiler;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.File;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.plt.reflect.JavaVersion;
@@ -85,28 +87,81 @@ public abstract class JavacCompiler implements CompilerInterface {
     * @param interactionsString unprocessed command line
     * @return command line with commands transformed */
   public String transformCommands(String interactionsString) {
-    if (interactionsString.startsWith("java ")) interactionsString = transformJavaCommand(interactionsString);
-    else if (interactionsString.startsWith("applet ")) interactionsString = transformAppletCommand(interactionsString);    
+    boolean smart = DrJava.getConfig().getSetting(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS);
+    if (interactionsString.startsWith("java ")) {
+      if (smart) interactionsString = transformRunCommand(interactionsString);
+      else interactionsString = transformJavaCommand(interactionsString);
+    }
+    else if (interactionsString.startsWith("applet ")) interactionsString = transformAppletCommand(interactionsString);
+    // else if (interactionsString.startsWith("run ")) interactionsString = transformRunCommand(interactionsString);
     return interactionsString;
   }
   
   public static String transformJavaCommand(String s) {
     // check the return type and public access before executing, per bug #1585210
-    String command = "try '{'\n" +
-                     "  java.lang.reflect.Method m = {0}.class.getMethod(\"main\", java.lang.String[].class);\n" +
-                     "  if (!m.getReturnType().equals(void.class)) throw new java.lang.NoSuchMethodException();\n" +
-                     "'}'\n" +
-                     "catch (java.lang.NoSuchMethodException e) '{'\n" +
-                     "  throw new java.lang.NoSuchMethodError(\"main\");\n" +
-                     "'}'\n" +
-                     "{0}.main(new String[]'{'{1}'}');";
+    String command = 
+      "try '{'\n" +
+      "  java.lang.reflect.Method m = {0}.class.getMethod(\"main\", java.lang.String[].class);\n" +
+      "  if (!m.getReturnType().equals(void.class)) throw new java.lang.NoSuchMethodException();\n" +
+      "'}'\n" +
+      "catch (java.lang.NoSuchMethodException e) '{'\n" +
+      "  throw new java.lang.NoSuchMethodError(\"main\");\n" +
+      "'}'\n" +
+      "{0}.main(new String[]'{'{1}'}');";
     return _transformCommand(s, command);
   }
   
   public static String transformAppletCommand(String s) {
     return _transformCommand(s,"edu.rice.cs.plt.swing.SwingUtil.showApplet(new {0}({1}), 400, 300);");
   }
-  
+
+  // This is a command that automatically detects if
+  // a) the class is an ACM Java Task Force program (subclass of acm.program.Program)
+  // b) an applet
+  // c) a class with a static main method
+  //
+  // If a), then DrJava inserts "code=MyClass" as argument 0.
+  // If b), then DrJava performs the same as "applet MyClass" (see above).
+  // If c), then DrJava executes MyClass.main (traditional java behavior).
+  public static String transformRunCommand(String s) {
+    // check the return type and public access before executing, per bug #1585210
+    String command = 
+      "'{' boolean isProgram = false; boolean isApplet = false; Class c = {0}.class;\n" +
+      // cannot use Class.forName, doesn't work in Interactions Pane (see bug #1080869)
+      "while(c != null) '{'\n" +
+      "  if (\"acm.program.Program\".equals(c.getName())) '{' isProgram = true; break; '}'\n" +
+      "  c = c.getSuperclass();\n" +
+      "'}'\n" +
+      "if (!isProgram) '{'\n" +
+      "  try '{'\n" +
+      // if this doesn't throw, {0} is a subclass of Applet
+      "    {0}.class.asSubclass(java.applet.Applet.class);\n" +
+      "    isApplet = true;\n" +
+      "  '}' catch(ClassCastException cce) '{' '}'\n" +
+      "'}'\n" +
+      "if (isApplet) '{'\n" +
+      "  edu.rice.cs.plt.swing.SwingUtil.showApplet(new {0}({1}), 400, 300);\n" +
+      "'}'\n" +
+      "else '{'" +
+      "  try '{'\n" +
+      "    java.lang.reflect.Method m = {0}.class.getMethod(\"main\", java.lang.String[].class);\n" +
+      "    if (!m.getReturnType().equals(void.class)) throw new java.lang.NoSuchMethodException();\n" +
+      "  '}'\n" +
+      "  catch (java.lang.NoSuchMethodException e) '{'\n" +
+      "    throw new java.lang.NoSuchMethodError(\"main\");\n" +
+      "  '}'\n" +
+      "  String[] args = new String[]'{'{1}'}';\n" +
+      "  if (isProgram) '{'\n" +
+      "    String[] newArgs = new String[args.length+1];\n" +
+      "    newArgs[0] = \"code={0}\";\n" +
+      "    System.arraycopy(args, 0, newArgs, 1, args.length);\n" +
+      "    args = newArgs;\n" +
+      "  '}'\n" +
+      "  {0}.main(args);\n"+
+      "'}' '}'";
+    return _transformCommand(s, command);
+  }
+
   /** Assumes a trimmed String. Returns a string of the call that the interpreter can use.
     * The arguments get formatted as comma-separated list of strings enclosed in quotes.
     * Example: _transformCommand("java MyClass arg1 arg2 arg3", "{0}.main(new String[]'{'{1}'}');")
