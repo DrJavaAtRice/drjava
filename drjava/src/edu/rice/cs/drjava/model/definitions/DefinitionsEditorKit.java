@@ -241,7 +241,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
             }
             //used to fix incorrect behavior when a space is at the end of a line
             else if (Character.isWhitespace(chPrev) && ch=='\n'){
-              while(Character.isWhitespace(chPrev)){
+              while(Character.isWhitespace(chPrev) && (offs>0)){
                 --offs;
                 ch = text.charAt(offs);
                 chPrev = text.charAt(offs - 1);
@@ -303,7 +303,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
             //used to fix incorrect behavior when a space is at the end of a line
             if (!Character.isWhitespace(chPrev) && Character.isWhitespace(ch)){
               int offs0 = offs;
-              while((offs-iOffs)<len && ch!='\n' && Character.isWhitespace(ch)){
+              while((offs-iOffs)<(len-1) && ch!='\n' && Character.isWhitespace(ch)){
                 ++offs; 
                 ch = text.charAt(offs-iOffs);
                 chPrev = text.charAt(offs-iOffs - 1);               
