@@ -101,7 +101,7 @@ public class VariableData {
       return false; 
     }
     
-    VariableData vd = (VariableData)obj;
+    VariableData vd = (VariableData) obj;
     
     if (! _name.equals(vd.getName())) {
 //      System.err.println("VariableData.equals: name equality failure");
@@ -133,8 +133,8 @@ public class VariableData {
 //      System.err.println("VariableData.equals: enclosingData failure");
         return false; 
       }
-    }
-    else if (! _enclosingData.equals(otherEnclosingData)) {
+    }  // formerly .equals but led to infinite loop when _enclosingData is a VariableData
+    else if (_enclosingData != otherEnclosingData) {  
 //      System.err.println("VariableData.equals: enclosingData failure");
       return false; 
     }
