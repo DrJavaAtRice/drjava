@@ -417,7 +417,13 @@ public class NewVersionPopup extends JDialog {
                                         targetFile.getAbsolutePath());
         }
         catch(InterruptedIOException iie) { /* aborted by user */ return; }
-        catch(IOException e) { abortUpdate("Error installing update:\n"+e.getMessage()); return; }
+        catch(final IOException e) {
+          EventQueue.invokeLater(new Runnable() {
+            public void run() {
+              abortUpdate("Error installing update:\n"+e.getMessage()); return; 
+            }
+          });
+        }
         finally {
           // clean up files
           for(File f: toCleanUp) { edu.rice.cs.plt.io.IOUtil.deleteRecursively(f); }
