@@ -575,6 +575,28 @@ public class ConfigFrame extends SwingFrame {
                                                                40, "<br>", SEPS)+"</p></html>", this,
                                  "Whether to use the names of the Java API classes for auto-completion as well.");
     addOptionComponent(panel, checkbox);
+
+    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
+    
+    final BooleanOptionComponent drmComponent =
+      new BooleanOptionComponent(OptionConstants.DISPLAY_RIGHT_MARGIN, "Display right margin", this,
+                                 "Whether to display a line at the right margin.");
+    addOptionComponent(panel, drmComponent);
+    final IntegerOptionComponent rmcComponent =
+      new IntegerOptionComponent(OptionConstants.RIGHT_MARGIN_COLUMNS,
+                                 "Right Margin Position", this,
+                                 "The number of columns after which the right margin is displayed.");
+    addOptionComponent(panel, rmcComponent);
+
+    OptionComponent.ChangeListener drmListener = new OptionComponent.ChangeListener() {
+      public Object value(Object oc) {
+        rmcComponent.getComponent().setEnabled(drmComponent.getComponent().isSelected());
+        return null;
+      }
+    };
+    drmComponent.addChangeListener(drmListener);
+    drmListener.value(drmComponent);
+    
     panel.displayComponents();
   }
 
@@ -650,6 +672,9 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, 
                        new ColorOptionComponent(OptionConstants.DRJAVA_ERRORS_BUTTON_COLOR, "DrJava Errors Button Background Color", this,
                                                 "The background color of the \"Errors\" button used to show internal DrJava errors.", true));
+    addOptionComponent(panel, 
+                       new ColorOptionComponent(OptionConstants.RIGHT_MARGIN_COLOR, "Right Margin Color", this,
+                                                "The color of the right margin line, if displayed.", true));
     
     panel.displayComponents();
   }

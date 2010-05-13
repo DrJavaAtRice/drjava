@@ -223,6 +223,9 @@ public interface OptionConstants {
   
   /** Color for the background of the "DrJava Errors" button. */
   public static final ColorOption DRJAVA_ERRORS_BUTTON_COLOR = new ColorOption("drjava.errors.button.color", Color.red);
+
+  /** Color for the line at the right margin. */
+  public static final ColorOption RIGHT_MARGIN_COLOR = new ColorOption("right.margin.color", new Color(204,204,204));
   
   /* ---------- Font Options ---------- */
   
@@ -257,6 +260,13 @@ public interface OptionConstants {
   
   /** Whether to draw anti-aliased text.  (Slightly slower.) */
   public static final BooleanOption TEXT_ANTIALIAS = new BooleanOption("text.antialias", Boolean.TRUE);
+
+  /** Whether to draw the right margin.  (Slightly slower.) */
+  public static final BooleanOption DISPLAY_RIGHT_MARGIN = new BooleanOption("display.right.margin", Boolean.TRUE);
+
+  /** After how many columns to draw the right margin. */
+  public static final NonNegativeIntegerOption RIGHT_MARGIN_COLUMNS =
+    new NonNegativeIntegerOption("right.margin.columns", 120);
   
   
   /* ---------- Other Display Options ---------- */

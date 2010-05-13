@@ -101,6 +101,15 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** Whether to draw text as antialiased. */
   private volatile boolean _antiAliasText = false;
 
+  /** Whether to display the right margin. */
+  private volatile boolean _displayRightMargin = false;
+
+  /** After how many columns to display the right margin. */
+  private volatile int _numRightMarginColumns = 120;
+
+  /** Color of the right margin. */
+  private volatile Color _rightMarginColor = Color.red;
+  
   /** Our current compiler error matching highlight. */
   private volatile HighlightManager.HighlightInfo _errorHighlightTag = null;
 
@@ -511,8 +520,11 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   
 //    this.setEditorKit(new StyledEditorKit());
 
-    _antiAliasText = DrJava.getConfig().getSetting(TEXT_ANTIALIAS).booleanValue();
-
+    _antiAliasText = DrJava.getConfig().getSetting(TEXT_ANTIALIAS);
+    _displayRightMargin = DrJava.getConfig().getSetting(DISPLAY_RIGHT_MARGIN);
+    _numRightMarginColumns = DrJava.getConfig().getSetting(RIGHT_MARGIN_COLUMNS);
+    _rightMarginColor = DrJava.getConfig().getSetting(RIGHT_MARGIN_COLOR);
+    
     OptionListener<Color> temp;
     Pair<Option<Color>, OptionListener<Color>> pair;
       
@@ -568,8 +580,30 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     Pair<Option<Boolean>, OptionListener<Boolean>> aaPair = 
       new Pair<Option<Boolean>, OptionListener<Boolean>>(OptionConstants.TEXT_ANTIALIAS, aaTemp);
     _booleanOptionListeners.add(aaPair);
-    DrJava.getConfig().addOptionListener( OptionConstants.TEXT_ANTIALIAS, aaTemp);
+    DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS, aaTemp);
 
+    DrJava.getConfig().addOptionListener(OptionConstants.DISPLAY_RIGHT_MARGIN,
+                                         new OptionListener<Boolean>() {
+      public void optionChanged(OptionEvent<Boolean> oce) {
+        _displayRightMargin = oce.value;
+        DefinitionsPane.this.repaint();
+      }
+    });
+    DrJava.getConfig().addOptionListener(OptionConstants.RIGHT_MARGIN_COLUMNS,
+                                         new OptionListener<Integer>() {
+      public void optionChanged(OptionEvent<Integer> oce) {
+        _numRightMarginColumns = oce.value;
+        DefinitionsPane.this.repaint();
+      }
+    });
+    DrJava.getConfig().addOptionListener(OptionConstants.RIGHT_MARGIN_COLOR,
+                                         new OptionListener<Color>() {
+      public void optionChanged(OptionEvent<Color> oce) {
+        _rightMarginColor = oce.value;
+        DefinitionsPane.this.repaint();
+      }
+    });
+    
     createPopupMenu();
 
     //Add listener to components that can bring up popup menus.
@@ -709,6 +743,15 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
     }
     super.paintComponent(g);
+    // paint the right margin line, if enabled
+    if (_displayRightMargin) {
+      g.setColor(_rightMarginColor);
+      FontMetrics metrics = getFontMetrics(getFont());
+      int width = new Double(metrics.getMaxCharBounds(g).getWidth()).intValue();
+      Rectangle view = _scrollPane.getViewport().getViewRect();
+      g.drawLine(_numRightMarginColumns*width, view.y,
+                 _numRightMarginColumns*width, view.y+view.height);
+    }
   }
 
   /** Creates the popup menu for the DefinitionsPane. */
