@@ -264,6 +264,10 @@ public class ExternalProcessPanel extends AbortablePanel {
   /** Gets called when the user double-clicks on the text pane. */
   public void doubleClicked(MouseEvent e) {
     // LOG.log("doubleClicked");
+        
+    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+    if ((docs == null) || (docs.size() == 0)) return; // do nothing
+
     final String t = _textArea.getText();
     int caret = _textArea.getCaretPosition();
     int start = caret;
@@ -308,10 +312,7 @@ public class ExternalProcessPanel extends AbortablePanel {
         break;
       }
     }
-
-    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
-    if ((docs == null) || (docs.size() == 0)) return; // do nothing
-
+    
     ArrayList<GoToFileListEntry> list;
     list = new ArrayList<GoToFileListEntry>(docs.size());
     // create a list with fully qualified class names
@@ -330,6 +331,9 @@ public class ExternalProcessPanel extends AbortablePanel {
     
     GoToFileListEntry uniqueMatch = null;
     String name, oldName = null, simpleName = null;
+    while ((start >= 0) && (start < line.length()) && Character.isWhitespace(line.charAt(start))) {
+      --start;
+    }
     while(start > 0) {
       ch = line.charAt(start);
       while(start > 0) {
@@ -392,6 +396,7 @@ public class ExternalProcessPanel extends AbortablePanel {
     }
     if (uniqueMatch == null) {
       // couldn't find a unique match, even after gradually including the fully qualified name
+      if (simpleName == null) { simpleName = ""; }
       _frame.gotoFileMatchingMask(simpleName);
     }
   }
