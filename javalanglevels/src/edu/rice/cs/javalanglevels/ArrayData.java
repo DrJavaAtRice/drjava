@@ -95,7 +95,7 @@ public class ArrayData extends SymbolData {
     setIsContinuation(false);
   }
 
-  /*@return the package of the element type*/
+  /** @return the package of the element type*/
   public String getPackage() { return _elementType.getPackage(); }
   
   /*Set the package of the element type to be the specified package:
@@ -124,7 +124,7 @@ public class ArrayData extends SymbolData {
     _elementType.setMav(mv);
   }
   
-  /*@return the SymbolData element type corresponding to the elements of this array.*/
+  /** @return the SymbolData element type corresponding to the elements of this array.*/
   public SymbolData getElementType() {
     return _elementType;
   }

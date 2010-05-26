@@ -45,23 +45,24 @@ import edu.rice.cs.plt.iter.*;
 
 import junit.framework.TestCase;
 
-/*TypeChecks the context of a body, such as a method body.  Common to all Language Levels.*/
+/** TypeChecks the context of a body, such as a method body.  Common to all Language Levels.*/
 public class BodyTypeChecker extends Bob {
-  /**
-   * The MethodData of this method.
-   */
+  /** The MethodData of this method. */
   protected BodyData _bodyData;
- 
-  /* Constructor for BodyTypeChecker.  Calls the super constructor for everything except bodyData, which we store a copy of
-   * in this visitor in order to have the proper type at compile time.  (Bob stores it as a Data).
-   * @param bodyData  The enclosing BodyData for the context we are type checking.
-   * @param file  The File corresponding to the source file.
-   * @param packageName  The package name from the source file.
-   * @param importedFiles  The names of the files that are specifically imported (through a class import statement) in the source file.
-   * @param importedPackages  The names of all the packages that are imported through a package import statement in the source file.
-   * @param vars  The list of VariableData that have already been defined (used so we can make sure we don't use a variable before it has been defined).
-   * @param thrown  The list of exceptions thrown in this body
-   */
+  
+  /** Constructor for BodyTypeChecker.  Calls the super constructor for everything except bodyData, which we store here
+    * in order to have the proper type at compile time.  (Bob stores it as a Data).
+    * @param bodyData  The enclosing BodyData for the context we are type checking.
+    * @param file  The File corresponding to the source file.
+    * @param packageName  The package name from the source file.
+    * @param importedFiles  The names of the files that are specifically imported (through a class import statement) in
+    *                       the source file.
+    * @param importedPackages  The names of all the packages that are imported through a package import statement in the
+    *                          source file.
+    * @param vars  The list of VariableData that have already been defined (used so we can make sure we don't use a 
+    *              variable before it has been defined).
+    * @param thrown  The list of exceptions thrown in this body
+    */
   public BodyTypeChecker(BodyData bodyData, File file, String packageName, LinkedList<String> importedFiles, 
                          LinkedList<String> importedPackages, LinkedList<VariableData> vars, 
                          LinkedList<Pair<SymbolData, JExpression>> thrown) {
@@ -69,23 +70,27 @@ public class BodyTypeChecker extends Bob {
     _bodyData = bodyData;
   }
   
-   /*@return the bodyData (enclosing data) for this context.*/
+   /** @return the bodyData (enclosing data) for this context. */
   protected Data _getData() { return _bodyData; }
   
-  /*@return the instance data of the class/interface enclosing this body data*/
+  /** @return the instance data of the class/interface enclosing this body data. */
   public TypeData forSimpleThisReferenceOnly(SimpleThisReference that) {
     return _bodyData.getSymbolData().getInstanceData();
   }
 
-  /*@return the instance data of the super class of the class enclosing this body data*/
+  /** @return the instance data of the super class of the class enclosing this body data. */
   public TypeData forSimpleSuperReferenceOnly(SimpleSuperReference that) {
     return _bodyData.getSymbolData().getSuperClass().getInstanceData();
   }
   
-  /**
-   * Create a new instance of this class for visiting inner bodies.
-   */
-  protected BodyTypeChecker createANewInstanceOfMe(BodyData bodyData, File file, String pakage, LinkedList<String> importedFiles, LinkedList<String> importedPackages, LinkedList<VariableData> vars, LinkedList<Pair<SymbolData, JExpression>> thrown) {
+  /** Create a new instance of this class for visiting inner bodies. */
+  protected BodyTypeChecker createANewInstanceOfMe(BodyData bodyData, 
+                                                   File file, 
+                                                   String pakage, 
+                                                   LinkedList<String> importedFiles, 
+                                                   LinkedList<String> importedPackages, 
+                                                   LinkedList<VariableData> vars, 
+                                                   LinkedList<Pair<SymbolData, JExpression>> thrown) {
     return new BodyTypeChecker(bodyData, file, pakage, importedFiles, importedPackages, vars, thrown);
   }
   
@@ -98,11 +103,10 @@ public class BodyTypeChecker extends Bob {
     return forBlock(that.getCode());
   }
   
-  /**
-   * We need to do this so that expressions (which should only occur in variable initializers and
-   * initializer blocks) can know which fields have already been declared.  Add all the variable
-   * datas that are declared in this declarator to the list of variables that are visibile from where we are.
-   */
+  /** We need to do this so that expressions (which should only occur in variable initializers and
+    * initializer blocks) can know which fields have already been declared.  Add all the variable
+    * datas that are declared in this declarator to the list of variables that are visibile from where we are.
+    */
   public TypeData forUninitializedVariableDeclaratorOnly(UninitializedVariableDeclarator that, 
                                                          TypeData type_result, 
                                                          TypeData name_result) {
@@ -112,11 +116,11 @@ public class BodyTypeChecker extends Bob {
 
 
   /** Look at the result of each item in the body.  If one is not null and does not correspond to an Expression
-   * Statement, then that means that that statement returns a value.  Check to make sure that there are no
-   * statements following it.  If there are, then those statements are unreachable so give an error.
-   * @param that  The Body we were type checking
-   * @param items_result  Array of results for each item in the body that was visited.
-   */
+    * Statement, then that means that that statement returns a value.  Check to make sure that there are no
+    * statements following it.  If there are, then those statements are unreachable so give an error.
+    * @param that  The Body we were type checking
+    * @param items_result  Array of results for each item in the body that was visited.
+    */
   public TypeData forBodyOnly(Body that, TypeData[] items_result) {
     for (int i = 0; i < items_result.length; i++) {
       if (items_result[i] != null && !(that.getStatements()[i] instanceof ExpressionStatement)) {
@@ -134,20 +138,20 @@ public class BodyTypeChecker extends Bob {
     return null;
   }
   
-  /*Delegate to forBodyOnly*/
+  /** Delegates to forBodyOnly. */
   public TypeData forBracedBodyOnly(BracedBody that, TypeData[] items_result) {
     return forBodyOnly(that, items_result);
   }
   
-  /*Delegate to forBodyOnly*/
+  /** Delegates to forBodyOnly. */
   public TypeData forUnbracedBodyOnly(UnbracedBody that, TypeData[] items_result) {
     return forBodyOnly(that, items_result);
   }
 
   
-  /*Make sure the enclosing method data is declared to return void.  If it is not, give an error.
-   *@return the type the method is declared to return.
-   */
+  /** Make sure the enclosing method data is declared to return void.  If it is not, give an error.
+    * @return the type the method is declared to return.
+    */
   public TypeData forVoidReturnStatementOnly(VoidReturnStatement that) {
     MethodData md = _bodyData.getMethodData();
     if (md.getReturnType() != SymbolData.VOID_TYPE) {
@@ -159,22 +163,21 @@ public class BodyTypeChecker extends Bob {
     return SymbolData.VOID_TYPE.getInstanceData();
   }
 
-  /*
-   * Visit the value being returned to determine its type.  Do the necessary bookkeeping and
-   * then delegate to forValueReturnStatementOnly.
-   */
+  /** Visit the value being returned to determine its type.  Do the necessary bookkeeping and
+    * then delegate to forValueReturnStatementOnly.
+    */
   public TypeData forValueReturnStatement(ValueReturnStatement that) {
-    ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, _vars, _thrown);
+    ExpressionTypeChecker etc = 
+      new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, _vars, _thrown);
     TypeData value_result = that.getValue().visit(etc);
     thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned);
     return forValueReturnStatementOnly(that, value_result);
   }
 
-  /*
-   * Make sure that the enclosing method is declared to throw the same type as the return statement
-   * is trying to return.  Also make sure that what is being returned is an instance of the type,
-   * not the type itself.
-   */
+  /** Make sure that the enclosing method is declared to throw the same type as the return statement
+    * is trying to return.  Also make sure that what is being returned is an instance of the type,
+    * not the type itself.
+    */
   public TypeData forValueReturnStatementOnly(ValueReturnStatement that, TypeData value_result) {
     MethodData md = _bodyData.getMethodData();
     SymbolData expected = md.getReturnType();
@@ -184,13 +187,14 @@ public class BodyTypeChecker extends Bob {
       return value_result;
     }
     
-    if (value_result == null || !assertFound(value_result, that)) { 
+    if (value_result == null || ! assertFound(value_result, that)) { 
       // There was an error parsing the return type, return the expected type.
       return expected.getInstanceData(); 
     }
     
     if (value_result != null && !value_result.isInstanceType()) {
-     _addError("You cannot return a class or interface name.  Perhaps you meant to say " + value_result.getName() + ".class or to create an instance", that);
+     _addError("You cannot return a class or interface name.  Perhaps you meant to say " + value_result.getName() +
+               ".class or to create an instance", that);
      return value_result.getInstanceData();
     }
     
@@ -207,14 +211,13 @@ public class BodyTypeChecker extends Bob {
   }
   
   
-  /*
-   * First, visit the condition expression of the for statement with a special visitor that
-   * makes sure no assignment is done.
-   * Then, visit the condition expression with the ExpressionTypeChecker which will do all the
-   * normal expression stuff.
-   * Then, visit the update and and code (block) of the for statement with this visitor.
-   * Be very careful about maintaing the various scopes here.
-   */
+  /** First, visit the condition expression of the for statement with a special visitor that
+    * makes sure no assignment is done.
+    * Then, visit the condition expression with the ExpressionTypeChecker which will do all the
+    * normal expression stuff.
+    * Then, visit the update and and code (block) of the for statement with this visitor.
+    * Be very careful about maintaing the various scopes here.
+    */
   public TypeData forForStatement(ForStatement that) {
     Boolean expOk = Boolean.TRUE;
     if (that.getCondition() instanceof Expression) {
@@ -223,45 +226,50 @@ public class BodyTypeChecker extends Bob {
       expOk = exp.visit(new NoAssignmentAllowedInExpression("the conditional expression of a for-statement"));
     }
 
-    BodyTypeChecker btc = createANewInstanceOfMe(_bodyData, _file, _package, _importedFiles, _importedPackages, cloneVariableDataList(_vars), _thrown);
+    LinkedList<VariableData> newVars = cloneVariableDataList(_vars);
+    BodyTypeChecker btc = 
+      createANewInstanceOfMe(_bodyData, _file, _package, _importedFiles, _importedPackages, newVars, _thrown);
     final TypeData init_result = that.getInit().visit(btc);
     
-    ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, btc._vars, _thrown);
+    ExpressionTypeChecker etc = 
+      new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, btc._vars, _thrown);
     final TypeData condition_result = that.getCondition().visit(etc);
     btc.thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned);
     final TypeData update_result = that.getUpdate().visit(btc);
     final TypeData code_result = that.getCode().visit(btc);
     
-    //Now, change any VariableDatas that were given a value in the ForStatement back to having been unassigned since its code is not
-    //necessarily executed.
+    // Now, change any VariableDatas that were given a value in the ForStatement back to having been unassigned since 
+    // its code is not necessarily executed.
     unassignVariableDatas(btc.thingsThatHaveBeenAssigned);
-    if (expOk.booleanValue()) {return forForStatementOnly(that, init_result, condition_result, update_result, code_result);}
+    if (expOk.booleanValue()) 
+      return forForStatementOnly(that, init_result, condition_result, update_result, code_result);
     else {return null;}
   }
   
   
   /* Make sure that the conditional expression has the right type. */
-  public TypeData forForStatementOnly(ForStatement that, TypeData init_result, TypeData condition_result, TypeData update_result, TypeData code_result) {
+  public TypeData forForStatementOnly(ForStatement that, TypeData init_result, TypeData condition_result, 
+                                      TypeData update_result, TypeData code_result) {
     if (condition_result != null && assertFound(condition_result, that)) { 
       if (!condition_result.isInstanceType()) {
-        _addError("This for-statement's conditional expression must be a boolean value. Instead, it is a class or interface name", that);
+        _addError("This for-statement's conditional expression must be a boolean value. Instead, it is a class or " +
+                  "interface name", that);
       }
       else if (!condition_result.getSymbolData().isBooleanType(LanguageLevelConverter.OPT.javaVersion())) {
-        _addError("This for-statement's conditional expression must be a boolean value. Instead, its type is " + condition_result.getName(), that);
+        _addError("This for-statement's conditional expression must be a boolean value. Instead, its type is " + 
+                  condition_result.getName(), that);
       }
     }
     return null;
   }
   
-
-  /*
-   * First, visit the condition expression of the if statement with a special visitor that
-   * makes sure no assignment is done.
-   * Then, visit the condition expression with the ExpressionTypeChecker which will do all the
-   * normal expression stuff.
-   * Then, visit the body of the if statement with this visitor.
-   * Be very careful about maintaing the various scopes here.
-   */
+  /** First, visit the condition expression of the if statement with a special visitor that
+    * makes sure no assignment is done.
+    * Then, visit the condition expression with the ExpressionTypeChecker which will do all the
+    * normal expression stuff.
+    * Then, visit the body of the if statement with this visitor.
+    * Be very careful about maintaing the various scopes here.
+    */
   public TypeData forIfThenStatement(IfThenStatement that) {
     Boolean expOk = Boolean.TRUE;
     if (that.getTestExpression() instanceof Expression) {
@@ -270,15 +278,17 @@ public class BodyTypeChecker extends Bob {
       expOk = exp.visit(new NoAssignmentAllowedInExpression("the conditional expression of an if-then statement"));
     }
 
-    //Update what has been assigned here with results from test expression, because any variables it sees or assigns will be visible
-    //in the rest of the body.
-    ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, _vars, _thrown);
+    // Update what has been assigned here with results from test expression, because any variables it sees or assigns 
+    // will be visible in the rest of the body.
+    ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, 
+                                                          _vars, _thrown);
     final TypeData testExpression_result = that.getTestExpression().visit(etc);
     thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned);
 
     //Use a new visitor for the body of the then statement--it is a different lexical scope, so we want to track the
     //variables seperately.
-    BodyTypeChecker btc = createANewInstanceOfMe(_bodyData, _file, _package, _importedFiles, _importedPackages, cloneVariableDataList(_vars), _thrown);
+    BodyTypeChecker btc = createANewInstanceOfMe(_bodyData, _file, _package, _importedFiles, _importedPackages, 
+                                                 cloneVariableDataList(_vars), _thrown);
     final TypeData thenStatement_result = that.getThenStatement().visit(btc);
     
     //Now, change any VariableDatas that were given a value in the ThenStatement back to having been unassigned
@@ -289,27 +299,29 @@ public class BodyTypeChecker extends Bob {
   }
   
   /* Make sure that the conditional expression has the right type. */
-  public TypeData forIfThenStatementOnly(IfThenStatement that, TypeData testExpression_result, TypeData thenStatement_result) {
+  public TypeData forIfThenStatementOnly(IfThenStatement that, TypeData testExpression_result, 
+                                         TypeData thenStatement_result) {
     if (testExpression_result != null && assertFound(testExpression_result, that.getTestExpression())) {
       if (!testExpression_result.isInstanceType()) {
-        _addError("This if-then-statement's conditional expression must be a boolean value. Instead, it is a class or interface name", that);
+        _addError("This if-then-statement's conditional expression must be a boolean value. Instead, it is a class " +
+                    "or interface name", that);
       }
       else if (!testExpression_result.getSymbolData().isBooleanType(LanguageLevelConverter.OPT.javaVersion())) {
-        _addError("This if-then-statement's conditional expression must be a boolean value. Instead, its type is " + testExpression_result.getName(), that.getTestExpression());
+        _addError("This if-then-statement's conditional expression must be a boolean value. Instead, its type is " + 
+                  testExpression_result.getName(), that.getTestExpression());
       }
     }
     return null;
   }
   
 
-  /*
-   * First, visit the condition expression of the if-then-else statement with a special visitor that
-   * makes sure no assignment is done.
-   * Then, visit the condition expression with the ExpressionTypeChecker which will do all the
-   * normal expression stuff.
-   * Then, visit the body of the if statement and the else with this visitor.
-   * Be very careful about maintaing the various scopes here.
-   */
+  /** First, visit the condition expression of the if-then-else statement with a special visitor that
+    * makes sure no assignment is done.
+    * Then, visit the condition expression with the ExpressionTypeChecker which will do all the
+    * normal expression stuff.
+    * Then, visit the body of the if statement and the else with this visitor.
+    * Be very careful about maintaing the various scopes here.
+    */
   public TypeData forIfThenElseStatement(IfThenElseStatement that) {
     Boolean expOk = Boolean.TRUE;
     if (that.getTestExpression() instanceof Expression) {
@@ -318,15 +330,17 @@ public class BodyTypeChecker extends Bob {
       expOk = exp.visit(new NoAssignmentAllowedInExpression("the conditional expression of an if-then-else statement"));
     }
     
-    //Update list of what has been assigned with one from test expression, because any variables it sees or assigns will be visible
-    //in the rest of the body.
-    ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, _vars, _thrown);
+    // Update list of what has been assigned with one from test expression, because any variables it sees or assigns 
+    // will be visible in the rest of the body.
+    ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, 
+                                                          _vars, _thrown);
     final TypeData testExpression_result = that.getTestExpression().visit(etc);
     thingsThatHaveBeenAssigned = etc.thingsThatHaveBeenAssigned;
     
     //Use a new visitor for the body of the then statement--it is a different lexical scope, so we want to track the
     //variables seperately.
-    BodyTypeChecker btcThen = createANewInstanceOfMe(_bodyData, _file, _package, _importedFiles, _importedPackages, cloneVariableDataList(_vars), _thrown);
+    BodyTypeChecker btcThen = createANewInstanceOfMe(_bodyData, _file, _package, _importedFiles, _importedPackages, 
+                                                     cloneVariableDataList(_vars), _thrown);
     final TypeData thenStatement_result = that.getThenStatement().visit(btcThen);
     //Now, change any VariableDatas that were given a value in the ThenStatement back to having been unassigned
     unassignVariableDatas(btcThen.thingsThatHaveBeenAssigned);
@@ -334,7 +348,8 @@ public class BodyTypeChecker extends Bob {
 
     //Use a new visitor for the body of the else statement--it is a different lexical scope, so we want to track the
     //variables seperately.
-    BodyTypeChecker btcElse = createANewInstanceOfMe(_bodyData, _file, _package, _importedFiles, _importedPackages, cloneVariableDataList(_vars), _thrown);
+    BodyTypeChecker btcElse = createANewInstanceOfMe(_bodyData, _file, _package, _importedFiles, _importedPackages, 
+                                                     cloneVariableDataList(_vars), _thrown);
     final TypeData elseStatement_result = that.getElseStatement().visit(btcElse);
     //Now, change any VariableDatas that were given a value in the ElseStatement back to having been unassigned
     unassignVariableDatas(btcElse.thingsThatHaveBeenAssigned);
@@ -342,28 +357,30 @@ public class BodyTypeChecker extends Bob {
     //Now compare the two lists of VariableDatas, and reassign those that were assigned in both branches.
     reassignVariableDatas(btcThen.thingsThatHaveBeenAssigned, btcElse.thingsThatHaveBeenAssigned);
     
-    if (expOk.booleanValue()) {return forIfThenElseStatementOnly(that, testExpression_result, thenStatement_result, elseStatement_result);}
+    if (expOk.booleanValue()) {return forIfThenElseStatementOnly(that, testExpression_result, thenStatement_result, 
+                                                                 elseStatement_result);}
     return null;
   }
     
-  /* Make sure that the conditional expression has the right type, and if both branches of the
-   * if/else return, return a value the common super type of the two return types.
-   *   We assume that thenStatement_result and elseStatement_result are InstanceDatas
-   */
-  public TypeData forIfThenElseStatementOnly(IfThenElseStatement that, TypeData testExpression_result, TypeData thenStatement_result, TypeData elseStatement_result) {
+  /** Make sure that the conditional expression has the right type, and if both branches of the
+    * if/else return, return a value the common super type of the two return types.
+    * We assume that thenStatement_result and elseStatement_result are InstanceDatas
+    */
+  public TypeData forIfThenElseStatementOnly(IfThenElseStatement that, TypeData testExpression_result, 
+                                             TypeData thenStatement_result, TypeData elseStatement_result) {
     if (testExpression_result != null && assertFound(testExpression_result, that.getTestExpression())) {
       if (!testExpression_result.isInstanceType()) {
-        _addError("This if-then-else statement's conditional expression must be a boolean value. Instead, it is a class or interface name", that);
+        _addError("This if-then-else statement's conditional expression must be a boolean value. Instead, it is a " +
+                  "class or interface name", 
+                  that);
       }
       else if (!testExpression_result.getSymbolData().isBooleanType(LanguageLevelConverter.OPT.javaVersion())) {
-        _addError("This if-then-else statement's conditional expression must be a boolean value. Instead, its type is " + testExpression_result.getName(), that.getTestExpression());
+        _addError("This if-then-else statement's conditional expression must be a boolean value. Instead, its type is "
+                    + testExpression_result.getName(), that.getTestExpression());
       }
     }
 
-    if (testExpression_result == null ||
-        thenStatement_result == null || 
-        elseStatement_result == null) { return null; }
-
+    if (testExpression_result == null || thenStatement_result == null || elseStatement_result == null) return null;
      
     //     We don't throw an error here because if the then and else branches return incompatible types,
     //     there must have already been an error thrown in forValueReturnStatementOnly
@@ -371,17 +388,15 @@ public class BodyTypeChecker extends Bob {
     SymbolData result = getCommonSuperType(thenStatement_result.getSymbolData(), elseStatement_result.getSymbolData());
     if (result==null) {return null;}
     return result.getInstanceData();
-  }
-  
+  } 
 
-  /*
-   * First, visit the condition expression of the while statement with a special visitor that
-   * makes sure no assignment is done.
-   * Then, visit the condition expression with the ExpressionTypeChecker which will do all the
-   * normal expression stuff.
-   * Then, visit the body with this visitor.
-   * Be very careful about maintaing the various scopes here.
-   */
+  /** First, visit the condition expression of the while statement with a special visitor that
+    * makes sure no assignment is done.
+    * Then, visit the condition expression with the ExpressionTypeChecker which will do all the
+    * normal expression stuff.
+    * Then, visit the body with this visitor.
+    * Be very careful about maintaing the various scopes here.
+    */
   public TypeData forWhileStatement(WhileStatement that) {
     Boolean expOk = Boolean.TRUE;
     if (that.getCondition() instanceof Expression) {
@@ -390,47 +405,51 @@ public class BodyTypeChecker extends Bob {
       expOk = exp.visit(new NoAssignmentAllowedInExpression("the condition expression of a while statement"));
     }
     
-    //Visit the condition expression with an expression type checker and
-    //then update list of what was assigned, because it will always be visited so it is in the same scope as the enclosing body.
-    ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, _vars, _thrown);
+    // Visit the condition expression with an expression type checker and
+    // then update list of what was assigned, because it will always be visited so it is in the same scope as the 
+    // enclosing body.
+    ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, 
+                                                          _vars, _thrown);
     final TypeData condition_result = that.getCondition().visit(etc);
     thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned);
 
     //Use a new visitor for the body of the while statement--it is a different lexical scope, so we want to track the
     //variables seperately.
-    BodyTypeChecker btc = createANewInstanceOfMe(_bodyData, _file, _package, _importedFiles, _importedPackages, cloneVariableDataList(_vars), _thrown);
+    BodyTypeChecker btc = createANewInstanceOfMe(_bodyData, _file, _package, _importedFiles, _importedPackages, 
+                                                 cloneVariableDataList(_vars), _thrown);
     final TypeData code_result = that.getCode().visit(btc);
     unassignVariableDatas(btc.thingsThatHaveBeenAssigned);
     if (expOk.booleanValue()) {return forWhileStatementOnly(that, condition_result, code_result);}
     return null;
   }
-  
-  
-  /**Make sure that the condition statement of the while returns type boolean. */
+    
+  /** Make sure that the condition statement of the while returns type boolean. */
   public TypeData forWhileStatementOnly(WhileStatement that, TypeData condition_result, TypeData code_result) {
     if (condition_result != null && assertFound(condition_result, that.getCondition())) {
-      if (!condition_result.isInstanceType()) {
-        _addError("This while-statement's conditional expression must be a boolean value. Instead, it is a class or interface name", that);
+      if (! condition_result.isInstanceType()) {
+        _addError("This while-statement's conditional expression must be a boolean value. Instead, it is a class or " +
+                    "interface name", that);
       }
       else if (!condition_result.getSymbolData().isBooleanType(LanguageLevelConverter.OPT.javaVersion())) {
-        _addError("This while-statement's conditional expression must be a boolean value. Instead, its type is " + condition_result.getName(), that.getCondition());
+        _addError("This while-statement's conditional expression must be a boolean value. Instead, its type is " + 
+                  condition_result.getName(), that.getCondition());
       }
     }
     return null;
   }
   
-  /*
-   * First, visit the body of the do statement with a body type checker.
-   * Then, visit the condition expression of the do statement with a special visitor that
-   * makes sure no assignment is done.
-   * Then, visit the condition expression with the ExpressionTypeChecker which will do all the
-   * normal expression stuff.
-   * Be very careful about maintaing the various scopes here.
-   */
+  /** First, visit the body of the do statement with a body type checker.
+    * Then, visit the condition expression of the do statement with a special visitor that
+    * makes sure no assignment is done.
+    * Then, visit the condition expression with the ExpressionTypeChecker which will do all the
+    * normal expression stuff.
+    * Be very careful about maintaing the various scopes here.
+    */
   public TypeData forDoStatement(DoStatement that) {
     //Use a new visitor for the body of the do statement--it is a different lexical scope, so we want to track the
     //variables seperately.
-    BodyTypeChecker btc = createANewInstanceOfMe(_bodyData, _file, _package, _importedFiles, _importedPackages, cloneVariableDataList(_vars), _thrown);
+    BodyTypeChecker btc = createANewInstanceOfMe(_bodyData, _file, _package, _importedFiles, _importedPackages, 
+                                                 cloneVariableDataList(_vars), _thrown);
     final TypeData code_result = that.getCode().visit(btc);
     unassignVariableDatas(btc.thingsThatHaveBeenAssigned);
     
@@ -441,7 +460,7 @@ public class BodyTypeChecker extends Bob {
       expOk = exp.visit(new NoAssignmentAllowedInExpression("the condition expression of a do statement"));
     }
 
-    //Visit the condition statement with a new ExpressionTypeChecker, then update the thingsThatHaveBeenAssigned list, since it is in the same scope as the body.
+    // Visit the condition statement with a new ExpressionTypeChecker, then update the thingsThatHaveBeenAssigned list, since it is in the same scope as the body.
     ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, _vars, _thrown);
     final TypeData condition_result = that.getCondition().visit(etc);
     thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned);
@@ -509,27 +528,22 @@ public class BodyTypeChecker extends Bob {
             toCheck = ((IntegerLiteral) lc.getLabel()).getValue();
           }
           if (toCheck != null) {
-            if (labels.contains(toCheck)) {
+            if (labels.contains(toCheck))
               _addError("You cannot have two switch cases with the same label " + toCheck, lc.getLabel());
-            }
-            else {
-              labels.add(toCheck);
-            }
+            else labels.add(toCheck);
           }
       }
       else {
-        if (seenDefault) {
-          _addError("A switch statement can only have one default case", sc);
-        }
+        if (seenDefault) _addError("A switch statement can only have one default case", sc);
         seenDefault = true;
       }
       
-      //compare the variables assigned, and let variablesAssigned store the variables that have been assigned in every case 
-      // that returns or breaks up to this one and are also assigned in this one
+      // Compare the variables assigned, and let variablesAssigned store the variables that have been assigned in every 
+      // case that returns or breaks up to this one and are also assigned in this one
       // if we're in the last case, we treat it as a break even though that may not happen explicitly
 
       if (cases_result[i] != null || (i == cases_result.length - 1)) { 
-        if (!hadCaseReturn) {
+        if (! hadCaseReturn) {
           variablesAssigned = btcs[i].thingsThatHaveBeenAssigned; 
           hadCaseReturn = true;
         }
@@ -539,33 +553,29 @@ public class BodyTypeChecker extends Bob {
             if (!btcs[i].thingsThatHaveBeenAssigned.contains(iter.next())) {iter.remove();}
           }
         }
-
       }
       
       //Now, change any VariableDatas that were given a value in the case statement back to having been unassigned
       unassignVariableDatas(btcs[i].thingsThatHaveBeenAssigned);
-
     }
 
     //Now assign a value to all variables that were assigned in each case branch, if there was a default case
     if (seenDefault) {
-      for (VariableData vd : variablesAssigned) {
-        vd.gotValue();
-      }
+      for (VariableData vd : variablesAssigned) vd.gotValue();
     }
     return forSwitchStatementOnly(that, test_result, cases_result, seenDefault);
 }
 
-  /**
-   * Here, we follow the following rules for determining what to return:
-   * If there is not a default block, the statement does not return.
-   * If the result from any of the blocks is NOT_FOUND, the statement does not return.  (NOT_FOUND signifies that a break statement was seen)
-   * If the last block does not return, then the statement does not return.
-   */
-   public TypeData forSwitchStatementOnly(SwitchStatement that, TypeData test_result, TypeData[] cases_result, boolean sawDefault) {
+  /** Here, we follow the following rules for determining what to return:
+    * If there is not a default block, the statement does not return.
+    * If the result from any of the blocks is NOT_FOUND, the statement does not return.  (NOT_FOUND signifies that a 
+    * break statement was seen). If the last block does not return, then the statement does not return.
+    */
+   public TypeData forSwitchStatementOnly(SwitchStatement that, TypeData test_result, TypeData[] cases_result, 
+                                          boolean sawDefault) {
      
      /**If we did not see a default block, this statement cannot be guaranteed to return*/
-     if (!sawDefault) {return null;}
+     if (!sawDefault) return null;
      
      /**If any of the blocks are NOT_FOUND, then the statement does not return.*/
      for (int i = 0; i<cases_result.length; i++) {
@@ -573,47 +583,43 @@ public class BodyTypeChecker extends Bob {
      }
      
      /**If the last block does not return, then the statement also does not return. */
-     if (cases_result[cases_result.length-1] == null) { return null; }
+     if (cases_result[cases_result.length-1] == null) return null;
      
      return _bodyData.getMethodData().getReturnType().getInstanceData();
   }
   
   
-  /**
-   * Make sure that the label for this LabeledCase is correct.  The label must be a constant expression of type int or char.
-   * Then delegate to the super class to handle the braced body of the switch case.
-   */
+  /** Make sure that the label for this LabeledCase is correct.  The label must be a constant expression of type int or 
+    * char.  Then delegate to the super class to handle the braced body of the switch case. */
    public TypeData forLabeledCase(LabeledCase that) {
-     ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, _vars, _thrown);
+     ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, 
+                                                           _vars, _thrown);
     final TypeData label_result = that.getLabel().visit(etc);
     thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned);
     Expression exp = that.getLabel();
     
-    if (label_result == null || !assertFound(label_result, exp)) {
-      return null;
-    }
+    if (label_result == null || !assertFound(label_result, exp)) return null;
     
     //we allow constant expressions of the form -5 or 5, but nothing else.
-    if (!(exp instanceof LexicalLiteral || exp instanceof NumericUnaryExpression && ((NumericUnaryExpression) exp).getValue() instanceof LexicalLiteral)) {
-      _addError("The labels of a switch statement must be constants.  You are using a more complicated expression of type " + label_result.getSymbolData().getName(), that.getLabel());
+    if (!(exp instanceof LexicalLiteral || exp instanceof NumericUnaryExpression && 
+          ((NumericUnaryExpression) exp).getValue() instanceof LexicalLiteral)) {
+      _addError("The labels of a switch statement must be constants.  You are using a more complicated expression of" +
+                " type " + label_result.getSymbolData().getName(), 
+                that.getLabel());
     }
     else if (!_isAssignableFrom(SymbolData.INT_TYPE, label_result.getSymbolData())) {
-      _addError("The labels of a switch statement must be constants of int or char type.  You specified a constant of type " + label_result.getSymbolData().getName(), that.getLabel());
+      _addError("The labels of a switch statement must be constants of int or char type.  You specified a constant of" +
+                " type " + label_result.getSymbolData().getName(), 
+                that.getLabel());
     }
     
     return forSwitchCase(that);
   }
   
-  /**
-   * Delegate handling this default case to its superclass.
-   */
-  public TypeData forDefaultCase(DefaultCase that) {
-    return forSwitchCase(that);
-  }
+  /** Delegate handling this default case to its superclass. */
+  public TypeData forDefaultCase(DefaultCase that) { return forSwitchCase(that); }
   
-  /**
-   * Visit the Braced Body of this SwitchCase, and return the result.
-   */
+  /** Visit the Braced Body of this SwitchCase, and return the result. */
   public TypeData forSwitchCase(SwitchCase that) {
     final TypeData code_result = that.getCode().visit(this);
     
@@ -630,13 +636,15 @@ public class BodyTypeChecker extends Bob {
     return code_result;
   }
   
- 
-  /*Visit the block, and update with what it assigns.  Return the result of visiting the block.*/
+  /* Visit the block, and update with what it assigns.  Return the result of visiting the block. */
   public TypeData forBlock(Block that) {
     BlockData bd = _bodyData.getNextBlock();
-    if (bd == null) { throw new RuntimeException("Internal Program Error: Enclosing body does not contain this block.  Please report this bug"); }
+    if (bd == null) 
+      throw new RuntimeException("Internal Program Error: Enclosing body does not contain this block." +
+                                                 "  Please report this bug");
     
-    BodyTypeChecker btc = createANewInstanceOfMe(bd, _file, _package, _importedFiles, _importedPackages, cloneVariableDataList(_vars), _thrown);
+    BodyTypeChecker btc = createANewInstanceOfMe(bd, _file, _package, _importedFiles, _importedPackages, 
+                                                 cloneVariableDataList(_vars), _thrown);
     TypeData statements_result = that.getStatements().visit(btc);
     thingsThatHaveBeenAssigned.addAll(btc.thingsThatHaveBeenAssigned);
     return statements_result;
@@ -719,42 +727,45 @@ public class BodyTypeChecker extends Bob {
   }
 
 
-  /*@return true if the symbol data is the generic SymbolData.EXCEPTIOn class or if it extends java.lang.Throwable*/
+  /** @return true if the symbol data is the generic SymbolData.EXCEPTIOn class or if it extends java.lang.Throwable*/
   protected boolean isException(SymbolData sd) {
-    return sd==SymbolData.EXCEPTION || sd.isSubClassOf(getSymbolData("java.lang.Throwable", new NullLiteral(SourceInfo.NO_INFO), false, false));
+    return sd == SymbolData.EXCEPTION || 
+      sd.isSubClassOf(getSymbolData("java.lang.Throwable", new NullLiteral(SourceInfo.NO_INFO), false, false));
   }
   
-  /**
-   * Returns the least restrictive type returned by the try block and catch blocks or the finally block.  Returns null if this
-   * try-catch statement doesn't necessarily return a value.
-   */
-  protected InstanceData tryCatchLeastRestrictiveType(InstanceData tryBlock_result, InstanceData[] catchBlocks_result, InstanceData finallyBlock_result) {// Return the common superclass or null if there exists a block that doesn't return no nothing (except the finally block) 
-    if (tryBlock_result == null || tryBlock_result == SymbolData.NOT_FOUND.getInstanceData()) {return finallyBlock_result;}
+  /** Returns the least restrictive type returned by the try block and catch blocks.  Returns null
+    * if this try-catch statement doesn't necessarily return a value.
+    */
+  protected InstanceData tryCatchLeastRestrictiveType(InstanceData tryBlock_result, InstanceData[] catchBlocks_result, 
+                                                      InstanceData finallyBlock_result) {
+  // Return the common superclass or null if there exists a block that doesn't return a value(except the finally block) 
+    if (tryBlock_result == null || tryBlock_result == SymbolData.NOT_FOUND.getInstanceData()) 
+      return finallyBlock_result;
     TypeData leastRestrictiveType = tryBlock_result;
     for (int i = 0; i < catchBlocks_result.length; i++) {
-      if (catchBlocks_result[i] == null) {return finallyBlock_result;}
-      if (catchBlocks_result[i] != SymbolData.NOT_FOUND.getInstanceData() && _isAssignableFrom(catchBlocks_result[i].getSymbolData(), leastRestrictiveType.getSymbolData())) {
+      if (catchBlocks_result[i] == null) return finallyBlock_result;
+      if (catchBlocks_result[i] != SymbolData.NOT_FOUND.getInstanceData() && 
+          _isAssignableFrom(catchBlocks_result[i].getSymbolData(), leastRestrictiveType.getSymbolData())) {
         leastRestrictiveType = catchBlocks_result[i];
       }
     }
 
     SymbolData result;
-    if (leastRestrictiveType == null && finallyBlock_result == null) {return null;}
-    else if (leastRestrictiveType == null) {result = getCommonSuperType(null, finallyBlock_result.getSymbolData());}
-    else if (finallyBlock_result == null) {result = getCommonSuperType(leastRestrictiveType.getSymbolData(), null);}
-    else { result = getCommonSuperType(leastRestrictiveType.getSymbolData(), finallyBlock_result.getSymbolData());} 
+    if (leastRestrictiveType == null && finallyBlock_result == null) return null;
+    else if (leastRestrictiveType == null) result = getCommonSuperType(null, finallyBlock_result.getSymbolData());
+    else if (finallyBlock_result == null) result = getCommonSuperType(leastRestrictiveType.getSymbolData(), null);
+    else result = getCommonSuperType(leastRestrictiveType.getSymbolData(), finallyBlock_result.getSymbolData()); 
    
-    if (result != null) {return result.getInstanceData();}
+    if (result != null) return result.getInstanceData();
     return null;
   }
   
-  /**
-   * Return true if the Exception is unchecked, and false otherwise.
-   * An exception is unchecked if it does not extend either java.lang.RuntimeException or java.lang.Error,
-   * and is not declared to be thrown by the enclosing method.
-   * @param sd  The SymbolData of the Exception we are checking.
-   * @param that  The JExpression passed to getSymbolData for error purposes.
-   */
+  /** Return true if the Exception is unchecked, and false otherwise.
+    * An exception is unchecked if it does not extend either java.lang.RuntimeException or java.lang.Error,
+    * and is not declared to be thrown by the enclosing method.
+    * @param sd  The SymbolData of the Exception we are checking.
+    * @param that  The JExpression passed to getSymbolData for error purposes.
+    */
   public boolean isUncaughtCheckedException(SymbolData sd, JExpression that) {
     if (isCheckedException(sd, that)) {
       MethodData md = _bodyData.getMethodData();
@@ -786,21 +797,22 @@ public class BodyTypeChecker extends Bob {
         }
         if (!foundThrownException) {
 //          System.err.println("Calling _addError for " +  currCaughtSD);
-          _addError("The exception " + currCaughtSD.getName() + " is never thrown in the body of the corresponding try block", 
+          _addError("The exception " + currCaughtSD.getName() + 
+                    " is never thrown in the body of the corresponding try block", 
                     that.getCatchBlocks()[i]);
         }
       } 
     }
   }
   
-  /**
-   * Make sure that every Exception in thrown is either in caught or in the list of what can be thrown from where we are.
-   * Also make sure that every Exception that is declared to be thrown or caught is actually thrown.
-   * @param that  The TryCatchStatement we are currently working with
-   * @param caught_array  The SymbolData[] of exceptions that are explicitely caught.
-   * @param thrown  The LinkedList of SymbolData of exceptions that are thrown.  This will be modified.
-   */
-  protected void compareThrownAndCaught(TryCatchStatement that, SymbolData[] caught_array, LinkedList<Pair<SymbolData, JExpression>> thrown) {
+  /** Make sure that every Exception in thrown is either in caught or in the list of what can be thrown from where we are.
+    * Also make sure that every Exception that is declared to be thrown or caught is actually thrown.
+    * @param that  The TryCatchStatement we are currently working with
+    * @param caught_array  The SymbolData[] of exceptions that are explicitely caught.
+    * @param thrown  The LinkedList of SymbolData of exceptions that are thrown.  This will be modified.
+    */
+  protected void compareThrownAndCaught(TryCatchStatement that, SymbolData[] caught_array, 
+                                        LinkedList<Pair<SymbolData, JExpression>> thrown) {
     LinkedList<SymbolData> caught = new LinkedList<SymbolData>();
     for (int i = 0; i<caught_array.length; i++) {
       caught.addLast(caught_array[i]);
@@ -828,9 +840,7 @@ public class BodyTypeChecker extends Bob {
     makeSureCaughtStuffWasThrown(that, caught_array, thrown);
   }
 
-/**
- * Assumes that tryBlock_result, catchBlocks_result, and finallyBlock_result are InstanceDatas
- */
+  /** Assumes that tryBlock_result, catchBlocks_result, and finallyBlock_result are InstanceDatas. */
   public TypeData forTryCatchFinallyStatementOnly(TryCatchFinallyStatement that, TypeData tryBlock_result, TypeData[] catchBlocks_result, TypeData finallyBlock_result) {
     checkDuplicateExceptions(that);
     
@@ -903,10 +913,9 @@ public class BodyTypeChecker extends Bob {
   }
   
   
-  /*
-   * Resolve the type of the exception, and visit the body, making sure the exception variable
-   * is in scope.
-   */
+  /** Resolves the type of the exception, and visits the body, making sure the exception variable
+    * is in scope.
+    */
   public TypeData forCatchBlock(CatchBlock that) {
     VariableDeclarator dec = that.getException().getDeclarator();
     SymbolData exception_result = getSymbolData(dec.getType().getName(), _data, dec.getType());
@@ -973,12 +982,12 @@ public class BodyTypeChecker extends Bob {
   }
   
   
-  /*A special visitor that does not allow assignment in any expressions*/
+  /* A special visitor that does not allow assignment in any expressions*/
   private class NoAssignmentAllowedInExpression extends JExpressionIFAbstractVisitor<Boolean> {
     String _location;
     private NoAssignmentAllowedInExpression(String location) { _location = location; }
   
-    /** Most expressions do not involve assignment */
+    /** Most expressions do not involve assignment. */
     public Boolean defaultCase(JExpressionIF that) { return Boolean.TRUE; }
   
     /* Throw an appropriate error*/

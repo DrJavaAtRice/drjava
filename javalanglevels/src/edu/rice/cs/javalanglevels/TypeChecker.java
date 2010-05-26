@@ -47,7 +47,7 @@ import edu.rice.cs.plt.iter.*;
 import junit.framework.TestCase;
 
 /** Does Type Checking that is not dependent on the enclosing body.  Also does top level type checking.  Common
- * to all langauge levels.*/
+  * to all langauge levels. */
 public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implements JExpressionIFVisitor<TypeData> {
   
   protected static final Log _log = new Log("LLConverter.txt", false);
@@ -61,26 +61,25 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   /**True if we have an error we can't recover from*/
   static boolean _errorAdded;
   
-  /**The source file we are type checking*/
+  /** The source file we are type checking */
   File _file;
   
-  /**The package of the source file*/
+  /** The package of the source file. */
   String _package;
   
-  /**Holds the names of the specifically imported classes*/
+  /** Holds the names of the specifically imported classes. */
   LinkedList<String> _importedFiles;  
   
   /**Holds the names of packages that are imported in the source file*/
   LinkedList<String> _importedPackages;
   
-  /**
-   * The normal one constructor.  Called to begin type checking
-   * @param file  The source file being type checked
-   * @param packageName  The name of the package of the source file
-   * @param errors  The list of errors that are encountered during type checking
-   * @param importedFiles  The specific classes imported in the source file
-   * @param importedPackages  The list of package names that are imported
-   */
+  /** The normal constructor.  Called to begin type checking
+    * @param file  The source file being type checked
+    * @param packageName  The name of the package of the source file
+    * @param errors  The list of errors that are encountered during type checking
+    * @param importedFiles  The specific classes imported in the source file
+    * @param importedPackages  The list of package names that are imported
+    */
   public TypeChecker(File file, String packageName, LinkedList<Pair<String, JExpressionIF>> errors,
                      Symboltable symbolTable, LinkedList<String> importedFiles,
                      LinkedList<String> importedPackages) {
@@ -98,50 +97,46 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     * @param importedFiles  The specific classes imported in the source file
     * @param importedPackages  The list of package names that are imported
     */
-  public TypeChecker(File file, String packageName, LinkedList<String> importedFiles, LinkedList<String> importedPackages) {
+  public TypeChecker(File file, String packageName, LinkedList<String> importedFiles, 
+                     LinkedList<String> importedPackages) {
     _file = file;
     _package = packageName;
     _importedFiles = importedFiles;
     _importedPackages = importedPackages;
   }
 
-  /**The top level type checker does not have a data*/
+  /**The top level type checker does not have a data */
   protected Data _getData() {
-    throw new RuntimeException("Internal Program Error: _getData() shouldn't get called from TypeChecker.  Please report this bug.");
+    throw new RuntimeException("Internal Program Error: _getData() shouldn't get called from TypeChecker.  " +
+                               "Please report this bug.");
   }
   
-  /**
-   * Returns the SymbolData corresponding to the name className.  Checks 1) unqualified or
-   * partially-qualified inner classes
-   * visible in this scope, 2) fully-qualified inner classes, 3) primitives,
-   * 4) array types, 5) fully qualified top-level classes, 6) imported classes,
-   * 7) a top-level class within this package, 8) imported packages, and 9) java.lang classes.
-   * Assumes that an error should be generated if the class is not found, and that
-   * classes are not allowed to extend java.lang.Runnable.
-   * Will always check accessiblity since giveException is assumed to be true.
-   **/
+  /** Returns the SymbolData corresponding to the name className.  Checks 1) unqualified or partially-qualified inner
+    * classes visible in this scope, 2) fully-qualified inner classes, 3) primitives, 4) array types, 5) fully
+    * qualified top-level classes, 6) imported classes, 7) a top-level class within this package, 8) imported packages,
+    * and 9) java.lang classes.  Assumes that an error should be generated if the class is not found, and that
+    * classes are not allowed to extend java.lang.Runnable.
+    * Will always check accessiblity since giveException is assumed to be true.
+    * */
   public SymbolData getSymbolData(String className, Data currentData, JExpression jexpr) {
     return getSymbolData(className, currentData, jexpr, true);
   }
   
-  /**
-   * Call the next version of GetSymbolData, but pass it giveException as the flag for whether or not to
-   * give ambigException.
-   */
+  /** Call the next version of GetSymbolData, but pass it giveException as the flag for whether or not to
+    * give ambigException.
+    */
   public SymbolData getSymbolData(String className, Data currentData, JExpression jexpr, boolean giveException) {
     return getSymbolData(giveException, className, currentData, jexpr, giveException);
   }
   
-  /**
-   * Returns the SymbolData corresponding to the name className.  Checks 1) unqualified or
-   * partially-qualified inner classes
-   * visible in this scope, 2) fully-qualified inner classes, 3) primitives,
-   * 4) array types, 5) fully qualified top-level classes, 6) imported classes,
-   * 7) a top-level class within this package, 8) imported packages, and 9) java.lang classes.
-   * Assumes that classes are not allowed to extend java.lang.Runnable.
-   * Will only check accessibility if giveException is true.
-   **/
-  public SymbolData getSymbolData(boolean giveAmbigException, String className, Data currentData, JExpression jexpr, boolean giveException) {
+  /** Returns the SymbolData corresponding to the name className.  Checks 1) unqualified or partially-qualified inner
+    * classes visible in this scope, 2) fully-qualified inner classes, 3) primitives, 4) array types, 5) fully 
+    * qualified top-level classes, 6) imported classes, 7) a top-level class within this package, 8) imported packages,
+    * and 9) java.lang classes.  Assumes that classes are not allowed to extend java.lang.Runnable.
+    * Will only check accessibility if giveException is true.
+    *  */
+  public SymbolData getSymbolData(boolean giveAmbigException, String className, Data currentData, JExpression jexpr, 
+                                  boolean giveException) {
     Data d = currentData;
     SymbolData result = null;
     while (d != null && result == null) {
@@ -149,29 +144,23 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       d = d.getOuterData();
     }
       
-    if (result == null) {
-      result = getSymbolData(className, jexpr, giveException, true);
-    }
+    if (result == null) result = getSymbolData(className, jexpr, giveException, true);
     
-    else {
-      if (result == SymbolData.AMBIGUOUS_REFERENCE) {
-        if (giveAmbigException) {_addError("Ambiguous reference to class or interface " + className, jexpr); return SymbolData.AMBIGUOUS_REFERENCE;}
-        return null;  //return null to indicate we were unable to resolve this.
-      }
+    else if (result == SymbolData.AMBIGUOUS_REFERENCE) {
+      if (giveAmbigException) {_addError("Ambiguous reference to class or interface " + className, jexpr); return SymbolData.AMBIGUOUS_REFERENCE;}
+      return null;  // return null to indicate we were unable to resolve this.
     }
-    if (result == null || !giveException) {return result;}
+    if (result == null || ! giveException) return result;
     if (checkAccessibility(jexpr, result.getMav(), className, result, currentData.getSymbolData(), "class or interface")) {
       return result;
     }
-    else {
-      return result;
-    }
+    else return result;
 
   }
 
   /** Returns the SymbolData corresponding to the name className, assuming that className
     * does not refer to an unqualified or partially-qualified inner class.
-    **/
+    * */
   public SymbolData getSymbolData(String className, JExpression jexpr, boolean giveException, boolean runnableNotOkay) {
     // Check qualified class name (which is no different at elementary level)
     SourceInfo si = jexpr.getSourceInfo();
@@ -193,36 +182,33 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     else {
       //Check to see that sd is really in the package it should be in.
       if (notRightPackage(sd)) {
-        _addError("The class " + sd.getName() + " is not in the right package. Perhaps you meant to package it?", jexpr);
+        _addError("The class " + sd.getName() + " is not in the right package. Perhaps you meant to package it?", 
+                  jexpr);
       }
       
       if (runnableNotOkay) {
         if (sd.implementsRunnable()) {
-          _addError(sd.getName() + " implements the Runnable interface, which is not allowed at any language level", jexpr);
+          _addError(sd.getName() + " implements the Runnable interface, which is not allowed at any language level", 
+                    jexpr);
           return null;
         }
       }
       return sd;
     }
   }
-  
-  
-  /**
-   * Return false if the symbolData is in the wrong package.
-   * @param sd  The SymbolData to check.
-   */
+   
+  /** Return false if the symbolData is in the wrong package.
+    * @param sd  The SymbolData to check.
+    */
   protected boolean notRightPackage(SymbolData sd) {
-    if (sd.getOuterData() != null) {
-      //if this is an inner class, check its outer data.
+    if (sd.getOuterData() != null) { // if this is an inner class, check its outer data.
       return notRightPackage(sd.getOuterData().getSymbolData());
     }
-    
-    return (sd.getPackage().equals("") && sd.getName().lastIndexOf(".") != -1) || !sd.getName().startsWith(sd.getPackage());
+    return (sd.getPackage().equals("") && sd.getName().lastIndexOf(".") != -1) || 
+      ! sd.getName().startsWith(sd.getPackage());
   }
   
-  /**
-   * Create a clone of the linked list of Variable Data.
-   */
+  /** Create a clone of the linked list of Variable Data. */
   public LinkedList<VariableData> cloneVariableDataList(LinkedList<VariableData> vars) {
     LinkedList<VariableData> nv = new LinkedList<VariableData>();
     for (int i = 0; i<vars.size(); i++) {
@@ -332,14 +318,16 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       }
     }
 
-    if (!isConstructor) {
+    if (! isConstructor) {
       for (SymbolData sup : enclosingSD.getInterfaces()) {
-        Pair<LinkedList<MethodData>, LinkedList<MethodData>> p = _getMatchingMethods(methodName, sup, arguments, jexpr, isConstructor, thisSD);
+        Pair<LinkedList<MethodData>, LinkedList<MethodData>> p = 
+          _getMatchingMethods(methodName, sup, arguments, jexpr, isConstructor, thisSD);
         matching.addAll(p.getFirst());
         matchingWithAutoBoxing.addAll(p.getSecond());
       }
       if (enclosingSD.getSuperClass() != null) {
-        Pair<LinkedList<MethodData>, LinkedList<MethodData>> p = _getMatchingMethods(methodName, enclosingSD.getSuperClass(), arguments, jexpr, isConstructor, thisSD);
+        Pair<LinkedList<MethodData>, LinkedList<MethodData>> p = 
+          _getMatchingMethods(methodName, enclosingSD.getSuperClass(), arguments, jexpr, isConstructor, thisSD);
         matching.addAll(p.getFirst());
         matchingWithAutoBoxing.addAll(p.getSecond());
       }
@@ -347,7 +335,6 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     return new Pair<LinkedList<MethodData>, LinkedList<MethodData>> (matching, matchingWithAutoBoxing);
   }
       
-  
   /** Finds which SymbolData this method is in, beginning at this SymbolData and recursively visiting super classes.
     * @param methodName  The name of the method.
     * @param enclosingSD  The SymbolData we're currently searching for the method.
@@ -589,13 +576,9 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   }
   
   
-  /**
-   * Return the field or variable with the name text inside of data.  (Referenced from thisSD)
-   */
+  /** Return the field or variable with the name text inside of data.  (Referenced from thisSD) */
   public static VariableData getFieldOrVariable(String text, Data data, SymbolData thisSD, JExpression piece) {
-    if (data == null) {
-      return null;
-    }
+    if (data == null) return null;
     return getFieldOrVariable(text, data, thisSD, piece, data.getVars(), true, true);
   }
   
@@ -701,13 +684,10 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   /** Return a TypeData array of the specified size. */
   protected TypeData[] makeArrayOfRetType(int len) { return new TypeData[len]; }
 
-  /**
-   * This method is called by default from cases that do not 
-   * override forCASEOnly.
-  **/
-  protected TypeData defaultCase(JExpressionIF that) {
-    return null;
-  }
+  /** This method is called by default from cases that do not 
+    * override forCASEOnly.
+    **/
+  protected TypeData defaultCase(JExpressionIF that) { return null; }
 
   public TypeData forClassDefOnly(ClassDef that, TypeData mav_result, TypeData name_result, TypeData[] typeParameters_result, TypeData superclass_result, TypeData[] interfaces_result, TypeData body_result) {
     return forJExpressionOnly(that);//forTypeDefBaseOnly(that, mav_result, name_result, typeParameters_result);
@@ -763,19 +743,24 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     return forJExpressionOnly(that);//StatementOnly(that);
   }
 
-  public TypeData forTryCatchStatementOnly(TryCatchStatement that, TypeData tryBlock_result, TypeData[] catchBlocks_result) {
+  public TypeData forTryCatchStatementOnly(TryCatchStatement that, TypeData tryBlock_result, 
+                                           TypeData[] catchBlocks_result) {
     return forJExpressionOnly(that);//StatementOnly(that);
   }
 
-  public TypeData forMethodDefOnly(MethodDef that, TypeData mav_result, TypeData[] typeParams_result, TypeData result_result, TypeData name_result, TypeData params_result, TypeData[] throws_result) {
-    return result_result;//forJExpressionOnly(that);
+  public TypeData forMethodDefOnly(MethodDef that, TypeData mav_result, TypeData[] typeParams_result, 
+                                   TypeData result_result, TypeData name_result, TypeData params_result, 
+                                   TypeData[] throws_result) {
+    return result_result; //forJExpressionOnly(that);
   }
-  public TypeData forConcreteMethodDefOnly(ConcreteMethodDef that, TypeData mav_result, TypeData[] typeParams_result, TypeData result_result, TypeData name_result, TypeData params_result, TypeData[] throws_result, TypeData body_result) {
-    return forMethodDefOnly(that, mav_result, typeParams_result, result_result, name_result, params_result, throws_result);
+  public TypeData forConcreteMethodDefOnly(ConcreteMethodDef that, TypeData mav_result, TypeData[] typeParams_result, 
+                                           TypeData result_result, TypeData name_result, TypeData params_result, 
+                                           TypeData[] throws_result, TypeData body_result) {
+    return forMethodDefOnly(that, mav_result, typeParams_result, result_result, name_result, params_result, 
+                            throws_result);
   }
-
   
-  /**Returns the common super type of the two types provided.*/
+  /** Returns the common super type of the two types provided.*/
   protected SymbolData getCommonSuperTypeBaseCase(SymbolData sdLeft, SymbolData sdRight) {
     if (sdLeft == SymbolData.EXCEPTION) { return sdRight; }
     if (sdRight == SymbolData.EXCEPTION) { return sdLeft; }
@@ -1039,7 +1024,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
         throw new RuntimeException("Internal Program Error: getSymbolData( " + that.getInterfaces()[i].getName() + ") returned null.  Please report this bug.");
       }
     }
-    ClassBodyTypeChecker cbtc = null;
+    
     //See if sd is a test class.  If so, it must be public.
     SymbolData testSd = getSymbolData("junit.framework.TestCase", new NullLiteral(SourceInfo.NO_INFO), false, true);
     if (testSd != null && sd.isSubClassOf(testSd)) { 
@@ -1055,27 +1040,16 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
         }
       }
       if (! foundOne) {
-        _addError("Class " + sd.getName() + " does not have any valid test methods.  Test methods must be declared public, must return void, and must start with the word \"test\"", that); 
+        _addError("Class " + sd.getName() + " does not have any valid test methods.  " +
+                    "Test methods must be declared public, must return void, and must start with the word \"test\"", 
+                  that); 
       }
     }
     
-//    //This is bad because it means that in this instance, the type checker is not language independent.
-//    //However, until we get to this point, it is impossible to tell if the class is a subclass of
-//    //TestCase that does not directly extend test case.  For instance, if class A extends
-//    //class B and class B extends TestCase, we would not know until this pass that class A also extends
-//    //test case.
-//    else {//if it is not a test class, and we are at the intermediate or elementary level, void is not allowed
-//      if (LanguageLevelConverter.isElementaryFile(_file)) {  
-//        cbtc = new VoidMethodsNotAllowedClassBodyTypeChecker(sd, _file, _package, _importedFiles, _importedPackages, new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>(), "Elementary");
-//      }
-//      else if (LanguageLevelConverter.isIntermediateFile(_file)) {
-//        cbtc = new VoidMethodsNotAllowedClassBodyTypeChecker(sd, _file, _package, _importedFiles, _importedPackages, new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>(), "Intermediate");
-//      }
-//    } 
+    ClassBodyTypeChecker cbtc = 
+      new ClassBodyTypeChecker(sd, _file, _package, _importedFiles, _importedPackages, new LinkedList<VariableData>(), 
+                               new LinkedList<Pair<SymbolData, JExpression>>());
     
-    if (cbtc == null) {
-      cbtc = new ClassBodyTypeChecker(sd, _file, _package, _importedFiles, _importedPackages, new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-    }
 
     final TypeData body_result = that.getBody().visit(cbtc);
     
@@ -1084,7 +1058,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     
     
     //only do this if there were no constructors: make sure that all final fields were given a value.
-    if (!cbtc.hasConstructor) {
+    if (! cbtc.hasConstructor) {
       LinkedList<VariableData> sdVars = sd.getVars();
       for (int i = 0; i<sdVars.size(); i++) {
         if (!sdVars.get(i).hasValue()) {

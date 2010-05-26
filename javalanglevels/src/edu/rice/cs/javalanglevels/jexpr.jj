@@ -1,7 +1,6 @@
-/**
- * Grammar for J-expressions.
- * Adapted from Java1.0.2LS.jj from the JavaCC distribution. 
- */
+/** Grammar for J-expressions.
+  * Adapted from Java1.0.2LS.jj from the JavaCC distribution. 
+  */
 
 options {
   JAVA_UNICODE_ESCAPE = true;
@@ -83,7 +82,7 @@ public class JExprParser {
     _currentFile = file;
   }
 
-  /** Strips off the "l" or "L" off the end of long literals */   
+  /** Strips off the "l" or "L" off the end of long literals. */   
   private static String _stripL(String in) {
     if (in.endsWith("l") || in.endsWith("L")) {
       return in.substring(0, in.length() - 1);
@@ -100,10 +99,7 @@ public class JExprParser {
     return in.substring(1, len - 1);
   }
 
-  /**
-   * Creates a source location that starts at the given first token
-   * and ends in the last token yet read.
-   */
+  /** Creates a source location that starts at the given first token and ends in the last token yet read. */
   private SourceInfo _loc(Token first) {
     return new SourceInfo(_currentFile,
                           first.beginLine,
@@ -112,10 +108,7 @@ public class JExprParser {
                           token.endColumn);
   }
 
-  /**
-   * Creates a source location that starts at the given first AST piece
-   * and ends in the last token yet read.
-   */
+  /** Creates a source location that starts at the given first AST piece and ends in the last token yet read. */
   private SourceInfo _loc(JExpressionIF first) {
     return new SourceInfo(_currentFile,
                           first.getSourceInfo().getStartLine(),
@@ -545,9 +538,7 @@ TOKEN:
  * THE JAVA LANGUAGE GRAMMAR STARTS HERE *
  *****************************************/
 
-/*
- * Program structuring syntax follows.
- */
+/* Program structuring syntax follows. */
 
 SourceFile SourceFile() :
 {

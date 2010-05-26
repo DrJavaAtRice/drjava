@@ -127,9 +127,9 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     return null;
   }
     
-  /* Convert the Variable declartaion to variable datas.  Then, make sure that all static fields are initialized and 
-   * that no fields are declared to be abstract. Finally, add the variable datas to the symbol data, and give an error if
-   * two fields have the same names */
+  /** Convert Variable [Field] declaration to variable datas.  Then, make sure that all static fields are initialized
+    * and that no fields are declared to be abstract. Finally, add the variable datas to the symbol data, and emit an 
+    * error if two fields have the same names. */
   public Void forVariableDeclarationOnly(VariableDeclaration that) {
     VariableData[] vds = _variableDeclaration2VariableData(that, _classData);
     // make sure that every non-static field is private and no static field are uninitialized:
@@ -238,7 +238,7 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     _checkError(); // reset check flag
     // Turn the parameters from a FormalParameterList to a VariableData[]
     VariableData[] vds = formalParameters2VariableData(that.getParameters(), md);
-    if (! _checkError()) {  //if there was an error converting the formalParameters, don't use them.
+    if (! _checkError()) {  // if there was an error converting the formalParameters, don't use them.
       md.setParams(vds);
       if (!md.addFinalVars(vds)) {
         _addAndIgnoreError("You cannot have two method parameters with the same name", that);

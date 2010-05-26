@@ -59,7 +59,7 @@ public class MethodData extends BodyData {
   /**Array of Strings corresponding to exceptions this method is declared to throw*/
   private String[] _thrown;
   
-  /**JExpression corresponding to this method*/
+  /**JExpression corresponding to this method */
   private JExpression _jexpr;
   
   /**True if this method was auto-generated during our language level conversion.  False otherwise*/
@@ -89,7 +89,7 @@ public class MethodData extends BodyData {
     _generated = false;
   }
   
-  /**Constructor used by the LanguageLevelConverter, where only the name and params matter*/
+  /** Constructor used by the LanguageLevelConverter, where only the name and params matter*/
   public MethodData(String name, VariableData[] params) {
     this(name, new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]), new TypeParameter[0], null, 
          params, new String[0], null, new NullLiteral(SourceInfo.NO_INFO));
@@ -105,10 +105,14 @@ public class MethodData extends BodyData {
 //    _log.log("Allocated: " + md + '\n' + "With modifiers: " + md.getMav());
     return md;
   }
+  
   public static MethodData make(String name, VariableData[] params) { return new MethodData(name, params); }
   
   /**@return true if this method was generated during the LanguageLevel conversion process*/
   public boolean isGenerated() { return _generated; }
+  
+  /** Returns true if this MethodData is static. */
+  public boolean isStatic() { return hasModifier("static"); }
   
   /**@param generated  true or false--whether to set this method to generated or not*/
   public void setGenerated(boolean generated) { _generated = generated; }

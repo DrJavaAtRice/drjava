@@ -46,7 +46,7 @@ import edu.rice.cs.plt.iter.*;
 import junit.framework.TestCase;
 
 
-/** Do what is necessary to type check the lhs of an assignment expression.  i.e. make sure that 
+/** Do what is necessary to type check the lhs of an assignment expression, i.e., make sure that 
   * what is on the lhs is something that can be assigned to, and if so, return its type.
   */
 public class LValueTypeChecker extends JExpressionIFAbstractVisitor<TypeData> {
@@ -100,9 +100,9 @@ public class LValueTypeChecker extends JExpressionIFAbstractVisitor<TypeData> {
       super(data, file, packageName, importedFiles, importedPackages, vars, thrown);
     }
 
-     /**
-      * A SimpleName reference is one of three things:
-      * 1. A variable reference, in which case the variable can be assigned to as long as it is not immutable and already has a value, or it is non-static in a static context
+     /** A SimpleName reference is one of three things:
+      * 1. A variable reference, in which case the variable can be assigned to as long as it is not immutable and 
+      *    already has a value, or it is non-static in a static context
       * 2. A class name reference (such as String), which cannot be assigned to.
       * 3. A PackageData i.e. unresolved type which cannot be assigned to.
       */
@@ -112,14 +112,14 @@ public class LValueTypeChecker extends JExpressionIFAbstractVisitor<TypeData> {
       
       VariableData reference = getFieldOrVariable(myWord.getText(), _data, _data.getSymbolData(), that, _vars, true, true);
       if (reference != null) {
-        if (!canBeAssigned(reference)) {
+        if (! canBeAssigned(reference)) {
           _addError("You cannot assign a value to " + reference.getName() + " because it is immutable and has already been given a value", that.getName());
         }
         else if (reference.gotValue()) { _bob.thingsThatHaveBeenAssigned.add(reference);}
         
         
-        //if reference is non-static, but context is static, give error
-        if (!reference.hasModifier("static") && inStaticMethod()) {
+        // if reference is non-static, but context is static, give error
+        if (! reference.hasModifier("static") && inStaticMethod()) {
           _addError("Non static field or variable " + reference.getName() + " cannot be referenced from a static context", that);
         }
 

@@ -652,9 +652,6 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       FormalParameter fp2 = new FormalParameter(SourceInfo.NO_INFO, uvd, true);  
       _iv.forFormalParameterDoFirst(fp2);
       assertEquals("should be no errors", 0, errors.size());
-//      assertEquals("The error message should be correct for a final parameter.", 
-//                   "The keyword \"final\" cannot be used at the Intermediate level", 
-//                   errors.getLast().getFirst());
     }
     
     public void test_NotAllowed() {
@@ -692,11 +689,16 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       VoidReturn vr = new VoidReturn(noInfo, "string");
       ConditionalExpression ce = new ConditionalExpression(noInfo, e, e, e);
       
-      BracedBody hasBitOperator = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new ExpressionStatement(SourceInfo.NO_INFO, 
-                                                                                                              new BitwiseOrAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 5)))});
+      BracedBody hasBitOperator = 
+        new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { 
+        new ExpressionStatement(SourceInfo.NO_INFO, 
+                                new BitwiseOrAssignmentExpression(SourceInfo.NO_INFO, 
+                                                                  new SimpleNameReference(SourceInfo.NO_INFO, 
+                                                                                          new Word(SourceInfo.NO_INFO, 
+                                                                                                   "i")), 
+                                                                  new IntegerLiteral(SourceInfo.NO_INFO, 5)))});
       
       TryCatchStatement tcs = new NormalTryCatchStatement(noInfo, b, new CatchBlock[0]);
-      
       
       si.visit(_iv);
       assertEquals("After visiting static initializer, errors should still be 0", 0, errors.size());
@@ -730,11 +732,15 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       
       syncs.visit(_iv);
       assertEquals("After visiting synchronized statment, errors should now be 1", 1, errors.size());
-      assertEquals("SynchronizedStatement is not allowed", "Synchronized statements cannot be used at the Intermediate level", errors.getLast().getFirst());
+      assertEquals("SynchronizedStatement is not allowed", 
+                   "Synchronized statements cannot be used at the Intermediate level", 
+                   errors.getLast().getFirst());
       
       tp.visit(_iv);
       assertEquals("After visiting type parameter, errors should now be 2", 2, errors.size());
-      assertEquals("TypeParameters is not allowed", "Type Parameters cannot be used at the Intermediate level", errors.getLast().getFirst());
+      assertEquals("TypeParameters is not allowed", 
+                   "Type Parameters cannot be used at the Intermediate level", 
+                   errors.getLast().getFirst());
       
 //     at.visit(_iv);
 //     assertEquals("ArrayTypes is not allowed", "Arrays cannot be used at the Intermediate level", errors.getLast().getFirst());

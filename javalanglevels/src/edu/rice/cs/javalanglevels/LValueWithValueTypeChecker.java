@@ -46,17 +46,16 @@ import edu.rice.cs.plt.iter.*;
 import junit.framework.TestCase;
 
 
-/**
- * Used to type check the LHS of an assignment expression such as += or -=, where the left hand side needs to not be final
- * and already have a value.
- */
+/** Used to type check the LHS of an assignment expression such as += or -=, where the left hand side needs to not be final
+  * and already have a value.
+  */
 public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<TypeData> {
   
-  /**Instance of the testAssignable visitor that will be used to make sure that if the lhs
-   * is something of the type that could be assigned to, it can actually be assigned to*/
+  /** Instance of the testAssignable visitor that will be used to make sure that if the lhs
+    * is something of the type that could be assigned to, it can actually be assigned to*/
   private final TestAssignable _testAssignableInstance;
 
-  //The visitor that invoked this: holds the error list
+  // The visitor that invoked this: holds the error list
   private final Bob _bob;
 
   /* Constructor for LValueTypeChecker.  Initializes _testAssignableInstance.
@@ -79,31 +78,29 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
     return null;
   }
 
-  /*Names can appear on the lhs, so check to see if the name can be assigned to*/
+  /* Names can appear on the lhs, so check to see if the name can be assigned to*/
   public TypeData forNameReference(NameReference that) {
     return that.visit(_testAssignableInstance);
   }
 
-  /**Array accesses can appear on the lhs, so check to see if the array can be assigned to*/
+  /** Array accesses can appear on the lhs, so check to see if the array can be assigned to*/
   public TypeData forArrayAccess(ArrayAccess that) {
     return that.visit(_testAssignableInstance);
   }
       
-  /**Recur on the value stored in the parentheses*/
+  /** Recur on the value stored in the parentheses*/
   public TypeData forParenthesized(Parenthesized that) {
     return that.getValue().visit(this);
   }
   
-  /**Checks to see if what is on the lhs is assignable to and already has a value*/
+  /** Checks to see if what is on the lhs is assignable to and already has a value*/
   private class TestAssignable extends ExpressionTypeChecker {
   
     public TestAssignable(Data data, File file, String packageName, LinkedList<String> importedFiles, LinkedList<String> importedPackages, LinkedList<VariableData> vars, LinkedList<Pair<SymbolData, JExpression>> thrown) {
       super(data, file, packageName, importedFiles, importedPackages, vars, thrown);
     }
 
-    /**
-     * The variable referenced here should already have a value and should not be final.
-     */
+    /** The variable referenced here should already have a value and should not be final. */
     public TypeData forSimpleNameReference(SimpleNameReference that) {
       Word myWord = that.getName();
       myWord.visit(this);
@@ -118,7 +115,7 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
         }
         
         //if reference is non-static, but context is static, give error
-        else if (!reference.hasModifier("static") && inStaticMethod()) {
+        else if (! reference.hasModifier("static") && inStaticMethod()) {
           _addError("Non static field or variable " + reference.getName() + " cannot be referenced from a static context", that);
         }
         

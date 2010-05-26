@@ -62,8 +62,11 @@ public class VariableData {
   /**The data that this variable belongs to*/
   private Data _enclosingData;
   
-  /** True if this is a field we had generated. */
+  /** True iff this is a field we had generated. */
   private boolean _generated;
+  
+  /** True iff this is a method parameter. */
+  private boolean _isLocalVariable;
   
   /** Constructor for VariableData.  hasInitializer and generated are set to {@code false}.
     * @param name  The name of the variable
@@ -81,6 +84,7 @@ public class VariableData {
     _enclosingData = enclosingData;
     _hasInitializer = false;
     _generated = false;
+    _isLocalVariable = false;
   }
   
   /** This constructor is only used when reading method parameters in a class file because class files only store the
@@ -91,6 +95,7 @@ public class VariableData {
     _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
     _type = type.getInstanceData();
     _hasBeenAssigned = false;
+    _isLocalVariable = true;
   }
   
   /** Checks the values of the fields*/
@@ -162,16 +167,22 @@ public class VariableData {
   /**Set the modifiers and visibility to the specified value*/
   public void setMav(ModifiersAndVisibility mav) { _modifiersAndVisibility = mav; }
   
-  /**@return the InstanceData corresponding to the type of this variable.*/
+  /** @return the InstanceData corresponding to the type of this variable.*/
   public InstanceData getType() {  return _type; }
   
-  /**@return the enclosing data*/
+  /** @return the enclosing data. */
   public Data getEnclosingData() { return _enclosingData; }
   
-  /**Set the enclosing data to be the specified value*/  
+  /** Sets the enclosing data to the specified value.     */  
   public void setEnclosingData(Data d) { _enclosingData = d; }
   
-  /** Add "final" to the modifiers and visibility for this class, if it is not already there. */
+  /** @return the _isLocalVariable flag.*/  
+  public boolean isLocalVariable() { return _isLocalVariable; }
+  
+  /** Sets the isLocalVariable flag to the specified value.     */  
+  public void setIsLocalVariable(boolean b) { _isLocalVariable = b; }
+  
+  /** Adds "final" to the modifiers and visibility for this class, if it is not already there. */
   public void setFinal() {
     if (!isFinal()) {
       String[] modifiers = _modifiersAndVisibility.getModifiers();
@@ -184,7 +195,7 @@ public class VariableData {
     }
   }
   
-  /** Add "private" to the modifiers and visibility for this class, if it is not already there. */
+  /** Adds "private" to the modifiers and visibility for this class, if it is not already there. */
   public void setPrivate() {
     if (! hasModifier("private")) {
       String[] modifiers = _modifiersAndVisibility.getModifiers();
@@ -231,7 +242,7 @@ public class VariableData {
   /** Returns true if this VariableData is static. */
   public boolean isStatic() { return hasModifier("static"); }
   
-  /** Returns true if this variable has the modifier specified*/
+  /** Returns true if this variable has the modifier specified. */
   public boolean hasModifier(String modifier) {
     String[] mavStrings = _modifiersAndVisibility.getModifiers();
     for (int i = 0; i < mavStrings.length; i++) {
@@ -281,11 +292,10 @@ public class VariableData {
     private VariableData _vd2;
     
     private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _publicMav2 = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
-    
+    private ModifiersAndVisibility 
+      _publicMav2 = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility 
+      _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});    
     public VariableDataTest() { this(""); }
     public VariableDataTest(String name) { super(name); }
     

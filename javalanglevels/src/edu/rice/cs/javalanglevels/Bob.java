@@ -85,14 +85,14 @@ public class Bob extends TypeChecker {
     _thrown = thrown;
   }
   
-  /*@return the enclosing data*/
+  /** @return the enclosing data*/
   protected Data _getData() { return _data; }
   
   /** @return true iff the first enclosing MethodData or SymbolData is a static method. */
   protected boolean inStaticMethod() {
     for (Data d = _data; d != null; d = d.getOuterData()) {
       if (d instanceof MethodData) { return d.hasModifier("static"); }
-      else if (d instanceof SymbolData) { return false; }
+//      else if (d instanceof SymbolData) { return false; }
     }
     return false;
   }
@@ -164,7 +164,7 @@ public class Bob extends TypeChecker {
         _addError("Cannot pass a class or interface name as a constructor argument.  " + 
                   "Perhaps you meant to create an instance or use " + args[i].getName() + ".class", exprs[i]);
       }
-      newArgs[i]=args[i].getInstanceData(); // getInstanceData() is used in place of a cast
+      newArgs[i] = args[i].getInstanceData(); // getInstanceData() is used in place of a cast
     }
     thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned);
     return newArgs;

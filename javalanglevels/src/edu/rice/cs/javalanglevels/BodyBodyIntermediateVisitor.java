@@ -43,7 +43,7 @@ import java.io.*;
 
 import junit.framework.TestCase;
 
-/** Language Level Visitor that represents the Intermediate Language Level.  Enforces constraints during the
+/** Language Level Visitor for the Intermediate Language Level.  Enforces constraints during the
   * first walk of the AST (checking for language specific errors and building the symbol table).
   * This class enforces things that are common to all contexts reachable within a method body or other body 
   * (not class or interface body) at the Intermediate Language Level). 
@@ -128,8 +128,7 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     return forCatchBlockOnly(that);
   }
   
-  /** Adds the variables that were declared to the body data and make sure that no two
-    * variables have the same name.*/
+  /** Adds the variables that were declared to the body data and make sure that no two variables have the same name.*/
   public Void forVariableDeclarationOnly(VariableDeclaration that) {
     if (! _bodyData.addFinalVars(_variableDeclaration2VariableData(that, _bodyData))) {
 //      System.err.println("Generating duplicate variable error");
@@ -189,10 +188,11 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
       if (vds[i].getMav().getModifiers().length > 0) {
         StringBuilder s = new StringBuilder("the keyword(s) ");
         String[] modifiers = vds[i].getMav().getModifiers();
-        for (String m: modifiers) { if (! m.equals("final")) s.append("\"" + m + "\" ");}
+        for (String m: modifiers) { if (! m.equals("final")) s.append("\"" + m + "\" "); }
         _addAndIgnoreError("You cannot use " + s + "to declare a local variable", vd);
       }
       vds[i].setFinal();
+      vds[i].setIsLocalVariable(true);
     }
 //    System.err.println("Return VariableDatas " + vds);
     return vds;

@@ -45,9 +45,7 @@ import edu.rice.cs.plt.iter.*;
 
 import junit.framework.TestCase;
 
-/**
- * Do the TypeChecking appropriate to the context of a class body.  Common to all Language Levels.
- */
+/** Do the TypeChecking appropriate to the context of a class body.  Common to all Language Levels. */
 public class ClassBodyTypeChecker extends Bob {
   
   /**The SymbolData corresponding to this class.*/
@@ -56,19 +54,16 @@ public class ClassBodyTypeChecker extends Bob {
   /**True if we encounter a ConstructorDef while visiting the body.*/
   protected boolean hasConstructor;
   
-  /*
-   * Constructor for ClassBodyTypeChecker.
-   * Adds all the variables in the symbol data to the list of what can be seen from this context,
-   * since class fields can always be seen.
-   * 
-   * @param sd  The SymbolData of the class we are type checking.
-   * @param file  The File corresponding to the source file we are checking.
-   * @param packageName  The package of the source file.
-   * @param importedFiles  A list of the names of the classes that are specifically imported in the source file
-   * @param importedPackages  A list of the names of the packages that are imported in the source file.
-   * @param vars  A list of the variable datas that can be seen and have been given a value before this context
-   * @param thrown  The exceptions that are thrown
-   */
+  /** Constructor for ClassBodyTypeChecker. Adds all the variables in the symbol data to the list of what can be seen
+    * from this context, since class fields can always be seen.
+    * @param sd  The SymbolData of the class we are type checking.
+    * @param file  The File corresponding to the source file we are checking.
+    * @param packageName  The package of the source file.
+    * @param importedFiles  A list of the names of the classes that are specifically imported in the source file
+    * @param importedPackages  A list of the names of the packages that are imported in the source file.
+    * @param vars  A list of the variable datas that can be seen and have been given a value before this context
+    * @param thrown  The exceptions that are thrown
+    */
   public ClassBodyTypeChecker(SymbolData sd, File file, String packageName, LinkedList<String> importedFiles, 
                               LinkedList<String> importedPackages, LinkedList<VariableData> vars, 
                               LinkedList<Pair<SymbolData, JExpression>> thrown) {
@@ -83,27 +78,21 @@ public class ClassBodyTypeChecker extends Bob {
     LinkedList<VariableData> superVars = sd.getAllSuperVars();
     for (int i = 0; i<superVars.size(); i++) {
       VariableData tempVD = superVars.get(i);
-      if (tempVD.isFinal()) {
-        if (tempVD.gotValue()) {
-          thingsThatHaveBeenAssigned.addLast(tempVD);
-        }
-      }
+      if (tempVD.isFinal() && tempVD.gotValue())
+        thingsThatHaveBeenAssigned.addLast(tempVD);
     }
     _vars.addAll(superVars);
-
   }
   
-  /*@return the symbol data corresponding to the class we are visiting*/
+  /** @return the symbol data corresponding to the class we are visiting*/
   protected Data _getData() { return _symbolData; }
-
   
-  /**
-   * We need to do this so that expressions (which should only occur in variable initializers and
-   * initializer blocks) can know which fields have already been declared
-   */
+  /** We need to do this so that expressions (which should only occur in variable initializers and
+    * initializer blocks) can know which fields have already been declared
+    */
   public TypeData forUninitializedVariableDeclaratorOnly(UninitializedVariableDeclarator that, 
-                                                            TypeData type_result, 
-                                                            TypeData name_result) {
+                                                         TypeData type_result, 
+                                                         TypeData name_result) {
     Word name = that.getName();
     String text = that.getName().getText();
     VariableData vd = getFieldOrVariable(text, _symbolData, _symbolData, name);
@@ -114,8 +103,7 @@ public class ClassBodyTypeChecker extends Bob {
     return null;
   }
 
-
-  /**Make sure the method is not missing a return type.  
+  /** Make sure the method is not missing a return type.  
    * If expected and actual are both not null, then their relationship (i.e.
    * is actual a subclass of expected) is checked when the value return statement that returns
    * actual is processed.
@@ -134,10 +122,9 @@ public class ClassBodyTypeChecker extends Bob {
     }
   }
   
-  /**
-   * Finds the corresponding MethodData for this constructor first.  Then visits the body, making sure that
-   * all final fields are assigned a value and that no final fields are reassigned.
-   */
+  /** Finds the corresponding MethodData for this constructor first.  Then visits the body, making sure that
+    * all final fields are assigned a value and that no final fields are reassigned.
+    */
   public TypeData forConstructorDef(ConstructorDef that) {
     hasConstructor = true;
     final TypeData mav_result = that.getMav().visit(this);
@@ -218,14 +205,12 @@ public class ClassBodyTypeChecker extends Bob {
     return forJExpressionOnly(that);
   }
   
-
-  /*
-   * Visit all of the fields of the ConcreteMethodDef, and resolve everything.  Then, find
-   * the corresponding MethodData in the SymbolData's list of methods.  It must match both in name and parameter
-   * types.  Keep track of what has been assigned before we visit the method body, and then visit the
-   * method body.  Then, make sure the return type of the method is okay, and unassign any variables
-   * for which the assignment should not be visible outside the scope of the method.
-   */
+  /** Visit all of the fields of the ConcreteMethodDef, and resolve everything.  Then, find
+    * the corresponding MethodData in the SymbolData's list of methods.  It must match both in name and parameter
+    * types.  Keep track of what has been assigned before we visit the method body, and then visit the
+    * method body.  Then, make sure the return type of the method is okay, and unassign any variables
+    * for which the assignment should not be visible outside the scope of the method.
+    */
   public TypeData forConcreteMethodDef(ConcreteMethodDef that) {
     final TypeData mav_result = that.getMav().visit(this);
     final TypeData[] typeParams_result = makeArrayOfRetType(that.getTypeParams().length);
@@ -291,7 +276,8 @@ public class ClassBodyTypeChecker extends Bob {
       }
     }
     
-    BodyTypeChecker btc = new BodyTypeChecker(md, _file, _package, _importedFiles, _importedPackages, ll, new LinkedList<Pair<SymbolData, JExpression>>());
+    BodyTypeChecker btc = new BodyTypeChecker(md, _file, _package, _importedFiles, _importedPackages, ll, 
+                                              new LinkedList<Pair<SymbolData, JExpression>>());
     
     TypeData body_result = that.getBody().visit(btc); // We assume that this will return an InstanceData -- the return type of the body
     
