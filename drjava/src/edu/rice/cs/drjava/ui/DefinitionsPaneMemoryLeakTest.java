@@ -337,7 +337,7 @@ public final class DefinitionsPaneMemoryLeakTest extends MultiThreadedTestCase {
     // try jmap first
     File jmap = new File(javaHome+SEP+"bin"+SEP+"jmap");
     // if that doesn't work, try jmap.exe
-    if (!jmap.exists()) jmap = new File(javaHome+SEP+"bin"+SEP+"jmap.exe");
+    if (! jmap.exists()) jmap = new File(javaHome+SEP+"bin"+SEP+"jmap.exe");
     
     // execute jmap -heap:format=b PID
     pb = new ProcessBuilder(jmap.getAbsolutePath(),
@@ -357,7 +357,7 @@ public final class DefinitionsPaneMemoryLeakTest extends MultiThreadedTestCase {
     // rename the file 
     File dump = new File("heap.bin");
     if (!dump.exists()) { throw new FileNotFoundException("heap.bin not found"); }
-    File newDump = new File("heap-DefinitionsPaneTest-"+pid+"-"+System.currentTimeMillis()+".bin");
+    File newDump = new File("heap-DefinitionsPaneTest-" + pid + "-" + System.currentTimeMillis() + ".bin");
     dump.renameTo(newDump);
     return newDump;
   }

@@ -308,7 +308,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         f.getPath().endsWith(OLD_PROJECT_FILE_EXTENSION);
     }
     public String getDescription() { 
-      return "DrJava Project Files (*"+PROJECT_FILE_EXTENSION+", *"+PROJECT_FILE_EXTENSION2+", *"+OLD_PROJECT_FILE_EXTENSION+")";
+      return "DrJava Project Files (*" + PROJECT_FILE_EXTENSION + ", *" + PROJECT_FILE_EXTENSION2 + ", *" + 
+        OLD_PROJECT_FILE_EXTENSION + ")";
     }
   };
   
@@ -3632,7 +3633,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         // ask if the user wants to submit the survey
         // but only if we haven't just asked if the user wants to download a new version
         // two dialogs on program start is too much clutter
-        if (DrJava.getConfig().getSetting(DIALOG_DRJAVA_SURVEY_ENABLED) && !edu.rice.cs.util.swing.Utilities.TEST_MODE) {
+        if (DrJava.getConfig().getSetting(DIALOG_DRJAVA_SURVEY_ENABLED) && 
+            ! edu.rice.cs.util.swing.Utilities.TEST_MODE) {
           if (DrJavaSurveyPopup.maySubmitSurvey()) {
             // either enough days have passed, or the configuration has changed
             alreadyShowedDialog = true;
@@ -4247,7 +4249,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         finally { hourglassOff(); }
       }
     }
-    catch (DebugException de) { MainFrameStatics.showError(MainFrame.this, de, "Debugger Error", "Could not start the debugger."); }
+    catch (DebugException de) { 
+      MainFrameStatics.showError(MainFrame.this, de, "Debugger Error", "Could not start the debugger."); 
+    }
     catch (NoClassDefFoundError err) {
       MainFrameStatics.showError(MainFrame.this, err, "Debugger Error",
                                "Unable to find the JPDA package for the debugger.\n" +
@@ -9144,7 +9148,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             _junitInterrupted("Unit testing cancelled by user.");
           }
         });
-        ScrollableListDialog<OpenDefinitionsDocument> dialog = new ScrollableListDialog.Builder<OpenDefinitionsDocument>()
+        ScrollableListDialog<OpenDefinitionsDocument> dialog = 
+          new ScrollableListDialog.Builder<OpenDefinitionsDocument>()
           .setOwner(MainFrame.this)
           .setTitle("Must Compile All Source Files to Run Unit Tests")
           .setText("<html>Before you can run unit tests, you must first compile all out of sync source files.<br>"+
