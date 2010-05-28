@@ -68,7 +68,8 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
   
   /** This constructor is called when testing.  It initializes all of the static fields of LanguageLevelVisitor. */
   public IntermediateVisitor(File file) {
-    this(file, new LinkedList<Pair<String, JExpressionIF>>(),
+    this(file, 
+         new LinkedList<Pair<String, JExpressionIF>>(),
          new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
          new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>());
   }
@@ -79,41 +80,15 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     * @param errors  The list of errors that have been encountered so far.
     * @param continuations  The table of classes we have encountered but still need to resolve
     * @param visitedFiles  The list of files we have visited
-    * @param newSDs  The new symbol datas we have created (that will need to have constructors created for them after 
-    *                this pass is finished)
     */
-  public IntermediateVisitor(File file, LinkedList<Pair<String, JExpressionIF>> errors,
+  public IntermediateVisitor(File file, 
+                             LinkedList<Pair<String, JExpressionIF>> errors,
                              Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations,
                              LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visitedFiles) {
     super(file, "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<String>(), continuations);
     this.errors = errors;
-//    this.symbolTable = symbolTable;
     this.visitedFiles= visitedFiles;
     _hierarchy = new Hashtable<String, TypeDefBase>(); //hierarchy;
-  }
-  
-  /**Only abstract, public, private, protected, static and final are allowed in language levels.*/
-  public Void forModifiersAndVisibilityDoFirst(ModifiersAndVisibility that) {
-    String[] modifiersAndVisibility = that.getModifiers();
-    StringBuffer sb = new StringBuffer();
-    String temp;
-    int count = 0;    
-    for(int i = 0; i < modifiersAndVisibility.length; i++) {
-      temp = modifiersAndVisibility[i];
-      if (! temp.equals("final") && ! temp.equals("abstract") && ! temp.equals("public") && ! temp.equals("private") && 
-          ! temp.equals("protected") && ! temp.equals("static")) {
-        sb.append(" \"" + temp + "\"");
-        count++;
-      }
-    }
-    // check if any illegal keywords were found
-    temp = "The keyword";
-    if (sb.length() > 0) {
-      if (count > 1)  temp = temp + "s";
-      _addAndIgnoreError(temp + sb.toString() + " cannot be used at the Intermediate level", that);
-      return null;
-    }
-    return super.forModifiersAndVisibilityDoFirst(that);
   }
   
   /** Check to make sure the inner class def is well-formed, resolve it, and store the resulting symbol in the outer 
@@ -135,11 +110,11 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     that.getMav().visit(this);
     that.getName().visit(this);
     for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
-//    that.getSuperclass().visit(this);
+    that.getSuperclass().visit(this);  // formerly commented out.  Why?
+    
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
     
     SymbolData sd = defineInnerSymbolData(that, name, data);
-    
     if (sd != null) { // We have a symbol data to work with, so visit the body and augment
       that.getBody().visit(new ClassBodyIntermediateVisitor(sd, 
                                                             _file, 
@@ -172,12 +147,14 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     
     that.getMav().visit(this);
     that.getName().visit(this);
-    for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
+        
+    // The following assert should be true because interfaces can't have fields!
+    assert that.getTypeParameters().length == 0;
+
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
     
     SymbolData sd = defineInnerSymbolData(that, name, data);
-    if (sd != null) {
-      
+    if (sd != null) { 
       that.getBody().visit(new InterfaceBodyIntermediateVisitor(sd, 
                                                                 _file, 
                                                                 _package,
@@ -190,6 +167,29 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     forInnerInterfaceDefOnly(that);
   }
   
+  /** Only abstract, public, private, protected, static and final are allowed in language levels.*/
+  public Void forModifiersAndVisibilityDoFirst(ModifiersAndVisibility that) {
+    String[] modifiersAndVisibility = that.getModifiers();
+    StringBuffer sb = new StringBuffer();
+    String temp;
+    int count = 0;    
+    for(int i = 0; i < modifiersAndVisibility.length; i++) {
+      temp = modifiersAndVisibility[i];
+      if (! temp.equals("final") && ! temp.equals("abstract") && ! temp.equals("public") && ! temp.equals("private") && 
+          ! temp.equals("protected") && ! temp.equals("static")) {
+        sb.append(" \"" + temp + "\"");
+        count++;
+      }
+    }
+    // check if any illegal keywords were found
+    temp = "The keyword";
+    if (sb.length() > 0) {
+      if (count > 1)  temp = temp + "s";
+      _addAndIgnoreError(temp + sb.toString() + " cannot be used at the Intermediate level", that);
+      return null;
+    }
+    return super.forModifiersAndVisibilityDoFirst(that);
+  }
   
 //  /** Do not allow explicit Package Statements at the Intermediate Level. */
 //  public Void forPackageStatementDoFirst(PackageStatement that) {
@@ -365,10 +365,12 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     that.getName().visit(this);
     that.getSuperclass().visit(this);
     
-    // Test cases are automatically public
+    // Test cases are automatically public; isTestCase => sd != null
     if (isTestCase) sd.addModifier("public");
     
+    // Process fields of this ClassDef (the get method is misnamed!)
     for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
+    
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
     
     if (sd != null) {
@@ -392,9 +394,12 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     forInterfaceDefDoFirst(that);
     if (prune(that)) return null;
     String className = getQualifiedClassName(that.getName().getText());
-    // The following for loop should be no-op because interfaces can't have fields!
+    
+    // The following assert should be true because interfaces can't have fields!
     assert that.getTypeParameters().length == 0;
-//    for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
+    
+    for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
+
     SymbolData sd = defineSymbolData(that, className);
     if (sd != null) {
       sd.setInterface(true);
@@ -405,6 +410,47 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     that.getName().visit(this);
     forInterfaceDefOnly(that);
     _classesToBeParsed.remove(className);
+    return null;
+  }
+  
+  /**Bitwise operators are not allowed at any language level...*/
+  public Void forShiftAssignmentExpressionDoFirst(ShiftAssignmentExpression that) {
+    _addAndIgnoreError("Shift assignment operators cannot be used at any language level", that);
+    return null;
+  }
+  public Void forBitwiseAssignmentExpressionDoFirst(BitwiseAssignmentExpression that) {
+    _addAndIgnoreError("Bitwise operators cannot be used at any language level", that);
+    return null;
+  }
+  public Void forBitwiseBinaryExpressionDoFirst(BitwiseBinaryExpression that) {
+    _addAndIgnoreError("Bitwise binary expressions cannot be used at any language level", that);
+    return null;
+  }
+  public Void forBitwiseOrExpressionDoFirst(BitwiseOrExpression that) {
+    _addAndIgnoreError("Bitwise or expressions cannot be used at any language level." + 
+                       "  Perhaps you meant to compare two values using regular or (||)", that);
+    return null;
+  }
+  public Void forBitwiseXorExpressionDoFirst(BitwiseXorExpression that) {
+    _addAndIgnoreError("Bitwise xor expressions cannot be used at any language level", that);
+    return null;
+  }
+  public Void forBitwiseAndExpressionDoFirst(BitwiseAndExpression that) {
+    _addAndIgnoreError("Bitwise and expressions cannot be used at any language level." + 
+                       "  Perhaps you meant to compare two values using regular and (&&)", that);
+    return null;
+  }
+  public Void forBitwiseNotExpressionDoFirst(BitwiseNotExpression that) {
+    _addAndIgnoreError("Bitwise not expressions cannot be used at any language level." + 
+                       "  Perhaps you meant to negate this value using regular not (!)", that);
+    return null;
+  }
+  public Void forShiftBinaryExpressionDoFirst(ShiftBinaryExpression that) {
+    _addAndIgnoreError("Bit shifting operators cannot be used at any language level", that);
+    return null;
+  }
+  public Void forBitwiseNotExpressionDoFirst(ShiftBinaryExpression that) {
+    _addAndIgnoreError("Bitwise operators cannot be used at any language level", that);
     return null;
   }
   
@@ -553,8 +599,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       _iv = new IntermediateVisitor(new File(""),
                                     errors,
                                     continuations, 
-                                    new LinkedList<Pair<LanguageLevelVisitor, 
-                                    SourceFile>>());
+                                    new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>());
       LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.make(new File("lib/buildlib/junit.jar")));
       _iv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
       _iv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
@@ -741,18 +786,6 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       assertEquals("TypeParameters is not allowed", 
                    "Type Parameters cannot be used at the Intermediate level", 
                    errors.getLast().getFirst());
-      
-//     at.visit(_iv);
-//     assertEquals("ArrayTypes is not allowed", "Arrays cannot be used at the Intermediate level", errors.getLast().getFirst());
-      
-//     ce.visit(_iv);
-//     assertEquals("ConditionalExpression is not allowed", "Conditional expressions cannot be used at the Intermediate level", errors.getLast().getFirst());
-      
-//     hasBitOperator.visit(_iv);
-//     assertEquals("Bitwise operators are not allowed", "Bitwise operators cannot be used at any language level", errors.getLast().getFirst());
-      
-//     tcs.visit(_iv);
-//     assertEquals("try-catch statements are not allowed", "A try-catch statement cannot appear here", errors.getLast().getFirst());
     }
     
     public void testForPrimitiveTypeDoFirst() {
@@ -777,7 +810,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       b.visit(_iv);
       assertEquals("After visiting boolean, errors should still be 0", 0, errors.size());
       
-      //now the types that should throw an error:
+      // now the types that formerly threw errors:
       
       PrimitiveType byt = new PrimitiveType(noInfo, "byte");
       PrimitiveType s = new PrimitiveType(noInfo, "short");
@@ -1018,8 +1051,8 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       sd2.setIsContinuation(true);
       MethodData md2 = new MethodData("myMethod", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[0], new String[0], sd2, amd2);
       
-      _iv.symbolTable.put("id", sd);
-      _iv.symbolTable.put("id2", sd2);
+      LanguageLevelConverter.symbolTable.put("id", sd);
+      LanguageLevelConverter.symbolTable.put("id2", sd2);
       
       id.visit(_iv);
       id2.visit(_iv);

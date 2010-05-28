@@ -319,18 +319,25 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
       TryCatchFinallyStatement tcfs = new TryCatchFinallyStatement(SourceInfo.NO_INFO, b, new CatchBlock[0], b);
       ntcs.visit(_bbv);
       tcfs.visit(_bbv);
-      assertEquals("After visiting both NormalTryCatchStatement and TryCatchFinallyStatement, there should be no errors", 0, errors.size());
+      assertEquals("After visiting both NormalTryCatchStatement and TryCatchFinallyStatement, there should be no " 
+                     + "errors", 0, errors.size());
       
       //make sure that if there is an error in one of the bodies, it is caught:
       BracedBody errorBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {
         new ExpressionStatement(SourceInfo.NO_INFO, 
-                                new BitwiseOrExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10)))});
+                                new BitwiseOrExpression(SourceInfo.NO_INFO, 
+                                                        new SimpleNameReference(SourceInfo.NO_INFO, 
+                                                                                new Word(SourceInfo.NO_INFO, "i")), 
+                                                        new IntegerLiteral(SourceInfo.NO_INFO, 10)))});
       Block errorBlock = new Block(SourceInfo.NO_INFO, errorBody);
       
       ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, errorBlock, new CatchBlock[0]);
       ntcs.visit(_bbv);
       assertEquals("Should be one error", 1, errors.size());
-      assertEquals("Error message should be correct", "Bitwise or expressions cannot be used at any language level.  Perhaps you meant to compare two values using regular or (||)", errors.getLast().getFirst());
+      assertEquals("Error message should be correct", 
+                   "Bitwise or expressions cannot be used at any language level.  " 
+                     + "Perhaps you meant to compare two values using regular or (||)", 
+                   errors.getLast().getFirst());
       
       //make sure that if there is an error in one of the catch statements, it is caught:
       UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, new PrimitiveType(SourceInfo.NO_INFO, "int"), new Word(SourceInfo.NO_INFO, "i"));

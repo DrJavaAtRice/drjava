@@ -86,24 +86,6 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     return null;
   }
   
-  /* Make sure that this concrete method def is not declared to be abstract or static. */
-  public Void forConcreteMethodDefDoFirst(ConcreteMethodDef that) {
-    ModifiersAndVisibility mav = that.getMav();
-    String[] modifiers = mav.getModifiers();
-    // Concrete methods can now be public, private, protected at the Intermediate level.  They still cannot be static.
-    for (int i = 0; i < modifiers.length; i++) {
-      if (modifiers[i].equals("abstract")) {
-        _addError("Methods that have a braced body cannot be declared \"abstract\"", that);
-        break;
-      }
-//      else if (modifiers[i].equals("static")) {
-//        _addError("Static methods cannot be used at the Intermediate level", that);
-//        break;
-//      }
-    }
-    return super.forConcreteMethodDefDoFirst(that);
-  }
-  
   /* Make sure that this abstract method def is declared to be abstract*/
   public Void forAbstractMethodDefDoFirst(AbstractMethodDef that) {
     if (! _classData.hasModifier("abstract")) {
@@ -133,20 +115,17 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
   public Void forVariableDeclarationOnly(VariableDeclaration that) {
     VariableData[] vds = _variableDeclaration2VariableData(that, _classData);
     // make sure that every non-static field is private and no static field are uninitialized:
-    LinkedList<VariableData> vdsList = new LinkedList<VariableData>();
+//    LinkedList<VariableData> vdsList = new LinkedList<VariableData>();
     for (int i = 0; i < vds.length; i++) {
       if (! vds[i].isStatic()) vds[i].setPrivate();
       else if (that.getDeclarators()[i] instanceof UninitializedVariableDeclarator) {  
         _addAndIgnoreError("All static fields must be initialized", that);
       }
-//      else if (!vds[i].hasModifier("static") && (that.getDeclarators()[i] instanceof InitializedVariableDeclarator)) {
-//        _addAndIgnoreError("Only static fields may be initialized outside of a constructor at the Intermediate level", that);
-//      }
       
-      vdsList.addLast(vds[i]);
+//      vdsList.addLast(vds[i]);
     }
 //    System.err.println("Constructed vdslist = " + vdsList);
-    if (! _classData.addFinalVars(vdsList.toArray(new VariableData[vdsList.size()]))) {
+    if (! _classData.addFinalVars(vds /* vdsList.toArray(new VariableData[vdsList.size()]) */)) {
 //      System.err.println("Duplicate variable declaration found");
       _addAndIgnoreError("You cannot have two fields with the same name.  Either you already have a field by that name in this class, or one of your superclasses or interfaces has a field by that name", that);
     }

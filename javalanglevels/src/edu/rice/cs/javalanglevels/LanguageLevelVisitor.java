@@ -1135,6 +1135,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       _addAndIgnoreError("The class or interface " + name + " has already been defined.", typeDefBase);
       return null;
     }
+//    if (qualifiedClassName.equals("listFW.IList")) System.err.println("**** listFW.Ilist is being defined!");
     
     // create the LinkedList for the SymbolDatas of the interfaces
     LinkedList<SymbolData> interfaces = new LinkedList<SymbolData>();
@@ -1509,7 +1510,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     else return false;
   }
   
-  /**Add an error explaining the modifiers' conflict.*/
+  /** Add an error explaining the modifiers' conflict. */
   private void _badModifiers(String first, String second, ModifiersAndVisibility that) {
     _addError("Illegal combination of modifiers. Can't use " + first + " and " + second + " together.", that);
   }
@@ -1734,47 +1735,30 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return forImportStatementOnly(that);
   }
   
-  /**Bitwise operators are not allowed at any language level...*/
-  public Void forShiftAssignmentExpressionDoFirst(ShiftAssignmentExpression that) {
-    _addAndIgnoreError("Shift assignment operators cannot be used at any language level", that);
-    return null;
-  }
-  public Void forBitwiseAssignmentExpressionDoFirst(BitwiseAssignmentExpression that) {
-    _addAndIgnoreError("Bitwise operators cannot be used at any language level", that);
-    return null;
-  }
-  public Void forBitwiseBinaryExpressionDoFirst(BitwiseBinaryExpression that) {
-    _addAndIgnoreError("Bitwise binary expressions cannot be used at any language level", that);
-    return null;
-  }
-  public Void forBitwiseOrExpressionDoFirst(BitwiseOrExpression that) {
-    _addAndIgnoreError("Bitwise or expressions cannot be used at any language level." + 
-                       "  Perhaps you meant to compare two values using regular or (||)", that);
-    return null;
-  }
-  public Void forBitwiseXorExpressionDoFirst(BitwiseXorExpression that) {
-    _addAndIgnoreError("Bitwise xor expressions cannot be used at any language level", that);
-    return null;
-  }
-  public Void forBitwiseAndExpressionDoFirst(BitwiseAndExpression that) {
-    _addAndIgnoreError("Bitwise and expressions cannot be used at any language level." + 
-                       "  Perhaps you meant to compare two values using regular and (&&)", that);
-    return null;
-  }
-  public Void forBitwiseNotExpressionDoFirst(BitwiseNotExpression that) {
-    _addAndIgnoreError("Bitwise not expressions cannot be used at any language level." + 
-                       "  Perhaps you meant to negate this value using regular not (!)", that);
-    return null;
-  }
-  public Void forShiftBinaryExpressionDoFirst(ShiftBinaryExpression that) {
-    _addAndIgnoreError("Bit shifting operators cannot be used at any language level", that);
-    return null;
-  }
-  public Void forBitwiseNotExpressionDoFirst(ShiftBinaryExpression that) {
-    _addAndIgnoreError("Bitwise operators cannot be used at any language level", that);
-    return null;
+  /** Makes sure that this concrete method def is not declared to be abstract. */
+  public Void forConcreteMethodDefDoFirst(ConcreteMethodDef that) {
+    ModifiersAndVisibility mav = that.getMav();
+    String[] modifiers = mav.getModifiers();
+    // Concrete methods can now be public, private, protected at the Intermediate level.  They still cannot be static.
+    for (int i = 0; i < modifiers.length; i++) {
+      if (modifiers[i].equals("abstract")) {
+        _addError("Methods that have a braced body cannot be declared \"abstract\"", that);
+        break;
+      }
+    }
+    return super.forConcreteMethodDefDoFirst(that);
   }
   
+  /** Bitwise operators are allowed in Full Java */
+  public Void forShiftAssignmentExpressionDoFirst(ShiftAssignmentExpression that) { return null; }
+  public Void forBitwiseAssignmentExpressionDoFirst(BitwiseAssignmentExpression that) { return null; }
+  public Void forBitwiseBinaryExpressionDoFirst(BitwiseBinaryExpression that) { return null; }
+  public Void forBitwiseOrExpressionDoFirst(BitwiseOrExpression that) { return null; }
+  public Void forBitwiseXorExpressionDoFirst(BitwiseXorExpression that) { return null; }
+  public Void forBitwiseAndExpressionDoFirst(BitwiseAndExpression that) { return null; }
+  public Void forBitwiseNotExpressionDoFirst(BitwiseNotExpression that) { return null; }
+  public Void forShiftBinaryExpressionDoFirst(ShiftBinaryExpression that) { return null; }
+  public Void forBitwiseNotExpressionDoFirst(ShiftBinaryExpression that) { return null; }
   
   /** The EmptyExpression is a sign of an error. It means that we were missing something
     * we needed when the parser built the AST*/
@@ -3232,20 +3216,20 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       
       shift1.visit(testLLVisitor);
-      assertEquals("Should be 1 error", 1, errors.size());
-      assertEquals("error message should be correct", "Shift assignment operators cannot be used at any language level",
-                   errors.getLast().getFirst());
+      assertEquals("Should be no errors", 0, errors.size());
+//      assertEquals("error message should be correct", "Shift assignment operators cannot be used at any language level",
+//                   errors.getLast().getFirst());
       
       shift2.visit(testLLVisitor);
-      assertEquals("Should be 2 errors", 2, errors.size());
-      assertEquals("error message should be correct", "Shift assignment operators cannot be used at any language level",
-                   errors.getLast().getFirst());
+      assertEquals("Should be no errors", 0, errors.size());
+//      assertEquals("error message should be correct", "Shift assignment operators cannot be used at any language level",
+//                   errors.getLast().getFirst());
       
       shift3.visit(testLLVisitor);
-      assertEquals("Should be 3 errors", 3, errors.size());
-      assertEquals("error message should be correct", "Shift assignment operators cannot be used at any language level",
-                   errors.getLast().getFirst());
-      
+      assertEquals("Should be no errors", 0, errors.size());
+//      assertEquals("error message should be correct", "Shift assignment operators cannot be used at any language level",
+//                   errors.getLast().getFirst());
+    
       //BitwiseAssignmentExpressions
       BitwiseAndAssignmentExpression bit1 = 
         new BitwiseAndAssignmentExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), 
@@ -3258,19 +3242,19 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
                                            new NullLiteral(SourceInfo.NO_INFO));
       
       bit1.visit(testLLVisitor);
-      assertEquals("Should be 4 errors", 4, errors.size());
-      assertEquals("error message should be correct", "Bitwise operators cannot be used at any language level", 
-                   errors.getLast().getFirst());
+      assertEquals("Should be no errors", 0, errors.size());
+//      assertEquals("error message should be correct", "Bitwise operators cannot be used at any language level", 
+//                   errors.getLast().getFirst());
       
       bit2.visit(testLLVisitor);
-      assertEquals("Should be 5 errors", 5, errors.size());
-      assertEquals("error message should be correct", "Bitwise operators cannot be used at any language level", 
-                   errors.getLast().getFirst());
+      assertEquals("Should be no errors", 0, errors.size());
+//      assertEquals("error message should be correct", "Bitwise operators cannot be used at any language level", 
+//                   errors.getLast().getFirst());
       
       bit3.visit(testLLVisitor);
-      assertEquals("Should be 6 errors", 6, errors.size());
-      assertEquals("error message should be correct", "Bitwise operators cannot be used at any language level", 
-                   errors.getLast().getFirst());
+      assertEquals("Should be no errors", 0, errors.size());
+//      assertEquals("error message should be correct", "Bitwise operators cannot be used at any language level", 
+//                   errors.getLast().getFirst());
       
       //BitwiseExpressions
       BitwiseAndExpression bit4 = 
@@ -3287,24 +3271,24 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       
       bit4.visit(testLLVisitor);
-      assertEquals("Should be 7 errors", 7, errors.size());
-      assertEquals("error message should be correct", "Bitwise and expressions cannot be used at any language level." + 
-                   "  Perhaps you meant to compare two values using regular and (&&)", errors.getLast().getFirst());
+      assertEquals("Should be no errors", 0, errors.size());
+//      assertEquals("error message should be correct", "Bitwise and expressions cannot be used at any language level." + 
+//                   "  Perhaps you meant to compare two values using regular and (&&)", errors.getLast().getFirst());
       
       bit5.visit(testLLVisitor);
-      assertEquals("Should be 8 errors", 8, errors.size());
-      assertEquals("error message should be correct", "Bitwise or expressions cannot be used at any language level." + 
-                   "  Perhaps you meant to compare two values using regular or (||)", errors.getLast().getFirst());
+      assertEquals("Should be no errors", 0, errors.size());
+//      assertEquals("error message should be correct", "Bitwise or expressions cannot be used at any language level." + 
+//                   "  Perhaps you meant to compare two values using regular or (||)", errors.getLast().getFirst());
       
       bit6.visit(testLLVisitor);
-      assertEquals("Should be 9 errors", 9, errors.size());
-      assertEquals("error message should be correct", "Bitwise xor expressions cannot be used at any language level", 
-                   errors.getLast().getFirst());
+      assertEquals("Should be no errors", 0, errors.size());
+//      assertEquals("error message should be correct", "Bitwise xor expressions cannot be used at any language level", 
+//                   errors.getLast().getFirst());
       
       bit7.visit(testLLVisitor);
-      assertEquals("Should be 10 errors", 10, errors.size());
-      assertEquals("error message should be correct", "Bitwise not expressions cannot be used at any language level." +
-                   "  Perhaps you meant to negate this value using regular not (!)", errors.getLast().getFirst());
+      assertEquals("Should be no errors", 0, errors.size());
+//      assertEquals("error message should be correct", "Bitwise not expressions cannot be used at any language level." +
+//                   "  Perhaps you meant to negate this value using regular not (!)", errors.getLast().getFirst());
       
       //shift binary expressions
       LeftShiftExpression shift4 = 
@@ -3317,26 +3301,25 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
         new RightSignedShiftExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), 
                                        new NullLiteral(SourceInfo.NO_INFO));
       
-      
       shift4.visit(testLLVisitor);
-      assertEquals("Should be 11 error", 11, errors.size());
-      assertEquals("error message should be correct", "Bit shifting operators cannot be used at any language level", 
-                   errors.getLast().getFirst());
+      assertEquals("Should be no errors", 0, errors.size());
+//      assertEquals("error message should be correct", "Bit shifting operators cannot be used at any language level", 
+//                   errors.getLast().getFirst());
       
       shift5.visit(testLLVisitor);
-      assertEquals("Should be 12 errors", 12, errors.size());
-      assertEquals("error message should be correct", "Bit shifting operators cannot be used at any language level", 
-                   errors.getLast().getFirst());
+      assertEquals("Should be no errors", 0, errors.size());
+//      assertEquals("error message should be correct", "Bit shifting operators cannot be used at any language level", 
+//                   errors.getLast().getFirst());
       
       shift6.visit(testLLVisitor);
-      assertEquals("Should be 13 errors", 13, errors.size());
-      assertEquals("error message should be correct", "Bit shifting operators cannot be used at any language level", 
-                   errors.getLast().getFirst());
+      assertEquals("Should be no errors", 0, errors.size());
+//      assertEquals("error message should be correct", "Bit shifting operators cannot be used at any language level", 
+//                   errors.getLast().getFirst());
       
       //empty expression
       EmptyExpression e = new EmptyExpression(SourceInfo.NO_INFO);
       e.visit(testLLVisitor);
-      assertEquals("Should be 14 errors", 14, errors.size());
+      assertEquals("Should be 1 error", 1, errors.size());
       assertEquals("Error message should be correct", "You appear to be missing an expression here", 
                    errors.getLast().getFirst());
       
@@ -3345,7 +3328,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
         new NoOpExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), 
                            new NullLiteral(SourceInfo.NO_INFO));
       noop.visit(testLLVisitor);
-      assertEquals("Should be 15 errors", 15, errors.size());
+      assertEquals("Should be 2 errors", 2, errors.size());
       assertEquals("Error message should be correct", "You are missing a binary operator here", 
                    errors.getLast().getFirst());
     }

@@ -118,7 +118,7 @@ public class MethodData extends BodyData {
   public void setGenerated(boolean generated) { _generated = generated; }
   
   /** Two MethodDatas are equal if ... */ 
-  public boolean equals (Object obj) {
+  public boolean equals(Object obj) {
     if (obj == this) return true;
     if (obj == null) return false;
     if ((obj.getClass() != this.getClass())) { //|| (obj.hashCode() != this.hashCode())) {
@@ -181,7 +181,9 @@ public class MethodData extends BodyData {
   /** @return the JExpression corresponding to this method*/
   public JExpression getJExpression() { return _jexpr; }
   
-  public String toString() { return "MethodData<" + _name + ">" ; }
+  public String toString() { return "MethodData<" + _name + /* ", " + _modifiersAndVisibility + ", " + 
+    Arrays.toString(_typeParameters) + ", " + _returnType + ", " + Arrays.toString(_params) + ", " + 
+    Arrays.toString(_thrown) + ", " + _jexpr + ", " + _generated + */ ">" ; }
   
   /** Tests the methods declared above*/
   public static class MethodDataTest extends TestCase {

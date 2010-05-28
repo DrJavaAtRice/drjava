@@ -140,7 +140,7 @@ public class VariableData {
       }
     }  // formerly .equals but led to infinite loop when _enclosingData is a VariableData
     else if (_enclosingData != otherEnclosingData) {  
-//      System.err.println("VariableData.equals: enclosingData failure");
+      System.err.println("VariableData.equals: enclosingData failure");
       return false; 
     }
     
@@ -152,7 +152,8 @@ public class VariableData {
   
   /**@return a readable representation of the Variable data*/
   public String toString() {
-    return "VariableData(" + _name + ", " + _modifiersAndVisibility.getModifiers() + ", " + _type + ", " + _hasBeenAssigned + ")";
+    return "VariableData(" + _name + ", " + Arrays.toString(_modifiersAndVisibility.getModifiers()) + ", " + _type + 
+      ", " + _hasBeenAssigned + ")";
   }
   
   /**@return the name of this field or variable*/
