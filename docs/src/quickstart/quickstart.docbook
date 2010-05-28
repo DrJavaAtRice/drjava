@@ -812,6 +812,16 @@ read -1, indicating of the end of the stream.</para>
 		<para>When this option is enabled, DrJava will include the names of the standard Java API classes in the list of names used for auto-completion.</para>
 	</formalpara></listitem>
 
+	<listitem><formalpara>
+		<title>Display Right Margin:</title>
+		<para>Enable this option to let DrJava display a vertical line representing the right margin of the document.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Right Margin Position:</title>
+		<para>This option controls the position of the right margin. By default, the right margin line is displayed after 120 columns, provided the "Display Right Margin" option above is enabled.</para>
+	</formalpara></listitem>
+
 	</itemizedlist>
 
 		<mediaobject>
@@ -955,6 +965,11 @@ read -1, indicating of the end of the stream.</para>
 	<listitem><formalpara>
 		<title>Restore last working directory of the Interactions Pane on start up:</title> 
 		<para>If this option is enabled, DrJava will restore the directory that was last used in the Interactions Pane. If it is disabled, DrJava will always use the value of the "user.home" property.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Smart Run ('java') Command:</title> 
+		<para>If this option is enabled, DrJava will run applets and ACM Java Task Force Programs using the 'java' command or the "Run" and "Run Project" buttons as well. These applets and ACM Java Task Force Programs do not need to have a main method to be run, as long as they are proper applets or ACM Java Task Force Programs.</para>
 	</formalpara></listitem>
 
 	<listitem><formalpara>

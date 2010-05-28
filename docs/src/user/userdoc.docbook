@@ -202,6 +202,11 @@ Developed by:   Java Programming Languages Team
  <title>Clipboard History</title>
  <para>Any text you copy or cut out of DrJava documents will be placed in the clipboard history, and the last 10 entries are kept (that number is configurable, see <link linkend="configuration">Configuring DrJava</link>). To access one of the entries in the history, use the "Paste from History" command in the Edit menu or press <keycode>Ctrl+Shift+V</keycode>. In the dialog that opens up, you can browse the history and select the entry to paste. In addition to inserting the text at the cursor, the selected entry will also be moved to the top of the clipboard history, and will therefore subsequently be available with the regular paste command.</para></formalpara>
     <para>The clipboard history is a great tool to minimize scrolling and document switching: Instead of going back and forth several times, you can just "copy, copy, copy" several pieces of code in a row, then go to another place in the code and do "paste, paste from history, paste from history".</para>
+
+      <formalpara>
+ <title>Right Margin</title>
+ <para>DrJava can display a line after a specified number of columns, representing the right margin of the document. By default, this line is displayed after 120 columns. You can type past this line, and it has no effect on the saved files or executed programs, but the right margin line can help you format your source code more uniformly.</para></formalpara>
+    <para>You can enable or disable the right margin line in the Display category of the Preferences window. The color of the line can be changed in the Colors category of the Preferences. (See <link linkend="configuration">Configuring DrJava</link>.)</para>
     </section>
 
     <section id="edit-multiple">
@@ -426,6 +431,8 @@ Welcome to DrJava.
     <para>Another shortcut for this feature is the "Run Document's Main Method" command, which can be found in both the Tools menu and the context menu of the document list.  This command will simply insert the appropriate <literal>"java MyClass"</literal> text into the Interactions Pane to run the current class's main method.</para>
 
     <para>DrJava also displays either a "Run Project" or a "Run" button in its toolbar, depending on whether you have specified a "Main Class" for the project or not, respectively. "Run Project" will run the main method of the project's "Main Class", while "Run" while execute the main method of the currently open document.</para>
+
+    <para>If "Smart Run ('java') Command" option is enabled, DrJava will also run applets and ACM Java Task Force programs using the <literal>java</literal> command and the "Run" or "Run Project" buttons (see <link linkend="configuration">Configuring DrJava</link>).</para>
 
     <formalpara>
       <title>Running the Document as Applet</title>
@@ -1438,6 +1445,21 @@ to.</para>
      <para>When this option is enabled, DrJava will include the names of the standard Java API classes in the list of names used for auto-completion.</para>
    </listitem>
  </varlistentry>
+
+ <varlistentry>
+   <term>Display Right Margin (<varname>display.right.margin = true</varname>)</term>
+   <listitem>
+     <para>Enable this option to let DrJava display a vertical line representing the right margin of the document.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>Right Margin Position (<varname>right.margin.columns = 120</varname>)</term>
+   <listitem>
+     <para>This option controls the position of the right margin. By default, the right margin line is displayed after 120 columns, provided the "Display Right Margin" option above is enabled.</para>
+   </listitem>
+ </varlistentry>
+
       </variablelist>
 
  </section>
@@ -1480,7 +1502,7 @@ to.</para>
 
  </section>
 
-      <!-- Fonts -->
+      <!-- Colors -->
     <section id="config-options-color">
       <title>Color Options</title>
       <para>Colors are defined similarly to HTML colors: as six hexadecimal digits preceded by a pound sign.  The first two digits specify a red value, the next two specify a green value, and the next two specify a blue value.  For example, <constant>#00FF00</constant> would be a bright green.  (In most cases, using the color chooser in the Preferences window is the simplest approach.)</para>
@@ -1641,6 +1663,13 @@ to.</para>
    </listitem>
  </varlistentry>
 
+ <varlistentry>
+   <term>Right Margin Color (<varname>right.margin.color = #CCCCCC</varname>)</term>
+   <listitem>
+     <para>Used as line color for the vertical line representing the right margin of the document, if the line is enabled.</para>
+   </listitem>
+ </varlistentry>
+
       </variablelist>
 
  </section>
@@ -1787,6 +1816,13 @@ to.</para>
    <term>Restore last working directory of the Interactions Pane on start up (<varname>sticky.interactions.dir = true</varname>)</term>
    <listitem>
      <para>If this option is enabled, DrJava will restore the directory that was last used in the Interactions Pane. If it is disabled, DrJava will always use the value of the "user.home" property.</para>
+   </listitem>
+ </varlistentry>
+
+ <varlistentry>
+   <term>Smart Run ('java') Command (<varname>smart.run.for.applets.and.programs = true</varname>)</term>
+   <listitem>
+     <para>If this option is enabled, DrJava will run applets and ACM Java Task Force Programs using the 'java' command or the "Run" and "Run Project" buttons as well. These applets and ACM Java Task Force Programs do not need to have a main method to be run, as long as they are proper applets or ACM Java Task Force Programs.</para>
    </listitem>
  </varlistentry>
 
