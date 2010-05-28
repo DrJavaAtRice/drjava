@@ -140,11 +140,12 @@ public abstract class JavacCompiler implements CompilerInterface {
       "  '}' catch(ClassCastException cce) '{' '}'\n" +
       "'}'\n" +
       "if (isApplet) '{'\n" +
-      "  edu.rice.cs.plt.swing.SwingUtil.showApplet(new {0}({1}), 400, 300);\n" +
+      "  edu.rice.cs.plt.swing.SwingUtil.showApplet(java.applet.Applet.class.cast(new {0}({1})), 400, 300);\n" +
       "'}'\n" +
       "else '{'" +
+      "  java.lang.reflect.Method m = null;\n" +
       "  try '{'\n" +
-      "    java.lang.reflect.Method m = {0}.class.getMethod(\"main\", java.lang.String[].class);\n" +
+      "    m = {0}.class.getMethod(\"main\", java.lang.String[].class);\n" +
       "    if (!m.getReturnType().equals(void.class)) throw new java.lang.NoSuchMethodException();\n" +
       "  '}'\n" +
       "  catch (java.lang.NoSuchMethodException e) '{'\n" +
@@ -157,7 +158,7 @@ public abstract class JavacCompiler implements CompilerInterface {
       "    System.arraycopy(args, 0, newArgs, 1, args.length);\n" +
       "    args = newArgs;\n" +
       "  '}'\n" +
-      "  {0}.main(args);\n"+
+      "  m.invoke(null, new Object[] '{' args '}');\n"+
       "'}' '}'";
     return _transformCommand(s, command);
   }
