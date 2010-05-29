@@ -305,6 +305,15 @@ public class StatementEvaluator extends AbstractVisitor<StatementEvaluator.Resul
   
   @Override public Result visit(ThrowStatement node) {
     Throwable t = (Throwable) new ExpressionEvaluator(_bindings, _opt).value(node.getExpression());
+    // bug fix for DrJava bug 3008828
+    if (t == null) {
+        // as per Java Language Specification (JLS):
+        // http://java.sun.com/docs/books/jls/third_edition/html/statements.html#14.18
+        // "If evaluation of the Expression completes normally, producing a null value,
+        // then an instance VÕ of class NullPointerException is created and thrown instead of null." 
+        t = new NullPointerException();
+        t.setStackTrace(new StackTraceElement[0]);
+    }
     throw new WrappedException(new EvaluatorException(t));
   }
 

@@ -555,4 +555,24 @@ public class JavaInterpreterTest extends DrJavaTestCase {
      Object result = interpret("public void foo() {}; foo()");
      assertSame("Should have returned NO_RESULT.", null, result);
    }
+  
+  /** Test throwing null, for bug 3008828. */
+  public void testThrowNull() throws InterpreterException {
+    try {
+      _interpreter.interpret("throw null");
+      fail("Should have thrown an EvaluatorException with a NullPointerException as cause.");
+    }
+    catch(Throwable t) {
+      if ((t == null) || (!(t instanceof EvaluatorException))) {
+        fail("Should have thrown an EvaluatorException with a NullPointerException as cause.");
+      }
+      else {
+        Throwable cause = t.getCause();
+        if (!(cause instanceof NullPointerException)) {
+          fail("Should have thrown an EvaluatorException with a NullPointerException as cause.");
+        }
+      }
+    }
+  }
+
 }
