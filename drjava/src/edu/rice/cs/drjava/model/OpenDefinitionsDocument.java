@@ -226,6 +226,22 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    */
   public void runApplet(String qualifiedClassName) throws ClassNameNotFoundException, IOException;
 
+  /** Runs this document, and tries to be smart about it. It detects if the class is a regular Java class with a
+    * main method, if it is an applet, or if it is an ACM Java Task Force program. It runs the program appropriately
+    * in the interactions pane after resetting interactions with the source root for this document as the
+    * working directory.  Warns the use if the class files for the doucment are not up to date.
+    * Fires an event to signal when execution is about to begin.
+    * NOTE: this code normally runs in the event thread; it cannot block waiting for an event that is triggered by
+    * event thread execution!
+    * 
+    * @param qualifiedClassName  the qualified name of the class (in this document) to run.  If NULL, it is the name
+    *                            of the top level class.
+    * 
+    * @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
+    * @exception IOException propagated from GlobalModel.compileAll()
+    */
+  public void runSmart(String qualifiedClassName) throws ClassNameNotFoundException, IOException;
+
   /** Starts testing the source using JUnit.  Demands that the definitions be saved and compiled before proceeding
    *  with testing.  Fires the appropriate events as the testing proceeds and finishes.
    *  TODO: this method is redundant and should be deprecated

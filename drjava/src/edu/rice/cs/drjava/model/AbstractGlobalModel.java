@@ -3221,6 +3221,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void runApplet(String className) throws IOException, ClassNameNotFoundException {
       throw new UnsupportedOperationException("AbstractGlobalModel does not support running");
     }
+
+    /** throws UnsupportedOperationException */
+    public void runSmart(String className) throws IOException, ClassNameNotFoundException {
+      throw new UnsupportedOperationException("AbstractGlobalModel does not support running");
+    }
     
     /** throws UnsupportedOperationException */
     public void startJUnit() throws IOException, ClassNotFoundException {

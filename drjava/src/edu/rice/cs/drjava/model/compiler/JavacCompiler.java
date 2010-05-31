@@ -87,13 +87,15 @@ public abstract class JavacCompiler implements CompilerInterface {
     * @param interactionsString unprocessed command line
     * @return command line with commands transformed */
   public String transformCommands(String interactionsString) {
-    boolean smart = DrJava.getConfig().getSetting(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS);
     if (interactionsString.startsWith("java ")) {
-      if (smart) interactionsString = transformRunCommand(interactionsString);
-      else interactionsString = transformJavaCommand(interactionsString);
+      interactionsString = transformJavaCommand(interactionsString);
     }
-    else if (interactionsString.startsWith("applet ")) interactionsString = transformAppletCommand(interactionsString);
-    // else if (interactionsString.startsWith("run ")) interactionsString = transformRunCommand(interactionsString);
+    else if (interactionsString.startsWith("applet ")) {
+        interactionsString = transformAppletCommand(interactionsString);
+    }
+    else if (interactionsString.startsWith("run ")) {
+        interactionsString = transformRunCommand(interactionsString);
+    }
     return interactionsString;
   }
   

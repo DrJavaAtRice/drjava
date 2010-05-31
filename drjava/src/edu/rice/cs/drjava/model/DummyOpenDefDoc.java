@@ -124,6 +124,8 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public void runMain(String className) throws IOException { throw new UnsupportedOperationException("Dummy method"); }
 
   public void runApplet(String className) throws IOException { throw new UnsupportedOperationException("Dummy method"); }
+
+  public void runSmart(String className) throws IOException { throw new UnsupportedOperationException("Dummy method"); }
   
   public boolean revertIfModifiedOnDisk() throws IOException {
     throw new UnsupportedOperationException("Dummy method");

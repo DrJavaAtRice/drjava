@@ -5542,7 +5542,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         if (f != null) {
           updateStatusField("Running Open Project");
           OpenDefinitionsDocument doc = _model.getDocumentForFile(f);
-          doc.runMain(_model.getMainClass());
+          boolean smart = DrJava.getConfig().getSetting(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS);
+          if (smart) {
+              doc.runSmart(_model.getMainClass());
+          }
+          else {
+              doc.runMain(_model.getMainClass());
+          }
         }
       }
       catch (ClassNameNotFoundException e) {
@@ -5562,9 +5568,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Internal helper method to run the main method of the current document in the interactions pane. */
   private void _runMain() {
-    updateStatusField("Running main Method of Current Document");
-    
-    try { _model.getActiveDocument().runMain(null); }
+    try {
+      boolean smart = DrJava.getConfig().getSetting(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS);
+      if (smart) {
+        updateStatusField("Running main Method of Current Document");
+        _model.getActiveDocument().runSmart(null);
+      }
+      else {
+        updateStatusField("Running Current Document");
+        _model.getActiveDocument().runMain(null);
+      }
+    }
     
     catch (ClassNameNotFoundException e) {
       // Display a warning message if a class name can't be found.
@@ -6335,6 +6349,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     item = menu.add(a);
     _setMenuShortcut(item, a, opt);
   }
+
+  /** Inserts an Action as a menu item to the given menu, at the specified index,
+    * using the specified configurable keystroke.
+    * @param menu Menu to add item to
+    * @param a Action for the menu item
+    * @param opt Configurable keystroke for the menu item
+    * @param index Index at which the action is inserted
+    */
+  private void _addMenuItem(JMenu menu, Action a, VectorOption<KeyStroke> opt, int index) {
+    JMenuItem item;
+    item = menu.insert(a, index);
+    _setMenuShortcut(item, a, opt);
+  }
   
   /** Sets the given menu item to have the specified configurable keystroke.
     * @param item Menu item containing the action
@@ -6473,7 +6500,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Creates and returns a tools menu. */
   private JMenu _setUpToolsMenu(int mask) {
-    JMenu toolsMenu = new JMenu("Tools");
+    final JMenu toolsMenu = new JMenu("Tools");
     PlatformFactory.ONLY.setMnemonic(toolsMenu,KeyEvent.VK_T);
     
     // Compile, Test, Javadoc
@@ -6484,6 +6511,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     toolsMenu.addSeparator();
     
     // Run
+    final int runActionIndex = toolsMenu.getItemCount();
     _addMenuItem(toolsMenu, _runAction, KEY_RUN);
     _addMenuItem(toolsMenu, _runAppletAction, KEY_RUN_APPLET);
     _addMenuItem(toolsMenu, _resetInteractionsAction, KEY_RESET_INTERACTIONS);
@@ -6598,6 +6626,28 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     toolsMenu.addSeparator();
     _addMenuItem(toolsMenu, _followFileAction, KEY_FOLLOW_FILE);
     
+    // Add the listener that changes the "Run Main" menu item
+    OptionListener<Boolean> runMainListener = new OptionListener<Boolean>() {
+      public void optionChanged(final OptionEvent<Boolean> oce) {
+        JMenuItem mi = toolsMenu.getItem(runActionIndex);
+
+        // change
+        if (oce.value) {
+          mi.setText("Run Document");
+          mi.setToolTipText("Run the current document, regardless of whether it is an applet, an ACM " +
+                            "Java Task Force program, or a regular Java program with a main method."); 
+        }
+        else {
+          mi.setText("Run Document's Main Method");
+          mi.setToolTipText("Run the main method of the current document"); 
+        }
+      }
+    };
+    DrJava.getConfig().addOptionListener(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS, runMainListener);
+    runMainListener.optionChanged(new OptionEvent<Boolean>
+                                  (OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS,
+                                   DrJava.getConfig().getSetting(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS)));
+      
     // Add the menus to the menu bar
     return toolsMenu;
   }
@@ -6908,6 +6958,26 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
     };
     DrJava.getConfig().addOptionListener(DRJAVA_ERRORS_BUTTON_COLOR, errBtnColorOptionListener);
+    // Add the listener that changes the "Run" button
+    OptionListener<Boolean> runButtonListener = new OptionListener<Boolean>() {
+      public void optionChanged(final OptionEvent<Boolean> oce) { 
+        if (oce.value) {
+          _runAction.putValue(Action.SHORT_DESCRIPTION, 
+                              "Run the current document, regardless of whether it is an applet, an ACM " +
+                              "Java Task Force program, or a regular Java program with a main method."); 
+        }
+        else {
+          _runAction.putValue(Action.SHORT_DESCRIPTION,
+                              "Run the main method of the current document"); 
+        }
+        // _runButton = _updateToolbarButton(_runButton, _runAction);
+        projectRunnableChanged();
+      }
+    };
+    DrJava.getConfig().addOptionListener(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS, runButtonListener);
+    runButtonListener.optionChanged(new OptionEvent<Boolean>
+                                    (OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS, DrJava.getConfig().
+                                       getSetting(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS)));
     
     // Correct the vertical height of the buttons.
     _fixToolbarHeights();
@@ -9475,15 +9545,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     public void projectRunnableChanged() {
-      if (_model.getMainClass() != null && _model.getMainClassContainingFile() != null && 
-          _model.getMainClassContainingFile().exists()) {
-        _runProjectAction.setEnabled(_model.isProjectActive());
-        _runButton = _updateToolbarButton(_runButton, _runProjectAction);
-      }
-      else {
-        _runProjectAction.setEnabled(false);
-        _runButton = _updateToolbarButton(_runButton, _runAction);
-      }
+      MainFrame.this.projectRunnableChanged();
     }
     
     public void documentNotFound(OpenDefinitionsDocument d, File f) {
@@ -9517,6 +9579,18 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (_currentDefPane != null) { _currentDefPane.updateCurrentLocationInDoc(); }
     }
   } // End of ModelListener class
+  
+  public void projectRunnableChanged() {
+    if (_model.getMainClass() != null && _model.getMainClassContainingFile() != null && 
+        _model.getMainClassContainingFile().exists()) {
+      _runProjectAction.setEnabled(_model.isProjectActive());
+      _runButton = _updateToolbarButton(_runButton, _runProjectAction);
+    }
+    else {
+      _runProjectAction.setEnabled(false);
+      _runButton = _updateToolbarButton(_runButton, _runAction);
+    }
+  }
   
 //  public static final edu.rice.cs.util.Log MFLOG = new edu.rice.cs.util.Log("mflog.txt",true); 
   

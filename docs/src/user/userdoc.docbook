@@ -432,7 +432,11 @@ Welcome to DrJava.
 
     <para>DrJava also displays either a "Run Project" or a "Run" button in its toolbar, depending on whether you have specified a "Main Class" for the project or not, respectively. "Run Project" will run the main method of the project's "Main Class", while "Run" while execute the main method of the currently open document.</para>
 
-    <para>If "Smart Run ('java') Command" option is enabled, DrJava will also run applets and ACM Java Task Force programs using the <literal>java</literal> command and the "Run" or "Run Project" buttons (see <link linkend="configuration">Configuring DrJava</link>).</para>
+    <para>If "Smart Run Command" option is enabled, DrJava will also run applets and ACM Java Task Force programs using the "Run" or "Run Project" buttons (see <link linkend="configuration">Configuring DrJava</link>).</para>
+
+    <para>The same smart behavior of running regular Java classes, applets and ACM Java Task Force programs can also be achieved by entering "run" followed by the class name and any arguments in the Interactions Pane.  For example, to run MySomething with args "arg1" and "arg2", type the following into the Interactions Pane:</para>
+
+    <programlisting>run MySomething arg1 arg2</programlisting>
 
     <formalpara>
       <title>Running the Document as Applet</title>
@@ -1820,9 +1824,9 @@ to.</para>
  </varlistentry>
 
  <varlistentry>
-   <term>Smart Run ('java') Command (<varname>smart.run.for.applets.and.programs = true</varname>)</term>
+   <term>Smart Run Command (<varname>smart.run.for.applets.and.programs = true</varname>)</term>
    <listitem>
-     <para>If this option is enabled, DrJava will run applets and ACM Java Task Force Programs using the 'java' command or the "Run" and "Run Project" buttons as well. These applets and ACM Java Task Force Programs do not need to have a main method to be run, as long as they are proper applets or ACM Java Task Force Programs.</para>
+     <para>If this option is enabled, DrJava will run applets and ACM Java Task Force Programs using the "Run" and "Run Project" buttons as well. These applets and ACM Java Task Force Programs do not need to have a main method to be run, as long as they are proper applets or ACM Java Task Force Programs.</para>
    </listitem>
  </varlistentry>
 

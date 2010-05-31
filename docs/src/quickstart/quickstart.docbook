@@ -968,8 +968,8 @@ read -1, indicating of the end of the stream.</para>
 	</formalpara></listitem>
 
 	<listitem><formalpara>
-		<title>Smart Run ('java') Command:</title> 
-		<para>If this option is enabled, DrJava will run applets and ACM Java Task Force Programs using the 'java' command or the "Run" and "Run Project" buttons as well. These applets and ACM Java Task Force Programs do not need to have a main method to be run, as long as they are proper applets or ACM Java Task Force Programs.</para>
+		<title>Smart Run Command:</title> 
+		<para>If this option is enabled, DrJava will run applets and ACM Java Task Force Programs using the "Run" and "Run Project" buttons as well. These applets and ACM Java Task Force Programs do not need to have a main method to be run, as long as they are proper applets or ACM Java Task Force Programs.</para>
 	</formalpara></listitem>
 
 	<listitem><formalpara>

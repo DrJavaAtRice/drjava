@@ -1525,12 +1525,11 @@ public class ConfigFrame extends SwingFrame {
     wdComponent.addChangeListener(wdListener);
     wdListener.value(wdComponent);
 
-    addOptionComponent(panel, new BooleanOptionComponent(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS, 
-                                                         "Smart Run ('java') Command", this,
-                                                         "<html>Whether the Run button (or 'java' command in the<br>"+
-                                                         "Interactions Pane) should automatically detect<br>"+
-                                                         "applets and ACM Java Task Force programs (subclasses<br>"+
-                                                         "of acm.program.Program).</html>"));
+    addOptionComponent(panel, new BooleanOptionComponent
+                         (OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS, 
+                          "Smart Run Command", this,
+                          "<html>Whether the Run button and meni item should automatically detect<br>"+
+                          "applets and ACM Java Task Force programs (subclasses of acm.program.Program).</html>"));
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));

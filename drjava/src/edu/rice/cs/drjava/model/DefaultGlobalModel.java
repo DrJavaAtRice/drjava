@@ -592,6 +592,24 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       _runInInteractions("applet {0}", qualifiedClassName);
     }
     
+    /** Runs this document, and tries to be smart about it. It detects if the class is a regular Java class with a
+      * main method, if it is an applet, or if it is an ACM Java Task Force program. It runs the program appropriately
+      * in the interactions pane after resetting interactions with the source root for this document as the
+      * working directory.  Warns the use if the class files for the doucment are not up to date.
+      * Fires an event to signal when execution is about to begin.
+      * NOTE: this code normally runs in the event thread; it cannot block waiting for an event that is triggered by
+      * event thread execution!
+      * 
+      * @param qualifiedClassName  the qualified name of the class (in this document) to run.  If NULL, it is the name
+      *                            of the top level class.
+      * 
+      * @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
+      * @exception IOException propagated from GlobalModel.compileAll()
+      */
+    public void runSmart(String qualifiedClassName) throws ClassNameNotFoundException, IOException {
+      _runInInteractions("run {0}", qualifiedClassName);
+    }
+    
     /** Runs JUnit on the current document.  Requires that all source documents are compiled before proceeding. */
     public void startJUnit() throws ClassNotFoundException, IOException { _junitModel.junit(this); }
     
