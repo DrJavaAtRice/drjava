@@ -205,4 +205,7 @@ public class Utilities {
   
   /** @return true iff that has "public" as a modifier. */
   public static boolean isPublic(String[] modifiers) { return contains(modifiers, "public"); }
+  
+  /** @return true iff that has "abstract" as a modifier. */
+  public static boolean isAbstract(String[] modifiers) { return contains(modifiers, "abstract"); }
 }

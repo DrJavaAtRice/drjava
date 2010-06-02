@@ -45,7 +45,7 @@ import edu.rice.cs.javalanglevels.parser.JExprParser;
 public abstract class Data {
   
   /**The name of this data. */
-  // This data design is truly atrocious.  The documentation is worse.  In a SymbolData, _name includes the package prefix. */
+  // This data design and documentation are awful.  In a SymbolData, _name includes the package prefix. */
   protected String _name;
   
   /**The vars defined in the lexical scope of this data.*/
@@ -108,7 +108,6 @@ public abstract class Data {
     }
     return false;
   }
-
      
   /** Set vars to the specified linked list of vars, the variables that are defined in the scope of this data. */
   void setVars(LinkedList<VariableData> vars) { _vars = vars; }
@@ -142,9 +141,7 @@ public abstract class Data {
   }
   
   //Used during testing
-  public void setEnclosingData(LinkedList<Data> d) {
-    _enclosingData = d;
-  }
+  public void setEnclosingData(LinkedList<Data> d) { _enclosingData = d; }
   
   /**
    * Check to see if a variable with the same name as vr has already been
@@ -163,22 +160,17 @@ public abstract class Data {
     return false;
   }
   
-  
-  /**
-   * Add the specified Variable Data to the list of variables defined in this
-   * scope, unless its name has already been used.  Return true if it was successfully
-   * added, and false otherwise.
-   * @param var  The variable we want to add to this scope.
-   * @return  true if it was successfully added, false otherwise.
-   */
+  /** Add the specified Variable Data to the list of variables defined in this scope, unless its name has already been 
+    * used.  Return true if it was successfully added, and false otherwise.
+    * @param var  The variable we want to add to this scope.
+    * @return  true if it was successfully added, false otherwise.
+    */
   public boolean addVar(VariableData var) {
     if (!_repeatedName(var)) {
       _vars.addLast(var);
       return true;
     }
-    else {
-      return false;
-    }
+    else return false;
   }
   
   /** Add the array of variable datas to the list of variables defined in this scope, unless a name has already been
@@ -198,24 +190,20 @@ public abstract class Data {
     return success;
   }
   
-  /**
-   * Add the array of variable datas to the list of variables defined in this scope, unless
-   * a name has already been used.  Return true if all variables were added successfully, 
-   * false otherwise.  Set each of the variable datas in the array to be final before
-   * adding them.
-   * @param vars the VariableData[] that we want to add.
-   * @return true if all VariableDatas were added successfully, false otherwise.
+  /** Add the array of variable datas to the list of variables defined in this scope, unless a name has already been 
+    * used.  Return true if all variables were added successfully, false otherwise.  Set each of the variable datas in 
+    * the array to be final before adding them.
+    * @param vars the VariableData[] that we want to add.
+    * @return true if all VariableDatas were added successfully, false otherwise.
    */
   public boolean addFinalVars(VariableData[] vars) {
     boolean success = true;
-    for (int i = 0; i<vars.length; i++) {
-      if (!_repeatedName(vars[i])) {
+    for (int i = 0; i < vars.length; i++) {
+      if (! _repeatedName(vars[i])) {
         vars[i].setFinal();
         _vars.addLast(vars[i]);
       }
-      else {
-        success = false;
-      }
+      else { success = false; }
     }
     return success;
   }
@@ -296,9 +284,7 @@ public abstract class Data {
   }
   
   /** Reset the block iterator to the beginning of the list of blocks. */
-  public void resetBlockIterator() {
-    _blockIterator = null;
-  }
+  public void resetBlockIterator() { _blockIterator = null; }
   
   /** Returns the next block contained within this data.
    * @return a BlockData, or null if none exists.
@@ -311,14 +297,10 @@ public abstract class Data {
   }
   
   /** Add a BlockData to this Data's list of blocks. */
-  public void addBlock(BlockData b) {
-    _blocks.add(b);
-  }
+  public void addBlock(BlockData b) { _blocks.add(b); }
   
   /** Remove all blocks from this data's list of enclosed blocks.  (Used to simplify testing.) */
-  public void removeAllBlocks() {
-    _blocks.clear();
-  }
+  public void removeAllBlocks() { _blocks.clear(); }
   
   /** Takes in a name and tries to match it with one of this Data's inner classes or inner interfaces.  The input string
     * is a name relative to this SymbolData (such as B.C to request the class A.B.C from class A) and may be delimited 

@@ -140,7 +140,7 @@ public class VariableData {
       }
     }  // formerly .equals but led to infinite loop when _enclosingData is a VariableData
     else if (_enclosingData != otherEnclosingData) {  
-      System.err.println("VariableData.equals: enclosingData failure");
+//      System.err.println("VariableData.equals: enclosingData failure");
       return false; 
     }
     

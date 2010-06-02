@@ -198,17 +198,17 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
 //    return null;
 //  }
 //  
-//  /**Do not allow inner classes at the Intermediate Level.*/
-//  public Void forInnerClassDefDoFirst(InnerClassDef that) {
-////    _addError("Inner classes cannot be used at the Intermediate level", that);
-//    return null;
-//  }
+  /** Allow inner classes at the Intermediate Level.  Override any inherited code. */
+  public Void forInnerClassDefDoFirst(InnerClassDef that) {
+//    _addError("Inner classes cannot be used at the Intermediate level", that);
+    return null;
+  }
   
-//  /**Do not allow inner interfaces at the Intermediate Level.*/
-//    public Void forInnerInterfaceDefDoFirst(InnerInterfaceDef that) {
+  /** Allow inner interfaces at the Intermediate Level. Override any inherited code. */
+    public Void forInnerInterfaceDefDoFirst(InnerInterfaceDef that) {
 //    _addError("Nested interfaces cannot be used at the Intermediate level", that);
-//    return null;
-//  }
+    return null;
+  }
   
 //  /**Do not allow static intiializers at the Intermediate Level.*/
 //  public Void forStaticInitializerDoFirst(StaticInitializer that) {

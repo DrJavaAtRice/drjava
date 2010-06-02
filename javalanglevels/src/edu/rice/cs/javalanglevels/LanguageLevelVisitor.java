@@ -552,14 +552,14 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     else return sd;
   }
   
-    /** Check the file system for the class name, returning the corresponding SymbolData if there is a match.  If no match
-    * is found an resolve is false, a continuation for the symbol is created and entered in the symbol table and continuatoin
-    * table.  This method is a leaf in the 'getSymbol' calling hierarchy.
+  /** Check the file system for the class name, returning the corresponding SymbolData if there is a match.  If no match
+    * is found an resolve is false, a continuation for the symbol is created and entered in the symbol table and 
+    * continuation table.  This method is a leaf in the 'getSymbol' calling hierarchy.
     * @param qualifiedClassName  The name of the class we're looking up.
     * @param si  Information about where the class was called from.
     * @param resolve  true if we want to fully resolve the SymbolData.
     * @param addError  true if we want to throw errors.
-    */
+`    */
   private SymbolData _getSymbolData_FromFileSystem(final String qualifiedClassName, SourceInfo si, boolean resolve,
                                                    boolean addError) {
     // If qualifiedClassName is already defined (and not a continuation to resolve), return
@@ -576,14 +576,16 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     String qualifiedClassNameWithSlashes = 
       qualifiedClassName.replace('.', System.getProperty("file.separator").charAt(0));
     File _fileParent = _file.getParentFile();
-    String programRoot = (_fileParent == null) ? "" : _fileParent.getAbsolutePath();  // Eventually set to root of package (for _file)
+    // Create var that is eventually set to root of package (for _file)
+    String programRoot = (_fileParent == null) ? "" : _fileParent.getAbsolutePath();  
     assert (programRoot != null); // parent != null => parent exists.
     
     final String path;  // The expected path name of the class file (less .class) for qualifiedClassName
 
     if (programRoot.length() > 0) {      
       String packageWithSlashes = _package.replace('.', System.getProperty("file.separator").charAt(0));
-      int indexOfPackage = programRoot.lastIndexOf(packageWithSlashes); // index of slash preceding first char of package name
+      // Get index of slash preceding first char of package name
+      int indexOfPackage = programRoot.lastIndexOf(packageWithSlashes); 
       if (indexOfPackage < 0) path = qualifiedClassName;
       else {
         programRoot = programRoot.substring(0, indexOfPackage);
@@ -760,7 +762,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       return ad;
     }
     
-    // First, handle classNames that clearly do NOT refer to inner classes
+    // First, handle classNames that do NOT manifestly refer to inner classes
     int indexOfNextDot = className.indexOf(".");
     int indexOfNextDollar = className.indexOf("$");   // '$' is assumed not to appear in source program type names
     if (indexOfNextDot == -1 && indexOfNextDollar == -1)
@@ -780,7 +782,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
        */
 //      boolean newResolve = resolve || (indexOfNextDot != length);
       sd = getSymbolDataHelper(prefix, si, resolve, fromClassFile, false, checkImportedStuff);
-//      if (prefix.equals("fully.qualified.Woah")) throw new RuntimeException(prefix + " passed to helper and newResolve = " + resolve );
+//      if (prefix.equals("fully.qualified.Woah")) 
+//        throw new RuntimeException(prefix + " passed to helper and newResolve = " + resolve );
       if (sd != null) { // prefix matches an extant symbol
         String outerClassName = prefix;
         String innerClassName = "";
@@ -874,7 +877,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     if (className.indexOf(".") != -1) return _getQualifiedSymbolData(className, si, resolve, fromClassFile, addError);
     
     String name = null; // name of the SymbolData to be returned
-    String qualifiedClassName = getQualifiedClassName(className);
+    String qualifiedClassName = getQualifiedClassName(className);  // Fails for inner class references
 //    if (className.equals("MyInnerClass")) 
 //      System.err.println("QualifiedClassName for MyInnerClass = " + qualifiedClassName);
 //    System.err.println("qualifiedClassName for " + className + " is " + qualifiedClassName);
@@ -1414,10 +1417,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return md;
   }
   
-  /** This method assumes that the modifiers for this particular VariableDeclaration
-    * have already been checked.  It does no semantics checking.  It simiply converts
-    * the declarators to variable datas, by trying to resolve the types of each declarator.  The VariableDeclaration
-    * may be a field declaration!
+  /** This method assumes that the modifiers for this particular VariableDeclaration have already been checked.  It 
+    * does no semantics checking.  It simply converts the declarators to variable datas, by trying to resolve the types
+    * of each declarator.  The VariableDeclaration may be a field declaration!
     */
   protected VariableData[] _variableDeclaration2VariableData(VariableDeclaration vd, Data enclosing) {
     LinkedList<VariableData> vds = new LinkedList<VariableData>();
@@ -1428,7 +1430,6 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       Type type = declarator.getType();
       String name = declarator.getName().getText();
       SymbolData sd = handleDeclarator(type, name, enclosing);
-   
       if (sd != null) {
         boolean initialized = declarator instanceof InitializedVariableDeclarator;
         // want hasBeenAssigned to be true if this variable declaration is initialized, and false otherwise.
@@ -1438,8 +1439,10 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //        vdata.setIsLocalVariable(true);
         vds.addLast(vdata); 
       }
-      
-      else _addAndIgnoreError("Class or Interface " + name + " not found", type);
+      else {
+//        System.err.println("handleDeclarator(" + type + ", " + name + ", " + enclosing + ") returned null");
+        _addAndIgnoreError("Class or Interface " + name + " not found", type);
+      }
     }
 //    System.err.println("Returning VariableDatas " + vds);
     return vds.toArray(new VariableData[vds.size()]);
@@ -1511,7 +1514,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   }
   
   /** Add an error explaining the modifiers' conflict. */
-  private void _badModifiers(String first, String second, ModifiersAndVisibility that) {
+  public void _badModifiers(String first, String second, JExpressionIF that) {
     _addError("Illegal combination of modifiers. Can't use " + first + " and " + second + " together.", that);
   }
   
@@ -1552,10 +1555,6 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
         else if (s.equals("final")) { 
           isFinal = true;
           if (isAbstract) _badModifiers("final", "abstract", that);
-        }
-        else if (s.equals("static")) { 
-          isStatic = true;
-          if (isAbstract)  _badModifiers("static", "abstract", that);
         }
         else if (s.equals("native")) { 
           isNative = true;
@@ -1695,7 +1694,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     int indexOfLastDot = qualifiedTypeName.lastIndexOf(".");
     if (indexOfLastDot != -1) {
       if (_package.equals(qualifiedTypeName.substring(0, indexOfLastDot))) {
-        _addAndIgnoreError("You do not need to import " + qualifiedTypeName + ".  It is in your package so it is already visible", that);
+        _addAndIgnoreError("You do not need to import " + qualifiedTypeName 
+                             + ".  It is in your package so it is already visible", 
+                           that);
         return null;
       }
     }
@@ -1739,7 +1740,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   public Void forConcreteMethodDefDoFirst(ConcreteMethodDef that) {
     ModifiersAndVisibility mav = that.getMav();
     String[] modifiers = mav.getModifiers();
-    // Concrete methods can now be public, private, protected at the Intermediate level.  They still cannot be static.
+    // Concrete methods can be public, private, protected, or static at the Intermediate (Functional) level.
     for (int i = 0; i < modifiers.length; i++) {
       if (modifiers[i].equals("abstract")) {
         _addError("Methods that have a braced body cannot be declared \"abstract\"", that);
@@ -1747,6 +1748,15 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       }
     }
     return super.forConcreteMethodDefDoFirst(that);
+  }
+  
+  /** Makes sure that this abstract method def is not declared to be static. */
+  public Void forAbstractMethodDefDoFirst(AbstractMethodDef that) {
+    ModifiersAndVisibility mav = that.getMav();
+    String[] modifiers = mav.getModifiers();
+    // Concrete methods can now be public, private, protected at the Intermediate level.  They still cannot be static.
+    if (Utilities.isStatic(modifiers)) _badModifiers("static", "abstract", that);
+    return super.forAbstractMethodDefDoFirst(that);
   }
   
   /** Bitwise operators are allowed in Full Java */
@@ -1812,7 +1822,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     // store the qualified names of all classes defined in this file in:
     _classNamesInThisFile = new LinkedList<String>();
     for (int i = 0; i < types.length; i++) {
-      // TODO: Add static inner classes to this list?
+      // TODO: Add inner classes to this list?
       
       String qualifiedClassName = getQualifiedClassName(types[i].getName().getText());
       _classNamesInThisFile.addFirst(qualifiedClassName);
@@ -1825,7 +1835,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       // Remove the class that is about to be visited from the list of ClassDefs in this file.
       String qualifiedClassName = getQualifiedClassName(types[i].getName().getText());
       // Only visit a class if _classesToBeParsed contains it.  Otherwise, this class has 
-      // already been resolved since it was a superclass of a previous class.
+      // already been processed since it was a superclass of a previous class.
       if (_classesToBeParsed.containsKey(qualifiedClassName)) {
         types[i].visit(this);
       }
@@ -3085,7 +3095,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       SymbolData sd = new SymbolData("alpha.beta");
       testLLVisitor.forPackageImportStatementOnly(cis);
       assertEquals("There should be no errorrs", 0, errors.size());
-      assertTrue("Imported Packages should now contain alpha.beta", testLLVisitor._importedPackages.contains("alpha.beta"));
+      assertTrue("Imported Packages should now contain alpha.beta", 
+                 testLLVisitor._importedPackages.contains("alpha.beta"));
       
       //Test one that should not throw an error: Importing a subpackage of the current package
       testLLVisitor._package = "myPackage";
@@ -3138,12 +3149,17 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       assertTrue("_classNamesInThisFile should contain the two ClassDefs.", 
                  testLLVisitor._classNamesInThisFile.contains("Awesome"));
-      assertTrue("_classNamesInThisFile should contain the two ClassDefs.", testLLVisitor._classNamesInThisFile.contains("Gnarly"));
+      assertTrue("_classNamesInThisFile should contain the two ClassDefs.", 
+                 testLLVisitor._classNamesInThisFile.contains("Gnarly"));
       
-      assertTrue("_classNamesInThisFile should contain the InterfaceDef", testLLVisitor._classNamesInThisFile.contains("NiftyWords"));
-      assertTrue("_classesToBeParsed should contain the two ClassDefs.", testLLVisitor._classesToBeParsed.containsKey("Awesome"));
-      assertTrue("_classesToBeParsed should contain the two ClassDefs.", testLLVisitor._classesToBeParsed.containsKey("Gnarly"));
-      assertTrue("_classesToBeParsed should contain the InterfaceDef", testLLVisitor._classesToBeParsed.containsKey("NiftyWords"));
+      assertTrue("_classNamesInThisFile should contain the InterfaceDef", 
+                 testLLVisitor._classNamesInThisFile.contains("NiftyWords"));
+      assertTrue("_classesToBeParsed should contain the two ClassDefs.", 
+                 testLLVisitor._classesToBeParsed.containsKey("Awesome"));
+      assertTrue("_classesToBeParsed should contain the two ClassDefs.", 
+                 testLLVisitor._classesToBeParsed.containsKey("Gnarly"));
+      assertTrue("_classesToBeParsed should contain the InterfaceDef", 
+                 testLLVisitor._classesToBeParsed.containsKey("NiftyWords"));
       
     }
     
@@ -3217,17 +3233,20 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       shift1.visit(testLLVisitor);
       assertEquals("Should be no errors", 0, errors.size());
-//      assertEquals("error message should be correct", "Shift assignment operators cannot be used at any language level",
+//      assertEquals("error message should be correct", 
+//                   "Shift assignment operators cannot be used at any language level",
 //                   errors.getLast().getFirst());
       
       shift2.visit(testLLVisitor);
       assertEquals("Should be no errors", 0, errors.size());
-//      assertEquals("error message should be correct", "Shift assignment operators cannot be used at any language level",
+//      assertEquals("error message should be correct", 
+//                   "Shift assignment operators cannot be used at any language level",
 //                   errors.getLast().getFirst());
       
       shift3.visit(testLLVisitor);
       assertEquals("Should be no errors", 0, errors.size());
-//      assertEquals("error message should be correct", "Shift assignment operators cannot be used at any language level",
+//      assertEquals("error message should be correct", 
+//                   "Shift assignment operators cannot be used at any language level",
 //                   errors.getLast().getFirst());
     
       //BitwiseAssignmentExpressions
@@ -3272,13 +3291,17 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       bit4.visit(testLLVisitor);
       assertEquals("Should be no errors", 0, errors.size());
-//      assertEquals("error message should be correct", "Bitwise and expressions cannot be used at any language level." + 
-//                   "  Perhaps you meant to compare two values using regular and (&&)", errors.getLast().getFirst());
+//      assertEquals("error message should be correct", 
+//                   "Bitwise and expressions cannot be used at any language level." + 
+//                   "  Perhaps you meant to compare two values using regular and (&&)", 
+//                   errors.getLast().getFirst());
       
       bit5.visit(testLLVisitor);
       assertEquals("Should be no errors", 0, errors.size());
-//      assertEquals("error message should be correct", "Bitwise or expressions cannot be used at any language level." + 
-//                   "  Perhaps you meant to compare two values using regular or (||)", errors.getLast().getFirst());
+//      assertEquals("error message should be correct", 
+//                   "Bitwise or expressions cannot be used at any language level." + 
+//                   "  Perhaps you meant to compare two values using regular or (||)", 
+//                   errors.getLast().getFirst());
       
       bit6.visit(testLLVisitor);
       assertEquals("Should be no errors", 0, errors.size());
@@ -3287,8 +3310,10 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       bit7.visit(testLLVisitor);
       assertEquals("Should be no errors", 0, errors.size());
-//      assertEquals("error message should be correct", "Bitwise not expressions cannot be used at any language level." +
-//                   "  Perhaps you meant to negate this value using regular not (!)", errors.getLast().getFirst());
+//      assertEquals("error message should be correct", 
+//                   "Bitwise not expressions cannot be used at any language level." +
+//                   "  Perhaps you meant to negate this value using regular not (!)", 
+//                   errors.getLast().getFirst());
       
       //shift binary expressions
       LeftShiftExpression shift4 = 

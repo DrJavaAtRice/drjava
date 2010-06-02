@@ -210,7 +210,6 @@ public class BodyTypeChecker extends Bob {
     return value_result;
   }
   
-  
   /** First, visit the condition expression of the for statement with a special visitor that
     * makes sure no assignment is done.
     * Then, visit the condition expression with the ExpressionTypeChecker which will do all the

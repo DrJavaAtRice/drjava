@@ -38,6 +38,7 @@ package edu.rice.cs.javalanglevels;
 
 import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.parser.*;
+import edu.rice.cs.javalanglevels.util.*;
 import java.util.*;
 import java.io.*;
 
@@ -60,7 +61,8 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     * @importedFiles  A list of classes that were specifically imported
     * @param importedPackages  A list of package names that were specifically imported
     * @param classDefsInThisFile  A list of the classes that are defined in the source file
-    * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need to be resolved
+    * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need 
+    *                       to be resolved
     */
   public BodyBodyIntermediateVisitor(BodyData bodyData,
                                      File file, 
@@ -123,7 +125,8 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     bd.addVar(exceptionVar);
     
     b.getStatements().visit(new BodyBodyIntermediateVisitor(bd, _file, _package, _importedFiles, _importedPackages, 
-                                                            _classNamesInThisFile, continuations, _innerClassesToBeParsed));
+                                                            _classNamesInThisFile, continuations, 
+                                                            _innerClassesToBeParsed));
     forBlockOnly(b);
     return forCatchBlockOnly(that);
   }
@@ -170,7 +173,7 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
   /** If this is the body of a constructor, referencing 'this' is illegal. So, check to see if this is a constructor,
     * and if so, throw an error. This should catch both the ComplexThisReference and the SimpleThisReference case.
     */
-  //TODO: Long term, it might be nice to create a ConstructorBodyIntermediateVisitor, so this check is not necessary here.
+  //TODO: it might be nice to create a ConstructorBodyIntermediateVisitor, so this check is not necessary here.
   public Void forThisReferenceDoFirst(ThisReference that) {
     if (isConstructor(_bodyData)) {
       _addAndIgnoreError("You cannot reference the field 'this' inside a constructor at the Intermediate Level", that);
@@ -198,6 +201,13 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     return vds;
   }
   
+//  /** Check for problems with modifiers that are specific to method definitions. */
+//  public Void forModifiersAndVisibilityDoFirst(ModifiersAndVisibility that) {
+//    String[] modifiers = that.getModifiers();
+//    if (Utilities.isAbstract(modifiers) && Utilities.isStatic(modifiers))  _badModifiers("static", "abstract", that);
+//    return super.forModifiersAndVisibilityDoFirst(that);
+//  }
+  
   /** Test most of the methods declared above right here: */
   public static class BodyBodyIntermediateVisitorTest extends TestCase {
     
@@ -206,10 +216,13 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     private SymbolData _sd1;
     private MethodData _md1;
     private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _protectedMav =
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
     private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _abstractMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
     private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
     
     
@@ -232,7 +245,8 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
       _hierarchy = new Hashtable<String, TypeDefBase>();
       _bbv = 
         new BodyBodyIntermediateVisitor(_md1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
-                                        new LinkedList<String>(), new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+                                        new LinkedList<String>(), 
+                                        new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
                                         new LinkedList<String>());
       _bbv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
       _bbv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
@@ -291,23 +305,26 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
       VariableData vd3 = new VariableData("field3", _finalMav, SymbolData.DOUBLE_TYPE, false, _bbv._bodyData);
       vdecl2.visit(_bbv);
       assertEquals("There should be one error.", 1, errors.size());
-      assertEquals("The error message should be correct", "You cannot have two variables with the same name.", errors.get(0).getFirst());
+      assertEquals("The error message should be correct", "You cannot have two variables with the same name.", 
+                   errors.get(0).getFirst());
       assertTrue("field3 was added.", _md1.getVars().contains(vd3));
     }
     
 //    public void testForOtherExpressionOnly() {
 //      // Test that if the OtherExpressino contains a Word, that the Word is resolved.
-//      assertFalse("java.lang.System should not be in the symbolTable.", symbolTable.containsKey("java.lang.System"));
-//      Expression ex = new Expression( SourceInfo.NO_INFO,
-//                                     new ExpressionPiece[] { new OtherExpression(SourceInfo.NO_INFO, 
-//                                                                                 new Word(SourceInfo.NO_INFO,
-//                                                                                                              "System"))});
+//      assertFalse("java.lang.System should not be in the symbolTable.", 
+//                  LanguageLevelConverter.symbolTable.containsKey("java.lang.System"));
+//      Expression ex = 
+//        new Expression( SourceInfo.NO_INFO,
+//                       new ExpressionPiece[] { new OtherExpression(SourceInfo.NO_INFO, 
+//                                                                   new Word(SourceInfo.NO_INFO, "System"))});
 //      ex.visit(_bbv);
 //////      System.out.println(errors.get(0).getFirst());
 ////      for (int i = 0; i < errors.size(); i++)
 ////        System.out.println(errors.get(i).getFirst());
 //      assertEquals("There should not be any errors.", 0, errors.size());
-//      assertTrue("java.lang.System should be in the symbolTable.", symbolTable.containsKey("java.lang.System"));
+//      assertTrue("java.lang.System should be in the symbolTable.", 
+//                 LanguageLevelConverter.symbolTable.containsKey("java.lang.System"));
 //    }
     
     public void testForTryCatchStatement() {

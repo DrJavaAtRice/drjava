@@ -591,15 +591,14 @@ public class SymbolData extends TypeData {
     return false;
   }
   
-  /**
-   * Check to see if this SymbolData is an inner class of outerClass (that is, that outerClass appears
-   * somewhere in its enclosing data chain.  If stopAtStatic flag is true, stop as soon as we see a static class
-   * in the chain.  This is because we are trying to resolve something, such as a "this" call, that cannot be seen outside
-   * of a static inner class.
-   * @param outerClass  The SymbolData we believe might be our outer class.
-   * @param stopAtStatic  boolean flag, true if we want to stop at a static outer class.
-   * @return  true if we are its inner class, false otherwise.
-   */
+   /** Checks to see if this SymbolData is an inner class of outerClass (that is, that outerClass appears
+     * somewhere in its enclosing data chain.  If stopAtStatic flag is true, stop as soon as we see a static class
+     * in the chain.  This is because we are trying to resolve something, such as a "this" call, that cannot be seen outside
+     * of a static inner class.
+     * @param outerClass  The SymbolData we believe might be our outer class.
+     * @param stopAtStatic  boolean flag, true if we want to stop at a static outer class.
+     * @return  true if we are its inner class, false otherwise.
+     */
   public boolean isInnerClassOf(SymbolData outerClass, boolean stopAtStatic) {
     if (this == outerClass) {return true;}
     Data outerData = this.getOuterData();
@@ -767,14 +766,12 @@ public class SymbolData extends TypeData {
     return super.addVar(var);
   }
   
-  /**
-   * When you add fields to a SymboLData, they are given an initial value.
-   */
+  /** When you add fields to a SymboLData, they are given an initial value.*/
   public boolean addVars(VariableData[] vars) {
    boolean success = true;
     for (int i = 0; i<vars.length; i++) {
       LinkedList<SymbolData> seen = new LinkedList<SymbolData>();
-      if (!_repeatedNameInHierarchy(vars[i], seen)) {
+      if (!_repeatedName(vars[i], seen)) {
         if (!vars[i].isFinal()) {
         vars[i].gotValue();
         }
@@ -787,14 +784,12 @@ public class SymbolData extends TypeData {
     return success;
  }
 
-  /** Add the array of variable datas to the list of variables defined in this scope, unless
-    * a name has already been used.  Return true if all variables were added successfully, 
-    * false otherwise.  Set each of the variable datas in the array to be final before
-    * adding them.
-    * 
-    * Since this method is used to add fields at the Elementary and Intermediate levels,
-    * and at these levels, we do not want the user to be able to shadow fields defined
-    * in the superclass hierarchy, instead of using the normal repeatedName method,
+  /** Add the array of variable datas to the list of variables defined in this scope, unless a name has already been 
+    * used.  Return true if all variables were added successfully, false otherwise.  Set each of the variable datas in 
+    * the array to be final before adding them. 
+    * Since this method is used to add fields at the Functional level,
+    * and at this level, we do not want the user to be able to shadow fields defined
+    * in the superclass hierarchy, instead of using the normal repeated Name method,
     * check the repeated name throughout the hierarchy.
     * 
     * @param vars  The VariableData[] that we want to add.
@@ -815,38 +810,44 @@ public class SymbolData extends TypeData {
     return success;
   }
   
-  /**
-   * Check to see if a variable with the same name as vr has already been
-   * defined in the scope of this data or its super class.  If so, return true.  Otherwise, return false.
-   * @param vr  The VariableData whose name we are searching for.
-   * @return  true if that name has already been used in this scope, false otherwise.
-   */
+  /** Checks to see if a variable with the same name as vr has already been defined in the scope of this data.  If so, 
+    * return true.  Otherwise, return false.
+    * @param vr  The VariableData whose name we are searching for.
+    * @return  true if that name has already been used in this scope, false otherwise.
+    */
+  private boolean _repeatedName(VariableData vr, LinkedList<SymbolData> seen) {
+    seen.addLast(this);
+    Iterator<VariableData> iter = _vars.iterator();
+    while (iter.hasNext()) {
+      if (vr.getName().equals(iter.next().getName())) return true;
+    }
+    return false;
+  }
+  
+  /** Checks to see if a variable with the same name as vr has already been defined in the scope of this data or its 
+    * super class/interfaces.  If so, return true.  Otherwise, return false.
+    * @param vr  The VariableData whose name we are searching for.
+    * @return  true if that name has already been used in this scope, false otherwise.
+    */
   private boolean _repeatedNameInHierarchy (VariableData vr, LinkedList<SymbolData> seen) {
     seen.addLast(this);
     Iterator<VariableData> iter = _vars.iterator();
     while (iter.hasNext()) {
-      if (vr.getName().equals(iter.next().getName())) {
-        return true;
-      }
+      if (vr.getName().equals(iter.next().getName())) return true;
     }
     
-    //Does this shadow something in the super class?
-    if (_superClass != null && _superClass._repeatedNameInHierarchy(vr, seen)) {return true;}
+    // Does this shadow something in the super class?
+    if (_superClass != null && _superClass._repeatedNameInHierarchy(vr, seen)) return true;
     
     //Does this shadow something in the super interfaces?
     for (int i = 0; i<_interfaces.size(); i++) {
-      if (_interfaces.get(i)._repeatedNameInHierarchy(vr, seen)) {return true;}
+      if (_interfaces.get(i)._repeatedNameInHierarchy(vr, seen)) return true;
     }
     return false;
   }
-
-
-  
   
   /** @return the list of methods defined in this symbol data*/
-  public LinkedList<MethodData> getMethods() {
-    return _methods;
-  }
+  public LinkedList<MethodData> getMethods() { return _methods; }
   
   /** Returns true if there is a method with the given name in this SymbolData.
     * @param name  The name of the method to return
@@ -1276,7 +1277,7 @@ public class SymbolData extends TypeData {
         this.isBooleanType(version));
   }
 
-  /**@return true if this is a non float or boolean type, without autoboxing*/
+  /** @return true if this is a non float or boolean type, without autoboxing*/
   public boolean isNonFloatOrBooleanTypeWithoutAutoboxing() {
     return (this==SymbolData.INT_TYPE ||
         this==SymbolData.LONG_TYPE ||

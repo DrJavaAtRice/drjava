@@ -39,9 +39,7 @@ package edu.rice.cs.javalanglevels;
 import edu.rice.cs.javalanglevels.parser.*;
 import java.io.File;
 
-/**
- * Used to represent custom parse exceptions in the JExpression parser.
- */
+/** Used to represent custom parse exceptions in the JExpression parser. */
 public class JExprParseException extends ParseException {
 
   private File _file;
@@ -52,8 +50,7 @@ public class JExprParseException extends ParseException {
                         Token currentTokenVal,
                         int[][] expectedTokenSequencesVal,
                         String[] tokenImageVal
-                       )
-  {
+                       ) {
     super(currentTokenVal, expectedTokenSequencesVal, tokenImageVal);
     _file = file;
     _message = message;
