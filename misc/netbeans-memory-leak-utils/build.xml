@@ -1,0 +1,432 @@
+<!-- netbeans-memory-leak-utils Build Script -->
+
+<!-- This build script is based on the template located at "trunk/misc/build-template.xml"
+     in the DrJava Subversion repository.  In general, changes made to the script should be
+     reflected in the template as well. -->
+     
+<project name="netbeans-memory-leak-utils" default="help">
+
+  <property name="readable-project-name" value="netbeans-memory-leak-utils" />
+  <property name="src-working-dir" value="src/org/netbeans/test" />
+  <property name="svn-repository" value="https://drjava.svn.sourceforge.net/svnroot/drjava" />
+
+  <!-- Properties loaded from a file -->
+  <property name="props" value="../ant.properties" />
+  <property file="${props}" />
+
+  <property environment="env" />
+  <property name="java6-home" value="${env.JAVA6_HOME}" />
+  <property name="java5-home" value="${env.JAVA5_HOME}" />
+  
+  <!-- Don't use or inherit the CLASSPATH environment variable for anything -->
+  <property name="build.sysclasspath" value="ignore" />
+  
+  <!-- Extension that defines the "extendclasspath" task.  This should be a standard feature of Ant, but
+       as long as it's not, we can use this extension from the Clover developers. -->
+  <taskdef resource="com/cenqua/ant/antlib.xml" classpath="lib/buildlib/cenquatasks.jar" />
+
+  <!-- Extension containing various tools, including "for" and "if" -->
+  <taskdef resource="net/sf/antcontrib/antlib.xml" classpath="lib/buildlib/ant-contrib.jar"/>
+
+  <!-- fornum task, used for test-repeat -->
+  <taskdef name="fornum" classname="edu.rice.cs.plt.ant.ForNumTask" classpath="lib/buildlib/plt-ant.jar" onerror="report" />
+  
+<!--  <extendclasspath path="lib/buildlib/junit.jar" /> -->
+
+  <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
+  
+  
+  
+  <!-- ************
+       Help Targets
+       ************ -->
+       
+  <target name="help" description="Print general build script information">
+    <echo message="----------------------------------------------------------------------" />
+    <echo message="${readable-project-name} Build Scripts" />
+    <echo message="----------------------------------------------------------------------" />
+    <echo message="Type 'ant -projecthelp' or 'ant -p' to see the list of targets." />
+    <echo message="Type 'ant options' to see the list of customizable options." />
+    <echo message="" />
+    <echo message="For this build file to function properly, the following environment" />
+    <echo message="variables may need to be defined (depending on the target invoked):" />
+    <echo message="PATH: The 'javac' command is used for compilation;" />
+    <echo message="      the 'java' command is used by default in testing/running; " />
+    <echo message="      the 'svn' command is used to generate version numbers and " />
+    <echo message="      in Subversion targets" />
+    <echo message="JAVA5_HOME: Home folder of the Java 5 JRE or JDK (required for" />
+    <echo message="            compiling and '-5' targets)" />
+    <echo message="JAVA6_HOME: Home folder of the Java 6 JRE or JDK (required for" />
+    <echo message="            '-6' targets)" />
+    <echo message="" />
+    <echo message="For control over the version of Java used to run Ant, set JAVA_HOME." />
+    <echo message="Ant may also require ANT_HOME to be set.  Note that the value of " />
+    <echo message="CLASSPATH will be ignored -- classes on the system class path will " />
+    <echo message="not be visible during the build process." />
+  </target>
+  
+  <target name="options" description="Print the list of customizable options">
+    <echo message="----------------------------------------------------------------------" />
+    <echo message="${readable-project-name} Build Script Customizable Options" />
+    <echo message="----------------------------------------------------------------------" />
+    <echo message="The following properties control custom behavior.  They may be defined " />
+    <echo message="on the command line ('-Dname=value'), in a properties file (named " />
+    <echo message="'../ant.properties' by default, and containing 'name=value' pairs on " />
+    <echo message="each line), or in the ANT_ARGS environment variable (using " />
+    <echo message="'-Dname=value')." />
+    <echo message="" />
+    <echo message="props: An external properties file (default: 'ant.properties')" />
+    <echo message="clean-can-fail: Whether the failure of a 'clean' operation can halt" />
+    <echo message="                the build (default: yes)" />
+  </target>
+  
+  
+  
+  <!-- ************
+       Build Target
+       ************ -->
+  
+  <target name="build" depends="jar" description="Shortcut for 'jar'">
+  </target>
+  
+
+
+  <!-- *******************
+       Compilation Targets
+       ******************* -->
+       
+  <target name="compile" depends="do-compile, copy-resources, unjar-libs"
+          description="Compile all source files (after generating the source)">
+  </target>
+  
+  <target name="do-compile" depends="resolve-java5-runtime, resolve-java5-tools">
+  
+    <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
+    
+    <mkdir dir="classes/base" />
+    <mkdir dir="classes/test" />
+    
+    <!-- Move any test classes back to base to prevent recompilation -->
+    <move todir="classes/base">
+      <fileset dir="classes/test" includes="**/*" />
+    </move>
+    
+    <javac srcdir="src" destdir="classes/base" source="1.5" target="1.5"
+           bootclasspath="${java5-runtime}" sourcepath="" includeAntRuntime="no"
+           executable="javac" fork="yes" memoryMaximumSize="512M"
+           debug="on" optimize="off" deprecation="on"	>
+      <classpath>
+        <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
+             debugger code into the "platform" module -->
+        <pathelement location="${java5-tools}" />
+        <fileset refid="libs" />
+        <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="classes/base" />
+      </classpath>
+      <compilerarg value="-Xlint" />
+      <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
+      <compilerarg value="-Xlint:-serial" /> 
+      <!-- Use the next line to compile against other sources, ignoring any unneeded classes.
+           This can be useful in creating a pruned version of a jar file for the lib directory.
+           (You must also clear the sourcepath="" option.)
+      <include name="${src-working-dir}/**/*.java" /> -->
+    </javac>
+    
+    <mkdir dir="classes/test" /> <!-- May be deleted by the previous move -->
+    <move todir="classes/test">
+      <fileset dir="classes/base">
+        <include name="**/*Test.class" />
+        <include name="**/*Test$*.class" />
+        <include name="**/*TestCase.class" />
+        <include name="**/*TestCase$*.class" />
+        <!-- Additional test classes should be listed here -->
+      </fileset>
+    </move>
+    
+  </target>
+  
+  
+  <target name="copy-resources">
+    <copy todir="classes/base">
+      <fileset dir="src">
+        <include name="**/LICENSE*" />
+        <include name="**/README*" />
+        <include name="**/*.gif" />
+        <include name="**/*.png" />
+        <include name="**/*.jpg" />
+        <include name="**/*.jpeg" />
+        <include name="**/*.properties" />
+        <!-- Additional resource files should be listed here -->
+      </fileset>
+    </copy>
+  </target>
+  
+  
+  <target name="unjar-libs">
+    <antcall target="do-unjar-libs">
+      <param name="generate-sourcedir" value="lib" />
+      <param name="generate-dir" value="classes/lib" />
+    </antcall>
+  </target>
+  
+  <target name="do-unjar-libs" depends="check-generate-dir-from-dir" unless="already-generated">
+    <echo message="Unjarring jar files in the lib directory" />
+    <!-- Delete "classes/lib" in case it exists (but is out of date) -->
+    <delete dir="classes/lib" />
+    <mkdir dir="classes/lib" />
+    <unjar dest="classes/lib">
+      <fileset refid="libs" />
+      <patternset excludes="META-INF/**" />
+    </unjar>
+  </target>
+  
+  
+
+  <!-- ***********
+       Jar Targets
+       *********** -->
+       
+  <target name="jar" depends="compile" 
+          description="Create the jar file with all classes and libs (compiling first)">
+    <jar jarfile="${ant.project.name}.jar">
+      <fileset dir="classes/lib" />
+      <fileset dir="classes/base" />
+    </jar>
+  </target>
+
+  
+  <!-- *************
+       Clean Targets
+       ************* -->
+       
+  <target name="clean" depends="clean-intermediate, clean-products"
+          description="Remove all build products; the result should match the intended Subversion contents">
+  </target>
+
+  <target name="clean-intermediate" unless="skip-clean">
+    <echo message="Deleting all intermediate build products" />
+    
+    <delete dir="classes" failonerror="${clean-can-fail}" />
+
+    <delete includeemptydirs="true" failonerror="${clean-can-fail}">
+      <fileset dir="testFiles">
+        <exclude name="**" />
+        <!-- Additional test output files should be listed here -->
+      </fileset>
+      <fileset dir="${basedir}" defaultexcludes="no">
+        <include name="TEST*" />
+        <include name="src/**/*.class" />
+        <include name="svn-info.txt" />
+        <include name="findbugs-excludes.xml" />
+        <!-- We could get rid of backups, but "update" ignores them, so they're okay.
+             (doesn't work if defaultexcludes is "yes") -->
+        <!-- <include name="**/*~" /> -->
+        <!-- Get rid of pesky OS helper files (doesn't work if defaultexcludes is "yes") -->
+        <include name="**/.DS_Store" />
+        <include name="**/Thumbs.db" />
+        <!-- Additional files to delete may be listed here -->
+      </fileset>
+    </delete>
+    
+  </target>
+  
+  <target name="clean-products" unless="skip-clean">
+    <echo message="Deleting all final build products" />
+    
+    <delete dir="docs" failonerror="${clean-can-fail}" />
+    <delete dir="testResults" failonerror="${clean-can-fail}" />
+    
+    <delete includeemptydirs="true" failonerror="${clean-can-fail}">
+      <fileset dir="${basedir}" defaultexcludes="no">
+        <include name="*.jar" />
+        <include name="*.zip" />
+        <include name="*.tar.gz" />
+        <include name="*.exe" />
+      </fileset>
+    </delete>
+	
+  </target>  
+  
+  <!-- ***************************
+       Property-resolution Targets 
+       *************************** -->
+  
+  <target name="resolve-java6-runtime">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java6-runtime will only be set the *first* time. -->
+
+    <property name="java6-runtime-1" location="${java6-home}/lib/rt.jar" />
+    <available property="java6-runtime" value="${java6-runtime-1}" file="${java6-runtime-1}" />
+
+    <property name="java6-runtime-2" location="${java6-home}/jre/lib/rt.jar" />
+    <available property="java6-runtime" value="${java6-runtime-2}" file="${java6-runtime-2}" />
+
+    <property name="java6-runtime-3" location="${java6-home}/../Classes/classes.jar" />
+    <available property="java6-runtime" value="${java6-runtime-3}" file="${java6-runtime-3}" />
+
+    <fail message="Can't find rt.jar in the Java 6 home: ${java6-home}" unless="java6-runtime" />
+  </target>
+  
+  <target name="resolve-java6-exec">
+    <!-- We rely on "location" to generate a platform-specific path -->
+
+    <property name="java6-exec-1" location="${java6-home}/bin/java.exe" />
+    <condition property="java6-exec" value="${java6-exec-1}">
+      <and>
+        <available file="${java6-exec-1}" />
+        <os family="windows" />
+      </and>
+    </condition>
+    
+    <property name="java6-exec-2" location="${java6-home}/bin/java" />
+    <available property="java6-exec" value="${java6-exec-2}" file="${java6-exec-2}" />
+
+    <fail message="Can't find the java executable in the Java 6 home: ${java6-home}" unless="java6-exec" />
+  </target>
+  
+  <target name="resolve-java5-runtime">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java5-runtime will only be set the *first* time. -->
+
+    <property name="java5-runtime-1" location="${java5-home}/lib/rt.jar" />
+    <available property="java5-runtime" value="${java5-runtime-1}" file="${java5-runtime-1}" />
+
+    <property name="java5-runtime-2" location="${java5-home}/jre/lib/rt.jar" />
+    <available property="java5-runtime" value="${java5-runtime-2}" file="${java5-runtime-2}" />
+
+    <property name="java5-runtime-3" location="${java5-home}/../Classes/classes.jar" />
+    <available property="java5-runtime" value="${java5-runtime-3}" file="${java5-runtime-3}" />
+
+    <fail message="Can't find rt.jar in the Java 5 home: ${java5-home}" unless="java5-runtime" />
+  </target>
+  
+  <target name="resolve-java5-exec">
+    <!-- We rely on "location" to generate a platform-specific path -->
+
+    <property name="java5-exec-1" location="${java5-home}/bin/java.exe" />
+    <condition property="java5-exec" value="${java5-exec-1}">
+      <and>
+        <available file="${java5-exec-1}" />
+        <os family="windows" />
+      </and>
+    </condition>
+    
+    <property name="java5-exec-2" location="${java5-home}/bin/java" />
+    <available property="java5-exec" value="${java5-exec-2}" file="${java5-exec-2}" />
+
+    <fail message="Can't find the java executable in the Java 5 home: ${java5-home}" unless="java5-exec" />
+  </target>
+    
+  <target name="resolve-java6-tools">
+    <property name="java6-tools-1" location="${java6-home}/lib/tools.jar" />
+    <available property="java6-tools" value="${java6-tools-1}" file="${java6-tools-1}" />
+
+    <property name="java6-tools-2" location="${java6-home}/../lib/tools.jar" />
+    <available property="java6-tools" value="${java6-tools-2}" file="${java6-tools-2}" />
+
+    <property name="java6-tools-3" location="${java6-home}/../Classes/classes.jar" />
+    <available property="java6-tools" value="${java6-tools-3}" file="${java6-tools-3}" />
+
+    <fail message="Can't find tools.jar in the Java 6 home: ${java6-home}" unless="java6-tools" />
+  </target>
+  
+  <target name="resolve-java5-tools">
+    <property name="java5-tools-1" location="${java5-home}/lib/tools.jar" />
+    <available property="java5-tools" value="${java5-tools-1}" file="${java5-tools-1}" />
+
+    <property name="java5-tools-2" location="${java5-home}/../lib/tools.jar" />
+    <available property="java5-tools" value="${java5-tools-2}" file="${java5-tools-2}" />
+
+    <property name="java5-tools-3" location="${java5-home}/../Classes/classes.jar" />
+    <available property="java5-tools" value="${java5-tools-3}" file="${java5-tools-3}" />
+
+    <fail message="Can't find tools.jar in the Java 5 home: ${java5-home}" unless="java5-tools" />
+  </target>
+  
+  <target name="resolve-current-tools">
+    <property name="current-tools-1" location="${java.home}/lib/tools.jar" />
+    <available property="current-tools" value="${current-tools-1}" file="${current-tools-1}" />
+
+    <property name="current-tools-2" location="${java.home}/../lib/tools.jar" />
+    <available property="current-tools" value="${current-tools-2}" file="${current-tools-2}" />
+
+    <property name="current-tools-3" location="${java.home}/../Classes/classes.jar" />
+    <available property="current-tools" value="${current-tools-3}" file="${current-tools-3}" />
+
+    <fail message="Can't find tools.jar in the Java home: ${java.home}" unless="current-tools" />
+  </target>
+  
+          
+  <target name="assert-jar-exists">
+    <available property="jar-exists" file="${ant.project.name}.jar" />
+    <fail message="Can't find ${ant.project.name}.jar" unless="jar-exists" />
+  </target>
+  
+  <target name="assert-clover-jar-exists">
+    <available property="clover-jar-exists" file="${clover-jar}" />
+    <fail message="${clover-jar} does not exist" unless="clover-jar-exists" />
+  </target>
+  
+  <target name="assert-launch4j-exists">
+    <available property="launch4j-exists" file="${launch4j-home}/launch4j.jar" />
+    <fail message="${launch4j-home}/launch4j.jar does not exist" unless="launch4j-exists" />
+  </target>
+  
+  <target name="assert-findbugs-exists">
+    <available property="findbugs-exists" file="${findbugs-home}/lib/findbugs.jar" />
+    <fail message="${findbugs-home}/lib/findbugs.jar does not exist" unless="findbugs-exists" />
+  </target>
+  
+    
+  <target name="resolve-jvm-args">
+    <condition property="jvm-args" value="-server">
+      <istrue value="${force-server}" />
+    </condition>
+    <!-- else... -->
+    <property name="jvm-args" value="" />
+  </target>
+  
+
+  <!-- Sets "already-generated" if "generate-file" is more recent than "generate-sourcefile";
+       otherwise, the out-of-date target file is deleted (if it exists).  Note that, since
+       properties can only be set once, this should happen underneath an "antcall". -->
+  <target name="check-generate-file-from-file">
+    <dependset>
+      <srcfilelist dir="${basedir}" files="${generate-sourcefile}" />
+      <targetfilelist dir="${basedir}" files="${generate-file}" />
+    </dependset>
+    <available file="${generate-file}" property="already-generated" />
+  </target>
+
+  <!-- Sets "already-generated" if "generate-file" is more recent than everything in
+       "generate-sourcedir"; otherwise, the out-of-date target file is deleted (if it exists).
+        Note that, since properties can only be set once, this should happen underneath an "antcall". -->
+  <target name="check-generate-file-from-dir">
+    <dependset>
+      <srcfileset dir="${generate-sourcedir}" />
+      <targetfilelist dir="${basedir}" files="${generate-file}" />
+    </dependset>
+    <available file="${generate-file}" property="already-generated" />
+  </target>
+
+  <!-- Sets "already-generated" if "generate-dir" was created (or modified) more recently 
+       than "generate-sourcefile".  Note that, since properties can only be set once, this 
+       should happen underneath an "antcall". -->
+  <target name="check-generate-dir-from-file">
+    <uptodate property="already-generated" targetfile="${generate-dir}" srcfile="${generate-sourcefile}" />
+  </target>
+  
+  <!-- Sets "already-generated" if "generate-dir" was created (or modified) more recently 
+       than everything in "generate-sourcedir".  Note that, since properties can only be 
+       set once, this should happen underneath an "antcall". -->
+  <target name="check-generate-dir-from-dir">
+    <!-- Unfortunately, a bug in uptodate prevents this from working properly,
+         so we just have to equate *existence* with being up to date.
+    <uptodate property="already-generated" targetfile="${generate-dir}" >
+      <srcfiles dir="${generate-sourcedir}" />
+    </uptodate>
+    -->
+    <available file="${generate-dir}" property="already-generated" />
+  </target>
+
+</project>

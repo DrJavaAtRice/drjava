@@ -225,6 +225,7 @@
         <pathelement location="${java5-tools}" />
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
         <pathelement location="classes/base" />
       </classpath>
       <compilerarg value="-Xlint" />
@@ -408,6 +409,7 @@
         <pathelement location="${test-tools}" />
         <pathelement location="${junit-jar}" />
         <pathelement location="lib/buildlib/plt-ant.jar" /> <!-- required for custom formatter -->
+        <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
         <pathelement location="${clover-jar}" />
         <pathelement location="classes/test" />
         <pathelement location="classes/base" />
@@ -575,6 +577,7 @@
         <pathelement location="${java5-tools}" />
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
       </classpath>
       <link href="http://java.sun.com/j2se/1.5/docs/api" />
       <link href="http://junit.org/junit/javadoc/3.8.1" />
@@ -645,6 +648,7 @@
         <pathelement location="${java5-tools}" />
         <pathelement location="classes/lib" />
         <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
       </auxclasspath>
     </findbugs>
     <delete file="findbugs-excludes.xml" />
