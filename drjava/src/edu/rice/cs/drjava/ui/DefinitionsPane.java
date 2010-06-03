@@ -576,33 +576,42 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     _colorOptionListeners.add(pair);
     DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_THREAD_COLOR, temp);
 
-    OptionListener<Boolean> aaTemp = new AntiAliasOptionListener();
-    Pair<Option<Boolean>, OptionListener<Boolean>> aaPair = 
-      new Pair<Option<Boolean>, OptionListener<Boolean>>(OptionConstants.TEXT_ANTIALIAS, aaTemp);
-    _booleanOptionListeners.add(aaPair);
-    DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS, aaTemp);
+    OptionListener<Boolean> bTemp = new AntiAliasOptionListener();
+    Pair<Option<Boolean>, OptionListener<Boolean>> bPair = 
+      new Pair<Option<Boolean>, OptionListener<Boolean>>(OptionConstants.TEXT_ANTIALIAS, bTemp);
+    _booleanOptionListeners.add(bPair);
+    DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS, bTemp);
 
-    DrJava.getConfig().addOptionListener(OptionConstants.DISPLAY_RIGHT_MARGIN,
-                                         new OptionListener<Boolean>() {
+    bTemp = new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oce) {
         _displayRightMargin = oce.value;
         DefinitionsPane.this.repaint();
       }
-    });
-    DrJava.getConfig().addOptionListener(OptionConstants.RIGHT_MARGIN_COLUMNS,
-                                         new OptionListener<Integer>() {
+    };
+    bPair = new Pair<Option<Boolean>, OptionListener<Boolean>>(OptionConstants.DISPLAY_RIGHT_MARGIN, bTemp);
+    _booleanOptionListeners.add(bPair);
+    DrJava.getConfig().addOptionListener(OptionConstants.DISPLAY_RIGHT_MARGIN, bTemp);
+
+    OptionListener<Integer> iTemp = new OptionListener<Integer>() {
       public void optionChanged(OptionEvent<Integer> oce) {
         _numRightMarginColumns = oce.value;
         DefinitionsPane.this.repaint();
       }
-    });
-    DrJava.getConfig().addOptionListener(OptionConstants.RIGHT_MARGIN_COLOR,
-                                         new OptionListener<Color>() {
+    };
+    Pair<Option<Integer>, OptionListener<Integer>> iPair = 
+      new Pair<Option<Integer>, OptionListener<Integer>>(OptionConstants.RIGHT_MARGIN_COLUMNS, iTemp);
+    _integerOptionListeners.add(iPair);
+    DrJava.getConfig().addOptionListener(OptionConstants.RIGHT_MARGIN_COLUMNS, iTemp);
+    
+    temp = new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oce) {
         _rightMarginColor = oce.value;
         DefinitionsPane.this.repaint();
       }
-    });
+    };
+    pair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.RIGHT_MARGIN_COLOR, temp);
+    _colorOptionListeners.add(pair);
+    DrJava.getConfig().addOptionListener(OptionConstants.RIGHT_MARGIN_COLOR, temp);
     
     createPopupMenu();
 
@@ -1224,6 +1233,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     
   private List<Pair<Option<Boolean>, OptionListener<Boolean>>> _booleanOptionListeners = 
     new LinkedList<Pair<Option<Boolean>, OptionListener<Boolean>>>();
+
+  private List<Pair<Option<Integer>, OptionListener<Integer>>> _integerOptionListeners = 
+    new LinkedList<Pair<Option<Integer>, OptionListener<Integer>>>();
   
   /** Called when the definitions pane is released from duty.  This frees up any option listeners that are holding 
    *  references to this object so this can be garbage collected.
@@ -1235,8 +1247,12 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     for (Pair<Option<Boolean>, OptionListener<Boolean>> p: _booleanOptionListeners) {
       DrJava.getConfig().removeOptionListener(p.first(), p.second());
     }
+    for (Pair<Option<Integer>, OptionListener<Integer>> p: _integerOptionListeners) {
+      DrJava.getConfig().removeOptionListener(p.first(), p.second());
+    }
     _colorOptionListeners.clear();
     _booleanOptionListeners.clear();
+    _integerOptionListeners.clear();
     
     ourMap.removeBindings();
     removeKeymap(ourMap.getName());

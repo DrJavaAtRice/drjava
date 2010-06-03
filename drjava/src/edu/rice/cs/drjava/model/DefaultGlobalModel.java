@@ -460,7 +460,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     * This was at one time called the <code>DefinitionsDocumentHandler</code>
     * but was renamed (2004-Jun-8) to be more descriptive/intuitive.
     */
-  class ConcreteOpenDefDoc extends AbstractGlobalModel.ConcreteOpenDefDoc {
+  class ConcreteOpenDefDoc extends AbstractGlobalModel.ConcreteOpenDefDoc {    
     /** Standard constructor for a document read from a file.  Initializes this ODD's DD.
       * @param f file describing DefinitionsDocument to manage
       */
@@ -624,6 +624,15 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     /** Called to indicate the document is being closed, so to remove all related state from the debug manager. */
     public void removeFromDebugger() { getBreakpointManager().removeRegions(this); }
+    
+    // This creation context is useful for debugging memory leaks in DefinitionsPaneMemoryLeakTest.
+    // It should be commented out for normal compilation.
+//    String creationContext;
+//    {
+//      StringWriter sw = new StringWriter();
+//      new RuntimeException("new ConcreteOpenDefDoc").printStackTrace(new PrintWriter(sw));
+//      creationContext = sw.toString();
+//    }
   } /* End of ConcreteOpenDefDoc */
   
   /** Creates a ConcreteOpenDefDoc for a new DefinitionsDocument.
