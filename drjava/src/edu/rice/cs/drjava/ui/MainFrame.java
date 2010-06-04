@@ -2769,7 +2769,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //          return getSaveFile(_interactionsHistoryChooser);
           _interactionsHistoryChooser.setMultiSelectionEnabled(false);
           int rc = _interactionsHistoryChooser.showSaveDialog(MainFrame.this);
-          File c = getChosenFile(_interactionsHistoryChooser, rc);
+          File c = getChosenFile(_interactionsHistoryChooser, rc, null);
           //Moved from history itself to here to account for bug #989232, non-existant default
           //history file found
           if ((c != null) && (c.getName().indexOf('.') == -1)) {
@@ -4354,17 +4354,24 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //    }
     
     OpenDefinitionsDocument active = _model.getActiveDocument();
+    File previous = null;
     
     // Fill in class name
-    //if (active.isUntitled()) {
-    try {
-      String className = active.getFirstTopLevelClassName();
-      if (!className.equals("")) {
-        jfc.setSelectedFile(new File(jfc.getCurrentDirectory(), className));
+    if (active.isUntitled()) {
+      try {
+        String className = active.getFirstTopLevelClassName();
+        if (!className.equals("")) {
+          jfc.setSelectedFile(new File(jfc.getCurrentDirectory(), className));
+        }
+      }
+      catch (ClassNameNotFoundException e) {
+        // Don't set selected file
       }
     }
-    catch (ClassNameNotFoundException e) {
-      // Don't set selected file
+    else {
+      // not untitled, select previous name
+      previous = active.getRawFile();
+      jfc.setSelectedFile(previous);
     }
     
     jfc.removeChoosableFileFilter(_projectFilter);
@@ -4373,7 +4380,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     jfc.setFileFilter(_javaSourceFilter);
     jfc.setMultiSelectionEnabled(false);
     int rc = jfc.showSaveDialog(this);
-    return getChosenFile(jfc, rc);
+    return getChosenFile(jfc, rc, previous);
   }
   
   /** Returns the current DefinitionsPane. */
@@ -5982,11 +5989,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Returns the File selected by the JFileChooser.
     * @param fc File chooser presented to the user
     * @param choice return value from fc
+    * @param previous previous file (or null if none)
     * @return Selected File
     * @throws OperationCanceledException if file choice canceled
     * @throws RuntimeException if fc returns a bad file or choice
     */
-  private File getChosenFile(JFileChooser fc, int choice) throws OperationCanceledException {
+  private File getChosenFile(JFileChooser fc, int choice, File previous) throws OperationCanceledException {
     switch (choice) {
       case JFileChooser.CANCEL_OPTION:
       case JFileChooser.ERROR_OPTION:
@@ -5996,9 +6004,22 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         if (chosen != null) {
           //append the appropriate language level extension if not written by user
           if (fc.getFileFilter() instanceof JavaSourceFilter) {
-            if (chosen.getName().indexOf(".") == -1)
-              return new File(chosen.getAbsolutePath() +
-                              OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
+            if (chosen.getName().indexOf(".") == -1) {
+              // no file extension
+              String previousName = (previous!=null)?previous.getName():"";
+              if (!DrJavaFileUtils.isSourceFile(previousName)) {
+                // previous file name doesn't have a file extension either
+                return new File(chosen.getAbsolutePath() + OptionConstants.
+                                  LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
+              }
+              else {
+                // use previous file's extension
+                int previousLastDotPos = previousName.lastIndexOf(".");
+                String previousExt = previousName.substring(previousLastDotPos);
+                File newFile = new File(chosen.getAbsolutePath() + previousExt);
+                return newFile;
+              }
+            }
           }
           return chosen;
         }
