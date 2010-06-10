@@ -446,7 +446,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       if (lib.isValid()) {
         FullVersion v = lib.version();
         Map<FullVersion, Iterable<JarJDKToolsLibrary>> mapToAddTo = results;
-        if (v.vendor().equals(JavaVersion.VendorType.MINT)) { mapToAddTo = mintResults; }
+        if (v.vendor().equals(JavaVersion.VendorType.COMPOUND)) { mapToAddTo = mintResults; }
         
         if (mapToAddTo.containsKey(v)) { mapToAddTo.put(v, IterUtil.compose(lib, mapToAddTo.get(v))); }
         else { mapToAddTo.put(v, IterUtil.singleton(lib)); }

@@ -34,7 +34,11 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package edu.rice.cs.plt.reflect;
 
+import edu.rice.cs.plt.lambda.Lambda3;
+
 import java.io.Serializable;
+import java.util.List;
+import java.util.Collections;
 
 /** A representation of a major Java version, with methods for parsing version number strings. */
 public enum JavaVersion {
@@ -47,6 +51,16 @@ public enum JavaVersion {
   JAVA_6 { public String versionString() { return "6"; } },
   JAVA_7 { public String versionString() { return "7"; } },
   FUTURE { public String versionString() { return ">7"; } };
+  
+  
+  /** The detector to recognize Mint. MUST BE INITIALIZED BEFORE CURRENT_FULL! */
+  public static final Lambda3<String,String,String,String> MINT_DETECTOR =
+    new Lambda3<String,String,String,String>() {
+    public String value(String java_version, String java_runtime_name, String java_vm_vendor) {
+      if (java_runtime_name.toLowerCase().contains("mint")) return "Mint";
+      return null;
+    }
+  };
   
   /**
    * The currently-available Java version, based on the {@code "java.class.version"} property.  Ideally, a {@code true} result 
@@ -113,24 +127,37 @@ public enum JavaVersion {
    * 
    * @see <a href="http://java.sun.com/j2se/versioning_naming.html#">The Sun version specification</a>
    */
-  public static FullVersion parseFullVersion(String java_version, String java_runtime_name, String java_vm_vendor) {
+  public static FullVersion parseFullVersion(String java_version,
+                                             String java_runtime_name,
+                                             String java_vm_vendor,
+                                             List<Lambda3<String,String,String,String>> compoundJVMDetectors) {
     VendorType vendor = VendorType.UNKNOWN;
     String vendorString = null;
-    if (java_runtime_name.toLowerCase().contains("mint")) {
-      vendor = VendorType.MINT;
-      vendorString = "Mint";
+    
+    for(Lambda3<String,String,String,String> detector: compoundJVMDetectors) {
+      String tempVendorString = detector.value(java_version,
+                                               java_runtime_name,
+                                               java_vm_vendor);
+      if (tempVendorString != null) {
+        vendor = VendorType.COMPOUND;
+        vendorString = tempVendorString;
+        break;
+      }
     }
-    if (java_runtime_name.toLowerCase().contains("openjdk")) {
-      vendor = VendorType.OPENJDK;
-      vendorString = "OpenJDK";
-    }
-    else if (java_vm_vendor.toLowerCase().contains("apple")) {
-      vendor = VendorType.APPLE;
-      vendorString = "Apple";
-    }
-    else if (java_vm_vendor.toLowerCase().contains("sun")) {
-      vendor = VendorType.SUN;
-      vendorString = "Sun";
+    
+    if (vendor == VendorType.UNKNOWN) {
+      if (java_runtime_name.toLowerCase().contains("openjdk")) {
+        vendor = VendorType.OPENJDK;
+        vendorString = "OpenJDK";
+      }
+      else if (java_vm_vendor.toLowerCase().contains("apple")) {
+        vendor = VendorType.APPLE;
+        vendorString = "Apple";
+      }
+      else if (java_vm_vendor.toLowerCase().contains("sun")) {
+        vendor = VendorType.SUN;
+        vendorString = "Sun";
+      }
     }
     
     String number;
@@ -196,8 +223,27 @@ public enum JavaVersion {
    * 
    * @see <a href="http://java.sun.com/j2se/versioning_naming.html#">The Sun version specification</a>
    */
+  public static FullVersion parseFullVersion(String java_version,
+                                             String java_runtime_name,
+                                             String java_vm_vendor) {
+    List<Lambda3<String,String,String,String>> detectors =
+      Collections.<Lambda3<String,String,String,String>>singletonList(MINT_DETECTOR);
+    return parseFullVersion(java_version,
+                            java_runtime_name,
+                            java_vm_vendor,
+                            detectors);
+  }
+  
+  /**
+   * Produce the {@code JavaVersion.FullVersion} corresponding to the given version string.  Accepts
+   * input of the form "1.6.0", "1.4.2_10", or "1.5.0_05-ea".  The underscore may be replaced by a dot.
+   * If the text cannot be parsed, a trivial version with major version UNRECOGNIZED is returned.
+   * 
+   * @see <a href="http://java.sun.com/j2se/versioning_naming.html#">The Sun version specification</a>
+   */
   public static FullVersion parseFullVersion(String text) {
-    return parseFullVersion(text, "", ""); // vendor = "unrecognized"
+    return parseFullVersion(text, "", "",
+                            Collections.<Lambda3<String,String,String,String>>emptyList()); // vendor = "unrecognized"
   }
   
   /**
@@ -253,17 +299,17 @@ public enum JavaVersion {
      * Compare two versions.  Major, maintenance, and update numbers are ordered sequentially.  When comparing
      * two versions that are otherwise equivalent, early access releases precede betas, followed by
      * release candidates and stable releases. Within the release types, Unrecognized < OpenJDK < Apple < Sun.
-     * Exception: Mint versions come before anything else.
-     * Mint6-ea, Mint6-beta, Mint6-rc, Mint6, Mint7, ..., Java5, ...,
+     * Exception: Compound versions come before anything else.
+     * Compound6-ea, Compound6-beta, Compound6-rc, Compound6, Compound7, ..., Java5, ...,
      * Java6-unrecognized, Java6-OpenJDK, Java6-Apple, Java6-Sun, ..., Java7
      */
     public int compareTo(FullVersion v) {
-      if ((_vendor==VendorType.MINT) && (v._vendor!=VendorType.MINT)) {
-        // this is Mint, v is not: this before v
+      if ((_vendor==VendorType.COMPOUND) && (v._vendor!=VendorType.COMPOUND)) {
+        // this is a Compound JVM, v is not: this before v
         return -1;
       }
-      if ((v._vendor==VendorType.MINT) && (_vendor!=VendorType.MINT)) {
-        // v is Mint, this is not: v before this
+      if ((v._vendor==VendorType.COMPOUND) && (_vendor!=VendorType.COMPOUND)) {
+        // v is a Compound JVM, this is not: v before this
         return 1;
       }
       
@@ -329,5 +375,5 @@ public enum JavaVersion {
   private static enum ReleaseType { UNRECOGNIZED, EARLY_ACCESS, BETA, RELEASE_CANDIDATE, STABLE; }
 
   /** The vendor of this version. */
-  public static enum VendorType { UNKNOWN, MINT, OPENJDK, APPLE, SUN; }
+  public static enum VendorType { UNKNOWN, COMPOUND, OPENJDK, APPLE, SUN; }
 }

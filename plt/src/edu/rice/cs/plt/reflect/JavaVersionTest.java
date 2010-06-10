@@ -36,7 +36,10 @@ package edu.rice.cs.plt.reflect;
 
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.Collections;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.lambda.Lambda3;
 import junit.framework.TestCase;
 
 import static edu.rice.cs.plt.reflect.JavaVersion.*;
@@ -288,6 +291,46 @@ public class JavaVersionTest extends TestCase {
     
     assertTrue(IterUtil.isEqual(sorter, IterUtil.make(v1, v2, v3, v4, v5, v6, v7)));
   }
+
+  public void testParseFullVersionDetectors() {
+    FullVersion v1 = parseFullVersion("1.4.2_10","habanero","habanero",DETECTORS);
+    assertEquals(JAVA_1_4, v1.majorVersion());
+    assertEquals("1.4.2_10-Habanero", v1.versionString());
+    
+    FullVersion v2 = parseFullVersion("1.4.3","mint","mint",DETECTORS);
+    assertEquals(JAVA_1_4, v2.majorVersion());
+    assertEquals("1.4.3-Mint", v2.versionString());
+    
+    FullVersion v3 = parseFullVersion("1.5.0.1","habanero","habanero",DETECTORS);
+    assertEquals(JAVA_5, v3.majorVersion());
+    assertEquals("5.0_1-Habanero", v3.versionString());
+    
+    FullVersion v4 = parseFullVersion("1.5.1-beta","mint","mint",DETECTORS);
+    assertEquals(JAVA_5, v4.majorVersion());
+    assertEquals("5.1-beta-Mint", v4.versionString());
+    
+    FullVersion v5 = parseFullVersion("1.5.1","habanero","habanero",DETECTORS);
+    assertEquals(JAVA_5, v5.majorVersion());
+    assertEquals("5.1-Habanero", v5.versionString());
+    
+    FullVersion v6 = parseFullVersion("1.6.0_2","mint","mint",DETECTORS);
+    assertEquals(JAVA_6, v6.majorVersion());
+    assertEquals("6.0_2-Mint", v6.versionString());
+    
+    FullVersion v7 = parseFullVersion("1.6.0_11","habanero","habanero",DETECTORS);
+    assertEquals("6.0_11-Habanero", v7.versionString());
+    
+    Set<FullVersion> sorter = new TreeSet<FullVersion>();
+    sorter.add(v7);
+    sorter.add(v5);
+    sorter.add(v3);
+    sorter.add(v1);
+    sorter.add(v2);
+    sorter.add(v4);
+    sorter.add(v6);
+    
+    assertTrue(IterUtil.isEqual(sorter, IterUtil.make(v1, v2, v3, v4, v5, v6, v7)));
+  }
   
   public void testParseFullVersionSort() {
     FullVersion vUnrecognized = parseFullVersion("1.6.0_11","","");
@@ -314,8 +357,8 @@ public class JavaVersionTest extends TestCase {
   public void testParseFullVersionDifferentSort() {
     FullVersion vUnrecognized = parseFullVersion("1.6.0_11","","");
     assertEquals("6.0_11", vUnrecognized.versionString());
-    FullVersion vMint = parseFullVersion("1.7.0_11","mint","mint");
-    assertEquals("7.0_11-Mint", vMint.versionString());
+    FullVersion vCompound = parseFullVersion("1.7.0_11","mint","mint");
+    assertEquals("7.0_11-Mint", vCompound.versionString());
     FullVersion vOpenJDK = parseFullVersion("1.6.0_11","OpenJDK Runtime Environment","Sun Microsystems Inc.");
     assertEquals("6.0_11-OpenJDK", vOpenJDK.versionString());
     FullVersion vApple = parseFullVersion("1.6.0_11","Java(TM) 2 Runtime Environment, Standard Edition","\"Apple Computer, Inc.\"");
@@ -328,9 +371,36 @@ public class JavaVersionTest extends TestCase {
     sorter.add(vApple);
     sorter.add(vOpenJDK);
     sorter.add(vUnrecognized);
-    sorter.add(vMint);
+    sorter.add(vCompound);
     
-    assertTrue(IterUtil.isEqual(sorter, IterUtil.make(vMint, vUnrecognized, vOpenJDK, vApple, vSun)));
+    assertTrue(IterUtil.isEqual(sorter, IterUtil.make(vCompound, vUnrecognized, vOpenJDK, vApple, vSun)));
+  }
+  
+  public void testParseFullVersionDifferentSortDetectors() {
+    FullVersion vUnrecognized = parseFullVersion("1.6.0_11","","",DETECTORS);
+    assertEquals("6.0_11", vUnrecognized.versionString());
+    FullVersion vCompound = parseFullVersion("1.7.0_11","mint","mint",DETECTORS);
+    assertEquals("7.0_11-Mint", vCompound.versionString());
+    FullVersion vCompound2 = parseFullVersion("1.7.0_11","habanero","habanero",DETECTORS);
+    assertEquals("7.0_11-Habanero", vCompound2.versionString());
+    FullVersion vOpenJDK = parseFullVersion("1.6.0_11","OpenJDK Runtime Environment","Sun Microsystems Inc.",DETECTORS);
+    assertEquals("6.0_11-OpenJDK", vOpenJDK.versionString());
+    FullVersion vApple = parseFullVersion("1.6.0_11","Java(TM) 2 Runtime Environment, Standard Edition",
+                                          "\"Apple Computer, Inc.\"",DETECTORS);
+    assertEquals("6.0_11", vApple.versionString());
+    FullVersion vSun = parseFullVersion("1.6.0_11","Java(TM) 2 Runtime Environment, Standard Edition",
+                                        "Sun Microsystems Inc.",DETECTORS);
+    assertEquals("6.0_11", vSun.versionString());
+    
+    Set<FullVersion> sorter = new TreeSet<FullVersion>();
+    sorter.add(vSun);
+    sorter.add(vApple);
+    sorter.add(vOpenJDK);
+    sorter.add(vUnrecognized);
+    sorter.add(vCompound);
+    sorter.add(vCompound2);
+    
+    assertTrue(IterUtil.isEqual(sorter, IterUtil.make(vCompound, vUnrecognized, vOpenJDK, vApple, vSun)));
   }
   
   public void testVersionToFullVersion() {
@@ -342,5 +412,22 @@ public class JavaVersionTest extends TestCase {
     assertEquals("Java 6.0", JAVA_6.fullVersion().toString());
     assertEquals("Java 7.0", JAVA_7.fullVersion().toString());
     assertEquals("Java >7.0", FUTURE.fullVersion().toString());
+  }
+  
+  public static final ArrayList<Lambda3<String,String,String,String>> DETECTORS =
+    new ArrayList<Lambda3<String,String,String,String>>();
+  static {
+    DETECTORS.add(new Lambda3<String,String,String,String>() {
+      public String value(String java_version, String java_runtime_name, String java_vm_vendor) {
+        if (java_runtime_name.toLowerCase().contains("mint")) return "Mint";
+        return null;
+      }
+    });
+    DETECTORS.add(new Lambda3<String,String,String,String>() {
+      public String value(String java_version, String java_runtime_name, String java_vm_vendor) {
+        if (java_runtime_name.toLowerCase().contains("habanero")) return "Habanero";
+        return null;
+      }
+    });
   }
 }

@@ -58,6 +58,7 @@ import javax.tools.StandardLocation;
 // DJError class is not in the same package as this
 import edu.rice.cs.drjava.model.DJError;
 
+import edu.rice.cs.drjava.model.compiler.Javac160FilteringCompiler;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -68,75 +69,12 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
 /** An implementation of JavacCompiler that supports compiling with the Eclipse compiler.  Must be compiled
   *  using javac 1.6.0.
   *
+  * TODO: figure out if filtering is necessary with the Eclipse compiler
   *  @version $Id$
   */
-public class EclipseCompiler extends JavacCompiler {
-  
-  // TODO: figure out if this is necessary with the Eclipse compiler
-  private final boolean _filterExe;
-  private File _tempJUnit = null;
-  private final String PREFIX = "drjava-junit";
-  private final String SUFFIX = ".jar";  
-  
-  public EclipseCompiler(JavaVersion.FullVersion version, String location, List<? extends File> defaultBootClassPath) {
+public class EclipseCompiler extends Javac160FilteringCompiler {
+    public EclipseCompiler(JavaVersion.FullVersion version, String location, List<? extends File> defaultBootClassPath) {
     super(version, location, defaultBootClassPath);
-    _filterExe = version.compareTo(JavaVersion.parseFullVersion("1.6.0_04")) >= 0;
-    if (_filterExe) {
-      // if we need to filter out exe files from the classpath, we also need to
-      // extract junit.jar and create a temporary file
-      try {
-        // edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("jdk160.txt",true);
-        // LOG.log("Filtering exe files from classpath.");
-        InputStream is = Javac160Compiler.class.getResourceAsStream("/junit.jar");
-        if (is!=null) {
-          // LOG.log("\tjunit.jar found");
-          _tempJUnit = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile(PREFIX,SUFFIX);
-          FileOutputStream fos = new FileOutputStream(_tempJUnit);
-          int size = edu.rice.cs.plt.io.IOUtil.copyInputStream(is,fos);
-          // LOG.log("\t"+size+" bytes written to "+_tempJUnit.getAbsolutePath());
-        }
-        else {
-          // LOG.log("\tjunit.jar not found");
-          if (_tempJUnit!=null) {
-            _tempJUnit.delete();
-            _tempJUnit = null;
-          }
-        }
-      }
-      catch(IOException ioe) {
-        if (_tempJUnit!=null) {
-          _tempJUnit.delete();
-          _tempJUnit = null;
-        }
-      }
-      // sometimes this file may be left behind, so create a shutdown hook
-      // that deletes temporary files matching our pattern
-      Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-        public void run() {
-          try {
-            File temp = File.createTempFile(PREFIX, SUFFIX);
-            IOUtil.attemptDelete(temp);
-            File[] toDelete = temp.getParentFile().listFiles(new FilenameFilter() {
-              public boolean accept(File dir, String name) {
-                if ((!name.startsWith(PREFIX)) || (!name.endsWith(SUFFIX))) return false;
-                String rest = name.substring(PREFIX.length(), name.length()-SUFFIX.length());
-                try {
-                  Integer i = new Integer(rest);
-                  // we could create an integer from the rest, this is one of our temporary files
-                  return true;
-                }
-                catch(NumberFormatException e) { /* couldn't convert, ignore this file */ }
-                return false;
-              }
-            });
-            for(File f: toDelete) {
-              f.delete();
-            }
-          }
-          catch(IOException ioe) { /* could not delete temporary files, ignore */ }
-        }
-      })); 
-    }
   }
   
   public boolean isAvailable() {
