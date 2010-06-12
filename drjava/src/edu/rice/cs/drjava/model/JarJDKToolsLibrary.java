@@ -44,9 +44,13 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Collections;
 import java.util.jar.JarFile;
 import java.util.jar.JarEntry;
 import java.util.jar.Manifest;
+import java.util.Enumeration;
 import java.io.IOException;
 
 import edu.rice.cs.plt.iter.IterUtil;
@@ -68,6 +72,7 @@ import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
 import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.model.javadoc.DefaultJavadocModel;
 import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
+import edu.rice.cs.drjava.model.compiler.descriptors.CompoundJDKDescriptor;
 
 /** A JDKToolsLibrary that was loaded from a specific jar file. */
 public class JarJDKToolsLibrary extends JDKToolsLibrary {
@@ -77,7 +82,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     * a new Java version is released.  (We can't just shadow *everything* because some classes, at 
     * least in OS X's classes.jar, can only be loaded by the JVM.)
     */
-  private static final Iterable<String> TOOLS_PACKAGES = IterUtil.asIterable(new String[]{
+  private static final Set<String> TOOLS_PACKAGES = new HashSet<String>();
+  static {
+    Collections.addAll(TOOLS_PACKAGES, new String[] {
       // From 1.4 tools.jar:
       "com.sun.javadoc",
       "com.sun.jdi",
@@ -102,17 +109,18 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       "com.sun.xml.internal.rngom",
       "com.sun.xml.internal.xsom",
       "org.relaxng",
-        
-      // Mint:
-      "com.sun.tools.javac",
-      "com.sun.tools.javac.tree",
-      "com.sun.tools.javac.comp",
-      "com.sun.tools.javac.main",
-      "edu.rice.cs.mint",
-      "edu.rice.cs.mint.comp",
-      "edu.rice.cs.mint.runtime",
-      "edu.rice.cs.mint.runtime.mspTree"
-  });
+//        
+//      // Mint:
+//      "com.sun.tools.javac",
+//      "com.sun.tools.javac.tree",
+//      "com.sun.tools.javac.comp",
+//      "com.sun.tools.javac.main",
+//      "edu.rice.cs.mint",
+//      "edu.rice.cs.mint.comp",
+//      "edu.rice.cs.mint.runtime",
+//      "edu.rice.cs.mint.runtime.mspTree"
+    });
+  }
 
   
   private final File _location;
@@ -402,6 +410,18 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
      * remember insertion order
      */
     LinkedHashSet<File> jars = new LinkedHashSet<File>();
+    addIfFile(edu.rice.cs.util.FileOps.getDrJavaFile(), jars); // drjava.jar file itself; check if it's a combined Mint/DrJava jar
+
+    // Search for all compound JDK descriptors in the drjava.jar file
+    Iterable<CompoundJDKDescriptor> descriptors = searchForCompoundJDKDescriptors(); 
+    for(CompoundJDKDescriptor desc: descriptors) {
+      // add the specific search directories and files
+      for(File f: desc.getSearchDirectories()) { addIfDir(f, roots); }
+      for(File f: desc.getSearchFiles()) { addIfFile(f, jars); }
+      // add to the set of packages that need to be shadowed
+      TOOLS_PACKAGES.addAll(desc.getToolsPackages());
+    }
+    
     // matches: starts with "j2sdk", starts with "jdk", has form "[number].[number].[number]" (OS X), starts with "java-" (Linux)
     Predicate<File> subdirFilter = LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("j2sdk.*"),
                                                  IOUtil.regexCanonicalCaseFilePredicate("jdk.*"),
@@ -413,32 +433,31 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         addIfFile(new File(subdir, "Classes/classes.jar"), jars);
       }
     }
-    
+
     // JavaMint
-    addIfFile(new File("/C:/Program Files/JavaMint/langtools/dist/lib/classes.jar"), jars);
-    addIfFile(new File("/C:/Program Files/JavaMint/langtools/dist/lib/tools.jar"), jars);
-    addIfFile(new File("/usr/local/soylatte/lib/classes.jar"), jars);
-    addIfFile(new File("/usr/local/soylatte/lib/tools.jar"), jars);
-    addIfFile(new File("/usr/local/JavaMint/langtools/dist/lib/classes.jar"), jars);
-    addIfFile(new File("/usr/local/JavaMint/langtools/dist/lib/tools.jar"), jars);
-    try {
-      String mint_home = System.getenv("MINT_HOME");
-      if (mint_home!=null) {
-        JDKToolsLibrary.msg("MINT_HOME environment variable set to: "+mint_home);
-        addIfFile(new File(new File(mint_home), "langtools/dist/lib/classes.jar"), jars);
-        addIfFile(new File(new File(mint_home), "langtools/dist/lib/tools.jar"), jars);
-      }
-      else {
-        JDKToolsLibrary.msg("MINT_HOME not set");
-      }
-    }
-    catch(Exception e) { /* ignore MINT_HOME variable */ }
-    addIfFile(edu.rice.cs.util.FileOps.getDrJavaFile(), jars); // drjava.jar file itself; check if it's a combined Mint/DrJava jar
+//    addIfFile(new File("/C:/Program Files/JavaMint/langtools/dist/lib/classes.jar"), jars);
+//    addIfFile(new File("/C:/Program Files/JavaMint/langtools/dist/lib/tools.jar"), jars);
+//    addIfFile(new File("/usr/local/soylatte/lib/classes.jar"), jars);
+//    addIfFile(new File("/usr/local/soylatte/lib/tools.jar"), jars);
+//    addIfFile(new File("/usr/local/JavaMint/langtools/dist/lib/classes.jar"), jars);
+//    addIfFile(new File("/usr/local/JavaMint/langtools/dist/lib/tools.jar"), jars);
+//    try {
+//      String mint_home = System.getenv("MINT_HOME");
+//      if (mint_home!=null) {
+//        JDKToolsLibrary.msg("MINT_HOME environment variable set to: "+mint_home);
+//        addIfFile(new File(new File(mint_home), "langtools/dist/lib/classes.jar"), jars);
+//        addIfFile(new File(new File(mint_home), "langtools/dist/lib/tools.jar"), jars);
+//      }
+//      else {
+//        JDKToolsLibrary.msg("MINT_HOME not set");
+//      }
+//    }
+//    catch(Exception e) { /* ignore MINT_HOME variable */ }
     
     // We store everything in reverse order, since that's the natural order of the versions
     Map<FullVersion, Iterable<JarJDKToolsLibrary>> results = 
       new TreeMap<FullVersion, Iterable<JarJDKToolsLibrary>>();
-    Map<FullVersion, Iterable<JarJDKToolsLibrary>> mintResults =
+    Map<FullVersion, Iterable<JarJDKToolsLibrary>> compoundResults =
       new TreeMap<FullVersion, Iterable<JarJDKToolsLibrary>>();
     
     for (File jar : jars) {
@@ -446,7 +465,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       if (lib.isValid()) {
         FullVersion v = lib.version();
         Map<FullVersion, Iterable<JarJDKToolsLibrary>> mapToAddTo = results;
-        if (v.vendor().equals(JavaVersion.VendorType.COMPOUND)) { mapToAddTo = mintResults; }
+        if (v.vendor().equals(JavaVersion.VendorType.COMPOUND)) { mapToAddTo = compoundResults; }
         
         if (mapToAddTo.containsKey(v)) { mapToAddTo.put(v, IterUtil.compose(lib, mapToAddTo.get(v))); }
         else { mapToAddTo.put(v, IterUtil.singleton(lib)); }
@@ -454,24 +473,24 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     }
     
     Iterable<JarJDKToolsLibrary> collapsed = IterUtil.reverse(IterUtil.collapse(results.values()));
-    Iterable<JarJDKToolsLibrary> mintCollapsed = IterUtil.reverse(IterUtil.collapse(mintResults.values()));
+    Iterable<JarJDKToolsLibrary> compoundCollapsed = IterUtil.reverse(IterUtil.collapse(compoundResults.values()));
     
-    Map<FullVersion, Iterable<JarJDKToolsLibrary>> javaMintResults =
+    Map<FullVersion, Iterable<JarJDKToolsLibrary>> allResults =
       new TreeMap<FullVersion, Iterable<JarJDKToolsLibrary>>();
-    // now we have the JDK libraries in collapsed and the Mint libraries in mintCollapsed
-    for(JarJDKToolsLibrary mintLib: mintCollapsed) {
-      JDKToolsLibrary.msg("mintLib: "+mintLib.version());
-      JDKToolsLibrary.msg("\t"+mintLib.location());
-      FullVersion mintVersion = mintLib.version();
+    // now we have the JDK libraries in collapsed and the compound libraries in compoundCollapsed
+    for(JarJDKToolsLibrary compoundLib: compoundCollapsed) {
+      JDKToolsLibrary.msg("compoundLib: "+compoundLib.version());
+      JDKToolsLibrary.msg("\t"+compoundLib.location());
+      FullVersion compoundVersion = compoundLib.version();
       JarJDKToolsLibrary found = null;
-      // try to find a JDK in results that matches mintVersion exactly, except for vendor
+      // try to find a JDK in results that matches compoundVersion exactly, except for vendor
       for(JarJDKToolsLibrary javaLib: collapsed) {
         JDKToolsLibrary.msg("\texact? "+javaLib.version());
         FullVersion javaVersion = javaLib.version();
-        if ((javaVersion.majorVersion().equals(mintVersion.majorVersion())) &&
-            (javaVersion.maintenance()==mintVersion.maintenance()) &&
-            (javaVersion.update()==mintVersion.update()) &&
-            (javaVersion.release()==mintVersion.release())) {
+        if ((javaVersion.majorVersion().equals(compoundVersion.majorVersion())) &&
+            (javaVersion.maintenance()==compoundVersion.maintenance()) &&
+            (javaVersion.update()==compoundVersion.update()) &&
+            (javaVersion.release()==compoundVersion.release())) {
           JDKToolsLibrary.msg("\t\tfound");
           found = javaLib;
           break;
@@ -482,27 +501,27 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         for(JarJDKToolsLibrary javaLib: collapsed) {
           JDKToolsLibrary.msg("\tmajor? "+javaLib.version());
           FullVersion javaVersion = javaLib.version();
-          if (javaVersion.majorVersion().equals(mintVersion.majorVersion())) {
+          if (javaVersion.majorVersion().equals(compoundVersion.majorVersion())) {
             JDKToolsLibrary.msg("\t\tfound");
             found = javaLib;
             break;
           }
         }
       }
-      // if we found a JDK, then create a new Mint library
+      // if we found a JDK, then create a new compound library
       if (found!=null) {
-        JarJDKToolsLibrary lib = makeFromFile(mintLib.location(), model, found.bootClassPath());
+        JarJDKToolsLibrary lib = makeFromFile(compoundLib.location(), model, found.bootClassPath());
         if (lib.isValid()) {
           JDKToolsLibrary.msg("\t==> "+lib.version());
           FullVersion v = lib.version();
-          if (javaMintResults.containsKey(v)) { javaMintResults.put(v, IterUtil.compose(lib, javaMintResults.get(v))); }
-          else { javaMintResults.put(v, IterUtil.singleton(lib)); }
+          if (allResults.containsKey(v)) { allResults.put(v, IterUtil.compose(lib, allResults.get(v))); }
+          else { allResults.put(v, IterUtil.singleton(lib)); }
         }
       }
     }
     JDKToolsLibrary.msg("Result:");
     Iterable<JarJDKToolsLibrary> result = IterUtil.
-      compose(collapsed,IterUtil.reverse(IterUtil.collapse(javaMintResults.values())));
+      compose(collapsed,IterUtil.reverse(IterUtil.collapse(allResults.values())));
     for(JarJDKToolsLibrary lib: result) {
       JDKToolsLibrary.msg("Found library: "+lib);
     }
@@ -521,5 +540,51 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     f = IOUtil.attemptCanonicalFile(f);
     if (IOUtil.attemptIsFile(f)) { set.add(f); JDKToolsLibrary.msg("File added:     "+f); }
     else { JDKToolsLibrary.msg("File not added: "+f); }
+  }
+  
+  public static Iterable<CompoundJDKDescriptor> searchForCompoundJDKDescriptors() {
+    JDKToolsLibrary.msg("---- Searching for descriptors ----");
+    long t0 = System.currentTimeMillis();
+    JDKToolsLibrary.msg("ms: "+t0);
+    Iterable<CompoundJDKDescriptor> descriptors = IterUtil.empty();
+    try {
+      File f = edu.rice.cs.util.FileOps.getDrJavaFile();
+      JDKToolsLibrary.msg("drjava.jar: "+f);
+      JarFile jf = new JarFile(f);
+      JDKToolsLibrary.msg("jar file: "+jf);
+      Enumeration<JarEntry> entries = jf.entries();
+      while(entries.hasMoreElements()) {
+        JarEntry je = entries.nextElement();
+        String name = je.getName();
+        if (name.startsWith("edu/rice/cs/drjava/model/compiler/descriptors/") &&
+            name.endsWith(".class") &&
+            !name.equals("edu/rice/cs/drjava/model/compiler/descriptors/CompoundJDKDescriptor.class") &&
+            (name.indexOf('$')<0)) {
+          int dotPos = name.indexOf(".class");
+          String className = name.substring(0, dotPos).replace('/','.');
+          try {
+            JDKToolsLibrary.msg("\tclass name: "+className);
+            Class<?> clazz = Class.forName(className);
+            Class<? extends CompoundJDKDescriptor> descClass = clazz.asSubclass(CompoundJDKDescriptor.class);
+            CompoundJDKDescriptor desc = descClass.newInstance();
+            JDKToolsLibrary.msg("\t\tloaded!");
+            descriptors = IterUtil.compose(descriptors, desc);
+          }
+          catch(LinkageError le) { JDKToolsLibrary.msg("LinkageError: "+le); /* ignore */ } 
+          catch(ClassNotFoundException cnfe) { JDKToolsLibrary.msg("ClassNotFoundException: "+cnfe); /* ignore */ }
+          catch(ClassCastException cce) { JDKToolsLibrary.msg("ClassCastException: "+cce); /* ignore */ }
+          catch(IllegalAccessException iae) { JDKToolsLibrary.msg("IllegalAccessException: "+iae); /* ignore */ }
+          catch(InstantiationException ie) { JDKToolsLibrary.msg("InstantiationException: "+ie); /* ignore */ }
+        }
+     }
+    }
+    catch(IOException ioe) {
+      /* ignore, just return the descriptors we have (which may be none) */
+    }
+    long t1 = System.currentTimeMillis();
+    JDKToolsLibrary.msg("ms: "+t1);
+    JDKToolsLibrary.msg("duration ms: "+(t1-t0));
+    JDKToolsLibrary.msg("---- Done searching for descriptors ----");
+    return descriptors;
   }
 }

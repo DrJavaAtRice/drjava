@@ -45,7 +45,7 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 
 /** The description of the Mint compound JDK. */
-public class MintDescriptor implements CompoundJDKDescriptor {
+public class Mint2Descriptor implements CompoundJDKDescriptor {
   
   /** Packages to shadow when loading a new tools.jar.  If we don't shadow these classes, we won't
     * be able to load distinct versions for each tools.jar library.  These should be verified whenever
@@ -78,31 +78,11 @@ public class MintDescriptor implements CompoundJDKDescriptor {
     return set;
   }
 
-  public Iterable<File> getSearchDirectories() { return IterUtil.empty(); }
+  public Iterable<File> getSearchDirectories() { return IterUtil.asIterable(new File[0]); }
   public Iterable<File> getSearchFiles() {
     Iterable<File> files = IterUtil.asIterable(new File[] {
-      new File("/C:/Program Files/JavaMint/langtools/dist/lib/classes.jar"),
-        new File("/C:/Program Files/JavaMint/langtools/dist/lib/tools.jar"),
-        new File("/usr/local/soylatte/lib/classes.jar"),
-        new File("/usr/local/soylatte/lib/tools.jar"),
-        new File("/usr/local/JavaMint/langtools/dist/lib/classes.jar"),
-        new File("/usr/local/JavaMint/langtools/dist/lib/tools.jar")
+      new File("/Users/mgricken/Documents/Research/Mint/java-mint/trunk/langtools/dist/lib/classes.jar")
     });
-    try {
-      String mint_home = System.getenv("MINT_HOME");
-      if (mint_home!=null) {
-        // JDKToolsLibrary.msg("MINT_HOME environment variable set to: "+mint_home);
-        files = IterUtil.compose(files, new File(new File(mint_home), "langtools/dist/lib/classes.jar"));
-        files = IterUtil.compose(files, new File(new File(mint_home), "langtools/dist/lib/tools.jar"));
-      }
-      else {
-        // JDKToolsLibrary.msg("MINT_HOME not set");
-      }
-    }
-    catch(Exception e) { /* ignore MINT_HOME variable */ }
-    
-    // drjava.jar file itself; check if it's a combined Mint/DrJava jar
-    files = IterUtil.compose(files, edu.rice.cs.util.FileOps.getDrJavaFile()); 
     return files;
   }
   
@@ -114,7 +94,7 @@ public class MintDescriptor implements CompoundJDKDescriptor {
   public Lambda3<String,String,String,String> getDetector() {
     return new Lambda3<String,String,String,String>() {
       public String value(String java_version, String java_runtime_name, String java_vm_vendor) {
-        if (java_runtime_name.toLowerCase().contains("mint")) return "Mint";
+        if (java_runtime_name.toLowerCase().contains("mint")) return "Mint2";
         return null;
       }
     };

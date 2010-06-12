@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.model.compiler.descriptors;
 
 import java.io.File;
+import java.util.Set;
 import edu.rice.cs.plt.lambda.Lambda3;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
@@ -48,7 +49,7 @@ public interface CompoundJDKDescriptor {
     * a new Java version is released.  (We can't just shadow *everything* because some classes, at 
     * least in OS X's classes.jar, can only be loaded by the JVM.)
     */
-  public Iterable<String> getToolsPackages();
+  public Set<String> getToolsPackages();
 
   public Iterable<File> getSearchDirectories();
   public Iterable<File> getSearchFiles();
