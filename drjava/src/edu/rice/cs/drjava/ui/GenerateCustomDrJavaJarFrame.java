@@ -175,7 +175,15 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
       protected void _chooseFile() {
         _mainFrame.removeModalWindowAdapter(GenerateCustomDrJavaJarFrame.this);
         super._chooseFile();
+        validateTextField();
         _mainFrame.installModalWindowAdapter(GenerateCustomDrJavaJarFrame.this, LambdaUtil.NO_OP, CLOSE);
+      }
+      public boolean validateTextField() {
+        String newValue = _fileField.getText().trim();
+        if ((newValue.length()>0) && !newValue.toLowerCase().endsWith(".jar")) {
+          _fileField.setText(newValue+".jar");
+        }
+        return super.validateTextField();
       }
     };
     _jarFileSelector.setFileFilter(new FileFilter() {
