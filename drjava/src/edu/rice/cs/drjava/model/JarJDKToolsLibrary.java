@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.model;
 import java.io.File;
 import java.util.Set;
 import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
@@ -125,12 +126,15 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   
   private final File _location;
   private final List<File> _bootClassPath; // may be null (i.e. compiler's internal behavior)
+  private final CompoundJDKDescriptor _jdkDescriptor; // may be null
   
-  private JarJDKToolsLibrary(File location, FullVersion version, CompilerInterface compiler, Debugger debugger,
+  private JarJDKToolsLibrary(File location, FullVersion version, CompoundJDKDescriptor desc,
+                             CompilerInterface compiler, Debugger debugger,
                              JavadocModel javadoc, List<File> bootClassPath) {
     super(version, compiler, debugger, javadoc);
     _location = location;
     _bootClassPath = bootClassPath;
+    _jdkDescriptor = desc;
   }
   
   public File location() { return _location; }
@@ -139,30 +143,44 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     else return null;
   }
   
+  public CompoundJDKDescriptor getJDKDescriptor() { return _jdkDescriptor; }
+  
   public String toString() { return super.toString() + " at " + _location + ", boot classpath: " + bootClassPath(); }
 
   /** Create a JarJDKToolsLibrary from a specific {@code "tools.jar"} or {@code "classes.jar"} file. */
-  public static JarJDKToolsLibrary makeFromFile(File f, GlobalModel model) {
-    return makeFromFile(f, model, new ArrayList<File>());
+  public static JarJDKToolsLibrary makeFromFile(File f, GlobalModel model, CompoundJDKDescriptor desc) {
+    return makeFromFile(f, model, desc, new ArrayList<File>());
   }
 
   /** Create a JarJDKToolsLibrary from a specific {@code "tools.jar"} or {@code "classes.jar"} file. */
-  public static JarJDKToolsLibrary makeFromFile(File f, GlobalModel model, List<File> additionalBootClassPath) {
-    FullVersion version = guessVersion(f);
-//    JDKToolsLibrary.msg("makeFromFile: "+f+" --> "+version);
+  public static JarJDKToolsLibrary makeFromFile(File f, GlobalModel model, CompoundJDKDescriptor desc,
+                                                List<File> additionalBootClassPath) {
     CompilerInterface compiler = NoCompilerAvailable.ONLY;
     Debugger debugger = NoDebuggerAvailable.ONLY;
     JavadocModel javadoc = new NoJavadocAvailable(model);
     
+    FullVersion version = guessVersion(f);
+    JDKToolsLibrary.msg("makeFromFile: "+f+" --> "+version);
+    JDKToolsLibrary.msg("\tdesc = "+desc);
+    
+    boolean isSupported = JavaVersion.CURRENT.supports(version.majorVersion());
+    if (desc!=null) {
+      isSupported |= JavaVersion.CURRENT.supports(desc.getMinimumMajorVersion());
+    }
+    
     // We can't execute code that was possibly compiled for a later Java API version.
     List<File> bootClassPath = null;
-    if (JavaVersion.CURRENT.supports(version.majorVersion())) {
+    if (isSupported) {
       // block tools.jar classes, so that references don't point to a different version of the classes
       ClassLoader loader =
         new ShadowingClassLoader(JarJDKToolsLibrary.class.getClassLoader(), true, TOOLS_PACKAGES, true);
       Iterable<File> path = IterUtil.singleton(IOUtil.attemptAbsoluteFile(f));
       
       String compilerAdapter = adapterForCompiler(version);
+      if (desc!=null) {
+        compilerAdapter = desc.getAdapterForCompiler();
+      }
+      
       if (compilerAdapter != null) {
         
         // determine boot class path
@@ -201,6 +219,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       }
       
       String debuggerAdapter = adapterForDebugger(version);
+      if (desc!=null) {
+        debuggerAdapter = desc.getAdapterForDebugger();
+      }
       String debuggerPackage = "edu.rice.cs.drjava.model.debug.jpda";
       if (debuggerAdapter != null) {
         try {
@@ -226,7 +247,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         
     }
     
-    return new JarJDKToolsLibrary(f, version, compiler, debugger, javadoc, bootClassPath);
+    return new JarJDKToolsLibrary(f, version, desc, compiler, debugger, javadoc, bootClassPath);
   }
   
   private static FullVersion guessVersion(File f) {
@@ -363,74 +384,76 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     /* roots is a list of possible parent directories of Java installations; we want to eliminate duplicates & 
      * remember insertion order
      */
-    LinkedHashSet<File> roots = new LinkedHashSet<File>();
+    LinkedHashMap<File,Set<CompoundJDKDescriptor>> roots = new LinkedHashMap<File,Set<CompoundJDKDescriptor>>();
     
     if (javaHome != null) {
-      addIfDir(new File(javaHome), roots);
-      addIfDir(new File(javaHome, ".."), roots);
-      addIfDir(new File(javaHome, "../.."), roots);
+      addIfDir(new File(javaHome), null, roots);
+      addIfDir(new File(javaHome, ".."), null, roots);
+      addIfDir(new File(javaHome, "../.."), null, roots);
     }
     if (envJavaHome != null) {
-      addIfDir(new File(envJavaHome), roots);
-      addIfDir(new File(envJavaHome, ".."), roots);
-      addIfDir(new File(envJavaHome, "../.."), roots);
+      addIfDir(new File(envJavaHome), null, roots);
+      addIfDir(new File(envJavaHome, ".."), null, roots);
+      addIfDir(new File(envJavaHome, "../.."), null, roots);
     }
     
     if (programFiles != null) {
-      addIfDir(new File(programFiles, "Java"), roots);
-      addIfDir(new File(programFiles), roots);
+      addIfDir(new File(programFiles, "Java"), null, roots);
+      addIfDir(new File(programFiles), null, roots);
     }
-    addIfDir(new File("/C:/Program Files/Java"), roots);
-    addIfDir(new File("/C:/Program Files"), roots);
+    addIfDir(new File("/C:/Program Files/Java"), null, roots);
+    addIfDir(new File("/C:/Program Files"), null, roots);
     if (systemDrive != null) {
-      addIfDir(new File(systemDrive, "Java"), roots);
-      addIfDir(new File(systemDrive), roots);
+      addIfDir(new File(systemDrive, "Java"), null, roots);
+      addIfDir(new File(systemDrive), null, roots);
     }
-    addIfDir(new File("/C:/Java"), roots);
-    addIfDir(new File("/C:"), roots);
+    addIfDir(new File("/C:/Java"), null, roots);
+    addIfDir(new File("/C:"), null, roots);
     
-    addIfDir(new File("/System/Library/Frameworks/JavaVM.framework/Versions"), roots);
+    addIfDir(new File("/System/Library/Frameworks/JavaVM.framework/Versions"), null, roots);
 
-    addIfDir(new File("/usr/java"), roots);
-    addIfDir(new File("/usr/j2se"), roots);
-    addIfDir(new File("/usr"), roots);
-    addIfDir(new File("/usr/local/java"), roots);
-    addIfDir(new File("/usr/local/j2se"), roots);
-    addIfDir(new File("/usr/local"), roots);
+    addIfDir(new File("/usr/java"), null, roots);
+    addIfDir(new File("/usr/j2se"), null, roots);
+    addIfDir(new File("/usr"), null, roots);
+    addIfDir(new File("/usr/local/java"), null, roots);
+    addIfDir(new File("/usr/local/j2se"), null, roots);
+    addIfDir(new File("/usr/local"), null, roots);
 
     /* Entries for Linux java packages */
-    addIfDir(new File("/usr/lib/jvm"), roots);
-    addIfDir(new File("/usr/lib/jvm/java-6-sun"), roots);
-    addIfDir(new File("/usr/lib/jvm/java-1.5.0-sun"), roots);
-    addIfDir(new File("/usr/lib/jvm/java-6-openjdk"), roots);
+    addIfDir(new File("/usr/lib/jvm"), null, roots);
+    addIfDir(new File("/usr/lib/jvm/java-6-sun"), null, roots);
+    addIfDir(new File("/usr/lib/jvm/java-1.5.0-sun"), null, roots);
+    addIfDir(new File("/usr/lib/jvm/java-6-openjdk"), null, roots);
 
-    addIfDir(new File("/home/javaplt/java/Linux-i686"), roots);
+    addIfDir(new File("/home/javaplt/java/Linux-i686"), null, roots);
 
     /* jars is a list of possible tools.jar (or classes.jar) files; we want to eliminate duplicates & 
      * remember insertion order
      */
-    LinkedHashSet<File> jars = new LinkedHashSet<File>();
-    addIfFile(edu.rice.cs.util.FileOps.getDrJavaFile(), jars); // drjava.jar file itself; check if it's a combined Mint/DrJava jar
+    LinkedHashMap<File,Set<CompoundJDKDescriptor>> jars = new LinkedHashMap<File,Set<CompoundJDKDescriptor>>();
+    // drjava.jar file itself; check if it's a combined Mint/DrJava jar
+    addIfFile(edu.rice.cs.util.FileOps.getDrJavaFile(), (CompoundJDKDescriptor)null, jars);
 
     // Search for all compound JDK descriptors in the drjava.jar file
     Iterable<CompoundJDKDescriptor> descriptors = searchForCompoundJDKDescriptors(); 
     for(CompoundJDKDescriptor desc: descriptors) {
       // add the specific search directories and files
-      for(File f: desc.getSearchDirectories()) { addIfDir(f, roots); }
-      for(File f: desc.getSearchFiles()) { addIfFile(f, jars); }
+      for(File f: desc.getSearchDirectories()) { addIfDir(f, desc, roots); }
+      for(File f: desc.getSearchFiles()) { addIfFile(f, desc, jars); }
       // add to the set of packages that need to be shadowed
       TOOLS_PACKAGES.addAll(desc.getToolsPackages());
     }
     
-    // matches: starts with "j2sdk", starts with "jdk", has form "[number].[number].[number]" (OS X), starts with "java-" (Linux)
+    // matches: starts with "j2sdk", starts with "jdk", has form "[number].[number].[number]" (OS X), or
+    // starts with "java-" (Linux)
     Predicate<File> subdirFilter = LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("j2sdk.*"),
                                                  IOUtil.regexCanonicalCaseFilePredicate("jdk.*"),
                                                  LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("\\d+\\.\\d+\\.\\d+"),
                                                                IOUtil.regexCanonicalCaseFilePredicate("java.*")));
-    for (File root : roots) {
-      for (File subdir : IOUtil.attemptListFilesAsIterable(root, subdirFilter)) {
-        addIfFile(new File(subdir, "lib/tools.jar"), jars);
-        addIfFile(new File(subdir, "Classes/classes.jar"), jars);
+    for (Map.Entry<File,Set<CompoundJDKDescriptor>> root : roots.entrySet()) {
+      for (File subdir : IOUtil.attemptListFilesAsIterable(root.getKey(), subdirFilter)) {
+        addIfFile(new File(subdir, "lib/tools.jar"), root.getValue(), jars);
+        addIfFile(new File(subdir, "Classes/classes.jar"), root.getValue(), jars);
       }
     }
 
@@ -460,15 +483,17 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     Map<FullVersion, Iterable<JarJDKToolsLibrary>> compoundResults =
       new TreeMap<FullVersion, Iterable<JarJDKToolsLibrary>>();
     
-    for (File jar : jars) {
-      JarJDKToolsLibrary lib = makeFromFile(jar, model);
-      if (lib.isValid()) {
-        FullVersion v = lib.version();
-        Map<FullVersion, Iterable<JarJDKToolsLibrary>> mapToAddTo = results;
-        if (v.vendor().equals(JavaVersion.VendorType.COMPOUND)) { mapToAddTo = compoundResults; }
-        
-        if (mapToAddTo.containsKey(v)) { mapToAddTo.put(v, IterUtil.compose(lib, mapToAddTo.get(v))); }
-        else { mapToAddTo.put(v, IterUtil.singleton(lib)); }
+    for (Map.Entry<File,Set<CompoundJDKDescriptor>> jar : jars.entrySet()) {
+      for (CompoundJDKDescriptor desc : jar.getValue()) {
+        JarJDKToolsLibrary lib = makeFromFile(jar.getKey(), model, desc);
+        if (lib.isValid()) {
+          FullVersion v = lib.version();
+          Map<FullVersion, Iterable<JarJDKToolsLibrary>> mapToAddTo = results;
+          if (v.vendor().equals(JavaVersion.VendorType.COMPOUND)) { mapToAddTo = compoundResults; }
+          
+          if (mapToAddTo.containsKey(v)) { mapToAddTo.put(v, IterUtil.compose(lib, mapToAddTo.get(v))); }
+          else { mapToAddTo.put(v, IterUtil.singleton(lib)); }
+        }
       }
     }
     
@@ -510,7 +535,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       }
       // if we found a JDK, then create a new compound library
       if (found!=null) {
-        JarJDKToolsLibrary lib = makeFromFile(compoundLib.location(), model, found.bootClassPath());
+        JarJDKToolsLibrary lib = makeFromFile(compoundLib.location(), model, compoundLib.getJDKDescriptor(),
+                                              found.bootClassPath());
         if (lib.isValid()) {
           JDKToolsLibrary.msg("\t==> "+lib.version());
           FullVersion v = lib.version();
@@ -529,16 +555,38 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   }
   
   /** Add a canonicalized {@code f} to the given set if it is an existing directory or link */
-  private static void addIfDir(File f, Set<? super File> set) {
+  private static void addIfDir(File f, CompoundJDKDescriptor c, Map<? super File, Set<CompoundJDKDescriptor>> map) {
     f = IOUtil.attemptCanonicalFile(f);
-    if (IOUtil.attemptIsDirectory(f)) { set.add(f); JDKToolsLibrary.msg("Dir added:     "+f); }
+    if (IOUtil.attemptIsDirectory(f)) {
+      Set<CompoundJDKDescriptor> set = map.get(f);
+      if (set==null) {
+        set = new LinkedHashSet<CompoundJDKDescriptor>();
+        map.put(f, set);
+      }
+      set.add(c);
+      JDKToolsLibrary.msg("Dir added:     "+f);
+    }
     else { JDKToolsLibrary.msg("Dir not added: "+f); }
   }
   
   /** Add a canonicalized {@code f} to the given set if it is an existing file */
-  private static void addIfFile(File f, Set<? super File> set) {
+  private static void addIfFile(File f, CompoundJDKDescriptor c, Map<? super File,Set<CompoundJDKDescriptor>> map) {
+    addIfFile(f, Collections.singleton(c), map);
+  }
+
+  /** Add a canonicalized {@code f} to the given set if it is an existing file */
+  private static void addIfFile(File f, Set<CompoundJDKDescriptor> cs,
+                                Map<? super File,Set<CompoundJDKDescriptor>> map) {
     f = IOUtil.attemptCanonicalFile(f);
-    if (IOUtil.attemptIsFile(f)) { set.add(f); JDKToolsLibrary.msg("File added:     "+f); }
+    if (IOUtil.attemptIsFile(f)) {
+      Set<CompoundJDKDescriptor> set = map.get(f);
+      if (set==null) {
+        set = new LinkedHashSet<CompoundJDKDescriptor>();
+        map.put(f, set);
+      }
+      set.addAll(cs);
+      JDKToolsLibrary.msg("File added:     "+f);
+    }
     else { JDKToolsLibrary.msg("File not added: "+f); }
   }
   

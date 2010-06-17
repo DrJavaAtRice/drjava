@@ -99,4 +99,6 @@ public class Mint2Descriptor implements CompoundJDKDescriptor {
       }
     };
   }
+
+  public String toString() { return getClass().getSimpleName()+" --> "+getAdapterForCompiler(); }
 }

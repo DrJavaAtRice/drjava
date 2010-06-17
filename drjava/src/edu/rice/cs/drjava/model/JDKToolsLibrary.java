@@ -95,7 +95,7 @@ public class JDKToolsLibrary {
       case JAVA_6: {
         switch (version.vendor()) {
           case OPENJDK: return "edu.rice.cs.drjava.model.compiler.Javac160OpenJDKCompiler";
-          case COMPOUND: return "edu.rice.cs.drjava.model.compiler.MintCompiler";
+          case COMPOUND: return null;
           default: return "edu.rice.cs.drjava.model.compiler.Javac160Compiler";
         }
       }

@@ -259,7 +259,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     File configTools = DrJava.getConfig().getSetting(JAVAC_LOCATION);
     if (configTools != FileOps.NULL_FILE) {
-      JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this);
+      JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this, null);
       if (fromConfig.isValid()) { 
         JarJDKToolsLibrary.msg("From config: "+fromConfig);
         results.put(coarsenVersion(fromConfig.version()), fromConfig);
