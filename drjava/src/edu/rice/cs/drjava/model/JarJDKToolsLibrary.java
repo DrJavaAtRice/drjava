@@ -56,6 +56,7 @@ import java.io.IOException;
 
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.lambda.Lambda3;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.lambda.Predicate;
 import edu.rice.cs.plt.reflect.ReflectUtil;
@@ -159,7 +160,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     Debugger debugger = NoDebuggerAvailable.ONLY;
     JavadocModel javadoc = new NoJavadocAvailable(model);
     
-    FullVersion version = guessVersion(f);
+    FullVersion version = guessVersion(f, desc);
     JDKToolsLibrary.msg("makeFromFile: "+f+" --> "+version);
     JDKToolsLibrary.msg("\tdesc = "+desc);
     
@@ -250,8 +251,16 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     return new JarJDKToolsLibrary(f, version, desc, compiler, debugger, javadoc, bootClassPath);
   }
   
-  private static FullVersion guessVersion(File f) {
+  private static FullVersion guessVersion(File f, CompoundJDKDescriptor desc) {
     FullVersion result = null;
+    
+    List<Lambda3<String,String,String,String>> detectors;
+    if (desc!=null) {
+      detectors = Collections.<Lambda3<String,String,String,String>>singletonList(desc.getDetector());
+    }
+    else {
+      detectors = Collections.<Lambda3<String,String,String,String>>emptyList();
+    }
 
     // We could start with f.getParentFile(), but this simplifies the logic
     File current = IOUtil.attemptCanonicalFile(f);
@@ -262,9 +271,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       String path = current.getAbsolutePath();
       if (path.startsWith("/System/Library/Frameworks/JavaVM.framework")) vendor = "apple";
       else if (path.toLowerCase().contains("openjdk")) vendor = "openjdk";
-      if (name.startsWith("jdk")) { result = JavaVersion.parseFullVersion(parsedVersion = name.substring(3),vendor,vendor); }
-      else if (name.startsWith("j2sdk")) { result = JavaVersion.parseFullVersion(parsedVersion = name.substring(5),vendor,vendor); }
-      else if (name.matches("\\d+\\.\\d+\\.\\d+")) { result = JavaVersion.parseFullVersion(parsedVersion = name,vendor,vendor); }
+      if (name.startsWith("jdk")) { result = JavaVersion.parseFullVersion(parsedVersion = name.substring(3),vendor,vendor,detectors); }
+      else if (name.startsWith("j2sdk")) { result = JavaVersion.parseFullVersion(parsedVersion = name.substring(5),vendor,vendor,detectors); }
+      else if (name.matches("\\d+\\.\\d+\\.\\d+")) { result = JavaVersion.parseFullVersion(parsedVersion = name,vendor,vendor,detectors); }
       current = current.getParentFile();
     } while (current != null && result == null);
     if (result == null || result.majorVersion().equals(JavaVersion.UNRECOGNIZED)) {
@@ -277,7 +286,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           if (v != null) {
             int space = v.indexOf(' ');
             if (space >= 0) v = v.substring(0,space);
-            result = JavaVersion.parseFullVersion(parsedVersion = v,vendor,vendor);
+            result = JavaVersion.parseFullVersion(parsedVersion = v,vendor,vendor,detectors);
           }
         }
       }
@@ -317,7 +326,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         else {
           vendor = "sun";
         }
-        result = JavaVersion.parseFullVersion(parsedVersion,vendor,vendor);
+        result = JavaVersion.parseFullVersion(parsedVersion,vendor,vendor,detectors);
       }
       catch(IOException ioe) { /* keep existing version */ }
       finally {

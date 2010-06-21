@@ -81,7 +81,8 @@ public class Mint2Descriptor implements CompoundJDKDescriptor {
   public Iterable<File> getSearchDirectories() { return IterUtil.asIterable(new File[0]); }
   public Iterable<File> getSearchFiles() {
     Iterable<File> files = IterUtil.asIterable(new File[] {
-      new File("/Users/mgricken/Documents/Research/Mint/java-mint/trunk/langtools/dist/lib/classes.jar")
+      new File("/Users/mgricken/Documents/Research/Mint/java-mint/trunk/langtools/dist/lib/classes.jar"),
+      new File("/D:/Documents/Research/Mint/java-mint/trunk/langtools/dist/lib/classes.jar")
     });
     return files;
   }
