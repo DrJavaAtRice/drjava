@@ -310,7 +310,7 @@ public class StatementEvaluator extends AbstractVisitor<StatementEvaluator.Resul
         // as per Java Language Specification (JLS):
         // http://java.sun.com/docs/books/jls/third_edition/html/statements.html#14.18
         // "If evaluation of the Expression completes normally, producing a null value,
-        // then an instance VÕ of class NullPointerException is created and thrown instead of null." 
+        // then an instance V' of class NullPointerException is created and thrown instead of null." 
         t = new NullPointerException();
         t.setStackTrace(new StackTraceElement[0]);
     }
