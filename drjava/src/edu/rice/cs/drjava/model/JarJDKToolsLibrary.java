@@ -264,9 +264,18 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       if (path.startsWith("/System/Library/Frameworks/JavaVM.framework")) vendor = "apple";
       else if (path.toLowerCase().contains("openjdk")) vendor = "openjdk";
       else if (path.toLowerCase().contains("sun")) vendor = "sun";
-      if (name.startsWith("jdk")) { result = JavaVersion.parseFullVersion(parsedVersion = name.substring(3),vendor,vendor); }
-      else if (name.startsWith("j2sdk")) { result = JavaVersion.parseFullVersion(parsedVersion = name.substring(5),vendor,vendor); }
-      else if (name.matches("\\d+\\.\\d+\\.\\d+")) { result = JavaVersion.parseFullVersion(parsedVersion = name,vendor,vendor); }
+      if (name.startsWith("jdk-")) {
+        result = JavaVersion.parseFullVersion(parsedVersion = name.substring(4),vendor,vendor);
+      }
+      else if (name.startsWith("jdk")) {
+        result = JavaVersion.parseFullVersion(parsedVersion = name.substring(3),vendor,vendor);
+      }
+      else if (name.startsWith("j2sdk")) {
+        result = JavaVersion.parseFullVersion(parsedVersion = name.substring(5),vendor,vendor);
+      }
+      else if (name.matches("\\d+\\.\\d+\\.\\d+")) {
+        result = JavaVersion.parseFullVersion(parsedVersion = name,vendor,vendor);
+      }
       current = current.getParentFile();
     } while (current != null && result == null);
     if (result == null || result.majorVersion().equals(JavaVersion.UNRECOGNIZED)) {
@@ -430,8 +439,6 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
      * remember insertion order
      */
     LinkedHashMap<File,Set<JDKDescriptor>> jars = new LinkedHashMap<File,Set<JDKDescriptor>>();
-    // drjava.jar file itself; check if it's a combined Mint/DrJava jar
-    addIfFile(edu.rice.cs.util.FileOps.getDrJavaFile(), (JDKDescriptor)null, jars);
 
     // Search for all compound JDK descriptors in the drjava.jar file
     Iterable<JDKDescriptor> descriptors = searchForJDKDescriptors(); 
@@ -464,6 +471,12 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     
     for (Map.Entry<File,Set<JDKDescriptor>> jar : jars.entrySet()) {
       for (JDKDescriptor desc : jar.getValue()) {
+        if (desc!=null) {
+          boolean containsCompiler = desc.containsCompiler(jar.getKey());
+          JDKToolsLibrary.msg("Checking file "+jar.getKey()+" for "+desc);
+          JDKToolsLibrary.msg("\t"+containsCompiler);
+          if (!containsCompiler) continue;
+        }
         JarJDKToolsLibrary lib = makeFromFile(jar.getKey(), model, desc);
         if (lib.isValid()) {
           FullVersion v = lib.version();

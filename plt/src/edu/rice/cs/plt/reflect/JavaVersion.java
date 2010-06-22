@@ -144,9 +144,39 @@ public enum JavaVersion {
     else { number = java_version.substring(0, dash); typeString = java_version.substring(dash+1); }
     
     int dot1 = number.indexOf('.');
-    if (dot1 == -1) { return new FullVersion(UNRECOGNIZED, 0, 0,
-                                             ReleaseType.STABLE, null,
-                                             vendor, vendorString, java_runtime_name, java_vm_vendor); }
+    if (dot1 == -1) {
+      try {
+        int feature = Integer.parseInt(number);
+        
+        ReleaseType type;
+        if (typeString == null) { type = ReleaseType.STABLE; }
+        else if (typeString.startsWith("ea")) { type = ReleaseType.EARLY_ACCESS; }
+        else if (typeString.startsWith("beta")) { type = ReleaseType.BETA; }
+        else if (typeString.startsWith("rc")) { type = ReleaseType.RELEASE_CANDIDATE; }
+        else { type = ReleaseType.UNRECOGNIZED; }
+        
+        JavaVersion version = UNRECOGNIZED;
+        switch (feature) {
+          case 1: version = JAVA_1_1; break;
+          case 2: version = JAVA_1_2; break;
+          case 3: version = JAVA_1_3; break;
+          case 4: version = JAVA_1_4; break;
+          case 5: version = JAVA_5; break;
+          case 6: version = JAVA_6; break;
+          case 7: version = JAVA_7; break;
+          default: if (feature > 7) { version = FUTURE; } break;
+        }
+        return new FullVersion(version, 0, 0,
+                               type, typeString,
+                               vendor, vendorString, java_runtime_name, java_vm_vendor);
+      }
+      catch(NumberFormatException nfe) {
+        return new FullVersion(UNRECOGNIZED, 0, 0,
+                               ReleaseType.STABLE, null,
+                               vendor, vendorString, java_runtime_name, java_vm_vendor);
+      }
+    }
+    
     int dot2 = number.indexOf('.', dot1+1);
     if (dot2 == -1) { return new FullVersion(UNRECOGNIZED, 0, 0,
                                              ReleaseType.STABLE, null,
