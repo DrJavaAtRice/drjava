@@ -1111,6 +1111,11 @@ public interface OptionConstants {
   public static final VectorOption<KeyStroke> KEY_GENERATE_CUSTOM_DRJAVA = 
     new VectorOption<KeyStroke>("key.generate.custom.drjava", new KeyStrokeOption("",null), to.vector());
   
+  /** The key binding for starting a new, blank DrJava instance. */
+  public static final VectorOption<KeyStroke> KEY_NEW_DRJAVA_INSTANCE= 
+    new VectorOption<KeyStroke>("key.new.drjava.instance", new KeyStrokeOption("",null),
+                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F1, CTRL_MASK|SHIFT_MASK)));
+  
   /* ---------- Find Replace Options ---------- */
   
   public static final BooleanOption FIND_MATCH_CASE = 

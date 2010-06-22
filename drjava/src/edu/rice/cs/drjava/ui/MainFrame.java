@@ -2228,6 +2228,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       popup.setVisible(true);
     }
   };
+
+  /** Action that starts a new, blank, unconnected DrJava instance. */
+  private final Action _newDrJavaInstanceAction = new AbstractAction("New DrJava Instance...") {
+    public void actionPerformed(ActionEvent ae) {
+      try {
+        Process p = edu.rice.cs.plt.concurrent.JVMBuilder.DEFAULT.classPath(FileOps.getDrJavaFile()).
+          start(edu.rice.cs.drjava.DrJava.class.getName(), "-new");
+      }
+      catch(IOException ioe) { MainFrameStatics.showIOError(MainFrame.this, ioe); }
+    }
+  };
   
   /** Action that switches to next document.  Only runs in the event thread. */
   private final Action _switchToNextAction = new AbstractAction("Next Document") {
@@ -5276,6 +5287,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // on HP tc1100 and Toshiba Portege tablet PCs, but did not help in all cases
     if (! _closeProject(true)) { return; /* if user pressed cancel, do not quit */ }
     
+    _updateSavedConfiguration();
+    
+    //DrJava.consoleOut().println("Quitting DrJava...");
+    dispose();    // Free GUI elements of this frame
+    _model.quit();
+  }
+  
+  void _updateSavedConfiguration() {
     _recentFileManager.saveRecentFiles();
     _recentProjectManager.saveRecentFiles();
     if (! _model.closeAllFilesOnQuit()) { return; /* if user pressed cancel, do not quit */ }
@@ -5287,9 +5306,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       try { DrJava.getConfig().saveConfiguration(); }
       catch (IOException ioe) { MainFrameStatics.showIOError(MainFrame.this, ioe); }
     }
-    //DrJava.consoleOut().println("Quitting DrJava...");
-    dispose();    // Free GUI elements of this frame
-    _model.quit();
   }
   
   private void _forceQuit() { _model.forceQuit(); }
@@ -6637,6 +6653,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                              DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)));
     final JMenu advancedMenu = new JMenu("Advanced");
     _addMenuItem(advancedMenu, _generateCustomDrJavaJarAction, KEY_GENERATE_CUSTOM_DRJAVA);
+    _addMenuItem(advancedMenu, _newDrJavaInstanceAction, KEY_NEW_DRJAVA_INSTANCE);
     toolsMenu.add(advancedMenu);
 
     toolsMenu.addSeparator();    
