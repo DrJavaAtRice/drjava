@@ -54,6 +54,7 @@ import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
 import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
 import edu.rice.cs.drjava.model.javadoc.DefaultJavadocModel;
+import edu.rice.cs.drjava.model.compiler.descriptors.JDKDescriptor;
 
 /** 
  * Provides dynamic access to the interface of a JDK's tools.jar classes.  This level of indirection
@@ -67,16 +68,21 @@ public class JDKToolsLibrary {
   private final CompilerInterface _compiler;
   private final Debugger _debugger;
   private final JavadocModel _javadoc;
+  private final JDKDescriptor _jdkDescriptor; // may be null
   
-  protected JDKToolsLibrary(FullVersion version, CompilerInterface compiler, Debugger debugger,
+  protected JDKToolsLibrary(FullVersion version, JDKDescriptor jdkDescriptor,
+                            CompilerInterface compiler, Debugger debugger,
                             JavadocModel javadoc) {
     _version = version;
     _compiler = compiler;
     _debugger = debugger;
     _javadoc = javadoc;
+    _jdkDescriptor = jdkDescriptor;
   }
   
   public FullVersion version() { return _version; }
+  
+  public JDKDescriptor jdkDescriptor() { return _jdkDescriptor; }
   
   public CompilerInterface compiler() { return _compiler; }
   
@@ -88,7 +94,23 @@ public class JDKToolsLibrary {
     return _compiler.isAvailable() || _debugger.isAvailable() || _javadoc.isAvailable();
   }
   
-  public String toString() { return "JDK library " + _version.versionString(); }
+  public String toString() {
+    if (_jdkDescriptor==null) {
+      switch(_version.vendor()) {
+        case SUN:
+          return "Sun JDK library " + _version.versionString();
+        case OPENJDK:
+          return "OpenJDK library " + _version.versionString();
+        case APPLE:
+          return "Apple JDK library " + _version.versionString();
+        default:
+          return "JDK library " + _version.versionString();
+      }
+    }
+    else {
+      return _jdkDescriptor.getName() + " library " + _version.versionString();
+    }
+  }
   
   protected static String adapterForCompiler(JavaVersion.FullVersion version) {
     switch (version.majorVersion()) {
@@ -165,7 +187,7 @@ public class JDKToolsLibrary {
     if (compiler!=NoCompilerAvailable.ONLY) {
       // if we have found a compiler, add it
       msg("                 compiler found");
-      list.add(new JDKToolsLibrary(version, compiler, debugger, javadoc));
+      list.add(new JDKToolsLibrary(version, null, compiler, debugger, javadoc));
     }
       
     if (JavaVersion.JAVA_6.compareTo(version.majorVersion())>=0) {
@@ -180,7 +202,7 @@ public class JDKToolsLibrary {
       if (compiler!=NoCompilerAvailable.ONLY) {
         // if we have found a compiler, add it
         msg("                 compiler found");
-        list.add(new JDKToolsLibrary(eclipseVersion, compiler, debugger, javadoc));
+        list.add(new JDKToolsLibrary(eclipseVersion, null, compiler, debugger, javadoc));
       }
     }
     msg("                 compilers found: "+list.size());
@@ -188,7 +210,7 @@ public class JDKToolsLibrary {
     if (list.size()==0) {
       // no compiler found, i.e. compiler == NoCompilerAvailable.ONLY
       msg("                 no compilers found, adding NoCompilerAvailable library");
-      list.add(new JDKToolsLibrary(version, NoCompilerAvailable.ONLY, debugger, javadoc));
+      list.add(new JDKToolsLibrary(version, null, NoCompilerAvailable.ONLY, debugger, javadoc));
     }
     
     return list;

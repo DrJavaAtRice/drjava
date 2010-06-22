@@ -285,11 +285,15 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     Iterable<JarJDKToolsLibrary> fromSearch = JarJDKToolsLibrary.search(this);
     for (JDKToolsLibrary t : fromSearch) {
       JavaVersion.FullVersion tVersion = t.version();
-      if (!results.containsKey(coarsenVersion(tVersion))) {
-        JarJDKToolsLibrary.msg("From search: "+t);
-        results.put(coarsenVersion(tVersion), t);
+      JarJDKToolsLibrary.msg("From search: "+t);
+      JavaVersion.FullVersion coarsenedVersion = coarsenVersion(tVersion);
+      JarJDKToolsLibrary.msg("\ttVersion: "+tVersion+" "+tVersion.vendor());
+      JarJDKToolsLibrary.msg("\tcoarsenedVersion: "+coarsenedVersion+" "+coarsenedVersion.vendor());
+      if (!results.containsKey(coarsenedVersion)) {
+        JarJDKToolsLibrary.msg("\tadded");
+        results.put(coarsenedVersion, t);
       }
-      else { JarJDKToolsLibrary.msg("From search: duplicate "+t); }
+      else { JarJDKToolsLibrary.msg("\tduplicate"); }
     }
     
     return IterUtil.reverse(results.values());

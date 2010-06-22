@@ -127,15 +127,13 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   
   private final File _location;
   private final List<File> _bootClassPath; // may be null (i.e. compiler's internal behavior)
-  private final JDKDescriptor _jdkDescriptor; // may be null
   
-  private JarJDKToolsLibrary(File location, FullVersion version, JDKDescriptor desc,
+  private JarJDKToolsLibrary(File location, FullVersion version, JDKDescriptor jdkDescriptor,
                              CompilerInterface compiler, Debugger debugger,
                              JavadocModel javadoc, List<File> bootClassPath) {
-    super(version, compiler, debugger, javadoc);
+    super(version, jdkDescriptor, compiler, debugger, javadoc);
     _location = location;
     _bootClassPath = bootClassPath;
-    _jdkDescriptor = desc;
   }
   
   public File location() { return _location; }
@@ -144,9 +142,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     else return null;
   }
   
-  public JDKDescriptor getJDKDescriptor() { return _jdkDescriptor; }
-  
-  public String toString() { return super.toString() + " at " + _location + ", boot classpath: " + bootClassPath(); }
+  public String toString() {
+    return super.toString() + " at " + _location + ", boot classpath: " + bootClassPath();
+  }
 
   /** Create a JarJDKToolsLibrary from a specific {@code "tools.jar"} or {@code "classes.jar"} file. */
   public static JarJDKToolsLibrary makeFromFile(File f, GlobalModel model, JDKDescriptor desc) {
@@ -251,7 +249,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     return new JarJDKToolsLibrary(f, version, desc, compiler, debugger, javadoc, bootClassPath);
   }
   
-  private static FullVersion guessVersion(File f) {
+  public static FullVersion guessVersion(File f) {
     FullVersion result = null;
     
     // We could start with f.getParentFile(), but this simplifies the logic
@@ -317,8 +315,11 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         JarFile jf = null;
         try {
           jf = new JarFile(f);
-          if (jf.getJarEntry("com/sun/tools/javac/util/JavacFileManager.class")!=null) {
-            // NOTE: this may cause Sun's Java 7 to also be recognized as openjdk
+          /* if (jf.getJarEntry("com/sun/tools/javac/file/JavacFileManager.class")!=null) {            
+            // NOTE: this may cause OpenJDK 7 to also be recognized as sun
+            vendor = "sun";
+          }
+          else */ if (jf.getJarEntry("com/sun/tools/javac/util/JavacFileManager.class")!=null) {
             vendor = "openjdk";
           }
           else if (jf.getJarEntry("com/sun/tools/javac/util/DefaultFileManager.class")!=null) {
@@ -527,7 +528,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       }
       // if we found a JDK, then create a new compound library
       if (found!=null) {
-        JarJDKToolsLibrary lib = makeFromFile(compoundLib.location(), model, compoundLib.getJDKDescriptor(),
+        JarJDKToolsLibrary lib = makeFromFile(compoundLib.location(), model, compoundLib.jdkDescriptor(),
                                               found.bootClassPath());
         if (lib.isValid()) {
           JDKToolsLibrary.msg("\t==> "+lib.version());
