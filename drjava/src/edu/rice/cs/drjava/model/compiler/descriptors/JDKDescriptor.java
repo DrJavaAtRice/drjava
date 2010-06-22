@@ -38,11 +38,11 @@ package edu.rice.cs.drjava.model.compiler.descriptors;
 
 import java.io.File;
 import java.util.Set;
-import edu.rice.cs.plt.lambda.Lambda3;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
-/** A description of a compound JDK like Mint. */
-public interface CompoundJDKDescriptor {
+/** A description of a JDK. */
+public interface JDKDescriptor {
+  public String getName();
   
   /** Packages to shadow when loading a new tools.jar.  If we don't shadow these classes, we won't
     * be able to load distinct versions for each tools.jar library.  These should be verified whenever
@@ -57,7 +57,7 @@ public interface CompoundJDKDescriptor {
   public String getAdapterForCompiler();
   public String getAdapterForDebugger();
   
+  public boolean containsCompiler(File f);
+    
   public JavaVersion getMinimumMajorVersion();
-
-  public Lambda3<String,String,String,String> getDetector();
 }

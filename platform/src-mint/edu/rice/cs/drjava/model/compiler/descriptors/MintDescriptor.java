@@ -40,12 +40,16 @@ import java.io.File;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Collections;
-import edu.rice.cs.plt.lambda.Lambda3;
+import java.io.IOException;
+import java.util.jar.JarFile;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 
 /** The description of the Mint compound JDK. */
-public class MintDescriptor implements CompoundJDKDescriptor {
+public class MintDescriptor implements JDKDescriptor {
+  public String getName() {
+    return "Mint";
+  }
   
   /** Packages to shadow when loading a new tools.jar.  If we don't shadow these classes, we won't
     * be able to load distinct versions for each tools.jar library.  These should be verified whenever
@@ -106,19 +110,34 @@ public class MintDescriptor implements CompoundJDKDescriptor {
     return files;
   }
   
+  public boolean containsCompiler(File f) {
+    if (f.isFile()) {
+      try {
+        JarFile jf = new JarFile(f);
+        return (jf.getJarEntry("edu/rice/cs/mint/comp/TransStaging.class")!=null &&
+                jf.getJarEntry("com/sun/source/tree/BracketExprTree.class")!=null &&
+                jf.getJarEntry("com/sun/source/tree/BracketStatTree.class")!=null &&
+                jf.getJarEntry("com/sun/source/tree/EscapeExprTree.class")!=null &&
+                jf.getJarEntry("com/sun/source/tree/EscapeStatTree.class")!=null &&
+                jf.getJarEntry("com/sun/tools/javac/util/DefaultFileManager.class")==null);
+      }
+      catch(IOException ioe) { return false; }
+    }
+    else if (f.isDirectory()) {
+      return (new File(f,"edu/rice/cs/mint/comp/TransStaging.class").exists() &&
+              new File(f,"com/sun/source/tree/BracketExprTree.class").exists() &&
+              new File(f,"com/sun/source/tree/BracketStatTree.class").exists() &&
+              new File(f,"com/sun/source/tree/EscapeExprTree.class").exists() &&
+              new File(f,"com/sun/source/tree/EscapeStatTree.class").exists() &&
+              new File(f,"com/sun/tools/javac/util/DefaultFileManager.class").exists());
+    }
+    return false;
+  }
+  
   public String getAdapterForCompiler() { return "edu.rice.cs.drjava.model.compiler.MintCompiler"; }
   public String getAdapterForDebugger() { return null; }
   
   public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_6; }
-
-  public Lambda3<String,String,String,String> getDetector() {
-    return new Lambda3<String,String,String,String>() {
-      public String value(String java_version, String java_runtime_name, String java_vm_vendor) {
-        if (java_runtime_name.toLowerCase().contains("mint")) return "Mint";
-        return null;
-      }
-    };
-  }
   
   public String toString() { return getClass().getSimpleName()+" --> "+getAdapterForCompiler(); }
 }

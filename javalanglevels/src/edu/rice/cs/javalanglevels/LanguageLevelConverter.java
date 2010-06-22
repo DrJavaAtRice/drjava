@@ -46,6 +46,7 @@ import java.io.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.*;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.tuple.Triple;
 
 /** An instance of this class converts a language level file to a .java file of the same name by first visiting the 
   * file to error-check it, and then by augmenting the file.  This class is tested at the top level in the
@@ -208,9 +209,11 @@ public class LanguageLevelConverter {
           }
           else {
             assert isAdvancedFile(f) || isFullJavaFile(f);
-            llv = new FullJavaVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(),
-                                      new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
-                                      languageLevelVisitedFiles);
+// TODO: Where is FullJavaVisitor?
+//            llv = new FullJavaVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(),
+//                                      new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+//                                      languageLevelVisitedFiles);
+            llv = null;
           }
           
           // Conformance checking pass
@@ -279,9 +282,9 @@ public class LanguageLevelConverter {
     else  { /* Perform type-checking on visited LL files and build list of files toAugment. */
       for (Triple<LanguageLevelVisitor, SourceFile, File> triple: visited) {
         
-        LanguageLevelVisitor llv = triple.getFirst();
-        SourceFile sf = triple.getSecond();
-        File f = triple.getThird();
+        LanguageLevelVisitor llv = triple.first();
+        SourceFile sf = triple.second();
+        File f = triple.third();
         
         if (isAdvancedFile(f)) { toAugment.addLast(triple); }
         else if (isLanguageLevelFile(f)) {
@@ -354,9 +357,9 @@ public class LanguageLevelConverter {
     for (Triple<LanguageLevelVisitor, SourceFile, File> triple: toAugment) 
       try {
       
-      LanguageLevelVisitor llv = triple.getFirst();
-      SourceFile sf = triple.getSecond();
-      File f = triple.getThird();
+      LanguageLevelVisitor llv = triple.first();
+      SourceFile sf = triple.second();
+      File f = triple.third();
       
       File augmentedFile = getJavaForLLFile(f); // create  empty .java file for .dj? file
       

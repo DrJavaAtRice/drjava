@@ -501,6 +501,7 @@
        *********** -->
        
   <target name="jar-full" depends="resolve-version-tag" description="Create the jar file with all classes and libs">
+    <delete file="${ant.project.name}-full.jar" failonerror="true"/>
     <jar jarfile="${ant.project.name}-full.jar">
       <manifest>
         <attribute name="Built-By" value="${user.name}" />
@@ -519,6 +520,7 @@
   </target>
 
   <target name="jar" depends="resolve-version-tag" description="Create the jar file without any support libs">
+    <delete file="${ant.project.name}.jar" failonerror="true"/>
     <jar jarfile="${ant.project.name}.jar">
       <manifest>
         <attribute name="Built-By" value="${user.name}" />
