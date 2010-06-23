@@ -82,7 +82,9 @@ public class MintDescriptor implements JDKDescriptor {
     return set;
   }
 
-  public Iterable<File> getSearchDirectories() { return IterUtil.empty(); }
+  public Iterable<File> getSearchDirectories() {
+    return IterUtil.singleton(edu.rice.cs.util.FileOps.getDrJavaFile().getParentFile());
+  }
   public Iterable<File> getSearchFiles() {
     Iterable<File> files = IterUtil.asIterable(new File[] {
       new File("/C:/Program Files/JavaMint/langtools/dist/lib/classes.jar"),
