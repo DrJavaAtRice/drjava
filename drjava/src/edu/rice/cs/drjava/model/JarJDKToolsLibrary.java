@@ -263,16 +263,16 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       else if (path.toLowerCase().contains("openjdk")) vendor = "openjdk";
       else if (path.toLowerCase().contains("sun")) vendor = "sun";
       if (name.startsWith("jdk-")) {
-        result = JavaVersion.parseFullVersion(parsedVersion = name.substring(4),vendor,vendor);
+        result = JavaVersion.parseFullVersion(parsedVersion = name.substring(4),vendor,vendor,f);
       }
       else if (name.startsWith("jdk")) {
-        result = JavaVersion.parseFullVersion(parsedVersion = name.substring(3),vendor,vendor);
+        result = JavaVersion.parseFullVersion(parsedVersion = name.substring(3),vendor,vendor,f);
       }
       else if (name.startsWith("j2sdk")) {
-        result = JavaVersion.parseFullVersion(parsedVersion = name.substring(5),vendor,vendor);
+        result = JavaVersion.parseFullVersion(parsedVersion = name.substring(5),vendor,vendor,f);
       }
       else if (name.matches("\\d+\\.\\d+\\.\\d+")) {
-        result = JavaVersion.parseFullVersion(parsedVersion = name,vendor,vendor);
+        result = JavaVersion.parseFullVersion(parsedVersion = name,vendor,vendor,f);
       }
       current = current.getParentFile();
     } while (current != null && result == null);
@@ -286,7 +286,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           if (v != null) {
             int space = v.indexOf(' ');
             if (space >= 0) v = v.substring(0,space);
-            result = JavaVersion.parseFullVersion(parsedVersion = v,vendor,vendor);
+            result = JavaVersion.parseFullVersion(parsedVersion = v,vendor,vendor,f);
           }
         }
       }
@@ -334,7 +334,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           catch(IOException ioe) { /* ignore, just trying to close the file */ }
         }
       }
-      result = JavaVersion.parseFullVersion(parsedVersion,vendor,vendor);
+      result = JavaVersion.parseFullVersion(parsedVersion,vendor,vendor,f);
     }
     return result;
   }

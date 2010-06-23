@@ -80,6 +80,8 @@ public class Javac160OpenJDKCompiler extends JavacCompiler {
   public Javac160OpenJDKCompiler(JavaVersion.FullVersion version, String location, List<? extends File> defaultBootClassPath) {
     super(version, location, defaultBootClassPath);
   }
+
+  public String getName() { return "OpenJDK " + _version.versionString(); }
   
   public boolean isAvailable() {
     try {
@@ -186,10 +188,6 @@ public class Javac160OpenJDKCompiler extends JavacCompiler {
     
     debug.logEnd("compile()");
     return errors;
-  }
-  
-  public String getName() {
-    return super.getName();
   }
   
   private Iterable<String> _createOptions(List<? extends File> classPath, List<? extends File> sourcePath, File destination, 

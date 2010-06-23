@@ -46,6 +46,7 @@ import edu.rice.cs.plt.reflect.JavaVersion.FullVersion;
 import edu.rice.cs.plt.reflect.ReflectException;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
@@ -214,7 +215,7 @@ public class JDKToolsLibrary {
     }
     
     return list;
-  }  
+  }
   
   public static final java.io.StringWriter LOG_STRINGWRITER = new java.io.StringWriter();
   protected static final java.io.PrintWriter LOG_PW = new java.io.PrintWriter(LOG_STRINGWRITER);

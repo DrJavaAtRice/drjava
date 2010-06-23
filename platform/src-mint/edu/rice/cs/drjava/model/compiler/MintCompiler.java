@@ -97,10 +97,16 @@ public class MintCompiler extends Javac160FilteringCompiler {
   /** Transform the command line to be interpreted into something the Interactions JVM can use.
     * This replaces "java MyClass a b c" with Java code to call MyClass.main(new String[]{"a","b","c"}).
     * "import MyClass" is not handled here.
+    * transformCommands should support at least "run", "java" and "applet".
     * @param interactionsString unprocessed command line
     * @return command line with commands transformed */
   public String transformCommands(String interactionsString) {
-    if (interactionsString.startsWith("mint ") ||
+    if (interactionsString.startsWith("applet ")) {
+      throw new RuntimeException("Applets not supported by Mint.");
+    }
+    if (interactionsString.startsWith("run ") ||
+        interactionsString.startsWith("applet ") ||
+        interactionsString.startsWith("mint ") ||
         interactionsString.startsWith("java ")) interactionsString = _transformMintCommand(interactionsString);
     return interactionsString;    
   }
