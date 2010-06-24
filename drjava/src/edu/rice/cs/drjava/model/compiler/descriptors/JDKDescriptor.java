@@ -54,6 +54,8 @@ public interface JDKDescriptor {
   public Iterable<File> getSearchDirectories();
   public Iterable<File> getSearchFiles();
   
+  public boolean isCompound();
+  
   public String getAdapterForCompiler();
   public String getAdapterForDebugger();
   

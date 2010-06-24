@@ -86,12 +86,15 @@ public class Mint2Descriptor implements JDKDescriptor {
   public Iterable<File> getSearchFiles() {
     Iterable<File> files = IterUtil.asIterable(new File[] {
       new File("/home/mgricken/JavaMint2/langtools/dist/lib/classes.jar"),
+      new File("/C:/Program Files/JavaMint2/langtools/dist/lib/classes.jar"),
       new File("/home/mgricken/research/Mint/java-mint/trunk/langtools/dist/lib/classes.jar"),
       new File("/Users/mgricken/Documents/Research/Mint/java-mint/trunk/langtools/dist/lib/classes.jar"),
       new File("/D:/Documents/Research/Mint/java-mint/trunk/langtools/dist/lib/classes.jar")
     });
     return files;
   }
+  
+  public boolean isCompound() { return true; }
   
   public boolean containsCompiler(File f) {
     if (f.isFile()) {

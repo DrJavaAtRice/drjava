@@ -45,10 +45,10 @@ import java.util.jar.JarFile;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 
-/** The description of the Mint compound JDK. */
-public class MintDescriptor implements JDKDescriptor {
+/** The description of the NextGen compound JDK. */
+public class NextGenDescriptor implements JDKDescriptor {
   public String getName() {
-    return "Mint";
+    return "NextGen";
   }
   
   /** Packages to shadow when loading a new tools.jar.  If we don't shadow these classes, we won't
@@ -69,15 +69,8 @@ public class MintDescriptor implements JDKDescriptor {
         "com.sun.xml.internal.xsom",
         "org.relaxng",
         
-        // Mint:
-        "com.sun.tools.javac",
-        "com.sun.tools.javac.tree",
-        "com.sun.tools.javac.comp",
-        "com.sun.tools.javac.main",
-        "edu.rice.cs.mint",
-        "edu.rice.cs.mint.comp",
-        "edu.rice.cs.mint.runtime",
-        "edu.rice.cs.mint.runtime.mspTree"
+        // Nextgen:
+        "edu.rice.cs.nextgen2" // more?
     });
     return set;
   }
@@ -87,29 +80,21 @@ public class MintDescriptor implements JDKDescriptor {
   }
   public Iterable<File> getSearchFiles() {
     Iterable<File> files = IterUtil.asIterable(new File[] {
-      new File("/C:/Program Files/JavaPLT/JavaMint/langtools/dist/lib/classes.jar"),
-        new File("/C:/Program Files/JavaPLT/JavaMint/langtools/dist/lib/tools.jar"),
-        new File("/C:/Program Files/JavaMint/langtools/dist/lib/classes.jar"),
-        new File("/C:/Program Files/JavaMint/langtools/dist/lib/tools.jar"),
-        new File("/usr/local/soylatte/lib/classes.jar"),
-        new File("/usr/local/soylatte/lib/tools.jar"),
-        new File("/usr/local/JavaMint/langtools/dist/lib/classes.jar"),
-        new File("/usr/local/JavaMint/langtools/dist/lib/tools.jar")
+      new File("/C:/Program Files/JavaPLT/nextgen2/nextgen2.jar")
     });
     try {
-      String mint_home = System.getenv("MINT_HOME");
-      if (mint_home!=null) {
-        // JDKToolsLibrary.msg("MINT_HOME environment variable set to: "+mint_home);
-        files = IterUtil.compose(files, new File(new File(mint_home), "langtools/dist/lib/classes.jar"));
-        files = IterUtil.compose(files, new File(new File(mint_home), "langtools/dist/lib/tools.jar"));
+      String ngc_home = System.getenv("NGC_HOME");
+      if (ngc_home!=null) {
+        // JDKToolsLibrary.msg("NGC_HOME environment variable set to: "+ngc_home);
+        files = IterUtil.compose(files, new File(new File(ngc_home), "nextgen2.jar"));
       }
       else {
-        // JDKToolsLibrary.msg("MINT_HOME not set");
+        // JDKToolsLibrary.msg("NGC_HOME not set");
       }
     }
-    catch(Exception e) { /* ignore MINT_HOME variable */ }
+    catch(Exception e) { /* ignore NGC_HOME variable */ }
     
-    // drjava.jar file itself; check if it's a combined Mint/DrJava jar
+    // drjava.jar file itself; check if it's a combined Nextgen/DrJava jar
     files = IterUtil.compose(files, edu.rice.cs.util.FileOps.getDrJavaFile()); 
     return files;
   }
@@ -120,27 +105,17 @@ public class MintDescriptor implements JDKDescriptor {
     if (f.isFile()) {
       try {
         JarFile jf = new JarFile(f);
-        return (jf.getJarEntry("edu/rice/cs/mint/comp/TransStaging.class")!=null &&
-                jf.getJarEntry("com/sun/source/tree/BracketExprTree.class")!=null &&
-                jf.getJarEntry("com/sun/source/tree/BracketStatTree.class")!=null &&
-                jf.getJarEntry("com/sun/source/tree/EscapeExprTree.class")!=null &&
-                jf.getJarEntry("com/sun/source/tree/EscapeStatTree.class")!=null &&
-                jf.getJarEntry("com/sun/tools/javac/util/DefaultFileManager.class")==null);
+        return (jf.getJarEntry("edu/rice/cs/nextgen2/classloader/Runner.class")!=null);
       }
       catch(IOException ioe) { return false; }
     }
     else if (f.isDirectory()) {
-      return (new File(f,"edu/rice/cs/mint/comp/TransStaging.class").exists() &&
-              new File(f,"com/sun/source/tree/BracketExprTree.class").exists() &&
-              new File(f,"com/sun/source/tree/BracketStatTree.class").exists() &&
-              new File(f,"com/sun/source/tree/EscapeExprTree.class").exists() &&
-              new File(f,"com/sun/source/tree/EscapeStatTree.class").exists() &&
-              new File(f,"com/sun/tools/javac/util/DefaultFileManager.class").exists());
+      return (new File(f,"edu/rice/cs/nextgen2/classloader/Runner.class").exists());
     }
     return false;
   }
   
-  public String getAdapterForCompiler() { return "edu.rice.cs.drjava.model.compiler.MintCompiler"; }
+  public String getAdapterForCompiler() { return "edu.rice.cs.drjava.model.compiler.NextGenCompiler"; }
   public String getAdapterForDebugger() { return null; }
   
   public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_6; }
