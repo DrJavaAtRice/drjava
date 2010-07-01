@@ -158,7 +158,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     Debugger debugger = NoDebuggerAvailable.ONLY;
     JavadocModel javadoc = new NoJavadocAvailable(model);
     
-    FullVersion version = guessVersion(f);
+    FullVersion version = guessVersion(f, desc);
     JDKToolsLibrary.msg("makeFromFile: "+f+" --> "+version+", vendor: "+version.vendor());
     JDKToolsLibrary.msg("\tdesc = "+desc);
     
@@ -249,8 +249,10 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     return new JarJDKToolsLibrary(f, version, desc, compiler, debugger, javadoc, bootClassPath);
   }
   
-  public static FullVersion guessVersion(File f) {
+  public static FullVersion guessVersion(File f, JDKDescriptor desc) {
     FullVersion result = null;
+    
+    boolean forceUnknown = (desc!=null) && desc.isCompound();
     
     // We could start with f.getParentFile(), but this simplifies the logic
     File current = IOUtil.attemptCanonicalFile(f);
@@ -259,9 +261,11 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     do {
       String name = current.getName();
       String path = current.getAbsolutePath();
-      if (path.startsWith("/System/Library/Frameworks/JavaVM.framework")) vendor = "apple";
-      else if (path.toLowerCase().contains("openjdk")) vendor = "openjdk";
-      else if (path.toLowerCase().contains("sun")) vendor = "sun";
+      if (!forceUnknown) {
+        if (path.startsWith("/System/Library/Frameworks/JavaVM.framework")) vendor = "apple";
+        else if (path.toLowerCase().contains("openjdk")) vendor = "openjdk";
+        else if (path.toLowerCase().contains("sun")) vendor = "sun";
+      }
       if (name.startsWith("jdk-")) {
         result = JavaVersion.parseFullVersion(parsedVersion = name.substring(4),vendor,vendor,f);
       }
@@ -306,71 +310,40 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     }
     
     if ((result == null) || (result.vendor()==JavaVersion.VendorType.UNKNOWN)) {
-      if (result.majorVersion().compareTo(JavaVersion.JAVA_6)<0) {
-        // Java 5 or earlier, assume Sun
-        vendor = "sun";
-      }
-      else {
-        // distinguish Sun Java 6 and OpenJDK 6 if it is still unknown
-        JarFile jf = null;
-        try {
-          jf = new JarFile(f);
-          /* if (jf.getJarEntry("com/sun/tools/javac/file/JavacFileManager.class")!=null) {            
-            // NOTE: this may cause OpenJDK 7 to also be recognized as sun
-            vendor = "sun";
-          }
-          else */ if (jf.getJarEntry("com/sun/tools/javac/util/JavacFileManager.class")!=null) {
-            vendor = "openjdk";
-          }
-          else if (jf.getJarEntry("com/sun/tools/javac/util/DefaultFileManager.class")!=null) {
-            vendor = "sun";
-          }
+      if (!forceUnknown) {
+        if (result.majorVersion().compareTo(JavaVersion.JAVA_6)<0) {
+          // Java 5 or earlier, assume Sun
+          vendor = "sun";
         }
-        catch(IOException ioe) { /* keep existing version */ }
-        finally {
+        else {
+          // distinguish Sun Java 6 and OpenJDK 6 if it is still unknown
+          JarFile jf = null;
           try {
-            if (jf != null) jf.close();
+            jf = new JarFile(f);
+            /* if (jf.getJarEntry("com/sun/tools/javac/file/JavacFileManager.class")!=null) {            
+             // NOTE: this may cause OpenJDK 7 to also be recognized as sun
+             vendor = "sun";
+             }
+             else */ if (jf.getJarEntry("com/sun/tools/javac/util/JavacFileManager.class")!=null) {
+               vendor = "openjdk";
+             }
+             else if (jf.getJarEntry("com/sun/tools/javac/util/DefaultFileManager.class")!=null) {
+               vendor = "sun";
+             }
           }
-          catch(IOException ioe) { /* ignore, just trying to close the file */ }
+          catch(IOException ioe) { /* keep existing version */ }
+          finally {
+            try {
+              if (jf != null) jf.close();
+            }
+            catch(IOException ioe) { /* ignore, just trying to close the file */ }
+          }
         }
       }
       result = JavaVersion.parseFullVersion(parsedVersion,vendor,vendor,f);
     }
     return result;
   }
-  
-//  // Lifted from DrJava.java; may be a useful alternative to the path-based approach of guessVersion.
-//  /** @return a string with the suspected version of the tools.jar file, or null if an error occurred. */
-//  private static String _getToolsJarVersion(File toolsJarFile) {
-//    try {
-//      JarFile jf = new JarFile(toolsJarFile);
-//      Manifest mf = jf.getManifest();
-//      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//      mf.write(baos);
-//      String str = baos.toString();
-//      // the expected format of str is:
-//      // Manifest-Version: 1.0
-//      // Created-By: 1.5.0_07 (Sun Microsystems Inc.)
-//      //
-//      final String CB = "Created-By: ";
-//      int beginPos = str.indexOf(CB);
-//      if (beginPos >= 0) {
-//        beginPos += CB.length();
-//        int endPos = str.indexOf(StringOps.EOL, beginPos);
-//        if (endPos >= 0) return str.substring(beginPos, endPos);
-//        else {
-//          endPos = str.indexOf(' ', beginPos);
-//          if (endPos >= 0) return str.substring(beginPos, endPos);
-//          else {
-//            endPos = str.indexOf('\t', beginPos);
-//            if (endPos >= 0) return str.substring(beginPos, endPos);
-//          }
-//        }
-//      }
-//    }
-//    catch(Exception rte) { /* ignore, just return null */ }
-//    return null;
-//  }
   
   /** Produce a list of tools libraries discovered on the file system.  A variety of locations are searched;
    * only those files that can produce a valid library (see {@link #isValid} are returned.  The result is
