@@ -80,7 +80,11 @@ public class NextGenDescriptor implements JDKDescriptor {
   }
   public Iterable<File> getSearchFiles() {
     Iterable<File> files = IterUtil.asIterable(new File[] {
-      new File("/C:/Program Files/JavaPLT/nextgen2/nextgen2.jar")
+      new File("/C:/Program Files/JavaPLT/nextgen2/nextgen2.jar"),
+        new File("/C:/Program Files/JavaPLT/nextgen2/nextgen2.jar"),
+        new File("/usr/local/JavaMint/nextgen2/nextgen2.jar"),
+        new File("/home/mgricken/research/Misc/NextGen/nextgen2/nextgen2.jar"),
+        new File(edu.rice.cs.util.FileOps.getDrJavaFile().getParentFile(), "nextgen2.jar")
     });
     try {
       String ngc_home = System.getenv("NGC_HOME");
@@ -105,12 +109,14 @@ public class NextGenDescriptor implements JDKDescriptor {
     if (f.isFile()) {
       try {
         JarFile jf = new JarFile(f);
-        return (jf.getJarEntry("edu/rice/cs/nextgen2/classloader/Runner.class")!=null);
+        return (jf.getJarEntry("edu/rice/cs/nextgen2/classloader/Runner.class")!=null &&
+                jf.getJarEntry("edu/rice/cs/nextgen2/compiler/Main.class")!=null);
       }
       catch(IOException ioe) { return false; }
     }
     else if (f.isDirectory()) {
-      return (new File(f,"edu/rice/cs/nextgen2/classloader/Runner.class").exists());
+      return (new File(f,"edu/rice/cs/nextgen2/classloader/Runner.class").exists() &&
+              new File(f,"edu/rice/cs/nextgen2/compiler/Main.class").exists());
     }
     return false;
   }
@@ -118,7 +124,7 @@ public class NextGenDescriptor implements JDKDescriptor {
   public String getAdapterForCompiler() { return "edu.rice.cs.drjava.model.compiler.NextGenCompiler"; }
   public String getAdapterForDebugger() { return null; }
   
-  public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_6; }
+  public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_5; }
   
   public String toString() { return getClass().getSimpleName()+" --> "+getAdapterForCompiler(); }
 }

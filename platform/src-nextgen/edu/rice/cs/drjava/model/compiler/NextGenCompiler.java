@@ -39,8 +39,19 @@ import java.io.*;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
+
+// NextGen classes
+import edu.rice.cs.nextgen2.compiler.main.JavaCompiler;
+import edu.rice.cs.nextgen2.compiler.util.Context;
+import edu.rice.cs.nextgen2.compiler.util.Name;
+import edu.rice.cs.nextgen2.compiler.util.Options;
+import edu.rice.cs.nextgen2.compiler.util.Position;
+//import edu.rice.cs.nextgen2.compiler.util.List; Clashes with java.util.List
+import edu.rice.cs.nextgen2.compiler.util.Log;
+
 
 // DJError class is not in the same package as this
 import edu.rice.cs.drjava.model.DJError;
@@ -62,6 +73,13 @@ public class NextGenCompiler extends Javac160FilteringCompiler {
                          java.util.List<? extends File> defaultBootClassPath) {
     super(version, location, defaultBootClassPath);
   }
+  
+  /** A writer that discards its input. */
+  private static final PrintWriter NULL_WRITER = new PrintWriter(new Writer() {
+    public void write(char cbuf[], int off, int len) throws IOException {}
+    public void flush() throws IOException {}
+    public void close() throws IOException {}
+  });
 
   public String getName() { return "Nextgen " + _version.versionString(); }
   
@@ -83,7 +101,6 @@ public class NextGenCompiler extends Javac160FilteringCompiler {
       throw new RuntimeException("Applets not supported by Nextgen.");
     }
     if (interactionsString.startsWith("run ") ||
-        interactionsString.startsWith("applet ") ||
         interactionsString.startsWith("nextgen ") ||
         interactionsString.startsWith("java ")) interactionsString = _transformNextgenCommand(interactionsString);
     return interactionsString;    
@@ -105,11 +122,13 @@ public class NextGenCompiler extends Javac160FilteringCompiler {
 
   public boolean isAvailable() {
     try {
-      // Diagnostic was introduced in the Java 1.6 compiler
-      Class<?> diagnostic = Class.forName("javax.tools.Diagnostic");
-      diagnostic.getMethod("getKind");
-      // check for Mint classes
+      // At least Java 5
+      Class.forName("java.lang.Enum");
+      
+      // check for NextGen classes
       Class.forName("edu.rice.cs.nextgen2.classloader.Runner");
+      Class.forName("edu.rice.cs.nextgen2.compiler.Main");
+      Class.forName("edu.rice.cs.nextgen2.compiler.main.JavaCompiler");
       return true;
     }
     catch (Exception e) { System.out.println(e); return false; }
@@ -136,7 +155,159 @@ public class NextGenCompiler extends Javac160FilteringCompiler {
                                                    java.util.List<? extends File> bootClassPath,
                                                    String sourceVersion,
                                                    boolean showWarnings) {
-    LinkedList<DJError> errors = new LinkedList<DJError>();
-    return errors;
+    debug.logStart("compile()");
+    debug.logValues(new String[]{ "this", "files", "classPath", "sourcePath", "destination", "bootClassPath", 
+                                          "sourceVersion", "showWarnings" },
+                    this, files, classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
+    
+    Context context = _createContext(classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
+    OurLog log = new OurLog(context);
+    JavaCompiler compiler = _makeCompiler(context);
+    
+    edu.rice.cs.nextgen2.compiler.util.List<String> filesToCompile = _emptyStringList();
+    for (File f : files) {
+      // TODO: Can we assume the files are canonical/absolute?  If not, we should use the util methods here.
+      filesToCompile = filesToCompile.prepend(f.getAbsolutePath());
+    }
+    
+    try { compiler.compile(filesToCompile); }
+    catch (Throwable t) {
+      // GJ defines the compile method to throw Throwable?!
+      //Added to account for error in javac whereby a variable that was not declared will
+      //cause an out of memory error. This change allows us to output both errors and not
+      //just the out of memory error
+      
+      LinkedList<DJError> errors = log.getErrors();
+      errors.addFirst(new DJError("Compile exception: " + t, false));
+      error.log(t);
+      debug.logEnd("compile() (caught an exception)");
+      return errors;
+    }
+    
+    debug.logEnd("compile()");
+    return log.getErrors();
+  }
+  
+  private Context _createContext(List<? extends File> classPath, List<? extends File> sourcePath, File destination, 
+                                 List<? extends File> bootClassPath, String sourceVersion, boolean showWarnings) {
+
+    if (bootClassPath == null) { bootClassPath = _defaultBootClassPath; }
+    
+    Context context = new Context();
+    Options options = Options.instance(context);
+    options.putAll(CompilerOptions.getOptions(showWarnings));
+    
+    //Should be setable some day?
+    options.put("-g", "");
+
+    if (classPath != null) { options.put("-classpath", IOUtil.pathToString(classPath)); }
+    if (sourcePath != null) { options.put("-sourcepath", IOUtil.pathToString(sourcePath)); }
+    if (destination != null) { options.put("-d", destination.getPath()); }
+    if (bootClassPath != null) { options.put("-bootclasspath", IOUtil.pathToString(bootClassPath)); }
+    if (sourceVersion != null) { options.put("-source", sourceVersion); }
+    if (!showWarnings) { options.put("-nowarn", ""); }
+    
+    // Bug fix: if "-target" is not present, Iterables in for-each loops cause compiler errors
+    if (sourceVersion != null) { options.put("-target", sourceVersion); }
+    else { options.put("-target", "1.5"); }
+
+    return context;
+  }
+
+  protected JavaCompiler _makeCompiler(Context context) {
+    return JavaCompiler.instance(context);
+  }
+  
+  /** Get an empty List using reflection, since the method to do so changed  with version 1.5.0_04. */
+  private edu.rice.cs.nextgen2.compiler.util.List<String> _emptyStringList() {
+    return edu.rice.cs.nextgen2.compiler.util.List.<String>make();
+  }
+
+  /**
+   * Replaces the standard compiler "log" so we can track the error
+   * messages ourselves. This version will work for JDK 1.4.1+
+   * or JSR14 v1.2+.
+   */
+  private static class OurLog extends Log {
+    // List of CompilerError
+    private LinkedList<DJError> _errors = new LinkedList<DJError>();
+    private String _sourceName = "";
+
+    public OurLog(Context context) { super(context, NULL_WRITER, NULL_WRITER, NULL_WRITER); }
+
+    /** JSR14 uses this crazy signature on warning method because it localizes the warning message. */
+    public void warning(int pos, String key, Object ... args) {
+      super.warning(pos, key, args);
+      //System.out.println("warning: pos = " + pos);
+
+      String msg = getText("compiler.warn." + key, args);
+      
+      if (currentSource()!=null) {
+        _errors.addLast(new DJError(new File(currentSource().toString()),
+                                    Position.line(pos) - 1, // gj is 1 based
+                                    Position.column(pos) - 1,
+                                    msg,
+                                    true));
+      }
+      else {
+        _errors.addLast(new DJError(msg, true));
+      }
+    }
+
+    /** "Mandatory warnings" were added at some point in the development of JDK 5 */
+    public void mandatoryWarning(int pos, String key, Object ... args) {
+      // super.mandatoryWarning(pos, key, args);
+      super.warning(pos, key, args);
+      //System.out.println("warning: pos = " + pos);
+      
+      String msg = getText("compiler.warn." + key, args);
+      
+      if (currentSource()!=null) {
+        _errors.addLast(new DJError(new File(currentSource().toString()),
+                                    Position.line(pos) - 1, // gj is 1 based
+                                    Position.column(pos) - 1,
+                                    msg,
+                                    true));
+      }
+      else {
+        _errors.addLast(new DJError(msg, true));
+      }
+    }
+    
+    /** JSR14 uses this crazy signature on error method because it localizes the error message. */
+    public void error(int pos, String key, Object ... args) {
+      super.error(pos, key, args);
+      //System.out.println("error: pos = " + pos);
+
+      String msg = getText("compiler.err." + key, args);
+
+      if (currentSource()!=null) {
+        _errors.addLast(new DJError(new File(currentSource().toString()),
+                                    Position.line(pos) - 1, // gj is 1 based
+                                    Position.column(pos) - 1,
+                                    msg,
+                                    false));
+      }
+      else {
+        _errors.addLast(new DJError(msg, false));
+      }
+    }
+
+    public void note(String key, Object ... args) {
+      super.note(key, args);
+      // For now, we just ignore notes
+      
+      //String msg = getText("compiler.note." + key, args);
+    }
+    
+    public void mandatoryNote(String key, Object ... args) {
+      // super.mandatoryNote(key, args);
+      super.note(key, args);
+      // For now, we just ignore notes
+      
+      //String msg = getText("compiler.note." + key, args);
+    }
+    
+    public LinkedList<DJError> getErrors() { return _errors; }
   }
 }

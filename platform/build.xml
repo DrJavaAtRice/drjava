@@ -367,8 +367,8 @@
     <antcall target="iterate-tests">
       <param name="platform-tag" value="nextgen" />
       <param name="extra-classpath" value="${nextgen-tools}" />
-<!--      <param name="test-jvm" value="${nextgen-exec}" /> --> <!-- TODO -->
-      <param name="test-jvm" value="${java6-exec}" />
+      <param name="test-jvm" value="${nextgen-exec}" /> <!-- TODO -->
+<!--      <param name="test-jvm" value="${java6-exec}" /> -->
     </antcall>
   </target>
 
@@ -1013,7 +1013,7 @@
     <if>
       <not><isset property="nextgen-exec" /></not>
       <then>
-        <property name="nextgen-exec-2" location="${nextgen-home}/langtools/bin/nextgen" />
+        <property name="nextgen-exec-2" location="${nextgen-home}/bin/nextgen" />
         <available property="nextgen-exec" value="${nextgen-exec-2}" file="${nextgen-exec-2}" />
       </then>
     </if>

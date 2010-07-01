@@ -488,6 +488,10 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           if (mapToAddTo.containsKey(v)) { mapToAddTo.put(v, IterUtil.compose(lib, mapToAddTo.get(v))); }
           else { mapToAddTo.put(v, IterUtil.singleton(lib)); }
         }
+        else {
+          JDKToolsLibrary.msg("\tlibrary is not valid: compiler="+lib.compiler().isAvailable()+
+                              " debugger="+lib.debugger().isAvailable()+" javadoc="+lib.javadoc().isAvailable());
+        }
       }
     }
     
@@ -509,7 +513,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         if ((javaVersion.majorVersion().equals(compoundVersion.majorVersion())) &&
             (javaVersion.maintenance()==compoundVersion.maintenance()) &&
             (javaVersion.update()==compoundVersion.update()) &&
-            (javaVersion.release()==compoundVersion.release())) {
+            (javaVersion.release()==compoundVersion.release()) &&
+            (javaVersion.supports(compoundLib.jdkDescriptor().getMinimumMajorVersion()))) {
           JDKToolsLibrary.msg("\t\tfound");
           found = javaLib;
           break;
@@ -520,7 +525,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         for(JarJDKToolsLibrary javaLib: collapsed) {
           JDKToolsLibrary.msg("\tmajor? "+javaLib.version());
           FullVersion javaVersion = javaLib.version();
-          if (javaVersion.majorVersion().equals(compoundVersion.majorVersion())) {
+          if (javaVersion.majorVersion().equals(compoundVersion.majorVersion()) &&
+              javaVersion.supports(compoundLib.jdkDescriptor().getMinimumMajorVersion())) {
             JDKToolsLibrary.msg("\t\tfound");
             found = javaLib;
             break;
