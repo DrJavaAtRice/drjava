@@ -45,10 +45,10 @@ import java.util.jar.JarFile;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 
-/** The description of the NextGen compound JDK. */
-public class NextGenDescriptor implements JDKDescriptor {
+/** The description of the Eclipse JDK. */
+public class EclipseDescriptor implements JDKDescriptor {
   public String getName() {
-    return "NextGen";
+    return "Eclipse";
   }
   
   /** Packages to shadow when loading a new tools.jar.  If we don't shadow these classes, we won't
@@ -67,68 +67,40 @@ public class NextGenDescriptor implements JDKDescriptor {
         "com.sun.xml.internal.dtdparser", // other xml.internal packages are in rt.jar
         "com.sun.xml.internal.rngom",
         "com.sun.xml.internal.xsom",
-        "org.relaxng",
-        
-        // Nextgen:
-        "edu.rice.cs.nextgen2" // more?
+        "org.relaxng"
     });
     return set;
   }
 
   public Iterable<File> getSearchDirectories() {
-    return IterUtil.singleton(edu.rice.cs.util.FileOps.getDrJavaFile().getParentFile());
+    return IterUtil.empty();
   }
   public Iterable<File> getSearchFiles() {
-    Iterable<File> files = IterUtil.asIterable(new File[] {
-      new File("/C:/Program Files/JavaPLT/nextgen2/nextgen2.jar"),
-        new File("/C:/Program Files/JavaPLT/nextgen2/jars/nextgen2.jar"),
-        new File("/C:/Program Files/JavaPLT/nextgen2/nextgen2.jar"),
-        new File("/C:/Program Files/JavaPLT/nextgen2/jars/nextgen2.jar"),
-        new File("/usr/local/JavaMint/nextgen2/nextgen2.jar"),
-        new File("/usr/local/JavaMint/nextgen2/jars/nextgen2.jar"),
-        new File("/home/mgricken/research/Misc/NextGen/nextgen2/nextgen2.jar"),
-        new File("/home/mgricken/research/Misc/NextGen/nextgen2/jars/nextgen2.jar"),
-        new File(edu.rice.cs.util.FileOps.getDrJavaFile().getParentFile(), "nextgen2.jar")
-    });
-    try {
-      String ngc_home = System.getenv("NGC_HOME");
-      if (ngc_home!=null) {
-        // JDKToolsLibrary.msg("NGC_HOME environment variable set to: "+ngc_home);
-        files = IterUtil.compose(files, new File(new File(ngc_home), "nextgen2.jar"));
-      }
-      else {
-        // JDKToolsLibrary.msg("NGC_HOME not set");
-      }
-    }
-    catch(Exception e) { /* ignore NGC_HOME variable */ }
-    
-    // drjava.jar file itself; check if it's a combined Nextgen/DrJava jar
-    files = IterUtil.compose(files, edu.rice.cs.util.FileOps.getDrJavaFile()); 
-    return files;
+    // drjava.jar file itself
+    return IterUtil.singleton(edu.rice.cs.util.FileOps.getDrJavaFile()); 
   }
   
-  public boolean isCompound() { return true; }
+  /** The Eclipse compiler doesn't need another JDK. It can run just with the JRE. */
+  public boolean isCompound() { return false; }
   
   public boolean containsCompiler(File f) {
     if (f.isFile()) {
       try {
         JarFile jf = new JarFile(f);
-        return (jf.getJarEntry("edu/rice/cs/nextgen2/classloader/Runner.class")!=null &&
-                jf.getJarEntry("edu/rice/cs/nextgen2/compiler/Main.class")!=null);
+        return (jf.getJarEntry("org/eclipse/jdt/internal/compiler/tool/EclipseCompiler.class")!=null);
       }
       catch(IOException ioe) { return false; }
     }
     else if (f.isDirectory()) {
-      return (new File(f,"edu/rice/cs/nextgen2/classloader/Runner.class").exists() &&
-              new File(f,"edu/rice/cs/nextgen2/compiler/Main.class").exists());
+      return (new File(f,"org/eclipse/jdt/internal/compiler/tool/EclipseCompiler.class").exists());
     }
     return false;
   }
   
-  public String getAdapterForCompiler() { return "edu.rice.cs.drjava.model.compiler.NextGenCompiler"; }
+  public String getAdapterForCompiler() { return "edu.rice.cs.drjava.model.compiler.EclipseCompiler"; }
   public String getAdapterForDebugger() { return null; }
   
-  public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_5; }
+  public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_6; }
   
   public String toString() { return getClass().getSimpleName()+" --> "+getAdapterForCompiler(); }
 }

@@ -191,21 +191,21 @@ public class JDKToolsLibrary {
       list.add(new JDKToolsLibrary(version, null, compiler, debugger, javadoc));
     }
       
-    if (JavaVersion.JAVA_6.compareTo(version.majorVersion())>=0) {
-      // at least Java 6, try Eclipse compiler
-      msg("                 at least Java 6, try EclipseCompiler");
-      // provide "UNKNOWN 6.0" as version
-      FullVersion eclipseVersion = JavaVersion.parseFullVersion(JavaVersion.JAVA_6.fullVersion().versionString(),
-                                                                "Eclipse","");
-      msg("                 version for Eclipse: "+eclipseVersion);
-      compiler = getCompilerInterface("edu.rice.cs.drjava.model.compiler.EclipseCompiler", eclipseVersion);
-      msg("                 compiler="+compiler.getClass().getName());
-      if (compiler!=NoCompilerAvailable.ONLY) {
-        // if we have found a compiler, add it
-        msg("                 compiler found");
-        list.add(new JDKToolsLibrary(eclipseVersion, null, compiler, debugger, javadoc));
-      }
-    }
+//    if (JavaVersion.JAVA_6.compareTo(version.majorVersion())>=0) {
+//      // at least Java 6, try Eclipse compiler
+//      msg("                 at least Java 6, try EclipseCompiler");
+//      // provide "UNKNOWN 6.0" as version
+//      FullVersion eclipseVersion = JavaVersion.parseFullVersion(JavaVersion.JAVA_6.fullVersion().versionString(),
+//                                                                "Eclipse","");
+//      msg("                 version for Eclipse: "+eclipseVersion);
+//      compiler = getCompilerInterface("edu.rice.cs.drjava.model.compiler.EclipseCompiler", eclipseVersion);
+//      msg("                 compiler="+compiler.getClass().getName());
+//      if (compiler!=NoCompilerAvailable.ONLY) {
+//        // if we have found a compiler, add it
+//        msg("                 compiler found");
+//        list.add(new JDKToolsLibrary(eclipseVersion, null, compiler, debugger, javadoc));
+//      }
+//    }
     msg("                 compilers found: "+list.size());
     
     if (list.size()==0) {

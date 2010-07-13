@@ -1029,6 +1029,12 @@
     <property name="nextgen-tools-1" location="${nextgen-home}/nextgen2.jar" />
     <available property="nextgen-tools" value="${nextgen-tools-1}" file="${nextgen-tools-1}" />
 
+    <property name="nextgen-tools-2" location="${nextgen-home}/jars/nextgen2.jar" />
+    <available property="nextgen-tools" value="${nextgen-tools-2}" file="${nextgen-tools-2}" />
+
+    <property name="nextgen-tools-3" location="${nextgen-home}/built" />
+    <available property="nextgen-tools" value="${nextgen-tools-3}" file="${nextgen-tools-3}/edu/rice/cs/nextgen2/compiler/Main.class" />
+
     <fail message="Can't find nextgen2.jar in the Nextgen home: ${nextgen-home}" unless="nextgen-tools" />
   </target>
   

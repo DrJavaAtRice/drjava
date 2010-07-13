@@ -111,16 +111,6 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       "com.sun.xml.internal.rngom",
       "com.sun.xml.internal.xsom",
       "org.relaxng",
-//        
-//      // Mint:
-//      "com.sun.tools.javac",
-//      "com.sun.tools.javac.tree",
-//      "com.sun.tools.javac.comp",
-//      "com.sun.tools.javac.main",
-//      "edu.rice.cs.mint",
-//      "edu.rice.cs.mint.comp",
-//      "edu.rice.cs.mint.runtime",
-//      "edu.rice.cs.mint.runtime.mspTree"
     });
   }
 
@@ -203,7 +193,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           File[] jars = IOUtil.attemptListFiles(libDir, IOUtil.extensionFilePredicate("jar"));
           if (jars != null) { bootClassPath.addAll(Arrays.asList(jars)); }
         }
-        bootClassPath.addAll(additionalBootClassPath);
+        if (additionalBootClassPath!=null) { bootClassPath.addAll(additionalBootClassPath); }
         if (bootClassPath.isEmpty()) { bootClassPath = null; } // null defers to the compiler's default behavior
 
         try {
@@ -455,8 +445,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         if (lib.isValid()) {
           FullVersion v = lib.version();
           Map<FullVersion, Iterable<JarJDKToolsLibrary>> mapToAddTo = results;
-          if (v.vendor().equals(JavaVersion.VendorType.UNKNOWN) ||
-              ((desc!=null)&&(desc.isCompound()))) { mapToAddTo = compoundResults; }
+          if ((desc!=null)&&(desc.isCompound())) { mapToAddTo = compoundResults; }
           
           if (mapToAddTo.containsKey(v)) { mapToAddTo.put(v, IterUtil.compose(lib, mapToAddTo.get(v))); }
           else { mapToAddTo.put(v, IterUtil.singleton(lib)); }
