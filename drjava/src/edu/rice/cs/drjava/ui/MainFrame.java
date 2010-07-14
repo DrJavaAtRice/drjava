@@ -119,6 +119,7 @@ import static edu.rice.cs.drjava.ui.MainFrameStatics.*;
 /** DrJava's main window. */
 public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetListener {
   private final static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("MainFrame.txt", false);
+  // public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("ProjectMenu.txt", true);
   
   private static final int INTERACTIONS_TAB = 0;
   private static final int CONSOLE_TAB = 1;
@@ -4698,6 +4699,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _saveProjectAsAction.setEnabled(false);
       _exportProjectInOldFormatAction.setEnabled(false);
       _projectPropertiesAction.setEnabled(false);
+//      LOG.log("_projectPropertiesAction.setEnabled(false);", new RuntimeException());
       _jarProjectAction.setEnabled(false);
       _junitProjectAction.setEnabled(false);
 //      _compileOpenProjectAction.setEnabled(false);
@@ -5745,6 +5747,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _autoRefreshAction = _junit_autoRefreshDecoratedAction = new DecoratedAction(_autoRefreshAction, false);
     _projectPropertiesAction = _junit_projectPropertiesDecoratedAction = 
       new DecoratedAction(_projectPropertiesAction, false);
+//    LOG.log("_projectPropertiesAction = _junit_projectPropertiesDecoratedAction = new DecoratedAction(_projectPropertiesAction, false);", new RuntimeException());
     _runProjectAction = _junit_runProjectDecoratedAction = new DecoratedAction(_runProjectAction, false);
     _runAction = _junit_runDecoratedAction = new DecoratedAction(_runAction, false);
     _runAppletAction = _junit_runAppletDecoratedAction = new DecoratedAction(_runAppletAction, false);
@@ -5763,6 +5766,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _cleanAction = _junit_cleanDecoratedAction.getUpdatedDecoree();
     _autoRefreshAction = _junit_autoRefreshDecoratedAction.getUpdatedDecoree();
     _projectPropertiesAction = _junit_projectPropertiesDecoratedAction.getUpdatedDecoree();
+//    LOG.log("_projectPropertiesAction = _junit_projectPropertiesDecoratedAction.getUpdatedDecoree();", new RuntimeException());
     _runProjectAction = _junit_runProjectDecoratedAction.getUpdatedDecoree();
     _runAction = _junit_runDecoratedAction.getUpdatedDecoree();
     _runAppletAction = _junit_runAppletDecoratedAction.getUpdatedDecoree();
@@ -6163,6 +6167,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     _setUpAction(_projectPropertiesAction, "Project Properties", "Preferences", "Edit Project Properties");
     _projectPropertiesAction.setEnabled(false);    
+//    LOG.log("_projectPropertiesAction.setEnabled(false);", new RuntimeException());
     
 //    _setUpAction(_junitProjectAction, "Test", "Test", "Test the current project");
 //    _junitProjectAction.setEnabled(false);    
@@ -8469,6 +8474,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
+  /** @return true if a project is active and a valid main class is set. */
+  boolean isProjectActiveAndMainClassSet() {
+    return (_model.isProjectActive() &&
+            (_model.getMainClass() != null) &&
+            (_model.getMainClassContainingFile() != null) && 
+            _model.getMainClassContainingFile().exists());
+  }
+  
   /** Listens to events from the debugger. */
   private class UIDebugListener implements DebugListener {
     /* Must be executed in evevt thread.*/
@@ -8977,7 +8990,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _enableInteractionsPane();
       _runAction.setEnabled(true);
       _runAppletAction.setEnabled(true);
-      _runProjectAction.setEnabled(_model.isProjectActive());
+      _runProjectAction.setEnabled(isProjectActiveAndMainClassSet());
       _interactionsPane.discardUndoEdits();
       
     }
@@ -8993,7 +9006,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void interpreterChanged(final boolean inProgress) {
       _runAction.setEnabled(! inProgress);
       _runAppletAction.setEnabled(! inProgress);
-      _runProjectAction.setEnabled(! inProgress);
+      _runProjectAction.setEnabled((! inProgress) && isProjectActiveAndMainClassSet());
       if (inProgress) _disableInteractionsPane();
       else _enableInteractionsPane();
     }
@@ -9205,7 +9218,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       interactionEnded();
       _runAction.setEnabled(true);
       _runAppletAction.setEnabled(true);
-      _runProjectAction.setEnabled(_model.isProjectActive());
+      _runProjectAction.setEnabled(isProjectActiveAndMainClassSet());
       _junitAction.setEnabled(true);
       _junitAllAction.setEnabled(true);
       _junitProjectAction.setEnabled(_model.isProjectActive());
@@ -9621,7 +9634,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public void projectRunnableChanged() {
     if (_model.getMainClass() != null && _model.getMainClassContainingFile() != null && 
         _model.getMainClassContainingFile().exists()) {
-      _runProjectAction.setEnabled(_model.isProjectActive());
+      _runProjectAction.setEnabled(isProjectActiveAndMainClassSet());
       _runButton = _updateToolbarButton(_runButton, _runProjectAction);
     }
     else {
