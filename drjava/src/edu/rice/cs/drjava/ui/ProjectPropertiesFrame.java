@@ -415,7 +415,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
     c.gridwidth = 1;
     c.insets = labelInsets;
 
-    JLabel refreshLabel = new JLabel("Auto Refresh");
+    JLabel refreshLabel = new JLabel("<html>Auto Refresh<br>on Open</html>");
     refreshLabel.setToolTipText("<html>Whether the project will automatically open new files found within the source tree</html>");
     gridbag.setConstraints(refreshLabel, c);
     panel.add(refreshLabel);

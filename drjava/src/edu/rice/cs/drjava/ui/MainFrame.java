@@ -6434,7 +6434,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(fileMenu, _newJUnitTestAction, KEY_NEW_TEST);
     _addMenuItem(fileMenu, _openAction, KEY_OPEN_FILE);
     _addMenuItem(fileMenu, _openFolderAction, KEY_OPEN_FOLDER);
-    //_addMenuItem(fileMenu, _openProjectAction, KEY_OPEN_PROJECT);
     
     fileMenu.addSeparator();
     
@@ -6700,31 +6699,29 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     JMenu projectMenu = new JMenu("Project");
     PlatformFactory.ONLY.setMnemonic(projectMenu,KeyEvent.VK_P);
     // New, open
-    projectMenu.add(_newProjectAction);
+    _addMenuItem(projectMenu, _newProjectAction, KEY_NEW_PROJECT);
     _addMenuItem(projectMenu, _openProjectAction, KEY_OPEN_PROJECT);
     
     //Save
-    projectMenu.add(_saveProjectAction);
+    _addMenuItem(projectMenu, _saveProjectAction, KEY_SAVE_PROJECT);
     //SaveAs
-    projectMenu.add(_saveProjectAsAction);
+    _addMenuItem(projectMenu, _saveProjectAsAction, KEY_SAVE_AS_PROJECT);
     
     // Close
     _addMenuItem(projectMenu, _closeProjectAction, KEY_CLOSE_PROJECT);
     
     projectMenu.addSeparator();
     // run project
-//    projectMenu.add(_compileOpenProjectAction);
-    projectMenu.add(_compileProjectAction);
-    projectMenu.add(_junitProjectAction);
-    projectMenu.add(_runProjectAction);
-//    projectMenu.add(_junitProjectAction);
-    projectMenu.add(_cleanAction);
-    projectMenu.add(_autoRefreshAction);
-    projectMenu.add(_jarProjectAction);
+    _addMenuItem(projectMenu, _compileProjectAction, KEY_COMPILE_PROJECT);
+    _addMenuItem(projectMenu, _junitProjectAction, KEY_JUNIT_PROJECT);
+    _addMenuItem(projectMenu, _runProjectAction, KEY_RUN_PROJECT);
+    _addMenuItem(projectMenu, _cleanAction, KEY_CLEAN_PROJECT);
+    _addMenuItem(projectMenu, _autoRefreshAction, KEY_AUTO_REFRESH_PROJECT);
+    _addMenuItem(projectMenu, _jarProjectAction, KEY_JAR_PROJECT);
     
     projectMenu.addSeparator();
     // eventually add project options
-    projectMenu.add(_projectPropertiesAction);
+    _addMenuItem(projectMenu, _projectPropertiesAction, KEY_PROJECT_PROPERTIES);
     
     return projectMenu;
   }
