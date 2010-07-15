@@ -53,10 +53,11 @@ import java.util.jar.JarEntry;
 import java.util.jar.Manifest;
 import java.util.Enumeration;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 
-import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
-import edu.rice.cs.plt.lambda.Lambda3;
+import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.lambda.Predicate;
 import edu.rice.cs.plt.reflect.ReflectUtil;
@@ -153,8 +154,16 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     JDKToolsLibrary.msg("\tdesc = "+desc);
     
     boolean isSupported = JavaVersion.CURRENT.supports(version.majorVersion());
+    Iterable<File> additionalCompilerFiles = IterUtil.empty();
     if (desc!=null) {
       isSupported |= JavaVersion.CURRENT.supports(desc.getMinimumMajorVersion());
+      try {
+        additionalCompilerFiles = desc.getAdditionalCompilerFiles(f);
+      }
+      catch(FileNotFoundException fnfe) {
+        // not all additional compiler files were found
+        isSupported = false;
+      }
     }
     
     // We can't execute code that was possibly compiled for a later Java API version.
@@ -163,7 +172,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       // block tools.jar classes, so that references don't point to a different version of the classes
       ClassLoader loader =
         new ShadowingClassLoader(JarJDKToolsLibrary.class.getClassLoader(), true, TOOLS_PACKAGES, true);
-      Iterable<File> path = IterUtil.singleton(IOUtil.attemptAbsoluteFile(f));
+      Iterable<File> path = IterUtil.map(IterUtil.compose(additionalCompilerFiles, f), new Lambda<File,File>() {
+        public File value(File arg) { return IOUtil.attemptAbsoluteFile(arg); }
+      });
       
       String compilerAdapter = adapterForCompiler(version);
       if (desc!=null) {
@@ -335,12 +346,13 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     return result;
   }
   
-  /** Produce a list of tools libraries discovered on the file system.  A variety of locations are searched;
-   * only those files that can produce a valid library (see {@link #isValid} are returned.  The result is
-   * sorted by version.  Where one library of the same version might be preferred over another, the preferred 
-   * library appears earlier in the result list.
-   */
-  public static Iterable<JarJDKToolsLibrary> search(GlobalModel model) {
+  /** return a collection with the default roots. */
+  protected static LinkedHashMap<File,Set<JDKDescriptor>> getDefaultSearchRoots() {
+    /* roots is a list of possible parent directories of Java installations; we want to eliminate duplicates & 
+     * remember insertion order
+     */
+    LinkedHashMap<File,Set<JDKDescriptor>> roots = new LinkedHashMap<File,Set<JDKDescriptor>>();
+    
     String javaHome = System.getProperty("java.home");
     String envJavaHome = null;
     String programFiles = null;
@@ -352,12 +364,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       programFiles = System.getenv("ProgramFiles");
       systemDrive = System.getenv("SystemDrive");
     }
-    
-    /* roots is a list of possible parent directories of Java installations; we want to eliminate duplicates & 
-     * remember insertion order
-     */
-    LinkedHashMap<File,Set<JDKDescriptor>> roots = new LinkedHashMap<File,Set<JDKDescriptor>>();
-    
+   
     if (javaHome != null) {
       addIfDir(new File(javaHome), null, roots);
       addIfDir(new File(javaHome, ".."), null, roots);
@@ -398,22 +405,13 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     addIfDir(new File("/usr/lib/jvm/java-6-openjdk"), null, roots);
 
     addIfDir(new File("/home/javaplt/java/Linux-i686"), null, roots);
-
-    /* jars is a list of possible tools.jar (or classes.jar) files; we want to eliminate duplicates & 
-     * remember insertion order
-     */
-    LinkedHashMap<File,Set<JDKDescriptor>> jars = new LinkedHashMap<File,Set<JDKDescriptor>>();
-
-    // Search for all compound JDK descriptors in the drjava.jar file
-    Iterable<JDKDescriptor> descriptors = searchForJDKDescriptors(); 
-    for(JDKDescriptor desc: descriptors) {
-      // add the specific search directories and files
-      for(File f: desc.getSearchDirectories()) { addIfDir(f, desc, roots); }
-      for(File f: desc.getSearchFiles()) { addIfFile(f, desc, jars); }
-      // add to the set of packages that need to be shadowed
-      TOOLS_PACKAGES.addAll(desc.getToolsPackages());
-    }
     
+    return roots;
+  }
+  
+  /* Search for jar files in roots and, if found, transfer them to the jars collection. */
+  protected static void searchRootsForJars(LinkedHashMap<File,Set<JDKDescriptor>> roots,
+                                           LinkedHashMap<File,Set<JDKDescriptor>> jars) {
     // matches: starts with "j2sdk", starts with "jdk", has form "[number].[number].[number]" (OS X), or
     // starts with "java-" (Linux)
     Predicate<File> subdirFilter = LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("j2sdk.*"),
@@ -426,13 +424,13 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         addIfFile(new File(subdir, "Classes/classes.jar"), root.getValue(), jars);
       }
     }
-    
-    // We store everything in reverse order, since that's the natural order of the versions
-    Map<FullVersion, Iterable<JarJDKToolsLibrary>> results = 
-      new TreeMap<FullVersion, Iterable<JarJDKToolsLibrary>>();
-    Map<FullVersion, Iterable<JarJDKToolsLibrary>> compoundResults =
-      new TreeMap<FullVersion, Iterable<JarJDKToolsLibrary>>();
-    
+  }
+  
+  /** Check which jars are valid JDKs, and determine if they are compound or full (non-compound) JDKs. */
+  protected static void collectValidResults(GlobalModel model,
+                                            LinkedHashMap<File,Set<JDKDescriptor>> jars,
+                                            Map<FullVersion, Iterable<JarJDKToolsLibrary>> results,
+                                            Map<FullVersion, Iterable<JarJDKToolsLibrary>> compoundResults) {
     for (Map.Entry<File,Set<JDKDescriptor>> jar : jars.entrySet()) {
       for (JDKDescriptor desc : jar.getValue()) {
         if (desc!=null) {
@@ -456,12 +454,17 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         }
       }
     }
-    
-    Iterable<JarJDKToolsLibrary> collapsed = IterUtil.reverse(IterUtil.collapse(results.values()));
-    Iterable<JarJDKToolsLibrary> compoundCollapsed = IterUtil.reverse(IterUtil.collapse(compoundResults.values()));
-    
-    Map<FullVersion, Iterable<JarJDKToolsLibrary>> allResults =
+  }
+  
+  /** Get completed compound JDKs by going through the list of compound JDKs and finding full JDKs that
+    * complete them. */
+  protected static Map<FullVersion, Iterable<JarJDKToolsLibrary>>
+    getCompletedCompoundResults(GlobalModel model,
+                                Iterable<JarJDKToolsLibrary> collapsed,
+                                Iterable<JarJDKToolsLibrary> compoundCollapsed) {
+    Map<FullVersion, Iterable<JarJDKToolsLibrary>> completedResults =
       new TreeMap<FullVersion, Iterable<JarJDKToolsLibrary>>();
+    
     // now we have the JDK libraries in collapsed and the compound libraries in compoundCollapsed
     for(JarJDKToolsLibrary compoundLib: compoundCollapsed) {
       JDKToolsLibrary.msg("compoundLib: "+compoundLib.version());
@@ -502,17 +505,71 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         if (lib.isValid()) {
           JDKToolsLibrary.msg("\t==> "+lib.version());
           FullVersion v = lib.version();
-          if (allResults.containsKey(v)) { allResults.put(v, IterUtil.compose(lib, allResults.get(v))); }
-          else { allResults.put(v, IterUtil.singleton(lib)); }
+          if (completedResults.containsKey(v)) {
+            completedResults.put(v, IterUtil.compose(lib, completedResults.get(v)));
+          }
+          else {
+            completedResults.put(v, IterUtil.singleton(lib));
+          }
         }
       }
     }
+    return completedResults;
+  }
+  
+  /** Produce a list of tools libraries discovered on the file system.  A variety of locations are searched;
+   * only those files that can produce a valid library (see {@link #isValid} are returned.  The result is
+   * sorted by version.  Where one library of the same version might be preferred over another, the preferred 
+   * library appears earlier in the result list.
+   */
+  public static Iterable<JarJDKToolsLibrary> search(GlobalModel model) {
+    /* roots is a list of possible parent directories of Java installations; we want to eliminate duplicates & 
+     * remember insertion order
+     */
+    LinkedHashMap<File,Set<JDKDescriptor>> roots = getDefaultSearchRoots();
+
+    /* jars is a list of possible tools.jar (or classes.jar) files; we want to eliminate duplicates & 
+     * remember insertion order
+     */
+    LinkedHashMap<File,Set<JDKDescriptor>> jars = new LinkedHashMap<File,Set<JDKDescriptor>>();
+
+    // Search for all compound JDK descriptors in the drjava.jar file
+    Iterable<JDKDescriptor> descriptors = searchForJDKDescriptors(); 
+    for(JDKDescriptor desc: descriptors) {
+      // add the specific search directories and files
+      for(File f: desc.getSearchDirectories()) { addIfDir(f, desc, roots); }
+      for(File f: desc.getSearchFiles()) { addIfFile(f, desc, jars); }
+      // add to the set of packages that need to be shadowed
+      TOOLS_PACKAGES.addAll(desc.getToolsPackages());
+    }
+    
+    // search for jar files in roots and, if found, transfer them to the jars collection
+    searchRootsForJars(roots, jars);
+
+    // check which jars are valid JDKs, and determine if they are compound or full (non-compound) JDKs
+    Map<FullVersion, Iterable<JarJDKToolsLibrary>> results = 
+      new TreeMap<FullVersion, Iterable<JarJDKToolsLibrary>>();
+    Map<FullVersion, Iterable<JarJDKToolsLibrary>> compoundResults =
+      new TreeMap<FullVersion, Iterable<JarJDKToolsLibrary>>();
+    
+    collectValidResults(model, jars, results, compoundResults);
+    
+    // We store everything in reverse order, since that's the natural order of the versions
+    Iterable<JarJDKToolsLibrary> collapsed = IterUtil.reverse(IterUtil.collapse(results.values()));
+    Iterable<JarJDKToolsLibrary> compoundCollapsed = IterUtil.reverse(IterUtil.collapse(compoundResults.values()));
+    
+    // Get completed compound JDKs by going through the list of compound JDKs and finding full JDKs that
+    // complete them
+    Map<FullVersion, Iterable<JarJDKToolsLibrary>> completedResults =
+      getCompletedCompoundResults(model, collapsed, compoundCollapsed);
+    
     JDKToolsLibrary.msg("Result:");
     Iterable<JarJDKToolsLibrary> result = IterUtil.
-      compose(collapsed,IterUtil.reverse(IterUtil.collapse(allResults.values())));
+      compose(collapsed,IterUtil.reverse(IterUtil.collapse(completedResults.values())));
     for(JarJDKToolsLibrary lib: result) {
       JDKToolsLibrary.msg("Found library: "+lib);
     }
+    
     return result;
   }
   

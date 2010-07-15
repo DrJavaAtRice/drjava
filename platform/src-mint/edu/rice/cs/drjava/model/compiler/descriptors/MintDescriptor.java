@@ -37,16 +37,19 @@
 package edu.rice.cs.drjava.model.compiler.descriptors;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Collections;
-import java.io.IOException;
 import java.util.jar.JarFile;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 
 /** The description of the Mint compound JDK. */
 public class MintDescriptor implements JDKDescriptor {
+  /** Return the name of this JDK.
+    * @return name */
   public String getName() {
     return "Mint";
   }
@@ -55,6 +58,8 @@ public class MintDescriptor implements JDKDescriptor {
     * be able to load distinct versions for each tools.jar library.  These should be verified whenever
     * a new Java version is released.  (We can't just shadow *everything* because some classes, at 
     * least in OS X's classes.jar, can only be loaded by the JVM.)
+    * 
+    * @return set of packages that need to be shadowed
     */
   public Set<String> getToolsPackages() {
     HashSet<String> set = new HashSet<String>();
@@ -82,9 +87,14 @@ public class MintDescriptor implements JDKDescriptor {
     return set;
   }
 
+  /** Returns a list of directories that should be searched for tools.jar and classes.jar files.
+    * @return list of directories to search */
   public Iterable<File> getSearchDirectories() {
     return IterUtil.singleton(edu.rice.cs.util.FileOps.getDrJavaFile().getParentFile());
   }
+
+  /** Returns a list of files that should be searched if they contain a compiler.
+    * @return list of files to search */
   public Iterable<File> getSearchFiles() {
     Iterable<File> files = IterUtil.asIterable(new File[] {
       new File("/C:/Program Files/JavaPLT/JavaMint/langtools/dist/lib/classes.jar"),
@@ -114,36 +124,43 @@ public class MintDescriptor implements JDKDescriptor {
     return files;
   }
   
+  /** True if this is a compound JDK and needs a fully featured JDK to operate.
+    * @return true if compound JDK (e.g. NextGen, Mint, Habanero). */
   public boolean isCompound() { return true; }
   
+  /** Return true if the file (jar file or directory) contains the compiler.
+    * @return true if the file contains the compiler */
   public boolean containsCompiler(File f) {
-    if (f.isFile()) {
-      try {
-        JarFile jf = new JarFile(f);
-        return (jf.getJarEntry("edu/rice/cs/mint/comp/TransStaging.class")!=null &&
-                jf.getJarEntry("com/sun/source/tree/BracketExprTree.class")!=null &&
-                jf.getJarEntry("com/sun/source/tree/BracketStatTree.class")!=null &&
-                jf.getJarEntry("com/sun/source/tree/EscapeExprTree.class")!=null &&
-                jf.getJarEntry("com/sun/source/tree/EscapeStatTree.class")!=null &&
-                jf.getJarEntry("com/sun/tools/javac/util/DefaultFileManager.class")==null);
-      }
-      catch(IOException ioe) { return false; }
-    }
-    else if (f.isDirectory()) {
-      return (new File(f,"edu/rice/cs/mint/comp/TransStaging.class").exists() &&
-              new File(f,"com/sun/source/tree/BracketExprTree.class").exists() &&
-              new File(f,"com/sun/source/tree/BracketStatTree.class").exists() &&
-              new File(f,"com/sun/source/tree/EscapeExprTree.class").exists() &&
-              new File(f,"com/sun/source/tree/EscapeStatTree.class").exists() &&
-              new File(f,"com/sun/tools/javac/util/DefaultFileManager.class").exists());
-    }
-    return false;
+    return Util.exists(f,
+                       "edu/rice/cs/mint/comp/TransStaging.class",
+                       "com/sun/source/tree/BracketExprTree.class",
+                       "com/sun/source/tree/BracketStatTree.class",
+                       "com/sun/source/tree/EscapeExprTree.class",
+                       "com/sun/source/tree/EscapeStatTree.class",
+                       "com/sun/tools/javac/util/DefaultFileManager.class");
   }
   
+  /** Return the class name of the compiler adapter.
+    * @return class name of compiler, or null if no compiler */
   public String getAdapterForCompiler() { return "edu.rice.cs.drjava.model.compiler.MintCompiler"; }
+
+  /** Return the class name of the debugger adapter.
+    * @return class name of debugger, or null if no debugger */
   public String getAdapterForDebugger() { return null; }
   
+  /** Return the minimum Java version required to use this JDK.
+    * @return minimum version */
   public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_6; }
+  
+  /** Return the list of additional files required to use the compiler.
+    * The compiler was found in the specified file. This method may have to search the user's hard drive, e.g.
+    * by looking relative to compiler.getParentFile(), by checking environment variables, or by looking in
+    * certain OS-specific directories.
+    * @param compiler location where the compiler was fund
+    * @return list of additional files that need to be available */
+  public Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException {
+    return IterUtil.empty();
+  }
   
   public String toString() { return getClass().getSimpleName()+" --> "+getAdapterForCompiler(); }
 }
