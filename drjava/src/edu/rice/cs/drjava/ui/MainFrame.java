@@ -119,7 +119,6 @@ import static edu.rice.cs.drjava.ui.MainFrameStatics.*;
 /** DrJava's main window. */
 public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetListener {
   private final static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("MainFrame.txt", false);
-  // public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("ProjectMenu.txt", true);
   
   private static final int INTERACTIONS_TAB = 0;
   private static final int CONSOLE_TAB = 1;
@@ -863,11 +862,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _pageSetupAction = new AbstractAction("Page Setup...") {
     public void actionPerformed(ActionEvent ae) { _pageSetup(); }
   };
-  
-//  /** Compiles all the project. */
-//  private Action _compileOpenProjectAction = new AbstractAction("Compile Open Project Files") {
-//    public void actionPerformed(ActionEvent ae) { _compileAll(); } // right now, it's the same as compile all
-//  };
   
   /** Compiles the document in the definitions pane. */
   private final Action _compileAction = new AbstractAction("Compile Current Document") {
@@ -2110,9 +2104,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _showDebugConsoleAction = new AbstractAction("Show DrJava Debug Console") {
     public void actionPerformed(ActionEvent e) { DrJavaRoot.showDrJavaDebugConsole(MainFrame.this); }
   };
-  
-  /* Enables the reset interactions command. Not currently used, since this action is NEVER disabled. */
-  public void enableResetInteractions() { _resetInteractionsAction.setEnabled(true); }
   
   /** Resets the Interactions pane. */
   private final Action _resetInteractionsAction = new AbstractAction("Reset Interactions") {
@@ -4212,7 +4203,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       getGlassPane().setVisible(true);
       _currentDefPane.setEditable(false);
       setAllowKeyEvents(false); 
-      _menuBar.setEnabled(false);
+      // _menuBar.setEnabled(false); // causes problems on Mac OS 10.6; make sure this runs in the event thread?
       _interactionsPane.setEnabled(false);
     }
   }
@@ -4225,7 +4216,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       getGlassPane().setVisible(false);
       _currentDefPane.setEditable(true);
       setAllowKeyEvents(true);
-      _menuBar.setEnabled(true);
+      // _menuBar.setEnabled(true); // causes problems on Mac OS 10.6; make sure this runs in the event thread?
       _interactionsPane.setEnabled(true);
     }
   }
@@ -4638,9 +4629,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _saveProjectAsAction.setEnabled(true);
       _exportProjectInOldFormatAction.setEnabled(true);
       _projectPropertiesAction.setEnabled(true);
-//      _junitProjectAction.setEnabled(true);
       _junitProjectAction.setEnabled(true);
-//      _compileOpenProjectAction.setEnabled(true);
       _compileProjectAction.setEnabled(true);
       _jarProjectAction.setEnabled(true);
       if (_model.getBuildDirectory() != null) _cleanAction.setEnabled(true);
@@ -4650,8 +4639,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
       _resetNavigatorPane();
       _model.refreshActiveDocument();
-//      _compileButton.setToolTipText("<html>Compile all documents in the project.source tree<br>" +
-//      "Auxiliary and external files are excluded.</html>");
     }
   }
   
@@ -4699,14 +4686,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _saveProjectAsAction.setEnabled(false);
       _exportProjectInOldFormatAction.setEnabled(false);
       _projectPropertiesAction.setEnabled(false);
-//      LOG.log("_projectPropertiesAction.setEnabled(false);", new RuntimeException());
       _jarProjectAction.setEnabled(false);
       _junitProjectAction.setEnabled(false);
-//      _compileOpenProjectAction.setEnabled(false);
       _compileProjectAction.setEnabled(false);
       _setUpContextMenus();
       _currentProjFile = FileOps.NULL_FILE;
-//      _compileButton.setToolTipText("Compile all open documents");
       return true;
     }
     else return false;  // Project closing cancelled in _checkProjectClose dialog
@@ -5747,7 +5731,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _autoRefreshAction = _junit_autoRefreshDecoratedAction = new DecoratedAction(_autoRefreshAction, false);
     _projectPropertiesAction = _junit_projectPropertiesDecoratedAction = 
       new DecoratedAction(_projectPropertiesAction, false);
-//    LOG.log("_projectPropertiesAction = _junit_projectPropertiesDecoratedAction = new DecoratedAction(_projectPropertiesAction, false);", new RuntimeException());
     _runProjectAction = _junit_runProjectDecoratedAction = new DecoratedAction(_runProjectAction, false);
     _runAction = _junit_runDecoratedAction = new DecoratedAction(_runAction, false);
     _runAppletAction = _junit_runAppletDecoratedAction = new DecoratedAction(_runAppletAction, false);
@@ -5766,7 +5749,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _cleanAction = _junit_cleanDecoratedAction.getUpdatedDecoree();
     _autoRefreshAction = _junit_autoRefreshDecoratedAction.getUpdatedDecoree();
     _projectPropertiesAction = _junit_projectPropertiesDecoratedAction.getUpdatedDecoree();
-//    LOG.log("_projectPropertiesAction = _junit_projectPropertiesDecoratedAction.getUpdatedDecoree();", new RuntimeException());
     _runProjectAction = _junit_runProjectDecoratedAction.getUpdatedDecoree();
     _runAction = _junit_runDecoratedAction.getUpdatedDecoree();
     _runAppletAction = _junit_runAppletDecoratedAction.getUpdatedDecoree();
@@ -6156,7 +6138,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                  "\" Format", "SaveAs", "Export Project In Old \"" + OLD_PROJECT_FILE_EXTENSION + "\" Format");
     _exportProjectInOldFormatAction.setEnabled(false);
     _setUpAction(_revertAction, "Revert", "Revert the current document to the saved version");
-    // No longer used
+    // Not yet working
 //    _setUpAction(_revertAllAction, "Revert All", "RevertAll",
 //                 "Revert all open documents to the saved versions");
     
@@ -6167,16 +6149,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     _setUpAction(_projectPropertiesAction, "Project Properties", "Preferences", "Edit Project Properties");
     _projectPropertiesAction.setEnabled(false);    
-//    LOG.log("_projectPropertiesAction.setEnabled(false);", new RuntimeException());
     
-//    _setUpAction(_junitProjectAction, "Test", "Test", "Test the current project");
-//    _junitProjectAction.setEnabled(false);    
     _setUpAction(_junitProjectAction, "Test Project", "Test the documents in the project source tree");
     _junitProjectAction.setEnabled(false);
     
-//    _setUpAction(_compileOpenProjectAction, "Compile", "Compile", "Compile the open project documents");
     _setUpAction(_compileProjectAction, "Compile Project", "Compile the documents in the project source tree");
-//    _compileOpenProjectAction.setEnabled(false);
     _compileProjectAction.setEnabled(false);
     
     _setUpAction(_runProjectAction, "Run Project", "Run the project's main method");
@@ -6289,7 +6266,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_saveHistoryAction, "Save History", "Save the history of interactions to a file");
     _setUpAction(_clearHistoryAction, "Clear History", "Clear the current history of interactions");
     
-    //_setUpAction(_abortInteractionAction, "Break", "Abort the current interaction");
     _setUpAction(_resetInteractionsAction, "Reset", "Reset the Interactions Pane");
     _resetInteractionsAction.setEnabled(true);
     _setUpAction(_closeSystemInAction, "Close System.in", "Close System.in Stream in Interactions Pane"); 
@@ -6574,11 +6550,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(historyMenu, _clearHistoryAction, KEY_CLEAR_HISTORY);
     toolsMenu.add(historyMenu);
     
-    // Abort/reset interactions, clear console
-    /*
-     _abortInteractionAction.setEnabled(false);
-     _addMenuItem(toolsMenu, _abortInteractionAction, KEY_ABORT_INTERACTION);
-     */
+    // Interactions, console
     final JMenu interMenu = new JMenu("Interactions & Console");    
     _addMenuItem(interMenu, _saveInteractionsCopyAction, KEY_SAVE_INTERACTIONS_COPY);
     _addMenuItem(interMenu, _viewInteractionsClassPathAction, KEY_VIEW_INTERACTIONS_CLASSPATH);
@@ -9061,8 +9033,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       try { showTab(_junitPanel, true);
         _junitPanel.setJUnitInProgress();
-        // _junitAction.setEnabled(false);
-        // _junitAllAction.setEnabled(false);
       }
       finally { 
 //        Utilities.show("Turning hourglassOff");
@@ -9077,8 +9047,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       // new ScrollableDialog(null, "junitClassesStarted called in MainFrame", "", "").show();
       showTab(_junitPanel, true);
       _junitPanel.setJUnitInProgress();
-      // _junitAction.setEnabled(false);
-      // _junitAllAction.setEnabled(false);
     }
     
     //public void junitRunning() { }
@@ -9552,10 +9520,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     /* Changes to the state */
     
     public void projectBuildDirChanged() {
-      if (_model.getBuildDirectory() != null) {
-        _cleanAction.setEnabled(true);
-      }
-      else _cleanAction.setEnabled(false);
+      _cleanAction.setEnabled((_model.getBuildDirectory() != null) &&
+                              (_model.getBuildDirectory() != FileOps.NULL_FILE));
     }
     
     public void projectWorkDirChanged() { }
@@ -9629,13 +9595,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   } // End of ModelListener class
   
   public void projectRunnableChanged() {
-    if (_model.getMainClass() != null && _model.getMainClassContainingFile() != null && 
-        _model.getMainClassContainingFile().exists()) {
-      _runProjectAction.setEnabled(isProjectActiveAndMainClassSet());
+    boolean b = isProjectActiveAndMainClassSet();
+    _runProjectAction.setEnabled(b);
+    if (b) {
       _runButton = _updateToolbarButton(_runButton, _runProjectAction);
     }
     else {
-      _runProjectAction.setEnabled(false);
       _runButton = _updateToolbarButton(_runButton, _runAction);
     }
   }

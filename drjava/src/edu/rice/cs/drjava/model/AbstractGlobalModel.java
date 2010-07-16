@@ -1896,7 +1896,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     if (_documentNavigator instanceof JTreeSortNavigator<?>) 
       ((JTreeSortNavigator<?>)_documentNavigator).collapsePaths(ir.getCollapsedPaths()); 
+
+    // project has not been changed yet, but...
+    setProjectChanged(false);
     
+    // it may change here, in the auto-refresh on open    
     if (_state.getAutoRefreshStatus()) openNewFilesInProject(); 
   }  // end _loadProject
   
