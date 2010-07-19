@@ -111,7 +111,7 @@ public class RecentFileManager implements OptionConstants {
       final FileOpenSelector recentSelector = new FileOpenSelector() {
         public File[] getFiles() { return new File[] { file }; }
       };
-      JMenuItem newItem = new JMenuItem("");
+      JMenuItem newItem = new JMenuItem((i+1) + ". " + file.getName());
       newItem.addActionListener(new AbstractAction("Open " + file.getName()) {
         public void actionPerformed(ActionEvent ae) {
           if (_recentFileAction != null) {

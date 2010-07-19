@@ -544,13 +544,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) { 
       JMenuItem m = (JMenuItem)ae.getSource();
       boolean b = m.isSelected();
+      _detachTabbedPanesMenuItem.setSelected(b);
       DrJava.getConfig().setSetting(DETACH_TABBEDPANES, b);
       _tabbedPanesFrame.setDisplayInFrame(b);
     }
   };
   
   // menu item (checkbox menu) for detaching the tabbed panes
-  private JMenuItem _detachTabbedPanesMenuItem;
+  private volatile JMenuItem _detachTabbedPanesMenuItem = null;
   
   /** Initializes the "Debugger" frame. */
   private void initDebugFrame() {
@@ -575,13 +576,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (_debugFrame == null) return; // debugger isn't used
       JMenuItem m = (JMenuItem)ae.getSource();
       boolean b = m.isSelected();
+      _detachDebugFrameMenuItem.setSelected(b);
       DrJava.getConfig().setSetting(DETACH_DEBUGGER, b);
       _debugFrame.setDisplayInFrame(b);
     }
   };
   
   // menu item (checkbox menu) for detaching the debugger pane
-  private JMenuItem _detachDebugFrameMenuItem;
+  private volatile JMenuItem _detachDebugFrameMenuItem;
   
   /** Sets the document in the definitions pane to a new templated junit test class. */
   private final Action _newJUnitTestAction = new AbstractAction("New JUnit Test Case...") {
@@ -2425,11 +2427,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
   
-  private JMenuItem _automaticTraceMenuItem;
+  // menu item (checkbox menu) for automatic trace in the debugger
+  private volatile JMenuItem _automaticTraceMenuItem;
   
   public void setAutomaticTraceMenuItemStatus() {
-    if (_automaticTraceMenuItem != null)
+    if (_automaticTraceMenuItem != null) {
       _automaticTraceMenuItem.setSelected(_model.getDebugger().isAutomaticTraceEnabled());
+    }
   }
   
   /** Action that automatically traces through entire program*/
@@ -6535,10 +6539,32 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(panesMenu, _prevRegionAction, KEY_TABBED_PREV_REGION);
     _addMenuItem(panesMenu, _nextRegionAction, KEY_TABBED_NEXT_REGION);
     panesMenu.addSeparator();
-    _detachTabbedPanesMenuItem = _newCheckBoxMenuItem(_detachTabbedPanesAction);
-    _detachTabbedPanesMenuItem.setSelected(DrJava.getConfig().getSetting(DETACH_TABBEDPANES));
-    _setMenuShortcut(_detachTabbedPanesMenuItem, _detachTabbedPanesAction, KEY_DETACH_TABBEDPANES);
-    panesMenu.add(_detachTabbedPanesMenuItem);
+    
+    JMenuItem tempDetachTabbedPanesMenuItem = _newCheckBoxMenuItem(_detachTabbedPanesAction);
+    tempDetachTabbedPanesMenuItem.setSelected(DrJava.getConfig().getSetting(DETACH_TABBEDPANES));
+    _setMenuShortcut(tempDetachTabbedPanesMenuItem, _detachTabbedPanesAction, KEY_DETACH_TABBEDPANES);
+    panesMenu.add(tempDetachTabbedPanesMenuItem);
+    if (_detachTabbedPanesMenuItem==null) {
+      // assign the first time
+      _detachTabbedPanesMenuItem = tempDetachTabbedPanesMenuItem;
+    }
+    else {
+      // otherwise link this item to the first item
+      final WeakReference<JMenuItem> weakRef = new WeakReference<JMenuItem>(tempDetachTabbedPanesMenuItem);
+      _detachTabbedPanesMenuItem.addItemListener(new ItemListener() {
+        public void itemStateChanged(ItemEvent e) {
+          JMenuItem temp = weakRef.get();
+          if (temp!=null) {
+            temp.setSelected(_detachTabbedPanesMenuItem.isSelected());
+          }
+          else {
+            // weak reference cleared, remove this listener
+            _detachTabbedPanesMenuItem.removeItemListener(this);
+          }
+        }
+      });
+    }
+   
     editMenu.add(panesMenu);
     
     // access to configurations GUI
@@ -6737,10 +6763,31 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     JMenu debugMenu = new JMenu("Debugger");
     PlatformFactory.ONLY.setMnemonic(debugMenu,KeyEvent.VK_D);
     // Enable debugging item
-    _debuggerEnabledMenuItem = _newCheckBoxMenuItem(_toggleDebuggerAction);
-    _debuggerEnabledMenuItem.setSelected(false);
-    _setMenuShortcut(_debuggerEnabledMenuItem, _toggleDebuggerAction, KEY_DEBUG_MODE_TOGGLE);
-    debugMenu.add(_debuggerEnabledMenuItem);
+    JMenuItem tempDebuggerEnabledMenuItem = _newCheckBoxMenuItem(_toggleDebuggerAction);
+    tempDebuggerEnabledMenuItem.setSelected(false);
+    _setMenuShortcut(tempDebuggerEnabledMenuItem, _toggleDebuggerAction, KEY_DEBUG_MODE_TOGGLE);
+    debugMenu.add(tempDebuggerEnabledMenuItem);
+    if (_debuggerEnabledMenuItem==null) {
+      // assign the first time
+      _debuggerEnabledMenuItem = tempDebuggerEnabledMenuItem;
+    }
+    else {
+      // otherwise link this item to the first item
+      final WeakReference<JMenuItem> weakRef = new WeakReference<JMenuItem>(tempDebuggerEnabledMenuItem);
+      _debuggerEnabledMenuItem.addItemListener(new ItemListener() {
+        public void itemStateChanged(ItemEvent e) {
+          JMenuItem temp = weakRef.get();
+          if (temp!=null) {
+            temp.setSelected(_debuggerEnabledMenuItem.isSelected());
+          }
+          else {
+            // weak reference cleared, remove this listener
+            _debuggerEnabledMenuItem.removeItemListener(this);
+          }
+        }
+      });
+    }
+    
     debugMenu.addSeparator();
     
     _addMenuItem(debugMenu, _toggleBreakpointAction, KEY_DEBUG_BREAKPOINT_TOGGLE);
@@ -6755,16 +6802,57 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(debugMenu, _stepIntoDebugAction, KEY_DEBUG_STEP_INTO);
     _addMenuItem(debugMenu, _stepOverDebugAction, KEY_DEBUG_STEP_OVER);
     _addMenuItem(debugMenu, _stepOutDebugAction, KEY_DEBUG_STEP_OUT);
-    _automaticTraceMenuItem = _newCheckBoxMenuItem(_automaticTraceDebugAction);
-    _setMenuShortcut(_automaticTraceMenuItem, _automaticTraceDebugAction, KEY_DEBUG_AUTOMATIC_TRACE);
-    debugMenu.add(_automaticTraceMenuItem);
+    
+    JMenuItem tempAutomaticTraceMenuItem = _newCheckBoxMenuItem(_automaticTraceDebugAction);
+    _setMenuShortcut(tempAutomaticTraceMenuItem, _automaticTraceDebugAction, KEY_DEBUG_AUTOMATIC_TRACE);
+    debugMenu.add(tempAutomaticTraceMenuItem);
+    if (_automaticTraceMenuItem==null) {
+      // assign the first time
+      _automaticTraceMenuItem = tempAutomaticTraceMenuItem;
+    }
+    else {
+      // otherwise link this item to the first item
+      final WeakReference<JMenuItem> weakRef = new WeakReference<JMenuItem>(tempAutomaticTraceMenuItem);
+      _automaticTraceMenuItem.addItemListener(new ItemListener() {
+        public void itemStateChanged(ItemEvent e) {
+          JMenuItem temp = weakRef.get();
+          if (temp!=null) {
+            temp.setSelected(_automaticTraceMenuItem.isSelected());
+          }
+          else {
+            // weak reference cleared, remove this listener
+            _automaticTraceMenuItem.removeItemListener(this);
+          }
+        }
+      });
+    }
     
     debugMenu.addSeparator();
-    _detachDebugFrameMenuItem = _newCheckBoxMenuItem(_detachDebugFrameAction);
-    _detachDebugFrameMenuItem.setSelected(DrJava.getConfig().getSetting(DETACH_DEBUGGER));
-    _setMenuShortcut(_detachDebugFrameMenuItem, _detachDebugFrameAction, KEY_DETACH_DEBUGGER);
-    debugMenu.add(_detachDebugFrameMenuItem);
-    
+    JMenuItem tempDetachDebugFrameMenuItem = _newCheckBoxMenuItem(_detachDebugFrameAction);
+    tempDetachDebugFrameMenuItem.setSelected(DrJava.getConfig().getSetting(DETACH_DEBUGGER));
+    _setMenuShortcut(tempDetachDebugFrameMenuItem, _detachDebugFrameAction, KEY_DETACH_DEBUGGER);
+    debugMenu.add(tempDetachDebugFrameMenuItem);
+    if (_detachDebugFrameMenuItem==null) {
+      // assign the first time
+      _detachDebugFrameMenuItem = tempDetachDebugFrameMenuItem;
+    }
+    else {
+      // otherwise link this item to the first item
+      final WeakReference<JMenuItem> weakRef = new WeakReference<JMenuItem>(tempDetachDebugFrameMenuItem);
+      _detachDebugFrameMenuItem.addItemListener(new ItemListener() {
+        public void itemStateChanged(ItemEvent e) {
+          JMenuItem temp = weakRef.get();
+          if (temp!=null) {
+            temp.setSelected(_detachDebugFrameMenuItem.isSelected());
+          }
+          else {
+            // weak reference cleared, remove this listener
+            _detachDebugFrameMenuItem.removeItemListener(this);
+          }
+        }
+      });
+    }
+
     // Start off disabled
     _setDebugMenuItemsEnabled(false);
     
@@ -6811,57 +6899,44 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     final Configuration config = DrJava.getConfig();
     int currentLanguageLevel = config.getSetting(LANGUAGE_LEVEL);
-    JRadioButtonMenuItem rbMenuItem;
-    rbMenuItem = new JRadioButtonMenuItem("Full Java");
-    rbMenuItem.setToolTipText("Use full Java syntax");
-    if (currentLanguageLevel != OptionConstants.FUNCTIONAL_JAVA_LEVEL) { rbMenuItem.setSelected(true); }
-    rbMenuItem.addActionListener(new ActionListener() {
+    final JRadioButtonMenuItem rbFullJavaMenuItem = new JRadioButtonMenuItem("Full Java");
+    rbFullJavaMenuItem.setToolTipText("Use full Java syntax");
+    if (currentLanguageLevel != OptionConstants.FUNCTIONAL_JAVA_LEVEL) { rbFullJavaMenuItem.setSelected(true); }
+    rbFullJavaMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         config.setSetting(LANGUAGE_LEVEL, OptionConstants.FULL_JAVA);
       }});
-    group.add(rbMenuItem);
-    languageLevelMenu.add(rbMenuItem);
+    group.add(rbFullJavaMenuItem);
+    languageLevelMenu.add(rbFullJavaMenuItem);
     languageLevelMenu.addSeparator();
     
-//    rbMenuItem = new JRadioButtonMenuItem("Elementary");
-//    rbMenuItem.setToolTipText("Use Elementary language-level features");
-//    if (currentLanguageLevel == OptionConstants.ELEMENTARY_LEVEL) { rbMenuItem.setSelected(true); }
-//    rbMenuItem.addActionListener(new ActionListener() {
-//      public void actionPerformed(ActionEvent e) {
-//        config.setSetting(LANGUAGE_LEVEL, OptionConstants.ELEMENTARY_LEVEL);
-//      }});
-//    group.add(rbMenuItem);
-//    languageLevelMenu.add(rbMenuItem);
-//    
-//    rbMenuItem = new JRadioButtonMenuItem("Intermediate");
-//    rbMenuItem.setToolTipText("Use Intermediate language-level features");
-//    if (currentLanguageLevel == OptionConstants.INTERMEDIATE_LEVEL) { rbMenuItem.setSelected(true); }
-//    rbMenuItem.addActionListener(new ActionListener() {
-//      public void actionPerformed(ActionEvent e) {
-//        config.setSetting(LANGUAGE_LEVEL, OptionConstants.INTERMEDIATE_LEVEL);
-//      }});
-//    group.add(rbMenuItem);
-//    languageLevelMenu.add(rbMenuItem);
-//    
-//    rbMenuItem = new JRadioButtonMenuItem("Advanced");
-//    rbMenuItem.setToolTipText("Use Advanced language-level features");
-//    if (currentLanguageLevel == OptionConstants.ADVANCED_LEVEL) { rbMenuItem.setSelected(true); }
-//    rbMenuItem.addActionListener(new ActionListener() {
-//      public void actionPerformed(ActionEvent e) {
-//        config.setSetting(LANGUAGE_LEVEL, OptionConstants.ADVANCED_LEVEL);
-//      }});
-//    group.add(rbMenuItem);
-//    languageLevelMenu.add(rbMenuItem);
-    
-    rbMenuItem = new JRadioButtonMenuItem("Functional Java");
-    rbMenuItem.setToolTipText("Use Functional Java language-level features");
-    if (currentLanguageLevel == OptionConstants.FUNCTIONAL_JAVA_LEVEL) { rbMenuItem.setSelected(true); }
-    rbMenuItem.addActionListener(new ActionListener() {
+    final JRadioButtonMenuItem rbFunctionalMenuItem = new JRadioButtonMenuItem("Functional Java");
+    rbFunctionalMenuItem.setToolTipText("Use Functional Java language-level features");
+    if (currentLanguageLevel == OptionConstants.FUNCTIONAL_JAVA_LEVEL) { rbFunctionalMenuItem.setSelected(true); }
+    rbFunctionalMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         config.setSetting(LANGUAGE_LEVEL, OptionConstants.FUNCTIONAL_JAVA_LEVEL);
       }});
-    group.add(rbMenuItem);
-    languageLevelMenu.add(rbMenuItem);
+    group.add(rbFunctionalMenuItem);
+    languageLevelMenu.add(rbFunctionalMenuItem);
+    
+    config.addOptionListener(LANGUAGE_LEVEL, new OptionListener<Integer>() {
+      public void optionChanged(OptionEvent<Integer> oce) {
+        switch(oce.value) {
+          case OptionConstants.ELEMENTARY_LEVEL:
+          case OptionConstants.INTERMEDIATE_LEVEL:
+          case OptionConstants.FUNCTIONAL_JAVA_LEVEL: {
+            rbFunctionalMenuItem.setSelected(true);
+            break;
+          }
+          default: {
+            rbFullJavaMenuItem.setSelected(true);
+            break;
+          }
+        }
+      }
+    });
+    
     return languageLevelMenu;
   }
   
