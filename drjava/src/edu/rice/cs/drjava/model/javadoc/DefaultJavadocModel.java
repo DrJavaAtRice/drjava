@@ -211,6 +211,7 @@ public class DefaultJavadocModel implements JavadocModel {
   private void _javadocAllWorker(final File destDirFile, FileSaveSelector saver) {
     // Note: JAVADOC_FROM_ROOTS is intended to set the -subpackages flag, but I don't think that's something
     // we should support -- in general, we only support performing operations on the files that are open.
+    // (dlsmith r4189)
     
     final List<String> docFiles = new ArrayList<String>(); // files to send to Javadoc
 
