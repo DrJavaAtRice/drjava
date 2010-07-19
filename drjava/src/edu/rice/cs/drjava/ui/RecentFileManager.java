@@ -165,18 +165,18 @@ public class RecentFileManager implements OptionConstants {
 
     _do(new Runnable1<JMenu>() {
       public void run(JMenu fileMenu) {
-    JMenuItem newItem = new JMenuItem("");
-    newItem.addActionListener(new AbstractAction("Open " + file.getName()) {
-      public void actionPerformed(ActionEvent ae) {
-        if (_recentFileAction != null) {
-          _recentFileAction.actionPerformed(recentSelector);
+        JMenuItem newItem = new JMenuItem("");
+        newItem.addActionListener(new AbstractAction("Open " + file.getName()) {
+          public void actionPerformed(ActionEvent ae) {
+            if (_recentFileAction != null) {
+              _recentFileAction.actionPerformed(recentSelector);
+            }
+          }
+        });
+        try { newItem.setToolTipText(file.getCanonicalPath()); }
+        catch(IOException e) {
+          // don't worry about it at this point
         }
-      }
-    });
-    try { newItem.setToolTipText(file.getCanonicalPath()); }
-    catch(IOException e) {
-      // don't worry about it at this point
-    }
         fileMenu.insert(newItem,_pos);
       }
     });
@@ -226,7 +226,7 @@ public class RecentFileManager implements OptionConstants {
     boolean wasEmpty = (delPos == 0);
     while (delPos > MAX) {
       _recentFiles.remove(delPos - 1);
-      _remove(_initPos+1-(delPos-1));
+      _remove(_initPos+delPos);
       
       delPos = _recentFiles.size();
     }
@@ -251,6 +251,9 @@ public class RecentFileManager implements OptionConstants {
     public void actionPerformed(FileOpenSelector selector);
   }
 
+  /** Apply the passed runnable to all menus, i.e. _fileMenu and all menus in
+    * _mirroredMenus. The menu is passed to the runnable in its parameter.
+    * @param r Runnable to apply to all menus. */
   public void _do(Runnable1<JMenu> r) {
     r.run(_fileMenu);
     for(JMenu fileMenu: _mirroredMenus) {
@@ -258,6 +261,8 @@ public class RecentFileManager implements OptionConstants {
     }
   }
   
+  /** Insert a separator into all menus at the specified position.
+    * @param pos position for the separator. */
   public void _insertSeparator(final int pos) {
     _do(new Runnable1<JMenu>() {
       public void run(JMenu fileMenu) {
@@ -266,6 +271,8 @@ public class RecentFileManager implements OptionConstants {
     });
   }
   
+  /** Remove a menu item from all menus at the specified position.
+    * @param pos position from which the menu item should be removed . */
   public void _remove(final int pos) {
     _do(new Runnable1<JMenu>() {
       public void run(JMenu fileMenu) {
