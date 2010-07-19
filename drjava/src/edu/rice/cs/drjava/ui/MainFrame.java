@@ -212,7 +212,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final JFileChooser _interactionsHistoryChooser = new JFileChooser();
   
   // Menu fields
-  private final JMenuBar _menuBar = new MenuBar();
+  private final JMenuBar _menuBar = new MenuBar(this);
   private volatile JMenu _fileMenu;
   private volatile JMenu _editMenu;
   private volatile JMenu _toolsMenu;
@@ -3252,7 +3252,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       // initialize menu bar and actions
       _setUpActions();
-      _setUpMenuBar();
+      _setUpMenuBar(_menuBar,
+                    _fileMenu, _editMenu, _toolsMenu, _projectMenu, _debugMenu, _languageLevelMenu, _helpMenu);
+      setJMenuBar(_menuBar);
       
       //    _setUpDocumentSelector();
       _setUpContextMenus();
@@ -3262,8 +3264,23 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _redoButton = _createManualToolbarButton(_redoAction);
       
       // initialize _toolBar
-      
       _setUpToolBar();
+      
+      // add recent file and project manager
+      RecentFileAction fileAct = new RecentFileManager.RecentFileAction() { 
+        public void actionPerformed(FileOpenSelector selector) { open(selector); }
+      }; 
+      _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2, _fileMenu,
+                                                 fileAct, OptionConstants.RECENT_FILES);
+      
+      RecentFileAction projAct = new RecentFileManager.RecentFileAction() { 
+        public void actionPerformed(FileOpenSelector selector) { openProject(selector); } 
+      };
+      _recentProjectManager = new RecentFileManager(_projectMenu.getItemCount() - 2, _projectMenu,
+                                                    projAct, OptionConstants.RECENT_PROJECTS);
+      
+      // set up the menu bars on other frames
+      _tabbedPanesFrame.setUpMenuBar();
       
       // Create detachable debug frame
       if (_debugPanel != null) { // using debugger
@@ -3285,23 +3302,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             DrJava.getConfig().setSetting(DETACH_DEBUGGER, false);
           }
         });
+        _debugFrame.setUpMenuBar();
       }
       else { // not using debugger
         _debugFrame = null;
       }
-      
-      // add recent file and project manager
-      RecentFileAction fileAct = new RecentFileManager.RecentFileAction() { 
-        public void actionPerformed(FileOpenSelector selector) { open(selector); }
-      }; 
-      _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2, _fileMenu,
-                                                 fileAct, OptionConstants.RECENT_FILES);
-      
-      RecentFileAction projAct = new RecentFileManager.RecentFileAction() { 
-        public void actionPerformed(FileOpenSelector selector) { openProject(selector); } 
-      };
-      _recentProjectManager = new RecentFileManager(_projectMenu.getItemCount() - 2, _projectMenu,
-                                                    projAct, OptionConstants.RECENT_PROJECTS);
       
       // Set frame icon
       setIconImage(getIcon("drjava64.png").getImage());
@@ -6330,31 +6335,60 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     return null;
   }
   
-  
   /** This allows us to intercept key events when compiling testing and turn them off when the glass pane is up. */
-  private class MenuBar extends JMenuBar {
+  static class MenuBar extends JMenuBar {
+    private final MainFrame _mf;
+    public MenuBar(MainFrame mf) { _mf = mf; }
     public boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
-      if (MainFrame.this.getAllowKeyEvents()) return super.processKeyBinding(ks, e, condition, pressed);
+      if (_mf.getAllowKeyEvents()) return super.processKeyBinding(ks, e, condition, pressed);
       return false;
     }
   }
   
+  public void addMenuBarInOtherFrame(JMenuBar menuBar) {
+    JMenu fileMenu = menuBar.getMenu(Utilities.getComponentIndex(_fileMenu));
+    _recentFileManager.addMirroredMenu(fileMenu);
+    JMenu projectMenu = menuBar.getMenu(Utilities.getComponentIndex(_projectMenu));
+    _recentProjectManager.addMirroredMenu(projectMenu);
+  }
+
+  public void removeMenuBarInOtherFrame(JMenuBar menuBar) {
+    JMenu fileMenu = menuBar.getMenu(Utilities.getComponentIndex(_fileMenu));
+    _recentFileManager.removeMirroredMenu(fileMenu);
+    JMenu projectMenu = menuBar.getMenu(Utilities.getComponentIndex(_projectMenu));
+    _recentProjectManager.removeMirroredMenu(projectMenu);
+  }
+    
   /** Sets up the components of the menu bar and links them to the private fields within MainFrame.  This method 
     * serves to make the code more legible on the higher calling level, i.e., the constructor.
     */
-  private void _setUpMenuBar() {
-    _menuBar.add(_fileMenu);
-    _menuBar.add(_editMenu);
-    _menuBar.add(_toolsMenu);
-    _menuBar.add(_projectMenu);
-    if (_showDebugger) _menuBar.add(_debugMenu);
-    _menuBar.add(_languageLevelMenu);
-    _menuBar.add(_helpMenu);
+  void _setUpMenuBar(JMenuBar menuBar) {
+    int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+    _setUpMenuBar(menuBar,
+                  _setUpFileMenu(mask), _setUpEditMenu(mask), _setUpToolsMenu(mask),
+                  _setUpProjectMenu(mask), _showDebugger?_setUpDebugMenu(mask):null,
+                  _setUpLanguageLevelMenu(mask), _setUpHelpMenu(mask));
+  }
+
+  void _setUpMenuBar(JMenuBar menuBar,
+                     JMenu fileMenu,
+                     JMenu editMenu,
+                     JMenu toolsMenu,
+                     JMenu projectMenu,
+                     JMenu debugMenu,
+                     JMenu languageLevelMenu,
+                     JMenu helpMenu) {
+    menuBar.add(fileMenu);
+    menuBar.add(editMenu);
+    menuBar.add(toolsMenu);
+    menuBar.add(projectMenu);
+    if (_showDebugger && (debugMenu!=null)) menuBar.add(debugMenu);
+    menuBar.add(languageLevelMenu);
+    menuBar.add(helpMenu);
     // Plastic-specific style hints
     if(Utilities.isPlasticLaf()) {
-      _menuBar.putClientProperty(com.jgoodies.looks.Options.HEADER_STYLE_KEY, com.jgoodies.looks.HeaderStyle.BOTH);
+      menuBar.putClientProperty(com.jgoodies.looks.Options.HEADER_STYLE_KEY, com.jgoodies.looks.HeaderStyle.BOTH);
     }
-    setJMenuBar(_menuBar);
   }
   
   /** Adds an Action as a menu item to the given menu, using the specified configurable keystroke.
