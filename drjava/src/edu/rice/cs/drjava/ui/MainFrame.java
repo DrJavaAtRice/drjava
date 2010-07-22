@@ -89,6 +89,7 @@ import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.ui.config.ConfigFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputModel;
+import edu.rice.cs.drjava.ui.avail.*;
 import edu.rice.cs.drjava.ui.ClipboardHistoryFrame;
 import edu.rice.cs.drjava.ui.RegionsTreePanel;
 import edu.rice.cs.drjava.project.*;
@@ -276,6 +277,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Listener for Main JVM */
   volatile private ConfigOptionListeners.MasterJVMXMXListener _masterJvmXmxListener;
+  
+  /** GUI component availability notifier. */
+  final DefaultGUIAvailabilityNotifier _guiAvailabilityNotifier = new DefaultGUIAvailabilityNotifier();
   
   /** Window adapter for "pseudo-modal" dialogs, i.e. non-modal dialogs that insist on keeping the focus. */
   protected java.util.HashMap<Window,WindowAdapter> _modalWindowAdapters 
@@ -501,6 +505,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };
   
   private volatile AbstractAction _runProjectAction = new AbstractAction("Run Main Class of Project") {
+    { _addGUIAvailabilityListener(this,
+                                 GUIAvailabilityListener.ComponentType.PROJECT,
+                                 GUIAvailabilityListener.ComponentType.PROJECT_MAIN_CLASS,
+                                 GUIAvailabilityListener.ComponentType.COMPILER,
+                                 GUIAvailabilityListener.ComponentType.INTERACTIONS); }
     public void actionPerformed(ActionEvent ae) { _runProject(); }
   };
   
@@ -521,6 +530,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   private final Action _jarProjectAction = new AbstractAction("Create Jar File from Project...") {
+    { _addGUIAvailabilityListener(this,
+                                  GUIAvailabilityListener.ComponentType.PROJECT,
+                                  GUIAvailabilityListener.ComponentType.COMPILER); }
     public void actionPerformed(ActionEvent ae) { _jarOptionsDialog.setVisible(true); }
   };
   
@@ -572,6 +584,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Action that detaches the debugger pane.  Only runs in the event thread. */
   private final Action _detachDebugFrameAction = new AbstractAction("Detach Debugger") {
+    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.DEBUGGER); }
     public void actionPerformed(ActionEvent ae) { 
       if (_debugFrame == null) return; // debugger isn't used
       JMenuItem m = (JMenuItem)ae.getSource();
@@ -638,6 +651,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };
   
   private final Action _closeProjectAction = new AbstractAction("Close") {
+    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT); }
     public void actionPerformed(ActionEvent ae) { 
       closeProject();
       _findReplace.updateFirstDocInSearch();
@@ -713,6 +727,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Tests all the files in a folder. */
   private volatile AbstractAction _junitFolderAction = new AbstractAction("Test Folder") {
+    { _addGUIAvailabilityListener(this,
+                                 GUIAvailabilityListener.ComponentType.JUNIT,
+                                 GUIAvailabilityListener.ComponentType.COMPILER,
+                                 GUIAvailabilityListener.ComponentType.INTERACTIONS); }
     public final void actionPerformed(ActionEvent ae) { _junitFolder(); }
   };
   
@@ -752,12 +770,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };  
   
   private final Action _saveProjectAction = new AbstractAction("Save") {
+    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT); }
     public void actionPerformed(ActionEvent ae) {
       _saveAll();  // saves project file and all modified project source files; does not save external files
     }
   };
   
   private final Action _saveProjectAsAction = new AbstractAction("Save As...") {
+    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT); }
     public void actionPerformed(ActionEvent ae) {
       if (_saveProjectAs()) {  // asks user for new project file name; sets _projectFile in global model to this value
         _saveAll();  // performs saveAll operation using new project file name, assuming "Save as" was not cancelled
@@ -767,6 +787,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   private final Action _exportProjectInOldFormatAction = 
     new AbstractAction("Export Project In Old \"" + OLD_PROJECT_FILE_EXTENSION + "\" Format") {
+    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT); }
     public void actionPerformed(ActionEvent ae) {
       File cpf = _currentProjFile;
       _currentProjFile = FileOps.NULL_FILE;
@@ -878,6 +899,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Compiles all the project. */
   private volatile AbstractAction _compileProjectAction = new AbstractAction("Compile Project") {
+    { _addGUIAvailabilityListener(this,
+                                 GUIAvailabilityListener.ComponentType.PROJECT,
+                                 GUIAvailabilityListener.ComponentType.COMPILER); }
     public void actionPerformed(ActionEvent ae) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
@@ -890,6 +914,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Compiles all documents in the navigators active group. */
   private volatile AbstractAction _compileFolderAction = new AbstractAction("Compile Folder") {
+    { _addGUIAvailabilityListener(this,
+                                 GUIAvailabilityListener.ComponentType.COMPILER); }
     public void actionPerformed(ActionEvent ae) { 
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
@@ -902,6 +928,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Compiles all open documents. */
   private volatile AbstractAction _compileAllAction = new AbstractAction("Compile All Documents") {
+    { _addGUIAvailabilityListener(this,
+                                 GUIAvailabilityListener.ComponentType.COMPILER); }
     public void actionPerformed(ActionEvent ae) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
@@ -912,26 +940,43 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** cleans the build directory */
   private volatile AbstractAction _cleanAction = new AbstractAction("Clean Build Directory") {
+    { _addGUIAvailabilityListener(this,
+                                 GUIAvailabilityListener.ComponentType.COMPILER,
+                                 GUIAvailabilityListener.ComponentType.PROJECT,
+                                 GUIAvailabilityListener.ComponentType.PROJECT_BUILD_DIR); }
     public void actionPerformed(ActionEvent ae) { _clean(); }
   };
   
   /** auto-refresh the project and open new files */
   private volatile AbstractAction _autoRefreshAction = new AbstractAction("Auto-Refresh Project") {
+    { _addGUIAvailabilityListener(this,
+                                 GUIAvailabilityListener.ComponentType.PROJECT,
+                                 GUIAvailabilityListener.ComponentType.COMPILER); }
     public void actionPerformed(ActionEvent ae) { _model.autoRefreshProject(); }
   };
   
   /** Finds and runs the main method of the current document, if it exists. */
   private volatile AbstractAction _runAction = new AbstractAction("Run Document's Main Method") {
+    { _addGUIAvailabilityListener(this,
+                                 GUIAvailabilityListener.ComponentType.COMPILER,
+                                 GUIAvailabilityListener.ComponentType.INTERACTIONS); }
     public void actionPerformed(ActionEvent ae) { _runMain(); }
   };
   
   /** Tries to run the current document as an applet. */
   private volatile AbstractAction _runAppletAction = new AbstractAction("Run Document as Applet") {
+    { _addGUIAvailabilityListener(this,
+                                 GUIAvailabilityListener.ComponentType.COMPILER,
+                                 GUIAvailabilityListener.ComponentType.INTERACTIONS); }
     public void actionPerformed(ActionEvent ae) { _runApplet(); }
   };
   
   /** Runs JUnit on the document in the definitions pane. */
   private volatile AbstractAction _junitAction = new AbstractAction("Test Current Document") {
+    { _addGUIAvailabilityListener(this,
+                                 GUIAvailabilityListener.ComponentType.JUNIT,
+                                 GUIAvailabilityListener.ComponentType.COMPILER,
+                                 GUIAvailabilityListener.ComponentType.INTERACTIONS); }
     public void actionPerformed(ActionEvent ae) { 
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) _mainSplit.resetToPreferredSizes();
       _junit(); 
@@ -940,6 +985,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Runs JUnit over all open JUnit tests. */
   private volatile AbstractAction _junitAllAction = new AbstractAction("Test All Documents") {
+    { _addGUIAvailabilityListener(this,
+                                 GUIAvailabilityListener.ComponentType.JUNIT,
+                                 GUIAvailabilityListener.ComponentType.COMPILER,
+                                 GUIAvailabilityListener.ComponentType.INTERACTIONS); }
     public void actionPerformed(ActionEvent e) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) _mainSplit.resetToPreferredSizes();
       _junitAll();
@@ -950,6 +999,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Runs JUnit over all open JUnit tests in the project directory. */
   private volatile AbstractAction _junitProjectAction = new AbstractAction("Test Project") {
+    { _addGUIAvailabilityListener(this,
+                                 GUIAvailabilityListener.ComponentType.PROJECT,
+                                 GUIAvailabilityListener.ComponentType.JUNIT,
+                                 GUIAvailabilityListener.ComponentType.COMPILER,
+                                 GUIAvailabilityListener.ComponentType.INTERACTIONS); }
     public void actionPerformed(ActionEvent e) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) _mainSplit.resetToPreferredSizes();
       _junitProject();
@@ -959,6 +1013,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Runs Javadoc on all open documents (and the files in their packages). */
   private volatile AbstractAction _javadocAllAction = new AbstractAction("Javadoc All Documents") {
+    { _addGUIAvailabilityListener(this,
+                                 GUIAvailabilityListener.ComponentType.JAVADOC,
+                                 GUIAvailabilityListener.ComponentType.COMPILER); }
     public void actionPerformed(ActionEvent ae) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
@@ -974,6 +1031,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Runs Javadoc on the current document. */
   private volatile AbstractAction _javadocCurrentAction = new AbstractAction("Preview Javadoc for Current Document") {
+    { _addGUIAvailabilityListener(this,
+                                 GUIAvailabilityListener.ComponentType.JAVADOC,
+                                 GUIAvailabilityListener.ComponentType.COMPILER); }
     public void actionPerformed(ActionEvent ae) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
@@ -2407,20 +2467,29 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };
   
   private volatile AbstractAction _projectPropertiesAction = new AbstractAction("Project Properties") {
+    { _addGUIAvailabilityListener(this,
+                                 GUIAvailabilityListener.ComponentType.PROJECT,
+                                 GUIAvailabilityListener.ComponentType.COMPILER,
+                                 GUIAvailabilityListener.ComponentType.JUNIT); }
     public void actionPerformed(ActionEvent ae) { _editProject(); }
   };
   
   /** Action that enables the debugger.  Only runs in the event thread. */
   private final Action _toggleDebuggerAction = new AbstractAction("Debug Mode") {
+    { _addGUIAvailabilityListener(this,
+                                 GUIAvailabilityListener.ComponentType.INTERACTIONS); }
     public void actionPerformed(ActionEvent ae) { 
-      setEnabled(false);
+      _guiAvailabilityNotifier.unavailable(GUIAvailabilityListener.ComponentType.INTERACTIONS);
       debuggerToggle();
-      setEnabled(true);
+      _guiAvailabilityNotifier.available(GUIAvailabilityListener.ComponentType.INTERACTIONS);
     }
   };
   
   /** Action that resumes debugging.  Only runs in the event thread. */
   private final Action _resumeDebugAction = new AbstractAction("Resume Debugger") {
+    { _addGUIAvailabilityListener(this,
+                                  GUIAvailabilityListener.ComponentType.DEBUGGER,
+                                  GUIAvailabilityListener.ComponentType.DEBUGGER_SUSPENDED); }
     public void actionPerformed(ActionEvent ae) {
       try { debuggerResume(); }
       catch (DebugException de) { MainFrameStatics.showDebugError(MainFrame.this, de); }
@@ -2433,11 +2502,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public void setAutomaticTraceMenuItemStatus() {
     if (_automaticTraceMenuItem != null) {
       _automaticTraceMenuItem.setSelected(_model.getDebugger().isAutomaticTraceEnabled());
-    }
+  }
   }
   
   /** Action that automatically traces through entire program*/
   private final Action _automaticTraceDebugAction = new AbstractAction("Automatic Trace") {
+    { _addGUIAvailabilityListener(this,
+                                  GUIAvailabilityListener.ComponentType.DEBUGGER,
+                                  GUIAvailabilityListener.ComponentType.DEBUGGER_SUSPENDED); }
     public void actionPerformed(ActionEvent ae) { 
       debuggerAutomaticTrace(); 
     }
@@ -2445,16 +2517,25 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Action that steps into the next method call.  Only runs in the event thread. */
   private final Action _stepIntoDebugAction = new AbstractAction("Step Into") {
+    { _addGUIAvailabilityListener(this,
+                                  GUIAvailabilityListener.ComponentType.DEBUGGER,
+                                  GUIAvailabilityListener.ComponentType.DEBUGGER_SUSPENDED); }
     public void actionPerformed(ActionEvent ae) { debuggerStep(Debugger.StepType.STEP_INTO); }
   };
   
   /** Action that executes the next line, without stepping into methods.  Only runs in the event thread. */
   private final Action _stepOverDebugAction = new AbstractAction("Step Over") {
+    { _addGUIAvailabilityListener(this,
+                                  GUIAvailabilityListener.ComponentType.DEBUGGER,
+                                  GUIAvailabilityListener.ComponentType.DEBUGGER_SUSPENDED); }
     public void actionPerformed(ActionEvent ae) { debuggerStep(Debugger.StepType.STEP_OVER); }
   };
   
   /** Action that steps out of the next method call.  Only runs in the event thread. */
   private final Action _stepOutDebugAction = new AbstractAction("Step Out") {
+    { _addGUIAvailabilityListener(this,
+                                  GUIAvailabilityListener.ComponentType.DEBUGGER,
+                                  GUIAvailabilityListener.ComponentType.DEBUGGER_SUSPENDED); }
     public void actionPerformed(ActionEvent ae) {
       debuggerStep(Debugger.StepType.STEP_OUT);
     }
@@ -3269,6 +3350,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       // initialize _toolBar
       _setUpToolBar();
+      
+      // Set up GUI component availability
+      _setUpGUIComponentAvailability();
       
       // add recent file and project manager
       RecentFileAction fileAct = new RecentFileManager.RecentFileAction() { 
@@ -4247,6 +4331,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     updateStatusField("Toggling Debugger Mode");
     try { 
       if (isDebuggerReady()) {
+        _guiAvailabilityNotifier.ensureUnavailable(GUIAvailabilityListener.ComponentType.DEBUGGER);
         debugger.shutdown();
       }
       else {
@@ -4633,16 +4718,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   private void _openProjectUpdate() {
     if (_model.isProjectActive()) {
-      _closeProjectAction.setEnabled(true);
-      _saveProjectAction.setEnabled(true);
-      _saveProjectAsAction.setEnabled(true);
-      _exportProjectInOldFormatAction.setEnabled(true);
-      _projectPropertiesAction.setEnabled(true);
-      _junitProjectAction.setEnabled(true);
-      _compileProjectAction.setEnabled(true);
-      _jarProjectAction.setEnabled(true);
-      if (_model.getBuildDirectory() != null) _cleanAction.setEnabled(true);
-      _autoRefreshAction.setEnabled(true);
+      _guiAvailabilityNotifier.available(GUIAvailabilityListener.ComponentType.PROJECT);
       _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
       _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
       _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
@@ -4690,14 +4766,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       new BackgroundColorListener(renderer);
       _resetNavigatorPane();
       if (_model.getDocumentCount() == 1) _model.setActiveFirstDocument();
-      _closeProjectAction.setEnabled(false);
-      _saveProjectAction.setEnabled(false);
-      _saveProjectAsAction.setEnabled(false);
-      _exportProjectInOldFormatAction.setEnabled(false);
-      _projectPropertiesAction.setEnabled(false);
-      _jarProjectAction.setEnabled(false);
-      _junitProjectAction.setEnabled(false);
-      _compileProjectAction.setEnabled(false);
+      _guiAvailabilityNotifier.unavailable(GUIAvailabilityListener.ComponentType.PROJECT);
       _setUpContextMenus();
       _currentProjFile = FileOps.NULL_FILE;
       return true;
@@ -5637,7 +5706,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // moved this back into the event thread to fix bug 2848696
     // this code doesn't have to run in an auxiliary thread
     // the actual unit testing later is done in a separate thread
-    _disableJUnitActions();
+    _guiAvailabilityNotifier.junitStarted(); // JUNIT and COMPILER
+
     // now also works with multiple documents
 //        hourglassOn();  // moved into the prelude before this thread start  
     try { _model.getJUnitModel().junitDocs(_model.getDocumentNavigator().getSelectedDocuments()); }
@@ -5651,7 +5721,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // moved this back into the event thread to fix bug 2848696
     // this code doesn't have to run in an auxiliary thread
     // the actual unit testing later is done in a separate thread
-    _disableJUnitActions();
+    _guiAvailabilityNotifier.junitStarted(); // JUNIT and COMPILER
+
 //        hourglassOn();  // turned off when JUnitStarted event is fired
     if (_model.getDocumentNavigator().isGroupSelected()) {
       ArrayList<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getDocuments();
@@ -5669,7 +5740,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private void _junitProject() {
     updateStatusField("Running JUnit Tests in Project");
     hourglassOn();  // turned off in junitStarted/nonTestCase/_junitInterrupted
-    _disableJUnitActions();
+    _guiAvailabilityNotifier.junitStarted(); // JUNIT and COMPILER
     try { _model.getJUnitModel().junitProject(); } 
     catch(UnexpectedException e) { _junitInterrupted(e); }
     catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
@@ -5679,90 +5750,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private void _junitAll() {
     updateStatusField("Running All Open Unit Tests");
     hourglassOn();  // turned off in junitStarted/nonTestCase/_junitInterrupted
-    _disableJUnitActions();
+    _guiAvailabilityNotifier.junitStarted(); // JUNIT and COMPILER
     try { _model.getJUnitModel().junitAll(); } 
     catch(UnexpectedException e) { _junitInterrupted(e); }
     catch(Exception e) { _junitInterrupted(new UnexpectedException(e)); }
-  }
-  
-  /* These are used to save the state of the enabled property of the actions disabled during junit testing. */
-  private volatile DecoratedAction _junit_compileProjectDecoratedAction;
-  private volatile DecoratedAction _junit_compileAllDecoratedAction;
-  private volatile DecoratedAction _junit_compileFolderDecoratedAction;
-  private volatile DecoratedAction _junit_junitFolderDecoratedAction;
-  private volatile DecoratedAction _junit_junitAllDecoratedAction;
-  private volatile DecoratedAction _junit_junitDecoratedAction;
-  private volatile DecoratedAction _junit_junitOpenProjectFilesDecoratedAction;
-  private volatile DecoratedAction _junit_cleanDecoratedAction;
-  private volatile DecoratedAction _junit_autoRefreshDecoratedAction;
-  private volatile DecoratedAction _junit_projectPropertiesDecoratedAction;
-  private volatile DecoratedAction _junit_runProjectDecoratedAction;
-  private volatile DecoratedAction _junit_runDecoratedAction;
-  private volatile DecoratedAction _junit_runAppletDecoratedAction;
-  private volatile DecoratedAction _junit_javadocAllAction;
-  private volatile DecoratedAction _junit_javadocCurrentAction;
-  
-  /** An AbstractAction that prevents changes to the decoree's enabled flag. */
-  private static class DecoratedAction extends AbstractAction {
-    /** The AbstractAction that is being decorated. */
-    AbstractAction _decoree;
-    /** The "shallow" enabled flag. */
-    boolean _shallowEnabled;
-    /** Create an action decorating the specified action, then sets the decoree's enabled flag to b. */
-    public DecoratedAction(AbstractAction a, boolean b) {
-      super((String)a.getValue("Name"));
-      _decoree = a;
-      _shallowEnabled = _decoree.isEnabled();
-      _decoree.setEnabled(b);
-      super.setEnabled(b);
-    }
-    public void actionPerformed(ActionEvent ae) { _decoree.actionPerformed(ae); }
-    /** Do not change the decoree's enabled flag, but cache this value in the shallow enabled flag. */
-    public void setEnabled(boolean b) { _shallowEnabled = b; }
-    /** Write the shallow enabled flag to the decoree, then return the decoree */
-    public AbstractAction getUpdatedDecoree() { _decoree.setEnabled(_shallowEnabled); return _decoree; }
-  }
-  
-  /** Sets the enabled status to false of all actions that could conflict with JUnit while its is running a test.
-    * Also used when running Javadoc, since Javadoc may invoke the compiler.
-    * This method saves aside the previous enable state of each action so that when the test is finished, any action
-    * disabled before the test will remain disabled afterward.
-    */
-  private void _disableJUnitActions() {    
-    _compileProjectAction = _junit_compileProjectDecoratedAction = new DecoratedAction(_compileProjectAction, false);
-    _compileAllAction = _junit_compileAllDecoratedAction = new DecoratedAction(_compileAllAction, false);
-    _compileFolderAction = _junit_compileFolderDecoratedAction = new DecoratedAction(_compileFolderAction, false);
-    _junitFolderAction = _junit_junitFolderDecoratedAction = new DecoratedAction(_junitFolderAction, false);
-    _junitAllAction = _junit_junitAllDecoratedAction = new DecoratedAction(_junitAllAction, false);
-    _junitAction = _junit_junitDecoratedAction = new DecoratedAction(_junitAction, false);
-    _junitProjectAction = _junit_junitOpenProjectFilesDecoratedAction = new DecoratedAction(_junitProjectAction, false);  
-    _cleanAction = _junit_cleanDecoratedAction = new DecoratedAction(_cleanAction, false);
-    _autoRefreshAction = _junit_autoRefreshDecoratedAction = new DecoratedAction(_autoRefreshAction, false);
-    _projectPropertiesAction = _junit_projectPropertiesDecoratedAction = 
-      new DecoratedAction(_projectPropertiesAction, false);
-    _runProjectAction = _junit_runProjectDecoratedAction = new DecoratedAction(_runProjectAction, false);
-    _runAction = _junit_runDecoratedAction = new DecoratedAction(_runAction, false);
-    _runAppletAction = _junit_runAppletDecoratedAction = new DecoratedAction(_runAppletAction, false);
-    _javadocCurrentAction = _junit_javadocCurrentAction = new DecoratedAction(_javadocCurrentAction, false);
-    _javadocAllAction = _junit_javadocAllAction = new DecoratedAction(_javadocAllAction, false);
-  }
-  
-  private void _restoreJUnitActionsEnabled() {
-    _compileProjectAction = _junit_compileProjectDecoratedAction.getUpdatedDecoree();
-    _compileAllAction = _junit_compileAllDecoratedAction.getUpdatedDecoree();
-    _compileFolderAction = _junit_compileFolderDecoratedAction.getUpdatedDecoree();
-    _junitFolderAction = _junit_junitFolderDecoratedAction.getUpdatedDecoree();
-    _junitAllAction = _junit_junitAllDecoratedAction.getUpdatedDecoree();
-    _junitAction = _junit_junitDecoratedAction.getUpdatedDecoree();
-    _junitProjectAction = _junit_junitOpenProjectFilesDecoratedAction.getUpdatedDecoree();
-    _cleanAction = _junit_cleanDecoratedAction.getUpdatedDecoree();
-    _autoRefreshAction = _junit_autoRefreshDecoratedAction.getUpdatedDecoree();
-    _projectPropertiesAction = _junit_projectPropertiesDecoratedAction.getUpdatedDecoree();
-    _runProjectAction = _junit_runProjectDecoratedAction.getUpdatedDecoree();
-    _runAction = _junit_runDecoratedAction.getUpdatedDecoree();
-    _runAppletAction = _junit_runAppletDecoratedAction.getUpdatedDecoree();
-    _javadocCurrentAction = _junit_javadocCurrentAction.getUpdatedDecoree();
-    _javadocAllAction = _junit_javadocAllAction.getUpdatedDecoree();
   }
   
 //  /**
@@ -6123,6 +6114,60 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
+  void _addGUIAvailabilityListener(Action a, GUIAvailabilityListener.ComponentType... components) {
+    _guiAvailabilityNotifier.
+      addListener(new ConjoinedGUIAvailabilityActionAdapter(a, _guiAvailabilityNotifier, components));
+  }
+
+  void _addGUIAvailabilityListener(Component a, GUIAvailabilityListener.ComponentType... components) {
+    _guiAvailabilityNotifier.
+      addListener(new ConjoinedGUIAvailabilityComponentAdapter(a, _guiAvailabilityNotifier, components));
+  }
+  
+  void _displayGUIComponentAvailabilityFrame() {
+    JFrame frame = new JFrame("GUI Availability");
+    frame.setAlwaysOnTop(true );
+    frame.setLocationByPlatform(true);
+    frame.getContentPane().setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.PAGE_AXIS));
+    for(final GUIAvailabilityListener.ComponentType c: GUIAvailabilityListener.ComponentType.values()) {
+      final edu.rice.cs.plt.lambda.DelayedThunk<JButton> buttonThunk = edu.rice.cs.plt.lambda.DelayedThunk.make();  
+      final JButton button = new JButton(new AbstractAction(c.toString()+" "+_guiAvailabilityNotifier.getCount(c)) {
+        public void actionPerformed(ActionEvent e) {
+          _guiAvailabilityNotifier.availabilityChanged(c, !buttonThunk.value().getText().endsWith(" 0"));
+        }
+      });
+      buttonThunk.set(button);
+      _guiAvailabilityNotifier.addListener(new ConjoinedGUIAvailabilityListener(_guiAvailabilityNotifier, c) {
+        public void availabilityChanged(boolean available) {
+          button.setText(c.toString()+" "+_guiAvailabilityNotifier.getCount(c));
+          button.setSelected(available);
+        }
+      });
+      button.setSelected(_guiAvailabilityNotifier.isAvailable(c));
+      frame.add(button);
+    }
+    frame.pack();
+    frame.setVisible(true);
+  }
+  
+  /** Initialize the availability of GUI components.
+    * 
+    * When JUnit is running, the compiler or Javadoc should not be invoked (Javadoc may invoke the compiler).
+    */
+  private void _setUpGUIComponentAvailability() {
+//    _displayGUIComponentAvailabilityFrame();
+    
+    _guiAvailabilityNotifier.ensureUnavailable(GUIAvailabilityListener.ComponentType.PROJECT);
+    _guiAvailabilityNotifier.ensureUnavailable(GUIAvailabilityListener.ComponentType.PROJECT_BUILD_DIR);
+    _guiAvailabilityNotifier.ensureUnavailable(GUIAvailabilityListener.ComponentType.PROJECT_MAIN_CLASS);
+    _guiAvailabilityNotifier.ensureUnavailable(GUIAvailabilityListener.ComponentType.DEBUGGER);
+    _guiAvailabilityNotifier.ensureUnavailable(GUIAvailabilityListener.ComponentType.DEBUGGER_SUSPENDED);
+    _guiAvailabilityNotifier.ensureAvailable(GUIAvailabilityListener.ComponentType.JUNIT);
+    _guiAvailabilityNotifier.ensureAvailable(GUIAvailabilityListener.ComponentType.COMPILER);
+    _guiAvailabilityNotifier.ensureAvailabilityIs(GUIAvailabilityListener.ComponentType.JAVADOC,
+                                                  _model.getJavadocModel().isAvailable());
+  }
+  
   /** Initializes all action objects.  Adds icons and descriptions to several of the actions. Note: this 
     * initialization will later be done in the constructor of each action, which will subclass AbstractAction.
     */
@@ -6140,12 +6185,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_saveCopyAction, "Save Copy", "SaveAs", "Save a copy of the current document");
     _setUpAction(_renameAction, "Rename", "Rename", "Rename the current document");
     _setUpAction(_saveProjectAction, "Save", "Save", "Save the current project");
-    _saveProjectAction.setEnabled(false);
     _setUpAction(_saveProjectAsAction, "Save As", "SaveAs", "Save current project to new project file");
-    _saveProjectAsAction.setEnabled(false);
     _setUpAction(_exportProjectInOldFormatAction, "Export Project In Old \"" + OLD_PROJECT_FILE_EXTENSION +
                  "\" Format", "SaveAs", "Export Project In Old \"" + OLD_PROJECT_FILE_EXTENSION + "\" Format");
-    _exportProjectInOldFormatAction.setEnabled(false);
     _setUpAction(_revertAction, "Revert", "Revert the current document to the saved version");
     // Not yet working
 //    _setUpAction(_revertAllAction, "Revert All", "RevertAll",
@@ -6154,29 +6196,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_closeAction, "Close", "Close the current document");
     _setUpAction(_closeAllAction, "Close All", "CloseAll", "Close all documents");
     _setUpAction(_closeProjectAction, "Close", "CloseAll", "Close the current project");
-    _closeProjectAction.setEnabled(false);
-    
     _setUpAction(_projectPropertiesAction, "Project Properties", "Preferences", "Edit Project Properties");
-    _projectPropertiesAction.setEnabled(false);    
-    
     _setUpAction(_junitProjectAction, "Test Project", "Test the documents in the project source tree");
-    _junitProjectAction.setEnabled(false);
-    
     _setUpAction(_compileProjectAction, "Compile Project", "Compile the documents in the project source tree");
-    _compileProjectAction.setEnabled(false);
-    
     _setUpAction(_runProjectAction, "Run Project", "Run the project's main method");
-    _runProjectAction.setEnabled(false);
-    
     _setUpAction(_jarProjectAction, "Jar", "Create a jar archive from this project");
-    _jarProjectAction.setEnabled(false);
-    
     _setUpAction(_saveAllAction, "Save All", "SaveAll", "Save all open documents");
-    
     _setUpAction(_cleanAction, "Clean", "Clean Build directory");
-    _cleanAction.setEnabled(false);
     _setUpAction(_autoRefreshAction, "Auto-Refresh", "Auto-refresh project");
-    _autoRefreshAction.setEnabled(false);
     _setUpAction(_compileAction, "Compile Current Document", "Compile the current document");
     _setUpAction(_compileAllAction, "Compile", "Compile all open documents");
     _setUpAction(_printDefDocAction, "Print", "Print the current document");
@@ -6253,10 +6280,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _setUpAction(_javadocCurrentAction, "Preview Javadoc Current", "Preview the Javadoc for the current document");
     }
     else {
-      _javadocAllAction.setEnabled(false);
       _setUpAction(_javadocAllAction, "Javadoc",
                    "Note: DrJava cannot run Javadoc because no JDK was found. Please install a JDK.");
-      _javadocCurrentAction.setEnabled(false);
       _setUpAction(_javadocCurrentAction, "Preview Javadoc Current",
                    "Note: DrJava cannot run Javadoc because no JDK was found.  Please install a JDK.");
     }
@@ -6276,7 +6301,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_clearHistoryAction, "Clear History", "Clear the current history of interactions");
     
     _setUpAction(_resetInteractionsAction, "Reset", "Reset the Interactions Pane");
-    _resetInteractionsAction.setEnabled(true);
     _setUpAction(_closeSystemInAction, "Close System.in", "Close System.in Stream in Interactions Pane"); 
     
     _setUpAction(_viewInteractionsClassPathAction, "View Interactions Classpath", 
@@ -6458,7 +6482,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(fileMenu, _saveAllAction, KEY_SAVE_ALL_FILES);
     _addMenuItem(fileMenu, _renameAction, KEY_RENAME_FILE);
     _renameAction.setEnabled(false);
-//    fileMenu.add(_saveProjectAsAction);
     
     _addMenuItem(fileMenu, _revertAction, KEY_REVERT_FILE);
     _revertAction.setEnabled(false);
@@ -6468,7 +6491,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     fileMenu.addSeparator();
     _addMenuItem(fileMenu, _closeAction, KEY_CLOSE_FILE);
     _addMenuItem(fileMenu, _closeAllAction, KEY_CLOSE_ALL_FILES);
-    //_addMenuItem(fileMenu, _closeProjectAction, KEY_CLOSE_PROJECT);
     
     // Page setup, print preview, print
     fileMenu.addSeparator();
@@ -6852,7 +6874,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       });
     }
-
+    
     // Start off disabled
     _setDebugMenuItemsEnabled(false);
     
@@ -6864,17 +6886,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * functions should always be disabled.
     */
   private void _setDebugMenuItemsEnabled(boolean isEnabled) {
-    
     _debuggerEnabledMenuItem.setSelected(isEnabled);
-    //_suspendDebugAction.setEnabled(false);
-    _resumeDebugAction.setEnabled(false);
-    _automaticTraceDebugAction.setEnabled(false);
-    _stepIntoDebugAction.setEnabled(false);
-    _stepOverDebugAction.setEnabled(false);
-    _stepOutDebugAction.setEnabled(false);
-    _detachDebugFrameAction.setEnabled(isEnabled);
-    
-    if (_showDebugger) _debugPanel.disableButtons();
+    _guiAvailabilityNotifier.ensureUnavailable(GUIAvailabilityListener.ComponentType.DEBUGGER_SUSPENDED);
+    if (_showDebugger) { _debugPanel.setAutomaticTraceButtonText(); }
   }
   
   /** Enables and disables the appropriate menu items in the debug menu depending upon the state of the current thread.
@@ -6882,13 +6896,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     *        false if the current thread has just been resumed
     */
   private void _setThreadDependentDebugMenuItems(boolean isSuspended) {
-    //_suspendDebugAction.setEnabled(!isSuspended);
-    _resumeDebugAction.setEnabled(isSuspended);
-    _automaticTraceDebugAction.setEnabled(isSuspended);
-    _stepIntoDebugAction.setEnabled(isSuspended);
-    _stepOverDebugAction.setEnabled(isSuspended);
-    _stepOutDebugAction.setEnabled(isSuspended);
-    _debugPanel.setThreadDependentButtons(isSuspended);
+    _guiAvailabilityNotifier.ensureAvailabilityIs(GUIAvailabilityListener.ComponentType.DEBUGGER_SUSPENDED,
+                                                  isSuspended);
+    _debugPanel.setAutomaticTraceButtonText();
   }
   
   /** Creates and returns the language levels menu. */
@@ -7057,7 +7067,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _toolBar.addSeparator();
     _toolBar.add(_compileButton = _createToolbarButton(_compileAllAction));
     _toolBar.add(_createToolbarButton(_resetInteractionsAction));
-    //_toolBar.add(_createToolbarButton(_abortInteractionAction));
     
     // Run, Junit, and JavaDoc
     _toolBar.addSeparator();
@@ -8359,7 +8368,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * Must be executed in event thread.
     */
   private void _updateDebugStatus() {
-    if (! isDebuggerReady()) return;
+    boolean debuggerReady = isDebuggerReady();
+    _guiAvailabilityNotifier.ensureAvailabilityIs(GUIAvailabilityListener.ComponentType.DEBUGGER, debuggerReady);
+    if (!debuggerReady) { return; }
     
     // if the document is untitled, don't show that it is out of sync since it can't be debugged anyway
     if (_model.getActiveDocument().isUntitled() || _model.getActiveDocument().getClassFileInSync()) {
@@ -8558,6 +8569,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             (_model.getMainClass() != null) &&
             (_model.getMainClassContainingFile() != null) && 
             _model.getMainClassContainingFile().exists());
+  }
+  /** @return true if a project is active and a valid main class is set. */
+  boolean isProjectActiveAndBuildDirSet() {
+    return (_model.isProjectActive() &&
+            (_model.getBuildDirectory() != null) &&
+            (_model.getBuildDirectory() != FileOps.NULL_FILE));
   }
   
   /** Listens to events from the debugger. */
@@ -9022,9 +9039,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void interactionStarted() {
       _interactionsPane.endCompoundEdit();
       _disableInteractionsPane();
-      _runAction.setEnabled(false);
-      _runAppletAction.setEnabled(false);
-      _runProjectAction.setEnabled(false);
+      _guiAvailabilityNotifier.unavailable(GUIAvailabilityListener.ComponentType.INTERACTIONS);
     }
     
     public void interactionEnded() {
@@ -9066,9 +9081,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       else im.resetLastErrors(); // reset the last errors, so the dialog works again if it is re-enabled
       _enableInteractionsPane();
-      _runAction.setEnabled(true);
-      _runAppletAction.setEnabled(true);
-      _runProjectAction.setEnabled(isProjectActiveAndMainClassSet());
+      _guiAvailabilityNotifier.available(GUIAvailabilityListener.ComponentType.INTERACTIONS);
       _interactionsPane.discardUndoEdits();
       
     }
@@ -9082,15 +9095,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       *        interactionEnded event will be fired)
       */
     public void interpreterChanged(final boolean inProgress) {
-      _runAction.setEnabled(! inProgress);
-      _runAppletAction.setEnabled(! inProgress);
-      _runProjectAction.setEnabled((! inProgress) && isProjectActiveAndMainClassSet());
+      _guiAvailabilityNotifier.availabilityChanged(GUIAvailabilityListener.ComponentType.INTERACTIONS, !inProgress);
       if (inProgress) _disableInteractionsPane();
       else _enableInteractionsPane();
     }
     
     public void compileStarted() {
       assert EventQueue.isDispatchThread();
+      _guiAvailabilityNotifier.unavailable(GUIAvailabilityListener.ComponentType.COMPILER);      
       showTab(_compilerErrorPanel, true);
       _compilerErrorPanel.setCompilationInProgress();
       _saveAction.setEnabled(false);
@@ -9098,6 +9110,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void compileEnded(File workDir, final List<? extends File> excludedFiles) {
       assert EventQueue.isDispatchThread();    
+      
+      _guiAvailabilityNotifier.available(GUIAvailabilityListener.ComponentType.COMPILER);
       
       _compilerErrorPanel.reset(excludedFiles.toArray(new File[0]));
       if (isDebuggerReady()) {
@@ -9114,7 +9128,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     /** Called if a compilation is aborted. */
-    public void compileAborted(Exception e) { /* Should probably display a simple popup */ }
+    public void compileAborted(Exception e) {
+      /* Should probably display a simple popup */
+      _guiAvailabilityNotifier.available(GUIAvailabilityListener.ComponentType.COMPILER);      
+    }
     
     /** Called after the active compiler has been changed. */
     public void activeCompilerChanged() {
@@ -9182,7 +9199,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void junitEnded() {
       assert EventQueue.isDispatchThread();
 //      new ScrollableDialog(null, "MainFrame.junitEnded() called", "", "").show();
-      _restoreJUnitActionsEnabled();
+      _guiAvailabilityNotifier.junitFinished(); // JUNIT and COMPILER
       // Use EventQueue invokeLater to ensure that JUnit panel is "reset" after it is updated with test results
       EventQueue.invokeLater(new Runnable() { public void run() { _junitPanel.reset(); } });
       _model.refreshActiveDocument();
@@ -9194,7 +9211,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
       
       hourglassOn();
-      _disableJUnitActions();
+      _guiAvailabilityNotifier.javadocStarted(); // JAVADOC and COMPILER
 
       showTab(_javadocErrorPanel, true);
       _javadocErrorPanel.setJavadocInProgress();
@@ -9208,10 +9225,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _javadocErrorPanel.getErrorListPane().setJavadocEnded(success);
         showTab(_javadocErrorPanel, true);
         _javadocErrorPanel.reset();
-        _restoreJUnitActionsEnabled();
         _model.refreshActiveDocument();
       }
-      finally { hourglassOff(); }
+      finally {
+        _guiAvailabilityNotifier.javadocFinished(); // JAVADOC and COMPILER
+        hourglassOff();
+      }
       
       // Display the results.
       if (success) {
@@ -9274,31 +9293,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void interpreterResetting() {
       assert duringInit() || EventQueue.isDispatchThread();
-      _junitAction.setEnabled(false);
-      _junitAllAction.setEnabled(false);
-      _junitProjectAction.setEnabled(false);
-      _runAction.setEnabled(false);
-      _runAppletAction.setEnabled(false);
-      _runProjectAction.setEnabled(false);
+      _guiAvailabilityNotifier.unavailable(GUIAvailabilityListener.ComponentType.INTERACTIONS);
       _closeInteractionsScript();
       _interactionsPane.setEditable(false);
       _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-      if (_showDebugger) _toggleDebuggerAction.setEnabled(false);
     }
     
     public void interpreterReady(File wd) {
       assert duringInit() || EventQueue.isDispatchThread();
       
       interactionEnded();
-      _runAction.setEnabled(true);
-      _runAppletAction.setEnabled(true);
-      _runProjectAction.setEnabled(isProjectActiveAndMainClassSet());
-      _junitAction.setEnabled(true);
-      _junitAllAction.setEnabled(true);
-      _junitProjectAction.setEnabled(_model.isProjectActive());
-      // This action should not be enabled until the slave JVM is used          
-//          _resetInteractionsAction.setEnabled(true);
-      if (_showDebugger) _toggleDebuggerAction.setEnabled(true);
+      _guiAvailabilityNotifier.available(GUIAvailabilityListener.ComponentType.INTERACTIONS);
       
       /* This line was moved here from interpreterResetting because it was possible to get an InputBox in 
        * InteractionsController between interpreterResetting and interpreterReady. Fixes bug #917054 
@@ -9503,7 +9508,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       finally { 
         hourglassOff();
-        _restoreJUnitActionsEnabled();
+        _guiAvailabilityNotifier.junitFinished(); // JUNIT and COMPILER
       }
     }
     
@@ -9522,9 +9527,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                     JOptionPane.ERROR_MESSAGE);
       // clean up as junitEnded except hourglassOff (should factored into a private method)
       showTab(_junitPanel, true);
-      _junitAction.setEnabled(true);
-      _junitAllAction.setEnabled(true);
-      _junitProjectAction.setEnabled(_model.isProjectActive());
+      _guiAvailabilityNotifier.junitFinished(); // JUNIT and COMPILER
       _junitPanel.reset();
     }
     
@@ -9629,8 +9632,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     /* Changes to the state */
     
     public void projectBuildDirChanged() {
-      _cleanAction.setEnabled((_model.getBuildDirectory() != null) &&
-                              (_model.getBuildDirectory() != FileOps.NULL_FILE));
+      _guiAvailabilityNotifier.ensureAvailabilityIs(GUIAvailabilityListener.ComponentType.PROJECT_BUILD_DIR,
+                                                    isProjectActiveAndBuildDirSet());
     }
     
     public void projectWorkDirChanged() { }
@@ -9704,9 +9707,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   } // End of ModelListener class
   
   public void projectRunnableChanged() {
-    boolean b = isProjectActiveAndMainClassSet();
-    _runProjectAction.setEnabled(b);
-    if (b) {
+    boolean mainClassSet = isProjectActiveAndMainClassSet();
+    _guiAvailabilityNotifier.ensureAvailabilityIs(GUIAvailabilityListener.ComponentType.PROJECT_MAIN_CLASS,
+                                                  mainClassSet);
+    if (mainClassSet) {
       _runButton = _updateToolbarButton(_runButton, _runProjectAction);
     }
     else {
@@ -9816,9 +9820,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /* Resets the JUnit functions in main frame. */
   private void _resetJUnit() {
-    _junitAction.setEnabled(true);
-    _junitAllAction.setEnabled(true);
-    _junitProjectAction.setEnabled(_model.isProjectActive());
     _junitPanel.reset();
   }
   
@@ -9828,10 +9829,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       MainFrameStatics.showJUnitInterrupted(MainFrame.this, e);
       removeTab(_junitPanel);
       _resetJUnit(); 
-      _restoreJUnitActionsEnabled();
       _model.refreshActiveDocument();
     }
-    finally { hourglassOff(); }
+    finally {
+      hourglassOff();
+      _guiAvailabilityNotifier.junitFinished(); // JUNIT and COMPILER
+  }
   }
   
   /* Pops up a message and cleans up after unit testing has been interrupted. */
@@ -9840,10 +9843,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       MainFrameStatics.showJUnitInterrupted(MainFrame.this, message);
       removeTab(_junitPanel);
       _resetJUnit(); 
-      _restoreJUnitActionsEnabled();
       _model.refreshActiveDocument();
     }
-    finally { hourglassOff(); }
+    finally {
+      hourglassOff();
+      _guiAvailabilityNotifier.junitFinished(); // JUNIT and COMPILER
+    }
   }
   
   boolean isDebuggerReady() { return _showDebugger &&  _model.getDebugger().isReady(); }

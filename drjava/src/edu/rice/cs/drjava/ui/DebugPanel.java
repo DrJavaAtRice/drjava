@@ -43,6 +43,7 @@ import javax.swing.table.*;
 import java.awt.event.*;
 import java.awt.*;
 
+import edu.rice.cs.drjava.ui.avail.*;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -417,14 +418,19 @@ public class DebugPanel extends JPanel implements OptionConstants {
       }
     };
     _resumeButton = new JButton(resumeAction);
+    _frame._addGUIAvailabilityListener(_resumeButton,
+                                      GUIAvailabilityListener.ComponentType.DEBUGGER,
+                                      GUIAvailabilityListener.ComponentType.DEBUGGER_SUSPENDED);
     
     Action automaticTrace = new AbstractAction("Automatic Trace") {
       public void actionPerformed(ActionEvent ae) {
         _frame.debuggerAutomaticTrace();
       }
     };
-    
     _automaticTraceButton = new JButton(automaticTrace);
+    _frame._addGUIAvailabilityListener(_automaticTraceButton,
+                                      GUIAvailabilityListener.ComponentType.DEBUGGER,
+                                      GUIAvailabilityListener.ComponentType.DEBUGGER_SUSPENDED);
     
     Action stepIntoAction = new AbstractAction("Step Into") {
       public void actionPerformed(ActionEvent ae) {
@@ -432,6 +438,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
       }
     };
     _stepIntoButton = new JButton(stepIntoAction);
+    _frame._addGUIAvailabilityListener(_stepIntoButton,
+                                      GUIAvailabilityListener.ComponentType.DEBUGGER,
+                                      GUIAvailabilityListener.ComponentType.DEBUGGER_SUSPENDED);
 
     Action stepOverAction = new AbstractAction("Step Over") {
       public void actionPerformed(ActionEvent ae) {
@@ -439,6 +448,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
       }
     };
     _stepOverButton = new JButton(stepOverAction);
+    _frame._addGUIAvailabilityListener(_stepOverButton,
+                                      GUIAvailabilityListener.ComponentType.DEBUGGER,
+                                      GUIAvailabilityListener.ComponentType.DEBUGGER_SUSPENDED);
 
     Action stepOutAction = new AbstractAction( "Step Out" ) {
       public void actionPerformed(ActionEvent ae) {
@@ -446,6 +458,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
       }
     };
     _stepOutButton = new JButton(stepOutAction);
+    _frame._addGUIAvailabilityListener(_stepOutButton,
+                                      GUIAvailabilityListener.ComponentType.DEBUGGER,
+                                      GUIAvailabilityListener.ComponentType.DEBUGGER_SUSPENDED);
     
     ActionListener closeListener =
       new ActionListener() {
@@ -482,7 +497,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     
     gbLayout.setConstraints(emptyPanel, c);
     
-    disableButtons();
+    updateButtons();
     _buttonPanel.add(mainButtons, BorderLayout.CENTER);
     _buttonPanel.add(closeButtonPanel, BorderLayout.EAST);
   }
@@ -633,32 +648,19 @@ public class DebugPanel extends JPanel implements OptionConstants {
     public void regionRemoved(Breakpoint r) { }
   }
 
-
-  /** Enables and disables the appropriate buttons depending on if the current
-   * thread has been suspended or resumed
-   * @param isSuspended indicates if the current thread has been suspended
-   */
-  public void setThreadDependentButtons(boolean isSuspended) {
-    _resumeButton.setEnabled(isSuspended);
-    _stepIntoButton.setEnabled(isSuspended);
-    _stepOverButton.setEnabled(isSuspended);
-    _stepOutButton.setEnabled(isSuspended);
-    setAutomaticTraceButtonText();
-    
-    _automaticTraceButton.setEnabled(isSuspended);
-  }
-  
-  public void disableButtons() {
-    setThreadDependentButtons(false);
+  public void updateButtons() {
+//    setAutomaticTraceButtonText();
   }
 
   /**Sets the AutomaticTraceButton text as well as the Automatic Trace check box menu item under Debugger based on whether automatic trace is enabled or not*/
   public void setAutomaticTraceButtonText() {
-     if(_model.getDebugger().isAutomaticTraceEnabled()) 
+    if(_model.getDebugger().isAutomaticTraceEnabled()) {
       _automaticTraceButton.setText("Disable Trace"); 
-     else 
+    }
+    else { 
       _automaticTraceButton.setText("Automatic Trace");
-     _frame.setAutomaticTraceMenuItemStatus();
+    }
+    _frame.setAutomaticTraceMenuItemStatus();
   }
   
   public void setStatusText(String text) { _statusBar.setText(text); }
