@@ -204,6 +204,12 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           File[] jars = IOUtil.attemptListFiles(libDir, IOUtil.extensionFilePredicate("jar"));
           if (jars != null) { bootClassPath.addAll(Arrays.asList(jars)); }
         }
+        else {
+          // could not determine boot classpath because the file was not named classes.jar or tools.jar
+          // at least put the compiler file itself and the additional compiler files on the boot classpath
+          bootClassPath.add(f);
+          for(File acf: additionalCompilerFiles) { bootClassPath.add(acf); };
+        }
         if (additionalBootClassPath!=null) { bootClassPath.addAll(additionalBootClassPath); }
         if (bootClassPath.isEmpty()) { bootClassPath = null; } // null defers to the compiler's default behavior
 

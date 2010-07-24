@@ -94,16 +94,17 @@ public class NextGenDescriptor implements JDKDescriptor {
         new File("/C:/Program Files/JavaPLT/nextgen2/jars/nextgen2.jar"),
         new File("/C:/Program Files/JavaPLT/nextgen2/nextgen2.jar"),
         new File("/C:/Program Files/JavaPLT/nextgen2/jars/nextgen2.jar"),
-        new File("/usr/local/JavaMint/nextgen2/nextgen2.jar"),
-        new File("/usr/local/JavaMint/nextgen2/jars/nextgen2.jar"),
-        new File("/home/mgricken/research/Misc/NextGen/nextgen2/nextgen2.jar"),
-        new File("/home/mgricken/research/Misc/NextGen/nextgen2/jars/nextgen2.jar"),
-        new File(edu.rice.cs.util.FileOps.getDrJavaFile().getParentFile(), "nextgen2.jar")
+        new File("/usr/local/nextgen2/nextgen2.jar"),
+        new File("/usr/local/nextgen2/jars/nextgen2.jar")
+//        new File("/home/mgricken/research/Misc/NextGen/nextgen2/nextgen2.jar"),
+//        new File("/home/mgricken/research/Misc/NextGen/nextgen2/jars/nextgen2.jar"),
+//        new File(edu.rice.cs.util.FileOps.getDrJavaFile().getParentFile(), "nextgen2.jar")
     });
     try {
       String ngc_home = System.getenv("NGC_HOME");
       if (ngc_home!=null) {
         // JDKToolsLibrary.msg("NGC_HOME environment variable set to: "+ngc_home);
+        files = IterUtil.compose(files, new File(new File(ngc_home), "jars/nextgen2.jar"));
         files = IterUtil.compose(files, new File(new File(ngc_home), "nextgen2.jar"));
       }
       else {

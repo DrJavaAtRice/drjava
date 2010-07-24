@@ -87,6 +87,8 @@ public class NextGenCompiler extends Javac160FilteringCompiler {
     * class path of the Interactions JVM. This is necessary for the Nextgen compiler,
     * since the Nextgen compiler needs to be invoked at runtime. */
   public java.util.List<File> additionalBootClassPathForInteractions() {
+    System.out.println("NextGenCompiler default boot classpath: "+((_defaultBootClassPath==null)?"null":IOUtil.pathToString(_defaultBootClassPath)));
+    System.out.println("NextGenCompiler.additionalBootClassPathForInteractions: "+new File(_location));
     return Arrays.asList(new File(_location));
   }
 
@@ -107,7 +109,7 @@ public class NextGenCompiler extends Javac160FilteringCompiler {
   }
   
   protected static String _transformNextgenCommand(String s) {
-    final String command = "edu.rice.cs.nextgen2.classloader.Runner.main(\"{0}\"{1});";
+    final String command = "edu.rice.cs.nextgen2.classloader.Runner.main(new String[]'{'\"{0}\"{1}'}');";
     if (s.endsWith(";"))  s = _deleteSemiColon(s);
     java.util.List<String> args = ArgumentTokenizer.tokenize(s, true);
     final String classNameWithQuotes = args.get(1); // this is "MyClass"
@@ -203,7 +205,7 @@ public class NextGenCompiler extends Javac160FilteringCompiler {
     if (classPath != null) { options.put("-classpath", IOUtil.pathToString(classPath)); }
     if (sourcePath != null) { options.put("-sourcepath", IOUtil.pathToString(sourcePath)); }
     if (destination != null) { options.put("-d", destination.getPath()); }
-    if (bootClassPath != null) { options.put("-bootclasspath", IOUtil.pathToString(bootClassPath)); }
+    if (bootClassPath != null) { System.out.println("bootClassPath: "+IOUtil.pathToString(bootClassPath)); options.put("-bootclasspath", IOUtil.pathToString(bootClassPath)); }
     if (sourceVersion != null) { options.put("-source", sourceVersion); }
     if (!showWarnings) { options.put("-nowarn", ""); }
     

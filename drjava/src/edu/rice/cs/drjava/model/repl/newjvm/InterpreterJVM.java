@@ -114,6 +114,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _classPathManager = new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
     _interpreterLoader = _classPathManager.makeClassLoader(null);
     _junitTestManager = new JUnitTestManager(this, _classPathManager);
+
+    // set the thread context class loader, this way NextGen and Mint can use the interpreter's class loader
+    Thread.currentThread().setContextClassLoader(_interpreterLoader);
     
     // _interpreterOptions = Options.DEFAULT;
     _interpreterOptions = new InteractionsPaneOptions();
@@ -200,6 +203,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     
     boolean available = _busyInterpreters.add(interpreter);
     if (!available) { debug.logEnd(); return InterpretResult.busy(); }
+    
+    // set the thread context class loader, this way NextGen and Mint can use the interpreter's class loader
+    Thread.currentThread().setContextClassLoader(_interpreterLoader);
     
     Option<Object> result = null;
     try { result = interpreter.interpret(input); }

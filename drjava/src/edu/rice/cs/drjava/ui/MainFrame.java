@@ -2157,17 +2157,20 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Displays the interactions classpath. */  
   public void viewInteractionsClassPath() {
-    String cp = IterUtil.multilineToString(_model.getInteractionsClassPath());
+    String cp = IterUtil.multilineToString(IterUtil.filter(_model.getInteractionsClassPath(),
+                                                           new Predicate<File>() {
+      HashSet<File> alreadySeen = new HashSet<File>();
+      public boolean contains(File arg) {
+        // filter out empty strings and duplicates
+        return !("".equals(arg.toString().trim())) && alreadySeen.add(arg);
+      }
+    }));
     new DrJavaScrollableDialog(this, "Interactions Classpath", "Current Interpreter Classpath", cp).show();
   }
   
   /** Action that shows what help documentation is available.  Only executes in the event thread. */
   private final Action _helpAction = new AbstractAction("Help") {
     public void actionPerformed(ActionEvent ae) {
-      // Create frame if we haven't yet
-//      if (_helpFrame == null) {
-//        _helpFrame = new HelpFrame();
-//      }
       _helpFrame.setVisible(true);
     }
   };
@@ -2175,10 +2178,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Action that shows the quick start documentation.  Only executes in the event thread. */
   private final Action _quickStartAction = new AbstractAction("QuickStart") {
     public void actionPerformed(ActionEvent ae) {
-      // Create frame if we haven't yet
-//      if (_quickStartFrame == null) {
-//        _quickStartFrame = new QuickStartFrame();
-//      }
       _quickStartFrame.setVisible(true);
     }
   };
@@ -2186,13 +2185,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Action that pops up an info dialog.  Only runs in the event thread. */
   private final Action _aboutAction = new AbstractAction("About") {
     public void actionPerformed(ActionEvent ae) {
-      // Create dialog if we haven't yet
-//      if (_aboutDialog == null) _aboutDialog = new AboutDialog(MainFrame.this);
-//      Point p = MainFrame.this.getLocation();
       _aboutDialog.setVisible(true);
-//      _aboutDialog.setLocation(p.x+(MainFrame.this.getWidth() - _aboutDialog.getWidth())/2, 
-//      p.y+(MainFrame.this.getHeight()-_aboutDialog.getHeight())/2);
-      
     }
   };
   

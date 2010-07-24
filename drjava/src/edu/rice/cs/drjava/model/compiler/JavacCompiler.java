@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.model.compiler;
 
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.io.File;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.DrJava;
@@ -79,7 +79,7 @@ public abstract class JavacCompiler implements CompilerInterface {
   
   /** A compiler can instruct DrJava to include additional elements for the boot
     * class path of the Interactions JVM. This isn't necessary for the Java compilers, though. */
-  public List<File> additionalBootClassPathForInteractions() { return new ArrayList<File>(); }
+  public List<File> additionalBootClassPathForInteractions() { return Arrays.<File>asList(); }
 
   /** Transform the command line to be interpreted into something the Interactions JVM can use.
     * This replaces "java MyClass a b c" with Java code to call MyClass.main(new String[]{"a","b","c"}).

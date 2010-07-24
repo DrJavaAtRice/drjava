@@ -136,8 +136,7 @@ public class MintDescriptor implements JDKDescriptor {
                        "com/sun/source/tree/BracketExprTree.class",
                        "com/sun/source/tree/BracketStatTree.class",
                        "com/sun/source/tree/EscapeExprTree.class",
-                       "com/sun/source/tree/EscapeStatTree.class",
-                       "com/sun/tools/javac/util/DefaultFileManager.class");
+                       "com/sun/source/tree/EscapeStatTree.class");
   }
   
   /** Return the class name of the compiler adapter.

@@ -221,13 +221,13 @@ public class JDKToolsLibrary {
   protected static final java.io.PrintWriter LOG_PW = new java.io.PrintWriter(LOG_STRINGWRITER);
   
   public static void msg(String s) {   
-    try {   
-      java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(new File(new File(System.getProperty("user.home")),   
-                                                                                       "mintcompiler.txt").getAbsolutePath(),true));   
-      pw.println(s);
+//    try {   
+//      java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(new File(new File(System.getProperty("user.home")),   
+//                                                                                       "mintcompiler.txt").getAbsolutePath(),true));   
+//      pw.println(s);
       LOG_PW.println(s);
-      pw.close();   
-    }   
-    catch(java.io.IOException ioe) { }   
+//      pw.close();   
+//    }   
+//    catch(java.io.IOException ioe) { }   
   }
 }
