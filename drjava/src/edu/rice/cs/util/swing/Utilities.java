@@ -264,4 +264,19 @@ public class Utilities {
     observable.addPropertyChangeListener(pcl);
     return pcl;
   }
+  
+  /** Return the index of the component in the parent container, or -1 if no parent or not found.
+    * @param component
+    * @return index of the component in the parent container, or -1 if not found */
+  public static int getComponentIndex(Component component) {
+    if (component != null && component.getParent() != null) {
+      Container c = component.getParent();
+      for (int i = 0; i < c.getComponentCount(); i++) {
+        if (c.getComponent(i) == component)
+          return i;
+      }
+    }
+    
+    return -1;
+  }
 }

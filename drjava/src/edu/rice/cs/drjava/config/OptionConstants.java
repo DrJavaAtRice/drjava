@@ -396,7 +396,8 @@ public interface OptionConstants {
   
   /** The key binding for creating a new java class file */
   public static final VectorOption<KeyStroke> KEY_NEW_CLASS_FILE =
-    new VectorOption<KeyStroke>("key.new.javafile", new KeyStrokeOption("",null), to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_N, MASK|SHIFT_MASK))); 
+    new VectorOption<KeyStroke>("key.new.javafile", new KeyStrokeOption("",null),
+                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_N, MASK|SHIFT_MASK))); 
   
   /** The key binding for opening an entire project.  I is right next to O, so
     * it seemed logical that ctrl-I would open a project and ctrl-O open a file */
@@ -404,6 +405,47 @@ public interface OptionConstants {
     new VectorOption<KeyStroke>("key.open.project", 
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_I, MASK)));
+
+  /** The key binding for creating a new project. */
+  public static final VectorOption<KeyStroke> KEY_NEW_PROJECT = 
+    new VectorOption<KeyStroke>("key.new.project", new KeyStrokeOption("",null), to.vector());
+
+  /** The key binding for saving a project. */
+  public static final VectorOption<KeyStroke> KEY_SAVE_PROJECT = 
+    new VectorOption<KeyStroke>("key.save.project", new KeyStrokeOption("",null), to.vector());
+
+  /** The key binding for saving a project as a different file. */
+  public static final VectorOption<KeyStroke> KEY_SAVE_AS_PROJECT = 
+    new VectorOption<KeyStroke>("key.save.as.project", new KeyStrokeOption("",null), to.vector());
+  
+  /** The key binding for compiling a project. */
+  public static final VectorOption<KeyStroke> KEY_COMPILE_PROJECT = 
+    new VectorOption<KeyStroke>("key.compile.project", new KeyStrokeOption("",null), to.vector());
+  
+  /** The key binding for testing a project. */
+  public static final VectorOption<KeyStroke> KEY_JUNIT_PROJECT = 
+    new VectorOption<KeyStroke>("key.junit.project", new KeyStrokeOption("",null), to.vector());
+  
+  /** The key binding for running a project. */
+  public static final VectorOption<KeyStroke> KEY_RUN_PROJECT = 
+    new VectorOption<KeyStroke>("key.run.project", new KeyStrokeOption("",null), to.vector());
+  
+  /** The key binding for cleaning a project. */
+  public static final VectorOption<KeyStroke> KEY_CLEAN_PROJECT = 
+    new VectorOption<KeyStroke>("key.clean.project", new KeyStrokeOption("",null), to.vector());
+  
+  /** The key binding for refreshing a project. */
+  public static final VectorOption<KeyStroke> KEY_AUTO_REFRESH_PROJECT = 
+    new VectorOption<KeyStroke>("key.auto.refresh.project", new KeyStrokeOption("",null), to.vector());
+  
+  /** The key binding for creating a jar of a project. */
+  public static final VectorOption<KeyStroke> KEY_JAR_PROJECT = 
+    new VectorOption<KeyStroke>("key.jar.project", new KeyStrokeOption("",null), to.vector());
+  
+  /** The key binding for editing the project properties. */
+  public static final VectorOption<KeyStroke> KEY_PROJECT_PROPERTIES = 
+    new VectorOption<KeyStroke>("key.project.properties", new KeyStrokeOption("",null),
+                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_I, MASK|SHIFT_MASK)));
   
   /** The key binding for creating a new JUnit test case */
   public static final VectorOption<KeyStroke> KEY_NEW_TEST = 
@@ -1110,6 +1152,11 @@ public interface OptionConstants {
   /** The key binding for the GenerateCustomDrJavaJarFrame. */
   public static final VectorOption<KeyStroke> KEY_GENERATE_CUSTOM_DRJAVA = 
     new VectorOption<KeyStroke>("key.generate.custom.drjava", new KeyStrokeOption("",null), to.vector());
+  
+  /** The key binding for starting a new, blank DrJava instance. */
+  public static final VectorOption<KeyStroke> KEY_NEW_DRJAVA_INSTANCE= 
+    new VectorOption<KeyStroke>("key.new.drjava.instance", new KeyStrokeOption("",null),
+                                to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F1, CTRL_MASK|SHIFT_MASK)));
   
   /* ---------- Find Replace Options ---------- */
   

@@ -137,8 +137,9 @@ public class KeyBindingManager {
       return true;
     }
     else if (_keyToDataMap.get(ks).getAction().equals(a)) {
-      // this key is already assigned to the same action, do nothing
-      return false;
+      // this key is already assigned to the same action; no action necessary, but updating doesn't hurt either
+      // and a gratuitous update simplifies dealing with multiple menu bars
+      return true;
     }
     else { // key-binding conflict
       if (_shouldCheckConflict) {

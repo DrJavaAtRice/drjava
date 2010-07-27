@@ -80,9 +80,7 @@ public class MainFrameStatics {
       try {
         String fileName = DrJavaFileUtils.removeExtension(input.getCanonicalPath()) + newExt;
         File file = new File(fileName);
-        if (! file.exists() || verifyOverwrite(parent, file)) { 
-          return file;
-        }
+        return file;
       }
       catch(IOException ioe) { showIOError(parent, ioe); }
     }

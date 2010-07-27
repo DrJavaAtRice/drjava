@@ -1000,12 +1000,15 @@ public class ConfigFrame extends SwingFrame {
                                                  "Custom Javadoc Parameters", this,
                                                  "Any extra flags or parameters to pass to Javadoc."));
     
-    addOptionComponent(panel, 
-                       new BooleanOptionComponent(OptionConstants.JAVADOC_FROM_ROOTS,
-                                                  "Generate Javadoc From Source Roots", this,
-                                                  "<html>Whether \"Javadoc All\" should generate Javadoc for all packages<br>" +
-                                                  "in an open document's source tree, rather than just the document's<br>" +
-                                                  "own package and sub-packages.</html>"));
+    // Note: JAVADOC_FROM_ROOTS is intended to set the -subpackages flag, but I don't think that's something
+    // we should support -- in general, we only support performing operations on the files that are open.
+    // (dlsmith r4189)
+//    addOptionComponent(panel, 
+//                       new BooleanOptionComponent(OptionConstants.JAVADOC_FROM_ROOTS,
+//                                                  "Generate Javadoc From Source Roots", this,
+//                                                  "<html>Whether \"Javadoc All\" should generate Javadoc for all packages<br>" +
+//                                                  "in an open document's source tree, rather than just the document's<br>" +
+//                                                  "own package and sub-packages.</html>"));
     
     panel.displayComponents();
   }

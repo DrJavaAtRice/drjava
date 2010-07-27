@@ -39,10 +39,12 @@ package edu.rice.cs.drjava.ui;
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.drjava.platform.PlatformFactory;
 import java.awt.Point;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import javax.swing.JMenuBar;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
 
@@ -161,6 +163,24 @@ public class DetachedFrame extends SwingFrame {
     _detach = detach;
     _reattach = reattach;
     initDone(); // call mandated by SwingFrame contract
+  }
+  
+  public void dispose() {
+    // Mac only
+    if (PlatformFactory.ONLY.isMacPlatform()) {
+      _mainFrame.removeMenuBarInOtherFrame(getJMenuBar());
+    }
+    super.dispose();
+  }
+  
+  public void setUpMenuBar() {
+    // Mac only
+    if (PlatformFactory.ONLY.isMacPlatform() && (getJMenuBar()==null)) {
+      JMenuBar menuBar = new MainFrame.MenuBar(_mainFrame);
+      _mainFrame._setUpMenuBar(menuBar);
+      _mainFrame.addMenuBarInOtherFrame(menuBar);
+      setJMenuBar(menuBar); // it's not that easy to reproduce the MainFrame's menu bar
+    }
   }
   
   /** Toggle visibility of this frame. Warning, it behaves like a modal dialog. */
