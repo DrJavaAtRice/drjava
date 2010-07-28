@@ -287,7 +287,10 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       }
       current = current.getParentFile();
     } while (current != null && result == null);
-    if (result == null || result.majorVersion().equals(JavaVersion.UNRECOGNIZED)) {
+    System.out.println(f+" After walking directories: "+result);
+    if (result == null || result.majorVersion().equals(JavaVersion.UNRECOGNIZED) ||
+        result.majorVersion().equals(JavaVersion.FUTURE)) {
+      System.out.println(f+" null or UNRECOGNIZED or FUTURE");
       JarFile jf = null;
       try {
         jf = new JarFile(f);
@@ -300,6 +303,23 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
             result = JavaVersion.parseFullVersion(parsedVersion = v,vendor,vendor,f);
           }
         }
+        
+        System.out.println(f+" After manifest: "+result);
+        
+        // still unknown or future
+        if (result == null || result.majorVersion().equals(JavaVersion.UNRECOGNIZED) ||
+            result.majorVersion().equals(JavaVersion.FUTURE)) {
+          System.out.println(f+" null or UNRECOGNIZED or FUTURE");
+          // look for the first class file
+          Enumeration<JarEntry> jes = jf.entries();
+          while(jes.hasMoreElements()) {
+            JarEntry je = jes.nextElement();
+            if (je.getName().endsWith(".class")) {
+              result = JavaVersion.parseClassVersion(jf.getInputStream(je)).fullVersion();
+              break;
+            }
+          }
+        }
       }
       catch(IOException ioe) { result = null; }
       finally {
@@ -308,12 +328,17 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         }
         catch(IOException ioe) { /* ignore, just trying to close the file */ }
       }
+      
+      System.out.println(f+" After all: "+result);
+      
       if (result == null || result.majorVersion().equals(JavaVersion.UNRECOGNIZED)) {
         // Couldn't find a good version number, so we'll just guess that it's the currently-running version
         // Useful where the tools.jar file is in an unusual custom location      
+        System.out.println(f+" null or UNRECOGNIZED or FUTURE");
         result = JavaVersion.CURRENT_FULL;
-        parsedVersion = result.versionString();
       }
+      
+      parsedVersion = result.versionString();
     }
     
     if ((result == null) || (result.vendor()==JavaVersion.VendorType.UNKNOWN)) {

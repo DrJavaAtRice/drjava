@@ -93,20 +93,69 @@ public enum JavaVersion {
       int major = Integer.parseInt(text.substring(0, dot));
       int minor = Integer.parseInt(text.substring(dot+1));
       
-      switch (major) {
-        case 45:
-          if (minor >= 3) { return JAVA_1_1; }
-          else { return UNRECOGNIZED; }
-        case 46: return JAVA_1_2;
-        case 47: return JAVA_1_3;
-        case 48: return JAVA_1_4;
-        case 49: return JAVA_5;
-        case 50: return JAVA_6;
-        case 51: return JAVA_7;
-        default: return (major > 51) ? FUTURE : UNRECOGNIZED;
-      }
+      return parseClassVersion(major, minor);
     }
     catch (NumberFormatException e) { return UNRECOGNIZED; }
+  }
+
+  /**
+   * Produce the {@code JavaVersion} corresponding to the given class version pair.  For example,
+   * {@code 49,0} maps to {@code JAVA_5}.  If the pair cannot be matched, {@code UNRECOGNIZED} will be
+   * returned.
+   */
+  public static JavaVersion parseClassVersion(int major, int minor) {
+    switch (major) {
+      case 45:
+        if (minor >= 3) { return JAVA_1_1; }
+        else { return UNRECOGNIZED; }
+      case 46: return JAVA_1_2;
+      case 47: return JAVA_1_3;
+      case 48: return JAVA_1_4;
+      case 49: return JAVA_5;
+      case 50: return JAVA_6;
+      case 51: return JAVA_7;
+    }
+    return (major > 51) ? FUTURE : UNRECOGNIZED;
+  }
+  
+  /**
+   * Produce the {@code JavaVersion} corresponding to the given class file.
+   */
+  public static JavaVersion parseClassVersion(java.io.File classFile) {
+    java.io.FileInputStream fis = null;
+    try {
+      fis = new java.io.FileInputStream(classFile);
+      return parseClassVersion(fis);
+    }
+    catch(java.io.IOException ioe) { return UNRECOGNIZED; }
+    finally {
+      if (fis!=null) {
+        try { fis.close(); }
+        catch(java.io.IOException ioe) { /* ignore */ }
+      }
+    }
+  }
+  
+  /**
+   * Produce the {@code JavaVersion} corresponding to the given class file.
+   */
+  public static JavaVersion parseClassVersion(java.io.InputStream is) {
+    java.io.DataInputStream dis = null;
+    try {
+      dis = new java.io.DataInputStream(is);
+      int magic = dis.readInt();
+      if (magic != 0xCAFEBABE) { return UNRECOGNIZED; }
+      int minor = dis.readUnsignedShort();
+      int major = dis.readUnsignedShort();
+      return parseClassVersion(major, minor);
+    }
+    catch(java.io.IOException ioe) { return UNRECOGNIZED; }
+    finally {
+      if (dis!=null) {
+        try { dis.close(); }
+        catch(java.io.IOException ioe) { /* ignore */ }
+      }
+    }
   }
   
   /**

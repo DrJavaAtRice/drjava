@@ -37,18 +37,22 @@
 package edu.rice.cs.drjava.model.compiler.descriptors;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Set;
+import java.util.HashSet;
+import java.util.Collections;
 import java.util.jar.JarFile;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 
-/** A description of a JDK. */
-public interface JDKDescriptor {
+/** The description of the HJ compound JDK. */
+public class HjDescriptor implements JDKDescriptor {
   /** Return the name of this JDK.
     * @return name */
-  public String getName();
+  public String getName() {
+    return "HJ";
+  }
   
   /** Packages to shadow when loading a new tools.jar.  If we don't shadow these classes, we won't
     * be able to load distinct versions for each tools.jar library.  These should be verified whenever
@@ -57,100 +61,95 @@ public interface JDKDescriptor {
     * 
     * @return set of packages that need to be shadowed
     */
-  public Set<String> getToolsPackages();
+  public Set<String> getToolsPackages() {
+    HashSet<String> set = new HashSet<String>();
+    Collections.addAll(set, new String[] {
+      // Additional from 6 tools.jar:
+      "com.sun.codemodel",
+        "com.sun.istack.internal.tools", // other istack packages are in rt.jar
+        "com.sun.istack.internal.ws",
+        "com.sun.source",
+        "com.sun.xml.internal.dtdparser", // other xml.internal packages are in rt.jar
+        "com.sun.xml.internal.rngom",
+        "com.sun.xml.internal.xsom",
+        "org.relaxng",
+        
+        // HJ:
+        "com.sun.tools.javac",
+        "com.sun.tools.javac.tree",
+        "com.sun.tools.javac.comp",
+        "com.sun.tools.javac.main" // TODO
+    });
+    return set;
+  }
 
   /** Returns a list of directories that should be searched for tools.jar and classes.jar files.
     * @return list of directories to search */
-  public Iterable<File> getSearchDirectories();
-  
+  public Iterable<File> getSearchDirectories() {
+    return IterUtil.singleton(edu.rice.cs.util.FileOps.getDrJavaFile().getParentFile());
+  }
+
   /** Returns a list of files that should be searched if they contain a compiler.
     * @return list of files to search */
-  public Iterable<File> getSearchFiles();
+  public Iterable<File> getSearchFiles() {
+    Iterable<File> files = IterUtil.asIterable(new File[] {
+      new File("/C:/Program Files/JavaPLT/hj/lib/hjc.jar"),
+        new File("/C:/Program Files/hj/lib/hjc.jar"),
+        new File("/usr/local/hj/lib/hjc.jar")
+    });
+    try {
+      String hj_home = System.getenv("HJ_HOME");
+      if (hj_home!=null) {
+        // JDKToolsLibrary.msg("HJ_HOME environment variable set to: "+hj_home);
+        files = IterUtil.compose(files, new File(new File(hj_home), "lib/hjc.jar"));
+      }
+      else {
+        // JDKToolsLibrary.msg("HJ_HOME not set");
+      }
+    }
+    catch(Exception e) { /* ignore HJ_HOME variable */ }
+    
+    // drjava.jar file itself; check if it's a combined HJ/DrJava jar
+    files = IterUtil.compose(files, edu.rice.cs.util.FileOps.getDrJavaFile()); 
+    return files;
+  }
   
   /** True if this is a compound JDK and needs a fully featured JDK to operate.
     * @return true if compound JDK (e.g. NextGen, Mint, Habanero). */
-  public boolean isCompound();
-  
-  /** Return the class name of the compiler adapter.
-    * @return class name of compiler, or null if no compiler */
-  public String getAdapterForCompiler();
-  
-  /** Return the class name of the debugger adapter.
-    * @return class name of debugger, or null if no debugger */
-  public String getAdapterForDebugger();
+  public boolean isCompound() { return true; }
   
   /** Return true if the file (jar file or directory) contains the compiler.
     * @return true if the file contains the compiler */
-  public boolean containsCompiler(File f);
+  public boolean containsCompiler(File f) {
+    return Util.exists(f,
+                       "hj/parser/HjLexer.class",
+                       "polyglot/ext/hj/Version.class",
+                       "polyglot/ext/hj/visit/HjTranslator.class");
+  }
+  
+  /** Return the class name of the compiler adapter.
+    * @return class name of compiler, or null if no compiler */
+  public String getAdapterForCompiler() { return "edu.rice.cs.drjava.model.compiler.HjCompiler"; }
 
+  /** Return the class name of the debugger adapter.
+    * @return class name of debugger, or null if no debugger */
+  public String getAdapterForDebugger() { return null; }
+  
   /** Return the minimum Java version required to use this JDK.
     * @return minimum version */
-  public JavaVersion getMinimumMajorVersion();
+  public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_5; }
   
   /** Return the list of additional files required to use the compiler.
     * The compiler was found in the specified file. This method may have to search the user's hard drive, e.g.
     * by looking relative to compiler.getParentFile(), by checking environment variables, or by looking in
     * certain OS-specific directories.
-    * 
-    * // for example:
-    * public Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException {
-    *   File parent = compiler.getParentFile();
-    *   File nextgen2orgjar = new File(parent, "nextgen2org.jar");
-    *   if (!Util.exists(nextgen2orgjar,
-    *                    "org/apache/bcel/classfile/Node.class")) {
-    *     throw new FileNotFoundException("org/apache/bcel/classfile/Node.class");
-    *   }
-    *   return IterUtil.singleton(nextgen2orgjar);
-    * }
-    * 
     * @param compiler location where the compiler was fund
     * @return list of additional files that need to be available */
-  public Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException;
-  
-  /** Utilities for JDK descriptors. */
-  public static class Util {
-    /** Return true if the file names exist in the specified file, which can either be a directory or jar file.
-      * @param jarOrDir jar file or directory
-      * @param fileNames file names that need to exist
-      * @return true if all file names are found */
-    public static boolean exists(File jarOrDir, String... fileNames) {
-      if (jarOrDir.isFile()) {
-        try {
-          JarFile jf = new JarFile(jarOrDir);
-          for(String fn: fileNames) {
-            if (jf.getJarEntry(fn)==null) return false;
-          }
-          return true;
-        }
-        catch(IOException ioe) { return false; }
-      }
-      else if (jarOrDir.isDirectory()) {
-        for(String fn: fileNames) {
-          if (!(new File(jarOrDir,fn).exists())) return false;
-        }
-        return true;
-      }
-      return false;
-    }
-   
-    /** Return the first of the file names that exists in the specified directory.
-      * Throws FileNotFoundException if none of them exists.
-      * @param jarOrDir jar file or directory
-      * @param fileNames file names that need to exist
-      * @return file name if found, or null
-      * @throws FileNotFoundException if none of them exists.*/
-    public static File oneOf(File dir, String... fileNames) throws FileNotFoundException {
-      if (dir.isDirectory()) {
-        for(String fn: fileNames) {
-          File f = new File(dir,fn);
-          if (f.exists()) return f;
-        }
-        throw new FileNotFoundException("None of "+IterUtil.toString(IterUtil.make(fileNames), "", ", ", "")+
-                                        " found in "+dir);
-
-      }
-      throw new FileNotFoundException(dir+" is not a directory");
-
-    }
+  public Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException {
+    File parentDir = compiler.getParentFile();
+    return IterUtil.make(Util.oneOf(parentDir, "sootclasses-2.3.0.jar"),
+                         Util.oneOf(parentDir, "polyglot.jar"));
   }
+  
+  public String toString() { return getClass().getSimpleName()+" --> "+getAdapterForCompiler(); }
 }
