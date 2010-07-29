@@ -75,10 +75,10 @@ public class MintDescriptor implements JDKDescriptor {
         "org.relaxng",
         
         // Mint:
-        "com.sun.tools.javac",
-        "com.sun.tools.javac.tree",
-        "com.sun.tools.javac.comp",
-        "com.sun.tools.javac.main",
+        "edu.rice.cs.mint.comp.com.sun.tools.javac",
+        "edu.rice.cs.mint.comp.com.sun.tools.javac.tree",
+        "edu.rice.cs.mint.comp.com.sun.tools.javac.comp",
+        "edu.rice.cs.mint.comp.com.sun.tools.javac.main",
         "edu.rice.cs.mint",
         "edu.rice.cs.mint.comp",
         "edu.rice.cs.mint.runtime",
@@ -133,10 +133,10 @@ public class MintDescriptor implements JDKDescriptor {
   public boolean containsCompiler(File f) {
     return Util.exists(f,
                        "edu/rice/cs/mint/comp/TransStaging.class",
-                       "com/sun/source/tree/BracketExprTree.class",
-                       "com/sun/source/tree/BracketStatTree.class",
-                       "com/sun/source/tree/EscapeExprTree.class",
-                       "com/sun/source/tree/EscapeStatTree.class");
+                       "edu/rice/cs/mint/comp/com/sun/source/tree/BracketExprTree.class",
+                       "edu/rice/cs/mint/comp/com/sun/source/tree/BracketStatTree.class",
+                       "edu/rice/cs/mint/comp/com/sun/source/tree/EscapeExprTree.class",
+                       "edu/rice/cs/mint/comp/com/sun/source/tree/EscapeStatTree.class");
   }
   
   /** Return the class name of the compiler adapter.
