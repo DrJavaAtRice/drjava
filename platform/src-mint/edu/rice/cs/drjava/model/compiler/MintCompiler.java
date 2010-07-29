@@ -35,27 +35,27 @@ package edu.rice.cs.drjava.model.compiler;
 
 import java.util.MissingResourceException;
 
-import com.sun.tools.javac.util.Options;
-import com.sun.tools.javac.util.Context;
-import com.sun.tools.javac.util.List;
-import com.sun.tools.javac.util.ListBuffer;
-import com.sun.tools.javac.util.Log;
-import com.sun.tools.javac.util.JavacMessages;
-import com.sun.tools.javac.util.PropagatedException;
-import com.sun.tools.javac.util.FatalError;
-import com.sun.tools.javac.util.ClientCodeException;
-import com.sun.tools.javac.processing.AnnotationProcessingError;
+import edu.rice.cs.mint.comp.com.sun.tools.javac.util.Options;
+import edu.rice.cs.mint.comp.com.sun.tools.javac.util.Context;
+import edu.rice.cs.mint.comp.com.sun.tools.javac.util.List;
+import edu.rice.cs.mint.comp.com.sun.tools.javac.util.ListBuffer;
+import edu.rice.cs.mint.comp.com.sun.tools.javac.util.Log;
+import edu.rice.cs.mint.comp.com.sun.tools.javac.util.JavacMessages;
+import edu.rice.cs.mint.comp.com.sun.tools.javac.util.PropagatedException;
+import edu.rice.cs.mint.comp.com.sun.tools.javac.util.FatalError;
+import edu.rice.cs.mint.comp.com.sun.tools.javac.util.ClientCodeException;
+import edu.rice.cs.mint.comp.com.sun.tools.javac.processing.AnnotationProcessingError;
 
-import com.sun.tools.javac.main.JavaCompiler;
+import edu.rice.cs.mint.comp.com.sun.tools.javac.main.JavaCompiler;
   
-import com.sun.tools.javac.file.JavacFileManager;
-import com.sun.tools.javac.file.CacheFSInfo;
+import edu.rice.cs.mint.comp.com.sun.tools.javac.file.JavacFileManager;
+import edu.rice.cs.mint.comp.com.sun.tools.javac.file.CacheFSInfo;
 
-import javax.tools.JavaFileObject;
-import javax.tools.JavaFileManager;
-import javax.tools.Diagnostic;
-import javax.tools.DiagnosticListener;
-import javax.annotation.processing.Processor;
+import edu.rice.cs.mint.comp.javax.tools.JavaFileObject;
+import edu.rice.cs.mint.comp.javax.tools.JavaFileManager;
+import edu.rice.cs.mint.comp.javax.tools.Diagnostic;
+import edu.rice.cs.mint.comp.javax.tools.DiagnosticListener;
+import edu.rice.cs.mint.comp.javax.annotation.processing.Processor;
 
 import java.io.*;
 
@@ -183,17 +183,17 @@ public class MintCompiler extends JavacCompiler {
   public boolean isAvailable() {
     try {
       // Diagnostic was introduced in the Java 1.6 compiler
-      Class<?> diagnostic = Class.forName("javax.tools.Diagnostic");
+      Class<?> diagnostic = Class.forName("edu.rice.cs.mint.comp.javax.tools.Diagnostic");
       diagnostic.getMethod("getKind");
       // javax.tools.Diagnostic is also found in rt.jar; to test if tools.jar
       // is availble, we need to test for a class only found in tools.jar
-      Class.forName("com.sun.tools.javac.main.JavaCompiler");
+      Class.forName("edu.rice.cs.mint.comp.com.sun.tools.javac.main.JavaCompiler");
       // check for Mint classes
       Class.forName("edu.rice.cs.mint.comp.TransStaging");
-      Class.forName("com.sun.source.tree.BracketExprTree");
-      Class.forName("com.sun.source.tree.BracketStatTree");
-      Class.forName("com.sun.source.tree.EscapeExprTree");
-      Class.forName("com.sun.source.tree.EscapeStatTree");
+      Class.forName("edu.rice.cs.mint.comp.com.sun.source.tree.BracketExprTree");
+      Class.forName("edu.rice.cs.mint.comp.com.sun.source.tree.BracketStatTree");
+      Class.forName("edu.rice.cs.mint.comp.com.sun.source.tree.EscapeExprTree");
+      Class.forName("edu.rice.cs.mint.comp.com.sun.source.tree.EscapeStatTree");
       return true;
     }
     catch (Exception e) { return false; }
@@ -487,8 +487,8 @@ public class MintCompiler extends JavacCompiler {
             apMessage(ex);
             return EXIT_SYSERR;
         } catch (ClientCodeException ex) {
-            // as specified by javax.tools.JavaCompiler#getTask
-            // and javax.tools.JavaCompiler.CompilationTask#call
+            // as specified by edu.rice.cs.mint.comp.javax.tools.JavaCompiler#getTask
+            // and edu.rice.cs.mint.comp.javax.tools.JavaCompiler.CompilationTask#call
             throw new RuntimeException(ex.getCause());
         } catch (PropagatedException ex) {
             throw ex.getCause();
@@ -579,7 +579,7 @@ public class MintCompiler extends JavacCompiler {
     }
 
     private static final String javacBundleName =
-        "com.sun.tools.javac.resources.javac";
+        "edu.rice.cs.mint.comp.com.sun.tools.javac.resources.javac";
 
     private static JavacMessages messages;
 }

@@ -275,11 +275,11 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       try {
         jf = new JarFile(f);
         if (jf.getJarEntry("edu/rice/cs/mint/comp/TransStaging.class")!=null &&
-            jf.getJarEntry("com/sun/source/tree/BracketExprTree.class")!=null &&
-            jf.getJarEntry("com/sun/source/tree/BracketStatTree.class")!=null &&
-            jf.getJarEntry("com/sun/source/tree/EscapeExprTree.class")!=null &&
-            jf.getJarEntry("com/sun/source/tree/EscapeStatTree.class")!=null &&
-            jf.getJarEntry("com/sun/tools/javac/util/DefaultFileManager.class")==null) {
+            jf.getJarEntry("edu/rice/cs/mint/comp/com/sun/source/tree/BracketExprTree.class")!=null &&
+            jf.getJarEntry("edu/rice/cs/mint/comp/com/sun/source/tree/BracketStatTree.class")!=null &&
+            jf.getJarEntry("edu/rice/cs/mint/comp/com/sun/source/tree/EscapeExprTree.class")!=null &&
+            jf.getJarEntry("edu/rice/cs/mint/comp/com/sun/source/tree/EscapeStatTree.class")!=null &&
+            jf.getJarEntry("edu/rice/cs/mint/comp/com/sun/tools/javac/util/DefaultFileManager.class")==null) {
           vendor = "mint";
         }    
         else if (jf.getJarEntry("com/sun/tools/javac/util/DefaultFileManager.class")==null) {
