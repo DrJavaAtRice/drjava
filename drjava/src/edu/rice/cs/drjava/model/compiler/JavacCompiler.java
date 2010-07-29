@@ -160,8 +160,17 @@ public abstract class JavacCompiler implements CompilerInterface {
       "    System.arraycopy(args, 0, newArgs, 1, args.length);\n" +
       "    args = newArgs;\n" +
       "  '}'\n" +
-      "  m.invoke(null, new Object[] '{' args '}');\n"+
-      "'}' '}'";
+      "  try '{'" +
+      "    m.setAccessible(true);\n" +
+      "    m.invoke(null, new Object[] '{' args '}');\n" +
+      "  '}' catch(SecurityException se) '{'\n" +
+      "    System.err.println(\"Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.\");\n" +
+      "  '}' catch(IllegalAccessException iae) '{'\n" +
+      "    System.err.println(\"Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.\");\n" +
+      "  '}' catch(java.lang.reflect.InvocationTargetException ite) '{'\n" +
+      "    if (ite.getCause()!=null) throw ite.getCause(); else\n" +
+      "    System.err.println(\"Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.\");\n" +
+      "'}' '}' '}'";
     return _transformCommand(s, command);
   }
 

@@ -162,6 +162,7 @@ public class MintCompiler extends JavacCompiler {
     * @return command line with commands transformed */
   public String transformCommands(String interactionsString) {
     if (interactionsString.startsWith("mint ") ||
+        interactionsString.startsWith("run ") ||
         interactionsString.startsWith("java ")) interactionsString = _transformMintCommand(interactionsString);
     return interactionsString;    
   }
