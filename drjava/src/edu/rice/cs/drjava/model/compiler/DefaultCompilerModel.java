@@ -238,7 +238,7 @@ public class DefaultCompilerModel implements CompilerModel {
     final ArrayList<File> excludedFiles = new ArrayList<File>();
     final ArrayList<DJError> packageErrors = new ArrayList<DJError>();
     for (OpenDefinitionsDocument doc : docs) {
-      if (doc.isSourceFile()) {
+      if (true) { //if (doc.isSourceFile()) { // TODO: allow .hj files
         File f = doc.getFile();
         // Check for null in case the file is untitled (not sure this is the correct check)
         if (f != null && f != FileOps.NULL_FILE) { filesToCompile.add(f); }

@@ -91,8 +91,8 @@ public class MintCompiler extends Javac160FilteringCompiler {
     * class path of the Interactions JVM. This is necessary for the Mint compiler,
     * since the Mint compiler needs to be invoked at runtime. */
   public java.util.List<File> additionalBootClassPathForInteractions() {
-    System.out.println("MintCompiler default boot classpath: "+((_defaultBootClassPath==null)?"null":IOUtil.pathToString(_defaultBootClassPath)));
-    System.out.println("MintCompiler.additionalBootClassPathForInteractions: "+new File(_location));
+//    System.out.println("MintCompiler default boot classpath: "+((_defaultBootClassPath==null)?"null":IOUtil.pathToString(_defaultBootClassPath)));
+//    System.out.println("MintCompiler.additionalBootClassPathForInteractions: "+new File(_location));
     return Arrays.asList(new File(_location));
   }
 

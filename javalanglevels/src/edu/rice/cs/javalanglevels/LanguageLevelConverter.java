@@ -209,11 +209,9 @@ public class LanguageLevelConverter {
           }
           else {
             assert isAdvancedFile(f) || isFullJavaFile(f);
-// TODO: Where is FullJavaVisitor?
-//            llv = new FullJavaVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(),
-//                                      new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
-//                                      languageLevelVisitedFiles);
-            llv = null;
+            llv = new FullJavaVisitor(f, new LinkedList<Pair<String, JExpressionIF>>(),
+                                      new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+                                      languageLevelVisitedFiles);
           }
           
           // Conformance checking pass

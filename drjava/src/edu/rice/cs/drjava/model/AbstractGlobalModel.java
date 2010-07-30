@@ -2896,7 +2896,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** @return true if this has a legal source file name (ends in extension ".java", ".dj0", ".dj1", or ".dj2". */
     public boolean isSourceFile() {
       if (isUntitled()) return false;  // assert _file != null
-      return DrJavaFileUtils.isSourceFile(_file.getName());
+      return DrJavaFileUtils.isSourceFile(_file.getName()); // TODO: allow .hj files
     }
     
     /** Returns whether this document is currently untitled (indicating whether it has a file yet or not).

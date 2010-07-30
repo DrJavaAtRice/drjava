@@ -104,16 +104,16 @@ public enum JavaVersion {
    * returned.
    */
   public static JavaVersion parseClassVersion(int major, int minor) {
-    switch (major) {
-      case 45:
-        if (minor >= 3) { return JAVA_1_1; }
-        else { return UNRECOGNIZED; }
-      case 46: return JAVA_1_2;
-      case 47: return JAVA_1_3;
-      case 48: return JAVA_1_4;
-      case 49: return JAVA_5;
-      case 50: return JAVA_6;
-      case 51: return JAVA_7;
+      switch (major) {
+        case 45:
+          if (minor >= 3) { return JAVA_1_1; }
+          else { return UNRECOGNIZED; }
+        case 46: return JAVA_1_2;
+        case 47: return JAVA_1_3;
+        case 48: return JAVA_1_4;
+        case 49: return JAVA_5;
+        case 50: return JAVA_6;
+        case 51: return JAVA_7;
     }
     return (major > 51) ? FUTURE : UNRECOGNIZED;
   }
@@ -174,18 +174,19 @@ public enum JavaVersion {
     String vendorString = null;
     
     if (vendor == VendorType.UNKNOWN) {
-      if (java_runtime_name.toLowerCase().contains("openjdk")) {
-        vendor = VendorType.OPENJDK;
-        vendorString = "OpenJDK";
-      }
-      else if (java_vm_vendor.toLowerCase().contains("apple")) {
-        vendor = VendorType.APPLE;
-        vendorString = "Apple";
-      }
-      else if (java_vm_vendor.toLowerCase().contains("sun")) {
-        vendor = VendorType.SUN;
-        vendorString = "Sun";
-      }
+    if (java_runtime_name.toLowerCase().contains("openjdk")) {
+      vendor = VendorType.OPENJDK;
+      vendorString = "OpenJDK";
+    }
+    else if (java_vm_vendor.toLowerCase().contains("apple")) {
+      vendor = VendorType.APPLE;
+      vendorString = "Apple";
+    }
+    else if (java_vm_vendor.toLowerCase().contains("sun") ||
+             java_vm_vendor.toLowerCase().contains("oracle")) {
+      vendor = VendorType.SUN;
+      vendorString = "Sun";
+    }
     }
     
     String number;
@@ -268,7 +269,7 @@ public enum JavaVersion {
     catch (NumberFormatException e) {
       return new FullVersion(UNRECOGNIZED, 0, 0, ReleaseType.STABLE, null, vendor, vendorString, location);
     }
-  }
+    }
 
   /**
    * Produce the {@code JavaVersion.FullVersion} corresponding to the given version string.  Accepts
@@ -342,7 +343,7 @@ public enum JavaVersion {
 
     /** Get the vendor associated with this full version */
     public VendorType vendor() { return _vendor; }
-
+    
     public File location() { return _location; }
     
     /** Convenience method calling {@code majorVersion().supports(v)} */
@@ -351,10 +352,10 @@ public enum JavaVersion {
     /**
      * Compare two versions.  Major, maintenance, and update numbers are ordered sequentially.  When comparing
      * two versions that are otherwise equivalent, early access releases precede betas, followed by
-     * release candidates and stable releases. Within the release types, Unrecognized < OpenJDK < Apple < Sun.
+     * release candidates and stable releases. Within the release types, Unrecognized < OpenJDK < Apple < Oracle.
      * Versions with unknown vendor are only equal if their locations are also equal.
      */
-    public int compareTo(FullVersion v) {      
+    public int compareTo(FullVersion v) {
       int result = _majorVersion.compareTo(v._majorVersion);
       if (result == 0) {
         result = _maintenance - v._maintenance;
@@ -370,13 +371,13 @@ public enum JavaVersion {
                   if (_location == null) {
                     if (v._location == null) return 0;
                     else return -1;
-                  }
+              }
                   else {
                     if (v._location == null) return 1;
                     else return _location.compareTo(v._location);
                   }
-                }
-              }
+            }
+          }
               else if (result == 0 && _vendor.equals(VendorType.UNKNOWN)) {
                 if (_location == null) {
                   if (v._location == null) return 0;
@@ -386,8 +387,8 @@ public enum JavaVersion {
                   if (v._location == null) return 1;
                   else return _location.compareTo(v._location);
                 }
-              }
-            }
+        }
+      }
           }
         }
       }
