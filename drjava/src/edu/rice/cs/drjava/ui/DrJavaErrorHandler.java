@@ -139,7 +139,7 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
     * https://sourceforge.net/tracker/?func=detail&atid=438935&aid=2831821&group_id=44253
     * @return true if this is the Swing bug */
   public static boolean isSwingBugArrayIndexOufOfBoundsExceptionInCharWidth(Throwable thrown) {
-    // only ignore on Sun JVMs
+    // only ignore on Sun/Oracle JVMs
     if (!edu.rice.cs.plt.reflect.JavaVersion.CURRENT_FULL.vendor().
           equals(edu.rice.cs.plt.reflect.JavaVersion.VendorType.SUN)) return false;
     

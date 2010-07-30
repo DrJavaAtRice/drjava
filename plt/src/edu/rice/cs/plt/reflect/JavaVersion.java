@@ -128,7 +128,8 @@ public enum JavaVersion {
       vendor = VendorType.APPLE;
       vendorString = "Apple";
     }
-    else if (java_vm_vendor.toLowerCase().contains("sun")) {
+    else if (java_vm_vendor.toLowerCase().contains("sun") ||
+             java_vm_vendor.toLowerCase().contains("oracle")) {
       vendor = VendorType.SUN;
       vendorString = "Sun";
     }
@@ -252,10 +253,10 @@ public enum JavaVersion {
     /**
      * Compare two versions.  Major, maintenance, and update numbers are ordered sequentially.  When comparing
      * two versions that are otherwise equivalent, early access releases precede betas, followed by
-     * release candidates and stable releases. Within the release types, Unrecognized < OpenJDK < Apple < Sun.
+     * release candidates and stable releases. Within the release types, Unrecognized < OpenJDK < Apple < Oracle.
      * Exception: Mint versions come before anything else.
      * Mint6-ea, Mint6-beta, Mint6-rc, Mint6, Mint7, ..., Java5, ...,
-     * Java6-unrecognized, Java6-OpenJDK, Java6-Apple, Java6-Sun, ..., Java7
+     * Java6-unrecognized, Java6-OpenJDK, Java6-Apple, Java6-Oracle, ..., Java7
      */
     public int compareTo(FullVersion v) {
       if ((_vendor==VendorType.MINT) && (v._vendor!=VendorType.MINT)) {
