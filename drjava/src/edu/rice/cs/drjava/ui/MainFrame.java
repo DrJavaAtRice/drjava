@@ -7639,7 +7639,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               m.add(Utilities.createDelegateAction("Compile File", _compileAction));
               m.add(Utilities.createDelegateAction("Test File", _junitAction));
               m.add(Utilities.createDelegateAction("Preview Javadoc for File", _javadocCurrentAction));
-              m.add(Utilities.createDelegateAction("Run File's Main Method", _runAction));
+              m.add(Utilities.createDelegateAction("Run File", _runAction));
               m.add(Utilities.createDelegateAction("Run File as Applet", _runAppletAction));
             }
             else if (docSelectedCount>1) {
