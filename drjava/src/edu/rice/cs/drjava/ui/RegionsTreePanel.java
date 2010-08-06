@@ -317,6 +317,10 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   /** Remove the selected regions. */
   protected void _remove() {   
     int[] rows = _regTree.getSelectionRows();
+    // bugfix for 3040733: "If nothing is selected null or an empty array will be returned,
+    // based on the TreeSelectionModel implementation."
+    // Still does not allow right-click selection+popup menu, at least on Linux. Works on the Mac.
+    if (rows == null) { rows = new int[0]; }
 //    System.err.println("_remove() called with rows " + StringOps.toString(rows));
     int len = rows.length;
     int row = (len > 0) ? rows[0] : 0;
