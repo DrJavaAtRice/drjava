@@ -44,6 +44,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.drjava.model.DrJavaFileUtils;
 
 /** An abstract parent for all javac-based compiler interfaces.  Manages the auxiliary naming methods.
   * To support loading via reflection, all subclasses are assumed to have a public constructor with
@@ -207,4 +208,16 @@ public abstract class JavacCompiler implements CompilerInterface {
     * @return a substring of s with one less character
     */
   protected static String _deleteSemiColon(String s) { return  s.substring(0, s.length() - 1); }
+  
+  /** .java --> true
+    * .dj   --> true
+    * .dj0  --> true
+    * .dj1  --> true
+    * .dj2  --> true
+    * otherwise false 
+    * @return true if the specified file is a source file for this compiler. */
+  public boolean isSourceFileForThisCompiler(File f) {
+    // by default, use DrJavaFileUtils.isSourceFile
+    return DrJavaFileUtils.isSourceFile(f);
+  }
 }

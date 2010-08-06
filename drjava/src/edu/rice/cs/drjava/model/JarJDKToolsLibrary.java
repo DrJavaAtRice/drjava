@@ -182,7 +182,6 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       }
       
       if (compilerAdapter != null) {
-        
         // determine boot class path
         File libDir = null;
         if (f.getName().equals("classes.jar")) { libDir = f.getParentFile(); }
@@ -216,6 +215,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         try {
           Class<?>[] sig = { FullVersion.class, String.class, List.class };
           Object[] args = { version, f.toString(), bootClassPath };
+          // JDKToolsLibrary.msg("classpath for compiler: "+IterUtil.multilineToString(path));
+          // JDKToolsLibrary.msg("boot classpath for compiler: "+IterUtil.multilineToString(bootClassPath));                
           CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadLibraryAdapter(loader, path, compilerAdapter, 
                                                                                          sig, args);
           if (attempt.isAvailable()) { compiler = attempt; }
@@ -287,10 +288,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       }
       current = current.getParentFile();
     } while (current != null && result == null);
-    System.out.println(f+" After walking directories: "+result);
     if (result == null || result.majorVersion().equals(JavaVersion.UNRECOGNIZED) ||
         result.majorVersion().equals(JavaVersion.FUTURE)) {
-      System.out.println(f+" null or UNRECOGNIZED or FUTURE");
       JarFile jf = null;
       try {
         jf = new JarFile(f);
@@ -304,12 +303,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           }
         }
         
-        System.out.println(f+" After manifest: "+result);
-        
         // still unknown or future
         if (result == null || result.majorVersion().equals(JavaVersion.UNRECOGNIZED) ||
             result.majorVersion().equals(JavaVersion.FUTURE)) {
-          System.out.println(f+" null or UNRECOGNIZED or FUTURE");
           // look for the first class file
           Enumeration<JarEntry> jes = jf.entries();
           while(jes.hasMoreElements()) {
@@ -328,13 +324,10 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         }
         catch(IOException ioe) { /* ignore, just trying to close the file */ }
       }
-      
-      System.out.println(f+" After all: "+result);
-      
+     
       if (result == null || result.majorVersion().equals(JavaVersion.UNRECOGNIZED)) {
         // Couldn't find a good version number, so we'll just guess that it's the currently-running version
         // Useful where the tools.jar file is in an unusual custom location      
-        System.out.println(f+" null or UNRECOGNIZED or FUTURE");
         result = JavaVersion.CURRENT_FULL;
       }
       

@@ -147,7 +147,8 @@ public class HjDescriptor implements JDKDescriptor {
     * @return list of additional files that need to be available */
   public Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException {
     File parentDir = compiler.getParentFile();
-    return IterUtil.make(Util.oneOf(parentDir, "sootclasses-2.3.0.jar"),
+    return IterUtil.make(Util.oneOf(parentDir, "hj.jar"),
+                         Util.oneOf(parentDir, "sootclasses-2.3.0.jar"),
                          Util.oneOf(parentDir, "polyglot.jar"),
                          Util.oneOf(parentDir, "lpg.jar"),
                          Util.oneOf(parentDir, "jasminclasses-2.3.0.jar"),

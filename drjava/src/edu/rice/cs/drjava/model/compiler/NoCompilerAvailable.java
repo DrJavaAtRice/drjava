@@ -80,4 +80,8 @@ public class NoCompilerAvailable implements CompilerInterface {
     * @param interactionsString unprocessed command line
     * @return command line with commands transformed */
   public String transformCommands(String interactionsString) { return interactionsString; }
+
+  /** Always false 
+    * @return true if the specified file is a source file for this compiler. */
+  public boolean isSourceFileForThisCompiler(File f) { return false; }
 }

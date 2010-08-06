@@ -92,4 +92,7 @@ public interface CompilerInterface {
     * @param interactionsString unprocessed command line
     * @return command line with commands transformed */
   String transformCommands(String interactionsString);
+  
+  /** @return true if the specified file is a source file for this compiler. */
+  boolean isSourceFileForThisCompiler(File f);
 }
