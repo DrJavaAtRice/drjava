@@ -2171,14 +2171,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public DocumentIterator getDocumentIterator() { return this; }
   
   /** Returns the ODD preceding the given document in the document list.
+    * NOTE: the returned document may be null if the document wasn't found and the user did not want to continue.
     * @param d the current Document
-    * @return the next Document
+    * @return the next Document (or null if not found and user did not want to continue)
     */
-  public OpenDefinitionsDocument getNextDocument(OpenDefinitionsDocument d)
-  {
-    return getNextDocument(d, null);
-  }
+  public OpenDefinitionsDocument getNextDocument(OpenDefinitionsDocument d) { return getNextDocument(d, null); }
   
+  /** Returns the ODD preceding the given document in the document list.
+    * NOTE: the returned document may be null if the document wasn't found and the user did not want to continue.
+    * @param d the current Document
+    * @param frame the frame that should serve as parent for a potential dialog window
+    * @return the next Document (or null if not found and user did not want to continue)
+    */
   public OpenDefinitionsDocument getNextDocument(OpenDefinitionsDocument d, Component frame) {
     OpenDefinitionsDocument nextdoc = null; // irrelevant initialization required by javac
 //    try {
@@ -2192,10 +2196,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    catch(DocumentClosedException dce) { return getNextDocument(nextdoc); }
   }
   
+  /** Checks that the document exists, and if it doesn't, asks if the user wants to continue.
+    * NOTE: the returned document may be null if the document wasn't found and the user did not want to continue.
+    * @param d the next Document
+    * @param frame the frame that should serve as parent for a potential dialog window
+    * @return the next Document (or null if not found and user did not want to continue)
+    */
   private OpenDefinitionsDocument getNextDocHelper(OpenDefinitionsDocument nextdoc, Component frame) {
     if ( nextdoc.isUntitled() || nextdoc.verifyExists()) return nextdoc;
     // Note: verifyExists prompts user for location of the file if it is not found
-    int rc = JOptionPane.showConfirmDialog(frame, "Files not found, continue to next document?", "Continue?", JOptionPane.YES_NO_OPTION); 
+    int rc = JOptionPane.showConfirmDialog(frame, "Files not found, continue to next document?", "Continue?",
+                                           JOptionPane.YES_NO_OPTION); 
     if(rc==JOptionPane.NO_OPTION)
       return null;
     // cannot find nextdoc; move on to next document
