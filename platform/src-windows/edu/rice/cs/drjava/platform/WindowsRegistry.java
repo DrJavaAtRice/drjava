@@ -596,20 +596,52 @@ public class WindowsRegistry {
     deleteKey(hKey, subKey);
   }
   
-  /** @return this Java string as a null-terminated byte array */
+  /** @return this Java string as a null-terminated byte array in the default Charset */
   public static byte[] stringToNullTerminated(String str) {
-    byte[] result = new byte[str.length() + 1];
-    for (int i = 0; i<str.length(); i++) {
-      result[i] = (byte) str.charAt(i);
-    }
-    result[str.length()] = 0;
-    return result;
+    return stringToNullTerminated(str, java.nio.charset.Charset.defaultCharset());
   }
   
-  /** @return this a null-terminated byte array as Java String */
+  /** @return this Java string as a null-terminated byte array */
+  public static byte[] stringToNullTerminated(String str, java.nio.charset.Charset charset) {
+    return stringToNullTerminated(str, charset.toString());
+  }
+  
+  /** @return this Java string as a null-terminated byte array */
+  public static byte[] stringToNullTerminated(String str, String charset) {
+    try {
+      byte[] barr = str.getBytes(charset);
+      byte[] result = new byte[barr.length + 1];
+      System.arraycopy(barr, 0, result, 0, barr.length);
+      result[result.length-1] = 0;
+      return result;
+    }
+    catch(java.io.UnsupportedEncodingException uee) {
+      return new byte[] { 0 };
+    }
+  }
+
+  /** @return this null-terminated byte array as Java String using the default Charset */
   public static String nullTerminatedToString(byte[] barr) {
-    if (barr==null) return null;
-    return new String(barr).substring(0, barr.length-1);
+    return nullTerminatedToString(barr, java.nio.charset.Charset.defaultCharset());
+  }
+  
+  /** @return this null-terminated byte array as Java String */
+  public static String nullTerminatedToString(byte[] barr, java.nio.charset.Charset charset) {
+    return nullTerminatedToString(barr, charset.toString());
+  }
+  
+  /** @return this null-terminated byte array as Java String */
+  public static String nullTerminatedToString(byte[] barr, String charset) {
+    try {
+      if (barr==null) return null;
+      // bugfix for 2976104: according to the String Javadocs, "The length of the new String is a function of the
+      // charset, and hence may not be equal to the length of the byte array."
+      // We cannot use barr.length to index in the string, we need to index in the array.
+      int len = barr.length;
+      if (barr[len-1] == 0) { --len; } // do not copy null terminator
+      return new String(barr, 0, len, charset);
+    }
+    catch(Exception e) { return ""; } // defensive programming for bug 2976104
   }
   
   /** @return a name for the hive (HKEY_???). */
