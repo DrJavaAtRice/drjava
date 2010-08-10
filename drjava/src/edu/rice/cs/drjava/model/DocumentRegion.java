@@ -56,7 +56,8 @@ public class DocumentRegion implements OrderedDocumentRegion {
  
   /** Create a new simple document region with a bona fide document */
   public DocumentRegion(OpenDefinitionsDocument doc, int start, int end) {
-    assert doc != null && end >= start;
+    assert doc != null;
+    assert end >= start; // split in two to help diagnose bug 2906538: AssertionError After Go To Find Result and Edit
     _doc = doc;
     _start = start;
     _end = end;
