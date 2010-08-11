@@ -37,50 +37,29 @@
 package edu.rice.cs.drjava.ui.avail;
 
 import edu.rice.cs.drjava.model.EventNotifier;
-import java.util.HashSet;
+
+import java.util.HashMap;
+import java.awt.Component;
 
 /**
- * Listener responding to the availability of several GUI components.
+ * Adapter from Component to ComplexGUIAvailabilityListener.
  *
  * @version $Id$
  */
-public abstract class ConjoinedGUIAvailabilityListener implements GUIAvailabilityListener {
-  protected final HashSet<ComponentType> _components = new HashSet<ComponentType>();
-  protected final GUIAvailabilityNotifier _notifier;
-  protected volatile boolean _lastValue = true;
+public class AndGUIAvailabilityComponentAdapter extends AndGUIAvailabilityListener {
+  protected final Component _adaptee;
   
   /** Create a listener that responds to changes in availability of several GUI components.
     * @param components components that must be available */
-  public ConjoinedGUIAvailabilityListener(GUIAvailabilityNotifier notifier, ComponentType... components) {
-    _notifier = notifier;
-    for(ComponentType c: components) {
-      _components.add(c);
-      _lastValue &= _notifier.isAvailable(c);
-    }
-  }
-  
-  /** @return true if all required components are available */
-  public boolean isAvailable() {
-    for(ComponentType c: _components) {
-      if (!_notifier.isAvailable(c)) return false;
-    }
-    return true;
-  }
-  
-  /** Called when a component's availability changes.
-    * @param component the component whose availability changed
-    * @param available true if component is available */  
-  public void availabilityChanged(ComponentType component, boolean available) {
-    if (_components.contains(component)) {
-      boolean newValue = isAvailable();
-      if (_lastValue != newValue) {
-        _lastValue = newValue;
-        availabilityChanged(newValue);
-      }
-    }
+  public AndGUIAvailabilityComponentAdapter(Component adaptee,
+                                            GUIAvailabilityNotifier notifier, ComponentType... components) {
+    super(notifier, components);
+    _adaptee = adaptee;
   }
   
   /** Called when the combined availability of all components changes.
     * @param available true if all components are available */  
-  public abstract void availabilityChanged(boolean available);
+  public void availabilityChanged(boolean available) {
+    _adaptee.setEnabled(available);
+  }
 }

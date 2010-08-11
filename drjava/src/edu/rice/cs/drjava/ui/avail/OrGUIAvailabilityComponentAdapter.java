@@ -42,17 +42,17 @@ import java.util.HashMap;
 import java.awt.Component;
 
 /**
- * Adapter from AbstractAction to ComplexGUIAvailabilityListener.
+ * Adapter from Component to ComplexGUIAvailabilityListener.
  *
  * @version $Id$
  */
-public class ConjoinedGUIAvailabilityComponentAdapter extends ConjoinedGUIAvailabilityListener {
+public class OrGUIAvailabilityComponentAdapter extends OrGUIAvailabilityListener {
   protected final Component _adaptee;
   
   /** Create a listener that responds to changes in availability of several GUI components.
     * @param components components that must be available */
-  public ConjoinedGUIAvailabilityComponentAdapter(Component adaptee,
-                                                  GUIAvailabilityNotifier notifier, ComponentType... components) {
+  public OrGUIAvailabilityComponentAdapter(Component adaptee,
+                                           GUIAvailabilityNotifier notifier, ComponentType... components) {
     super(notifier, components);
     _adaptee = adaptee;
   }

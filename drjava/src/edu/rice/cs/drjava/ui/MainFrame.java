@@ -1202,23 +1202,27 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Undoes the last change to the active definitions document. */
   private final DelegatingAction _undoAction = new DelegatingAction() {
     public void actionPerformed(ActionEvent e) {
-      if(_interactionsPane.hasFocus()){
+      // use whether the delegatee is the Interactions Pane's action instead of whether
+      // _interactionsPane.hasFocus(), because the focus will be lost when the user clicks
+      // on the menu bar.
+      final boolean intPaneFocused = (getDelegatee()==_interactionsPane.getUndoAction());
+      if (intPaneFocused) {
         _interactionsPane.endCompoundEdit();
       }
-      else{
+      else {
         _currentDefPane.endCompoundEdit();  
       }
+      
       super.actionPerformed(e);
-      if(_interactionsPane.hasFocus()){
+      
+      if (intPaneFocused) {
         _interactionsPane.requestFocusInWindow();
       }
-      else{
+      else {
         _currentDefPane.requestFocusInWindow();
         
         OpenDefinitionsDocument doc = _model.getActiveDocument();
-//      Utilities.showDebug("isModifiedSinceSave() = " + doc.isModifiedSinceSave());
         _saveAction.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
-//      Utilities.showDebug("check status");
       }
     }
   };
@@ -1226,12 +1230,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Redoes the last undo to the active definitions document. */
   private final DelegatingAction _redoAction = new DelegatingAction() {
     public void actionPerformed(ActionEvent e) {
+      // use whether the delegatee is the Interactions Pane's action instead of whether
+      // _interactionsPane.hasFocus(), because the focus will be lost when the user clicks
+      // on the menu bar.
+      final boolean intPaneFocused = (getDelegatee()==_interactionsPane.getRedoAction());
+      
       super.actionPerformed(e);
-      if(_interactionsPane.hasFocus())
-      {
+      if (intPaneFocused) {
         _interactionsPane.requestFocusInWindow();
       }
-      else{
+      else {
         _currentDefPane.requestFocusInWindow();
         OpenDefinitionsDocument doc = _model.getActiveDocument();
         _saveAction.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
@@ -3070,14 +3078,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };
   
   // adds Listener for undo/redo action for the interactions pane
-  public FocusListener _undoRedoInteractionFocusListener = new FocusListener() {
-    public void focusLost(FocusEvent e) {      
+  public FocusListener _undoRedoInteractionFocusListener = new FocusAdapter() {
+    public void focusGained(FocusEvent e){ 
+      _undoAction.setDelegatee(_interactionsPane.getUndoAction());
+      _redoAction.setDelegatee(_interactionsPane.getRedoAction());  
+    }
+  };
+  public FocusListener _undoRedoDefinitionsFocusListener = new FocusAdapter() {
+    public void focusGained(FocusEvent e){ 
       _undoAction.setDelegatee(_currentDefPane.getUndoAction());
       _redoAction.setDelegatee(_currentDefPane.getRedoAction());   
-    }
-    public void focusGained(FocusEvent e){ 
-    _undoAction.setDelegatee(_interactionsPane.getUndoAction()); 
-      _redoAction.setDelegatee(_interactionsPane.getRedoAction());  
     }
   };
   
@@ -3305,6 +3315,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _currentDefDoc = activeDoc.getDocument();
       _currentDefPane = (DefinitionsPane) defScroll.getViewport().getView();
       _currentDefPane.notifyActive();
+      _currentDefPane.addFocusListener(_undoRedoDefinitionsFocusListener);
       
       // Get proper cross-platform mask.
       int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
@@ -6116,12 +6127,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   void _addGUIAvailabilityListener(Action a, GUIAvailabilityListener.ComponentType... components) {
     _guiAvailabilityNotifier.
-      addListener(new ConjoinedGUIAvailabilityActionAdapter(a, _guiAvailabilityNotifier, components));
+      addListener(new AndGUIAvailabilityActionAdapter(a, _guiAvailabilityNotifier, components));
   }
 
   void _addGUIAvailabilityListener(Component a, GUIAvailabilityListener.ComponentType... components) {
     _guiAvailabilityNotifier.
-      addListener(new ConjoinedGUIAvailabilityComponentAdapter(a, _guiAvailabilityNotifier, components));
+      addListener(new AndGUIAvailabilityComponentAdapter(a, _guiAvailabilityNotifier, components));
   }
   
   void _displayGUIComponentAvailabilityFrame() {
@@ -6137,7 +6148,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       });
       buttonThunk.set(button);
-      _guiAvailabilityNotifier.addListener(new ConjoinedGUIAvailabilityListener(_guiAvailabilityNotifier, c) {
+      _guiAvailabilityNotifier.addListener(new AndGUIAvailabilityListener(_guiAvailabilityNotifier, c) {
         public void availabilityChanged(boolean available) {
           button.setText(c.toString()+" "+_guiAvailabilityNotifier.getCount(c));
           button.setSelected(available);
@@ -6221,8 +6232,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     _setUpAction(_undoAction, "Undo", "Undo previous command");
     _setUpAction(_redoAction, "Redo", "Redo last undo");
-    _undoAction.putValue(Action.NAME, "Undo Previous Command");
-    _redoAction.putValue(Action.NAME, "Redo Last Undo");
+    _undoAction.putValue(Action.NAME, "Undo previous command");
+    _redoAction.putValue(Action.NAME, "Redo last undo");
     
     _setUpAction(cutAction, "Cut", "Cut selected text to the clipboard");
     _setUpAction(copyAction, "Copy", "Copy selected text to the clipboard");
@@ -6423,11 +6434,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param menu Menu to add item to
     * @param a Action for the menu item
     * @param opt Configurable keystroke for the menu item
+    * @return the added menu item
     */
-  private void _addMenuItem(JMenu menu, Action a, VectorOption<KeyStroke> opt) {
+  private JMenuItem _addMenuItem(JMenu menu, Action a, VectorOption<KeyStroke> opt) {
     JMenuItem item;
     item = menu.add(a);
     _setMenuShortcut(item, a, opt);
+    return item;
   }
 
   /** Inserts an Action as a menu item to the given menu, at the specified index,
@@ -6436,11 +6449,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param a Action for the menu item
     * @param opt Configurable keystroke for the menu item
     * @param index Index at which the action is inserted
+    * @return the added menu item
     */
-  private void _addMenuItem(JMenu menu, Action a, VectorOption<KeyStroke> opt, int index) {
+  private JMenuItem _addMenuItem(JMenu menu, Action a, VectorOption<KeyStroke> opt, int index) {
     JMenuItem item;
     item = menu.insert(a, index);
     _setMenuShortcut(item, a, opt);
+    return item;
   }
   
   /** Sets the given menu item to have the specified configurable keystroke.
@@ -6510,8 +6525,25 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     JMenu editMenu = new JMenu("Edit");
     PlatformFactory.ONLY.setMnemonic(editMenu,KeyEvent.VK_E);
     // Undo, redo
-    _addMenuItem(editMenu, _undoAction, KEY_UNDO);
-    _addMenuItem(editMenu, _redoAction, KEY_REDO);
+    final JMenuItem undoItem = _addMenuItem(editMenu, _undoAction, KEY_UNDO);
+    _undoAction.addPropertyChangeListener(new PropertyChangeListener() {
+      public void propertyChange(PropertyChangeEvent evt) {
+        if ("enabled".equals(evt.getPropertyName())) {
+          boolean val = (Boolean) evt.getNewValue();
+          undoItem.setEnabled(val);
+        }
+      }
+    });
+    
+    final JMenuItem redoItem = _addMenuItem(editMenu, _redoAction, KEY_REDO);
+    _redoAction.addPropertyChangeListener(new PropertyChangeListener() {
+      public void propertyChange(PropertyChangeEvent evt) {
+        if ("enabled".equals(evt.getPropertyName())) {
+          boolean val = (Boolean) evt.getNewValue();
+          redoItem.setEnabled(val);
+        }
+      }
+    });
     
     // Cut, copy, paste, select all
     editMenu.addSeparator();
@@ -7421,7 +7453,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     _interactionsPane.addKeyListener(_historyListener);
     _interactionsPane.addFocusListener(_focusListenerForRecentDocs);
-     _interactionsPane.addFocusListener(_undoRedoInteractionFocusListener);
+    _interactionsPane.addFocusListener(_undoRedoInteractionFocusListener);
     
     _consoleScroll.addKeyListener(_historyListener);
     _consoleScroll.addFocusListener(_focusListenerForRecentDocs);
@@ -8071,16 +8103,20 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // guaranteed to make it editable again when we return from the compilation, so we take the state
     // with us.  We guarantee only one definitions pane is un-editable at any time.
     if (_currentDefPane.isEditable()) {
+      if (_currentDefPane != null) { _currentDefPane.removeFocusListener(_undoRedoDefinitionsFocusListener); }
       _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();
       _currentDefPane.notifyActive();
+      _currentDefPane.addFocusListener(_undoRedoDefinitionsFocusListener);
     }
     else {
       try { _currentDefPane.setEditable(true); }
       catch(NoSuchDocumentException e) { /* It's OK */ }
       
+      if (_currentDefPane != null) { _currentDefPane.removeFocusListener(_undoRedoDefinitionsFocusListener); }
       _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();
       _currentDefPane.notifyActive();
       _currentDefPane.setEditable(false);
+      _currentDefPane.addFocusListener(_undoRedoDefinitionsFocusListener);
     }
     // reset the undo/redo menu items
     resetUndo();
@@ -8127,6 +8163,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     resetUndo();
     _updateDebugStatus();
   }
+  
   /** Resets the undo/redo menu items */
   public void resetUndo() {
     _undoAction.setDelegatee(_currentDefPane.getUndoAction());

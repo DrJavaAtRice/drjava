@@ -46,13 +46,13 @@ import javax.swing.Action;
  *
  * @version $Id$
  */
-public class ConjoinedGUIAvailabilityActionAdapter extends ConjoinedGUIAvailabilityListener {
+public class AndGUIAvailabilityActionAdapter extends AndGUIAvailabilityListener {
   protected final Action _adaptee;
   
   /** Create a listener that responds to changes in availability of several GUI components.
     * @param components components that must be available */
-  public ConjoinedGUIAvailabilityActionAdapter(Action adaptee,
-                                               GUIAvailabilityNotifier notifier, ComponentType... components) {
+  public AndGUIAvailabilityActionAdapter(Action adaptee,
+                                         GUIAvailabilityNotifier notifier, ComponentType... components) {
     super(notifier, components);
     _adaptee = adaptee;
   }

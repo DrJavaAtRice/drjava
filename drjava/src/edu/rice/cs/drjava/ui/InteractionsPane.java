@@ -64,7 +64,7 @@ import edu.rice.cs.drjava.model.repl.*;
   */
 public abstract class InteractionsPane extends AbstractDJPane implements OptionConstants, ClipboardOwner {
   
-  static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("InteractionsPane.txt", false);
+  public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("InteractionsPane.txt", false);
   
   /** fields for use in undo/redo functionality */
   private volatile UndoAction _undoAction;
@@ -340,8 +340,6 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   /** @return the redo action. */
   public RedoAction getRedoAction() { return  _redoAction; }
   
-  
-
   /** The undo action. */
   public class UndoAction extends AbstractAction {
     
@@ -356,6 +354,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
      */
     public void actionPerformed(ActionEvent e) {
       try {
+        // LOG.log("UndoAction.actionPerformed. _doc = "+_doc+", event = "+e);
         _doc.getUndoManager().undo();
         _doc.updateModifiedSinceSave();
       }
