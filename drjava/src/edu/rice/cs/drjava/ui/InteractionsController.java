@@ -66,6 +66,13 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
+import javax.swing.text.Document;
+import javax.swing.undo.UndoManager;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.event.UndoableEditListener;
+import javax.swing.event.UndoableEditEvent;
+
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
@@ -78,6 +85,8 @@ import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsModel;
 
 import edu.rice.cs.drjava.config.OptionConstants;
+
+import edu.rice.cs.util.swing.DelegatingAction;
 
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
@@ -102,6 +111,8 @@ public class InteractionsController extends AbstractConsoleController {
   private static final String INPUT_ENTERED_NAME = "Input Entered";
   private static final String INSERT_NEWLINE_NAME = "Insert Newline";
   private static final String INSERT_END_OF_STREAM = "Insert End of Stream";
+  private static final String UNDO_NAME = "Undo";
+  private static final String REDO_NAME = "Redo";
   
   /** Style for System.in box */
   public static final String INPUT_BOX_STYLE = "input.box.style";
@@ -156,7 +167,7 @@ public class InteractionsController extends AbstractConsoleController {
     public String getConsoleInput() {
       if (_endOfStream) return ""; // input stream has been closed, don't ask for more input
       final CompletionMonitor completionMonitor = new CompletionMonitor();
-      _box = new InputBox(_endOfStream);  // FIX: move _box inside run as final local variable
+      _box = new InputBox(_endOfStream);
       
       // Embed the input box into the interactions pane. This operation must be performed in the UI thread
       EventQueue.invokeLater(new Runnable() {  // why EventQueue.invokeLater?
@@ -183,6 +194,10 @@ public class InteractionsController extends AbstractConsoleController {
               _pane.setEditable(true);
               _pane.setCaretPosition(_doc.getLength()); 
               _pane.requestFocusInWindow();
+              
+              // use undo/redo for the Interactions Pane again
+              UNDO_ACTION.setDelegatee(_pane.getUndoAction());
+              REDO_ACTION.setDelegatee(_pane.getRedoAction());
               
               completionMonitor.signal();
             }
@@ -212,6 +227,8 @@ public class InteractionsController extends AbstractConsoleController {
           _box.setVisible(true);
           EventQueue.invokeLater(new Runnable() { public void run() { _box.requestFocusInWindow(); } });
           
+          UNDO_ACTION.setDelegatee(_box.getUndoAction());
+          REDO_ACTION.setDelegatee(_box.getRedoAction());
           _pane.setEditable(false);
         }
       });
@@ -256,6 +273,8 @@ public class InteractionsController extends AbstractConsoleController {
     this(model, adapter, new InteractionsPane(adapter) {  // creates InteractionsPane
       public int getPromptPos() { return model.getDocument().getPromptPos(); }
     }, disableCloseSystemInMenuItemCommand);
+    UNDO_ACTION.setDelegatee(_pane.getUndoAction());
+    REDO_ACTION.setDelegatee(_pane.getRedoAction());
   }
   
   /** Glue together the given model and view.
@@ -645,6 +664,15 @@ public class InteractionsController extends AbstractConsoleController {
       _doc.append("\n", null);  // null style
       _pane.indent(Indenter.IndentReason.ENTER_KEY_PRESS); }
   };
+  
+  private final DelegatingAction UNDO_ACTION = new DelegatingAction();
+  private final DelegatingAction REDO_ACTION = new DelegatingAction();
+  
+  /** @return the undo action. */
+  public Action getUndoAction() { return UNDO_ACTION; }
+  
+  /** @return the redo action. */
+  public Action getRedoAction() { return REDO_ACTION; }
  
   /** A box that can be inserted into the interactions pane for separate input.  Do not confuse with 
     * edu.rice.cs.util.swing.InputBox. */
@@ -658,6 +686,7 @@ public class InteractionsController extends AbstractConsoleController {
     private volatile boolean _antiAliasText = DrJava.getConfig().getSetting(OptionConstants.TEXT_ANTIALIAS);
     private volatile boolean _endOfStream = false;
     private volatile boolean _closedWithEnter = false;
+    
     
     public InputBox(boolean endOfStream) {
       _endOfStream = endOfStream;
@@ -698,17 +727,48 @@ public class InteractionsController extends AbstractConsoleController {
         }
       });
       
+      final InputMap im = getInputMap(WHEN_FOCUSED);
+      final ActionMap am = getActionMap();
+      
       // Add the input listener for <Shift+Enter> and <Cntl+Enter>
       final Action newLineAction = new AbstractAction() {
         public void actionPerformed(ActionEvent e) { insert("\n", getCaretPosition()); }
-      };
-      
-      final InputMap im = getInputMap(WHEN_FOCUSED);
+      };      
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,java.awt.Event.SHIFT_MASK), INSERT_NEWLINE_NAME);
-      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,java.awt.Event.CTRL_MASK), INSERT_NEWLINE_NAME);
-      
-      final ActionMap am = getActionMap();
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,java.awt.Event.CTRL_MASK), INSERT_NEWLINE_NAME);      
       am.put(INSERT_NEWLINE_NAME, newLineAction);
+      
+      // Link undo/redo to this InputBox
+      final UndoManager undo = new UndoManager();
+      final Document doc = getDocument(); 
+      
+      // Listen for undo and redo events
+      doc.addUndoableEditListener(new UndoableEditListener() {
+        public void undoableEditHappened(UndoableEditEvent evt) {
+          undo.addEdit(evt.getEdit());
+        }
+      }); 
+      
+      final Action undoAction = new AbstractAction("Undo") {
+        public void actionPerformed(ActionEvent e) {
+          try {
+            if (undo.canUndo()) { undo.undo(); }
+          }
+          catch (CannotUndoException cue) { } 
+        }
+      };
+      for(KeyStroke ks: DrJava.getConfig().getSetting(OptionConstants.KEY_UNDO)) { im.put(ks, UNDO_NAME); }
+      am.put(UNDO_NAME, undoAction);
+      final Action redoAction = new AbstractAction("Redo") {
+        public void actionPerformed(ActionEvent e) {
+          try {
+            if (undo.canRedo()) { undo.redo(); }
+          }
+          catch (CannotRedoException cue) { }
+        }
+      };
+      for(KeyStroke ks: DrJava.getConfig().getSetting(OptionConstants.KEY_REDO)) { im.put(ks, REDO_NAME); }
+      am.put(REDO_NAME, redoAction);
     }
     
     /** Returns true if this stream has been closed. */
@@ -789,6 +849,12 @@ public class InteractionsController extends AbstractConsoleController {
       
       getCaret().setVisible(false);
     }
+    
+    /** @return the undo action. */
+    public Action getUndoAction() { return getActionMap().get(UNDO_NAME); }
+    
+    /** @return the redo action. */
+    public Action getRedoAction() { return getActionMap().get(REDO_NAME); }
   }
   
   /** A listener interface that allows for others outside the interactions controller to be notified when the input

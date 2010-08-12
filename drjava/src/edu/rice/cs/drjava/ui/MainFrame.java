@@ -1205,7 +1205,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       // use whether the delegatee is the Interactions Pane's action instead of whether
       // _interactionsPane.hasFocus(), because the focus will be lost when the user clicks
       // on the menu bar.
-      final boolean intPaneFocused = (getDelegatee()==_interactionsPane.getUndoAction());
+      final boolean intPaneFocused = (getDelegatee()==_interactionsController.getUndoAction());
       if (intPaneFocused) {
         _interactionsPane.endCompoundEdit();
       }
@@ -1233,7 +1233,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       // use whether the delegatee is the Interactions Pane's action instead of whether
       // _interactionsPane.hasFocus(), because the focus will be lost when the user clicks
       // on the menu bar.
-      final boolean intPaneFocused = (getDelegatee()==_interactionsPane.getRedoAction());
+      final boolean intPaneFocused = (getDelegatee()==_interactionsController.getRedoAction());
       
       super.actionPerformed(e);
       if (intPaneFocused) {
@@ -3080,8 +3080,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   // adds Listener for undo/redo action for the interactions pane
   public FocusListener _undoRedoInteractionFocusListener = new FocusAdapter() {
     public void focusGained(FocusEvent e){ 
-      _undoAction.setDelegatee(_interactionsPane.getUndoAction());
-      _redoAction.setDelegatee(_interactionsPane.getRedoAction());  
+      _undoAction.setDelegatee(_interactionsController.getUndoAction());
+      _redoAction.setDelegatee(_interactionsController.getRedoAction());  
     }
   };
   public FocusListener _undoRedoDefinitionsFocusListener = new FocusAdapter() {
