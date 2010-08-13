@@ -480,7 +480,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Creates a new blank document and select it in the definitions pane. */
   private final Action _newAction = new AbstractAction("New") {
     public void actionPerformed(ActionEvent ae) {
-//      System.out.println("------------------new----------------------");
       _new();
     }
   };
@@ -3077,14 +3076,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void focusGained(FocusEvent e) { }
   };
   
-  // adds Listener for undo/redo action for the interactions pane
-  public FocusListener _undoRedoInteractionFocusListener = new FocusAdapter() {
-    public void focusGained(FocusEvent e){ 
-      _undoAction.setDelegatee(_interactionsController.getUndoAction());
-      _redoAction.setDelegatee(_interactionsController.getRedoAction());  
-    }
-  };
-  public FocusListener _undoRedoDefinitionsFocusListener = new FocusAdapter() {
+  // adds Listener for undo/redo action for the definitions pane
+  public final FocusListener _undoRedoDefinitionsFocusListener = new FocusAdapter() {
     public void focusGained(FocusEvent e){ 
       _undoAction.setDelegatee(_currentDefPane.getUndoAction());
       _redoAction.setDelegatee(_currentDefPane.getRedoAction());   
@@ -7453,7 +7446,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     _interactionsPane.addKeyListener(_historyListener);
     _interactionsPane.addFocusListener(_focusListenerForRecentDocs);
-    _interactionsPane.addFocusListener(_undoRedoInteractionFocusListener);
+    _interactionsController.addFocusListener(new FocusAdapter() {
+      public void focusGained(FocusEvent e){ 
+        _undoAction.setDelegatee(_interactionsController.getUndoAction());
+        _redoAction.setDelegatee(_interactionsController.getRedoAction());  
+      }
+    });
     
     _consoleScroll.addKeyListener(_historyListener);
     _consoleScroll.addFocusListener(_focusListenerForRecentDocs);

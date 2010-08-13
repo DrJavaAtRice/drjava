@@ -44,6 +44,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.FocusListener;
 
 import java.io.File;
 
@@ -168,6 +169,10 @@ public class InteractionsController extends AbstractConsoleController {
       if (_endOfStream) return ""; // input stream has been closed, don't ask for more input
       final CompletionMonitor completionMonitor = new CompletionMonitor();
       _box = new InputBox(_endOfStream);
+      // add all focus listeners to the Input Box
+      for(FocusListener fl: _undoRedoInteractionFocusListeners) {
+        _box.addFocusListener(fl);
+      }
       
       // Embed the input box into the interactions pane. This operation must be performed in the UI thread
       EventQueue.invokeLater(new Runnable() {  // why EventQueue.invokeLater?
@@ -667,6 +672,20 @@ public class InteractionsController extends AbstractConsoleController {
   
   private final DelegatingAction UNDO_ACTION = new DelegatingAction();
   private final DelegatingAction REDO_ACTION = new DelegatingAction();
+  private final ArrayList<FocusListener> _undoRedoInteractionFocusListeners = new ArrayList<FocusListener>();
+  
+  /** Add a focus listener to the Interactions Pane and the Input Box. */
+  public void addFocusListener(FocusListener listener) {
+    _pane.addFocusListener(listener);
+    // we need to store the focus listeners, because they need to be added to future
+    // Input Boxes too.
+    _undoRedoInteractionFocusListeners.add(listener);
+    if (_box != null) {
+      for(FocusListener fl: _undoRedoInteractionFocusListeners) {
+        _box.addFocusListener(fl);
+      }
+    }
+  }
   
   /** @return the undo action. */
   public Action getUndoAction() { return UNDO_ACTION; }
@@ -742,19 +761,14 @@ public class InteractionsController extends AbstractConsoleController {
       final UndoManager undo = new UndoManager();
       final Document doc = getDocument(); 
       
-      // Listen for undo and redo events
-      doc.addUndoableEditListener(new UndoableEditListener() {
-        public void undoableEditHappened(UndoableEditEvent evt) {
-          undo.addEdit(evt.getEdit());
-        }
-      }); 
-      
       final Action undoAction = new AbstractAction("Undo") {
         public void actionPerformed(ActionEvent e) {
           try {
-            if (undo.canUndo()) { undo.undo(); }
+            if (undo.canUndo()) { undo.undo(); }           
           }
           catch (CannotUndoException cue) { } 
+          setEnabled(undo.canUndo() && isEditable());
+          am.get(REDO_NAME).setEnabled(undo.canRedo() && isEditable());
         }
       };
       for(KeyStroke ks: DrJava.getConfig().getSetting(OptionConstants.KEY_UNDO)) { im.put(ks, UNDO_NAME); }
@@ -765,10 +779,23 @@ public class InteractionsController extends AbstractConsoleController {
             if (undo.canRedo()) { undo.redo(); }
           }
           catch (CannotRedoException cue) { }
+          undoAction.setEnabled(undo.canUndo() && isEditable());
+          setEnabled(undo.canRedo() && isEditable());
         }
       };
       for(KeyStroke ks: DrJava.getConfig().getSetting(OptionConstants.KEY_REDO)) { im.put(ks, REDO_NAME); }
       am.put(REDO_NAME, redoAction);
+      
+      // Listen for undo and redo events
+      doc.addUndoableEditListener(new UndoableEditListener() {
+        public void undoableEditHappened(UndoableEditEvent evt) {
+          undo.addEdit(evt.getEdit());
+          undoAction.setEnabled(undo.canUndo() && isEditable());
+          redoAction.setEnabled(undo.canRedo() && isEditable());
+        }
+      });
+      undoAction.setEnabled(undo.canUndo() && isEditable());
+      redoAction.setEnabled(undo.canRedo() && isEditable());
     }
     
     /** Returns true if this stream has been closed. */
