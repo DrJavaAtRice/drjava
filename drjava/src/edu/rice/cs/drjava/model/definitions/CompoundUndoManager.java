@@ -51,8 +51,7 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
   */
 public class CompoundUndoManager extends UndoManager {
   
-  static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("CompoundUndoManager.txt", true);
-  public boolean logEnabled = false;
+  static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("CompoundUndoManager.txt", false);
   
   private static volatile int counter = 0;
   
@@ -90,9 +89,6 @@ public class CompoundUndoManager extends UndoManager {
     */
   public /* synchronized */ int startCompoundEdit() {
     _compoundEdits.add(0, new CompoundEdit());
-    if (logEnabled) {
-      LOG.log("startCompoundEdit "+_compoundEdits, new RuntimeException());
-    }
     _keys.add(0, Integer.valueOf(_nextKey));
     if (_nextKey < Integer.MAX_VALUE) _nextKey++;
     else _nextKey = Integer.MIN_VALUE;
@@ -117,7 +113,6 @@ public class CompoundUndoManager extends UndoManager {
     if (_keys.get(0) == key) {
       _keys.remove(0);
       final CompoundEdit ce = _compoundEdits.remove(0);
-      if (logEnabled) LOG.log("endCompoundEdit "+_compoundEdits);          
       
       ce.end();
       if (ce.canUndo()) {

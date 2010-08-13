@@ -134,7 +134,6 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   /** Resets the undo manager. */
   public void resetUndoManager() {
     _undoManager = new CompoundUndoManager(_notifier);
-    _undoManager.logEnabled = true;
     _undoManager.setLimit(UNDO_LIMIT);
   }
   
