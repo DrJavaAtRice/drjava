@@ -8292,11 +8292,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     // Update Interactions Pane
     _interactionsPane.setFont(f);
-    _interactionsController.setDefaultFont(f);
     
     // Update Console Pane
     _consolePane.setFont(f);
-    _consoleController.setDefaultFont(f);
     
     _findReplace.setFieldFont(f);
     _compilerErrorPanel.setListFont(f);

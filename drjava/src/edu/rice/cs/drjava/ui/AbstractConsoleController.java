@@ -108,13 +108,7 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   protected void _addDocumentStyles() {
     // Default
     _interactionsDJDocument.setDocStyle(ConsoleDocument.DEFAULT_STYLE, _defaultStyle);
-    DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR,
-                                         new OptionListener<Color>() {
-      public void optionChanged(OptionEvent<Color> oe) {
-        setDefaultFont(oe.value);
-      }
-    });
-
+    
     // System.out
     _systemOutStyle.addAttributes(_defaultStyle);
     _systemOutStyle.addAttribute(StyleConstants.Foreground,
@@ -138,55 +132,6 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
         _systemErrStyle.addAttribute(StyleConstants.Foreground, oe.value);
       }
     });
-  }
-
-  /** Sets the font for the document, updating all existing text.  This behavior is only necessary in Mac OS X, since
-    * setFont() works fine on JTextPane on all other tested platforms.  This glitch in the Mac JVM still exists as of
-    * 11-28-06 in beta Java 6.0 build 88.
-    * @param f New font to use.
-    */
-  public void setDefaultFont(Font f) {
-    Color c = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
-    setDefaultFont(f, c);
-  }
-
-  /** Sets the color for the document, updating all existing text.  This behavior is only necessary in Mac OS X, since
-    * changing the main font works on all other tested platforms.
-    * @param c New color to use.
-    */
-  public void setDefaultFont(Color c) {
-    Font f = DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN);
-    setDefaultFont(f, c);
-  }
-
-  /** Sets the font and color for the document, updating all existing text.  This behavior is only necessary in Mac OS
-    * X, since setFont() and changing the main font works on all other tested platforms.
-    * @param f New font to use.
-    * @param c New color to use.
-    */
-  public void setDefaultFont(Font f, Color c) {
-    if (PlatformFactory.ONLY.isMacPlatform()) {
-      SimpleAttributeSet fontSet = new SimpleAttributeSet();
-      StyleConstants.setFontFamily(fontSet, f.getFamily());
-      StyleConstants.setFontSize(fontSet, f.getSize());
-      StyleConstants.setBold(fontSet, f.isBold());
-      StyleConstants.setItalic(fontSet, f.isItalic());
-      if (c != null) {
-        StyleConstants.setForeground(fontSet, c);
-      }
-      _interactionsDJDocument.setCharacterAttributes(0, _interactionsDJDocument.getLength()+1, fontSet, false);
-      _pane.setCharacterAttributes(fontSet, false);
-      _updateStyles(fontSet);
-    }
-  }
-
-  /** Updates all document styles with the attributes contained in newSet.
-    * @param newSet Style containing new attributes to use.
-    */
-  protected void _updateStyles(AttributeSet newSet) {
-    _defaultStyle.addAttributes(newSet);
-    _systemOutStyle.addAttributes(newSet);
-    _systemErrStyle.addAttributes(newSet);
   }
 
   /** Sets up the model.*/

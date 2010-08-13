@@ -100,15 +100,10 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     _hasPrompt = val;
   }
   
-// old undo/redo functionality (i.e do nothing)
-//  protected int startCompoundEdit() { return 0; /* Do nothing */ }
-//  protected void endCompoundEdit(int key) { /* Do nothing */ }
-//  protected void endLastCompoundEdit() { /* Do nothing */ }
-//  protected void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand) { }
   protected void _styleChanged() { /* Do nothing */ }
  
- //-------------Undo/Redo Functionality---------------------// 
-/** Appending any information for the reduced model from each undo command */
+  //-------------Undo/Redo Functionality---------------------// 
+  /** Appending any information for the reduced model from each undo command */
   private static class CommandUndoableEdit extends AbstractUndoableEdit {
     private final Runnable _undoCommand;
     private final Runnable _redoCommand;
@@ -131,7 +126,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     public boolean isSignificant() { return false; }
   }
   
-/** Getter method for CompoundUndoManager
+  /** Getter method for CompoundUndoManager
     * @return _undoManager
     */
   public CompoundUndoManager getUndoManager() { return _undoManager; }
@@ -139,6 +134,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   /** Resets the undo manager. */
   public void resetUndoManager() {
     _undoManager = new CompoundUndoManager(_notifier);
+    _undoManager.logEnabled = true;
     _undoManager.setLimit(UNDO_LIMIT);
   }
   
@@ -334,5 +330,5 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     // Note that there is similar code in InteractionsDocument.  Something should be refactored.
     try { insertText(getLength(), message + "\n", styleName); }
     catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
-  } 
+  }
 }

@@ -51,7 +51,8 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
   */
 public class CompoundUndoManager extends UndoManager {
   
-  static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("CompoundUndoManager.txt", false);
+  static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("CompoundUndoManager.txt", true);
+  public boolean logEnabled = false;
   
   private static volatile int counter = 0;
   
@@ -89,6 +90,9 @@ public class CompoundUndoManager extends UndoManager {
     */
   public /* synchronized */ int startCompoundEdit() {
     _compoundEdits.add(0, new CompoundEdit());
+    if (logEnabled) {
+      LOG.log("startCompoundEdit "+_compoundEdits, new RuntimeException());
+    }
     _keys.add(0, Integer.valueOf(_nextKey));
     if (_nextKey < Integer.MAX_VALUE) _nextKey++;
     else _nextKey = Integer.MIN_VALUE;
@@ -113,6 +117,7 @@ public class CompoundUndoManager extends UndoManager {
     if (_keys.get(0) == key) {
       _keys.remove(0);
       final CompoundEdit ce = _compoundEdits.remove(0);
+      if (logEnabled) LOG.log("endCompoundEdit "+_compoundEdits);          
       
       ce.end();
       if (ce.canUndo()) {
@@ -120,7 +125,9 @@ public class CompoundUndoManager extends UndoManager {
           super.addEdit(ce);
           _notifyUndoHappened();
         }
-        else _compoundEdits.get(0).addEdit(ce);
+        else {
+          _compoundEdits.get(0).addEdit(ce);
+        }
       } 
     }
     else throw new IllegalStateException("Improperly nested compound edits.");
@@ -163,7 +170,10 @@ public class CompoundUndoManager extends UndoManager {
   /** Returns true when a compound edit is in progress,  or when there are valid stored undoable edits
     * @return true iff undoing is possible
     */
-  public /* synchronized */ boolean canUndo() { return _compoundEditInProgress() || super.canUndo(); }
+  public /* synchronized */ boolean canUndo() {
+    LOG.log("canUndo: _compoundEditInProgress() = "+_compoundEditInProgress()+", super.canUndo() = "+super.canUndo());
+    LOG.log("    "+_compoundEdits);
+    return _compoundEditInProgress() || super.canUndo(); }
   
   /** Returns the presentation name for this undo, or delegates to super if none is available
     * @return the undo's presentation name

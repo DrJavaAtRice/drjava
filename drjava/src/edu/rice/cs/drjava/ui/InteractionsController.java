@@ -414,18 +414,6 @@ public class InteractionsController extends AbstractConsoleController {
     });
   }
   
-  /** Updates all document styles with the attributes contained in newSet.  This behavior is only used in Mac OS X, 
-    * JDK 1.4.1, since setFont() works fine on JTextPane on all other tested platforms.
-    * @param newSet Style containing new attributes to use.
-    */
-  protected void _updateStyles(AttributeSet newSet) {
-    super._updateStyles(newSet);
-    _errStyle.addAttributes(newSet);
-    StyleConstants.setBold(_errStyle, true);  // ensure err is always bold
-    _debugStyle.addAttributes(newSet);
-    StyleConstants.setBold(_debugStyle, true);  // ensure debug is always bold
-  }
-  
   /** Adds listeners to the model. */
   protected void _setupModel() { _doc.setBeep(_pane.getBeep()); }
   
