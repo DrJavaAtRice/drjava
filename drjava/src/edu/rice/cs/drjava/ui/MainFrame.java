@@ -1593,7 +1593,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Goes to the file specified by the word the cursor is on. */
-  final Action gotoFileUnderCursorAction = new AbstractAction("Go to File Under Cursor") {
+  final Action _gotoFileUnderCursorAction = new AbstractAction("Go to File Under Cursor") {
     public void actionPerformed(ActionEvent ae) { _gotoFileUnderCursor(); }
   };
   
@@ -6256,7 +6256,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_findPrevAction, "Find Previous", "Repeats the last find in the opposite direction");
     _setUpAction(_gotoLineAction, "Go to line", "Go to a line number in the document");
     _setUpAction(_gotoFileAction, "Go to File", "Go to a file specified by its name");
-    _setUpAction(gotoFileUnderCursorAction, "Go to File Under Cursor",
+    _setUpAction(_gotoFileUnderCursorAction, "Go to File Under Cursor",
                  "Go to the file specified by the word the cursor is located on");
     
     _setUpAction(_switchToPrevAction, "Previous Document", "Up", "Switch to the previous document");
@@ -6573,7 +6573,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     final JMenu goToMenu = new JMenu("Go To");
     _addMenuItem(goToMenu, _gotoLineAction, KEY_GOTO_LINE);
     _addMenuItem(goToMenu, _gotoFileAction, KEY_GOTO_FILE);
-    _addMenuItem(goToMenu, gotoFileUnderCursorAction, KEY_GOTO_FILE_UNDER_CURSOR);
+    _addMenuItem(goToMenu, _gotoFileUnderCursorAction, KEY_GOTO_FILE_UNDER_CURSOR);
     _addMenuItem(goToMenu, _gotoOpeningBraceAction, KEY_OPENING_BRACE);
     _addMenuItem(goToMenu, _gotoClosingBraceAction, KEY_CLOSING_BRACE);
     editMenu.add(goToMenu);
