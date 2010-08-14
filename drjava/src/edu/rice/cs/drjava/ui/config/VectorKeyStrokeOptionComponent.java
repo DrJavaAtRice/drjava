@@ -60,13 +60,30 @@ public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStr
   public static final HashMap<KeyStroke, VectorKeyStrokeOptionComponent> _keyToKSOC =
     new HashMap<KeyStroke, VectorKeyStrokeOptionComponent>();
 
+  /** Reset the current keystroke map to the values in the backup map. */
+  public static void resetCurrentKeyStrokeMap() {
+    HashMap<KeyStroke, VectorKeyStrokeOptionComponent> newKeyToKSOC = 
+      new HashMap<KeyStroke, VectorKeyStrokeOptionComponent>();
+    
+    for(VectorKeyStrokeOptionComponent vksoc: _keyToKSOC.values()) {
+      for(KeyStroke k: vksoc.getKeyStrokes()) newKeyToKSOC.put(k, vksoc);
+    }
+    
+    _keyToKSOC.clear();
+    for(Map.Entry<KeyStroke, VectorKeyStrokeOptionComponent> e: newKeyToKSOC.entrySet()) {
+      _keyToKSOC.put(e.getKey(), e.getValue());
+    }
+  }
+  
   public VectorKeyStrokeOptionComponent (VectorOption<KeyStroke> opt, String text, SwingFrame parent) {
     this(opt, text, parent, null);
+    for(KeyStroke k: getKeyStrokes()) _keyToKSOC.put(k, this);
   }
   
   /** Constructor that allows for a tooltip description. */
   public VectorKeyStrokeOptionComponent (VectorOption<KeyStroke> opt, String text, SwingFrame parent, String description) {
     this(opt, text, parent, description, false);
+    for(KeyStroke k: getKeyStrokes()) _keyToKSOC.put(k, this);
   }
 
   /** Constructor with flag for move buttons. */
