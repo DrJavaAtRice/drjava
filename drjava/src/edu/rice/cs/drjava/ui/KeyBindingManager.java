@@ -59,9 +59,6 @@ public class KeyBindingManager {
 
   private MainFrame _mainFrame = null;
 
-  // Needed to get the DefaultEditorKit actions from their names
-  private ActionMap _actionMap;
-
   /** Should only check conflicts when the keyboard configuration options are first entered into the maps. Afterwards, 
     * the GUI configuration will warn the user about actions whose key-bindings will be overwritten in the GetKeyDialog,
     * and the preferences panel will reflect the changes. When the user hit apply, no conflicts should exist in the 
@@ -70,11 +67,6 @@ public class KeyBindingManager {
   private boolean _shouldCheckConflict = true;
 
   public void setMainFrame (MainFrame mainFrame) { _mainFrame = mainFrame; }
-
-  /** Sets the ActionMap
-    * @param actionMap the ActionMap to set to
-    */
-  public void setActionMap (ActionMap actionMap) { _actionMap = actionMap; }
 
   public void setShouldCheckConflict (boolean bool) { _shouldCheckConflict = bool;  }
   

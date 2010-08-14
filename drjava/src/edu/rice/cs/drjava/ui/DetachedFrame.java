@@ -48,6 +48,25 @@ import javax.swing.JMenuBar;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
 
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.Action;
+import javax.swing.AbstractAction;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
+import javax.swing.MenuElement;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import java.awt.event.KeyEvent;
+import java.awt.event.ActionEvent;
+import java.util.Vector;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.OptionListener;
+import edu.rice.cs.drjava.config.OptionEvent;
+import edu.rice.cs.drjava.ui.KeyBindingManager;
+import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeData;
+import edu.rice.cs.drjava.DrJava;
+
 public class DetachedFrame extends SwingFrame {
   /** Class to save the frame state, i.e. location. */
   public static class FrameState {
@@ -109,6 +128,8 @@ public class DetachedFrame extends SwingFrame {
       setDisplayInFrame(false);
     }
   };
+  /** Old InputMap without accelerators added. */
+  private final InputMap _oldInputMap = new InputMap();
 
   /** Returns the last state of the frame, i.e. the location and dimension.
     * @return frame state
@@ -151,6 +172,33 @@ public class DetachedFrame extends SwingFrame {
     validate();
   }
   
+  /** Recursively process the MenuElement and add entries to the InputMap and ActionMap so that the
+    * menu element's accelerator will invoke the menu element's action even if the MenuElement is
+    * not present in another frame.
+    * Note that this will only use the first key stroke configured for an action, because a menu item
+    * can only have one accelerator key stroke.
+    */
+  protected static void processMenuElement(MenuElement elt, InputMap im, ActionMap am) {
+    if ((elt instanceof JMenuItem) && !(elt instanceof JMenu)) {
+      // this is a leaf
+      JMenuItem menuItem = (JMenuItem)elt;
+      KeyStroke ks = menuItem.getAccelerator();
+      if (ks != null) {
+        // it has an accelerator
+        Action a = menuItem.getAction();
+        final String ACTION_NAME =
+          ks.toString()+"-"+System.identityHashCode(ks)+"-"+
+          a.toString()+"-"+System.identityHashCode(a);
+        im.put(ks, ACTION_NAME);
+        am.put(ACTION_NAME, a);
+      }
+    }
+    else {
+      // interior node or root, process recursively
+      for(MenuElement subElt: elt.getSubElements()) { processMenuElement(subElt, im, am); }
+    }
+  }
+  
   /** Create a tabbed pane frame. Initially, the tabbed pane is displayed in the split pane
     * @param name frame name
     * @param mf the MainFrame
@@ -162,7 +210,46 @@ public class DetachedFrame extends SwingFrame {
     _mainFrame = mf;
     _detach = detach;
     _reattach = reattach;
+    
+    // not strictly necessary on Mac, because Mac DetachedFrames have a menu bar
+    final InputMap im = getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    // First clone the InputMap so we can change the keystroke mappings
+    if (im.keys()!=null) { // keys() may return null!
+      for(KeyStroke ks: im.keys()) { _oldInputMap.put(ks, im.get(ks)); }
+    }
+    // Add listeners to all key bindings
+    for (KeyStrokeData ksd: KeyBindingManager.ONLY.getKeyStrokeData()) {
+      if (ksd.getOption() != null) {
+        DrJava.getConfig().addOptionListener(ksd.getOption(), _keyBindingOptionListener);
+      }
+    }
+    // Then update the key bindings
+    updateKeyBindings();
+
     initDone(); // call mandated by SwingFrame contract
+  }  
+    
+  /** OptionListener responding to changes for the undo/redo key bindings. */
+  private final OptionListener<Vector<KeyStroke>> _keyBindingOptionListener = new OptionListener<Vector<KeyStroke>>() {
+    public void optionChanged(OptionEvent<Vector<KeyStroke>> oce) {
+      updateKeyBindings();
+    }
+  };
+  
+  /** Update the key bindings from the MainFrame menu bar. */
+  public void updateKeyBindings() {
+    // first restore old InputMap.
+    final InputMap im = getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    final ActionMap am = getRootPane().getActionMap();
+    
+    if (im.keys()!=null) { // keys() may return null!
+      for(KeyStroke ks: im.keys()) { im.remove(ks); }
+    }
+    if (_oldInputMap.keys()!=null) { // keys() may return null!
+      for(KeyStroke ks: _oldInputMap.keys()) { im.put(ks, _oldInputMap.get(ks)); }
+    }
+    
+    processMenuElement(_mainFrame.getJMenuBar(), im, am);
   }
   
   public void dispose() {

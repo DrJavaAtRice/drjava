@@ -453,12 +453,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       "<html>Open this document each time this project is opened.<br>"+
       "This file would then be compiled and tested with the<br>"+
       "rest of the project.</html>";
-      putValue(Action.SHORT_DESCRIPTION, msg);
+      putValue(Action.LONG_DESCRIPTION, msg);
     }
     public void actionPerformed(ActionEvent ae) { _moveToAuxiliary(); }
   };
   private final Action _removeAuxiliaryAction = new AbstractAction("Do Not Include With Project") {
-    { putValue(Action.SHORT_DESCRIPTION, "Do not open this document next time this project is opened."); }
+    { putValue(Action.LONG_DESCRIPTION, "Do not open this document next time this project is opened."); }
     public void actionPerformed(ActionEvent ae) { _removeAuxiliary(); }
   };
   private final Action _moveAllToAuxiliaryAction = new AbstractAction("Include All With Project") {
@@ -467,13 +467,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       "<html>Open these documents each time this project is opened.<br>"+
       "These files would then be compiled and tested with the<br>"+
       "rest of the project.</html>";
-      putValue(Action.SHORT_DESCRIPTION, msg);
+      putValue(Action.LONG_DESCRIPTION, msg);
     }
     public void actionPerformed(ActionEvent ae) { _moveAllToAuxiliary(); }
   };
   
   private final Action _removeAllAuxiliaryAction = new AbstractAction("Do Not Include Any With Project") {
-    { putValue(Action.SHORT_DESCRIPTION, "Do not open these documents next time this project is opened."); }
+    { putValue(Action.LONG_DESCRIPTION, "Do not open these documents next time this project is opened."); }
     public void actionPerformed(ActionEvent ae) { _removeAllAuxiliary(); }
   };
   
@@ -500,6 +500,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   private final Action _newProjectAction = new AbstractAction("New") {
+    { putValue(Action.SHORT_DESCRIPTION, "New DrJava project"); }
     public void actionPerformed(ActionEvent ae) { _newProject(); }
   };
   
@@ -646,11 +647,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * source file in the editor pane)
     */
   private final Action _openProjectAction = new AbstractAction("Open...") {
+    { putValue(Action.SHORT_DESCRIPTION, "Open DrJava project"); }
     public void actionPerformed(ActionEvent ae) { _openProject(); }
   };
   
   private final Action _closeProjectAction = new AbstractAction("Close") {
-    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT); }
+    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT);
+      putValue(Action.SHORT_DESCRIPTION, "Close DrJava project"); }
     public void actionPerformed(ActionEvent ae) { 
       closeProject();
       _findReplace.updateFirstDocInSearch();
@@ -769,14 +772,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };  
   
   private final Action _saveProjectAction = new AbstractAction("Save") {
-    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT); }
+    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT); 
+      putValue(Action.SHORT_DESCRIPTION, "Save DrJava project"); }
     public void actionPerformed(ActionEvent ae) {
       _saveAll();  // saves project file and all modified project source files; does not save external files
     }
   };
   
   private final Action _saveProjectAsAction = new AbstractAction("Save As...") {
-    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT); }
+    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT);
+      putValue(Action.SHORT_DESCRIPTION, "Save DrJava project As");
+      putValue(Action.LONG_DESCRIPTION, "Save DrJava project under different name"); }
     public void actionPerformed(ActionEvent ae) {
       if (_saveProjectAs()) {  // asks user for new project file name; sets _projectFile in global model to this value
         _saveAll();  // performs saveAll operation using new project file name, assuming "Save as" was not cancelled
@@ -3206,22 +3212,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //    
 //    Utilities.show("Global Model started");
       
-      _tabbedPanesFrame = new DetachedFrame("Tabbed Panes", MainFrame.this, new Runnable1<DetachedFrame>() {
-        public void run(DetachedFrame frame) {
-          frame.getContentPane().add(_tabbedPane);
-        }
-      }, new Runnable1<DetachedFrame>() {
-        public void run(DetachedFrame frame) {
-          _mainSplit.setBottomComponent(_tabbedPane);
-        }
-      });
-      _tabbedPanesFrame.addWindowListener(new WindowAdapter() {
-        public void windowClosing(WindowEvent we) {
-          _detachTabbedPanesMenuItem.setSelected(false);
-          DrJava.getConfig().setSetting(DETACH_TABBEDPANES, false);
-        }
-      });
-      
       _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
       _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
       
@@ -3315,7 +3305,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       // set up key-bindings
       KeyBindingManager.ONLY.setMainFrame(MainFrame.this);
-      KeyBindingManager.ONLY.setActionMap(_currentDefPane.getActionMap());
       _setUpKeyBindingMaps();
       
       _posListener.updateLocation();
@@ -3370,6 +3359,22 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       };
       _recentProjectManager = new RecentFileManager(_projectMenu.getItemCount() - 2, _projectMenu,
                                                     projAct, OptionConstants.RECENT_PROJECTS);
+      
+      _tabbedPanesFrame = new DetachedFrame("Tabbed Panes", MainFrame.this, new Runnable1<DetachedFrame>() {
+        public void run(DetachedFrame frame) {
+          frame.getContentPane().add(_tabbedPane);
+        }
+      }, new Runnable1<DetachedFrame>() {
+        public void run(DetachedFrame frame) {
+          _mainSplit.setBottomComponent(_tabbedPane);
+        }
+      });
+      _tabbedPanesFrame.addWindowListener(new WindowAdapter() {
+        public void windowClosing(WindowEvent we) {
+          _detachTabbedPanesMenuItem.setSelected(false);
+          DrJava.getConfig().setSetting(DETACH_TABBEDPANES, false);
+        }
+      });
       
       // set up the menu bars on other frames
       _tabbedPanesFrame.setUpMenuBar();
@@ -6344,10 +6349,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                  "e.g. libraries or resources.</html>");
   }
   
-  private void _setUpAction(Action a, String name, String icon, String shortDesc) {
+  private void _setUpAction(Action a, String name, String icon, String longDesc) {
     a.putValue(Action.SMALL_ICON, _getIcon(icon + "16.gif"));
     a.putValue(Action.DEFAULT, name);
-    a.putValue(Action.SHORT_DESCRIPTION, shortDesc);
+    a.putValue(Action.LONG_DESCRIPTION, longDesc);
   }
   
   private void _setUpAction(Action a, String icon, String shortDesc) { _setUpAction(a, icon, icon, shortDesc); }
@@ -7010,7 +7015,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     ret.setEnabled(false);
     ret.addActionListener(a);
-    ret.setToolTipText( (String) a.getValue(Action.SHORT_DESCRIPTION));
+    ret.setToolTipText( (String) a.getValue(Action.LONG_DESCRIPTION));
     ret.setFont(buttonFont);
 //    Boolean test = a instanceof DelegatingAction;
     a.addPropertyChangeListener(new PropertyChangeListener() {
@@ -7117,12 +7122,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     OptionListener<Boolean> runButtonListener = new OptionListener<Boolean>() {
       public void optionChanged(final OptionEvent<Boolean> oce) { 
         if (oce.value) {
-          _runAction.putValue(Action.SHORT_DESCRIPTION, 
+          _runAction.putValue(Action.LONG_DESCRIPTION, 
                               "Run the current document, regardless of whether it is an applet, an ACM " +
                               "Java Task Force program, or a regular Java program with a main method."); 
         }
         else {
-          _runAction.putValue(Action.SHORT_DESCRIPTION,
+          _runAction.putValue(Action.LONG_DESCRIPTION,
                               "Run the main method of the current document"); 
         }
         // _runButton = _updateToolbarButton(_runButton, _runAction);

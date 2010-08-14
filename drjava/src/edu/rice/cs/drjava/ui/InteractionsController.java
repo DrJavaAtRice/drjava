@@ -760,7 +760,9 @@ public class InteractionsController extends AbstractConsoleController {
       
       // Link undo/redo to this InputBox
       // First clone the InputMap so we can change the keystroke mappings
-      for(KeyStroke ks: im.keys()) { _oldInputMap.put(ks, im.get(ks)); }
+      if (im.keys()!=null) { // im.keys() may be null!
+        for(KeyStroke ks: im.keys()) { _oldInputMap.put(ks, im.get(ks)); }
+      }
       
       final UndoManager undo = new UndoManager();
       final Document doc = getDocument(); 
@@ -806,8 +808,12 @@ public class InteractionsController extends AbstractConsoleController {
     public void updateKeyBindings() {
       // first restore old InputMap.
       final InputMap im = getInputMap(WHEN_FOCUSED);
-      for(KeyStroke ks: im.keys()) { im.remove(ks); }
-      for(KeyStroke ks: _oldInputMap.keys()) { im.put(ks, _oldInputMap.get(ks)); }
+      if (im.keys()!=null) { // im.keys() may be null!
+        for(KeyStroke ks: im.keys()) { im.remove(ks); }
+      }
+      if (_oldInputMap.keys()!=null) { // keys() may return null!
+        for(KeyStroke ks: _oldInputMap.keys()) { im.put(ks, _oldInputMap.get(ks)); }
+      }
       
       for(KeyStroke ks: DrJava.getConfig().getSetting(OptionConstants.KEY_UNDO)) { im.put(ks, UNDO_NAME); }
       for(KeyStroke ks: DrJava.getConfig().getSetting(OptionConstants.KEY_REDO)) { im.put(ks, REDO_NAME); }
