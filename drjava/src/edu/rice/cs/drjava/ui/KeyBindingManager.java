@@ -190,7 +190,7 @@ public class KeyBindingManager {
       }
     }
   }
-
+  
   /** A listener that can be attached to VectorKeyStrokeOptions that automatically updates the Hashtables in 
     * KeyBindingManager, the corresponding selection Action bindings, and the menu accelerators.
     */

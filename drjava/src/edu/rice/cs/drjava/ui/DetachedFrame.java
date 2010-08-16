@@ -44,22 +44,17 @@ import java.awt.Point;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import javax.swing.JMenuBar;
-import java.util.StringTokenizer;
-import java.util.NoSuchElementException;
-
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
-import javax.swing.Action;
-import javax.swing.AbstractAction;
-import javax.swing.JComponent;
-import javax.swing.KeyStroke;
-import javax.swing.MenuElement;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 import java.awt.event.KeyEvent;
 import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+import java.util.StringTokenizer;
+import java.util.NoSuchElementException;
 import java.util.Vector;
+import java.util.HashMap;
+import java.util.Map;
+import javax.swing.*;
+
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
@@ -130,6 +125,9 @@ public class DetachedFrame extends SwingFrame {
   };
   /** Old InputMap without accelerators added. */
   private final InputMap _oldInputMap = new InputMap();
+  /** Listeners that need to be removed when this frame is disposed. Key=Listener, Value=JMenuItem listened to. */
+  private final HashMap<PropertyChangeListener,JMenuItem> _listenersToRemoveWhenDisposed =
+    new HashMap<PropertyChangeListener,JMenuItem>();
 
   /** Returns the last state of the frame, i.e. the location and dimension.
     * @return frame state
@@ -199,6 +197,85 @@ public class DetachedFrame extends SwingFrame {
     }
   }
   
+  /** Recursively copy the first menu bar's accelerators into the second menu bar.
+    * Installs listeners to keep the accelerators updated. */
+  protected void copyAccelerators(JMenuBar source, JMenuBar dest) {
+    int sourceIndex = 0;
+    int destIndex = 0;
+    while(sourceIndex<source.getMenuCount() && destIndex<dest.getMenuCount()) {
+      JMenu sourceMenu = source.getMenu(sourceIndex++);
+      while((destIndex<dest.getMenuCount()) &&
+            (dest.getMenu(destIndex).getText() == null ||
+             !dest.getMenu(destIndex).getText().equals(sourceMenu.getText()))) {
+        ++destIndex;
+      }
+      if (destIndex<dest.getMenuCount()) {
+        JMenu destMenu = dest.getMenu(destIndex++);
+        copyAccelerators(sourceMenu, destMenu);
+      }
+    }
+  }
+  
+  /** Recursively copy the first menu's accelerators into the second menu.
+    * Installs listeners to keep the accelerators updated. */
+  protected void copyAccelerators(MenuElement source, MenuElement dest) {
+    if (!(source instanceof JMenu) && !(source instanceof JPopupMenu) &&
+        !(dest instanceof JMenu) && !(dest instanceof JPopupMenu) &&
+        (source instanceof JMenuItem) && (dest instanceof JMenuItem)) {
+      // this is a leaf
+      final JMenuItem sourceItem = (JMenuItem)source;
+      final JMenuItem destItem = (JMenuItem)dest;
+      if ((sourceItem.getText() != null) &&
+          sourceItem.getText().equals(destItem.getText())) {
+        destItem.setAccelerator(sourceItem.getAccelerator());
+        PropertyChangeListener listener = new PropertyChangeListener() {
+          public void propertyChange(PropertyChangeEvent evt) {
+            if ("accelerator".equals(evt.getPropertyName())) {
+              destItem.setAccelerator(sourceItem.getAccelerator());
+            }
+          }
+        };
+        sourceItem.addPropertyChangeListener(listener);
+        _listenersToRemoveWhenDisposed.put(listener, sourceItem);
+      }
+    }
+    else {
+      MenuElement[] sourceElts = source.getSubElements();
+      MenuElement[] destElts = dest.getSubElements();
+      int sourceIndex = 0;
+      int destIndex = 0;
+      while(sourceIndex<sourceElts.length && destIndex<destElts.length) {
+        MenuElement sourceElement = sourceElts[sourceIndex++];
+        boolean matches = false;
+        do {
+          while((destIndex<destElts.length) &&
+                !(destElts[destIndex].getClass().equals(sourceElement.getClass()))) {
+            ++destIndex;
+          }
+          if (destIndex>=destElts.length) { break; }
+          if ((sourceElement instanceof JMenuItem) &&
+              (destElts[destIndex]instanceof JMenuItem)) {
+            JMenuItem sourceItem = (JMenuItem)sourceElement;
+            JMenuItem destItem = (JMenuItem)destElts[destIndex];
+            if (sourceItem.getText() == null) {
+              matches = (destItem.getText() == null);
+            }
+            else {
+              matches = sourceItem.getText().equals(destItem.getText());
+            }
+          }
+          else {
+            matches = true;
+          }
+        } while(!matches);
+        if (destIndex<destElts.length) {
+          MenuElement destElement = destElts[destIndex++];
+          copyAccelerators(sourceElement, destElement);
+        }
+      }
+    }
+  }
+  
   /** Create a tabbed pane frame. Initially, the tabbed pane is displayed in the split pane
     * @param name frame name
     * @param mf the MainFrame
@@ -255,6 +332,10 @@ public class DetachedFrame extends SwingFrame {
   public void dispose() {
     // Mac only
     if (PlatformFactory.ONLY.isMacPlatform()) {
+      for(Map.Entry<PropertyChangeListener,JMenuItem> e: _listenersToRemoveWhenDisposed.entrySet()) {
+        e.getValue().removePropertyChangeListener(e.getKey());
+      }
+
       _mainFrame.removeMenuBarInOtherFrame(getJMenuBar());
     }
     super.dispose();
@@ -266,6 +347,7 @@ public class DetachedFrame extends SwingFrame {
       JMenuBar menuBar = new MainFrame.MenuBar(_mainFrame);
       _mainFrame._setUpMenuBar(menuBar);
       _mainFrame.addMenuBarInOtherFrame(menuBar);
+      copyAccelerators(_mainFrame.getJMenuBar(), menuBar);
       setJMenuBar(menuBar); // it's not that easy to reproduce the MainFrame's menu bar
     }
   }
