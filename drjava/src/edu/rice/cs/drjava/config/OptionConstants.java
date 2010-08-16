@@ -309,9 +309,11 @@ public interface OptionConstants {
     /** Return the look-and-feel to use by default */
     public static String getDefaultLookAndFeel() {
       if (PlatformFactory.ONLY.isMacPlatform())
-        return UIManager.getSystemLookAndFeelClassName();
+        return UIManager.getSystemLookAndFeelClassName(); // Mac: Let the system decide.
+      else if (PlatformFactory.ONLY.isWindowsPlatform())
+        return UIManager.getCrossPlatformLookAndFeelClassName(); // Windows: Metal, because the Windows LAF is ugly
       else
-        return UIManager.getCrossPlatformLookAndFeelClassName();
+        return UIManager.getSystemLookAndFeelClassName(); // Linux: Let the system decide. Probably GTK, which is ok.
     }
     
     /** Need to ensure that a look-and-feel can be instantiated and is valid.

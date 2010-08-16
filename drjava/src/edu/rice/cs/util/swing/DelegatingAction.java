@@ -62,7 +62,7 @@ public class DelegatingAction implements Action {
   /** The action to delegate to. If it's null, this action is disabled and all method calls will result in 
     * IllegalStateExceptions.
     */
-  private Action _delegatee;
+  private volatile Action _delegatee;
   private final LinkedList<PropertyChangeListener> _listenerList =
     new LinkedList<PropertyChangeListener>();
 
@@ -125,16 +125,18 @@ public class DelegatingAction implements Action {
     _delegatee.actionPerformed(ae);
   }
 
+  public Action getDelegatee() { return _delegatee; }
+    
   public void setDelegatee(final Action newDelegatee) {
     if (newDelegatee == null) {
       throw new IllegalArgumentException("setDelegatee(null) is not allowed!");
     }
-
+    
     // create property change notifications
-    Boolean isEnabled = newDelegatee.isEnabled() ? Boolean.TRUE : Boolean.FALSE;
+    boolean isEnabled = newDelegatee.isEnabled();
 
     PropertyChangeEvent enabledEvent
-      =new PropertyChangeEvent(newDelegatee, "enabled", Boolean.FALSE, isEnabled);
+       = new PropertyChangeEvent(newDelegatee, "enabled", Boolean.FALSE, isEnabled);
 
     PropertyChangeEvent[] events = null;
 

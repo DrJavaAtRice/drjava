@@ -224,4 +224,27 @@ public class MainFrameStatics {
     }
     public OpenDefinitionsDocument getOpenDefinitionsDocument() { return null; }
   }
+  
+  /** Returns a JRadioButtonMenuItem that looks like a JCheckBoxMenuItem. This is a workaround for a known 
+    * bug on OS X's version of Java. (See http://developer.apple.com/qa/qa2001/qa1154.html)
+    * @param action Action for the menu item
+    * @return JRadioButtonMenuItem with a checkbox icon
+    */
+  public static JMenuItem newCheckBoxMenuItem(Action action) {
+    String RADIO_ICON_KEY = "RadioButtonMenuItem.checkIcon";
+    String CHECK_ICON_KEY = "CheckBoxMenuItem.checkIcon";
+    
+    // Store the default radio button icon to put back later
+    Object radioIcon = UIManager.get(RADIO_ICON_KEY);
+    
+    // Replace radio button's checkIcon with that of JCheckBoxMenuItem
+    // so that our menu item looks like a checkbox
+    UIManager.put(RADIO_ICON_KEY, UIManager.get(CHECK_ICON_KEY));
+    JRadioButtonMenuItem pseudoCheckBox = new JRadioButtonMenuItem(action);
+    
+    // Put original radio button checkIcon back.
+    UIManager.put(RADIO_ICON_KEY, radioIcon);
+    
+    return pseudoCheckBox;
+  }
 }

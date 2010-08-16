@@ -168,5 +168,7 @@ public class ConfigPanel extends JPanel {
       if (_components.get(i) instanceof VectorOptionComponent<?>)
         ((VectorOptionComponent<?>)_components.get(i)).resizeTable();
     }
+    // must reset the "current keystroke map" when resetting
+    VectorKeyStrokeOptionComponent.resetCurrentKeyStrokeMap();
   }
 }

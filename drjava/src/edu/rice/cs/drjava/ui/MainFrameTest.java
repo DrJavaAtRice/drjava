@@ -121,7 +121,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   public void testCreateManualToolbarButton() {
     final Action a = new AbstractAction("Test Action") { public void actionPerformed(ActionEvent ae) { } };
     
-    a.putValue(Action.SHORT_DESCRIPTION, "test tooltip");
+    a.putValue(Action.LONG_DESCRIPTION, "test tooltip");
     Utilities.invokeAndWait(new Runnable() { public void run() { _but = _frame._createManualToolbarButton(a); } });
     
     assertTrue("Returned JButton is enabled.", ! _but.isEnabled());

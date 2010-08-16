@@ -34,32 +34,24 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.ui.avail;
+package edu.rice.cs.drjava.platform;
 
-import edu.rice.cs.drjava.model.EventNotifier;
-
-import java.util.HashMap;
-import javax.swing.Action;
+import junit.framework.*;
 
 /**
- * Adapter from Action to ComplexGUIAvailabilityListener.
- *
- * @version $Id$
+ * Tests for WindowsRegistry.
  */
-public class ConjoinedGUIAvailabilityActionAdapter extends ConjoinedGUIAvailabilityListener {
-  protected final Action _adaptee;
-  
-  /** Create a listener that responds to changes in availability of several GUI components.
-    * @param components components that must be available */
-  public ConjoinedGUIAvailabilityActionAdapter(Action adaptee,
-                                               GUIAvailabilityNotifier notifier, ComponentType... components) {
-    super(notifier, components);
-    _adaptee = adaptee;
-  }
-  
-  /** Called when the combined availability of all components changes.
-    * @param available true if all components are available */  
-  public void availabilityChanged(boolean available) {
-    _adaptee.setEnabled(available);
+public class WindowsRegistryTest extends TestCase {
+  /** Tests different charsets and null-terminated strings. */
+  public void testNullTerminatedCharsets() {
+    String s = "ABCDE";
+    byte[] utf8 = WindowsRegistry.stringToNullTerminated(s, "UTF-8");
+    assertTrue(utf8.length-1==s.length());
+    byte[] utf16 = WindowsRegistry.stringToNullTerminated(s, "UTF-16");
+    assertFalse(utf16.length-1==s.length());
+    String s8 = WindowsRegistry.nullTerminatedToString(utf8, "UTF-8");
+    assertEquals(s, s8);
+    String s16 = WindowsRegistry.nullTerminatedToString(utf16, "UTF-16");
+    assertEquals(s, s16);
   }
 }

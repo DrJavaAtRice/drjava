@@ -453,12 +453,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       "<html>Open this document each time this project is opened.<br>"+
       "This file would then be compiled and tested with the<br>"+
       "rest of the project.</html>";
-      putValue(Action.SHORT_DESCRIPTION, msg);
+      putValue(Action.LONG_DESCRIPTION, msg);
     }
     public void actionPerformed(ActionEvent ae) { _moveToAuxiliary(); }
   };
   private final Action _removeAuxiliaryAction = new AbstractAction("Do Not Include With Project") {
-    { putValue(Action.SHORT_DESCRIPTION, "Do not open this document next time this project is opened."); }
+    { putValue(Action.LONG_DESCRIPTION, "Do not open this document next time this project is opened."); }
     public void actionPerformed(ActionEvent ae) { _removeAuxiliary(); }
   };
   private final Action _moveAllToAuxiliaryAction = new AbstractAction("Include All With Project") {
@@ -467,20 +467,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       "<html>Open these documents each time this project is opened.<br>"+
       "These files would then be compiled and tested with the<br>"+
       "rest of the project.</html>";
-      putValue(Action.SHORT_DESCRIPTION, msg);
+      putValue(Action.LONG_DESCRIPTION, msg);
     }
     public void actionPerformed(ActionEvent ae) { _moveAllToAuxiliary(); }
   };
   
   private final Action _removeAllAuxiliaryAction = new AbstractAction("Do Not Include Any With Project") {
-    { putValue(Action.SHORT_DESCRIPTION, "Do not open these documents next time this project is opened."); }
+    { putValue(Action.LONG_DESCRIPTION, "Do not open these documents next time this project is opened."); }
     public void actionPerformed(ActionEvent ae) { _removeAllAuxiliary(); }
   };
   
   /** Creates a new blank document and select it in the definitions pane. */
   private final Action _newAction = new AbstractAction("New") {
     public void actionPerformed(ActionEvent ae) {
-//      System.out.println("------------------new----------------------");
       _new();
     }
   };
@@ -501,6 +500,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   private final Action _newProjectAction = new AbstractAction("New") {
+    { putValue(Action.SHORT_DESCRIPTION, "New DrJava project"); }
     public void actionPerformed(ActionEvent ae) { _newProject(); }
   };
   
@@ -647,11 +647,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * source file in the editor pane)
     */
   private final Action _openProjectAction = new AbstractAction("Open...") {
+    { putValue(Action.SHORT_DESCRIPTION, "Open DrJava project"); }
     public void actionPerformed(ActionEvent ae) { _openProject(); }
   };
   
   private final Action _closeProjectAction = new AbstractAction("Close") {
-    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT); }
+    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT);
+      putValue(Action.SHORT_DESCRIPTION, "Close DrJava project"); }
     public void actionPerformed(ActionEvent ae) { 
       closeProject();
       _findReplace.updateFirstDocInSearch();
@@ -770,14 +772,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };  
   
   private final Action _saveProjectAction = new AbstractAction("Save") {
-    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT); }
+    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT); 
+      putValue(Action.SHORT_DESCRIPTION, "Save DrJava project"); }
     public void actionPerformed(ActionEvent ae) {
       _saveAll();  // saves project file and all modified project source files; does not save external files
     }
   };
   
   private final Action _saveProjectAsAction = new AbstractAction("Save As...") {
-    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT); }
+    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT);
+      putValue(Action.SHORT_DESCRIPTION, "Save DrJava project As");
+      putValue(Action.LONG_DESCRIPTION, "Save DrJava project under different name"); }
     public void actionPerformed(ActionEvent ae) {
       if (_saveProjectAs()) {  // asks user for new project file name; sets _projectFile in global model to this value
         _saveAll();  // performs saveAll operation using new project file name, assuming "Save as" was not cancelled
@@ -1202,23 +1207,27 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Undoes the last change to the active definitions document. */
   private final DelegatingAction _undoAction = new DelegatingAction() {
     public void actionPerformed(ActionEvent e) {
-      if(_interactionsPane.hasFocus()){
+      // use whether the delegatee is the Interactions Pane's action instead of whether
+      // _interactionsPane.hasFocus(), because the focus will be lost when the user clicks
+      // on the menu bar.
+      final boolean intPaneFocused = (getDelegatee()==_interactionsController.getUndoAction());
+      if (intPaneFocused) {
         _interactionsPane.endCompoundEdit();
       }
-      else{
+      else {
         _currentDefPane.endCompoundEdit();  
       }
+      
       super.actionPerformed(e);
-      if(_interactionsPane.hasFocus()){
+      
+      if (intPaneFocused) {
         _interactionsPane.requestFocusInWindow();
       }
-      else{
+      else {
         _currentDefPane.requestFocusInWindow();
         
         OpenDefinitionsDocument doc = _model.getActiveDocument();
-//      Utilities.showDebug("isModifiedSinceSave() = " + doc.isModifiedSinceSave());
         _saveAction.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
-//      Utilities.showDebug("check status");
       }
     }
   };
@@ -1226,12 +1235,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Redoes the last undo to the active definitions document. */
   private final DelegatingAction _redoAction = new DelegatingAction() {
     public void actionPerformed(ActionEvent e) {
+      // use whether the delegatee is the Interactions Pane's action instead of whether
+      // _interactionsPane.hasFocus(), because the focus will be lost when the user clicks
+      // on the menu bar.
+      final boolean intPaneFocused = (getDelegatee()==_interactionsController.getRedoAction());
+      
       super.actionPerformed(e);
-      if(_interactionsPane.hasFocus())
-      {
+      if (intPaneFocused) {
         _interactionsPane.requestFocusInWindow();
       }
-      else{
+      else {
         _currentDefPane.requestFocusInWindow();
         OpenDefinitionsDocument doc = _model.getActiveDocument();
         _saveAction.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
@@ -1586,7 +1599,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Goes to the file specified by the word the cursor is on. */
-  final Action gotoFileUnderCursorAction = new AbstractAction("Go to File Under Cursor") {
+  final Action _gotoFileUnderCursorAction = new AbstractAction("Go to File Under Cursor") {
     public void actionPerformed(ActionEvent ae) { _gotoFileUnderCursor(); }
   };
   
@@ -3062,15 +3075,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void focusGained(FocusEvent e) { }
   };
   
-  // adds Listener for undo/redo action for the interactions pane
-  public FocusListener _undoRedoInteractionFocusListener = new FocusListener() {
-    public void focusLost(FocusEvent e) {      
+  // adds Listener for undo/redo action for the definitions pane
+  public final FocusListener _undoRedoDefinitionsFocusListener = new FocusAdapter() {
+    public void focusGained(FocusEvent e){ 
       _undoAction.setDelegatee(_currentDefPane.getUndoAction());
       _redoAction.setDelegatee(_currentDefPane.getRedoAction());   
-    }
-    public void focusGained(FocusEvent e){ 
-    _undoAction.setDelegatee(_interactionsPane.getUndoAction()); 
-      _redoAction.setDelegatee(_interactionsPane.getRedoAction());  
     }
   };
   
@@ -3196,22 +3205,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //    
 //    Utilities.show("Global Model started");
       
-      _tabbedPanesFrame = new DetachedFrame("Tabbed Panes", MainFrame.this, new Runnable1<DetachedFrame>() {
-        public void run(DetachedFrame frame) {
-          frame.getContentPane().add(_tabbedPane);
-        }
-      }, new Runnable1<DetachedFrame>() {
-        public void run(DetachedFrame frame) {
-          _mainSplit.setBottomComponent(_tabbedPane);
-        }
-      });
-      _tabbedPanesFrame.addWindowListener(new WindowAdapter() {
-        public void windowClosing(WindowEvent we) {
-          _detachTabbedPanesMenuItem.setSelected(false);
-          DrJava.getConfig().setSetting(DETACH_TABBEDPANES, false);
-        }
-      });
-      
       _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
       _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
       
@@ -3298,13 +3291,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _currentDefDoc = activeDoc.getDocument();
       _currentDefPane = (DefinitionsPane) defScroll.getViewport().getView();
       _currentDefPane.notifyActive();
+      _currentDefPane.addFocusListener(_undoRedoDefinitionsFocusListener);
       
       // Get proper cross-platform mask.
       int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
       
       // set up key-bindings
       KeyBindingManager.ONLY.setMainFrame(MainFrame.this);
-      KeyBindingManager.ONLY.setActionMap(_currentDefPane.getActionMap());
       _setUpKeyBindingMaps();
       
       _posListener.updateLocation();
@@ -3319,14 +3312,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _javadocErrorPanel.reset();
       
       // Create menubar and menus
-      _fileMenu = _setUpFileMenu(mask);
-      _editMenu = _setUpEditMenu(mask);
-      _toolsMenu = _setUpToolsMenu(mask);
-      _projectMenu = _setUpProjectMenu(mask);
+      _fileMenu = _setUpFileMenu(mask, true);
+      _editMenu = _setUpEditMenu(mask, true);
+      _toolsMenu = _setUpToolsMenu(mask, true);
+      _projectMenu = _setUpProjectMenu(mask, true);
       _debugMenu = null;
-      if (_showDebugger) _debugMenu = _setUpDebugMenu(mask);
-      _languageLevelMenu = _setUpLanguageLevelMenu(mask);
-      _helpMenu = _setUpHelpMenu(mask);
+      if (_showDebugger) _debugMenu = _setUpDebugMenu(mask, true);
+      _languageLevelMenu = _setUpLanguageLevelMenu(mask, true);
+      _helpMenu = _setUpHelpMenu(mask, true);
       
       // initialize menu bar and actions
       _setUpActions();
@@ -3359,6 +3352,22 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       };
       _recentProjectManager = new RecentFileManager(_projectMenu.getItemCount() - 2, _projectMenu,
                                                     projAct, OptionConstants.RECENT_PROJECTS);
+      
+      _tabbedPanesFrame = new DetachedFrame("Tabbed Panes", MainFrame.this, new Runnable1<DetachedFrame>() {
+        public void run(DetachedFrame frame) {
+          frame.getContentPane().add(_tabbedPane);
+        }
+      }, new Runnable1<DetachedFrame>() {
+        public void run(DetachedFrame frame) {
+          _mainSplit.setBottomComponent(_tabbedPane);
+        }
+      });
+      _tabbedPanesFrame.addWindowListener(new WindowAdapter() {
+        public void windowClosing(WindowEvent we) {
+          _detachTabbedPanesMenuItem.setSelected(false);
+          DrJava.getConfig().setSetting(DETACH_TABBEDPANES, false);
+        }
+      });
       
       // set up the menu bars on other frames
       _tabbedPanesFrame.setUpMenuBar();
@@ -6109,12 +6118,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   void _addGUIAvailabilityListener(Action a, GUIAvailabilityListener.ComponentType... components) {
     _guiAvailabilityNotifier.
-      addListener(new ConjoinedGUIAvailabilityActionAdapter(a, _guiAvailabilityNotifier, components));
+      addListener(new AndGUIAvailabilityActionAdapter(a, _guiAvailabilityNotifier, components));
   }
 
   void _addGUIAvailabilityListener(Component a, GUIAvailabilityListener.ComponentType... components) {
     _guiAvailabilityNotifier.
-      addListener(new ConjoinedGUIAvailabilityComponentAdapter(a, _guiAvailabilityNotifier, components));
+      addListener(new AndGUIAvailabilityComponentAdapter(a, _guiAvailabilityNotifier, components));
   }
   
   void _displayGUIComponentAvailabilityFrame() {
@@ -6130,7 +6139,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       });
       buttonThunk.set(button);
-      _guiAvailabilityNotifier.addListener(new ConjoinedGUIAvailabilityListener(_guiAvailabilityNotifier, c) {
+      _guiAvailabilityNotifier.addListener(new AndGUIAvailabilityListener(_guiAvailabilityNotifier, c) {
         public void availabilityChanged(boolean available) {
           button.setText(c.toString()+" "+_guiAvailabilityNotifier.getCount(c));
           button.setSelected(available);
@@ -6214,8 +6223,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     _setUpAction(_undoAction, "Undo", "Undo previous command");
     _setUpAction(_redoAction, "Redo", "Redo last undo");
-    _undoAction.putValue(Action.NAME, "Undo Previous Command");
-    _redoAction.putValue(Action.NAME, "Redo Last Undo");
+    _undoAction.putValue(Action.NAME, "Undo previous command");
+    _redoAction.putValue(Action.NAME, "Redo last undo");
     
     _setUpAction(cutAction, "Cut", "Cut selected text to the clipboard");
     _setUpAction(copyAction, "Copy", "Copy selected text to the clipboard");
@@ -6245,7 +6254,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_findPrevAction, "Find Previous", "Repeats the last find in the opposite direction");
     _setUpAction(_gotoLineAction, "Go to line", "Go to a line number in the document");
     _setUpAction(_gotoFileAction, "Go to File", "Go to a file specified by its name");
-    _setUpAction(gotoFileUnderCursorAction, "Go to File Under Cursor",
+    _setUpAction(_gotoFileUnderCursorAction, "Go to File Under Cursor",
                  "Go to the file specified by the word the cursor is located on");
     
     _setUpAction(_switchToPrevAction, "Previous Document", "Up", "Switch to the previous document");
@@ -6333,10 +6342,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                  "e.g. libraries or resources.</html>");
   }
   
-  private void _setUpAction(Action a, String name, String icon, String shortDesc) {
+  private void _setUpAction(Action a, String name, String icon, String longDesc) {
     a.putValue(Action.SMALL_ICON, _getIcon(icon + "16.gif"));
     a.putValue(Action.DEFAULT, name);
-    a.putValue(Action.SHORT_DESCRIPTION, shortDesc);
+    a.putValue(Action.LONG_DESCRIPTION, longDesc);
   }
   
   private void _setUpAction(Action a, String icon, String shortDesc) { _setUpAction(a, icon, icon, shortDesc); }
@@ -6386,9 +6395,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   void _setUpMenuBar(JMenuBar menuBar) {
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
     _setUpMenuBar(menuBar,
-                  _setUpFileMenu(mask), _setUpEditMenu(mask), _setUpToolsMenu(mask),
-                  _setUpProjectMenu(mask), _showDebugger?_setUpDebugMenu(mask):null,
-                  _setUpLanguageLevelMenu(mask), _setUpHelpMenu(mask));
+                  _setUpFileMenu(mask, false), _setUpEditMenu(mask, false), _setUpToolsMenu(mask, false),
+                  _setUpProjectMenu(mask, false), _showDebugger?_setUpDebugMenu(mask, false):null,
+                  _setUpLanguageLevelMenu(mask, false), _setUpHelpMenu(mask, false));
   }
 
   void _setUpMenuBar(JMenuBar menuBar,
@@ -6416,11 +6425,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param menu Menu to add item to
     * @param a Action for the menu item
     * @param opt Configurable keystroke for the menu item
+    * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
+    * @return the added menu item
     */
-  private void _addMenuItem(JMenu menu, Action a, VectorOption<KeyStroke> opt) {
+  private JMenuItem _addMenuItem(JMenu menu, Action a, VectorOption<KeyStroke> opt, boolean updateKeyboardManager) {
     JMenuItem item;
     item = menu.add(a);
-    _setMenuShortcut(item, a, opt);
+    _setMenuShortcut(item, a, opt, updateKeyboardManager);
+    return item;
   }
 
   /** Inserts an Action as a menu item to the given menu, at the specified index,
@@ -6429,135 +6441,164 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param a Action for the menu item
     * @param opt Configurable keystroke for the menu item
     * @param index Index at which the action is inserted
+    * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
+    * @return the added menu item
     */
-  private void _addMenuItem(JMenu menu, Action a, VectorOption<KeyStroke> opt, int index) {
+  private JMenuItem _addMenuItem(JMenu menu, Action a, VectorOption<KeyStroke> opt, int index,
+                                 boolean updateKeyboardManager) {
     JMenuItem item;
     item = menu.insert(a, index);
-    _setMenuShortcut(item, a, opt);
+    _setMenuShortcut(item, a, opt, updateKeyboardManager);
+    return item;
   }
   
   /** Sets the given menu item to have the specified configurable keystroke.
     * @param item Menu item containing the action
     * @param a Action for the menu item
     * @param opt Configurable keystroke for the menu item
+    * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
     */
-  private void _setMenuShortcut(JMenuItem item, Action a, VectorOption<KeyStroke> opt) {
+  private void _setMenuShortcut(JMenuItem item, Action a, VectorOption<KeyStroke> opt, boolean updateKeyboardManager) {
     Vector<KeyStroke> keys = DrJava.getConfig().getSetting(opt);
     // Checks that "a" is the action associated with the keystroke.
     // Need to check in case two actions were assigned to the same
     // key in the config file.
     // Also check that the keystroke isn't the NULL_KEYSTROKE, which
     //  can strangely be triggered by certain keys in Windows.
-    KeyBindingManager.ONLY.put(opt, a, item, item.getText());
+    if (updateKeyboardManager) { KeyBindingManager.ONLY.put(opt, a, item, item.getText()); }
     if ((keys.size() > 0) && KeyBindingManager.ONLY.get(keys.get(0)) == a) {
       item.setAccelerator(keys.get(0));
     }
   }
   
-  /** Creates and returns a file menu.  Side effects: sets values for _saveMenuItem. */
-  private JMenu _setUpFileMenu(int mask) {
+  /** Creates and returns a file menu.  Side effects: sets values for _saveMenuItem.
+    * @param mask the keystroke modifier to be used
+    * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
+    */
+  private JMenu _setUpFileMenu(int mask, boolean updateKeyboardManager) {
     JMenu fileMenu = new JMenu("File");
     PlatformFactory.ONLY.setMnemonic(fileMenu,KeyEvent.VK_F);
     // New, open
-    _addMenuItem(fileMenu, _newAction, KEY_NEW_FILE);
-    _addMenuItem(fileMenu, _newClassAction, KEY_NEW_CLASS_FILE);
+    _addMenuItem(fileMenu, _newAction, KEY_NEW_FILE, updateKeyboardManager);
+    _addMenuItem(fileMenu, _newClassAction, KEY_NEW_CLASS_FILE, updateKeyboardManager);
 
-    _addMenuItem(fileMenu, _newJUnitTestAction, KEY_NEW_TEST);
-    _addMenuItem(fileMenu, _openAction, KEY_OPEN_FILE);
-    _addMenuItem(fileMenu, _openFolderAction, KEY_OPEN_FOLDER);
+    _addMenuItem(fileMenu, _newJUnitTestAction, KEY_NEW_TEST, updateKeyboardManager);
+    _addMenuItem(fileMenu, _openAction, KEY_OPEN_FILE, updateKeyboardManager);
+    _addMenuItem(fileMenu, _openFolderAction, KEY_OPEN_FOLDER, updateKeyboardManager);
     
     fileMenu.addSeparator();
     
-    _addMenuItem(fileMenu, _saveAction, KEY_SAVE_FILE);
+    _addMenuItem(fileMenu, _saveAction, KEY_SAVE_FILE, updateKeyboardManager);
     _saveAction.setEnabled(true);
-    _addMenuItem(fileMenu, _saveAsAction, KEY_SAVE_FILE_AS);
-    _addMenuItem(fileMenu, _saveCopyAction, KEY_SAVE_FILE_COPY);
-    _addMenuItem(fileMenu, _saveAllAction, KEY_SAVE_ALL_FILES);
-    _addMenuItem(fileMenu, _renameAction, KEY_RENAME_FILE);
+    _addMenuItem(fileMenu, _saveAsAction, KEY_SAVE_FILE_AS, updateKeyboardManager);
+    _addMenuItem(fileMenu, _saveCopyAction, KEY_SAVE_FILE_COPY, updateKeyboardManager);
+    _addMenuItem(fileMenu, _saveAllAction, KEY_SAVE_ALL_FILES, updateKeyboardManager);
+    _addMenuItem(fileMenu, _renameAction, KEY_RENAME_FILE, updateKeyboardManager);
     _renameAction.setEnabled(false);
     
-    _addMenuItem(fileMenu, _revertAction, KEY_REVERT_FILE);
+    _addMenuItem(fileMenu, _revertAction, KEY_REVERT_FILE, updateKeyboardManager);
     _revertAction.setEnabled(false);
     //tmpItem = fileMenu.add(_revertAllAction);
     
     // Close, Close all
     fileMenu.addSeparator();
-    _addMenuItem(fileMenu, _closeAction, KEY_CLOSE_FILE);
-    _addMenuItem(fileMenu, _closeAllAction, KEY_CLOSE_ALL_FILES);
+    _addMenuItem(fileMenu, _closeAction, KEY_CLOSE_FILE, updateKeyboardManager);
+    _addMenuItem(fileMenu, _closeAllAction, KEY_CLOSE_ALL_FILES, updateKeyboardManager);
     
     // Page setup, print preview, print
     fileMenu.addSeparator();
-    _addMenuItem(fileMenu, _pageSetupAction, KEY_PAGE_SETUP);
-    _addMenuItem(fileMenu, _printDefDocPreviewAction, KEY_PRINT_PREVIEW);
-    _addMenuItem(fileMenu, _printDefDocAction, KEY_PRINT);
+    _addMenuItem(fileMenu, _pageSetupAction, KEY_PAGE_SETUP, updateKeyboardManager);
+    _addMenuItem(fileMenu, _printDefDocPreviewAction, KEY_PRINT_PREVIEW, updateKeyboardManager);
+    _addMenuItem(fileMenu, _printDefDocAction, KEY_PRINT, updateKeyboardManager);
     
     // Quit
     fileMenu.addSeparator();
-    _addMenuItem(fileMenu, _quitAction, KEY_QUIT);
+    _addMenuItem(fileMenu, _quitAction, KEY_QUIT, updateKeyboardManager);
     
     return fileMenu;
   }
   
-  /** Creates and returns a edit menu. */
-  private JMenu _setUpEditMenu(int mask) {
+  /** Creates and returns a edit menu.
+    * @param mask the keystroke modifier to be used
+    * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
+    */
+  private JMenu _setUpEditMenu(int mask, boolean updateKeyboardManager) {
     JMenu editMenu = new JMenu("Edit");
     PlatformFactory.ONLY.setMnemonic(editMenu,KeyEvent.VK_E);
     // Undo, redo
-    _addMenuItem(editMenu, _undoAction, KEY_UNDO);
-    _addMenuItem(editMenu, _redoAction, KEY_REDO);
+    final JMenuItem undoItem = _addMenuItem(editMenu, _undoAction, KEY_UNDO, updateKeyboardManager);
+    _undoAction.addPropertyChangeListener(new PropertyChangeListener() {
+      public void propertyChange(PropertyChangeEvent evt) {
+        if ("enabled".equals(evt.getPropertyName())) {
+          boolean val = (Boolean) evt.getNewValue();
+          undoItem.setEnabled(val);
+        }
+      }
+    });
+    
+    final JMenuItem redoItem = _addMenuItem(editMenu, _redoAction, KEY_REDO, updateKeyboardManager);
+    _redoAction.addPropertyChangeListener(new PropertyChangeListener() {
+      public void propertyChange(PropertyChangeEvent evt) {
+        if ("enabled".equals(evt.getPropertyName())) {
+          boolean val = (Boolean) evt.getNewValue();
+          redoItem.setEnabled(val);
+        }
+      }
+    });
     
     // Cut, copy, paste, select all
     editMenu.addSeparator();
-    _addMenuItem(editMenu, cutAction, KEY_CUT);
-    _addMenuItem(editMenu, copyAction, KEY_COPY);
-    _addMenuItem(editMenu, pasteAction, KEY_PASTE);
-    _addMenuItem(editMenu, _pasteHistoryAction, KEY_PASTE_FROM_HISTORY);
-    _addMenuItem(editMenu, _selectAllAction, KEY_SELECT_ALL);
+    _addMenuItem(editMenu, cutAction, KEY_CUT, updateKeyboardManager);
+    _addMenuItem(editMenu, copyAction, KEY_COPY, updateKeyboardManager);
+    _addMenuItem(editMenu, pasteAction, KEY_PASTE, updateKeyboardManager);
+    _addMenuItem(editMenu, _pasteHistoryAction, KEY_PASTE_FROM_HISTORY, updateKeyboardManager);
+    _addMenuItem(editMenu, _selectAllAction, KEY_SELECT_ALL, updateKeyboardManager);
     
     // Indent lines, comment lines
     editMenu.addSeparator();
-    //_addMenuItem(editMenu, _indentLinesAction, KEY_INDENT);
+    //_addMenuItem(editMenu, _indentLinesAction, KEY_INDENT, updateKeyboardManager);
     JMenuItem editItem = editMenu.add(_indentLinesAction);
     editItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0));
-    _addMenuItem(editMenu, _commentLinesAction, KEY_COMMENT_LINES);
-    _addMenuItem(editMenu, _uncommentLinesAction, KEY_UNCOMMENT_LINES);
-    _addMenuItem(editMenu, completeWordUnderCursorAction, KEY_COMPLETE_FILE);
+    _addMenuItem(editMenu, _commentLinesAction, KEY_COMMENT_LINES, updateKeyboardManager);
+    _addMenuItem(editMenu, _uncommentLinesAction, KEY_UNCOMMENT_LINES, updateKeyboardManager);
+    _addMenuItem(editMenu, completeWordUnderCursorAction, KEY_COMPLETE_FILE, updateKeyboardManager);
     
     // Find/replace
     editMenu.addSeparator();
-    _addMenuItem(editMenu, _findReplaceAction, KEY_FIND_REPLACE);
-    _addMenuItem(editMenu, _findNextAction, KEY_FIND_NEXT);
-    _addMenuItem(editMenu, _findPrevAction, KEY_FIND_PREV);
+    _addMenuItem(editMenu, _findReplaceAction, KEY_FIND_REPLACE, updateKeyboardManager);
+    _addMenuItem(editMenu, _findNextAction, KEY_FIND_NEXT, updateKeyboardManager);
+    _addMenuItem(editMenu, _findPrevAction, KEY_FIND_PREV, updateKeyboardManager);
     
     // Next, prev doc
     editMenu.addSeparator();
-    _addMenuItem(editMenu, _switchToPrevAction, KEY_PREVIOUS_DOCUMENT);
-    _addMenuItem(editMenu, _switchToNextAction, KEY_NEXT_DOCUMENT);
-    _addMenuItem(editMenu, _browseBackAction, KEY_BROWSE_BACK);
-    _addMenuItem(editMenu, _browseForwardAction, KEY_BROWSE_FORWARD);
+    _addMenuItem(editMenu, _switchToPrevAction, KEY_PREVIOUS_DOCUMENT, updateKeyboardManager);
+    _addMenuItem(editMenu, _switchToNextAction, KEY_NEXT_DOCUMENT, updateKeyboardManager);
+    _addMenuItem(editMenu, _browseBackAction, KEY_BROWSE_BACK, updateKeyboardManager);
+    _addMenuItem(editMenu, _browseForwardAction, KEY_BROWSE_FORWARD, updateKeyboardManager);
     editMenu.addSeparator();
     
     // Go to
     final JMenu goToMenu = new JMenu("Go To");
-    _addMenuItem(goToMenu, _gotoLineAction, KEY_GOTO_LINE);
-    _addMenuItem(goToMenu, _gotoFileAction, KEY_GOTO_FILE);
-    _addMenuItem(goToMenu, gotoFileUnderCursorAction, KEY_GOTO_FILE_UNDER_CURSOR);
-    _addMenuItem(goToMenu, _gotoOpeningBraceAction, KEY_OPENING_BRACE);
-    _addMenuItem(goToMenu, _gotoClosingBraceAction, KEY_CLOSING_BRACE);
+    _addMenuItem(goToMenu, _gotoLineAction, KEY_GOTO_LINE, updateKeyboardManager);
+    _addMenuItem(goToMenu, _gotoFileAction, KEY_GOTO_FILE, updateKeyboardManager);
+    _addMenuItem(goToMenu, _gotoFileUnderCursorAction, KEY_GOTO_FILE_UNDER_CURSOR, updateKeyboardManager);
+    _addMenuItem(goToMenu, _gotoOpeningBraceAction, KEY_OPENING_BRACE, updateKeyboardManager);
+    _addMenuItem(goToMenu, _gotoClosingBraceAction, KEY_CLOSING_BRACE, updateKeyboardManager);
     editMenu.add(goToMenu);
     
     // Panes
     final JMenu panesMenu = new JMenu("Tabbed Panes");
-    _addMenuItem(panesMenu, _switchToPreviousPaneAction, KEY_PREVIOUS_PANE);
-    _addMenuItem(panesMenu, _switchToNextPaneAction, KEY_NEXT_PANE);
+    _addMenuItem(panesMenu, _switchToPreviousPaneAction, KEY_PREVIOUS_PANE, updateKeyboardManager);
+    _addMenuItem(panesMenu, _switchToNextPaneAction, KEY_NEXT_PANE, updateKeyboardManager);
     panesMenu.addSeparator();
-    _addMenuItem(panesMenu, _prevRegionAction, KEY_TABBED_PREV_REGION);
-    _addMenuItem(panesMenu, _nextRegionAction, KEY_TABBED_NEXT_REGION);
+    _addMenuItem(panesMenu, _prevRegionAction, KEY_TABBED_PREV_REGION, updateKeyboardManager);
+    _addMenuItem(panesMenu, _nextRegionAction, KEY_TABBED_NEXT_REGION, updateKeyboardManager);
     panesMenu.addSeparator();
     
-    JMenuItem tempDetachTabbedPanesMenuItem = _newCheckBoxMenuItem(_detachTabbedPanesAction);
+    JMenuItem tempDetachTabbedPanesMenuItem = MainFrameStatics.newCheckBoxMenuItem(_detachTabbedPanesAction);
     tempDetachTabbedPanesMenuItem.setSelected(DrJava.getConfig().getSetting(DETACH_TABBEDPANES));
-    _setMenuShortcut(tempDetachTabbedPanesMenuItem, _detachTabbedPanesAction, KEY_DETACH_TABBEDPANES);
+    _setMenuShortcut(tempDetachTabbedPanesMenuItem, _detachTabbedPanesAction, KEY_DETACH_TABBEDPANES,
+                     updateKeyboardManager);
     panesMenu.add(tempDetachTabbedPanesMenuItem);
     if (_detachTabbedPanesMenuItem==null) {
       // assign the first time
@@ -6584,65 +6625,68 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     // access to configurations GUI
     editMenu.addSeparator();
-    _addMenuItem(editMenu, _editPreferencesAction, KEY_PREFERENCES);
+    _addMenuItem(editMenu, _editPreferencesAction, KEY_PREFERENCES, updateKeyboardManager);
     
     // Add the menus to the menu bar
     return editMenu;
   }
   
-  /** Creates and returns a tools menu. */
-  private JMenu _setUpToolsMenu(int mask) {
+  /** Creates and returns a tools menu.
+    * @param mask the keystroke modifier to be used
+    * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
+    */
+  private JMenu _setUpToolsMenu(int mask, boolean updateKeyboardManager) {
     final JMenu toolsMenu = new JMenu("Tools");
     PlatformFactory.ONLY.setMnemonic(toolsMenu,KeyEvent.VK_T);
     
     // Compile, Test, Javadoc
-    _addMenuItem(toolsMenu, _compileAllAction, KEY_COMPILE_ALL);
-    _addMenuItem(toolsMenu, _compileAction, KEY_COMPILE);
-    _addMenuItem(toolsMenu, _junitAllAction, KEY_TEST_ALL);
-    _addMenuItem(toolsMenu, _junitAction, KEY_TEST);
+    _addMenuItem(toolsMenu, _compileAllAction, KEY_COMPILE_ALL, updateKeyboardManager);
+    _addMenuItem(toolsMenu, _compileAction, KEY_COMPILE, updateKeyboardManager);
+    _addMenuItem(toolsMenu, _junitAllAction, KEY_TEST_ALL, updateKeyboardManager);
+    _addMenuItem(toolsMenu, _junitAction, KEY_TEST, updateKeyboardManager);
     toolsMenu.addSeparator();
     
     // Run
     final int runActionIndex = toolsMenu.getItemCount();
-    _addMenuItem(toolsMenu, _runAction, KEY_RUN);
-    _addMenuItem(toolsMenu, _runAppletAction, KEY_RUN_APPLET);
-    _addMenuItem(toolsMenu, _resetInteractionsAction, KEY_RESET_INTERACTIONS);
+    _addMenuItem(toolsMenu, _runAction, KEY_RUN, updateKeyboardManager);
+    _addMenuItem(toolsMenu, _runAppletAction, KEY_RUN_APPLET, updateKeyboardManager);
+    _addMenuItem(toolsMenu, _resetInteractionsAction, KEY_RESET_INTERACTIONS, updateKeyboardManager);
     toolsMenu.addSeparator();
     
     // Javadoc
     final JMenu javadocMenu = new JMenu("Javadoc");
-    _addMenuItem(javadocMenu, _javadocAllAction, KEY_JAVADOC_ALL);
-    _addMenuItem(javadocMenu, _javadocCurrentAction, KEY_JAVADOC_CURRENT);
+    _addMenuItem(javadocMenu, _javadocAllAction, KEY_JAVADOC_ALL, updateKeyboardManager);
+    _addMenuItem(javadocMenu, _javadocCurrentAction, KEY_JAVADOC_CURRENT, updateKeyboardManager);
     javadocMenu.addSeparator();
-    _addMenuItem(javadocMenu, _openJavadocAction, KEY_OPEN_JAVADOC);
-    _addMenuItem(javadocMenu, _openJavadocUnderCursorAction, KEY_OPEN_JAVADOC_UNDER_CURSOR);    
+    _addMenuItem(javadocMenu, _openJavadocAction, KEY_OPEN_JAVADOC, updateKeyboardManager);
+    _addMenuItem(javadocMenu, _openJavadocUnderCursorAction, KEY_OPEN_JAVADOC_UNDER_CURSOR, updateKeyboardManager);    
     toolsMenu.add(javadocMenu);
     
     final JMenu historyMenu = new JMenu("History");
-    _addMenuItem(historyMenu, _executeHistoryAction, KEY_EXECUTE_HISTORY);
-    _addMenuItem(historyMenu, _loadHistoryScriptAction, KEY_LOAD_HISTORY_SCRIPT);
-    _addMenuItem(historyMenu, _saveHistoryAction, KEY_SAVE_HISTORY);
-    _addMenuItem(historyMenu, _clearHistoryAction, KEY_CLEAR_HISTORY);
+    _addMenuItem(historyMenu, _executeHistoryAction, KEY_EXECUTE_HISTORY, updateKeyboardManager);
+    _addMenuItem(historyMenu, _loadHistoryScriptAction, KEY_LOAD_HISTORY_SCRIPT, updateKeyboardManager);
+    _addMenuItem(historyMenu, _saveHistoryAction, KEY_SAVE_HISTORY, updateKeyboardManager);
+    _addMenuItem(historyMenu, _clearHistoryAction, KEY_CLEAR_HISTORY, updateKeyboardManager);
     toolsMenu.add(historyMenu);
     
     // Interactions, console
     final JMenu interMenu = new JMenu("Interactions & Console");    
-    _addMenuItem(interMenu, _saveInteractionsCopyAction, KEY_SAVE_INTERACTIONS_COPY);
-    _addMenuItem(interMenu, _viewInteractionsClassPathAction, KEY_VIEW_INTERACTIONS_CLASSPATH);
-    _addMenuItem(interMenu, _copyInteractionToDefinitionsAction, KEY_LIFT_CURRENT_INTERACTION);
-    _addMenuItem(interMenu, _printInteractionsAction, KEY_PRINT_INTERACTIONS);
+    _addMenuItem(interMenu, _saveInteractionsCopyAction, KEY_SAVE_INTERACTIONS_COPY, updateKeyboardManager);
+    _addMenuItem(interMenu, _viewInteractionsClassPathAction, KEY_VIEW_INTERACTIONS_CLASSPATH, updateKeyboardManager);
+    _addMenuItem(interMenu, _copyInteractionToDefinitionsAction, KEY_LIFT_CURRENT_INTERACTION, updateKeyboardManager);
+    _addMenuItem(interMenu, _printInteractionsAction, KEY_PRINT_INTERACTIONS, updateKeyboardManager);
     interMenu.addSeparator();
-    _addMenuItem(interMenu, _clearConsoleAction, KEY_CLEAR_CONSOLE);
-    _addMenuItem(interMenu, _saveConsoleCopyAction, KEY_SAVE_CONSOLE_COPY);
-    _addMenuItem(interMenu, _printConsoleAction, KEY_PRINT_CONSOLE);
-    _addMenuItem(interMenu, _closeSystemInAction, KEY_CLOSE_SYSTEM_IN);
+    _addMenuItem(interMenu, _clearConsoleAction, KEY_CLEAR_CONSOLE, updateKeyboardManager);
+    _addMenuItem(interMenu, _saveConsoleCopyAction, KEY_SAVE_CONSOLE_COPY, updateKeyboardManager);
+    _addMenuItem(interMenu, _printConsoleAction, KEY_PRINT_CONSOLE, updateKeyboardManager);
+    _addMenuItem(interMenu, _closeSystemInAction, KEY_CLOSE_SYSTEM_IN, updateKeyboardManager);
     if (DrJava.getConfig().getSetting(SHOW_DEBUG_CONSOLE).booleanValue()) {
       toolsMenu.add(_showDebugConsoleAction);
     }
     toolsMenu.add(interMenu);
     
     final JMenu extMenu = new JMenu("External Processes");
-    _addMenuItem(extMenu, _executeExternalProcessAction, KEY_EXEC_PROCESS);
+    _addMenuItem(extMenu, _executeExternalProcessAction, KEY_EXEC_PROCESS, updateKeyboardManager);
     final JMenuItem execItem = extMenu.getItem(0);
     extMenu.addSeparator();
     extMenu.add(_editExternalProcessesAction);
@@ -6703,17 +6747,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       optionChanged(new OptionEvent<Integer>(OptionConstants.EXTERNAL_SAVED_COUNT,
                                              DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)));
     final JMenu advancedMenu = new JMenu("Advanced");
-    _addMenuItem(advancedMenu, _generateCustomDrJavaJarAction, KEY_GENERATE_CUSTOM_DRJAVA);
-    _addMenuItem(advancedMenu, _newDrJavaInstanceAction, KEY_NEW_DRJAVA_INSTANCE);
+    _addMenuItem(advancedMenu, _generateCustomDrJavaJarAction, KEY_GENERATE_CUSTOM_DRJAVA, updateKeyboardManager);
+    _addMenuItem(advancedMenu, _newDrJavaInstanceAction, KEY_NEW_DRJAVA_INSTANCE, updateKeyboardManager);
     toolsMenu.add(advancedMenu);
 
     toolsMenu.addSeparator();    
     
-    _addMenuItem(toolsMenu, _bookmarksPanelAction, KEY_BOOKMARKS_PANEL);
-    _addMenuItem(toolsMenu, _toggleBookmarkAction, KEY_BOOKMARKS_TOGGLE);
+    _addMenuItem(toolsMenu, _bookmarksPanelAction, KEY_BOOKMARKS_PANEL, updateKeyboardManager);
+    _addMenuItem(toolsMenu, _toggleBookmarkAction, KEY_BOOKMARKS_TOGGLE, updateKeyboardManager);
     
     toolsMenu.addSeparator();
-    _addMenuItem(toolsMenu, _followFileAction, KEY_FOLLOW_FILE);
+    _addMenuItem(toolsMenu, _followFileAction, KEY_FOLLOW_FILE, updateKeyboardManager);
     
     // Add the listener that changes the "Run Main" menu item
     OptionListener<Boolean> runMainListener = new OptionListener<Boolean>() {
@@ -6741,46 +6785,52 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     return toolsMenu;
   }
   
-  /** Creates and returns a project menu. */
-  private JMenu _setUpProjectMenu(int mask) {
+  /** Creates and returns a project menu
+    * @param mask the keystroke modifier to be used
+    * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
+    */
+  private JMenu _setUpProjectMenu(int mask, boolean updateKeyboardManager) {
     JMenu projectMenu = new JMenu("Project");
     PlatformFactory.ONLY.setMnemonic(projectMenu,KeyEvent.VK_P);
     // New, open
-    _addMenuItem(projectMenu, _newProjectAction, KEY_NEW_PROJECT);
-    _addMenuItem(projectMenu, _openProjectAction, KEY_OPEN_PROJECT);
+    _addMenuItem(projectMenu, _newProjectAction, KEY_NEW_PROJECT, updateKeyboardManager);
+    _addMenuItem(projectMenu, _openProjectAction, KEY_OPEN_PROJECT, updateKeyboardManager);
     
     //Save
-    _addMenuItem(projectMenu, _saveProjectAction, KEY_SAVE_PROJECT);
+    _addMenuItem(projectMenu, _saveProjectAction, KEY_SAVE_PROJECT, updateKeyboardManager);
     //SaveAs
-    _addMenuItem(projectMenu, _saveProjectAsAction, KEY_SAVE_AS_PROJECT);
+    _addMenuItem(projectMenu, _saveProjectAsAction, KEY_SAVE_AS_PROJECT, updateKeyboardManager);
     
     // Close
-    _addMenuItem(projectMenu, _closeProjectAction, KEY_CLOSE_PROJECT);
+    _addMenuItem(projectMenu, _closeProjectAction, KEY_CLOSE_PROJECT, updateKeyboardManager);
     
     projectMenu.addSeparator();
     // run project
-    _addMenuItem(projectMenu, _compileProjectAction, KEY_COMPILE_PROJECT);
-    _addMenuItem(projectMenu, _junitProjectAction, KEY_JUNIT_PROJECT);
-    _addMenuItem(projectMenu, _runProjectAction, KEY_RUN_PROJECT);
-    _addMenuItem(projectMenu, _cleanAction, KEY_CLEAN_PROJECT);
-    _addMenuItem(projectMenu, _autoRefreshAction, KEY_AUTO_REFRESH_PROJECT);
-    _addMenuItem(projectMenu, _jarProjectAction, KEY_JAR_PROJECT);
+    _addMenuItem(projectMenu, _compileProjectAction, KEY_COMPILE_PROJECT, updateKeyboardManager);
+    _addMenuItem(projectMenu, _junitProjectAction, KEY_JUNIT_PROJECT, updateKeyboardManager);
+    _addMenuItem(projectMenu, _runProjectAction, KEY_RUN_PROJECT, updateKeyboardManager);
+    _addMenuItem(projectMenu, _cleanAction, KEY_CLEAN_PROJECT, updateKeyboardManager);
+    _addMenuItem(projectMenu, _autoRefreshAction, KEY_AUTO_REFRESH_PROJECT, updateKeyboardManager);
+    _addMenuItem(projectMenu, _jarProjectAction, KEY_JAR_PROJECT, updateKeyboardManager);
     
     projectMenu.addSeparator();
     // eventually add project options
-    _addMenuItem(projectMenu, _projectPropertiesAction, KEY_PROJECT_PROPERTIES);
+    _addMenuItem(projectMenu, _projectPropertiesAction, KEY_PROJECT_PROPERTIES, updateKeyboardManager);
     
     return projectMenu;
   }
   
-  /** Creates and returns a debug menu. */
-  private JMenu _setUpDebugMenu(int mask) {
+  /** Creates and returns a debug menu.
+    * @param mask the keystroke modifier to be used
+    * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
+    */
+  private JMenu _setUpDebugMenu(int mask, boolean updateKeyboardManager) {
     JMenu debugMenu = new JMenu("Debugger");
     PlatformFactory.ONLY.setMnemonic(debugMenu,KeyEvent.VK_D);
     // Enable debugging item
-    JMenuItem tempDebuggerEnabledMenuItem = _newCheckBoxMenuItem(_toggleDebuggerAction);
+    JMenuItem tempDebuggerEnabledMenuItem = MainFrameStatics.newCheckBoxMenuItem(_toggleDebuggerAction);
     tempDebuggerEnabledMenuItem.setSelected(false);
-    _setMenuShortcut(tempDebuggerEnabledMenuItem, _toggleDebuggerAction, KEY_DEBUG_MODE_TOGGLE);
+    _setMenuShortcut(tempDebuggerEnabledMenuItem, _toggleDebuggerAction, KEY_DEBUG_MODE_TOGGLE, updateKeyboardManager);
     debugMenu.add(tempDebuggerEnabledMenuItem);
     if (_debuggerEnabledMenuItem==null) {
       // assign the first time
@@ -6805,21 +6855,22 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     debugMenu.addSeparator();
     
-    _addMenuItem(debugMenu, _toggleBreakpointAction, KEY_DEBUG_BREAKPOINT_TOGGLE);
+    _addMenuItem(debugMenu, _toggleBreakpointAction, KEY_DEBUG_BREAKPOINT_TOGGLE, updateKeyboardManager);
     //_printBreakpointsMenuItem = debugMenu.add(_printBreakpointsAction);
     //_clearAllBreakpointsMenuItem =
-    _addMenuItem(debugMenu, _clearAllBreakpointsAction, KEY_DEBUG_CLEAR_ALL_BREAKPOINTS);
-    _addMenuItem(debugMenu, _breakpointsPanelAction, KEY_DEBUG_BREAKPOINT_PANEL);
+    _addMenuItem(debugMenu, _clearAllBreakpointsAction, KEY_DEBUG_CLEAR_ALL_BREAKPOINTS, updateKeyboardManager);
+    _addMenuItem(debugMenu, _breakpointsPanelAction, KEY_DEBUG_BREAKPOINT_PANEL, updateKeyboardManager);
     debugMenu.addSeparator();
     
-    //_addMenuItem(debugMenu, _suspendDebugAction, KEY_DEBUG_SUSPEND);
-    _addMenuItem(debugMenu, _resumeDebugAction, KEY_DEBUG_RESUME);
-    _addMenuItem(debugMenu, _stepIntoDebugAction, KEY_DEBUG_STEP_INTO);
-    _addMenuItem(debugMenu, _stepOverDebugAction, KEY_DEBUG_STEP_OVER);
-    _addMenuItem(debugMenu, _stepOutDebugAction, KEY_DEBUG_STEP_OUT);
+    //_addMenuItem(debugMenu, _suspendDebugAction, KEY_DEBUG_SUSPEND, updateKeyboardManager);
+    _addMenuItem(debugMenu, _resumeDebugAction, KEY_DEBUG_RESUME, updateKeyboardManager);
+    _addMenuItem(debugMenu, _stepIntoDebugAction, KEY_DEBUG_STEP_INTO, updateKeyboardManager);
+    _addMenuItem(debugMenu, _stepOverDebugAction, KEY_DEBUG_STEP_OVER, updateKeyboardManager);
+    _addMenuItem(debugMenu, _stepOutDebugAction, KEY_DEBUG_STEP_OUT, updateKeyboardManager);
     
-    JMenuItem tempAutomaticTraceMenuItem = _newCheckBoxMenuItem(_automaticTraceDebugAction);
-    _setMenuShortcut(tempAutomaticTraceMenuItem, _automaticTraceDebugAction, KEY_DEBUG_AUTOMATIC_TRACE);
+    JMenuItem tempAutomaticTraceMenuItem = MainFrameStatics.newCheckBoxMenuItem(_automaticTraceDebugAction);
+    _setMenuShortcut(tempAutomaticTraceMenuItem, _automaticTraceDebugAction, KEY_DEBUG_AUTOMATIC_TRACE,
+                     updateKeyboardManager);
     debugMenu.add(tempAutomaticTraceMenuItem);
     if (_automaticTraceMenuItem==null) {
       // assign the first time
@@ -6843,9 +6894,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     debugMenu.addSeparator();
-    JMenuItem tempDetachDebugFrameMenuItem = _newCheckBoxMenuItem(_detachDebugFrameAction);
+    JMenuItem tempDetachDebugFrameMenuItem = MainFrameStatics.newCheckBoxMenuItem(_detachDebugFrameAction);
     tempDetachDebugFrameMenuItem.setSelected(DrJava.getConfig().getSetting(DETACH_DEBUGGER));
-    _setMenuShortcut(tempDetachDebugFrameMenuItem, _detachDebugFrameAction, KEY_DETACH_DEBUGGER);
+    _setMenuShortcut(tempDetachDebugFrameMenuItem, _detachDebugFrameAction, KEY_DETACH_DEBUGGER, updateKeyboardManager);
     debugMenu.add(tempDetachDebugFrameMenuItem);
     if (_detachDebugFrameMenuItem==null) {
       // assign the first time
@@ -6894,8 +6945,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _debugPanel.setAutomaticTraceButtonText();
   }
   
-  /** Creates and returns the language levels menu. */
-  private JMenu _setUpLanguageLevelMenu(int mask) {
+  /** Creates and returns the language levels menu.
+    * @param mask the keystroke modifier to be used
+    * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
+    */
+  private JMenu _setUpLanguageLevelMenu(int mask, boolean updateKeyboardManager) {
     JMenu languageLevelMenu = new JMenu("Language Level");
     PlatformFactory.ONLY.setMnemonic(languageLevelMenu,KeyEvent.VK_L);
     ButtonGroup group = new ButtonGroup();
@@ -6943,20 +6997,23 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     return languageLevelMenu;
   }
   
-  /** Creates and returns a help menu. */
-  private JMenu _setUpHelpMenu(int mask) {
+  /** Creates and returns a help menu.
+    * @param mask the keystroke modifier to be used
+    * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
+    */
+  private JMenu _setUpHelpMenu(int mask, boolean updateKeyboardManager) {
     JMenu helpMenu = new JMenu("Help");
     PlatformFactory.ONLY.setMnemonic(helpMenu,KeyEvent.VK_H);
-    _addMenuItem(helpMenu, _helpAction, KEY_HELP);
-    _addMenuItem(helpMenu, _quickStartAction, KEY_QUICKSTART);
+    _addMenuItem(helpMenu, _helpAction, KEY_HELP, updateKeyboardManager);
+    _addMenuItem(helpMenu, _quickStartAction, KEY_QUICKSTART, updateKeyboardManager);
     helpMenu.addSeparator();
-    _addMenuItem(helpMenu, _aboutAction, KEY_ABOUT);
-    _addMenuItem(helpMenu, _drjavaSurveyAction, KEY_DRJAVA_SURVEY);
-    _addMenuItem(helpMenu, _checkNewVersionAction, KEY_CHECK_NEW_VERSION);
-    _addMenuItem(helpMenu, _errorsAction, KEY_DRJAVA_ERRORS);
+    _addMenuItem(helpMenu, _aboutAction, KEY_ABOUT, updateKeyboardManager);
+    _addMenuItem(helpMenu, _drjavaSurveyAction, KEY_DRJAVA_SURVEY, updateKeyboardManager);
+    _addMenuItem(helpMenu, _checkNewVersionAction, KEY_CHECK_NEW_VERSION, updateKeyboardManager);
+    _addMenuItem(helpMenu, _errorsAction, KEY_DRJAVA_ERRORS, updateKeyboardManager);
     helpMenu.addSeparator();
-    _addMenuItem(helpMenu, _forceQuitAction, KEY_FORCE_QUIT);
-    _addMenuItem(helpMenu, _exportProjectInOldFormatAction, KEY_EXPORT_OLD);
+    _addMenuItem(helpMenu, _forceQuitAction, KEY_FORCE_QUIT, updateKeyboardManager);
+    _addMenuItem(helpMenu, _exportProjectInOldFormatAction, KEY_EXPORT_OLD, updateKeyboardManager);
     return helpMenu;
   }
   
@@ -6978,7 +7035,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     ret.setEnabled(false);
     ret.addActionListener(a);
-    ret.setToolTipText( (String) a.getValue(Action.SHORT_DESCRIPTION));
+    ret.setToolTipText( (String) a.getValue(Action.LONG_DESCRIPTION));
     ret.setFont(buttonFont);
 //    Boolean test = a instanceof DelegatingAction;
     a.addPropertyChangeListener(new PropertyChangeListener() {
@@ -7085,12 +7142,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     OptionListener<Boolean> runButtonListener = new OptionListener<Boolean>() {
       public void optionChanged(final OptionEvent<Boolean> oce) { 
         if (oce.value) {
-          _runAction.putValue(Action.SHORT_DESCRIPTION, 
+          _runAction.putValue(Action.LONG_DESCRIPTION, 
                               "Run the current document, regardless of whether it is an applet, an ACM " +
                               "Java Task Force program, or a regular Java program with a main method."); 
         }
         else {
-          _runAction.putValue(Action.SHORT_DESCRIPTION,
+          _runAction.putValue(Action.LONG_DESCRIPTION,
                               "Run the main method of the current document"); 
         }
         // _runButton = _updateToolbarButton(_runButton, _runAction);
@@ -7414,7 +7471,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     _interactionsPane.addKeyListener(_historyListener);
     _interactionsPane.addFocusListener(_focusListenerForRecentDocs);
-     _interactionsPane.addFocusListener(_undoRedoInteractionFocusListener);
+    _interactionsController.addFocusListener(new FocusAdapter() {
+      public void focusGained(FocusEvent e){ 
+        _undoAction.setDelegatee(_interactionsController.getUndoAction());
+        _redoAction.setDelegatee(_interactionsController.getRedoAction());  
+      }
+    });
     
     _consoleScroll.addKeyListener(_historyListener);
     _consoleScroll.addFocusListener(_focusListenerForRecentDocs);
@@ -8064,16 +8126,20 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // guaranteed to make it editable again when we return from the compilation, so we take the state
     // with us.  We guarantee only one definitions pane is un-editable at any time.
     if (_currentDefPane.isEditable()) {
+      if (_currentDefPane != null) { _currentDefPane.removeFocusListener(_undoRedoDefinitionsFocusListener); }
       _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();
       _currentDefPane.notifyActive();
+      _currentDefPane.addFocusListener(_undoRedoDefinitionsFocusListener);
     }
     else {
       try { _currentDefPane.setEditable(true); }
       catch(NoSuchDocumentException e) { /* It's OK */ }
       
+      if (_currentDefPane != null) { _currentDefPane.removeFocusListener(_undoRedoDefinitionsFocusListener); }
       _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();
       _currentDefPane.notifyActive();
       _currentDefPane.setEditable(false);
+      _currentDefPane.addFocusListener(_undoRedoDefinitionsFocusListener);
     }
     // reset the undo/redo menu items
     resetUndo();
@@ -8120,6 +8186,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     resetUndo();
     _updateDebugStatus();
   }
+  
   /** Resets the undo/redo menu items */
   public void resetUndo() {
     _undoAction.setDelegatee(_currentDefPane.getUndoAction());
@@ -8164,29 +8231,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     newbar.revalidate();
     scroll.setHorizontalScrollBar(newbar);
     scroll.revalidate();
-  }
-  
-  /** Returns a JRadioButtonMenuItem that looks like a JCheckBoxMenuItem. This is a workaround for a known 
-    * bug on OS X's version of Java. (See http://developer.apple.com/qa/qa2001/qa1154.html)
-    * @param action Action for the menu item
-    * @return JRadioButtonMenuItem with a checkbox icon
-    */
-  private JMenuItem _newCheckBoxMenuItem(Action action) {
-    String RADIO_ICON_KEY = "RadioButtonMenuItem.checkIcon";
-    String CHECK_ICON_KEY = "CheckBoxMenuItem.checkIcon";
-    
-    // Store the default radio button icon to put back later
-    Object radioIcon = UIManager.get(RADIO_ICON_KEY);
-    
-    // Replace radio button's checkIcon with that of JCheckBoxMenuItem
-    // so that our menu item looks like a checkbox
-    UIManager.put(RADIO_ICON_KEY, UIManager.get(CHECK_ICON_KEY));
-    JRadioButtonMenuItem pseudoCheckBox = new JRadioButtonMenuItem(action);
-    
-    // Put original radio button checkIcon back.
-    UIManager.put(RADIO_ICON_KEY, radioIcon);
-    
-    return pseudoCheckBox;
   }
   
   /** Gets the absolute file, or if necessary, the canonical file.
@@ -8250,11 +8294,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     // Update Interactions Pane
     _interactionsPane.setFont(f);
-    _interactionsController.setDefaultFont(f);
     
     // Update Console Pane
     _consolePane.setFont(f);
-    _consoleController.setDefaultFont(f);
     
     _findReplace.setFieldFont(f);
     _compilerErrorPanel.setListFont(f);

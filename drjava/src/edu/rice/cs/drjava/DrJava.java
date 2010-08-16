@@ -52,6 +52,7 @@ import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 import edu.rice.cs.plt.concurrent.DelayedInterrupter;
 import edu.rice.cs.plt.concurrent.JVMBuilder;
+import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
@@ -178,7 +179,7 @@ public class DrJava {
     if (_doRestart && _alreadyRestarted) {
       _log.log("addFileToOpen: already done the restart, trying to use remote control");
       // we already did the restart, try to use the remote control to open the file
-      if (DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED)) {
+      if (DrJava.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_ENABLED)) {
         _log.log("\tremote control...");
         openWithRemoteControl(_filesToOpen,NUM_REMOTE_CONTROL_RETRIES );
         _log.log("\tclearing _filesToOpen");
@@ -200,7 +201,7 @@ public class DrJava {
     * @return true if successful
     */
   public static synchronized boolean openWithRemoteControl(ArrayList<String> files, int numAttempts) {
-    if (!DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED) ||
+    if (!DrJava.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_ENABLED) ||
         !_restartedDrJavaUsesRemoteControl ||
         (files.size()==0)) return false;
     
@@ -255,7 +256,7 @@ public class DrJava {
       // if there were files passed on the command line,
       // try to open them in an existing instance
       if (!_forceNewInstance &&
-          DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED) &&
+          DrJava.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_ENABLED) &&
           (_filesToOpen.size() > 0)) {
         if (openWithRemoteControl(_filesToOpen,1)) System.exit(0); // files opened in existing instance, quit
       }
@@ -290,7 +291,7 @@ public class DrJava {
         }
         
         if (_doRestart) {
-          if (DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED)) {
+          if (DrJava.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_ENABLED)) {
             // at this time, OUR remote control server hasn't been started yet
             // if one is running, then we won't be able to contact the restarted DrJava
            _restartedDrJavaUsesRemoteControl = !RemoteControlClient.isServerRunning();
@@ -453,7 +454,7 @@ public class DrJava {
     }
     
     if ((!("".equals(getConfig().getSetting(MASTER_JVM_XMX)))) &&
-        (!(edu.rice.cs.drjava.config.OptionConstants.heapSizeChoices.get(0).equals(getConfig().getSetting(MASTER_JVM_XMX))))) { 
+        (!(OptionConstants.heapSizeChoices.get(0).equals(getConfig().getSetting(MASTER_JVM_XMX))))) { 
       _jvmArgs.add("-Xmx" + getConfig().getSetting(MASTER_JVM_XMX).trim() + "M");
       heapSizeGiven = true;
     }
@@ -598,7 +599,7 @@ public class DrJava {
   public static boolean warnIfLinuxWithCompiz() {
     try {
       if (!System.getProperty("os.name").equals("Linux")) return false; // not Linux
-      if (!DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.WARN_IF_COMPIZ)) return false; // set to ignore
+      if (!DrJava.getConfig().getSetting(OptionConstants.WARN_IF_COMPIZ)) return false; // set to ignore
       
       // get /bin/ps
       File ps = new File("/bin/ps");
@@ -622,30 +623,36 @@ public class DrJava {
       }
       if (!compiz) return false; // no Compiz
       
+      final JavaVersion.FullVersion ver160_20 = JavaVersion.parseFullVersion("1.6.0_20");
+      if (JavaVersion.CURRENT_FULL.compareTo(ver160_20)>=0) return false; // Java >= 1.6.0_20
+      
       String[] options = new String[] { "Yes", "Yes, and ignore from now on", "No" };
-      int res = javax.swing.JOptionPane.showOptionDialog(null,
-                                                         "<html>DrJava has detected that you are using Compiz.<br>" + 
-                                                         "<br>" + 
-                                                         "Compiz and Java Swing are currently incompatible and can cause<br>" + 
-                                                         "DrJava or your computer to crash.<br>" + 
-                                                         "<br>" + 
-                                                         "We recommend that you <b>disable Compiz</b>. On Ubuntu, go to<br>" + 
-                                                         "System->Preferences->Appearence, display the Visual Effects tab,<br>" + 
-                                                         "and select 'None'.<br>" + 
-                                                         "<br>" + 
-                                                         "For more information, please go to http://drjava.org/compiz<br>" + 
-                                                         "<br>" + 
-                                                         "Do you want to start DrJava anyway?</html>",
-                                                         "Compiz detected",
-                                                         JOptionPane.DEFAULT_OPTION,
-                                                         javax.swing.JOptionPane.WARNING_MESSAGE,
-                                                         null,
-                                                         options,
-                                                         options[0]);
+      int res = javax.swing.JOptionPane.
+        showOptionDialog(null,
+                         "<html>DrJava has detected that you are using Compiz with a version<br>" +
+                         "of Java that is older than " + ver160_20 + ".<br>" + 
+                         "<br>" + 
+                         "Compiz and older versions of Java are incompatible and can cause<br>" + 
+                         "DrJava or your computer to crash.<br>" + 
+                         "<br>" + 
+                         "We recommend that you <b>update to " + ver160_20 + " or newer</b>,<br>" +
+                         "or that you disable Compiz if you still experience problems.<br>" +
+                         "On Ubuntu, go to System->Preferences->Appearence, display the<br>" +
+                         "Visual Effects tab, and select 'None'.<br>" + 
+                         "<br>" + 
+                         "For more information, please go to http://drjava.org/compiz<br>" + 
+                         "<br>" + 
+                         "Do you want to start DrJava anyway?</html>",
+                         "Compiz detected",
+                         JOptionPane.DEFAULT_OPTION,
+                         javax.swing.JOptionPane.WARNING_MESSAGE,
+                         null,
+                         options,
+                         options[0]);
       switch(res) {
         case 1:
           // set "ignore" option
-          DrJava.getConfig().setSetting(edu.rice.cs.drjava.config.OptionConstants.WARN_IF_COMPIZ, false);
+          DrJava.getConfig().setSetting(OptionConstants.WARN_IF_COMPIZ, false);
           break;
         case 2:
           System.exit(0);

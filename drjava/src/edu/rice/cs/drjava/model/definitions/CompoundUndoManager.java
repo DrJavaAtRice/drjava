@@ -120,7 +120,9 @@ public class CompoundUndoManager extends UndoManager {
           super.addEdit(ce);
           _notifyUndoHappened();
         }
-        else _compoundEdits.get(0).addEdit(ce);
+        else {
+          _compoundEdits.get(0).addEdit(ce);
+        }
       } 
     }
     else throw new IllegalStateException("Improperly nested compound edits.");
@@ -163,7 +165,10 @@ public class CompoundUndoManager extends UndoManager {
   /** Returns true when a compound edit is in progress,  or when there are valid stored undoable edits
     * @return true iff undoing is possible
     */
-  public /* synchronized */ boolean canUndo() { return _compoundEditInProgress() || super.canUndo(); }
+  public /* synchronized */ boolean canUndo() {
+    LOG.log("canUndo: _compoundEditInProgress() = "+_compoundEditInProgress()+", super.canUndo() = "+super.canUndo());
+    LOG.log("    "+_compoundEdits);
+    return _compoundEditInProgress() || super.canUndo(); }
   
   /** Returns the presentation name for this undo, or delegates to super if none is available
     * @return the undo's presentation name

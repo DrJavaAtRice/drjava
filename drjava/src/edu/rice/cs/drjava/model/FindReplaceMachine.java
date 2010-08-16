@@ -196,8 +196,9 @@ public class FindReplaceMachine {
     */
   public boolean onMatch() {
     
-    // Bug: this invariant doesn't hold.  See DrJava bug #2321815
-/* assert Utilities.TEST_MODE || EventQueue.isDispatchThread(); */
+    // Should be fixed now because of invokeAndWait in MainFrame constructor
+    // (was: this invariant doesn't hold.  See DrJava bug #2321815)
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     String findWord = _findWord;
     int wordLen, off;
@@ -281,10 +282,7 @@ public class FindReplaceMachine {
         count += _replaceAllInCurrentDoc(false);
         _doc = _docIterator.getNextDocument(_doc, _frame);
         
-        if(_doc==null)
-        {
-            i=n;
-        }
+        if(_doc==null) break;
       }
       
       // update display (adding "*") in navigatgorPane
@@ -367,10 +365,7 @@ public class FindReplaceMachine {
         count += _processAllInCurrentDoc(findAction, false);
         _doc = _docIterator.getNextDocument(_doc, _frame);
         
-        if(_doc==null)
-        {
-            i=n;
-        }
+        if(_doc==null) break;
       }
       
       // update display (perhaps adding "*") in navigatgorPane
@@ -644,7 +639,9 @@ public class FindReplaceMachine {
 //    System.err.println("_findNextInOtherDocs(" + startDoc.getText() + ", " + start + ", " + len + ")");
     
     boolean allWrapped = false;
+    // _doc may be null if the next document isn't found and the user didn't want to continue!
     _doc = _isForward ? _docIterator.getNextDocument(startDoc) : _docIterator.getPrevDocument(startDoc);
+    if (_doc == null) return new FindResult(startDoc, -1, true, true);
     
     while (_doc != startDoc) {
       if (_doc == _firstDoc) allWrapped = true;
@@ -664,7 +661,9 @@ public class FindReplaceMachine {
         if (fr.getFoundOffset() >= 0) return fr;
       }
 //      System.err.println("Advancing from '" + _doc.getText() + "' to next doc");        
+      // _doc may be null if the next document isn't found and the user didn't want to continue!
       _doc = _isForward ? _docIterator.getNextDocument(_doc) : _docIterator.getPrevDocument(_doc);     
+      if (_doc == null) return new FindResult(startDoc, -1, true, true);
 //      System.err.println("Next doc is: '" + _doc.getText() + "'");
     }
     
