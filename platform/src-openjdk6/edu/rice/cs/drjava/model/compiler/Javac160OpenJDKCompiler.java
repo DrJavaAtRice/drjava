@@ -81,7 +81,12 @@ public class Javac160OpenJDKCompiler extends JavacCompiler {
     super(version, location, defaultBootClassPath);
   }
 
-  public String getName() { return "OpenJDK " + _version.versionString(); }
+  public String getName() {
+    String versionString = _version.toString();
+    String prefix = "Java ";
+    if (versionString.startsWith(prefix)) versionString = versionString.substring(prefix.length());
+    return "OpenJDK " + versionString;
+  }
   
   public boolean isAvailable() {
     try {

@@ -62,7 +62,7 @@ import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.util.ArgumentTokenizer;
 
-import static edu.rice.cs.drjava.model.compiler.descriptors.JDKDescriptor.Util;
+import static edu.rice.cs.drjava.model.JDKDescriptor.Util;
 
 /** An implementation of JavacCompiler that supports compiling with the Java 1.6.0/Mint compiler.
   * Must be compiled using javac 1.6.0 and with Mint on the boot classpath.

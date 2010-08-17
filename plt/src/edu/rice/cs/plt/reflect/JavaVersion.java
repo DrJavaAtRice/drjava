@@ -97,23 +97,23 @@ public enum JavaVersion {
     }
     catch (NumberFormatException e) { return UNRECOGNIZED; }
   }
-
+  
   /**
    * Produce the {@code JavaVersion} corresponding to the given class version pair.  For example,
    * {@code 49,0} maps to {@code JAVA_5}.  If the pair cannot be matched, {@code UNRECOGNIZED} will be
    * returned.
    */
   public static JavaVersion parseClassVersion(int major, int minor) {
-      switch (major) {
-        case 45:
-          if (minor >= 3) { return JAVA_1_1; }
-          else { return UNRECOGNIZED; }
-        case 46: return JAVA_1_2;
-        case 47: return JAVA_1_3;
-        case 48: return JAVA_1_4;
-        case 49: return JAVA_5;
-        case 50: return JAVA_6;
-        case 51: return JAVA_7;
+    switch (major) {
+      case 45:
+        if (minor >= 3) { return JAVA_1_1; }
+        else { return UNRECOGNIZED; }
+      case 46: return JAVA_1_2;
+      case 47: return JAVA_1_3;
+      case 48: return JAVA_1_4;
+      case 49: return JAVA_5;
+      case 50: return JAVA_6;
+      case 51: return JAVA_7;
     }
     return (major > 51) ? FUTURE : UNRECOGNIZED;
   }
@@ -174,19 +174,19 @@ public enum JavaVersion {
     String vendorString = null;
     
     if (vendor == VendorType.UNKNOWN) {
-    if (java_runtime_name.toLowerCase().contains("openjdk")) {
-      vendor = VendorType.OPENJDK;
-      vendorString = "OpenJDK";
-    }
-    else if (java_vm_vendor.toLowerCase().contains("apple")) {
-      vendor = VendorType.APPLE;
-      vendorString = "Apple";
-    }
-    else if (java_vm_vendor.toLowerCase().contains("sun") ||
-             java_vm_vendor.toLowerCase().contains("oracle")) {
-      vendor = VendorType.SUN;
-      vendorString = "Sun";
-    }
+      if (java_runtime_name.toLowerCase().contains("openjdk")) {
+        vendor = VendorType.OPENJDK;
+        vendorString = "OpenJDK";
+      }
+      else if (java_vm_vendor.toLowerCase().contains("apple")) {
+        vendor = VendorType.APPLE;
+        vendorString = "Apple";
+      }
+      else if (java_vm_vendor.toLowerCase().contains("sun") ||
+               java_vm_vendor.toLowerCase().contains("oracle")) {
+        vendor = VendorType.SUN;
+        vendorString = "Sun";
+      }
     }
     
     String number;
@@ -269,8 +269,8 @@ public enum JavaVersion {
     catch (NumberFormatException e) {
       return new FullVersion(UNRECOGNIZED, 0, 0, ReleaseType.STABLE, null, vendor, vendorString, location);
     }
-    }
-
+  }
+  
   /**
    * Produce the {@code JavaVersion.FullVersion} corresponding to the given version string.  Accepts
    * input of the form "1.6.0", "1.4.2_10", or "1.5.0_05-ea".  The underscore may be replaced by a dot.
@@ -340,7 +340,7 @@ public enum JavaVersion {
     
     /** Get the update associated with this full version */
     public ReleaseType release() { return _type; }    
-
+    
     /** Get the vendor associated with this full version */
     public VendorType vendor() { return _vendor; }
     
@@ -371,13 +371,13 @@ public enum JavaVersion {
                   if (_location == null) {
                     if (v._location == null) return 0;
                     else return -1;
-              }
+                  }
                   else {
                     if (v._location == null) return 1;
                     else return _location.compareTo(v._location);
                   }
-            }
-          }
+                }
+              }
               else if (result == 0 && _vendor.equals(VendorType.UNKNOWN)) {
                 if (_location == null) {
                   if (v._location == null) return 0;
@@ -387,8 +387,8 @@ public enum JavaVersion {
                   if (v._location == null) return 1;
                   else return _location.compareTo(v._location);
                 }
-        }
-      }
+              }
+            }
           }
         }
       }
@@ -423,6 +423,11 @@ public enum JavaVersion {
       result.append("." + _maintenance);
       if (_update != 0) { result.append("_" + _update); }
       if (!_type.equals(ReleaseType.STABLE)) { result.append('-').append(_typeString); }
+      return result.toString();
+    }
+    
+    private String stringSuffixWithVendor() {
+      StringBuilder result = new StringBuilder(stringSuffix());
       if ((!_vendor.equals(VendorType.SUN)) && 
           (!_vendor.equals(VendorType.APPLE)) &&
           (!_vendor.equals(VendorType.UNKNOWN))) {
@@ -432,14 +437,14 @@ public enum JavaVersion {
     }
     
     /** Produce a string representing version number */
-    public String versionString() { return _majorVersion.versionString() + stringSuffix(); }
-
+    public String versionString() { return _majorVersion.versionString() + stringSuffixWithVendor(); }
+    
     public String toString() { return _majorVersion + stringSuffix(); }
     
   }
-    
+  
   private static enum ReleaseType { UNRECOGNIZED, EARLY_ACCESS, BETA, RELEASE_CANDIDATE, STABLE; }
-
+  
   /** The vendor of this version. */
   public static enum VendorType { UNKNOWN, OPENJDK, APPLE, SUN; }
 }

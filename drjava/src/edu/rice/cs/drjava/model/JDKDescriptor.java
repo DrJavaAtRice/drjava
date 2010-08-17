@@ -34,21 +34,27 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.compiler.descriptors;
+package edu.rice.cs.drjava.model;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.util.Set;
 import java.util.jar.JarFile;
+import java.util.Collections;
+
+import edu.rice.cs.drjava.model.JDKToolsLibrary;
 import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.reflect.JavaVersion.FullVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 
-/** A description of a JDK. */
-public interface JDKDescriptor {
+/** A description of a JDK.
+  * Put subclasses of JDKDescriptor in the edu.rice.cs.drjava.model.compiler.descriptors package for DrJava
+  * to find. */
+public abstract class JDKDescriptor {
   /** Return the name of this JDK.
     * @return name */
-  public String getName();
+  public abstract String getName();
   
   /** Packages to shadow when loading a new tools.jar.  If we don't shadow these classes, we won't
     * be able to load distinct versions for each tools.jar library.  These should be verified whenever
@@ -57,35 +63,53 @@ public interface JDKDescriptor {
     * 
     * @return set of packages that need to be shadowed
     */
-  public Set<String> getToolsPackages();
+  public abstract Set<String> getToolsPackages();
 
   /** Returns a list of directories that should be searched for tools.jar and classes.jar files.
     * @return list of directories to search */
-  public Iterable<File> getSearchDirectories();
+  public abstract Iterable<File> getSearchDirectories();
   
   /** Returns a list of files that should be searched if they contain a compiler.
     * @return list of files to search */
-  public Iterable<File> getSearchFiles();
+  public abstract Iterable<File> getSearchFiles();
   
   /** True if this is a compound JDK and needs a fully featured JDK to operate.
     * @return true if compound JDK (e.g. NextGen, Mint, Habanero). */
-  public boolean isCompound();
+  public abstract boolean isCompound();
+  
+  /** True if this is a JDK that can serve as base for a compound JDK.
+    * @return true if base for a compound JDK (e.g. Sun JDK, OpenJDK, AppleJDK). */
+  public boolean isBaseForCompound() { return false; }
   
   /** Return the class name of the compiler adapter.
     * @return class name of compiler, or null if no compiler */
-  public String getAdapterForCompiler();
+  public abstract String getAdapterForCompiler();
+
+  /** Return the class name of the compiler adapter.
+    * @param guessedVersion the guessed version of the compiler
+    * @return class name of compiler, or null if no compiler */
+  public String getAdapterForCompiler(JavaVersion.FullVersion guessedVersion) {
+    return getAdapterForCompiler(); // ignore the version
+  }
   
   /** Return the class name of the debugger adapter.
     * @return class name of debugger, or null if no debugger */
-  public String getAdapterForDebugger();
+  public abstract String getAdapterForDebugger();
+
+  /** Return the class name of the debugger adapter.
+    * @param guessedVersion the guessed version of the compiler
+    * @return class name of debugger, or null if no debugger */
+  public String getAdapterForDebugger(JavaVersion.FullVersion guessedVersion) {
+    return getAdapterForDebugger(); // ignore version
+  }
   
   /** Return true if the file (jar file or directory) contains the compiler.
     * @return true if the file contains the compiler */
-  public boolean containsCompiler(File f);
+  public abstract boolean containsCompiler(File f);
 
   /** Return the minimum Java version required to use this JDK.
     * @return minimum version */
-  public JavaVersion getMinimumMajorVersion();
+  public abstract JavaVersion getMinimumMajorVersion();
   
   /** Return the list of additional files required to use the compiler.
     * The compiler was found in the specified file. This method may have to search the user's hard drive, e.g.
@@ -105,7 +129,52 @@ public interface JDKDescriptor {
     * 
     * @param compiler location where the compiler was fund
     * @return list of additional files that need to be available */
-  public Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException;
+  public abstract Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException;
+
+  /** Return a description of this JDK.
+    * @param version the specific version of the compiler
+    * @return description */
+  public String getDescription(JavaVersion.FullVersion version) {
+    return getName() + " library " + version.versionString();
+  }
+  
+  /** Singleton representing a JDK that doesn't have a descriptor. */
+  public static final JDKDescriptor NONE = new None();
+    
+  /** Class for the singleton representing a JDK that doesn't have a descriptor. */
+  private static final class None extends JDKDescriptor {
+    public String getName() { return "none"; }
+    public String getDescription(JavaVersion.FullVersion version) {
+      switch(version.vendor()) {
+        case SUN:
+          return "Sun JDK library " + version.toString();
+        case OPENJDK:
+          return "OpenJDK library " + version.toString();
+        case APPLE:
+          return "Apple JDK library " + version.toString();
+        default:
+          return "JDK library " + version.toString();
+      }
+    }
+    public Set<String> getToolsPackages() { return Collections.emptySet(); }
+    public Iterable<File> getSearchDirectories() { return IterUtil.empty(); }  
+    public Iterable<File> getSearchFiles() { return IterUtil.empty(); }
+    public boolean isCompound() { return false; }
+    public boolean isBaseForCompound() { return true; }
+    public String getAdapterForCompiler() { return ""; }
+    public String getAdapterForCompiler(JavaVersion.FullVersion guessedVersion) {
+      return JDKToolsLibrary.adapterForCompiler(guessedVersion);
+    }
+    public String getAdapterForDebugger() { return ""; }
+    public String adapterForDebugger(JavaVersion.FullVersion guessedVersion) {
+      return JDKToolsLibrary.adapterForCompiler(guessedVersion);
+    }
+    public boolean containsCompiler(File f) { return true; }
+    public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_1_1; }
+    public Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException {
+      return IterUtil.empty();
+    }
+  }
   
   /** Utilities for JDK descriptors. */
   public static class Util {

@@ -46,8 +46,10 @@ import java.util.jar.JarFile;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 
+import edu.rice.cs.drjava.model.JDKDescriptor;
+
 /** The description of the Mint compound JDK. */
-public class MintDescriptor implements JDKDescriptor {
+public class MintDescriptor extends JDKDescriptor {
   /** Return the name of this JDK.
     * @return name */
   public String getName() {

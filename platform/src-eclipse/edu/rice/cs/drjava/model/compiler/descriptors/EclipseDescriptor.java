@@ -44,8 +44,10 @@ import java.util.Collections;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 
+import edu.rice.cs.drjava.model.JDKDescriptor;
+
 /** The description of the Eclipse JDK. */
-public class EclipseDescriptor implements JDKDescriptor {
+public class EclipseDescriptor extends JDKDescriptor {
   public String getName() {
     return "Eclipse";
   }

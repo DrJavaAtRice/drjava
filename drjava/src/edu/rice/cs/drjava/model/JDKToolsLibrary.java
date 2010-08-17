@@ -55,7 +55,7 @@ import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
 import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
 import edu.rice.cs.drjava.model.javadoc.DefaultJavadocModel;
-import edu.rice.cs.drjava.model.compiler.descriptors.JDKDescriptor;
+import edu.rice.cs.drjava.model.JDKDescriptor;
 
 /** 
  * Provides dynamic access to the interface of a JDK's tools.jar classes.  This level of indirection
@@ -69,11 +69,12 @@ public class JDKToolsLibrary {
   private final CompilerInterface _compiler;
   private final Debugger _debugger;
   private final JavadocModel _javadoc;
-  private final JDKDescriptor _jdkDescriptor; // may be null
+  private final JDKDescriptor _jdkDescriptor; // JDKDescriptor.NONE if none
   
   protected JDKToolsLibrary(FullVersion version, JDKDescriptor jdkDescriptor,
                             CompilerInterface compiler, Debugger debugger,
                             JavadocModel javadoc) {
+    assert jdkDescriptor != null;
     _version = version;
     _compiler = compiler;
     _debugger = debugger;
@@ -95,25 +96,9 @@ public class JDKToolsLibrary {
     return _compiler.isAvailable() || _debugger.isAvailable() || _javadoc.isAvailable();
   }
   
-  public String toString() {
-    if (_jdkDescriptor==null) {
-      switch(_version.vendor()) {
-        case SUN:
-          return "Sun JDK library " + _version.versionString();
-        case OPENJDK:
-          return "OpenJDK library " + _version.versionString();
-        case APPLE:
-          return "Apple JDK library " + _version.versionString();
-        default:
-          return "JDK library " + _version.versionString();
-      }
-    }
-    else {
-      return _jdkDescriptor.getName() + " library " + _version.versionString();
-    }
-  }
+  public String toString() { return _jdkDescriptor.getDescription(_version); }
   
-  protected static String adapterForCompiler(JavaVersion.FullVersion version) {
+  public static String adapterForCompiler(JavaVersion.FullVersion version) {
     switch (version.majorVersion()) {
       case JAVA_6: {
         switch (version.vendor()) {
@@ -127,7 +112,7 @@ public class JDKToolsLibrary {
     }
   }
   
-  protected static String adapterForDebugger(JavaVersion.FullVersion version) {
+  public static String adapterForDebugger(JavaVersion.FullVersion version) {
     switch (version.majorVersion()) {
       case JAVA_6: return "edu.rice.cs.drjava.model.debug.jpda.JPDADebugger";
       case JAVA_5: return "edu.rice.cs.drjava.model.debug.jpda.JPDADebugger";
@@ -211,7 +196,7 @@ public class JDKToolsLibrary {
     if (list.size()==0) {
       // no compiler found, i.e. compiler == NoCompilerAvailable.ONLY
       msg("                 no compilers found, adding NoCompilerAvailable library");
-      list.add(new JDKToolsLibrary(version, null, NoCompilerAvailable.ONLY, debugger, javadoc));
+      list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, NoCompilerAvailable.ONLY, debugger, javadoc));
     }
     
     return list;

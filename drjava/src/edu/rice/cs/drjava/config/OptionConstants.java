@@ -51,7 +51,7 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import edu.rice.cs.drjava.platform.PlatformFactory;
-
+import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.util.FileOps;
 
 import static java.awt.Event.*;
@@ -312,8 +312,16 @@ public interface OptionConstants {
         return UIManager.getSystemLookAndFeelClassName(); // Mac: Let the system decide.
       else if (PlatformFactory.ONLY.isWindowsPlatform())
         return UIManager.getCrossPlatformLookAndFeelClassName(); // Windows: Metal, because the Windows LAF is ugly
-      else
-        return UIManager.getSystemLookAndFeelClassName(); // Linux: Let the system decide. Probably GTK, which is ok.
+      else {
+        if (JavaVersion.CURRENT.supports(JavaVersion.JAVA_6)) {
+          // Linux with Java 6: Let the system decide. Probably GTK, which is ok.
+          return UIManager.getSystemLookAndFeelClassName();
+        }
+        else {
+          // Linux with Java older than Java 6: Metal
+          return UIManager.getCrossPlatformLookAndFeelClassName();
+        }
+      }
     }
     
     /** Need to ensure that a look-and-feel can be instantiated and is valid.
