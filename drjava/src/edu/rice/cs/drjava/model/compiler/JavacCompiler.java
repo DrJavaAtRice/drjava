@@ -45,6 +45,8 @@ import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
+import java.lang.reflect.Constructor;
+
 /** An abstract parent for all javac-based compiler interfaces.  Manages the auxiliary naming methods.
   * To support loading via reflection, all subclasses are assumed to have a public constructor with
   * a matching signature.
@@ -116,9 +118,9 @@ public abstract class JavacCompiler implements CompilerInterface {
   public static String transformAppletCommand(String s) {
     return _transformCommand(s,"edu.rice.cs.plt.swing.SwingUtil.showApplet(new {0}({1}), 400, 300);");
   }
-
+  
   // This is a command that automatically detects if
-  // a) the class is an ACM Java Task Force program (subclass of acm.program.Program)
+  // a) the class is an ACM Java Task Force program (subclass of acm.program.Program or acm.graphics.GTurtle)
   // b) an applet
   // c) a class with a static main method
   //
@@ -131,7 +133,8 @@ public abstract class JavacCompiler implements CompilerInterface {
       "'{' boolean isProgram = false; boolean isApplet = false; Class c = {0}.class;\n" +
       // cannot use Class.forName, doesn't work in Interactions Pane (see bug #1080869)
       "while(c != null) '{'\n" +
-      "  if (\"acm.program.Program\".equals(c.getName())) '{' isProgram = true; break; '}'\n" +
+      "  if (\"acm.program.Program\".equals(c.getName()) ||\n" +
+      "      \"acm.graphics.GTurtle\".equals(c.getName())) '{' isProgram = true; break; '}'\n" +
       "  c = c.getSuperclass();\n" +
       "'}'\n" +
       "if (!isProgram) '{'\n" +
@@ -141,11 +144,17 @@ public abstract class JavacCompiler implements CompilerInterface {
       "    isApplet = true;\n" +
       "  '}' catch(ClassCastException cce) '{' '}'\n" +
       "'}'\n" +
+      "java.lang.reflect.Method m = null;\n" +
+      "String[] args = null;\n" +
       "if (isApplet) '{'\n" +
-      "  edu.rice.cs.plt.swing.SwingUtil.showApplet(java.applet.Applet.class.cast(new {0}({1})), 400, 300);\n" +
+      "  try '{'\n" +
+      "    m = {0}.class.getMethod(\"main\", java.lang.String[].class);\n" +
+      "    if (!m.getReturnType().equals(void.class)) m = null;\n" +
+      "  '}'\n" +
+      "  catch (java.lang.NoSuchMethodException e) '{' m = null; '}'\n" +
+      "  if (m==null) edu.rice.cs.plt.swing.SwingUtil.showApplet(java.applet.Applet.class.cast(new {0}({1})), 400, 300);\n" +
       "'}'\n" +
-      "else '{'" +
-      "  java.lang.reflect.Method m = null;\n" +
+      "else '{'\n" +
       "  try '{'\n" +
       "    m = {0}.class.getMethod(\"main\", java.lang.String[].class);\n" +
       "    if (!m.getReturnType().equals(void.class)) throw new java.lang.NoSuchMethodException();\n" +
@@ -153,13 +162,15 @@ public abstract class JavacCompiler implements CompilerInterface {
       "  catch (java.lang.NoSuchMethodException e) '{'\n" +
       "    throw new java.lang.NoSuchMethodError(\"main\");\n" +
       "  '}'\n" +
-      "  String[] args = new String[]'{'{1}'}';\n" +
+      "  args = new String[]'{'{1}'}';\n" +
       "  if (isProgram) '{'\n" +
       "    String[] newArgs = new String[args.length+1];\n" +
       "    newArgs[0] = \"code={0}\";\n" +
       "    System.arraycopy(args, 0, newArgs, 1, args.length);\n" +
       "    args = newArgs;\n" +
       "  '}'\n" +
+      "'}'\n" +
+      "if (m!=null) '{'\n"+
       "  try '{'" +
       "    m.setAccessible(true);\n" +
       "    m.invoke(null, new Object[] '{' args '}');\n" +
@@ -170,7 +181,7 @@ public abstract class JavacCompiler implements CompilerInterface {
       "  '}' catch(java.lang.reflect.InvocationTargetException ite) '{'\n" +
       "    if (ite.getCause()!=null) throw ite.getCause(); else\n" +
       "    System.err.println(\"Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.\");\n" +
-      "'}' '}' '}'";
+      "'}' '}' '}'"; 
     return _transformCommand(s, command);
   }
 
@@ -206,4 +217,177 @@ public abstract class JavacCompiler implements CompilerInterface {
     * @return a substring of s with one less character
     */
   protected static String _deleteSemiColon(String s) { return  s.substring(0, s.length() - 1); }
+  
+//  /** This method performs the "smart run". Unfortunately, we don't get the right static error messages.
+//    * @param s full command line, i.e. "run MyClass 1 2 3"
+//    * @param c class to be run, i.e. MyClass.class
+//    */
+//  @SuppressWarnings("unchecked")
+//  public static void runCommand(String s, Class c) throws Throwable {
+//    if (s.endsWith(";"))  s = _deleteSemiColon(s);
+//    List<String> tokens = ArgumentTokenizer.tokenize(s, true);
+//    final String classNameWithQuotes = tokens.get(1); // this is "MyClass"
+//    final String className =
+//      classNameWithQuotes.substring(1, classNameWithQuotes.length() - 1); // removes quotes, becomes MyClass
+//    String[] args = new String[tokens.size() - 2];
+//    for (int i = 2; i < tokens.size(); i++) {
+//      String t = tokens.get(i);
+//      args[i - 2] = t.substring(1, t.length() - 1);
+//    }
+//    
+//    boolean isProgram = false;
+//    boolean isApplet = false;
+//    Class oldC = c;
+//    while(c != null) {
+//      if ("acm.program.Program".equals(c.getName()) ||
+//          "acm.graphics.GTurtle".equals(c.getName())) { isProgram = true; break; }
+//      c = c.getSuperclass();
+//    }
+//    c = oldC;
+//    if (!isProgram) {
+//      try {
+//        // if this doesn't throw, c is a subclass of Applet
+//        c.asSubclass(java.applet.Applet.class);
+//        isApplet = true;
+//      } catch(ClassCastException cce) { }
+//    }
+//
+//    java.lang.reflect.Method m = null;
+//    if (isApplet) {
+//      try {
+//        m = c.getMethod("main", java.lang.String[].class);
+//        if (!m.getReturnType().equals(void.class)) { m = null; }
+//      }
+//      catch (java.lang.NoSuchMethodException e) { m = null; }
+//      if (m==null) {
+//        java.applet.Applet instance = null;
+//        if (args.length==0) {
+//          try {
+//            // try default (nullary) constructor first
+//            Constructor ctor = c.getConstructor();
+//            instance = java.applet.Applet.class.cast(ctor.newInstance());
+//          }
+//          catch(NoSuchMethodException nsme) { instance = null; }
+//          catch(InstantiationException ie) { instance = null; }
+//          catch(IllegalAccessException iae) { instance = null; }
+//          catch(java.lang.reflect.InvocationTargetException ite) {
+//            if (ite.getCause()!=null) {
+//              throw ite.getCause();
+//            }
+//            else {
+//              System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
+//            }
+//          }
+//          if (instance==null) {
+//            try {
+//              // try String[] constructor next
+//              Constructor ctor = c.getConstructor(String[].class);
+//              instance = java.applet.Applet.class.cast(ctor.newInstance(new Object[] { new String[0] }));
+//            }
+//            catch(NoSuchMethodException nsme) { instance = null; }
+//            catch(InstantiationException ie) { instance = null; }
+//            catch(IllegalAccessException iae) { instance = null; }
+//            catch(java.lang.reflect.InvocationTargetException ite) {
+//              if (ite.getCause()!=null) {
+//                throw ite.getCause();
+//              }
+//              else {
+//                System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
+//                return;
+//              }
+//            }
+//          }
+//          if (instance==null) {
+//            System.err.println("Error: This applet does not have a default constructor or a constructor "+
+//                               "accepting String[].");
+//            return;
+//          }
+//        }
+//        else {
+//          try {
+//            // try String[] constructor
+//            Constructor ctor = c.getConstructor(String[].class);
+//            instance = java.applet.Applet.class.cast(ctor.newInstance(new Object[] { args }));
+//          }
+//          catch(NoSuchMethodException nsme) { instance = null; }
+//          catch(InstantiationException ie) { instance = null; }
+//          catch(IllegalAccessException iae) { instance = null; }
+//          catch(java.lang.reflect.InvocationTargetException ite) {
+//            if (ite.getCause()!=null) {
+//              throw ite.getCause();
+//            }
+//            else {
+//              System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
+//              return;
+//            }
+//          }
+//          if (instance==null) {
+//            System.err.println("Error: This applet does not have a constructor accepting String[].");
+//            return;
+//          }
+//        }
+//        edu.rice.cs.plt.swing.SwingUtil.showApplet(instance, 400, 300);
+//      }
+//    }
+//    else {
+//      try {
+//        m = c.getMethod("main", java.lang.String[].class);
+//        if (!m.getReturnType().equals(void.class)) {
+//          System.err.println("Error: This class does not have a static void main method accepting String[].");
+//          m = null;
+//        }
+//      }
+//      catch (java.lang.NoSuchMethodException e) {
+//        System.err.println("Error: This class does not have a static void main method accepting String[].");
+//        m = null;
+//      }
+//    }
+//    if (m != null) {
+//      if (isProgram) {
+//        String[] newArgs = new String[args.length+1];
+//        newArgs[0] = "code="+c.getName();
+//        System.arraycopy(args, 0, newArgs, 1, args.length);
+//        args = newArgs;
+//      }
+//      try {
+//        m.setAccessible(true);
+//        m.invoke(null, new Object[] { args });
+//      }
+//      catch(SecurityException se) {
+//        System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
+//      }
+//      catch(IllegalAccessException iae) {
+//        System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
+//      }
+//      catch(java.lang.reflect.InvocationTargetException ite) {
+//        if (ite.getCause()!=null) {
+//          throw ite.getCause();
+//        }
+//        else {
+//          System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
+//        }
+//      }
+//    }
+//  }
+//  
+//  // This is a command that automatically detects if
+//  // a) the class is an ACM Java Task Force program (subclass of acm.program.Program)
+//  // b) an applet
+//  // c) a class with a static main method
+//  //
+//  // If a), then DrJava inserts "code=MyClass" as argument 0.
+//  // If b), then DrJava performs the same as "applet MyClass" (see above).
+//  // If c), then DrJava executes MyClass.main (traditional java behavior).
+//  public static String transformRunCommand(String s) {    
+//    if (s.endsWith(";"))  s = _deleteSemiColon(s);
+//    List<String> args = ArgumentTokenizer.tokenize(s, true);
+//    final String classNameWithQuotes = args.get(1); // this is "MyClass"
+//    final String className =
+//      classNameWithQuotes.substring(1, classNameWithQuotes.length() - 1); // removes quotes, becomes MyClass
+//    
+//    // we pass MyClass.class just to get a "Static Error: Undefined class 'MyClass'"
+//    String ret = JavacCompiler.class.getName()+".runCommand(\""+s.toString()+"\", "+className+".class)";
+//    System.out.println(ret);
+//    return ret;
+//  }
 }
