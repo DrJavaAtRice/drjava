@@ -55,6 +55,7 @@ import edu.rice.cs.util.text.SwingDocument;
 
 import java.awt.EventQueue;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -92,7 +93,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** A set of normal endings for lines. */
   protected static final HashSet<String> _normEndings = _makeNormEndings();
   /** A set of Java keywords. */
-  protected static final HashSet<String> _keywords = _makeKeywords();
+  protected final HashSet<String> _keywords = _makeKeywords();
   /** A set of Java keywords. */
   protected static final HashSet<String> _primTypes = _makePrimTypes();
   /** The default indent setting. */
@@ -227,7 +228,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** Create a set of Java/GJ keywords for special coloring.
     * @return the set of keywords
     */
-  protected static HashSet<String> _makeKeywords() {
+  protected HashSet<String> _makeKeywords() {
     final String[] words =  {
       "import", "native", "package", "goto", "const", "if", "else", "switch", "while", "for", "do", "true", "false",
       "null", "this", "super", "new", "instanceof", "return", "static", "synchronized", "transient", "volatile", 
@@ -237,6 +238,38 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     HashSet<String> keywords = new HashSet<String>();
     for (int i = 0; i < words.length; i++) { keywords.add(words[i]); }
     return  keywords;
+  }
+
+  /** Add the specified keyword for syntax highlighting.
+    * @param s keyword to add
+    * @return this document (used to chain several addKeyword calls) */
+  public AbstractDJDocument addKeyword(String s) {
+    _keywords.add(s);
+    return this;
+  }
+
+  /** Remove the specified keyword from syntax highlighting.
+    * @param s keyword to remove
+    * @return this document (used to chain several removeKeyword calls) */
+  public AbstractDJDocument removeKeyword(String s) {
+    _keywords.remove(s);
+    return this;
+  }
+
+  /** Set the specified keywords as keywords for syntax highlighting.
+    * @param keywords keywords to highlight
+    * @return this document (used to chain several xxxKeyword calls) */
+  public AbstractDJDocument setKeywords(Set<String> keywords) {
+    _keywords.clear();
+    _keywords.addAll(keywords);
+    return this;
+  }
+
+  /** Reset the keywords to highlight for syntax highlighting to the Java keywords.
+    * @return this document (used to chain several xxxKeyword calls) */
+  public AbstractDJDocument resetKeywords() {
+    setKeywords(_makeKeywords());
+    return this;
   }
   
   /** Create a set of Java/GJ primitive types for special coloring.
