@@ -2709,6 +2709,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _file = file;
       if (! AbstractGlobalModel.isUntitled(file)) _timestamp = file.lastModified();
       else _timestamp = 0L;
+      // highlight Habanero Java keywords
+      if (file.getName().endsWith(".hj")) {
+        getDocument().resetKeywords().addKeyword("async").addKeyword("finish");
+      }
+      else { getDocument().resetKeywords(); }
     }
     
     /** Returns the timestamp. */
