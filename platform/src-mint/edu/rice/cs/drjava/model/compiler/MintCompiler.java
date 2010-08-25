@@ -61,8 +61,14 @@ import java.io.*;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Iterator;
+
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 // DJError class is not in the same package as this
 import edu.rice.cs.drjava.model.DJError;
@@ -146,7 +152,44 @@ public class MintCompiler extends Javac160FilteringCompiler {
     catch (Exception e) { return false; }
     catch (LinkageError e) { return false; }
   }
+
+  /** Return the set of source file extensions that this compiler supports.
+    * @return the set of source file extensions that this compiler supports. */
+  public Set<String> getSourceFileExtensions() {
+    HashSet<String> extensions = new HashSet<String>();
+    extensions.add(edu.rice.cs.drjava.config.OptionConstants.JAVA_FILE_EXTENSION);
+    return extensions;
+  }
   
+  /** Return a file filter that can be used to open files this compiler supports.
+    * @return file filter for appropriate source files for this compiler */
+  public FileFilter getFileFilter() {
+    return new FileNameExtensionFilter
+      ("Mint source files (*"+edu.rice.cs.drjava.config.OptionConstants.JAVA_FILE_EXTENSION+")",
+       edu.rice.cs.drjava.config.OptionConstants.JAVA_FILE_EXTENSION.substring(1)); // skip '.'
+  }
+
+  /** Return the extension of the files that should be opened with the "Open Folder..." command.
+    * @return file extension for the "Open Folder..." command for this compiler. */
+  public String getOpenAllFilesInFolderExtension() {
+    return edu.rice.cs.drjava.config.OptionConstants.JAVA_FILE_EXTENSION;
+  }
+
+  /** Return true if this compiler can be used in conjunction with the language level facility.
+    * @return true if language levels can be used. */
+  public boolean supportsLanguageLevels() { return false; }
+  
+  /** Return the set of keywords that should be highlighted in the specified file.
+    * @param f file for which to return the keywords
+    * @return the set of keywords that should be highlighted in the specified file. */
+  public Set<String> getKeywordsForFile(File f) { return new HashSet<String>(MINT_KEYWORDS); }
+  
+  /** Set of Mint keywords for special coloring. */
+  public static final HashSet<String> MINT_KEYWORDS = new HashSet<String>();
+  static {
+    MINT_KEYWORDS.addAll(JAVA_KEYWORDS);
+    MINT_KEYWORDS.add("separable");
+  }
 
   /** Compile the given files.
     *  @param files  Source files to compile.

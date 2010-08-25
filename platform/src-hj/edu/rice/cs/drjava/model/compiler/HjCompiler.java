@@ -35,20 +35,22 @@
 package edu.rice.cs.drjava.model.compiler;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.io.FilenameFilter;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Scanner;
 
+import javax.swing.filechooser.FileFilter;
 
 
 
@@ -168,15 +170,77 @@ public class HjCompiler extends Javac160FilteringCompiler {
   public boolean isAvailable() {
     return true;
   }
+
+  /** The extension for a HJ source file */
+  public static final String HJ_FILE_EXTENSION = ".hj";
   
   /** .hj   --> true
     * otherwise false 
     * @return true if the specified file is a source file for this compiler. */
   public boolean isSourceFileForThisCompiler(File f) {
     // by default, use DrJavaFileUtils.isSourceFile
-    return f.getName().endsWith(".hj");
+    return f.getName().endsWith(HJ_FILE_EXTENSION);
   }
   
+  /** Return the set of source file extensions that this compiler supports.
+    * @return the set of source file extensions that this compiler supports. */
+  public Set<String> getSourceFileExtensions() {
+    HashSet<String> extensions = new HashSet<String>();
+    extensions.add(HJ_FILE_EXTENSION);
+    return extensions;
+  }
+  
+  /** Return a file filter that can be used to open files this compiler supports.
+    * @return file filter for appropriate source files for this compiler */
+  public FileFilter getFileFilter() {
+    // javax.swing.filechooser.FileNameExtensionFilter not available, since HJ compiles with Java 5
+    return new FileFilter() {
+      /** Returns true if the file's extension matches ".hj". */
+      public boolean accept(File f) {
+        if (f.isDirectory()) {
+          return true;
+        }
+        return f.getName().endsWith(HJ_FILE_EXTENSION);
+      }
+      
+      /** @return A description of this filter to display. */
+      public String getDescription() {
+        return "Habanero Java source files (*"+HJ_FILE_EXTENSION+")";
+      }
+    };
+  }
+
+  /** Return the extension of the files that should be opened with the "Open Folder..." command.
+    * @return file extension for the "Open Folder..." command for this compiler. */
+  public String getOpenAllFilesInFolderExtension() {
+    return HJ_FILE_EXTENSION;
+  }
+
+  /** Return true if this compiler can be used in conjunction with the language level facility.
+    * @return true if language levels can be used. */
+  public boolean supportsLanguageLevels() { return false; }
+  
+  /** Return the set of keywords that should be highlighted in the specified file.
+    * @param f file for which to return the keywords
+    * @return the set of keywords that should be highlighted in the specified file. */
+  public Set<String> getKeywordsForFile(File f) {
+    return isSourceFileForThisCompiler(f)?new HashSet<String>(HJ_KEYWORDS):new HashSet<String>();
+  }
+  
+  /** Set of Mint keywords for special coloring. */
+  public static final HashSet<String> HJ_KEYWORDS = new HashSet<String>();
+  static {
+    HJ_KEYWORDS.addAll(JAVA_KEYWORDS);
+    final String[] words =  {
+      "at","activitylocal","async","ateach","atomic","arrayView","await",
+      "boxed","compilertest","complex64","complex32","current","extern",
+      "finish","forall","foreach","fun","future","here","imag","isolated",
+      "local","method","mutable","next","nonblocking","now","nullable",
+      "or","phased","placelocal","real","reference","safe","self","seq",
+      "sequential","signal","single","unsafe","value","wait","when"
+    };
+    for(String s: words) { HJ_KEYWORDS.add(s); }
+  }
   
   /** Compile the given files.
     *  @param files  Source files to compile.

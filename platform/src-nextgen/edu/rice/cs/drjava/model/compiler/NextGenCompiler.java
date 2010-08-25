@@ -38,10 +38,12 @@ import java.util.MissingResourceException;
 import java.io.*;
 
 import java.util.Arrays;
-import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
+import javax.swing.filechooser.FileFilter;
 
 // NextGen classes
 import edu.rice.cs.nextgen2.compiler.main.JavaCompiler;
@@ -137,6 +139,43 @@ public class NextGenCompiler extends Javac160FilteringCompiler {
     catch (LinkageError e) { return false; }
   }
   
+  /** Return the set of source file extensions that this compiler supports.
+    * @return the set of source file extensions that this compiler supports. */
+  public Set<String> getSourceFileExtensions() {
+    HashSet<String> extensions = new HashSet<String>();
+    extensions.add(edu.rice.cs.drjava.config.OptionConstants.JAVA_FILE_EXTENSION);
+    return extensions;
+  }
+  
+  /** Return a file filter that can be used to open files this compiler supports.
+    * @return file filter for appropriate source files for this compiler */
+  public FileFilter getFileFilter() {
+    // javax.swing.filechooser.FileNameExtensionFilter not available, since NextGen compiles with Java 5
+    return new FileFilter() {
+      /** Returns true if the file's extension matches ".java". */
+      public boolean accept(File f) {
+        if (f.isDirectory()) {
+          return true;
+        }
+        return f.getName().endsWith(edu.rice.cs.drjava.config.OptionConstants.JAVA_FILE_EXTENSION);
+      }
+      
+      /** @return A description of this filter to display. */
+      public String getDescription() {
+        return "Mint source files (*"+edu.rice.cs.drjava.config.OptionConstants.JAVA_FILE_EXTENSION+")";
+      }
+    };
+  }
+
+  /** Return the extension of the files that should be opened with the "Open Folder..." command.
+    * @return file extension for the "Open Folder..." command for this compiler. */
+  public String getOpenAllFilesInFolderExtension() {
+    return edu.rice.cs.drjava.config.OptionConstants.JAVA_FILE_EXTENSION;
+  }
+  
+  /** Return true if this compiler can be used in conjunction with the language level facility.
+    * @return true if language levels can be used. */
+  public boolean supportsLanguageLevels() { return false; }
 
   /** Compile the given files.
     *  @param files  Source files to compile.

@@ -61,6 +61,7 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.Configuration;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
@@ -223,10 +224,10 @@ public class DefaultJavadocModel implements JavadocModel {
         final File file = IOUtil.attemptCanonicalFile(docFile);
 
         // If this is a language level file, make sure it has been compiled
-        if (isLLFile(file)) {
+        if (DrJavaFileUtils.isLLFile(file)) {
           // Utilities.showDebug("isLLFile=true: "+file);
           llDocs.add(doc);
-          docFiles.add(getJavaForLLFile(file).getPath());
+          docFiles.add(DrJavaFileUtils.getJavaForLLFile(file).getPath());
         }
         else {
           docFiles.add(file.getPath());
@@ -321,11 +322,11 @@ public class DefaultJavadocModel implements JavadocModel {
     // Try to get the file from the document
     File docFile = _getFileFromDocument(doc, saver);
     final File file = IOUtil.attemptCanonicalFile(docFile);
-    final File javaFile = getJavaForLLFile(file);
+    final File javaFile = DrJavaFileUtils.getJavaForLLFile(file);
 
     Utilities.invokeLater(new Runnable() { public void run() {
       // If this is a language level file, make sure it has been compiled
-      if (isLLFile(file)) {
+      if (DrJavaFileUtils.isLLFile(file)) {
         // Utilities.showDebug("isLLFile = true");
         final List<OpenDefinitionsDocument> singleton = new ArrayList<OpenDefinitionsDocument>();
         singleton.add(doc);
@@ -413,27 +414,6 @@ public class DefaultJavadocModel implements JavadocModel {
     });
   }
 
-  /** @return true if the file is a language level file. */
-  private static boolean isLLFile(File f) {
-    File canonicalFile = IOUtil.attemptCanonicalFile(f);
-    String fileName = canonicalFile.getPath();
-    int lastIndex = fileName.lastIndexOf(OptionConstants.DJ_FILE_EXTENSION);
-    return (lastIndex != -1);
-  }
-
-  /** @return true if the file is a language level file. */
-  private static File getJavaForLLFile(File f) {
-    File canonicalFile = IOUtil.attemptCanonicalFile(f);
-    String fileName = canonicalFile.getPath();
-    int lastIndex = fileName.lastIndexOf(OptionConstants.DJ_FILE_EXTENSION);
-    if (lastIndex != -1) {
-      return new File(fileName.substring(0, lastIndex) + OptionConstants.JAVA_FILE_EXTENSION);
-    }
-    else {
-      return f;
-    }
-  }
-  
   /** Suggests a default location for generating Javadoc, based on the given document's source root.  (Appends 
     * JavadocModel.SUGGESTED_DIR_NAME to the sourceroot.) Ensures that the document is saved first, or else no 
     * reasonable suggestion will be found.

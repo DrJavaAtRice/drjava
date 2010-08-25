@@ -169,7 +169,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
     assertEquals("There should be 0 documents in the cache", 0, _cache.getNumInCache()); // was 0
     
     // This tests that isModifiedSinceSave does not cause the document to load into the cache,
-    // so the two that should have been kicked out, 1 & 2 should not be loaded uppon calling isModified.
+    // so the two that should have been kicked out, 1 & 2 should not be loaded upon calling isModified.
     
     assertFalse("Document 1 shouldn't be modified", doc1.isModifiedSinceSave());
     assertFalse("Document 2 shouldn't be modified", doc2.isModifiedSinceSave());
@@ -245,7 +245,7 @@ public class DocumentCacheTest extends DrJavaTestCase {
     
     // cache = [3 4 5 6]
     // This tests that isModifiedSinceSave does not cause the document to load into the cache,
-    // so the two that should have been kicked out, 1 & 2 should not be loaded uppon calling isModified.
+    // so the two that should have been kicked out, 1 & 2 should not be loaded upon calling isModified.
     
     assertFalse("Document 1 shouldn't be modified", doc1.isModifiedSinceSave());
     assertFalse("Document 2 shouldn't be modified", doc2.isModifiedSinceSave());

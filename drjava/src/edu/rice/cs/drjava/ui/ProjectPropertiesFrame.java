@@ -639,6 +639,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
           qualifiedName = qualifiedName.substring(1);
         
         //Remove the .java extension if it exists
+        // TODO: What about language level file extensions? What about Habanero Java extension?
         if(qualifiedName.toLowerCase().endsWith(OptionConstants.JAVA_FILE_EXTENSION))
           qualifiedName = qualifiedName.substring(0, qualifiedName.length() - 5);
           

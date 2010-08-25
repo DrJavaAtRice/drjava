@@ -149,6 +149,9 @@ public class DocumentCache {
   private class DocManager implements DCacheAdapter {
     
     private final DDReconstructor _rec;
+    /** Set of keywords if they were updated since the document had been kicked out, or null if not updated. */
+    private volatile HashSet<String> _keywords = null;
+
     private volatile int _stat; // I know, this is not very OO
     private volatile DefinitionsDocument _doc;
     
@@ -172,6 +175,10 @@ public class DocumentCache {
       try { // _doc is not in memory
         _doc = _rec.make();
         assert _doc != null;
+        // update documents if necessary
+        if (_keywords!=null) {
+          _doc.setKeywords(_keywords); _keywords.clear(); _keywords = null;
+        }
       }
       catch(Exception e) { throw new UnexpectedException(e); }
 //        Utilities.showDebug("Document " + _doc + " reconstructed; _stat = " + _stat);
@@ -311,6 +318,19 @@ public class DocumentCache {
     }
     
     public String toString() { return "DocManager for " + _rec.toString() + "[stat = " + _stat + "]"; } 
+    
+    /** Set the specified keywords as keywords for syntax highlighting.
+      * @param keywords keywords to highlight */
+    public void setKeywords(Set<String> keywords) {
+      if (_doc != null) {
+        // resident
+        _doc.setKeywords(keywords);
+      }
+      else {
+        // virtualized
+        _keywords = new HashSet<String>(keywords);
+      }
+    }
   }
   
   ////////////////////////////////////////

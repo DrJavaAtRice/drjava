@@ -159,6 +159,7 @@ public class ProjectProfile implements ProjectFileIR {
     DocFile[] possibleContainers = getSourceFiles();
     
     String main = getMainClass();
+    // TODO: What about language level file extensions? What about Habanero Java extension?
     if(main.toLowerCase().endsWith(OptionConstants.JAVA_FILE_EXTENSION)){
       main = main.substring(0, main.length()-OptionConstants.JAVA_FILE_EXTENSION.length());
       main = main.replace(File.separatorChar,'.');

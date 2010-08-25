@@ -801,14 +801,14 @@ public class JPDADebugger implements Debugger {
         }
         
         for(File f: files) {
-          if (f.getName().equals(className + OptionConstants.JAVA_FILE_EXTENSION) ||
-              f.getName().equals(className + OptionConstants.DJ_FILE_EXTENSION) ||
-              f.getName().equals(className + OptionConstants.OLD_DJ0_FILE_EXTENSION) ||
-              f.getName().equals(className + OptionConstants.OLD_DJ1_FILE_EXTENSION) ||
-              f.getName().equals(className + OptionConstants.OLD_DJ2_FILE_EXTENSION)) {
-            fileName = f.getName();
-            break;
+          // TODO: What about Habanero Java extension?
+          for(String ext: DrJavaFileUtils.getSourceFileExtensions()) {
+            if (f.getName().equals(className + ext)) {
+              fileName = f.getName();
+              break;
+            }
           }
+          if (fileName!=null) { break; }
         }
         if (fileName == null) {
           fileName = className + OptionConstants.JAVA_FILE_EXTENSION;

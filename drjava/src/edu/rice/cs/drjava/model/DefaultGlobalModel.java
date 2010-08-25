@@ -468,10 +468,21 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     /** Standard constructor for a document read from a file.  Initializes this ODD's DD.
       * @param f file describing DefinitionsDocument to manage
       */
-    ConcreteOpenDefDoc(File f) { super(f); }
+    ConcreteOpenDefDoc(File f) {
+      super(f);
+      
+      // update the syntax highlighting for this document
+      // can't be done in AbstractGlobalModel.ConcreteOpenDefDoc because getCompilerModel is not supported
+      updateSyntaxHighlighting();
+    }
     
     /* Standard constructor for a new document (no associated file) */
-    ConcreteOpenDefDoc(NullFile f) { super(f); }
+    ConcreteOpenDefDoc(NullFile f) { super(f);
+      
+      // update the syntax highlighting for this document
+      // can't be done in AbstractGlobalModel.ConcreteOpenDefDoc because getCompilerModel is not supported
+      updateSyntaxHighlighting();
+    }
     
     /** Starting compiling this document.  Used only for unit testing.  Only rus in the event thread. */
     public void startCompile() throws IOException { 

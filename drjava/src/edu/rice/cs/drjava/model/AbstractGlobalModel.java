@@ -468,6 +468,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return null;
     }
     
+    // TODO: What about language level file extensions? What about Habanero Java extension?
     if (path.toLowerCase().endsWith(OptionConstants.JAVA_FILE_EXTENSION)){
       return new File(getProjectFile().getParent(), path);
     } //if
@@ -1385,10 +1386,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Opens all files in the specified folder dir and places them in the appropriate places in the document navigator.
     * If "open folders recursively" is checked, this operation opens all files in the subtree rooted at dir.
     */
-  public void openFolder(File dir, boolean rec) throws IOException, OperationCanceledException, AlreadyOpenException {
+  public void openFolder(File dir, boolean rec, String ext)
+    throws IOException, OperationCanceledException, AlreadyOpenException {
     debug.logStart();
     
-    final File[] sfiles =  getFilesInFolder(dir, rec); 
+    final File[] sfiles =  getFilesInFolder(dir, rec, ext); 
     if(sfiles == null) return;
     openFiles(new FileOpenSelector() { public File[] getFiles() { return sfiles; } });
     
@@ -1397,17 +1399,25 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     debug.logEnd();
   }
   
+  /** @return the file extension for the "Open Folder..." command for the currently selected compiler. */
+  public String getOpenAllFilesInFolderExtension() {
+    CompilerModel cm = getCompilerModel();
+    if (cm==null) {
+      return OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)];
+    }
+    else {
+      return cm.getActiveCompiler().getOpenAllFilesInFolderExtension();
+    }
+  }
   
-  
-  public File[] getFilesInFolder(File dir, boolean rec) throws IOException, OperationCanceledException, 
+  public File[] getFilesInFolder(File dir, boolean rec, String ext) throws IOException, OperationCanceledException, 
     AlreadyOpenException {
     
     if (dir == null || !dir.isDirectory()) return null; // just in case
     
     Iterable<File> filesIterable;
     
-    String extension = OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]
-      .substring(1); // do not include the dot ("java", not ".java")
+    String extension = ext.substring(1); // do not include the dot ("java", not ".java")
     
     Predicate<File> match = LambdaUtil.and(IOUtil.IS_FILE, IOUtil.extensionFilePredicate(extension));
     if (rec) { filesIterable = IOUtil.listFilesRecursively(dir, match); }
@@ -1444,7 +1454,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return null;
     File[] allFiles;
     try {
-      allFiles = getFilesInFolder(projRoot, true);
+      allFiles = getFilesInFolder(projRoot, true, getOpenAllFilesInFolderExtension());
     } catch(IOException e) { return null; }
     catch(OperationCanceledException e) { return null; }
     catch(AlreadyOpenException e) { return null; }
@@ -2602,6 +2612,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   public static boolean isUntitled(final File f) { return f == null || (f instanceof NullFile); }
+
+  /** Update the syntax highlighting for all open documents. */
+  public void updateSyntaxHighlighting() {
+    for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) { doc.updateSyntaxHighlighting(); }
+    // refresh active document so syntax highlighting updates in the currently visible document too
+    Utilities.invokeLater(new Runnable() { public void run() { refreshActiveDocument(); } });
+  }
   
   // ---------- ConcreteOpenDefDoc inner class ----------
   
@@ -2709,11 +2726,21 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _file = file;
       if (! AbstractGlobalModel.isUntitled(file)) _timestamp = file.lastModified();
       else _timestamp = 0L;
-      // highlight Habanero Java keywords
-      if (file.getName().endsWith(".hj")) {
-        getDocument().resetKeywords().addKeyword("async").addKeyword("finish");
+      updateSyntaxHighlighting();
+    }
+
+    /** Update the syntax highlighting for the file type. */
+    public void updateSyntaxHighlighting() {
+      // can't be called in AbstractGlobalModel.ConcreteOpenDefDoc because getCompilerModel is not supported
+      CompilerModel cm = getCompilerModel();
+      if (cm==null) {
+        // use the cache adapter so setting the keywords doesn't load the document
+        _cacheAdapter.setKeywords(edu.rice.cs.drjava.model.compiler.JavacCompiler.JAVA_KEYWORDS);
       }
-      else { getDocument().resetKeywords(); }
+      else {
+        // use the cache adapter so setting the keywords doesn't load the document
+        _cacheAdapter.setKeywords(cm.getActiveCompiler().getKeywordsForFile(_file));
+      }
     }
     
     /** Returns the timestamp. */

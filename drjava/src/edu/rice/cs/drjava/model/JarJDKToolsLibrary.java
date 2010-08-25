@@ -651,7 +651,10 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     else { JDKToolsLibrary.msg("File not added: "+f); }
   }
   
-  /** Search for JDK descriptors. */
+  /** Search for JDK descriptors.
+    * Note: This does not work properly if not all classes are in a jar or in the same directory.
+    * For example, when doing an "ant run", the classes are spread across classes/base and classes/lib,
+    * with the edu.rice.cs.drjava.DrJava class in classes/base but the descriptors in classes/lib. */
   private static Iterable<JDKDescriptor> searchForJDKDescriptors() {
     JDKToolsLibrary.msg("---- Searching for descriptors ----");
     long t0 = System.currentTimeMillis();

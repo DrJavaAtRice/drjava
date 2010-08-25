@@ -47,16 +47,6 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
   * @version $Id$
   */
 public interface CompilerModel {
-  
-  /** Legal source file name extensions */
-  public static final String[] EXTENSIONS = new String[]{
-    edu.rice.cs.drjava.config.OptionConstants.JAVA_FILE_EXTENSION,
-      edu.rice.cs.drjava.config.OptionConstants.DJ_FILE_EXTENSION,
-      edu.rice.cs.drjava.config.OptionConstants.OLD_DJ0_FILE_EXTENSION,
-      edu.rice.cs.drjava.config.OptionConstants.OLD_DJ1_FILE_EXTENSION,
-      edu.rice.cs.drjava.config.OptionConstants.OLD_DJ2_FILE_EXTENSION
-  };
-  
   //----------------------------Locking--------------------------------------//
   
   /** Returns the lock used to prevent simultaneous compilation and JUnit testing */

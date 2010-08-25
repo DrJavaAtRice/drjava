@@ -37,6 +37,8 @@
 package edu.rice.cs.drjava.model;
 
 import java.io.File;
+import java.util.Set;
+import java.util.HashSet;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.drjava.config.OptionConstants;
 
@@ -44,6 +46,18 @@ import edu.rice.cs.drjava.config.OptionConstants;
   * @version $Id$
   */
 public class DrJavaFileUtils  {
+  /** Return the set of source file extensions that this compiler supports.
+    * @return the set of source file extensions that this compiler supports. */
+  public static Set<String> getSourceFileExtensions() {
+    HashSet<String> extensions = new HashSet<String>();
+    extensions.add(OptionConstants.JAVA_FILE_EXTENSION);
+    extensions.add(OptionConstants.DJ_FILE_EXTENSION);
+    extensions.add(OptionConstants.OLD_DJ0_FILE_EXTENSION);
+    extensions.add(OptionConstants.OLD_DJ1_FILE_EXTENSION);
+    extensions.add(OptionConstants.OLD_DJ2_FILE_EXTENSION);
+    return extensions;
+  }
+  
   /** .java --> true
     * .dj   --> true
     * .dj0  --> true

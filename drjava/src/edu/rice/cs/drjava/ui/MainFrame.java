@@ -297,12 +297,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** For saving files. We have a persistent dialog to keep track of the last directory from which we saved. */
   private volatile JFileChooser _saveChooser;
   
-  /** Filter for source files (.java and .dj?). */
-  private final javax.swing.filechooser.FileFilter _javaSourceFilter = new SmartSourceFilter();
-  
-  /** Filter for source files (.java and .dj?). */
-  private final javax.swing.filechooser.FileFilter _unfilteredJavaSourceFilter = new JavaSourceFilter();
-  
   /** Filter for drjava project files (.drjava and .xml and .pjt) */
   private final javax.swing.filechooser.FileFilter _projectFilter = new javax.swing.filechooser.FileFilter() {
     public boolean accept(File f) {
@@ -340,14 +334,22 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   // ------ End Field Declarations ------
   
+  /** @return the source file filter as directed by the currently selected compiler. */
+  private javax.swing.filechooser.FileFilter getSourceFileFilter() {
+    edu.rice.cs.drjava.model.compiler.CompilerModel cm = _model.getCompilerModel();
+    if (cm==null) {
+      return new SmartSourceFilter();
+    }
+    else {
+      return cm.getActiveCompiler().getFileFilter();
+    }
+  }
+  
   /** Returns the files to open to the model (command pattern). */
   private final FileOpenSelector _openSelector = new FileOpenSelector() {
     public File[] getFiles() throws OperationCanceledException {
-      //_openChooser.removeChoosableFileFilter(_projectFilter);
-      _openChooser.resetChoosableFileFilters();
-      
-      _openChooser.addChoosableFileFilter(_unfilteredJavaSourceFilter);
-      _openChooser.setFileFilter(_javaSourceFilter);
+      _openChooser.resetChoosableFileFilters();      
+      _openChooser.setFileFilter(getSourceFileFilter());
       return getOpenFiles(_openChooser);
     }
   };
@@ -355,12 +357,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Returns the files to open to the model (command pattern). */
   private final FileOpenSelector _openFileOrProjectSelector = new FileOpenSelector() {
     public File[] getFiles() throws OperationCanceledException {
-      //_openChooser.removeChoosableFileFilter(_projectFilter);
-      _openChooser.resetChoosableFileFilters();
-      
-      _openChooser.addChoosableFileFilter(_unfilteredJavaSourceFilter);
+      _openChooser.resetChoosableFileFilters();      
       _openChooser.addChoosableFileFilter(_projectFilter);
-      _openChooser.setFileFilter(_javaSourceFilter);
+      _openChooser.setFileFilter(getSourceFileFilter());
       return getOpenFiles(_openChooser);
     }
   };
@@ -697,7 +696,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       List<File> l= _model.getDocumentNavigator().getSelectedFolders();
       for(File f: l) {
         File fAbs = new File(_model.getProjectRoot(), f.toString());
-        _openFolder(fAbs, false);  
+        _openFolder(fAbs, false, _model.getOpenAllFilesInFolderExtension());  
       }
       
       // The following does not apply anymore:
@@ -2124,9 +2123,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Saves a copy of either the console or the interactions pane to a file. */
   public void _saveConsoleCopy(ConsoleDocument doc) {
-    _saveChooser.removeChoosableFileFilter(_projectFilter);
-    _saveChooser.removeChoosableFileFilter(_javaSourceFilter);
-    _saveChooser.removeChoosableFileFilter(_unfilteredJavaSourceFilter);
+    _saveChooser.resetChoosableFileFilters();
     _saveChooser.setFileFilter(_txtFileFilter);    
     _saveChooser.setMultiSelectionEnabled(false);
     _saveChooser.setSelectedFile(new File(""));
@@ -2160,13 +2157,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     catch (IOException ioe) {
       MainFrameStatics.showIOError(MainFrame.this, new IOException("An error occured writing the contents to a file"));
-    }
-    finally {
-      _saveChooser.removeChoosableFileFilter(_projectFilter);
-      _saveChooser.removeChoosableFileFilter(_javaSourceFilter);
-      _saveChooser.removeChoosableFileFilter(_unfilteredJavaSourceFilter);
-      _saveChooser.removeChoosableFileFilter(_txtFileFilter);
-      _saveChooser.setFileFilter(_javaSourceFilter);
     }
   }
   
@@ -2996,6 +2986,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         else if (name.endsWith(OptionConstants.OLD_DJ0_FILE_EXTENSION)) ret = _dj0;
         else if (name.endsWith(OptionConstants.OLD_DJ1_FILE_EXTENSION)) ret = _dj1;
         else if (name.endsWith(OptionConstants.OLD_DJ2_FILE_EXTENSION)) ret = _dj2;
+        // TODO: What about Habanero Java extension?
       }
       if (ret == null) {
         ret = super.getIcon(f);
@@ -3235,7 +3226,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       };
       _openChooser.setPreferredSize(new Dimension(650, 410));
       _openChooser.setCurrentDirectory(workDir);
-      _openChooser.setFileFilter(_javaSourceFilter);
+      _openChooser.resetChoosableFileFilters();
+      _openChooser.setFileFilter(getSourceFileFilter());
       _openChooser.setMultiSelectionEnabled(true);
       
       _openRecursiveCheckBox.setSelected(config.getSetting(OptionConstants.OPEN_FOLDER_RECURSIVE).booleanValue());
@@ -3252,6 +3244,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       else
         _openProjectChooser.setCurrentDirectory(workDir);
       
+      _openProjectChooser.resetChoosableFileFilters();
       _openProjectChooser.setFileFilter(_projectFilter);
       _openProjectChooser.setMultiSelectionEnabled(false);
       _saveChooser = new JFileChooser() {
@@ -3263,10 +3256,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       };
       _saveChooser.setPreferredSize(new Dimension(650, 410));
       _saveChooser.setCurrentDirectory(workDir);
-      _saveChooser.setFileFilter(_javaSourceFilter);
+      _saveChooser.resetChoosableFileFilters();
+      _saveChooser.setFileFilter(getSourceFileFilter());
       
       _interactionsHistoryChooser.setPreferredSize(new Dimension(650, 410));
       _interactionsHistoryChooser.setCurrentDirectory(workDir);
+      _interactionsHistoryChooser.resetChoosableFileFilters();
       _interactionsHistoryChooser.setFileFilter(new InteractionsHistoryFilter());
       _interactionsHistoryChooser.setMultiSelectionEnabled(true);
       
@@ -4215,53 +4210,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     dc.setAccessory(_openRecursiveCheckBox);
     return dc;
   }
-//  
-//  private JFileChooser makeFolderChooser(File workDir) {
-//    _folderChooser = new JFileChooser();
-//    _folderChooser.setMultiSelectionEnabled(false);
-//    _folderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-//    _folderChooser.setCurrentDirectory(workDir);
-//    _folderChooser.setApproveButtonText("Select");
-//    _folderChooser.setFileFilter(new DirectoryFilter());
-//    _folderChooser.setDialogTitle("Open Folder");
-//    
-//    
-//    Container button_row = (Container)findButtonContainer(_folderChooser, _folderChooser.getApproveButtonText());
-//    Container buttons = (Container) button_row.getParent();
-//    
-////    Component c2 = ((BorderLayout)_folderChooser.getLayout()).getLayoutComponent(BorderLayout.SOUTH);
-//    
-////    System.out.println("c1: " + c1);
-////    System.out.println("c2: " + c2);
-//    
-//    
-////    JPanel buttons = (JPanel)c2;
-////    JPanel button_row = (JPanel)buttons.getComponent(3);
-//    JPanel bottom_row = new JPanel();
-//    bottom_row.setLayout(new BorderLayout());
-//    bottom_row.add(new JCheckBox("Recursive Open"), BorderLayout.CENTER);
-//    bottom_row.add(button_row, BorderLayout.EAST);
-//    buttons.add(bottom_row);
-//    
-//    return _folderChooser;
-//  }
-  
-//  private Container findButtonContainer(Container container, String buttonText) {
-//    Container answer = null;
-//    Component[] cs = container.getComponents();
-//    for(Component c: cs) {
-//      if (c instanceof JButton && ((JButton)c).getText().equals(buttonText)) {
-//        return container;
-//      }else if (c instanceof Container) {
-//        answer = findButtonContainer((Container)c, buttonText);
-//      }
-//      
-//      if (answer != null) break;
-//    }
-//    return answer;
-//  }
-  
-  
+ 
   /** Sets up the ctrl-tab listener. */
   private void setUpKeys() { setFocusTraversalKeysEnabled(false); }
   
@@ -4473,10 +4422,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       jfc.setSelectedFile(previous);
     }
     
-    jfc.removeChoosableFileFilter(_projectFilter);
-    jfc.removeChoosableFileFilter(_javaSourceFilter);
-    jfc.removeChoosableFileFilter(_unfilteredJavaSourceFilter);
-    jfc.setFileFilter(_javaSourceFilter);
+    jfc.resetChoosableFileFilters();
+    jfc.setFileFilter(getSourceFileFilter());
     jfc.setMultiSelectionEnabled(false);
     int rc = jfc.showSaveDialog(this);
     return getChosenFile(jfc, rc, previous);
@@ -4849,7 +4796,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * TODO: change the dialog title to give the current path rather than "..."
     */
   public void openFolder(DirectoryChooser chooser) {
-    String type = "'" + OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)] + "' ";
+    String ext = _model.getOpenAllFilesInFolderExtension();
+    String type = "'" + ext + "' ";
     chooser.setDialogTitle("Open All " + type + "Files in ...");
     
     File openDir = FileOps.NULL_FILE;
@@ -4867,16 +4815,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     boolean rec = _openRecursiveCheckBox.isSelected();
     DrJava.getConfig().setSetting(OptionConstants.OPEN_FOLDER_RECURSIVE, Boolean.valueOf(rec));
     updateStatusField("Opening folder " + dir);
-    _openFolder(dir, rec);
+    _openFolder(dir, rec, ext);
   }
   
   /** Opens all the files in the specified directory; it opens all files in nested folders if rec is true.
     * @param dir the specified directory
     * @param rec true if files in nested folders should be opened
+    * @param ext extension
     */
-  private void _openFolder(File dir, boolean rec) {
+  private void _openFolder(File dir, boolean rec, String ext) {
     hourglassOn();
-    try { _model.openFolder(dir, rec); }
+    try { _model.openFolder(dir, rec, ext); }
     catch(AlreadyOpenException e) { /* do nothing */ }
     catch(IOException e) { MainFrameStatics.showIOError(MainFrame.this, e); }
     catch(OperationCanceledException oce) { /* do nothing */ }
@@ -5147,6 +5096,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private void _newProject() {
     
     _closeProject(true);  // suppress resetting interactions; it will be done in _model.newProject() below
+    _saveChooser.resetChoosableFileFilters();
     _saveChooser.setFileFilter(_projectFilter);
     _saveChooser.setMultiSelectionEnabled(false);
     int rc = _saveChooser.showSaveDialog(this);
@@ -5182,18 +5132,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * specified file.  Nothing is written in the file system; this action is performed by a subsequent _saveAll().
     * @return false if the user canceled the action */
   private boolean _saveProjectAs() {
-    
-//    // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
-    _saveChooser.removeChoosableFileFilter(_projectFilter);
-    _saveChooser.removeChoosableFileFilter(_javaSourceFilter);
-    _saveChooser.removeChoosableFileFilter(_unfilteredJavaSourceFilter);
+    _saveChooser.resetChoosableFileFilters();
     _saveChooser.setFileFilter(_projectFilter);
-//    File selection = _saveChooser.getSelectedFile();
-//    if (selection != null) {  // what is this block of commands for?
-//      _saveChooser.setSelectedFile(selection.getParentFile());
-//      _saveChooser.setSelectedFile(selection);
-//      _saveChooser.setSelectedFile(null);
-//    }
     
     if (_currentProjFile != FileOps.NULL_FILE) _saveChooser.setSelectedFile(_currentProjFile);
     _saveChooser.setMultiSelectionEnabled(false);
@@ -6956,24 +6896,29 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     final Configuration config = DrJava.getConfig();
     int currentLanguageLevel = config.getSetting(LANGUAGE_LEVEL);
-    final JRadioButtonMenuItem rbFullJavaMenuItem = new JRadioButtonMenuItem("Full Java");
-    rbFullJavaMenuItem.setToolTipText("Use full Java syntax");
-    if (currentLanguageLevel != OptionConstants.FUNCTIONAL_JAVA_LEVEL) { rbFullJavaMenuItem.setSelected(true); }
-    rbFullJavaMenuItem.addActionListener(new ActionListener() {
+    
+    final AbstractAction rbFullJavaAction = new AbstractAction("Full Java") {
+      { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.LANGUAGE_LEVELS); }
       public void actionPerformed(ActionEvent e) {
         config.setSetting(LANGUAGE_LEVEL, OptionConstants.FULL_JAVA);
-      }});
+      }
+    };
+    final JRadioButtonMenuItem rbFullJavaMenuItem = new JRadioButtonMenuItem(rbFullJavaAction);
+    rbFullJavaMenuItem.setToolTipText("Use full Java syntax");
+    if (currentLanguageLevel != OptionConstants.FUNCTIONAL_JAVA_LEVEL) { rbFullJavaMenuItem.setSelected(true); }
     group.add(rbFullJavaMenuItem);
     languageLevelMenu.add(rbFullJavaMenuItem);
     languageLevelMenu.addSeparator();
     
-    final JRadioButtonMenuItem rbFunctionalMenuItem = new JRadioButtonMenuItem("Functional Java");
-    rbFunctionalMenuItem.setToolTipText("Use Functional Java language-level features");
-    if (currentLanguageLevel == OptionConstants.FUNCTIONAL_JAVA_LEVEL) { rbFunctionalMenuItem.setSelected(true); }
-    rbFunctionalMenuItem.addActionListener(new ActionListener() {
+    final AbstractAction rbFunctionalAction = new AbstractAction("Functional Java") {
+      { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.LANGUAGE_LEVELS); }
       public void actionPerformed(ActionEvent e) {
         config.setSetting(LANGUAGE_LEVEL, OptionConstants.FUNCTIONAL_JAVA_LEVEL);
-      }});
+      }
+    };
+    final JRadioButtonMenuItem rbFunctionalMenuItem = new JRadioButtonMenuItem(rbFunctionalAction);
+    rbFunctionalMenuItem.setToolTipText("Use Functional Java language-level features");
+    if (currentLanguageLevel == OptionConstants.FUNCTIONAL_JAVA_LEVEL) { rbFunctionalMenuItem.setSelected(true); }
     group.add(rbFunctionalMenuItem);
     languageLevelMenu.add(rbFunctionalMenuItem);
     
@@ -6993,6 +6938,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       }
     });
+    _guiAvailabilityNotifier.ensureAvailabilityIs
+      (GUIAvailabilityListener.ComponentType.LANGUAGE_LEVELS,
+       _model.getCompilerModel().getActiveCompiler().supportsLanguageLevels());
     
     return languageLevelMenu;
   }
@@ -9170,11 +9118,18 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     /** Called after the active compiler has been changed. */
     public void activeCompilerChanged() {
+      // NOTE: Does not run in the event thread!
       String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
       if (linkVersion.equals(JAVADOC_AUTO_TEXT)) {
         // The Java API Javadoc version must match the compiler.  Since compiler was changed, we rebuild the API list
         clearJavaAPISet();
       }
+      // update syntax highlighting for all documents
+      _model.updateSyntaxHighlighting();
+      // update availability of language levels
+      _guiAvailabilityNotifier.ensureAvailabilityIs
+        (GUIAvailabilityListener.ComponentType.LANGUAGE_LEVELS,
+         _model.getCompilerModel().getActiveCompiler().supportsLanguageLevels());
     }
     
     public void prepareForRun(final OpenDefinitionsDocument doc) {
@@ -10340,7 +10295,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                   try {
                     String rel = FileOps.stringMakeRelativeTo(d.getRawFile(), projectRoot);
                     String full = rel.replace(File.separatorChar, '.');
-                    for (String ext: edu.rice.cs.drjava.model.compiler.CompilerModel.EXTENSIONS) {
+                    
+                    // TODO: What about Habanero Java extension?
+                    for (String ext: DrJavaFileUtils.getSourceFileExtensions()) {
                       if (full.endsWith(ext)) {
                         full = full.substring(0, full.lastIndexOf(ext));
                         break;

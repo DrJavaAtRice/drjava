@@ -173,7 +173,7 @@ public class JDKToolsLibrary {
     if (compiler!=NoCompilerAvailable.ONLY) {
       // if we have found a compiler, add it
       msg("                 compiler found");
-      list.add(new JDKToolsLibrary(version, null, compiler, debugger, javadoc));
+      list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, compiler, debugger, javadoc));
     }
       
 //    if (JavaVersion.JAVA_6.compareTo(version.majorVersion())>=0) {

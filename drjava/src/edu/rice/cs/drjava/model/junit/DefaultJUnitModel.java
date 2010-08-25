@@ -625,6 +625,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     * @return the file associated with the given class
     */
   public File getFileForClassName(String className) {
+    // TODO: What about language level file extensions? What about Habanero Java extension?
     return _model.getSourceFile(className + OptionConstants.JAVA_FILE_EXTENSION);
   }
   

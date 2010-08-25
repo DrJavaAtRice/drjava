@@ -38,13 +38,18 @@ package edu.rice.cs.drjava.model.compiler;
 
 import java.util.List;
 import java.util.Arrays;
+import java.util.Set;
+import java.util.HashSet;
 import java.io.File;
-import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.DJError;
+import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.drjava.model.DrJavaFileUtils;
+
+import javax.swing.filechooser.FileFilter;
+import edu.rice.cs.drjava.ui.SmartSourceFilter;
 
 import java.lang.reflect.Constructor;
 
@@ -230,6 +235,41 @@ public abstract class JavacCompiler implements CompilerInterface {
   public boolean isSourceFileForThisCompiler(File f) {
     // by default, use DrJavaFileUtils.isSourceFile
     return DrJavaFileUtils.isSourceFile(f);
+  }
+  
+  /** Return the set of source file extensions that this compiler supports.
+    * @return the set of source file extensions that this compiler supports. */
+  public Set<String> getSourceFileExtensions() { return DrJavaFileUtils.getSourceFileExtensions(); }
+  
+  /** Return a file filter that can be used to open files this compiler supports.
+    * @return file filter for appropriate source files for this compiler */
+  public FileFilter getFileFilter() { return new SmartSourceFilter(); }
+
+  /** Return the extension of the files that should be opened with the "Open Folder..." command.
+    * @return file extension for the "Open Folder..." command for this compiler. */
+  public String getOpenAllFilesInFolderExtension() {
+    return OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL)];
+  }
+
+  /** Return true if this compiler can be used in conjunction with the language level facility.
+    * @return true if language levels can be used. */
+  public boolean supportsLanguageLevels() { return true; }
+  
+  /** Return the set of keywords that should be highlighted in the specified file.
+    * @param f file for which to return the keywords
+    * @return the set of keywords that should be highlighted in the specified file. */
+  public Set<String> getKeywordsForFile(File f) { return new HashSet<String>(JAVA_KEYWORDS); }
+  
+  /** Set of Java/GJ keywords for special coloring. */
+  public static final HashSet<String> JAVA_KEYWORDS = new HashSet<String>();
+  static {
+    final String[] words =  {
+      "import", "native", "package", "goto", "const", "if", "else", "switch", "while", "for", "do", "true", "false",
+      "null", "this", "super", "new", "instanceof", "return", "static", "synchronized", "transient", "volatile", 
+      "final", "strictfp", "throw", "try", "catch", "finally", "throws", "extends", "implements", "interface", "class",
+      "break", "continue", "public", "protected", "private", "abstract", "case", "default", "assert", "enum"
+    };
+    for(String s: words) { JAVA_KEYWORDS.add(s); }
   }
   
 //  /** This method performs the "smart run". Unfortunately, we don't get the right static error messages.
