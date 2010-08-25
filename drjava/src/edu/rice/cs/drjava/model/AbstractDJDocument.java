@@ -240,19 +240,19 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return  keywords;
   }
 
-  /** Add the specified keyword for syntax highlighting.
-    * @param s keyword to add
+  /** Add the specified keywords for syntax highlighting.
+    * @param keywords keywords to add
     * @return this document (used to chain several addKeyword calls) */
-  public AbstractDJDocument addKeyword(String s) {
-    _keywords.add(s);
+  public AbstractDJDocument addKeyword(String... keywords) {
+    for(String s: keywords) { _keywords.add(s); }
     return this;
   }
 
   /** Remove the specified keyword from syntax highlighting.
-    * @param s keyword to remove
+    * @param keywords keyword to remove
     * @return this document (used to chain several removeKeyword calls) */
-  public AbstractDJDocument removeKeyword(String s) {
-    _keywords.remove(s);
+  public AbstractDJDocument removeKeyword(String... keywords) {
+    for(String s: keywords) { _keywords.remove(s); }
     return this;
   }
 

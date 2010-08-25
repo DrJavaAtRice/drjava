@@ -2602,6 +2602,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   public static boolean isUntitled(final File f) { return f == null || (f instanceof NullFile); }
+
+  /** Update the syntax highlighting for all open documents. */
+  public void updateSyntaxHighlighting() {
+    for (OpenDefinitionsDocument doc: getOpenDefinitionsDocuments()) { doc.updateSyntaxHighlighting(); }
+    // refresh active document so syntax highlighting updates in the currently visible document too
+    Utilities.invokeLater(new Runnable() { public void run() { refreshActiveDocument(); } });
+  }
   
   // ---------- ConcreteOpenDefDoc inner class ----------
   
@@ -2686,7 +2693,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
        * BrowserDocumentRegion is NOT a subclass of DocumentRegion. */
       _browserRegions = new HashSet<BrowserDocumentRegion>();
       
-      updateSyntaxHighlighting(f);
+      // update the syntax highlighting for this document
+      updateSyntaxHighlighting();
     }
     
     //------------ Getters and Setters -------------//
@@ -2711,16 +2719,34 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _file = file;
       if (! AbstractGlobalModel.isUntitled(file)) _timestamp = file.lastModified();
       else _timestamp = 0L;
-      updateSyntaxHighlighting(file);
+      updateSyntaxHighlighting();
     }
 
     /** Update the syntax highlighting for the file type. */
-    protected void updateSyntaxHighlighting(File file) {
-      // NOTE: Insert code below to highlight Habanero Java keywords
-//      if (file.getName().endsWith(".hj")) {
-//        getDocument().resetKeywords().addKeyword("async").addKeyword("finish");
+    public void updateSyntaxHighlighting() {
+      // NOTE: Insert code below to highlight Habanero Java and Mint keywords
+//      if (_file.getName().endsWith(".hj")) {
+//        getDocument().resetKeywords().addKeyword("at","activitylocal","async","ateach","atomic","arrayView","await",
+//                                                 "boxed","compilertest","complex64","complex32","current","extern",
+//                                                 "finish","forall","foreach","fun","future","here","imag","isolated",
+//                                                 "local","method","mutable","next","nonblocking","now","nullable",
+//                                                 "or","phased","placelocal","real","reference","safe","self","seq",
+//                                                 "sequential","signal","single","unsafe","value","wait","when");
 //      }
-//      else { getDocument().resetKeywords(); }
+//      else {
+//        CompilerModel cm = getCompilerModel();
+//        if (cm==null) {
+//          getDocument().resetKeywords();
+//        }
+//        else {
+//          if (cm.getActiveCompiler().getName().toLowerCase().contains("mint")) {
+//            getDocument().resetKeywords().addKeyword("separable");
+//          }
+//          else {
+//            getDocument().resetKeywords();
+//          }
+//        }
+//      }
     }
     
     /** Returns the timestamp. */

@@ -447,5 +447,11 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   /** @return the caret position as set by the view. */
   public int getCaretPosition() { throw new UnsupportedOperationException("Dummy method"); }
 
-  public boolean containsClassOrInterfaceOrEnum() throws BadLocationException { throw new UnsupportedOperationException("Dummy method"); }
+  public boolean containsClassOrInterfaceOrEnum() throws BadLocationException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  /** Update the syntax highlighting for the file type. */
+  public void updateSyntaxHighlighting() { throw new UnsupportedOperationException("Dummy method"); }
+
 }

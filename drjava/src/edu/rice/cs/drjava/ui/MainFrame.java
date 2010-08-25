@@ -9177,11 +9177,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     /** Called after the active compiler has been changed. */
     public void activeCompilerChanged() {
+      // NOTE: Does not run in the event thread!
       String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
       if (linkVersion.equals(JAVADOC_AUTO_TEXT)) {
         // The Java API Javadoc version must match the compiler.  Since compiler was changed, we rebuild the API list
         clearJavaAPISet();
       }
+      // update syntax highlighting for all documents
+      _model.updateSyntaxHighlighting();
     }
     
     public void prepareForRun(final OpenDefinitionsDocument doc) {
