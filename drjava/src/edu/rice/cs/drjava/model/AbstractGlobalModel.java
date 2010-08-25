@@ -2685,6 +2685,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       /* The following table is not affected by inconsistency between hashCode/equals in DocumentRegion, because
        * BrowserDocumentRegion is NOT a subclass of DocumentRegion. */
       _browserRegions = new HashSet<BrowserDocumentRegion>();
+      
+      updateSyntaxHighlighting(f);
     }
     
     //------------ Getters and Setters -------------//
@@ -2709,11 +2711,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _file = file;
       if (! AbstractGlobalModel.isUntitled(file)) _timestamp = file.lastModified();
       else _timestamp = 0L;
+      updateSyntaxHighlighting(file);
+    }
+
+    /** Update the syntax highlighting for the file type. */
+    protected void updateSyntaxHighlighting(File file) {
       // NOTE: Insert code below to highlight Habanero Java keywords
-      // if (file.getName().endsWith(".hj")) {
-      //   getDocument().resetKeywords().addKeyword("async").addKeyword("finish");
-      // }
-      // else { getDocument().resetKeywords(); }
+//      if (file.getName().endsWith(".hj")) {
+//        getDocument().resetKeywords().addKeyword("async").addKeyword("finish");
+//      }
+//      else { getDocument().resetKeywords(); }
     }
     
     /** Returns the timestamp. */
