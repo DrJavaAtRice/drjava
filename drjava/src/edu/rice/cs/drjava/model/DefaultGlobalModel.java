@@ -259,7 +259,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     File configTools = DrJava.getConfig().getSetting(JAVAC_LOCATION);
     if (configTools != FileOps.NULL_FILE) {
-      JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this);
+      JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this, JDKDescriptor.NONE);
       if (fromConfig.isValid()) { 
         JarJDKToolsLibrary.msg("From config: "+fromConfig);
         results.put(coarsenVersion(fromConfig.version()), fromConfig);
@@ -285,11 +285,15 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     Iterable<JarJDKToolsLibrary> fromSearch = JarJDKToolsLibrary.search(this);
     for (JDKToolsLibrary t : fromSearch) {
       JavaVersion.FullVersion tVersion = t.version();
-      if (!results.containsKey(coarsenVersion(tVersion))) {
-        JarJDKToolsLibrary.msg("From search: "+t);
-        results.put(coarsenVersion(tVersion), t);
+      JarJDKToolsLibrary.msg("From search: "+t);
+      JavaVersion.FullVersion coarsenedVersion = coarsenVersion(tVersion);
+      JarJDKToolsLibrary.msg("\ttVersion: "+tVersion+" "+tVersion.vendor());
+      JarJDKToolsLibrary.msg("\tcoarsenedVersion: "+coarsenedVersion+" "+coarsenedVersion.vendor());
+      if (!results.containsKey(coarsenedVersion)) {
+        JarJDKToolsLibrary.msg("\tadded");
+        results.put(coarsenedVersion, t);
       }
-      else { JarJDKToolsLibrary.msg("From search: duplicate "+t); }
+      else { JarJDKToolsLibrary.msg("\tduplicate"); }
     }
     
     return IterUtil.reverse(results.values());
@@ -464,10 +468,21 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     /** Standard constructor for a document read from a file.  Initializes this ODD's DD.
       * @param f file describing DefinitionsDocument to manage
       */
-    ConcreteOpenDefDoc(File f) { super(f); }
+    ConcreteOpenDefDoc(File f) {
+      super(f);
+      
+      // update the syntax highlighting for this document
+      // can't be done in AbstractGlobalModel.ConcreteOpenDefDoc because getCompilerModel is not supported
+      updateSyntaxHighlighting();
+    }
     
     /* Standard constructor for a new document (no associated file) */
-    ConcreteOpenDefDoc(NullFile f) { super(f); }
+    ConcreteOpenDefDoc(NullFile f) { super(f);
+      
+      // update the syntax highlighting for this document
+      // can't be done in AbstractGlobalModel.ConcreteOpenDefDoc because getCompilerModel is not supported
+      updateSyntaxHighlighting();
+    }
     
     /** Starting compiling this document.  Used only for unit testing.  Only rus in the event thread. */
     public void startCompile() throws IOException { 

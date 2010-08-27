@@ -199,7 +199,8 @@ public interface GlobalModel extends ILoadDocuments {
   public boolean closeFiles(List<OpenDefinitionsDocument> docs);
 
   /* Opens all files in specified folder.  If rec is true, open all files in the tree rooted at dir. */
-  public void openFolder(File dir, boolean rec) throws IOException, OperationCanceledException, AlreadyOpenException;
+  public void openFolder(File dir, boolean rec, String ext)
+    throws IOException, OperationCanceledException, AlreadyOpenException;
   
   /** Saves all open documents, prompting when necessary. */
   public void saveAllFiles(FileSaveSelector com) throws IOException;

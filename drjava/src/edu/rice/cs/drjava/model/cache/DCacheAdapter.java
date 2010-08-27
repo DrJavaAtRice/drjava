@@ -36,6 +36,7 @@
 
 package edu.rice.cs.drjava.model.cache;
 
+import java.util.Set;
 import java.io.IOException;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
@@ -44,7 +45,9 @@ import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
 /** A lightweight wrapper type for DefinitionsDocuments that may or may not be resident in memory.  An instance of this
+  * (??? -- incomplete sentence).
   * The wrapper includes a copy of the String text of the document if it has been kicked out of the cache.
+  * It may also contain the currently set keywords so they can be modified without loading in the document.
   */
 public interface DCacheAdapter {
   
@@ -83,4 +86,8 @@ public interface DCacheAdapter {
   
   /* Method for notifying the DCacheAdapter that this document has been reset via undo commands. */
   public void documentReset();
+  
+  /** Set the specified keywords as keywords for syntax highlighting.
+    * @param keywords keywords to highlight */
+  public void setKeywords(Set<String> keywords);
 }

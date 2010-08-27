@@ -468,6 +468,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return null;
     }
     
+    // TODO: What about language level file extensions? What about Habanero Java extension?
     if (path.toLowerCase().endsWith(OptionConstants.JAVA_FILE_EXTENSION)){
       return new File(getProjectFile().getParent(), path);
     } //if
@@ -1385,10 +1386,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Opens all files in the specified folder dir and places them in the appropriate places in the document navigator.
     * If "open folders recursively" is checked, this operation opens all files in the subtree rooted at dir.
     */
-  public void openFolder(File dir, boolean rec) throws IOException, OperationCanceledException, AlreadyOpenException {
+  public void openFolder(File dir, boolean rec, String ext)
+    throws IOException, OperationCanceledException, AlreadyOpenException {
     debug.logStart();
     
-    final File[] sfiles =  getFilesInFolder(dir, rec); 
+    final File[] sfiles =  getFilesInFolder(dir, rec, ext); 
     if(sfiles == null) return;
     openFiles(new FileOpenSelector() { public File[] getFiles() { return sfiles; } });
     
@@ -1397,17 +1399,25 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     debug.logEnd();
   }
   
+  /** @return the file extension for the "Open Folder..." command for the currently selected compiler. */
+  public String getOpenAllFilesInFolderExtension() {
+    CompilerModel cm = getCompilerModel();
+    if (cm==null) {
+      return OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)];
+    }
+    else {
+      return cm.getActiveCompiler().getOpenAllFilesInFolderExtension();
+    }
+  }
   
-  
-  public File[] getFilesInFolder(File dir, boolean rec) throws IOException, OperationCanceledException, 
+  public File[] getFilesInFolder(File dir, boolean rec, String ext) throws IOException, OperationCanceledException, 
     AlreadyOpenException {
     
     if (dir == null || !dir.isDirectory()) return null; // just in case
     
     Iterable<File> filesIterable;
     
-    String extension = OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]
-      .substring(1); // do not include the dot ("java", not ".java")
+    String extension = ext.substring(1); // do not include the dot ("java", not ".java")
     
     Predicate<File> match = LambdaUtil.and(IOUtil.IS_FILE, IOUtil.extensionFilePredicate(extension));
     if (rec) { filesIterable = IOUtil.listFilesRecursively(dir, match); }
@@ -1444,7 +1454,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return null;
     File[] allFiles;
     try {
-      allFiles = getFilesInFolder(projRoot, true);
+      allFiles = getFilesInFolder(projRoot, true, getOpenAllFilesInFolderExtension());
     } catch(IOException e) { return null; }
     catch(OperationCanceledException e) { return null; }
     catch(AlreadyOpenException e) { return null; }
@@ -2692,9 +2702,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       /* The following table is not affected by inconsistency between hashCode/equals in DocumentRegion, because
        * BrowserDocumentRegion is NOT a subclass of DocumentRegion. */
       _browserRegions = new HashSet<BrowserDocumentRegion>();
-      
-      // update the syntax highlighting for this document
-      updateSyntaxHighlighting();
     }
     
     //------------ Getters and Setters -------------//
@@ -2724,29 +2731,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 
     /** Update the syntax highlighting for the file type. */
     public void updateSyntaxHighlighting() {
-      // NOTE: Insert code below to highlight Habanero Java and Mint keywords
-//      if (_file.getName().endsWith(".hj")) {
-//        getDocument().resetKeywords().addKeyword("at","activitylocal","async","ateach","atomic","arrayView","await",
-//                                                 "boxed","compilertest","complex64","complex32","current","extern",
-//                                                 "finish","forall","foreach","fun","future","here","imag","isolated",
-//                                                 "local","method","mutable","next","nonblocking","now","nullable",
-//                                                 "or","phased","placelocal","real","reference","safe","self","seq",
-//                                                 "sequential","signal","single","unsafe","value","wait","when");
-//      }
-//      else {
-//        CompilerModel cm = getCompilerModel();
-//        if (cm==null) {
-//          getDocument().resetKeywords();
-//        }
-//        else {
-//          if (cm.getActiveCompiler().getName().toLowerCase().contains("mint")) {
-//            getDocument().resetKeywords().addKeyword("separable");
-//          }
-//          else {
-//            getDocument().resetKeywords();
-//          }
-//        }
-//      }
+      // can't be called in AbstractGlobalModel.ConcreteOpenDefDoc because getCompilerModel is not supported
+      CompilerModel cm = getCompilerModel();
+      if (cm==null) {
+        // use the cache adapter so setting the keywords doesn't load the document
+        _cacheAdapter.setKeywords(edu.rice.cs.drjava.model.compiler.JavacCompiler.JAVA_KEYWORDS);
+      }
+      else {
+        // use the cache adapter so setting the keywords doesn't load the document
+        _cacheAdapter.setKeywords(cm.getActiveCompiler().getKeywordsForFile(_file));
+      }
     }
     
     /** Returns the timestamp. */
@@ -2942,10 +2936,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** @return true if this is an auxiliary file. */
     public boolean isAuxiliaryFile() { return ! isUntitled() && _state.isAuxiliaryFile(_file); }
     
-    /** @return true if this has a legal source file name (ends in extension ".java", ".dj0", ".dj1", or ".dj2". */
+    /** @return true if this has a legal source file name for the currently active compiler */
     public boolean isSourceFile() {
       if (isUntitled()) return false;  // assert _file != null
-      return DrJavaFileUtils.isSourceFile(_file.getName());
+      return getCompilerModel().getActiveCompiler().isSourceFileForThisCompiler(_file);
     }
     
     /** Returns whether this document is currently untitled (indicating whether it has a file yet or not).

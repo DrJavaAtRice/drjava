@@ -46,6 +46,7 @@ import edu.rice.cs.plt.reflect.JavaVersion.FullVersion;
 import edu.rice.cs.plt.reflect.ReflectException;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
+import edu.rice.cs.plt.object.ObjectUtil;
 
 import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
@@ -54,6 +55,7 @@ import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
 import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
 import edu.rice.cs.drjava.model.javadoc.DefaultJavadocModel;
+import edu.rice.cs.drjava.model.JDKDescriptor;
 
 /** 
  * Provides dynamic access to the interface of a JDK's tools.jar classes.  This level of indirection
@@ -67,16 +69,22 @@ public class JDKToolsLibrary {
   private final CompilerInterface _compiler;
   private final Debugger _debugger;
   private final JavadocModel _javadoc;
+  private final JDKDescriptor _jdkDescriptor; // JDKDescriptor.NONE if none
   
-  protected JDKToolsLibrary(FullVersion version, CompilerInterface compiler, Debugger debugger,
+  protected JDKToolsLibrary(FullVersion version, JDKDescriptor jdkDescriptor,
+                            CompilerInterface compiler, Debugger debugger,
                             JavadocModel javadoc) {
+    assert jdkDescriptor != null;
     _version = version;
     _compiler = compiler;
     _debugger = debugger;
     _javadoc = javadoc;
+    _jdkDescriptor = jdkDescriptor;
   }
   
   public FullVersion version() { return _version; }
+  
+  public JDKDescriptor jdkDescriptor() { return _jdkDescriptor; }
   
   public CompilerInterface compiler() { return _compiler; }
   
@@ -88,14 +96,14 @@ public class JDKToolsLibrary {
     return _compiler.isAvailable() || _debugger.isAvailable() || _javadoc.isAvailable();
   }
   
-  public String toString() { return "JDK library " + _version.versionString(); }
+  public String toString() { return _jdkDescriptor.getDescription(_version); }
   
-  protected static String adapterForCompiler(JavaVersion.FullVersion version) {
+  public static String adapterForCompiler(JavaVersion.FullVersion version) {
     switch (version.majorVersion()) {
       case JAVA_6: {
         switch (version.vendor()) {
           case OPENJDK: return "edu.rice.cs.drjava.model.compiler.Javac160OpenJDKCompiler";
-          case MINT: return "edu.rice.cs.drjava.model.compiler.MintCompiler";
+          case UNKNOWN: return null;
           default: return "edu.rice.cs.drjava.model.compiler.Javac160Compiler";
         }
       }
@@ -104,7 +112,7 @@ public class JDKToolsLibrary {
     }
   }
   
-  protected static String adapterForDebugger(JavaVersion.FullVersion version) {
+  public static String adapterForDebugger(JavaVersion.FullVersion version) {
     switch (version.majorVersion()) {
       case JAVA_6: return "edu.rice.cs.drjava.model.debug.jpda.JPDADebugger";
       case JAVA_5: return "edu.rice.cs.drjava.model.debug.jpda.JPDADebugger";
@@ -165,34 +173,34 @@ public class JDKToolsLibrary {
     if (compiler!=NoCompilerAvailable.ONLY) {
       // if we have found a compiler, add it
       msg("                 compiler found");
-      list.add(new JDKToolsLibrary(version, compiler, debugger, javadoc));
+      list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, compiler, debugger, javadoc));
     }
       
-    if (JavaVersion.JAVA_6.compareTo(version.majorVersion())>=0) {
-      // at least Java 6, try Eclipse compiler
-      msg("                 at least Java 6, try EclipseCompiler");
-      // provide "UNKNOWN 6.0" as version
-      FullVersion eclipseVersion = JavaVersion.parseFullVersion(JavaVersion.JAVA_6.fullVersion().versionString(),
-                                                                "Eclipse","");
-      msg("                 version for Eclipse: "+eclipseVersion);
-      compiler = getCompilerInterface("edu.rice.cs.drjava.model.compiler.EclipseCompiler", eclipseVersion);
-      msg("                 compiler="+compiler.getClass().getName());
-      if (compiler!=NoCompilerAvailable.ONLY) {
-        // if we have found a compiler, add it
-        msg("                 compiler found");
-        list.add(new JDKToolsLibrary(eclipseVersion, compiler, debugger, javadoc));
-      }
-    }
+//    if (JavaVersion.JAVA_6.compareTo(version.majorVersion())>=0) {
+//      // at least Java 6, try Eclipse compiler
+//      msg("                 at least Java 6, try EclipseCompiler");
+//      // provide "UNKNOWN 6.0" as version
+//      FullVersion eclipseVersion = JavaVersion.parseFullVersion(JavaVersion.JAVA_6.fullVersion().versionString(),
+//                                                                "Eclipse","");
+//      msg("                 version for Eclipse: "+eclipseVersion);
+//      compiler = getCompilerInterface("edu.rice.cs.drjava.model.compiler.EclipseCompiler", eclipseVersion);
+//      msg("                 compiler="+compiler.getClass().getName());
+//      if (compiler!=NoCompilerAvailable.ONLY) {
+//        // if we have found a compiler, add it
+//        msg("                 compiler found");
+//        list.add(new JDKToolsLibrary(eclipseVersion, null, compiler, debugger, javadoc));
+//      }
+//    }
     msg("                 compilers found: "+list.size());
     
     if (list.size()==0) {
       // no compiler found, i.e. compiler == NoCompilerAvailable.ONLY
       msg("                 no compilers found, adding NoCompilerAvailable library");
-      list.add(new JDKToolsLibrary(version, NoCompilerAvailable.ONLY, debugger, javadoc));
+      list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, NoCompilerAvailable.ONLY, debugger, javadoc));
     }
     
     return list;
-  }  
+  }
   
   public static final java.io.StringWriter LOG_STRINGWRITER = new java.io.StringWriter();
   protected static final java.io.PrintWriter LOG_PW = new java.io.PrintWriter(LOG_STRINGWRITER);

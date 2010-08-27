@@ -206,7 +206,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     
     // set the thread context class loader, this way NextGen and Mint can use the interpreter's class loader
     Thread.currentThread().setContextClassLoader(_interpreterLoader);
-
+    
     Option<Object> result = null;
     try { result = interpreter.interpret(input); }
     catch (InterpreterException e) { debug.logEnd(); return InterpretResult.exception(e); }

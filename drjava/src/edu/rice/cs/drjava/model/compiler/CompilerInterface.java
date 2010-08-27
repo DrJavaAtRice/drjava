@@ -38,6 +38,8 @@ package edu.rice.cs.drjava.model.compiler;
 
 import java.io.File;
 import java.util.List;
+import java.util.Set;
+import javax.swing.filechooser.FileFilter;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
@@ -88,7 +90,34 @@ public interface CompilerInterface {
   /** Transform the command line to be interpreted into something the Interactions JVM can use.
     * This replaces "java MyClass a b c" with Java code to call MyClass.main(new String[]{"a","b","c"}).
     * "import MyClass" is not handled here.
+    * transformCommands should support at least "run", "java" and "applet".
     * @param interactionsString unprocessed command line
     * @return command line with commands transformed */
   String transformCommands(String interactionsString);
+  
+  /** Return true if the specified file is a source file for this compiler. 
+    * @param f file to check if it is a source file
+    * @return true if the specified file is a source file for this compiler. */
+  boolean isSourceFileForThisCompiler(File f);
+  
+  /** Return the set of source file extensions that this compiler supports.
+    * @return the set of source file extensions that this compiler supports. */
+  Set<String> getSourceFileExtensions();
+  
+  /** Return a file filter that can be used to open files this compiler supports.
+    * @return file filter for appropriate source files for this compiler. */
+  FileFilter getFileFilter();
+  
+  /** Return the extension of the files that should be opened with the "Open Folder..." command.
+    * @return file extension for the "Open Folder..." command for this compiler. */
+  String getOpenAllFilesInFolderExtension();
+  
+  /** Return the set of keywords that should be highlighted in the specified file.
+    * @param f file for which to return the keywords
+    * @return the set of keywords that should be highlighted in the specified file. */
+  Set<String> getKeywordsForFile(File f);
+  
+  /** Return true if this compiler can be used in conjunction with the language level facility.
+    * @return true if language levels can be used. */
+  boolean supportsLanguageLevels();
 }

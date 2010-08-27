@@ -54,7 +54,7 @@ public class JVMBuilderTest extends TestCase {
     
     JVMBuilder customCP = new JVMBuilder(IterUtil.compose(currentCPFiles, new File("xx")));
     Process p2 = customCP.start(TestProcess.class.getName(), "d", "e");
-    checkProcessOutput(p2, currentCP + ":" + IOUtil.attemptAbsoluteFile(new File("xx")),
+    checkProcessOutput(p2, currentCP + File.pathSeparator + IOUtil.attemptAbsoluteFile(new File("xx")),
                        System.getProperty("user.dir"), IterUtil.make("d", "e"));
     
     JVMBuilder customDir = new JVMBuilder(File.listRoots()[0]);
