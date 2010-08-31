@@ -86,6 +86,9 @@ public class Javac160Compiler extends Javac160FilteringCompiler {
       // Diagnostic was introduced in the Java 1.6 compiler
       Class<?> diagnostic = Class.forName("javax.tools.Diagnostic");
       diagnostic.getMethod("getKind");
+      // The Apple Java 6 Developer Preview 6 (javase6release1dp6.dmg) doesn't contain this class, and because
+      // of that, it can't be used as a Java 6 compiler
+      Class.forName("javax.lang.model.element.Name");
       // javax.tools.Diagnostic is also found in rt.jar; to test if tools.jar
       // is availble, we need to test for a class only found in tools.jar
       Class.forName("com.sun.tools.javac.main.JavaCompiler");

@@ -45,15 +45,18 @@ import java.util.Collections;
 import java.util.jar.JarFile;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.lambda.LambdaUtil;
+import edu.rice.cs.plt.lambda.Predicate;
 
 import edu.rice.cs.drjava.model.JDKDescriptor;
 
-/** The description of the Mint compound JDK. */
-public class MintDescriptor extends JDKDescriptor {
+/** The description of the SoyLatte JDK. */
+public class SoyLatteDescriptor extends JDKDescriptor {
   /** Return the name of this JDK.
     * @return name */
   public String getName() {
-    return "Mint";
+    return "SoyLatte";
   }
   
   /** Packages to shadow when loading a new tools.jar.  If we don't shadow these classes, we won't
@@ -75,16 +78,7 @@ public class MintDescriptor extends JDKDescriptor {
         "com.sun.xml.internal.rngom",
         "com.sun.xml.internal.xsom",
         "org.relaxng",
-        
-        // Mint:
-        "edu.rice.cs.mint.comp.com.sun.tools.javac",
-        "edu.rice.cs.mint.comp.com.sun.tools.javac.tree",
-        "edu.rice.cs.mint.comp.com.sun.tools.javac.comp",
-        "edu.rice.cs.mint.comp.com.sun.tools.javac.main",
-        "edu.rice.cs.mint",
-        "edu.rice.cs.mint.comp",
-        "edu.rice.cs.mint.runtime",
-        "edu.rice.cs.mint.runtime.mspTree"
+        "javax.lang.element"
     });
     return set;
   }
@@ -92,56 +86,50 @@ public class MintDescriptor extends JDKDescriptor {
   /** Returns a list of directories that should be searched for tools.jar and classes.jar files.
     * @return list of directories to search */
   public Iterable<File> getSearchDirectories() {
-    return IterUtil.singleton(edu.rice.cs.util.FileOps.getDrJavaFile().getParentFile());
+    if (System.getProperty("os.name").toLowerCase().indexOf("mac")<0) return IterUtil.empty(); // Mac only
+    Iterable<File> roots = IterUtil.asIterable(new File[] {
+      new File("/usr/local/soylatte"),
+        new File("/usr/local")
+    });
+    Predicate<File> subdirFilter = LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("\\d+\\.\\d+\\.\\d+"),
+                                                 IOUtil.regexCanonicalCaseFilePredicate("soylatte.*"));
+    Iterable<File> dirs = IterUtil.empty();
+    for(File d: roots) {
+      dirs = IterUtil.compose(dirs, IOUtil.attemptListFilesAsIterable(d, subdirFilter)); 
+    }
+    return dirs;
   }
 
   /** Returns a list of files that should be searched if they contain a compiler.
     * @return list of files to search */
   public Iterable<File> getSearchFiles() {
-    Iterable<File> files = IterUtil.asIterable(new File[] {
-      new File("/C:/Program Files/JavaPLT/JavaMint/langtools/dist/lib/classes.jar"),
-        new File("/C:/Program Files/JavaPLT/JavaMint/langtools/dist/lib/tools.jar"),
-        new File("/C:/Program Files/JavaMint/langtools/dist/lib/classes.jar"),
-        new File("/C:/Program Files/JavaMint/langtools/dist/lib/tools.jar"),
-        new File("/usr/local/JavaMint/langtools/dist/lib/classes.jar"),
-        new File("/usr/local/JavaMint/langtools/dist/lib/tools.jar")
+    if (System.getProperty("os.name").toLowerCase().indexOf("mac")<0) return IterUtil.empty(); // Mac only
+    return IterUtil.asIterable(new File[] {
+      new File("/usr/local/soylatte/lib/classes.jar"),
+        new File("/usr/local/soylatte/lib/tools.jar")
     });
-    try {
-      String mint_home = System.getenv("MINT_HOME");
-      if (mint_home!=null) {
-        // JDKToolsLibrary.msg("MINT_HOME environment variable set to: "+mint_home);
-        files = IterUtil.compose(files, new File(new File(mint_home), "langtools/dist/lib/classes.jar"));
-        files = IterUtil.compose(files, new File(new File(mint_home), "langtools/dist/lib/tools.jar"));
-      }
-      else {
-        // JDKToolsLibrary.msg("MINT_HOME not set");
-      }
-    }
-    catch(Exception e) { /* ignore MINT_HOME variable */ }
-    
-    // drjava.jar file itself; check if it's a combined Mint/DrJava jar
-    files = IterUtil.compose(files, edu.rice.cs.util.FileOps.getDrJavaFile()); 
-    return files;
   }
   
   /** True if this is a compound JDK and needs a fully featured JDK to operate.
     * @return true if compound JDK (e.g. NextGen, Mint, Habanero). */
-  public boolean isCompound() { return true; }
+  public boolean isCompound() { return false; }
   
   /** Return true if the file (jar file or directory) contains the compiler.
     * @return true if the file contains the compiler */
   public boolean containsCompiler(File f) {
+    if (System.getProperty("os.name").toLowerCase().indexOf("mac")<0) return false; // Mac only
     return Util.exists(f,
-                       "edu/rice/cs/mint/comp/TransStaging.class",
-                       "edu/rice/cs/mint/comp/com/sun/source/tree/BracketExprTree.class",
-                       "edu/rice/cs/mint/comp/com/sun/source/tree/BracketStatTree.class",
-                       "edu/rice/cs/mint/comp/com/sun/source/tree/EscapeExprTree.class",
-                       "edu/rice/cs/mint/comp/com/sun/source/tree/EscapeStatTree.class");
+                       "sun/tools/javac/Main.class",
+                       "com/sun/tools/javac/main/JavaCompiler.class",
+                       "com/sun/tools/javac/util/Context.class",
+                       "com/sun/tools/javac/util/Name.class",
+                       "com/sun/tools/javac/util/Options.class",
+                       "com/sun/tools/javac/util/Position.class");
   }
   
   /** Return the class name of the compiler adapter.
     * @return class name of compiler, or null if no compiler */
-  public String getAdapterForCompiler() { return "edu.rice.cs.drjava.model.compiler.MintCompiler"; }
+  public String getAdapterForCompiler() { return "edu.rice.cs.drjava.model.compiler.Javac160Compiler"; }
 
   /** Return the class name of the debugger adapter.
     * @return class name of debugger, or null if no debugger */
@@ -158,7 +146,8 @@ public class MintDescriptor extends JDKDescriptor {
     * @param compiler location where the compiler was fund
     * @return list of additional files that need to be available */
   public Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException {
-    return IterUtil.empty();
+    File parentDir = compiler.getParentFile();
+    return IterUtil.make(Util.oneOf(parentDir, "../jre/lib/rt.jar"));
   }
   
   public String toString() { return getClass().getSimpleName()+" --> "+getAdapterForCompiler(); }
