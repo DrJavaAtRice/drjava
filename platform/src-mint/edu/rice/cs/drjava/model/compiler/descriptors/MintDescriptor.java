@@ -120,7 +120,7 @@ public class MintDescriptor extends JDKDescriptor {
     catch(Exception e) { /* ignore MINT_HOME variable */ }
     
     // drjava.jar file itself; check if it's a combined Mint/DrJava jar
-    files = IterUtil.compose(files, edu.rice.cs.util.FileOps.getDrJavaFile()); 
+    files = IterUtil.compose(edu.rice.cs.util.FileOps.getDrJavaFile(), files); 
     return files;
   }
   

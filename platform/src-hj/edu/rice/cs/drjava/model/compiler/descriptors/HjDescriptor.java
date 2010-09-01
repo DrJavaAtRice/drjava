@@ -43,10 +43,11 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Collections;
 import java.util.jar.JarFile;
-import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.plt.iter.IterUtil;
 
 import edu.rice.cs.drjava.model.JDKDescriptor;
+import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.util.FileOps;
 
 /** The description of the HJ compound JDK. */
 public class HjDescriptor extends JDKDescriptor {
@@ -112,7 +113,7 @@ public class HjDescriptor extends JDKDescriptor {
     catch(Exception e) { /* ignore HJ_HOME variable */ }
     
     // drjava.jar file itself; check if it's a combined HJ/DrJava jar
-    files = IterUtil.compose(files, edu.rice.cs.util.FileOps.getDrJavaFile()); 
+    files = IterUtil.compose(edu.rice.cs.util.FileOps.getDrJavaFile(), files); 
     return files;
   }
   
@@ -148,13 +149,19 @@ public class HjDescriptor extends JDKDescriptor {
     * @param compiler location where the compiler was fund
     * @return list of additional files that need to be available */
   public Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException {
-    File parentDir = compiler.getParentFile();
-    return IterUtil.make(Util.oneOf(parentDir, "hj.jar"),
-                         Util.oneOf(parentDir, "sootclasses-2.3.0.jar"),
-                         Util.oneOf(parentDir, "polyglot.jar"),
-                         Util.oneOf(parentDir, "lpg.jar"),
-                         Util.oneOf(parentDir, "jasminclasses-2.3.0.jar"),
-                         Util.oneOf(parentDir, "java_cup.jar"));
+    if (compiler.equals(FileOps.getDrJavaFile())) {
+      // all in one, don't need anything else
+      return IterUtil.empty();
+    }
+    else {
+      File parentDir = compiler.getParentFile();
+      return IterUtil.make(Util.oneOf(parentDir, "hj.jar"),
+                           Util.oneOf(parentDir, "sootclasses-2.3.0.jar"),
+                           Util.oneOf(parentDir, "polyglot.jar"),
+                           Util.oneOf(parentDir, "lpg.jar"),
+                           Util.oneOf(parentDir, "jasminclasses-2.3.0.jar"),
+                           Util.oneOf(parentDir, "java_cup.jar"));
+    }
   }
   
   public String toString() { return getClass().getSimpleName()+" --> "+getAdapterForCompiler(); }

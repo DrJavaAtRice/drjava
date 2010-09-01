@@ -116,7 +116,7 @@ public class NextGenDescriptor extends JDKDescriptor {
     catch(Exception e) { /* ignore NGC_HOME variable */ }
     
     // drjava.jar file itself; check if it's a combined Nextgen/DrJava jar
-    files = IterUtil.compose(files, edu.rice.cs.util.FileOps.getDrJavaFile()); 
+    files = IterUtil.compose(edu.rice.cs.util.FileOps.getDrJavaFile(), files); 
     return files;
   }
   

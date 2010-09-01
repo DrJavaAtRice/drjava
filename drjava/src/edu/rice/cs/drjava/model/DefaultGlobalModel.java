@@ -82,6 +82,7 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.plt.tuple.Pair;
 
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.FileOps;
@@ -248,6 +249,54 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     return tVersion;
   }
   
+  // A pair of version and descriptor.
+  // If the descriptor is something different than JDKDescriptor.NONE, then this pair will always
+  // return false for equals(), except if it is compared to the identical pair.
+  private static class VerDescPair implements Comparable<VerDescPair> {    
+    protected final JavaVersion.FullVersion _first;
+    protected final JDKDescriptor _second;
+    
+    public VerDescPair(JavaVersion.FullVersion first, JDKDescriptor second) {
+      _first = first;
+      _second = second;
+    }    
+
+    public boolean equals(Object o) {
+      // identity --> true
+      if (this == o) { return true; }
+      // different class --> false
+      else if (o == null || !getClass().equals(o.getClass())) { return false; }
+      else {
+        VerDescPair cast = (VerDescPair) o;
+        // only true if both versions are equal and both descriptors are NONE
+        return 
+          (_first == null ? cast._first == null : _first.equals(cast._first)) &&
+          (_second == null ? cast._second == null :
+             ((_second==JDKDescriptor.NONE) && (cast._second==JDKDescriptor.NONE)));
+      }
+    }
+    
+    public int hashCode() {
+      return 
+        (_first == null ? 0 : _first.hashCode()) ^ 
+        (_second == null ? 0 : _second.hashCode() << 1) ^ 
+        getClass().hashCode();
+    }
+    
+    public int compareTo(VerDescPair o) {
+      int result = _first.compareTo(o._first);
+      if (result == 0) {
+        result = System.identityHashCode(_second) - System.identityHashCode(o._second);
+      }
+      return result;
+    }
+  }
+  
+  // return a new version-descriptor pair for a library
+  private VerDescPair getVerDescPair(JDKToolsLibrary lib) {
+    return new VerDescPair(coarsenVersion(lib.version()), lib.jdkDescriptor());
+  }
+  
   private Iterable<JDKToolsLibrary> findLibraries() {
     // Order to return: config setting, runtime (if different version), from search (if different versions)
     
@@ -255,14 +304,14 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     // almost always be true, it seems like more trouble than it is worth
     
     // map is sorted by version, lowest-to-highest
-    Map<JavaVersion.FullVersion, JDKToolsLibrary> results = new TreeMap<JavaVersion.FullVersion, JDKToolsLibrary>();
+    Map<VerDescPair, JDKToolsLibrary> results = new TreeMap<VerDescPair, JDKToolsLibrary>();
     
     File configTools = DrJava.getConfig().getSetting(JAVAC_LOCATION);
     if (configTools != FileOps.NULL_FILE) {
       JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this, JDKDescriptor.NONE);
       if (fromConfig.isValid()) { 
         JarJDKToolsLibrary.msg("From config: "+fromConfig);
-        results.put(coarsenVersion(fromConfig.version()), fromConfig);
+        results.put(getVerDescPair(fromConfig), fromConfig);
       }
       else { JarJDKToolsLibrary.msg("From config: invalid "+fromConfig); }
     }
@@ -271,11 +320,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     Iterable<JDKToolsLibrary> allFromRuntime = JDKToolsLibrary.makeFromRuntime(this);
 
     for(JDKToolsLibrary fromRuntime: allFromRuntime) {
-      JavaVersion.FullVersion runtimeVersion = fromRuntime.version();
       if (fromRuntime.isValid()) {
-        if (!results.containsKey(coarsenVersion(runtimeVersion))) {
+        if (!results.containsKey(getVerDescPair(fromRuntime))) {
           JarJDKToolsLibrary.msg("From runtime: "+fromRuntime);
-          results.put(coarsenVersion(runtimeVersion), fromRuntime);
+          results.put(getVerDescPair(fromRuntime), fromRuntime);
         }
         else { JarJDKToolsLibrary.msg("From runtime: duplicate "+fromRuntime); }
       }
@@ -289,9 +337,9 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       JavaVersion.FullVersion coarsenedVersion = coarsenVersion(tVersion);
       JarJDKToolsLibrary.msg("\ttVersion: "+tVersion+" "+tVersion.vendor());
       JarJDKToolsLibrary.msg("\tcoarsenedVersion: "+coarsenedVersion+" "+coarsenedVersion.vendor());
-      if (!results.containsKey(coarsenedVersion)) {
+      if (!results.containsKey(getVerDescPair(t))) {
         JarJDKToolsLibrary.msg("\tadded");
-        results.put(coarsenedVersion, t);
+        results.put(getVerDescPair(t), t);
       }
       else { JarJDKToolsLibrary.msg("\tduplicate"); }
     }
