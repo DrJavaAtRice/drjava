@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright 2007-2008 Sun Microsystems, Inc.  All Rights Reserved.
+ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+
+ This code is free software; you can redistribute it and/or modify it
+ under the terms of the GNU General Public License version 2 only, as
+ published by the Free Software Foundation.  Sun designates this
+ particular file as subject to the "Classpath" exception as provided
+ by Sun in the LICENSE file that accompanied this code.
+
+ This code is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ version 2 for more details (a copy is included in the LICENSE file that
+ accompanied this code).
+
+ You should have received a copy of the GNU General Public License version
+ 2 along with this work; if not, write to the Free Software Foundation,
+ Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+
+ Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
+ CA 95054 USA or visit www.sun.com if you need additional information or
+ have any questions.
+-->
+
+<!--
+ This is the main build file for the complete langtools workspace.
+ It is used both when working on the tools in NetBeans, and when building
+ JDK itself, in which case it is invoked from the wrapper Makefile.
+ -->
+
+<project name="drjava-hj" default="drjava-hj" basedir=".">
+  <property name="build.dir" location="build"/>
+
+  <property name="input1" location="input/hj.jar"/>
+  <property name="input2" location="input/hjc.jar"/>
+  <property name="input3" location="input/hj-ant-task.jar"/>
+  <property name="input4" location="input/jasminclasses-2.3.0.jar"/>
+  <property name="input5" location="input/java_cup.jar"/>
+  <property name="input6" location="input/lpg.jar"/>
+  <property name="input7" location="input/polyglot.jar"/>
+  <property name="input8" location="input/sootclasses-2.3.0.jar"/>
+
+  <target name="clean" description="Delete all generated files">
+    <delete dir="${build.dir}"/>
+    <delete file="drjava-hj.jar"/>
+  </target>
+
+  <target name="drjava-hj"
+	  description="Create a combined DrJava/HJ jar file">
+    <available property="drjava-exists" file="drjava.jar"/>
+    <available property="input1-exists" file="${input1}"/>
+    <available property="input2-exists" file="${input2}"/>
+    <available property="input3-exists" file="${input3}"/>
+    <available property="input4-exists" file="${input4}"/>
+    <available property="input5-exists" file="${input5}"/>
+    <available property="input6-exists" file="${input6}"/>
+    <available property="input7-exists" file="${input7}"/>
+    <available property="input8-exists" file="${input8}"/>
+ 
+    <fail message="Can't find file drjava.jar" unless="drjava-exists" />
+    <fail message="Can't find file ${input1}" unless="input1-exists" />
+    <fail message="Can't find file ${input2}" unless="input2-exists" />
+    <fail message="Can't find file ${input3}" unless="input3-exists" />
+    <fail message="Can't find file ${input4}" unless="input4-exists" />
+    <fail message="Can't find file ${input5}" unless="input5-exists" />
+    <fail message="Can't find file ${input6}" unless="input6-exists" />
+    <fail message="Can't find file ${input7}" unless="input7-exists" />
+    <fail message="Can't find file ${input8}" unless="input8-exists" />
+
+    <tempfile property="combine.jars.temp.dir" destDir="${build.dir}"/>
+    <echo message="temp.dir = ${combine.jars.temp.dir}" />
+    <delete dir="${combine.jars.temp.dir}" failonerror="false"/>
+    <mkdir dir="${combine.jars.temp.dir}"/>
+    <unzip src="${input1}" dest="${combine.jars.temp.dir}"/>
+    <unzip src="${input2}" dest="${combine.jars.temp.dir}"/>
+    <unzip src="${input3}" dest="${combine.jars.temp.dir}"/>
+    <unzip src="${input4}" dest="${combine.jars.temp.dir}"/>
+    <unzip src="${input5}" dest="${combine.jars.temp.dir}"/>
+    <unzip src="${input6}" dest="${combine.jars.temp.dir}"/>
+    <unzip src="${input7}" dest="${combine.jars.temp.dir}"/>
+    <unzip src="${input8}" dest="${combine.jars.temp.dir}"/>
+    <unzip src="drjava.jar" dest="${combine.jars.temp.dir}" overwrite="true"/>
+    <unzip src="misc/drjava-hj-splash.zip"
+	   dest="${combine.jars.temp.dir}" overwrite="true"/>
+    
+    <java classname="DrJavaHJPropertyFile"
+	  classpath="drjavaHJPropertyFile"
+	  fork="true"
+	  dir="."
+	  failonerror="true">
+      <arg value="${combine.jars.temp.dir}/edu/rice/cs/drjava/config/options.properties"/>
+    </java>
+    
+    <manifest file="${combine.jars.temp.dir}/META-INF/MANIFEST.MF" mode="update">
+      <attribute name="Created-By" value="1.5.0-drjavahj"/>
+    </manifest>
+    
+    <jar destfile="drjava-hj.jar" basedir="${combine.jars.temp.dir}"
+	 manifest="${combine.jars.temp.dir}/META-INF/MANIFEST.MF"/>
+    <delete dir="${combine.jars.temp.dir}" failonerror="false"/>
+  </target>
+  
+</project>
+
