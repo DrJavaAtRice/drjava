@@ -59,7 +59,7 @@ public class PackageData extends TypeData {
    */
   public PackageData(PackageData pd, String s) {
     super(null);
-    _name = pd.getName() + "." + s;
+    _name = pd.getName() + '.' + s;
   }
   
   /** for now, throw a big error, becuase you should have known better. */ 

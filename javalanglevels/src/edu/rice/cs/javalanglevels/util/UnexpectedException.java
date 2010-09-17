@@ -34,37 +34,35 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.javalanglevels;
+package edu.rice.cs.javalanglevels.util;
 
-import edu.rice.cs.javalanglevels.parser.*;
-import java.io.File;
+/** DUPLICATES edu.rice.cs.util.UnexpectedException in the drjava code base.
+  * An exception which DrJava throws on an unexpected error. Many times, we have to catch BadLocationExceptions in
+  * code that accesses DefinitionDocument, even if we know for a fact that a BadLocationException cannot occur.  
+  * In that case, and in other similar cases where we know that an exception should not occur, we throw this on the 
+  * off chance that something does go wrong. This aids us in debugging the code.
+  */
+public class UnexpectedException extends RuntimeException {
 
-/** Used to represent custom parse exceptions in the JExpression parser. */
-public class JExprParseException extends ParseException {
+  private Throwable _value;
 
-  private File _file;
-  private String _message;
-
-  public JExprParseException(File file, 
-                             String message,
-                             Token currentTokenVal,
-                             int[][] expectedTokenSequencesVal,
-                             String[] tokenImageVal) { 
-    super(currentTokenVal, expectedTokenSequencesVal, tokenImageVal);
-    _file = file;
-    _message = message;
+   /** Constructs an unexpected exception with <code>value.toString()</code> as it's message. */
+  public UnexpectedException(Throwable value) { 
+    super(value.toString());
+    _value = value; 
+  }
+  /** Constructs an unexpected exception for value with custom message string + <code>value.toString()</code>. */
+  public UnexpectedException(Throwable value, String msg) { 
+    super(msg + ": " + value.toString());
+    _value = value;
   }
   
-  /** Wrap a ParseException (assumed not to be a JExprParseException.
-   * The file will be null. */
-  public JExprParseException(ParseException e) { 
-    super(e.currentToken, e.expectedTokenSequences, e.tokenImage);
-    _file = null;
-    _message = e.getMessage();
-  }
+  /** Constructs a new RuntimeException to report that unreachable point in code has been reached */
+  public UnexpectedException() { this(new RuntimeException("Unreachable point in code has been reached!")); }
   
-  /** May be null */
-  public File getFile() { return _file; }
+  /** Constructs a new RuntimeException to report specified message */
+  public UnexpectedException(String msg) { this(new RuntimeException(msg)); }
   
-  public String getMessage() { return _message; }
+  /** Returns the contained exception. */
+  public Throwable getCause() { return _value; }
 }

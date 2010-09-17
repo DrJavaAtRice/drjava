@@ -56,12 +56,12 @@ public class LValueTypeChecker extends JExpressionIFAbstractVisitor<TypeData> {
   private final TestAssignable _testAssignableInstance;
   
   //The visitor that invoked this: holds the error list
-  private final Bob _bob;
+  private final SpecialTypeChecker _bob;
 
   /* Constructor for LValueTypeChecker.  Initializes _testAssignableInstance.
    * @param bob  The visitor that invoked this visitor.
    */
-  public LValueTypeChecker(Bob bob) {
+  public LValueTypeChecker(SpecialTypeChecker bob) {
     _testAssignableInstance = new TestAssignable(bob._data, bob._file, bob._package, bob._importedFiles, bob._importedPackages, bob._vars, bob._thrown);
     _bob = bob;
   }
@@ -148,7 +148,7 @@ public class LValueTypeChecker extends JExpressionIFAbstractVisitor<TypeData> {
     public TypeData forComplexNameReference(ComplexNameReference that) {
       ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, _vars, _thrown);
       TypeData lhs = that.getEnclosing().visit(etc);
-      _bob.thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned); //update internal Bob's list of what got assigned
+      _bob.thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned); //update internal SpecialTypeChecker's list of what got assigned
       Word myWord = that.getName();
       
       //if lhs is a package data, either we found a class reference or this piece is still part of the package
@@ -207,11 +207,11 @@ public class LValueTypeChecker extends JExpressionIFAbstractVisitor<TypeData> {
     public TypeData forArrayAccess(ArrayAccess that) {
       ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, _vars, _thrown);
       TypeData lhs = that.getArray().visit(etc);
-      _bob.thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned); //update internal Bob's list of what got assigned
+      _bob.thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned); //update internal SpecialTypeChecker's list of what got assigned
       
       ExpressionTypeChecker indexTC = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, _vars, _thrown);
       TypeData index = that.getIndex().visit(indexTC);
-      _bob.thingsThatHaveBeenAssigned.addAll(indexTC.thingsThatHaveBeenAssigned); //update internal Bob's list of what got assigned
+      _bob.thingsThatHaveBeenAssigned.addAll(indexTC.thingsThatHaveBeenAssigned); //update internal SpecialTypeChecker's list of what got assigned
       
       
       return forArrayAccessOnly(that, lhs, index);
@@ -265,7 +265,7 @@ public class LValueTypeChecker extends JExpressionIFAbstractVisitor<TypeData> {
       _sd5 = new SymbolData("");
       _sd6 = new SymbolData("cebu");
       _lvtc = 
-        new LValueTypeChecker(new Bob(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(),
+        new LValueTypeChecker(new SpecialTypeChecker(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(),
                    new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>()));
       _ta = _lvtc._testAssignableInstance;
       _lvtc._bob.errors = new LinkedList<Pair<String, JExpressionIF>>();
@@ -483,12 +483,12 @@ public class LValueTypeChecker extends JExpressionIFAbstractVisitor<TypeData> {
       TypeData result = varRef4.visit(_lvtc);
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), result);
       assertEquals("Should still be 2 errors", 2, _lvtc._bob.errors.size());
-      
 
       _lvtc._bob._data = oldData;
-      
 
-      //what if what we have is an inner class?
+      // What if what we have is an inner class?
+      /* This test case may be WRONG.  '$' should not be used as a name segment delimiter in internal 
+       * symbol names. */
       SymbolData inner = new SymbolData("java.lang.String$Inner");
       inner.setPackage("java.lang");
       inner.setIsContinuation(false);
@@ -572,11 +572,12 @@ public class LValueTypeChecker extends JExpressionIFAbstractVisitor<TypeData> {
         new ArrayData(SymbolData.INT_TYPE, 
                       new LanguageLevelVisitor(_lvtc._bob._file,
                                                _lvtc._bob._package,
+                                               null, // enclosingClassName for top level traversal
                                                _lvtc._bob._importedFiles, 
                                                _lvtc._bob._importedPackages,
-                                               new LinkedList<String>(), 
-                                               new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
-                                               new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>()),
+                                               new HashSet<String>(), 
+                                               new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                               new LinkedList<Command>()),
                       SourceInfo.NO_INFO);
       VariableData variable1 = new VariableData("variable1", _publicMav, intArray, true, _ta._data);
       _ta._vars.add(variable1);
@@ -644,11 +645,6 @@ public class LValueTypeChecker extends JExpressionIFAbstractVisitor<TypeData> {
                    _lvtc._bob.errors.getLast().getFirst());
       
     }
-    
-    
-    
     //methods of TestAssignable are implicitly tested above.
-    
   }
-  
 }

@@ -74,18 +74,14 @@ public class Log {
     */
   public Log(String name, boolean isEnabled) { this(new File(name), isEnabled); }
   
-  public Log(File f, boolean isEnabled) {
-    _file = f;
+  public Log(File f, boolean isEnabled) { _file = f;
     _name = f.getName();
     _isEnabled = isEnabled;
     _init();
   }
   
   /** Creates the log file, if enabled. */
-  protected void _init() {
-    if (_writer == null) {
-      if (_isEnabled || ENABLE_ALL) {
-        try {
+  protected void _init() { if (_writer == null) {   if (_isEnabled || ENABLE_ALL) {     try {
           FileWriter w = new FileWriter(_file.getAbsolutePath(), true);
           _writer = new PrintWriter(w);
           log("Log '" + _name + "' opened: " + DATE_FORMAT.format(new Date()));
@@ -109,18 +105,16 @@ public class Log {
   /** Prints a message to the log, if enabled.
     * @param message Message to print.
     */
-  public synchronized void log(String message) {
-    if (isEnabled()) {
-      if (_writer == null) {
-        _init();
-      }
+  public synchronized void log(String message) { 
+    if (isEnabled()) {   
+      if (_writer == null) _init();
       _writer.println(DATE_FORMAT.format(new Date()) + ": " + message);
       _writer.flush();
     }
   }
   
   /** Converts a stack trace (StackTraceElement[]) to string form */
-  public static String traceToString(StackTraceElement[] trace) {
+  public static String traceToString(StackTraceElement[] trace) { 
     final StringBuilder traceImage = new StringBuilder();
     for (StackTraceElement e: trace) traceImage.append("\n\tat " + e.toString());
     return traceImage.toString();
@@ -130,7 +124,7 @@ public class Log {
     * @param s  Message to print
     * @param trace  Stack track to log
     */
-  public synchronized void log(String s, StackTraceElement[] trace) {
+  public synchronized void log(String s, StackTraceElement[] trace) { 
     if (isEnabled()) log(s + traceToString(trace));
   }
   
@@ -138,8 +132,8 @@ public class Log {
     * @param s Message to print
     * @param t Throwable to log
     */
-  public synchronized void log(String s, Throwable t) {
-    if (isEnabled()) {
+  public synchronized void log(String s, Throwable t) { 
+    if (isEnabled()) {   
       StringWriter sw = new StringWriter();
       PrintWriter pw = new PrintWriter(sw);
       t.printStackTrace(pw);
@@ -148,7 +142,7 @@ public class Log {
   }
   
   /** Closes a log file. */
-  public void close() {
+  public void close() { 
     _writer.close();
     _writer = null;
   }

@@ -240,7 +240,7 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forMinusAssignmentExpressionOnly(MinusAssignmentExpression that) { 
     return forNumericAssignmentExpressionOnly(that); 
   }
-  public Void forMultiplyAssignmentExpressionDoFirst(MultiplyAssignmentExpression that) {
+  public Void forMultiplyAssignmentExpressionDoFirst(MultiplyAssignmentExpression that) { 
     return forNumericAssignmentExpressionDoFirst(that); 
   }
   public Void forMultiplyAssignmentExpressionOnly(MultiplyAssignmentExpression that) { 
@@ -261,7 +261,7 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forShiftAssignmentExpressionDoFirst(ShiftAssignmentExpression that) { 
     return forAssignmentExpressionDoFirst(that);
   }
-  public Void forShiftAssignmentExpressionOnly(ShiftAssignmentExpression that) {
+  public Void forShiftAssignmentExpressionOnly(ShiftAssignmentExpression that) { 
     return forAssignmentExpressionOnly(that);
   }
   public Void forLeftShiftAssignmentExpressionDoFirst(LeftShiftAssignmentExpression that) { 
@@ -297,13 +297,13 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forBitwiseOrAssignmentExpressionDoFirst(BitwiseOrAssignmentExpression that) { 
     return forBitwiseAssignmentExpressionDoFirst(that);
   }
-  public Void forBitwiseOrAssignmentExpressionOnly(BitwiseOrAssignmentExpression that) {
+  public Void forBitwiseOrAssignmentExpressionOnly(BitwiseOrAssignmentExpression that) { 
     return forBitwiseAssignmentExpressionOnly(that); 
   }
   public Void forBitwiseXorAssignmentExpressionDoFirst(BitwiseXorAssignmentExpression that) { 
     return forBitwiseAssignmentExpressionDoFirst(that);
   }
-  public Void forBitwiseXorAssignmentExpressionOnly(BitwiseXorAssignmentExpression that) {
+  public Void forBitwiseXorAssignmentExpressionOnly(BitwiseXorAssignmentExpression that) { 
     return forBitwiseAssignmentExpressionOnly(that);
   }
   public Void forBinaryExpressionDoFirst(BinaryExpression that) { return forExpressionDoFirst(that); }
@@ -340,18 +340,20 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forComparisonExpressionOnly(ComparisonExpression that) { return forBinaryExpressionOnly(that); }
   public Void forLessThanExpressionDoFirst(LessThanExpression that) { return forComparisonExpressionDoFirst(that); }
   public Void forLessThanExpressionOnly(LessThanExpression that) { return forComparisonExpressionOnly(that); }
-  public Void forLessThanOrEqualExpressionDoFirst(LessThanOrEqualExpression that) {
+  public Void forLessThanOrEqualExpressionDoFirst(LessThanOrEqualExpression that) { 
     return forComparisonExpressionDoFirst(that);
   }
-  public Void forLessThanOrEqualExpressionOnly(LessThanOrEqualExpression that) {
+  public Void forLessThanOrEqualExpressionOnly(LessThanOrEqualExpression that) { 
     return forComparisonExpressionOnly(that); 
   }
-  public Void forGreaterThanExpressionDoFirst(GreaterThanExpression that) { return forComparisonExpressionDoFirst(that); }
+  public Void forGreaterThanExpressionDoFirst(GreaterThanExpression that) { 
+    return forComparisonExpressionDoFirst(that); 
+  }
   public Void forGreaterThanExpressionOnly(GreaterThanExpression that) { return forComparisonExpressionOnly(that); }
   public Void forGreaterThanOrEqualExpressionDoFirst(GreaterThanOrEqualExpression that) { 
     return forComparisonExpressionDoFirst(that); 
   }
-  public Void forGreaterThanOrEqualExpressionOnly(GreaterThanOrEqualExpression that) {
+  public Void forGreaterThanOrEqualExpressionOnly(GreaterThanOrEqualExpression that) { 
     return forComparisonExpressionOnly(that);
   }
   public Void forShiftBinaryExpressionDoFirst(ShiftBinaryExpression that) { return forBinaryExpressionDoFirst(that); }
@@ -364,7 +366,7 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forRightSignedShiftExpressionOnly(RightSignedShiftExpression that) { 
     return forShiftBinaryExpressionOnly(that); 
   }
-  public Void forRightUnsignedShiftExpressionDoFirst(RightUnsignedShiftExpression that) {
+  public Void forRightUnsignedShiftExpressionDoFirst(RightUnsignedShiftExpression that) { 
     return forShiftBinaryExpressionDoFirst(that);
   }
   public Void forRightUnsignedShiftExpressionOnly(RightUnsignedShiftExpression that) { 
@@ -399,7 +401,7 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forPositivePrefixIncrementExpressionDoFirst(PositivePrefixIncrementExpression that) { 
     return forPrefixIncrementExpressionDoFirst(that);
   }
-  public Void forPositivePrefixIncrementExpressionOnly(PositivePrefixIncrementExpression that) {
+  public Void forPositivePrefixIncrementExpressionOnly(PositivePrefixIncrementExpression that) { 
     return forPrefixIncrementExpressionOnly(that); 
   }
   public Void forNegativePrefixIncrementExpressionDoFirst(NegativePrefixIncrementExpression that) { 
@@ -417,10 +419,10 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forPositivePostfixIncrementExpressionDoFirst(PositivePostfixIncrementExpression that) { 
     return forPostfixIncrementExpressionDoFirst(that); 
   }
-  public Void forPositivePostfixIncrementExpressionOnly(PositivePostfixIncrementExpression that) {
+  public Void forPositivePostfixIncrementExpressionOnly(PositivePostfixIncrementExpression that) { 
     return forPostfixIncrementExpressionOnly(that);
   }
-  public Void forNegativePostfixIncrementExpressionDoFirst(NegativePostfixIncrementExpression that) {
+  public Void forNegativePostfixIncrementExpressionDoFirst(NegativePostfixIncrementExpression that) { 
     return forPostfixIncrementExpressionDoFirst(that); 
   }
   public Void forNegativePostfixIncrementExpressionOnly(NegativePostfixIncrementExpression that) { 
@@ -466,12 +468,10 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forInstantiationOnly(Instantiation that) { return forPrimaryOnly(that); }
   public Void forClassInstantiationDoFirst(ClassInstantiation that) { return forInstantiationDoFirst(that); }
   public Void forClassInstantiationOnly(ClassInstantiation that) { return forInstantiationOnly(that); }
-  public Void forNamedClassInstantiationDoFirst(NamedClassInstantiation that) {
+  public Void forNamedClassInstantiationDoFirst(NamedClassInstantiation that) { 
     return forClassInstantiationDoFirst(that); 
   }
-  public Void forNamedClassInstantiationOnly(NamedClassInstantiation that) {
-    return forClassInstantiationOnly(that); 
-  }
+  public Void forNamedClassInstantiationOnly(NamedClassInstantiation that) { return forClassInstantiationOnly(that); }
   public Void forSimpleNamedClassInstantiationDoFirst(SimpleNamedClassInstantiation that) { 
     return forNamedClassInstantiationDoFirst(that); 
   }
@@ -516,16 +516,16 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forSimpleUninitializedArrayInstantiationOnly(SimpleUninitializedArrayInstantiation that) { 
     return forUninitializedArrayInstantiationOnly(that);
   }
-  public Void forComplexUninitializedArrayInstantiationDoFirst(ComplexUninitializedArrayInstantiation that) {
+  public Void forComplexUninitializedArrayInstantiationDoFirst(ComplexUninitializedArrayInstantiation that) { 
     return forUninitializedArrayInstantiationDoFirst(that);
   }
-  public Void forComplexUninitializedArrayInstantiationOnly(ComplexUninitializedArrayInstantiation that) {
+  public Void forComplexUninitializedArrayInstantiationOnly(ComplexUninitializedArrayInstantiation that) { 
     return forUninitializedArrayInstantiationOnly(that); 
   }
-  public Void forInitializedArrayInstantiationDoFirst(InitializedArrayInstantiation that) {
+  public Void forInitializedArrayInstantiationDoFirst(InitializedArrayInstantiation that) { 
     return forArrayInstantiationDoFirst(that); 
   }
-  public Void forInitializedArrayInstantiationOnly(InitializedArrayInstantiation that) {
+  public Void forInitializedArrayInstantiationOnly(InitializedArrayInstantiation that) { 
     return forArrayInstantiationOnly(that);
   }
   public Void forSimpleInitializedArrayInstantiationDoFirst(SimpleInitializedArrayInstantiation that) { 
@@ -579,13 +579,13 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forSimpleThisConstructorInvocationDoFirst(SimpleThisConstructorInvocation that) { 
     return forThisConstructorInvocationDoFirst(that); 
   }
-  public Void forSimpleThisConstructorInvocationOnly(SimpleThisConstructorInvocation that) {
+  public Void forSimpleThisConstructorInvocationOnly(SimpleThisConstructorInvocation that) { 
     return forThisConstructorInvocationOnly(that); 
   }
   public Void forComplexThisConstructorInvocationDoFirst(ComplexThisConstructorInvocation that) { 
     return forThisConstructorInvocationDoFirst(that); 
   }
-  public Void forComplexThisConstructorInvocationOnly(ComplexThisConstructorInvocation that) {
+  public Void forComplexThisConstructorInvocationOnly(ComplexThisConstructorInvocation that) { 
     return forThisConstructorInvocationOnly(that); 
   }
   public Void forSuperConstructorInvocationDoFirst(SuperConstructorInvocation that) { 
@@ -636,7 +636,7 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forParenthesizedExpressionListOnly(ParenthesizedExpressionList that) { 
     return forExpressionListOnly(that); 
   }
-  public Void forUnparenthesizedExpressionListDoFirst(UnparenthesizedExpressionList that) {
+  public Void forUnparenthesizedExpressionListDoFirst(UnparenthesizedExpressionList that) { 
     return forExpressionListDoFirst(that);
   }
   public Void forUnparenthesizedExpressionListOnly(UnparenthesizedExpressionList that) { 
@@ -648,28 +648,32 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
   public Void forEmptyForConditionOnly(EmptyForCondition that) { return forJExpressionOnly(that); }
   
   /* Implementation of JExpressionIFVisitor_void methods to implement depth-first traversal. */
-  public Void forSourceFile(SourceFile that) {
+  public Void forSourceFile(SourceFile that) { 
     forSourceFileDoFirst(that);
     if (prune(that)) return null;
     for (int i = 0; i < that.getPackageStatements().length; i++) that.getPackageStatements()[i].visit(this);
     for (int i = 0; i < that.getImportStatements().length; i++) that.getImportStatements()[i].visit(this);
-    for (int i = 0; i < that.getTypes().length; i++) that.getTypes()[i].visit(this); return forSourceFileOnly(that);
+    for (int i = 0; i < that.getTypes().length; i++) that.getTypes()[i].visit(this);
+    return forSourceFileOnly(that);
   }
-  public Void forModifiersAndVisibility(ModifiersAndVisibility that) {
+  public Void forModifiersAndVisibility(ModifiersAndVisibility that) { 
     forModifiersAndVisibilityDoFirst(that);
-    if (prune(that)) return null; return forModifiersAndVisibilityOnly(that);
+    if (prune(that)) return null;
+    return forModifiersAndVisibilityOnly(that);
   }
-  public Void forCompoundWord(CompoundWord that) {
+  public Void forCompoundWord(CompoundWord that) { 
     forCompoundWordDoFirst(that);
     if (prune(that)) return null;
-    for (int i = 0; i < that.getWords().length; i++) that.getWords()[i].visit(this); return forCompoundWordOnly(that);
+    for (int i = 0; i < that.getWords().length; i++) that.getWords()[i].visit(this);
+    return forCompoundWordOnly(that);
   }
-  public Void forWord(Word that) {
+  public Void forWord(Word that) { 
     forWordDoFirst(that);
-    if (prune(that)) return null; return forWordOnly(that);
+    if (prune(that)) return null;
+    return forWordOnly(that);
   }
   
-  public Void forClassDef(ClassDef that) {
+  public Void forClassDef(ClassDef that) { 
     forClassDefDoFirst(that);
     if (prune(that)) return null;    
     that.getMav().visit(this);
@@ -700,732 +704,847 @@ public class JExpressionIFPrunableDepthFirstVisitor implements JExpressionIFVisi
     return forInnerClassDefOnly(that); 
   }  
   
-  public Void forInterfaceDef(InterfaceDef that) {
-      forInterfaceDefDoFirst(that);
-      if (prune(that)) return null;
-      that.getMav().visit(this);
-      for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
-      for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
-      that.getBody().visit(this); return forInterfaceDefOnly(that);
-    }
-    public Void forInnerInterfaceDef(InnerInterfaceDef that) {
-      forInnerInterfaceDefDoFirst(that);
-      if (prune(that)) return null;
-      that.getMav().visit(this);
-      for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
-      for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
-      that.getBody().visit(this); return forInnerInterfaceDefOnly(that);
-    }
-    public Void forConstructorDef(ConstructorDef that) {
-      forConstructorDefDoFirst(that);
-      if (prune(that)) return null;
-      that.getName().visit(this);
-      that.getMav().visit(this);
-      for (int i = 0; i < that.getParameters().length; i++) that.getParameters()[i].visit(this);
-      for (int i = 0; i < that.getThrows().length; i++) that.getThrows()[i].visit(this);
-      that.getStatements().visit(this); return forConstructorDefOnly(that);
-    }
-    public Void forInstanceInitializer(InstanceInitializer that) {
-      forInstanceInitializerDoFirst(that);
-      if (prune(that)) return null;
-      that.getCode().visit(this); return forInstanceInitializerOnly(that);
-    }
-    public Void forStaticInitializer(StaticInitializer that) {
-      forStaticInitializerDoFirst(that);
-      if (prune(that)) return null;
-      that.getCode().visit(this); return forStaticInitializerOnly(that);
-    }
-    public Void forPackageStatement(PackageStatement that) {
-      forPackageStatementDoFirst(that);
-      if (prune(that)) return null;
-      that.getCWord().visit(this); return forPackageStatementOnly(that);
-    }
-    public Void forClassImportStatement(ClassImportStatement that) {
-      forClassImportStatementDoFirst(that);
-      if (prune(that)) return null;
-      that.getCWord().visit(this); return forClassImportStatementOnly(that);
-    }
-    public Void forPackageImportStatement(PackageImportStatement that) {
-      forPackageImportStatementDoFirst(that);
-      if (prune(that)) return null;
-      that.getCWord().visit(this); return forPackageImportStatementOnly(that);
-    }
-    public Void forLabeledStatement(LabeledStatement that) {
-      forLabeledStatementDoFirst(that);
-      if (prune(that)) return null;
-      that.getLabel().visit(this);
-      that.getStatement().visit(this); return forLabeledStatementOnly(that);
-    }
-    public Void forBlock(Block that) {
-      forBlockDoFirst(that);
-      if (prune(that)) return null;
-      that.getStatements().visit(this); return forBlockOnly(that);
-    }
-    public Void forExpressionStatement(ExpressionStatement that) {
-      forExpressionStatementDoFirst(that);
-      if (prune(that)) return null;
-      that.getExpression().visit(this); return forExpressionStatementOnly(that);
-    }
-    public Void forSwitchStatement(SwitchStatement that) {
-      forSwitchStatementDoFirst(that);
-      if (prune(that)) return null;
-      that.getTest().visit(this);
-      for (int i = 0; i < that.getCases().length; i++) that.getCases()[i].visit(this); 
-      return forSwitchStatementOnly(that);
-    }
-    public Void forIfThenStatement(IfThenStatement that) {
-      forIfThenStatementDoFirst(that);
-      if (prune(that)) return null;
-      that.getTestExpression().visit(this);
-      that.getThenStatement().visit(this); return forIfThenStatementOnly(that);
-    }
-    public Void forIfThenElseStatement(IfThenElseStatement that) {
-      forIfThenElseStatementDoFirst(that);
-      if (prune(that)) return null;
-      that.getTestExpression().visit(this);
-      that.getThenStatement().visit(this);
-      that.getElseStatement().visit(this); return forIfThenElseStatementOnly(that);
-    }
-    public Void forWhileStatement(WhileStatement that) {
-      forWhileStatementDoFirst(that);
-      if (prune(that)) return null;
-      that.getCondition().visit(this);
-      that.getCode().visit(this); return forWhileStatementOnly(that);
-    }
-    public Void forDoStatement(DoStatement that) {
-      forDoStatementDoFirst(that);
-      if (prune(that)) return null;
-      that.getCode().visit(this);
-      that.getCondition().visit(this); return forDoStatementOnly(that);
-    }
-    public Void forForStatement(ForStatement that) {
-      forForStatementDoFirst(that);
-      if (prune(that)) return null;
-      that.getInit().visit(this);
-      that.getCondition().visit(this);
-      that.getUpdate().visit(this);
-      that.getCode().visit(this); return forForStatementOnly(that);
-    }
-    public Void forLabeledBreakStatement(LabeledBreakStatement that) {
-      forLabeledBreakStatementDoFirst(that);
-      if (prune(that)) return null;
-      that.getLabel().visit(this); return forLabeledBreakStatementOnly(that);
-    }
-    public Void forUnlabeledBreakStatement(UnlabeledBreakStatement that) {
-      forUnlabeledBreakStatementDoFirst(that);
-      if (prune(that)) return null; return forUnlabeledBreakStatementOnly(that);
-    }
-    public Void forLabeledContinueStatement(LabeledContinueStatement that) {
-      forLabeledContinueStatementDoFirst(that);
-      if (prune(that)) return null;
-      that.getLabel().visit(this); return forLabeledContinueStatementOnly(that);
-    }
-    public Void forUnlabeledContinueStatement(UnlabeledContinueStatement that) {
-      forUnlabeledContinueStatementDoFirst(that);
-      if (prune(that)) return null; return forUnlabeledContinueStatementOnly(that);
-    }
-    public Void forVoidReturnStatement(VoidReturnStatement that) {
-      forVoidReturnStatementDoFirst(that);
-      if (prune(that)) return null; return forVoidReturnStatementOnly(that);
-    }
-    public Void forValueReturnStatement(ValueReturnStatement that) {
-      forValueReturnStatementDoFirst(that);
-      if (prune(that)) return null;
-      that.getValue().visit(this); return forValueReturnStatementOnly(that);
-    }
-    public Void forThrowStatement(ThrowStatement that) {
-      forThrowStatementDoFirst(that);
-      if (prune(that)) return null;
-      that.getThrown().visit(this); return forThrowStatementOnly(that);
-    }
-    public Void forSynchronizedStatement(SynchronizedStatement that) {
-      forSynchronizedStatementDoFirst(that);
-      if (prune(that)) return null;
-      that.getLockExpr().visit(this);
-      that.getBlock().visit(this); return forSynchronizedStatementOnly(that);
-    }
-    public Void forTryCatchFinallyStatement(TryCatchFinallyStatement that) {
-      forTryCatchFinallyStatementDoFirst(that);
-      if (prune(that)) return null;
-      that.getTryBlock().visit(this);
-      for (int i = 0; i < that.getCatchBlocks().length; i++) that.getCatchBlocks()[i].visit(this);
-      that.getFinallyBlock().visit(this); return forTryCatchFinallyStatementOnly(that);
-    }
-    public Void forNormalTryCatchStatement(NormalTryCatchStatement that) {
-      forNormalTryCatchStatementDoFirst(that);
-      if (prune(that)) return null;
-      that.getTryBlock().visit(this);
-      for (int i = 0; i < that.getCatchBlocks().length; i++) that.getCatchBlocks()[i].visit(this); 
-      return forNormalTryCatchStatementOnly(that);
-    }
-    public Void forEmptyStatement(EmptyStatement that) {
-      forEmptyStatementDoFirst(that);
-      if (prune(that)) return null; return forEmptyStatementOnly(that);
-    }
-    public Void forConcreteMethodDef(ConcreteMethodDef that) {
-      forConcreteMethodDefDoFirst(that);
-      if (prune(that)) return null;
-      that.getMav().visit(this);
-      for (int i = 0; i < that.getTypeParams().length; i++) that.getTypeParams()[i].visit(this);
-      that.getResult().visit(this);
-      for (int i = 0; i < that.getParams().length; i++) that.getParams()[i].visit(this);
-      for (int i = 0; i < that.getThrows().length; i++) that.getThrows()[i].visit(this);
-      that.getBody().visit(this); return forConcreteMethodDefOnly(that);
-    }
-    public Void forAbstractMethodDef(AbstractMethodDef that) {
-      forAbstractMethodDefDoFirst(that);
-      if (prune(that)) return null;
-      that.getMav().visit(this);
-      for (int i = 0; i < that.getTypeParams().length; i++) that.getTypeParams()[i].visit(this);
-      that.getResult().visit(this);
-      for (int i = 0; i < that.getParams().length; i++) that.getParams()[i].visit(this);
-      for (int i = 0; i < that.getThrows().length; i++) that.getThrows()[i].visit(this); 
-      return forAbstractMethodDefOnly(that);
-    }
-    public Void forFormalParameter(FormalParameter that) {
-      forFormalParameterDoFirst(that);
-      if (prune(that)) return null;
-      that.getDeclarator().visit(this); return forFormalParameterOnly(that);
-    }
-    public Void forVariableDeclaration(VariableDeclaration that) {
-      forVariableDeclarationDoFirst(that);
-      if (prune(that)) return null;
-      that.getMav().visit(this);
-      for (int i = 0; i < that.getDeclarators().length; i++) that.getDeclarators()[i].visit(this);
-      return forVariableDeclarationOnly(that);
-    }
-    public Void forUninitializedVariableDeclarator(UninitializedVariableDeclarator that) {
-      forUninitializedVariableDeclaratorDoFirst(that);
-      if (prune(that)) return null;
-      that.getType().visit(this); return forUninitializedVariableDeclaratorOnly(that);
-    }
-    public Void forInitializedVariableDeclarator(InitializedVariableDeclarator that) {
-      forInitializedVariableDeclaratorDoFirst(that);
-      if (prune(that)) return null;
-      that.getType().visit(this);
-      that.getInitializer().visit(this); return forInitializedVariableDeclaratorOnly(that);
-    }
-    public Void forTypeParameter(TypeParameter that) {
-      forTypeParameterDoFirst(that);
-      if (prune(that)) return null;
-      that.getVariable().visit(this);
-      that.getBound().visit(this); return forTypeParameterOnly(that);
-    }
-    public Void forArrayInitializer(ArrayInitializer that) {
-      forArrayInitializerDoFirst(that);
-      if (prune(that)) return null;
-      for (int i = 0; i < that.getItems().length; i++) that.getItems()[i].visit(this); 
-      return forArrayInitializerOnly(that);
-    }
-    public Void forPrimitiveType(PrimitiveType that) {
-      forPrimitiveTypeDoFirst(that);
-      if (prune(that)) return null; return forPrimitiveTypeOnly(that);
-    }
-    public Void forArrayType(ArrayType that) {
-      forArrayTypeDoFirst(that);
-      if (prune(that)) return null;
-      that.getElementType().visit(this); return forArrayTypeOnly(that);
-    }
-    public Void forMemberType(MemberType that) {
-      forMemberTypeDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forMemberTypeOnly(that);
-    }
-    public Void forClassOrInterfaceType(ClassOrInterfaceType that) {
-      forClassOrInterfaceTypeDoFirst(that);
-      if (prune(that)) return null;
-      for (int i = 0; i < that.getTypeArguments().length; i++) that.getTypeArguments()[i].visit(this); 
-      return forClassOrInterfaceTypeOnly(that);
-    }
-    public Void forTypeVariable(TypeVariable that) {
-      forTypeVariableDoFirst(that);
-      if (prune(that)) return null; return forTypeVariableOnly(that);
-    }
-    public Void forVoidReturn(VoidReturn that) {
-      forVoidReturnDoFirst(that);
-      if (prune(that)) return null; return forVoidReturnOnly(that);
-    }
-    public Void forLabeledCase(LabeledCase that) {
-      forLabeledCaseDoFirst(that);
-      if (prune(that)) return null;
-      that.getLabel().visit(this);
-      that.getCode().visit(this); return forLabeledCaseOnly(that);
-    }
-    public Void forDefaultCase(DefaultCase that) {
-      forDefaultCaseDoFirst(that);
-      if (prune(that)) return null;
-      that.getCode().visit(this); return forDefaultCaseOnly(that);
-    }
-    public Void forCatchBlock(CatchBlock that) {
-      forCatchBlockDoFirst(that);
-      if (prune(that)) return null;
-      that.getException().visit(this);
-      that.getBlock().visit(this); return forCatchBlockOnly(that);
-    }
-    public Void forSimpleAssignmentExpression(SimpleAssignmentExpression that) {
-      forSimpleAssignmentExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getName().visit(this);
-      that.getValue().visit(this); return forSimpleAssignmentExpressionOnly(that);
-    }
-    public Void forPlusAssignmentExpression(PlusAssignmentExpression that) {
-      forPlusAssignmentExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getName().visit(this);
-      that.getValue().visit(this); return forPlusAssignmentExpressionOnly(that);
-    }
-    public Void forMinusAssignmentExpression(MinusAssignmentExpression that) {
-      forMinusAssignmentExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getName().visit(this);
-      that.getValue().visit(this); return forMinusAssignmentExpressionOnly(that);
-    }
-    public Void forMultiplyAssignmentExpression(MultiplyAssignmentExpression that) {
-      forMultiplyAssignmentExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getName().visit(this);
-      that.getValue().visit(this); return forMultiplyAssignmentExpressionOnly(that);
-    }
-    public Void forDivideAssignmentExpression(DivideAssignmentExpression that) {
-      forDivideAssignmentExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getName().visit(this);
-      that.getValue().visit(this); return forDivideAssignmentExpressionOnly(that);
-    }
-    public Void forModAssignmentExpression(ModAssignmentExpression that) {
-      forModAssignmentExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getName().visit(this);
-      that.getValue().visit(this); return forModAssignmentExpressionOnly(that);
-    }
-    public Void forLeftShiftAssignmentExpression(LeftShiftAssignmentExpression that) {
-      forLeftShiftAssignmentExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getName().visit(this);
-      that.getValue().visit(this); return forLeftShiftAssignmentExpressionOnly(that);
-    }
-    public Void forRightSignedShiftAssignmentExpression(RightSignedShiftAssignmentExpression that) {
-      forRightSignedShiftAssignmentExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getName().visit(this);
-      that.getValue().visit(this); return forRightSignedShiftAssignmentExpressionOnly(that);
-    }
-    public Void forRightUnsignedShiftAssignmentExpression(RightUnsignedShiftAssignmentExpression that) {
-      forRightUnsignedShiftAssignmentExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getName().visit(this);
-      that.getValue().visit(this); return forRightUnsignedShiftAssignmentExpressionOnly(that);
-    }
-    public Void forBitwiseAndAssignmentExpression(BitwiseAndAssignmentExpression that) {
-      forBitwiseAndAssignmentExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getName().visit(this);
-      that.getValue().visit(this); return forBitwiseAndAssignmentExpressionOnly(that);
-    }
-    public Void forBitwiseOrAssignmentExpression(BitwiseOrAssignmentExpression that) {
-      forBitwiseOrAssignmentExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getName().visit(this);
-      that.getValue().visit(this); return forBitwiseOrAssignmentExpressionOnly(that);
-    }
-    public Void forBitwiseXorAssignmentExpression(BitwiseXorAssignmentExpression that) {
-      forBitwiseXorAssignmentExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getName().visit(this);
-      that.getValue().visit(this); return forBitwiseXorAssignmentExpressionOnly(that);
-    }
-    public Void forOrExpression(OrExpression that) {
-      forOrExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forOrExpressionOnly(that);
-    }
-    public Void forAndExpression(AndExpression that) {
-      forAndExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forAndExpressionOnly(that);
-    }
-    public Void forBitwiseOrExpression(BitwiseOrExpression that) {
-      forBitwiseOrExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forBitwiseOrExpressionOnly(that);
-    }
-    public Void forBitwiseXorExpression(BitwiseXorExpression that) {
-      forBitwiseXorExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forBitwiseXorExpressionOnly(that);
-    }
-    public Void forBitwiseAndExpression(BitwiseAndExpression that) {
-      forBitwiseAndExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forBitwiseAndExpressionOnly(that);
-    }
-    public Void forEqualsExpression(EqualsExpression that) {
-      forEqualsExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forEqualsExpressionOnly(that);
-    }
-    public Void forNotEqualExpression(NotEqualExpression that) {
-      forNotEqualExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forNotEqualExpressionOnly(that);
-    }
-    public Void forLessThanExpression(LessThanExpression that) {
-      forLessThanExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forLessThanExpressionOnly(that);
-    }
-    public Void forLessThanOrEqualExpression(LessThanOrEqualExpression that) {
-      forLessThanOrEqualExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forLessThanOrEqualExpressionOnly(that);
-    }
-    public Void forGreaterThanExpression(GreaterThanExpression that) {
-      forGreaterThanExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forGreaterThanExpressionOnly(that);
-    }
-    public Void forGreaterThanOrEqualExpression(GreaterThanOrEqualExpression that) {
-      forGreaterThanOrEqualExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forGreaterThanOrEqualExpressionOnly(that);
-    }
-    public Void forLeftShiftExpression(LeftShiftExpression that) {
-      forLeftShiftExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forLeftShiftExpressionOnly(that);
-    }
-    public Void forRightSignedShiftExpression(RightSignedShiftExpression that) {
-      forRightSignedShiftExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forRightSignedShiftExpressionOnly(that);
-    }
-    public Void forRightUnsignedShiftExpression(RightUnsignedShiftExpression that) {
-      forRightUnsignedShiftExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forRightUnsignedShiftExpressionOnly(that);
-    }
-    public Void forPlusExpression(PlusExpression that) {
-      forPlusExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forPlusExpressionOnly(that);
-    }
-    public Void forMinusExpression(MinusExpression that) {
-      forMinusExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forMinusExpressionOnly(that);
-    }
-    public Void forMultiplyExpression(MultiplyExpression that) {
-      forMultiplyExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forMultiplyExpressionOnly(that);
-    }
-    public Void forDivideExpression(DivideExpression that) {
-      forDivideExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forDivideExpressionOnly(that);
-    }
-    public Void forModExpression(ModExpression that) {
-      forModExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forModExpressionOnly(that);
-    }
-    public Void forNoOpExpression(NoOpExpression that) {
-      forNoOpExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getLeft().visit(this);
-      that.getRight().visit(this); return forNoOpExpressionOnly(that); 
-    }
-    public Void forPositivePrefixIncrementExpression(PositivePrefixIncrementExpression that) {
-      forPositivePrefixIncrementExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getValue().visit(this); return forPositivePrefixIncrementExpressionOnly(that); 
-    }
-    public Void forNegativePrefixIncrementExpression(NegativePrefixIncrementExpression that) {
-      forNegativePrefixIncrementExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getValue().visit(this); return forNegativePrefixIncrementExpressionOnly(that); 
-    }
-    public Void forPositivePostfixIncrementExpression(PositivePostfixIncrementExpression that) {
-      forPositivePostfixIncrementExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getValue().visit(this); return forPositivePostfixIncrementExpressionOnly(that); 
-    }
-    public Void forNegativePostfixIncrementExpression(NegativePostfixIncrementExpression that) {
-      forNegativePostfixIncrementExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getValue().visit(this); return forNegativePostfixIncrementExpressionOnly(that); 
-    }
-    public Void forPositiveExpression(PositiveExpression that) {
-      forPositiveExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getValue().visit(this); return forPositiveExpressionOnly(that); 
-    }
-    public Void forNegativeExpression(NegativeExpression that) {
-      forNegativeExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getValue().visit(this); return forNegativeExpressionOnly(that); 
-    }
-    public Void forBitwiseNotExpression(BitwiseNotExpression that) {
-      forBitwiseNotExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getValue().visit(this); return forBitwiseNotExpressionOnly(that); 
-    }
-    public Void forNotExpression(NotExpression that) {
-      forNotExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getValue().visit(this); return forNotExpressionOnly(that); 
-    }
-    public Void forConditionalExpression(ConditionalExpression that) {
-      forConditionalExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getCondition().visit(this);
-      that.getForTrue().visit(this);
-      that.getForFalse().visit(this); return forConditionalExpressionOnly(that); 
-    }
-    public Void forInstanceofExpression(InstanceofExpression that) {
-      forInstanceofExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getValue().visit(this);
-      that.getType().visit(this); return forInstanceofExpressionOnly(that); 
-    }
-    public Void forCastExpression(CastExpression that) {
-      forCastExpressionDoFirst(that);
-      if (prune(that)) return null;
-      that.getType().visit(this);
-      that.getValue().visit(this); return forCastExpressionOnly(that); 
-    }
-    public Void forIntegerLiteral(IntegerLiteral that) {
-      forIntegerLiteralDoFirst(that);
-      if (prune(that)) return null; return forIntegerLiteralOnly(that); 
-    }
-    public Void forLongLiteral(LongLiteral that) {
-      forLongLiteralDoFirst(that);
-      if (prune(that)) return null; return forLongLiteralOnly(that); 
-    }
-    public Void forDoubleLiteral(DoubleLiteral that) {
-      forDoubleLiteralDoFirst(that);
-      if (prune(that)) return null; return forDoubleLiteralOnly(that); 
-    }
-    public Void forFloatLiteral(FloatLiteral that) {
-      forFloatLiteralDoFirst(that);
-      if (prune(that)) return null; return forFloatLiteralOnly(that); 
-    }
-    public Void forBooleanLiteral(BooleanLiteral that) {
-      forBooleanLiteralDoFirst(that);
-      if (prune(that)) return null; return forBooleanLiteralOnly(that); 
-    }
-    public Void forCharLiteral(CharLiteral that) {
-      forCharLiteralDoFirst(that);
-      if (prune(that)) return null; return forCharLiteralOnly(that); 
-    }
-    public Void forStringLiteral(StringLiteral that) {
-      forStringLiteralDoFirst(that);
-      if (prune(that)) return null; return forStringLiteralOnly(that); 
-    }
-    public Void forNullLiteral(NullLiteral that) {
-      forNullLiteralDoFirst(that);
-      if (prune(that)) return null; return forNullLiteralOnly(that); 
-    }
-    public Void forSimpleNamedClassInstantiation(SimpleNamedClassInstantiation that) {
-      forSimpleNamedClassInstantiationDoFirst(that);
-      if (prune(that)) return null;
-      that.getType().visit(this);
-      that.getArguments().visit(this); return forSimpleNamedClassInstantiationOnly(that); 
-    }
-    public Void forComplexNamedClassInstantiation(ComplexNamedClassInstantiation that) {
-      forComplexNamedClassInstantiationDoFirst(that);
-      if (prune(that)) return null;
-      that.getEnclosing().visit(this);
-      that.getType().visit(this);
-      that.getArguments().visit(this); return forComplexNamedClassInstantiationOnly(that); 
-    }
-    public Void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
-      forSimpleAnonymousClassInstantiationDoFirst(that);
-      if (prune(that)) return null;
-      that.getType().visit(this);
-      that.getArguments().visit(this);
-      that.getBody().visit(this); return forSimpleAnonymousClassInstantiationOnly(that); 
-    }
-    public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
-      forComplexAnonymousClassInstantiationDoFirst(that);
-      if (prune(that)) return null;
-      that.getEnclosing().visit(this);
-      that.getType().visit(this);
-      that.getArguments().visit(this);
-      that.getBody().visit(this); return forComplexAnonymousClassInstantiationOnly(that); 
-    }
-    public Void forSimpleUninitializedArrayInstantiation(SimpleUninitializedArrayInstantiation that) {
-      forSimpleUninitializedArrayInstantiationDoFirst(that);
-      if (prune(that)) return null;
-      that.getType().visit(this);
-      that.getDimensionSizes().visit(this); return forSimpleUninitializedArrayInstantiationOnly(that); 
-    }
-    public Void forComplexUninitializedArrayInstantiation(ComplexUninitializedArrayInstantiation that) {
-      forComplexUninitializedArrayInstantiationDoFirst(that);
-      if (prune(that)) return null;
-      that.getEnclosing().visit(this);
-      that.getType().visit(this);
-      that.getDimensionSizes().visit(this); return forComplexUninitializedArrayInstantiationOnly(that); 
-    }
-    public Void forSimpleInitializedArrayInstantiation(SimpleInitializedArrayInstantiation that) {
-      forSimpleInitializedArrayInstantiationDoFirst(that);
-      if (prune(that)) return null;
-      that.getType().visit(this);
-      that.getInitializer().visit(this); return forSimpleInitializedArrayInstantiationOnly(that); 
-    }
-    public Void forComplexInitializedArrayInstantiation(ComplexInitializedArrayInstantiation that) {
-      forComplexInitializedArrayInstantiationDoFirst(that);
-      if (prune(that)) return null;
-      that.getEnclosing().visit(this);
-      that.getType().visit(this);
-      that.getInitializer().visit(this); return forComplexInitializedArrayInstantiationOnly(that); 
-    }
-    public Void forSimpleNameReference(SimpleNameReference that) {
-      forSimpleNameReferenceDoFirst(that);
-      if (prune(that)) return null;
-      that.getName().visit(this); return forSimpleNameReferenceOnly(that); 
-    }
-    public Void forComplexNameReference(ComplexNameReference that) {
-      forComplexNameReferenceDoFirst(that);
-      if (prune(that)) return null;
-      that.getEnclosing().visit(this);
-      that.getName().visit(this); return forComplexNameReferenceOnly(that); 
-    }
-    public Void forSimpleThisReference(SimpleThisReference that) {
-      forSimpleThisReferenceDoFirst(that);
-      if (prune(that)) return null; return forSimpleThisReferenceOnly(that); 
-    }
-    public Void forComplexThisReference(ComplexThisReference that) {
-      forComplexThisReferenceDoFirst(that);
-      if (prune(that)) return null;
-      that.getEnclosing().visit(this); return forComplexThisReferenceOnly(that); 
-    }
-    public Void forSimpleSuperReference(SimpleSuperReference that) {
-      forSimpleSuperReferenceDoFirst(that);
-      if (prune(that)) return null; return forSimpleSuperReferenceOnly(that); 
-    }
-    public Void forComplexSuperReference(ComplexSuperReference that) {
-      forComplexSuperReferenceDoFirst(that);
-      if (prune(that)) return null;
-      that.getEnclosing().visit(this); return forComplexSuperReferenceOnly(that); 
-    }
-    public Void forSimpleMethodInvocation(SimpleMethodInvocation that) {
-      forSimpleMethodInvocationDoFirst(that);
-      if (prune(that)) return null;
-      that.getName().visit(this);
-      that.getArguments().visit(this); return forSimpleMethodInvocationOnly(that); 
-    }
-    public Void forComplexMethodInvocation(ComplexMethodInvocation that) {
-      forComplexMethodInvocationDoFirst(that);
-      if (prune(that)) return null;
-      that.getEnclosing().visit(this);
-      that.getName().visit(this);
-      that.getArguments().visit(this); return forComplexMethodInvocationOnly(that); 
-    }
-    public Void forSimpleThisConstructorInvocation(SimpleThisConstructorInvocation that) {
-      forSimpleThisConstructorInvocationDoFirst(that);
-      if (prune(that)) return null;
-      that.getArguments().visit(this); return forSimpleThisConstructorInvocationOnly(that); 
-    }
-    public Void forComplexThisConstructorInvocation(ComplexThisConstructorInvocation that) {
-      forComplexThisConstructorInvocationDoFirst(that);
-      if (prune(that)) return null;
-      that.getEnclosing().visit(this);
-      that.getArguments().visit(this); return forComplexThisConstructorInvocationOnly(that); 
-    }
-    public Void forSimpleSuperConstructorInvocation(SimpleSuperConstructorInvocation that) {
-      forSimpleSuperConstructorInvocationDoFirst(that);
-      if (prune(that)) return null;
-      that.getArguments().visit(this); return forSimpleSuperConstructorInvocationOnly(that); 
-    }
-    public Void forComplexSuperConstructorInvocation(ComplexSuperConstructorInvocation that) {
-      forComplexSuperConstructorInvocationDoFirst(that);
-      if (prune(that)) return null;
-      that.getEnclosing().visit(this);
-      that.getArguments().visit(this); return forComplexSuperConstructorInvocationOnly(that); 
-    }
-    public Void forClassLiteral(ClassLiteral that) {
-      forClassLiteralDoFirst(that);
-      if (prune(that)) return null;
-      that.getType().visit(this); return forClassLiteralOnly(that); 
-    }
-    public Void forArrayAccess(ArrayAccess that) {
-      forArrayAccessDoFirst(that);
-      if (prune(that)) return null;
-      that.getArray().visit(this);
-      that.getIndex().visit(this); return forArrayAccessOnly(that); 
-    }
-    public Void forParenthesized(Parenthesized that) {
-      forParenthesizedDoFirst(that);
-      if (prune(that)) return null;
-      that.getValue().visit(this); return forParenthesizedOnly(that); 
-    }
-    public Void forEmptyExpression(EmptyExpression that) {
-      forEmptyExpressionDoFirst(that);
-      if (prune(that)) return null; return forEmptyExpressionOnly(that); 
-    }
+  public Void forInterfaceDef(InterfaceDef that) { 
+    forInterfaceDefDoFirst(that);
+    if (prune(that)) return null;
+    that.getMav().visit(this);
+    for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
+    for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
+    that.getBody().visit(this); 
+    return forInterfaceDefOnly(that);
+  }
+  public Void forInnerInterfaceDef(InnerInterfaceDef that) { 
+    forInnerInterfaceDefDoFirst(that);
+    if (prune(that)) return null;
+    that.getMav().visit(this);
+    for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
+    for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
+    that.getBody().visit(this); 
+    return forInnerInterfaceDefOnly(that);
+  }
+  public Void forConstructorDef(ConstructorDef that) { 
+    forConstructorDefDoFirst(that);
+    if (prune(that)) return null;
+    that.getName().visit(this);
+    that.getMav().visit(this);
+    for (int i = 0; i < that.getParameters().length; i++) that.getParameters()[i].visit(this);
+    for (int i = 0; i < that.getThrows().length; i++) that.getThrows()[i].visit(this);
+    that.getStatements().visit(this);
+    return forConstructorDefOnly(that);
+  }
+  public Void forInstanceInitializer(InstanceInitializer that) { 
+    forInstanceInitializerDoFirst(that);
+    if (prune(that)) return null;
+    that.getCode().visit(this);
+    return forInstanceInitializerOnly(that);
+  }
+  public Void forStaticInitializer(StaticInitializer that) { 
+    forStaticInitializerDoFirst(that);
+    if (prune(that)) return null;
+    that.getCode().visit(this);
+    return forStaticInitializerOnly(that);
+  }
+  public Void forPackageStatement(PackageStatement that) { 
+    forPackageStatementDoFirst(that);
+    if (prune(that)) return null;
+    that.getCWord().visit(this);
+    return forPackageStatementOnly(that);
+  }
+  public Void forClassImportStatement(ClassImportStatement that) {
+    forClassImportStatementDoFirst(that);
+    if (prune(that)) return null;
+    that.getCWord().visit(this);
+    return forClassImportStatementOnly(that);
+  }
+  public Void forPackageImportStatement(PackageImportStatement that) {
+    forPackageImportStatementDoFirst(that);
+    if (prune(that)) return null;
+    that.getCWord().visit(this);
+    return forPackageImportStatementOnly(that);
+  }
+  public Void forLabeledStatement(LabeledStatement that) { 
+    forLabeledStatementDoFirst(that);
+    if (prune(that)) return null;
+    that.getLabel().visit(this);
+    that.getStatement().visit(this);
+    return forLabeledStatementOnly(that);
+  }
+  public Void forBlock(Block that) {
+    forBlockDoFirst(that);
+    if (prune(that)) return null;
+    that.getStatements().visit(this);
+    return forBlockOnly(that);
+  }
+  public Void forExpressionStatement(ExpressionStatement that) { 
+    forExpressionStatementDoFirst(that);
+    if (prune(that)) return null;
+    that.getExpression().visit(this);
+    return forExpressionStatementOnly(that);
+  }
+  public Void forSwitchStatement(SwitchStatement that) { 
+    forSwitchStatementDoFirst(that);
+    if (prune(that)) return null;
+    that.getTest().visit(this);
+    for (int i = 0; i < that.getCases().length; i++) that.getCases()[i].visit(this); 
+    return forSwitchStatementOnly(that);
+  }
+  public Void forIfThenStatement(IfThenStatement that) { 
+    forIfThenStatementDoFirst(that);
+    if (prune(that)) return null;
+    that.getTestExpression().visit(this);
+    that.getThenStatement().visit(this);
+    return forIfThenStatementOnly(that);
+  }
+  public Void forIfThenElseStatement(IfThenElseStatement that) { 
+    forIfThenElseStatementDoFirst(that);
+    if (prune(that)) return null;
+    that.getTestExpression().visit(this);
+    that.getThenStatement().visit(this);
+    that.getElseStatement().visit(this);
+    return forIfThenElseStatementOnly(that);
+  }
+  public Void forWhileStatement(WhileStatement that) {
+    forWhileStatementDoFirst(that);
+    if (prune(that)) return null;
+    that.getCondition().visit(this);
+    that.getCode().visit(this);
+    return forWhileStatementOnly(that);
+  }
+  public Void forDoStatement(DoStatement that) { 
+    forDoStatementDoFirst(that);
+    if (prune(that)) return null;
+    that.getCode().visit(this);
+    that.getCondition().visit(this);
+    return forDoStatementOnly(that);
+  }
+  public Void forForStatement(ForStatement that) { 
+    forForStatementDoFirst(that);
+    if (prune(that)) return null;
+    that.getInit().visit(this);
+    that.getCondition().visit(this);
+    that.getUpdate().visit(this);
+    that.getCode().visit(this);
+    return forForStatementOnly(that);
+  }
+  public Void forLabeledBreakStatement(LabeledBreakStatement that) { 
+    forLabeledBreakStatementDoFirst(that);
+    if (prune(that)) return null;
+    that.getLabel().visit(this);
+    return forLabeledBreakStatementOnly(that);
+  }
+  public Void forUnlabeledBreakStatement(UnlabeledBreakStatement that) { 
+    forUnlabeledBreakStatementDoFirst(that);
+    if (prune(that)) return null;
+    return forUnlabeledBreakStatementOnly(that);
+  }
+  public Void forLabeledContinueStatement(LabeledContinueStatement that) { 
+    forLabeledContinueStatementDoFirst(that);
+    if (prune(that)) return null;
+    that.getLabel().visit(this);
+    return forLabeledContinueStatementOnly(that);
+  }
+  public Void forUnlabeledContinueStatement(UnlabeledContinueStatement that) { 
+    forUnlabeledContinueStatementDoFirst(that);
+    if (prune(that)) return null;
+    return forUnlabeledContinueStatementOnly(that);
+  }
+  public Void forVoidReturnStatement(VoidReturnStatement that) { 
+    forVoidReturnStatementDoFirst(that);
+    if (prune(that)) return null;
+    return forVoidReturnStatementOnly(that);
+  }
+  public Void forValueReturnStatement(ValueReturnStatement that) { 
+    forValueReturnStatementDoFirst(that);
+    if (prune(that)) return null;
+    that.getValue().visit(this);
+    return forValueReturnStatementOnly(that);
+  }
+  public Void forThrowStatement(ThrowStatement that) { 
+    forThrowStatementDoFirst(that);
+    if (prune(that)) return null;
+    that.getThrown().visit(this);
+    return forThrowStatementOnly(that);
+  }
+  public Void forSynchronizedStatement(SynchronizedStatement that) { 
+    forSynchronizedStatementDoFirst(that);
+    if (prune(that)) return null;
+    that.getLockExpr().visit(this);
+    that.getBlock().visit(this);
+    return forSynchronizedStatementOnly(that);
+  }
+  public Void forTryCatchFinallyStatement(TryCatchFinallyStatement that) { 
+    forTryCatchFinallyStatementDoFirst(that);
+    if (prune(that)) return null;
+    that.getTryBlock().visit(this);
+    for (int i = 0; i < that.getCatchBlocks().length; i++) that.getCatchBlocks()[i].visit(this);
+    that.getFinallyBlock().visit(this);
+    return forTryCatchFinallyStatementOnly(that);
+  }
+  public Void forNormalTryCatchStatement(NormalTryCatchStatement that) { 
+    forNormalTryCatchStatementDoFirst(that);
+    if (prune(that)) return null;
+    that.getTryBlock().visit(this);
+    for (int i = 0; i < that.getCatchBlocks().length; i++) that.getCatchBlocks()[i].visit(this); 
+    return forNormalTryCatchStatementOnly(that);
+  }
+  public Void forEmptyStatement(EmptyStatement that) { 
+    forEmptyStatementDoFirst(that);
+    if (prune(that)) return null;
+    return forEmptyStatementOnly(that);
+  }
+  public Void forConcreteMethodDef(ConcreteMethodDef that) { 
+    forConcreteMethodDefDoFirst(that);
+    if (prune(that)) return null;
+    that.getMav().visit(this);
+    for (int i = 0; i < that.getTypeParams().length; i++) that.getTypeParams()[i].visit(this);
+    that.getResult().visit(this);
+    for (int i = 0; i < that.getParams().length; i++) that.getParams()[i].visit(this);
+    for (int i = 0; i < that.getThrows().length; i++) that.getThrows()[i].visit(this);
+    that.getBody().visit(this); 
+    return forConcreteMethodDefOnly(that);
+  }
+  public Void forAbstractMethodDef(AbstractMethodDef that) { 
+    forAbstractMethodDefDoFirst(that);
+    if (prune(that)) return null;
+    that.getMav().visit(this);
+    for (int i = 0; i < that.getTypeParams().length; i++) that.getTypeParams()[i].visit(this);
+    that.getResult().visit(this);
+    for (int i = 0; i < that.getParams().length; i++) that.getParams()[i].visit(this);
+    for (int i = 0; i < that.getThrows().length; i++) that.getThrows()[i].visit(this); 
+    return forAbstractMethodDefOnly(that);
+  }
+  public Void forFormalParameter(FormalParameter that) { 
+    forFormalParameterDoFirst(that);
+    if (prune(that)) return null;
+    that.getDeclarator().visit(this);
+    return forFormalParameterOnly(that);
+  }
+  public Void forVariableDeclaration(VariableDeclaration that) { 
+    forVariableDeclarationDoFirst(that);
+    if (prune(that)) return null;
+    that.getMav().visit(this);
+    for (int i = 0; i < that.getDeclarators().length; i++) that.getDeclarators()[i].visit(this);
+    return forVariableDeclarationOnly(that);
+  }
+  public Void forUninitializedVariableDeclarator(UninitializedVariableDeclarator that) { 
+    forUninitializedVariableDeclaratorDoFirst(that);
+    if (prune(that)) return null;
+    that.getType().visit(this);
+    return forUninitializedVariableDeclaratorOnly(that);
+  }
+  public Void forInitializedVariableDeclarator(InitializedVariableDeclarator that) { 
+    forInitializedVariableDeclaratorDoFirst(that);
+    if (prune(that)) return null;
+    that.getType().visit(this);
+    that.getInitializer().visit(this);
+    return forInitializedVariableDeclaratorOnly(that);
+  }
+  public Void forTypeParameter(TypeParameter that) { 
+    forTypeParameterDoFirst(that);
+    if (prune(that)) return null;
+    that.getVariable().visit(this);
+    that.getBound().visit(this);
+    return forTypeParameterOnly(that);
+  }
+  public Void forArrayInitializer(ArrayInitializer that) { 
+    forArrayInitializerDoFirst(that);
+    if (prune(that)) return null;
+    for (int i = 0; i < that.getItems().length; i++) that.getItems()[i].visit(this); 
+    return forArrayInitializerOnly(that);
+  }
+  public Void forPrimitiveType(PrimitiveType that) { 
+    forPrimitiveTypeDoFirst(that);
+    if (prune(that)) return null;
+    return forPrimitiveTypeOnly(that);
+  }
+  public Void forArrayType(ArrayType that) { 
+    forArrayTypeDoFirst(that);
+    if (prune(that)) return null;
+    that.getElementType().visit(this);
+    return forArrayTypeOnly(that);
+  }
+  public Void forMemberType(MemberType that) { 
+    forMemberTypeDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this);
+    return forMemberTypeOnly(that);
+  }
+  public Void forClassOrInterfaceType(ClassOrInterfaceType that) { 
+    forClassOrInterfaceTypeDoFirst(that);
+    if (prune(that)) return null;
+    for (int i = 0; i < that.getTypeArguments().length; i++) that.getTypeArguments()[i].visit(this); 
+    return forClassOrInterfaceTypeOnly(that);
+  }
+  public Void forTypeVariable(TypeVariable that) { 
+    forTypeVariableDoFirst(that);
+    if (prune(that)) return null;
+    return forTypeVariableOnly(that);
+  }
+  public Void forVoidReturn(VoidReturn that) { 
+    forVoidReturnDoFirst(that);
+    if (prune(that)) return null;
+    return forVoidReturnOnly(that);
+  }
+  public Void forLabeledCase(LabeledCase that) { 
+    forLabeledCaseDoFirst(that);
+    if (prune(that)) return null;
+    that.getLabel().visit(this);
+    that.getCode().visit(this);
+    return forLabeledCaseOnly(that);
+  }
+  public Void forDefaultCase(DefaultCase that) { 
+    forDefaultCaseDoFirst(that);
+    if (prune(that)) return null;
+    that.getCode().visit(this);
+    return forDefaultCaseOnly(that);
+  }
+  public Void forCatchBlock(CatchBlock that) { 
+    forCatchBlockDoFirst(that);
+    if (prune(that)) return null;
+    that.getException().visit(this);
+    that.getBlock().visit(this);
+    return forCatchBlockOnly(that);
+  }
+  public Void forSimpleAssignmentExpression(SimpleAssignmentExpression that) { 
+    forSimpleAssignmentExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getName().visit(this);
+    that.getValue().visit(this);
+    return forSimpleAssignmentExpressionOnly(that);
+  }
+  public Void forPlusAssignmentExpression(PlusAssignmentExpression that) { 
+    forPlusAssignmentExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getName().visit(this);
+    that.getValue().visit(this);
+    return forPlusAssignmentExpressionOnly(that);
+  }
+  public Void forMinusAssignmentExpression(MinusAssignmentExpression that) { 
+    forMinusAssignmentExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getName().visit(this);
+    that.getValue().visit(this);
+    return forMinusAssignmentExpressionOnly(that);
+  }
+  public Void forMultiplyAssignmentExpression(MultiplyAssignmentExpression that) { 
+    forMultiplyAssignmentExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getName().visit(this);
+    that.getValue().visit(this);
+    return forMultiplyAssignmentExpressionOnly(that);
+  }
+  public Void forDivideAssignmentExpression(DivideAssignmentExpression that) { 
+    forDivideAssignmentExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getName().visit(this);
+    that.getValue().visit(this);
+    return forDivideAssignmentExpressionOnly(that);
+  }
+  public Void forModAssignmentExpression(ModAssignmentExpression that) { 
+    forModAssignmentExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getName().visit(this);
+    that.getValue().visit(this);
+    return forModAssignmentExpressionOnly(that);
+  }
+  public Void forLeftShiftAssignmentExpression(LeftShiftAssignmentExpression that) { 
+    forLeftShiftAssignmentExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getName().visit(this);
+    that.getValue().visit(this);
+    return forLeftShiftAssignmentExpressionOnly(that);
+  }
+  public Void forRightSignedShiftAssignmentExpression(RightSignedShiftAssignmentExpression that) { 
+    forRightSignedShiftAssignmentExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getName().visit(this);
+    that.getValue().visit(this);
+    return forRightSignedShiftAssignmentExpressionOnly(that);
+  }
+  public Void forRightUnsignedShiftAssignmentExpression(RightUnsignedShiftAssignmentExpression that) { 
+    forRightUnsignedShiftAssignmentExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getName().visit(this);
+    that.getValue().visit(this);
+    return forRightUnsignedShiftAssignmentExpressionOnly(that);
+  }
+  public Void forBitwiseAndAssignmentExpression(BitwiseAndAssignmentExpression that) { 
+    forBitwiseAndAssignmentExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getName().visit(this);
+    that.getValue().visit(this);
+    return forBitwiseAndAssignmentExpressionOnly(that);
+  }
+  public Void forBitwiseOrAssignmentExpression(BitwiseOrAssignmentExpression that) { 
+    forBitwiseOrAssignmentExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getName().visit(this);
+    that.getValue().visit(this);
+    return forBitwiseOrAssignmentExpressionOnly(that);
+  }
+  public Void forBitwiseXorAssignmentExpression(BitwiseXorAssignmentExpression that) { 
+    forBitwiseXorAssignmentExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getName().visit(this);
+    that.getValue().visit(this);
+    return forBitwiseXorAssignmentExpressionOnly(that);
+  }
+  public Void forOrExpression(OrExpression that) { 
+    forOrExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this);
+    return forOrExpressionOnly(that);
+  }
+  public Void forAndExpression(AndExpression that) { 
+    forAndExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this);
+    return forAndExpressionOnly(that);
+  }
+  public Void forBitwiseOrExpression(BitwiseOrExpression that) { 
+    forBitwiseOrExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this);
+    return forBitwiseOrExpressionOnly(that);
+  }
+  public Void forBitwiseXorExpression(BitwiseXorExpression that) { 
+    forBitwiseXorExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this);
+    return forBitwiseXorExpressionOnly(that);
+  }
+  public Void forBitwiseAndExpression(BitwiseAndExpression that) { 
+    forBitwiseAndExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this);
+    return forBitwiseAndExpressionOnly(that);
+  }
+  public Void forEqualsExpression(EqualsExpression that) { 
+    forEqualsExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this);
+    return forEqualsExpressionOnly(that);
+  }
+  public Void forNotEqualExpression(NotEqualExpression that) { 
+    forNotEqualExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this);
+    return forNotEqualExpressionOnly(that);
+  }
+  public Void forLessThanExpression(LessThanExpression that) { 
+    forLessThanExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this);
+    return forLessThanExpressionOnly(that);
+  }
+  public Void forLessThanOrEqualExpression(LessThanOrEqualExpression that) { 
+    forLessThanOrEqualExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this);
+    return forLessThanOrEqualExpressionOnly(that);
+  }
+  public Void forGreaterThanExpression(GreaterThanExpression that) { 
+    forGreaterThanExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this);
+    return forGreaterThanExpressionOnly(that);
+  }
+  public Void forGreaterThanOrEqualExpression(GreaterThanOrEqualExpression that) { 
+    forGreaterThanOrEqualExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this);
+    return forGreaterThanOrEqualExpressionOnly(that);
+  }
+  public Void forLeftShiftExpression(LeftShiftExpression that) { 
+    forLeftShiftExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this);
+    return forLeftShiftExpressionOnly(that);
+  }
+  public Void forRightSignedShiftExpression(RightSignedShiftExpression that) { 
+    forRightSignedShiftExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this);
+    return forRightSignedShiftExpressionOnly(that);
+  }
+  public Void forRightUnsignedShiftExpression(RightUnsignedShiftExpression that) { 
+    forRightUnsignedShiftExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this);
+    return forRightUnsignedShiftExpressionOnly(that);
+  }
+  public Void forPlusExpression(PlusExpression that) { 
+    forPlusExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this); 
+    return forPlusExpressionOnly(that);
+  }
+  public Void forMinusExpression(MinusExpression that) { 
+    forMinusExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this); 
+    return forMinusExpressionOnly(that);
+  }
+  public Void forMultiplyExpression(MultiplyExpression that) { 
+    forMultiplyExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this); 
+    return forMultiplyExpressionOnly(that);
+  }
+  public Void forDivideExpression(DivideExpression that) { 
+    forDivideExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this); 
+    return forDivideExpressionOnly(that);
+  }
+  public Void forModExpression(ModExpression that) { 
+    forModExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this); 
+    return forModExpressionOnly(that);
+  }
+  public Void forNoOpExpression(NoOpExpression that) { 
+    forNoOpExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getLeft().visit(this);
+    that.getRight().visit(this); 
+    return forNoOpExpressionOnly(that); 
+  }
+  public Void forPositivePrefixIncrementExpression(PositivePrefixIncrementExpression that) { 
+    forPositivePrefixIncrementExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getValue().visit(this); 
+    return forPositivePrefixIncrementExpressionOnly(that); 
+  }
+  public Void forNegativePrefixIncrementExpression(NegativePrefixIncrementExpression that) { 
+    forNegativePrefixIncrementExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getValue().visit(this); 
+    return forNegativePrefixIncrementExpressionOnly(that); 
+  }
+  public Void forPositivePostfixIncrementExpression(PositivePostfixIncrementExpression that) { 
+    forPositivePostfixIncrementExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getValue().visit(this); 
+    return forPositivePostfixIncrementExpressionOnly(that); 
+  }
+  public Void forNegativePostfixIncrementExpression(NegativePostfixIncrementExpression that) { 
+    forNegativePostfixIncrementExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getValue().visit(this); 
+    return forNegativePostfixIncrementExpressionOnly(that); 
+  }
+  public Void forPositiveExpression(PositiveExpression that) { 
+    forPositiveExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getValue().visit(this); 
+    return forPositiveExpressionOnly(that); 
+  }
+  public Void forNegativeExpression(NegativeExpression that) { 
+    forNegativeExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getValue().visit(this); 
+    return forNegativeExpressionOnly(that); 
+  }
+  public Void forBitwiseNotExpression(BitwiseNotExpression that) { 
+    forBitwiseNotExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getValue().visit(this); 
+    return forBitwiseNotExpressionOnly(that); 
+  }
+  public Void forNotExpression(NotExpression that) { 
+    forNotExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getValue().visit(this); 
+    return forNotExpressionOnly(that); 
+  }
+  public Void forConditionalExpression(ConditionalExpression that) { 
+    forConditionalExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getCondition().visit(this);
+    that.getForTrue().visit(this);
+    that.getForFalse().visit(this); 
+    return forConditionalExpressionOnly(that); 
+  }
+  public Void forInstanceofExpression(InstanceofExpression that) { 
+    forInstanceofExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getValue().visit(this);
+    that.getType().visit(this); 
+    return forInstanceofExpressionOnly(that); 
+  }
+  public Void forCastExpression(CastExpression that) { 
+    forCastExpressionDoFirst(that);
+    if (prune(that)) return null;
+    that.getType().visit(this);
+    that.getValue().visit(this); 
+    return forCastExpressionOnly(that); 
+  }
+  public Void forIntegerLiteral(IntegerLiteral that) { 
+    forIntegerLiteralDoFirst(that);
+    if (prune(that)) return null; 
+    return forIntegerLiteralOnly(that); 
+  }
+  public Void forLongLiteral(LongLiteral that) { 
+    forLongLiteralDoFirst(that);
+    if (prune(that)) return null; 
+    return forLongLiteralOnly(that); 
+  }
+  public Void forDoubleLiteral(DoubleLiteral that) { 
+    forDoubleLiteralDoFirst(that);
+    if (prune(that)) return null; 
+    return forDoubleLiteralOnly(that); 
+  }
+  public Void forFloatLiteral(FloatLiteral that) { 
+    forFloatLiteralDoFirst(that);
+    if (prune(that)) return null; 
+    return forFloatLiteralOnly(that); 
+  }
+  public Void forBooleanLiteral(BooleanLiteral that) { 
+    forBooleanLiteralDoFirst(that);
+    if (prune(that)) return null; 
+    return forBooleanLiteralOnly(that); 
+  }
+  public Void forCharLiteral(CharLiteral that) { 
+    forCharLiteralDoFirst(that);
+    if (prune(that)) return null; 
+    return forCharLiteralOnly(that); 
+  }
+  public Void forStringLiteral(StringLiteral that) { 
+    forStringLiteralDoFirst(that);
+    if (prune(that)) return null; 
+    return forStringLiteralOnly(that); 
+  }
+  public Void forNullLiteral(NullLiteral that) { 
+    forNullLiteralDoFirst(that);
+    if (prune(that)) return null; 
+    return forNullLiteralOnly(that); 
+  }
+  public Void forSimpleNamedClassInstantiation(SimpleNamedClassInstantiation that) { 
+    forSimpleNamedClassInstantiationDoFirst(that);
+    if (prune(that)) return null;
+    that.getType().visit(this);
+    that.getArguments().visit(this); 
+    return forSimpleNamedClassInstantiationOnly(that); 
+  }
+  public Void forComplexNamedClassInstantiation(ComplexNamedClassInstantiation that) { 
+    forComplexNamedClassInstantiationDoFirst(that);
+    if (prune(that)) return null;
+    that.getEnclosing().visit(this);
+    that.getType().visit(this);
+    that.getArguments().visit(this); 
+    return forComplexNamedClassInstantiationOnly(that); 
+  }
+  public Void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) { 
+    forSimpleAnonymousClassInstantiationDoFirst(that);
+    if (prune(that)) return null;
+    that.getType().visit(this);
+    that.getArguments().visit(this);
+    that.getBody().visit(this); 
+    return forSimpleAnonymousClassInstantiationOnly(that); 
+  }
+  public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) { 
+    forComplexAnonymousClassInstantiationDoFirst(that);
+    if (prune(that)) return null;
+    that.getEnclosing().visit(this);
+    that.getType().visit(this);
+    that.getArguments().visit(this);
+    that.getBody().visit(this); 
+    return forComplexAnonymousClassInstantiationOnly(that); 
+  }
+  public Void forSimpleUninitializedArrayInstantiation(SimpleUninitializedArrayInstantiation that) { 
+    forSimpleUninitializedArrayInstantiationDoFirst(that);
+    if (prune(that)) return null;
+    that.getType().visit(this);
+    that.getDimensionSizes().visit(this); 
+    return forSimpleUninitializedArrayInstantiationOnly(that); 
+  }
+  public Void forComplexUninitializedArrayInstantiation(ComplexUninitializedArrayInstantiation that) { 
+    forComplexUninitializedArrayInstantiationDoFirst(that);
+    if (prune(that)) return null;
+    that.getEnclosing().visit(this);
+    that.getType().visit(this);
+    that.getDimensionSizes().visit(this); 
+    return forComplexUninitializedArrayInstantiationOnly(that); 
+  }
+  public Void forSimpleInitializedArrayInstantiation(SimpleInitializedArrayInstantiation that) { 
+    forSimpleInitializedArrayInstantiationDoFirst(that);
+    if (prune(that)) return null;
+    that.getType().visit(this);
+    that.getInitializer().visit(this); 
+    return forSimpleInitializedArrayInstantiationOnly(that); 
+  }
+  public Void forComplexInitializedArrayInstantiation(ComplexInitializedArrayInstantiation that) { 
+    forComplexInitializedArrayInstantiationDoFirst(that);
+    if (prune(that)) return null;
+    that.getEnclosing().visit(this);
+    that.getType().visit(this);
+    that.getInitializer().visit(this); 
+    return forComplexInitializedArrayInstantiationOnly(that); 
+  }
+  public Void forSimpleNameReference(SimpleNameReference that) { 
+    forSimpleNameReferenceDoFirst(that);
+    if (prune(that)) return null;
+    that.getName().visit(this);
+    return forSimpleNameReferenceOnly(that); 
+  }
+  public Void forComplexNameReference(ComplexNameReference that) { 
+    forComplexNameReferenceDoFirst(that);
+    if (prune(that)) return null;
+    that.getEnclosing().visit(this);
+    that.getName().visit(this); 
+    return forComplexNameReferenceOnly(that); 
+  }
+  public Void forSimpleThisReference(SimpleThisReference that) { 
+    forSimpleThisReferenceDoFirst(that);
+    if (prune(that)) return null; 
+    return forSimpleThisReferenceOnly(that); 
+  }
+  public Void forComplexThisReference(ComplexThisReference that) { 
+    forComplexThisReferenceDoFirst(that);
+    if (prune(that)) return null;
+    that.getEnclosing().visit(this); 
+    return forComplexThisReferenceOnly(that); 
+  }
+  public Void forSimpleSuperReference(SimpleSuperReference that) { 
+    forSimpleSuperReferenceDoFirst(that);
+    if (prune(that)) return null; 
+    return forSimpleSuperReferenceOnly(that); 
+  }
+  public Void forComplexSuperReference(ComplexSuperReference that) { 
+    forComplexSuperReferenceDoFirst(that);
+    if (prune(that)) return null;
+    that.getEnclosing().visit(this); 
+    return forComplexSuperReferenceOnly(that); 
+  }
+  public Void forSimpleMethodInvocation(SimpleMethodInvocation that) { 
+    forSimpleMethodInvocationDoFirst(that);
+    if (prune(that)) return null;
+    that.getName().visit(this);
+    that.getArguments().visit(this); 
+    return forSimpleMethodInvocationOnly(that); 
+  }
+  public Void forComplexMethodInvocation(ComplexMethodInvocation that) { 
+    forComplexMethodInvocationDoFirst(that);
+    if (prune(that)) return null;
+    that.getEnclosing().visit(this);
+    that.getName().visit(this);
+    that.getArguments().visit(this); 
+    return forComplexMethodInvocationOnly(that); 
+  }
+  public Void forSimpleThisConstructorInvocation(SimpleThisConstructorInvocation that) { 
+    forSimpleThisConstructorInvocationDoFirst(that);
+    if (prune(that)) return null;
+    that.getArguments().visit(this); 
+    return forSimpleThisConstructorInvocationOnly(that); 
+  }
+  public Void forComplexThisConstructorInvocation(ComplexThisConstructorInvocation that) { 
+    forComplexThisConstructorInvocationDoFirst(that);
+    if (prune(that)) return null;
+    that.getEnclosing().visit(this);
+    that.getArguments().visit(this); 
+    return forComplexThisConstructorInvocationOnly(that); 
+  }
+  public Void forSimpleSuperConstructorInvocation(SimpleSuperConstructorInvocation that) { 
+    forSimpleSuperConstructorInvocationDoFirst(that);
+    if (prune(that)) return null;
+    that.getArguments().visit(this); 
+    return forSimpleSuperConstructorInvocationOnly(that); 
+  }
+  public Void forComplexSuperConstructorInvocation(ComplexSuperConstructorInvocation that) { 
+    forComplexSuperConstructorInvocationDoFirst(that);
+    if (prune(that)) return null;
+    that.getEnclosing().visit(this);
+    that.getArguments().visit(this); 
+    return forComplexSuperConstructorInvocationOnly(that); 
+  }
+  public Void forClassLiteral(ClassLiteral that) {
+    forClassLiteralDoFirst(that);
+    if (prune(that)) return null;
+    that.getType().visit(this); 
+    return forClassLiteralOnly(that); 
+  }
+  public Void forArrayAccess(ArrayAccess that) {
+    forArrayAccessDoFirst(that);
+    if (prune(that)) return null;
+    that.getArray().visit(this);
+    that.getIndex().visit(this);
+    return forArrayAccessOnly(that); 
+  }
+  public Void forParenthesized(Parenthesized that) {
+    forParenthesizedDoFirst(that);
+    if (prune(that)) return null;
+    that.getValue().visit(this);
+    return forParenthesizedOnly(that); 
+  }
+  public Void forEmptyExpression(EmptyExpression that) {
+    forEmptyExpressionDoFirst(that);
+    if (prune(that)) return null;
+    return forEmptyExpressionOnly(that); 
+  }
 //  public void forEmptyDimensionExpression(EmptyDimensionExpression that) {
 //    forEmptyDimensionExpressionDoFirst(that);
 //    if (prune(that)) return;
 //    forEmptyDimensionExpressionOnly(that);
 //  }
-    
-    public Void forBracedBody(BracedBody that) {
-      forBracedBodyDoFirst(that);
-      if (prune(that)) return null;
-      for (int i = 0; i < that.getStatements().length; i++) that.getStatements()[i].visit(this); 
-      return forBracedBodyOnly(that);
-    }
-    public Void forUnbracedBody(UnbracedBody that) {
-      forUnbracedBodyDoFirst(that);
-      if (prune(that)) return null;
-      for (int i = 0; i < that.getStatements().length; i++) that.getStatements()[i].visit(this); 
-      return forUnbracedBodyOnly(that);
-    }
-    public Void forParenthesizedExpressionList(ParenthesizedExpressionList that) {
-      forParenthesizedExpressionListDoFirst(that);
-      if (prune(that)) return null;
-      for (int i = 0; i < that.getExpressions().length; i++) that.getExpressions()[i].visit(this);
-      return forParenthesizedExpressionListOnly(that);
-    }
-    public Void forUnparenthesizedExpressionList(UnparenthesizedExpressionList that) {
-      forUnparenthesizedExpressionListDoFirst(that);
-      if (prune(that)) return null;
-      for (int i = 0; i < that.getExpressions().length; i++) that.getExpressions()[i].visit(this); 
-      return forUnparenthesizedExpressionListOnly(that);
-    }
-    public Void forDimensionExpressionList(DimensionExpressionList that) {
-      forDimensionExpressionListDoFirst(that);
-      if (prune(that)) return null;
-      for (int i = 0; i < that.getExpressions().length; i++) that.getExpressions()[i].visit(this); 
-      return forDimensionExpressionListOnly(that); }  
-    public Void forEmptyForCondition(EmptyForCondition that) {
-      forEmptyForConditionDoFirst(that);
-      if (prune(that)) return null; return forEmptyForConditionOnly(that);
-    }
-    /** This method is called by default from cases that do not override forCASEDoFirst. */
-    protected Void defaultDoFirst(JExpressionIF that) { return null; }
-    /** This method is called by default from cases that do not override forCASEOnly. */
-    protected Void defaultCase(JExpressionIF that) { return null; } 
-    protected boolean prune(JExpressionIF that) { return true; }
+  
+  public Void forBracedBody(BracedBody that) { 
+    forBracedBodyDoFirst(that);
+    if (prune(that)) return null;
+    for (int i = 0; i < that.getStatements().length; i++) that.getStatements()[i].visit(this); 
+    return forBracedBodyOnly(that);
+  }
+  public Void forUnbracedBody(UnbracedBody that) { 
+    forUnbracedBodyDoFirst(that);
+    if (prune(that)) return null;
+    for (int i = 0; i < that.getStatements().length; i++) that.getStatements()[i].visit(this); 
+    return forUnbracedBodyOnly(that);
+  }
+  public Void forParenthesizedExpressionList(ParenthesizedExpressionList that) { 
+    forParenthesizedExpressionListDoFirst(that);
+    if (prune(that)) return null;
+    for (int i = 0; i < that.getExpressions().length; i++) that.getExpressions()[i].visit(this);
+    return forParenthesizedExpressionListOnly(that);
+  }
+  public Void forUnparenthesizedExpressionList(UnparenthesizedExpressionList that) { 
+    forUnparenthesizedExpressionListDoFirst(that);
+    if (prune(that)) return null;
+    for (int i = 0; i < that.getExpressions().length; i++) that.getExpressions()[i].visit(this); 
+    return forUnparenthesizedExpressionListOnly(that);
+  }
+  public Void forDimensionExpressionList(DimensionExpressionList that) { 
+    forDimensionExpressionListDoFirst(that);
+    if (prune(that)) return null;
+    for (int i = 0; i < that.getExpressions().length; i++) that.getExpressions()[i].visit(this); 
+    return forDimensionExpressionListOnly(that); }  
+  public Void forEmptyForCondition(EmptyForCondition that) { 
+    forEmptyForConditionDoFirst(that);
+    if (prune(that)) return null; 
+    return forEmptyForConditionOnly(that);
+  }
+  /** This method is called by default from cases that do not override forCASEDoFirst. */
+  protected Void defaultDoFirst(JExpressionIF that) { return null; }
+  /** This method is called by default from cases that do not override forCASEOnly. */
+  protected Void defaultCase(JExpressionIF that) { return null; } 
+  protected boolean prune(JExpressionIF that) { return true; }
 }

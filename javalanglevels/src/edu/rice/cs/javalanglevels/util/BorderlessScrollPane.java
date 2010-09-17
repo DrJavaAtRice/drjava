@@ -39,12 +39,11 @@ package edu.rice.cs.javalanglevels.util;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
-/**
- * A JScrollPane without a traditional Swing border.  Uses its own
- * EtchedBorder instead, which improves the appearance of nested panes
- * on Mac OS X.
- * @version $Id$
- */
+/** A JScrollPane without a traditional Swing border.  Uses its own
+  * EtchedBorder instead, which improves the appearance of nested panes
+  * on Mac OS X.
+  * @version $Id$
+  */
 public class BorderlessScrollPane extends JScrollPane {
   /** The default border for a "borderless" scroll pane.
    */
@@ -53,19 +52,19 @@ public class BorderlessScrollPane extends JScrollPane {
   // note, I can't think of a way to guarantee superclass behavior without
   // overriding each superclass constructor and then calling setBorder().
   
-  public BorderlessScrollPane() {
+  public BorderlessScrollPane() { 
     super();
     setBorder(DEFAULT);
   }
-  public BorderlessScrollPane(Component view) {
+  public BorderlessScrollPane(Component view) { 
     super(view);
     setBorder(DEFAULT);
   }
-  public BorderlessScrollPane(Component view, int vsbPolicy, int hsbPolicy) {
+  public BorderlessScrollPane(Component view, int vsbPolicy, int hsbPolicy) { 
     super(view,vsbPolicy,hsbPolicy);
     setBorder(DEFAULT);
   }
-  public BorderlessScrollPane(int vsbPolicy, int hsbPolicy) {
+  public BorderlessScrollPane(int vsbPolicy, int hsbPolicy) { 
     super(vsbPolicy,hsbPolicy);
     setBorder(DEFAULT);
   }

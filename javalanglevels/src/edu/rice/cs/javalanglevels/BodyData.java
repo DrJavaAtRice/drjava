@@ -41,26 +41,17 @@ import java.util.*;
 
 import junit.framework.TestCase;
 
-/**
- * Represents the data for a given method or block.
- */
-public abstract class BodyData extends Data{
+/** Abstract class corresponding to a method or block.  BodyData ::= MethodData | BlockData */
+public abstract class BodyData extends Data {
   
-  public BodyData(Data outerData) {
-    super(outerData);
-  }
+  public BodyData(Data outerData) { super(outerData); }
   
   /** Return the enclosing SymbolData, corresponding to the enclosing class.
     * Note-this may be several layers up the tree.
     */
-  public SymbolData getSymbolData() {
-    return _outerData.getSymbolData();//_enclosingData.get(0).getSymbolData();
-  }
+  public SymbolData getSymbolData() { return _outerData.getSymbolData(); }
   
-  /**
-   * Will return this, if it is a method data, or the enclosing method
-   * data if this is a block data.
-   */
+  /** Will return this, if it is a method data, or the enclosing method data if this is a block data. */
   public abstract MethodData getMethodData();
   
   /** True if this is a method data. */
@@ -75,12 +66,8 @@ public abstract class BodyData extends Data{
     private SymbolData _sd1;
     private SymbolData _sd2;
         
-    public BodyDataTest() {
-      this("");
-    }
-    public BodyDataTest(String name) {
-      super(name);
-    }
+    public BodyDataTest() { this(""); }
+    public BodyDataTest(String name) { super(name); }
     
     public void testGetThis() {
       //getThis should be able to go up the tree correctly.

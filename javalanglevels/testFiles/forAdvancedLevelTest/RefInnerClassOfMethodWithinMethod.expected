@@ -4,16 +4,11 @@
 class RefInnerClassOfMethodWithinMethod {
   
   void myMethod() {
-    class MyInnerClass {
-    
-    }
+    class MyInnerClass { }
 
     MyInnerClass c;
     
-
   }
-    
-
 }
 
     

@@ -56,18 +56,21 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     */
   public FullJavaVisitor(File file, 
                          String packageName, 
+                         String enclosingClassName,
                          LinkedList<String> importedFiles, 
                          LinkedList<String> importedPackages,
-                         LinkedList<String> classNamesInThisFile, 
-                         Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
-    super(file, packageName, importedFiles, importedPackages, classNamesInThisFile, continuations);
+                         HashSet<String> classesInThisFile, 
+                         Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations,
+                         LinkedList<Command> fixUps) {
+    super(file, packageName, enclosingClassName, importedFiles, importedPackages, classesInThisFile, continuations, fixUps);
   }
   
   /** This constructor is called when testing.  It initializes all of the static fields of LanguageLevelVisitor. */
   public FullJavaVisitor(File file) {
     this(file, 
          new LinkedList<Pair<String, JExpressionIF>>(),
-         new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+         new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+         new LinkedList<Command>(),
          new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>());
   }
   
@@ -80,17 +83,30 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     */
   public FullJavaVisitor(File file, 
                          LinkedList<Pair<String, JExpressionIF>> errors, 
-                         Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations,
+                         Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations,
+                         LinkedList<Command> fixUps,
                          LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visitedFiles) {
-    super(file, 
-          "", 
-          new LinkedList<String>(), 
-          new LinkedList<String>(), 
-          new LinkedList<String>(), 
-          continuations);
+    this(file, new LinkedList<String>(), errors, continuations, fixUps, visitedFiles);
+  }
+
+  /** This constructor is called from LanguageLevelConverter when it is instantiating a new
+    * FullJavaVisitor to visit a new file.  Package is set to "" by default.
+    * @param file  The File corresponding to the source file we are visiting
+    * @param importedPackages The list of strings describing the imported packages for this file
+    * @param errors  The list of errors that have been encountered so far.
+    * @param continuations  The table of classes we have encountered but still need to resolve
+    * @param visitedFiles  The list of files we have visited
+    */
+  public FullJavaVisitor(File file,
+                         LinkedList<String> importedPackages,
+                         LinkedList<Pair<String, JExpressionIF>> errors, 
+                         Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations,
+                         LinkedList<Command> fixUps,
+                         LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visitedFiles) {
+    super(file, "", null, new LinkedList<String>(), importedPackages, new HashSet<String>(), continuations, fixUps);
     this.errors = errors;
     this.visitedFiles= visitedFiles;//new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();
-    _hierarchy = new Hashtable<String, TypeDefBase>();//hierarchy;
+//    _hierarchy = new Hashtable<String, TypeDefBase>();//hierarchy;
   }
 
   /** At the FullJava Level, there is no code augmentation.  If we are working with a class that has no constructor,
@@ -108,20 +124,20 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     // if sd already has a constructor, just return.
     boolean hasOtherConstructor = sd.hasMethod(name);
     if (hasOtherConstructor) {
-          LanguageLevelConverter._newSDs.remove(sd); //this won't do anything if sd is not in _newSDs.
-          System.err.println(sd + " removed from _newSDs.  _newSDs = " + LanguageLevelConverter._newSDs);
+          LanguageLevelConverter._newSDs.remove(sd); // this won't do anything if sd is not in _newSDs.
+//          System.err.println(sd + " removed from _newSDs.  _newSDs = " + LanguageLevelConverter._newSDs);
           return;
     }
     
     // otherwise, it doesn't have a constructor, so let's add it!
     MethodData md = MethodData.make(name,
-                                   new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}), 
-                                   new TypeParameter[0], 
-                                   sd, 
-                                   new VariableData[0], // No Parameters
-                                   new String[0], 
-                                   sd,
-                                   null);
+                                    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}), 
+                                    new TypeParameter[0], 
+                                    sd, 
+                                    new VariableData[0], // No Parameters
+                                    new String[0], 
+                                    sd,
+                                    null);
 
     addGeneratedMethod(sd, md);
     LanguageLevelConverter._newSDs.remove(sd); //this won't do anything if sd is not in _newSDs.
@@ -135,13 +151,19 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     * @param that  The AST Node for the inner class def
     * @param data  The Data that encloses this inner class.  This is a Data because the inner class can be in a class 
     *              or a method.
+    * @param relName The relative name of the inner class including no qualifiers
     * @param name  The qualified name of the inner class including the qualified name of the enclosing data followed by 
     *              a $.  For local classes, we append a number after the $ corresponding to the order that the local 
     *              class appears in the enclosing class and then put the name of the class.  For anonymous classes, we 
     *              only put a number after the $.  For example, if class A has a method B that has a local class C, then
     *              name should be "A$1C".
     */
-  protected void handleInnerClassDef(InnerClassDef that, Data data, String name) {
+  protected void handleInnerClassDef(InnerClassDef that, Data data, String relName, String name) {
+    System.err.println("Processing InnerClassDef for " + name + " defined in " + data.getName());
+    
+    assert (data instanceof SymbolData) || (data instanceof MethodData);
+//    assert (data instanceof SymbolData) ? data.getName().equals(_enclosingClassName) : true;
+    
     forInnerClassDefDoFirst(that);
     if (prune(that)) return;
 
@@ -152,13 +174,14 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     that.getSuperclass().visit(this);  // formerly commented out.  Why?
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
         
-    SymbolData sd = defineInnerSymbolData(that, name, data);
-    if (sd != null) { //we have a symbol data to work with, so visit the body and augment
-      that.getBody().visit(new ClassBodyFullJavaVisitor(sd, "", _file, _package, _importedFiles,
-                                                        _importedPackages, _classNamesInThisFile, continuations));
+    SymbolData sd = defineInnerSymbolData(that, relName, name, data);
+    if (sd != null) { // We have a symbol data to work with, so visit the body and augment
+
+      that.getBody().visit(new ClassBodyFullJavaVisitor(sd, sd.getName(), _file, _package, _importedFiles,
+                                                        _importedPackages, _classesInThisFile, continuations, fixUps));
     }
    
-    // Inner classes are not put into _classesToBeParsed since they are parsed whenever their outer classes are parsed.
+    // Inner classes are not put into _classesInThisFile since they are parsed whenever their outer classes are parsed.
 
     forInnerClassDefOnly(that);
   }
@@ -168,7 +191,10 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     * and InterfaceBodyIntermediateVisitor but needs the correct SymbolData so we pass it in.  This method is tested
     * in those files.
     */
-  protected void handleInnerInterfaceDef(InnerInterfaceDef that, Data data, String name) {
+  protected void handleInnerInterfaceDef(InnerInterfaceDef that, Data data, String relName, String name) {
+    System.err.println("Processing InnerInterfaceDef for " + name);
+    assert (data instanceof SymbolData) || (data instanceof MethodData);
+    
     forInnerInterfaceDefDoFirst(that);
     if (prune(that)) return;
     
@@ -180,10 +206,10 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
     
-    SymbolData sd = defineInnerSymbolData(that, name, data);
+    SymbolData sd = defineInnerSymbolData(that, relName, name, data);
     if (sd != null) {
       that.getBody().visit(new InterfaceBodyFullJavaVisitor(sd, _file, _package, _importedFiles, _importedPackages,
-                                                            _classNamesInThisFile, continuations));
+                                                            _classesInThisFile, continuations, fixUps));
     }
 
     forInnerInterfaceDefOnly(that);
@@ -240,73 +266,33 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
   /** Process PrimitiveType. */
   public Void forPrimitiveTypeDoFirst(PrimitiveType that) { return super.forPrimitiveTypeDoFirst(that); }
 
-  /* Process TryCatchStatement. */
-  public Void forTryCatchStatementDoFirst(TryCatchStatement that) {
-    return super.forTryCatchStatementDoFirst(that);
-  }
+//  /* Process TryCatchStatement. */
+//  public Void forTryCatchStatementDoFirst(TryCatchStatement that) {
+//    return super.forTryCatchStatementDoFirst(that);
+//  }
   
   /** Check to see if the specified className is a class defined in the current file.
-    * If it is, it will be stored in _classNamesInThisFile.
+    * If it is, it will be stored in _classesInThisFile.
     */
   private boolean _isClassInCurrentFile(String className) {
-    Iterator<String> iter = _classNamesInThisFile.iterator();
+    Iterator<String> iter = _classesInThisFile.iterator();
     while (iter.hasNext()) {
       String s = iter.next();
-      if (s.equals(className) || s.endsWith("." + className)) return true;
+      if (s.equals(className) || s.endsWith('.' + className)) return true;
     }
     return false;   
   }
   
-  /** Convert the specified array of FormalParameters into an array of VariableDatas which is then returned.  For each
-    * parameter, try to resolve its type.  A type can be a regular top level type, an inner class type, or something we
-    * haven't seen yet (i.e., a continuation).
-    * @param fps  The formal parameters we are trying to resolve.
-    * @param d  The data these formal parameters belong to.
-    * @return  An array of VariableData corresponding to the formal parameters.
+  /** This overriding is a hack.  The parameters to a static method can be referenced within the method itself,
+    *  even though they are not declared to be static fields.  Making them static has no effect on any other processing.
     */
-  protected VariableData[] formalParameters2VariableData(FormalParameter[] fps, Data d) {
-    VariableData[] varData = new VariableData[fps.length];
-    VariableDeclarator vd;
-    String[] mav;
-    
-    // This is something of a hack.  The parameters to a static method can be referenced within the method itself,
-    // even though they are not declared to be static fields.  Making them static has no effect on any other processing.
-    if (d instanceof MethodData && d.hasModifier("static"))
-      mav = new String[] {"final", "static"};
-    else
-      mav = new String[] {"final"};
-    
-    for (int i = 0; i < varData.length; i++) {
-      vd = fps[i].getDeclarator();
-      String name = vd.getName().getText();
-      SymbolData type = getSymbolData(vd.getType().getName(), vd.getType().getSourceInfo());
-      
-      if (type == null) {
-        //see if this is a partially qualified field reference
-        type = d.getInnerClassOrInterface(vd.getType().getName());
-      }
-      
-      if (type == null) {
-        //if we still couldn't resolve sd, create a continuation for it.
-        String typeName = d.getSymbolData().getName() + "." + vd.getType().getName();
-        type = new SymbolData(typeName);
-        d.getSymbolData().addInnerClass(type);
-        type.setOuterData(d.getSymbolData());
-//        System.err.println("Creating continuation for " + typeName + " at FJV:232");
-        continuations.put(typeName, new Pair<SourceInfo, LanguageLevelVisitor>(vd.getType().getSourceInfo(), this));
-      }
-      
-      varData[i] = 
-        new VariableData(name, new ModifiersAndVisibility(SourceInfo.NO_INFO, mav), type, true, d);
-      varData[i].gotValue();
-
-    }
-    return varData;
+  protected String[] getFormalParameterMav(Data d) { 
+    return (d.hasModifier("static")) ? new String[] {"static"} : new String[] { };
   }
   
   /** Use the doFirst method to make sure there aren't any errors with the declaration.  Then, use defineSymbolData to 
     * create the appropriate symbol data, and then visit the class body.
-    * Once the ClassDef has been handled, remove the class from _classesToBeParsed so we know it's been taken care of.
+    * Once the ClassDef has been handled, remove the class from _classesInThisFile so we know it's been taken care of.
     * @param that  The ClassDef being handled.
     * TODO: refactor with same method in IntermediateVisitor; almost identical.
     */
@@ -315,11 +301,18 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     if (prune(that)) return null;
 
     String className = getQualifiedClassName(that.getName().getText());
-    SymbolData sd = defineSymbolData(that, className); 
+    System.err.println("Processing class " + className);
+    SymbolData sd = defineSymbolData(that, className);
+    assert getQualifiedSymbolData(className, SourceInfo.NO_INFO, false) != null;
+//    _enclosingClassName = className;
+//    System.err.println("Setting _enclosingClassName to " + className);
     
     that.getMav().visit(this);
     that.getName().visit(this);
     that.getSuperclass().visit(this);  // formerly commented out.  Why?
+    
+    
+    if (sd != null) identifyInnerClasses(that);
     
     // Process fields of this ClassDef (the get method is misnamed!)
     for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
@@ -328,26 +321,10 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     
     if (sd != null) {
       that.getBody().visit(new ClassBodyFullJavaVisitor(sd, className, _file, _package, _importedFiles, 
-                                                        _importedPackages, _classNamesInThisFile, continuations));
+                                                        _importedPackages, _classesInThisFile, continuations, fixUps));
     }
     forClassDefOnly(that);
-    _classesToBeParsed.remove(className);
     return null;
-  }
-  
-  /** The top level should call forBracedBody which calls ... */
-  public Void forBracedBodyDoFirst(BracedBody that) {
-    for (BodyItemI bi: that.getStatements()) {
-      if (bi instanceof TypeDefBase) {
-        TypeDefBase type = (TypeDefBase) bi;
-        String rawClassName = type.getName().getText();
-        _log.log("Adding " + rawClassName + " to _innerClassesToBeParsed inside " + that + "\n");
-//        System.err.println("Adding " + rawClassName + " to _innerClassesToBeParsed inside " + that + "\n");
-        _innerClassesToBeParsed.add(_enclosingClassName + "." + rawClassName);
-      }
-    }
-//    System.err.println("_innerClassesToBeParsed = " + _innerClassesToBeParsed);
-    return super.forBracedBodyDoFirst(that);
   }
 
   /** This is a noop, because we do not do code augmentation at the Advanced Level. */
@@ -361,7 +338,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
    
   /** Create a SymbolData corresponding to this interface and add it appropriately.
     * Then visit the body to handle anything defined inside the interface.
-    * Once the interface has been resolved, remove it from _classesToBeParsed.
+    * Once the interface has been resolved, remove it from _classesInThisFile.
     * TODO: refactor with same method in IntermediateVisitor; they appear identical
     */
   public Void forInterfaceDef(InterfaceDef that) {
@@ -370,8 +347,8 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
 
     String className = getQualifiedClassName(that.getName().getText());
 //    if (className.equals("listFW.IList")) System.err.println("Attempting to define symbol " + className);
-    SymbolData sd = defineSymbolData(that, className);
-    
+    SymbolData sd = defineSymbolData(that, className);  //TODO: should this statement follow interface processing in 345
+  
     that.getMav().visit(this);
     that.getName().visit(this); 
     
@@ -382,57 +359,25 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     
     if (sd != null) {
       sd.setInterface(true);
+      identifyInnerClasses(that);  // inner interfaces??
       that.getBody().visit(new InterfaceBodyFullJavaVisitor(sd, _file, _package, _importedFiles, _importedPackages,
-                                                            _classNamesInThisFile, continuations));
+                                                            _classesInThisFile, continuations, fixUps));
     }
     
     forInterfaceDefOnly(that);
-    _classesToBeParsed.remove(className);
+    _classesInThisFile.remove(className);
     return null;
-  }
-
-  /** Do the work that is shared between SimpleAnonymousClassInstantiations and ComplexAnonymousClassInstantiations.
-    * Do not generate automatic accessors for the anonymous class--this will be done in type checker pass.
-    * @param that  The AnonymousClassInstantiation being visited
-    * @param enclosing  The enclosing Data
-    * @param superC  The super class being instantiated--i.e. new A() { ...}, would have a super class of A.
-    */
-  public void anonymousClassInstantiationHelper(AnonymousClassInstantiation that, Data enclosing, SymbolData superC) {
-    that.getArguments().visit(this); 
-    String anonName = getQualifiedClassName(enclosing.getSymbolData().getName()) + "$" + 
-      enclosing.getSymbolData().preincrementAnonymousInnerClassNum();
-    //Get the SymbolData that will correspond to this anonymous class
-    SymbolData sd = new SymbolData(anonName);
-    enclosing.addInnerClass(sd);
-    sd.setOuterData(enclosing);
-    
-    if (superC != null && ! superC.isInterface()) {
-      sd.setSuperClass(superC); // the super class is what was passed in
-    }
-    sd.setPackage(_package);
-    
-    //visit the body to get it all nice and resolved.
-    that.getBody().visit(new ClassBodyFullJavaVisitor(sd, anonName, _file, _package, _importedFiles, _importedPackages, 
-                                                      _classNamesInThisFile, continuations));
-
   }
   
   /** Look up the super type of this class instantiation and add it to the symbol table.  Visit the body of the class
     * instantiation.  All handling of this as an anonymous inner class (i.e. adding it to the enclosing SD's list of
     * inner classes, creating a symbol data for the anonyomous inner class, etc) is handled in the TypeChecker pass.  
     * This is because no one will depend on that symbolData until we create it.
-    * @param that  The SimpleAnonymousClassInstantiation being processed.
+    * @param that       The SimpleAnonymousClassInstantiation being processed.
+    * @param enclosing  The SymbolData of the enclosing class.
     */
-  public void simpleAnonymousClassInstantiationHelper(SimpleAnonymousClassInstantiation that, Data data) {
-    forSimpleAnonymousClassInstantiationDoFirst(that);
-    if (prune(that)) return;
-
-    //resolve the super class and make sure it will be in the SymbolTable.
-    SymbolData superC = getSymbolData(that.getType().getName(), that.getSourceInfo());
-    
-    anonymousClassInstantiationHelper(that, data, superC);
-
-    forSimpleAnonymousClassInstantiationOnly(that);
+  public void simpleAnonymousClassInstantiationHelper(SimpleAnonymousClassInstantiation that, SymbolData enclosing) {
+    /* Nested inner computation (e.g., new E().new W()) breaks conformity checking.  So we suppress it. */
   }
   
   /** Do not resolve the super class type of this instantiation, because it will have already been resolved (it
@@ -440,35 +385,26 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     * classes should have also been resolved).
     * Visit the body of the class instantiation.  
     * @param that  The ComplexAnonymousClassInstantiation being processed.
-    * @param data  The enclosing data where this was sreferenced from.
+    * @param enclosing  The SymbolData of the enclosing class.
     */
-  public void complexAnonymousClassInstantiationHelper(ComplexAnonymousClassInstantiation that, Data data) {
-    forComplexAnonymousClassInstantiationDoFirst(that);
-    if (prune(that)) return;
-    
-    //visit the enclosing 
-    that.getEnclosing().visit(this);
-    
-    // no need to resolve the super class of the type being instantiated, because it is a complex type, so its enclosing 
-    // data should get added to the symbolTable along with it wherever we resolved its enclosing data.
-    
-    //originally, make super class null.  This will be updated in the TypeChecker pass.
-    anonymousClassInstantiationHelper(that, data, null);
-
-    
-    forComplexAnonymousClassInstantiationOnly(that);
+  public void complexAnonymousClassInstantiationHelper(ComplexAnonymousClassInstantiation that, SymbolData enclosing) {
+    /* Nested inner computation (e.g., new E().new W()) breaks conformity checking.  So we suppress it. */
   }
   
   /* Resolve the ArrayType by looking it up. */  
   public Void forArrayType(ArrayType that) {
     forArrayTypeDoFirst(that);
     if (prune(that)) return null;
+    System.err.println("###### getSymbolData on " + that.getName() + " SHOULD BE ARRAY NAME");
     getSymbolData(that.getName(), that.getSourceInfo());
     return null;
   }
   
-  /** Test the methods defined in the enclosing class.
-    * There is a test method corresponding to almost every method in the above class.
+  /** Test the methods defined in the enclosing class.  There is a test method corresponding to almost every method in 
+    * the above class.
+    * TODO:  WHICH IS WRONG!  Many of the methods in FullJavaVisitor are invoked at the level of ClassBodyFullJavaVisitor
+    * and BodyBodyFullJavaVisitor.  Moreover, they rely on overrides that are present only at that subclass level.  Move
+    * the tests that relate to subclasses to the appropriate subclasses!
     */
   public static class FullJavaVisitorTest extends TestCase {
     
@@ -481,6 +417,8 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     private SymbolData _sd4;
     private SymbolData _sd5;
     private SymbolData _sd6;
+    private SymbolData _objectSD;
+    
     private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
     private ModifiersAndVisibility _protectedMav = 
       new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
@@ -503,22 +441,38 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       LanguageLevelConverter._newSDs.clear();
       LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.make(new File("lib/buildlib/junit.jar")));
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
-      _hierarchy = new Hashtable<String, TypeDefBase>();
+//      _hierarchy = new Hashtable<String, TypeDefBase>();
       _fv = new FullJavaVisitor(new File(""), 
                                 errors,
-                                continuations, 
+                                continuations,
+                                new LinkedList<Command>(),
                                 new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>());
-      _fv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
-      _fv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
-      _fv._resetNonStaticFields();
+      _fv._classesInThisFile = new HashSet<String>();
+      _fv.continuations = new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>();
       _fv._importedPackages.addFirst("java.lang");
       _errorAdded = false;
+      
       _sd1 = new SymbolData("i.like.monkey");
       _sd2 = new SymbolData("i.like.giraffe");
       _sd3 = new SymbolData("zebra");
       _sd4 = new SymbolData("u.like.emu");
       _sd5 = new SymbolData("");
       _sd6 = new SymbolData("cebu");
+      
+      _sd1.setIsContinuation(false);
+      _sd1.setInterface(false);
+      _sd1.setPackage("i.like");
+      _sd1.setTypeParameters(new TypeParameter[0]);
+      _sd1.setInterfaces(new ArrayList<SymbolData>()); 
+      
+      _objectSD = LanguageLevelConverter.symbolTable.get("java.lang.Object");
+      _sd1.setSuperClass(_objectSD);
+      
+      _fv._enclosingClassName = "i.like.monkey";
+      _fv.symbolTable.put("i.like.monkey", _sd1);
+
+      _sd1.setSuperClass(_objectSD);
+      _errorAdded = false;  // static field of this.  TODO: fix this!
     }
     
     public void testForModifiersAndVisibilityDoFirst() {
@@ -564,6 +518,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     }
     
     public void testForClassDefDoFirst() {
+      System.err.println("*** Starting testForClassDefDoFirst");
       // check an example that works
       ClassDef cd0 = new ClassDef(SourceInfo.NO_INFO, _publicMav,
                                   new Word(SourceInfo.NO_INFO, "Lisa"),
@@ -594,6 +549,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
                                  
       _fv.forClassDefDoFirst(cd2);
       assertEquals("there should still be 0 errors", 0, errors.size());
+      System.err.println("Ending testForClassDefDoFirst");
     }
     
     public void testForFormalParameterDoFirst() {
@@ -717,32 +673,29 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     }
     
     public void testForArrayType() {
-      LanguageLevelConverter.symbolTable.put("name", new SymbolData("name"));
+      System.err.println("**** Starting testForArrayType");
+      SymbolData sd = new SymbolData("Name");
+      sd.setIsContinuation(false);
+      sd.setInterface(false);
+      sd.setPackage("");
+      sd.setTypeParameters(new TypeParameter[0]);
+      sd.setInterfaces(new ArrayList<SymbolData>()); 
+      sd.setSuperClass(LanguageLevelConverter.symbolTable.get("java.lang.Object"));
+      LanguageLevelConverter.symbolTable.put("Name", sd);
+                       
       ArrayInitializer ai = new ArrayInitializer(SourceInfo.NO_INFO, new VariableInitializerI[0]);
-      TypeVariable tv = new TypeVariable(SourceInfo.NO_INFO, "name");
-      ArrayType at = new ArrayType(SourceInfo.NO_INFO, "name[]", tv);
+      TypeVariable tv = new TypeVariable(SourceInfo.NO_INFO, "Name");
+      ArrayType at = new ArrayType(SourceInfo.NO_INFO, "Name[]", tv);
       
       at.visit(_fv);
       assertEquals("There should be no errors", 0, errors.size());
-      SymbolData sd = LanguageLevelConverter.symbolTable.get("name[]");
-      assertNotNull("sd should not be null", sd);
-      ArrayData ad = (ArrayData) sd;
-      assertEquals("ad should have an inner sd of name name:", "name", ad.getElementType().getName());
-      
-      ai = new ArrayInitializer(SourceInfo.NO_INFO, new VariableInitializerI[0]);
-      tv = new TypeVariable(SourceInfo.NO_INFO, "String");
-      at = new ArrayType(SourceInfo.NO_INFO, "String[]", tv);
-      
-      VariableDeclarator vd = 
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, at, new Word(SourceInfo.NO_INFO, "myArray"));
-      VariableDeclaration vdecl = 
-        new VariableDeclaration(SourceInfo.NO_INFO, _publicMav, new VariableDeclarator[] {vd});
-      vdecl.visit(_fv);
-      SymbolData bob = LanguageLevelConverter.symbolTable.get("java.lang.String[]");
-      assertNotNull("bob should not be null", bob);
+      SymbolData asd = LanguageLevelConverter.symbolTable.get("Name[]");
+      assertNotNull("asd should not be null", asd);
+      ArrayData ad = (ArrayData) asd;
+      assertEquals("ad should have an elt sd of name 'Name'", "Name", ad.getElementType().getName());
       
       //Test a multi-dimensional array
-      tv = new TypeVariable(SourceInfo.NO_INFO, "Object");
+      tv = new TypeVariable(SourceInfo.NO_INFO, "java.lang.Object");
       at = new ArrayType(SourceInfo.NO_INFO, "Object[]", tv);
       ArrayType at2 = new ArrayType(SourceInfo.NO_INFO, "Object[][]", at);
 
@@ -755,61 +708,62 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
                     LanguageLevelConverter.symbolTable.get("java.lang.Object[][]"));
     }
     
-    public void xtestCreateConstructor() {
-      SymbolData sd = 
-        new SymbolData("ClassName", _publicMav, new TypeParameter[0], null, new LinkedList<SymbolData>(), null);
-      VariableData v1 = new VariableData("i", _publicMav, SymbolData.INT_TYPE, false, sd);
-      VariableData v2 = new VariableData("j", _publicMav, SymbolData.CHAR_TYPE, false, sd);
-      VariableData v3 = new VariableData("var", _publicMav, SymbolData.DOUBLE_TYPE, false, sd);
-      sd.addVar(v1);
-      sd.addVar(v2);
-      sd.setSuperClass(_sd1);
-      
-      MethodData md = new MethodData("ClassName", _publicMav, new TypeParameter[0], sd, 
-                                   new VariableData[0], 
-                                   new String[0], 
-                                   sd,
-                                   null);
-      md.addVars(md.getParams());
-      _fv.createConstructor(sd);
-      
-      assertEquals("sd should have 1 method: its own constructor", md, sd.getMethods().getFirst());
-      
-      // since this is the only constructor in the symbol data, all the fields should be assigned to have a value after 
-      // visiting sd.
-      v1 = new VariableData("i", _publicMav, SymbolData.INT_TYPE, true, sd);
-      v2 = new VariableData("j", _publicMav, SymbolData.CHAR_TYPE, true, sd);
-
-      
-      //now test a subclass of sd:
-      SymbolData subSd = 
-        new SymbolData("Subclass",_publicMav, new TypeParameter[0], null, new LinkedList<SymbolData>(), null);
-      subSd.addVar(v3);
-      subSd.setSuperClass(sd);
-
-      
-      VariableData v1Param = new VariableData("super_i", _packageMav, SymbolData.INT_TYPE, true, null);
-      VariableData v2Param = new VariableData("super_j", _packageMav, SymbolData.CHAR_TYPE, true, null);
-      VariableData[] vars = {v1Param, v2Param, v3};
-      MethodData md2 = new MethodData("Subclass", _publicMav, new TypeParameter[0], subSd,
-                                      new VariableData[0], new String[0], subSd, null);
-      md2.addVars(md2.getParams());
-                
-      _fv.createConstructor(subSd);
-      v1Param.setEnclosingData(subSd.getMethods().getFirst());
-      v2Param.setEnclosingData(subSd.getMethods().getFirst());
-      assertEquals("subSd should have 1 method: its own constructor.", md2, subSd.getMethods().getFirst());
-    }
-    
-    public void xtest_getFieldAccessorName() {
-      // This may change in the future if we change getFieldAccessorName
-      assertEquals("Should correctly convert from lower case to upper case", "name", _fv.getFieldAccessorName("name"));
-    }
+    // TODO: resurrect a test of this method
+//    public void testCreateConstructor() {
+//      SymbolData sd = 
+//        new SymbolData("ClassName", _publicMav, new TypeParameter[0], null, new LinkedList<SymbolData>(), null);
+//      VariableData v1 = new VariableData("i", _publicMav, SymbolData.INT_TYPE, false, sd);
+//      VariableData v2 = new VariableData("j", _publicMav, SymbolData.CHAR_TYPE, false, sd);
+//      VariableData v3 = new VariableData("var", _publicMav, SymbolData.DOUBLE_TYPE, false, sd);
+//      sd.addVar(v1);
+//      sd.addVar(v2);
+//      sd.setSuperClass(_sd1);
+//      
+//      MethodData md = new MethodData("ClassName", _publicMav, new TypeParameter[0], sd, 
+//                                   new VariableData[0], 
+//                                   new String[0], 
+//                                   sd,
+//                                   null);
+//      md.addVars(md.getParams());
+//      _fv.createConstructor(sd);
+//      
+//      assertEquals("sd should have 1 method: its own constructor", md, sd.getMethods().getFirst());
+//      
+//      // since this is the only constructor in the symbol data, all the fields should be assigned to have a value after 
+//      // visiting sd.
+//      v1 = new VariableData("i", _publicMav, SymbolData.INT_TYPE, true, sd);
+//      v2 = new VariableData("j", _publicMav, SymbolData.CHAR_TYPE, true, sd);
+//
+//      
+//      //now test a subclass of sd:
+//      SymbolData subSd = 
+//        new SymbolData("Subclass",_publicMav, new TypeParameter[0], null, new ArrayList<SymbolData>(), null);
+//      subSd.addVar(v3);
+//      subSd.setSuperClass(sd);
+//
+//      
+//      VariableData v1Param = new VariableData("super_i", _packageMav, SymbolData.INT_TYPE, true, null);
+//      VariableData v2Param = new VariableData("super_j", _packageMav, SymbolData.CHAR_TYPE, true, null);
+//      VariableData[] vars = {v1Param, v2Param, v3};
+//      MethodData md2 = new MethodData("Subclass", _publicMav, new TypeParameter[0], subSd,
+//                                      new VariableData[0], new String[0], subSd, null);
+//      md2.addVars(md2.getParams());
+//                
+//      _fv.createConstructor(subSd);
+//      v1Param.setEnclosingData(subSd.getMethods().getFirst());
+//      v2Param.setEnclosingData(subSd.getMethods().getFirst());
+//      assertEquals("subSd should have 1 method: its own constructor.", md2, subSd.getMethods().getFirst());
+//    }
+//    
+//    public void xtest_getFieldAccessorName() {
+//      // This may change in the future if we change getFieldAccessorName
+//      assertEquals("Should correctly convert from lower case to upper case", "name", _fv.getFieldAccessorName("name"));
+//    }
     
     //ToString, HashCode, and Equals should be no-ops.
     public void testCreateToString() {
       SymbolData sd = 
-        new SymbolData("ClassName", _publicMav, new TypeParameter[0], null, new LinkedList<SymbolData>(), null);
+        new SymbolData("ClassName", _publicMav, new TypeParameter[0], null, new ArrayList<SymbolData>(), null);
       _fv.createToString(sd);
       //should have been no-op
       assertEquals("sd should have no methods", 0, sd.getMethods().size());
@@ -817,7 +771,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     
     public void testCreateHashCode() {
       SymbolData sd = 
-        new SymbolData("ClassName", _publicMav, new TypeParameter[0], null, new LinkedList<SymbolData>(), null);      
+        new SymbolData("ClassName", _publicMav, new TypeParameter[0], null, new ArrayList<SymbolData>(), null);      
       _fv.createHashCode(sd);
       //should have been no-op
       assertEquals("sd should have 0 methods", 0, sd.getMethods().size());
@@ -825,20 +779,21 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     
     public void testCreateEquals() {
       SymbolData sd = 
-        new SymbolData("ClassName", _publicMav, new TypeParameter[0], null, new LinkedList<SymbolData>(), null);
+        new SymbolData("ClassName", _publicMav, new TypeParameter[0], null, new ArrayList<SymbolData>(), null);
       _fv.createEquals(sd);
       //should have been no-op
       assertEquals("sd should have 0 methods", 0, sd.getMethods().size());
     }
     
     public void testForClassDef() {
+      System.err.println("**** Starting testForClassDef");
       //check an example that's not abstract
       _fv._package = "myPackage";
       ClassDef cd0 = 
         new ClassDef(SourceInfo.NO_INFO, _packageMav, 
                      new Word(SourceInfo.NO_INFO, "Lisa"),
                      new TypeParameter[0], 
-                     new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), 
+                     new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
                      new ReferenceType[0], 
                      new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0])); 
       
@@ -922,7 +877,8 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       cd4.visit(_fv);
 
       assertEquals("There should still be 0 errors", 0, errors.size());
-      _fv._importedFiles.remove("junit.framework.TestCase");  
+      _fv._importedFiles.remove("junit.framework.TestCase"); 
+      System.err.println("**** Ending testForClassDef");
     }
     
     public void testForInterfaceDef() {
@@ -956,14 +912,14 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
                          new TypeParameter[0], 
                          new ReferenceType[] { new ClassOrInterfaceType(SourceInfo.NO_INFO, "id", new Type[0]) }, 
                          new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { amd2 }));
-      SymbolData sd = new SymbolData("id", _publicMav, new TypeParameter[0], new LinkedList<SymbolData>(), null);
+      SymbolData sd = new SymbolData("id", _publicMav, new TypeParameter[0], new ArrayList<SymbolData>(), null);
       sd.setIsContinuation(true);
       MethodData md = 
         new MethodData("myMethod", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[0], 
                        new String[0], sd, amd);
 
-      LinkedList<SymbolData> interfaces = new LinkedList<SymbolData>();
-      interfaces.addLast(sd);
+      ArrayList<SymbolData> interfaces = new ArrayList<SymbolData>();
+      interfaces.add(sd);
       SymbolData sd2 = new SymbolData("id2", _publicMav, new TypeParameter[0], interfaces, null);
       sd2.setIsContinuation(true);
       MethodData md2 = 
@@ -980,9 +936,11 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       assertEquals("Should return the same symbol datas:id2 ", sd2, LanguageLevelConverter.symbolTable.get("id2"));
     }
     
-    public void testHandleInnerClassDef() {      
-      SymbolData obj = new SymbolData("java.lang.Object");
-      LanguageLevelConverter.symbolTable.put("java.lang.Object", obj);
+    public void testHandleInnerClassDef() { 
+      System.err.println("**** Starting testHandleInnerClassDef");
+      // setUp has created a FullJavaVisitor which initializes the symbolTable
+      
+//      LanguageLevelConverter.symbolTable.put("java.lang.Object", _objectSD);
       InnerClassDef cd1 = 
         new InnerClassDef(SourceInfo.NO_INFO, 
                           _packageMav, 
@@ -998,44 +956,51 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
                           new TypeParameter[0], 
                           new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
                           new ReferenceType[0], 
-                          new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {cd1}));
+                          new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { cd1 }));
 
-      SymbolData outerData = new SymbolData("i.eat.potato");
-      SymbolData sd0 = 
-        new SymbolData(outerData.getName() + "$Lisa", _packageMav, new TypeParameter[0], obj, 
-                       new LinkedList<SymbolData>(), null); 
-      SymbolData sd1 = 
-        new SymbolData(outerData.getName() + "$Lisa$Bart", _packageMav, new TypeParameter[0], obj, 
-                       new LinkedList<SymbolData>(), null); 
-      
-      outerData.addInnerClass(sd0);
-      sd0.setOuterData(outerData);
+//      SymbolData outerData = new SymbolData("i.eat.potato");
+//      outerData.setIsContinuation(false);
+//      outerData.setSuperClass(_objectSD);
+                                         
+//      SymbolData sd0 = 
+//        new SymbolData(outerData.getName() + "$Lisa", _packageMav, new TypeParameter[0], _objectSD, 
+//                       new ArrayList<SymbolData>(), null); 
+//      SymbolData sd1 = 
+//        new SymbolData(outerData.getName() + "$Lisa$Bart", _packageMav, new TypeParameter[0], _objectSD, 
+//                       new ArrayList<SymbolData>(), null); 
+//      
+//      outerData.addInnerClass(sd0);
+//      sd0.setOuterData(outerData);
+//
+//      sd0.addInnerClass(sd1);
+//      sd1.setOuterData(sd0);
 
-      sd0.addInnerClass(sd1);
-      sd1.setOuterData(sd0);
-
-      sd0.setIsContinuation(true);
-      sd1.setIsContinuation(true);
-      
+//      sd0.setIsContinuation(true);
+//      sd1.setIsContinuation(true);      
             
-      LanguageLevelConverter.symbolTable.put(outerData.getName() + "$Lisa", sd0);
+//      LanguageLevelConverter.symbolTable.put(outerData.getName() + "$Lisa", sd0);
 
-      _fv.handleInnerClassDef(cd0, outerData, outerData.getName() + "$Lisa");
-
-      SymbolData sd = outerData.getInnerClassOrInterface("Lisa");
+      _fv.handleInnerClassDef(cd0, _sd1, "Lisa", _sd1.getName() + ".Lisa");                        
+                              
+      SymbolData sd0 = _sd1.getInnerClassOrInterface("Lisa");
       assertEquals("There should be no errors", 0, errors.size());
-      assertEquals("This symbolData should now have sd0 as an inner class", sd0, sd);
-      assertEquals("sd0 should have the correct outer data", outerData, sd0.getOuterData());
-      assertEquals("sd1 should have the correct outer data", sd0, sd1.getOuterData());
-      assertEquals("Sd should now have sd1 as an inner class", sd1, sd.getInnerClassOrInterface("Bart"));
-      
-      
+      assertNotNull("Lisa is inner class of i.like.monkey", sd0);
+      assertEquals("sd0 should have the correct outer data", _sd1, sd0.getOuterData());
       assertEquals("Lisa should have 0 methods", 0, sd0.getMethods().size());
+      assertNotNull("symbolTable contains fully qualified name for Lisa", 
+                    _fv.getQualifiedSymbolData("i.like.monkey.Lisa"));
+      
+      SymbolData sd1 = sd0.getInnerClassOrInterface("Bart");
+      assertEquals("There should be no errors", 0, errors.size());
+      assertNotNull("Bart is inner class of Lisa", sd1);
+      assertEquals("sd1 should have the correct outer data", sd0, sd1.getOuterData());
+      assertEquals("Bart should have 0 methods", 0, sd1.getMethods().size());
+      assertNotNull("symbolTable contains fully qualified name for Bart", 
+                    _fv.getQualifiedSymbolData("i.like.monkey.Lisa.Bart"));
+      System.err.println("**** Ending testHandleInnerClassDef");
     }
     
     public void xtestHandleInnerInterfaceDef() {
-      SymbolData obj = new SymbolData("java.lang.Object");
-      LanguageLevelConverter.symbolTable.put("java.lang.Object", obj);
       InnerInterfaceDef cd1 = 
         new InnerInterfaceDef(SourceInfo.NO_INFO, _packageMav, new Word(SourceInfo.NO_INFO, "Bart"),
                               new TypeParameter[0], new ReferenceType[0], 
@@ -1050,11 +1015,11 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
 
       
       SymbolData sd0 = 
-        new SymbolData(outerData.getName() + "$Lisa", _packageMav, new TypeParameter[0], new LinkedList<SymbolData>(), 
+        new SymbolData(outerData.getName() + "$Lisa", _packageMav, new TypeParameter[0], new ArrayList<SymbolData>(), 
                        null); 
       SymbolData sd1 = 
         new SymbolData(outerData.getName() + "$Lisa$Bart", _packageMav, new TypeParameter[0], 
-                       new LinkedList<SymbolData>(), null);
+                       new ArrayList<SymbolData>(), null);
       sd0.addInnerInterface(sd1);
       sd0.setIsContinuation(true);
       sd1.setIsContinuation(true);
@@ -1069,7 +1034,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       sd1.setIsContinuation(true);
 
       
-      _fv.handleInnerInterfaceDef(cd0, outerData, outerData.getName() + "$Lisa");
+      _fv.handleInnerInterfaceDef(cd0, outerData, "Lisa", outerData.getName() + "$Lisa");
 
       SymbolData sd = outerData.getInnerClassOrInterface("Lisa");
       
@@ -1175,10 +1140,12 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
                    "You cannot have two method parameters with the same name", errors.get(0).getFirst());
     }
     
+    /* NOTE: This is test excluded because the tested method is now a no-op. */
     public void xtestSimpleAnonymousClassInstantiationHelper() {
+      System.err.println("**** Starting testSimpleAnonymousClassInstantiationHelper");
       SimpleAnonymousClassInstantiation basic = 
         new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, 
-                                              new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), 
+                                              new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
                                               new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
                                               new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       
@@ -1186,19 +1153,20 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
      _fv._package = "i.like";
      _fv.simpleAnonymousClassInstantiationHelper(basic, _sd1);
      assertEquals("There should be no errors", 0, errors.size());
-     SymbolData obj = LanguageLevelConverter.symbolTable.get("java.lang.Object");
-     assertNotNull("Object should be in the symbol table", obj);
-     assertEquals("sd1 should have one inner class", 1, _sd1.getInnerClasses().size());
+     assertNotNull("Object should be in the symbol table", _objectSD);
+     assertEquals("_sd1 should have one inner class", 1, _sd1.getInnerClasses().size());
      SymbolData inner = _sd1.getInnerClasses().get(0);
      assertEquals("The inner class should have the proper name", "i.like.monkey$1", inner.getName());
      assertEquals("The inner class should have proper outer data", _sd1, inner.getOuterData());
-     assertEquals("The inner class should have proper super class", obj, inner.getSuperClass());
+     assertEquals("The inner class should have proper super class", _objectSD, inner.getSuperClass());
      assertEquals("The inner class should have the right package", "i.like", inner.getPackage());
      assertEquals("The inner class should have 0 methods", 0, inner.getMethods().size());
+     
+     System.err.println("**** Ending testSimpleAnonymousClassInstantiationHelper");
     }
 
-    
-    public void testComplexAnonymousClassInstantiationHelper() {
+    /* NOTE: This is test excluded because the tested method is now a no-op. */
+    public void xtestComplexAnonymousClassInstantiationHelper() {
       ComplexAnonymousClassInstantiation basic = 
         new ComplexAnonymousClassInstantiation(SourceInfo.NO_INFO, 
                                                new SimpleNameReference(SourceInfo.NO_INFO,
@@ -1208,7 +1176,8 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
                                                new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
 
      _fv._package = "i.like";
-     _fv.complexAnonymousClassInstantiationHelper(basic, _sd1);
+     _fv._enclosingClassName = "i.like.monkey";
+     _fv.complexAnonymousClassInstantiationHelper(basic, _sd1);  // TODO: the wrong enclosing context?
      assertEquals("There should be no errors", 0, errors.size());
      SymbolData obj = LanguageLevelConverter.symbolTable.get("java.lang.Object");
      assertNotNull("Object should be in the symbol table", obj);
@@ -1222,27 +1191,28 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
      assertEquals("The inner class should have 0 methods", 0, inner.getMethods().size());
     }
 
-    public void testForVariableDeclaration() {
+    /* NOTE: the following test is excluded because the anonymous class helper functions are now no-ops. */
+    public void xtestForVariableDeclaration() {
       // Make sure that if forVariableDeclaration is called with a AnonymousClassInstantiation, the symbolData is only 
       // added once.  This is to make sure an old bug stays fixed.
       SimpleAnonymousClassInstantiation basic = 
         new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, 
-                                              new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), 
+                                              new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
                                               new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
                                               new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
-     VariableDeclarator[] d1 = {
-       new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                         new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
-                                         new Word(SourceInfo.NO_INFO, "b"), basic)
-     };
-     VariableDeclaration vd1 = new VariableDeclaration(SourceInfo.NO_INFO,_publicMav, d1); 
-     
-     ClassBodyFullJavaVisitor cbav = 
-       new ClassBodyFullJavaVisitor(_sd1, "", _fv._file, _fv._package, _fv._importedFiles, _fv._importedPackages, 
-                                    _fv._classNamesInThisFile, _fv.continuations);
-     vd1.visit(cbav);
-     assertEquals("Should be 1 inner class of _sd1", 1, _sd1.getInnerClasses().size());
-     
+      VariableDeclarator[] d1 = {
+        new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                          new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+                                          new Word(SourceInfo.NO_INFO, "b"), basic)
+      };
+      VariableDeclaration vd1 = new VariableDeclaration(SourceInfo.NO_INFO,_publicMav, d1); 
+      
+      ClassBodyFullJavaVisitor cbav = 
+        new ClassBodyFullJavaVisitor(_sd1, _sd1.getName(), _fv._file, _fv._package, _fv._importedFiles, _fv._importedPackages, 
+                                     _fv._classesInThisFile, _fv.continuations, _fv.fixUps);
+      vd1.visit(cbav);
+      assertEquals("Should be 1 inner class of _sd1", 1, _sd1.getInnerClasses().size());
+      System.err.println("**** Completed testForVariableDeclaration");
     }
     
     public void testDummy() { }

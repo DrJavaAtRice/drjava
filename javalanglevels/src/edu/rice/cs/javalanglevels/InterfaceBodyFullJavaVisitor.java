@@ -1,19 +1,13 @@
 /*BEGIN_COPYRIGHT_BLOCK
- *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *    * Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *    * Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
- *      names of its contributors may be used to endorse or promote products
- *      derived from this software without specific prior written permission.
- * 
+ * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu). All rights reserved. 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
+ * following conditions are met:
+ *    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ *      disclaimer.
+ *    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *      following disclaimer in the documentation and/or other materials provided with the distribution.
+ *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the names of its contributors may be used 
+ *      to endorse or promote products derived from this software without specific prior written permission.
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -45,35 +39,34 @@ import java.io.*;
 
 import junit.framework.TestCase;
 
-/*
- * Language Level Visitor that represents the FullJava Language Level.  Enforces constraints during the
- * first walk of the AST (checking for langauge specific errors and building the symbol table).
- * This class enforces things that are common to all contexts reachable within an interface body at 
- * the FullJava Language Level. 
- */
+/** Language Level Visitor class that implements the FullJava Language Level.  Enforces constraints during the first 
+  * walk of the AST (checking for langauge specific errors and building the symbol table).  This class enforces some
+  * constraints imposed on an interface body at the FullJava Language Level. 
+  */
 public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
   
   /**The SymbolData corresponding to this interface. */
   private SymbolData _symbolData;
   
-  /*
-   * Constructor for InterfaceBodyFullJavaVisitor.
-   * @param sd  The SymbolData that encloses the context we are visiting.
-   * @param file  The source file this came from.
-   * @param packageName  The package the source file is in
-   * @importedFiles  A list of classes that were specifically imported
-   * @param importedPackages  A list of package names that were specifically imported
-   * @param classDefsInThisFile  A list of the classes that are defined in the source file
-   * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need to be resolved
-   */
+  /** Constructor for InterfaceBodyFullJavaVisitor.
+    * @param sd             The SymbolData that encloses the context we are visiting.
+    * @param file           The source file this came from.
+    * @param packageName    The package the source file is in
+    * @importedFiles        A list of classes that were specifically imported
+    * @param importedPackages   A list of package names that were specifically imported
+    * @param classesInThisFile  A list of the classes that are yet to be defined in this source file
+    * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need to 
+    *                       be resolved
+    */
   public InterfaceBodyFullJavaVisitor(SymbolData sd, 
                                       File file, 
-                                      String packageName, 
+                                      String packageName,
                                       LinkedList<String> importedFiles, 
                                       LinkedList<String> importedPackages, 
-                                      LinkedList<String> classDefsInThisFile,
-                                      Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
-    super(file, packageName, importedFiles, importedPackages, classDefsInThisFile, continuations);
+                                      HashSet<String> classesInThisFile,
+                                      Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations,
+                                      LinkedList<Command> fixUps) {
+    super(file, packageName, sd.getName(), importedFiles, importedPackages, classesInThisFile, continuations, fixUps);
     _symbolData = sd;
   }
   
@@ -108,8 +101,8 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     _addAndIgnoreError("The field 'super' does not exist in interfaces.  Only classes have a 'super' field", that);
     return null;
   }
-
-    public Void forAbstractMethodDef(AbstractMethodDef that) {
+  
+  public Void forAbstractMethodDef(AbstractMethodDef that) {
     forAbstractMethodDefDoFirst(that);
     if (_checkError()) return null;
     
@@ -117,13 +110,13 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     
     //All interface methods are considered public by default: enforce this.
     if (md.hasModifier("private")) {
-      _addAndIgnoreError("Interface methods cannot be made private.  They must be public.", that.getMav());
+      _addAndIgnoreError("Interface methods cannot be private.  They must be public.", that.getMav());
     }
     if (md.hasModifier("protected")) {
-      _addAndIgnoreError("Interface methods cannot be made protected.  They must be public.", that.getMav());
+      _addAndIgnoreError("Interface methods cannot be protected.  They must be public.", that.getMav());
     }
     
- // All interface methods are considered public by default.
+    // All interface methods are considered public by default.
     md.addModifier("public");
     md.addModifier("abstract"); // and all interface methods are abstract. 
     String className = getUnqualifiedClassName(_symbolData.getName());
@@ -137,13 +130,15 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
   
   /** Call the method in FullJavaVisitor since it's common to this, d ClassBodyIntermediateVisitor. */
   public Void forInnerInterfaceDef(InnerInterfaceDef that) {
-    handleInnerInterfaceDef(that, _symbolData, getQualifiedClassName(_symbolData.getName()) + "." + that.getName().getText());
+    String relName = that.getName().getText();
+    handleInnerInterfaceDef(that, _symbolData, relName, getQualifiedClassName(_symbolData.getName()) + '.' + relName);
     return null;
   }
   
   /**Call the method in FullJavaVisitor; it's common to this, ClassBodyIntermediateVisitor, ClassBodyAdvancedVisitor.*/
   public Void forInnerClassDef(InnerClassDef that) {
-    handleInnerClassDef(that, _symbolData, getQualifiedClassName(_symbolData.getName()) + "." + that.getName().getText());
+    String relName = that.getName().getText();
+    handleInnerClassDef(that, _symbolData, relName, getQualifiedClassName(_symbolData.getName()) + '.' + relName);
     return null;
   }
   
@@ -155,13 +150,13 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
 
   /** Delegate to method in LLV */
   public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
-    complexAnonymousClassInstantiationHelper(that, _symbolData);
+    complexAnonymousClassInstantiationHelper(that, _symbolData);  // TODO: the wrong enclosing context?
     return null;
   }
 
   /** Delegate to method in LLV*/
   public Void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
-//    System.err.println("Calling simpleAnonymousClassInstantiation Helper from InterfaceBody " + that.getSourceInfo());
+    System.err.println("Calling simpleAnonymousClassInstantiation Helper from InterfaceBody " + that.getSourceInfo());
     simpleAnonymousClassInstantiationHelper(that, _symbolData);
     return null;
   }
@@ -172,6 +167,8 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     private InterfaceBodyFullJavaVisitor _ibfv;
     
     private SymbolData _sd1;
+    private SymbolData _objectSD;
+     
     private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
     private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
     private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
@@ -183,25 +180,39 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     public InterfaceBodyFullJavaVisitorTest(String name) { super(name);  }
     
     public void setUp() {
-      _sd1 = new SymbolData("i.like.monkey");
-
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       LanguageLevelConverter.symbolTable.clear();
       LanguageLevelConverter._newSDs.clear();
       LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.make(new File("lib/buildlib/junit.jar")));
-      visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
-      _hierarchy = new Hashtable<String, TypeDefBase>();
+      visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();   
+      
+            
+      _sd1 = new SymbolData("MyInterface");
+      _sd1.setIsContinuation(false);
+      _sd1.setInterface(true);
+      _sd1.setPackage("");
+      _sd1.setTypeParameters(new TypeParameter[0]);
+      _sd1.setInterfaces(new ArrayList<SymbolData>());
+      
+      // NOTE: the following ensures that the symbolTable includes essential types
       _ibfv = new InterfaceBodyFullJavaVisitor(_sd1, 
                                                new File(""), 
                                                "", 
                                                new LinkedList<String>(), 
                                                new LinkedList<String>(), 
-                                               new LinkedList<String>(), 
-                                               new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-      _ibfv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
-      _ibfv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
-      _ibfv._resetNonStaticFields();
+                                               new HashSet<String>(), 
+                                               new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                               new LinkedList<Command>());
+      _ibfv._classesInThisFile = new HashSet<String>();
+      _ibfv.continuations = new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>();
       _ibfv._importedPackages.addFirst("java.lang");
+      _ibfv._enclosingClassName = "MyInterface";
+
+      _objectSD = LanguageLevelConverter.symbolTable.get("java.lang.Object");
+      _sd1.setSuperClass(_objectSD);
+      
+      LanguageLevelConverter.symbolTable.put("MyInterface", _sd1);
+
       _errorAdded = false;
     }
     
@@ -340,7 +351,7 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
                                              _abstractMav, 
                                              new TypeParameter[0], 
                                              new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                             new Word(SourceInfo.NO_INFO, "monkey"),
+                                             new Word(SourceInfo.NO_INFO, "MyInterface"),
                                              new FormalParameter[0],
                                              new ReferenceType[0]);
       mdef.visit(_ibfv);
@@ -373,7 +384,7 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
       amd4.visit(_ibfv);
       assertEquals("There should be two errors", 2, errors.size());
       assertEquals("The error message should be correct", 
-                   "Interface methods cannot be made private.  They must be public." , 
+                   "Interface methods cannot be private.  They must be public." , 
                    errors.get(1).getFirst());
     
       //What if the method is protected: Should throw error
@@ -387,7 +398,7 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
       amd5.visit(_ibfv);
       assertEquals("There should be three errors", 3, errors.size());
       assertEquals("The error message should be correct",
-                   "Interface methods cannot be made protected.  They must be public." , 
+                   "Interface methods cannot be protected.  They must be public." , 
                    errors.get(2).getFirst());
     }
     
@@ -396,9 +407,9 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
       _ibfv._symbolData = new SymbolData("MyInterface");
       _ibfv._symbolData.setInterface(true);
       
-      SymbolData obj = new SymbolData("java.lang.Object");
+//      SymbolData obj = new SymbolData("java.lang.Object");
       LanguageLevelConverter._newSDs.clear();
-      LanguageLevelConverter.symbolTable.put("java.lang.Object", obj);
+//      LanguageLevelConverter.symbolTable.put("java.lang.Object", obj);
       
       InnerClassDef cd1 = 
         new InnerClassDef(SourceInfo.NO_INFO, 
@@ -417,46 +428,43 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
                           new ReferenceType[0], 
                           new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {cd1}));
      
-      SymbolData sd0 = new SymbolData(_ibfv._symbolData.getName() + "$Lisa", _packageMav, new TypeParameter[0], obj, 
-                                      new LinkedList<SymbolData>(), null); 
-      SymbolData sd1 = 
-        new SymbolData(_ibfv._symbolData.getName() + "$Lisa$Bart", _packageMav, new TypeParameter[0], obj, 
-                       new LinkedList<SymbolData>(), null); 
+//      SymbolData sd0 = new SymbolData(_ibfv._symbolData.getName() + "$Lisa", _packageMav, new TypeParameter[0], obj, 
+//                                      new ArrayList<SymbolData>(), null); 
+//      SymbolData sd1 = 
+//        new SymbolData(_ibfv._symbolData.getName() + "$Lisa$Bart", _packageMav, new TypeParameter[0], obj, 
+//                       new ArrayList<SymbolData>(), null); 
       
-      _ibfv._symbolData.addInnerClass(sd0);
-      sd0.setOuterData(_ibfv._symbolData);
+//      _ibfv._symbolData.addInnerClass(sd0);
+//      sd0.setOuterData(_ibfv._symbolData);
 
-      sd0.addInnerClass(sd1);
-      sd1.setOuterData(sd0);
-
-      sd0.setIsContinuation(true);
-      sd1.setIsContinuation(true);
-      LanguageLevelConverter._newSDs.clear();
-      LanguageLevelConverter.symbolTable.put(_ibfv._symbolData.getName() + "$Lisa", sd0);
+//      sd0.addInnerClass(sd1);
+//      sd1.setOuterData(sd0);
+//
+//      sd0.setIsContinuation(true);
+//      sd1.setIsContinuation(true);
+//      LanguageLevelConverter._newSDs.clear();
+//      LanguageLevelConverter.symbolTable.put(_ibfv._symbolData.getName() + "$Lisa", sd0);
 
       cd0.visit(_ibfv);
 
-      SymbolData sd = _ibfv._symbolData.getInnerClassOrInterface("Lisa");
+      SymbolData sd0 = _ibfv._symbolData.getInnerClassOrInterface("Lisa");
+      assertNotNull("Inner class Lisa exists", sd0);
       
-      assertEquals("This symbolData should now have sd0 as an inner class", sd0, sd);
-      assertEquals("sd0 should have the correct outer data", _ibfv._symbolData, sd0.getOuterData());
+      assertEquals("Lisa should have the correct outer data", _ibfv._symbolData, sd0.getOuterData());
+      assertTrue("_sd1 should be an interface", _sd1.isInterface());
       assertFalse("sd0 should be a class", sd0.isInterface());
-      assertFalse("sd1 should be a class", sd1.isInterface());
-      assertTrue("Top symbol data should be an interface", _ibfv._symbolData.isInterface());
-      assertEquals("sd1 should have the correct outer data", sd0, sd1.getOuterData());
-      assertEquals("Sd should now have sd1 as an inner class", sd1, sd.getInnerClassOrInterface("Bart"));
+      assertEquals("Lisa should have 0 methods", 0, sd0.getMethods().size());  
       
-      assertEquals("Lisa should have 0 methods", 0, sd0.getMethods().size());
+      SymbolData sd1 = sd0.getInnerClassOrInterface("Bart");
+      assertNotNull("Inner class Bart exists", sd1);
+      
+      assertEquals("Bart should have the correct outer data", sd0, sd1.getOuterData());
+      assertFalse("sd1 should be a class", sd1.isInterface());
+      assertEquals("Bart should have 0 methods", 0, sd1.getMethods().size());
     }
     
     public void testForInnerInterfaceDef() {
-      _ibfv._symbolData = new SymbolData("MyInterface");
-      _ibfv._symbolData.setInterface(true);
 
-      
-      SymbolData obj = new SymbolData("java.lang.Object");
-      LanguageLevelConverter._newSDs.clear();
-      LanguageLevelConverter.symbolTable.put("java.lang.Object", obj);
       InnerInterfaceDef cd1 = 
         new InnerInterfaceDef(SourceInfo.NO_INFO, _packageMav, new Word(SourceInfo.NO_INFO, "Bart"),
                               new TypeParameter[0], new ReferenceType[0], 
@@ -467,38 +475,43 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
                               new TypeParameter[0], new ReferenceType[0], 
                               new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {cd1}));
       
-      SymbolData sd0 = new SymbolData(_ibfv._symbolData.getName() + "$Lisa", _packageMav, new TypeParameter[0], 
-                                      new LinkedList<SymbolData>(), null); 
-      SymbolData sd1 = new SymbolData(_ibfv._symbolData.getName() + "$Lisa$Bart", _packageMav, new TypeParameter[0], 
-                                      new LinkedList<SymbolData>(), null);
-      sd0.addInnerInterface(sd1);
-
-      
-      _ibfv._symbolData.addInnerInterface(sd0);
-      sd0.setOuterData(_ibfv._symbolData);
-
-      sd0.addInnerInterface(sd1);
-      sd1.setOuterData(sd0);
-
-      
-      sd0.setIsContinuation(true);
-      sd1.setIsContinuation(true);
-      LanguageLevelConverter._newSDs.clear();
-      LanguageLevelConverter.symbolTable.put(_ibfv._symbolData.getName() + "$Lisa", sd0);
-      LanguageLevelConverter._newSDs.clear();
-      LanguageLevelConverter.symbolTable.put(_ibfv._symbolData.getName() + "$Lisa$Bart", sd1);
+//      SymbolData sd0 = new SymbolData(_ibfv._symbolData.getName() + "$Lisa", _packageMav, new TypeParameter[0], 
+//                                      new ArrayList<SymbolData>(), null); 
+//      SymbolData sd1 = new SymbolData(_ibfv._symbolData.getName() + "$Lisa$Bart", _packageMav, new TypeParameter[0], 
+//                                      new ArrayList<SymbolData>(), null);
+//      sd0.addInnerInterface(sd1);
+//
+//      
+//      _ibfv._symbolData.addInnerInterface(sd0);
+//      sd0.setOuterData(_ibfv._symbolData);
+//
+//      sd0.addInnerInterface(sd1);
+//      sd1.setOuterData(sd0);
+//
+//      
+//      sd0.setIsContinuation(true);
+//      sd1.setIsContinuation(true);
+//      LanguageLevelConverter._newSDs.clear();
+//      LanguageLevelConverter.symbolTable.put(_ibfv._symbolData.getName() + "$Lisa", sd0);
+//      LanguageLevelConverter._newSDs.clear();
+//      LanguageLevelConverter.symbolTable.put(_ibfv._symbolData.getName() + "$Lisa$Bart", sd1);
 
       cd0.visit(_ibfv);
 
-      SymbolData sd = _ibfv._symbolData.getInnerClassOrInterface("Lisa");
+      SymbolData sd0 = _ibfv._symbolData.getInnerClassOrInterface("Lisa");
+      assertNotNull("Inner interfacae Lisa exists", sd0);
       
-      assertEquals("This symbolData should now have sd0 as an inner interface", sd0, sd);
-      assertEquals("sd0 should have the correct outer data", _ibfv._symbolData, sd0.getOuterData());
-      assertEquals("sd1 should have the correct outer data", sd0, sd1.getOuterData());
-      assertEquals("Sd should now have sd1 as an inner interface", sd1, sd.getInnerClassOrInterface("Bart"));
-      assertTrue("Lisa should be an interface", sd0.isInterface());
-      assertTrue("Bart should be an interface", sd1.isInterface());
-      assertTrue("The outer data should be an interface", _ibfv._symbolData.isInterface());      
+      assertEquals("Lisa should have the correct outer data", _ibfv._symbolData, sd0.getOuterData());
+      assertTrue("_sd1 should be an interface", _sd1.isInterface());
+      assertTrue("sd0 should be a interface", sd0.isInterface());
+      assertEquals("Lisa should have 0 methods", 0, sd0.getMethods().size());  
+      
+      SymbolData sd1 = sd0.getInnerClassOrInterface("Bart");
+      assertNotNull("Inner interface Bart exists", sd1);
+      
+      assertEquals("Bart should have the correct outer data", sd0, sd1.getOuterData());
+      assertTrue("sd1 should be an interface", sd1.isInterface());
+      assertEquals("Bart should have 0 methods", 0, sd1.getMethods().size());
     }
 
     public void testForConstructorDef() {

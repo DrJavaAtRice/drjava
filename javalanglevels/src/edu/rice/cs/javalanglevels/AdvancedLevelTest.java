@@ -84,7 +84,21 @@ public class AdvancedLevelTest extends TestCase {
     };
   }
   
-  /** Try some example files and make sure they can be converted without errors and that the resulting conversions are correct. */
+  /** This ensures that setUp() is not failing. */
+  public void testNothing() {
+    LanguageLevelVisitor llv = 
+      new LanguageLevelVisitor(new File(""), 
+                               "",
+                               null,
+                               new LinkedList<String>(), 
+                               new LinkedList<String>(),
+                               new HashSet<String>(), 
+                               new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                               new LinkedList<Command>());
+  }
+  
+  /** Try some example files and make sure they can be converted without errors and that the resulting conversions are 
+    * correct. */
   public void testSuccessful() {
 
     _log.log("Running testSuccessful");

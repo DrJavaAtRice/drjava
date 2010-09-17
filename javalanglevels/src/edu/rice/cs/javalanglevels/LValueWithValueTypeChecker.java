@@ -56,12 +56,12 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
   private final TestAssignable _testAssignableInstance;
 
   // The visitor that invoked this: holds the error list
-  private final Bob _bob;
+  private final SpecialTypeChecker _bob;
 
   /* Constructor for LValueTypeChecker.  Initializes _testAssignableInstance.
    * @param bob  The visitor that invoked this visitor.
    */
-  public LValueWithValueTypeChecker(Bob bob) {
+  public LValueWithValueTypeChecker(SpecialTypeChecker bob) {
     _testAssignableInstance = new TestAssignable(bob._data, bob._file, bob._package, bob._importedFiles, bob._importedPackages, bob._vars, bob._thrown);
     _bob = bob;
   }
@@ -196,21 +196,21 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
         return sd;
       }
       
-      if (sd != SymbolData.AMBIGUOUS_REFERENCE) {_addError("Could not resolve " + myWord.getText() + " from the context of " + Data.dollarSignsToDots(lhs.getName()), that);}
+      if (sd != SymbolData.AMBIGUOUS_REFERENCE) {_addError("Could not resolve " + myWord.getText() + 
+                                                           " from the context of " + 
+                                                           Data.dollarSignsToDots(lhs.getName()), that);}
       return null;
     }
     
-    /**
-     * Type-check the lhs and the index.
-     */
+    /** Type-check the lhs and the index. */
     public TypeData forArrayAccess(ArrayAccess that) {
       ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, _vars, _thrown);
       TypeData lhs = that.getArray().visit(etc);
-      _bob.thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned); //update internal Bob's list of what got assigned
+      _bob.thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned); //update internal SpecialTypeChecker's list of what got assigned
       
       ExpressionTypeChecker indexTC = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, _vars, _thrown);
       TypeData index = that.getIndex().visit(indexTC);
-      _bob.thingsThatHaveBeenAssigned.addAll(indexTC.thingsThatHaveBeenAssigned); //update internal Bob's list of what got assigned
+      _bob.thingsThatHaveBeenAssigned.addAll(indexTC.thingsThatHaveBeenAssigned); //update internal SpecialTypeChecker's list of what got assigned
       
       return forArrayAccessOnly(that, lhs, index);
     }
@@ -256,7 +256,10 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
       _sd4 = new SymbolData("u.like.emu");
       _sd5 = new SymbolData("");
       _sd6 = new SymbolData("cebu");
-      _lvtc = new LValueWithValueTypeChecker(new Bob(_sd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>()));
+      _lvtc = 
+        new LValueWithValueTypeChecker(new SpecialTypeChecker(_sd1, new File(""), "", new LinkedList<String>(), 
+                                                              new LinkedList<String>(), new LinkedList<VariableData>(), 
+                                                              new LinkedList<Pair<SymbolData, JExpression>>()));
       _ta = _lvtc._testAssignableInstance;
       _lvtc._bob.errors = new LinkedList<Pair<String, JExpressionIF>>();
       LanguageLevelConverter.symbolTable.clear();
@@ -384,7 +387,8 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
 
       assertEquals("Should return null", null, ambigRef.visit(_lvtc));
       assertEquals("Should be 4 errors", 4, _lvtc._bob.errors.size());
-      assertEquals("Error message should be correct", "Ambiguous reference to class or interface ambigThing", _lvtc._bob.errors.getLast().getFirst());    
+      assertEquals("Error message should be correct", "Ambiguous reference to class or interface ambigThing", 
+                   _lvtc._bob.errors.getLast().getFirst());    
     }
     
     
@@ -523,7 +527,6 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
       assertEquals("Should be 8 errors", 8, _lvtc._bob.errors.size());
       assertEquals("Error message should be correct", "Could not resolve nonsense from the context of java.lang.String", _lvtc._bob.errors.getLast().getFirst());
     
-    
       //if the reference is ambiguous (matches both an interface and a class) give an error
       ComplexNameReference ambigRef = new ComplexNameReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "cebu")), new Word(SourceInfo.NO_INFO, "ambigThing"));
 
@@ -558,7 +561,9 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
 
       assertEquals("Should return null", null, ambigRef.visit(_lvtc));
       assertEquals("Should be 9 errors", 9, _lvtc._bob.errors.size());
-      assertEquals("Error message should be correct", "Ambiguous reference to class or interface ambigThing", _lvtc._bob.errors.getLast().getFirst());    
+      // TODO: should following error message mention the context 'cebu'?
+      assertEquals("Error message should be correct", "Ambiguous reference to class or interface ambigThing", 
+                   _lvtc._bob.errors.getLast().getFirst());    
     
     }
       
@@ -567,12 +572,13 @@ public class LValueWithValueTypeChecker extends JExpressionIFAbstractVisitor<Typ
       ArrayData intArray = 
         new ArrayData(SymbolData.INT_TYPE, 
                       new LanguageLevelVisitor(_lvtc._bob._file,
-                                               _lvtc._bob._package, 
+                                               _lvtc._bob._package,
+                                               null, // enclosingClassName for top level traversal
                                                _lvtc._bob._importedFiles, 
                                                _lvtc._bob._importedPackages, 
-                                               new LinkedList<String>(), 
-                                               new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
-                                               new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>()),
+                                               new HashSet<String>(), 
+                                               new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                               new LinkedList<Command>()),
                       SourceInfo.NO_INFO);
       VariableData variable1 = new VariableData("variable1", _publicMav, intArray, true, _ta._data);
       _ta._vars.add(variable1);

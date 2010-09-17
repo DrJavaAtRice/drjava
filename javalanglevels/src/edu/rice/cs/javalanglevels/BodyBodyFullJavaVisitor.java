@@ -38,6 +38,8 @@ package edu.rice.cs.javalanglevels;
 
 import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.parser.*;
+import edu.rice.cs.plt.reflect.JavaVersion;
+
 import java.util.*;
 import java.io.*;
 
@@ -59,21 +61,29 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
     * @param packageName  The package the source file is in
     * @importedFiles  A list of classes that were specifically imported
     * @param importedPackages  A list of package names that were specifically imported
-    * @param classDefsInThisFile  A list of the classes that are defined in the source file
+    * @param classesInThisFile  A list of the classes that are yet to be defined in this source file
     * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need to 
     *                       be resolved
+    * @param fixUps  A list of commands to be performed after this pass to fixup the symbolTable
     */
   public BodyBodyFullJavaVisitor(BodyData bodyData,
                                  File file, 
                                  String packageName,
+                                 String enclosingClassName,
                                  LinkedList<String> importedFiles, 
                                  LinkedList<String> importedPackages, 
-                                 LinkedList<String> classDefsInThisFile, 
-                                 Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations,
-                                 LinkedList<String> innerClassesToBeParsed) {
-    super(file, packageName, importedFiles, importedPackages, classDefsInThisFile, continuations);
+                                 HashSet<String> classesInThisFile, 
+                                 Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations,
+                                 LinkedList<Command> fixUps,
+                                 HashSet<String> innerClassesInThisBody) {
+    super(file, packageName, enclosingClassName, importedFiles, importedPackages, classesInThisFile, continuations, fixUps);
     _bodyData = bodyData;
-    _innerClassesToBeParsed = innerClassesToBeParsed;
+//    _innerClassesInThisBody = innerClassesInThisBody;
+    
+    SymbolData objectSD = symbolTable.get("java.lang.Object");   
+    SymbolData integerSD = symbolTable.get("java.lang.Integer");
+    assert objectSD != null && integerSD != null;
+    assert integerSD.isAssignableTo(objectSD, JavaVersion.JAVA_5);
   }
   
   /** Ignore MethodDef. */
@@ -92,9 +102,9 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
     if (prune(that)) return null;
     BlockData bd = new BlockData(_bodyData);
     _bodyData.addBlock(bd);
-    that.getStatements().visit(new BodyBodyFullJavaVisitor(bd, _file, _package, _importedFiles, _importedPackages, 
-                                                           _classNamesInThisFile, continuations, 
-                                                           _innerClassesToBeParsed));
+    that.getStatements().visit(new BodyBodyFullJavaVisitor(bd, _file, _package, _enclosingClassName, _importedFiles, 
+                                                           _importedPackages, _classesInThisFile, continuations, fixUps,
+                                                           new HashSet<String>()));
     return forBlockOnly(that);
   }
   
@@ -109,22 +119,27 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
     BlockData bd = new BlockData(_bodyData);
     _bodyData.addBlock(bd);
     
-    VariableData exceptionVar = formalParameters2VariableData(new FormalParameter[]{ that.getException() }, bd)[0];
+    SymbolData enclosing = getQualifiedSymbolData(_enclosingClassName);
+    VariableData exceptionVar = 
+      formalParameters2VariableData(new FormalParameter[]{ that.getException() }, enclosing)[0];
     if (prune(that.getException())) return null;
     bd.addVar(exceptionVar);
     
-    b.getStatements().visit(new BodyBodyFullJavaVisitor(bd, _file, _package, _importedFiles, _importedPackages, 
-                                                        _classNamesInThisFile, continuations, 
-                                                        _innerClassesToBeParsed));
+    BodyBodyFullJavaVisitor bbfjv = 
+      new BodyBodyFullJavaVisitor(bd, _file, _package, _enclosingClassName, _importedFiles,
+                                  _importedPackages, _classesInThisFile, continuations, fixUps,
+                                  new HashSet<String>());
+    b.getStatements().visit(bbfjv);
     forBlockOnly(b);
     return forCatchBlockOnly(that);
   }
   
   /** Adds the variables that were declared to the body data and make sure that no two variables have the same name.*/
   public Void forVariableDeclarationOnly(VariableDeclaration that) {
+    System.err.println("Calling _variableDeclaration2VariableData in BodyBodyFullJavaVisitor.java");
     if (! _bodyData.addVars(_variableDeclaration2VariableData(that, _bodyData))) {
 /* The following commenting out of code is kludge to get around the fact that LL processing does not allow a for
- * index variable to repeated in successive for loops. */
+ * index variable to repeated in successive for loops. TODO: fix this. */
 //      _addAndIgnoreError("You cannot have two variables with the same name.", that);
     }
     return null;
@@ -133,31 +148,54 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
   /** Ignore TryCatchStatement.*/
   public Void forTryCatchStatementDoFirst(TryCatchStatement that) { return null; }
 
-  /** Process a local inner class definition */
+  /** Process a local class definition */
   public Void forInnerClassDef(InnerClassDef that) {
     // TODO: is this necessarily local?
-    handleInnerClassDef(that, _bodyData, getQualifiedClassName(_bodyData.getSymbolData().getName()) + "."
-                          + _bodyData.getSymbolData().preincrementLocalClassNum() + that.getName().getText());
+    SymbolData enclosingClass = _bodyData.getSymbolData();
+    assert _enclosingClassName.equals(getQualifiedClassName(enclosingClass.getName()));
+    
+    String relName = that.getName().getText();
+    String fullName = _enclosingClassName + '.' + enclosingClass.preincrementLocalClassNum() + relName;
+    System.err.println("***ALARM*** Processing local class '" + relName + "' in class " + _enclosingClassName
+                         + " with flattened class name " + fullName);
+    handleInnerClassDef(that, _bodyData, relName, fullName);
+    // How do we know that generated number is correct?
     return null;
   }
   
-  /** Process a local inner interface definition */
+  /** Process a local interface definition */
   public Void forInnerInterfaceDef(InnerInterfaceDef that) {
-    // TODO: is this necessarily local?
-    handleInnerInterfaceDef(that, _bodyData, getQualifiedClassName(_bodyData.getSymbolData().getName()) + "."
-                              + _bodyData.getSymbolData().preincrementLocalClassNum() + that.getName().getText());
+    _addAndIgnoreError("Local interfaces are illegal in Java.", that);
     return null;
   }
   
-  /** Delegate to method in LLV. */
-  public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
-    complexAnonymousClassInstantiationHelper(that, _bodyData);
+//  /** Delegate to method in LLV. */
+//  public Void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
+//    simpleAnonymousClassInstantiationHelper(that, _bodyData);
+//    return null;
+//  }
+//  
+//    /** Delegate to helper method. */
+//  public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
+//    SymbolData enclosing = getQualifiedSymbolData(_enclosingClassName);
+//    assert enclosing != null;
+//    complexAnonymousClassInstantiationHelper(that, enclosing);  // TODO: the wrong enclosing context?
+//    return null;
+//  }
+
+  /** Delegate to helper method. */
+  public Void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
+    SymbolData enclosing = getQualifiedSymbolData(_enclosingClassName);
+    assert enclosing != null;
+    simpleAnonymousClassInstantiationHelper(that, enclosing);
     return null;
   }
-
-  /** Delegate to method in LLV. */
-  public Void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
-    simpleAnonymousClassInstantiationHelper(that, _bodyData);
+  
+  /** Delegate to helper method. */
+  public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
+    SymbolData enclosing = getQualifiedSymbolData(_enclosingClassName);
+    assert enclosing != null;
+    complexAnonymousClassInstantiationHelper(that, enclosing);  // TODO: the wrong enclosing context?
     return null;
   }
 
@@ -195,21 +233,38 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       LanguageLevelConverter.symbolTable.clear();
       LanguageLevelConverter._newSDs.clear();
+      // Use _sd1 for _enclosingClassName
+      LanguageLevelConverter.symbolTable.put("i.like.monkey", _sd1);
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
-      _hierarchy = new Hashtable<String, TypeDefBase>();
+//      _hierarchy = new Hashtable<String, TypeDefBase>();
       _bfv = new BodyBodyFullJavaVisitor(_md1, 
                                          new File(""), 
-                                         "", 
+                                         "",
+                                         "i.like.monkey",
                                          new LinkedList<String>(), 
                                          new LinkedList<String>(), 
-                                         new LinkedList<String>(), 
-                                         new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
-                                         new LinkedList<String>());
-      _bfv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
-      _bfv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
-      _bfv._resetNonStaticFields();
+                                         new HashSet<String>(), 
+                                         new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                         new LinkedList<Command>(),
+                                         new HashSet<String>());
+      assert _bfv._enclosingClassName.equals("i.like.monkey");
+      _bfv._classesInThisFile = new HashSet<String>();
+      _bfv.continuations = new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>();
+//      _bfv._resetNonStaticFields();  // clobbers _package and _enclosingClassName
       _bfv._importedPackages.addFirst("java.lang");
       _errorAdded = false;
+      _sd1.setIsContinuation(false);
+      _sd1.setInterface(false);
+      _sd1.setPackage("");
+      _sd1.setTypeParameters(new TypeParameter[0]);
+      SymbolData objectSD = _bfv.getQualifiedSymbolData("java.lang.Object", SourceInfo.NO_INFO);
+      _sd1.setSuperClass(objectSD);
+      _sd1.setInterfaces(new ArrayList<SymbolData>());
+    }
+    
+    public void testSetUp() {
+      assertFalse("i.like.monkey is present", _bfv.getQualifiedSymbolData("i.like.monkey", SourceInfo.NO_INFO) == null);
+      assertEquals("_enclosingClassName is set", "i.like.monkey", _bfv._enclosingClassName);
     }
     
     public void testForMethodDefDoFirst() {
@@ -320,8 +375,6 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
      public void testForInnerClassDef() {
      
       // Test a local inner class definition and reference
-      SymbolData obj = new SymbolData("java.lang.Object");
-      LanguageLevelConverter.symbolTable.put("java.lang.Object", obj);
       InnerClassDef cd0 = 
         new InnerClassDef(SourceInfo.NO_INFO, 
                           _packageMav, 
@@ -358,11 +411,13 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
                                new ReferenceType[0], 
                                new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
        iid.visit(_bfv);
-       assertEquals("There should be no errors", 0, errors.size());
+       assertEquals("There should be one error", 1, errors.size());
+       assertEquals("The error message should be correct", 
+                   "Local interfaces are illegal in Java.", errors.get(0).getFirst());
+       SymbolData innerInterface = _bfv._bodyData.getInnerClassOrInterface("Broken");
+       assertNull("Should NOT have a inner interface named Broken", innerInterface);
        
        // Test a inner interface definition and reference
-       SymbolData obj = new SymbolData("java.lang.Object");
-       LanguageLevelConverter.symbolTable.put("java.lang.Object", obj);
        InnerInterfaceDef id0 = 
          new InnerInterfaceDef(SourceInfo.NO_INFO, 
                                _packageMav, 
@@ -371,9 +426,11 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
                                new ReferenceType[0], 
                                new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
        id0.visit(_bfv);
-       assertEquals("There should be no errors", 0, errors.size());
-       SymbolData innerInterface = _bfv._bodyData.getInnerClassOrInterface("RodInterface");
-       assertNotNull("Should have a inner interface named RodInterface", innerInterface);
+       assertEquals("There should be 2 errors", 2, errors.size());
+       assertEquals("The error message should be correct", 
+                    "Local interfaces are illegal in Java.", errors.get(1).getFirst());
+       innerInterface = _bfv._bodyData.getInnerClassOrInterface("RodInterface");
+       assertNull("Should NOT have a inner interface named RodInterface", innerInterface);
        
        // Test one with explicit modifiers
       InnerInterfaceDef id1 = 
@@ -384,7 +441,11 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
                           new ReferenceType[0], 
                           new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       id1.visit(_bfv);
-      assertEquals("There should be no errors", 0, errors.size());  // class modifiers are allowed
+      assertEquals("There should be three errors", 3, errors.size());  // class modifiers are allowed
+      assertEquals("The error message should be correct", 
+                   "Local interfaces are illegal in Java.", errors.get(2).getFirst());
+      innerInterface = _bfv._bodyData.getInnerClassOrInterface("Todd");
+      assertNull("Should NOT have a inner interface named Todd", innerInterface);
      }
      public void testDummy() { }
   }

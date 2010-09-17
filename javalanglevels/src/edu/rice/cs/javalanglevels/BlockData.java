@@ -39,28 +39,19 @@ package edu.rice.cs.javalanglevels;
 import edu.rice.cs.javalanglevels.tree.*;
 import java.util.*;
 
-/**
- * Represents the data for a given braced body--not for a method.
- */
+/** Class containing the data for a braced body--not for a method. */
 public class BlockData extends BodyData { 
   
-  /**
-   * Create a new BlockData corresponding to the outer data outerData.
-   * @param outerData  The Data that encloses this BodyData.
-   */
-  public BlockData(Data outerData) {
-    super(outerData);
+  /** Create a new BlockData corresponding to the outer data outerData.
+    * @param outerData  The Data that encloses this BodyData.
+    */
+  public BlockData(Data outerData) { super(outerData); }
+  
+  /** Get the outer method data of this block. */
+  public MethodData getMethodData() { 
+    return ((BodyData)_enclosingData.get(0)).getMethodData(); // (MethodData)_outerData;
   }
   
-  /**
-   * Get the outer method data of this block.
-   */
-  public MethodData getMethodData() {
-    return ((BodyData)_enclosingData.get(0)).getMethodData();//(MethodData)_outerData;
-  }
-  
-  /**
-   * This is never a method data, so always return false.
-   */
+  /** This is never a method data, so always return false. */
   public boolean isMethodData() { return false; }
 }

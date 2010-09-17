@@ -52,7 +52,7 @@ public class InstanceData extends TypeData {
   private SymbolData _classSymbolData;
   
   /*@param classSD  The SymbolData this is an instance of*/
-  public InstanceData(SymbolData classSD) {
+  public InstanceData(SymbolData classSD) { 
     super(null);
     _classSymbolData = classSD;
     _name = classSD.getName();
@@ -61,7 +61,7 @@ public class InstanceData extends TypeData {
   /**@return  true since this is an InstanceData.*/
   public boolean isInstanceType() { return true; }
  
- /**@return  The class SymbolData corresponding to the class of this InstanceData.*/
+  /**@return  The class SymbolData corresponding to the class of this InstanceData.*/
   public SymbolData getSymbolData() { return _classSymbolData;  }
 
   /**@return this InstanceData.*/
@@ -69,8 +69,8 @@ public class InstanceData extends TypeData {
   
   public String toString() { return "An instance of type '" + _classSymbolData +"'"; }
   
-  public boolean equals(Object o) {
-    return o.getClass() == getClass() && ((InstanceData)o)._classSymbolData.equals(_classSymbolData);
+  public boolean equals(Object o) { 
+    return o != null && o.getClass() == getClass() && ((InstanceData)o)._classSymbolData.equals(_classSymbolData);
   }
   
   public int hashCode() { return _classSymbolData.hashCode(); }

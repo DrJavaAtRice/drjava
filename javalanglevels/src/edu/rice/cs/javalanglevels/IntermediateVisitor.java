@@ -45,7 +45,6 @@ import edu.rice.cs.plt.iter.*;
 
 import junit.framework.TestCase;
 
-
 /** Top-level Language Level Visitor that represents the Intermediate Language Level.  Enforces constraints during the
   * first walk of the AST (checking for langauge specific errors and building the symbol table).
   * This class enforces things that are common to all contexts reachable at the Intermediate Language Level 
@@ -58,37 +57,66 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     * is the empty string.
     */
   public IntermediateVisitor(File file, 
-                             String packageName, 
+                             String packageName,
+                             String enclosingClassName,
                              LinkedList<String> importedFiles, 
                              LinkedList<String> importedPackages,
-                             LinkedList<String> classNamesInThisFile, 
-                             Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
-    super(file, packageName, importedFiles, importedPackages, classNamesInThisFile, continuations);
+                             HashSet<String> classesInThisFile, 
+                             Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations,
+                             LinkedList<Command> fixUps) {
+    super(file, packageName, enclosingClassName, importedFiles, importedPackages, classesInThisFile, continuations, fixUps);
   }
-  
+
   /** This constructor is called when testing.  It initializes all of the static fields of LanguageLevelVisitor. */
   public IntermediateVisitor(File file) {
     this(file, 
          new LinkedList<Pair<String, JExpressionIF>>(),
-         new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+         new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(), 
+         new LinkedList<Command>(),
          new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>());
   }
   
   /** This constructor is called from LanguageLevelVisitor and LanguageLevelConverter when they are instantiating a new
-    * IntermediateVisitor to visit a new file with.  Package is set to "" by default.
+    * IntermediateVisitor to visit a new file with.  _package is set to "" by default. _enclosingClassName is set to null
     * @param file  The File corresponding to the source file we are visiting
     * @param errors  The list of errors that have been encountered so far.
     * @param continuations  The table of classes we have encountered but still need to resolve
+    * @param fixUps   This list of symbolTable fixups to perform after visitation
     * @param visitedFiles  The list of files we have visited
     */
-  public IntermediateVisitor(File file, 
+  public IntermediateVisitor(File file,
                              LinkedList<Pair<String, JExpressionIF>> errors,
-                             Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations,
+                             Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations,
+                             LinkedList<Command> fixUps,
                              LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visitedFiles) {
-    super(file, "", new LinkedList<String>(), new LinkedList<String>(), new LinkedList<String>(), continuations);
+    this(file, new LinkedList<String>(), errors, continuations, fixUps, visitedFiles);
+  }
+  
+  /** This constructor is called from LanguageLevelVisitor and LanguageLevelConverter when they are instantiating a new
+    * IntermediateVisitor to visit a new file with.  _package is set to "" by default. _enclosingClassName is set to null
+    * @param file             The File corresponding to the source file we are visiting
+    * @param importedPackages The list of strings describing the imported packages for this file
+    * @param errors           The list of errors that have been encountered so far.
+    * @param continuations    The table of classes we have encountered but still need to resolve
+    * @param fixUps           This list of symbolTable fixups to perform after visitation
+    * @param visitedFiles     The list of files we have visited
+    */
+  public IntermediateVisitor(File file,
+                             LinkedList<String> importedPackages,
+                             LinkedList<Pair<String, JExpressionIF>> errors,
+                             Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations,
+                             LinkedList<Command> fixUps,
+                             LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visitedFiles) {
+    super(file, "", null, new LinkedList<String>(), importedPackages, new HashSet<String>(), continuations, fixUps);
     this.errors = errors;
     this.visitedFiles= visitedFiles;
-    _hierarchy = new Hashtable<String, TypeDefBase>(); //hierarchy;
+//    _hierarchy = new Hashtable<String, TypeDefBase>(); //hierarchy;
+  }
+  
+  /** Factory method inherited from LLV class. */
+  public LanguageLevelVisitor newClassBodyVisitor(SymbolData anonSD, String anonName) {
+    return new ClassBodyFullJavaVisitor(anonSD, anonName, _file, _package, _importedFiles, _importedPackages, 
+                                        _classesInThisFile, continuations, fixUps);
   }
   
   /** Check to make sure the inner class def is well-formed, resolve it, and store the resulting symbol in the outer 
@@ -96,14 +124,19 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     * Data so we pass it in.  This method is tested in those files.  We use the fully qualified name so that we 
     * don't accidentally conflict with another class in the symbol table.
     * @param that  AST Node for the inner class def
-    * @param data  Data that encloses this inner class; the inner class can be in a class or a method.
-    * @param name  Qualified name of the inner class. For a local class, we construct the same name as the Java
-    *   compiler (??), which inserts "$<seq#>" as the delimiter preceding the raw class name. For example, if class A 
+    * @param enclosing  Data that encloses this inner class; the inner class can be in a class or a method.
+    * @param relName The relative name of the inner class including no qualifiers
+    * @param name  Fully qualified name of the inner class. For a local class, we construct the same name as the Java 
+    *   compiler, which inserts "$<seq#>" as the delimiter preceding the raw class name. For example, if class A
     *   has a method B with a local class C, then qualified name for this class is "A$1C", provided the class is the
     *   first local class (including anonymous classes) in the enclosing class.
     */
-  protected void handleInnerClassDef(InnerClassDef that, Data data, String name) {
-//    System.err.println("Processing InnerClassDef for " + name);
+  // TODO: add a factory method for constructing the classbody visitor (so it is different for FullJava and Functional
+  // and hoist this code into LanguageLevelVisitor
+  protected void handleInnerClassDef(InnerClassDef that, Data enclosing, String relName, String name) {
+//    System.err.println("Processing InnerClassDef for " + name + " defined in " + enclosing.getName());
+    
+    assert (enclosing instanceof SymbolData) || (enclosing instanceof MethodData);
     forInnerClassDefDoFirst(that);
     if (prune(that)) return;
     
@@ -114,34 +147,45 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
     
-    SymbolData sd = defineInnerSymbolData(that, name, data);
-    if (sd != null) { // We have a symbol data to work with, so visit the body and augment
-      that.getBody().visit(new ClassBodyIntermediateVisitor(sd, 
+    SymbolData sd = defineInnerSymbolData(that, relName, name, enclosing);
+    if (sd != null) { // We have a SymbolData to work with, so visit the body and augment
+      that.getBody().visit(new ClassBodyIntermediateVisitor(sd,
+                                                            sd.getName(),
                                                             _file, 
                                                             _package,
                                                             _importedFiles, 
                                                             _importedPackages, 
-                                                            _classNamesInThisFile, 
-                                                            continuations));
+                                                            _classesInThisFile, 
+                                                            continuations,
+                                                            fixUps));
       
+      // The following methods are no-ops in FullJavaVisitor
       createAccessors(sd, _file);
       createToString(sd);
       createHashCode(sd);
       createEquals(sd);
     }
     // IMPORTANT: error message if sd is null?
-    // Inner classes are not entered in _classesToBeParsed since they are parsed when their outer classes are parsed.
+    // Inner classes are not entered in _classesInThisFile since they are parsed when their outer classes are parsed.
     
     forInnerClassDefOnly(that);
   }
   
-  /** Check to make sure that the inner interface is okay, and resolve it and store it in the
-    * outer class's list of inner classes.  This method is common to both ClassBodyIntermediateVisitor
-    * and InterfaceBodyIntermediateVisitor but needs the correct SymbolData so we pass it in.  This method is tested
-    * in those files.
+  /** Confirms that the inner interface is well-formed, resolves it, and stores it in the outer class's list of inner 
+    * classes.  This method is common to both ClassBodyIntermediateVisitor and InterfaceBodyIntermediateVisitor but 
+    * needs the correct SymbolData so we pass it in.  This method is tested in those files.
+    * @param that  AST Node for the inner class def
+    * @param enclosing  Data that encloses this inner class; the inner class can be in a class or a method.
+    * @param name  Fully qualified name of the inner class. For a local class, we construct the same name as the Java 
+    *   compiler (??), which inserts "$<seq#>" as the delimiter preceding the raw class name. For example, if class A
+    *   has a method B with a local class C, then qualified name for this class is "A$1C", provided the class is the
+    *   first local class (including anonymous classes) in the enclosing class.
     */
-  protected void handleInnerInterfaceDef(InnerInterfaceDef that, Data data, String name) {
+  // TODO: add a factory method for constructing the classbody visitor (so it is different for FullJava and Functional
+  // and hoist this code into LanguageLevelVisitor
+  protected void handleInnerInterfaceDef(InnerInterfaceDef that, Data enclosing, String relName, String name) {
 //    System.err.println("Processing InnerInterfaceDef for " + name);
+    assert (enclosing instanceof SymbolData) || (enclosing instanceof MethodData);
     forInnerInterfaceDefDoFirst(that);
     if (prune(that)) return;
     
@@ -153,15 +197,16 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
 
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
     
-    SymbolData sd = defineInnerSymbolData(that, name, data);
+    SymbolData sd = defineInnerSymbolData(that, relName, name, enclosing);
     if (sd != null) { 
       that.getBody().visit(new InterfaceBodyIntermediateVisitor(sd, 
                                                                 _file, 
                                                                 _package,
                                                                 _importedFiles, 
                                                                 _importedPackages,
-                                                                _classNamesInThisFile, 
-                                                                continuations));
+                                                                _classesInThisFile, 
+                                                                continuations,
+                                                                fixUps));
     }
     
     forInnerInterfaceDefOnly(that);
@@ -198,17 +243,18 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
 //    return null;
 //  }
 //  
-  /** Allow inner classes at the Intermediate Level.  Override any inherited code. */
-  public Void forInnerClassDefDoFirst(InnerClassDef that) {
-//    _addError("Inner classes cannot be used at the Intermediate level", that);
-    return null;
-  }
-  
-  /** Allow inner interfaces at the Intermediate Level. Override any inherited code. */
-    public Void forInnerInterfaceDefDoFirst(InnerInterfaceDef that) {
-//    _addError("Nested interfaces cannot be used at the Intermediate level", that);
-    return null;
-  }
+  /* The following two overrides appear unnecessary. */
+//  /** Allow inner classes at the Intermediate Level.  Override any inherited code. */
+//  public Void forInnerClassDefDoFirst(InnerClassDef that) {
+////    _addError("Inner classes cannot be used at the Intermediate level", that);
+//    return null;
+//  }
+//  
+//  /** Allow inner interfaces at the Intermediate Level. Override any inherited code. */
+//    public Void forInnerInterfaceDefDoFirst(InnerInterfaceDef that) {
+////    _addError("Nested interfaces cannot be used at the Intermediate level", that);
+//    return null;
+//  }
   
 //  /**Do not allow static intiializers at the Intermediate Level.*/
 //  public Void forStaticInitializerDoFirst(StaticInitializer that) {
@@ -320,12 +366,12 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
   
   
   /*Check to see if className is one of the classes declared in the current source file,
-   * by looking through classNamesInThisFile.*/
+   * by looking through classesInThisFile.*/
   private boolean _isClassInCurrentFile(String className) {
-    Iterator<String> iter = _classNamesInThisFile.iterator();
+    Iterator<String> iter = _classesInThisFile.iterator();
     while (iter.hasNext()) {
       String s = iter.next();
-      if (s.equals(className) || s.endsWith("." + className)) {
+      if (s.equals(className) || s.endsWith('.' + className)) {
         return true;
       }
     }
@@ -333,9 +379,9 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
   }  
   
   /** Use the doFirst method to make sure there aren't any errors with the declaration.  Then, use defineSymbolData to 
-    * create the appropriate symbol data, and then visit the class body.  Finally, autogenerate the toString, equals, 
+    * create the appropriate SymbolData, and then visit the class body.  Finally, autogenerate the toString, equals, 
     * hashCode, and accessor methods.  The constructor will be autogenerated right before the TypeChecking pass starts.
-    * Once the class def has been handled, remove it from classesToBeParsed.
+    * Once the class def has been handled, remove it from _classesInThisFile.
     */
   public Void forClassDef(ClassDef that) {    
     forClassDefDoFirst(that);
@@ -343,30 +389,27 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     
     boolean isTestCase = false;  // flag to support automatic importing of junit.framework.*;
     String className = getQualifiedClassName(that.getName().getText());
-    SymbolData sd = defineSymbolData(that, className);
+    System.err.println("Processing class " + className);
     
-    if (sd != null) {
+    String superName = that.getSuperclass().getName();
     
-      String superName = that.getSuperclass().getName();
-      if (superName.equals("TestCase") || superName.equals("junit.framework.TestCase")) {
-        isTestCase = true;
-        if (! _importedPackages.contains("junit.framework") && ! _importedFiles.contains("junit.framework.TestCase")) {
-//          System.err.println("importing junit.framework.TestCase in file " + that.getSourceInfo());
-          _importedFiles.addLast("junit.framework.TestCase");
-          sd.setHasAutoGeneratedJunitImport(true);
-        }
-        // add to symbol table
-        getSymbolData("junit.framework.TestCase", that.getSourceInfo(), true, false, true, false); 
-//        assert getSymbolData("junit.framework.TestCase", that.getSourceInfo()) != null;
+    if (superName.equals("TestCase") || superName.equals("junit.framework.TestCase")) {
+      isTestCase = true;
+      if (! _importedPackages.contains("junit.framework") && ! _importedFiles.contains("junit.framework.TestCase")) {
+        _importedFiles.addLast("junit.framework.TestCase");
+        createImportedSymbolContinuation("junit.framework.TestCase", that.getSourceInfo());
       }
+      assert getQualifiedSymbolData("junit.framework.TestCase", that.getSourceInfo()) != null;
     }
-    
+      
+    SymbolData sd = defineSymbolData(that, className);
+    assert getQualifiedSymbolData(className, that.getSourceInfo()) != null;
+
     that.getMav().visit(this);
     that.getName().visit(this);
     that.getSuperclass().visit(this);
     
-    // Test cases are automatically public; isTestCase => sd != null
-    if (isTestCase) sd.addModifier("public");
+    if (sd != null) identifyInnerClasses(that);
     
     // Process fields of this ClassDef (the get method is misnamed!)
     for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
@@ -374,21 +417,29 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
     
     if (sd != null) {
-      that.getBody().visit(new ClassBodyIntermediateVisitor(sd, _file, _package, _importedFiles, _importedPackages,
-                                                            _classNamesInThisFile, continuations));
+      if (isTestCase) {
+        // Test cases are automatically public; isTestCase => sd != null
+        sd.addModifier("public");
+        if (! _importedPackages.contains("junit.framework") && ! _importedFiles.contains("junit.framework.TestCase"))
+          sd.setHasAutoGeneratedJunitImport(true);
+      }
+      that.getBody().visit(new ClassBodyIntermediateVisitor(sd, className, _file, _package, _importedFiles, 
+                                                            _importedPackages, _classesInThisFile, continuations,
+                                                            fixUps));
       createAccessors(sd, _file);
       createToString(sd);
       createHashCode(sd);
       createEquals(sd);
     }
+    
     forClassDefOnly(that);
-    _classesToBeParsed.remove(className);
+    _classesInThisFile.remove(className);
     return null;
   }
   
   /** Use the doFirst method to make sure that there aren't any errors with the declaration.  Define a SymbolData 
     * corresponding to this interface definition. Then visit the body to handle anything defined inside the interfac
-    * Once the interface has been resolved, remove it from _classesToBeParsed.
+    * Once the interface has been resolved, remove it from _classesInThisFile.
     */
   public Void forInterfaceDef(InterfaceDef that) {
     forInterfaceDefDoFirst(that);
@@ -402,14 +453,16 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
 
     SymbolData sd = defineSymbolData(that, className);
     if (sd != null) {
+      identifyInnerClasses(that);  // inner interfaces??
       sd.setInterface(true);
       that.getBody().visit(new InterfaceBodyIntermediateVisitor(sd, _file, _package, _importedFiles, _importedPackages, 
-                                                                _classNamesInThisFile, continuations));
+                                                                _classesInThisFile, continuations, fixUps));
     }
+    
     that.getMav().visit(this);
     that.getName().visit(this);
     forInterfaceDefOnly(that);
-    _classesToBeParsed.remove(className);
+    _classesInThisFile.remove(className);
     return null;
   }
   
@@ -427,7 +480,8 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     return null;
   }
   public Void forBitwiseOrExpressionDoFirst(BitwiseOrExpression that) {
-    _addAndIgnoreError("Bitwise or expressions cannot be used at any language level." + 
+    System.err.println("Visiting BitwiseOrExpression: " + that);
+    _addAndIgnoreError("Bitwise or expressions cannot be used in the functional language level." + 
                        "  Perhaps you meant to compare two values using regular or (||)", that);
     return null;
   }
@@ -485,47 +539,55 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     return super._variableDeclaration2VariableData(vd, enclosingData);
   }
   
-  /** Do the work that is shared between SimpleAnonymousClassInstantiations and ComplexAnonymousClassInstantiations.  Do
-    * not generate automatic accessors for the anonymous class--this will be done in type checker pass.
-    * @param that  The AnonymousClassInstantiation being visited
-    * @param enclosing  The enclosing Data
-    * @param superC  The super class being instantiated--i.e. new A() { ...}, would have a super class of A.
-    */
-  public void anonymousClassInstantiationHelper(AnonymousClassInstantiation that, Data enclosing, SymbolData superC) {
-    that.getArguments().visit(this); 
-    
-    //Get the SymbolData that will correspond to this anonymous class
-    SymbolData sd = new SymbolData(getQualifiedClassName(enclosing.getSymbolData().getName()) + "$" + 
-                                   enclosing.getSymbolData().preincrementAnonymousInnerClassNum());
-    enclosing.addInnerClass(sd);
-    sd.setOuterData(enclosing);
-    sd.setSuperClass(superC); //the super class is what was passed in
-    sd.setPackage(_package);
-    
-    createToString(sd);
-    createHashCode(sd);
-    createEquals(sd);
-    //accessors will be filled in in typeChecker pass
-    
-    //visit the body to get it all nice and resolved.  NOTE: what about the fact that all of the methods MUST BE PUBLIC
-    that.getBody().visit(new ClassBodyIntermediateVisitor(sd, _file, _package, _importedFiles, _importedPackages, 
-                                                          _classNamesInThisFile, continuations));
-  }
+//  /** Do the work that is shared between SimpleAnonymousClassInstantiations and ComplexAnonymousClassInstantiations.  Do
+//    * not generate automatic accessors for the anonymous class--this will be done in type checker pass.
+//    * @param that  The AnonymousClassInstantiation being visited
+//    * @param enclosing  The enclosing Data
+//    * @param superC  The super class being instantiated--i.e. new A() { ...}, would have a super class of A.
+//    */
+//  public void anonymousClassInstantiationHelper(AnonymousClassInstantiation that, SymbolData enclosing, 
+//    SymbolData superC) {
+//  
+//    that.getArguments().visit(this); 
+//    
+//    // Generate the internal class name for this anonymous inner class
+//    String anonName = getQualifiedClassName(enclosing.getSymbolData().getName()) + "$" + 
+//      enclosing.getSymbolData().preincrementAnonymousInnerClassNum();
+//    
+//    // Create the SymbolData that will correspond to this anonymous class
+//    SymbolData sd = new SymbolData(anonName);
+//    enclosing.addInnerClass(sd);
+//    sd.setOuterData(enclosing);
+//    
+//    if (superC != null && ! superC.isInterface()) {
+//      sd.setSuperClass(superC); // the super class is what was passed in
+//    }
+//    sd.setPackage(_package);
+//    
+//    createToString(sd);
+//    createHashCode(sd);
+//    createEquals(sd);
+//    //accessors will be filled in in typeChecker pass
+//    
+//    //visit the body to get it all nice and resolved.  NOTE: what about the fact that all of the methods MUST BE PUBLIC
+//    that.getBody().visit(new ClassBodyIntermediateVisitor(sd, anonName, _file, _package, _importedFiles,
+//                                                          _importedPackages, _classesInThisFile, continuations,
+//                                                          fixUps));
+//  }
   
   /** Look up the supertype of this class instantiation and add it to the symbol table. Visit the body of the class 
     * instantiation.  The processing of this anonymous inner class (i.e. adding it to the enclosing SD's list of inner 
-    * classes, creating a symbol data for the anonyomous inner class, etc) will be handled in the TypeChecker pass.
+    * classes, creating a SymbolData for the anonyomous inner class, etc) will be handled in the TypeChecker pass.
     * This is because no one will depend on that symbolData until we create it.
-    * @param that  The SimpleAnonymousClassInstantiation being processed.
+    * @param that       The SimpleAnonymousClassInstantiation being processed.
+    * @param enclosing  The SymbolData of the enclosing class.
     */
-  public void simpleAnonymousClassInstantiationHelper(SimpleAnonymousClassInstantiation that, Data data) {
+  public void simpleAnonymousClassInstantiationHelper(SimpleAnonymousClassInstantiation that, SymbolData enclosing) {
     forSimpleAnonymousClassInstantiationDoFirst(that);
     if (prune(that)) return;
     
-    //resolve the super class and make sure it will be in the SymbolTable.
-    SymbolData superC = getSymbolData(that.getType().getName(), that.getSourceInfo());
-    
-    anonymousClassInstantiationHelper(that, data, superC);
+    String superName = that.getType().getName();
+    anonymousClassInstantiationHelper(that, enclosing, superName);
     
     forSimpleAnonymousClassInstantiationOnly(that);
   }
@@ -534,25 +596,20 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     * inner class of the enclosing SD.  When the enclosing SD was resolved, all of its inner classes 
     * should have also been resolved).  Visit the body of the class instantiation.  
     * @param that  The ComplexAnonymousClassInstantiation being processed.
-    * @param data  The enclosing data where this was sreferenced from.
+    * @param enclosing  The SymbolData of the enclosing class.
     */
-  public void complexAnonymousClassInstantiationHelper(ComplexAnonymousClassInstantiation that, Data data) {
+  public void complexAnonymousClassInstantiationHelper(ComplexAnonymousClassInstantiation that, SymbolData enclosing) {
     forComplexAnonymousClassInstantiationDoFirst(that);
     if (prune(that)) return;
     
     //visit the enclosing 
     that.getEnclosing().visit(this);
     
-    // No need to resolve the super class of the type being instantiated, because it is a complex type, so its enclosing 
-    // data should get added to the symbolTable along with it wherever we resolved its enclosing data.
-    
-    // Originally, make super class null.  This will be updated in the TypeChecker pass.
-    anonymousClassInstantiationHelper(that, data, null);
-    
+    String superName = that.getType().getName();
+    anonymousClassInstantiationHelper(that, enclosing, superName);
     
     forComplexAnonymousClassInstantiationOnly(that);
   }
-  
   
   /** Test the methods declared in the above class. */
   public static class IntermediateVisitorTest extends TestCase {
@@ -565,19 +622,19 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     private SymbolData _sd4;
     private SymbolData _sd5;
     private SymbolData _sd6;
-    private ModifiersAndVisibility _publicMav = 
+    public static final ModifiersAndVisibility PUBLIC_MAV = 
       new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] { "public" });
-    private ModifiersAndVisibility _protectedMav = 
+    public static final ModifiersAndVisibility PROTECTED_MAV = 
       new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] { "protected" });
-    private ModifiersAndVisibility _privateMav = 
+    public static final ModifiersAndVisibility PRIVATE_MAV = 
       new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] { "private" });
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = 
+    public static final ModifiersAndVisibility PACKAGE_MAV = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    public static final ModifiersAndVisibility ABSTRACT_MAV = 
       new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _privateAbstractMav = 
+    public static final ModifiersAndVisibility PRIVATE_ABSTRACT_MAV = 
       new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract", "private"});  // illegal
-    private ModifiersAndVisibility _staticMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"static"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+    public static final ModifiersAndVisibility STATIC_MAV = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"static"});
+    public static final ModifiersAndVisibility FINAL_MAV = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
     
     public IntermediateVisitorTest() { this(""); }
     public IntermediateVisitorTest(String name) {
@@ -594,16 +651,17 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       LanguageLevelConverter._newSDs.clear();
       LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.make(new File("lib/buildlib/junit.jar")));
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();      
-      _hierarchy = new Hashtable<String, TypeDefBase>();
+//      _hierarchy = new Hashtable<String, TypeDefBase>();
       
       _iv = new IntermediateVisitor(new File(""),
                                     errors,
-                                    continuations, 
+                                    continuations,
+                                    new LinkedList<Command>(),
                                     new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>());
       LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.make(new File("lib/buildlib/junit.jar")));
-      _iv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
-      _iv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
-      _iv._resetNonStaticFields();
+      _iv._classesInThisFile = new HashSet<String>();
+      _iv.continuations = new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>();
+//      _iv._resetNonStaticFields();
       _iv._importedPackages.addFirst("java.lang");
       _errorAdded = false;
       _sd1 = new SymbolData("i.like.monkey");
@@ -612,16 +670,28 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       _sd4 = new SymbolData("u.like.emu");
       _sd5 = new SymbolData("");
       _sd6 = new SymbolData("cebu");
+      
+      _sd1.setIsContinuation(false);
+      _sd1.setInterface(false);
+      _sd1.setPackage("");
+      _sd1.setTypeParameters(new TypeParameter[0]);
+      _sd1.setInterfaces(new ArrayList<SymbolData>()); 
+      
+      _iv._enclosingClassName = "i.like.monkey";
+      _iv.symbolTable.put("i.like.monkey", _sd1);
+      SymbolData objectSD = _iv.getQualifiedSymbolData("java.lang.Object", SourceInfo.NO_INFO);
+      _sd1.setSuperClass(objectSD);
+      _errorAdded = false;  // static field of this.  TODO: fix this!
     }
     
     public void testForModifiersAndVisibilityDoFirst() {
       
       // Check that the proper modifiers are allowed:
-      _iv.forModifiersAndVisibilityDoFirst(_abstractMav);
-      _iv.forModifiersAndVisibilityDoFirst(_publicMav);
-      _iv.forModifiersAndVisibilityDoFirst(_privateMav);
-      _iv.forModifiersAndVisibilityDoFirst(_protectedMav);
-      _iv.forModifiersAndVisibilityDoFirst(_staticMav);
+      _iv.forModifiersAndVisibilityDoFirst(ABSTRACT_MAV);
+      _iv.forModifiersAndVisibilityDoFirst(PUBLIC_MAV);
+      _iv.forModifiersAndVisibilityDoFirst(PRIVATE_MAV);
+      _iv.forModifiersAndVisibilityDoFirst(PROTECTED_MAV);
+      _iv.forModifiersAndVisibilityDoFirst(STATIC_MAV);
       
       ModifiersAndVisibility mavs = new ModifiersAndVisibility(SourceInfo.NO_INFO, 
                                                                new String[] {"private", "static"});
@@ -630,7 +700,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       
       //check errors:
       
-      _iv.forModifiersAndVisibilityDoFirst(_finalMav);
+      _iv.forModifiersAndVisibilityDoFirst(FINAL_MAV);
 //      assertEquals("there should now be 1 errors", 1, errors.size());
 //      assertEquals("The error message should be correct for private modifier:", 
 //                   "The keyword \"final\" cannot be used at the Intermediate level", errors.get(0).getFirst());
@@ -653,7 +723,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     
     public void testForClassDefDoFirst() {
       //check an example that works
-      ClassDef cd0 = new ClassDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "Lisa"),
+      ClassDef cd0 = new ClassDef(SourceInfo.NO_INFO, PUBLIC_MAV, new Word(SourceInfo.NO_INFO, "Lisa"),
                                   new TypeParameter[0], 
                                   new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
                                   new ReferenceType[0], 
@@ -663,7 +733,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       assertEquals("should be no errors", 0, errors.size());
       
       //check that an error is not thrown if a class doesn't explicitely extend another class
-      ClassDef cd1 = new ClassDef(SourceInfo.NO_INFO, _publicMav, 
+      ClassDef cd1 = new ClassDef(SourceInfo.NO_INFO, PUBLIC_MAV, 
                                   new Word(SourceInfo.NO_INFO, "Test"), new TypeParameter[0], JExprParser.NO_TYPE,
                                   new ReferenceType[0], new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       
@@ -672,8 +742,9 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       
       //check that an error is not thrown if a class implements any interfaces.
       ClassDef cd2 = 
-        new ClassDef(SourceInfo.NO_INFO, _publicMav, 
-                     new Word(SourceInfo.NO_INFO, "Test"), new TypeParameter[0],
+        new ClassDef(SourceInfo.NO_INFO, PUBLIC_MAV, 
+                     new Word(SourceInfo.NO_INFO, "Test"),
+                     new TypeParameter[0],
                      new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
                      new ReferenceType[] {new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0])}, 
                      new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
@@ -714,8 +785,8 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       //      ClassModifier cm = ClassModifier.NONE;
       TypeVariable tv = new TypeVariable(noInfo, "name");
       
-      InnerInterfaceDef ii = new InnerInterfaceDef(noInfo, _publicMav, w, tps, rts, emptyBody);
-      InnerClassDef ic = new InnerClassDef(noInfo, _publicMav, w, tps, superClass, rts, emptyBody);
+      InnerInterfaceDef ii = new InnerInterfaceDef(noInfo, PUBLIC_MAV, w, tps, rts, emptyBody);
+      InnerClassDef ic = new InnerClassDef(noInfo, PUBLIC_MAV, w, tps, superClass, rts, emptyBody);
       
       StaticInitializer si = new StaticInitializer(noInfo, b);
       LabeledStatement ls = new LabeledStatement(noInfo, new Word(noInfo, "label"), stmt);
@@ -832,59 +903,140 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     
     public void test_isClassInCurrentFile() {
       assertFalse("class not in file should return false", _iv._isClassInCurrentFile("NotInFile"));
-      _iv._classNamesInThisFile.addLast("package.MyClass");
+      _iv._classesInThisFile.add("package.MyClass");
       assertTrue("full class name in file should return true", _iv._isClassInCurrentFile("package.MyClass"));
       assertTrue("unqualified class name in file should return true", _iv._isClassInCurrentFile("MyClass"));
       
       assertFalse("partial name in file, not same class, should return false", _iv._isClassInCurrentFile("Class"));
       
     }
-    
+  
+    /** Tests createConstructor.  Must ensure that no fixups remain pending before invoking this method. */
     public void testCreateConstructor() {
-      SymbolData sd = new SymbolData("ClassName", _publicMav, new TypeParameter[0], null, new LinkedList<SymbolData>(), null);
-      VariableData v1 = new VariableData("i", _publicMav, SymbolData.INT_TYPE, false, sd);
-      VariableData v2 = new VariableData("j", _publicMav, SymbolData.CHAR_TYPE, false, sd);
-      VariableData v3 = new VariableData("var", _publicMav, SymbolData.DOUBLE_TYPE, false, sd);
+      SymbolData sd =
+        new SymbolData("ClassName", PUBLIC_MAV, new TypeParameter[0], null, new ArrayList<SymbolData>(), null);
+      VariableData v1 = new VariableData("i", PUBLIC_MAV, SymbolData.INT_TYPE, false, sd);
+      VariableData v2 = new VariableData("j", PUBLIC_MAV, SymbolData.CHAR_TYPE, false, sd);
       sd.addVar(v1);
       sd.addVar(v2);
       sd.setSuperClass(_sd1);
+      sd.setIsContinuation(false);
+
+      System.err.println("****** Creating constructor for " + _sd1);
+      _iv.createConstructor(_sd1);  // Cannot create constructor for s1 without creating one for its superclass.
       
-      MethodData md = new MethodData("ClassName", _publicMav, new TypeParameter[0], sd, 
-                                     sd.getVars().toArray(new VariableData[0]), 
+      /* Construct expected MethodData */
+      // Copy vars without visibility
+      LinkedList<VariableData> params = new LinkedList<VariableData>();
+      for (VariableData vd: sd.getVars()) {
+        VariableData newParam = vd.copyWithoutVisibility();
+        newParam.setGenerated(true);
+        params.add(newParam);
+      };
+        
+      MethodData md = new MethodData("ClassName", 
+                                     PUBLIC_MAV, 
+                                     new TypeParameter[0], 
+                                     sd, 
+                                     params.toArray(new VariableData[params.size()]), 
                                      new String[0], 
                                      sd,
                                      null);
-      md.addVars(md.getParams());
+      md.addVars(md.getParams());     
+      md.setGenerated(true);
+      
+      System.err.println("****** Before creating Classname constructor, ClassName methods = " + sd.getMethods());
+      System.err.println("****** Creating constructor for " + sd);
       _iv.createConstructor(sd);
+      System.err.println("****** After creating constructor, ClassName method = " + sd.getMethods());
+
+      MethodData conSD = sd.getMethods().getFirst();
+          
+      System.err.println("****** Generated MethodData: " + conSD.toBigString());
+      System.err.println("****** Expectred MethodData: " + md.toBigString());
+      assertEquals("sd should have 1 method: its own constructor", md, conSD);
       
-      assertEquals("sd should have 1 method: its own constructor", md, sd.getMethods().getFirst());
-      
-      //since this is the only constructor in the symbol data, all the fields should be assigned to have a value after visiting sd.
-      v1 = new VariableData("i", _publicMav, SymbolData.INT_TYPE, true, sd);
-      v2 = new VariableData("j", _publicMav, SymbolData.CHAR_TYPE, true, sd);
+//      // Since this is the only constructor in the SymbolData, all the fields should be assigned after visiting sd.
+//      v1 = new VariableData("i", PUBLIC_MAV, SymbolData.INT_TYPE, true, sd);
+//      v2 = new VariableData("j", PUBLIC_MAV, SymbolData.CHAR_TYPE, true, sd);
       
       // We no longer do this in createConstructor
 //      assertTrue("v1 should be correct--set to true", sd.getVars().contains(v1));
 //      assertTrue("v2 should be correct--set to true", sd.getVars().contains(v2));
+
+      // Now test a subclass of sd:
+
+      SymbolData subSD = 
+        new SymbolData("Subclass", PUBLIC_MAV, new TypeParameter[0], null, new ArrayList<SymbolData>(), null);
+      VariableData v3 = new VariableData("var", PUBLIC_MAV, SymbolData.DOUBLE_TYPE, false, subSD);
+      subSD.addVar(v3);
       
+//      // Revise params rather than recreating them, because they contain hidden fields like enclosingData that
+//      // must be right for equality testing to succeeed
+//      params.get(0).setName("super_i");
+//      params.get(1).setName("super_j");
+//      VariableData v3Param = v3.copyWithoutVisibility();
+//      v3Param.setGenerated(true);
+//      params.add(v3Param);
       
+      subSD.setSuperClass(sd);
       
-      //now test a subclass of sd:
-      SymbolData subSd = new SymbolData("Subclass",_publicMav, new TypeParameter[0], null, new LinkedList<SymbolData>(), null);
-      subSd.addVar(v3);
-      subSd.setSuperClass(sd);
+      // Create copies of v1, v2. v3 with Package MAV
+      VariableData v1Param = new VariableData("super_i", PACKAGE_MAV, SymbolData.INT_TYPE, true, subSD);
+      VariableData v2Param = new VariableData("super_j", PACKAGE_MAV, SymbolData.CHAR_TYPE, true, subSD);
+      VariableData v3Param = new VariableData("var", PACKAGE_MAV, SymbolData.DOUBLE_TYPE, true, subSD);
+          
+      v1Param.setGenerated(true);
+      v2Param.setGenerated(true);
+      v3Param.setGenerated(true);
       
-      VariableData v1Param = new VariableData("super_i", _packageMav, SymbolData.INT_TYPE, true, null);
-      VariableData v2Param = new VariableData("super_j", _packageMav, SymbolData.CHAR_TYPE, true, null);
-      VariableData[] vars = {v1Param, v2Param, v3};
-      MethodData md2 = new MethodData("Subclass", _publicMav, new TypeParameter[0], subSd,
-                                      vars, new String[0], subSd, null);
+      VariableData[] newParams = new VariableData[] { v1Param, v2Param, v3Param };
+      
+//      VariableData[] newParams = params.toArray(new VariableData[params.size()]);
+      
+      MethodData md2 = 
+        new MethodData("Subclass", 
+                       PUBLIC_MAV, 
+                       new TypeParameter[0], 
+                       subSD, 
+                       newParams,
+                       new String[0], 
+                       subSD, 
+                       null);
+      
       md2.addVars(md2.getParams());
+      md2.setGenerated(true);
       
-      _iv.createConstructor(subSd);
-      v1Param.setEnclosingData(subSd.getMethods().getFirst());
-      v2Param.setEnclosingData(subSd.getMethods().getFirst());
-      assertEquals("subSd should have 1 method: its own constructor.", md2, subSd.getMethods().getFirst());
+      _iv.createConstructor(subSD);
+      
+      conSD = subSD.getMethods().getFirst();  // Reusing conSD local variable
+      System.err.println("****** Expected params = " + Arrays.toString(md2.getParams()));
+      System.err.println("****** Results  params = " + Arrays.toString(conSD.getParams()));
+      
+      System.err.println("****** Expected vars = " + md2.getVars());
+      System.err.println("****** Results  vars = " + conSD.getVars());
+      
+      System.err.println("****** Constructor for Subclass is: " + conSD.toBigString());
+      System.err.println("****** Expected MethodData is: " + md2.toBigString());
+      
+      assert md2.getName().equals(conSD.getName());
+      assert md2.getMav().equals(conSD.getMav());
+      assert arrayEquals(md2.getTypeParameters(), conSD.getTypeParameters());
+      assert arrayEquals(md2.getThrown(), conSD.getThrown());
+      assert md2.getEnclosingData().equals(conSD.getEnclosingData());
+      LinkedList<VariableData> mVars = md2.getVars();
+      LinkedList<VariableData> cVars = conSD.getVars();
+      assert mVars.size() == cVars.size();
+      for (int i = 0; i < mVars.size(); i++) {
+        System.err.println("****** EnclosingData of mVars " + i + " = " + mVars.get(i).getEnclosingData());
+        System.err.println("****** EnclosingData of cVars " + i + " = " + cVars.get(i).getEnclosingData());
+        assertEquals("Var Test" + i, mVars.get(i), cVars.get(i));
+      }
+        
+      assert md2.getVars().equals(conSD.getVars());
+      assert arrayEquals(md2.getParams(), conSD.getParams());
+
+      assertEquals("subSD should have 1 method: its own constructor.", md2, conSD);
     }
     
     public void test_getFieldAccessorName() {
@@ -893,11 +1045,13 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     }
     
     public void testCreateToString() {
-      SymbolData sd = new SymbolData("ClassName", _publicMav, new TypeParameter[0], null, new LinkedList<SymbolData>(), null);
+      SymbolData sd = 
+        new SymbolData("ClassName", PUBLIC_MAV, new TypeParameter[0], null, new ArrayList<SymbolData>(), null);
       
-      MethodData md = new MethodData("toString", _publicMav,
+      MethodData md = new MethodData("toString", 
+                                     PUBLIC_MAV,
                                      new TypeParameter[0],
-                                     _iv.getSymbolData("String", _iv._makeSourceInfo("java.lang.String")), 
+                                     _iv.getSymbolData("java.lang.String", SourceInfo.make("java.lang.String")), 
                                      new VariableData[0],
                                      new String[0], 
                                      sd,
@@ -908,9 +1062,14 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     }
     
     public void testCreateHashCode() {
-      SymbolData sd = new SymbolData("ClassName", _publicMav, new TypeParameter[0], null, new LinkedList<SymbolData>(), null);      
+      SymbolData sd = new SymbolData("ClassName", 
+                                     PUBLIC_MAV, 
+                                     new TypeParameter[0], 
+                                     null, 
+                                     new ArrayList<SymbolData>(), 
+                                     null);      
       MethodData md = new MethodData("hashCode",
-                                     _publicMav, 
+                                     PUBLIC_MAV, 
                                      new TypeParameter[0], 
                                      SymbolData.INT_TYPE, 
                                      new VariableData[0],
@@ -922,17 +1081,18 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     }
     
     public void testCreateEquals() {
-      SymbolData sd = new SymbolData("ClassName", _publicMav, new TypeParameter[0], null, new LinkedList<SymbolData>(), null);
+      SymbolData sd =
+        new SymbolData("ClassName", PUBLIC_MAV, new TypeParameter[0], null, new ArrayList<SymbolData>(), null);
+      VariableData[] vds =
+        new VariableData[] { new VariableData(_iv.getSymbolData("java.lang.Object", SourceInfo.make("java.lang.Object"))) };
       MethodData md = new MethodData("equals",
-                                     _publicMav, 
+                                     PUBLIC_MAV, 
                                      new TypeParameter[0], 
                                      SymbolData.BOOLEAN_TYPE, 
-                                     new VariableData[] { new VariableData(_iv.getSymbolData("Object", _iv._makeSourceInfo("java.lang.Object"))) },
+                                     vds,
                                      new String[0], 
                                      sd,
                                      null);
-      
-      
       _iv.createEquals(sd);
       md.getParams()[0].setEnclosingData(sd.getMethods().getFirst());                               
       assertEquals("sd should have 1 method: equals()", md, sd.getMethods().getFirst());
@@ -941,9 +1101,9 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     public void testForClassDef() {
       //check an example that's not abstract
       _iv._package = "myPackage";
-      ClassDef cd0 = new ClassDef(SourceInfo.NO_INFO, _packageMav, new Word(SourceInfo.NO_INFO, "Lisa"),
+      ClassDef cd0 = new ClassDef(SourceInfo.NO_INFO, PACKAGE_MAV, new Word(SourceInfo.NO_INFO, "Lisa"),
                                   new TypeParameter[0], 
-                                  new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), new ReferenceType[0], 
+                                  new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], 
                                   new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0])); 
       
       cd0.visit(_iv);
@@ -956,11 +1116,11 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       assertTrue("Lisa should be in _newSDs", LanguageLevelConverter._newSDs.containsKey(sd));
       MethodData md2 = 
         new MethodData("equals",
-                       _publicMav, 
+                       PUBLIC_MAV, 
                        new TypeParameter[0], 
                        SymbolData.BOOLEAN_TYPE, 
-                       new VariableData[] { new VariableData(_iv.getSymbolData("Object", 
-                                                                               _iv._makeSourceInfo("java.lang.Object"))) },
+                       new VariableData[] { new VariableData(_iv.getSymbolData("java.lang.Object", 
+                                                                               SourceInfo.make("java.lang.Object"))) },
                        new String[0], 
                        sd,
                        null);
@@ -972,13 +1132,19 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       
       //check an example that's abstract
       _iv._package = "";
-      ClassDef cd1 = new ClassDef(SourceInfo.NO_INFO, _abstractMav, new Word(SourceInfo.NO_INFO, "Bart"),
-                                  new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "System", new Type[0]), new ReferenceType[0], 
+      ClassDef cd1 = new ClassDef(SourceInfo.NO_INFO, 
+                                  ABSTRACT_MAV, 
+                                  new Word(SourceInfo.NO_INFO, "Bart"),
+                                  new TypeParameter[0],
+                                  new ClassOrInterfaceType(SourceInfo.NO_INFO, "System", new Type[0]), 
+                                  new ReferenceType[0], 
                                   new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       cd1.visit(_iv);
       assertEquals("There should be no errors", 0, errors.size());
-      assertTrue("Should have resolved java.lang.System", LanguageLevelConverter.symbolTable.containsKey("java.lang.System"));
-      assertFalse("Should not be a continuation", LanguageLevelConverter.symbolTable.get("java.lang.System").isContinuation());
+      assertTrue("Should have resolved java.lang.System", 
+                 LanguageLevelConverter.symbolTable.containsKey("java.lang.System"));
+      assertFalse("Should not be a continuation", 
+                  LanguageLevelConverter.symbolTable.get("java.lang.System").isContinuation());
       sd = LanguageLevelConverter.symbolTable.get("Bart");
       
       assertEquals("There should be 3 methods", 3, sd.getMethods().size());
@@ -986,7 +1152,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       
       //Check an example where the class extends TestCase, and has a test method that returns void.
       ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NO_INFO, 
-                                                    _packageMav, 
+                                                    PACKAGE_MAV, 
                                                     new TypeParameter[0], 
                                                     new VoidReturn(SourceInfo.NO_INFO, "void"), 
                                                     new Word(SourceInfo.NO_INFO, "testMethodName"),
@@ -994,9 +1160,13 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
                                                     new ReferenceType[0], 
                                                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       
-      ClassDef cd3 = new ClassDef(SourceInfo.NO_INFO, _abstractMav, new Word(SourceInfo.NO_INFO, "TestSuper2"),
-                                  new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "TestCase", new Type[0]), new ReferenceType[0], 
-                                  new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {cmd}));
+      ClassDef cd3 = new ClassDef(SourceInfo.NO_INFO, 
+                                  ABSTRACT_MAV, 
+                                  new Word(SourceInfo.NO_INFO, "TestSuper2"),
+                                  new TypeParameter[0], 
+                                  new ClassOrInterfaceType(SourceInfo.NO_INFO, "TestCase", new Type[0]), 
+                                  new ReferenceType[0], 
+                                  new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { cmd }));
       
       _iv._file=new File("TestSuper2.dj0");
       _iv._importedFiles.addLast("junit.framework.TestCase");
@@ -1008,7 +1178,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       // Check a method with void return, but name not starting with test, but it's still okay.
       //This is now checked in the type checker!
       ConcreteMethodDef cmd2 = new ConcreteMethodDef(SourceInfo.NO_INFO, 
-                                                     _packageMav, 
+                                                     PACKAGE_MAV, 
                                                      new TypeParameter[0], 
                                                      new VoidReturn(SourceInfo.NO_INFO, "void"), 
                                                      new Word(SourceInfo.NO_INFO, "uhOh"),
@@ -1016,9 +1186,13 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
                                                      new ReferenceType[0], 
                                                      new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       
-      ClassDef cd4 = new ClassDef(SourceInfo.NO_INFO, _abstractMav, new Word(SourceInfo.NO_INFO, "TestVoidNoTestMethod"),
-                                  new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "junit.framework.TestCase", new Type[0]), new ReferenceType[0], 
-                                  new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {cmd2}));
+      ClassDef cd4 = new ClassDef(SourceInfo.NO_INFO, 
+                                  ABSTRACT_MAV, 
+                                  new Word(SourceInfo.NO_INFO, "TestVoidNoTestMethod"),
+                                  new TypeParameter[0], 
+                                  new ClassOrInterfaceType(SourceInfo.NO_INFO, "junit.framework.TestCase", new Type[0]), 
+                                  new ReferenceType[0], 
+                                  new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { cmd2 }));
       
       
       
@@ -1031,26 +1205,46 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     }
     
     public void testForInterfaceDef() {
-      AbstractMethodDef amd = new AbstractMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], new PrimitiveType(SourceInfo.NO_INFO, "int"),
-                                                    new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[0], new ReferenceType[0]);
-      AbstractMethodDef amd2 = new AbstractMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], new PrimitiveType(SourceInfo.NO_INFO, "int"),
-                                                     new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[0], new ReferenceType[0]);
-      InterfaceDef id = new InterfaceDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "id"), new TypeParameter[0], new ReferenceType[0], 
-                                         new BracedBody(SourceInfo.NO_INFO, 
-                                                        new BodyItemI[] {amd}));
-      InterfaceDef id2 = new InterfaceDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "id2"), new TypeParameter[0], new ReferenceType[] {new ClassOrInterfaceType(SourceInfo.NO_INFO, "id", new Type[0])}, 
-                                          new BracedBody(SourceInfo.NO_INFO, 
-                                                         new BodyItemI[] {amd2}));
-      SymbolData sd = new SymbolData("id", _publicMav, new TypeParameter[0], new LinkedList<SymbolData>(), null);
+      AbstractMethodDef amd = new AbstractMethodDef(SourceInfo.NO_INFO, 
+                                                    PUBLIC_MAV, 
+                                                    new TypeParameter[0], 
+                                                    new PrimitiveType(SourceInfo.NO_INFO, "int"),
+                                                    new Word(SourceInfo.NO_INFO, "myMethod"), 
+                                                    new FormalParameter[0], 
+                                                    new ReferenceType[0]);
+      AbstractMethodDef amd2 = new AbstractMethodDef(SourceInfo.NO_INFO, 
+                                                     PUBLIC_MAV, 
+                                                     new TypeParameter[0], 
+                                                     new PrimitiveType(SourceInfo.NO_INFO, "int"),
+                                                     new Word(SourceInfo.NO_INFO, "myMethod"), 
+                                                     new FormalParameter[0], 
+                                                     new ReferenceType[0]);
+      InterfaceDef id = new InterfaceDef(SourceInfo.NO_INFO, 
+                                         PUBLIC_MAV, 
+                                         new Word(SourceInfo.NO_INFO, "id"), 
+                                         new TypeParameter[0], 
+                                         new ReferenceType[0], 
+                                         new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {amd}));
+      InterfaceDef id2 = 
+        new InterfaceDef(SourceInfo.NO_INFO, 
+                         PUBLIC_MAV, 
+                         new Word(SourceInfo.NO_INFO, "id2"), 
+                         new TypeParameter[0], 
+                         new ReferenceType[] { new ClassOrInterfaceType(SourceInfo.NO_INFO, "id", new Type[0]) }, 
+                         new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { amd2 }));
+      SymbolData sd = new SymbolData("id", PUBLIC_MAV, new TypeParameter[0], new ArrayList<SymbolData>(), null);
       sd.setIsContinuation(true);
-      MethodData md = new MethodData("myMethod", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[0], new String[0], sd, amd);
+      MethodData md = 
+        new MethodData("myMethod", PUBLIC_MAV, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[0], 
+                       new String[0], sd, amd);
       
-      LinkedList<SymbolData> interfaces = new LinkedList<SymbolData>();
-      interfaces.addLast(sd);
-      SymbolData sd2 = new SymbolData("id2", _publicMav, new TypeParameter[0], interfaces, null);
+      ArrayList<SymbolData> interfaces = new ArrayList<SymbolData>();
+      interfaces.add(sd);
+      SymbolData sd2 = new SymbolData("id2", PUBLIC_MAV, new TypeParameter[0], interfaces, null);
       sd2.setIsContinuation(true);
-      MethodData md2 = new MethodData("myMethod", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[0], new String[0], sd2, amd2);
-      
+      MethodData md2 = 
+        new MethodData("myMethod", PUBLIC_MAV, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[0], 
+                       new String[0], sd2, amd2);
       LanguageLevelConverter.symbolTable.put("id", sd);
       LanguageLevelConverter.symbolTable.put("id2", sd2);
       
@@ -1067,26 +1261,40 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     public void testCreateMethodData() {
       // Test one that doesn't work.
       MethodDef mdef = new AbstractMethodDef(SourceInfo.NO_INFO, 
-                                             _privateAbstractMav, 
+                                             PRIVATE_ABSTRACT_MAV, 
                                              new TypeParameter[0], 
                                              new PrimitiveType(SourceInfo.NO_INFO, "int"), 
                                              new Word(SourceInfo.NO_INFO, "methodName"),
                                              new FormalParameter[0],
                                              new ReferenceType[0]); 
       
-      MethodData mdata = new MethodData("methodName", _privateAbstractMav, new TypeParameter[0], SymbolData.INT_TYPE, 
+      MethodData mdata = new MethodData("methodName", PRIVATE_ABSTRACT_MAV, new TypeParameter[0], SymbolData.INT_TYPE, 
                                         new VariableData[0], 
                                         new String[0],
                                         _sd1,
                                         null);
+      _iv._package = "i.like";
+      _iv._enclosingClassName = "i.like.monkey";
+      _iv.symbolTable.put("i.like.monkey", _sd1);
+      System.err.println("SymbolData for i.like.monkey = " + _iv.getQualifiedSymbolData("i.like.monkey", SourceInfo.NO_INFO));
       assertEquals("Should return the correct MethodData", mdata, _iv.createMethodData(mdef, _sd1));
       assertEquals("There should be one errors.", 1, errors.size());
-//      assertEquals("The error message should be correct.", "The keyword \"final\" cannot be used at the Intermediate level", errors.get(0).getFirst());
+//      assertEquals("The error message should be correct.", 
+//      "The keyword \"final\" cannot be used at the Intermediate level", 
+//        errors.get(0).getFirst());
       
       // Test one that does work.
+      UninitializedVariableDeclarator uvd1 =
+        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                            new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                                            new Word(SourceInfo.NO_INFO, "field1"));
+      UninitializedVariableDeclarator uvd2 =
+        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                            new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                            new Word(SourceInfo.NO_INFO, "field1"));
       mdef = 
         new AbstractMethodDef(SourceInfo.NO_INFO, 
-                              _abstractMav, 
+                              ABSTRACT_MAV, 
                               new TypeParameter[] { new TypeParameter(SourceInfo.NO_INFO,
                                                                       new TypeVariable(SourceInfo.NO_INFO, "T"),
                                                                       new TypeVariable(SourceInfo.NO_INFO, "U"))},
@@ -1094,52 +1302,59 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
                               new Word(SourceInfo.NO_INFO, "methodName"),
                               new FormalParameter[] {
                                 new FormalParameter(SourceInfo.NO_INFO, 
-                                                    new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                                                        new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                                                                        new Word (SourceInfo.NO_INFO, "field1")),
+                                                    uvd1,
                                                     false
                                                    ),
                                   new FormalParameter(SourceInfo.NO_INFO, 
-                                                      new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                                                          new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                                                                          new Word (SourceInfo.NO_INFO, "field1")),
+                                                      uvd2,
                                                       false
                                                      )},
                               new ReferenceType[] { new TypeVariable(SourceInfo.NO_INFO, "X") }
                               );
       mdata = 
         new MethodData("methodName", 
-                       _abstractMav, 
+                       ABSTRACT_MAV, 
                        new TypeParameter[] { new TypeParameter(SourceInfo.NO_INFO,
                                                                new TypeVariable(SourceInfo.NO_INFO, "T"),
                                                                new TypeVariable(SourceInfo.NO_INFO, "U"))}, 
                        SymbolData.VOID_TYPE, 
-                       new VariableData[] { new VariableData("field1", _finalMav, SymbolData.DOUBLE_TYPE, true, null),
-                         new VariableData("field1", _finalMav, SymbolData.INT_TYPE, true, null) }, 
+                       new VariableData[] { new VariableData("field1", FINAL_MAV, SymbolData.DOUBLE_TYPE, true, _sd1),
+                         new VariableData("field1", FINAL_MAV, SymbolData.INT_TYPE, true, _sd1) }, 
                        new String[] { "X" },
                        _sd1,
                        null);
       
       
       MethodData result = _iv.createMethodData(mdef, _sd1);
-      mdata.getParams()[0].setEnclosingData(result);
-      mdata.getParams()[1].setEnclosingData(result);
+      /* Enclosing data for formal parameters is the enclosing class, not the enclosing method. */
+//      mdata.getParams()[0].setEnclosingData(result);
+//      mdata.getParams()[1].setEnclosingData(result);
+      
       // have to add the parameters to the vars manually
-      mdata.addVars(new VariableData[] { new VariableData("field1", _finalMav, SymbolData.DOUBLE_TYPE, true, result) });                                                          
+      mdata.addVars(new VariableData[] { new VariableData("field1", FINAL_MAV, SymbolData.DOUBLE_TYPE, true, _sd1) });
+      System.err.println("****** mdata  = " + mdata);
+      System.err.println("****** result = " + result);
       assertEquals("Should return the correct MethodData", mdata, result);
       assertEquals("There should be 2 errors.", 2, errors.size());
-      //This is now caught in the type checker.
-      //assertEquals("The second error message should be correct.", "The keyword \"void\" cannot be used at the Intermediate level", errors.get(1).getFirst());
-      assertEquals("The second error message should be correct.", "You cannot have two method parameters with the same name", errors.get(1).getFirst());
+      // This is now caught in the type checker.
+//      assertEquals("The second error message should be correct.", 
+//                   "The keyword \"void\" cannot be used at the Intermediate level", 
+//                   errors.get(1).getFirst());
+      assertEquals("The second error message should be correct.", 
+                   "You cannot have two method parameters with the same name", 
+                   errors.get(1).getFirst());
     }
     
     public void testSimpleAnonymousClassInstantiationHelper() {
       SimpleAnonymousClassInstantiation basic = 
         new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, 
-                                              new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), 
+                                              new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
                                               new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
                                               new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       _iv._package = "i.like";
+      _iv._enclosingClassName = "i.like.monkey";
+      _iv.symbolTable.put("i.like.monkey", _sd1);
+      System.err.println("SymbolData for i.like.monkey = " + _iv.getQualifiedSymbolData("i.like.monkey", SourceInfo.NO_INFO));
       _iv.simpleAnonymousClassInstantiationHelper(basic, _sd1);
       assertEquals("There should be no errors", 0, errors.size());
       SymbolData obj = LanguageLevelConverter.symbolTable.get("java.lang.Object");
@@ -1153,15 +1368,18 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       assertEquals("The inner class should have 3 methods", 3, inner.getMethods().size());
     }
     
-    
     public void testComplexAnonymousClassInstantiationHelper() {
-      ComplexAnonymousClassInstantiation basic = new ComplexAnonymousClassInstantiation(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "java.lang.Object")),
-                                                                                        new ClassOrInterfaceType(SourceInfo.NO_INFO, "Inner", new Type[0]), 
-                                                                                        new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
-                                                                                        new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
-      
+      SimpleNameReference snr =
+        new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "java.lang.Object"));
+      ComplexAnonymousClassInstantiation basic = 
+        new ComplexAnonymousClassInstantiation(SourceInfo.NO_INFO, 
+                                               snr,
+                                               new ClassOrInterfaceType(SourceInfo.NO_INFO, "Inner", new Type[0]), 
+                                               new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
+                                               new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       _iv._package = "i.like";
-      _iv.complexAnonymousClassInstantiationHelper(basic, _sd1);
+      _iv._enclosingClassName = "i.like.monkey";
+      _iv.complexAnonymousClassInstantiationHelper(basic, _sd1); // TODO: the wrong enclosing context?
       assertEquals("There should be no errors", 0, errors.size());
       SymbolData obj = LanguageLevelConverter.symbolTable.get("java.lang.Object");
       assertNotNull("Object should be in the symbol table", obj);
@@ -1176,36 +1394,45 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     }
     
     public void testForVariableDeclaration() {
-      //make sure that if forVariableDeclaration is called with a AnonymousClassInstantiation, the symboldata is only added once.
-      //this is to make sure an old bug stays fixed.
-      SimpleAnonymousClassInstantiation basic = new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), 
-                                                                                      new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
-                                                                                      new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+      // Confirm that if forVariableDeclaration is called with a AnonymousClassInstantiation, the symboldata is only 
+      // added once. This is to make sure an old bug stays fixed.
+      SimpleAnonymousClassInstantiation basic = 
+        new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, 
+                                              new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+                                              new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
+                                              new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       
       
       
-      VariableDeclarator[] d1 = {new InitializedVariableDeclarator(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), new Word(SourceInfo.NO_INFO, "b"), basic)};
-      VariableDeclaration vd1 = new VariableDeclaration(SourceInfo.NO_INFO,_publicMav, d1); 
+      VariableDeclarator[] d1 = { 
+        new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                          new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+                                          new Word(SourceInfo.NO_INFO, "b"), basic)};
+      
+      VariableDeclaration vd1 = new VariableDeclaration(SourceInfo.NO_INFO,PUBLIC_MAV, d1); 
       
       ClassBodyIntermediateVisitor cbiv = 
-        new ClassBodyIntermediateVisitor(_sd1, 
+        new ClassBodyIntermediateVisitor(_sd1,
+                                         _sd1.getName(),
                                          _iv._file, 
                                          _iv._package,
                                          _iv._importedFiles, 
                                          _iv._importedPackages, 
-                                         _iv._classNamesInThisFile, 
-                                         _iv.continuations);
+                                         _iv._classesInThisFile, 
+                                         _iv.continuations,
+                                         _iv.fixUps);
       
       vd1.visit(cbiv);
       assertEquals("Should be 1 inner class of _sd1", 1, _sd1.getInnerClasses().size());
-      
     }
     
     public void testForPackageStatementDoFirst() {
       PackageStatement ps = new PackageStatement(SourceInfo.NO_INFO, new CompoundWord(SourceInfo.NO_INFO, new Word[0]));
       ps.visit(_iv);
       assertEquals("Should be no errors", 0, errors.size());
-//      assertEquals("Error message should be correct", "Package statements cannot be used at the Intermediate level.  All Intermediate level classes and interfaces are assumed to be in the default package", errors.getLast().getFirst());
+//      assertEquals("Error message should be correct", "Package statements cannot be used at the Intermediate level."
+//                     + "  All Intermediate level classes and interfaces are assumed to be in the default package", 
+//                   errors.getLast().getFirst());
     }
   }
 }

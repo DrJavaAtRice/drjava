@@ -46,12 +46,12 @@ import edu.rice.cs.plt.iter.*;
 import junit.framework.TestCase;
 
 /** TypeChecks the context of a body, such as a method body.  Common to all Language Levels.*/
-public class BodyTypeChecker extends Bob {
+public class BodyTypeChecker extends SpecialTypeChecker {
   /** The MethodData of this method. */
   protected BodyData _bodyData;
   
   /** Constructor for BodyTypeChecker.  Calls the super constructor for everything except bodyData, which we store here
-    * in order to have the proper type at compile time.  (Bob stores it as a Data).
+    * in order to have the proper type at compile time.  (SpecialTypeChecker stores it as a Data).
     * @param bodyData  The enclosing BodyData for the context we are type checking.
     * @param file  The File corresponding to the source file.
     * @param packageName  The package name from the source file.
@@ -124,14 +124,14 @@ public class BodyTypeChecker extends Bob {
   public TypeData forBodyOnly(Body that, TypeData[] items_result) {
     for (int i = 0; i < items_result.length; i++) {
       if (items_result[i] != null && !(that.getStatements()[i] instanceof ExpressionStatement)) {
-
+        
         // Found a statement that returns a value.
         if (i < items_result.length - 1) {
-        
+          
           // there must be unreachable statements
           _addError("Unreachable statement.", (JExpression)that.getStatements()[i+1]);
         }
-       // either way, return the result to keep on type-checking.
+        // either way, return the result to keep on type-checking.
         return items_result[i];
       }
     }
@@ -204,8 +204,9 @@ public class BodyTypeChecker extends Bob {
       return SymbolData.VOID_TYPE.getInstanceData();
     }
     else if (!_isAssignableFrom(expected, value_result.getSymbolData())) {
-      _addError("This method expected to return type: \"" + 
-                expected.getName() + "\" but here returned type: \"" + value_result.getName() + "\".", that);
+      _addError("This method expected to return type: " + '"' + expected.getName() + '"' 
+                  + " but here returned type: " + '"' + value_result.getName() + '"', 
+                that);
     }
     return value_result;
   }
@@ -830,7 +831,7 @@ public class BodyTypeChecker extends Bob {
         }
         // Check if this exception is a checked exception and is not declared to be thrown by the enclosing method
         //This is a checked exception.  It should have been caught.
-        if (!foundCatchBlock) {
+        if (! foundCatchBlock) {
           handleUncheckedException(sd, j);
         }
       }
@@ -1024,19 +1025,17 @@ public class BodyTypeChecker extends Bob {
     private SymbolData _sd5;
     private SymbolData _sd6;
     private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _protectedMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
     private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _abstractMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"}); 
     
-    
-    public BodyTypeCheckerTest() {
-      this("");
-    }
-    public BodyTypeCheckerTest(String name) {
-      super(name);
-    }
+    public BodyTypeCheckerTest() { this("");  }
+    public BodyTypeCheckerTest(String name) { super(name); }
     
     public void setUp() {
       _sd1 = new SymbolData("i.like.monkey");
@@ -1177,7 +1176,8 @@ public class BodyTypeChecker extends Bob {
       TypeData sd = bb1.visit(_bbtc);
       assertEquals("There should be one error", 1, errors.size());
       assertEquals("Should return boolean type", SymbolData.BOOLEAN_TYPE.getInstanceData(), sd);
-      assertEquals("Error message should be correct", "This method expected to return type: \"int\" but here returned type: \"boolean\".", errors.get(0).getFirst());
+      assertEquals("Error message should be correct", 
+                   "This method expected to return type: \"int\" but here returned type: \"boolean\"", errors.get(0).getFirst());
       
       //value return statement returns something that is assignable from the method return type
       BracedBody bb2 = new BracedBody(SourceInfo.NO_INFO,
@@ -1186,7 +1186,7 @@ public class BodyTypeChecker extends Bob {
       sd = bb2.visit(_bbtc);
       assertEquals("There should be still be one error", 1, errors.size());
       assertEquals("Should return char type", SymbolData.CHAR_TYPE.getInstanceData(), sd);
-      assertEquals("Error message should still be correct", "This method expected to return type: \"int\" but here returned type: \"boolean\".", errors.get(0).getFirst());
+      assertEquals("Error message should still be correct", "This method expected to return type: \"int\" but here returned type: \"boolean\"", errors.get(0).getFirst());
       
       
       //method returns void
@@ -1238,7 +1238,7 @@ public class BodyTypeChecker extends Bob {
       
       assertEquals("Should return Object type", "java.lang.Object", sd.getName());
       assertEquals("Error message should be correct", 
-                   "This method expected to return type: \"int\" but here returned type: \"boolean\".", 
+                   "This method expected to return type: \"int\" but here returned type: \"boolean\"", 
                    errors.get(1).getFirst());                                                          
 
       //test if they do return subtypes of each other
@@ -2532,29 +2532,33 @@ public class BodyTypeChecker extends Bob {
       LanguageLevelVisitor llv = 
         new LanguageLevelVisitor(new File(""), 
                                  "", 
+                                 null, // enclosingClassName for top level traversal
                                  new LinkedList<String>(), 
                                  new LinkedList<String>(), 
-                                 new LinkedList<String>(), 
-                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+                                 new HashSet<String>(), 
+                                 new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                 new LinkedList<Command>());
       
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded=false;
 //      LanguageLevelConverter.symbolTable = llv.symbolTable = new Symboltable();
-      llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
+      llv.continuations = new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
-      llv._hierarchy = new Hashtable<String, TypeDefBase>();
-      llv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
+//      llv._hierarchy = new Hashtable<String, TypeDefBase>();
+      llv._classesInThisFile = new HashSet<String>();
 
       llv._importedFiles.addLast("java.io.IOException");
-      SymbolData e = llv.getSymbolData("java.lang.Exception", SourceInfo.NO_INFO, true);
-      SymbolData re = llv.getSymbolData("java.lang.RuntimeException", SourceInfo.NO_INFO, true);
-      SymbolData ioe = llv.getSymbolData("java.io.IOException", SourceInfo.NO_INFO, true);
+      SymbolData e = llv.getQualifiedSymbolData("java.lang.Exception", SourceInfo.NO_INFO);
+      SymbolData re = llv.getQualifiedSymbolData("java.lang.RuntimeException", SourceInfo.NO_INFO);
+      SymbolData ioe = llv.getQualifiedSymbolData("java.io.IOException", SourceInfo.NO_INFO);
       
-      symbolTable.put("java.lang.Exception", e);
-      symbolTable.put("java.lang.RuntimeException", re);
-      symbolTable.put("java.io.IOException", ioe);
+      assert symbolTable.containsKey("java.lang.Exception");
+      assert symbolTable.containsKey("java.lang.RuntimeException");
+      assert symbolTable.containsKey("java.io.IOException");
+      assert symbolTable.contains(e);
+      assert symbolTable.contains(re);
+      assert symbolTable.contains(ioe);
       
-
       CatchBlock c1 = new CatchBlock(SourceInfo.NO_INFO, fp1, b);
       CatchBlock c2 = new CatchBlock(SourceInfo.NO_INFO, fp2, b);
       CatchBlock c3 = new CatchBlock(SourceInfo.NO_INFO, fp3, b);
@@ -2607,10 +2611,10 @@ public class BodyTypeChecker extends Bob {
       
       SymbolData sd = new SymbolData("java.lang.Object");
       SymbolData sd2 = new SymbolData("java.lang.String");
-      sd.setIsContinuation(false);
-      sd2.setIsContinuation(false);
-      symbolTable.put("java.lang.Object", sd);
-      symbolTable.put("java.lang.String", sd2);
+//      sd.setIsContinuation(false);
+//      sd2.setIsContinuation(false);
+//      symbolTable.put("java.lang.Object", sd);
+//      symbolTable.put("java.lang.String", sd2);
       sd2.setSuperClass(sd);
       
       assertEquals("Should return Object", sd.getInstanceData(), _bbtc.tryCatchLeastRestrictiveType(sd2.getInstanceData(), new InstanceData[]{sd.getInstanceData(), sd2.getInstanceData()}, null));
@@ -2633,19 +2637,23 @@ public class BodyTypeChecker extends Bob {
       NullLiteral nl = new NullLiteral(SourceInfo.NO_INFO);
 
       _bbtc._importedFiles.addLast("java.io.IOException");
-      
+      // TODO: create LL constructor specifically for testing that only takes file name.
       LanguageLevelVisitor llv = 
-        new LanguageLevelVisitor(new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
+        new LanguageLevelVisitor(new File(""), "", 
+                                 null /* enclosingClassName */, 
                                  new LinkedList<String>(), 
-                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+                                 new LinkedList<String>(), 
+                                 new HashSet<String>(), 
+                                 new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                 new LinkedList<Command>());
       
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded = false;
 //      LanguageLevelConverter.symbolTable.clear();  // done in setUp()
-      llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
+      llv.continuations = new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
-      llv._hierarchy = new Hashtable<String, TypeDefBase>();
-      llv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
+//      llv._hierarchy = new Hashtable<String, TypeDefBase>();
+      llv._classesInThisFile = new HashSet<String>();
 
       llv._importedFiles.addLast("java.io.IOException");
 
@@ -2653,8 +2661,12 @@ public class BodyTypeChecker extends Bob {
       SymbolData re = llv.getSymbolData("java.lang.RuntimeException", SourceInfo.NO_INFO, true);
       SymbolData ioe = llv.getSymbolData("java.io.IOException", SourceInfo.NO_INFO, true);
       
-      symbolTable.put("java.lang.RuntimeException", re);
-      symbolTable.put("java.io.IOException", ioe);
+      assert symbolTable.containsKey("java.lang.RuntimeException");
+      assert symbolTable.containsKey("java.io.IOException");
+      assert symbolTable.contains(re);
+      assert symbolTable.contains(ioe);
+//      symbolTable.put("java.lang.RuntimeException", re);
+//      symbolTable.put("java.io.IOException", ioe);
 
       
       _bbtc.handleMethodInvocation(md, nl);
@@ -2670,21 +2682,26 @@ public class BodyTypeChecker extends Bob {
       LanguageLevelVisitor llv = 
         new LanguageLevelVisitor(new File(""), 
                                  "", 
+                                 null, // enclosingClassName for top level traversal
                                  new LinkedList<String>(), 
                                  new LinkedList<String>(), 
-                                 new LinkedList<String>(), 
-                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+                                 new HashSet<String>(), 
+                                 new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                 new LinkedList<Command>());
       
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded=false;
 //      LanguageLevelConverter.symbolTable = llv.symbolTable = new Symboltable();
-      llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
+      llv.continuations = new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
-      llv._hierarchy = new Hashtable<String, TypeDefBase>();
-      llv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
+//      llv._hierarchy = new Hashtable<String, TypeDefBase>();
+      llv._classesInThisFile = new HashSet<String>();
 
       SymbolData re = llv.getSymbolData("java.lang.RuntimeException", SourceInfo.NO_INFO, true);
-      symbolTable.put("java.lang.RuntimeException", re);
+      assert symbolTable.containsKey("java.lang.RuntimeException");
+      assert symbolTable.contains(re);
+      
+//      symbolTable.put("java.lang.RuntimeException", re);
       
       VariableData vd = new VariableData("myException", _publicMav, re, true, _bbtc._bodyData);
       _bbtc._vars.addLast(vd);
@@ -2829,19 +2846,37 @@ public class BodyTypeChecker extends Bob {
     }
     
     public void testCompareThrownAndCaught() {
-      JExpression j = new SimpleMethodInvocation(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "myMethod"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i"))}));
+      
+      JExpression j = 
+        new SimpleMethodInvocation(SourceInfo.NO_INFO, 
+                                   new Word(SourceInfo.NO_INFO, "myMethod"), 
+                                   new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i"))}));
       
       BracedBody emptyBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
       Block b = new Block(SourceInfo.NO_INFO, emptyBody);
 
       PrimitiveType intt = new PrimitiveType(SourceInfo.NO_INFO, "int");
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "i"));
-      FormalParameter param = new FormalParameter(SourceInfo.NO_INFO, new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "j")), false);
+      UninitializedVariableDeclarator uvd = 
+        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "i"));
+      FormalParameter param = 
+        new FormalParameter(SourceInfo.NO_INFO, 
+                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "j")), false);
 
-      NormalTryCatchStatement ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[] {new CatchBlock(SourceInfo.NO_INFO,  param, b)});
+      NormalTryCatchStatement ntcs = 
+        new NormalTryCatchStatement(SourceInfo.NO_INFO, 
+                                    b, 
+                                    new CatchBlock[] {new CatchBlock(SourceInfo.NO_INFO,  param, b)});
 
-      SymbolData javaLangThrowable =  _bbtc.getSymbolData("java.lang.Throwable", ntcs, false, true); 
+      SymbolData javaLangThrowable =  _bbtc.getSymbolData("java.lang.Throwable", ntcs, false, true);
+      System.err.println("**** In symbol table, java.lang.Throwable = " + symbolTable.get("java.lang.Throwable"));
+      assertEquals("There should be no errors", 0, errors.size());
+      javaLangThrowable.setPackage("java.lang");  // Don't know why it is not properly set already
       _bbtc.symbolTable.put("java.lang.Throwable", javaLangThrowable);
+ 
+      System.err.println("***Name for java.lang.Throwable = " + javaLangThrowable.getName());
+      System.err.println("***notRightPackage for java.lang.Throwable = " + _bbtc.notRightPackage(javaLangThrowable));
+      System.err.println("***Package for java.lang.Throwable = " + javaLangThrowable.getPackage());
+                        
       SymbolData exception = new SymbolData("my.crazy.exception");
       exception.setSuperClass(javaLangThrowable);
       SymbolData exception2 = new SymbolData("A&M.beat.Rice.in.BaseballException");
@@ -2854,7 +2889,10 @@ public class BodyTypeChecker extends Bob {
       thrown.addLast(new Pair<SymbolData, JExpression>(exception2, ntcs));
       thrown.addLast(new Pair<SymbolData, JExpression>(exception3, ntcs));
       
+      assertEquals("There should be no errors", 0, errors.size());
       _bbtc.compareThrownAndCaught(ntcs, caught_array, thrown);
+      for (int i = 0; i < errors.size(); i++) 
+        System.err.println("Error " + i + ":\n" + errors.get(i).getFirst());
       assertEquals("There should be no errors", 0, errors.size());
       
       _bbtc.compareThrownAndCaught(ntcs, new SymbolData[] {exception2}, thrown);
@@ -2866,26 +2904,36 @@ public class BodyTypeChecker extends Bob {
     public void testForBracedBody() {
       LanguageLevelVisitor llv = 
         new LanguageLevelVisitor(new File(""), 
-                                 "", 
+                                 "",
+                                 null, // enclosingClassName for top level traversal
                                  new LinkedList<String>(), 
                                  new LinkedList<String>(), 
-                                 new LinkedList<String>(), 
-                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+                                 new HashSet<String>(), 
+                                 new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                 new LinkedList<Command>());
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded=false;
 //      LanguageLevelConverter.symbolTable = llv.symbolTable = new Symboltable();
-      llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
+      llv.continuations = new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
-      llv._hierarchy = new Hashtable<String, TypeDefBase>();
-      llv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
+//      llv._hierarchy = new Hashtable<String, TypeDefBase>();
+      llv._classesInThisFile = new HashSet<String>();
 
-      SymbolData eb = llv.getSymbolData("java.util.prefs.BackingStoreException", SourceInfo.NO_INFO, true);
-      SymbolData re = llv.getSymbolData("java.lang.RuntimeException", SourceInfo.NO_INFO, true);
-//      LanguageLevelConverter.symbolTable = symbolTable = llv.symbolTable;
-
+      // preload symbolTable
+      SymbolData throwable = llv.getQualifiedSymbolData("java.lang.Throwable");
+      SymbolData exception = llv.getQualifiedSymbolData("java.lang.Exception");
+      SymbolData string = llv.getQualifiedSymbolData("java.lang.String");
+      SymbolData eb = llv.getQualifiedSymbolData("java.util.prefs.BackingStoreException");
+      SymbolData re = llv.getQualifiedSymbolData("java.lang.RuntimeException");
       
+      assert symbolTable.contains(throwable);
+      assert symbolTable.contains(exception);
+      assert symbolTable.contains(string);
+
+      System.err.println("Interfaces for java.lang.RuntimeException = " + re.getInterfaces());
       //Make sure it is okay to have something else other than an uncaught exception in a braced body.
-      BracedBody plainBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new UnlabeledBreakStatement(SourceInfo.NO_INFO)});
+      BracedBody plainBody = 
+        new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new UnlabeledBreakStatement(SourceInfo.NO_INFO)});
       plainBody.visit(_bbtc);
       assertEquals("There should be no errors", 0, errors.size());
 
@@ -2900,7 +2948,6 @@ public class BodyTypeChecker extends Bob {
                                                              new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0])))});
       runtimeBB.visit(_bbtc);
       assertEquals("There should be no errors", 0, errors.size());
-      
       
       //Make sure it is okay to have a uncaught exception in a braced body, if the method is declared to throw it.
       BracedBody bb = new BracedBody(SourceInfo.NO_INFO, 
@@ -2984,21 +3031,31 @@ public class BodyTypeChecker extends Bob {
       LanguageLevelVisitor llv = 
         new LanguageLevelVisitor(new File(""), 
                                  "", 
+                                 null, // enclosingClassName for top level traversal
                                  new LinkedList<String>(), 
                                  new LinkedList<String>(), 
-                                 new LinkedList<String>(), 
-                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+                                 new HashSet<String>(), 
+                                 new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                 new LinkedList<Command>());
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded = false;
 //      LanguageLevelConverter.symbolTable = llv.symbolTable = symbolTable;
 //      LanguageLevelConverter._newSDs = new Hashtable<SymbolData, LanguageLevelVisitor>();
-      llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
+      llv.continuations = new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
-      llv._hierarchy = new Hashtable<String, TypeDefBase>();
-      llv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
+//      llv._hierarchy = new Hashtable<String, TypeDefBase>();
+      llv._classesInThisFile = new HashSet<String>();
 
+      // preload symbolTable
+      SymbolData throwable = llv.getQualifiedSymbolData("java.lang.Throwable");
+      SymbolData exception = llv.getQualifiedSymbolData("java.lang.Exception");
+      SymbolData string = llv.getQualifiedSymbolData("java.lang.String");
       SymbolData eb = llv.getSymbolData("java.util.prefs.BackingStoreException", SourceInfo.NO_INFO, true);
       SymbolData re = llv.getSymbolData("java.lang.RuntimeException", SourceInfo.NO_INFO, true);
+      
+      assert symbolTable.contains(throwable);
+      assert symbolTable.contains(exception);
+      assert symbolTable.contains(string);
       
       BracedBody emptyBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
       BracedBody bb = new BracedBody(SourceInfo.NO_INFO, 
@@ -3016,15 +3073,16 @@ public class BodyTypeChecker extends Bob {
       _bbtc._bodyData.getMethodData().setThrown(new String[0]);
       _bbtc._bodyData.addBlock(new BlockData(_bbtc._bodyData));
       _bbtc._bodyData.addBlock(new BlockData(_bbtc._bodyData));
-
-
       
       //Test that an empty finally block behaves as expected
       TryCatchFinallyStatement tcfs = new TryCatchFinallyStatement(SourceInfo.NO_INFO, b, new CatchBlock[0], b2);
       tcfs.visit(_bbtc);
       assertEquals("Should be 1 error", 1, errors.size());
-      assertEquals("Error message should be correct", "This statement throws the exception java.util.prefs.BackingStoreException which needs to be caught or declared to be thrown", errors.get(0).getFirst());
-            
+      assertEquals("Error message should be correct", 
+                   "This statement throws the exception java.util.prefs.BackingStoreException which needs to be caught"
+                     + " or declared to be thrown",
+                   errors.getLast().getFirst());
+                   
       //Test that a finally block where only one branch ends abruptly acts as expected
       IfThenElseStatement ites1 = new IfThenElseStatement(SourceInfo.NO_INFO,
                                                           new BooleanLiteral(SourceInfo.NO_INFO, true),
@@ -3041,9 +3099,9 @@ public class BodyTypeChecker extends Bob {
       TypeData result = tcfs2.visit(_bbtc);  // Duplicates previous error
       assertEquals("Should return Exception", SymbolData.EXCEPTION.getInstanceData(), result);
       assertEquals("Should still be 1 error", 1, errors.size());
-      assertEquals("Error message should be correct", 
-                   "This statement throws the exception java.util.prefs.BackingStoreException " +
-                   "which needs to be caught or declared to be thrown", 
+      assertEquals("Error message should be correct",
+                   "This statement throws the exception java.util.prefs.BackingStoreException which needs to be caught"
+                     + " or declared to be thrown", 
                    errors.get(0).getFirst());
                                       
       //Test that a finally block where both branches end abruptly acts as expected (break)
@@ -3109,8 +3167,10 @@ public class BodyTypeChecker extends Bob {
       
       nested.visit(_bbtc);  // Duplicates existing error
       assertEquals("There should still be 1 errors", 1, errors.size());
-      assertEquals("Error message should be correct", "This statement throws the exception java.util.prefs.BackingStoreException " +
-                   "which needs to be caught or declared to be thrown", errors.get(0).getFirst());
+      assertEquals("Error message should be correct", 
+                   "This statement throws the exception java.util.prefs.BackingStoreException which needs to be caught"
+                     + " or declared to be thrown", 
+                   errors.get(0).getFirst());
                                       
       //Test that no error is thrown if the exception is caught
       UninitializedVariableDeclarator uvd1 = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.util.prefs.BackingStoreException", new Type[0]), new Word(SourceInfo.NO_INFO, "e"));
@@ -3164,7 +3224,8 @@ public class BodyTypeChecker extends Bob {
       _bbtc._bodyData.resetBlockIterator();
 
       nested3.visit(_bbtc);
-      assertEquals("There should still be 1 errors", 1, errors.size());
+      System.err.println("Last error was " + errors.getLast().getFirst());
+      assertEquals("There should still be 1 error", 1, errors.size());
       
       //Test that no error is thrown if the method is declared to throw it
       _bbtc._bodyData.getMethodData().setThrown(new String[]{"java.util.prefs.BackingStoreException"});
@@ -3178,21 +3239,31 @@ public class BodyTypeChecker extends Bob {
       LanguageLevelVisitor llv = 
         new LanguageLevelVisitor(new File(""), 
                                  "", 
+                                 null, // enclosingClassName for top level traversal
                                  new LinkedList<String>(), 
                                  new LinkedList<String>(), 
-                                 new LinkedList<String>(), 
-                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+                                 new HashSet<String>(), 
+                                 new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                 new LinkedList<Command>());
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded=false;
 //      LanguageLevelConverter.symbolTable = llv.symbolTable = symbolTable;
 //      LanguageLevelConverter._newSDs = new Hashtable<SymbolData, LanguageLevelVisitor>();
-      llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
+      llv.continuations = new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
-      llv._hierarchy = new Hashtable<String, TypeDefBase>();
-      llv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
+//      llv._hierarchy = new Hashtable<String, TypeDefBase>();
+      llv._classesInThisFile = new HashSet<String>();
 
-      SymbolData eb = llv.getSymbolData("java.util.prefs.BackingStoreException", SourceInfo.NO_INFO, true);
-      SymbolData re = llv.getSymbolData("java.lang.RuntimeException", SourceInfo.NO_INFO, true);
+      // preload symbolTable
+      SymbolData throwable = llv.getQualifiedSymbolData("java.lang.Throwable");
+      SymbolData exception = llv.getQualifiedSymbolData("java.lang.Exception");
+      SymbolData string = llv.getQualifiedSymbolData("java.lang.String");
+      SymbolData eb = llv.getQualifiedSymbolData("java.util.prefs.BackingStoreException");
+      SymbolData re = llv.getQualifiedSymbolData("java.lang.RuntimeException");
+           
+      assert symbolTable.contains(throwable);
+      assert symbolTable.contains(exception);
+      assert symbolTable.contains(string);
       
       BracedBody emptyBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
       BracedBody bb = new BracedBody(SourceInfo.NO_INFO, 
@@ -3215,7 +3286,12 @@ public class BodyTypeChecker extends Bob {
       _bbtc._bodyData.addBlock(new BlockData(_bbtc._bodyData));
       tcfs.visit(_bbtc);
       assertEquals("Should be 1 error", 1, errors.size());
-      assertEquals("Error message should be correct", "This statement throws the exception java.util.prefs.BackingStoreException which needs to be caught or declared to be thrown", errors.get(0).getFirst());
+      assertEquals("Error message should be correct",
+                   "This statement throws the exception java.util.prefs.BackingStoreException " + 
+                   "which needs to be caught or declared to be thrown", 
+//                   "You are attempting to throw java.util.prefs.BackingStoreException, which does not implement the "
+//                     + "Throwable interface",
+                   errors.getLast().getFirst());
             
 //      Test that an error is thrown if a try catch statement is nested, an error is thrown but not caught, and finally doesn't return
       NormalTryCatchStatement inner = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[0]);
@@ -3234,6 +3310,8 @@ public class BodyTypeChecker extends Bob {
       nested.visit(_bbtc);
       assertEquals("There should still be be 1 error", 1, errors.size());  // Generated error is a duplicate!
       assertEquals("Error message should be correct", 
+//                   "You are attempting to throw java.util.prefs.BackingStoreException, which does not implement the"
+//                     + " Throwable interface",
                    "This statement throws the exception java.util.prefs.BackingStoreException " + 
                    "which needs to be caught or declared to be thrown", 
                    errors.get(0).getFirst());
@@ -3281,6 +3359,7 @@ public class BodyTypeChecker extends Bob {
 
       
       nested3.visit(_bbtc);
+      System.err.println("Last error is: " + errors.getLast().getFirst());
       assertEquals("There should still be 1 error", 1, errors.size());
       
       // Test that no error is thrown if the method is declared to throw it

@@ -51,7 +51,7 @@ public class SymbolData extends TypeData {
   
   /***************Singleton primitive SymbolDatas********************/
   
-  /**This represents the boolean primitive*/
+  /** This anonymous class represents the boolean primitive type */
   public static final SymbolData BOOLEAN_TYPE = new PrimitiveData("boolean") {
     
     /** You can only cast a boolean primitive to a boolean primitive or a Boolean object (in 1.5). */
@@ -61,41 +61,41 @@ public class SymbolData extends TypeData {
     
     /** Returns true if the specified SymbolData is a boolean type. */
     public boolean isAssignableTo(SymbolData toCheck, JavaVersion version) {
-      if (toCheck == null) {return false;}
+      if (toCheck == null) return false;
       if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !toCheck.isPrimitiveType()) {
         SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Boolean");
         return (autoBoxMe != null && autoBoxMe.isAssignableTo(toCheck, version));
       }
-      return toCheck==BOOLEAN_TYPE;
+      return toCheck == BOOLEAN_TYPE;
     }
   };
   
-  /**This represents the char primitive*/
+  /** This anonymous class represents the char primitive type. */
   public static final SymbolData CHAR_TYPE = new PrimitiveData("char") {
     
-    /** You can cast a char primitive to a char, int, long, float, double or short or byte or Character object (in 1.5) */
+    /** You can cast a char to a char, int, long, float, double or short or byte or Character object (in 1.5) */
     public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
       return isAssignableTo(castTo, version) || castTo == SymbolData.SHORT_TYPE || castTo == SymbolData.BYTE_TYPE;
     }
 
     /** You can assign a char primitive to a char, int, long, float, double or Character object (in 1.5) */
     public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
-      if (assignTo == null) {return false;}
+      if (assignTo == null) return false;
       if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !assignTo.isPrimitiveType()) {
         SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Character");
         return autoBoxMe != null && autoBoxMe.isAssignableTo(assignTo, version);
       }
 
-      return assignTo==SymbolData.INT_TYPE || 
-        assignTo==SymbolData.LONG_TYPE || 
+      return assignTo == SymbolData.INT_TYPE || 
+        assignTo == SymbolData.LONG_TYPE || 
         assignTo == SymbolData.FLOAT_TYPE || 
         assignTo == SymbolData.DOUBLE_TYPE || 
         assignTo == SymbolData.CHAR_TYPE;
     }
   };
   
-  /**This represents the byte primitive*/
-  public static final SymbolData BYTE_TYPE = new PrimitiveData("byte"){
+  /** This anonymous class represents the byte primitive type */
+  public static final SymbolData BYTE_TYPE = new PrimitiveData("byte") {
     
     /** You can cast a byte primitive to a char, int, long, float, double or short or byte or Byte object (in 1.5) */
     public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
@@ -120,8 +120,8 @@ public class SymbolData extends TypeData {
     }
   };
 
-  /**This represents the short primitive*/
-  public static final SymbolData SHORT_TYPE = new PrimitiveData("short"){
+  /** This anonymous class represents the short primitive type. */
+  public static final SymbolData SHORT_TYPE = new PrimitiveData("short") {
     
     /** You can cast a short primitive to a char, int, long, float, double or short or byte or Short object (in 1.5) */
     public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
@@ -130,7 +130,7 @@ public class SymbolData extends TypeData {
 
     /** You can assign a short primitive to a short, int, long, float, double, or Short object(in 1.5) */
     public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
-      if (assignTo == null) {return false;}
+      if (assignTo == null) return false;
 
       if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !assignTo.isPrimitiveType()) {
         SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Short");
@@ -145,17 +145,19 @@ public class SymbolData extends TypeData {
     }
   };
   
-  /**This represents the int primitive*/
-  public static final SymbolData INT_TYPE = new PrimitiveData("int"){
+  /** This anonymous class represents the int primitive type. */
+  public static final SymbolData INT_TYPE = new PrimitiveData("int") {
     
     /** You can cast a int primitive to a char, int, long, float, double or short or byte or Short object (in 1.5) */
     public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
-      return isAssignableTo(castTo, version) || castTo == SymbolData.CHAR_TYPE || castTo == SymbolData.SHORT_TYPE || castTo == SymbolData.BYTE_TYPE;
+      return isAssignableTo(castTo, version) || castTo == SymbolData.CHAR_TYPE || castTo == SymbolData.SHORT_TYPE 
+        || castTo == SymbolData.BYTE_TYPE;
     }
 
-    /** You can assign a int primitive to a int, long, float, double, or Integer object(in 1.5) */
+    /** You can assign a int primitive to a int, long, float, double, or Integer/Long/Float/Double or
+      * Number/Object type (in 1.5) */
     public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
-      if (assignTo == null) {return false;}
+      if (assignTo == null) return false;
 
       if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !assignTo.isPrimitiveType()) {
         SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Integer");
@@ -167,8 +169,7 @@ public class SymbolData extends TypeData {
     }
   };
   
-  
-  /**This represents the long primitive*/
+  /** This represents the long primitive */
   public static final SymbolData LONG_TYPE = new PrimitiveData("long"){
     
     /** You can cast a long primitive to a char, int, long, float, double or short or byte or Short object (in 1.5) */
@@ -177,9 +178,7 @@ public class SymbolData extends TypeData {
         castTo == SymbolData.SHORT_TYPE || castTo == SymbolData.BYTE_TYPE;
     }
 
-    /**
-     * You can assign a long primitive to a long, float, double, or Long object(in 1.5)
-     */
+    /** You can assign a long primitive to a long, float, double, or Long object(in 1.5) */
     public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
       if (assignTo == null) {return false;}
 
@@ -195,21 +194,18 @@ public class SymbolData extends TypeData {
     }
   };
   
-  /**This represents the float primitive*/
+  /** This represents the float primitive */
   public static final SymbolData FLOAT_TYPE = new PrimitiveData("float"){
     
-    /**
-     * You can cast a float primitive to a char, int, long, float, double or short or byte or Short object (in 1.5)
-     */
+    /** You can cast a float primitive to a char, int, long, float, double or short or byte or Short object (in 1.5) */
     public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
-      return isAssignableTo(castTo, version) || castTo == SymbolData.CHAR_TYPE || castTo == SymbolData.INT_TYPE || castTo == SymbolData.LONG_TYPE || castTo == SymbolData.SHORT_TYPE || castTo == SymbolData.BYTE_TYPE;
+      return isAssignableTo(castTo, version) || castTo == SymbolData.CHAR_TYPE || castTo == SymbolData.INT_TYPE 
+        || castTo == SymbolData.LONG_TYPE || castTo == SymbolData.SHORT_TYPE || castTo == SymbolData.BYTE_TYPE;
     }
 
-    /**
-     * You can assign a float primitive to a float, double, or Float object(in 1.5)
-     */
+    /** You can assign a float primitive to a float, double, or Float object(in 1.5) */
     public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
-      if (assignTo == null) {return false;}
+      if (assignTo == null) return false;
 
       if (LanguageLevelConverter.versionSupportsAutoboxing(version) && !assignTo.isPrimitiveType()) {
         SymbolData autoBoxMe = LanguageLevelConverter.symbolTable.get("java.lang.Float");
@@ -223,11 +219,12 @@ public class SymbolData extends TypeData {
   /**This represents the double primitive*/
   public static final SymbolData DOUBLE_TYPE = new PrimitiveData("double"){
     
-    /**
-     * You can cast a double primitive to a char, int, long, float, double or short or byte or Short object (in 1.5)
-     */
+    /** A double primitive can be cast to a char, int, long, float, double, short or byte primitive or a Float
+      * or Double object,  */
     public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
-      return isAssignableTo(castTo, version) || castTo == SymbolData.CHAR_TYPE || castTo == SymbolData.INT_TYPE || castTo == SymbolData.LONG_TYPE || castTo == SymbolData.DOUBLE_TYPE || castTo == SymbolData.SHORT_TYPE || castTo == SymbolData.BYTE_TYPE;
+      return isAssignableTo(castTo, version) || castTo == SymbolData.CHAR_TYPE || castTo == SymbolData.INT_TYPE 
+        || castTo == SymbolData.LONG_TYPE || castTo == SymbolData.DOUBLE_TYPE || castTo == SymbolData.SHORT_TYPE 
+        || castTo == SymbolData.BYTE_TYPE;
     }
 
     /** You can assign a double primitive to a float, double, or Float object(in 1.5) */
@@ -242,7 +239,7 @@ public class SymbolData extends TypeData {
     }
   };
   
-  /**Used for the void type*/
+  /** Used for the void type. */
   public static final SymbolData VOID_TYPE = new PrimitiveData("void") {
   
     /** A void value cannot be cast to anything */
@@ -264,7 +261,7 @@ public class SymbolData extends TypeData {
     
   };
 
-  /**Used to signal a symbol table search that failed*/
+  /** Used to signal a symbol table search that failed. */
   public static final SymbolData NOT_FOUND = new SymbolData("not found") {
   
     /** A not-found value cannot be cast to anything */
@@ -298,7 +295,7 @@ public class SymbolData extends TypeData {
     public boolean isAssignableTo(SymbolData toCheck, JavaVersion version) { return false; }
   };
   
-  /** Used when a this constructor invocation is seen*/
+  /** Used when a this constructor invocation is seen. */
   public static final SymbolData THIS_CONSTRUCTOR = new SymbolData("this constructor") {
     /** Cannot be cast to anything */
     public boolean isCastableTo(SymbolData castTo, JavaVersion version) { return false; }
@@ -307,7 +304,7 @@ public class SymbolData extends TypeData {
     public boolean isAssignableTo(SymbolData toCheck, JavaVersion version) { return false; }
   };
   
-  /** Used when a super constructor invocation is seen*/
+  /** Used when a super constructor invocation is seen. */
   public static final SymbolData SUPER_CONSTRUCTOR = new SymbolData("super constructor") {
     /** Cannot be cast to anything */
     public boolean isCastableTo(SymbolData castTo, JavaVersion version) { return false; }
@@ -329,6 +326,8 @@ public class SymbolData extends TypeData {
   
   /********Instance fields***********/
   
+  /* The inherited _name field is fully qualified. */
+  
   /**True iff this symbol data is a continuation (i.e. hasn't been resolved)*/
   private boolean _isContinuation;
   
@@ -345,7 +344,7 @@ public class SymbolData extends TypeData {
   private SymbolData _superClass;
   
   /**List of SymbolDatas corresponding to super interfaces. */
-  private LinkedList<SymbolData> _interfaces;
+  private ArrayList<SymbolData> _interfaces;
   
   /**List of SymbolDatas corresponding to inner interfaces. */
   private LinkedList<SymbolData> _innerInterfaces;
@@ -353,7 +352,7 @@ public class SymbolData extends TypeData {
   /** Flag that is true if this SymbolData is an interface. */
   private boolean _isInterface;
   
-  /** Stores the package information for this symbol data. */
+  /** Stores the package information for this symbol data.  May not be set. */
   private String _package;
   
   /** Represents an instance of this class--i.e. an instantiation of it.*/
@@ -368,6 +367,8 @@ public class SymbolData extends TypeData {
   /* The number of anonymous inner classes, used in naming them. */
   private int _anonymousInnerClassNum;
   
+  /** Constructors */
+  
   /** Constructor for SymbolData
     * @param name  The name of this class or interface
     * @param modifiersAndVisibility  The modifiersAndVisibility of this class or interface
@@ -377,7 +378,7 @@ public class SymbolData extends TypeData {
     * @param outerData  The enclosing data of this class, or null
     */
   public SymbolData(String name, ModifiersAndVisibility modifiersAndVisibility, TypeParameter[] typeParameters, 
-                    SymbolData superClass, LinkedList<SymbolData> interfaces, Data outerData) {
+                    SymbolData superClass, ArrayList<SymbolData> interfaces, Data outerData) {
     super(outerData);
     _name = name;
     _modifiersAndVisibility = modifiersAndVisibility;
@@ -386,7 +387,9 @@ public class SymbolData extends TypeData {
     _superClass = superClass;
     _interfaces = interfaces;
     
-    for (int i = 0; i < interfaces.size(); i++) { addEnclosingData(_interfaces.get(i)); }
+    assert interfaces != null;
+    
+    for (SymbolData sd: interfaces) { addEnclosingData(sd); }
     
     /* Add first because we want to look at the super class first */
     _enclosingData.addFirst(_superClass);
@@ -411,7 +414,7 @@ public class SymbolData extends TypeData {
     * @param outerData  The enclosing data of this class, or null
     */
   public SymbolData(String name, ModifiersAndVisibility modifiersAndVisibility, TypeParameter[] typeParameters,
-                    SymbolData superClass, LinkedList<SymbolData> interfaces, Data outerData, String pkg) {
+                    SymbolData superClass, ArrayList<SymbolData> interfaces, Data outerData, String pkg) {
     this(name, modifiersAndVisibility, typeParameters, superClass, interfaces, outerData);
     _package = pkg;
   }
@@ -425,20 +428,23 @@ public class SymbolData extends TypeData {
     * @param outerData  The enclosing data of this class, or null
     */
   public SymbolData(String name, ModifiersAndVisibility modifiersAndVisibility, TypeParameter[] typeParameters,
-                    LinkedList<SymbolData> interfaces, Data outerData) {
+                    ArrayList<SymbolData> interfaces, Data outerData) {
     this(name, modifiersAndVisibility, typeParameters, null, interfaces, outerData);
     _isInterface = true;
   }
 
-  /** Called to create a continuation when all you know is the name */
-  public SymbolData(String name) {
+  /** Creates a continuation symbol for the specified name; does not enter this name in any table. */
+  public SymbolData(String name) { this(name, SourceInfo.NO_INFO); }
+  
+  /** Creates a continuation symbol for the specified name and source info; does not enter this name in any table. */ 
+  public SymbolData(String name, SourceInfo si) {
     super(null);
     _name = name;
-    _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    _modifiersAndVisibility = new ModifiersAndVisibility(si, new String[0]);
     _typeParameters = new TypeParameter[0];
     _methods = new LinkedList<MethodData>();
     _superClass = null;
-    _interfaces = new LinkedList<SymbolData>();
+    _interfaces = new ArrayList<SymbolData>();
     _innerClasses = new LinkedList<SymbolData>();
     _innerInterfaces = new LinkedList<SymbolData>();
     _isContinuation = true;
@@ -470,24 +476,24 @@ public class SymbolData extends TypeData {
    */
    public boolean isAssignableTo(SymbolData assignTo, JavaVersion version) {
      if (assignTo != null) {
-       if (assignTo.isPrimitiveType() && LanguageLevelConverter.versionSupportsAutoboxing(version)) { //You never box the left, so see if this can be unboxed to be a primitive.
+       if (assignTo.isPrimitiveType() && LanguageLevelConverter.versionSupportsAutoboxing(version)) { 
+         // You never box the left, so see if this can be unboxed to be a primitive.
          SymbolData unboxedType = this.unbox();
-         if (unboxedType == null) {return false;}
-         else {return unboxedType.isAssignableTo(assignTo, version);}
+         if (unboxedType == null) return false;
+         else return unboxedType.isAssignableTo(assignTo, version);
        }
-       
-       else {
-         return this.isSubClassOf(assignTo);
-       }
-      
+       else return this.isSubClassOf(assignTo);
      }
      return false;
    }
   
-   /**
-    * If this SymbolData is a wrapper class for a primitive, return the primitive type.  Else return null.
-    * @return the Primitive this SymbolData wraps, if there is one.  Otherwise return null.
-    */
+   /** Resolves this symbol using the visitor llv. 
+     * @return the new symbol definition. */
+   public SymbolData resolve(SourceInfo si, LanguageLevelVisitor llv) { return llv.resolveSymbol(si, this); }
+   
+   /** If this SymbolData is a wrapper class for a primitive, return the primitive type.  Else return null.
+     * @return the Primitive this SymbolData wraps, if there is one.  Otherwise return null.
+     */
    private SymbolData unbox() {
      String name = getName();
      if (name.equals("java.lang.Integer")) {return SymbolData.INT_TYPE;}
@@ -514,7 +520,8 @@ public class SymbolData extends TypeData {
    *      - castTo is an array type, and this is Object
    *   4. this is an interface type and
    *      - castTo is a class type and is not final OR this implements this
-   *      - castTo is an interface type and this and castTo do not contain one or more methods with the same signature but different return types
+   *      - castTo is an interface type and this and castTo do not contain one or more methods with the same signature 
+   *        but different return types
    *      - castTo is an array type and this is either Serializable or Cloneable.
    * @param castTo  The TypeData we are trying to cast to.  (castTo) this
    * @return true  If the cast is legal, false otherwise.
@@ -522,7 +529,8 @@ public class SymbolData extends TypeData {
    public boolean isCastableTo(SymbolData castTo, JavaVersion version) {
      if (castTo != null) {
        if (castTo.isPrimitiveType()) { 
-         if (LanguageLevelConverter.versionSupportsAutoboxing(version)) { //You never box the left, so see if this can be unboxed to be a primitive.
+         if (LanguageLevelConverter.versionSupportsAutoboxing(version)) { 
+           //You never box the left, so see if this can be unboxed to be a primitive.
            SymbolData unboxedType = this.unbox();
            if (unboxedType == null) {return false;}
            else {return unboxedType.isCastableTo(castTo, version);}
@@ -541,18 +549,19 @@ public class SymbolData extends TypeData {
          
        }
        
-       else { //this is an interface
+       else { // this is an interface
          
          if (!castTo.isInterface()) {//castTo is a class or array
            return !castTo.hasModifier("final") || castTo.isSubClassOf(this);
          }
          
-         else { //castTo is an interface
-           //return false if this and castTo contain one or more methods with the same signature but different return types.
-           if (LanguageLevelConverter.versionSupportsAutoboxing(version)) {return true;} //this check is no longer done in 1.5
+         else { // castTo is an interface
+           // return false if this and castTo contain methods with the same signature but different return types.
+           if (LanguageLevelConverter.versionSupportsAutoboxing(version)) return true; 
            for (MethodData md: this.getMethods()) {
              if (checkDifferentReturnTypes(md, castTo, false, version)) {
-               //TypeChecker._addError("Types " + this.getName() + " and " + castTo.getName() + " are incompatible.  Both implement " + md.getName() + " but have different return types", md.getSourceInfo());
+               /* TypeChecker._addError("Types " + this.getName() + " and " + castTo.getName() + " are incompatible.  
+                  Both implement " + md.getName() + " but have different return types", md.getSourceInfo()); */
                return false;
              }
            }
@@ -566,28 +575,18 @@ public class SymbolData extends TypeData {
    /** Depth-first traversal of the tree of enclosing data checking to see if sd is above this SymbolData 
      * in the class hierarchy.
      */
-   public boolean isSubClassOf(SymbolData superClass) {
-    if (superClass == null) return false;
-    if (this == superClass) return true;
-    if (superClass.isInterface()) {
-      Iterator<SymbolData> iter = _interfaces.iterator();
-      while (iter.hasNext()) {
-        SymbolData d = iter.next();
-        if (d == null) {
-          continue;
-        }
-        if (d == superClass) {
-          return true;
-        }
-        if (d.isSubClassOf(superClass)) {
-          return true;
-        }
+   public boolean isSubClassOf(SymbolData sd) {
+    if (sd == null) return false;
+    if (this.equals(sd)) return true;
+    if (sd.isInterface()) {
+      for (SymbolData i: _interfaces) {
+        if (i == null) continue;
+        if (i.equals(sd)) return true;
+        if (i.isSubClassOf(sd)) return true;
       }
     }
 
-    if (_superClass != null) {
-      return this._superClass.isSubClassOf(superClass);
-    }
+    if (_superClass != null) return _superClass.isSubClassOf(sd);
     return false;
   }
   
@@ -600,9 +599,9 @@ public class SymbolData extends TypeData {
      * @return  true if we are its inner class, false otherwise.
      */
   public boolean isInnerClassOf(SymbolData outerClass, boolean stopAtStatic) {
-    if (this == outerClass) {return true;}
+    if (this == outerClass) return true;
     Data outerData = this.getOuterData();
-    if (outerData == null) {return false;}
+    if (outerData == null) return false;
     if (stopAtStatic && this.hasModifier("static")) {return false;}
     return outerData.getSymbolData().isInnerClassOf(outerClass, stopAtStatic);
   }
@@ -613,19 +612,19 @@ public class SymbolData extends TypeData {
  /**@return this SymbolData.*/
   public SymbolData getSymbolData() { return this; }
   
-  /**@return the InstanceData corresponding to this class.*/
+  /** @return the InstanceData corresponding to this class. */
   public InstanceData getInstanceData() { return _instanceData; }
 
-  /**set the InstanceData for this class to the specified value*/
+  /** Sets the InstanceData for this class to the specified value. */
   public void setInstanceData(InstanceData id) { _instanceData = id; }
   
-  /**@return the package*/
+  /** @return the package */
   public String getPackage() { return _package; }
   
-  /**Set the package to the specified value*/
+  /** Sets the package to the specified value */
   public void setPackage(String pkg) { _package = pkg;  }
   
-  /**@return the generic type parameters*/
+  /** @return the generic type parameters */
   public TypeParameter[] getTypeParameters() {
     return _typeParameters;
   }
@@ -651,7 +650,10 @@ public class SymbolData extends TypeData {
   
   /** Takes in a name and tries to match it with one of this Data's inner classes or inner interfaces.  The input string
     * is a name relative to this SymbolData (such as B.C to request the class A.B.C from class A) and may be delimited 
-    * by '.' or '$'.  Checks the super class and interfaces of this SymbolData to see if the inner class or interface 
+    * by '.' or '$'.  
+    * TODO; NO!!! This is broken.  '$' appears in anonymous class names and local class names, where it is NOT
+    * used as a name segment separator
+    * Checks the super class and interfaces of this SymbolData to see if the inner class or interface 
     * can be found there.  If no matching visibile inner classes or interfaces are found, but one or more that are not 
     * visible are found, one of the non-visibile ones will be returned.
     * @return  The SymbolData for the matching inner class or interface or null if there isn't one or SymbolData.
@@ -679,27 +681,31 @@ public class SymbolData extends TypeData {
     SymbolData newResult = null;
     SymbolData privateResult = null;
     
-    //Next, look through the inner classes/interfaces of this class's super class
-    //Check accessibility, because if you cannot see the super class's inner class, you can't use it.
+    // Next, look through the inner classes/interfaces of this class's super class
+    // Check accessibility, because if you cannot see the super class's inner class, you can't use it.
     if (_superClass != null) {
       newResult = _superClass.getInnerClassOrInterfaceHelper(nameToMatch, firstIndexOfDot);
       if (newResult != null) {
         SymbolData outerPiece;
-        if (firstIndexOfDot > 0) {
+        
+        if (firstIndexOfDot > 0)
           outerPiece = _superClass.getInnerClassOrInterfaceHelper(nameToMatch.substring(0, firstIndexOfDot), -1);
-        }
-        else {
-          outerPiece = newResult;
-        }
+        else outerPiece = newResult;
+        
         if (TypeChecker.checkAccessibility(outerPiece.getMav(), outerPiece, this)) {result = newResult;}
-        else {privateResult = newResult;}
+        else privateResult = newResult;
       }
     }
     
-    //Next, look through the inner classes/interfaces of each of this class's interfaces
-    //Check accessibility, because if you cannot see the super class's inner class, you can't use it.
-    for (SymbolData id: _interfaces) {
-      newResult = id.getInnerClassOrInterfaceHelper(nameToMatch, firstIndexOfDot);
+    // Next, look through the inner classes/interfaces of each of this class's interfaces
+    // Check accessibility, because if you cannot see the super class's inner class, you can't use it.
+    for (SymbolData id: _interfaces) {  // TODO: find out how null is being inserted in _interfaces
+      if (id == null) {
+//        System.err.println("In SymbolData " + getName() + ", _interfaces contains a null entry");
+//        assert false;
+        continue;
+      }
+       newResult = id.getInnerClassOrInterfaceHelper(nameToMatch, firstIndexOfDot);
       if (newResult != null) {
         SymbolData outerPiece;
         if (firstIndexOfDot > 0) {
@@ -757,13 +763,10 @@ public class SymbolData extends TypeData {
   /**Return the anonymous inner class num, and then decrement it*/
   public int postdecrementAnonymousInnerClassNum() { return _anonymousInnerClassNum--; }  
   
-  /**
-   * When you add a field to a SymbolData, it is given an initial value.
-   */
+  /** Adds a (perhaps mutable) field to a SymbolData. */
   public boolean addVar(VariableData var) {
-//    var.hasValue();
-//    if var is not final, var.gotValue()
-    return super.addVar(var);
+//    if (! var.isFinal()) var.setHasValue();
+    return super.addVar(var); 
   }
   
   /** When you add fields to a SymboLData, they are given an initial value.*/
@@ -771,15 +774,11 @@ public class SymbolData extends TypeData {
    boolean success = true;
     for (int i = 0; i<vars.length; i++) {
       LinkedList<SymbolData> seen = new LinkedList<SymbolData>();
-      if (!_repeatedName(vars[i], seen)) {
-        if (!vars[i].isFinal()) {
-        vars[i].gotValue();
-        }
+      if (! _repeatedName(vars[i], seen)) {
+//        if (! vars[i].isFinal()) vars[i].setHasValue();
         _vars.addLast(vars[i]);
       }
-      else {
-        success = false;
-      }
+      else success = false;
     }
     return success;
  }
@@ -800,7 +799,7 @@ public class SymbolData extends TypeData {
     for (int i = 0; i<vars.length; i++) {
       LinkedList<SymbolData> seen = new LinkedList<SymbolData>();
       if (!_repeatedNameInHierarchy(vars[i], seen)) {
-        vars[i].setFinal();
+        if (! vars[i].isFinal()) vars[i].setFinal();
         _vars.addLast(vars[i]);
       }
       else {
@@ -839,9 +838,9 @@ public class SymbolData extends TypeData {
     // Does this shadow something in the super class?
     if (_superClass != null && _superClass._repeatedNameInHierarchy(vr, seen)) return true;
     
-    //Does this shadow something in the super interfaces?
-    for (int i = 0; i<_interfaces.size(); i++) {
-      if (_interfaces.get(i)._repeatedNameInHierarchy(vr, seen)) return true;
+    //Does this shadow something in the super interfaces?  TODO: postpone this test until all interfaces have been identified.
+    for (SymbolData sd: _interfaces) {
+      if (sd != null && sd._repeatedNameInHierarchy(vr, seen)) return true;
     }
     return false;
   }
@@ -873,11 +872,13 @@ public class SymbolData extends TypeData {
       if (currMd.getName().equals(name)) {
         if (paramTypes.length == currMd.getParams().length) {
           boolean match = true;
-          for (int j = 0; j<paramTypes.length; j++) {
-            if (paramTypes[j].getSymbolData() != 
-                currMd.getParams()[j].getType().getSymbolData()) {match = false; break;}
+          for (int j = 0; j < paramTypes.length; j++) {
+            if (! paramTypes[j].getSymbolData().equals(currMd.getParams()[j].getType().getSymbolData())) { 
+              match = false; 
+              break; 
+            }
           }
-          if (match) {return currMd; }
+          if (match) return currMd;
         }
       }
     }
@@ -894,22 +895,22 @@ public class SymbolData extends TypeData {
     return repeatedSignature(listOfMethods, method, false);
   }
   
-  
   /** Checks if two methods in this SymbolData have the same name and parameters.
     * @param listOfMethods  The methods in this SymbolData
     * @param method  The MethodData for the method to be added
     * @param fromClassFile  Whether or not a class file is adding this method.
     *                       Important because bridge methods, which differ only in return type,
     *                       can be added from a class file and are legal but cannot exist in source code.
-    * @return  The MethodData that was already in listOfMethods that method duplicates if there is one or null otherwise.
+    * @return the MethodData that was already in listOfMethods that method duplicates if there is one or null otherwise.
     */
-  public static MethodData repeatedSignature(LinkedList<MethodData> listOfMethods, MethodData method, boolean fromClassFile) {
+  public static MethodData repeatedSignature(LinkedList<MethodData> listOfMethods, MethodData method, 
+                                             boolean fromClassFile) {
     Iterator<MethodData> iter = listOfMethods.iterator();
     VariableData[] methodParams = method.getParams();
     while (iter.hasNext()) {
       boolean match = true;
       MethodData currMd = iter.next();
-      // Check that the names are the same and that if this is called from a class file that the return types are the same.
+      // Check if names are the same and if this is called from a class file check if return types are the same.
       if (currMd.getName().equals(method.getName()) && 
           (! fromClassFile || currMd.getReturnType() == method.getReturnType())) {
         VariableData[] currMdParams = currMd.getParams();
@@ -1007,9 +1008,10 @@ public class SymbolData extends TypeData {
     * @param addError  true if errors should be added to the type checker
     * @return  Whether there exists a conflict
     */
-  protected static boolean checkDifferentReturnTypes(MethodData md, SymbolData sd, boolean addError, JavaVersion version) {
+  protected static boolean checkDifferentReturnTypes(MethodData md, SymbolData sd, boolean addError, 
+                                                     JavaVersion version) {
     // We only want to check the super class and interfaces, not outer classes.
-    LinkedList<SymbolData> interfaces = sd.getInterfaces();    
+    ArrayList<SymbolData> interfaces = sd.getInterfaces();    
     LinkedList<SymbolData> enclosingData = new LinkedList<SymbolData>();
     enclosingData.addAll(interfaces);
     SymbolData superClass = sd.getSuperClass();
@@ -1023,13 +1025,12 @@ public class SymbolData extends TypeData {
       if (matchingMd != null) {
         if (matchingMd.hasModifier("private")) return false;
         boolean subclass = md.getReturnType().isSubClassOf(matchingMd.getReturnType());
-        if (matchingMd.getReturnType() != md.getReturnType() && !(subclass && LanguageLevelConverter.versionIs15(version))) {
+        if (matchingMd.getReturnType() != md.getReturnType() && ! subclass && 
+            LanguageLevelConverter.versionIs15(version)) {
           StringBuffer methodSignature = new StringBuffer(md.getName() + "(");
           VariableData[] params = md.getParams();
           for (int i = 0; i < params.length; i++) {
-            if (i > 0) {
-              methodSignature.append(", ");
-            }
+            if (i > 0) methodSignature.append(", ");
             methodSignature.append(params[i].getType().getName());
           }
           methodSignature.append(")");
@@ -1051,12 +1052,13 @@ public class SymbolData extends TypeData {
           if (matchingMd.hasModifier("protected")) access = "protected";
           if (addError) {
             TypeChecker.errors.
-              addLast(new Pair<String, JExpressionIF>(md.getName() + " in " + md.getSymbolData().getName() +
-                                                      " cannot override " + matchingMd.getName() + " in " +
-                                                      matchingMd.getSymbolData().getName() + 
-                                                      ".  You are attempting to assign weaker access priviledges. In " +
-                                                      matchingMd.getSymbolData().getName() + ", " + matchingMd.getName() +
-                                                      " was " + access, md.getJExpression())); } 
+              addLast(new Pair<String, JExpressionIF>(md.getName() + " in " + md.getSymbolData().getName() 
+                                                        + " cannot override " + matchingMd.getName() + " in " 
+                                                        + matchingMd.getSymbolData().getName() + 
+                                                      ".  You are attempting to assign weaker access priviledges. In " 
+                                                        + matchingMd.getSymbolData().getName() + ", "
+                                                        + matchingMd.getName() + " was " 
+                                                        + access, md.getJExpression())); } 
           return true;
         }
       }
@@ -1084,23 +1086,25 @@ public class SymbolData extends TypeData {
     }
         
     String newName = methodName;
-    int counter = 0;  //note: it is possible that the counter could wrap around and this could run infinitely, but that is very unlikely.
+    int counter = 0;  // Note: loop tests for counter overflow, but memory would be exhausted much earlier
     while (names.contains(newName) && counter != -1) {
-      newName = methodName + counter; counter++;
+      newName = methodName + counter; 
+      counter++;
     }
     
-    if (counter == -1) {throw new RuntimeException("Internal Program Error: Unable to rename method " + methodName + ".  All possible names were taken.  Please report this bug.");}
+    if (counter == -1) throw 
+      new RuntimeException("Internal Program Error: Unable to rename method " + methodName 
+                             + ".  All possible names were taken.  Please report this bug.");
 
     return newName; 
   }
   
   
-  /**
-   * Called to generate an error message when two methods are created with the same signature.
-   */
+  /** Called to generate an error message when two methods are created with the same signature. */
   private String _createErrorMessage(MethodData md) {
-    StringBuffer message = new StringBuffer("In the class \"" + md.getSymbolData().getName() + 
-                                            "\", you cannot have two methods with the same name: \"" + md.getName() + "\"");
+    StringBuffer message = 
+      new StringBuffer("In the class \"" + md.getSymbolData().getName() + 
+                       "\", you cannot have two methods with the same name: \"" + md.getName() + "\"");
     VariableData[] params = md.getParams();
     if (params.length > 0) {
       message.append(" and parameter type");
@@ -1118,12 +1122,11 @@ public class SymbolData extends TypeData {
     return message.toString();
   }
   
-  /**
-   * When adding a method, we must check that the method's signature (name and parameters)
-   * does not match that of any other method in the same class.  We also must check that
-   * a method does not have the same signature but a different return type from a method 
-   * in its superclass or one of its interfaces.
-   */
+  /** When adding a method, we must check that the method's signature (name and parameters)
+    * does not match that of any other method in the same class.  We also must check that
+    * a method does not have the same signature but a different return type from a method 
+    * in its superclass or one of its interfaces.
+`    */
   public void addMethod(MethodData method) {
     // Detect repeated methods
     if (repeatedSignature(_methods, method) != null) {
@@ -1131,7 +1134,8 @@ public class SymbolData extends TypeData {
                                                                         method.getJExpression()));
     }
     else {
-        _methods.addLast(method);
+      _methods.addLast(method);
+//      System.err.println("*** Adding method " + method.getName() + " to " + this);
     }
   }
   
@@ -1144,8 +1148,10 @@ public class SymbolData extends TypeData {
     // Detect if a method was user-defined that matches the signature of an auto-generated method.
     MethodData md = repeatedSignature(_methods, method);
     if (md != null) {
-      LanguageLevelVisitor.errors.addLast(new Pair<String, JExpressionIF>("This method's signature conflicts with an automatically generated method's signature", 
-                                                                        md.getJExpression()));
+      LanguageLevelVisitor.errors.
+        addLast(new Pair<String, JExpressionIF>("This method's signature conflicts with an automatically generated "
+                                                  + "method's signature", 
+                                                md.getJExpression()));
     }
     else {
         _methods.addLast(method);
@@ -1157,14 +1163,16 @@ public class SymbolData extends TypeData {
    * name and parameters with different return types for bridge methods.
    */
   public void addMethod(MethodData method, boolean isAugmentedCode, boolean fromClassFile) {
-    // Detect if a method was user-defined that matches the signature of an auto-generated method.
-    MethodData md = repeatedSignature(_methods, method, fromClassFile);
-    if (md != null) {
-      LanguageLevelVisitor.errors.addLast(new Pair<String, JExpressionIF>(_createErrorMessage(method), md.getJExpression()));
-    }
-    else {
+  // This checking cannot be performed until symbolTable is complete  
+//    // Detect if a method was user-defined that matches the signature of an auto-generated method.
+//    MethodData md = repeatedSignature(_methods, method, fromClassFile);
+//    if (md != null) {
+//      LanguageLevelVisitor.errors.
+//        addLast(new Pair<String, JExpressionIF>(_createErrorMessage(method), md.getJExpression()));
+//    }
+//    else {
       _methods.addLast(method);
-    }
+//    }
   }
 
   /**@return the superClass of this symbol data*/
@@ -1172,32 +1180,33 @@ public class SymbolData extends TypeData {
     return _superClass;
   }
   
-  /**Set the super class to the specified value*/
+  public void clearSuperClass() { _superClass = null; }
+  
+  /** Set the super class to the specified value. */
   public void setSuperClass(SymbolData superClass) {
+    assert superClass != null;
     _superClass = superClass;
     addEnclosingData(superClass);
   }
   
   /**@return the interfaces of this symbol data*/
-  public LinkedList<SymbolData> getInterfaces() {
-    return _interfaces;
-  }
+  public ArrayList<SymbolData> getInterfaces() { return _interfaces; }
   
-  /**Add an interface to the list of interfaces*/
+  /** Add an interface to the list of interfaces.  TODO: find out where null is being added as an interface! */
   public void addInterface(SymbolData interphace) {
-    _interfaces.addLast(interphace);
-    addEnclosingData(interphace);
-  }
-  
-  /**Set the interfaces to be the specified list*/
-  public void setInterfaces(LinkedList<SymbolData> interfaces) {
-    _interfaces = interfaces;
-    for (int i = 0; i<interfaces.size(); i++) {
-      addEnclosingData(interfaces.get(i));
+    if (interphace != null) {
+      _interfaces.add(interphace);
+      addEnclosingData(interphace);
     }
   }
   
-
+  /**Set the interfaces to be the specified list*/
+  public void setInterfaces(ArrayList<SymbolData> interfaces) {
+    assert interfaces != null;
+    _interfaces = interfaces;
+    for (SymbolData sd: interfaces) { if (sd != null) addEnclosingData(sd); }
+  }
+  
   /**Add one to the number of constructors for this symbol data*/
   public void incrementConstructorCount() {
     _constructorNumber ++;
@@ -1325,19 +1334,17 @@ public class SymbolData extends TypeData {
     return getName().hashCode();
   }
   
-  
-  /**
-   * Check to see if this class is one of the 5 known classes that implement Runnable.
-   *  Checking each class recursively to see if it extends Runnable is too time consuming, so we are hoping this short cut will work.
-   * Clearly, this has some disadvantages.
-   */
+  /** Check to see if this class is one of the 5 known classes that implement Runnable.  Checking each class recursively
+    * to see if it extends Runnable is too time consuming, so we are hoping this short cut will work.
+    * Clearly, this has some disadvantages.
+    */
   public boolean implementsRunnable() {
-   return this.getName().equals("java.lang.Thread") || this.getName().equals("java.util.TimerTask") || 
-     this.getName().equals("javax.swing.text.AsyncBoxView$ChildState") || this.getName().equals("java.awt.image.renderable.RenderableImageProducer")
+   return this.getName().equals("java.lang.Thread") || this.getName().equals("java.util.TimerTask") 
+     || this.getName().equals("javax.swing.text.AsyncBoxView$ChildState") 
+     || this.getName().equals("java.awt.image.renderable.RenderableImageProducer")
      || this.getName().equals("java.util.concurrent.FutureTask");// || this.getName().equals("java.lang.Runnable");
   }
   
-
   /**Check to see if the interface i appears anywhere in the hierarchy for this class/interface*/
   public boolean hasInterface(SymbolData i) {
     if (i==null) return false;
@@ -1368,21 +1375,22 @@ public class SymbolData extends TypeData {
     return myVars;
   }
   
-  
-   /**
-    * Test the methods defined in the above class
-    */
+   /** Test the methods defined in the above class */
   public static class SymbolDataTest extends TestCase {
     
     private SymbolData _sd;
     
     private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _protectedMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
     private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _abstractMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
     private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
-    private ModifiersAndVisibility _publicFinalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[]{"public", "final"});
+    private ModifiersAndVisibility _publicFinalMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[]{"public", "final"});
     
     public SymbolDataTest() {
       this("");
@@ -1577,11 +1585,12 @@ public class SymbolData extends TypeData {
                                       
       assertFalse("There should be no conflict", checkDifferentReturnTypes(md8, _sd, JavaVersion.JAVA_5));
       assertEquals("There should still be 3 errors", 3, TypeChecker.errors.size());
-      assertTrue("There should be a conflict in 1.4", checkDifferentReturnTypes(md8, _sd, JavaVersion.JAVA_1_4));
-      assertEquals("There should now be 4 errors", 4, TypeChecker.errors.size());
-      assertEquals("The error message should be correct", TypeChecker.errors.getLast().getFirst(), 
-                   "superSuperMethodName(char) in superClass cannot override superSuperMethodName(char) in " + 
-                   superSuperSd.getName() + "; attempting to use different return types");
+      /* Java 1.4 is not supported. */
+//      assertTrue("There should be a conflict in 1.4", checkDifferentReturnTypes(md8, _sd, JavaVersion.JAVA_1_4));
+//      assertEquals("There should now be 4 errors", 4, TypeChecker.errors.size());
+//      assertEquals("The error message should be correct", TypeChecker.errors.getLast().getFirst(), 
+//                   "superSuperMethodName(char) in superClass cannot override superSuperMethodName(char) in " + 
+//                   superSuperSd.getName() + "; attempting to use different return types");
     }
     
     public void test_createErrorMessage() {
@@ -1606,9 +1615,10 @@ public class SymbolData extends TypeData {
                                       new String[0],
                                       _sd,
                                       null);
-                                      assertEquals("The error message should be correct.", 
-                                                   "In the class \"i.like.monkey\", you cannot have two methods with the same name: \"superSuperMethodName\" and parameter type: char", 
-                                                   _sd._createErrorMessage(md2));
+      assertEquals("The error message should be correct.", 
+                   "In the class \"i.like.monkey\", you cannot have two methods with the same name: "
+                     + "\"superSuperMethodName\" and parameter type: char", 
+                   _sd._createErrorMessage(md2));
       md2.getParams()[0].setEnclosingData(md2);
       // Test with a method with two parameters.
       MethodData md3 = new MethodData("superSuperMethodName",
@@ -1624,7 +1634,8 @@ public class SymbolData extends TypeData {
       md3.getParams()[1].setEnclosingData(md3);
                                       
       assertEquals("The error message should be correct.", 
-                   "In the class \"i.like.monkey\", you cannot have two methods with the same name: \"superSuperMethodName\" and parameter types: char, char", 
+                   "In the class \"i.like.monkey\", you cannot have two methods with the same name: "
+                     + "\"superSuperMethodName\" and parameter types: char, char", 
                    _sd._createErrorMessage(md3));
       
     }
@@ -1655,7 +1666,8 @@ public class SymbolData extends TypeData {
       _sd.addMethod(md2);
       assertEquals("There should be one error.", 1, LanguageLevelVisitor.errors.size());
       assertEquals("The error message should be correct.", "In the class \"" + _sd.getName() + 
-                   "\", you cannot have two methods with the same name: \"" + md.getName() + "\" and parameter types: char, boolean",
+                   "\", you cannot have two methods with the same name: \"" + md.getName() 
+                     + "\" and parameter types: char, boolean",
                    LanguageLevelVisitor.errors.get(0).getFirst());
       MethodData md4 = new MethodData("methodName",
                                      _publicMav,
@@ -1869,10 +1881,12 @@ public class SymbolData extends TypeData {
     
     public void testEquals() {
       SymbolData superSd = new SymbolData("superClass");
-      _sd = new SymbolData("i.like.monkey", _publicMav, new TypeParameter[0], superSd, new LinkedList<SymbolData>(), null);
+      _sd = 
+        new SymbolData("i.like.monkey", _publicMav, new TypeParameter[0], superSd, new ArrayList<SymbolData>(), null);
       
       //check variables that are equal;
-      SymbolData _sd2 = new SymbolData("i.like.monkey", _publicMav, new TypeParameter[0], superSd, new LinkedList<SymbolData>(), null);
+      SymbolData _sd2 = 
+        new SymbolData("i.like.monkey", _publicMav, new TypeParameter[0], superSd, new ArrayList<SymbolData>(), null);
       assertTrue("Equals should return true if two SymbolDatas are equal", _sd.equals(_sd2));
       assertTrue("Equals should return true in opposite direction as well", _sd2.equals(_sd));
 
@@ -1880,29 +1894,32 @@ public class SymbolData extends TypeData {
       assertFalse("Equals should return false if SymbolData is compared to null",_sd.equals(null));   
     
       //different names
-      _sd2 = new SymbolData("q", _publicMav, new TypeParameter[0], superSd, new LinkedList<SymbolData>(), null);
+      _sd2 = new SymbolData("q", _publicMav, new TypeParameter[0], superSd, new ArrayList<SymbolData>(), null);
       assertFalse("Equals should return false if class names are different", _sd.equals(_sd2));
       
       //different MAV
-      _sd2 = new SymbolData("i.like.monkey", _protectedMav, new TypeParameter[0], superSd, new LinkedList<SymbolData>(), null);
+      _sd2 = 
+        new SymbolData("i.like.monkey", _protectedMav, new TypeParameter[0], superSd, new ArrayList<SymbolData>(), null);
       assertFalse("Equals should return false if class modifiers are different", _sd.equals(_sd2));
       
       //different type parameters
-      _sd2 = new SymbolData("i.like.monkey", 
-                            _publicMav, 
-                            new TypeParameter[] { new TypeParameter(SourceInfo.NO_INFO, new TypeVariable(SourceInfo.NO_INFO,"tv"), 
-                                                                    new TypeVariable(SourceInfo.NO_INFO,"i")) }, 
-                            superSd, 
-                            new LinkedList<SymbolData>(), null);
+      _sd2 = 
+        new SymbolData("i.like.monkey", 
+                       _publicMav, 
+                       new TypeParameter[] { new TypeParameter(SourceInfo.NO_INFO, 
+                                                               new TypeVariable(SourceInfo.NO_INFO,"tv"), 
+                                                               new TypeVariable(SourceInfo.NO_INFO,"i")) }, 
+                       superSd, 
+                       new ArrayList<SymbolData>(), null);
       assertFalse("Equals should return false if class type parameters are different", _sd.equals(_sd2));
       
       //different super classes
-      _sd2 = new SymbolData("i.like.monkey", _publicMav, new TypeParameter[0], null, new LinkedList<SymbolData>(), null);
+      _sd2 = new SymbolData("i.like.monkey", _publicMav, new TypeParameter[0], null, new ArrayList<SymbolData>(), null);
       assertFalse("Equals should return false if super classes are different", _sd.equals(_sd2));
       
       //different interfaces
-      LinkedList<SymbolData> interfaces = new LinkedList<SymbolData>();
-      interfaces.addLast(SymbolData.INT_TYPE);
+      ArrayList<SymbolData> interfaces = new ArrayList<SymbolData>();
+      interfaces.add(SymbolData.INT_TYPE);
       _sd2 = new SymbolData("i.like.monkey", _publicMav, new TypeParameter[0], superSd, interfaces, null);
       assertFalse("Equals should return false if the interfaces are different", _sd.equals(_sd2));
     }
@@ -1923,7 +1940,8 @@ public class SymbolData extends TypeData {
     }
   
     public void testHasInterface() {
-      // Runnable has two subinterfacers, subRunnable and subRunnable2.  subRunnable has a subclass someSd and subRunnable2 has a subclass someOtherSd.
+      /* Runnable has two subinterfacers, subRunnable and subRunnable2.  subRunnable has a subclass someSd and
+         subRunnable2 has a subclass someOtherSd. */
       
       SymbolData runnable = new SymbolData("java.lang.Runnable");
       runnable.setInterface(true);
@@ -1958,8 +1976,12 @@ public class SymbolData extends TypeData {
     }
     
     public void test_isAssignable() {
-      MethodData md = new MethodData("Overwritten", _publicMav, new TypeParameter[0], _sd, new VariableData[0], new String[0], _sd, new NullLiteral(SourceInfo.NO_INFO));
-      MethodData md2 = new MethodData("Overwriting", _publicMav, new TypeParameter[0], _sd, new VariableData[0], new String[0], _sd, new NullLiteral(SourceInfo.NO_INFO));
+      MethodData md = 
+        new MethodData("Overwritten", _publicMav, new TypeParameter[0], _sd, new VariableData[0], new String[0], _sd, 
+                       new NullLiteral(SourceInfo.NO_INFO));
+      MethodData md2 = 
+        new MethodData("Overwriting", _publicMav, new TypeParameter[0], _sd, new VariableData[0], new String[0], _sd, 
+                       new NullLiteral(SourceInfo.NO_INFO));
 
       //tests a wide variety of possibilities, but not all possibilities.
       assertTrue("Should be assignable", _isCompatible(md, md2));
@@ -2003,7 +2025,7 @@ public class SymbolData extends TypeData {
       assertTrue("Should be repeated name", _d._repeatedNameInHierarchy(vd, new LinkedList<SymbolData>()));
       
       //what if interface has var
-      _d.setSuperClass(null);
+      _d.clearSuperClass();
       _d.addInterface(superC);
       assertTrue("Should also be repeated name", _d._repeatedNameInHierarchy(vd, new LinkedList<SymbolData>()));
     }
@@ -2128,7 +2150,8 @@ public class SymbolData extends TypeData {
       assertTrue("outer2 is an outer class of itself", outer2.isInnerClassOf(outer2, true));
       assertFalse("_sd is not related to notInChain", _sd.isInnerClassOf(notInChain, true));
       assertFalse("_sd is not an outer class of outer1", outer1.isInnerClassOf(_sd, true));
-      assertFalse("outer3 cannot be seen from _sd if the static flag is true, because outer2 is static", _sd.isInnerClassOf(outer3, true));
+      assertFalse("outer3 cannot be seen from _sd if the static flag is true, because outer2 is static", 
+                  _sd.isInnerClassOf(outer3, true));
       assertTrue("But, outer3 is an outer class of _sd", _sd.isInnerClassOf(outer3, false));
     }
     

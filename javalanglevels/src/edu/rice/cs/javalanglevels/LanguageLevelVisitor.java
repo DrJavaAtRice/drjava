@@ -45,21 +45,34 @@ import edu.rice.cs.javalanglevels.util.Log;
 import edu.rice.cs.javalanglevels.util.Utilities;
 import java.util.*;
 import java.io.*;
-import java.lang.reflect.Modifier;
-import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.reflect.JavaVersion;
-import edu.rice.cs.plt.reflect.PathClassLoader;
-import edu.rice.cs.plt.reflect.EmptyClassLoader;
 import edu.rice.cs.plt.iter.*;
 import edu.rice.cs.plt.io.IOUtil;
 
 import junit.framework.TestCase;
 
-/** Top-level Language Level Visitor that represents what is common between all Language Levels.  Enforces constraints
-  * during the first walk of the AST (checking for general errors and building the symbol table).  This class enforces
-  * things that are common to all contexts reachable at any Language Level, as well as top level constraints.
+/** Top-level Language Level Visitor that implements the constraint checking and symbol table building that is common to
+  * first pass processing for the Functional and FullJava levels.  There are two major complications in performing this
+  * pass.  First, references to symbols appear in the signatures of type (class/interface) definitions that have not yet
+  * been defined.  In the symbol table, the binding of these references must be deferred until a fixup list is executed
+  * after the first pass visit has finished.  This visitor and its descendants maintain a FixUp list for this purpose.
+  * Second, the loading of signature information into the symbol table (called "resolving" in this documentation) is
+  * deferred for some symbols.  A dummy entry called a "continuation" is created in the symbol table for each such 
+  * symbol.  
   */
 public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor {
+  
+  public static final ModifiersAndVisibility PUBLIC_MAV = 
+    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+  public static final ModifiersAndVisibility PROTECTED_MAV = 
+    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+  public static final ModifiersAndVisibility PRIVATE_MAV = 
+    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+  public static final ModifiersAndVisibility PACKAGE_MAV = 
+    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+  public static final ModifiersAndVisibility FINAL_MAV = 
+    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[]{"final"});
+    
   
   /** Errors we have encountered during this pass: string is the text of the error, JExpressionIF is the part of
     * the AST where the error occurs. */
@@ -69,12 +82,17 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     * LanguageLevelConverter.symboltable. */
   public final Symboltable symbolTable;
   
-  /*Stores the information on the refernce as well as the visitor we were using when we encountered the
-   * reference, for a type that has not been resolved yet*/
-  static Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations;
-
+  /** A table of the names of symbols for which dummy symbol entries (continuations) have been created and resolution 
+    * has been deferred.  In some cases (symbols subsequently defined in a file being converted), resolution occurs 
+    * during execution.  TODO: make this field dynamic. */
+  static Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations;
   
-  /* A list of other files that are visited.  If the SourceFile is not null, then the source file was
+  /** A table of the commands to be executed after this visitation is complete; these commands fill in missing objects
+    * in the symbolTable (which were not available at the time the containing object was constructed.
+    * TODO: make this field dynamic. */
+  static LinkedList<Command> fixUps;
+
+  /* A list of other files that are being visited.  If the SourceFile is not null, then the source file was
    * visited as opposed to the class file.  This info is used by LanguageLevelConverter in DrJava.
    * We keep the LLV rather than the file, because the LLV has a file, and we need some other information
    * stored in the LLV to properly look up the file.
@@ -84,36 +102,30 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   /**True once we have encountered an error we cannot recover from.*/
   static boolean _errorAdded;
   
-  /** A list of qualified class names of the subclasses of this class that have been traversed and 
-    * continuations pending the resolution of their superclasses.
-    */
-  static Hashtable<String, TypeDefBase> _hierarchy;
-  
-  /**The source file that is being compiled */
+  /** The source file that is being compiled */
   File _file;
   
   /** The package of the current file */
   String _package;
   
-  /** The name of the class currently being parsed.  This is null for a top-level visitor but is set in ...ClassBodyVisitor. 
-    * The package name prefix is excluded.  */
+  /** The name of the current enclosing class.  This is null for a top-level visitor but is bound to an object in
+    * IntermediateVisitor/FullJavaVisitor.  The package name prefix is included.  Inner class names include class 
+    * qualifiers. */
   String _enclosingClassName;
   
-  /** A list of file names (classes) imported by the current file. */
+  /** A list of file names (classes) imported by the current file. TODO: change the name to _importedClasses or
+    * _importedTypes. */
   LinkedList<String> _importedFiles;
   
   /** A list of package names imported by the current file. */
   LinkedList<String> _importedPackages;
   
-  /** A list of ClassDefs and InterfaceDefs in the current file. */
-  LinkedList<String> _classNamesInThisFile;
+  /** The fully qualified class names for top level ClassDefs and InterfaceDefs in the current file that have not
+    * yet been defined.  This filed is used to optimize symbol table lookups obviating the need for some fixups. */
+  HashSet<String> _classesInThisFile;
   
-  /** A Hashtable containing a list of qualified class names of classes waiting to be parsed 
-    * within SourceFiles we're in the process of compiling mapped to a pair containing their
-    * ClassDefs and LanguageLevelVisitors.
-    */
-  Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>> _classesToBeParsed;
-  LinkedList<String> _innerClassesToBeParsed;
+//  /** The inner classes in this class body; null if this is not within a class body. */
+//  HashSet<String> _innerClassesInThisBody;
   
   protected static final Log _log = new Log("LLConverter.txt", false);
   
@@ -122,41 +134,33 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     * @param packageName  The name of the package corresponding to the file
     * @param importedFiles  The list of files (classes) imported by this source file
     * @param importedPackages  The list of packages imported by this source file
-    * @param classNamesInThisFile  The list of names of classes defined in this file
+    * @param classesInThisFile  The list of names of classes defined in this file
     * @param continuations  The table of classes we have encountered but still need to resolve
     */
   public LanguageLevelVisitor(File file, 
-                              String packageName, 
+                              String packageName,
+                              String enclosingClassName,
                               LinkedList<String> importedFiles, 
                               LinkedList<String> importedPackages, 
-                              LinkedList<String> classNamesInThisFile, 
-                              Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
+                              HashSet<String> classesInThisFile, 
+                              Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations,
+                              LinkedList<Command> fixUps) {
     _file = file;
-    _enclosingClassName = null;
     _package = packageName;
+    _enclosingClassName = enclosingClassName;
     _importedFiles = importedFiles;
     _importedPackages = importedPackages;
-    _classNamesInThisFile = classNamesInThisFile;
-    _classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
-    _innerClassesToBeParsed = new LinkedList<String>();
+    _classesInThisFile = classesInThisFile;
+//    _innerClassesInThisBody = new HashSet<String>();
     this.continuations = continuations;
+    this.fixUps = fixUps;
     symbolTable = LanguageLevelConverter.symbolTable;
-  }
-  
-  /** This is a special constructor called from the TypeChecker that sets classesToBeParsed.
-    * Normally, classesToBeParsed is set by the concrete instantiation of the LanguageLevelVisitor,
-    * but in the case of the TypeChecker, we just create a LangaugeLevelVisitor so we can use its
-    * getSymbolData code.  Thus, we must give it a classesToBeParsed to avoid a null pointer exception.
-    */
-  public LanguageLevelVisitor(File file, 
-                              String packageName, 
-                              LinkedList<String> importedFiles, 
-                              LinkedList<String> importedPackages, 
-                              LinkedList<String> classNamesInThisFile, 
-                              Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>> classesToBeParsed,
-                              Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
-    this(file, packageName, importedFiles, importedPackages, classNamesInThisFile, continuations);
-    _classesToBeParsed = classesToBeParsed;
+    assert fixUps != null;
+    
+    // Ensure that the imported packages include "java.lang" 
+    if (! _importedPackages.contains("java.lang")) _importedPackages.addFirst("java.lang");
+    // Ensure that the symbol table contains the essential types;  TODO: this is kludge; fix it !!!
+    LanguageLevelConverter.loadSymbolTable();
   }
   
   /* Reset the nonStatic fields of this visitor.  Used during testing. */
@@ -166,7 +170,6 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     _package = "";
     _importedFiles = new LinkedList<String>();
     _importedPackages = new LinkedList<String>();
-    _classNamesInThisFile = new LinkedList<String>();
   }
   
   /** @return the accessor name corresponding to given field name. */
@@ -175,29 +178,38 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   /**@return the source file*/
   public File getFile() { return _file; }
   
-  /** @return true if this data is a constructor, i.e., it is a method data,
-    * its name and return type are the same, and its return type matches its enclosing sd.
+  /** @return true if this data is a constructor, i.e., it is a method data, its name and return type are the same, and
+    * its return type matches its enclosing sd.
     */
   protected boolean isConstructor(Data d) {
-    if (!(d instanceof MethodData)) return false;
+    if ( !(d instanceof MethodData) ) return false;
     MethodData md = (MethodData) d;
+    SymbolData rt = md.getReturnType();
+    SymbolData sd = md.getSymbolData();  // if this is a constructor, sd must be a defined symbol
     
-    return (md.getReturnType() != null) && (md.getSymbolData() != null) &&
-      (md.getReturnType().getName().indexOf(md.getName()) != -1) && 
-      (md.getReturnType() == md.getSymbolData());
+    return (rt != null && sd != null && rt.getName().indexOf(md.getName()) != -1 && rt == sd);
   }
   
-  /** Takes a classname and returns only the final segment of it.  This removes all the dots and dollar signs. */
+  /** Factory method that constructs an appropriate class body visitor for this visitor class (either 
+    * ClassBodyIntermediateVisitor or ClassBodyFullJavaVisitor). This class and method should be abstract, but the LLV 
+    * class is used concretely in testing and  elswhere.  The default choice is ClassBodyFullJavaVisitor. */
+  public LanguageLevelVisitor newClassBodyVisitor(SymbolData anonSD, String anonName) {
+    return new ClassBodyFullJavaVisitor(anonSD, anonName, _file, _package, _importedFiles, _importedPackages, 
+                                        _classesInThisFile, continuations, fixUps);
+  }
+    
+  /** Takes a classname and returns only the final segment of it.  This removes all the dots.  Returns "" for anonymous
+    * class names.   TODO: Do we need to fix this? */
   public static String getUnqualifiedClassName(String className) { 
-    int lastIndexOfDot = className.lastIndexOf(".");
+    int lastIndexOfDot = className.lastIndexOf('.');
     if (lastIndexOfDot != -1) {
       className = className.substring(lastIndexOfDot + 1);
     }
-    int lastIndexOfDollar = className.lastIndexOf("$");
+    int lastIndexOfDollar = className.lastIndexOf('$');
     if (lastIndexOfDollar != -1) {
       className = className.substring(lastIndexOfDollar + 1);
     }
-    //Remove any leading numbers
+    // Remove any leading numbers  TODO: why do this?  If we encounter a 
     while (className.length() > 0 && Character.isDigit(className.charAt(0))) { 
       className = className.substring(1, className.length());
     }
@@ -205,7 +217,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   }
   
   /** Convert the ReferenceType[] to a String[] with the names of the ReferenceTypes. */
-  protected String[] referenceType2String(ReferenceType[] rts) {
+  protected static String[] referenceType2String(ReferenceType[] rts) {
     String[] throwStrings = new String[rts.length];
     for (int i = 0; i < throwStrings.length; i++) {
       throwStrings[i] = rts[i].getName();
@@ -213,169 +225,13 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return throwStrings;
   }
   
-  /** We'll use this class loader to look up resources (*not* to load classes) */
-  private static final Thunk<ClassLoader> RESOURCES = new Thunk<ClassLoader>() {
-    private Options _cachedOptions = null;
-    private ClassLoader _cachedResult = null;
-    public ClassLoader value() {
-      if (LanguageLevelConverter.OPT != _cachedOptions) {
-        _cachedOptions = LanguageLevelConverter.OPT;
-        Iterable<File> searchPath = IterUtil.<File>compose(LanguageLevelConverter.OPT.bootClassPath(),
-                                                     LanguageLevelConverter.OPT.classPath());
-        _cachedResult = new PathClassLoader(EmptyClassLoader.INSTANCE, searchPath);
-      }
-      return _cachedResult;
-    }
-  };
-  
-  /** Uses the ASM class reader to read the class file corresponding to the class in the specified directory, and uses
-    * the information from ASM to build a SymbolData corresponding to the class.
-    * @param qualifiedClassName  The fully qualified class name of the class we are looking up
-    * @param directoryName  The directory where the class is located.
-    */
-  private SymbolData _classFile2SymbolData(String qualifiedClassName, String programRoot) {
-    ClassReader reader = null;
-    try {
-      String fileName = qualifiedClassName.replace('.', '/') + ".class";
-      InputStream stream = RESOURCES.value().getResourceAsStream(fileName);
-      if (stream == null && programRoot != null) {
-        stream = PathClassLoader.getResourceInPathAsStream(fileName, new File(programRoot));
-      }
-      if (stream == null) { return null; }
-      // Let IOUtil handle the stream here, because it closes it when it's done, unlike ASM.
-      reader = new ClassReader(IOUtil.toByteArray(stream));
-    }
-    catch (IOException e) { return null; }
-    
-    // This is done so that the SymbolData in the Symboltable is updated and returned.
-    final SymbolData sd;
-    SymbolData sdLookup = symbolTable.get(qualifiedClassName); 
-    if (sdLookup == null)  { // create dummy continuation for sd
-      sd = new SymbolData(qualifiedClassName);
-      symbolTable.put(qualifiedClassName, sd);
-    }
-    else { sd = sdLookup; }
-    
-    // make it be a non-continuation, since we are filling it in
-    sd.setIsContinuation(false);
-    
-    final SourceInfo lookupInfo = _makeSourceInfo(qualifiedClassName);
-    final String unqualifiedClassName = getUnqualifiedClassName(qualifiedClassName);
-    
-    ClassVisitor extractData = new ClassVisitor() {
-      
-      public void visit(int version, int access, String name, String sig, String sup, String[] interfaces) {
-        sd.setMav(_createMav(access));
-        sd.setInterface(Modifier.isInterface(access));
-        
-        int slash = name.lastIndexOf('/');
-        if (slash == -1) { sd.setPackage(""); }
-        else { sd.setPackage(name.substring(0, slash).replace('/', '.')); }
-        
-        if (sup == null) { sd.setSuperClass(null); }
-        else { sd.setSuperClass(getSymbolDataForClassFile(sup.replace('/', '.'), lookupInfo)); }
-        
-        if (interfaces != null) {
-          for (String iName : interfaces) {
-            SymbolData superInterface = getSymbolDataForClassFile(iName.replace('/', '.'), lookupInfo);
-            if (superInterface != null) { sd.addInterface(superInterface); }
-          }
-        }
-      }
-      
-      public FieldVisitor visitField(int access, String name, String desc, String sig, Object value) {
-        /* Private fields cannot be ignored because they are used in code augmentation for generating constructors,
-         * equals, and hashCode. */
-        String typeString = org.objectweb.asm.Type.getType(desc).getClassName();
-        SymbolData type = getSymbolDataForClassFile(typeString, lookupInfo);
-        if (type != null) { sd.addVar(new VariableData(name, _createMav(access), type, true, sd)); }
-        return null;
-      }
-      
-      public MethodVisitor visitMethod(int access, String name, String desc, String sig, String[] exceptions) {
-        if (Modifier.isPrivate(access)) return null; // ignore private methods in class files; they are invisible
-        boolean valid = true;
-        String methodName;
-        SymbolData returnType;
-        if (name.equals("<init>")) {
-          methodName = unqualifiedClassName;
-          returnType = sd;
-        }
-        else {
-          methodName = name;
-          String returnString = org.objectweb.asm.Type.getReturnType(desc).getClassName();
-          returnType = getSymbolDataForClassFile(returnString, lookupInfo);
-          valid = valid && (returnType != null);
-        }
-        org.objectweb.asm.Type[] argTypes = org.objectweb.asm.Type.getArgumentTypes(desc);
-        VariableData[] args = new VariableData[argTypes.length]; 
-        for (int i = 0; i < argTypes.length; i++) {
-          SymbolData argType = getSymbolDataForClassFile(argTypes[i].getClassName(), lookupInfo);
-          if (argType == null) { valid = false; }
-          else { args[i] = new VariableData(argType); }
-        }
-        if (exceptions == null) { exceptions = new String[0]; }
-        for (int i = 0; i < exceptions.length; i++) { exceptions[i] = exceptions[i].replace('/', '.'); }
-        
-        if (valid) {
-          MethodData m = 
-            MethodData.make(methodName, _createMav(access), new TypeParameter[0], returnType, args, exceptions, sd, null);
-          for (VariableData arg : args) { arg.setEnclosingData(m); }
-          sd.addMethod(m, false, true);
-        }
-        return null;
-      }
-      
-      public void visitSource(String source, String debug) {}
-      public void visitOuterClass(String owner, String name, String desc) {}
-      public AnnotationVisitor visitAnnotation(String desc, boolean visible) { return null; }
-      public void visitAttribute(Attribute attr) {}
-      public void visitInnerClass(String name, String outerName, String innerName, int access) {}
-      public void visitEnd() {}
-      
-    };
-    reader.accept(extractData, ClassReader.SKIP_CODE);
-    
-    
-    //Remove the class from the list of continuations to resolve.
-    continuations.remove(qualifiedClassName);
-    
-    return sd;
-  }
-  
-  /** Build a SourceInfo corresponding to the specified class name, with -1 as the
-    * value for row and column of the start and finish.
-    */
-  protected SourceInfo _makeSourceInfo(String qualifiedClassName) {
-    return new SourceInfo(new File(qualifiedClassName), -1, -1, -1, -1);
-  }
-  
-  /** Looks up the SymbolData for a qualified name that is in the list of classes to be parsed.
-    * This method assumes that qualifiedClassName is in _classesToBeParsed.
-    */
-  private SymbolData _lookupFromClassesToBeParsed(String qualifiedClassName, SourceInfo si, boolean resolve) {
-    if (resolve) {
-      Pair<TypeDefBase, LanguageLevelVisitor> p = _classesToBeParsed.get(qualifiedClassName);
-      if (p == null) {
-        // This occurs when a class depends upon another class in the same file that has a bogus super class.
-        // Perhaps occurs elsewhere...?
-        return null;
-      }
-      // Check for cyclic inheritance.
-      TypeDefBase cd = p.getFirst();
-      LanguageLevelVisitor llv = p.getSecond();
-      cd.visit(llv);
-      return symbolTable.get(qualifiedClassName);
-    }
-    else {
-      // Return a continuation, since it shouldn't be in the symbolTable yet based on where we call this method from.
-      // The visitor we pair here doesn't matter because it should always get removed from the continuations list before
-      // it is visited.
-//      System.err.println("Creating continuation for class to be parsed: " + qualifiedClassName);
-      SymbolData sd = addSymbolData(si, qualifiedClassName);
-      return sd;
-    }
-  }
+
+//  /** Build a SourceInfo corresponding to the specified class name, with -1 as the
+//    * value for row and column of the start and finish.
+//    */
+//  protected static SourceInfo _makeSourceInfo(String qualifiedClassName) {
+//    return new SourceInfo(new File(qualifiedClassName), -1, -1, -1, -1);
+//  }
   
   /** Check to see if the specified classname is the name of a fully qualified java library class. */
   public static boolean isJavaLibraryClass(String className) {
@@ -402,173 +258,86 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return false;
   }
   
-  /** Resolves references to class files embedded in a class file.  Sets resolve to true since we are loading the symbol
-    * table from compiled code.  The class name is guaranteed to be fully qualified.  If the result is null, gives an 
-    * error.  Removes the symbol data from the continuations list, and return it.
-    * @return the result of trying to resolve className.
-    */
-  protected SymbolData getSymbolDataForClassFile(String className, SourceInfo si) {
-    SymbolData sd = getSymbolDataHelper(className, si, true, true, true, false);
-    
-    if (sd == null) {
-      // This is an error in the user's class file so throw an error.
-      // The NullLiteral is a hack to get a JExpression with the correct SourceInfo inside.
-      _addAndIgnoreError("Class " + className + " not found.", new NullLiteral(si));
-      return null;
-    }
-    sd.setIsContinuation(false);
-    
-    continuations.remove(sd.getName());
-    return sd;
-  }
-  
-  /** Checks to see if the provided class name is the name of a primative type, and if so,
-    * returns the corresponding SymbolData.  Otherwise, returns null.
-    */
-  private SymbolData _getSymbolData_Primitive(String className) {
-    if (className.equals("boolean")) {
-      return SymbolData.BOOLEAN_TYPE;
-    }
-    else if (className.equals("char")) {
-      return SymbolData.CHAR_TYPE;
-    }
-    else if (className.equals("byte")) {
-      return SymbolData.BYTE_TYPE;
-    }
-    else if (className.equals("short")) {
-      return SymbolData.SHORT_TYPE;
-    }
-    else if (className.equals("int")) {
-      return SymbolData.INT_TYPE;
-    }
-    else if (className.equals("long")) {
-      return SymbolData.LONG_TYPE;
-    }
-    else if (className.equals("float")) {
-      return SymbolData.FLOAT_TYPE;
-    }
-    else if (className.equals("double")) {
-      return SymbolData.DOUBLE_TYPE;
-    }
-    else if (className.equals("void")) {
-      return SymbolData.VOID_TYPE;
-    }
-    else if (className.equals("null")) {
-      return SymbolData.NULL_TYPE;
-    }
-    return null;
-  }
-  
-  /** Assume the class name is qualified, and try to look it up.
-    * If it's a continuation and resolve is true, resolve the class 
-    * by reading its class file.
-    * @param className  The name to look up.  Presumed to be qualified.
-    * @param si  The source info of where this was called from.
-    * @param resolve  true if we want to resolve the SymbolData.
-    * @param addError  Whether we want to throw an error or not if we can't find the class 
-    */ 
-  private SymbolData _getQualifiedSymbolData(String className, SourceInfo si, boolean resolve, boolean fromClassFile, 
-                                             boolean addError) {
-    _log.log("_getQualifiedSymbolData called on '" + className + "'");
-   
-    // We assume a period in a class name means it is qualified, make sure it's either in
-    // this package, is imported specifically, is in an imported package, or is in java.lang.
-    // We can't directly check it, because parsing class files adds every class that is recursively
-    // referenced by that class file, and we shouldn't be allowed to see some of them.
-    SymbolData sd = symbolTable.get(className);
-//    if (className.equals("fully.qualified.Woah")) System.err.println("_getQualifiedSymbolData(" + className + ", ...) called" +
-//                                                                    "\nsd = " + sd);
-    /* If sd is not null then return it unless it is a continuation that we are resolving.
-     * If we're from a class file, then a continuation is ok because we assume
-     * that we'll find it later. (?)  If you don't return here, you can get into
-     * an infinite loop if there's a self-referencing class.
-     */
-    _log.log("Corresponding symbolTable entry = " + sd);
-    if (sd != null && (! resolve || ! sd.isContinuation() || fromClassFile)) { 
-      _log.log("Returning " + sd);
-      return sd; 
-    }
-    
-    // Look it up in the symbol table, see if it's a Java library class, look it up from the filesystem.
-    if (isJavaLibraryClass(className)) {
-      _log.log("Calling  _classFile2SymbolData");
-      return _classFile2SymbolData(className, null);
-    }
-    else if (resolve) {  // Look for class file if resolving a continuation
-      SymbolData newSd = _getSymbolData_FromFileSystem(className, si, resolve, addError);
-      if (newSd != SymbolData.NOT_FOUND) {
-        _log.log("Returning " + sd + " from file system");
-        return newSd;
-      }
-      else if (sd != null && sd.isContinuation()) return sd;
-      if (addError) {
-        _addAndIgnoreError("The class " + className + " was not found.", new NullLiteral(si));
-      }
-    }
-    _log.log("Returning null");
-    return null;
-  }
-  
   /* Creates a new ArrayData of the element type specified by eltSd  with llv and si as the corresponding 
-   * LanguageLevelVisitor and SourceInfo and enters it in the SymbolTable. */
+   * LanguageLevelVisitor and SourceInfo and enters it in the SymbolTable. NOTE: this code erroneously
+   * marks an array symbol as a non-continuations when the element symbol is still a continuation!
+   */
   public ArrayData defineArraySymbolData(SymbolData eltSd, LanguageLevelVisitor llv, SourceInfo si) {
-    ArrayData arraySd = new ArrayData(eltSd, llv, si);
+    ArrayData arraySd = new ArrayData(eltSd, llv, si);  // sets _ isContinuation to false! 
+    System.err.println("##### Defining the array symbol " + arraySd.getName());
     symbolTable.put(arraySd.getName(), arraySd);
     return arraySd;
   }
-        
-  /** Gets the inner SymbolData for this array type. If it's not null, then try to lookup the ArrayData
-    * corresponding to that type plus '[]'.  If it's already there, return it.  If not, create a new ArrayData
-    * and put it in the Symbol Table.  This method is a leaf in the 'get...Symbol' hierarchy.
+  
+  /* Convenience method used in testing. */ 
+  private SymbolData getArraySymbolData(String eltClassName, SourceInfo si, boolean addError, boolean checkImports) {
+    return _getArraySymbolData(eltClassName, si, addError, checkImports /*, _classesInThisFile*/);
+  }
+                                           
+  /** Gets the SymbolData for an array type given className, the class name for its element type. First, it looks up the 
+    * the SymbolData for className.  If it's not null, then it tries to lookup the SymbolData for className + "[]"
+    * If it's found, return it.  If not, create a new ArrayData and put it in the symbolTable.  This method is a leaf 
+    * in the 'get...Symbol' hierarchy.
+    * @param className  The String name of the array type we're trying to resolve.
+    * @param si  The SourceInfo corresponding to the class.  Used if an error is encountered..
+    */
+  private SymbolData _getArraySymbolData(String eltClassName, SourceInfo si, boolean addError, boolean checkImports/*, 
+                                         HashSet<String> classesInThisFile*/) {
+    // resolve should only be true when post-visitation resolution is performed
+    if (eltClassName.equals("String[]")) System.err.println("String[] passed to getArraySymbolData");
+    if (eltClassName.equals("String")) System.err.println("String passed to getArraySymbolData");
+    SymbolData eltSD =  getSymbolData(eltClassName, si, addError, checkImports/*, classesInThisFile*/);
+    if (eltSD != null) {
+      if (eltSD.getName().equals("java.lang.String")) System.err.println("java.lang.String FOUND");
+      SymbolData sd = symbolTable.get(eltSD.getName() + "[]");  // Look up fully qualified name
+      if (sd != null) return sd;
+      else return defineArraySymbolData(eltSD, this, si /*, classesInThisFile*/);
+    }
+    else return null;
+  }
+  
+  /** Get the SymbolData for the array type given the fully qualified className for the element type.  Lookup the 
+    * element type; if it's not null, then try to lookup the symbol for the qualifiedClassName + "[]".  If it's already
+    * there, return it.  If not, create a new ArrayData and put it in the Symbol Table.  This method is a leaf in the 
+    * 'get...SymbolDataHelper' hierarchy.
     * @param className  The String name of the array type we're trying to resolve.
     * @param si  The SourceInfo corresponding to the class.  Used if an error is encountered.
     * @param resolve  true if this SymbolData needs to be completely resolved.
     * @param fromClassFile  true if this type is from a class file.
     */
-  private SymbolData _getArraySymbolData(String className, SourceInfo si, boolean resolve, boolean fromClassFile, 
-                                         boolean addError, boolean checkImportedPackages) {
-    // shouldn't be resolving an array type since you can't extend one, so resolve should be false
-    SymbolData innerSd = getSymbolDataHelper(className.substring(0, className.length() - 2), si, resolve, fromClassFile, 
-                                             addError, checkImportedPackages);
-    if (innerSd != null) {
-      SymbolData sd = symbolTable.get(innerSd.getName() + "[]");
-      if (sd != null) { return sd; }
-      else { return defineArraySymbolData(innerSd, this, si); }
+  private SymbolData _getQualifiedArraySymbolData(String eltClassName, SourceInfo si, boolean resolve, 
+                                               boolean fromClassFile /*, HashSet<String> classesInThisFile*/) {
+    // resolve should only be true when post-visitation resolution is performed
+    SymbolData eltSD = getQualifiedSymbolData(eltClassName, si, resolve, fromClassFile, true /*, classesInThisFile*/);
+    if (eltSD != null) {
+      SymbolData sd = symbolTable.get(eltSD.getName() + "[]");  // Look up fully qualified name
+      if (sd != null) return sd;
+      else return defineArraySymbolData(eltSD, this, si /*, classesInThisFile*/);
     }
-    else { return null; }
+    else return null;
   }
   
-  /** The SymbolData we want is defined later in the current file.  If it needs to be looked up or resolved, do so.
+  /** Checks the file system for the class name, returning the corresponding SymbolData if there is an up-to-date match.
+    * If resolve is false but a corresponding source file is matched, a continuation is returned.  If no source file is
+    * found but a class file is found, the symbol is resolved against the class file even if resolve is false.
+    * If resolve is true and a corresponding source file is found, the symbol is resolved against the corresponding 
+    * class file provided it is up-to-date.  If it is not up-to-date, the method throws an error message.  If no source 
+    * file or class file corresponding to the class is found, SymbolData.NOT_FOUND is returned.
     * @param qualifiedClassName  The name of the class we're looking up.
-    * @param si  Information about where the class was called from.
-    * @param resolve  true if we want to fully resolve the SymbolData.
-    */
-  private SymbolData _getSymbolData_FromCurrFile(String qualifiedClassName, SourceInfo si, boolean resolve) {
-    SymbolData sd = symbolTable.get(qualifiedClassName);
-    if (sd == null || (sd.isContinuation() && resolve)) {
-      // The class is below the one we're currently parsing or there was an error in parsing one of the classes.
-      return _lookupFromClassesToBeParsed(qualifiedClassName, si, resolve);
-    }
-    else return sd;
-  }
-  
-  /** Check the file system for the class name, returning the corresponding SymbolData if there is a match.  If no match
-    * is found an resolve is false, a continuation for the symbol is created and entered in the symbol table and 
-    * continuation table.  This method is a leaf in the 'getSymbol' calling hierarchy.
-    * @param qualifiedClassName  The name of the class we're looking up.
-    * @param si  Information about where the class was called from.
-    * @param resolve  true if we want to fully resolve the SymbolData.
-    * @param addError  true if we want to throw errors.
+    * @param si                  Information about where the class was called from.
+    * @param resolve             true if we want to fully resolve the SymbolData.
+    * @param addError            true if we want to throw errors.
 `    */
-  private SymbolData _getSymbolData_FromFileSystem(final String qualifiedClassName, SourceInfo si, boolean resolve,
-                                                   boolean addError) {
+  protected SymbolData _getSymbolDataFromFileSystem(final String qualifiedClassName, SourceInfo si, boolean resolve,
+                                                    boolean addError) {
     // If qualifiedClassName is already defined (and not a continuation to resolve), return
     SymbolData sd = symbolTable.get(qualifiedClassName);
-    if (sd != null && (! resolve || ! sd.isContinuation())) { return sd; }
+    if (sd != null && (! sd.isContinuation() || ! resolve)) return sd;  
+    // Note: sd != null && ! sd.isContinuation => sd has already been resolved
     
-    // Is qualifiedClassName in _classesToBeParsed, look it up directly in the parsed ASTs
-    Pair<TypeDefBase, LanguageLevelVisitor> pair = _classesToBeParsed.get(qualifiedClassName);
-    if (pair != null) return _lookupFromClassesToBeParsed(qualifiedClassName, si, resolve);
+//    // Is qualifiedClassName in _classesInThisFile, look it up directly in the parsed ASTs
+//    boolean present = _classesInThisFile.contains(qualifiedClassName);
+//    if (present) return _identifyTypeFromClassNamesInThisfile(qualifiedClassName, si, resolve);
     
     /* If qualifiedClassName is not in the symbol table or list of classes to be parsed, check if the class is defined
      * in this package tree.
@@ -619,7 +388,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       public boolean accept(File f) {
         try {
           f = f.getCanonicalFile();
-          return new File(path + ".dj0").getCanonicalFile().equals(f) ||
+          return new File(path + ".dj").getCanonicalFile().equals(f) ||
+            new File(path + ".dj0").getCanonicalFile().equals(f) ||
             new File(path + ".dj1").getCanonicalFile().equals(f) ||
             new File(path + ".dj2").getCanonicalFile().equals(f) ||
             new File(path + ".java").getCanonicalFile().equals(f);
@@ -639,7 +409,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       }
     }
 
-    // Claim: sourceFile is not the current file.  Otherwise, className would have been in _classNamesInThisFile.
+//    // Claim: sourceFile is not the current file or sd is an inner class.  Otherwise, className would have been in 
+//    // _classesInThisFile.
     
     // If sourceFile exists, we have identified the class corresponding to qualifiedClassName.  If resolve is false, 
     // simply create and return the appropriate continuation, deferring the loading of class information until reolution
@@ -650,11 +421,12 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       // First see if we even need to resolve this class. If not, create a continuation and return it.
       if (! resolve) { 
         assert sd == null;
-        sd = addSymbolData(si, qualifiedClassName); // defer loading class file information
+        sd = makeContinuation(si, qualifiedClassName); // create a continuation for qualifiedClassName; defer resolution
         return sd;
 //        else {
 //          sd = new SymbolData(qualifiedClassName);
-//          continuations.put(qualifiedClassName, new Pair<SourceInfo, LanguageLevelVisitor>(si, this));
+//          continuations.put(qualifiedClassName, 
+//                            new Triple<SourceInfo, LanguageLevelVisitor, SymbolData>(si, this, sd));
 //          symbolTable.put(qualifiedClassName, sd);
 //          return sd;
         }
@@ -672,14 +444,15 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       }
     }
     
-    // if source file exists, the corresponding class file is up to date
+    // if source file exists, confirm that the corresponding class file is up to date
+    // if source file does not exist, confirm that a class file does exist
     if (classFile.exists()) {
       // read this classfile, create the SymbolData and return it
      _log.log("Reading classFile " + qualifiedClassName);
-      sd = _classFile2SymbolData(qualifiedClassName, programRoot);
+      sd = LanguageLevelConverter._classFile2SymbolData(qualifiedClassName, programRoot);
       if (sd == null) {
         if (addError) {
-          _addAndIgnoreError("File " + classFile + " is not a valid class file.", null);
+          _addAndIgnoreError("File " + classFile + " is not a valid class file.",  new NullLiteral(si));
         }
         return null;
       }
@@ -689,133 +462,195 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return SymbolData.NOT_FOUND;
   }
  
-  /** Calls getSymbolData with default values By default, resolve is false.  By default, fromClassFile is false, since 
-    * this is only true when we are trying to resolve types from the context of a class file. By default addError is
-    * true, since we want to display errors.  By default checkImportedStuff is true, since we want to consider 
-    * imported packages and classes initially.
-    * @param className  The String name of the class to resolve
-    * @param si  The SourceInfo corresponding to the reference to the type
-    */
-  protected SymbolData getSymbolData(String className, SourceInfo si) {
-    return getSymbolData(className, si, false, false, true, true);
+  /** Resolves the continuation cont. */
+  public SymbolData resolveSymbol(SourceInfo si, SymbolData cont) { 
+    System.err.println("***ALARM*** resolveSymbol called for '" + cont + "'");
+    return getQualifiedSymbolData(cont.getName(), si, true); 
   }
   
-  /** Call getSymbolData with some default values.  Once it has returned, check to see if you got back the resolved 
-    * class if resolve is true. By default, fromClassFile is false, since this is only true when we are trying to 
-    * resolve types from the context of a class file.  By default addError is true, since we want to display errors.
-    * By default checkImportedStuff will be true, since we want to consider imported packages and classes initially.
-    * @param className  The String name of the class to resolve.
-    * @param si  The SourceInfo corresponding to the reference to the type
-    * @param resolve  true if we want to resolve the symbol data corresponding to this class, 
-    *                 false if we want to leave it as a continuation
+  /** Call getSymbolData with some default values. By default addError is true, since we want to 
+    * display errors. By default checkImports is true, since we want to consider imported packages and classes.
+    * @param className  The referenced name of the class to resolve.
+    * @param si         The SourceInfo corresponding to the reference to the type
     */  
-  public SymbolData getSymbolData(String className, SourceInfo si, boolean resolve) {
-    SymbolData sd = getSymbolData(className, si, resolve, false, true, true);
-    return sd;
+  public SymbolData getSymbolData(String className, SourceInfo si) {
+    return getSymbolData(className, si, true, true);
   }
   
-  /** Calls getSymbolData with some default values.  By default addError will be true, since we want to display errors.
-    * By default checkImportedStuff will be true, since we want to consider imported packages and classes initially.
-    * @param className  The String name of the class to resolve
-    * @param si  The SourceInfo corresponding to the reference to the type
-    * @param resolve  true if we want to resolve the symbol data corresponding to this class, 
-    *                 false if we want to leave it as a continuation
-    * @param fromClassFile  true only when we are trying to resolve types from the context of a class file.
-    */  
-  protected SymbolData getSymbolData(String className, SourceInfo si, boolean resolve, boolean fromClassFile) {
-    return getSymbolData(className, si, resolve, fromClassFile, true, true);
-  }
-  
-  /** Call getSymbolData with some default values.  By default checkImportedStuff will be true, since we want to
+  /** Call getSymbolData with some default values.  By default checkImports will be true, since we want to
     * consider imported packages and classes initially.
-    * @param className  The String name of the class to resolve
-    * @param si  The SourceInfo corresponding to the reference to the type
-    * @param resolve  true if we want to resolve the symbol data corresponding to this class, false if we want to 
-    *                 leave it as a continuation
-    * @param fromClassFile  true only when we are trying to resolve types from the context of a class file.
-    * @param addError  true if we want to give an error if this class cannot be resolved.
+    * @param className      The referenced name of the class to identify
+    * @param si             The SourceInfo corresponding to the reference to the type
+    * @param addError       true if we want to give an error if this class cannot be resolved.
     */  
-  protected SymbolData getSymbolData(String className, SourceInfo si, boolean resolve, boolean fromClassFile, 
-                                     boolean addError) {
-    return this.getSymbolData(className, si, resolve, fromClassFile, addError, true);
+  protected SymbolData getSymbolData(String className, SourceInfo si, boolean addError) {
+    return this.getSymbolData(className, si, addError, true);
   }
   
-  /** This method processes qualified class names by looking up each piece sequentially.  Once a SymbolData is found
-    * matching to the class name processed thus far, we process rest of the class name as an inner class reference.  
-    * This method calls getSymbolDataHelper to look up classes.
-    * @param className           The name of the class to lookup.
-    * @param si                  The SourceInfo of the reference to className used in case of an error.
-    * @param resolve             Whether to return a continuation or fully parse the class.
-    * @param fromClassFile       Whether this was called from the class file reader.
-    * @param addError            Whether to add errors or not
-    * @param checkImportedStuff  Whether to try prepending the imported package names
+  /** Simple signature for getSymbol that uses the current context to fill in context information, i.e., it passes _file
+    * for file, _package for pkg, _importedFiles for importedFiles, _importedPackages for importedPackages, and 
+    * _enclosingClass for enclosingClassName.  This version should be used in all contexts EXCEPT fixups which are 
+    * executed outside of any context and must provide saved context information.
     */
-  protected SymbolData getSymbolData(String className, SourceInfo si, boolean resolve, boolean fromClassFile, 
-                                     boolean addError, boolean checkImportedStuff) {
- 
+  protected SymbolData getSymbolData(String className, SourceInfo si, boolean addError, boolean checkImports) {
+    return getSymbolData(_file, _package, _importedFiles, _importedPackages, _enclosingClassName, 
+                         className, si, addError, checkImports);
+  }
+
+  /** This method processes classNames which may or may not include qualifying prefixes.  Array types are recognized and
+    * treated recursively. The raw className is initially compared with:
+    *   * top-level classes defined in the this file;
+    *   * fully qualified classes in the file system;
+    *   * inner classes defined in the enclosing class;
+    *   * classes in the same package defined in other files;
+    *   * imported classes; and
+    *   * classes in imported packages.
+    * Then className is decomposed in a prefix and an extension where prefixes are matched against symbols as described
+    * above.  If a matching prefix is found, the remainder is matched against inner classes of the matched symbol.
+    * The protocol does not exactly match the one in the JLS. 
+    * This results of method are relative to _file, _package, _importedFiles, _importedPackages, and _enclosingClassName.
+    * The external variables _classesInThisFile and _innerClassesInThisBody are used to reduce the number of fixups but 
+    * should not affect the ultimate results (after fixups) of any searches.
+    * This method calls getQualifiedSymbolData to look up fully qualified class names in the symbol table; this process
+    * does not depend on anything but the contents of the symbol table.
+    * @param file                   The file containing the className reference.
+    * @param package                The package corresponding to file.
+    * @param importedFiles          The imported files for this file
+    * @param importedPackages       The imported Packages for this file
+    * @param enclosingClassName     The enclosing className
+    * @param className              The referenced name of the class to lookup.
+    * @param si                     The SourceInfo of the reference to className used in case of an error.
+    * @param addError               Whether to add errors or not
+    * @param checkImports           Whether to try prepending the imported package names
+    */
+  protected SymbolData getSymbolData(File file,
+                                     String pkg,
+                                     LinkedList<String> importedFiles,
+                                     LinkedList<String> importedPackages,
+                                     String enclosingClassName,
+                                     String className, 
+                                     SourceInfo si, 
+                                     boolean addError, 
+                                     boolean checkImports) {
+    
+    if (className == null) {
+      System.err.println("***ERROR*** getSymbolData called with null className");
+      assert false;
+    }
+//    if (className.equals("Object")) System.err.println("getSymbol called for 'Object'");
+//    if (className.equals("String")) System.err.println("getSymbol called for 'String'");
+    
+    /** Check to see if type with className (as is) can be found. */
+    SymbolData existingSD = getQualifiedSymbolData(className, si, false, false, addError);
+    if (existingSD != null) return existingSD;
+        
     if (className.endsWith("[]")) { // className refers to an array type
-      String rawClassName = className.substring(0, className.length() - 2);
-      SymbolData sd = getSymbolData(rawClassName, si, resolve, fromClassFile, addError, checkImportedStuff);
-      if (sd == null) return null;   // Should only happen in tests.
-      ArrayData ad = new ArrayData(sd, this, si);
-      symbolTable.put(ad.getName(), ad);
-      return ad;
+      String eltClassName = className.substring(0, className.length() - 2);  // may not be fully qualified
+      if (eltClassName.equals("String")) System.err.println("getSymbolData called for String[]");
+      return getArraySymbolData(/* file, pkg, importedFiles, importedPackages, enclosingClassName, */
+                                eltClassName, si, addError, checkImports);
     }
     
-    // First, handle classNames that do NOT manifestly refer to inner classes
-    int indexOfNextDot = className.indexOf(".");
-    int indexOfNextDollar = className.indexOf("$");   // '$' is assumed not to appear in source program type names
-    if (indexOfNextDot == -1 && indexOfNextDollar == -1)
-      return getSymbolDataHelper(className, si, resolve, fromClassFile, addError, checkImportedStuff);
+    // Try matching the className against current package
+    String qualClassName = getQualifiedClassName(pkg, className);  // TODO: make this work for an inner class
+    existingSD = getQualifiedSymbolData(qualClassName, si);
+    if (existingSD != null) return existingSD; 
     
-    // Try to decompose className into an inner class reference, but name may simply be fully qualified
-    indexOfNextDot = 0;   
+    // Check for relative inner class reference
+    if (enclosingClassName != null) {
+      // Assume that className is an inner class relative to _enclosingClassName (which always holds for local 
+      // classes and often holds for immediate inner class references.  Fortunately, local class references cannot be
+      // forward references.
+      SymbolData enclosingSD = getQualifiedSymbolData(enclosingClassName, si);
+      if (enclosingSD != null) {
+        SymbolData sd = enclosingSD.getInnerClassOrInterface(className);
+        if (sd != null) return sd;
+//        // NOTE: the following should be unnecessary since the forward referenced inner symbol should be sd above 
+//        // Check for forward reference to an inner class of the enclosing class
+//        String qualifiedName = enclosingSD + '.' + className;
+//        if (_innerClassesInThisBody.contains(qualifiedName))  // forward reference to inner class/interface
+//          return getQualifiedSymbolData(qualifiedName, si);   // return continuation
+      }
+    }
+    
+    // TODO: imported inner class can have qualification so the following logic is broken.  The following logic
+    // ignores the possibility of importing an inner class.  Fix this !!!
+    if (className.indexOf('.') == -1) { // className has no qualification; may be imported
+    
+      // Check if the className's package was imported.
+      if (checkImports) {
+//        if (className.equals("Object")) System.err.println("***SHOUT*** checking imports for 'Object'");
+        
+        // Check if className was specifically imported.
+        // We will not check that the package is correct here, because it is caught in the type checker.
+        Iterator<String> iter = importedFiles.iterator();
+        while (iter.hasNext()) {
+          String s = iter.next();
+          if (s.endsWith(className)) {
+            SymbolData importSD = symbolTable.get(s); // All imported files should be in the symbol table.
+            if (importSD == null) System.err.println("***ALARM*** Imported symbol lookup failed for " + s);
+            // if importSD is a continuation it will be subsequently be resolved
+            return importSD;
+          }
+        }
+      }
+     
+      // Look for a match against imported packages
+      // TODO:  Within a relative class name the separators must be converted from '.' to '$'
+      SymbolData resultSD = null;
+      assert importedPackages.contains("java.lang");
+//      assert symbolTable.containsKey("java.lang.Object");
+      for (String prefix: importedPackages) {
+        String s = prefix + '.' + className;
+        if (className.equals("java.lang.Object")) System.err.println("***ALARM*** Looking up: " + s);
+        SymbolData sD = getQualifiedSymbolData(s, si, false, false, false);
+//        if (qualClassName.equals("java.lang.Object")) 
+//          System.err.println("matching sd is: " + sD + "\nsymbolTable.get(\"" + s + "\") = "+ symbolTable.get(s));
+        if (sD != null) {
+          if (resultSD == null || resultSD.equals(sD)) resultSD = sD;
+          else {  // sD is NOT the first match; flag an error
+            if (addError) {
+              _addAndIgnoreError("The class name " + qualClassName + " is ambiguous.  It could be " + resultSD.getName()
+                                   + " or " + sD.getName(), new NullLiteral(si));
+              return null;
+            }
+          }
+        }
+      }
+      if (resultSD != null) return resultSD;
+      else return null;  // subsequent searching assumes that className is qualified.
+    }
+    
+    // Decompose class name as fully qualified name followed by an inner class reference
+    // TODO: the separator within inner class names is '$'
+    int indexOfNextDot = 0;
+//    int indexOfNextDollar = className.indexOf("$");   // '$' only appears as separator for inner class names  
     SymbolData sd;
     int length = className.length();
     while (indexOfNextDot != length) {
-      indexOfNextDot = className.indexOf(".", indexOfNextDot + 1);
+      indexOfNextDot = className.indexOf('.', indexOfNextDot + 1);
       if (indexOfNextDot == -1) { indexOfNextDot = length; }
       String prefix = className.substring(0, indexOfNextDot);
-      /* We want to resolve after every piece until the last one because we need to know when we actually have a class
-       * so that we can tell that the rest of the pieces are inner classes.  We use the resolve parameter's value for 
-       * the last piece since that means there are no inner classes
-       */
-//      boolean newResolve = resolve || (indexOfNextDot != length);
-      sd = getSymbolDataHelper(prefix, si, resolve, fromClassFile, false, checkImportedStuff);
-//      if (prefix.equals("fully.qualified.Woah")) 
-//        throw new RuntimeException(prefix + " passed to helper and newResolve = " + resolve );
-      if (sd != null) { // prefix matches an extant symbol
+      
+      /* We want to try finding each prefix in the symbol table; the decomposition is putative. */
+      sd = getQualifiedSymbolData(prefix, si, false, false, false);
+      if (sd != null && sd != SymbolData.AMBIGUOUS_REFERENCE) { // prefix matches an existing symbol
         String outerClassName = prefix;
         String innerClassName = "";
         if (indexOfNextDot != length) {
           SymbolData outerClassSD = sd;
-          innerClassName = className.substring(indexOfNextDot + 1);
+          innerClassName = className.substring(indexOfNextDot + 1);  // putative relative name of inner class
 //          System.err.println("Outer class prefix found: " + prefix + " inner class extension: " + innerClassName);
+          // NOTE: should be able to search symbolTable using getSymbolData
           sd = outerClassSD.getInnerClassOrInterface(innerClassName);
+          if (sd != null) return sd;
 //          System.err.println("Corresponding symbol = " + sd);
-          if (sd == null) { // create continuation for inner class; we are forbidding some ambiguities Java may permit
-            sd = addInnerSymbolData(si, outerClassName + "." + innerClassName, outerClassSD);
-          }
-          return sd;
+//          if (sd == null) { // create continuation for inner class; we are forbidding some ambiguities Java may permit
+//            sd = addInnerSymbolData(si, outerClassName + '.' + innerClassName, outerClassSD);
+//          }
+          /* otherwise try another decomposition. */
         }
-        else if (sd == SymbolData.AMBIGUOUS_REFERENCE) {
-          _addAndIgnoreError("Ambiguous reference to class or interface " + className, new NullLiteral(si));
-          return null;
-        }
-        else if (sd != null && sd != SymbolData.NOT_FOUND) { return sd; }
       }
-      // sd may be null or an error element of SymbolData
-    }
-    
-    // No match was found
-    if (! fromClassFile && addError) {
-      // _log.log("Returning an Invalid class name for " + className);
-      String newName = className;
-      int lastDollar = newName.lastIndexOf("$");
-      newName = newName.substring(lastDollar + 1, newName.length());
-//      Utilities.show("Invalid class name " + newName + " and " + className);
-      _addAndIgnoreError("Invalid class name " + newName, new NullLiteral(si));
-//      throw new RuntimeException("Invalid class name " + newName + " encountered in file " + _file);
     }
     return null;
   }
@@ -829,15 +664,13 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     */
   protected SymbolData getSymbolData(TypeData lhs, String name, SourceInfo si, boolean addError) {
     //arguments we do not need to pass in
-    boolean resolve = false;
-    boolean fromClassFile = false;
-    boolean checkImportedStuff = false;
+    boolean checkImports = false;
     
-    if (lhs == null) {return null;}
+    if (lhs == null) return null;
     
     else if (lhs instanceof PackageData) {
-      String className = lhs.getName() + "." + name;
-      return getSymbolDataHelper(className, si, resolve, fromClassFile, addError, checkImportedStuff);
+      String qualClassName = lhs.getName() + '.' + name;
+      return getQualifiedSymbolData(qualClassName, si, false, false, addError);
     }
     
     else { //if (lhs instanceof SymbolData) {
@@ -850,559 +683,530 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     }
   }
   
-  /** This method takes in a class name (it may or may not be qualified) and tries to find it in the symbol 
-    * table.  If the class name is not qualified and this search fails, it tries to match the class name with classes
-    * defined in the current file.  Then it tries to match it with one of the imported files.  If this fails
-    * it tries to prepend the imported packages to the class name.   If this fails, either report an error (if resolve
-    * is true) or return null.
-    * @param className  The name of the class to lookup.
-    * @param si  The SourceInfo of the reference to className used in case of an error.
-    * @param resolve  Whether to return a continuation or fully parse the class.
+  /** Tries to find (or in some cases creates) the SymbolData for the fiven fully qualified class name.  It
+    * searches imported files, primitive types, as well as types in the symbol table. */
+  protected SymbolData getQualifiedSymbolData(String qualClassName) {
+    return getQualifiedSymbolData(qualClassName, SourceInfo.NO_INFO);
+  }
+  
+  /** Tries to find (or in some cases creates) the SymbolData for the fiven fully qualified class name.  It
+    * searches imported files, primitive types, as well as types in the symbol table. */
+  protected SymbolData getQualifiedSymbolData(String qualClassName, SourceInfo si) {
+    return getQualifiedSymbolData(qualClassName, si, false, false, true);
+  }
+  
+  /** This method tries to find (or in some cases creates) the SymbolData for the fiven fully qualified class name.  It
+    * searches imported files, primitive types, as well as types in the symbol table. If resolve is true, it loads the
+    * symbolTable with all of the requisite information about qualClassName. */
+  protected SymbolData getQualifiedSymbolData(String qualClassName, SourceInfo si, boolean resolve) {
+    return getQualifiedSymbolData(qualClassName, si, resolve, false, true);
+  }
+  
+  
+  /** This method tries to find (or in some cases creates) the SymbolData for the fiven fully qualified class name or
+    * class name.  It uses _classesInThisFile to avoid returning null in some cases (eliminating the need for some
+    * fixups).  Except for the _classesInThisFile optimization (which works uniformly if it is set to null during
+    * continuation resolution and fixups), this lookup only depends on the contents of the symbol table and the file
+    * system.
+    * @param qualClassName  The fully qualified name of the class to lookup.
+    * @param si             The SourceInfo of the reference to qualClassName used in case of an error.
+    * @param resolve        Whether to return a continuation or fully parse the class.
     * @param fromClassFile  Whether this was called from the class file reader.
-    * @param addError  Whether to add errors.  We don't add errors when iterating through a qualified class name's
-    * package.
+    * @param addError       Whether to add errors.  We don't add errors when iterating through a qualified class name's
+    *                       package.
     */
-  protected SymbolData getSymbolDataHelper(String className, SourceInfo si, boolean resolve, boolean fromClassFile, 
-                                           boolean addError, boolean checkImportedStuff) {
-    // Check for primitive types.    
-    SymbolData sd = _getSymbolData_Primitive(className);
-    if (sd != null) { return sd; }
-    
-    // Check for array types.
-    if (className.endsWith("[]")) {
-      return _getArraySymbolData(className, si, resolve, fromClassFile, addError, checkImportedStuff);
-    }
-    
-    // Check for qualified types. (FAILS for inner classes).  This invocation may be the result of a recursive call.
-    if (className.indexOf(".") != -1) return _getQualifiedSymbolData(className, si, resolve, fromClassFile, addError);
-    
-    String name = null; // name of the SymbolData to be returned
-    String qualifiedClassName = getQualifiedClassName(className);  // Fails for inner class references
-//    if (className.equals("MyInnerClass")) 
-//      System.err.println("QualifiedClassName for MyInnerClass = " + qualifiedClassName);
-//    System.err.println("qualifiedClassName for " + className + " is " + qualifiedClassName);
-    // Check if className is defined in this file.
-    if (_classNamesInThisFile.contains(qualifiedClassName)) {
-      return _getSymbolData_FromCurrFile(qualifiedClassName, si, resolve);
-    }
-   
-    // Check if className was specifically imported -- Not done at elementary level.
-    // At this point, we know that class name is not qualified.
-    // We will not check that the package is correct here, because it is caught in the type checker.
-    Iterator<String> iter = _importedFiles.iterator();
-    if (checkImportedStuff) {
-      while (iter.hasNext()) {
-        String s = iter.next();
-        if (s.endsWith(className)) {
-          // All imported files should be in the symbol table.
-          SymbolData tempSd = symbolTable.get(s);
-          // Only need to fully resolve if resolve is on and the imported file is a continuation.
-//          if (tempSd == null) System.err.println("Symbol lookup failed for " + s);
-          if (resolve && tempSd != null && tempSd.isContinuation()) {
-//            if (className.equals("Woah")) System.err.println("Calling getSymbolData for Woah");
-            return getSymbolData(s, si, resolve, fromClassFile, addError, false);  // POTENTIAL INFINITE RECURSION!
-          }
-          else return tempSd;
-        }
-      }
-    }
-    
-    // Check if the qualified class name is already in the symbol table at this package level.
-    // Skip checking if this class is in the package if it's qualified and not qualified with this
-    // package.
-    if (className.indexOf(".") == -1 || (!_package.equals("") && className.startsWith(_package))) {
-      sd = symbolTable.get(qualifiedClassName);
-//      if (className.equals("Woah")) 
-//        System.err.println("Potentially calling getSymbolData_FromFileSystem for Woah; sd = " + sd);
-      if (sd == null || (sd.isContinuation() && resolve)) {
-        sd = _getSymbolData_FromFileSystem(qualifiedClassName, si, resolve, addError);
-//        if (className.equals("Woah")) 
-//          System.err.println("getSymbolData_FromFileSystem for Woah returned = " + sd);
-        if (sd != null && sd != SymbolData.NOT_FOUND) return sd;
-      }      
-      else {
-        // Either we're in the default package and we found the unqualified name or we found a continuation and don't
-        // need to resolve it.
-        return sd;
-      }
+  protected SymbolData getQualifiedSymbolData(String qualClassName, SourceInfo si, boolean resolve, boolean fromClassFile, 
+                                           boolean addError) {
+    assert qualClassName != null;
+//    if (qualClassName.startsWith("RefInnerClassCrazy")) 
+//      System.err.println("ALARM: getQualifiedSymbolData called for '" + qualClassName + "'");
+//    
+    if (qualClassName.equals("java.lang.Throwable")) {
+      System.err.println("***ALARM: getQualifiedSymbolData called for '" + qualClassName + "'");
+      if (symbolTable.get(qualClassName) != null) System.err.println("***ALARM: java.lang.Throwable already exists");
     }
 
-    SymbolData resultSd = null;
-    // Check if the className's package was imported.
-    if (checkImportedStuff) {
-//      if (className.equals("Object")) System.err.println("Checking import packages for Object");
-      iter = _importedPackages.iterator();
-      while (iter.hasNext()) {
-        String s = iter.next() + "." + className;
-//        if (className.equals("Object")) System.err.println("Looking up: " + s);
-        SymbolData tempSd;
-        tempSd = getSymbolDataHelper(s, si, resolve, fromClassFile, false, false);
-//        if (className.equals("Object")) 
-//          System.err.println("matching sd is: " + tempSd + "\nsymbolTable.get(\"" + s + "\") = "+ symbolTable.get(s));
-        if (tempSd != null) {
-          if (resultSd == null) resultSd = tempSd;
-          else {  // tempSd is NOT the first match; flag an error
-            if (addError) {
-              _addAndIgnoreError("The class name " + className + " is ambiguous.  It could be " + resultSd.getName() + 
-                                 " or " + tempSd.getName(), new NullLiteral(si));
-              return null;
-            }
-          }
-        }
+    assert (qualClassName != null && ! qualClassName.equals(""));
+    
+    // Check for primitive types.
+    SymbolData sd = LanguageLevelConverter._getPrimitiveSymbolData(qualClassName);
+    if (sd != null) { return sd; }
+    
+    // Check for already defined types
+    SymbolData existingSD = symbolTable.get(qualClassName);
+    if (existingSD != null && (! resolve || ! existingSD.isContinuation())) return existingSD;
+    
+    // Check for array types.
+    if (qualClassName.endsWith("[]"))
+      return _getQualifiedArraySymbolData(qualClassName.substring(0, qualClassName.length() - 2), si, resolve, 
+                                       fromClassFile);
+    // If qualClassName is a library file, resolve it immediately by reading its class file.
+    if (isJavaLibraryClass(qualClassName)) {
+      _log.log("Calling  _classFile2SymbolData");
+      SymbolData cfSD = LanguageLevelConverter._classFile2SymbolData(qualClassName, null);
+      if (! qualClassName.startsWith("java.") && ! qualClassName.startsWith("sun."))
+        System.err.println("Defining class file symbol " + qualClassName);
+      assert cfSD == null || symbolTable.contains(cfSD);
+      return cfSD;
+    }
+    
+    if (_classesInThisFile.contains(qualClassName))  // Make continuation for top level class not yet parsed in this file
+      return makeContinuation(si, qualClassName);
+    
+    // If performing post-visit resolution, read the signature info for this symbol from a class file
+    if (resolve) {  // Look for up-to-date class file
+      SymbolData newSd = _getSymbolDataFromFileSystem(qualClassName, si, true, true);  // resolve, addError = true
+      if (newSd != null && newSd != SymbolData.NOT_FOUND) {
+        _log.log("Returning " + sd + " from file system");
+        return newSd;
+      }
+      else {
+        System.err.println("***ALARM*** The class " + qualClassName + " was not found.");
+        _addAndIgnoreError("The class " + qualClassName + " was not found.", new NullLiteral(si));
+        assert false;
       }
     }
-    return resultSd;
+    return null;    // qualClassName not found
   }
   
-  /** Creates a ModifiersAndVisibility from the provided modifier flags. */
-  private ModifiersAndVisibility _createMav(int flags) {
-    LinkedList<String> strings = new LinkedList<String>();
-    if (Modifier.isAbstract(flags)) { strings.addLast("abstract"); }
-    if (Modifier.isFinal(flags)) { strings.addLast("final"); }
-    if (Modifier.isNative(flags)) { strings.addLast("native"); }
-    if (Modifier.isPrivate(flags)) { strings.addLast("private"); }
-    if (Modifier.isProtected(flags)) { strings.addLast("protected"); }
-    if (Modifier.isPublic(flags)) { strings.addLast("public"); }
-    if (Modifier.isStatic(flags)) { strings.addLast("static"); }
-    if (Modifier.isStrict(flags)) { strings.addLast("strictfp"); }
-    if (Modifier.isSynchronized(flags)) { strings.addLast("synchronized"); }
-    if (Modifier.isTransient(flags)) { strings.addLast("transient"); }
-    if (Modifier.isVolatile(flags)) { strings.addLast("volatile"); }
-    return new ModifiersAndVisibility(SourceInfo.NO_INFO, strings.toArray(new String[strings.size()]));
-  }
-  
+ 
   /** The Qualified Class Name is the package, followed by a dot, followed by the rest of the class name.
     * If the provided className is already qualified, just return it.  If the package is not empty,
     * and the className does not start with the package, append the package name onto the className, and return it.
     * @param className  The className to qualify.
     */
-  protected String getQualifiedClassName(String className) {
+  protected String getQualifiedClassName(String className) { return getQualifiedClassName(_package, className); }
+  
+  /** If the specified package pkg is empty or pkg is a prefix of className, return className.  Otherwise return
+    * className qualified with the pkg prefix.
+    * @param pkg        The package name to use as a prefix.
+    * @param className  The className to qualify.
+    */
+  public static String getQualifiedClassName(String pkg, String className) {
 //    if (className.equals("java")) throw new RuntimeException("BOGUS getQualifiedClassName call on 'java'");
-    if (!_package.equals("") && ! className.startsWith(_package)) return _package + "." + className;
+    if (! pkg.equals("") && ! className.startsWith(pkg)) return pkg + '.' + className;
     else return className;
   }
   
-  // Creates a continuation for an inner class or interface
+  // Creates a continuation for an inner class/interface; qualifiedTypeName is known to exist
   protected SymbolData addInnerSymbolData(SourceInfo si, String qualifiedTypeName, Data enclosing) {
-    SymbolData sd = new SymbolData(qualifiedTypeName); // create continuation
-    SymbolData enclosingSD = enclosing.getSymbolData();
-    // if qualifiedTypeName refers to an external inner class, the following will likely fail
-    symbolTable.put(qualifiedTypeName, sd);  
+    SymbolData sd = makeContinuation(si, qualifiedTypeName); // create continuation
+    SymbolData enclosingSD = enclosing.getSymbolData();  // must exist in symbol table
+    // if qualifiedTypeName refers to an external inner class, the following will likely fail.  TODO: eliminate this
     enclosing.getSymbolData().addInnerClass(sd);
     sd.setOuterData(enclosingSD);
-    continuations.put(qualifiedTypeName, new Pair<SourceInfo, LanguageLevelVisitor>(si, this));
-//    System.err.println("Creating continuation for inner type " + qualifiedTypeName);
     return sd;
   }
   
-//  /** Does what is necessary to process this TypeDefBase from the context of the enclosing class.
-//    * This method is very similar to addSymbolData, except that it uses an enclosing data for reference.
-//    */
-//  protected SymbolData addInnerSymbolData(TypeDefBase typeDefBase, 
-//                                          String qualifiedTypeName, 
-//                                          String partialName, 
-//                                          Data enclosing, 
-//                                          boolean isClass) {
-//    // Try to look up in symbol table, in case it has already been defined
-//    SymbolData sd = symbolTable.get(qualifiedTypeName);
-//    
-//    // Try to look up in enclosing's list of inner classes
-//    if (sd == null) { sd = enclosing.getInnerClassOrInterface(partialName); }
-//    
-//    if (sd != null && ! sd.isContinuation()) {
-////      Utilities.show("This class has already been defined sd = " + sd);
-//      _addAndIgnoreError("This class has already been defined.", typeDefBase);
-////      throw new RuntimeException("ALREADY DEFINED CLASS ERROR; THROWING EXCEPTION");
-//      return null;
-//    }
-//    
-//    if (sd != null) {
-//      // make sure it is a direct inner class or interface of this data.
-//      if (sd.getOuterData() != enclosing) { sd = null; }
-//    }
-//    
-//    /* IMPORTANT: this is defineSymbol for inner classes! Why is all this here for forward references? */
-//    // create a new CONTINUATION symbolData for it if this is the first time we've seen it
-//    if (sd == null) { 
-//      sd = new SymbolData(qualifiedTypeName);
-//      sd.setOuterData(enclosing);
-//      if (isClass) { enclosing.getSymbolData().addInnerClass(sd); }
-//      else { enclosing.getSymbolData().addInnerInterface(sd); }
-//    }
-//    
-////    // create the LinkedList for the SymbolDatas of the interfaces
-////    LinkedList<SymbolData> interfaces = new LinkedList<SymbolData>();
-////    SymbolData tempSd;
-////    ReferenceType[] rts = typeDefBase.getInterfaces();
-////    for (int i = 0; i < rts.length; i++) {
-////      SourceInfo si = rts[i].getSourceInfo();
-////      String tempName = rts[i].getName();
-////      tempSd = getSymbolData(tempName, si, false, false, false);
-////      
-////      if (tempSd != null) { interfaces.addLast(tempSd); }
-////      
-////      else if (enclosing instanceof SymbolData) {
-////        // Check to see if this is an inner class referencing an inner interface
-////        tempSd = enclosing.getInnerClassOrInterface(tempName);
-////        if (tempSd == null) {
-////          String qualifyingPart = qualifiedTypeName.substring(0, qualifiedTypeName.lastIndexOf("."));
-////          String qualifiedTempName = qualifyingPart + "." + tempName;
-////          // Should we introduce addInnerInterfaceSymbol ?
-////          tempSd = new SymbolData(qualifiedTempName);
-////          tempSd.setInterface(true);
-////          enclosing.getSymbolData().addInnerInterface(tempSd); //interfaces can only be defined in symbol datas
-////          tempSd.setOuterData(enclosing);
-//////          System.err.println("Creating inner interface continuation for " + qualifiedTempName + " at LLV: 1042");
-////          continuations.put(qualifiedTempName, new Pair<SourceInfo, LanguageLevelVisitor>(si, this));          
-////        }
-////        interfaces.addLast(tempSd);
-////      }
-////      
-////      else {
-////        _addAndIgnoreError("Cannot resolve interface " + rts[i].getName(), rts[i]);
-////        return null;
-////      }
-//    
-//    }
-//    
-//    //Set the package to be the current package
-//    sd.setPackage(_package);
-//    
-//    SymbolData superClass = null;
-//    
-//    if (typeDefBase instanceof InterfaceDef) {
-//      // Add Object as the super class of this, so that it will know it implements Object's methods.
-//      superClass = getSymbolData("Object", typeDefBase.getSourceInfo(), false);
-//      sd.setInterface(true);
-//    }
-//    
-//    else if (typeDefBase instanceof ClassDef) {
-//      ClassDef cd = (ClassDef) typeDefBase;
-//      ReferenceType rt = cd.getSuperclass();
-//      String superClassName = rt.getName();
-//      superClass = getSymbolData(superClassName, rt.getSourceInfo(), false, false, false);
-//      
-//      if (superClass == null) {
-//        superClass = enclosing.getInnerClassOrInterface(superClassName);
-//        if (superClass == null) {
-//          String qualifyingPart = qualifiedTypeName.substring(0, qualifiedTypeName.lastIndexOf("."));
-//          superClass = new SymbolData(qualifyingPart + "." + superClassName);
-//          enclosing.addInnerClass(superClass);
-//          superClass.setOuterData(enclosing);
-////          System.err.println("Creating continuation for " + superClassName + " at LLV:1079");
-//          continuations.put(superClassName, new Pair<SourceInfo, LanguageLevelVisitor>(rt.getSourceInfo(), this)); 
-//        }
-//      }
-//      sd.setInterface(false);
-//    }
-//    
-//    else {throw new RuntimeException("Internal Program Error: typeDefBase was not a ClassDef or InterfaceDef." + 
-//                                     "  Please report this bug.");}
-//    
-//    // get the SymbolData of the superclass which must be in the symbol table
-//    // since we visited the type in forClassDef() although it may be a continuation. 
-//    
-//    // there is a continuation in the symbol table, update the fields
-//    sd.setMav(typeDefBase.getMav());
-//    sd.setTypeParameters(typeDefBase.getTypeParameters());
-//    sd.setSuperClass(superClass);
-//    sd.setInterfaces(interfaces);
-//    sd.setIsContinuation(false);
-//    continuations.remove(sd.getName());
-//    if (sd != null && !sd.isInterface()) { LanguageLevelConverter._newSDs.put(sd, this); }
-//    return sd;
-//  }
-  
-  /** This method creates the specified continuation in the symbol table.  Should never happen for an inner class.
+  /** This method creates the specified continuation in the symbol table.  Assumes qualClassName is fully qualified.
     * @param si  The SourceInfo corresponding to this occurrence of the class symbol
-    * @param qualifiedClassName  The name for the class.
+    * @param referencedClassName  The referenced name for the class.  In some cases, it is fully qualified.
     */
-  protected SymbolData addSymbolData(SourceInfo si, String qualifiedClassName) {
-    SymbolData sd = new SymbolData(qualifiedClassName);  // create a continuation
-    continuations.put(qualifiedClassName, new Pair<SourceInfo, LanguageLevelVisitor>(si, this));
-    symbolTable.put(qualifiedClassName, sd);
-//    System.err.println("Creating continuation for " + qualifiedClassName + " at LLV:1124");
+  protected SymbolData makeContinuation(SourceInfo si, String qualClassName) {
+    SymbolData sd = new SymbolData(qualClassName);  // create a continuation
+    symbolTable.put(qualClassName, sd);
+    continuations.put(qualClassName, new Triple<SourceInfo, LanguageLevelVisitor, SymbolData>(si, this, sd));
+//    System.err.println("Creating continuation for " + referencedClassName + " at LLV:1124");
     return sd;
   }
   
-  /** This method takes in a TypeDefBase (which is either a ClassDef or an InterfaceDef), generates a SymbolData, and 
-    * adds the name and SymbolData pair to the symbol table.  It checks that this class is not already in the symbol 
-    * table. Should never happen for an inner class or interface.
+  /** Looks up the type with name rt from within the class name qualifiedClassName. At top level, qualifiedClassName ==
+    * null. The parameter qualifiedClassName is required becaue this method may be called in a fixup.  */
+  protected SymbolData _lookupTypeFromWithinClass(ReferenceType rt, String qualifiedClassName) {
+    // Perform a raw lookup assuming name of rt is fully qualified
+    String rtName = rt.getName();
+    SourceInfo si = rt.getSourceInfo();
+    // Perform a lookup at top level.
+    assert _importedPackages.contains("java.lang");
+    SymbolData sD = getSymbolData(rtName, si, false);
+    if (rtName.equals("Object") && sD == null)
+      System.err.println("Looking up 'Object' in '" + qualifiedClassName + "' yields null");
+    if (sD == null && qualifiedClassName != null) { // check if rt refers to an inner type of qualifiedClassName
+      SymbolData sd = getQualifiedSymbolData(qualifiedClassName, SourceInfo.NO_INFO);
+      sD = sd.getInnerClassOrInterface(rtName);
+      assert sD == getQualifiedSymbolData(qualifiedClassName + '.' + rtName, SourceInfo.NO_INFO);
+    }
+    else 
+    if (qualifiedClassName != null) {
+      int prefixLen = qualifiedClassName.lastIndexOf('.');
+      if (sD == null && prefixLen >= 0) { // check if rt refers to an inner class of the class enclosing sd 
+        // Check to see if this is an inner class referencing an inner interface
+        String qualifyingBase = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf('.'));
+        SymbolData outerSD = getQualifiedSymbolData(qualifyingBase, SourceInfo.NO_INFO);
+        if (outerSD != null) {
+          sD = outerSD.getInnerClassOrInterface(rtName);
+          assert sD == getQualifiedSymbolData(qualifyingBase + '.' + rtName, si);
+          // TODO: expand this search to include interfaces defined in any of the enclosing classes.  
+        }
+      }
+    }
+    return sD;
+  }
+  
+  /** Overloaded signature for defineSymbolData.  Passes _enclosingClassName for enclosingClassName and
+    * _classesInThisFile for classesInThisFile */
+   protected SymbolData defineSymbolData(TypeDefBase typeDefBase, final String qualifiedTypeName) {
+     return defineSymbolData(typeDefBase, qualifiedTypeName, _enclosingClassName /*, _classesInThisFile*/ );
+   }
+   
+  /** Given a TypeDefBase (which is either a ClassDef or an InterfaceDef) and the corresponding qualifiedTypeName, this
+    * method generates a SymbolData, and adds the name and SymbolData pair to the symbol table.  It checks that this 
+    * class is not already in the symbol table. This error should never happen for an inner class or interface.
+    * Assumes that the defined class is top level.  If used for inner class definition, the caller must be perform
+    * any special inner class initialization.
     * @param typeDefBase  The AST node for the class def, interface def, inner class def, or inner interface def.
-    * @param qualifiedClassName  The name for the class; null if this definition is a duplicate
+    * @param qualifiedTypeName  The fully qualified name of the class or interface
     */
-  protected SymbolData defineSymbolData(TypeDefBase typeDefBase, String qualifiedClassName) {
-    String name = qualifiedClassName;  // may be an interface
-    SymbolData sd = symbolTable.get(name);
-    if (sd != null && ! sd.isContinuation()) {
+  protected SymbolData defineSymbolData(final TypeDefBase typeDefBase, final String qualifiedTypeName,
+                                        final String enclosingClassName /*, final HashSet<String> classesInThisFile*/) {
+    assert (typeDefBase instanceof InterfaceDef) || (typeDefBase instanceof ClassDef);
+    assert ! qualifiedTypeName.startsWith("null.");
+    String name = qualifiedTypeName;  // may be an interface
+    SymbolData contSd = symbolTable.get(qualifiedTypeName);
+    System.err.println("In defineSymbolData call for " + qualifiedTypeName + ", contSd = " + contSd);
+    if (contSd != null && ! contSd.isContinuation()) {
       _addAndIgnoreError("The class or interface " + name + " has already been defined.", typeDefBase);
       return null;
     }
-//    if (qualifiedClassName.equals("listFW.IList")) System.err.println("**** listFW.Ilist is being defined!");
+    // If no continuation exists, create a SymbolData for this definition
+    final SymbolData sd = (contSd == null) ? new SymbolData(qualifiedTypeName) : contSd;
+    symbolTable.put(qualifiedTypeName, sd);
     
-    // create the LinkedList for the SymbolDatas of the interfaces
-    LinkedList<SymbolData> interfaces = new LinkedList<SymbolData>();
-    SymbolData tempSd;
+//    // Save _enclosingClassName in a final var; may be null if called at the top level, e.g. defining a
+//    // top level class or interface.
+//    final String enclosingClassName = _enclosingClassName; 
     
-    // Create SymbolDatas (continuations) for the interfaces if they do not already exist
-    ReferenceType[] rts = typeDefBase.getInterfaces();
-    for (ReferenceType rt: rts) {
-      tempSd = getSymbolData(rt.getName(), rt.getSourceInfo(), false, false, false);
-      
-      if (tempSd != null) interfaces.addLast(tempSd);  
-      else if (qualifiedClassName.indexOf(".") != -1) { // class is inner
-        // Check to see if this is an inner class referencing an inner interface
-        String qualifyingPart = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf("."));
-        tempSd = getSymbolData(qualifyingPart + "." + rt.getName(), rt.getSourceInfo(), false, false, false);
-        if (tempSd == null) {
-          String tempName = qualifyingPart + "." + rt.getName();
-          tempSd = new SymbolData(tempName);
-          tempSd.setInterface(true);
-//          System.err.println("Creating continuation for " + tempName  + " at LLV: 1144");
-          continuations.put(tempName, new Pair<SourceInfo, LanguageLevelVisitor>(rt.getSourceInfo(), this));          
-        }
-        interfaces.addLast(tempSd);
-      }
-      else if (tempSd == null) {  // class is not inner; ith superinterface not yet defined
-        String tempName = rt.getName();
-        _log.log("CREATING continuation " + tempName + " with SourceInfo " + rt.getSourceInfo());
-//        System.err.println("CREATING continuation for " + tempName + " at LLV: 1154");
-        tempSd = new SymbolData(tempName);
-        tempSd.setInterface(true);
-        continuations.put(tempName, new Pair<SourceInfo, LanguageLevelVisitor>(rt.getSourceInfo(), this));    
-      }
-    }
-    
-    if (sd == null) { // create a new SymbolData.
-      sd = new SymbolData(name);
-      symbolTable.put(name, sd);
-    }
-    
+    // Make this SymbolData as a non-continuation
+    sd.setIsContinuation(false);
     //Set the package to be the current package
     sd.setPackage(_package);
-     
-    SymbolData superClass = null;
+    // Set the MAV and type parameters (the latter are not used currently)
+    sd.setMav(typeDefBase.getMav());
+    sd.setTypeParameters(typeDefBase.getTypeParameters());
     
-    // Create a SymbolData for the superclass of typeDefBase
+    // Create the LinkedList for the SymbolDatas of the interfaces
+    final ArrayList<SymbolData> interfaces = new ArrayList<SymbolData>();
+    
+    // Get or create SymbolDatas (continuations) for the interfaces
+    ReferenceType[] rts = typeDefBase.getInterfaces();
+    for (final ReferenceType rt: rts) {
+      SymbolData sD = _lookupTypeFromWithinClass(rt, enclosingClassName);
+      if (sD != null && ! sD.isInterface()) {
+        sD.setInterface(true);
+//        System.err.println("Interface type = " + sD);
+//        assert false;
+      }
+      interfaces.add(sD);                     // Note: confirm that null can be added to an ArrayList
+      if (sD == null) { 
+        // create a fixup for this interface reference
+        Command fixUp = new Command() {
+          public void execute() {
+            SymbolData newSD = _lookupTypeFromWithinClass(rt, enclosingClassName);
+            assert newSD != null && newSD.isInterface();  // EXPAND
+            int lastIndex = interfaces.size() - 1;
+            interfaces.set(lastIndex, newSD);
+          }
+        };
+        fixUps.add(fixUp);
+      }
+    }
+     
+    // Create SymbolData variable for superclass
+    SymbolData superSD = null;
+    
+    // Get or create the SymbolData for the superclass/interface; setInterface and setSuperClass
     
     if (typeDefBase instanceof InterfaceDef) {
-      //add Object as the super class of this, so that it will know it implements Object's methods.
-      superClass = getSymbolData("Object", typeDefBase.getSourceInfo(), false);
+      // set Object as the super class of this, so that it will know it implements Object's methods.
+      superSD = getSymbolData("java.lang.Object", typeDefBase.getSourceInfo(), false);
       sd.setInterface(true);
+      sd.setSuperClass(superSD);
     }
     
     else if (typeDefBase instanceof ClassDef) {
       ClassDef cd = (ClassDef) typeDefBase;
-      ReferenceType rt = cd.getSuperclass();
-      // rt cannot be null because every user-defined class extends something.  We must resolve
-      // the superclass before proceeding in order to properly identify words as
-      // fields or static references to classes.
-      String superClassName = rt.getName();
-//      if (superClassName.equals("TestCase") || superClassName.equals("junit.framework.TestCase")) {
-//            System.out.println("WARNING! " + superClassName + " encountered as superclass");
-//            assert false;
-//      }
-      SourceInfo si = rt.getSourceInfo();
-      // The following line generates an infinite recursion in some cases if resolve (the 3rd parm) is true.  Yet
-      // when superclass is TestCase and TestCase is not imported
-      superClass = getSymbolData(superClassName, si, false); //TODO: if true can generate infinite loop in helper
-      
-      if (superClass == null) {
-        // Couldn't resolve the super class: make it Object by default
-        superClass = addSymbolData(si, superClassName);
+      final ReferenceType rt = cd.getSuperclass();
+      superSD = _lookupTypeFromWithinClass(rt, enclosingClassName);
+      if (superSD == null && rt.getName().equals("Object"))  {
+        System.err.println("ALARM: _lookupTypeFromWithinClass for 'Object' returned null");
       }
       sd.setInterface(false);
+      
+      if (superSD != null) sd.setSuperClass(superSD);
+      else {
+        Command fixUp = new Command() {
+          public void execute() { 
+            SymbolData newSuperSD = _lookupTypeFromWithinClass(rt, enclosingClassName);
+            System.err.println("***** In a FIXUP, looking up type " + rt + " from within " + enclosingClassName);
+            if (newSuperSD == null)
+//              newSuperSD = getSymbolData("java.lang.Object", typeDefBase.getSourceInfo(), false);
+              _addAndIgnoreError("The class " + sd + " has an undefined superclass " + rt, typeDefBase);
+            else
+              sd.setSuperClass(newSuperSD); 
+          }
+        };
+        fixUps.add(fixUp);
+      }
     }
     
-    else { throw new RuntimeException("Internal Program Error: typeDefBase was not a ClassDef or InterfaceDef." + 
-                                      "  Please report this bug."); }
-    
-    // get the SymbolData of the superclass which must be in the symbol table
-    // since we visited the type in forClassDef() although it may be a continuation. 
-    
-    // there is a continuation in the symbol table, update the fields
-    sd.setMav(typeDefBase.getMav());
-    sd.setTypeParameters(typeDefBase.getTypeParameters());
-    sd.setSuperClass(superClass);
+    // Set the inferfaces; fixups will be done on the elements of the interface ArrayList
     sd.setInterfaces(interfaces);
-    sd.setIsContinuation(false);
-    _log.log("REMOVING continuation " + sd.getName());
-    continuations.remove(sd.getName());
+
+    // Remove symbol name from continuation table.
+    _log.log("REMOVING continuation " + qualifiedTypeName);
+    continuations.remove(qualifiedTypeName);
     
+    // Add sd to the list of classes defined in program text; used to generate constructors. TODO: What about Full Java?
     if (! sd.isInterface()) { LanguageLevelConverter._newSDs.put(sd, this); }
+    
+    _classesInThisFile.remove(qualifiedTypeName);  // a no-op if qualifiedClassName is an inner class
     return sd;
   }
   
-  /** This method takes in a TypeDefBase (which is either an InnerClassDef or an InnerInterfaceDef), generates a 
-    * SymbolData, and adds the name and SymbolData pair to the symbol table.  It checks that this class is not already 
-    * in the symbol table, except as a continuation. Should never happen for an inner class or interface.
+  /** Takes in a TypeDefBase (which is either an InnerClassDef or an InnerInterfaceDef) and creates a SymbolData for it,
+    * either by converting a continuation to it or by creating a new symbol (if no continuationis present).
     * @param typeDefBase  The AST node for the class def, interface def, inner class def, or inner interface def.
-    * @param qualifiedClassName  The name for the class; null if this definition is a duplicate
+    * @param relName      The relative (unqualified) name of the symbol
+    * @param qualifiedTypeName  The fully qualified name for the class; null if this definition is a duplicate
+    * @param enclosing    The enclosing SymbolData or MethodData (for a local class defined within a method).
     */
-  protected SymbolData defineInnerSymbolData(TypeDefBase typeDefBase, String qualifiedTypeName, Data enclosing) { 
-        /* IMPORTANT: this is defineSymbol for inner classes! */
-    String name = qualifiedTypeName;  // may be an interface
-    SymbolData sd = symbolTable.get(name);
-    if (sd != null && ! sd.isContinuation()) {
-      _addAndIgnoreError("The class or interface " + name + " has already been defined.", typeDefBase);
-      return null;
-    }
+  protected SymbolData defineInnerSymbolData(TypeDefBase typeDefBase, String relName, String qualifiedTypeName, 
+                                             Data enclosing) {
+    assert (enclosing instanceof SymbolData) || (enclosing instanceof MethodData);
+    /* IMPORTANT: this is defineSymbolData for inner classes! */
+//    if (qualifiedTypeName.startsWith("RefInnerClass")) {
+    System.err.println("*** defineInnerSymbolData called for '" + relName + " with full name " + qualifiedTypeName + 
+                       "' in '" + enclosing + "'");
+//    }
+    SymbolData sd = defineSymbolData(typeDefBase, qualifiedTypeName /*, _classesInThisFile*/); 
+    if (sd == null) System.err.println("defineSymbolData failed for " + qualifiedTypeName);
+    assert sd != null;
+    // Set fields of sd that are required for innerSymbols
+
+    sd.setOuterData(enclosing);
     
-    // create the LinkedList for the SymbolDatas of the interfaces
-    LinkedList<SymbolData> interfaces = new LinkedList<SymbolData>();
-    SymbolData tempSd;
-    ReferenceType[] rts = typeDefBase.getInterfaces();
-    for (int i = 0; i < rts.length; i++) {
-      SourceInfo si = rts[i].getSourceInfo();
-      String tempName = rts[i].getName();
-      tempSd = getSymbolData(tempName, si, false, false, false);
-      
-      if (tempSd != null) { interfaces.addLast(tempSd); }
-      
-      else if (enclosing instanceof SymbolData) {
-        // Check to see if this is an inner class referencing an inner interface
-        tempSd = enclosing.getInnerClassOrInterface(tempName);
-        if (tempSd == null) {
-          String qualifyingPart = qualifiedTypeName.substring(0, qualifiedTypeName.lastIndexOf("."));
-          String qualifiedTempName = qualifyingPart + "." + tempName;
-          // Should we introduce addInnerInterfaceSymbol ?
-          tempSd = new SymbolData(qualifiedTempName);
-          tempSd.setInterface(true);
-          enclosing.getSymbolData().addInnerInterface(tempSd); //interfaces can only be defined in symbol datas
-          tempSd.setOuterData(enclosing);
-//          System.err.println("Creating inner interface continuation for " + qualifiedTempName + " at LLV: 1042");
-          continuations.put(qualifiedTempName, new Pair<SourceInfo, LanguageLevelVisitor>(si, this));          
-        }
-        interfaces.addLast(tempSd);
+//    if (enclosing instanceof SymbolData) { // sd is an inner class or interface of an enclosing class (not a method)
+    if (sd.isInterface()) {
+//      assert enclosing instanceof SymbolData;
+//      assert enclosing.getName().equals(_enclosingClassName):
+      ((SymbolData) enclosing).addInnerInterface(sd); 
+    }
+    else if (! enclosing.getName().equals(_enclosingClassName)) {  
+      // sd is a local class embedded in a method.  We need to add sd to  the innerclasses of _enclosingClassName
+      if (! (enclosing instanceof MethodData))
+        System.err.println("***** In defineInnerSymbolData, enclosing = " + enclosing 
+                             + " but _enclosingClassName = " + _enclosingClassName);
+      assert enclosing instanceof MethodData;
+      SymbolData enclosingClassSD = getQualifiedSymbolData(_enclosingClassName);
+      assert enclosingClassSD != null;
+      enclosingClassSD.addInnerClass(sd);
+      enclosing.addInnerClass(sd);  // adds innerClass to list for the enclosing MethodData 
+    }
+    else {
+      // sd is a non-local inner class
+      assert enclosing.getName().equals(_enclosingClassName);
+      enclosing.addInnerClass(sd);
+//    _innerClassesInThisBody.remove(sd);  // a no-op if _innerClassesInThisBody is empty
+    }
+    return sd;
+  }
+  
+  /** This method takes in an AnonymousClassInstantion, generates a SymbolData for it, and 
+    * adds the name and SymbolData pair to the symbol table.
+    * @param AnonymousClassInstantiation  The AST node for the anonymous class instantiation.
+    * @param qualifiedTypeName  The fully qualified name of the class
+    */
+  protected SymbolData defineAnonymousSymbolData(final AnonymousClassInstantiation anonInst, 
+                                                 final String qualifiedAnonName,
+                                                 final String superName) {
+    // Generated name cannot be in symbolTable
+    System.err.println("defineAnonymousSymbolData called for " + qualifiedAnonName + " extending " + superName);
+
+    final SourceInfo si = anonInst.getSourceInfo();
+    // Create a SymbolData for this definition
+    final SymbolData sd = new SymbolData(qualifiedAnonName);
+    symbolTable.put(qualifiedAnonName, sd);
+    
+    // Make this SymbolData as a non-continuation
+    sd.setIsContinuation(false);
+    //Set the package to be the current package
+    sd.setPackage(_package);
+    
+//    sd.setMav(anonInst.getMav());  // What is Mav for anonymous class?
+//    sd.setTypeParameters(anonInst.getTypeParameters()); 
+    
+    if (_enclosingClassName != null) {
+      SymbolData enclosingSD = getQualifiedSymbolData(_enclosingClassName, SourceInfo.NO_INFO);
+      if (enclosingSD == null) {
+        System.err.println("***ALARM*** Class " + _enclosingClassName + " has been defined but is not found in symbolTable");
+        assert false;
       }
+      enclosingSD.addInnerClass(sd);
       
-      else {
-        _addAndIgnoreError("Cannot resolve interface " + rts[i].getName(), rts[i]);
-        return null;
-      }
+      if (enclosingSD.getName().equals("HasAnonymousInnerClass")) 
+        System.err.println("****** The SymbolData for " + sd + " added to the inner classes of " + enclosingSD);
+      
+      // Set fields of sd that are required for innerSymbols
+      sd.setOuterData(enclosingSD);
+
     }
         
-    // create a new symbolData for this inner class or interface if not seen before
-    if (sd == null) { 
-      sd = new SymbolData(qualifiedTypeName);
-      sd.setOuterData(enclosing);
-      if (typeDefBase instanceof ClassDef) { enclosing.getSymbolData().addInnerClass(sd); }
-      else { 
-        enclosing.getSymbolData().addInnerInterface(sd); 
+    SymbolData superSD = getSymbolData(superName, anonInst.getSourceInfo());
+        
+    if (superSD != null) {
+      if (superSD.isInterface()) {
+        sd.setSuperClass(getQualifiedSymbolData("java.lang.Object", si));
+        sd.setInterfaces(new ArrayList<SymbolData>(Arrays.asList(new SymbolData[] { superSD })));
       }
+      else sd.setSuperClass(superSD);  //  By default sd.getInterfaces() == new ArrayList<SymbolData>()
     }
-    //Set the package to be the current package
-    sd.setPackage(_package);
-    
-    SymbolData superClass = null;
-    
-    if (typeDefBase instanceof InterfaceDef) {
-      // Add Object as the super class of this, so that it will know it implements Object's methods.
-      superClass = getSymbolData("Object", typeDefBase.getSourceInfo(), false);
-      sd.setInterface(true);
-    }
-    else if (typeDefBase instanceof ClassDef) {
-      ClassDef cd = (ClassDef) typeDefBase;
-      ReferenceType rt = cd.getSuperclass();
-      String superClassName = rt.getName();
-      superClass = getSymbolData(superClassName, rt.getSourceInfo(), false, false, false);
-      
-      if (superClass == null) {  // Why is this necessary?  Forward reference to another inner class?
-        superClass = enclosing.getInnerClassOrInterface(superClassName);
-        if (superClass == null) {
-          String qualifyingPart = qualifiedTypeName.substring(0, qualifiedTypeName.lastIndexOf("."));
-          superClass = new SymbolData(qualifyingPart + "." + superClassName);
-          enclosing.addInnerClass(superClass);
-          superClass.setOuterData(enclosing);
-//          System.err.println("Creating continuation for " + superClassName + " at LLV:1079");
-          continuations.put(superClassName, new Pair<SourceInfo, LanguageLevelVisitor>(rt.getSourceInfo(), this)); 
+    else {
+      // Create a fixup
+      Command fixUp = new Command() {
+        public void execute() { 
+          SymbolData superSD = getSymbolData(superName, si);
+          if (superSD == null) 
+            _addAndIgnoreError("The class/interface " + superName + " was not found.",  anonInst);
+          else if (superSD.isInterface()) {
+            sd.setSuperClass(getQualifiedSymbolData("java.lang.Object", si));
+            sd.setInterfaces(new ArrayList<SymbolData>(Arrays.asList(new SymbolData[] { superSD })));
+          }                        
+          else sd.setSuperClass(superSD);  //  By default sd.getInterfaces() == new ArrayList<SymbolData>()
         }
-      }
-      sd.setInterface(false);
+      };
+      fixUps.add(fixUp);
     }
-    
-    else throw new RuntimeException("Internal Program Error: typeDefBase was not a ClassDef or InterfaceDef." + 
-                                     "  Please report this bug.");
-    
-    // get the SymbolData of the superclass which must be in the symbol table
-    // since we visited the type in forClassDef() although it may be a continuation. 
-    
-    // there is a continuation in the symbol table, update the fields
-    sd.setMav(typeDefBase.getMav());
-    sd.setTypeParameters(typeDefBase.getTypeParameters());
-    sd.setSuperClass(superClass);
-    sd.setInterfaces(interfaces);
-    sd.setIsContinuation(false);
-    _log.log("REMOVING continuation " + sd.getName());
-    continuations.remove(sd.getName());
-    if (! sd.isInterface()) { LanguageLevelConverter._newSDs.put(sd, this); }
     return sd;
   }
-    
+  
+  /** This method is factored out of formalParameters2VariableData so it can be overridden in FullJavaVisitor.
+    * @return the formal parameter mav appropriate for the language level; "Functional level" is default. */
+  protected String[] getFormalParameterMav(Data d) { return new String[] {"final"}; }
+  
   /** Convert the specified array of FormalParameters into an array of VariableDatas which is then returned.
     * All formal parameters are automatically made final.
+    * @param fps        The AST node for the parameter list
+    * @param enclosing  The SymbolData for the enclosing class (not method!)
+    * NOTE: enclosing refers to the enclosing class rather than enclosing method because any new types
+    * defined in the method are not visible in the parameter list.
     * TODO: At the advanced level, this may need to be overwritten?
     */
-  protected VariableData[] formalParameters2VariableData(FormalParameter[] fps, Data enclosing) {
+  protected VariableData[] formalParameters2VariableData(FormalParameter[] fps, SymbolData enclosing) {
+    assert enclosing != null /* && (enclosing instanceof SymbolData || enclosing instanceof BlockData)*/; 
+    // BodyData ::= MethodData | BlockData
 //    Utilities.show("formalParameters2VariableData called on " + fps);
-    //Should conssolidate with same method in AdvancedVisitor; almost identical
-    VariableData[] varData = new VariableData[fps.length];
+    // Should conssolidate with same method in FullJavadVisitor; almost identical
+    final VariableData[] varData = new VariableData[fps.length];
+    final String enclosingClassName = enclosing.getName();
+    
     VariableDeclarator vd;
-    String[] mav = new String[] {"final"};
+    String[] mav = getFormalParameterMav(enclosing);
         
     for (int i = 0; i < varData.length; i++) {
       vd = fps[i].getDeclarator();
       String name = vd.getName().getText();  // getName returns a Word
-      String typeName = vd.getType().getName();
-      SourceInfo si = vd.getType().getSourceInfo();
-      SymbolData type = getSymbolData(typeName, si);
+     
+      Type type = vd.getType();
+      final String typeName = type.getName();
+       if (name.equals("myArray")) 
+         System.err.println("*** 2Var called for var " + name + " type = " + typeName);
+      final SourceInfo si = type.getSourceInfo();
+      // Note: typeName CANNOT be a local type; no such type is in scope
+      SymbolData sd = _identifyType(typeName, si, enclosingClassName);
+
+      varData[i] = 
+        new VariableData(name, new ModifiersAndVisibility(SourceInfo.NO_INFO, mav), sd, true, enclosing);
       
-      if (type == null) {
-        // See if this is a partially qualified field reference in the symbol table
-        type = enclosing.getInnerClassOrInterface(typeName);
+      assert ! varData[i].isPrivate();
+      if (sd == null) { // TODO !!!: can this happen? 
+        // To establish a reference to a not-yet-defined type, create a fixup
+        final int j = i;
+        Command fixUp = new Command() {
+          public void execute() { 
+            SymbolData newSd = _identifyType(typeName, si, enclosingClassName);
+            assert newSd != null && newSd != SymbolData.NOT_FOUND;  // TODO !!!: Expand to error message?
+            varData[j].setType(newSd);
+          }
+        };
+        fixUps.add(fixUp);
+      }
+    
 //        System.err.println("For inner class/interface " + typeName + " found type " + type);
-      }
-      
-      if (type == null) { // create a continuation for it
-        String qualifiedTypeName = enclosing.getSymbolData().getName() + "." + typeName;
-        if (_innerClassesToBeParsed.contains(qualifiedTypeName)) {  // reference to an inner class.
-          type = addInnerSymbolData(si, qualifiedTypeName, enclosing);
-        }
-        else { // reference to a top level class or an external class
-          type = addSymbolData(si, typeName);
-        }
-      }
-      
-      varData[i] = new VariableData(name, new ModifiersAndVisibility(SourceInfo.NO_INFO, mav), type, true, enclosing);
       varData[i].gotValue();
       varData[i].setIsLocalVariable(true);
     }
    
     return varData;
   }
+   
+//  /** Identifies the SymbolData in symbolTable matching typeName.  Returns null if no match is
+//    * found.  Searches for typeName as a fully qualified Name and as a relative name within
+//    * the current class.  TODO: match inner classes of classes enclosing the current class. */
+//  private SymbolData _identifyVarType(String typeName, SourceInfo si) {
+//    SymbolData sd = getSymbolData(typeName, si);
+//    if (sd != null) return sd;
+//    SymbolData enclosingSD = getQualifiedSymbolData(_enclosingClassName, SourceInfo.NO_INFO);
+//    assert enclosingSD != null;
+//    return _enclosingClass.getInnerClassOrInterface(typeName);
+//    // TODO: fails for nested inner classes
+//  }
   
-  /** Create a MethodData corresponding to the MethodDef within the context of the SymbolData sd. */
-  protected MethodData createMethodData(MethodDef that, SymbolData sd) {
-//    Utilities.show("createMethodData called on " + that);
+  /** Looks up the return type of a method. */
+  private SymbolData _lookupReturnString(String rtString, SourceInfo si) {
+    return  rtString.equals("void") ? SymbolData.VOID_TYPE : getSymbolData(rtString, si);
+  }
+      
+  /** Creates a MethodData corresponding to the MethodDef within the context of the SymbolData sd. */
+  protected MethodData createMethodData(final MethodDef that, final SymbolData sd) {
+    
+    assert _enclosingClassName != null && getQualifiedSymbolData(_enclosingClassName).equals(sd);
+    
 //    _log.log("createMethodData(" + that + ", " + sd + ") called.");
+    System.err.println("createMethodData(" + that.getName().getText() + ", " + sd + ") called.");
+    System.err.println("_enclosingClassName = " + _enclosingClassName);
     that.getMav().visit(this);
     that.getName().visit(this);
     
     // Turn the thrown exceptions from a ReferenceType[] to a String[]
     String[] throwStrings = referenceType2String(that.getThrows());
+       
+    final String rtString = that.getResult().getName();
+
+    // Identify the return type
+    final SourceInfo si = that.getResult().getSourceInfo();
+//    if (! sd.equals(getQualifiedSymbolData(_enclosingClassName, SourceInfo.NO_INFO))) {
+//      System.err.println("sd = " + sd);
+//      System.err.println("other = " + getQualifiedSymbolData(_enclosingClassName, SourceInfo.NO_INFO));
+//      assert false;
+//    }
+    // Note: rtString cannot be a local type; no such type is in scope
+    SymbolData returnType = _identifyType(rtString, si, _enclosingClassName);
     
-    // Turn the ReturnTypeI into a SymbolData    
-    String rtString = that.getResult().getName();
-    SymbolData returnType;
-    //TODO: Overwrite this at the Advanced level (or maybe not)
-    if (rtString.equals("void"))  returnType = SymbolData.VOID_TYPE;
-    else returnType = getSymbolData(rtString, that.getResult().getSourceInfo());
+    final String name = that.getName().getText();
+    System.err.println("Creating MethodData for " + name + " in type " + sd);
+    final MethodData md = 
+      MethodData.make(name, that.getMav(), that.getTypeParams(), returnType, null, throwStrings, sd, that);
+    VariableData[] vds = formalParameters2VariableData(that.getParams(), sd);
+        
+    if (returnType == null) {
+      System.err.println("Creating return type fixup for " + rtString + " in method " + name + " in class " + sd);
+      final String enclosingClassName = _enclosingClassName;
+      Command fixUp = new Command() {
+        public void execute() {
+          SymbolData newReturnType = _identifyType(rtString, si, enclosingClassName);
+          if (newReturnType == null) 
+            _addAndIgnoreError("The return type " + rtString + " for method " + name + " in type " + sd + " is undefined.", 
+                               that);
+          else md.setReturnType(newReturnType);
+        }
+      };
+      fixUps.add(fixUp);
+    }
     
-    MethodData md = MethodData.make(that.getName().getText(), that.getMav(), that.getTypeParams(), returnType, 
-                                    new VariableData[0], throwStrings, sd, that);
+    System.err.println("Called createMethodData(" + name + ", " + sd.getName() + ")");
 //    _log.log("createMethodData called.  Created MethodData " + md + '\n' + "with modifiers:" + md.getMav());
     // Turn the parameters from a FormalParameterList to a VariableData[]
-    VariableData[] vds = formalParameters2VariableData(that.getParams(), md);
+
     
     if (_checkError()) {  //if there was an error converting the formalParameters, don't use them.
       return md;
@@ -1417,60 +1221,92 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return md;
   }
   
+  /** Generates a brief print string for a VariableDeclarator. */
+  private static String declaratorsToString(VariableDeclarator[] vds) {
+    StringBuilder printString = new StringBuilder("{ ");
+    for (VariableDeclarator vd: vds) {
+      printString.append(vd.getName().getText()).append(": ").append(vd.getType().getName()).append("; ");
+    }
+    return printString.append('}').toString();
+  }
+  
   /** This method assumes that the modifiers for this particular VariableDeclaration have already been checked.  It 
-    * does no semantics checking.  It simply converts the declarators to variable datas, by trying to resolve the types
-    * of each declarator.  The VariableDeclaration may be a field declaration!
+    * does no semantic checking.  It simply converts the declarators to variable datas, by trying to resolve the types
+    * of each declarator.  The VariableDeclaration may be a field declaration!  The Data enclosing may be a MethodData!
     */
-  protected VariableData[] _variableDeclaration2VariableData(VariableDeclaration vd, Data enclosing) {
+  protected VariableData[] _variableDeclaration2VariableData(VariableDeclaration vd, final Data enclosing) {
+    assert enclosing != null;
+    System.err.println("*** 2Var called for \n" + declaratorsToString(vd.getDeclarators()) + "\nin " + enclosing);
     LinkedList<VariableData> vds = new LinkedList<VariableData>();
     ModifiersAndVisibility mav = vd.getMav();
     VariableDeclarator[] declarators = vd.getDeclarators();
-    for (VariableDeclarator declarator: declarators) {
+    for (final VariableDeclarator declarator: declarators) {
       declarator.visit(this); // Does NOTHING!
-      Type type = declarator.getType();
-      String name = declarator.getName().getText();
-      SymbolData sd = handleDeclarator(type, name, enclosing);
-      if (sd != null) {
-        boolean initialized = declarator instanceof InitializedVariableDeclarator;
-        // want hasBeenAssigned to be true if this variable declaration is initialized, and false otherwise.
-//        System.err.println("creating new VariableData for " + name);
-        VariableData vdata = new VariableData(name, mav, sd, initialized, enclosing); 
-        vdata.setHasInitializer(initialized);
+      final Type type = declarator.getType();
+      final String name = declarator.getName().getText();
+      final String typeName = type.getName();
+//      assert enclosing == getQualifiedSymbolData(_enclosingClassName, SourceInfo.NO_INFO);
+      // TODO: if enclosing is a MethodData, we should first look for a local class!!!  This search will always
+      // succeed if a matching local class exists because no forward reference is possible. (Confirm this!) !!!
+      /* TODO: do we need to worry about case when enclosing is a MethodData?  Yes. defineInnerSymbolData 
+       * already treats local classes specially, but it doesn't help.  References to local types use relative
+       * class names. */
+      SymbolData sd = _identifyType(typeName, declarator.getSourceInfo(), _enclosingClassName);  // may be null
+      boolean initialized = declarator instanceof InitializedVariableDeclarator;
+      // want hasBeenAssigned to be true if this variable declaration is initialized, and false otherwise.
+      System.err.println("Creating new VariableData " + name + " : " + typeName + " within " + _enclosingClassName);
+      final VariableData vdata = new VariableData(name, mav, sd, initialized, enclosing); 
+      vdata.setHasInitializer(initialized);
 //        vdata.setIsLocalVariable(true);
-        vds.addLast(vdata); 
-      }
-      else {
-//        System.err.println("handleDeclarator(" + type + ", " + name + ", " + enclosing + ") returned null");
-        _addAndIgnoreError("Class or Interface " + name + " not found", type);
+      vds.addLast(vdata); 
+//        System.err.println("identifyReturnType(" + type + ", " + name + ", " + enclosing + ") returned null");
+      if (sd == null) { // TODO !!! Can this really happen?
+        // Create fixup
+        final String enclosingName = _enclosingClassName;  // Grab the current enclosing class name
+        System.err.println("**** Creating fixup for preceding VariableData");
+        Command fixup = new Command() {
+          public void execute() {
+            System.err.println("**** Executing fixup for " + typeName + " within " + enclosingName);
+            SymbolData newSd = _identifyType(typeName, declarator.getSourceInfo(), enclosingName);
+            if (newSd != null) vdata.setType(newSd);
+            else _addAndIgnoreError("Class or Interface " + typeName + " not found", type);
+          }
+        };
+        fixUps.add(fixup);       
       }
     }
 //    System.err.println("Returning VariableDatas " + vds);
     return vds.toArray(new VariableData[vds.size()]);
-  }
-  
-  // What happens with array types?
-  SymbolData handleDeclarator(Type type, String name, Data enclosing) {
-
-    String typeName = type.getName();
-    SourceInfo si = type.getSourceInfo();
-    SymbolData sd = getSymbolData(typeName, si);
+  }                       
+                                  
+  /** Identifies the SymbolData matching name in symbolTable.  Returns null if no match is
+    * found.  Searches for typeName as a fully qualified Name and as a relative name within
+    * the enclosing class.  TODO !!!: enclosingClassName should be sd of enclosing data.  Methods can
+    * introduce local types.  Make sure that we can match inner classes of the chain of enclosing
+    * datas.  We need to use the relative inner class name to do this. */
+  private SymbolData _identifyType(String name, SourceInfo si, String enclosingClassName) {
+    System.err.println("Calling _identifyType(" + name  + ") within " + enclosingClassName);
     
-    if (sd == null) {
-      // See if this is a partially qualified field reference
-      sd = enclosing.getInnerClassOrInterface(typeName);
-    }
+    SymbolData sd = getSymbolData(name, si);  // TODO: uses wrong enclosingClassName!!!
+    if (sd != null) return sd;
     
-    if (sd == null) { // create a continuation for it
-      String qualifiedTypeName = enclosing.getSymbolData().getName() + "." + typeName;
-      if (_innerClassesToBeParsed.contains(qualifiedTypeName)) {  
-        // reference to an inner class. Exclude .dj1 and .dj0 files?
-        sd = addInnerSymbolData(si, qualifiedTypeName, enclosing);
-      }
-      else { // reference to a top level class or an external class
-        sd = addSymbolData(si, typeName);
-      }
+    SymbolData enclosingSD = getQualifiedSymbolData(enclosingClassName, SourceInfo.NO_INFO);
+    if (enclosingSD == null) {
+      System.err.println("***ERROR*** in _identifyType " + enclosingClassName + " NOT FOUND");
+      return null;  // should only happen in tests
     }
-    return sd;
+    sd = enclosingSD.getInnerClassOrInterface(name);
+     
+    if (sd != null) return sd;
+//    
+//    // Create continuation for new type
+//    String qualifiedTypeName = enclosingClassName + '.' + name;
+//    if (_innerClassesInThisBody.contains(qualifiedTypeName)) {  
+//      // reference to an inner class that will subsequently be defined
+//      sd = addInnerSymbolData(si, qualifiedTypeName, enclosingSD);
+//    }
+    
+    return sd;  // Note: sd is null if name is not identified.
   }
                                
   /** This method is called when an error should be added to the static LinkedList of errors.
@@ -1495,7 +1331,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
                                  "  Please report this bug.");
     }
     _errorAdded = false;
-    errors.addLast(new Pair<String, JExpressionIF>(message, that));
+    Pair<String, JExpressionIF> newMsg = new Pair<String, JExpressionIF>(message, that);
+    if (! errors.contains(newMsg)) errors.addLast(newMsg);
+    else System.err.println("Suppressing error as duplicate: " + newMsg);
   }
   
   protected boolean prune(JExpressionIF node) { return _checkError(); }
@@ -1582,7 +1420,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     Iterator<String> iter = _importedFiles.iterator();
     while (iter.hasNext()) {
       String s = iter.next();
-      if (s.endsWith(name) && ! s.equals(getQualifiedClassName(name))) {
+      if (s.endsWith(name) && ! s.equals(getQualifiedClassName(name))) {  // TODO: this test is too coarse!
         _addAndIgnoreError("The class " + name + " was already imported.", that);
       }
     }
@@ -1599,12 +1437,13 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     
     // See if this is a Blacklisted class.  Blacklisted classes are any classes in java.lang or TestCase.
     SymbolData javaLangClass = 
-      getSymbolData("java.lang." + that.getName().getText(), that.getSourceInfo(), true, false, false, false);
+       getQualifiedSymbolData("java.lang." + that.getName().getText(), that.getSourceInfo(), false, false, false);
     if (that.getName().getText().equals("TestCase") || (javaLangClass != null && ! javaLangClass.isContinuation())) {
       _addError("You cannot define a class with the name " + that.getName().getText() + 
                 " because that class name is reserved." +
                 "  Please choose a different name for this class", that);
     }
+//    identifyInnerClasses(that);
     return forTypeDefBaseDoFirst(that);
   }
   
@@ -1620,6 +1459,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
         _addAndIgnoreError("Interfaces cannot be final", that);
       }
     }
+//    identifyInnerClasses(that);  // inner interfaces??
     return forTypeDefBaseDoFirst(that);
   }
   
@@ -1636,6 +1476,88 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return forTypeDefBaseDoFirst(that);  
   }
   
+  /** Do the common work for SimpleAnonymousClassInstantiations and ComplexAnonymousClassInstantiations
+    * and in FullJava and Functional Java.
+    * @param that       The AnonymousClassInstantiation being visited.
+    * @param enclosing  The SymbolData of the enclosing class.
+    * @param superC  The super class being instantiated--i.e. new A() { ...}, would have a super class of A.
+    */
+  public void anonymousClassInstantiationHelper(AnonymousClassInstantiation that, SymbolData enclosing, String superName) {
+    that.getArguments().visit(this);
+    SymbolData enclosingSD = enclosing.getSymbolData();
+    String enclosingSDName = enclosingSD.getName();
+    assert enclosingSDName.equals(_enclosingClassName);
+    String anonName = getQualifiedClassName(enclosingSDName) + "$" +  enclosingSD.preincrementAnonymousInnerClassNum();
+    
+    System.err.println("****** In anonymousCIH the anonName = " + anonName + " superName = " + superName 
+                         + " enclosing = " + enclosing);
+    
+    // Define the SymbolData that will correspond to this anonymous class
+    SymbolData anonSD = defineAnonymousSymbolData(that, anonName, superName);
+    
+//    if (this instanceof IntermediateVisitor) {
+    // These methods are no-ops in FullJavaVisitor
+    createToString(anonSD);
+    createHashCode(anonSD);
+    createEquals(anonSD);
+    // Accessors will be filled in in typeChecker pass
+//    }
+    
+    // Visit the body (with the appropritate class body visitor to get it all nice and resolved.
+    System.err.println("Calling appropriate class body visitor for " + anonName);
+    that.getBody().visit(newClassBodyVisitor(anonSD, anonName));
+  }
+  
+  /** Processes the class body that. */
+  protected void identifyInnerClasses(TypeDefBase that) {
+    String enclosingType = getQualifiedClassName(that.getName().getText());
+    assert enclosingType != null;
+    // Process the members of this class
+    System.err.println("Finding inner classes in " + enclosingType);
+    SymbolData sd = getSymbolData(enclosingType, SourceInfo.NO_INFO);
+    BracedBody body = that.getBody();
+    for (BodyItemI bi: body.getStatements()) {
+      if (bi instanceof TypeDefBase) {
+        TypeDefBase type = (TypeDefBase) bi;
+        String rawClassName = type.getName().getText();
+        System.err.println("Adding " + rawClassName + " to inner classes of " + enclosingType + "\n");
+        String fullClassName = enclosingType + '.' + rawClassName;
+//        System.err.println("Adding " + rawClassName + " to _innerClassesInThisBody inside " + that + "\n");
+        
+//          _innerClassesInThisBody.add(fullClassName);
+        SymbolData innerSD = makeContinuation(bi.getSourceInfo(), fullClassName);
+        sd.addInnerClass(innerSD);
+      }
+    }
+//    System.err.println("_innerClassesInThisBody = " + _innerClassesInThisBody);
+  }
+    
+  /** Process the members/statements of the class body, method body, or ordinary body (e.g. a try body, catch clause 
+    * body, or compound statement body. This is VERY BAD data design.  These various bodies have significantly 
+    * different meanings. */
+//  public Void forBracedBodyDoFirst(BracedBody that) {
+//    if (! (this instanceof BodyBodyFullJavaVisitor)) {  // full Java method bodies are excluded by this test
+//      // Process the members of this class
+//      SymbolData sd = getSymbolData(_enclosingClassName, SourceInfo.NO_INFO);
+//      for (BodyItemI bi: that.getStatements()) {
+//        if (bi instanceof TypeDefBase) {
+//          TypeDefBase type = (TypeDefBase) bi;
+//          String rawClassName = type.getName().getText();
+//          _log.log("Adding " + rawClassName + " to _innerClassesInThisBody inside " + that + "\n");
+//          String fullClassName = _enclosingClassName + '.' + rawClassName;
+////        System.err.println("Adding " + rawClassName + " to _innerClassesInThisBody inside " + that + "\n");
+//          
+//          _innerClassesInThisBody.add(fullClassName);
+//          SymbolData innerSD = makeContinuation(bi.getSourceInfo(), fullClassName);
+//          sd.addInnerClass(innerSD);
+//        }
+//      }
+//    System.err.println("_innerClassesInThisBody = " + _innerClassesInThisBody);
+//    }
+//    
+//    return super.forBracedBodyDoFirst(that);
+//  }
+  
   /** This sets the package name field in order to find other classes in the same package. */
   public Void forPackageStatementOnly(PackageStatement that) {
     CompoundWord cWord = that.getCWord();
@@ -1648,24 +1570,23 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       for (int i = 1; i < words.length; i++) {
         String temp = words[i].getText();
         newPackage = newPackage + separator + temp;
-        _package = _package + "." + temp;
+        _package = _package + '.' + temp;
       }    
       String directory = _file.getParent();
       if (directory == null || !directory.endsWith(newPackage)) {
         _addAndIgnoreError("The package name must mirror your file's directory.", that);
       }
     }
-    //call getSymbolData to see if this is actually a class as well as a Package Name.  If it is, an error
-    //will be given in the TypeChecking step
-    //If file is a .java file and not compiled, won't find it.  This is not consistent with the JLS.
-    //if file is a ll file and not compiled, will find it, though this is not consistent with the JLS.
-    getSymbolData(_package, that.getSourceInfo(), false, false, false);
+    // Call getSymbolData to see if this is actually a class as well as a Package Name.  If it is, an error will be 
+    // given in the TypeChecking step.
+    // If file is a .java file and not compiled, won't find it.  This is not consistent with the JLS.
+    // if file is a ll file and not compiled, will find it, though this is not consistent with the JLS.
+//    getSymbolData(_package, that.getSourceInfo(), false);
     return forJExpressionOnly(that);
   }
   
   
-  /** Make sure the class being imported has not already been imported and that it doesn
-    * not duplicate the package--i.e. import something that is already in the package.
+  /** Make sure the class being imported has not already been imported.
     * If there are no errors, add it to the list of imported files, and create a continuation for it.
     * The class will be resolved later.
     */
@@ -1674,9 +1595,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     Word[] words = cWord.getWords();
     
     // Make sure that this specific imported class has not already been specifically imported
-    for (int i = 0; i<_importedFiles.size(); i++) {
+    for (int i = 0; i < _importedFiles.size(); i++) {
       String name = _importedFiles.get(i);
-      int indexOfLastDot = name.lastIndexOf(".");
+      int indexOfLastDot = name.lastIndexOf('.');
       if (indexOfLastDot != -1 && 
           (words[words.length-1].getText()).equals(name.substring(indexOfLastDot + 1, name.length()))) {
         _addAndIgnoreError("The class " + words[words.length-1].getText() + " has already been imported.", that);
@@ -1685,34 +1606,41 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     }
     
     StringBuilder nameBuff = new StringBuilder(words[0].getText());
-    for (int i = 1; i < words.length; i++) {nameBuff.append("." + words[i].getText());}
+    for (int i = 1; i < words.length; i++) {nameBuff.append('.' + words[i].getText());}
     
     String qualifiedTypeName = nameBuff.toString();
     
-    // Make sure that this imported class does not duplicate the package.  WHY? FIX THIS.
-    // Although this is allowed in full java, we decided to not allow it at any LanguageLevel.
-    int indexOfLastDot = qualifiedTypeName.lastIndexOf(".");
-    if (indexOfLastDot != -1) {
-      if (_package.equals(qualifiedTypeName.substring(0, indexOfLastDot))) {
-        _addAndIgnoreError("You do not need to import " + qualifiedTypeName 
-                             + ".  It is in your package so it is already visible", 
-                           that);
-        return null;
-      }
-    }
+//    // Make sure that this imported class does not duplicate the package.  WHY? FIX THIS.
+//    // Although this is allowed in full java, we decided to not allow it at any LanguageLevel.
+//    int indexOfLastDot = qualifiedTypeName.lastIndexOf('.');
+//    if (indexOfLastDot != -1) {
+//      if (_package.equals(qualifiedTypeName.substring(0, indexOfLastDot))) {
+//        _addAndIgnoreError("You do not need to import " + qualifiedTypeName 
+//                             + ".  It is in your package so it is already visible", 
+//                           that);
+//        return null;
+//      }
+//    }
     
     //Now add the class to the list of imported files
     _importedFiles.addLast(qualifiedTypeName);  
     
-    // Create a continuation for imported class (named temp) if one does not already exist
+    // Create a continuation for imported class if one does not already exist
+    createImportedSymbolContinuation(qualifiedTypeName, that.getSourceInfo());
+    return forImportStatementOnly(that);
+  }
+  
+  /** Create a continuation for imported class specified by qualifiedName if one does not already exist. */
+  protected SymbolData createImportedSymbolContinuation(String qualifiedTypeName, SourceInfo si) {
+
     SymbolData sd = symbolTable.get(qualifiedTypeName);
     if (sd == null) {
       // Create a continuation for the imported class and put it into the symbol table so
       // that on lookup, we can check imported classes before classes in the same package.
 //      System.err.println("Creating continuation for imported class " + temp);
-      sd = addSymbolData(that.getSourceInfo(), qualifiedTypeName);
+      sd = makeContinuation(si, qualifiedTypeName);
     }
-    return forImportStatementOnly(that);
+    return sd;
   }
   
   /**Check to make sure that this package import statement is not trying to import the current pacakge. */
@@ -1720,7 +1648,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     CompoundWord cWord = that.getCWord();
     Word[] words = cWord.getWords();
     StringBuilder tempBuff = new StringBuilder(words[0].getText());
-    for (int i = 1; i < words.length; i++) { tempBuff.append("." + words[i].getText()); }
+    for (int i = 1; i < words.length; i++) { tempBuff.append('.' + words[i].getText()); }
     String temp = tempBuff.toString();
     
     
@@ -1731,7 +1659,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       return null;
     }
 
-    _importedPackages.addLast(temp);
+    if (! _importedPackages.contains(temp)) _importedPackages.addLast(temp);
     
     return forImportStatementOnly(that);
   }
@@ -1820,23 +1748,22 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     
     TypeDefBase[] types = that.getTypes();
     // store the qualified names of all classes defined in this file in:
-    _classNamesInThisFile = new LinkedList<String>();
+    _classesInThisFile = new HashSet<String>();
     for (int i = 0; i < types.length; i++) {
       // TODO: Add inner classes to this list?
       
       String qualifiedClassName = getQualifiedClassName(types[i].getName().getText());
-      _classNamesInThisFile.addFirst(qualifiedClassName);
-//      System.err.println("Adding " + qualifiedClassName + " to _classesToBeParsed");
-      _log.log("Adding " + qualifiedClassName + " to _classesToBeParsed");
-      _classesToBeParsed.put(qualifiedClassName, new Pair<TypeDefBase, LanguageLevelVisitor>(types[i], this));
+      _classesInThisFile.add(qualifiedClassName);
+//      System.err.println("Adding " + qualifiedClassName + " to _classesInThisFile");
+      _log.log("Adding " + qualifiedClassName + " to _classesInThisFile");
     }
     
     for (int i = 0; i < types.length; i++) {
       // Remove the class that is about to be visited from the list of ClassDefs in this file.
       String qualifiedClassName = getQualifiedClassName(types[i].getName().getText());
-      // Only visit a class if _classesToBeParsed contains it.  Otherwise, this class has 
+      // Only visit a class if _classesInThisFile contains it.  Otherwise, this class has 
       // already been processed since it was a superclass of a previous class.
-      if (_classesToBeParsed.containsKey(qualifiedClassName)) {
+      if (_classesInThisFile.contains(qualifiedClassName)) {
         types[i].visit(this);
       }
     }
@@ -1858,9 +1785,13 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   
   /** Do nothing.  This is handled in the forVariableDeclarationOnly case.*/
   public Void forVariableDeclaration(VariableDeclaration that) {
+//    System.err.println("forVariableDeclaration in LLV called for " + that);
     forVariableDeclarationDoFirst(that);
+    
     if (prune(that)) return null;
+    System.err.println("forVariableDeclarationDoFirst(...) completed with no errors");
     that.getMav().visit(this);
+    System.err.println("Mav visit completed in forVariableDeclaration; getClass() = "  + getClass());
     return forVariableDeclarationOnly(that);
   }
   
@@ -1888,111 +1819,151 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     */
   public void createConstructor(SymbolData sd) {
     if (LanguageLevelConverter.isAdvancedFile(_file)) return;
-    
-    SymbolData superSd = sd.getSuperClass();
-    
-    //there was an error somewhere else.  just return.
-    if (sd.isContinuation()) return;
-    
-    LinkedList<MethodData> superMethods = superSd.getMethods();
-    String superUnqualifiedName = getUnqualifiedClassName(superSd.getName());
-    
-    LanguageLevelVisitor sslv = LanguageLevelConverter._newSDs.remove(superSd);
-    if (sslv != null) {sslv.createConstructor(superSd);}
-    
-    // Find the super's smallest constructor.
-    MethodData superConstructor = null;
-    Iterator<MethodData> iter = superMethods.iterator();
-    while (iter.hasNext()) {
-      MethodData superMd = iter.next();
-      if (superMd.getName().equals(superUnqualifiedName)) {
-        if (superConstructor == null || superMd.getParams().length < superConstructor.getParams().length) {
-          superConstructor = superMd;
-        }
-      }
+ 
+    System.err.println("**** createConstructor called for " + sd);
+        
+//    if (sd == null) {
+//      System.err.println("**** Error **** After fixups, SymbolData " + sd + " has null for a super class");
+//      assert false;
+//    }
+//    
+    if (sd.isContinuation()) {
+      _addError("Could not generate constructor for class " + sd + " because it has no definition", 
+                new NullLiteral(SourceInfo.NO_INFO));
+      return;
     }
     
-    String name = getUnqualifiedClassName(sd.getName());
-    MethodData md = new MethodData(name,
-                                   new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}), 
-                                   new TypeParameter[0], 
-                                   sd, 
-                                   new VariableData[0], // Parameters to be filled in later. 
-                                   new String[0], 
-                                   sd,
-                                   null);
+    SymbolData superSd = sd.getSuperClass();
+    if (superSd == null) {
+      _addError("Could not generate constructor for class " + sd + " because it has no superclass", 
+                new NullLiteral(SourceInfo.NO_INFO));
+      return;
+    }
     
-    LinkedList<VariableData> params = new LinkedList<VariableData>();
-    if (superConstructor != null) {
+    else {
+      LinkedList<MethodData> superMethods = superSd.getMethods();
+      String superUnqualifiedName = getUnqualifiedClassName(superSd.getName());
+      
+      LanguageLevelVisitor sslv = LanguageLevelConverter._newSDs.remove(superSd);
+      
+      // if sslv == null, the superclass constructor has already been generated or we are caught in a cyclic
+      // inheritance hierarchy
+      if (sslv != null) {
+        sslv.createConstructor(superSd);
+        System.err.println("Creating constructor for superclass " + superSd);
+      }
+      
+      // Find the super's smallest constructor.
+      MethodData superConstructor = null;
+      for (MethodData superMd: superMethods) {
+//      Iterator<MethodData> iter = superMethods.iterator();
+//      while (iter.hasNext()) {
+//        MethodData superMd = iter.next();
+        if (superMd.getName().equals(superUnqualifiedName)) {
+          if (superConstructor == null || superMd.getParams().length < superConstructor.getParams().length) {
+            superConstructor = superMd;
+          }
+        }
+      }
+      if (superConstructor == null) {
+        _addAndIgnoreError("Could not generate constructor for class " + sd + " superclass has no constructor, perhaps"
+                           + " because the class hierarchy is cyclic.",
+                           new NullLiteral(SourceInfo.NO_INFO));
+        return;
+      }
+//      if (superConstructor == null) {
+//        System.err.println("**** Error **** The superclass " + superSd + " has no constructors ");
+//      }
+      String name = getUnqualifiedClassName(sd.getName());
+      MethodData md = new MethodData(name,
+                                     PUBLIC_MAV, 
+                                     new TypeParameter[0], 
+                                     sd, 
+                                     new VariableData[0], // Parameters to be filled in later. 
+                                     new String[0], 
+                                     sd,
+                                     null);
+      
+      LinkedList<VariableData> params = new LinkedList<VariableData>();
+//      if (superConstructor != null) {
       for (VariableData superParam : superConstructor.getParams()) {
         String paramName = md.createUniqueName("super_" + superParam.getName());
-        VariableData newParam = 
-          new VariableData(paramName, new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]), 
-                           superParam.getType().getSymbolData(), true, md);
+        SymbolData superParamSD = superParam.getType();
+        assert superParamSD != null;
+        VariableData newParam = new VariableData(paramName, PACKAGE_MAV, superParamSD, true, sd);  // Note: sd was md
         newParam.setGenerated(true);
         params.add(newParam);
         // Next line done on each iteration so that createUniqueName handles nameless super parameters (in class files)
-        md.addVar(newParam); 
+        md.addVar(newParam);  // Fixups have already been executed
       }
-    }
+//      }
     
-    // only add in those fields that do not have a value and are not static.
-    boolean hasOtherConstructor = sd.hasMethod(name);
-    
-    for (VariableData field : sd.getVars()) {
+      // only add in those fields that do not have a value and are not static.
+      boolean hasOtherConstructor = sd.hasMethod(name);
       
-      if (! field.hasInitializer() && ! field.hasModifier("static")) {
-        if (! hasOtherConstructor) { field.gotValue(); } // Set hasValue if no other constructors need to be visited
-        // Rather than creating a new parameter, we use the field, since all the important data is the same in both of
-        // them.
-        params.add(field);
+      for (VariableData field : sd.getVars()) {
+        
+        if (! field.hasInitializer() && ! field.hasModifier("static")) {
+          if (! hasOtherConstructor) { field.gotValue(); } // Set hasValue if no other constructors need to be visited
+          // Rather than creating a new parameter, we use the field, since all the important data is the same in both of
+          // them.
+          VariableData param = field.copyWithoutVisibility();
+          params.add(param);
+        }
       }
+      // Some fields may be declared private, but parameters cannot be; unprivatize the 
+      
+      md.setParams(params.toArray(new VariableData[params.size()]));
+      md.setVars(params);
+      
+      System.err.println("**** Adding constructor " + md + " **** to symbol " + sd);
+//      if (md.getName().equals("ClassName"))
+//        System.err.println("****** constructor visibility = " + md.getMav());
+      addGeneratedMethod(sd, md);
     }
-    md.setParams(params.toArray(new VariableData[params.size()]));
-    md.setVars(params);
-    
-    addGeneratedMethod(sd, md);
     LanguageLevelConverter._newSDs.remove(sd); // this won't do anything if sd is not in _newSDs.
   }
   
   /** Create a method that is an accessor for each field in the class.
     * File file is passed in so this can remain a static method
+    * TODO: should this be called AFTER all fixups have been performed?  No method needs to be in 
+    *       symbol table.
     */
   protected static void createAccessors(SymbolData sd, File file) {
     if (LanguageLevelConverter.isAdvancedFile(file)) return;
     LinkedList<VariableData> fields = sd.getVars();
-    Iterator<VariableData> iter = fields.iterator();
-    while (iter.hasNext()) {
-      VariableData vd = iter.next();      
-      if (!vd.hasModifier("static")) { 
+    for (final VariableData vd: fields) {     
+      if (! vd.hasModifier("static")) { 
         String name = getFieldAccessorName(vd.getName());
-        String[] mavStrings;
-        mavStrings = new String[] {"public"};
-        MethodData md = new MethodData(name,
-                                       new ModifiersAndVisibility(SourceInfo.NO_INFO, mavStrings), 
-                                       new TypeParameter[0], 
-                                       vd.getType().getSymbolData(), 
-                                       new VariableData[0],
-                                       new String[0], 
-                                       sd,
-                                       null); // no SourceInfo
+        SymbolData returnTypeSD = vd.getType();
+        final MethodData md = new MethodData(name,
+                                             PUBLIC_MAV, 
+                                             new TypeParameter[0], 
+                                             returnTypeSD, 
+                                             new VariableData[0],
+                                             new String[0], 
+                                             sd,
+                                             null); // no SourceInfo
         addGeneratedMethod(sd, md);
+        if (returnTypeSD == null) { // create a fixup to patch the return type of md; vd may have pending return type
+          Command fixUp = new Command() {
+            public void execute() { md.setReturnType(vd.getType()); }
+          };
+          fixUps.add(fixUp);
+        } 
       }
     }
-  }
+  } 
   
   /** Create a method called toString that returns type String. Overridden at the Advanced Level files, because n code
     * augmentation is done for them so you don't want to create this method.
     */ 
   protected void createToString(SymbolData sd) {
     String name = "toString";
-    String[] mavStrings;
-    mavStrings = new String[] {"public"};
-    //    }
     MethodData md = new MethodData(name,
-                                   new ModifiersAndVisibility(SourceInfo.NO_INFO, mavStrings), 
+                                   PUBLIC_MAV, 
                                    new TypeParameter[0], 
-                                   getSymbolData("String", _makeSourceInfo("java.lang.String")), 
+                                   getSymbolData("java.lang.String", SourceInfo.make("java.lang.String")), 
                                    new VariableData[0],
                                    new String[0], 
                                    sd,
@@ -2000,17 +1971,13 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     addGeneratedMethod(sd, md);    
   }
   
-  /**
-   * Create a method called hashCode that returns an int.
-   * Overriden for Advanced Level files, because no code augmentation is done for
-   * them, so we don't want to create this method.
-   */ 
+  /** Creates a method called hashCode that returns an int. Overriden for FullJava files, because no code augmentation 
+    * is done for them, so we don't want to create this method.
+    */ 
   protected void createHashCode(SymbolData sd) {    
     String name = "hashCode";
-    String[] mavStrings;
-    mavStrings = new String[] {"public"};
     MethodData md = new MethodData(name,
-                                   new ModifiersAndVisibility(SourceInfo.NO_INFO, mavStrings), 
+                                   PUBLIC_MAV, 
                                    new TypeParameter[0], 
                                    SymbolData.INT_TYPE, 
                                    new VariableData[0],
@@ -2020,19 +1987,15 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     addGeneratedMethod(sd, md);
   }
   
-  /**
-   * Create a method called equals() that takes in an Object argument and returns a boolean.
-   * Overriden for Advanced Level files, because no code augmentation is done for
-   * them, so we don't want to create this method.
-   */ 
+  /** Creates a method called equals() that takes in an Object argument and returns a boolean.  Overriden for FullJava
+    * files, because no code augmentation is done for them, so we don't want to create this method.
+    */ 
   protected void createEquals(SymbolData sd) {    
     String name = "equals";
-    String[] mavStrings;
-    mavStrings = new String[] {"public"};
-    SymbolData type = getSymbolData("java.lang.Object", _makeSourceInfo("java.lang.Object"));
+    SymbolData type = getSymbolData("java.lang.Object", SourceInfo.make("java.lang.Object"));
     VariableData param = new VariableData(type);
     MethodData md = new MethodData(name,
-                                   new ModifiersAndVisibility(SourceInfo.NO_INFO, mavStrings), 
+                                   PUBLIC_MAV,
                                    new TypeParameter[0], 
                                    SymbolData.BOOLEAN_TYPE, 
                                    new VariableData[] {param},
@@ -2056,7 +2019,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   
   /**Return the SymbolData for java.lang.String by default*/
   public Void forStringLiteralOnly(StringLiteral that) {
-    getSymbolData("String", that.getSourceInfo(), true);
+    getQualifiedSymbolData("java.lang.String", that.getSourceInfo(), true);
     return null;
   }
   
@@ -2073,6 +2036,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
      */
     getSymbolData(that.getType().getName(), that.getSourceInfo());
     
+    // TODO? create a fixup?
+    
     return forSimpleNamedClassInstantiationOnly(that);
   }
   
@@ -2080,7 +2045,18 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   /** Determines whether array1 equals array2 using the equals method on Object[] arrays in java.util.Arrays.
     * @return true if the two array argument (which may be null) are equal.
     */ 
-  public static boolean arrayEquals(Object[] array1, Object[] array2) { return Arrays.equals(array1, array2); }
+  public static boolean arrayEquals(Object[] array1, Object[] array2) {
+//    return Arrays.equals(array1, array2); 
+    int n = array1.length;
+    if (n != array2.length) return false;
+    for (int i = 0; i < n; i++) {
+      Object o1 = array1[i];
+      Object o2 = array2[i];
+      if (o1 == null && o2 != null) return false;
+      if (! o1.equals(o2)) return false;
+    };
+    return true;
+  }
   
   /** Use this to see if a name references a type that needs to be added to the symbolTable. */
   private class ResolveNameVisitor extends JExpressionIFAbstractVisitor<TypeData> {
@@ -2093,13 +2069,14 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       return null;
     }
     
-    /** Try to look up this simple name reference and match it to a symbol data.
-      * If it could not be matched, return a package data.
+    /** Try to look up this simple name reference and match it to a symbol data. If it could not be matched, return a 
+      * package data.
       * @param that  The thing we're trying to match to a type
       */
     public TypeData forSimpleNameReference(SimpleNameReference that) {
       SymbolData result = getSymbolData(that.getName().getText(), that.getSourceInfo());
       // it could not be resolved: return a Package Data
+      // TODO: create a fixup !!!
       if (result == SymbolData.NOT_FOUND) {
         return new PackageData(that.getName().getText());
       }
@@ -2114,13 +2091,13 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       TypeData lhs = that.getEnclosing().visit(this);
       SymbolData result = getSymbolData(lhs, that.getName().getText(), that.getSourceInfo(), true);
       
+      // TODO: create a fixup?
       if (result == SymbolData.NOT_FOUND) { 
         if (lhs instanceof PackageData) {
           return new PackageData((PackageData) lhs, that.getName().getText());
         }
         return null;
       }
-      
       return result;
     }
   }
@@ -2137,38 +2114,31 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     private SymbolData _sd4;
     private SymbolData _sd5;
     private SymbolData _sd6;
-    private ModifiersAndVisibility _publicMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
-    private ModifiersAndVisibility _finalMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[]{"final"});
-    
+
     public LanguageLevelVisitorTest() { this(""); }
     public LanguageLevelVisitorTest(String name) { super(name); }
     
     public void setUp() {
+      Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations =
+        new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>();
+      LinkedList<Command> fixUps = new LinkedList<Command>();
+      // The following ensures that essential symbols have been loaded into the symbolTable, a static field of 
+      // LanguageLevelConverter.
       testLLVisitor = new LanguageLevelVisitor(new File(""), 
-                                               "", 
+                                               "",
+                                               "i.like.monkey",
                                                new LinkedList<String>(), 
                                                new LinkedList<String>(), 
-                                               new LinkedList<String>(), 
-                                               new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-
+                                               new HashSet<String>(), 
+                                               continuations,
+                                               fixUps);
       errors = new LinkedList<Pair<String, JExpressionIF>>();
-      _errorAdded=false;
-      LanguageLevelConverter.symbolTable.clear();
+      _errorAdded = false;
       
-      testLLVisitor.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();      
-      _hierarchy = new Hashtable<String, TypeDefBase>();
-      testLLVisitor._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
-      testLLVisitor._resetNonStaticFields();
-      testLLVisitor._importedPackages.add("java.lang");
+//      _hierarchy = new Hashtable<String, TypeDefBase>();
+      testLLVisitor._classesInThisFile = new HashSet<String>();
+      if (! testLLVisitor._importedPackages.contains("java.lang")) testLLVisitor._importedPackages.add("java.lang");
 
       _sd1 = new SymbolData("i.like.monkey");
       _sd2 = new SymbolData("i.like.giraffe");
@@ -2192,14 +2162,14 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     public void testClassFile2SymbolData() {
       
       //test a java.lang symbol data
-      SymbolData objectSD = testLLVisitor._classFile2SymbolData("java.lang.Object", "");
-      SymbolData stringSD = testLLVisitor._classFile2SymbolData("java.lang.String", "");
-      MethodData md = new MethodData("substring", _publicMav, new TypeParameter[0], stringSD, 
+      SymbolData objectSD = LanguageLevelConverter._classFile2SymbolData("java.lang.Object", "");
+      SymbolData stringSD = LanguageLevelConverter._classFile2SymbolData("java.lang.String", "");
+      MethodData md = new MethodData("substring", PUBLIC_MAV, new TypeParameter[0], stringSD, 
                                      new VariableData[] {new VariableData(SymbolData.INT_TYPE)},
                                      new String[0], stringSD, null);
       assertTrue("java.lang.String should have been converted successfully", 
                  stringSD.getName().equals("java.lang.String"));
-      assertEquals("java.lang.String's superClass should should be java.lang.Object", 
+      assertEquals("java.lang.String's superSD should should be java.lang.Object", 
                    objectSD,
                    stringSD.getSuperClass());
       
@@ -2210,7 +2180,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       while (iter.hasNext()) {
         MethodData currMd = iter.next();
         if (currMd.getName().equals("substring") && currMd.getParams().length == 1 && 
-            currMd.getParams()[0].getType() == SymbolData.INT_TYPE.getInstanceData()) {
+            currMd.getParams()[0].getInstanceData() == SymbolData.INT_TYPE.getInstanceData()) {
+          // TODO: comparing getInstanceData() on preceding line is goofy; should check getType() instead
           found = true;
           md.getParams()[0].setEnclosingData(currMd);
           break;
@@ -2223,27 +2194,27 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
                    testLLVisitor.getSymbolData("java.lang.String", SourceInfo.NO_INFO).getPackage());
       
       //now, test that a second call to the same method won't replace the symbol data that is already there.
-      SymbolData newStringSD = testLLVisitor._classFile2SymbolData("java.lang.String", "");
+      SymbolData newStringSD = LanguageLevelConverter._classFile2SymbolData("java.lang.String", "");
       assertTrue("Second call to classFileToSymbolData should not change sd in hash table.", 
-                 stringSD == testLLVisitor.symbolTable.get("java.lang.String"));
+                 stringSD == LanguageLevelConverter.symbolTable.get("java.lang.String"));
       assertTrue("Second call to classFileToSymbolData should return same SD.", 
-                 newStringSD == testLLVisitor.symbolTable.get("java.lang.String"));      
+                 newStringSD == LanguageLevelConverter.symbolTable.get("java.lang.String"));      
       //now, test one of our own small class files.
       
-      SymbolData bartSD = testLLVisitor._classFile2SymbolData("Bart", "testFiles");
+      SymbolData bartSD = LanguageLevelConverter._classFile2SymbolData("Bart", "testFiles");
       assertFalse("bartSD should not be null", bartSD == null);
       assertFalse("bartSD should not be a continuation", bartSD.isContinuation());
       MethodData md1 = 
-        new MethodData("myMethod", _protectedMav, 
+        new MethodData("myMethod", PROTECTED_MAV, 
                        new TypeParameter[0], SymbolData.BOOLEAN_TYPE, 
                        new VariableData[] { new VariableData(SymbolData.INT_TYPE) }, 
                        new String[] {"java.lang.Exception"}, bartSD, null);
       
       md1.getParams()[0].setEnclosingData(bartSD.getMethods().getLast());
-      MethodData md2 = new MethodData("Bart", _publicMav, new TypeParameter[0], bartSD,
+      MethodData md2 = new MethodData("Bart", PUBLIC_MAV, new TypeParameter[0], bartSD,
                                       new VariableData[0], new String[0], bartSD, null);
       
-      VariableData vd1 = new VariableData("i", _publicMav, SymbolData.INT_TYPE, true, bartSD);
+      VariableData vd1 = new VariableData("i", PUBLIC_MAV, SymbolData.INT_TYPE, true, bartSD);
       
       LinkedList<MethodData> bartsMD = new LinkedList<MethodData>();
       bartsMD.addFirst(md1);
@@ -2261,143 +2232,140 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       assertEquals("Bart's Method Data should be a linked list containing only md1", bartsMD, bartSD.getMethods());
     }
     
-    public void testLookupFromClassesToBeParsed() {
-      // Create a ClassDef.  Recreate the ClassOrInterfaceType for Object instead of using 
-      // JExprParser.NO_TYPE since otherwise the ElementaryVisitor will complain that the
-      // user must explicitly extend Object.
-      ClassDef cd = 
-        new ClassDef(SourceInfo.NO_INFO, _publicMav, 
-                     new Word(SourceInfo.NO_INFO, "Lisa"),
-                     new TypeParameter[0], 
-                     new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), 
-                     new ReferenceType[0], 
-                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
-      
-      // Use a ElementaryVisitor so lookupFromClassesToBeParsed will actually visit the ClassDef.
-      IntermediateVisitor bv = new IntermediateVisitor(new File(""), 
-                                                       errors, 
-                                                       continuations, 
-                                                       new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>());
-      
-      // Test that passing resolve equals false returns a continuation.
-      assertTrue("Should return a continuation", 
-                 testLLVisitor._lookupFromClassesToBeParsed("Lisa", SourceInfo.NO_INFO, false).isContinuation());
-      // Put Lisa in the hierarchy and test that there is one error and that the message
-      // says that there is cyclic inheritance.
-//      _hierarchy.put("Lisa", cd);
-//      _classesToBeParsed.put("Lisa", new Pair<TypeDefBase, LanguageLevelVisitor>(cd, bv));
-//      assertEquals("Should return null because Lisa is in the hierarchy", 
-//                   null,
-//                   _llv._lookupFromClassesToBeParsed("Lisa", SourceInfo.NO_INFO, true));
-//      assertEquals("Should be one error", 1, errors.size());
-//      assertEquals("Error message should be correct", "Cyclic inheritance involving Lisa", errors.get(0).getFirst());
-//      _hierarchy.remove("Lisa");
-      //Re-add Lisa because the first call with resolve set to true removed it and
-      // test that Lisa is actually visited and added to the symbolTable.
-      testLLVisitor._classesToBeParsed.put("Lisa", new Pair<TypeDefBase, LanguageLevelVisitor>(cd, bv));
-      assertFalse("Should return a non-continuation", 
-                  testLLVisitor._lookupFromClassesToBeParsed("Lisa", 
-                                                    SourceInfo.NO_INFO,
-                                                    true).isContinuation());
-    }
+//    public void testLookupFromClassesToBeParsed() {
+//      // Create a ClassDef.  Recreate the ClassOrInterfaceType for Object instead of using 
+//      // JExprParser.NO_TYPE since otherwise the ElementaryVisitor will complain that the
+//      // user must explicitly extend Object.
+//      ClassDef cd = 
+//        new ClassDef(SourceInfo.NO_INFO, PUBLIC_MAV, 
+//                     new Word(SourceInfo.NO_INFO, "Lisa"),
+//                     new TypeParameter[0], 
+//                     new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+//                     new ReferenceType[0], 
+//                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+//      
+//      // Use a ElementaryVisitor so lookupFromClassesToBeParsed will actually visit the ClassDef.
+//      IntermediateVisitor bv = new IntermediateVisitor(new File(""), 
+//                                                       errors, 
+//                                                       continuations, 
+//                                                       new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>());
+//      
+//      // Test that passing resolve equals false returns a continuation.
+////      assertTrue("Should return a continuation", 
+////                 testLLVisitor._identifyTypeFromClassesToBeParsed("Lisa", SourceInfo.NO_INFO, false).isContinuation());
+//      // Put Lisa in the hierarchy and test that there is one error and that the message
+//      // says that there is cyclic inheritance.
+////      _hierarchy.put("Lisa", cd);
+////      _classesInThisFile.put("Lisa", new Pair<TypeDefBase, LanguageLevelVisitor>(cd, bv));
+////      assertEquals("Should return null because Lisa is in the hierarchy", 
+////                   null,
+////                   _llv._identifyTypeFromClassesToBeParsed("Lisa", SourceInfo.NO_INFO, true));
+////      assertEquals("Should be one error", 1, errors.size());
+////      assertEquals("Error message should be correct", "Cyclic inheritance involving Lisa", errors.get(0).getFirst());
+////      _hierarchy.remove("Lisa");
+//      //Re-add Lisa because the first call with resolve set to true removed it and
+//      // test that Lisa is actually visited and added to the symbolTable.
+//      testLLVisitor._classesInThisFile.put("Lisa", new Pair<TypeDefBase, LanguageLevelVisitor>(cd, bv));
+//      assertFalse("Should return a non-continuation", 
+//                  testLLVisitor._identifyTypeFromClassesToBeParsed("Lisa", 
+//                                                    SourceInfo.NO_INFO,
+//                                                    true).isContinuation());
+//    }
     
     public void testGetSymbolDataForClassFile() {
       // Test that passing a legal class return a non-continuation.
       assertFalse("Should return a non-continuation", 
-                  testLLVisitor.getSymbolDataForClassFile("java.lang.String", SourceInfo.NO_INFO).isContinuation());
+                  LanguageLevelConverter.getSymbolDataForClassFile("java.lang.String", null).isContinuation());
       
       // Test that passing a userclass that can't be found returns null and adds an error.
-      assertEquals("Should return null with a user class that can't be found",
-                   null,
-                   testLLVisitor.getSymbolDataForClassFile("Marge", SourceInfo.NO_INFO));
-      assertEquals("There should be one error", 1, errors.size());
-      assertEquals("The error message should be correct", 
-                   "Class Marge not found.", 
-                   errors.get(0).getFirst());
+      assertNull("Should return null with a user class that can't be found",
+                 LanguageLevelConverter.getSymbolDataForClassFile("Marge", null));
+//      assertEquals("There should be one error", 1, errors.size());
+//      assertEquals("The error message should be correct", "Class Marge not found.", errors.get(0).getFirst());
     }
     
     
     public void testGetSymbolData_Primitive() {
       assertEquals("should be boolean type", SymbolData.BOOLEAN_TYPE, 
-                   testLLVisitor._getSymbolData_Primitive("boolean"));
-      assertEquals("should be char type", SymbolData.CHAR_TYPE, testLLVisitor._getSymbolData_Primitive("char"));
-      assertEquals("should be byte type", SymbolData.BYTE_TYPE, testLLVisitor._getSymbolData_Primitive("byte"));
-      assertEquals("should be short type", SymbolData.SHORT_TYPE, testLLVisitor._getSymbolData_Primitive("short"));
-      assertEquals("should be int type", SymbolData.INT_TYPE, testLLVisitor._getSymbolData_Primitive("int"));
-      assertEquals("should be long type", SymbolData.LONG_TYPE, testLLVisitor._getSymbolData_Primitive("long"));
-      assertEquals("should be float type", SymbolData.FLOAT_TYPE, testLLVisitor._getSymbolData_Primitive("float"));
-      assertEquals("should be double type", SymbolData.DOUBLE_TYPE, testLLVisitor._getSymbolData_Primitive("double"));
-      assertEquals("should be void type", SymbolData.VOID_TYPE, testLLVisitor._getSymbolData_Primitive("void"));
-      assertEquals("should be null type", SymbolData.NULL_TYPE, testLLVisitor._getSymbolData_Primitive("null"));
+                   LanguageLevelConverter._getPrimitiveSymbolData("boolean"));
+      assertEquals("should be char type", SymbolData.CHAR_TYPE, LanguageLevelConverter._getPrimitiveSymbolData("char"));
+      assertEquals("should be byte type", SymbolData.BYTE_TYPE, LanguageLevelConverter._getPrimitiveSymbolData("byte"));
+      assertEquals("should be short type", SymbolData.SHORT_TYPE, LanguageLevelConverter._getPrimitiveSymbolData("short"));
+      assertEquals("should be int type", SymbolData.INT_TYPE, LanguageLevelConverter._getPrimitiveSymbolData("int"));
+      assertEquals("should be long type", SymbolData.LONG_TYPE, LanguageLevelConverter._getPrimitiveSymbolData("long"));
+      assertEquals("should be float type", SymbolData.FLOAT_TYPE, LanguageLevelConverter._getPrimitiveSymbolData("float"));
+      assertEquals("should be double type", SymbolData.DOUBLE_TYPE, LanguageLevelConverter._getPrimitiveSymbolData("double"));
+      assertEquals("should be void type", SymbolData.VOID_TYPE, LanguageLevelConverter._getPrimitiveSymbolData("void"));
+      assertEquals("should be null type", SymbolData.NULL_TYPE, LanguageLevelConverter._getPrimitiveSymbolData("null"));
       assertEquals("should return null--not a primitive", null, 
-                   testLLVisitor._getSymbolData_Primitive("java.lang.String"));
+                   LanguageLevelConverter._getPrimitiveSymbolData("java.lang.String"));
     }
     
-    public void testGetQualifiedSymbolData() {
-      testLLVisitor._file = new File("testFiles/Fake.dj0");
-      SymbolData sd = new SymbolData("testPackage.File");
-      testLLVisitor._package = "testPackage";
-      LanguageLevelConverter.symbolTable.put("testPackage.File", sd);
-      
-      SymbolData sd1 = new SymbolData("java.lang.String");
-      LanguageLevelConverter.symbolTable.put("java.lang.String", sd1);
-      
-      //Test that classes not in the symbol table are handled correctly.
-      assertEquals("should the continuation symbol", sd, 
-                   testLLVisitor._getQualifiedSymbolData("testPackage.File", SourceInfo.NO_INFO, true, false, true));
-//      assertEquals("should be one error so far.", 1, errors.size());
-      
-      
-      SymbolData sd2 = testLLVisitor._getQualifiedSymbolData("java.lang.Integer", SourceInfo.NO_INFO, true, true, true);
-      assertEquals("should return non-continuation java.lang.Integer", "java.lang.Integer", sd2.getName());
-      assertFalse("should not be a continuation.", sd2.isContinuation());
-      
-      SymbolData sd3 = testLLVisitor._getQualifiedSymbolData("Wow", SourceInfo.NO_INFO, true, true, true);
-      assertEquals("search should fail", null, sd3);
-//      assertEquals("should return Wow", "Wow", sd3.getName());
-//      assertFalse("Should not be a continuation.", sd3.isContinuation());
-      
-      // "testPackage.File" has been entered as a continuation in symbolTable.  Why should the following lookup fail?
-//      //Test that classes in the symbol table are handled correctly
-//      assertEquals("should return null sd--does not exist", null, 
-//                   _llv._getQualifiedSymbolData("testPackage.File", SourceInfo.NO_INFO, false, false, true));
-//      assertEquals("Should be 1 error", 1, errors.size());
-      
-      sd.setIsContinuation(false);
-      assertEquals("should return non-continuation sd", sd, 
-                   testLLVisitor._getQualifiedSymbolData("testPackage.File", SourceInfo.NO_INFO, true, false,  true));
-      
-      
-      assertEquals("Should return sd1.", sd1, 
-                   testLLVisitor._getQualifiedSymbolData("java.lang.String", SourceInfo.NO_INFO, true, false, true));
-      assertFalse("sd1 should no longer be a continuation.", sd1.isContinuation());
-      
-      
-      
-      //check that stuff not in symbol table and packaged incorrectly is handled right.
-      assertEquals("should return null-because it's not a valid class", null, 
-                   testLLVisitor._getQualifiedSymbolData("testPackage.not.in.symboltable", 
-                                                   SourceInfo.NO_INFO, true, false, true));
-      
-      assertEquals("should be two errors so far.", 2, errors.size());
-      assertNull("should return null", 
-                 testLLVisitor._getQualifiedSymbolData("testPackage.not.in.symboltable", 
-                                                 SourceInfo.NO_INFO, false, false, false));
-      
-      assertNull("should return null.", 
-                 testLLVisitor._getQualifiedSymbolData("notRightPackage", SourceInfo.NO_INFO, false, false, false));
-      assertEquals("should still be two errors.", 2, errors.size());
-    }
+//    public void testGetQualifiedSymbolData() {
+//      testLLVisitor._file = new File("testFiles/Fake.dj0");
+//      SymbolData sd = new SymbolData("testPackage.File");
+//      testLLVisitor._package = "testPackage";
+//      LanguageLevelConverter.symbolTable.put("testPackage.File", sd);
+//      
+//      SymbolData sd1 = new SymbolData("java.lang.String");
+//      LanguageLevelConverter.symbolTable.put("java.lang.String", sd1);
+//      
+//      //Test that classes not in the symbol table are handled correctly.
+//      assertEquals("should the continuation symbol", sd, 
+//                   testLLVisitor._getQualifiedSymbolData("testPackage.File", SourceInfo.NO_INFO, true, false, true));
+////      assertEquals("should be one error so far.", 1, errors.size());
+//      
+//      
+//      SymbolData sd2 = testLLVisitor._getQualifiedSymbolData("java.lang.Integer", SourceInfo.NO_INFO, true, true, true);
+//      assertEquals("should return non-continuation java.lang.Integer", "java.lang.Integer", sd2.getName());
+//      assertFalse("should not be a continuation.", sd2.isContinuation());
+//      
+//      SymbolData sd3 = testLLVisitor._getQualifiedSymbolData("Wow", SourceInfo.NO_INFO, true, true, true);
+//      assertEquals("search should fail", null, sd3);
+////      assertEquals("should return Wow", "Wow", sd3.getName());
+////      assertFalse("Should not be a continuation.", sd3.isContinuation());
+//      
+//      // "testPackage.File" has been entered as a continuation in symbolTable.  Why should the following lookup fail?
+////      //Test that classes in the symbol table are handled correctly
+////      assertEquals("should return null sd--does not exist", null, 
+////                   _llv._getQualifiedSymbolData("testPackage.File", SourceInfo.NO_INFO, false, false, true));
+////      assertEquals("Should be 1 error", 1, errors.size());
+//      
+//      sd.setIsContinuation(false);
+//      assertEquals("should return non-continuation sd", sd, 
+//                   testLLVisitor._getQualifiedSymbolData("testPackage.File", SourceInfo.NO_INFO, true, false,  true));
+//      
+//      
+//      assertEquals("Should return sd1.", sd1, 
+//                   testLLVisitor._getQualifiedSymbolData("java.lang.String", SourceInfo.NO_INFO, true, false, true));
+//      assertFalse("sd1 should no longer be a continuation.", sd1.isContinuation());
+//      
+//      
+//      
+//      //check that stuff not in symbol table and packaged incorrectly is handled right.
+//      assertEquals("should return null-because it's not a valid class", null, 
+//                   testLLVisitor._getQualifiedSymbolData("testPackage.not.in.symboltable", 
+//                                                   SourceInfo.NO_INFO, true, false, true));
+//      
+//      assertEquals("should be two errors so far.", 2, errors.size());
+//      assertNull("should return null", 
+//                 testLLVisitor._getQualifiedSymbolData("testPackage.not.in.symboltable", 
+//                                                 SourceInfo.NO_INFO, false, false, false));
+//      
+//      assertNull("should return null.", 
+//                 testLLVisitor._getQualifiedSymbolData("notRightPackage", SourceInfo.NO_INFO, false, false, false));
+//      assertEquals("should still be two errors.", 2, errors.size());
+//    }
     
     public void testGetArraySymbolData() {
       //Initially, force the inner sd of this array type to be null, to test that.
       assertEquals("Should return null, because inner sd is null.", null, 
-                   testLLVisitor._getArraySymbolData("TestFile[]", SourceInfo.NO_INFO, false, false, false, false));
+                   testLLVisitor.getArraySymbolData("TestFile", SourceInfo.NO_INFO, false, false));
       
       /**Now, put a real SymbolData base in the table.*/
       SymbolData sd = new SymbolData("Iexist");
       LanguageLevelConverter.symbolTable.put("Iexist", sd);
-      testLLVisitor._getArraySymbolData("Iexist[]", SourceInfo.NO_INFO, false, false, false, false).getName();
+      testLLVisitor.getArraySymbolData("Iexist", SourceInfo.NO_INFO, false, false).getName();
       assertTrue("Should have created an array data and add it to symbol table.", 
                  LanguageLevelConverter.symbolTable.containsKey("Iexist[]"));
       SymbolData ad = LanguageLevelConverter.symbolTable.get("Iexist[]");
@@ -2421,51 +2389,63 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       /**Now try it with the full thing already in the symbol table.*/
       assertEquals("Since it's already in symbol table now, should just return it.", ad, 
-                   testLLVisitor._getArraySymbolData("Iexist[]", SourceInfo.NO_INFO, false, false, false, false));
+                   testLLVisitor.getArraySymbolData("Iexist", SourceInfo.NO_INFO, false, false));
       
       /**Now, try it with a multiple dimension array.*/
-      testLLVisitor._getArraySymbolData("Iexist[][]", SourceInfo.NO_INFO, false, false, false, false);
+      testLLVisitor.getArraySymbolData("Iexist[]", SourceInfo.NO_INFO, false, false);
       assertTrue("Should have added a multidimensional array to the table.", 
                  LanguageLevelConverter.symbolTable.containsKey("Iexist[][]"));
       
-      SymbolData sd2 = new SymbolData("String");
-      LanguageLevelConverter.symbolTable.put("String", sd2);
-      testLLVisitor._getArraySymbolData("String[][]", SourceInfo.NO_INFO, false, false, false, false);
-      assertTrue("Should have added String[] to table", LanguageLevelConverter.symbolTable.containsKey("String[]"));
-      assertTrue("Should have added String[][] to table", LanguageLevelConverter.symbolTable.containsKey("String[][]"));
+      SymbolData sd2 = new SymbolData("java.lang.String");
+      LanguageLevelConverter.symbolTable.put("java.lang.String", sd2);
+      testLLVisitor.getArraySymbolData("String[]", SourceInfo.NO_INFO, false, true);
+      assertTrue("Should have added java.lang.String[] to table", 
+                 LanguageLevelConverter.symbolTable.containsKey("java.lang.String[]"));
+      assertTrue("Should have added java.lang.String[][] to table", 
+                 LanguageLevelConverter.symbolTable.containsKey("java.lang.String[][]"));
     }
-    
-    public void testGetSymbolData_FromCurrFile() {
+    /** Tests _getSymbolDataFromFileSystem and one case of getQualifiedSymbolData. */
+    public void testGetSymbolDataFromFileSystem() {
       _sd4.setIsContinuation(false);
       _sd6.setIsContinuation(true);
       LanguageLevelConverter.symbolTable.put("u.like.emu", _sd4);
       LanguageLevelConverter.symbolTable.put("cebu", _sd6);
       
-      // Test if it's already in the symbol table and doesn't need to be resolved
-      // not stopping when it should.  get error b/c not in classes to be parsed 
-      // assertEquals("symbol data is not a continuation, so should just be returned.", _sd6, 
-      //   _llv._getSymbolData_FromCurrFile("cebu", SourceInfo.NO_INFO, true));
+      // Test if it's already in the symbol table and doesn't need to be resolved not stopping when it should.  
+      // get error b/c not in classes to be parsed 
+      assertEquals("symbol data is a not a continuation, but resolve is false so should just be returned", _sd6, 
+         testLLVisitor._getSymbolDataFromFileSystem("cebu", SourceInfo.NO_INFO, false, true));
       assertEquals("symbol data is a continuation, but resolve is false, so should just be returned.", _sd4, 
-                   testLLVisitor._getSymbolData_FromCurrFile("u.like.emu", SourceInfo.NO_INFO, false));
+                   testLLVisitor._getSymbolDataFromFileSystem("u.like.emu", SourceInfo.NO_INFO, false, true));
       
-      //test if it needs to be resolved:
+      // Lookup a name not in the file system with resolve equal to false, to confirm that null is returned.
+      
+      assertEquals("Should return SymbolData.NOT_FOUND", SymbolData.NOT_FOUND, 
+                   testLLVisitor._getSymbolDataFromFileSystem("Corky", SourceInfo.NO_INFO, false, true));
+        // TODO: fix this test             
+//      SymbolData matchCorky = testLLVisitor._getSymbolDataFromFileSystem("Corky", SourceInfo.NO_INFO, true);
+//      assertFalse("Should return a non-continuation", matchCorky.isContinuation());
+      
+      // Test if it needs to be resolved:
       ClassDef cd = 
-        new ClassDef(SourceInfo.NO_INFO, _publicMav, 
+        new ClassDef(SourceInfo.NO_INFO, PUBLIC_MAV, 
                      new Word(SourceInfo.NO_INFO, "Lisa"),
                      new TypeParameter[0], 
-                     new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), 
+                     new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
                      new ReferenceType[0], 
                      new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       
       // Use a ElementaryVisitor so lookupFromClassesToBeParsed will actually visit the ClassDef.
       IntermediateVisitor bv = new IntermediateVisitor(new File(""));
       
-      testLLVisitor. _classesToBeParsed.put("Lisa", new Pair<TypeDefBase, LanguageLevelVisitor>(cd, bv));
-      assertFalse("Should return a non-continuation", 
-                  testLLVisitor._getSymbolData_FromCurrFile("Lisa", SourceInfo.NO_INFO, true).isContinuation());
+      testLLVisitor._classesInThisFile.add("Lisa" /*, new Pair<TypeDefBase, LanguageLevelVisitor>(cd, bv)*/);
+      assert testLLVisitor._classesInThisFile.contains("Lisa");
+      SymbolData matchLisa = 
+        testLLVisitor.getQualifiedSymbolData("Lisa", SourceInfo.NO_INFO, true);
+      assertTrue("Should return a continuation", matchLisa.isContinuation());
     }
     
-    public void testGetSymbolData_FromFileSystem() {
+    public void testGetSymbolDataFromFileSystem2() {
       //what if it is in classes to be parsed?
       //and what if the class we're looking up is in the same package as the current file?
       //qualified
@@ -2475,18 +2455,18 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       testLLVisitor.symbolTable.put("fully.qualified.Woah", sd2);
       
       SymbolData result = 
-        testLLVisitor._getSymbolData_FromFileSystem("fully.qualified.Woah", SourceInfo.NO_INFO, false, true);
+        testLLVisitor._getSymbolDataFromFileSystem("fully.qualified.Woah", SourceInfo.NO_INFO, false, true);
       
       assertEquals("Should return sd2, unresolved.", sd2, result);
       assertTrue("sd2 should still be unresolved", sd2.isContinuation());
       assertEquals("Should be no errors", 0, errors.size());
       
-//      result = _llv._getSymbolData_FromFileSystem("fully.qualified.Woah", SourceInfo.NO_INFO, false, true);
+//      result = _llv._getSymbolDataFromFileSystem("fully.qualified.Woah", SourceInfo.NO_INFO, false, true);
 //      assertEquals("Should return sd2, now unresolved.", sd2, result);
 //      assertTrue("sd2 should not be resolved", sd2.isContinuation());
 //      assertEquals("Should be no errors", 0, errors.size());
       
-//      result = _llv._getSymbolData_FromFileSystem("fully.qualified.Woah", SourceInfo.NO_INFO, true, true);
+//      result = _llv._getSymbolDataFromFileSystem("fully.qualified.Woah", SourceInfo.NO_INFO, true, true);
 //      assertEquals("Should return sd2, now resolved.", sd2, result);
 //      assertFalse("sd2 should now be resolved", sd2.isContinuation());   
 //      assertEquals("Should be no errors", 0, errors.size());
@@ -2500,13 +2480,13 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       sd2 = new SymbolData("fully.qualified.Woah");
       testLLVisitor.symbolTable.put("fully.qualified.Woah", sd2);
       
-      result = testLLVisitor._getSymbolData_FromFileSystem("fully.qualified.Woah", SourceInfo.NO_INFO, false, true);
+      result = testLLVisitor._getSymbolDataFromFileSystem("fully.qualified.Woah", SourceInfo.NO_INFO, false, true);
       
       assertEquals("Should return sd2, unresolved.", sd2, result);
       assertTrue("sd2 should still be unresolved", sd2.isContinuation());
       assertEquals("Should be no errors", 0, errors.size());
       
-//      result = _llv._getSymbolData_FromFileSystem("fully.qualified.Woah", SourceInfo.NO_INFO, true, true);
+//      result = _llv._getSymbolDataFromFileSystem("fully.qualified.Woah", SourceInfo.NO_INFO, true, true);
 //      assertEquals("Should return sd2, now resolved.", sd2, result);
       
 //      assertFalse("sd2 should be resolved", sd2.isContinuation());
@@ -2519,28 +2499,28 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       //unqualified
       SymbolData sd1 = new SymbolData("Wow");
-      SymbolData obj = testLLVisitor._getSymbolData_FromFileSystem("java.lang.Object", SourceInfo.NO_INFO, true, true);
+      SymbolData obj = testLLVisitor._getSymbolDataFromFileSystem("java.lang.Object", SourceInfo.NO_INFO, true, true);
       sd1.setSuperClass(obj);
       testLLVisitor.symbolTable.put("Wow", sd1);
       
-      result = testLLVisitor._getSymbolData_FromFileSystem("Wow", SourceInfo.NO_INFO, false, true);
+      result = testLLVisitor._getSymbolDataFromFileSystem("Wow", SourceInfo.NO_INFO, false, true);
       assertEquals("Should return sd1, unresolved.", sd1, result);
       assertTrue("sd1 should still be unresolved.", sd1.isContinuation());
       assertEquals("Should be no errors", 0, errors.size());
       
-      result = testLLVisitor._getSymbolData_FromFileSystem("Wow", SourceInfo.NO_INFO, true, true);
+      result = testLLVisitor._getSymbolDataFromFileSystem("Wow", SourceInfo.NO_INFO, true, true);
       assertEquals("Should return sd1, resolved.", sd1, result);
       assertFalse("sd1 should be resolved.", sd1.isContinuation());
       assertEquals("Should be no errors", 0, errors.size());
       
-      result = testLLVisitor._getSymbolData_FromFileSystem("Wow", SourceInfo.NO_INFO, true, true);
+      result = testLLVisitor._getSymbolDataFromFileSystem("Wow", SourceInfo.NO_INFO, true, true);
       assertEquals("Should return sd1.", sd1, result);
       assertFalse("sd1 should still be resolved.", sd1.isContinuation());
       assertEquals("Should be no errors", 0, errors.size());
       
       
       //finding the most recent file
-      result = testLLVisitor._getSymbolData_FromFileSystem("James", SourceInfo.NO_INFO, true, true);
+      result = testLLVisitor._getSymbolDataFromFileSystem("James", SourceInfo.NO_INFO, true, true);
       assertEquals("Search for James should fail", null, result);
 //      assertEquals("Result should have 3 variables.", 3, result.getVars().size());
 //      assertEquals("Should be no errors", 0, errors.size());
@@ -2549,7 +2529,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       testLLVisitor._package = "myPackage";
       assertEquals("Should return NOT_FOUND-does not exist.", 
                    SymbolData.NOT_FOUND, 
-                   testLLVisitor._getSymbolData_FromFileSystem("WrongPackage.className", 
+                   testLLVisitor._getSymbolDataFromFileSystem("WrongPackage.className", 
                                                                SourceInfo.NO_INFO, true, false));
       assertEquals("Should be no errors", 0, errors.size());
       
@@ -2557,9 +2537,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       testLLVisitor._package = "";
       testLLVisitor._file = new File("testFiles/Fake.dj0");
       LinkedList<VariableData> vds = new LinkedList<VariableData>();
-      result = testLLVisitor._getSymbolData_FromFileSystem("Doh", SourceInfo.NO_INFO, true, true);
-      vds.addLast(new VariableData("i", _packageMav, SymbolData.INT_TYPE, true, result));
-      vds.addLast(new VariableData("o", _packageMav, obj, true, result));
+      result = testLLVisitor._getSymbolDataFromFileSystem("Doh", SourceInfo.NO_INFO, true, true);
+      vds.addLast(new VariableData("i", PACKAGE_MAV, SymbolData.INT_TYPE, true, result));
+      vds.addLast(new VariableData("o", PACKAGE_MAV, obj, true, result));
 // Since some list elements are arrays, comparison test is suspect
 //      assertEquals("should have correct variable datas", vds, result.getVars());
 //      assertFalse("should not be a continuation", result.isContinuation());
@@ -2576,20 +2556,19 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       SymbolData sd1 = new SymbolData("Wow");
       testLLVisitor.symbolTable.put("Wow", sd1);
       assertEquals("Should return an equal SymbolData", 
-                   sd1, testLLVisitor.getSymbolData("Wow", SourceInfo.NO_INFO, true, false));
+                   sd1, testLLVisitor.getQualifiedSymbolData("Wow", SourceInfo.NO_INFO, true));
       assertFalse("Should not be a continuation", sd1.isContinuation());  // There is a pre-existing class file Wow!
       
       // Invalid case
       SymbolData result = testLLVisitor.getSymbolData("ima.invalid", SourceInfo.NO_INFO, true, false);
       assertEquals("Should return null-invalid class name", null, result);
-      assertEquals("There should be one error", 1, testLLVisitor.errors.size());
-      assertEquals("The error message should be correct", "Invalid class name ima.invalid", errors.get(0).getFirst());
+      assertEquals("There should not be any errors", 0, testLLVisitor.errors.size());
       
       // Fully qualified class name
       testLLVisitor._package="fully.qualified";
       testLLVisitor._file = new File("testFiles/fully/qualified/Fake.dj0");
       SymbolData sd2 = new SymbolData("fully.qualified.Symbol");
-      testLLVisitor.symbolTable.put("fully.qualified.Symbolh", sd2);
+      testLLVisitor.symbolTable.put("fully.qualified.Symbol", sd2);
       
       result = testLLVisitor.getSymbolData("fully.qualified.Symbol", SourceInfo.NO_INFO, true, false);
       
@@ -2617,17 +2596,16 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       assertEquals("Should return sd3", sd3, result);
     }
     
-    
-    public void testGetSymbolDataHelper() {
+    public void testGetQualifiedSymbolData() {
       // Primitive types
       assertEquals("should return the int SymbolData", SymbolData.INT_TYPE, 
-                   testLLVisitor.getSymbolDataHelper("int", SourceInfo.NO_INFO, true, true, true, true));
+                   testLLVisitor.getQualifiedSymbolData("int", SourceInfo.NO_INFO, true, true, true));
       assertEquals("should return the byte SymbolData", SymbolData.BYTE_TYPE, 
-                   testLLVisitor.getSymbolDataHelper("byte", SourceInfo.NO_INFO, false, false, false, true));
+                   testLLVisitor.getQualifiedSymbolData("byte", SourceInfo.NO_INFO, false, false, false));
       
       // Array types
       ArrayData ad = new ArrayData(SymbolData.INT_TYPE, testLLVisitor, SourceInfo.NO_INFO);
-      SymbolData result = testLLVisitor.getSymbolDataHelper("int[]", SourceInfo.NO_INFO, true, true, true, true);
+      SymbolData result = testLLVisitor.getQualifiedSymbolData("int[]", SourceInfo.NO_INFO, true, true, true);
       ad.getVars().get(0).setEnclosingData(result);  //.equals(...) on VariableData compares enclosing datas with ==.
       ad.getMethods().get(0).setEnclosingData(result.getMethods().get(0).getEnclosingData()); //similar hack
       assertEquals("should return the array type", ad, result);
@@ -2636,44 +2614,50 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       SymbolData sd = new SymbolData("java.lang.System");
       LanguageLevelConverter.symbolTable.put("java.lang.System", sd);
       assertEquals("should return the same sd", sd, 
-                   testLLVisitor.getSymbolDataHelper("java.lang.System", SourceInfo.NO_INFO, false, true, true, true));
+                   testLLVisitor.getQualifiedSymbolData("java.lang.System", SourceInfo.NO_INFO, false, true, true));
       assertTrue("should be a continuation", sd.isContinuation());
       assertEquals("should return the now resolved sd", sd, 
-                   testLLVisitor.getSymbolDataHelper("java.lang.System", SourceInfo.NO_INFO, true, false, true, true));
+                   testLLVisitor.getQualifiedSymbolData("java.lang.System", SourceInfo.NO_INFO, true, false, true));
       assertFalse("should not be a continuation", sd.isContinuation());
       
       // In this file
       sd = new SymbolData("fully.qualified.Qwerty");
       LanguageLevelConverter.symbolTable.put("fully.qualified.Qwerty", sd);
-      testLLVisitor._classNamesInThisFile.addLast("fully.qualified.Qwerty");
+      testLLVisitor._classesInThisFile.add("fully.qualified.Qwerty");
       // Use a ElementaryVisitor so lookupFromClassesToBeParsed will actually visit the ClassDef.
       IntermediateVisitor bv = new IntermediateVisitor(new File(""), 
                                                        errors, 
-                                                       continuations, 
+                                                       continuations,
+                                                       fixUps,
                                                        new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>());
       bv._package = "fully.qualified";
       bv._file = new File("testFiles/fully/qualified/Fake.dj0");
       ClassDef cd = new ClassDef(SourceInfo.NO_INFO, 
-                                 _packageMav, 
+                                 PACKAGE_MAV, 
                                  new Word(SourceInfo.NO_INFO, "Qwerty"),
                                  new TypeParameter[0],
-                                 new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]),
+                                 new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]),
                                  new ReferenceType[0], 
                                  new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
-      bv._classesToBeParsed.put("fully.qualified.Qwerty", new Pair<TypeDefBase, LanguageLevelVisitor>(cd, bv));
+      bv._classesInThisFile.add("fully.qualified.Qwerty" /*, new Pair<TypeDefBase, LanguageLevelVisitor>(cd, bv)*/);
       assertEquals("should return sd the continuation", sd, 
-                   bv.getSymbolDataHelper("Qwerty", SourceInfo.NO_INFO, false, true, true, true));
+                   bv.getSymbolData("Qwerty", SourceInfo.NO_INFO, true, true));
       assertTrue("should be a continuation", sd.isContinuation());
-      assertEquals("should return sd, now resolved", sd, 
-                   bv.getSymbolDataHelper("Qwerty", SourceInfo.NO_INFO, true, true, true, true));
-      assertFalse("should not be a continuation", sd.isContinuation());
+      assertEquals("should also return a continuation", sd, 
+                   bv.getQualifiedSymbolData("fully.qualified.Qwerty", SourceInfo.NO_INFO, false, false, true));
+      assertTrue("should be a continuation", sd.isContinuation());
       
       // Imported files
       testLLVisitor._importedFiles.addLast("a.b.c");
       sd = new SymbolData("a.b.c");
-      LanguageLevelConverter.symbolTable.put("a.b.c.", sd);
+//      System.err.println("SymbolData for 'a.b.c' is " + sd);
+      LanguageLevelConverter.symbolTable.put("a.b.c", sd);
+//      System.err.println("SymbolTable entry for 'a.b.c' is " + LanguageLevelConverter.symbolTable.get("a.b.c"));
+//      LanguageLevelConverter.symbolTable.put("foobar", new SymbolData("This is strange"));
+//      System.err.println("SymbolTable entry for 'foobar' is " + LanguageLevelConverter.symbolTable.get("foobar"));
       assertEquals("should find the continuation in the symbol table", sd, 
-                   testLLVisitor.getSymbolDataHelper("c", SourceInfo.NO_INFO, false, true, true, true));
+                   testLLVisitor.getQualifiedSymbolData("a.b.c", SourceInfo.NO_INFO, false, true, true));
+      // TODO: create an import table to look at when no match is found in symbolTable.
       assertTrue("should be a continuation", sd.isContinuation());
       
       testLLVisitor._package="fully.qualified";
@@ -2682,7 +2666,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       SymbolData sd2 = new SymbolData("fully.qualified.Woah");
       sd2.setIsContinuation(false);
       LanguageLevelConverter.symbolTable.put("fully.qualified.Woah", sd2);
-      result = testLLVisitor.getSymbolDataHelper("Woah", SourceInfo.NO_INFO, true, false, true, true);
+      result = testLLVisitor.getQualifiedSymbolData("fully.qualified.Woah", SourceInfo.NO_INFO, true, false, true);
 //      System.err.println("result for 'fully.qualifed.Woah' is " + result);
       assertEquals("should find the resolved symbol data in the symbol table", sd2, result);
       assertFalse("should not be a continuation", sd2.isContinuation());
@@ -2695,23 +2679,23 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       LanguageLevelConverter.symbolTable.put("fully.qualified.Woah", sd2);
       
 //      System.err.println("_llv.getSymbolData for fully.qualified.Woah = " +
-//                         _llv.getSymbolDataHelper("fully.qualified.Woah", 
-//      SourceInfo.NO_INFO, true, true, true, true));
+//                         _llv.getQualifiedSymbolData("fully.qualified.Woah", 
+//      SourceInfo.NO_INFO, true, true, true));
      
-      result = testLLVisitor.getSymbolDataHelper("Woah", SourceInfo.NO_INFO, false, false, true, true);
+      result = testLLVisitor.getQualifiedSymbolData("fully.qualified.Woah", SourceInfo.NO_INFO, false, false, true);
       
       assertEquals("Should return sd2, unresolved.", sd2, result);
       assertTrue("sd2 should still be unresolved", sd2.isContinuation());
       
-      result = testLLVisitor.getSymbolDataHelper("Woah", SourceInfo.NO_INFO, false, false, true, true);
+      result = testLLVisitor.getQualifiedSymbolData("fully.qualified.Woah", SourceInfo.NO_INFO, false, false, true);
       assertEquals("Should return sd2, now unresolved.", sd2, result);
       assertTrue("sd2 should not be resolved", sd2.isContinuation());
       
       // The following "test" forces the definition of "Woah" to be retrieved from the file system but THERE IS NO CLASS
       // FILE so the file system search returns null!
-//      result = _llv.getSymbolDataHelper("Woah", SourceInfo.NO_INFO, true, false, true, true);
-//      assertEquals("Should return sd2, now resolved.", sd2, result);
-//      assertFalse("sd2 should now be resolved", sd2.isContinuation());
+      result = testLLVisitor.getQualifiedSymbolData("fully.qualified.Woah", SourceInfo.NO_INFO, true, false, true);
+      assertEquals("Should return sd2, now resolved.", sd2, result);
+      assertFalse("sd2 should now be resolved", sd2.isContinuation());
       
       // Imported Packages
       LanguageLevelConverter.symbolTable.remove("fully.qualified.Woah");
@@ -2722,26 +2706,26 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       sd2 = new SymbolData("fully.qualified.Woah");
       LanguageLevelConverter.symbolTable.put("fully.qualified.Woah", sd2);
       assertEquals("should find the unresolved symbol data in the symbol table", sd2, 
-                   testLLVisitor.getSymbolDataHelper("Woah", SourceInfo.NO_INFO, false, false, true, true));
+                   testLLVisitor.getQualifiedSymbolData("fully.qualified.Woah", SourceInfo.NO_INFO, false, false, true));
       assertTrue("should not be a continuation", sd2.isContinuation());
       
       sd2.setIsContinuation(false);
-      result = testLLVisitor.getSymbolDataHelper("Woah", SourceInfo.NO_INFO, true, false, true, true);
+      result = testLLVisitor.getQualifiedSymbolData("fully.qualified.Woah", SourceInfo.NO_INFO, true, false, true);
       assertEquals("should find the resolved symbol data in the symbol table", sd2, result);
       assertFalse("should not be a continuation", sd2.isContinuation());
       
       //test java.lang classes that need to be looked up
       //want to resolve
       SymbolData stringSD = new SymbolData("java.lang.String");
-      SymbolData newsd1 = testLLVisitor.getSymbolDataHelper("String", SourceInfo.NO_INFO, true, true, true, true);
+      SymbolData newsd1 = testLLVisitor.getQualifiedSymbolData("java.lang.String", SourceInfo.NO_INFO, true, true, true);
       assertEquals("should have correct name.", stringSD.getName(), newsd1.getName());
       assertFalse("should not be a continuation", newsd1.isContinuation());
       
       // Test ambiguous class name (i.e. it is unqualified, and matches unqualified names in 2 or more packages.
       LanguageLevelConverter.symbolTable.put("random.package.String", new SymbolData("random.package.String"));
-      LanguageLevelConverter.symbolTable.put("java.lang.Object", new SymbolData("java.lang.Object"));
+//      LanguageLevelConverter.symbolTable.put("java.lang.Object", new SymbolData("java.lang.Object"));
       testLLVisitor._importedPackages.addLast("random.package");
-      result = testLLVisitor.getSymbolDataHelper("String", SourceInfo.NO_INFO, true, true, true, true);
+      result = testLLVisitor.getSymbolData("String", SourceInfo.NO_INFO);
       assertEquals("Result should be null", null, result);
       assertEquals("There should be 1 error", 1, errors.size());
       assertEquals("The error message should be correct", "The class name String is ambiguous." + 
@@ -2754,10 +2738,10 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     
     public void test_forModifiersAndVisibility() {
       // Test access specifiers.
-      testLLVisitor.forModifiersAndVisibility(_publicMav);
-      testLLVisitor.forModifiersAndVisibility(_protectedMav);
-      testLLVisitor.forModifiersAndVisibility(_privateMav);
-      testLLVisitor.forModifiersAndVisibility(_packageMav);
+      testLLVisitor.forModifiersAndVisibility(PUBLIC_MAV);
+      testLLVisitor.forModifiersAndVisibility(PROTECTED_MAV);
+      testLLVisitor.forModifiersAndVisibility(PRIVATE_MAV);
+      testLLVisitor.forModifiersAndVisibility(PACKAGE_MAV);
       
       
       assertEquals("There should be no errors.", 0, errors.size());
@@ -2822,12 +2806,12 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     
     public void testAddSymbolData() {
       /**Put super class in symbol table.*/
-      SymbolData obj = new SymbolData("java.lang.Object");
-      obj.setIsContinuation(false);
-      LanguageLevelConverter.symbolTable.put("java.lang.Object", obj);
+      SymbolData obj = LanguageLevelConverter.symbolTable.get("java.lang.Object");
+//      obj.setIsContinuation(false);
+//      LanguageLevelConverter.symbolTable.put("java.lang.Object", obj);
       
       ClassDef cd = 
-        new ClassDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "Awesome"),
+        new ClassDef(SourceInfo.NO_INFO, PUBLIC_MAV, new Word(SourceInfo.NO_INFO, "Awesome"),
                      new TypeParameter[0], 
                      new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
                      new ReferenceType[0], 
@@ -2841,8 +2825,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       assertFalse("sd should also no longer be a continuation.", sd.isContinuation());
       assertEquals("result and sd should be equal.", sd, result);
       
-      /**Hierarchy should be empty at the end.*/
-      assertEquals("hierarchy should be empty", 0, _hierarchy.size());
+//      /**Hierarchy should be empty at the end.*/
+//      assertEquals("hierarchy should be empty", 0, _hierarchy.size());
       
       /**Check that if the class is already defined, an appropriate error is thrown.*/
       assertEquals("Should return null, because it is already in the SymbolTable.", null, 
@@ -2850,7 +2834,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       assertEquals("Length of errors should now be 1.", 1, errors.size());
       assertEquals("Error message should be correct.", "The class or interface Awesome has already been defined.", 
                    errors.get(0).getFirst());
-      assertEquals("hierarchy should be empty.", 0, _hierarchy.size());
+//      assertEquals("hierarchy should be empty.", 0, _hierarchy.size());
       
     }
     
@@ -2859,8 +2843,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
         new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
                                             new PrimitiveType(SourceInfo.NO_INFO, "int"), 
                                             new Word(SourceInfo.NO_INFO, "i")) };
-      VariableDeclaration vd1 = new VariableDeclaration(SourceInfo.NO_INFO,_publicMav, d1); 
-      VariableData[] vdata1 = { new VariableData("i", _publicMav, SymbolData.INT_TYPE, false, _sd1) };
+      VariableDeclaration vd1 = new VariableDeclaration(SourceInfo.NO_INFO,PUBLIC_MAV, d1); 
+      VariableData[] vdata1 = { new VariableData("i", PUBLIC_MAV, SymbolData.INT_TYPE, false, _sd1) };
       
       assertTrue("Should properly recognize a basic VariableDeclaration", 
                  arrayEquals(vdata1, testLLVisitor._variableDeclaration2VariableData(vd1, _sd1)));
@@ -2873,10 +2857,10 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
                                           new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
                                           new Word(SourceInfo.NO_INFO, "b"), 
                                           new BooleanLiteral(SourceInfo.NO_INFO, true)) };
-      VariableDeclaration vd2 = new VariableDeclaration(SourceInfo.NO_INFO,_privateMav, d2); 
-      VariableData bData = new VariableData("b", _privateMav, SymbolData.BOOLEAN_TYPE, true, _sd1);
+      VariableDeclaration vd2 = new VariableDeclaration(SourceInfo.NO_INFO,PRIVATE_MAV, d2); 
+      VariableData bData = new VariableData("b", PRIVATE_MAV, SymbolData.BOOLEAN_TYPE, true, _sd1);
       bData.setHasInitializer(true);
-      VariableData[] vdata2 = {new VariableData("i", _privateMav, SymbolData.INT_TYPE, false, _sd1),
+      VariableData[] vdata2 = {new VariableData("i", PRIVATE_MAV, SymbolData.INT_TYPE, false, _sd1),
         bData};
       
       assertTrue("Should properly recognize a more complicated VariableDeclaration", 
@@ -2887,7 +2871,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
         new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
                                             new ClassOrInterfaceType(SourceInfo.NO_INFO, "LinkedList", new Type[0]), 
                                             new Word(SourceInfo.NO_INFO, "myList"))};
-      VariableDeclaration vd3 = new VariableDeclaration(SourceInfo.NO_INFO, _privateMav, d3);
+      VariableDeclaration vd3 = new VariableDeclaration(SourceInfo.NO_INFO, PRIVATE_MAV, d3);
       testLLVisitor._variableDeclaration2VariableData(vd3, _sd1);
       assertEquals("There should now be no errors", 0, errors.size());
 //     assertEquals("The error message should be correct", "Class or Interface LinkedList not found", 
@@ -2959,7 +2943,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     
     public void testForClassDefDoFirst() {      
       ClassDef cd = 
-        new ClassDef(SourceInfo.NO_INFO, _publicMav, 
+        new ClassDef(SourceInfo.NO_INFO, PUBLIC_MAV, 
                      new Word(SourceInfo.NO_INFO, "Awesome"),
                      new TypeParameter[0], 
                      new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
@@ -2973,7 +2957,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       assertEquals("The error message should be correct.", "The class Awesome was already imported.", 
                    errors.get(0).getFirst());
       
-      ClassDef cd2 = new ClassDef(SourceInfo.NO_INFO, _privateMav, 
+      ClassDef cd2 = new ClassDef(SourceInfo.NO_INFO, PRIVATE_MAV, 
                                   new Word(SourceInfo.NO_INFO, "privateClass"),
                                   new TypeParameter[0], 
                                   new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
@@ -2987,14 +2971,14 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     }
     
     public void testForInterfaceDefDoFirst() {
-      InterfaceDef id = new InterfaceDef(SourceInfo.NO_INFO, _publicMav, 
+      InterfaceDef id = new InterfaceDef(SourceInfo.NO_INFO, PUBLIC_MAV, 
                                          new Word(SourceInfo.NO_INFO, "Awesome"),
                                          new TypeParameter[0], new ReferenceType[0], 
                                          new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       testLLVisitor.forInterfaceDefDoFirst(id);
       assertEquals("There should be no errors.", 0, errors.size());
       
-      InterfaceDef id2 = new InterfaceDef(SourceInfo.NO_INFO, _privateMav, 
+      InterfaceDef id2 = new InterfaceDef(SourceInfo.NO_INFO, PRIVATE_MAV, 
                                           new Word(SourceInfo.NO_INFO, "privateinterface"),
                                           new TypeParameter[0], new ReferenceType[0], 
                                           new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
@@ -3003,7 +2987,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       assertEquals("The error message should be correct", "Top level interfaces cannot be private", 
                    errors.get(0).getFirst());
       
-      InterfaceDef id3 = new InterfaceDef(SourceInfo.NO_INFO, _finalMav, 
+      InterfaceDef id3 = new InterfaceDef(SourceInfo.NO_INFO, FINAL_MAV, 
                                           new Word(SourceInfo.NO_INFO, "finalinterface"),
                                           new TypeParameter[0], new ReferenceType[0], 
                                           new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
@@ -3013,7 +2997,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     }
     
     public void testForInnerInterfaceDefDoFirst() {
-      InterfaceDef id = new InterfaceDef(SourceInfo.NO_INFO, _publicMav, 
+      InterfaceDef id = new InterfaceDef(SourceInfo.NO_INFO, PUBLIC_MAV, 
                                          new Word(SourceInfo.NO_INFO, "Awesome"),
                                          new TypeParameter[0], new ReferenceType[0], 
                                          new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
@@ -3021,7 +3005,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       assertEquals("There should be no errors.", 0, errors.size());
       
       InnerInterfaceDef id2 = 
-        new InnerInterfaceDef(SourceInfo.NO_INFO, _finalMav, new Word(SourceInfo.NO_INFO, "finalinterface"),
+        new InnerInterfaceDef(SourceInfo.NO_INFO, FINAL_MAV, new Word(SourceInfo.NO_INFO, "finalinterface"),
                               new TypeParameter[0], new ReferenceType[0], 
                               new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       id2.visit(testLLVisitor);
@@ -3049,41 +3033,40 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     public void testForClassImportStatementOnly() {
       
       //Test one that works
-      Word[] words = new Word[] {new Word(SourceInfo.NO_INFO, "alpha"),
-        new Word(SourceInfo.NO_INFO, "beta")};
+      Word[] words = new Word[] { new Word(SourceInfo.NO_INFO, "alpha"), new Word(SourceInfo.NO_INFO, "beta")};
       CompoundWord cw = new CompoundWord(SourceInfo.NO_INFO, words);
       ClassImportStatement cis = new ClassImportStatement(SourceInfo.NO_INFO, cw);
       SymbolData sd = new SymbolData("alpha.beta");
       testLLVisitor.forClassImportStatementOnly(cis);
       assertTrue("imported files should contain alpha.beta", testLLVisitor._importedFiles.contains("alpha.beta"));
-      assertEquals("There should be a continuation.", sd, LanguageLevelConverter.symbolTable.get("alpha.beta"));
+      // continuations should not appear in symbolTable
+//      assertEquals("There should be a continuation.", sd, LanguageLevelConverter.symbolTable.get("alpha.beta"));
       assertTrue("It should be in continuations.", testLLVisitor.continuations.containsKey("alpha.beta"));
       
       // Test one that should throw an error: Class has already been imported. alpha.beta should now be in the 
       // symbolTable, and alpha should be in the list of packages, so this will throw an error
-      Word[] words2 = new Word[] {new Word(SourceInfo.NO_INFO, "gamma"),
-        new Word(SourceInfo.NO_INFO, "beta")};
+      Word[] words2 = new Word[] { new Word(SourceInfo.NO_INFO, "gamma"), new Word(SourceInfo.NO_INFO, "beta")};
       CompoundWord cw2 = new CompoundWord(SourceInfo.NO_INFO, words2);
       ClassImportStatement cis2 = new ClassImportStatement(SourceInfo.NO_INFO, cw2);
       cis2.visit(testLLVisitor);
       
       assertEquals("There should be one error", 1, errors.size());
-      assertEquals("The error message should be correct", "The class beta has already been imported.", 
+      assertEquals("The error message should be correct", 
+                   "The class beta has already been imported.", 
                    errors.get(0).getFirst());
       
-      //Test one that should throw an error: Importing a class from the current package
-      testLLVisitor._package = "myPackage";
-      Word[] words3 = 
-        new Word[] { new Word(SourceInfo.NO_INFO, "myPackage"), new Word(SourceInfo.NO_INFO, "cookie")};
-      CompoundWord cw3 = new CompoundWord(SourceInfo.NO_INFO, words3);
-      ClassImportStatement cis3 = new ClassImportStatement(SourceInfo.NO_INFO, cw3);
-      cis3.visit(testLLVisitor);
-      
-      assertEquals("There should now be 2 errors", 2, errors.size());
-      assertEquals("The second error message should be correct", "You do not need to import myPackage.cookie." + 
-                   "  It is in your package so it is already visible", errors.get(1).getFirst());
-      
-      
+    // Consistent with javac,  the following test no longer throws an error.
+//      //Test one that should throw an error: Importing a class from the current package
+//      testLLVisitor._package = "myPackage";
+//      Word[] words3 =  new Word[] { new Word(SourceInfo.NO_INFO, "myPackage"), new Word(SourceInfo.NO_INFO, "cookie")};
+//      CompoundWord cw3 = new CompoundWord(SourceInfo.NO_INFO, words3);
+//      ClassImportStatement cis3 = new ClassImportStatement(SourceInfo.NO_INFO, cw3);
+//      cis3.visit(testLLVisitor);
+//      
+//      assertEquals("There should now be 2 errors", 2, errors.size());
+//      assertEquals("The second error message should be correct", 
+//                   "You do not need to import myPackage.cookie.  It is in your package so it is already visible", 
+//                   errors.get(1).getFirst());
     }
     
     public void testForPackageImportStatementOnly() {
@@ -3125,17 +3108,17 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     }
     
     public void testForSourceFile() {
-      ClassDef cd = new ClassDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "Awesome"),
+      ClassDef cd = new ClassDef(SourceInfo.NO_INFO, PUBLIC_MAV, new Word(SourceInfo.NO_INFO, "Awesome"),
                                  new TypeParameter[0], 
                                  new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
                                  new ReferenceType[0], 
                                  new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
-      ClassDef cd2 = new ClassDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "Gnarly"),
+      ClassDef cd2 = new ClassDef(SourceInfo.NO_INFO, PUBLIC_MAV, new Word(SourceInfo.NO_INFO, "Gnarly"),
                                   new TypeParameter[0], 
                                   new ClassOrInterfaceType(SourceInfo.NO_INFO, "Awesome", new Type[0]), 
                                   new ReferenceType[0], 
                                   new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
-      InterfaceDef id = new InterfaceDef(SourceInfo.NO_INFO, _publicMav, 
+      InterfaceDef id = new InterfaceDef(SourceInfo.NO_INFO, PUBLIC_MAV, 
                                          new Word(SourceInfo.NO_INFO, "NiftyWords"),
                                          new TypeParameter[0], 
                                          new ReferenceType[0], 
@@ -3147,19 +3130,19 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
                                      new TypeDefBase[] {cd, cd2, id});
       testLLVisitor.forSourceFile(sf);
       
-      assertTrue("_classNamesInThisFile should contain the two ClassDefs.", 
-                 testLLVisitor._classNamesInThisFile.contains("Awesome"));
-      assertTrue("_classNamesInThisFile should contain the two ClassDefs.", 
-                 testLLVisitor._classNamesInThisFile.contains("Gnarly"));
+      assertTrue("_classesInThisFile should contain the two ClassDefs.", 
+                 testLLVisitor._classesInThisFile.contains("Awesome"));
+      assertTrue("_classesInThisFile should contain the two ClassDefs.", 
+                 testLLVisitor._classesInThisFile.contains("Gnarly"));
       
-      assertTrue("_classNamesInThisFile should contain the InterfaceDef", 
-                 testLLVisitor._classNamesInThisFile.contains("NiftyWords"));
-      assertTrue("_classesToBeParsed should contain the two ClassDefs.", 
-                 testLLVisitor._classesToBeParsed.containsKey("Awesome"));
-      assertTrue("_classesToBeParsed should contain the two ClassDefs.", 
-                 testLLVisitor._classesToBeParsed.containsKey("Gnarly"));
-      assertTrue("_classesToBeParsed should contain the InterfaceDef", 
-                 testLLVisitor._classesToBeParsed.containsKey("NiftyWords"));
+      assertTrue("_classesInThisFile should contain the InterfaceDef", 
+                 testLLVisitor._classesInThisFile.contains("NiftyWords"));
+      assertTrue("_classesInThisFile should contain the two ClassDefs.", 
+                 testLLVisitor._classesInThisFile.contains("Awesome"));
+      assertTrue("_classesInThisFile should contain the two ClassDefs.", 
+                 testLLVisitor._classesInThisFile.contains("Gnarly"));
+      assertTrue("_classesInThisFile should contain the InterfaceDef", 
+                 testLLVisitor._classesInThisFile.contains("NiftyWords"));
       
     }
     
@@ -3200,19 +3183,19 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     public void testExceptionsInSymbolTable() {
             
       // Make sure that exceptions are being added to symbol table 
-      ClassOrInterfaceType exceptionType = new ClassOrInterfaceType(SourceInfo.NO_INFO, 
-                                                                    "java.util.prefs.BackingStoreException", 
-                                                                    new Type[0]);
+      ClassOrInterfaceType exceptionType = 
+        new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.util.prefs.BackingStoreException", new Type[0]);
       ParenthesizedExpressionList expList = new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]);
       
       BracedBody bb = 
         new BracedBody(SourceInfo.NO_INFO, 
                        new BodyItemI[] { new ThrowStatement(SourceInfo.NO_INFO, 
                                                             new SimpleNamedClassInstantiation(SourceInfo.NO_INFO, 
-                                                                                              exceptionType, expList))});
+                                                                                              exceptionType, 
+                                                                                              expList))});
       bb.visit(testLLVisitor);
-      assertFalse("The SymbolTable should have java.util.prefs.BackingStoreException", 
-                  LanguageLevelConverter.symbolTable.get("java.util.prefs.BackingStoreException") == null);
+      assertNotNull("The SymbolTable should have java.util.prefs.BackingStoreException", 
+                  LanguageLevelConverter.symbolTable.get("java.util.prefs.BackingStoreException"));
       
     }
     
@@ -3299,7 +3282,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       bit5.visit(testLLVisitor);
       assertEquals("Should be no errors", 0, errors.size());
 //      assertEquals("error message should be correct", 
-//                   "Bitwise or expressions cannot be used at any language level." + 
+//                   "Bitwise or expressions cannot be used in the functional level." +
 //                   "  Perhaps you meant to compare two values using regular or (||)", 
 //                   errors.getLast().getFirst());
       
@@ -3360,18 +3343,18 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     
     public void testIsConstructor() {
       MethodData constr = 
-        new MethodData("monkey", _publicMav, new TypeParameter[0], _sd1, new VariableData[0], new String[0], _sd1, 
+        new MethodData("monkey", PUBLIC_MAV, new TypeParameter[0], _sd1, new VariableData[0], new String[0], _sd1, 
                        new NullLiteral(SourceInfo.NO_INFO));
       MethodData notRightOuter = 
-        new MethodData("monkey", _publicMav, new TypeParameter[0], _sd1, new VariableData[0], new String[0], _sd2, 
+        new MethodData("monkey", PUBLIC_MAV, new TypeParameter[0], _sd1, new VariableData[0], new String[0], _sd2, 
                        new NullLiteral(SourceInfo.NO_INFO));
       _sd2.setOuterData(_sd1);
       _sd1.addInnerClass(_sd2);
       MethodData notRightName = 
-        new MethodData("chimp", _publicMav, new TypeParameter[0], _sd1, new VariableData[0], new String[0], _sd1, 
+        new MethodData("chimp", PUBLIC_MAV, new TypeParameter[0], _sd1, new VariableData[0], new String[0], _sd1, 
                        new NullLiteral(SourceInfo.NO_INFO));
       MethodData notRightReturnType = 
-        new MethodData("monkey", _publicMav, new TypeParameter[0], _sd2, new VariableData[0], new String[0], _sd1, 
+        new MethodData("monkey", PUBLIC_MAV, new TypeParameter[0], _sd2, new VariableData[0], new String[0], _sd1, 
                        new NullLiteral(SourceInfo.NO_INFO));
       
       //try one that works

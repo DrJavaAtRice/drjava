@@ -38,6 +38,7 @@ package edu.rice.cs.javalanglevels;
 
 import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.parser.*;
+import edu.rice.cs.javalanglevels.util.*;
 import java.util.*;
 import junit.framework.TestCase;
 
@@ -47,19 +48,21 @@ public class VariableData {
   /**The name of this variable*/
   private String _name;
   
-  /**The modifiers and visibility*/
+  /** The modifiers and visibility. */
   private ModifiersAndVisibility _modifiersAndVisibility;
   
-  /**The type of this variable, once it has been initialized*/
-  private InstanceData _type;
+  /** The type of this variable represented by a SymbolData. */
+  private SymbolData _type;
   
-  /**True if this variable has been given a value*/
+  /** True if this variable has been given a value*/
   private boolean _hasBeenAssigned;
   
-  /**True if this variable has an initializer*/
+  /** True if this variable has an initializer*/
   private boolean _hasInitializer;
   
-  /**The data that this variable belongs to*/
+  /** The data that this variable belongs to.  For a formal parameter, it is the enclosing class, since
+    * nothing in a formal parameter declaration can refer to bindings introduced in the method or the
+    * catch clause. */
   private Data _enclosingData;
   
   /** True iff this is a field we had generated. */
@@ -67,6 +70,9 @@ public class VariableData {
   
   /** True iff this is a method parameter. */
   private boolean _isLocalVariable;
+  
+  /** An instance corresponding to this; generated on demand. */
+  private InstanceData _instance;
   
   /** Constructor for VariableData.  hasInitializer and generated are set to {@code false}.
     * @param name  The name of the variable
@@ -79,12 +85,13 @@ public class VariableData {
                       boolean hasBeenAssigned, Data enclosingData) {
     _name = name;
     _modifiersAndVisibility = modifiersAndVisibility;
-    _type = type.getInstanceData();
+    _type = type;
     _hasBeenAssigned = hasBeenAssigned;
     _enclosingData = enclosingData;
     _hasInitializer = false;
     _generated = false;
     _isLocalVariable = false;
+    _instance = null;
   }
   
   /** This constructor is only used when reading method parameters in a class file because class files only store the
@@ -93,41 +100,61 @@ public class VariableData {
   public VariableData(SymbolData type) {
     _name = "";
     _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
-    _type = type.getInstanceData();
+    _type = type;
     _hasBeenAssigned = false;
     _isLocalVariable = true;
+    _instance = null;
+  }
+  
+  /** Make a copy of this VariableData erasing all visibility modifiers and setting hasBeenAssigned to true. Used in 
+    * LanguageLevelVisitor.createConstructor to generate the parameter list of the created constructor. 
+    * @return a new Variable Data identical to this except for erasing visibility modifiers. */
+  public VariableData copyWithoutVisibility() {
+    String[] mavStrings = _modifiersAndVisibility.getModifiers();
+    LinkedList<String> newMavList = new LinkedList<String>();
+    int size = 0;
+    for (int i = 0; i < mavStrings.length; i++) {
+      String mod = mavStrings[i];
+      if (! isVisibility(mod)) { 
+        newMavList.add(mod);
+        size++;
+      }
+    }
+    String[] newMavStrings = newMavList.toArray(new String[size]);
+    ModifiersAndVisibility newMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, newMavStrings);
+    return new VariableData(_name, newMav, _type, true, _enclosingData);
   }
   
   /** Checks the values of the fields*/
   public boolean equals(Object obj) { 
     if (obj == null) return false;
     else if (obj.getClass() != this.getClass()) { 
-//      System.err.println("VariableData.equals: Class equality failure");
+      System.err.println("VariableData.equals: Class equality failure");
       return false; 
     }
     
     VariableData vd = (VariableData) obj;
     
     if (! _name.equals(vd.getName())) {
-//      System.err.println("VariableData.equals: name equality failure");
+      System.err.println("VariableData.equals: name equality failure");
       return false;
     }
     if (! _modifiersAndVisibility.equals(vd.getMav())) {
-//      System.err.println("VariableData.equals: modifiersAndVisibility equality failure");
+      System.err.println("VariableData.equals: modifiersAndVisibility equality failure");
       return false;
     }
     
     if (! _type.equals(vd.getType())) {
-//      System.err.println("VariableData.equals: type equality failure");
+      System.err.println("VariableData.equals: type equality failure");
       return false;
     }
     
     if (_hasBeenAssigned != vd.hasValue()) {
-//      System.err.println("VariableData.equals: hasBeenAssigned equality failure");
+      System.err.println("VariableData.equals: hasBeenAssigned equality failure");
       return false;
     }
     if (_hasInitializer != vd._hasInitializer) {
-//      System.err.println("VariableData.equals: hasInitializer equality failure");
+      System.err.println("VariableData.equals: hasInitializer equality failure");
       return false;
     }
     Data otherEnclosingData = vd.getEnclosingData();
@@ -135,12 +162,12 @@ public class VariableData {
     if (_enclosingData == null) {
       if (otherEnclosingData == null) return true;
       else {
-//      System.err.println("VariableData.equals: enclosingData failure");
+      System.err.println("VariableData.equals: enclosingData failure");
         return false; 
       }
     }  // formerly .equals but led to infinite loop when _enclosingData is a VariableData
     else if (_enclosingData != otherEnclosingData) {  
-//      System.err.println("VariableData.equals: enclosingData failure");
+      System.err.println("VariableData.equals: enclosingData failure");
       return false; 
     }
     
@@ -159,17 +186,28 @@ public class VariableData {
   /**@return the name of this field or variable*/
   public String getName() { return _name; }
   
-  /**Set the name of this variable to the specified string*/
+  /**Set the name of this variable to the specified string. */
   public void setName(String s) { _name = s; }
   
-  /**@return the modifiers and visibility*/
+  /**@return the modifiers and visibility. */
   public ModifiersAndVisibility getMav() { return _modifiersAndVisibility; }
   
-  /**Set the modifiers and visibility to the specified value*/
+  /**Set the modifiers and visibility to the specified value. */
   public void setMav(ModifiersAndVisibility mav) { _modifiersAndVisibility = mav; }
   
-  /** @return the InstanceData corresponding to the type of this variable.*/
-  public InstanceData getType() {  return _type; }
+  /** @return the SymbolData representing the type of this variable. */
+  public SymbolData getType() { return _type; }
+  
+  /** Sets the SymbolData representing the type of this variable. */
+  public void setType(SymbolData type) { _type = type; }
+  
+  /** Assumes  _type != null
+    * @return the InstanceData corresponding to the type of this variable. */
+  public InstanceData getInstanceData() { 
+    assert _type != null;
+    if (_instance == null) _instance = _type.getInstanceData();
+    return _instance;
+  }
   
   /** @return the enclosing data. */
   public Data getEnclosingData() { return _enclosingData; }
@@ -185,15 +223,9 @@ public class VariableData {
   
   /** Adds "final" to the modifiers and visibility for this class, if it is not already there. */
   public void setFinal() {
-    if (!isFinal()) {
-      String[] modifiers = _modifiersAndVisibility.getModifiers();
-      String[] newModifiers = new String[modifiers.length + 1];
-      newModifiers[0] = "final";
-      for (int i = 1; i <= modifiers.length; i++) {
-        newModifiers[i] = modifiers[i-1];
-      }
-      _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NO_INFO, newModifiers);
-    }
+    String[] newModifiers = Utilities.catenate(_modifiersAndVisibility.getModifiers(), new String[]{"final"});
+//    System.err.println("modifiers with 'final' = " + Arrays.toString(newModifiers));
+    _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NO_INFO, newModifiers);
   }
   
   /** Adds "private" to the modifiers and visibility for this class, if it is not already there. */
@@ -243,6 +275,10 @@ public class VariableData {
   /** Returns true if this VariableData is static. */
   public boolean isStatic() { return hasModifier("static"); }
   
+  public static boolean isVisibility(String s) {
+    return s.equals("private") || s.equals("protected") || s.equals("public");
+  }
+  
   /** Returns true if this variable has the modifier specified. */
   public boolean hasModifier(String modifier) {
     String[] mavStrings = _modifiersAndVisibility.getModifiers();
@@ -268,6 +304,9 @@ public class VariableData {
   
   /** Returns true if this VariableData has been given a value. */
   public boolean hasValue() { return _hasBeenAssigned; }
+  
+  /** Set _hasBeenAssigned flag. */
+  public void setHasValue() { _hasBeenAssigned = true; }
   
   /** If this VariableData has not been given a value, set _hasBeenAssigned to true, and return true.  Otherwise, 
     * return false to indicate it already has a value and should not be reassigned. */

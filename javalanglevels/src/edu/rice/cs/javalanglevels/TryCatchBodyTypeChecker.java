@@ -68,10 +68,7 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
     return new TryCatchBodyTypeChecker(bodyData, file, pakage, importedFiles, importedPackages, vars, thrown);
   }
   
-  /**
-   * Overwritten here, becuase it is okay for there to be thrown exceptions in the middle of a 
-   * try catch.
-   */
+  /** Overwritten here, becuase it is okay for there to be thrown exceptions in the middle of a try catch. */
   public TypeData forBracedBody(BracedBody that) {
     final TypeData[] items_result = makeArrayOfRetType(that.getStatements().length);
     for (int i = 0; i < that.getStatements().length; i++) {
@@ -123,19 +120,18 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
     private SymbolData _sd5;
     private SymbolData _sd6;
     private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    private ModifiersAndVisibility _protectedMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
     private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+    private ModifiersAndVisibility _abstractMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
     private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
     
     
-    public TryCatchBodyTypeCheckerTest() {
-      this("");
-    }
-    public TryCatchBodyTypeCheckerTest(String name) {
-      super(name);
-    }
+    public TryCatchBodyTypeCheckerTest() { this(""); }
+    public TryCatchBodyTypeCheckerTest(String name) { super(name); }
     
     public void setUp() {
       _sd1 = new SymbolData("i.like.monkey");
@@ -186,18 +182,32 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
       LanguageLevelVisitor llv = 
         new LanguageLevelVisitor(new File(""), 
                                  "",
+                                 null, // enclosingClassName for top level traversal
                                  new LinkedList<String>(), 
                                  new LinkedList<String>(), 
-                                 new LinkedList<String>(), 
-                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+                                 new HashSet<String>(), 
+                                 new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                 new LinkedList<Command>());
       llv.errors = new LinkedList<Pair<String, JExpressionIF>>();
       llv._errorAdded=false;
       LanguageLevelConverter.symbolTable.clear();
       LanguageLevelConverter._newSDs.clear();
-      llv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
+      LanguageLevelConverter.loadSymbolTable();
+      llv.continuations = new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>();
       llv.visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
-      llv._hierarchy = new Hashtable<String, TypeDefBase>();
-      llv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
+//      llv._hierarchy = new Hashtable<String, TypeDefBase>();
+      llv._classesInThisFile = new HashSet<String>();
+      
+      SymbolData o = symbolTable.get("java.lang.Object");
+//      o.setIsContinuation(false);
+//      o.setMav(_publicMav);
+//      symbolTable.put("java.lang.Object", o);
+             
+      SymbolData string = new SymbolData("java.lang.String");
+      string.setIsContinuation(false);
+      string.setMav(_publicMav);
+      string.setSuperClass(o);   // a white lie for this test   
+      symbolTable.put("java.lang.String", string);
 
       SymbolData e = llv.getSymbolData("java.util.prefs.BackingStoreException", SourceInfo.NO_INFO, true);
       

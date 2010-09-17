@@ -52,7 +52,7 @@ import junit.framework.TestCase;
 public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
   
   /**The SymbolData corresponding to this interface.*/
-  private SymbolData _symbolData;
+  private SymbolData _enclosing;
   
   /** Constructor for InterfaceBodyIntermediateVisitor.
     * @param sd  The SymbolData that encloses the context we are visiting.
@@ -60,7 +60,7 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
     * @param packageName  The package the source file is in
     * @importedFiles  A list of classes that were specifically imported
     * @param importedPackages  A list of package names that were specifically imported
-    * @param classDefsInThisFile  A list of the classes that are defined in the source file
+    * @param classesInThisFile  A list of the classes that are yet to be defined in this source file
     * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need to be resolved
     */
   public InterfaceBodyIntermediateVisitor(SymbolData sd, 
@@ -68,10 +68,11 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
                                           String packageName, 
                                           LinkedList<String> importedFiles, 
                                           LinkedList<String> importedPackages, 
-                                          LinkedList<String> classDefsInThisFile, 
-                                          Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
-    super(file, packageName, importedFiles, importedPackages, classDefsInThisFile, continuations);
-    _symbolData = sd;
+                                          HashSet<String> classesInThisFile, 
+                                          Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations,
+                                          LinkedList<Command> fixUps) {
+    super(file, packageName, sd.getName(), importedFiles, importedPackages, classesInThisFile, continuations, fixUps);
+    _enclosing = sd;
   }
   
   /*Throw an appropriate error*/
@@ -118,25 +119,25 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
     forAbstractMethodDefDoFirst(that);
     if (_checkError()) return null;
     
-    MethodData md = createMethodData(that, _symbolData);
+    MethodData md = createMethodData(that, _enclosing);
     
     //All interface methods are considered public by default: enforce this.
     if (md.hasModifier("private")) {
-      _addAndIgnoreError("Interface methods cannot be made private.  They must be public.", that.getMav());
+      _addAndIgnoreError("Interface methods cannot be private.  They must be public.", that.getMav());
     }
     if (md.hasModifier("protected")) {
-      _addAndIgnoreError("Interface methods cannot be made protected.  They must be public.", that.getMav());
+      _addAndIgnoreError("Interface methods cannot be protected.  They must be public.", that.getMav());
     }
     
  // All interface methods are considered public by default.
     md.addModifier("public");
     md.addModifier("abstract"); //and all interface methods are abstract. 
-    String className = getUnqualifiedClassName(_symbolData.getName());
+    String className = getUnqualifiedClassName(_enclosing.getName());
     if (className.equals(md.getName())) {
       _addAndIgnoreError("Only constructors can have the same name as the class they appear in, " + 
                          "and constructors cannot appear in interfaces.", that);
     }
-    else _symbolData.addMethod(md);
+    else _enclosing.addMethod(md);
     return null;
   }
   
@@ -160,13 +161,13 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
   
   /** Delegate to method in LLV */
   public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
-    complexAnonymousClassInstantiationHelper(that, _symbolData);
+    complexAnonymousClassInstantiationHelper(that, _enclosing);   // TODO: the wrong enclosing context?
     return null;
   }
 
   /** Delegate to method in LLV */
   public Void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
-    simpleAnonymousClassInstantiationHelper(that, _symbolData);
+    simpleAnonymousClassInstantiationHelper(that, _enclosing);
     return null;
   }
   
@@ -193,24 +194,32 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
     
     public void setUp() {
       _sd1 = new SymbolData("i.like.monkey");
+      _sd1.setIsContinuation(false);
+      _sd1.setInterface(false);
+      _sd1.setPackage("");
+      _sd1.setTypeParameters(new TypeParameter[0]);
+      _sd1.setInterfaces(new ArrayList<SymbolData>());
 
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       LanguageLevelConverter.symbolTable.clear();
       LanguageLevelConverter._newSDs.clear();
       LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.make(new File("lib/buildlib/junit.jar")));
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
-      _hierarchy = new Hashtable<String, TypeDefBase>();
+//      _hierarchy = new Hashtable<String, TypeDefBase>();
       _ibiv = 
         new InterfaceBodyIntermediateVisitor(_sd1, 
                                              new File(""), 
                                              "", 
                                              new LinkedList<String>(), 
-                                             new LinkedList<String>(), new LinkedList<String>(), 
-                                             new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-      _ibiv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
-      _ibiv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
-      _ibiv._resetNonStaticFields();
+                                             new LinkedList<String>(), 
+                                             new HashSet<String>(), 
+                                             new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                             new LinkedList<Command>());
+      _ibiv._classesInThisFile = new HashSet<String>();
+      _ibiv.continuations = new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>();
       _ibiv._importedPackages.addFirst("java.lang");
+      _ibiv._enclosingClassName = "i.like.monkey";
+      _ibiv.symbolTable.put("i.like.monkey", _sd1);
       _errorAdded = false;
     }
     
@@ -232,7 +241,7 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
     
     public void testForAbstractMethodDefDoFirst() {
       // Check one that works
-      _ibiv._symbolData.setMav(_abstractMav);
+      _ibiv._enclosing.setMav(_abstractMav);
       AbstractMethodDef amd2 = new AbstractMethodDef(SourceInfo.NO_INFO, 
                                                      _abstractMav, 
                                                      new TypeParameter[0], 
@@ -242,7 +251,7 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
                                                      new ReferenceType[0]);
       amd2.visit(_ibiv);
       assertEquals("There should be no errors", 0, errors.size());
-      assertTrue("The method def should be public", _ibiv._symbolData.getMethods().get(0).hasModifier("public"));
+      assertTrue("The method def should be public", _ibiv._enclosing.getMethods().get(0).hasModifier("public"));
 
     }
 
@@ -311,7 +320,8 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
                                              new Word(SourceInfo.NO_INFO, "methodName"),
                                              new FormalParameter[0],
                                              new ReferenceType[0]);
-      _ibiv._symbolData.setMav(_abstractMav);
+      _ibiv._enclosing.setMav(_abstractMav);
+      
       mdef.visit(_ibiv);
       assertEquals("There should not be any errors.", 0, errors.size());
       
@@ -340,7 +350,7 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
                                                      new ReferenceType[0]);
       amd3.visit(_ibiv);
       assertEquals("There should still be one error", 1, errors.size());
-      assertTrue("The method def should be public", _ibiv._symbolData.getMethods().get(1).hasModifier("public"));
+      assertTrue("The method def should be public", _ibiv._enclosing.getMethods().get(1).hasModifier("public"));
 
       //What if the method is called private? Should throw error
       AbstractMethodDef amd4 = new AbstractMethodDef(SourceInfo.NO_INFO, 
@@ -352,7 +362,7 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
                                                      new ReferenceType[0]);
       amd4.visit(_ibiv);
       assertEquals("There should be two errors", 2, errors.size());
-      assertEquals("The error message should be correct","Interface methods cannot be made private.  They must be public." , errors.get(1).getFirst());
+      assertEquals("The error message should be correct","Interface methods cannot be private.  They must be public." , errors.get(1).getFirst());
     
       //What if the method is protected: Should throw error
       AbstractMethodDef amd5 = new AbstractMethodDef(SourceInfo.NO_INFO, 
@@ -364,7 +374,7 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
                                                      new ReferenceType[0]);
       amd5.visit(_ibiv);
       assertEquals("There should be three errors", 3, errors.size());
-      assertEquals("The error message should be correct","Interface methods cannot be made protected.  They must be public." , errors.get(2).getFirst());
+      assertEquals("The error message should be correct","Interface methods cannot be protected.  They must be public." , errors.get(2).getFirst());
     }
     
     

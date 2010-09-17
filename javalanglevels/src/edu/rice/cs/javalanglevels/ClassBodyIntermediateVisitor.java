@@ -53,8 +53,8 @@ import junit.framework.TestCase;
  */
 public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
   
-  /**The SymbolData corresponding to this class. */
-  private SymbolData _classData;
+  /** The SymbolData corresponding to this class. */
+  private SymbolData _enclosing;
   
   /** Constructor for ClassBodyAdvancedVisitor.
     * @param sd  The SymbolData that encloses the context we are visiting.
@@ -62,24 +62,22 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     * @param packageName  The package the source file is in
     * @importedFiles  A list of classes that were specifically imported
     * @param importedPackages  A list of package names that were specifically imported
-    * @param classDefsInThisFile  A list of the classes that are defined in the source file
+    * @param classesInThisFile  A list of the classes that are yet to be defined in this source file
     * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need to 
     *                       be resolved
+    * @param fixUps  A list of commands to be performed after this pass to fixup the symbolTable
     */
-  public ClassBodyIntermediateVisitor(SymbolData sd, 
+  public ClassBodyIntermediateVisitor(SymbolData sd,
+                                      String className,
                                       File file, 
                                       String packageName, 
                                       LinkedList<String> importedFiles, 
                                       LinkedList<String> importedPackages, 
-                                      LinkedList<String> classDefsInThisFile, 
-                                      Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations) {
-    super(file, 
-          packageName, 
-          importedFiles, 
-          importedPackages, 
-          classDefsInThisFile, 
-          continuations);    
-    _classData = sd;
+                                      HashSet<String> classesInThisFile, 
+                                      Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations,
+                                      LinkedList<Command> fixUps) {
+    super(file,  packageName, className, importedFiles, importedPackages, classesInThisFile, continuations, fixUps);    
+    _enclosing = sd;
   }
   
   /*Add an appropriate error*/
@@ -93,7 +91,7 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
 
 //    ModifiersAndVisibility mav = that.getMav();
 //    String[] modifiers = mav.getModifiers();
-    if (! _classData.isInterface() && ! _classData.hasModifier("abstract")) { // interfaces not yet marked abstract
+    if (! _enclosing.isInterface() && ! _enclosing.hasModifier("abstract")) { // interfaces not yet marked abstract
       _addError("Abstract methods can only be declared in abstract classes", that);
     }
     return super.forAbstractMethodDefDoFirst(that);
@@ -110,7 +108,7 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     * error if two fields have the same names. */
   public Void forVariableDeclarationOnly(VariableDeclaration that) {
 //    System.err.println("Calling _variableDeclaration2VariableData on " + that);
-    VariableData[] vds = _variableDeclaration2VariableData(that, _classData);
+    VariableData[] vds = _variableDeclaration2VariableData(that, _enclosing);
 //    System.err.println("Constructed vds array = " + Arrays.toString(vds));
     // make sure that every non-static field is private and no static field are uninitialized:
 //    LinkedList<VariableData> vdsList = new LinkedList<VariableData>();
@@ -124,7 +122,7 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
 //      vdsList.addLast(vds[i]);
     }
 //    System.err.println("Processed vds array = " + Arrays.toString(vds));
-    if (! _classData.addFinalVars(vds /* vdsList.toArray(new VariableData[vdsList.size()]) */)) {
+    if (! _enclosing.addFinalVars(vds /* vdsList.toArray(new VariableData[vdsList.size()]) */)) {
 //      System.err.println("Duplicate variable declaration found");
       _addAndIgnoreError("You cannot have two fields with the same name.  Either you already have a field by that "
                            + "name in this class, or one of your superclasses or interfaces has a field by that name", 
@@ -133,71 +131,73 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     return null;
   }
 
-    /**Call the method in FullJavaVisitor since it's common to this and FullJavaBodyFullJavaVisitor. */
+  /** Call the method in FullJavaVisitor since it's common to this and FullJavaBodyFullJavaVisitor. */
   public Void forInnerInterfaceDef(InnerInterfaceDef that) {
-    String innerClassName = getQualifiedClassName(_classData.getName()) + "." + that.getName().getText(); 
-    handleInnerInterfaceDef(that, _classData, innerClassName);
+    String relName = that.getName().getText();
+    String innerClassName = getQualifiedClassName(_enclosing.getName()) + '.' + relName; 
+    handleInnerInterfaceDef(that, _enclosing, relName, innerClassName);
     return null;
   }
   /** Process a local inner class definition */
   public Void forInnerClassDef(InnerClassDef that) {
 //    System.err.println("CBIV.forInnerClassDef called on " + that.getName());
-    String innerClassName = getQualifiedClassName(_classData.getName()) + "." + that.getName().getText();
-    handleInnerClassDef(that, _classData, innerClassName);
+    String relName = that.getName().getText();
+    String innerClassName = getQualifiedClassName(_enclosing.getName()) + '.' + relName;
+    handleInnerClassDef(that, _enclosing, relName, innerClassName);
     return null;
   }
-  /* Create a method data corresponding to this method declaration, and then visit the concrete method def with a new 
-   * bodybody visitor, passing it the enclosing method data. Methods are still public by default, but this can be 
-   * overridden by the user. Make sure the method name is different from the class name.
-   */
+  
+  /** Creates a method data corresponding to this method declaration, and then visit the concrete method def with a new 
+    * bodybody visitor, passing it the enclosing method data. Methods are still public by default, but this can be 
+    * overridden by the user. Make sure the method name is different from the class name.
+    */
   public Void forConcreteMethodDef(ConcreteMethodDef that) {
     forConcreteMethodDefDoFirst(that);
     if (prune(that)) return null;
-    MethodData md = createMethodData(that, _classData);
+    MethodData md = createMethodData(that, _enclosing);
     
     // At Intermediate Level, methods are still public by default.
     if (! md.hasModifier("public") && ! md.hasModifier("private") && ! md.hasModifier("protected")) {
       md.addModifier("public");
     }
 
-    String className = getUnqualifiedClassName(_classData.getName());
+    String className = getUnqualifiedClassName(_enclosing.getName());
     if (className.equals(md.getName())) {
       _addAndIgnoreError("Only constructors can have the same name as the class they appear in, and constructors do "
                            + "not have an explicit return type",
                          that);
     }
-    else _classData.addMethod(md);
+    else _enclosing.addMethod(md);
 
-    that.getBody().visit(new BodyBodyIntermediateVisitor(md, _file, _package, _importedFiles, _importedPackages, 
-                                                         _classNamesInThisFile, continuations, _innerClassesToBeParsed));
+    that.getBody().visit(new BodyBodyIntermediateVisitor(md, _file, _package, _enclosingClassName, _importedFiles, 
+                                                         _importedPackages, _classesInThisFile, continuations, 
+                                                         fixUps, new HashSet<String>()));
     return forConcreteMethodDefOnly(that);
   }
   
-  /** Create a method data corresponding to this method declaration, and then visit the
-    * abstract method def with a new bodybody visitor, passing it the enclosing method data.
+  /** Create a method data corresponding to this method declaration.
     * Make sure the method name is different from the class name.
     * At the Intermediate Level, methods are public by default, but this can be overridden by the user.
     */
   public Void forAbstractMethodDef(AbstractMethodDef that) {
     forAbstractMethodDefDoFirst(that);
     if (prune(that)) return null;
-    MethodData md = createMethodData(that, _classData);
-
-    //At Intermediate Level, methods are still public by default.
+    MethodData md = createMethodData(that, _enclosing);
+    
+    // At Intermediate Level, methods are still public by default.
     if (! md.hasModifier("public") && ! md.hasModifier("private") && ! md.hasModifier("protected")) {
       md.addModifier("public");
     }
-    
-    String className = getUnqualifiedClassName(_classData.getName());
+
+    String className = getUnqualifiedClassName(_enclosing.getName());
     if (className.equals(md.getName())) {
       _addAndIgnoreError("Only constructors can have the same name as the class they appear in, and constructors do "
                            + "not have an explicit return type",
                          that);
     }
-    else {
-      _classData.addMethod(md);
-    }
-    return null;
+    else _enclosing.addMethod(md);
+
+    return forAbstractMethodDefOnly(that);
   }
   
   /** Create a constructor corresponding to the specifications in the ConstructorDef.  */
@@ -207,16 +207,16 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
 
     that.getMav().visit(this);
     String name = getUnqualifiedClassName(that.getName().getText());
-    if (!name.equals(getUnqualifiedClassName(_classData.getName()))) {
+    if (!name.equals(getUnqualifiedClassName(_enclosing.getName()))) {
       _addAndIgnoreError("The constructor return type and class name must match", that);
     }
 
     // Turn the thrown exceptions from a ReferenceType[] to a String[]
     String[] throwStrings = referenceType2String(that.getThrows());
     
-    SymbolData returnType = _classData;
+    SymbolData returnType = _enclosing;
     MethodData md = new MethodData(name, that.getMav(), new TypeParameter[0], returnType, 
-                                   new VariableData[0], throwStrings, _classData, that);
+                                   new VariableData[0], throwStrings, _enclosing, that);  // VariableData is dummy
     
     // At Intermediate Level, constructors are still public by default.
     if (! md.hasModifier("public") && ! md.hasModifier("private") && ! md.hasModifier("protected")) {
@@ -225,7 +225,7 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     
     _checkError(); // reset check flag
     // Turn the parameters from a FormalParameterList to a VariableData[]
-    VariableData[] vds = formalParameters2VariableData(that.getParameters(), md);
+    VariableData[] vds = formalParameters2VariableData(that.getParameters(), _enclosing);
     if (! _checkError()) {  // if there was an error converting the formalParameters, don't use them.
       md.setParams(vds);
       if (!md.addFinalVars(vds)) {
@@ -233,24 +233,24 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
       }
     }
     
-    _classData.addMethod(md);
-    that.getStatements().visit(new BodyBodyIntermediateVisitor(md, _file, _package, _importedFiles, _importedPackages, 
-                                                               _classNamesInThisFile, continuations, 
-                                                               _innerClassesToBeParsed));
+    _enclosing.addMethod(md);
+    that.getStatements().visit(new BodyBodyIntermediateVisitor(md, _file, _package, _enclosingClassName, _importedFiles,
+                                                               _importedPackages, _classesInThisFile, continuations, 
+                                                               fixUps, new HashSet<String>()));
     //note that we have seen a constructor.
-    _classData.incrementConstructorCount();
+    _enclosing.incrementConstructorCount();
     return forConstructorDefOnly(that);
   }
   
   /** Delegate to method in LLV. */
   public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
-    complexAnonymousClassInstantiationHelper(that, _classData);
+    complexAnonymousClassInstantiationHelper(that, _enclosing);   // TODO: the wrong enclosing context?
     return null;
   }
 
   /** Delegate to method in LLV. */
   public Void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
-    simpleAnonymousClassInstantiationHelper(that, _classData);
+    simpleAnonymousClassInstantiationHelper(that, _enclosing);
     return null;
   }
     
@@ -283,12 +283,14 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
       new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract", "static"});
     private ModifiersAndVisibility _privateAbstractMav = 
       new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private", "abstract"});
-    private ModifiersAndVisibility _finalStaticMav = 
+    private ModifiersAndVisibility _staticFinalMav = 
       new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"static", "final"});
-     private ModifiersAndVisibility _staticFinalMav = 
+     private ModifiersAndVisibility _finalStaticMav = 
       new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final", "static"});
-    private ModifiersAndVisibility _privateFinalMav = 
+    private ModifiersAndVisibility _finalPrivateMav = 
       new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final", "private"});
+    private ModifiersAndVisibility _privateFinalMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private", "final"});
     
     
     public ClassBodyIntermediateVisitorTest() { this(""); }
@@ -300,18 +302,21 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       LanguageLevelConverter.symbolTable.clear();
       LanguageLevelConverter._newSDs.clear();
+      LanguageLevelConverter.symbolTable.put("i.like.monkey", _sd1);
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
-      _hierarchy = new Hashtable<String, TypeDefBase>();
-      _cbiv = new ClassBodyIntermediateVisitor(_sd1, 
+//      _hierarchy = new Hashtable<String, TypeDefBase>();
+      _cbiv = new ClassBodyIntermediateVisitor(_sd1,
+                                               _sd1.getName(),
                                                new File(""), 
                                                "", 
                                                new LinkedList<String>(), 
                                                new LinkedList<String>(), 
-                                               new LinkedList<String>(), 
-                                               new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-      _cbiv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
-      _cbiv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
-      _cbiv._resetNonStaticFields();
+                                               new HashSet<String>(), 
+                                               new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                               new LinkedList<Command>());
+      _cbiv.continuations = new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(); // no _sd1
+      _cbiv._classesInThisFile = new HashSet<String>();
+//      _cbiv._resetNonStaticFields();
       _cbiv._importedPackages.addFirst("java.lang");
       _errorAdded = false;
     }
@@ -379,7 +384,7 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
                    errors.get(0).getFirst());
       
       // Check one that works
-      _cbiv._classData.setMav(_abstractMav);
+      _cbiv._enclosing.setMav(_abstractMav);
       AbstractMethodDef amd2 = new AbstractMethodDef(SourceInfo.NO_INFO, 
                                                      _abstractMav, 
                                                      new TypeParameter[0], 
@@ -429,8 +434,10 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
           new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
                                               new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
                                               new Word (SourceInfo.NO_INFO, "field2"))});
-      VariableData vd1 = new VariableData("field1", _privateFinalMav, SymbolData.DOUBLE_TYPE, false, _cbiv._classData);
-      VariableData vd2 = new VariableData("field2", _privateFinalMav, SymbolData.BOOLEAN_TYPE, false, _cbiv._classData);
+      VariableData vd1 = 
+        new VariableData("field1", _privateFinalMav, SymbolData.DOUBLE_TYPE, false, _cbiv._enclosing);
+      VariableData vd2 = 
+        new VariableData("field2", _privateFinalMav, SymbolData.BOOLEAN_TYPE, false, _cbiv._enclosing);
       vdecl.visit(_cbiv);
       
 //      VariableData vd0 = _sd1.getVars().get(0);
@@ -445,6 +452,9 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
 //      assertEquals("enclosingData are equal", vd1.getEnclosingData(), vd0.getEnclosingData());
 //      assertEquals("mavs are equal", vd1.getMav(), vd0.getMav());
 //      assertEquals("vd1.equals(vd0)", vd1, vd0);
+
+//      System.err.println("_sd1 vars =  " + _sd1.getVars());
+//      System.err.println("vd1 = " + vd1 + "; vd2 = " + vd2);
       assertTrue("field1 was added.", _sd1.getVars().contains(vd1));
       assertTrue("field2 was added.", _sd1.getVars().contains(vd2));
       
@@ -460,13 +470,16 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
         new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
                                             new PrimitiveType(SourceInfo.NO_INFO, "int"), 
                                             new Word (SourceInfo.NO_INFO, "field3"))});
-      VariableData vd3 = new VariableData("field3", _privateFinalMav, SymbolData.DOUBLE_TYPE, false, _cbiv._classData);
+      VariableData vd3 = 
+        new VariableData("field3", _privateFinalMav, SymbolData.DOUBLE_TYPE, false, _cbiv._enclosing);
       vdecl2.visit(_cbiv);
       assertEquals("There should be one error.", 1, errors.size());
       assertEquals("The error message should be correct", 
                    "You cannot have two fields with the same name.  Either you already have a field by that name in "
                      + "this class, or one of your superclasses or interfaces has a field by that name", 
                    errors.get(0).getFirst());
+//      System.err.println("_sd1 vars =  " + _sd1.getVars());
+//      System.err.println("vd3 = " + vd3);
       assertTrue("field3 was added.", _sd1.getVars().contains(vd3));
       
       //Check a static field that has not been assigned (won't work)
@@ -476,7 +489,8 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
         new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
                                             new PrimitiveType(SourceInfo.NO_INFO, "double"), 
                                             new Word (SourceInfo.NO_INFO, "field4"))});
-      VariableData vd4 = new VariableData("field4", _staticFinalMav, SymbolData.DOUBLE_TYPE, false, _cbiv._classData);  
+      VariableData vd4 = 
+        new VariableData("field4", _staticFinalMav, SymbolData.DOUBLE_TYPE, false, _cbiv._enclosing);  
       
       vdecl3.visit(_cbiv);
 //      System.err.println("vd4 = " + vd4);
@@ -495,7 +509,8 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
                                             new Word (SourceInfo.NO_INFO, "field5"), 
                                           new DoubleLiteral(SourceInfo.NO_INFO, 2.4))});
       vdecl5.visit(_cbiv);
-      VariableData vd5 = new VariableData("field5", _privateFinalMav, SymbolData.DOUBLE_TYPE, true, _cbiv._classData);
+      VariableData vd5 = 
+        new VariableData("field5", _privateFinalMav, SymbolData.DOUBLE_TYPE, true, _cbiv._enclosing);
       vd5.setHasInitializer(true);
 //      VariableData vd0 = _sd1.getVars().get(4);
 //      System.err.println("vd5 = " + vd5);
@@ -518,10 +533,11 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
                                             new Word (SourceInfo.NO_INFO, "field6"))});
       
       
-      VariableData vd6 = new VariableData("field6", _privateFinalMav, SymbolData.DOUBLE_TYPE, false, _cbiv._classData);
+      VariableData vd6 = 
+        new VariableData("field6", _finalPrivateMav, SymbolData.DOUBLE_TYPE, false, _cbiv._enclosing);
       SymbolData myData = new SymbolData("myData");
       myData.addVar(vd6);
-      _cbiv._classData.setSuperClass(myData);
+      _cbiv._enclosing.setSuperClass(myData);
       vdecl6.visit(_cbiv);
       assertEquals("There should be two errors.", 2, errors.size());
       assertEquals("The error message should be correct", "You cannot have two fields with the same name.  Either you" +
@@ -543,10 +559,23 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
                                                               new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
                                                               new Word (SourceInfo.NO_INFO, "field2")),
                             false)};
-      VariableData vd1 = new VariableData("field1", _finalMav, SymbolData.DOUBLE_TYPE, true, _cbiv._classData);
-      VariableData vd2 = new VariableData("field2", _finalMav, SymbolData.BOOLEAN_TYPE, true, _cbiv._classData);
-      VariableData[] vds = _cbiv.formalParameters2VariableData(fps, _cbiv._classData);
+
+      MethodData md = new MethodData("methodName", 
+                                     _packageMav, 
+                                     new TypeParameter[0], 
+                                     SymbolData.INT_TYPE, 
+                                     new VariableData[0],  // a dummy value
+                                     new String[0],
+                                     _sd1,  // enclosing class
+                                     null); // no SourceInfo
+      VariableData vd1 = new VariableData("field1", _finalMav, SymbolData.DOUBLE_TYPE, true, _sd1);
+      VariableData vd2 = new VariableData("field2", _finalMav, SymbolData.BOOLEAN_TYPE, true, _sd1);
+      System.err.println("vd1 = " + vd1);
+      System.err.println("vd2 = " + vd2);
+      VariableData[] vds = _cbiv.formalParameters2VariableData(fps, _sd1);
       assertEquals("There should not be any errors.", 0, errors.size());
+      System.err.println("vds[0] = " + vds[0]);
+      System.err.println("vds[1] = " + vds[1]);
       assertEquals("vd1 should be the first entry in vds.", vd1, vds[0]);
       assertEquals("vd2 should be the second entry in vds.", vd2, vds[1]);
     }
@@ -612,7 +641,7 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
                                              new Word(SourceInfo.NO_INFO, "methodName"),
                                              new FormalParameter[0],
                                              new ReferenceType[0]);
-      _cbiv._classData.setMav(_abstractMav);
+      _cbiv._enclosing.setMav(_abstractMav);
 
       mdef.visit(_cbiv);
       assertEquals("There should not be any errors", 0, errors.size());
@@ -671,8 +700,6 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
 
 
     public void testForInnerInterfaceDef() {
-      SymbolData obj = new SymbolData("java.lang.Object");
-      LanguageLevelConverter.symbolTable.put("java.lang.Object", obj);
       InnerInterfaceDef cd1 = new InnerInterfaceDef(SourceInfo.NO_INFO, _packageMav, 
                                                     new Word(SourceInfo.NO_INFO, "Bart"),
                                        new TypeParameter[0], new ReferenceType[0], 
@@ -683,20 +710,20 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
                                        new TypeParameter[0], new ReferenceType[0], 
                                             new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {cd1}));
       
-      SymbolData sd0 = new SymbolData(_cbiv._classData.getName() + "$Lisa", _packageMav, new TypeParameter[0], 
-                                      new LinkedList<SymbolData>(), null); 
-      SymbolData sd1 = new SymbolData(_cbiv._classData.getName() + "$Lisa$Bart", _packageMav, new TypeParameter[0], 
-                                      new LinkedList<SymbolData>(), null);
+      SymbolData sd0 = new SymbolData(_cbiv._enclosing.getName() + "$Lisa", _packageMav, new TypeParameter[0], 
+                                      new ArrayList<SymbolData>(), null); 
+      SymbolData sd1 = new SymbolData(_cbiv._enclosing.getName() + "$Lisa$Bart", _packageMav, new TypeParameter[0], 
+                                      new ArrayList<SymbolData>(), null);
       sd0.addInnerInterface(sd1);
       sd0.setIsContinuation(true);
       sd1.setIsContinuation(true);
       
-      LanguageLevelConverter.symbolTable.put(_cbiv._classData.getName() + "$Lisa", sd0);
-      LanguageLevelConverter.symbolTable.put(_cbiv._classData.getName() + "$Lisa$Bart", sd1);
+      LanguageLevelConverter.symbolTable.put(_cbiv._enclosing.getName() + "$Lisa", sd0);
+      LanguageLevelConverter.symbolTable.put(_cbiv._enclosing.getName() + "$Lisa$Bart", sd1);
 
       cd0.visit(_cbiv);
 
-      SymbolData sd = _cbiv._classData.getInnerClassOrInterface("Lisa");
+      SymbolData sd = _cbiv._enclosing.getInnerClassOrInterface("Lisa");
 
       // NOTE: No longer allowing inner interfaces at the intermediate level
       assertEquals("There should be no errors", 0, errors.size());
@@ -711,19 +738,19 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
                                              new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       
       //What if constructor name and SymbolData name don't match?  Should throw an error.
-      _cbiv._classData = new SymbolData("NotRightName");
+      _cbiv._enclosing = new SymbolData("NotRightName");
       cd.visit(_cbiv);
       assertEquals("Should be 1 error", 1, errors.size());
       assertEquals("Error message should be correct", 
                    "The constructor return type and class name must match", errors.getLast().getFirst());
       
       //If they are the same, it should work just fine.
-      _cbiv._classData = new SymbolData("MyClass");
+      _cbiv._enclosing = new SymbolData("MyClass");
       
-      MethodData constructor = new MethodData("MyClass", _publicMav, new TypeParameter[0], _cbiv._classData, 
+      MethodData constructor = new MethodData("MyClass", _publicMav, new TypeParameter[0], _cbiv._enclosing, 
                                               new VariableData[0], 
                                               new String[0], 
-                                              _cbiv._classData,
+                                              _cbiv._enclosing,
                                               null);
       
       
@@ -731,8 +758,8 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
       
       
       assertEquals("Should still be 1 error", 1, errors.size());
-      assertEquals("SymbolData should have 1 method", 1, _cbiv._classData.getMethods().size());
-      assertTrue("SymbolData's constructor should be correct", _cbiv._classData.getMethods().contains(constructor));
+      assertEquals("SymbolData should have 1 method", 1, _cbiv._enclosing.getMethods().size());
+      assertTrue("SymbolData's constructor should be correct", _cbiv._enclosing.getMethods().contains(constructor));
       
       //With a ConstructorDef with more throws and variables, should work okay.
       FormalParameter fp = 
@@ -742,25 +769,30 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
                                                                 new Word(SourceInfo.NO_INFO, "i")), false);
       ReferenceType rt = new TypeVariable(SourceInfo.NO_INFO, "MyMadeUpException");
       ConstructorDef cd2 = new ConstructorDef(SourceInfo.NO_INFO, 
-                                              new Word(SourceInfo.NO_INFO, "MyClass"), _publicMav, 
-                                              new FormalParameter[] {fp}, new ReferenceType[] {rt}, 
+                                              new Word(SourceInfo.NO_INFO, "MyClass"), 
+                                              _publicMav, 
+                                              new FormalParameter[] {fp}, 
+                                              new ReferenceType[] {rt}, 
                                               new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       
-      VariableData vd = new VariableData("i", _finalMav, SymbolData.INT_TYPE, true, null);
-      MethodData constructor2 = new MethodData("MyClass", _publicMav, new TypeParameter[0], _cbiv._classData, 
+      VariableData vd = new VariableData("i", _finalMav, SymbolData.INT_TYPE, true, _cbiv._enclosing);
+      MethodData constructor2 = new MethodData("MyClass", 
+                                               _publicMav, 
+                                               new TypeParameter[0], 
+                                               _cbiv._enclosing, 
                                                new VariableData[] {vd}, 
                                                new String[] {"MyMadeUpException"}, 
-                                              _cbiv._classData,
-                                              null);
+                                               _cbiv._enclosing,
+                                               null);
 
                                            
       constructor2.addVar(vd);
       cd2.visit(_cbiv);
-      vd.setEnclosingData(_cbiv._classData.getMethods().getLast());
+//      vd.setEnclosingData(_cbiv._enclosing.getMethods().getLast());
       assertEquals("Should still be 1 error", 1, errors.size());
-      assertEquals("SymbolData should have 2 methods", 2, _cbiv._classData.getMethods().size());
+      assertEquals("SymbolData should have 2 methods", 2, _cbiv._enclosing.getMethods().size());
       
-      assertTrue("SymbolData should have new constructor", _cbiv._classData.getMethods().contains(constructor2));
+      assertTrue("SymbolData should have new constructor", _cbiv._enclosing.getMethods().contains(constructor2));
       
                                               
       //If two variable names are duplicated, should throw an error.

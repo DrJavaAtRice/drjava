@@ -63,7 +63,13 @@ public class IntermediateLevelTest extends TestCase {
     directory = new File("testFiles/forIntermediateLevelTest");
     
   }
-
+  
+  public void assertEquals(String s, Data answer, Data testValue) {
+    if (! answer.equals(testValue)) 
+      System.err.println("Unit test '" + s + "' failed. Expected '" + 
+                         answer.getName() + "'.  Found '" + testValue.getName() + "'.");
+  }
+  
   /** Test that files that are correct can be processed with no errors and result in the expected augmented file.
     * Yay.dj1 is designed to be handled as a 1.4 file, so ignore it here.
     */
@@ -142,31 +148,32 @@ public class IntermediateLevelTest extends TestCase {
   }
   
   
-  /*Make sure that 1.4 augmentation rules are correctly followed for Yay.dj1*/
+  /** Make sure that 1.4 augmentation rules are correctly followed for Yay.dj1*/
   public void test14Augmentation() {
-        File[] arrayF = new File[]{ new File("testFiles/forIntermediateLevelTest/Yay.dj1")};
-      LanguageLevelConverter llc = new LanguageLevelConverter();
-      Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-      result = llc.convert(arrayF, new Options(JavaVersion.JAVA_1_4, EmptyIterable.<File>make()));
-      assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());
-      
-      assertEquals("should be no visitor exceptions", new LinkedList<Pair<String, JExpressionIF>>(), result.getSecond());
-      
-      
-      File currFile = new File("testFiles/forIntermediateLevelTest/Yay.dj1");
-      String fileName = currFile.getAbsolutePath();
-      fileName = fileName.substring(0, fileName.length() -4);
-      File resultingFile = new File(fileName + ".java");
-      File correctFile = new File(fileName + ".expected");
-        
-      try {
-        assertEquals("File " + currFile.getName() + " should have been parsed and augmented correctly.",
-                     lf(IOUtil.toString(correctFile)),
-                     lf(IOUtil.toString(resultingFile)));
-        }
-      catch (IOException ioe) {
-        fail(ioe.getMessage());
-        // let JUnit throw the exception
-      }
+    File[] arrayF = new File[]{ new File("testFiles/forIntermediateLevelTest/Yay.dj1")};
+    LanguageLevelConverter llc = new LanguageLevelConverter();
+    Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
+    assert llc._newSDs != null;
+    result = llc.convert(arrayF, new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make()));
+    assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());
+    
+    assertEquals("should be no visitor exceptions", new LinkedList<Pair<String, JExpressionIF>>(), result.getSecond());
+    
+    
+    File currFile = new File("testFiles/forIntermediateLevelTest/Yay.dj1");
+    String fileName = currFile.getAbsolutePath();
+    fileName = fileName.substring(0, fileName.length() -4);
+    File resultingFile = new File(fileName + ".java");
+    File correctFile = new File(fileName + ".expected");
+    
+    try {
+      assertEquals("File " + currFile.getName() + " should have been parsed and augmented correctly.",
+                   lf(IOUtil.toString(correctFile)),
+                   lf(IOUtil.toString(resultingFile)));
+    }
+    catch (IOException ioe) {
+      fail(ioe.getMessage());
+      // let JUnit throw the exception
+    }
   }
 }

@@ -45,27 +45,28 @@ import java.util.*;
 
 public class Symboltable extends Hashtable<String, SymbolData> {
   
-  /** Overrides put function of hash table.  If the specified SymbolData is already in
-    * the table, simply update its fields.  Otherwise, do a normal put operation.
-    */
-  public SymbolData put(String name, SymbolData sd) {
-    SymbolData inTable = this.get(sd.getName());
-    if (inTable != null) {
-      /**Replace all its fields with those of sd.*/
-      inTable.setIsContinuation(sd.isContinuation());
-      inTable.setTypeParameters(sd.getTypeParameters());
-      inTable.setMethods(sd.getMethods());
-      inTable.setSuperClass(sd.getSuperClass());
-      inTable.setInterfaces(sd.getInterfaces());
-      inTable.setOuterData(sd.getOuterData());
-      inTable.setInnerClasses(sd.getInnerClasses());
-    }
-    else {
-      super.put(sd.getName(), sd);
-    }
-    
-    return sd;
-  }
+//  /** Augments put function of hash table.  If the specified SymbolData is already in
+//    * the table, simply update its fields.  Otherwise, do a normal put operation.
+//    * ALARM: this does not work 
+//    */
+//  public void put(String name, SymbolData sd, SymbolData oldSd) {
+//    if (oldSd != null) {
+//      /**Replace all its fields with those of sd.*/
+//      oldSd.setIsContinuation(sd.isContinuation());
+//      oldSd.setTypeParameters(sd.getTypeParameters());
+//      oldSd.setMethods(sd.getMethods());
+//      oldSd.setSuperClass(sd.getSuperClass());
+//      oldSd.setInterfaces(sd.getInterfaces());
+//      oldSd.setOuterData(sd.getOuterData());
+//      oldSd.setInnerClasses(sd.getInnerClasses());
+//    }
+//    // Enter new symbol in this
+//    super.put(sd.getName(), sd);
+////    return sd;
+//  }
   
-  public SymbolData get (String name) { return super.get(name); }
+//  /** Overloaded version of preceding method; oldSd defaults to null. */
+//  public SymbolData put(String name, SymbolData sd) { return put(name, sd, null); }
+  
+//  public SymbolData get (String name) { return super.get(name); }
 }

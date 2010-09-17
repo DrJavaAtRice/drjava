@@ -46,17 +46,17 @@ import edu.rice.cs.plt.iter.*;
 import junit.framework.TestCase;
 
 /** This is a TypeChecker for all Expressions used in the students files.  It is used with every LanguageLevel. */
-public class ExpressionTypeChecker extends Bob {
+public class ExpressionTypeChecker extends SpecialTypeChecker {
   
   public final JavaVersion JAVA_VERSION = LanguageLevelConverter.OPT.javaVersion();
   
   /** Simply pass the necessary information on to superclass constructor.
-    * @param data  The data that represents the context.
+    * @param data  The data that represents the context.  TODO: What classes can it be?
     * @param file  The file that corresponds to the source file
     * @param packageName  The string representing the package name
     * @param importedFiles  The list of file names that have been specifically imported
     * @param importedPackages  The list of package names that have been specifically imported
-    * @param vars  The list of fields that have been assigned up to the point where Bob is called.
+    * @param vars  The list of fields that have been assigned up to the point where SpecialTypeChecker is called.
     * @param thrown  The list of exceptions that the context is declared to throw
     */
   public ExpressionTypeChecker(Data data, File file, String packageName, LinkedList<String> importedFiles, 
@@ -726,7 +726,7 @@ public class ExpressionTypeChecker extends Bob {
     // Cannot instantiate a non-static inner class from a static context (i.e. new A.B() where B is dynamic).
     // Here, we make sure that if B is non-static, it is not an inner class of anything.
     String name = that.getType().getName();
-    int lastIndexOfDot = name.lastIndexOf(".");
+    int lastIndexOfDot = name.lastIndexOf('.');
     if (!type.hasModifier("static") && (type.getOuterData() != null) && lastIndexOfDot != -1) {
       String firstPart = name.substring(0, lastIndexOfDot);
       String secondPart = name.substring(lastIndexOfDot + 1, name.length()); //skip the dot itself
@@ -793,10 +793,15 @@ public class ExpressionTypeChecker extends Bob {
     * Basically, update the anonymous inner class corresponding to the enclosing data and the superC with superC 
     * and accessors, if necessary.
     * @param that  The AnonymousClassInstantiation being processed.
-    * @param superC  The data corresponding to the super class of this instantiation (the type being created)
+    * @param superC  The SymbolData corresponding to the super class of this instantiation (the type being created)
     */
   public SymbolData handleAnonymousClassInstantiation(AnonymousClassInstantiation that, SymbolData superC) {
-    SymbolData sd = _data.getNextAnonymousInnerClass();
+//    SymbolData sd = _data.getNextAnonymousInnerClass();
+    /* The preceding line changed to following because anonymous class is filed under its enclosing class not 
+     * enclosing method. */
+    SymbolData sd = superC.getNextAnonymousInnerClass();
+    System.err.println("***** In handleACI(" + that.getType().getName() + ", " + superC + ") sd = " + sd);
+    System.err.println("Inner classes of " + superC + " are: " + superC.getInnerClasses());
     if (sd == null) {
       _addError("Nested anonymous classes are not supported at any language lavel", that);
       return sd;
@@ -826,34 +831,44 @@ public class ExpressionTypeChecker extends Bob {
     * @return  The result of type checking the class instantiation.
     */
   public TypeData forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
-    if (_data.isDoublyAnonymous()) {
-      _addError(_data + "is a nested anonymous class, which is not supported at any language level", that);
+    /* Note: _data should be the enclosing class. */
+//    System.err.println("******** Type-checking the anonymous class " + that);
+//    if (! (_data instanceof SymbolData) )
+//      System.err.println("********* Type-checking following anon class blows up " + that);
+//                                     
+//    assert _data instanceof SymbolData;
+    
+    SymbolData enclosing = _data.getSymbolData();  // grabs the enclosing class if _data not already a SymbolData
+    
+    if (enclosing.isDoublyAnonymous()) {
+      _addError(enclosing + "is a nested anonymous class, which is not supported at any language level", that);
       return null;
     }
-    
-    final SymbolData superclass_result = getSymbolData(that.getType().getName(), _data, that); // resolve super class
-    
+    System.err.println("***** forSACInst called for anon class in " + enclosing);
+    final SymbolData superClass = getSymbolData(that.getType().getName(), enclosing, that); // resolve super class
+    System.err.println("**** SuperClass symbol is " + superClass);
     // Get this anonymous inner class's SymbolData, and finish resolving it.
-    SymbolData myData = handleAnonymousClassInstantiation(that, superclass_result);
+    SymbolData myData = handleAnonymousClassInstantiation(that, enclosing /*.getEnclosingClass() */);
+    System.err.println("This anonymous class's symbol is: " + myData);
     if (myData == null) return null;
     
     // Cannot instantiate a non-static inner class from a static context (i.e. new A.B() where B is dynamic).
     // Here, we make sure that if B is non-static, it is not an inner class of anything.
     String name = that.getType().getName();
-    int lastIndexOfDot = name.lastIndexOf(".");
-    if (!superclass_result.hasModifier("static") && !superclass_result.isInterface() && 
-        (superclass_result.getOuterData() != null) && lastIndexOfDot != -1) {
+    int lastIndexOfDot = name.lastIndexOf('.');
+    if (!superClass.hasModifier("static") && !superClass.isInterface() && 
+        (superClass.getOuterData() != null) && lastIndexOfDot != -1) {
       String firstPart = name.substring(0, lastIndexOfDot);
       String secondPart = name.substring(lastIndexOfDot + 1, name.length());
-      _addError(Data.dollarSignsToDots(superclass_result.getName()) + 
+      _addError(Data.dollarSignsToDots(superClass.getName()) + 
                 " is not a static inner class, and thus cannot be instantiated from this context." + 
                 "  Perhaps you meant to use an instantiation of the form new " + Data.dollarSignsToDots(firstPart) + 
                 "().new " + Data.dollarSignsToDots(secondPart) + "()", that);
     }
     
     
-    //if superclass_result is an interface, then the constructor that should be used is Object--i.e. no arguments
-    if (superclass_result.isInterface()) {
+    //if superClass is an interface, then the constructor that should be used is Object--i.e. no arguments
+    if (superClass.isInterface()) {
       Expression[] expr = that.getArguments().getExpressions();
       if (expr.length > 0) { 
         _addError("You are creating an anonymous inner class that directly implements an interface, thus you should" + 
@@ -861,7 +876,7 @@ public class ExpressionTypeChecker extends Bob {
                   expr.length + " arguments", that);}
     }
     
-    else classInstantiationHelper(that, superclass_result); //use super class here, since it has constructors in it
+    else classInstantiationHelper(that, superClass); //use super class here, since it has constructors in it
     
     
     //clone the variables and visit the body.
@@ -883,24 +898,38 @@ public class ExpressionTypeChecker extends Bob {
     * @return  The result of type checking the class instantiation.
     */
   public TypeData forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
+    /* Note: _data should be the enclosing class. */
+//    System.err.println("******** Type-checking the anonymous class " + that);
+//    if (! (_data instanceof SymbolData) )
+//      System.err.println("********* Type-checking following anon class blows up " + that);
+//                                     
+//    assert _data instanceof SymbolData;
+    
+   
     if (_data.isDoublyAnonymous()) {
       _addError(_data + "is a nested anonymous class, which is not supported at any language level", that);
       return null;
     }
-    TypeData enclosingType = that.getEnclosing().visit(this);
+    
+    SymbolData lexEnclosing = _data.getSymbolData();  // grabs the enclosing class if _data not already a SymbolData
+    
+    Expression receiver = that.getEnclosing();
+    
+    // Get the enclosing type as specified by the "receiver" expression.
+    TypeData enclosingType = receiver.visit(this);
+    
     if ((enclosingType == null) || ! assertFound(enclosingType, that.getEnclosing())) { return null; }
     
-    //make sure we can see enclosingType
-    checkAccessibility(that, enclosingType.getSymbolData().getMav(), enclosingType.getSymbolData().getName(), 
-                       enclosingType.getSymbolData(), _data.getSymbolData(), "class or interface", true);
+    SymbolData enclosing = enclosingType.getSymbolData();
     
-    final SymbolData superclass_result = getSymbolData(that.getType().getName(), enclosingType.getSymbolData(), 
-                                                       that.getType());
+    // Make sure we can see enclosing SymbolData from within lexEnclosing
+    checkAccessibility(that, enclosing.getMav(), enclosing.getName(), enclosing, lexEnclosing, "class or interface", true);
     
+    final SymbolData superClass = getSymbolData(that.getType().getName(), enclosing, that.getType());
     
-    
-    // Get this anonymous inner class's SymbolData
-    SymbolData myData = handleAnonymousClassInstantiation(that, superclass_result);
+    // Get this anonymous inner class's SymbolData; passing lexEnclosing is a hack.  It almost certainly should be
+    // enclosing, but the LLV processing contains the same error.  We need to be consistent.
+    SymbolData myData = handleAnonymousClassInstantiation(that, lexEnclosing);  // TODO: the wrong enclosing context?
     if (myData == null) return null;
     
     // TODO: will getSymbolData correctly handle all cases here?
@@ -908,7 +937,7 @@ public class ExpressionTypeChecker extends Bob {
     
     boolean resultIsStatic;
     
-    if (superclass_result.isInterface()) {
+    if (superClass.isInterface()) {
       Expression[] expr = that.getArguments().getExpressions();
       if (expr.length > 0) { 
         _addError("You are creating an anonymous inner class that directly implements an interface, thus you should" + 
@@ -919,9 +948,9 @@ public class ExpressionTypeChecker extends Bob {
     }
     
     
-    else { //superclass_result is an interface...need to do some extra checking for static types.
-      InstanceData result = classInstantiationHelper(that, superclass_result); //use super class here, since it has constructors in it
-      if (result == null) {return null;}
+    else { // superClass is an interface...need to do some extra checking for static types.
+      InstanceData result = classInstantiationHelper(that, superClass); //use super class here, since it has constructors in it
+      if (result == null) return null;
       
       resultIsStatic = result.getSymbolData().hasModifier("static");
     }
@@ -934,7 +963,7 @@ public class ExpressionTypeChecker extends Bob {
     
     else if (enclosingType.isInstanceType() && resultIsStatic) {
       _addError("You cannot instantiate a static inner class or interface with this syntax.  Instead, try new " + 
-                Data.dollarSignsToDots(superclass_result.getName()) + "()", that);
+                Data.dollarSignsToDots(superClass.getName()) + "()", that);
     }
     
     //clone the variables and visit the body.
@@ -985,7 +1014,8 @@ public class ExpressionTypeChecker extends Bob {
       if (inStaticMethod() && ! reference.hasModifier("static")  && ! reference.isLocalVariable()) {
         _addError("Non-static variable or field " + reference.getName() + " cannot be referenced from a static context", that);
       }
-      
+      if (reference.getType() == null || reference.getType().getInstanceData() == null) 
+        System.err.println("Expression type checking in " + _data + " blows up; AST = " + that);
       return reference.getType().getInstanceData();  
     }
     
@@ -1191,9 +1221,7 @@ public class ExpressionTypeChecker extends Bob {
   
   
   
-  /**
-   * Make sure the lhs is actually an array type and that the index is an int.
-   */
+  /** Make sure the lhs is actually an array type and that the index is an int. */
   public TypeData forArrayAccessOnly(ArrayAccess that, TypeData lhs, TypeData index) {
     //if either lhs or index is null then an error has already been caught--return null
     if (lhs == null || index == null) {return null;}
@@ -1218,13 +1246,11 @@ public class ExpressionTypeChecker extends Bob {
     }
     
     return ((ArrayData)lhs.getSymbolData()).getElementType().getInstanceData();
-    
-    
   }
-  
   
   //*** Primitives and Literals *******//
   public TypeData forStringLiteralOnly(StringLiteral that) {
+    assert symbolTable.get("java.lang.String") != null;
     return symbolTable.get("java.lang.String").getInstanceData();
   }
   
@@ -1314,7 +1340,7 @@ public class ExpressionTypeChecker extends Bob {
       _addError("Cannot access the non-static method " + md.getName() + " from a static context", that);
     }
     
-    //if MethodData is declared to throw exceptions, add them to thrown list:
+    // If MethodData is declared to throw exceptions, add them to thrown list:
     String[] thrown = md.getThrown();
     for (int i = 0; i<thrown.length; i++) {
       _thrown.addLast(new Pair<SymbolData, JExpression>(getSymbolData(thrown[i], _getData(), that), that));
@@ -1576,10 +1602,10 @@ public class ExpressionTypeChecker extends Bob {
   }
   
   
-  //moved from TypeChecker
+  // Moved from TypeChecker
   public TypeData forInnerClassDef(InnerClassDef that) {
     String className = that.getName().getText();
-    SymbolData sd = _data.getInnerClassOrInterface(className); // This works because className will never be a qualified name
+    SymbolData sd = _data.getInnerClassOrInterface(className); // className is always a qualified name
     // Check for cyclic inheritance
     if (checkForCyclicInheritance(sd, new LinkedList<SymbolData>(), that)) {
       return null;
@@ -1590,14 +1616,14 @@ public class ExpressionTypeChecker extends Bob {
     for (int i = 0; i < that.getTypeParameters().length; i++) {
       typeParameters_result[i] = that.getTypeParameters()[i].visit(this);
     }
-    final TypeData superclass_result = that.getSuperclass().visit(this);
+    final TypeData superClass = that.getSuperclass().visit(this);
     final TypeData[] interfaces_result = makeArrayOfRetType(that.getInterfaces().length);
     for (int i = 0; i < that.getInterfaces().length; i++) {
       interfaces_result[i] = that.getInterfaces()[i].visit(this);
     }
     final TypeData body_result = that.getBody().visit(new ClassBodyTypeChecker(sd, _file, _package, _importedFiles, 
                                                                                _importedPackages, _vars, _thrown));
-//    return forInnerClassDefOnly(that, mav_result, name_result, typeParameters_result, superclass_result, 
+//    return forInnerClassDefOnly(that, mav_result, name_result, typeParameters_result, superClass, 
 //                                interfaces_result, body_result);
     return null;
   }
@@ -1728,6 +1754,7 @@ public class ExpressionTypeChecker extends Bob {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       LanguageLevelConverter.symbolTable.clear();
       LanguageLevelConverter._newSDs.clear();
+      LanguageLevelConverter.loadSymbolTable();
       _etc = 
         new ExpressionTypeChecker(null, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
                                   new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
@@ -1856,12 +1883,13 @@ public class ExpressionTypeChecker extends Bob {
     public void testForSimpleUninitializedArrayInstantiation() {
       LanguageLevelVisitor llv = 
         new LanguageLevelVisitor(_etc._file, 
-                                 _etc._package, 
+                                 _etc._package,
+                                 null, // enclosingClassName for top level traversal
                                  _etc._importedFiles, 
                                  _etc._importedPackages, 
-                                 new LinkedList<String>(), 
-                                 new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
-                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+                                 new HashSet<String>(), 
+                                 new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                 new LinkedList<Command>());
 //      LanguageLevelConverter.symbolTable = llv.symbolTable = _etc.symbolTable;
 //      LanguageLevelConverter._newSDs = new Hashtable<SymbolData, LanguageLevelVisitor>();
       
@@ -1954,12 +1982,13 @@ public class ExpressionTypeChecker extends Bob {
     public void testForUninitializedArrayInstantiationOnly() {
       LanguageLevelVisitor llv = 
         new LanguageLevelVisitor(_etc._file, 
-                                 _etc._package, 
+                                 _etc._package,
+                                 null, // enclosingClassName for top level traversal
                                  _etc._importedFiles, 
-                                 _etc._importedPackages, 
-                                 new LinkedList<String>(), 
-                                 new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
-                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+                                 _etc._importedPackages,  
+                                 new HashSet<String>(), 
+                                 new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                 new LinkedList<Command>());
       
 //      LanguageLevelConverter.symbolTable = llv.symbolTable = _etc.symbolTable;
 //      LanguageLevelConverter._newSDs = new Hashtable<SymbolData, LanguageLevelVisitor>();
@@ -2029,11 +2058,12 @@ public class ExpressionTypeChecker extends Bob {
       LanguageLevelVisitor llv = 
         new LanguageLevelVisitor(_etc._file, 
                                  _etc._package, 
+                                 null, // enclosingClassName for top level traversal
                                  _etc._importedFiles, 
                                  _etc._importedPackages, 
-                                 new LinkedList<String>(), 
-                                 new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
-                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+                                 new HashSet<String>(), 
+                                 new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                 new LinkedList<Command>());
       
       ArrayData intArray = new ArrayData(SymbolData.INT_TYPE, llv, SourceInfo.NO_INFO);
       intArray.setIsContinuation(false);
@@ -3133,7 +3163,7 @@ public class ExpressionTypeChecker extends Bob {
       
       //if lhs is not a package data, it gets more complicated:
       
-      //we're referencing a variable inside of symbol data lhs:
+      // we're referencing a variable inside of symbol data lhs:
       VariableData myVar = new VariableData("myVar", _publicStaticMav, SymbolData.DOUBLE_TYPE, true, string);
       string.addVar(myVar);
       ComplexNameReference varRef1 = new ComplexNameReference(SourceInfo.NO_INFO, ref2, new Word(SourceInfo.NO_INFO, "myVar"));
@@ -3445,12 +3475,13 @@ public class ExpressionTypeChecker extends Bob {
       Hashtable<SymbolData, LanguageLevelVisitor> testNewSDs = LanguageLevelConverter._newSDs;
       LanguageLevelVisitor testLLVisitor = 
         new LanguageLevelVisitor(_etc._file, 
-                                 _etc._package, 
+                                 _etc._package,
+                                 null, // enclosingClassName for top level traversal
                                  _etc._importedFiles, 
                                  _etc._importedPackages, 
-                                 new LinkedList<String>(), 
-                                 new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
-                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+                                 new HashSet<String>(), 
+                                 new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                 new LinkedList<Command>());
       
       //if lhs is an array, and index is an int instance, no errors
       ArrayData ad = new ArrayData(SymbolData.INT_TYPE, testLLVisitor, SourceInfo.NO_INFO);             
@@ -3577,7 +3608,6 @@ public class ExpressionTypeChecker extends Bob {
       
     }
     
-    
     public void testMethodInvocationHelper() {
       MethodInvocation noArgs = new SimpleMethodInvocation(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "myName"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]));
       MethodInvocation typeArg = new SimpleMethodInvocation(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "myName"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[]{new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "int"))}));
@@ -3585,7 +3615,9 @@ public class ExpressionTypeChecker extends Bob {
       MethodInvocation oneDoubleArg = new SimpleMethodInvocation(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "myName"), new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[]{new DoubleLiteral(SourceInfo.NO_INFO, 4.2)}));
       
       //should be able to match no args correctly
-      MethodData noArgsM = new MethodData("myName", _publicMav, new TypeParameter[0], SymbolData.BOOLEAN_TYPE, new VariableData[0], new String[0], _sd2, new NullLiteral(SourceInfo.NO_INFO));
+      MethodData noArgsM = 
+        new MethodData("myName", _publicMav, new TypeParameter[0], SymbolData.BOOLEAN_TYPE, new VariableData[0], 
+                       new String[0], _sd2, new NullLiteral(SourceInfo.NO_INFO));
       _sd2.addMethod(noArgsM);
       assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), _etc.methodInvocationHelper(noArgs, _sd2.getInstanceData()));
       assertEquals("Should be no errors", 0, errors.size());
@@ -3828,11 +3860,12 @@ public class ExpressionTypeChecker extends Bob {
       LanguageLevelVisitor llv = 
         new LanguageLevelVisitor(_etc._file, 
                                  _etc._package, 
+                                 null, // enclosingClassName for top level traversal
                                  _etc._importedFiles, 
                                  _etc._importedPackages, 
-                                 new LinkedList<String>(), 
-                                 new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
-                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+                                 new HashSet<String>(), 
+                                 new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                 new LinkedList<Command>());
 //      LanguageLevelConverter.symbolTable = llv.symbolTable = _etc.symbolTable;
 //      LanguageLevelConverter._newSDs = new Hashtable<SymbolData, LanguageLevelVisitor>();
       ArrayData boolArray = new ArrayData(SymbolData.BOOLEAN_TYPE, llv, SourceInfo.NO_INFO);
@@ -4121,46 +4154,31 @@ public class ExpressionTypeChecker extends Bob {
     
     
     public void testForSimpleAnonymousClassInstantiation() {
-      AnonymousClassInstantiation basic = new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), 
-                                                                                new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
-                                                                                new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+      ClassOrInterfaceType objType = new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]);
+      AnonymousClassInstantiation basic = 
+        new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, 
+                                              objType, 
+                                              new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
+                                              new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       
-      
-      SymbolData object = new SymbolData("java.lang.Object");
-      object.setIsContinuation(false);
-      object.setPackage("java.lang");
-      object.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
-      MethodData cdObj = 
-        new MethodData("Object", _publicMav, new TypeParameter[0], object, new VariableData[0], new String[0], object, basic);
-      object.addMethod(cdObj);
-      
-      
-      symbolTable.put("java.lang.Object", object);
-      
-      /* This erroneous configuration now throws an error message asserting anonymous inner classes cannot be nested in LL. */
-//     // if our enclosing data does not have any anonymous inner classes, throw runtime exception:
-//     try {
-//       basic.visit(_etc);
-//       fail("Should have thrown runtime exception");
-//     }
-//     catch(RuntimeException e) {
-//       assertEquals("Should throw correct exception", "Internal Program Error: Couldn't find the SymbolData for the anonymous inner class.  Please report this bug.", e.getMessage());
-//     }
+      SymbolData object = LanguageLevelConverter.symbolTable.get("java.lang.Object");
       
       _sd1.setAnonymousInnerClassNum(0);
       
-      //once our enclosing data does have an anonymous inner class, it's okay to look it up
+      // Once our enclosing data does have an anonymous inner class, it's okay to look it up
       SymbolData anon1 = new SymbolData("i.like.monkey$1");
       anon1.setIsContinuation(false);
       anon1.setPackage("i.like");
       anon1.setMav(_publicMav);
       anon1.setOuterData(_sd1);
+      assert object != null;
+      anon1.setSuperClass(object);
       _sd1.addInnerClass(anon1);
-      
+      System.err.println("****** anon1 is: " + anon1);
+      System.err.println("****** instance data = " + anon1.getInstanceData());
       assertEquals("Should return anon1 instance", anon1.getInstanceData(), basic.visit(_etc));
       
       assertEquals("Should be no errors", 0, errors.size());
-      
       
       VariableDeclaration vdecl = new VariableDeclaration(SourceInfo.NO_INFO,
                                                           _packageMav,
@@ -4305,52 +4323,35 @@ public class ExpressionTypeChecker extends Bob {
     }
     
     public void testForComplexAnonymousClassInstantiation() {
+      ClassOrInterfaceType objType = new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]);
+      
       AnonymousClassInstantiation basic = 
         new ComplexAnonymousClassInstantiation(SourceInfo.NO_INFO, 
                                                new SimpleNameReference(SourceInfo.NO_INFO, 
                                                                        new Word(SourceInfo.NO_INFO, "bob")),
-                                               new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), 
+                                               objType, 
                                                new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
                                                new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       
+      // Create a variable 'bob' of type _sd2 within _sd1
       VariableData bob = new VariableData("bob", _publicMav, _sd2, true, _sd1);
-      _etc._vars.add(bob);
+      _etc._vars.add(bob);  // _data for _etc is _sd1
       
-      SymbolData object = new SymbolData("java.lang.Object");
-      object.setIsContinuation(false);
-      object.setPackage("java.lang");
-      object.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
-      MethodData cdObj = 
-        new MethodData("Object", _publicMav, new TypeParameter[0], object, new VariableData[0], new String[0], object, basic);
-      object.addMethod(cdObj);
-      
-      _sd2.addInnerClass(object);
-      object.setOuterData(_sd2);
-      
-      /* The code base now interprets the following situation as nesting an anonymous class in an anonymous class and 
-       * classifies it as a LL syntax error. */
-//     // if our enclosing data does not have any anonymous inner classes, throw runtime exception:
-//     try {
-//       basic.visit(_etc);
-//       fail("Should have thrown runtime exception");
-//     }
-//      catch(RuntimeException e) {
-//        assertEquals("Should throw correct exception", 
-//                     "Internal Program Error: Couldn't find the SymbolData for the anonymous inner class.  "
-//                       + "Please report this bug.", 
-//                     e.getMessage());
-//      }
+      SymbolData object = LanguageLevelConverter.symbolTable.get("java.lang.Object");
       
       _sd1.setAnonymousInnerClassNum(0);
       
-      //once our enclosing data does have an anonymous inner class, it's okay to look it up
+      // Once our enclosing data does have an anonymous inner class, it's okay to look it up
       SymbolData anon1 = new SymbolData("i.like.monkey$1");
       anon1.setIsContinuation(false);
       anon1.setPackage("i.like");
       anon1.setMav(_publicMav);
       anon1.setOuterData(_sd1);
+      assert object != null;
+      anon1.setSuperClass(object);
       _sd1.addInnerClass(anon1);
-      
+      System.err.println("****** anon1 is: " + anon1);
+      System.err.println("****** instance data = " + anon1.getInstanceData());
       assertEquals("Should return anon1 instance", anon1.getInstanceData(), basic.visit(_etc));
       
       assertEquals("Should be no errors", 0, errors.size());
@@ -4391,14 +4392,17 @@ public class ExpressionTypeChecker extends Bob {
                                                new ClassOrInterfaceType(SourceInfo.NO_INFO, "name", new Type[0]), 
                                                new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]), 
                                                classBb);
+      
+      // This test is not well-documented.  In refactoring, I tried to preserve it as best as possible.
       SymbolData sd = new SymbolData("name");
       sd.setIsContinuation(false);
       sd.setMav(_publicMav);
+      sd.setSuperClass(object);
       symbolTable.put("name", sd);
       SymbolData anon2 = new SymbolData("i.like.monkey$2");
       anon2.setIsContinuation(false);
       anon2.setPackage("i.like");
-      anon2.setSuperClass(null);
+      anon2.setSuperClass(sd);
       anon2.setOuterData(_sd1);
       _sd1.addInnerClass(anon2);
       

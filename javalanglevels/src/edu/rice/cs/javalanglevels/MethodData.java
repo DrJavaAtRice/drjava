@@ -77,7 +77,7 @@ public class MethodData extends BodyData {
    */
   public MethodData(String name, ModifiersAndVisibility modifiersAndVisibility, TypeParameter[] typeParameters, 
                     SymbolData returnType, VariableData[] params, String[] thrown, SymbolData enclosingClass, 
-                    JExpression jexpr) {
+                    JExpression jexpr) { 
     super(enclosingClass);
     _name = name;
     _modifiersAndVisibility = modifiersAndVisibility;
@@ -90,7 +90,7 @@ public class MethodData extends BodyData {
   }
   
   /** Constructor used by the LanguageLevelConverter, where only the name and params matter*/
-  public MethodData(String name, VariableData[] params) {
+  public MethodData(String name, VariableData[] params) { 
     this(name, new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]), new TypeParameter[0], null, 
          params, new String[0], null, new NullLiteral(SourceInfo.NO_INFO));
   }
@@ -118,12 +118,10 @@ public class MethodData extends BodyData {
   public void setGenerated(boolean generated) { _generated = generated; }
   
   /** Two MethodDatas are equal if ... */ 
-  public boolean equals(Object obj) {
+  public boolean equals(Object obj) { 
     if (obj == this) return true;
     if (obj == null) return false;
-    if ((obj.getClass() != this.getClass())) { //|| (obj.hashCode() != this.hashCode())) {
-      return false;
-    }
+    if ((obj.getClass() != this.getClass())) return false;
     MethodData md = (MethodData) obj;
 
     return _name.equals(md.getName()) &&
@@ -167,12 +165,11 @@ public class MethodData extends BodyData {
   public ModifiersAndVisibility getMav() { return _modifiersAndVisibility; }
     
   /** Makes this method public.  Only used in ClassBodyElementaryVisitor. */
-  public void addPublicMav() {
+  public void addPublicMav() { 
     String[] oldMav = _modifiersAndVisibility.getModifiers();
     String[] modifiers = new String[oldMav.length + 1];
     modifiers[0] = "public";
-    for (int i = 0; i < oldMav.length; i++) {
-      modifiers[i+1] = oldMav[i];
+    for (int i = 0; i < oldMav.length; i++) {   modifiers[i+1] = oldMav[i];
     }
     _modifiersAndVisibility = new ModifiersAndVisibility(_modifiersAndVisibility.getSourceInfo(), modifiers);
   }
@@ -181,9 +178,12 @@ public class MethodData extends BodyData {
   /** @return the JExpression corresponding to this method*/
   public JExpression getJExpression() { return _jexpr; }
   
-  public String toString() { return "MethodData<" + _name + /* ", " + _modifiersAndVisibility + ", " + 
+  public String toString() { return "method: " + _name; }
+  
+  public String toBigString() { 
+    return "method " + _name + "<" + _modifiersAndVisibility + ", " + 
     Arrays.toString(_typeParameters) + ", " + _returnType + ", " + Arrays.toString(_params) + ", " + 
-    Arrays.toString(_thrown) + ", " + _jexpr + ", " + _generated + */ ">" ; }
+    Arrays.toString(_thrown) + ", " + _jexpr + ", " + _generated +  ">" ; }
   
   /** Tests the methods declared above*/
   public static class MethodDataTest extends TestCase {
@@ -193,7 +193,8 @@ public class MethodData extends BodyData {
     
     private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
     private ModifiersAndVisibility _publicMav2 = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    private ModifiersAndVisibility _protectedMav = 
+      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
     private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
     
     public MethodDataTest() { this(""); }
@@ -208,8 +209,12 @@ public class MethodData extends BodyData {
       Type t = new PrimitiveType(SourceInfo.NO_INFO, "int");
       Word name = new Word(SourceInfo.NO_INFO, "m");
       Word paramName = new Word(SourceInfo.NO_INFO, "i");
-      FormalParameter fp = new FormalParameter(SourceInfo.NO_INFO, new UninitializedVariableDeclarator(SourceInfo.NO_INFO, t, paramName), false);
-      MethodDef mdef = new AbstractMethodDef(SourceInfo.NO_INFO, _publicMav, tp, t, name, new FormalParameter[] {fp}, new ReferenceType[0]);
+      FormalParameter fp = 
+        new FormalParameter(SourceInfo.NO_INFO, new UninitializedVariableDeclarator(SourceInfo.NO_INFO, t, paramName), 
+                            false);
+      MethodDef mdef = 
+        new AbstractMethodDef(SourceInfo.NO_INFO, _publicMav, tp, t, name, new FormalParameter[] {fp}, 
+                              new ReferenceType[0]);
       _md = new MethodData("m", _publicMav, tp, SymbolData.INT_TYPE, new VariableData[] {vd},
                              new String[] {"I throw this"}, SymbolData.BOOLEAN_TYPE, mdef);
 
@@ -246,8 +251,9 @@ public class MethodData extends BodyData {
      assertFalse("Two MethodDatas with different MAVs are not equal", _md.equals(_md2));
      
     //different type parameters
-     TypeParameter[] tp2 = new TypeParameter[] {new TypeParameter(SourceInfo.NO_INFO, new TypeVariable(SourceInfo.NO_INFO,"tv"), 
-                                                                new TypeVariable(SourceInfo.NO_INFO,"i"))};
+     TypeParameter[] tp2 = 
+       new TypeParameter[] { new TypeParameter(SourceInfo.NO_INFO, new TypeVariable(SourceInfo.NO_INFO,"tv"), 
+                                               new TypeVariable(SourceInfo.NO_INFO,"i"))};
    
      _md2 = new MethodData("m", _publicMav2, tp2, SymbolData.INT_TYPE, new VariableData[]{vd},
                            new String[] {"I throw this"}, SymbolData.BOOLEAN_TYPE, mdef);

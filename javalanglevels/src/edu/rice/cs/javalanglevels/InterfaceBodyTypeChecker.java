@@ -46,7 +46,7 @@ import edu.rice.cs.plt.iter.*;
 import junit.framework.TestCase;
 
 /**Do the TypeChecking appropriate to the context of a class body.  Common to all Language Levels.*/
-public class InterfaceBodyTypeChecker extends Bob {
+public class InterfaceBodyTypeChecker extends SpecialTypeChecker {
   
   /**The SymbolData corresponding to this interface.*/
   private SymbolData _symbolData;

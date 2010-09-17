@@ -39,26 +39,30 @@ package edu.rice.cs.javalanglevels.util;
 import java.awt.EventQueue;
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.*;
 import java.awt.datatransfer.*;
+import java.lang.reflect.Array;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.channels.FileChannel;
+
+import javax.swing.*;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
-import java.io.IOException;
+
 
 public class Utilities {
   
   /** A file copy method taken from the web. */
   public static void copyFile(File sourceFile, File destFile) throws IOException {
-    if(! destFile.exists()) destFile.createNewFile();
+    if (! destFile.exists()) destFile.createNewFile();
     
     FileChannel source = null;
     FileChannel destination = null;
@@ -77,7 +81,7 @@ public class Utilities {
   /** Runs the task synchronously if the current thread is the event thread; otherwise passes it to the
     * event thread to be run asynchronously after all events already on the queue have been processed.
     */
-  public static void invokeLater(Runnable task) {
+  public static void invokeLater(Runnable task) { 
     if (EventQueue.isDispatchThread()) {
       task.run(); 
       return;
@@ -85,7 +89,7 @@ public class Utilities {
     EventQueue.invokeLater(task);
   }
   
-  public static void invokeAndWait(Runnable task) {
+  public static void invokeAndWait(Runnable task) { 
     if (EventQueue.isDispatchThread()) {
       task.run(); 
       return;
@@ -96,16 +100,17 @@ public class Utilities {
   
   public static void main(String[] args) { clearEventQueue(); }
   
-  public static void clearEventQueue() {
-    Utilities.invokeAndWait(new Runnable() { public void run() { } });
-  }
+  public static void clearEventQueue() { Utilities.invokeAndWait(new Runnable() { public void run() { } }); }
   
   /** Show a modal debug message box with an OK button regardless of TEST_MODE.
     * @param msg string to display
     */
   public static void show(final String msg) { 
-    Utilities.invokeAndWait(new Runnable() { public void run() {
-      new ScrollableDialog(null,"Debug Message", "Debug Message from Utilities.show():", msg, false).show(); } } );
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        new ScrollableDialog(null,"Debug Message", "Debug Message from Utilities.show():", msg, false).show(); 
+      } 
+    } );
   }
   
   /** Shows a modal debug message box with an OK button when not in TEST_MODE.
@@ -116,21 +121,21 @@ public class Utilities {
   /** Shows a modal message box with an OK button.
     * @param msg string to display
     */
-  public static void showMessageBox(final String msg, final String title) {
-    // Utilities.invokeAndWait(new Runnable() { public void run() { JOptionPane.showMessageDialog(null, msg); } } );
-    Utilities.invokeAndWait(new Runnable() { public void run() {
-      new ScrollableDialog(null, title, "Message:", msg, false).show();
-    } } );
+  public static void showMessageBox(final String msg, final String title) { 
+//    Utilities.invokeAndWait(new Runnable() { public void run() { JOptionPane.showMessageDialog(null, msg); } } );
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { new ScrollableDialog(null, title, "Message:", msg, false).show(); } 
+    } );
   }
   
-  public static void showStackTrace(final Throwable t) {
-    Utilities.invokeAndWait(new Runnable() { public void run() { 
-      new ScrollableDialog(null, "Stack Trace", "Stack Trace:", getStackTrace(t), false).show();
-    } } );
+  public static void showStackTrace(final Throwable t) { 
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() {  new ScrollableDialog(null, "Stack Trace", "Stack Trace:", getStackTrace(t), false).show(); } 
+    } );
   }
   
   /** @return a string with the current clipboard selection, or null if not available. */
-  public static String getClipboardSelection(Component c) {
+  public static String getClipboardSelection(Component c) { 
     Clipboard cb = c.getToolkit().getSystemClipboard();
     if (cb == null) return null;
     Transferable t = cb.getContents(null);
@@ -149,16 +154,16 @@ public class Utilities {
   }
   
   /** @return an action with a new name that delegates to another action. */
-  public static AbstractAction createDelegateAction(String newName, final Action delegate) {
-    return new AbstractAction(newName) {
-      public void actionPerformed(ActionEvent ae) { delegate.actionPerformed(ae); }
+  public static AbstractAction createDelegateAction(String newName, final Action delegate) { 
+    return new AbstractAction(newName) { 
+      public void actionPerformed(ActionEvent ae) { delegate.actionPerformed(ae); } 
     };
   }
     /** Gets the stack trace of the given Throwable as a String.
     * @param t the throwable object for which to get the stack trace
     * @return the stack trace of the given Throwable
     */
-  public static String getStackTrace(Throwable t) {
+  public static String getStackTrace(Throwable t) { 
     StringWriter sw = new StringWriter();
     PrintWriter pw = new PrintWriter(sw);
     t.printStackTrace(pw);
@@ -168,15 +173,17 @@ public class Utilities {
   /** Gets the stack trace of the current code. Does not include this method.
     * @return the stack trace for the current code
     */
-  public static String getStackTrace() {
-    try { throw new Exception(); } // Thread.getStackTrace() might be more efficient, but is new in Java 5.0
-    catch (Exception e) {
+  public static String getStackTrace() { 
+    // TODO: Thread.getStackTrace() which is new to Java 5.0 might be more efficient
+    try { throw new Exception(); } 
+    catch (Exception e) {   
       StringWriter sw = new StringWriter();
       PrintWriter pw = new PrintWriter(sw);
       StackTraceElement[] stes = e.getStackTrace();
       int skip = 1;
-      for(StackTraceElement ste: stes) {
-        if (skip>0) { --skip; } else { pw.print("at "); pw.println(ste); }
+      for(StackTraceElement ste: stes) { 
+        if (skip > 0) --skip; 
+        else { pw.print("at "); pw.println(ste); }
       }
       return sw.toString();
     }
@@ -184,14 +191,14 @@ public class Utilities {
   
   /** The standard java.util contains method on arrays of reference type.
     * @return true iff the value elt appears in a. */
-  public static boolean contains(Object[] a, Object elt) {
+  public static boolean contains(Object[] a, Object elt) { 
     for (Object o: a) { if (o.equals(elt)) return true; }
     return false;
   }
   
   /** @return true iff that has a visibility modifier. */
-  public static boolean hasVisibilityModifier(String[] modifiers) {
-    for (String s: modifiers) {
+  public static boolean hasVisibilityModifier(String[] modifiers) { 
+    for (String s: modifiers) { 
       if (s.equals("private") || s.equals("public") || s.equals("protected")) return true;
     }
     return false;
@@ -208,4 +215,16 @@ public class Utilities {
   
   /** @return true iff that has "abstract" as a modifier. */
   public static boolean isAbstract(String[] modifiers) { return contains(modifiers, "abstract"); }
+  
+  public static <T> T[] catenate(T[] A, T[] B) {
+//   T[] C = Arrays.copyOf(A, A.length + B.length);  /* depends on Java 6 */
+    
+    /* The following block is Java 5 hackery equivalent of preceding commented out line. */   
+    Class<T> eltClass = (Class<T>) A.getClass().getComponentType();
+    T[] C = (T[]) Array.newInstance(eltClass, A.length + B.length);
+    System.arraycopy(A, 0, C, 0, A.length);
+    
+    System.arraycopy(B, 0, C, A.length, B.length);
+    return C;
+  }
 }

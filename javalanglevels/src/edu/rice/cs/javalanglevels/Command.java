@@ -29,27 +29,7 @@
 
 package edu.rice.cs.javalanglevels;
 
-/** Utility class, allows us to store two things as a single object. */
-public class Pair<T,U> {
-  T _first;
-  U _second;
-
-  public Pair(T first, U second) {
-    _first = first;
-    _second = second;
-  }
-
-  public T getFirst() { return _first; }
-
-  public U getSecond() { return _second; }
-  
-  public boolean equals(Object o) {
-    return  (o != null) && (o.getClass() == this.getClass()) &&
-      getFirst().equals(((Pair) o).getFirst()) && getSecond().equals(((Pair) o).getSecond());
-  }
-  
-  /** Define a hash code based on the first and second's hash code */
-  public int hashCode() { return _first.hashCode() ^ _second.hashCode(); }
-  
-  public String toString() { return "Pair(" + _first + ", " + _second + ")"; }
+/** Utility interface, used as supertype of anonymous command classes. */
+public interface Command {
+  void execute();
 }

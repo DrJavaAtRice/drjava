@@ -39,6 +39,7 @@ package edu.rice.cs.javalanglevels;
 import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.parser.JExprParser;
 import edu.rice.cs.javalanglevels.util.Log;
+import edu.rice.cs.javalanglevels.util.UnexpectedException;
 import java.util.*;
 import java.io.File;
 import edu.rice.cs.plt.reflect.JavaVersion;
@@ -50,12 +51,30 @@ import junit.framework.TestCase;
   * to all langauge levels. */
 public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implements JExpressionIFVisitor<TypeData> {
   
+  public static ModifiersAndVisibility _publicMav = 
+    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+  public static ModifiersAndVisibility _protectedMav = 
+    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+  public static ModifiersAndVisibility _privateMav = 
+    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+  public static ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+  public static ModifiersAndVisibility _abstractMav =
+    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+  public static ModifiersAndVisibility _finalMav =
+    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+  public static ModifiersAndVisibility _finalPublicMav =
+    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final", "public"});
+  public static ModifiersAndVisibility _publicAbstractMav =
+    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public", "abstract"});
+  public static ModifiersAndVisibility _publicStaticMav =
+    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public", "static"});
+  
   protected static final Log _log = new Log("LLConverter.txt", false);
 
-  /**Holds any errors that are encountered during TypeChecking*/
+  /** Holds any errors that are encountered during TypeChecking */
   static LinkedList<Pair<String, JExpressionIF>> errors;
   
-  /**Holds the information about any classes/interfaces that have been resolved*/
+  /** Holds the information about any classes/interfaces that have been resolved */
   static final Symboltable symbolTable = LanguageLevelConverter.symbolTable;
   
   /**True if we have an error we can't recover from*/
@@ -111,22 +130,35 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
                                "Please report this bug.");
   }
   
+  /** Adds an appropriate definition of junit.framework.TestCase to symbolTable. */
+  protected static SymbolData defineTestCaseClass() {
+    SymbolData testCase = new SymbolData("junit.framework.TestCase");
+    testCase.setIsContinuation(false);
+    testCase.setMav(_publicMav);
+    testCase.setPackage("junit.framework");
+    LanguageLevelConverter.symbolTable.put("junit.framework.TestCase", testCase);
+    return testCase;
+  }
+  
   /** Returns the SymbolData corresponding to the name className.  Checks 1) unqualified or partially-qualified inner
     * classes visible in this scope, 2) fully-qualified inner classes, 3) primitives, 4) array types, 5) fully
     * qualified top-level classes, 6) imported classes, 7) a top-level class within this package, 8) imported packages,
     * and 9) java.lang classes.  Assumes that an error should be generated if the class is not found, and that
     * classes are not allowed to extend java.lang.Runnable.
     * Will always check accessiblity since giveException is assumed to be true.
-    * */
-  public SymbolData getSymbolData(String className, Data currentData, JExpression jexpr) {
-    return getSymbolData(className, currentData, jexpr, true);
+    * @param className    The class name to look up which may or may not be fully qualified.
+    * @param enclosingData  The enclosing data -- either a MethodData or a ClassData for this reference
+    * @param jexpr        The AST of the phrase containing the reference.
+    * */ 
+  public SymbolData getSymbolData(String className, Data enclosingData, JExpression jexpr) {
+    return getSymbolData(className, enclosingData, jexpr, true);
   }
   
   /** Call the next version of GetSymbolData, but pass it giveException as the flag for whether or not to
     * give ambigException.
     */
-  public SymbolData getSymbolData(String className, Data currentData, JExpression jexpr, boolean giveException) {
-    return getSymbolData(giveException, className, currentData, jexpr, giveException);
+  public SymbolData getSymbolData(String className, Data enclosingData, JExpression jexpr, boolean giveException) {
+    return getSymbolData(giveException, className, enclosingData, jexpr, giveException);
   }
   
   /** Returns the SymbolData corresponding to the name className.  Checks 1) unqualified or partially-qualified inner
@@ -135,12 +167,12 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     * and 9) java.lang classes.  Assumes that classes are not allowed to extend java.lang.Runnable.
     * Will only check accessibility if giveException is true.
     *  */
-  public SymbolData getSymbolData(boolean giveAmbigException, String className, Data currentData, JExpression jexpr, 
+  public SymbolData getSymbolData(boolean giveAmbigException, String className, Data enclosingData, JExpression jexpr, 
                                   boolean giveException) {
-    Data d = currentData;
+    Data d = enclosingData;
     SymbolData result = null;
     while (d != null && result == null) {
-      result = currentData.getInnerClassOrInterface(className);
+      result = enclosingData.getInnerClassOrInterface(className);
       d = d.getOuterData();
     }
       
@@ -151,7 +183,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       return null;  // return null to indicate we were unable to resolve this.
     }
     if (result == null || ! giveException) return result;
-    if (checkAccessibility(jexpr, result.getMav(), className, result, currentData.getSymbolData(), "class or interface")) {
+    if (checkAccessibility(jexpr, result.getMav(), className, result, enclosingData.getSymbolData(), "class or interface")) {
       return result;
     }
     else return result;
@@ -166,15 +198,22 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     SourceInfo si = jexpr.getSourceInfo();
     LanguageLevelVisitor llv = 
       new LanguageLevelVisitor(_file, 
-                               _package, 
+                               _package,
+                               null,  // enclosing class for top level traversal
                                _importedFiles, 
                                _importedPackages, 
-                               new LinkedList<String>(), 
-                               new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
-                               new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
-//    LanguageLevelConverter.symbolTable = llv.symbolTable = this.symbolTable;
+                               new HashSet<String>(), 
+                               new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                               new LinkedList<Command>());
+
     LanguageLevelConverter._newSDs.clear();
-    SymbolData sd = llv.getSymbolData(className, si, false, false, false, true); // TODO: Is this right?
+    assert LanguageLevelConverter.symbolTable.containsKey("java.lang.Object");
+    SymbolData sd = llv.getSymbolData(className, si, false, true); // TODO: Is this right?
+//    if (sd == null) {
+//      System.err.println("***ALARM*** The following symbol was not found in symbolTable: " + className);
+//    }
+//    else if (sd.getName().equals("java.lang.Throwable"))
+//          System.err.println("*** Package for retrieved java.lang.Throwable is " + sd.getPackage());
     if (sd == null || sd.isContinuation()) {
       if (giveException) { _addError("Class or variable " + className + " not found.", jexpr); }
       return null;
@@ -204,7 +243,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     if (sd.getOuterData() != null) { // if this is an inner class, check its outer data.
       return notRightPackage(sd.getOuterData().getSymbolData());
     }
-    return (sd.getPackage().equals("") && sd.getName().lastIndexOf(".") != -1) || 
+    return (sd.getPackage().equals("") && sd.getName().lastIndexOf('.') != -1) || 
       ! sd.getName().startsWith(sd.getPackage());
   }
   
@@ -224,18 +263,17 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     * @param className  The className to qualify.
     */
   protected String getQualifiedClassName(String className) {
-    if (!_package.equals("") && ! className.startsWith(_package)) { return _package + "." + className;}
+    if (! _package.equals("") && ! className.startsWith(_package)) { return _package + '.' + className;}
     else return className;
   }
-
   
   /** Check to see if the two symbol datas are in the same package.*/
   private static boolean _areInSamePackage(SymbolData enclosingSD, SymbolData thisSD) {
     String enclosingSDName = enclosingSD.getName();
-    int lastIndexOfDot = enclosingSDName.lastIndexOf(".");
+    int lastIndexOfDot = enclosingSDName.lastIndexOf('.');
     if (lastIndexOfDot != -1) {
 
-      //check for inner class names:
+      // Check for inner class names:
       if (enclosingSD.getOuterData() != null) {
         return _areInSamePackage(enclosingSD.getOuterData().getSymbolData(), thisSD);
       }
@@ -244,7 +282,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     }
     else { enclosingSDName = ""; }
     String thisSDName = thisSD.getName();
-    lastIndexOfDot = thisSDName.lastIndexOf(".");
+    lastIndexOfDot = thisSDName.lastIndexOf('.');
     if (lastIndexOfDot != -1) {
       
       //check for inner class names:
@@ -283,17 +321,25 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     Iterator<MethodData> iter = mds.iterator();
     LinkedList<MethodData> matching = new LinkedList<MethodData>();
     LinkedList<MethodData> matchingWithAutoBoxing = new LinkedList<MethodData>();
+    if (enclosingSD.getName().equals("NonEmpty"))
+      System.err.println("Starting search for method " + methodName + " in " + enclosingSD);
     while (iter.hasNext()) {
       MethodData md = iter.next();
+//      System.err.println("Testing method " + md.getName());
+      if (md.getName().equals("NonEmpty")) {
+        System.err.println("*** for NonEmpty(), params length = " + md.getParams().length + "; args length = " + arguments.length);
+      }
       // Check that the names match.
       if (md.getName().equals(methodName) && md.getParams().length == arguments.length) {
         VariableData[] vds = md.getParams();
         int i;
         
         boolean matches = true;
+        
         // First check to see if any methods exist that match the invocation without using autoboxing
         for (i = 0; i < vds.length && i < arguments.length; i++) {
-          matches = matches && _isAssignableFromWithoutAutoboxing(vds[i].getType().getSymbolData(), arguments[i].getSymbolData());
+          matches = matches && 
+            _isAssignableFromWithoutAutoboxing(vds[i].getType().getSymbolData(), arguments[i].getSymbolData());
           if (matches == false) break;
         }
         
@@ -303,11 +349,27 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
         }
 
         if (matches == false) { // Didn't match the method directly; try to match it with autoboxing
+          if (enclosingSD.getName().equals("NonEmpty")) {
+            System.err.println("*** Looking for autoboxing match for NonEmpty");
+            System.err.println("vds = " + Arrays.toString(vds) + " arguments = " + Arrays.toString(arguments));
+          }
           matches = true;
           // Now check to see if any methods exist that match the invocation while using autoboxing.
           for (i = 0; i < vds.length && i < arguments.length; i++) {
+            if  (enclosingSD.getName().equals("NonEmpty")) {
+              SymbolData parmSD = vds[i].getType().getSymbolData();
+              System.err.println("vds[" + i + "].getType().getSymbolData() = " + parmSD);
+              SymbolData argSD = arguments[i].getSymbolData();
+              System.err.println("arguments[" + i + "].getSymbolData() = " + argSD);
+              if (argSD.equals(SymbolData.INT_TYPE) && parmSD.equals(symbolTable.get("java.lang.Object")))
+                assert _isAssignableFrom(parmSD, argSD);
+            }
             matches = matches && _isAssignableFrom(vds[i].getType().getSymbolData(), arguments[i].getSymbolData());
-            if (matches == false) break;
+            if (matches == false) {
+              if (enclosingSD.getName().equals("NonEmpty"))
+                System.err.println("No match found for NonEmpty using autoboxing");
+              break;
+            }
           }
 
           // if all arguments checked out, check the access stuff.
@@ -332,6 +394,11 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
         matchingWithAutoBoxing.addAll(p.getSecond());
       }
     }
+    if (methodName.equals("NonEmpty")) {
+      System.err.println("***** enclosingSD = " + enclosingSD + "; thisSD = " + thisSD + "; matching methods: " + matching);
+      System.err.println("***** matching methods with autoboxing: " + matchingWithAutoBoxing);
+    }
+    
     return new Pair<LinkedList<MethodData>, LinkedList<MethodData>> (matching, matchingWithAutoBoxing);
   }
       
@@ -370,20 +437,32 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   }
   
   
-  /**
-   * Finds which SymbolData this method is in, beginning at this SymbolData and recursively visiting super classes.
-   * Adds an error if the method is not found.
-   * @param methodName  The name of the method.
-   * @param enclosingSD  The SymbolData we're currently searching for the method.
-   * @param arguments  The instance types of the arguments to the method.
-   * @param jexpr  The JExpression for the method invocation used in the error message.
-   * @param errorMessage  The error to be displayed if the method cannot be found.
-   * @param isConstructor  Tells us if this method is a constructor. If so, we know it must be in the initial SymbolData.
-   *                       We assume that the correct SymbolData was passed in.
-   * @param thisSD  The SymbolData of the initial SymbolData.
-   * @return  The SymbolData where we find the method of null if it was not found.  An error is added if it is not found.
-   */
-  protected MethodData _lookupMethod(String methodName, SymbolData enclosingSD, InstanceData[] arguments, JExpression jexpr, String errorMessage, boolean isConstructor, SymbolData thisSD) {
+  /** Finds which SymbolData this method is in, beginning at this SymbolData and recursively visiting super classes.
+    * Adds an error if the method is not found.
+    * @param methodName  The name of the method.
+    * @param enclosingSD  The SymbolData we're currently searching for the method.
+    * @param arguments  The instance types of the arguments to the method.
+    * @param jexpr  The JExpression for the method invocation used in the error message.
+    * @param errorMessage  The error to be displayed if the method cannot be found.
+    * @param isConstructor  Tells us if this method is a constructor. If so, we know it must be in the initial SymbolData.
+    *                       We assume that the correct SymbolData was passed in.
+    * @param thisSD  The SymbolData of the initial SymbolData.
+    * @return  The SymbolData where we find the method of null if it was not found.  An error is added if it is not found.
+    */
+  protected MethodData _lookupMethod(String methodName, SymbolData enclosingSD, InstanceData[] arguments, 
+                                     JExpression jexpr, String errorMessage, boolean isConstructor, SymbolData thisSD) {
+//    if (enclosingSD.isContinuation() && jexpr != null) {
+//      SymbolData newSD = getSymbolData(enclosingSD.getName(), enclosingSD, jexpr);
+//      if (newSD != null) {
+//        System.err.println("Replacing " + enclosingSD + " by " + newSD);
+//        if (methodName == "getName()" || methodName == "getName") {
+//          System.err.println("The methods of " + enclosingSD + " are: \n" + enclosingSD.getMethods());
+//          throw new UnexpectedException("Computation aborted");
+////          System.err.println("The methods of " + newSD + " are: \n" + newSD.getMethods());
+//        }
+//        enclosingSD = newSD;
+//      }
+//    }
     if (! isConstructor && methodName.equals(LanguageLevelVisitor.getUnqualifiedClassName(enclosingSD.getName()))) {
       _addError("The keyword 'new' is required to invoke a constructor", jexpr);
     }
@@ -550,7 +629,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     // Check for the protected modifier.
     for (int i = 0; i < modifiers.length; i++) {
       if (modifiers[i].equals("protected")) {
-        // Compare the package names. Remember that inner classes have '$' in their names.
+        // Compare the package names. Remember that inner classes have '$' in their names.  NO! TODO: Fix this !!!
         if (_areInSamePackage(enclosingSD, thisSD)) {
           return true;
         }
@@ -669,12 +748,10 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     return true;
   }
 
-  /**
-   *  Add an error pair consisting of the specified String message and JExpression.
-   * Set _errorAdded to true.
-   * @param message  Error message
-   * @param that  The JExpression corresponding to where the error is.
-   */
+  /** Adds an error pair consisting of the specified String message and JExpression. Sets _errorAdded to true.
+    * @param message  Error message
+    * @param that  The JExpression corresponding to where the error is.
+    */
   protected static void _addError(String message, JExpressionIF that) {
     _errorAdded = true;
     Pair<String, JExpressionIF> p = new Pair<String, JExpressionIF>(message, that);
@@ -769,29 +846,22 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     return null;
   }
   
-   
-  
   /** Return whether the value on the right can be assigned to the value on the left. 
     * Uses autoboxing if the user has java 1.5.
     */
-  protected boolean _isAssignableFrom(SymbolData sdLeft, SymbolData sdRight) {
-    
+  protected static boolean _isAssignableFrom(SymbolData sdLeft, SymbolData sdRight) {
     if (sdRight == null) return false;
+//    System.err.println("Java Version = " + LanguageLevelConverter.OPT.javaVersion());
+    assert LanguageLevelConverter.versionSupportsAutoboxing(LanguageLevelConverter.OPT.javaVersion());
     return sdRight.isAssignableTo(sdLeft, LanguageLevelConverter.OPT.javaVersion());
-
   }
   
-  /**
-   * Return whether the value on the right can be assigned to the value on the left. 
-   * Does not use autoboxing.
-   */
+  /** Return whether the value on the right can be assigned to the value on the left.  Does not use autoboxing. */
   protected boolean _isAssignableFromWithoutAutoboxing(SymbolData sdLeft, SymbolData sdRight) {
     
     if (sdRight == null) { return false; }
-    return sdRight.isAssignableTo(sdLeft, JavaVersion.JAVA_1_4);
+    return sdRight.isAssignableTo(sdLeft, JavaVersion.JAVA_1_4);  // Version 1.4 used to turn off autoboxing
   }
-
-
 
   /**
    * The method will add an error for each abstract method in the current SymbolData's inheritance hierarchy
@@ -825,11 +895,8 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     // TODO: Check all enclosingDatas (interfaces too).
     _checkAbstractMethodsHelper(sd, sd.getSuperClass(), cmds, classDef);
     //check interfaces as well:
-    LinkedList<SymbolData> interfaces = sd.getInterfaces();
-    Iterator<SymbolData> iter = interfaces.iterator();
-    while (iter.hasNext()) {
-      SymbolData next = iter.next();
-      _checkAbstractMethodsHelper(sd, next, cmds, classDef);
+    for (SymbolData iSD: sd.getInterfaces()) {
+      _checkAbstractMethodsHelper(sd, iSD, cmds, classDef);
     }
   }
   
@@ -864,7 +931,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
           VariableData[] params = md.getParams();
           InstanceData[] arguments = new InstanceData[params.length];
           for (int i = 0; i < params.length; i++) {
-            arguments[i] = params[i].getType();
+            arguments[i] = params[i].getType().getInstanceData();
           }
           message.append("(");
           if (arguments.length > 0) {
@@ -886,10 +953,8 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     _checkAbstractMethodsHelper(origSd, sd.getSuperClass(), _cloneMethodDataList(concreteMds), classDef);
     
     //check the interfaces
-    LinkedList<SymbolData> interfaces = sd.getInterfaces();
-    Iterator<SymbolData> interiter = interfaces.iterator();
-    while (interiter.hasNext()) {
-      _checkAbstractMethodsHelper(origSd, interiter.next(), _cloneMethodDataList(concreteMds), classDef);
+    for (SymbolData iSD: sd.getInterfaces()) {
+      _checkAbstractMethodsHelper(origSd, iSD, _cloneMethodDataList(concreteMds), classDef);
     }
   }
   
@@ -943,11 +1008,12 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       hierarchy.addLast(innerClasses.get(i));
     }
     
-    boolean doReturn = checkForCyclicInheritance(sd.getSuperClass(), cloneSDList(hierarchy), tdb);
-    LinkedList<SymbolData> interfaces = sd.getInterfaces();
-    for (int i = 0; i < interfaces.size(); i++) {
-      SymbolData currInterface = interfaces.get(i);
-      doReturn |= checkForCyclicInheritance(currInterface, cloneSDList(hierarchy), tdb);
+    LinkedList<SymbolData> clonedHierarchy = cloneSDList(hierarchy);
+    boolean doReturn = checkForCyclicInheritance(sd.getSuperClass(), clonedHierarchy, tdb);
+    
+    //check the interfaces
+    for (SymbolData iSD: sd.getInterfaces()) {
+      doReturn |= checkForCyclicInheritance(iSD, clonedHierarchy, tdb);
     }
     
     return doReturn;
@@ -955,12 +1021,18 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   
   /**Do what is necessary to handle a class def */
   public TypeData forClassDef(ClassDef that) {
+    
+    SymbolData objectSD = getSymbolData("java.lang.Object", that, true, false);
+    assert SymbolData.INT_TYPE.isAssignableTo(objectSD, LanguageLevelConverter.OPT.javaVersion());
+  
     String className = getQualifiedClassName(that.getName().getText());
     SymbolData sd = getSymbolData(className, that, true, false);
-//    if (sd == null) {
-//      System.err.println("****DISASTER****  sd is null for ClassDef " + that);
-//      _log.log("****DISASTER****  sd is null for ClassDef " + that);
-//    }
+    if (sd == null) {
+      System.err.println("****DISASTER****  sd is null for ClassDef " + className);
+      _addError("The class " + className + " was never defined", that);
+      _log.log("*********DISASTER****  sd is null for ClassDef " + className);
+      return null;
+    }
     // Check for cyclic inheritance
     if (checkForCyclicInheritance(sd, new LinkedList<SymbolData>(), that)) {
       return null;
@@ -1137,7 +1209,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     Word[] words = cWord.getWords();
     
     StringBuffer name = new StringBuffer(words[0].getText());
-    for (int i = 1; i < words.length; i++) {name.append("." + words[i].getText());}
+    for (int i = 1; i < words.length; i++) {name.append('.' + words[i].getText());}
     //This makes sure the class can be imported and is in the right package.
     final TypeData cWord_result = getSymbolData(name.toString(), that, true, true);
     if (cWord_result != null) { 
@@ -1158,7 +1230,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     Word[] words = cWord.getWords();
     
     StringBuffer nameBuff = new StringBuffer(words[0].getText());
-    for (int i = 1; i < words.length; i++) {nameBuff.append("." + words[i].getText());}
+    for (int i = 1; i < words.length; i++) {nameBuff.append('.' + words[i].getText());}
     String name = nameBuff.toString();
       
      
@@ -1241,13 +1313,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     private SymbolData _sd4;
     private SymbolData _sd5;
     private SymbolData _sd6;
-    private ModifiersAndVisibility _publicMav    = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav   = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav   = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav  = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav     = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
-    
+    private SymbolData _object;
     
     public TypeCheckerTest() { this(""); }
     public TypeCheckerTest(String name) { super(name); }
@@ -1255,6 +1321,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     public void setUp() {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       LanguageLevelConverter.symbolTable.clear();
+      LanguageLevelConverter.loadSymbolTable();
 
       _btc = new TypeChecker(new File(""), "", new LinkedList<String>(), new LinkedList<String>());
       LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
@@ -1267,29 +1334,66 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       _sd5 = new SymbolData("");
       _sd6 = new SymbolData("cebu");
       
-      SymbolData Double = new SymbolData("java.lang.Double");
-      SymbolData Float = new SymbolData("java.lang.Float");
-      SymbolData Long = new SymbolData("java.lang.Long");
-      SymbolData Integer = new SymbolData("java.lang.Integer");
-      SymbolData o = new SymbolData("java.lang.Object");
-      o.setIsContinuation(false);
-      o.setMav(_publicMav);
-      symbolTable.put("java.lang.Object", o);
-
-      Integer.setSuperClass(o);
-      SymbolData Short = new SymbolData("java.lang.Short");
-      SymbolData Character = new SymbolData("java.lang.Character");
-      SymbolData Byte = new SymbolData("java.lang.Byte");
-      SymbolData Boolean = new SymbolData("java.lang.Boolean");
-      symbolTable.put("java.lang.Double", Double);
-      symbolTable.put("java.lang.Float", Float);
-      symbolTable.put("java.lang.Long", Long);
-      symbolTable.put("java.lang.Integer", Integer);
-      symbolTable.put("java.lang.Short", Short);
-      symbolTable.put("java.lang.Character", Character);
-      symbolTable.put("java.lang.Byte", Byte);
-      symbolTable.put("java.lang.Boolean", Boolean);
-
+      _object = symbolTable.get("java.lang.Object");
+      assert _object != null;
+//      o.setIsContinuation(false);
+//      o.setMav(_publicMav);
+//      symbolTable.put("java.lang.Object", o);
+      
+      assert symbolTable.get("java.lang.Double") != null;
+//      Double.setIsContinuation(false);
+//      Double.setMav(_publicMav);
+//      Double.setSuperClass(o);   // a white lie for this test
+//      symbolTable.put("java.lang.Double", Double);
+      
+      assert symbolTable.get("java.lang.Float") != null;
+//      Float.setIsContinuation(false);
+//      Float.setMav(_publicMav);
+//      Float.setSuperClass(o);    // a white lie for this test
+//      symbolTable.put("java.lang.Float", Float);
+      
+      assert symbolTable.get("java.lang.Long") != null;
+//      Long.setIsContinuation(false);
+//      Long.setMav(_publicMav);
+//      Long.setSuperClass(o);     // a white lie for this test
+//      symbolTable.put("java.lang.Long", Long);
+            
+      assert symbolTable.get("java.lang.Integer") != null;
+//      Integer.setIsContinuation(false);
+//      Integer.setMav(_publicMav);
+//      Integer.setSuperClass(o);   // a white lie for this test
+//      symbolTable.put("java.lang.Integer", Integer);
+            
+      assert symbolTable.get("java.lang.Short") != null;
+//      Short.setIsContinuation(false);
+//      Short.setMav(_publicMav);
+//      Short.setSuperClass(o);   // a white lie for this test
+//      symbolTable.put("java.lang.Short", Short);
+      
+      assert symbolTable.get("java.lang.Character") != null;
+//      Character.setIsContinuation(false);
+//      Character.setMav(_publicMav);
+//      Character.setSuperClass(o);   // a white lie for this test     
+//      symbolTable.put("java.lang.Character", Character);
+      
+      assert symbolTable.get("java.lang.Byte") != null;
+//      Byte.setIsContinuation(false);
+//      Byte.setMav(_publicMav);
+//      Byte.setSuperClass(o);   // a white lie for this test        
+//      symbolTable.put("java.lang.Byte", Byte);
+      
+      assert symbolTable.get("java.lang.Boolean") != null;
+//      Boolean.setIsContinuation(false);
+//      Boolean.setMav(_publicMav);
+//      Boolean.setSuperClass(o);   // a white lie for this test   
+//      symbolTable.put("java.lang.Boolean", Boolean);
+         
+      assert symbolTable.get("java.lang.String") != null;
+//      SymbolData string = new SymbolData("java.lang.String");
+//      string.setIsContinuation(false);
+//      string.setMav(_publicMav);
+//      string.setSuperClass(_object);   // a white lie for this test   
+//      symbolTable.put("java.lang.String", string);
     }
     
     public void test_getData() {
@@ -1307,9 +1411,8 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       SymbolData sd = symbolTable.get("java.lang.Object");
       sd.setPackage("java.lang");
       assertEquals("Should get _sd3 from the Symboltable.", _sd3, _btc.getSymbolData("zebra", new NullLiteral(SourceInfo.NO_INFO), true, true));
-      assertEquals("Should get sd from the Symboltable.", sd, _btc.getSymbolData("Object", new NullLiteral(SourceInfo.NO_INFO), true, true));
+      assertEquals("Should get sd from the Symboltable.", sd, _btc.getSymbolData("java.lang.Object", new NullLiteral(SourceInfo.NO_INFO), true, true));
       _btc.getSymbolData("koala", new NullLiteral(SourceInfo.NO_INFO), true, true);
-      
       
       assertEquals("Should be one error", 1, errors.size());
       assertEquals("ERror message should be correct ", "Class or variable koala not found.", errors.get(0).getFirst());
@@ -1317,7 +1420,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       
       sd.setPackage("notRightPackage");
-      _btc.getSymbolData("Object", new NullLiteral(SourceInfo.NO_INFO), true, true);
+      _btc.getSymbolData("java.lang.Object", new NullLiteral(SourceInfo.NO_INFO), true, true);
       assertEquals("Should be 1 error", 1, errors.size());
       assertEquals("Error message should be correct", "The class java.lang.Object is not in the right package. Perhaps you meant to package it?", errors.get(0).getFirst());
       
@@ -1411,7 +1514,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
    
     public void testGetQualifiedClassName() {
       //first test when the package is empty:
-      _btc._package="";
+      _btc._package = "";
       assertEquals("Should not change qualified name.", "simpson.Bart", _btc.getQualifiedClassName("simpson.Bart"));
       assertEquals("Should not change unqualified name.", "Lisa", _btc.getQualifiedClassName("Lisa"));
       
@@ -1694,7 +1797,6 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       }
     }
   
-    
     public void test_isAssignableFrom() {
       assertTrue("Should be assignable.", _btc._isAssignableFrom(SymbolData.DOUBLE_TYPE, symbolTable.get("java.lang.Double")));
       assertFalse("Should not be assignable.", _btc._isAssignableFrom(symbolTable.get("java.lang.Double"), SymbolData.FLOAT_TYPE));
@@ -1725,12 +1827,13 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       
       LanguageLevelVisitor llv = 
         new LanguageLevelVisitor(_btc._file, 
-                                 _btc._package, 
+                                 _btc._package,
+                                 null, // enclosingClassName for top level traversal
                                  _btc._importedFiles, 
                                  _btc._importedPackages, 
-                                 new LinkedList<String>(), 
-                                 new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>(), 
-                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+                                 new HashSet<String>(), 
+                                 new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                 new LinkedList<Command>());
       
 //      LanguageLevelConverter.symbolTable = llv.symbolTable = _btc.symbolTable;
       LanguageLevelConverter._newSDs.clear();
@@ -1749,18 +1852,24 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       
       assertTrue("Should be able to assign an array to an interface of java.io.Serializable", _btc._isAssignableFrom(symbolTable.get("java.io.Serializable"), integerArray));
 
-      
-      //System.setProperty("java.specification.version", "1.4");
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_1_4, EmptyIterable.<File>make());
-      assertFalse("Should not be assignable.", _btc._isAssignableFrom(symbolTable.get("java.lang.Double"), SymbolData.INT_TYPE));
-      assertFalse("Should not be assignable.", _btc._isAssignableFrom(SymbolData.DOUBLE_TYPE, symbolTable.get("java.lang.Short")));
-      assertFalse("Should not be assignable.", _btc._isAssignableFrom(symbolTable.get("java.lang.Double"), symbolTable.get("java.lang.Character")));
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
+      assertFalse("Should not be assignable.", 
+                  _btc._isAssignableFrom(symbolTable.get("java.lang.Double"), SymbolData.INT_TYPE));
+      assertFalse("Should not be assignable.", 
+                  _btc._isAssignableFrom(symbolTable.get("java.lang.Double"), symbolTable.get("java.lang.Character")));
       assertTrue("Should be assignable.", _btc._isAssignableFrom(SymbolData.DOUBLE_TYPE, SymbolData.BYTE_TYPE));
-      assertTrue("Should be assignable.", _btc._isAssignableFrom(symbolTable.get("java.lang.Integer"), symbolTable.get("java.lang.Integer")));
-      assertFalse("Should not be assignable.", _btc._isAssignableFrom(symbolTable.get("java.lang.Integer"), symbolTable.get("java.lang.Character")));
-      assertFalse("Should not be assignable.", _btc._isAssignableFrom(SymbolData.INT_TYPE, symbolTable.get("java.lang.Character")));
-      assertFalse("Should not be assignable.", _btc._isAssignableFrom(symbolTable.get("java.lang.Object"), SymbolData.INT_TYPE));
-      assertTrue("Should be able to assign an array to Object", _btc._isAssignableFrom(symbolTable.get("java.lang.Object"), intArray));
+      assertTrue("Should be assignable.", 
+                  _btc._isAssignableFrom(SymbolData.DOUBLE_TYPE, symbolTable.get("java.lang.Short")));
+      assertTrue("Should be assignable.", 
+                 _btc._isAssignableFrom(symbolTable.get("java.lang.Integer"), symbolTable.get("java.lang.Integer")));
+      assertFalse("Should not be assignable.", 
+                  _btc._isAssignableFrom(symbolTable.get("java.lang.Integer"), symbolTable.get("java.lang.Character")));
+      assertTrue("Should not assignable.", 
+                  _btc._isAssignableFrom(SymbolData.INT_TYPE, symbolTable.get("java.lang.Character")));
+      assertTrue("Should be assignable.", 
+                  _btc._isAssignableFrom(symbolTable.get("java.lang.Object"), SymbolData.INT_TYPE));
+      assertTrue("Should be able to assign an array to Object", 
+                 _btc._isAssignableFrom(symbolTable.get("java.lang.Object"), intArray));
 
       
       //check that classes are know to be subclasses of their interfaces.
@@ -1816,7 +1925,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       assertEquals("The error message should be correct", "Cyclic inheritance involving " + _sd2.getName(), errors.get(0).getFirst());
       
       //if your super class implements your inner class, there is cyclic inheritance
-      LinkedList<SymbolData> temp = _sd3.getInterfaces();
+      ArrayList<SymbolData> temp = _sd3.getInterfaces();
       _sd3.getInterfaces().remove(_sd2);
       _sd3.setInterfaces(temp);
       _sd2.setSuperClass(_sd6);
@@ -1824,13 +1933,14 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       _sd4.setSuperClass(symbolTable.get("java.lang.Object"));
       assertTrue("Should be cyclic inheritance", _btc.checkForCyclicInheritance(_sd1, new LinkedList<SymbolData>(), nl));
       assertEquals("Should now be 2 errors", 2, errors.size());
-      assertEquals("The error message should be correct", "Cyclic inheritance involving " + _sd4.getName(), errors.get(1).getFirst());
+      assertEquals("The error message should be correct", "Cyclic inheritance involving " + _sd4.getName(), 
+                   errors.get(1).getFirst());
     }
     
     public void testForClassDef() {
       
       ClassDef cd = new ClassDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "Lisa"),
-                                 new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "Object", new Type[0]), new ReferenceType[0], 
+                                 new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], 
                                  new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
 
      //Test that no cyclic inheritance goes okay
@@ -1896,7 +2006,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       SymbolData superI = new SymbolData("superI");
       superI.setInterface(true);
       superI.setIsContinuation(false);
-      Lisa.setSuperClass(new SymbolData("super", _publicMav, new TypeParameter[0], null, new LinkedList<SymbolData>(), null));
+      Lisa.setSuperClass(new SymbolData("super", _publicMav, new TypeParameter[0], null, new ArrayList<SymbolData>(), null));
 
       Lisa.addInterface(superI);
       _btc.symbolTable.put("superI", superI);
@@ -1925,10 +2035,10 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       sd.setIsContinuation(false);
       sd.addVar(vData);
       SymbolData sd2 = symbolTable.get("java.lang.Object");
-      sd2.setIsContinuation(false);
-      sd2.setMav(_publicMav);
-      sd2.setPackage("java.lang");
-      MethodData objMd = new MethodData("Object", _publicMav, new TypeParameter[0], sd2, new VariableData[0], new String[0], sd2, cd);
+//      sd2.setIsContinuation(false);
+//      sd2.setMav(_publicMav);
+//      sd2.setPackage("java.lang");
+      MethodData objMd = new MethodData("java.lang.Object", _publicMav, new TypeParameter[0], sd2, new VariableData[0], new String[0], sd2, cd);
       sd2.addMethod(objMd);
       
       sd.setSuperClass(sd2);
@@ -1996,7 +2106,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       SymbolData superSD = new SymbolData("SuperSD");
       superSD.setInterface(true);
       sd.setSuperClass(superSD);
-      sd.setInterfaces(new LinkedList<SymbolData>());
+      sd.setInterfaces(new ArrayList<SymbolData>());
       symbolTable.put("superSD", superSD);
       cd7.visit(_btc);
       assertEquals("There should be 8 errors now", 8, errors.size());
@@ -2022,13 +2132,10 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       sd.setMav(_privateMav);
       symbolTable.remove("Hspia");
       symbolTable.put("Hspia", sd);
-      SymbolData t = new SymbolData("junit.framework.TestCase");
-      t.setIsContinuation(false);
-      t.setMav(_publicMav);
-      t.setPackage("junit.framework");
-      symbolTable.remove("junit.framework.TestCase");
-      symbolTable.put("junit.framework.TestCase", t);
-      sd.setSuperClass(t);
+      
+      SymbolData testCase = defineTestCaseClass();
+      sd.setSuperClass(testCase);
+      
       cd7.visit(_btc);
 
       assertEquals("There should now be 11 errors", 11, errors.size());
@@ -2042,17 +2149,15 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       
       //Test that if a class that is not public extends test case, an error is thrown.
       //Also check that if a test class doesn't have any test methods, an error is thrown.
-      _btc._file=new File("Hspia.dj0");
+      _btc._file = new File("Hspia.dj0");
       sd.setMav(_publicMav);
       symbolTable.remove("Hspia");
       symbolTable.put("Hspia", sd);
-      t = new SymbolData("junit.framework.TestCase");
-      t.setIsContinuation(false);
-      t.setMav(_publicMav);
-      t.setPackage("junit.framework");
-      symbolTable.remove("junit.framework.TestCase");
-      symbolTable.put("junit.framework.TestCase", t);
-      sd.setSuperClass(t);
+      
+//      SymbolData testCase = defineTestCase();
+//      symbolTable.put("junit.framework.TestCase", testCase);
+//      sd.setSuperClass(testCase);
+      
       cd7.visit(_btc);
       
       assertEquals("There should still be 11 errors", 11, errors.size());  // Generated duplicate error message
@@ -2173,7 +2278,8 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     }
     
     public void testForClassImportStatement() {
-      Word[] words = new Word[] {new Word(SourceInfo.NO_INFO, "alpha"),
+      Word[] words = new Word[] {
+        new Word(SourceInfo.NO_INFO, "alpha"),
         new Word(SourceInfo.NO_INFO, "beta")};
       CompoundWord cw = new CompoundWord(SourceInfo.NO_INFO, words);
       ClassImportStatement cis = new ClassImportStatement(SourceInfo.NO_INFO, cw);
@@ -2197,23 +2303,29 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     }
 
     public void testForPackageStatement() {
-      Word[] badWords = new Word[] {new Word(SourceInfo.NO_INFO, "java"), new Word(SourceInfo.NO_INFO, "lang"), new Word(SourceInfo.NO_INFO, "Object")};
-      Word[] okWords = new Word[] {new Word(SourceInfo.NO_INFO, "java"), new Word(SourceInfo.NO_INFO, "lang")};
+      Word[] badWords = new Word[] { 
+        new Word(SourceInfo.NO_INFO, "java"), 
+        new Word(SourceInfo.NO_INFO, "lang"), 
+        new Word(SourceInfo.NO_INFO, "Object")};
+      Word[] okWords = new Word[] { new Word(SourceInfo.NO_INFO, "java"), new Word(SourceInfo.NO_INFO, "lang")};
 
-      PackageStatement badPackage = new PackageStatement(SourceInfo.NO_INFO, new CompoundWord(SourceInfo.NO_INFO, badWords));
-      PackageStatement okPackage = new PackageStatement(SourceInfo.NO_INFO, new CompoundWord(SourceInfo.NO_INFO, okWords));
+      PackageStatement badPackage = 
+        new PackageStatement(SourceInfo.NO_INFO, new CompoundWord(SourceInfo.NO_INFO, badWords));
+      PackageStatement okPackage = 
+        new PackageStatement(SourceInfo.NO_INFO, new CompoundWord(SourceInfo.NO_INFO, okWords));
       
-      SymbolData object = new SymbolData("java.lang.Object");
-      object.setPackage("java.lang");
-      object.setIsContinuation(false);
-      symbolTable.put("java.lang.Object", object);
+//      SymbolData object = new SymbolData("java.lang.Object");
+//      object.setPackage("java.lang");
+//      object.setIsContinuation(false);
+//      symbolTable.put("java.lang.Object", object);
       
       okPackage.visit(_btc);
       assertEquals("Should be 0 errors", 0, errors.size());
       
       badPackage.visit(_btc);
       assertEquals("Should be 1 error", 1, errors.size());
-      assertEquals("Error message should be correct", "java.lang.Object is not a allowable package name, because it conflicts with a class you have already defined", errors.getLast().getFirst());
+      assertEquals("Error message should be correct", 
+                   "java.lang.Object is not a allowable package name, because it conflicts with a class you have already defined", errors.getLast().getFirst());
     }
     
     public void testAutoBoxingAndUnboxing() {
@@ -2292,11 +2404,13 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
 
       _sd1.addVar(vd1);
       _sd1.setMethods(new LinkedList<MethodData>());
-      md = new MethodData("monkey", _publicMav, new TypeParameter[0], _sd1, new VariableData[]{vd2}, new String[0], _sd1, new NullLiteral(SourceInfo.NO_INFO));
+      md = new MethodData("monkey", _publicMav, new TypeParameter[0], _sd1, new VariableData[]{vd2}, new String[0], 
+                          _sd1, new NullLiteral(SourceInfo.NO_INFO));
       vd2.setEnclosingData(md);
       _sd1.addMethod(md);
       
-      b.visit(new ClassBodyTypeChecker(_sd1, _btc._file, "", new LinkedList<String>(), new LinkedList<String>(), _sd1.getVars(), new LinkedList<Pair<SymbolData, JExpression>>()));
+      b.visit(new ClassBodyTypeChecker(_sd1, _btc._file, "", new LinkedList<String>(), new LinkedList<String>(), 
+                                       _sd1.getVars(), new LinkedList<Pair<SymbolData, JExpression>>()));
       
       assertEquals("There should be no errors", 0, errors.size());
       
@@ -2309,7 +2423,9 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       
       
       _sd1.addVar(vd2);
-      se.visit(new ClassBodyTypeChecker(_sd1, _btc._file, "", new LinkedList<String>(), new LinkedList<String>(), _sd1.getVars(), new LinkedList<Pair<SymbolData, JExpression>>()));
+      se.visit(new ClassBodyTypeChecker(_sd1, _btc._file, "", new LinkedList<String>(), new LinkedList<String>(), 
+                                        _sd1.getVars(), new LinkedList<Pair<SymbolData, JExpression>>()));
+//      System.err.println("*******The errant error message is: \n" + errors.get(0).getFirst());
       assertEquals("There should be no errors", 0, errors.size());
       
       //Test that an error is thrown when there is an ambiguous method.

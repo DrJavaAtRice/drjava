@@ -65,7 +65,7 @@ public class ScrollableDialog /* implements Serializable */ {
    * @param header Message to display at the top of this dialog
    * @param text Text to insert into the scrollable JTextArea
    */
-  public ScrollableDialog(JFrame parent, String title, String header, String text) {
+  public ScrollableDialog(JFrame parent, String title, String header, String text) { 
     this(parent, title, header, text, DEFAULT_WIDTH, DEFAULT_HEIGHT, false);
   }
   
@@ -77,7 +77,7 @@ public class ScrollableDialog /* implements Serializable */ {
    * @param width Width for this dialog
    * @param height Height for this dialog
    */
-  public ScrollableDialog(JFrame parent, String title, String header, String text, int width, int height) {
+  public ScrollableDialog(JFrame parent, String title, String header, String text, int width, int height) { 
     this(parent, title, header, text, width, height, false);
   }
   
@@ -88,7 +88,7 @@ public class ScrollableDialog /* implements Serializable */ {
    * @param text Text to insert into the scrollable JTextArea
    * @param wrap whether to wrap long lines
    */
-  public ScrollableDialog(JFrame parent, String title, String header, String text, boolean wrap) {
+  public ScrollableDialog(JFrame parent, String title, String header, String text, boolean wrap) { 
     this(parent, title, header, text, DEFAULT_WIDTH, DEFAULT_HEIGHT, wrap);
   }
   
@@ -101,7 +101,7 @@ public class ScrollableDialog /* implements Serializable */ {
    * @param height Height for this dialog
    * @param wrap whether to wrap long lines
    */
-  public ScrollableDialog(JFrame parent, String title, String header, String text, int width, int height, boolean wrap) {
+  public ScrollableDialog(JFrame parent, String title, String header, String text, int width, int height, boolean wrap) { 
     _dialog = new JDialog(parent, title, true);    
     Container content = _dialog.getContentPane();
 
@@ -118,9 +118,9 @@ public class ScrollableDialog /* implements Serializable */ {
     _dialog.setSize(width, height);
     
     // Add components
-    _textScroll = new BorderlessScrollPane(_textArea,
-                                           JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                                           wrap?JScrollPane.HORIZONTAL_SCROLLBAR_NEVER:JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    int scrollIndicator = wrap ? JScrollPane.HORIZONTAL_SCROLLBAR_NEVER : JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED;
+    _textScroll =  new BorderlessScrollPane(_textArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, scrollIndicator);
+    
     JPanel scrollWrapper = new JPanel(new BorderLayout(0,5));
     scrollWrapper.setBorder(new EmptyBorder(5,5,0,5));
     scrollWrapper.add(new JLabel(header),BorderLayout.NORTH);
@@ -133,36 +133,28 @@ public class ScrollableDialog /* implements Serializable */ {
     
     content.add(scrollWrapper, BorderLayout.CENTER);
     content.add(bottomPanel, BorderLayout.SOUTH);
-    
-    // This method is deprecated.  There are alternatives, but it is
-    // probably best to let defer to the standard focus-management
-    // policy rather than trying to customize it.
-    //_textArea.requestDefaultFocus();
+  
+    /* This method is deprecated.  There are alternatives, but it is probably best to let defer to the standard 
+     * focus-management policy rather than trying to customize it. */
+//    _textArea.requestDefaultFocus(); 
   }
-
+  
   /** Adds buttons to this dialog's button panel.
     * Subclasses can override this to add different buttons.
     */
-  protected void _addButtons() {
-    _buttonPanel.add(new JButton(_okAction));
-  }
-
+  protected void _addButtons() { _buttonPanel.add(new JButton(_okAction)); }
   /** A default "OK" action which disposes this dialog when invoked. */
-  private Action _okAction = new AbstractAction("OK") {
-    public void actionPerformed(ActionEvent e) {
-      _dialog.dispose();
-    }
+  private Action _okAction = new AbstractAction("OK") { 
+    public void actionPerformed(ActionEvent e) { _dialog.dispose(); }
   };
 
   /** Sets the font for the text area in this dialog.
     * @param f New font for the text
     */
-  public void setTextFont(Font f) {
-    _textArea.setFont(f);
-  }
+  public void setTextFont(Font f) { _textArea.setFont(f); }
   
   /** Shows this dialog. */
-  public void show() {
+  public void show() { 
     _textArea.setCaretPosition(0);
     _textScroll.getHorizontalScrollBar().setValue(_textScroll.getHorizontalScrollBar().getMinimum());
     _textScroll.getVerticalScrollBar().setValue(_textScroll.getVerticalScrollBar().getMinimum());

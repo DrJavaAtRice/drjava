@@ -89,8 +89,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
   /** A String of variable definitions to be written at the end of the top-level class definitions */
   static private List<String> _endOfClassVarDefs;
   
-  /** The Data enclosing whatever we are currently augmenting.*/
-  private Data _enclosingData;
+  /** The SymbolData enclosing whatever we are currently augmenting.*/
+  private SymbolData _enclosingData;
   
   /** Main constructor for Augmentor: Used by the LanguageLevelConverter when converting language level files.
     * @param safeSupportCode  true if the user wants safe support code to be generated (this comes with a high overhead)
@@ -117,7 +117,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     * This constructor should only be called from within another Augmentor.
     * @param d  The EnclosingData from which this Augmentor works.
     */
-  protected Augmentor(Data d) { _enclosingData = d; }
+  protected Augmentor(SymbolData d) { _enclosingData = d; }
   
   /** This method is called by default from cases that do not override forCASEOnly. */
   protected Void defaultCase(JExpressionIF that) { return null; } 
@@ -212,16 +212,19 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     * @param that  The ConcreteMethodDef being augmented.
     */
   public Void forConcreteMethodDef(ConcreteMethodDef that) {
+    assert _enclosingData != null;
+    
     forMethodDef(that);
+    SymbolData enclosing = _enclosingData.getSymbolData();
     MethodData md = 
-      _enclosingData.getSymbolData().getMethod(that.getName().getText(), 
-                                               formalParameters2TypeDatas(that.getParams(), _enclosingData));
+      enclosing.getMethod(that.getName().getText(), 
+                          formalParameters2TypeDatas(that.getParams(), enclosing));
 //    _log.log("Augmenting ConcreteMethodDef " + that + " with MethodData " + md);
     if (md == null) { 
       throw new RuntimeException("Internal Program Error: Can't find method data for " + that.getName() + 
                                  " Please report this bug."); 
     }
-    that.getBody().visit(new MethodBodyAugmentor(md));
+    that.getBody().visit(new MethodBodyAugmentor(enclosing));
     return null;
   }
   
@@ -480,22 +483,24 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     return null;
   }
   
-  /**
-   * Convert the provided FormalParameter array into an array of TypeData corresponding
-   * to the types of the FormalParameters.
-   */
-  protected static TypeData[] formalParameters2TypeDatas(FormalParameter[] fp, Data enclosing) { 
-    TypeData[] tds = new TypeData[fp.length];
-    for (int j = 0; j<fp.length; j++) {
-      SymbolData type = _llv.getSymbolData(fp[j].getDeclarator().getType().getName(), fp[j].getSourceInfo());
+  /** Convert the provided FormalParameter array into an array of TypeData corresponding
+    * to the types of the FormalParameters.
+    */
+  protected static TypeData[] formalParameters2TypeDatas(FormalParameter[] fps, SymbolData enclosing) { 
+    TypeData[] tds = new TypeData[fps.length];
+    int j = 0;
+    for (FormalParameter fp: fps) {
+      SymbolData type = _llv.getSymbolData(fp.getDeclarator().getType().getName(), fp.getSourceInfo());
       
       if (type == null) {
         //see if this is a partially qualified field reference
-        type = enclosing.getInnerClassOrInterface(fp[j].getDeclarator().getType().getName());
+        type = enclosing.getInnerClassOrInterface(fp.getDeclarator().getType().getName());
       }
       
-      tds[j]= type;
+      tds[j]= type; j++;  // store type in next empty slot of tds
     }
+    assert j == fps.length;
+    
     return tds;
   }
   
@@ -646,8 +651,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     VariableData toStringFlag = new VariableData(flagName, 
                                                  new ModifiersAndVisibility(NO_INFO, 
                                                                             new String[]{ "private", "static" }),
-                                 _llv.getSymbolDataHelper("java.util.LinkedList", SourceInfo.NO_INFO, 
-                                                          false, false, false, false),
+                                 _llv.getQualifiedSymbolData("java.util.LinkedList", SourceInfo.NO_INFO, false),
                                  true, sd);
     toStringFlag.setGenerated(true);
     sd.addVar(toStringFlag);
@@ -753,7 +757,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     
     VariableData equalsList = 
       new VariableData(listName, new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[]{ "private", "static" }),
-                       _llv.getSymbolDataHelper("java.util.LinkedList", SourceInfo.NO_INFO, false, false, false, false),
+                       _llv.getQualifiedSymbolData("java.util.LinkedList", SourceInfo.NO_INFO, false),
                        true, sd);
     equalsList.setGenerated(true);
     sd.addVar(equalsList);
@@ -948,7 +952,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     listName = sd.createUniqueName(listName);
     VariableData hashCodeList =
       new VariableData(listName, new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[]{ "private", "static" }),
-                       _llv.getSymbolDataHelper("java.util.LinkedList", SourceInfo.NO_INFO, false, false, false, false),
+                       _llv.getQualifiedSymbolData("java.util.LinkedList", SourceInfo.NO_INFO, false),
                        true, sd);
     hashCodeList.setGenerated(true);
     
@@ -1674,7 +1678,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
   public static class MethodBodyAugmentor extends Augmentor {
     
     /** Mandatory forwarding constructor. */
-    protected MethodBodyAugmentor(Data enclosing) { super(enclosing); }
+    protected MethodBodyAugmentor(SymbolData enclosing) { super(enclosing); }
     
     /** Writes out implicit variableDeclarationModfiers that must be added to augmented file. */
     protected void augmentVariableDeclarationModifiers(VariableDeclaration that) { _writeToFileOut("final "); }
@@ -1700,13 +1704,15 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     
     public void setUp() {
       LanguageLevelVisitor llv =
-        new IntermediateVisitor(_f, new LinkedList<Pair<String, JExpressionIF>>(), 
-                              new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
-                              new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>());
+        new IntermediateVisitor(_f, 
+                                new LinkedList<Pair<String, JExpressionIF>>(), 
+                                new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                new LinkedList<Command>(),
+                                new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>());
       _a = new Augmentor(true, null, null, llv);
       LanguageLevelConverter.symbolTable.clear();
       Symboltable _s = LanguageLevelConverter.symbolTable;   
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_1_4, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
     }
 
     public void testFormalParameters2TypeDatas() {
@@ -1759,25 +1765,25 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
 
 //    public void testIsElementaryFile() {
 //      _llv = new ElementaryVisitor(new File("elementary.dj0"), new LinkedList<Pair<String, JExpressionIF>>(), _s, 
-//                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+//                                   new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(), 
 //                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
 //                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
 //      assertTrue("This is an elementary file", _isElementaryFile());
 //      _llv = new IntermediateVisitor(new File("intermediate.dj1"), 
 //                                     new LinkedList<Pair<String, JExpressionIF>>(), _s, 
-//                                     new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+//                                     new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
 //                                     new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
 //                                     new Hashtable<SymbolData, LanguageLevelVisitor>());
 //      assertFalse("This is an intermediate file", _isElementaryFile());
 //      _llv = new AdvancedVisitor(new File("advanced.dj2"),
 //                                 new LinkedList<Pair<String, JExpressionIF>>(), _s, 
-//                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+//                                 new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
 //                                 new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
 //                                 new Hashtable<SymbolData, LanguageLevelVisitor>());
 //      assertFalse("This is an advanced file", _isElementaryFile());
 //      _llv = new ElementaryVisitor(new File("full.java"), 
 //                                   new LinkedList<Pair<String, JExpressionIF>>(), _s, 
-//                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+//                                   new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(), 
 //                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
 //                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
 //      assertFalse("This is a full file", _isElementaryFile());
@@ -1786,25 +1792,25 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
 //    public void testIsIntermediateFile() {
 //      _llv = new ElementaryVisitor(new File("elementary.dj0"), 
 //                                   new LinkedList<Pair<String, JExpressionIF>>(), _s,
-//                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+//                                   new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
 //                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
 //                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
 //      assertFalse("This is an elementary file", _isIntermediateFile());
 //      _llv = new IntermediateVisitor(new File("intermediate.dj1"),
 //                                     new LinkedList<Pair<String, JExpressionIF>>(), _s,
-//                                     new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+//                                     new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
 //                                     new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
 //                                     new Hashtable<SymbolData, LanguageLevelVisitor>());
 //      assertTrue("This is an intermediate file", _isIntermediateFile());
 //      _llv = new AdvancedVisitor(new File("advanced.dj2"),
 //                                 new LinkedList<Pair<String, JExpressionIF>>(), _s, 
-//                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+//                                 new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
 //                                 new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
 //                                 new Hashtable<SymbolData, LanguageLevelVisitor>());
 //      assertFalse("This is an advanced file", _isIntermediateFile());
 //      _llv = new ElementaryVisitor(new File("full.java"),
 //                                   new LinkedList<Pair<String, JExpressionIF>>(), _s,
-//                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+//                                   new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
 //                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
 //                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
 //      assertFalse("This is a full file", _isIntermediateFile());
@@ -1813,25 +1819,25 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
 //    public void testIsAdvancedFile() {
 //      _llv = new ElementaryVisitor(new File("elementary.dj0"),
 //                                   new LinkedList<Pair<String, JExpressionIF>>(), _s, 
-//                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+//                                   new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
 //                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
 //                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
 //      assertFalse("This is an elementary file", _isAdvancedFile());
 //      _llv = new IntermediateVisitor(new File("intermediate.dj1"), 
 //                                     new LinkedList<Pair<String, JExpressionIF>>(), _s, 
-//                                     new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+//                                     new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(), 
 //                                     new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
 //                                     new Hashtable<SymbolData, LanguageLevelVisitor>());
 //      assertFalse("This is an intermediate file", _isAdvancedFile());
 //      _llv = new AdvancedVisitor(new File("advanced.dj2"), 
 //                                 new LinkedList<Pair<String, JExpressionIF>>(), _s, 
-//                                 new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
+//                                 new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
 //                                 new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(),
 //                                 new Hashtable<SymbolData, LanguageLevelVisitor>());
 //      assertTrue("This is an advanced file", _isAdvancedFile());
 //      _llv = new ElementaryVisitor(new File("full.java"), 
 //                                   new LinkedList<Pair<String, JExpressionIF>>(), _s, 
-//                                   new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(), 
+//                                   new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(), 
 //                                   new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>(), 
 //                                   new Hashtable<SymbolData, LanguageLevelVisitor>());
 //      assertFalse("This is a full file", _isAdvancedFile());

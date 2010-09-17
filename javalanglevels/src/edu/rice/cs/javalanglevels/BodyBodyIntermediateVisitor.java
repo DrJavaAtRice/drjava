@@ -60,29 +60,35 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     * @param packageName  The package the source file is in
     * @importedFiles  A list of classes that were specifically imported
     * @param importedPackages  A list of package names that were specifically imported
-    * @param classDefsInThisFile  A list of the classes that are defined in the source file
+    * @param classesInThisFile  A list of the classes that are yet to be defined in this source file
     * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need 
     *                       to be resolved
+    * @param fixUps  A list of commands to be performed after this pass to fixup the symbolTable
     */
   public BodyBodyIntermediateVisitor(BodyData bodyData,
                                      File file, 
                                      String packageName, 
+                                     String enclosingClassName,
                                      LinkedList<String> importedFiles, 
                                      LinkedList<String> importedPackages,
-                                     LinkedList<String> classDefsInThisFile, 
-                                     Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>> continuations,
-                                     LinkedList<String> innerClassesToBeParsed) {
+                                     HashSet<String> classesInThisFile, 
+                                     Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations,
+                                     LinkedList<Command> fixUps,
+                                     HashSet<String> innerClassesInThisBody) {
     super(file, 
-          packageName, 
+          packageName,
+          enclosingClassName,
           importedFiles, 
           importedPackages, 
-          classDefsInThisFile, 
-          continuations);
+          classesInThisFile, 
+          continuations,
+          fixUps);
     _bodyData = bodyData;
-    _innerClassesToBeParsed = innerClassesToBeParsed;
+    assert _enclosingClassName != null;
+//    _innerClassesInThisBody = innerClassesInThisBody;
   }
   
-  /*Give an appropriate error*/
+  /** Give an appropriate error */
   public Void forMethodDefDoFirst(MethodDef that) {
     _addError("Methods definitions cannot appear within the body of another method or block.", that);
     return null;
@@ -97,20 +103,25 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     return forBlock(that.getCode());
   }
 
- /* Visit this BlockData with a new BodyBodyIntermediate visitor after making sure no errors need to be thrown.*/
+ /* Visit this Block within the same BlockData with a new BodyBodyIntermediate visitor (to deal with new local scope?)
+  * after making sure no errors need to be thrown.*/
   public Void forBlock(Block that) {
     forBlockDoFirst(that);
     if (prune(that)) return null;
+    // The following code is incomprehensible.  Why mutate _bodyData?  Why create bd?
     BlockData bd = new BlockData(_bodyData);
     _bodyData.addBlock(bd);
-    that.getStatements().visit(new BodyBodyIntermediateVisitor(bd, _file, _package, _importedFiles, _importedPackages,
-                                                               _classNamesInThisFile, continuations, 
-                                                               _innerClassesToBeParsed));
+    that.getStatements().visit(new BodyBodyIntermediateVisitor(bd, _file, _package, _enclosingClassName, _importedFiles,
+                                                               _importedPackages, _classesInThisFile, continuations, 
+                                                               fixUps, new HashSet<String>()));
     return forBlockOnly(that);
   }
   
-  /** Visit the block as in forBlock(), but first add the exception parameter as a variable in that block. */
+  /** Visit the block as in forBlock(), but first add the exception parameter as a variable in that 
+    * lock. 
+    * TODO: move this method into LanguageLevelVisitor. */
   public Void forCatchBlock(CatchBlock that) {
+    System.err.println("***ALARM*** BodyBodyIntermediateVisitor is visiting catch block");
     forCatchBlockDoFirst(that);
     if (prune(that)) return null;
     
@@ -120,13 +131,19 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     BlockData bd = new BlockData(_bodyData);
     _bodyData.addBlock(bd);
     
-    VariableData exceptionVar = formalParameters2VariableData(new FormalParameter[]{ that.getException() }, bd)[0];
+    SymbolData enclosing = getQualifiedSymbolData(_enclosingClassName);
+   
+    VariableData exceptionVar = 
+      formalParameters2VariableData(new FormalParameter[]{ that.getException() }, enclosing)[0];
     if (prune(that.getException())) return null;
     bd.addVar(exceptionVar);
     
-    b.getStatements().visit(new BodyBodyIntermediateVisitor(bd, _file, _package, _importedFiles, _importedPackages, 
-                                                            _classNamesInThisFile, continuations, 
-                                                            _innerClassesToBeParsed));
+    System.err.println("Visiting augmented catch block with new visitor!");
+    BodyBodyIntermediateVisitor bbijv = 
+      new BodyBodyIntermediateVisitor(bd, _file, _package, _enclosingClassName, _importedFiles,
+                                      _importedPackages, _classesInThisFile, continuations, fixUps,
+                                      new HashSet<String>());
+    b.getStatements().visit(bbijv);
     forBlockOnly(b);
     return forCatchBlockOnly(that);
   }
@@ -134,39 +151,56 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
   /** Adds the variables that were declared to the body data and make sure that no two variables have the same name.*/
   public Void forVariableDeclarationOnly(VariableDeclaration that) {
     if (! _bodyData.addFinalVars(_variableDeclaration2VariableData(that, _bodyData))) {
+      /* Does not allow repeated use of a for loop index variable.  TODO: fix this. */
 //      System.err.println("Generating duplicate variable error");
       _addAndIgnoreError("You cannot have two variables with the same name.", that);
     }
     return null;
   }
   
-  /** Override method in IntermediateVisitor that throws an error here.*/
-  public Void forTryCatchStatementDoFirst(TryCatchStatement that) { return null; /*  No errors to throw here. */ }
+//  /** Override method in IntermediateVisitor that throws an error here.*/
+//  public Void forTryCatchStatementDoFirst(TryCatchStatement that) { return null; /*  No errors to throw here. */ }
   
   /** Process a local inner class definition */
   public Void forInnerClassDef(InnerClassDef that) {
-//    System.err.println("BBIV.forInnerClassDef called on " + that.getName());
-    handleInnerClassDef(that, _bodyData, getQualifiedClassName(_bodyData.getSymbolData().getName()) + "." + 
-                        _bodyData.getSymbolData().preincrementLocalClassNum() + that.getName().getText());
+    // TODO: is this necessarily local?
+    SymbolData enclosingClass = _bodyData.getSymbolData();
+    assert _enclosingClassName != null;
+    assert enclosingClass != null;
+    assert _enclosingClassName.equals(getQualifiedClassName(enclosingClass.getName()));
+    
+    String relName = that.getName().getText();
+    String fullName = _enclosingClassName + '.' + enclosingClass.preincrementLocalClassNum() + relName;
+    System.err.println("***ALARM*** Processing local class '" + relName + "' in class " + _enclosingClassName
+                         + " with flattened class name " + fullName);
+    handleInnerClassDef(that, _bodyData, relName, fullName);
+    // How do we know that generated number is correct?
     return null;
   }
   
-   /** Process a local inner interface definition */
+  /** Process a local inner interface definition */
   public Void forInnerInterfaceDef(InnerInterfaceDef that) {
-    handleInnerInterfaceDef(that, _bodyData, getQualifiedClassName(_bodyData.getSymbolData().getName()) + "." + 
-                        _bodyData.getSymbolData().preincrementLocalClassNum() + that.getName().getText());
+    System.err.println("***Signalling local interface error");
+    _addAndIgnoreError("Local interfaces are illegal in Java.", that);
+//    handleInnerInterfaceDef(that, _bodyData, getQualifiedClassName(_bodyData.getSymbolData().getName()) + '.' + 
+//                        _bodyData.getSymbolData().preincrementLocalClassNum() + that.getName().getText());
+//    // How do we know that generated number is correct?
     return null;
   }
 
-  /** Delegate to method in LLV. */
-  public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
-    complexAnonymousClassInstantiationHelper(that, _bodyData);
-    return null;
-  }
-
-  /** Delegate to method in LLV. */
+  /** Delegate to helper method. */
   public Void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
-    simpleAnonymousClassInstantiationHelper(that, _bodyData);
+    SymbolData enclosing = getQualifiedSymbolData(_enclosingClassName);
+    assert enclosing != null;
+    simpleAnonymousClassInstantiationHelper(that, enclosing);
+    return null;
+  }
+  
+  /** Delegate to helper method. */
+  public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
+    SymbolData enclosing = getQualifiedSymbolData(_enclosingClassName);
+    assert enclosing != null;
+    complexAnonymousClassInstantiationHelper(that, enclosing);  // TODO: the wrong enclosing context?
     return null;
   }
   
@@ -186,7 +220,7 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     * @param enclosingData  The Data which contains the variables
     */
   protected VariableData[] _variableDeclaration2VariableData(VariableDeclaration vd, Data enclosingData) {
-    VariableData[] vds = llVariableDeclaration2VariableData(vd, enclosingData);
+    VariableData[] vds = super._variableDeclaration2VariableData(vd, enclosingData);
     for (int i = 0; i < vds.length; i++) {
       if (vds[i].getMav().getModifiers().length > 0) {
         StringBuilder s = new StringBuilder("the keyword(s) ");
@@ -194,8 +228,8 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
         for (String m: modifiers) { if (! m.equals("final")) s.append("\"" + m + "\" "); }
         _addAndIgnoreError("You cannot use " + s + "to declare a local variable", vd);
       }
-      vds[i].setFinal();
-      vds[i].setIsLocalVariable(true);
+      if (! vds[i].isFinal()) vds[i].setFinal();
+//      vds[i].setIsLocalVariable(true);
     }
 //    System.err.println("Return VariableDatas " + vds);
     return vds;
@@ -231,27 +265,43 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     public BodyBodyIntermediateVisitorTest(String name) { super(name); }
     
     public void setUp() {
-      _sd1 = new SymbolData("i.like.monkey");
-      _md1 = new MethodData("methodName", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE, 
-                                   new VariableData[0], 
-                                   new String[0],
-                                   _sd1,
-                                   null);
+      _sd1 = new SymbolData("ILikeMonkey");
+      _sd1.setIsContinuation(false);
+      
+      _md1 = new MethodData("methodName", 
+                            _publicMav, 
+                            new TypeParameter[0], 
+                            SymbolData.INT_TYPE, 
+                            new VariableData[0], 
+                            new String[0],
+                            _sd1,
+                            null);
 
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       LanguageLevelConverter.symbolTable.clear();
       LanguageLevelConverter._newSDs.clear();
+      LanguageLevelConverter.symbolTable.put("ILikeMonkey", _sd1);
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
-      _hierarchy = new Hashtable<String, TypeDefBase>();
+//      _hierarchy = new Hashtable<String, TypeDefBase>();
+      
       _bbv = 
-        new BodyBodyIntermediateVisitor(_md1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
+        new BodyBodyIntermediateVisitor(_md1, 
+                                        new File(""), 
+                                        "", 
+                                        "ILikeMonkey", 
                                         new LinkedList<String>(), 
-                                        new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>(),
-                                        new LinkedList<String>());
-      _bbv._classesToBeParsed = new Hashtable<String, Pair<TypeDefBase, LanguageLevelVisitor>>();
-      _bbv.continuations = new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>();
-      _bbv._resetNonStaticFields();
+                                        new LinkedList<String>(), 
+                                        new HashSet<String>(), 
+                                        new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                        new LinkedList<Command>(),
+                                        new HashSet<String>());
+      
+      _bbv._classesInThisFile = new HashSet<String>();
+      _bbv.continuations = new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>();
+//      _bbv._resetNonStaticFields();
       _bbv._importedPackages.addFirst("java.lang");
+      _sd1.setSuperClass(_bbv.getQualifiedSymbolData("java.lang.Object"));
+
       _errorAdded = false;
     }
     
@@ -271,8 +321,7 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
                    errors.get(0).getFirst());
     }
     
-    /* These last two tests are shared with ClassBodyIntermediateVisitor,
-     * perhaps we could factor them out. */
+    /* These last two tests are shared with ClassBodyIntermediateVisitor, perhaps we could factor them out. */
     
     public void testForVariableDeclarationOnly() {
       // Check one that works
@@ -288,6 +337,7 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
       VariableData vd1 = new VariableData("field1", _finalMav, SymbolData.DOUBLE_TYPE, false, _bbv._bodyData);
       VariableData vd2 = new VariableData("field2", _finalMav, SymbolData.BOOLEAN_TYPE, false, _bbv._bodyData);
       vdecl.visit(_bbv);
+      if (errors.size() > 0) System.err.println("Error was:" + errors.get(0).getFirst());
       assertEquals("There should not be any errors.", 0, errors.size());
       assertTrue("field1 was added.", _md1.getVars().contains(vd1));
       assertTrue("field2 was added.", _md1.getVars().contains(vd2));
@@ -327,6 +377,21 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
 //                 LanguageLevelConverter.symbolTable.containsKey("java.lang.System"));
 //    }
     
+    /** Generate a block containing a bitwise or operation and the specified SourceInfo si.   Note: we need
+      * to generate error blocks with distinct literal data to avoid generating duplicate error messages
+      * which are suppressed in the cumulative errors table. */
+    private Block _generateErrorBlock(int litValue) {
+      final SourceInfo si = SourceInfo.NO_INFO;
+      BracedBody errorBody = new BracedBody(si, new BodyItemI[] {
+        new ExpressionStatement(si, 
+                                new BitwiseOrExpression(si, 
+                                                        new SimpleNameReference(si, 
+                                                                                new Word(si, "i")), 
+                                                        new IntegerLiteral(si, litValue)))});
+      return new Block(si, errorBody);
+    }
+      
+      
     public void testForTryCatchStatement() {
       //Make sure that no error is thrown
       BracedBody emptyBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
@@ -339,38 +404,49 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
       assertEquals("After visiting both NormalTryCatchStatement and TryCatchFinallyStatement, there should be no " 
                      + "errors", 0, errors.size());
       
-      //make sure that if there is an error in one of the bodies, it is caught:
-      BracedBody errorBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {
-        new ExpressionStatement(SourceInfo.NO_INFO, 
-                                new BitwiseOrExpression(SourceInfo.NO_INFO, 
-                                                        new SimpleNameReference(SourceInfo.NO_INFO, 
-                                                                                new Word(SourceInfo.NO_INFO, "i")), 
-                                                        new IntegerLiteral(SourceInfo.NO_INFO, 10)))});
-      Block errorBlock = new Block(SourceInfo.NO_INFO, errorBody);
+//      //make sure that if there is an error in one of the bodies, it is caught:
+//      BracedBody errorBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {
+//        new ExpressionStatement(SourceInfo.NO_INFO, 
+//                                new BitwiseOrExpression(SourceInfo.NO_INFO, 
+//                                                        new SimpleNameReference(SourceInfo.NO_INFO, 
+//                                                                                new Word(SourceInfo.NO_INFO, "i")), 
+//                                                        new IntegerLiteral(SourceInfo.NO_INFO, 10)))});
+//      Block errorBlock = new Block(SourceInfo.NO_INFO, errorBody);
       
-      ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, errorBlock, new CatchBlock[0]);
+//      assert ! SourceInfo.TEST_0.equals(SourceInfo.TEST_1);
+      ntcs = new NormalTryCatchStatement(SourceInfo.TEST_0, _generateErrorBlock(0), new CatchBlock[0]);
       ntcs.visit(_bbv);
       assertEquals("Should be one error", 1, errors.size());
       assertEquals("Error message should be correct", 
-                   "Bitwise or expressions cannot be used at any language level.  " 
+                   "Bitwise or expressions cannot be used in the functional language level.  " 
                      + "Perhaps you meant to compare two values using regular or (||)", 
                    errors.getLast().getFirst());
       
       //make sure that if there is an error in one of the catch statements, it is caught:
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, new PrimitiveType(SourceInfo.NO_INFO, "int"), new Word(SourceInfo.NO_INFO, "i"));
-      FormalParameter fp = new FormalParameter(SourceInfo.NO_INFO, uvd, false);
+      UninitializedVariableDeclarator uvd = 
+        new UninitializedVariableDeclarator(SourceInfo.TEST_1, 
+                                            new PrimitiveType(SourceInfo.TEST_1, "int"), 
+                                            new Word(SourceInfo.TEST_1, "i"));
+      FormalParameter fp = new FormalParameter(SourceInfo.TEST_1, uvd, false);
 
-      tcfs = new TryCatchFinallyStatement(SourceInfo.NO_INFO, b, new CatchBlock[] {
-        new CatchBlock(SourceInfo.NO_INFO, fp, errorBlock)}, b);
-        
+      tcfs = new TryCatchFinallyStatement(SourceInfo.TEST_1, b, new CatchBlock[] {
+        new CatchBlock(SourceInfo.TEST_1, fp, _generateErrorBlock(1))
+      }, b);
+      
+     assertEquals("Should be one error", 1, errors.size());
      tcfs.visit(_bbv);
      assertEquals("Should be two errors", 2, errors.size());
-     assertEquals("Error message should be correct", "Bitwise or expressions cannot be used at any language level.  Perhaps you meant to compare two values using regular or (||)", errors.getLast().getFirst());
+     assertEquals("Error message should be correct", 
+                  "Bitwise or expressions cannot be used in the functional language level."
+                  + "  Perhaps you meant to compare two values using regular or (||)", 
+                  errors.getLast().getFirst());
     }
     
     public void testForThisReferenceDoFirst() {
       SimpleThisReference str = new SimpleThisReference(SourceInfo.NO_INFO);
-      ComplexThisReference ctr = new ComplexThisReference(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "field")));
+      ComplexThisReference ctr = 
+        new ComplexThisReference(SourceInfo.NO_INFO, 
+                                 new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "field")));
 
       //if a this reference occurs outside of a constructor, no error
       _bbv._bodyData = _md1;
@@ -380,7 +456,7 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
            
       
       //if a this reference occurs in a constructor, give an error
-      MethodData constr = new MethodData("monkey", _publicMav, new TypeParameter[0], _sd1, 
+      MethodData constr = new MethodData("ILikeMonkey", _publicMav, new TypeParameter[0], _sd1, 
                                    new VariableData[0], 
                                    new String[0],
                                    _sd1,
@@ -388,13 +464,99 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
       _bbv._bodyData = constr;
       str.visit(_bbv);
       assertEquals("Should be 1 error", 1, errors.size());
-      assertEquals("Error message should be correct", "You cannot reference the field 'this' inside a constructor at the Intermediate Level", errors.getLast().getFirst());
+      assertEquals("Error message should be correct", 
+                   "You cannot reference the field 'this' inside a constructor at the Intermediate Level", 
+                   errors.getLast().getFirst());
       
       ctr.visit(_bbv);
       assertEquals("Should be 2 errors", 2, errors.size());
-      assertEquals("Error message should be correct", "You cannot reference the field 'this' inside a constructor at the Intermediate Level", errors.getLast().getFirst());
+      assertEquals("Error message should be correct", 
+                   "You cannot reference the field 'this' inside a constructor at the Intermediate Level", 
+                   errors.getLast().getFirst());
+      
       
     }
     
+     public void testForInnerClassDef() {
+     
+      // Test a local inner class definition and reference
+      SymbolData obj = new SymbolData("ILikeMonkey");
+      LanguageLevelConverter.symbolTable.put("ILikeMonkey", obj);
+      InnerClassDef cd0 = 
+        new InnerClassDef(SourceInfo.NO_INFO, 
+                          _packageMav, 
+                          new Word(SourceInfo.NO_INFO, "Rod"),
+                          new TypeParameter[0], 
+                          new ClassOrInterfaceType(SourceInfo.NO_INFO, "ILikeMonkey", new Type[0]), 
+                          new ReferenceType[0], 
+                          new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+      cd0.visit(_bbv);
+      assertEquals("There should be no errors", 0, errors.size());
+      SymbolData innerClass1 = _bbv._bodyData.getInnerClassOrInterface("Rod");
+      assertNotNull("Should have a inner class named Rod", innerClass1);
+      
+      // Test one with explicit modifiers
+      InnerClassDef cd1 = 
+        new InnerClassDef(SourceInfo.NO_INFO, 
+                          _publicMav, 
+                          new Word(SourceInfo.NO_INFO, "Todd"),
+                          new TypeParameter[0], 
+                          new ClassOrInterfaceType(SourceInfo.NO_INFO, "ILikeMonkey", new Type[0]), 
+                          new ReferenceType[0], 
+                          new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+      cd1.visit(_bbv);
+      assertEquals("There should be no errors", 0, errors.size());  // modifiers are allowed
+      SymbolData innerClass2 = _bbv._bodyData.getInnerClassOrInterface("Todd");
+      assertNotNull("Should have a inner class named Todd", innerClass2);
+     }
+     
+     public void testForInnerInterfaceDef() {       
+       //Test a trivial inner interface definition
+       InnerInterfaceDef iid = 
+         new InnerInterfaceDef(SourceInfo.NO_INFO, 
+                               _packageMav, 
+                               new Word(SourceInfo.NO_INFO, "Broken"),
+                               new TypeParameter[0], 
+                               new ReferenceType[0], 
+                               new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+       iid.visit(_bbv);
+       assertEquals("There should be one error", 1, errors.size());
+       assertEquals("The error message should be correct", 
+                    "Local interfaces are illegal in Java.", errors.get(0).getFirst());
+       SymbolData innerInterface = _bbv._bodyData.getInnerClassOrInterface("Broken");
+       assertNull("Should NOT have a inner interface named Broken", innerInterface);
+       
+       // Test a inner interface definition and reference
+       InnerInterfaceDef id0 = 
+         new InnerInterfaceDef(SourceInfo.NO_INFO, 
+                               _packageMav, 
+                               new Word(SourceInfo.NO_INFO, "RodInterface"),
+                               new TypeParameter[0], 
+                               new ReferenceType[0], 
+                               new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+       id0.visit(_bbv);
+       assertEquals("There should be 2 errors", 2, errors.size());
+       assertEquals("The error message should be correct", 
+                    "Local interfaces are illegal in Java.", errors.get(1).getFirst());
+       innerInterface = _bbv._bodyData.getInnerClassOrInterface("RodInterface");
+       assertNull("Should NOT have a inner interface named RodInterface", innerInterface);
+       
+       // Test one with explicit modifiers
+       InnerInterfaceDef id1 = 
+         new InnerInterfaceDef(SourceInfo.NO_INFO, 
+                               _publicMav, 
+                               new Word(SourceInfo.NO_INFO, "Todd"),
+                               new TypeParameter[0], 
+                               new ReferenceType[0], 
+                               new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+       id1.visit(_bbv);
+       assertEquals("There should be three errors", 3, errors.size());  // class modifiers are allowed
+       assertEquals("The error message should be correct", 
+                    "Local interfaces are illegal in Java.", errors.get(2).getFirst());
+       innerInterface = _bbv._bodyData.getInnerClassOrInterface("Todd");
+       assertNull("Should NOT have a inner interface named Todd", innerInterface);
+     }
+     
+     public void testDummy() { }
   }
 }

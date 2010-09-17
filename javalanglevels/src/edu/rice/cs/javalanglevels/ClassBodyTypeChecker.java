@@ -46,7 +46,7 @@ import edu.rice.cs.plt.iter.*;
 import junit.framework.TestCase;
 
 /** Do the TypeChecking appropriate to the context of a class body.  Common to all Language Levels. */
-public class ClassBodyTypeChecker extends Bob {
+public class ClassBodyTypeChecker extends SpecialTypeChecker {
   
   /**The SymbolData corresponding to this class.*/
   private SymbolData _symbolData;
@@ -97,7 +97,7 @@ public class ClassBodyTypeChecker extends Bob {
     String text = that.getName().getText();
     VariableData vd = getFieldOrVariable(text, _symbolData, _symbolData, name);
     if (vd == null) {
-      throw new RuntimeException("The field " + text + " was not found in " + _symbolData.getName() + ".");
+      throw new RuntimeException("The field " + text + " was not found in " + _symbolData.getName() + '.');
     }
     _vars.addLast(vd);
     return null;
@@ -167,7 +167,7 @@ public class ClassBodyTypeChecker extends Bob {
       }
     }
     if (md == null) {
-      throw new RuntimeException("The constructor " + LanguageLevelVisitor.getUnqualifiedClassName(_symbolData.getName()) + " was not in the class " + _symbolData.getName() + ".");
+      throw new RuntimeException("The constructor " + LanguageLevelVisitor.getUnqualifiedClassName(_symbolData.getName()) + " was not in the class " + _symbolData.getName() + '.');
     }
 
     LinkedList<VariableData> ll = new LinkedList<VariableData>();// = cloneVariableDataList(_vars);
@@ -381,6 +381,7 @@ public class ClassBodyTypeChecker extends Bob {
       _sd4 = new SymbolData("u.like.emu");
       _sd5 = new SymbolData("");
       _sd6 = new SymbolData("cebu");
+      
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       LanguageLevelConverter.symbolTable.clear();
       LanguageLevelConverter._newSDs.clear();
@@ -394,9 +395,10 @@ public class ClassBodyTypeChecker extends Bob {
     public void testForUninitializedVariableDeclaratorOnly() {
       VariableData vd1 = new VariableData("Mojo", _publicMav, SymbolData.INT_TYPE, false, _cbbtc._data);
       _sd1.addVar(vd1);
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                                                new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                                                                new Word(SourceInfo.NO_INFO, "Mojo"));
+      UninitializedVariableDeclarator uvd = 
+        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                            new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                            new Word(SourceInfo.NO_INFO, "Mojo"));
 //      uvd.visit(_cbbtc);
       _cbbtc.forUninitializedVariableDeclaratorOnly(uvd, SymbolData.INT_TYPE, null);
       assertTrue("_vars should contain Mojo.", _cbbtc._vars.contains(vd1));      
@@ -550,19 +552,35 @@ public class ClassBodyTypeChecker extends Bob {
                    errors.get(0).getFirst());
       
       //Check that a final variable cannot be reassigned to
-      s = new ValueReturnStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")));
-      VariableDeclaration i = new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd});
-      ExpressionStatement se = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 2)));
-      ExpressionStatement se2 = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 5)));
+      s = new ValueReturnStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, 
+                                                                               new Word(SourceInfo.NO_INFO, "i")));
+      VariableDeclaration i = 
+        new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd});
+      ExpressionStatement se = 
+        new ExpressionStatement(SourceInfo.NO_INFO, 
+                                new SimpleAssignmentExpression(SourceInfo.NO_INFO, 
+                                                               new SimpleNameReference(SourceInfo.NO_INFO, 
+                                                                                       new Word(SourceInfo.NO_INFO, "i")), 
+                                                               new IntegerLiteral(SourceInfo.NO_INFO, 2)));
+      ExpressionStatement se2 = 
+        new ExpressionStatement(SourceInfo.NO_INFO, 
+                                new SimpleAssignmentExpression(SourceInfo.NO_INFO, 
+                                                               new SimpleNameReference(SourceInfo.NO_INFO, 
+                                                                                       new Word(SourceInfo.NO_INFO, "i")), 
+                                                               new IntegerLiteral(SourceInfo.NO_INFO, 5)));
       
       BracedBody b = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {i, se, se2, s});
-      ConcreteMethodDef cmd2 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], intt,
-                                                    new Word(SourceInfo.NO_INFO, "doubleAssignmentMethod"), new FormalParameter[0],
-                                                    new ReferenceType[0], b);
+      ConcreteMethodDef cmd2 = 
+        new ConcreteMethodDef(SourceInfo.NO_INFO, 
+                              _publicMav, 
+                              new TypeParameter[0], intt,
+                              new Word(SourceInfo.NO_INFO, "doubleAssignmentMethod"), 
+                              new FormalParameter[0],
+                              new ReferenceType[0], b);
       
       VariableData vdi = new VariableData("i", _finalMav, SymbolData.INT_TYPE, false, null);
       MethodData md2 = new MethodData("doubleAssignmentMethod", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE,
-                                     new VariableData[0], new String[0], _sd1, cmd2);
+                                      new VariableData[0], new String[0], _sd1, cmd2);
       _sd1.addMethod(md2);
       vdi.setEnclosingData(md2);
 
@@ -692,63 +710,114 @@ public class ClassBodyTypeChecker extends Bob {
     }
     
     public void testForConstructorDef() {
-      VariableDeclaration vd = new VariableDeclaration(SourceInfo.NO_INFO, _finalMav, new VariableDeclarator[] {new UninitializedVariableDeclarator(SourceInfo.NO_INFO, new PrimitiveType(SourceInfo.NO_INFO, "int"), new Word(SourceInfo.NO_INFO, "i"))});
-      ExpressionStatement se = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 1)));      
-      BracedBody cbb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {se});
-      ConstructorDef cd = new ConstructorDef(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "Jimes"), _publicMav, new FormalParameter[0], new ReferenceType[0], cbb);
+      VariableDeclarator[] vds = 
+        new VariableDeclarator[] { new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                                                       new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                                                       new Word(SourceInfo.NO_INFO, "i"))};
+      
+      VariableDeclaration vd =  new VariableDeclaration(SourceInfo.NO_INFO, _finalMav, vds);
+      SimpleNameReference snr =  
+        new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i"));
+      ExpressionStatement es = 
+        new ExpressionStatement(SourceInfo.NO_INFO, 
+                                new SimpleAssignmentExpression(SourceInfo.NO_INFO, 
+                                                               snr, 
+                                                               new IntegerLiteral(SourceInfo.NO_INFO, 1)));      
+      BracedBody cbb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { es });
+      ConstructorDef cd =  new ConstructorDef(SourceInfo.NO_INFO, 
+                                              new Word(SourceInfo.NO_INFO, "Jimes"), 
+                                              _publicMav, 
+                                              new FormalParameter[0], 
+                                              new ReferenceType[0], 
+                                              cbb);
       BracedBody b = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {vd, cd});
-      ClassDef classDef = new ClassDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "Jimes"), new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], b);
+      ClassDef classDef = 
+        new ClassDef(SourceInfo.NO_INFO, 
+                     _publicMav, 
+                     new Word(SourceInfo.NO_INFO, "Jimes"), 
+                     new TypeParameter[0], 
+                     new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.io.StreamTokenizer", new Type[0]), 
+                     new ReferenceType[0], 
+                     b);
 
-      SymbolData sd = new SymbolData("Jimes");
-      VariableData vData = new VariableData("i", _finalMav, SymbolData.INT_TYPE, false, sd);
+      SymbolData jimes = new SymbolData("Jimes");
+      VariableData vData = new VariableData("i", _finalMav, SymbolData.INT_TYPE, false, jimes);
       _cbbtc._file = new File("Jimes.dj0");
-      sd.setMav(_publicMav);
-      sd.setIsContinuation(false);
-      sd.addVar(vData);
-      SymbolData sd2 = new SymbolData("java.lang.Object");
-      sd2.setIsContinuation(false);
-      sd2.setMav(_publicMav);
-      sd2.setPackage("java.lang");
-      sd.setSuperClass(sd2);
-      symbolTable.put("Jimes", sd);
-      symbolTable.put("java.lang.Object", sd2);
-      MethodData md = new MethodData("Jimes", _publicMav, new TypeParameter[0], sd, new VariableData[0], new String[0], sd, cd);
-      MethodData objMd = new MethodData("Object", _publicMav, new TypeParameter[0], sd2, new VariableData[0], new String[0], sd2, cd);
-      sd.addMethod(md);
+      jimes.setMav(_publicMav);
+      jimes.setIsContinuation(false);
+      jimes.addVar(vData);
+
+      symbolTable.put("Jimes", jimes);
+
+//      SymbolData obj = _cbbtc.getSymbolData("java.lang.Object", new NullLiteral(SourceInfo.NO_INFO), false, true);
+      SymbolData tokenizer = _cbbtc.getSymbolData("java.io.StreamTokenizer", new NullLiteral(SourceInfo.NO_INFO), false, true);
+      jimes.setSuperClass(tokenizer);
+      SymbolData jutc = defineTestCaseClass();
       
+      assert symbolTable.contains(tokenizer);
+      assert symbolTable.contains(jutc);
       
-      //assumes an explicit super call with no arguments
+      MethodData md = 
+        new MethodData("Jimes", _publicMav, new TypeParameter[0], jimes, new VariableData[0], new String[0], jimes, cd);
+      MethodData objMd = 
+        new MethodData("java.lang.Object", _publicMav, new TypeParameter[0], tokenizer, new VariableData[0], 
+                       new String[0], tokenizer, cd);
+      jimes.addMethod(md);
+      
+      // assumes an explicit super call with no arguments
       classDef.visit(_cbbtc);
       assertEquals("There should be one error", 1, errors.size());
-      assertEquals("Error message should be correct", "You must invoke one of java.lang.Object's constructors here.  You can either explicitly invoke one of its exisitng constructors or add a constructor with signature: Object().", errors.getLast().getFirst());
+      assertEquals("Error message should be correct", 
+                   "You must invoke one of java.io.StreamTokenizer's constructors here.  You can either explicitly "
+                     + "invoke one of its exisitng constructors or add a constructor with signature: StreamTokenizer().", 
+                   errors.getLast().getFirst());
 
       // test that a constructor can set the value of a final field
-      sd2.addMethod(objMd); //give super class constructor
+      tokenizer.addMethod(objMd); //give super class constructor
       vData.lostValue();
 
       classDef.visit(_cbbtc);
       assertEquals("There should still be one error", 1, errors.size());
 
-      
+      // Since we are going to traverse classDef again, we are resetting the error log.
+      errors.clear();
       // test that if the constructor does not assign a value to the final field, then an error is thrown
       vData.lostValue();
       cbb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {});
-      cd = new ConstructorDef(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "Jimes"), _publicMav, new FormalParameter[0], new ReferenceType[0], cbb);
+      cd = new ConstructorDef(SourceInfo.NO_INFO, 
+                              new Word(SourceInfo.NO_INFO, "Jimes"), 
+                              _publicMav, 
+                              new FormalParameter[0], 
+                              new ReferenceType[0], 
+                              cbb);
       b = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {vd, cd});
-      classDef = new ClassDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "Jimes"), new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], b);
+      classDef = new ClassDef(SourceInfo.NO_INFO, 
+                              _publicMav, 
+                              new Word(SourceInfo.NO_INFO, "Jimes"), 
+                              new TypeParameter[0], 
+                              new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+                              new ReferenceType[0], b);
  
+      System.err.println("***** Starting traversal of classDef");
       classDef.visit(_cbbtc);
+//      System.err.println("Error 3 for line 803 of ClassBodyTypeChecker is: " + errors.get(2).getFirst());
+      System.err.println("Error 2 for line 803 of ClassBodyTypeChecker is: " + errors.get(1).getFirst());
+      System.err.println("Error 1 for line 803 of ClassBodyTypeChecker is: " + errors.get(0).getFirst());
+      
       assertEquals("There should be 2 errors now", 2, errors.size());
-      assertEquals("The error message should be correct", "The final field i has not been initialized.  Make sure you give it a value in this constructor", errors.getLast().getFirst());
+      
+      assertEquals("The second error message should be correct", 
+                   "The final field i has not been initialized.  Make sure you give it a value in this constructor", 
+                   errors.getLast().getFirst());
       
       //test the case of a constructor that makes a call to another constructor
-      vData = new VariableData("j", _finalMav, SymbolData.INT_TYPE, false, sd);
-      sd.setVars(new LinkedList<VariableData>());
-      sd.addVar(vData);
+      vData = new VariableData("j", _finalMav, SymbolData.INT_TYPE, false, jimes);
+      jimes.setVars(new LinkedList<VariableData>());
+      jimes.addVar(vData);
 
       LinkedList<VariableData> vs = new LinkedList<VariableData>();
       vs.addLast(vData);
-      _cbbtc = new ClassBodyTypeChecker(sd, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), vs, new LinkedList<Pair<SymbolData, JExpression>>());
+      _cbbtc = new ClassBodyTypeChecker(jimes, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), vs, new LinkedList<Pair<SymbolData, JExpression>>());
       ExpressionStatement assign = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")), new IntegerLiteral(SourceInfo.NO_INFO, 45)));
       b = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new ExpressionStatement(SourceInfo.NO_INFO, new SimpleThisConstructorInvocation(SourceInfo.NO_INFO, new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]))), assign});
       cd = new ConstructorDef(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "name"), _publicMav, new FormalParameter[0], new ReferenceType[0], b);

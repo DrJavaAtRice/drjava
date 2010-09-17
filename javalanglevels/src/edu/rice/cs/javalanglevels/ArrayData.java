@@ -54,12 +54,11 @@ public class ArrayData extends SymbolData {
   /**The type of the elements of this array.  For example, int[] has an _elementType of int.*/
   private SymbolData _elementType;
   
-  /**
-   * Creates a new ArrayData corresponding to the elementType sd.
-   * @param sd  The SymbolData element type.
-   * @param llv  The LanguageLevelVisitor who created this ArrayData.
-   * @param si  The SourceInfo corresponding to this ArrayData.
-   */
+  /** Creates a new ArrayData corresponding to the elementType sd.
+    * @param sd   The SymbolData element type; may be a continuation
+    * @param llv  The LanguageLevelVisitor who created this ArrayData.
+    * @param si   The SourceInfo corresponding to this ArrayData.
+    */
   public ArrayData(SymbolData sd, LanguageLevelVisitor llv, SourceInfo si) {
     super(sd.getName() + "[]");
     
@@ -67,12 +66,10 @@ public class ArrayData extends SymbolData {
     
     // Arrays only have one field called length, and it is automatically given a value
     addVar(new VariableData("length", 
-                            new ModifiersAndVisibility(SourceInfo.NO_INFO, 
-                                                       new String[] {"public", "final"}),
-                            SymbolData.INT_TYPE, true, this));
+                            new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public", "final"}),
+                            SymbolData.INT_TYPE, true, this)); 
     
-    
-    //All arrays are a subclass of Object
+    // All arrays are a subclass of Object
     SymbolData object = llv.getSymbolData("java.lang.Object", si);
     setSuperClass(object);
     
@@ -98,16 +95,14 @@ public class ArrayData extends SymbolData {
   /** @return the package of the element type*/
   public String getPackage() { return _elementType.getPackage(); }
   
-  /*Set the package of the element type to be the specified package:
-   * @param s  The package to use*/
-  public void setPackage(String s) {
-    _elementType.setPackage(s);
-  }
+  /** Set the package of the element type to be the specified package:
+    * @param s  The package to use*/
+  public void setPackage(String s) { _elementType.setPackage(s); }
   
   
   /* @return the ModifiersAndVisibility of the element type*/
   public ModifiersAndVisibility getMav() {
-    if (_elementType.hasModifier("final")) { return _elementType.getMav(); }
+    if (_elementType.hasModifier("final"))  return _elementType.getMav();
     else {
       String[] elementMavs = _elementType.getMav().getModifiers();
       String[] newMavs = new String[elementMavs.length + 1];
@@ -118,43 +113,33 @@ public class ArrayData extends SymbolData {
     }
   }
   
-  /*Set the ModifiersAndVisibility of the element type to the specified value.
-   * @param mv  The ModifiersAndVisibility to use.*/
-  public void setMav(ModifiersAndVisibility mv) {
-    _elementType.setMav(mv);
-  }
+  /** Sets the ModifiersAndVisibility of the element type to the specified value.
+    * @param mv  The ModifiersAndVisibility to use. */
+  public void setMav(ModifiersAndVisibility mv) { _elementType.setMav(mv); }
   
   /** @return the SymbolData element type corresponding to the elements of this array.*/
-  public SymbolData getElementType() {
-    return _elementType;
-  }
+  public SymbolData getElementType() { return _elementType; }
   
-  /**Delegate to the outer data of your element type*/
-  public Data getOuterData() {
-    return _elementType.getOuterData();
-  }
+  /** Delegates to the outer data of your element type*/
+  public Data getOuterData() { return _elementType.getOuterData(); }
   
-  /**
-   * A Noop, because arrays shouldn't have outer data
-   */
+  /** A Noop, because arrays shouldn't have outer data */
   public void setOuterData(Data outerData) {
 //    _elementType.setOuterData(outerData);
   }
-  
-  
+    
   public boolean equals(Object obj) {
-    if (this == obj) {return true;}
+    if (this == obj) return true;
     if (obj == null) return false;
-    if ((obj.getClass() != this.getClass())) { //|| (obj.hashCode() != this.hashCode())) {
-      return false;
-    }
+    if (obj.getClass() != this.getClass()) return false;
+
     ArrayData ad = (ArrayData) obj;    
     
     //For 2 array datas to be equal, all their symbolData fields must be equal, and their element types must be equal
     return super.equals(obj) && getElementType().equals(ad.getElementType());
   }
   
-  /** Provide a hashcode method that distinguishes between array datas based on name */
+  /** Provides a hashcode method that distinguishes between array datas based on name */
   public int hashCode() { return getName().hashCode(); }
   
   /** Returns true only under the following conditions: 
@@ -252,11 +237,13 @@ public class ArrayData extends SymbolData {
     
     public void setUp() {
       llv = new LanguageLevelVisitor(new File(""), 
-                                     "", 
+                                     "",
+                                     null,
                                      new LinkedList<String>(), 
                                      new LinkedList<String>(),
-                                     new LinkedList<String>(), 
-                                     new Hashtable<String, Pair<SourceInfo, LanguageLevelVisitor>>());
+                                     new HashSet<String>(), 
+                                     new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
+                                     new LinkedList<Command>());
       
       LanguageLevelConverter.symbolTable.clear();
       LanguageLevelConverter._newSDs.clear();

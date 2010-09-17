@@ -42,7 +42,7 @@ import java.util.*;
 
 import junit.framework.TestCase;
 
-/** Represents the data for a given class or instance of a class.  
+/** Abstract class for the data representing a given class or instance of a class.  
   * When talking about TypeData, we are either talking about a specific instantiation of
   * a class (represented by a InstanceData) or a class type itself (represented by a SymbolData).
   */
