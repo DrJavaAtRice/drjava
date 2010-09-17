@@ -283,7 +283,7 @@ public abstract class Data {
     */
   public SymbolData getNextAnonymousInnerClass() {
     String name = getSymbolData().getName() + "$" + getSymbolData().preincrementAnonymousInnerClassNum();
-    System.err.println("**** Looking up anonymous inner class " + name);
+//    System.err.println("**** Looking up anonymous inner class " + name);
     LinkedList<SymbolData> myDatas = getInnerClasses();
     SymbolData myData = null;
     //look through the inner classes for the data
@@ -339,11 +339,11 @@ public abstract class Data {
     SymbolData privateResult = null;
     SymbolData result = getInnerClassOrInterfaceHelper(relName, firstIndexOfDot);
     if (relName.endsWith("Rod")) {
-      System.err.println("getInnerClassOrInterfaceHelper('" + relName + "', " + firstIndexOfDot + ")");
-      System.err.println("_innerClasses = " + _innerClasses);
+//      System.err.println("getInnerClassOrInterfaceHelper('" + relName + "', " + firstIndexOfDot + ")");
+//      System.err.println("_innerClasses = " + _innerClasses);
     }
     if (result != null) {
-      System.err.println("Result is: '" + result + "'");
+//      System.err.println("Result is: '" + result + "'");
       SymbolData outerPiece;
       if (firstIndexOfDot > 0) {
         outerPiece = getInnerClassOrInterfaceHelper(relName.substring(0, firstIndexOfDot), -1);
@@ -381,7 +381,7 @@ public abstract class Data {
       String sdName = sd.getName();
 
       sdName = LanguageLevelVisitor.getUnqualifiedClassName(sdName);
-      if (sdName.equals("Rod")) System.err.println("In getInnerClass, sdName = 'Rod'; relName = '" + relName +"'");
+//      if (sdName.equals("Rod")) System.err.println("In getInnerClass, sdName = 'Rod'; relName = '" + relName +"'");
       if (firstIndexOfDot == -1) {
         if (sdName.equals(relName)) return sd;
       }
@@ -493,7 +493,7 @@ public abstract class Data {
       // Compare a vd to a symbol data who has a var with the same name
       _d.addVar(vd);
       assertTrue("Should be repeated name", _d._repeatedName(vd));
-      System.err.println("testRepeatedName finished");
+//      System.err.println("testRepeatedName finished");
     }
     
     public void testIsAbstract() {
@@ -508,7 +508,7 @@ public abstract class Data {
       // abstract
       assertTrue("Should be abstract", _d.hasModifier("abstract"));
       
-      System.err.println("testIsAbstract finished");
+//      System.err.println("testIsAbstract finished");
     }
    
     public void testAddVar() {
@@ -531,7 +531,7 @@ public abstract class Data {
       assertTrue("Should be able to add a different variable", _d.addVar(vd2));
       assertEquals("Variable list should have 2 variables, vd, vd2", myVds, _d.getVars());
       
-      System.err.println("testAddVar finished");
+//      System.err.println("testAddVar finished");
       
     }
     
@@ -564,7 +564,7 @@ public abstract class Data {
       assertTrue("Should be able to add an empty array", _d.addVars(new VariableData[0]));
       assertEquals("Variable list should not have changed by adding empty array", myVds, _d.getVars());
       
-      System.err.println("testAddVars finished");
+//      System.err.println("testAddVars finished");
     }
     
     public void testGetVar() {
@@ -579,7 +579,7 @@ public abstract class Data {
      
      // Lookup a name that should not be there
       assertEquals("Should return null--no variable with that name", null, _d.getVar("whatever"));
-      System.err.println("testGetVar finished");
+//      System.err.println("testGetVar finished");
     }
     
     public void testIsOuterData() {
@@ -591,7 +591,7 @@ public abstract class Data {
       assertTrue("d246 should be outer data of d2", d2.isOuterData(d246));
       assertTrue("d246 should be outer data of _d", _d.isOuterData(d246));
       assertFalse("d2 should not be outer data of d246", d246.isOuterData(d2));
-      System.err.println("testIsOuterData finished");
+//      System.err.println("testIsOuterData finished");
     }
     
     public void testGetInnerClassOrInterface() {
@@ -688,7 +688,7 @@ public abstract class Data {
       assertEquals("Should return innerInterfaceInner", innerInterfaceInner, 
                    me.getInnerClassOrInterface("MyInner.Inner"));
       
-      System.err.println("testGetInnerClassOrInterface finished");
+//      System.err.println("testGetInnerClassOrInterface finished");
     }
     
     public void testCreateUniqueName() {
@@ -732,7 +732,7 @@ public abstract class Data {
       sd3.addVar(vd0);
       result = sd.createUniqueName("avar");
       assertEquals("the result is correct", "avar1", result);
-      System.err.println("testCreateName finished");
+//      System.err.println("testCreateName finished");
     }
 
     public void testGetNextAnonymousInnerClass() {
@@ -755,7 +755,7 @@ public abstract class Data {
       assertEquals("Should return null", null, _d.getNextAnonymousInnerClass());
       assertEquals("Should return null", null, sd1.getNextAnonymousInnerClass());
       
-      System.err.println("testGetNextAnonymousInnerClass finished");
+//      System.err.println("testGetNextAnonymousInnerClass finished");
     } 
   }
 }

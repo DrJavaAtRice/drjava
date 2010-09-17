@@ -800,8 +800,8 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     /* The preceding line changed to following because anonymous class is filed under its enclosing class not 
      * enclosing method. */
     SymbolData sd = superC.getNextAnonymousInnerClass();
-    System.err.println("***** In handleACI(" + that.getType().getName() + ", " + superC + ") sd = " + sd);
-    System.err.println("Inner classes of " + superC + " are: " + superC.getInnerClasses());
+//    System.err.println("***** In handleACI(" + that.getType().getName() + ", " + superC + ") sd = " + sd);
+//    System.err.println("Inner classes of " + superC + " are: " + superC.getInnerClasses());
     if (sd == null) {
       _addError("Nested anonymous classes are not supported at any language lavel", that);
       return sd;
@@ -844,12 +844,12 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       _addError(enclosing + "is a nested anonymous class, which is not supported at any language level", that);
       return null;
     }
-    System.err.println("***** forSACInst called for anon class in " + enclosing);
+//    System.err.println("***** forSACInst called for anon class in " + enclosing);
     final SymbolData superClass = getSymbolData(that.getType().getName(), enclosing, that); // resolve super class
-    System.err.println("**** SuperClass symbol is " + superClass);
+//    System.err.println("**** SuperClass symbol is " + superClass);
     // Get this anonymous inner class's SymbolData, and finish resolving it.
     SymbolData myData = handleAnonymousClassInstantiation(that, enclosing /*.getEnclosingClass() */);
-    System.err.println("This anonymous class's symbol is: " + myData);
+//    System.err.println("This anonymous class's symbol is: " + myData);
     if (myData == null) return null;
     
     // Cannot instantiate a non-static inner class from a static context (i.e. new A.B() where B is dynamic).
@@ -1014,8 +1014,8 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       if (inStaticMethod() && ! reference.hasModifier("static")  && ! reference.isLocalVariable()) {
         _addError("Non-static variable or field " + reference.getName() + " cannot be referenced from a static context", that);
       }
-      if (reference.getType() == null || reference.getType().getInstanceData() == null) 
-        System.err.println("Expression type checking in " + _data + " blows up; AST = " + that);
+//      if (reference.getType() == null || reference.getType().getInstanceData() == null) 
+//        System.err.println("Expression type checking in " + _data + " blows up; AST = " + that);
       return reference.getType().getInstanceData();  
     }
     
@@ -4174,8 +4174,8 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       assert object != null;
       anon1.setSuperClass(object);
       _sd1.addInnerClass(anon1);
-      System.err.println("****** anon1 is: " + anon1);
-      System.err.println("****** instance data = " + anon1.getInstanceData());
+//      System.err.println("****** anon1 is: " + anon1);
+//      System.err.println("****** instance data = " + anon1.getInstanceData());
       assertEquals("Should return anon1 instance", anon1.getInstanceData(), basic.visit(_etc));
       
       assertEquals("Should be no errors", 0, errors.size());
@@ -4338,10 +4338,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       _etc._vars.add(bob);  // _data for _etc is _sd1
       
       SymbolData object = LanguageLevelConverter.symbolTable.get("java.lang.Object");
-      
       _sd1.setAnonymousInnerClassNum(0);
-      
-      // Once our enclosing data does have an anonymous inner class, it's okay to look it up
       SymbolData anon1 = new SymbolData("i.like.monkey$1");
       anon1.setIsContinuation(false);
       anon1.setPackage("i.like");
@@ -4350,8 +4347,6 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       assert object != null;
       anon1.setSuperClass(object);
       _sd1.addInnerClass(anon1);
-      System.err.println("****** anon1 is: " + anon1);
-      System.err.println("****** instance data = " + anon1.getInstanceData());
       assertEquals("Should return anon1 instance", anon1.getInstanceData(), basic.visit(_etc));
       
       assertEquals("Should be no errors", 0, errors.size());

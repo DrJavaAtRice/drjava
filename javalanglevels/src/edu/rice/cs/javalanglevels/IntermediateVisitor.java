@@ -389,7 +389,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     
     boolean isTestCase = false;  // flag to support automatic importing of junit.framework.*;
     String className = getQualifiedClassName(that.getName().getText());
-    System.err.println("Processing class " + className);
+//    System.err.println("Processing class " + className);
     
     String superName = that.getSuperclass().getName();
     
@@ -480,7 +480,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     return null;
   }
   public Void forBitwiseOrExpressionDoFirst(BitwiseOrExpression that) {
-    System.err.println("Visiting BitwiseOrExpression: " + that);
+//    System.err.println("Visiting BitwiseOrExpression: " + that);
     _addAndIgnoreError("Bitwise or expressions cannot be used in the functional language level." + 
                        "  Perhaps you meant to compare two values using regular or (||)", that);
     return null;
@@ -922,7 +922,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       sd.setSuperClass(_sd1);
       sd.setIsContinuation(false);
 
-      System.err.println("****** Creating constructor for " + _sd1);
+//      System.err.println("****** Creating constructor for " + _sd1);
       _iv.createConstructor(_sd1);  // Cannot create constructor for s1 without creating one for its superclass.
       
       /* Construct expected MethodData */
@@ -945,15 +945,15 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       md.addVars(md.getParams());     
       md.setGenerated(true);
       
-      System.err.println("****** Before creating Classname constructor, ClassName methods = " + sd.getMethods());
-      System.err.println("****** Creating constructor for " + sd);
+//      System.err.println("****** Before creating Classname constructor, ClassName methods = " + sd.getMethods());
+//      System.err.println("****** Creating constructor for " + sd);
       _iv.createConstructor(sd);
-      System.err.println("****** After creating constructor, ClassName method = " + sd.getMethods());
+//      System.err.println("****** After creating constructor, ClassName method = " + sd.getMethods());
 
       MethodData conSD = sd.getMethods().getFirst();
           
-      System.err.println("****** Generated MethodData: " + conSD.toBigString());
-      System.err.println("****** Expectred MethodData: " + md.toBigString());
+//      System.err.println("****** Generated MethodData: " + conSD.toBigString());
+//      System.err.println("****** Expectred MethodData: " + md.toBigString());
       assertEquals("sd should have 1 method: its own constructor", md, conSD);
       
 //      // Since this is the only constructor in the SymbolData, all the fields should be assigned after visiting sd.
@@ -1010,14 +1010,14 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       _iv.createConstructor(subSD);
       
       conSD = subSD.getMethods().getFirst();  // Reusing conSD local variable
-      System.err.println("****** Expected params = " + Arrays.toString(md2.getParams()));
-      System.err.println("****** Results  params = " + Arrays.toString(conSD.getParams()));
+//      System.err.println("****** Expected params = " + Arrays.toString(md2.getParams()));
+//      System.err.println("****** Results  params = " + Arrays.toString(conSD.getParams()));
       
-      System.err.println("****** Expected vars = " + md2.getVars());
-      System.err.println("****** Results  vars = " + conSD.getVars());
+//      System.err.println("****** Expected vars = " + md2.getVars());
+//      System.err.println("****** Results  vars = " + conSD.getVars());
       
-      System.err.println("****** Constructor for Subclass is: " + conSD.toBigString());
-      System.err.println("****** Expected MethodData is: " + md2.toBigString());
+//      System.err.println("****** Constructor for Subclass is: " + conSD.toBigString());
+//      System.err.println("****** Expected MethodData is: " + md2.toBigString());
       
       assert md2.getName().equals(conSD.getName());
       assert md2.getMav().equals(conSD.getMav());
@@ -1028,8 +1028,8 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       LinkedList<VariableData> cVars = conSD.getVars();
       assert mVars.size() == cVars.size();
       for (int i = 0; i < mVars.size(); i++) {
-        System.err.println("****** EnclosingData of mVars " + i + " = " + mVars.get(i).getEnclosingData());
-        System.err.println("****** EnclosingData of cVars " + i + " = " + cVars.get(i).getEnclosingData());
+//        System.err.println("****** EnclosingData of mVars " + i + " = " + mVars.get(i).getEnclosingData());
+//        System.err.println("****** EnclosingData of cVars " + i + " = " + cVars.get(i).getEnclosingData());
         assertEquals("Var Test" + i, mVars.get(i), cVars.get(i));
       }
         
@@ -1276,7 +1276,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       _iv._package = "i.like";
       _iv._enclosingClassName = "i.like.monkey";
       _iv.symbolTable.put("i.like.monkey", _sd1);
-      System.err.println("SymbolData for i.like.monkey = " + _iv.getQualifiedSymbolData("i.like.monkey", SourceInfo.NO_INFO));
+//      System.err.println("SymbolData for i.like.monkey = " + _iv.getQualifiedSymbolData("i.like.monkey", SourceInfo.NO_INFO));
       assertEquals("Should return the correct MethodData", mdata, _iv.createMethodData(mdef, _sd1));
       assertEquals("There should be one errors.", 1, errors.size());
 //      assertEquals("The error message should be correct.", 
@@ -1332,8 +1332,8 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       
       // have to add the parameters to the vars manually
       mdata.addVars(new VariableData[] { new VariableData("field1", FINAL_MAV, SymbolData.DOUBLE_TYPE, true, _sd1) });
-      System.err.println("****** mdata  = " + mdata);
-      System.err.println("****** result = " + result);
+//      System.err.println("****** mdata  = " + mdata);
+//      System.err.println("****** result = " + result);
       assertEquals("Should return the correct MethodData", mdata, result);
       assertEquals("There should be 2 errors.", 2, errors.size());
       // This is now caught in the type checker.
@@ -1354,7 +1354,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       _iv._package = "i.like";
       _iv._enclosingClassName = "i.like.monkey";
       _iv.symbolTable.put("i.like.monkey", _sd1);
-      System.err.println("SymbolData for i.like.monkey = " + _iv.getQualifiedSymbolData("i.like.monkey", SourceInfo.NO_INFO));
+//      System.err.println("SymbolData for i.like.monkey = " + _iv.getQualifiedSymbolData("i.like.monkey", SourceInfo.NO_INFO));
       _iv.simpleAnonymousClassInstantiationHelper(basic, _sd1);
       assertEquals("There should be no errors", 0, errors.size());
       SymbolData obj = LanguageLevelConverter.symbolTable.get("java.lang.Object");

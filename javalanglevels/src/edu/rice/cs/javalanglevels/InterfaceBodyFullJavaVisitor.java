@@ -156,7 +156,7 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
 
   /** Delegate to method in LLV*/
   public Void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
-    System.err.println("Calling simpleAnonymousClassInstantiation Helper from InterfaceBody " + that.getSourceInfo());
+//    System.err.println("Calling simpleAnonymousClassInstantiation Helper from InterfaceBody " + that.getSourceInfo());
     simpleAnonymousClassInstantiationHelper(that, _symbolData);
     return null;
   }

@@ -72,7 +72,7 @@ public class ElementaryLevelTest extends TestCase {
     File[] testFiles = directory.listFiles(new FileFilter() {
       public boolean accept(File pathName) { return pathName.getAbsolutePath().endsWith(".dj0"); }
     });
-    System.err.println("testFiles for testSuccessful = " + Arrays.toString(testFiles));
+//    System.err.println("testFiles for testSuccessful = " + Arrays.toString(testFiles));
     LanguageLevelConverter llc = new LanguageLevelConverter();
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
     result = llc.convert(testFiles, new Options(JavaVersion.JAVA_5,
@@ -90,7 +90,7 @@ public class ElementaryLevelTest extends TestCase {
       File resultingFile = new File(fileName + ".java");
       File correctFile = new File(fileName + ".expected");
       
-      System.err.println("Testing file: " + fileName);
+//      System.err.println("Testing file: " + fileName);
       
       if (correctFile.exists()) {
         try {
@@ -119,7 +119,7 @@ public class ElementaryLevelTest extends TestCase {
     for (int i = 0; i < testFiles.length; i++) {
       LanguageLevelConverter llc = new LanguageLevelConverter();
       result = llc.convert(new File[]{ testFiles[i] }, new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make()));
-//      System.out.println("Test result = " + result);
+//      System.err.println("Test result = " + result);
       assertTrue("should be parse exceptions or visitor exceptions in file " + testFiles[i].getName(),
                  ! result.getFirst().isEmpty() || ! result.getSecond().isEmpty());
     }
@@ -178,7 +178,7 @@ public class ElementaryLevelTest extends TestCase {
     };
     LanguageLevelConverter llc = new LanguageLevelConverter();
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-    System.err.println("files for testOrderMatters = " + Arrays.toString(files));
+//    System.err.println("files for testOrderMatters = " + Arrays.toString(files));
     result = llc.convert(files, new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make()));
     
     assertEquals("should be no parse exceptions", new LinkedList<JExprParseException>(), result.getFirst());
@@ -186,7 +186,7 @@ public class ElementaryLevelTest extends TestCase {
     assertEquals("the error message should be correct", "Could not resolve symbol f", 
                  result.getSecond().getFirst().getFirst());
     
-    System.err.println("testOrderMatters finished");
+//    System.err.println("testOrderMatters finished");
   }
   
   /** An empty file should not get converted to a .java file. */

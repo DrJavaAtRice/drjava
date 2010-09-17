@@ -321,7 +321,7 @@ public class ConstructorBodyTypeChecker extends BodyTypeChecker {
     if (startIndex == 0) implicitSuperConstructor(that);
     
     int thrownSize = _thrown.size();
-    System.err.println("_thrown.size() in " + _data + " = " + thrownSize);
+//    System.err.println("_thrown.size() in " + _data + " = " + thrownSize);
     for (int j = 0; j < thrownSize; j++) {
       if (isUncaughtCheckedException(_thrown.get(j).getFirst(), that)) {
         handleUncheckedException(_thrown.get(j).getFirst(), _thrown.get(j).getSecond());

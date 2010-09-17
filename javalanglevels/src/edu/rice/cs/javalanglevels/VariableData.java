@@ -129,32 +129,32 @@ public class VariableData {
   public boolean equals(Object obj) { 
     if (obj == null) return false;
     else if (obj.getClass() != this.getClass()) { 
-      System.err.println("VariableData.equals: Class equality failure");
+//      System.err.println("VariableData.equals: Class equality failure");
       return false; 
     }
     
     VariableData vd = (VariableData) obj;
     
     if (! _name.equals(vd.getName())) {
-      System.err.println("VariableData.equals: name equality failure");
+//      System.err.println("VariableData.equals: name equality failure");
       return false;
     }
     if (! _modifiersAndVisibility.equals(vd.getMav())) {
-      System.err.println("VariableData.equals: modifiersAndVisibility equality failure");
+//      System.err.println("VariableData.equals: modifiersAndVisibility equality failure");
       return false;
     }
     
     if (! _type.equals(vd.getType())) {
-      System.err.println("VariableData.equals: type equality failure");
+//      System.err.println("VariableData.equals: type equality failure");
       return false;
     }
     
     if (_hasBeenAssigned != vd.hasValue()) {
-      System.err.println("VariableData.equals: hasBeenAssigned equality failure");
+//      System.err.println("VariableData.equals: hasBeenAssigned equality failure");
       return false;
     }
     if (_hasInitializer != vd._hasInitializer) {
-      System.err.println("VariableData.equals: hasInitializer equality failure");
+//      System.err.println("VariableData.equals: hasInitializer equality failure");
       return false;
     }
     Data otherEnclosingData = vd.getEnclosingData();
@@ -162,12 +162,12 @@ public class VariableData {
     if (_enclosingData == null) {
       if (otherEnclosingData == null) return true;
       else {
-      System.err.println("VariableData.equals: enclosingData failure");
+//      System.err.println("VariableData.equals: enclosingData failure");
         return false; 
       }
     }  // formerly .equals but led to infinite loop when _enclosingData is a VariableData
     else if (_enclosingData != otherEnclosingData) {  
-      System.err.println("VariableData.equals: enclosingData failure");
+//      System.err.println("VariableData.equals: enclosingData failure");
       return false; 
     }
     

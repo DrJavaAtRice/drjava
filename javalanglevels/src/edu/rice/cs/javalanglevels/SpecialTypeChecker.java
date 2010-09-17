@@ -481,7 +481,7 @@ public class SpecialTypeChecker extends TypeChecker {
 
   /** If an exception is thrown but not caught, throw the appropriate error, based on the JExpression.*/
   public void handleUncheckedException(SymbolData sd, JExpression j) {
-    System.err.println("***** handleUncheckedException called for " + sd + " and " + j);
+//    System.err.println("***** handleUncheckedException called for " + sd + " and " + j);
     if (j instanceof MethodInvocation) {
       _addError("The method " + ((MethodInvocation)j).getName().getText() + " is declared to throw the exception " + 
                 sd.getName() + " which needs to be caught or declared to be thrown", j);

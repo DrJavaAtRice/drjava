@@ -107,7 +107,7 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
   public Void forVariableDeclarationOnly(VariableDeclaration that) {
 //    System.err.println("forVariableDeclarationOnly called in ClassBodyFullJavaVisitor for " + that);
     VariableData[] vds = _variableDeclaration2VariableData(that, _enclosing);
-    System.err.println(" ## generated vds = " + Arrays.toString(vds));
+//    System.err.println(" ## generated vds = " + Arrays.toString(vds));
 
     // Add the variable datas to the symbol data
 //    LinkedList<VariableData> vdsList = new LinkedList<VariableData>();
@@ -397,14 +397,14 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
         new VariableDeclaration(SourceInfo.NO_INFO, _publicMav, new VariableDeclarator[] { vd });
       assertEquals("There should be no errors", 0, errors.size());
       
-      System.err.println("*** Beginning traversal of VariableDeclaration with String[]");
+//      System.err.println("*** Beginning traversal of VariableDeclaration with String[]");
       vdecl.visit(_cbfjv);
-      System.err.println("Traversal of VariableDeclaration at line 397 is complete");
+//      System.err.println("Traversal of VariableDeclaration above is complete");
       assertEquals("There should be no errors", 0, errors.size());
 //      System.err.println("That error is: " + errors.getLast().getFirst());
  
       SymbolData bob = LanguageLevelConverter.symbolTable.get("java.lang.String[]");
-      System.err.println("Getting READY to fail");
+//      System.err.println("Getting READY to fail");
 //      try { Thread.sleep(1000); } catch (Exception e) { };
       assertNotNull("bob should not be null", bob);
     }
@@ -427,7 +427,7 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
       vdecl.visit(_cbfjv);
       assertEquals("There should not be any errors.", 0, errors.size());
       
-      System.err.println("_sd1 vars =  " + _sd1.getVars());
+//      System.err.println("_sd1 vars =  " + _sd1.getVars());
       assertTrue("field1 was added.", _sd1.getVars().contains(vd1));
       assertTrue("field2 was added.", _sd1.getVars().contains(vd2));
       

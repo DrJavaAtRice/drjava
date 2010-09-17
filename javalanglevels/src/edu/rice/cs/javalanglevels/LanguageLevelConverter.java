@@ -184,7 +184,7 @@ public class LanguageLevelConverter {
     
     assert LanguageLevelConverter.symbolTable.contains(sd);
     
-    if (! sd.isContinuation()) { System.err.println("***NOTE*** Non-continuation " + sd + " resolved from class file"); }
+//    if (! sd.isContinuation()) { System.err.println("***NOTE*** Non-continuation " + sd + " resolved from class file"); }
     // make it be a non-continuation, since we are filling it in
     sd.setIsContinuation(false);
     
@@ -206,7 +206,7 @@ public class LanguageLevelConverter {
         if (sup == null) { sd.clearSuperClass(); }
         else { 
           String superClassName = sup.replace('/', '.');
-          if (name.equals("Integer")) System.err.println("The superclass of Integer is " + superClassName);
+//          if (name.equals("Integer")) System.err.println("The superclass of Integer is " + superClassName);
           SymbolData superSD = LanguageLevelConverter.symbolTable.get(superClassName);
           if (superSD == null || superSD.isContinuation()) {
             superSD = getSymbolDataForClassFile(superClassName, programRoot);
@@ -291,8 +291,8 @@ public class LanguageLevelConverter {
     Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations = 
       LanguageLevelVisitor.continuations;
     if (continuations != null) continuations.remove(qualifiedClassName);  // UGH!  Why is this necessary?
-    if (qualifiedClassName.equals("java.lang.Throwable")) 
-      System.err.println("***Package name for constructed symbol 'java.lang.Thowable' is: " + sd.getPackage());
+//    if (qualifiedClassName.equals("java.lang.Throwable")) 
+//      System.err.println("***Package name for constructed symbol 'java.lang.Thowable' is: " + sd.getPackage());
     return sd;
   }
   
@@ -361,10 +361,10 @@ public class LanguageLevelConverter {
   public Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>>
     convert(File[] files, Options options, Map<File,Set<String>> sourceToTopLevelClassMap) {
     
-    System.err.println("LanguageLevelConverter.convert called on files:  " + Arrays.toString(files));
+//    System.err.println("LanguageLevelConverter.convert called on files:  " + Arrays.toString(files));
     _log.log("LanguageLevelConverter.convert called on files:  " + Arrays.toString(files));
     OPT = options;
-    System.err.println("Options = " + options);
+//    System.err.println("Options = " + options);
     assert symbolTable != null;
     symbolTable.clear();
     _newSDs.clear();
@@ -543,7 +543,7 @@ public class LanguageLevelConverter {
       SymbolData key = keys.nextElement();
       LanguageLevelVisitor sdlv = _newSDs.get(key);   // Can return null because of silly side effects!
       if (sdlv != null) {
-        System.err.println("*** Creating constructor for " + key);
+//        System.err.println("*** Creating constructor for " + key);
         sdlv.createConstructor(key);  // Bug fix is a kludge! Deletes (key,sdlv) from _newSDs!
       }
     } 
@@ -584,7 +584,7 @@ public class LanguageLevelConverter {
           if (symbolTable.get("java.lang.Character") == null) 
             llv.getSymbolData("java.lang.Character", SourceInfo.NO_INFO);
           
-          System.err.println("**** Type checking " + f);
+//          System.err.println("**** Type checking " + f);
           // Type check.
           TypeChecker btc = 
             new TypeChecker(llv._file, llv._package, llv.errors, symbolTable, llv._importedFiles, llv._importedPackages);

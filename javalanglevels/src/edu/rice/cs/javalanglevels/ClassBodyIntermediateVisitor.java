@@ -570,12 +570,12 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
                                      null); // no SourceInfo
       VariableData vd1 = new VariableData("field1", _finalMav, SymbolData.DOUBLE_TYPE, true, _sd1);
       VariableData vd2 = new VariableData("field2", _finalMav, SymbolData.BOOLEAN_TYPE, true, _sd1);
-      System.err.println("vd1 = " + vd1);
-      System.err.println("vd2 = " + vd2);
+//      System.err.println("vd1 = " + vd1);
+//      System.err.println("vd2 = " + vd2);
       VariableData[] vds = _cbiv.formalParameters2VariableData(fps, _sd1);
       assertEquals("There should not be any errors.", 0, errors.size());
-      System.err.println("vds[0] = " + vds[0]);
-      System.err.println("vds[1] = " + vds[1]);
+//      System.err.println("vds[0] = " + vds[0]);
+//      System.err.println("vds[1] = " + vds[1]);
       assertEquals("vd1 should be the first entry in vds.", vd1, vds[0]);
       assertEquals("vd2 should be the second entry in vds.", vd2, vds[1]);
     }

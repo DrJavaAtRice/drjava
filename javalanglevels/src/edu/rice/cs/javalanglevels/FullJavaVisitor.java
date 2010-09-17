@@ -159,7 +159,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     *              name should be "A$1C".
     */
   protected void handleInnerClassDef(InnerClassDef that, Data data, String relName, String name) {
-    System.err.println("Processing InnerClassDef for " + name + " defined in " + data.getName());
+//    System.err.println("Processing InnerClassDef for " + name + " defined in " + data.getName());
     
     assert (data instanceof SymbolData) || (data instanceof MethodData);
 //    assert (data instanceof SymbolData) ? data.getName().equals(_enclosingClassName) : true;
@@ -192,7 +192,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     * in those files.
     */
   protected void handleInnerInterfaceDef(InnerInterfaceDef that, Data data, String relName, String name) {
-    System.err.println("Processing InnerInterfaceDef for " + name);
+//    System.err.println("Processing InnerInterfaceDef for " + name);
     assert (data instanceof SymbolData) || (data instanceof MethodData);
     
     forInnerInterfaceDefDoFirst(that);
@@ -301,7 +301,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     if (prune(that)) return null;
 
     String className = getQualifiedClassName(that.getName().getText());
-    System.err.println("Processing class " + className);
+//    System.err.println("Processing class " + className);
     SymbolData sd = defineSymbolData(that, className);
     assert getQualifiedSymbolData(className, SourceInfo.NO_INFO, false) != null;
 //    _enclosingClassName = className;
@@ -395,7 +395,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
   public Void forArrayType(ArrayType that) {
     forArrayTypeDoFirst(that);
     if (prune(that)) return null;
-    System.err.println("###### getSymbolData on " + that.getName() + " SHOULD BE ARRAY NAME");
+//    System.err.println("###### getSymbolData on " + that.getName() + " SHOULD BE ARRAY NAME");
     getSymbolData(that.getName(), that.getSourceInfo());
     return null;
   }
@@ -518,7 +518,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     }
     
     public void testForClassDefDoFirst() {
-      System.err.println("*** Starting testForClassDefDoFirst");
+//      System.err.println("*** Starting testForClassDefDoFirst");
       // check an example that works
       ClassDef cd0 = new ClassDef(SourceInfo.NO_INFO, _publicMav,
                                   new Word(SourceInfo.NO_INFO, "Lisa"),
@@ -549,7 +549,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
                                  
       _fv.forClassDefDoFirst(cd2);
       assertEquals("there should still be 0 errors", 0, errors.size());
-      System.err.println("Ending testForClassDefDoFirst");
+//      System.err.println("Ending testForClassDefDoFirst");
     }
     
     public void testForFormalParameterDoFirst() {
@@ -673,7 +673,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     }
     
     public void testForArrayType() {
-      System.err.println("**** Starting testForArrayType");
+//      System.err.println("**** Starting testForArrayType");
       SymbolData sd = new SymbolData("Name");
       sd.setIsContinuation(false);
       sd.setInterface(false);
@@ -786,7 +786,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     }
     
     public void testForClassDef() {
-      System.err.println("**** Starting testForClassDef");
+//      System.err.println("**** Starting testForClassDef");
       //check an example that's not abstract
       _fv._package = "myPackage";
       ClassDef cd0 = 
@@ -878,7 +878,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
 
       assertEquals("There should still be 0 errors", 0, errors.size());
       _fv._importedFiles.remove("junit.framework.TestCase"); 
-      System.err.println("**** Ending testForClassDef");
+//      System.err.println("**** Ending testForClassDef");
     }
     
     public void testForInterfaceDef() {
@@ -937,7 +937,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     }
     
     public void testHandleInnerClassDef() { 
-      System.err.println("**** Starting testHandleInnerClassDef");
+//      System.err.println("**** Starting testHandleInnerClassDef");
       // setUp has created a FullJavaVisitor which initializes the symbolTable
       
 //      LanguageLevelConverter.symbolTable.put("java.lang.Object", _objectSD);
@@ -997,7 +997,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       assertEquals("Bart should have 0 methods", 0, sd1.getMethods().size());
       assertNotNull("symbolTable contains fully qualified name for Bart", 
                     _fv.getQualifiedSymbolData("i.like.monkey.Lisa.Bart"));
-      System.err.println("**** Ending testHandleInnerClassDef");
+//      System.err.println("**** Ending testHandleInnerClassDef");
     }
     
     public void xtestHandleInnerInterfaceDef() {
@@ -1142,7 +1142,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     
     /* NOTE: This is test excluded because the tested method is now a no-op. */
     public void xtestSimpleAnonymousClassInstantiationHelper() {
-      System.err.println("**** Starting testSimpleAnonymousClassInstantiationHelper");
+//      System.err.println("**** Starting testSimpleAnonymousClassInstantiationHelper");
       SimpleAnonymousClassInstantiation basic = 
         new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, 
                                               new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
@@ -1162,7 +1162,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
      assertEquals("The inner class should have the right package", "i.like", inner.getPackage());
      assertEquals("The inner class should have 0 methods", 0, inner.getMethods().size());
      
-     System.err.println("**** Ending testSimpleAnonymousClassInstantiationHelper");
+//     System.err.println("**** Ending testSimpleAnonymousClassInstantiationHelper");
     }
 
     /* NOTE: This is test excluded because the tested method is now a no-op. */
@@ -1212,7 +1212,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
                                      _fv._classesInThisFile, _fv.continuations, _fv.fixUps);
       vd1.visit(cbav);
       assertEquals("Should be 1 inner class of _sd1", 1, _sd1.getInnerClasses().size());
-      System.err.println("**** Completed testForVariableDeclaration");
+//      System.err.println("**** Completed testForVariableDeclaration");
     }
     
     public void testDummy() { }

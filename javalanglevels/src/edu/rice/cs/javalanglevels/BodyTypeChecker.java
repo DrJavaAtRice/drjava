@@ -2868,14 +2868,14 @@ public class BodyTypeChecker extends SpecialTypeChecker {
                                     new CatchBlock[] {new CatchBlock(SourceInfo.NO_INFO,  param, b)});
 
       SymbolData javaLangThrowable =  _bbtc.getSymbolData("java.lang.Throwable", ntcs, false, true);
-      System.err.println("**** In symbol table, java.lang.Throwable = " + symbolTable.get("java.lang.Throwable"));
+//      System.err.println("**** In symbol table, java.lang.Throwable = " + symbolTable.get("java.lang.Throwable"));
       assertEquals("There should be no errors", 0, errors.size());
       javaLangThrowable.setPackage("java.lang");  // Don't know why it is not properly set already
       _bbtc.symbolTable.put("java.lang.Throwable", javaLangThrowable);
  
-      System.err.println("***Name for java.lang.Throwable = " + javaLangThrowable.getName());
-      System.err.println("***notRightPackage for java.lang.Throwable = " + _bbtc.notRightPackage(javaLangThrowable));
-      System.err.println("***Package for java.lang.Throwable = " + javaLangThrowable.getPackage());
+//      System.err.println("***Name for java.lang.Throwable = " + javaLangThrowable.getName());
+//      System.err.println("***notRightPackage for java.lang.Throwable = " + _bbtc.notRightPackage(javaLangThrowable));
+//      System.err.println("***Package for java.lang.Throwable = " + javaLangThrowable.getPackage());
                         
       SymbolData exception = new SymbolData("my.crazy.exception");
       exception.setSuperClass(javaLangThrowable);
@@ -2892,7 +2892,7 @@ public class BodyTypeChecker extends SpecialTypeChecker {
       assertEquals("There should be no errors", 0, errors.size());
       _bbtc.compareThrownAndCaught(ntcs, caught_array, thrown);
       for (int i = 0; i < errors.size(); i++) 
-        System.err.println("Error " + i + ":\n" + errors.get(i).getFirst());
+//        System.err.println("Error " + i + ":\n" + errors.get(i).getFirst());
       assertEquals("There should be no errors", 0, errors.size());
       
       _bbtc.compareThrownAndCaught(ntcs, new SymbolData[] {exception2}, thrown);
@@ -2930,7 +2930,7 @@ public class BodyTypeChecker extends SpecialTypeChecker {
       assert symbolTable.contains(exception);
       assert symbolTable.contains(string);
 
-      System.err.println("Interfaces for java.lang.RuntimeException = " + re.getInterfaces());
+//      System.err.println("Interfaces for java.lang.RuntimeException = " + re.getInterfaces());
       //Make sure it is okay to have something else other than an uncaught exception in a braced body.
       BracedBody plainBody = 
         new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new UnlabeledBreakStatement(SourceInfo.NO_INFO)});
@@ -3224,7 +3224,7 @@ public class BodyTypeChecker extends SpecialTypeChecker {
       _bbtc._bodyData.resetBlockIterator();
 
       nested3.visit(_bbtc);
-      System.err.println("Last error was " + errors.getLast().getFirst());
+//      System.err.println("Last error was " + errors.getLast().getFirst());
       assertEquals("There should still be 1 error", 1, errors.size());
       
       //Test that no error is thrown if the method is declared to throw it
@@ -3359,7 +3359,7 @@ public class BodyTypeChecker extends SpecialTypeChecker {
 
       
       nested3.visit(_bbtc);
-      System.err.println("Last error is: " + errors.getLast().getFirst());
+//      System.err.println("Last error is: " + errors.getLast().getFirst());
       assertEquals("There should still be 1 error", 1, errors.size());
       
       // Test that no error is thrown if the method is declared to throw it

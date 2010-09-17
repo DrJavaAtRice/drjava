@@ -321,14 +321,14 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     Iterator<MethodData> iter = mds.iterator();
     LinkedList<MethodData> matching = new LinkedList<MethodData>();
     LinkedList<MethodData> matchingWithAutoBoxing = new LinkedList<MethodData>();
-    if (enclosingSD.getName().equals("NonEmpty"))
-      System.err.println("Starting search for method " + methodName + " in " + enclosingSD);
+//    if (enclosingSD.getName().equals("NonEmpty"))
+//      System.err.println("Starting search for method " + methodName + " in " + enclosingSD);
     while (iter.hasNext()) {
       MethodData md = iter.next();
 //      System.err.println("Testing method " + md.getName());
-      if (md.getName().equals("NonEmpty")) {
-        System.err.println("*** for NonEmpty(), params length = " + md.getParams().length + "; args length = " + arguments.length);
-      }
+//      if (md.getName().equals("NonEmpty")) {
+//        System.err.println("*** for NonEmpty(), params length = " + md.getParams().length + "; args length = " + arguments.length);
+//      }
       // Check that the names match.
       if (md.getName().equals(methodName) && md.getParams().length == arguments.length) {
         VariableData[] vds = md.getParams();
@@ -349,25 +349,25 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
         }
 
         if (matches == false) { // Didn't match the method directly; try to match it with autoboxing
-          if (enclosingSD.getName().equals("NonEmpty")) {
-            System.err.println("*** Looking for autoboxing match for NonEmpty");
-            System.err.println("vds = " + Arrays.toString(vds) + " arguments = " + Arrays.toString(arguments));
-          }
+//          if (enclosingSD.getName().equals("NonEmpty")) {
+//            System.err.println("*** Looking for autoboxing match for NonEmpty");
+//            System.err.println("vds = " + Arrays.toString(vds) + " arguments = " + Arrays.toString(arguments));
+//          }
           matches = true;
           // Now check to see if any methods exist that match the invocation while using autoboxing.
           for (i = 0; i < vds.length && i < arguments.length; i++) {
             if  (enclosingSD.getName().equals("NonEmpty")) {
               SymbolData parmSD = vds[i].getType().getSymbolData();
-              System.err.println("vds[" + i + "].getType().getSymbolData() = " + parmSD);
+//              System.err.println("vds[" + i + "].getType().getSymbolData() = " + parmSD);
               SymbolData argSD = arguments[i].getSymbolData();
-              System.err.println("arguments[" + i + "].getSymbolData() = " + argSD);
+//              System.err.println("arguments[" + i + "].getSymbolData() = " + argSD);
               if (argSD.equals(SymbolData.INT_TYPE) && parmSD.equals(symbolTable.get("java.lang.Object")))
                 assert _isAssignableFrom(parmSD, argSD);
             }
             matches = matches && _isAssignableFrom(vds[i].getType().getSymbolData(), arguments[i].getSymbolData());
             if (matches == false) {
               if (enclosingSD.getName().equals("NonEmpty"))
-                System.err.println("No match found for NonEmpty using autoboxing");
+//                System.err.println("No match found for NonEmpty using autoboxing");
               break;
             }
           }
@@ -394,10 +394,10 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
         matchingWithAutoBoxing.addAll(p.getSecond());
       }
     }
-    if (methodName.equals("NonEmpty")) {
-      System.err.println("***** enclosingSD = " + enclosingSD + "; thisSD = " + thisSD + "; matching methods: " + matching);
-      System.err.println("***** matching methods with autoboxing: " + matchingWithAutoBoxing);
-    }
+//    if (methodName.equals("NonEmpty")) {
+//      System.err.println("***** enclosingSD = " + enclosingSD + "; thisSD = " + thisSD + "; matching methods: " + matching);
+//      System.err.println("***** matching methods with autoboxing: " + matchingWithAutoBoxing);
+//    }
     
     return new Pair<LinkedList<MethodData>, LinkedList<MethodData>> (matching, matchingWithAutoBoxing);
   }
@@ -1028,7 +1028,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     String className = getQualifiedClassName(that.getName().getText());
     SymbolData sd = getSymbolData(className, that, true, false);
     if (sd == null) {
-      System.err.println("****DISASTER****  sd is null for ClassDef " + className);
+//      System.err.println("****DISASTER****  sd is null for ClassDef " + className);
       _addError("The class " + className + " was never defined", that);
       _log.log("*********DISASTER****  sd is null for ClassDef " + className);
       return null;

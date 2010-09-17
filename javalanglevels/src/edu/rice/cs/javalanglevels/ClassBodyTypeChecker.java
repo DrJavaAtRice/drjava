@@ -798,11 +798,11 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
                               new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
                               new ReferenceType[0], b);
  
-      System.err.println("***** Starting traversal of classDef");
+//      System.err.println("***** Starting traversal of classDef");
       classDef.visit(_cbbtc);
 //      System.err.println("Error 3 for line 803 of ClassBodyTypeChecker is: " + errors.get(2).getFirst());
-      System.err.println("Error 2 for line 803 of ClassBodyTypeChecker is: " + errors.get(1).getFirst());
-      System.err.println("Error 1 for line 803 of ClassBodyTypeChecker is: " + errors.get(0).getFirst());
+//      System.err.println("Error 2 for line 803 of ClassBodyTypeChecker is: " + errors.get(1).getFirst());
+//      System.err.println("Error 1 for line 803 of ClassBodyTypeChecker is: " + errors.get(0).getFirst());
       
       assertEquals("There should be 2 errors now", 2, errors.size());
       

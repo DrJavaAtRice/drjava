@@ -136,7 +136,7 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
   
   /** Adds the variables that were declared to the body data and make sure that no two variables have the same name.*/
   public Void forVariableDeclarationOnly(VariableDeclaration that) {
-    System.err.println("Calling _variableDeclaration2VariableData in BodyBodyFullJavaVisitor.java");
+//    System.err.println("Calling _variableDeclaration2VariableData in BodyBodyFullJavaVisitor.java");
     if (! _bodyData.addVars(_variableDeclaration2VariableData(that, _bodyData))) {
 /* The following commenting out of code is kludge to get around the fact that LL processing does not allow a for
  * index variable to repeated in successive for loops. TODO: fix this. */
@@ -156,8 +156,8 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
     
     String relName = that.getName().getText();
     String fullName = _enclosingClassName + '.' + enclosingClass.preincrementLocalClassNum() + relName;
-    System.err.println("***ALARM*** Processing local class '" + relName + "' in class " + _enclosingClassName
-                         + " with flattened class name " + fullName);
+//    System.err.println("***ALARM*** Processing local class '" + relName + "' in class " + _enclosingClassName
+//                         + " with flattened class name " + fullName);
     handleInnerClassDef(that, _bodyData, relName, fullName);
     // How do we know that generated number is correct?
     return null;

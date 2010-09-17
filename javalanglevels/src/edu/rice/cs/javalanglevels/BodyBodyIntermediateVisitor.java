@@ -121,7 +121,7 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     * lock. 
     * TODO: move this method into LanguageLevelVisitor. */
   public Void forCatchBlock(CatchBlock that) {
-    System.err.println("***ALARM*** BodyBodyIntermediateVisitor is visiting catch block");
+//    System.err.println("***ALARM*** BodyBodyIntermediateVisitor is visiting catch block");
     forCatchBlockDoFirst(that);
     if (prune(that)) return null;
     
@@ -138,7 +138,7 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     if (prune(that.getException())) return null;
     bd.addVar(exceptionVar);
     
-    System.err.println("Visiting augmented catch block with new visitor!");
+//    System.err.println("Visiting augmented catch block with new visitor!");
     BodyBodyIntermediateVisitor bbijv = 
       new BodyBodyIntermediateVisitor(bd, _file, _package, _enclosingClassName, _importedFiles,
                                       _importedPackages, _classesInThisFile, continuations, fixUps,
@@ -171,8 +171,8 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     
     String relName = that.getName().getText();
     String fullName = _enclosingClassName + '.' + enclosingClass.preincrementLocalClassNum() + relName;
-    System.err.println("***ALARM*** Processing local class '" + relName + "' in class " + _enclosingClassName
-                         + " with flattened class name " + fullName);
+//    System.err.println("***ALARM*** Processing local class '" + relName + "' in class " + _enclosingClassName
+//                         + " with flattened class name " + fullName);
     handleInnerClassDef(that, _bodyData, relName, fullName);
     // How do we know that generated number is correct?
     return null;
@@ -180,7 +180,7 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
   
   /** Process a local inner interface definition */
   public Void forInnerInterfaceDef(InnerInterfaceDef that) {
-    System.err.println("***Signalling local interface error");
+//    System.err.println("***Signalling local interface error");
     _addAndIgnoreError("Local interfaces are illegal in Java.", that);
 //    handleInnerInterfaceDef(that, _bodyData, getQualifiedClassName(_bodyData.getSymbolData().getName()) + '.' + 
 //                        _bodyData.getSymbolData().preincrementLocalClassNum() + that.getName().getText());
@@ -337,7 +337,7 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
       VariableData vd1 = new VariableData("field1", _finalMav, SymbolData.DOUBLE_TYPE, false, _bbv._bodyData);
       VariableData vd2 = new VariableData("field2", _finalMav, SymbolData.BOOLEAN_TYPE, false, _bbv._bodyData);
       vdecl.visit(_bbv);
-      if (errors.size() > 0) System.err.println("Error was:" + errors.get(0).getFirst());
+//      if (errors.size() > 0) System.err.println("Error was:" + errors.get(0).getFirst());
       assertEquals("There should not be any errors.", 0, errors.size());
       assertTrue("field1 was added.", _md1.getVars().contains(vd1));
       assertTrue("field2 was added.", _md1.getVars().contains(vd2));
