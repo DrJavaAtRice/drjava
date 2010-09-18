@@ -228,7 +228,7 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     VariableData[] vds = formalParameters2VariableData(that.getParameters(), _enclosing);
     if (! _checkError()) {  // if there was an error converting the formalParameters, don't use them.
       md.setParams(vds);
-      if (!md.addFinalVars(vds)) {
+      if (! md.addFinalVars(vds)) {
         _addAndIgnoreError("You cannot have two method parameters with the same name", that);
       }
     }

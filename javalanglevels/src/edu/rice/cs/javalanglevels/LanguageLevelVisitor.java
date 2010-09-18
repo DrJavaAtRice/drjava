@@ -887,29 +887,42 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     // Create the LinkedList for the SymbolDatas of the interfaces
     final ArrayList<SymbolData> interfaces = new ArrayList<SymbolData>();
     
-    // Get or create SymbolDatas (continuations) for the interfaces
+    // Get or create SymbolDatas for the interfaces
     ReferenceType[] rts = typeDefBase.getInterfaces();
-    for (final ReferenceType rt: rts) {
-      SymbolData sD = _lookupTypeFromWithinClass(rt, enclosingClassName);
-      if (sD != null && ! sD.isInterface()) {
-        sD.setInterface(true);
-//        System.err.println("Interface type = " + sD);
-//        assert false;
+    for (int i = 0; i < rts.length; i++) {
+      final ReferenceType rt = rts[i];
+      final String rtName = rt.getName();
+      boolean forwardRef = false;
+      SymbolData iD = _lookupTypeFromWithinClass(rt, enclosingClassName);
+      if (iD != null && ! iD.isContinuation() && ! iD.isInterface()) {
+        _addError("The symbol " + rtName + " is not an interface", typeDefBase);
       }
-      interfaces.add(sD);                     // Note: confirm that null can be added to an ArrayList
-      if (sD == null) { 
-        // create a fixup for this interface reference
+      if (iD == null || iD.isContinuation())  { // create a dummy symbol pending fixUp TODO: is this necessary?
+        iD = new SymbolData(rtName);
+        forwardRef = true;
+      }
+      
+      interfaces.add(iD);                     
+      if (forwardRef) { 
+        // create a fixup for this interface slot
+        final int j = i;
         Command fixUp = new Command() {
           public void execute() {
-            SymbolData newSD = _lookupTypeFromWithinClass(rt, enclosingClassName);
-            assert newSD != null && newSD.isInterface();  // EXPAND
-            int lastIndex = interfaces.size() - 1;
-            interfaces.set(lastIndex, newSD);
+            SymbolData newID = _lookupTypeFromWithinClass(rt, enclosingClassName);
+            if (newID == null) _addError("The symbol " + rtName + " is not defined", typeDefBase);
+            else if (! newID.isInterface()) 
+              _addError("The symbol " + rtName + " is not an interface", typeDefBase);
+            interfaces.set(j, newID);
+            sd.addEnclosingData(newID);
           }
         };
         fixUps.add(fixUp);
       }
     }
+      
+    // Set the inferfaces; fixups will be done on the elements of the interface ArrayList, but this does not
+    // add the found interface to the enclosing data of sd.
+    sd.setInterfaces(interfaces);
      
     // Create SymbolData variable for superclass
     SymbolData superSD = null;
@@ -918,39 +931,32 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     
     if (typeDefBase instanceof InterfaceDef) {
       // set Object as the super class of this, so that it will know it implements Object's methods.
-      superSD = getSymbolData("java.lang.Object", typeDefBase.getSourceInfo(), false);
+      SymbolData objectSD = getSymbolData("java.lang.Object", typeDefBase.getSourceInfo(), false);
       sd.setInterface(true);
-      sd.setSuperClass(superSD);
+      sd.setSuperClass(objectSD);
     }
     
     else if (typeDefBase instanceof ClassDef) {
+      sd.setInterface(false);
       ClassDef cd = (ClassDef) typeDefBase;
       final ReferenceType rt = cd.getSuperclass();
-      superSD = _lookupTypeFromWithinClass(rt, enclosingClassName);
-//      if (superSD == null && rt.getName().equals("Object"))  {
-//        System.err.println("ALARM: _lookupTypeFromWithinClass for 'Object' returned null");
-//      }
-      sd.setInterface(false);
+      superSD = _lookupTypeFromWithinClass(rt, enclosingClassName);    
       
       if (superSD != null) sd.setSuperClass(superSD);
       else {
         Command fixUp = new Command() {
           public void execute() { 
             SymbolData newSuperSD = _lookupTypeFromWithinClass(rt, enclosingClassName);
-//            System.err.println("***** In a FIXUP, looking up type " + rt + " from within " + enclosingClassName);
             if (newSuperSD == null)
-//              newSuperSD = getSymbolData("java.lang.Object", typeDefBase.getSourceInfo(), false);
-              _addAndIgnoreError("The class " + sd + " has an undefined superclass " + rt, typeDefBase);
-            else
+              _addError("The class " + sd + " has an undefined superclass " + rt, typeDefBase);
+            else  // TODO: Does not check that newSuperSD is not an interace  
               sd.setSuperClass(newSuperSD); 
           }
         };
         fixUps.add(fixUp);
       }
     }
-    
-    // Set the inferfaces; fixups will be done on the elements of the interface ArrayList
-    sd.setInterfaces(interfaces);
+
 
     // Remove symbol name from continuation table.
     _log.log("REMOVING continuation " + qualifiedTypeName);
@@ -1091,16 +1097,16 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   protected VariableData[] formalParameters2VariableData(FormalParameter[] fps, SymbolData enclosing) {
     assert enclosing != null /* && (enclosing instanceof SymbolData || enclosing instanceof BlockData)*/; 
     // BodyData ::= MethodData | BlockData
+    
 //    Utilities.show("formalParameters2VariableData called on " + fps);
-    // Should conssolidate with same method in FullJavadVisitor; almost identical
+    // Should consolidate with same method in FullJavadVisitor; almost identical
     final VariableData[] varData = new VariableData[fps.length];
     final String enclosingClassName = enclosing.getName();
     
-    VariableDeclarator vd;
     String[] mav = getFormalParameterMav(enclosing);
         
-    for (int i = 0; i < varData.length; i++) {
-      vd = fps[i].getDeclarator();
+    for (int i = 0; i < fps.length; i++) {
+      VariableDeclarator vd = fps[i].getDeclarator();
       String name = vd.getName().getText();  // getName returns a Word
      
       Type type = vd.getType();
@@ -1118,6 +1124,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       if (sd == null) { // TODO !!!: can this happen? 
         // To establish a reference to a not-yet-defined type, create a fixup
         final int j = i;
+        /* The following is a kludge to make method signature collision detection work (unless different
+         * names are used for the same type). */
+        varData[j].setType(new SymbolData(typeName));
         Command fixUp = new Command() {
           public void execute() { 
             SymbolData newSd = _identifyType(typeName, si, enclosingClassName);
@@ -1132,7 +1141,6 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       varData[i].gotValue();
       varData[i].setIsLocalVariable(true);
     }
-   
     return varData;
   }
    

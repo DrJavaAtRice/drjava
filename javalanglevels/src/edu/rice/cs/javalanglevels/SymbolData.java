@@ -1114,10 +1114,13 @@ public class SymbolData extends TypeData {
       message.append(":");
     }
     for (int i = 0; i < params.length; i++) {
-      if (i > 0) {
-        message.append(",");
+      VariableData p = params[i];
+      if (p != null && p.getType() != null) {
+        if (i > 0) {
+          message.append(",");
+        }
+        message.append(" " + p.getType().getName());
       }
-      message.append(" " + params[i].getType().getName());
     }
     return message.toString();
   }
@@ -1131,7 +1134,7 @@ public class SymbolData extends TypeData {
     // Detect repeated methods
     if (repeatedSignature(_methods, method) != null) {
       LanguageLevelVisitor.errors.addLast(new Pair<String, JExpressionIF>(_createErrorMessage(method), 
-                                                                        method.getJExpression()));
+                                                                          method.getJExpression()));
     }
     else {
       _methods.addLast(method);
@@ -1347,14 +1350,14 @@ public class SymbolData extends TypeData {
   
   /**Check to see if the interface i appears anywhere in the hierarchy for this class/interface*/
   public boolean hasInterface(SymbolData i) {
-    if (i==null) return false;
+    if (i == null) return false;
 
     if (getInterfaces().contains(i)) { return true; }
     
     if ((this.getSuperClass() != null) && this.getSuperClass().hasInterface(i)) { return true; }
     
-    for (int j = 0; j<getInterfaces().size(); j++) {
-      if (getInterfaces().get(j).hasInterface(i)) {return true;}
+    for (int j = 0; j < getInterfaces().size(); j++) {
+      if (getInterfaces().get(j).hasInterface(i)) return true;
     }
     return false;
   }
