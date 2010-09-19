@@ -39,12 +39,11 @@ package edu.rice.cs.drjava.platform;
 import javax.swing.Action;
 import java.net.URL;
 
-/**
- * Central interface for all platform-specific code in DrJava.
- * A default platform-neutral implementation is provided in DefaultPlatform.
- * @version $Id$
- * @see edu.rice.cs.drjava.platform.DefaultPlatform
- */
+/** The central interface for all platform-specific code in DrJava.  A default platform-neutral implementation is
+  * provided in DefaultPlatform.
+  * @version $Id$
+  * @see edu.rice.cs.drjava.platform.DefaultPlatform
+  */
 public interface PlatformSupport {
   
   /** Returns whether this is a Mac OS X platform. */
