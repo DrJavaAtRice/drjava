@@ -297,7 +297,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   }
   
 
-  /**pass a default value*/
+  /** Pass a default value*/
   protected MethodData _lookupMethodHelper(String methodName, SymbolData enclosingSD, InstanceData[] arguments, 
                                            JExpression jexpr, boolean isConstructor, SymbolData thisSD) {
     return _lookupMethodHelper(methodName, enclosingSD, arguments, jexpr, isConstructor, thisSD, 
@@ -653,7 +653,6 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       return false;
     }
   }
-  
   
   /** Return the field or variable with the name text inside of data.  (Referenced from thisSD) */
   public static VariableData getFieldOrVariable(String text, Data data, SymbolData thisSD, JExpression piece) {
@@ -1140,13 +1139,11 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       }
     }
 
-    //unassign anything that got assigned in the scope of the class def.
-    
+    // Unassign anything that got assigned in the scope of the class def.
     unassignVariableDatas(cbtc.thingsThatHaveBeenAssigned);
     
     return forClassDefOnly(that, mav_result, name_result, typeParameters_result, superclass_result, interfaces_result, body_result);
   }
-  
 
   /**Do everything necessary to handle an interface*/
   public TypeData forInterfaceDef(InterfaceDef that) {
@@ -1164,18 +1161,15 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       }
     }
     
-
-    
     // Check for cyclic inheritance
     if (checkForCyclicInheritance(sd, new LinkedList<SymbolData>(), that)) {
       return null;
     }
     
-    //make sure that this does not extend the runnable interface
-    if (sd.hasInterface(getSymbolData("java.lang.Runnable", that, false, false))) {
-      _addError(sd.getName() + " extends the Runnable interface, which is not allowed at any language level", that);
-    }
-
+//    // Make sure that this does not extend the runnable interface
+//    if (sd.hasInterface(getSymbolData("java.lang.Runnable", that, false, false))) {
+//      _addError(sd.getName() + " extends the Runnable interface, which is not allowed at any language level", that);
+//    }
     
     final TypeData mav_result = that.getMav().visit(this);
     final TypeData name_result = that.getName().visit(this);
@@ -2214,30 +2208,30 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       assertEquals("There should be 2 errors", 2, errors.size());
       assertEquals("The error message should be correct", "The interface superI is private and cannot be accessed from somewhereElse.Lisa", errors.get(1).getFirst());
 
-      
-      //Test that if the interface extends java.lang.Runnable, then an error is thrown.
-      InterfaceDef id3 = new InterfaceDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "JimesH"),
-                                  new TypeParameter[0], new ReferenceType[] {new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Runnable", new Type[0])}, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
-      SymbolData sd = new SymbolData("JimesH");
-      sd.setIsContinuation(false);
-      sd.setInterface(true);
-      
-      symbolTable.clear();
-      SymbolData runnableSd = new SymbolData("java.lang.Runnable");
-      runnableSd.setMav(_publicMav);
-      runnableSd.setIsContinuation(false);
-      runnableSd.setPackage("java.lang");
-      runnableSd.setInterface(true);
-      sd.addInterface(runnableSd);
-      symbolTable.put("JimesH", sd);
-      symbolTable.remove("java.lang.Runnable");
-      symbolTable.put("java.lang.Runnable", runnableSd);
+      /* The Runnable restriction has been dropped. */
+//      //Test that if the interface extends java.lang.Runnable, then an error is thrown.
+//      InterfaceDef id3 = new InterfaceDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "JimesH"),
+//                                  new TypeParameter[0], new ReferenceType[] {new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Runnable", new Type[0])}, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+//      SymbolData sd = new SymbolData("JimesH");
+//      sd.setIsContinuation(false);
+//      sd.setInterface(true);
+//      
+//      symbolTable.clear();
+//      SymbolData runnableSd = new SymbolData("java.lang.Runnable");
+//      runnableSd.setMav(_publicMav);
+//      runnableSd.setIsContinuation(false);
+//      runnableSd.setPackage("java.lang");
+//      runnableSd.setInterface(true);
+//      sd.addInterface(runnableSd);
+//      symbolTable.put("JimesH", sd);
+//      symbolTable.remove("java.lang.Runnable");
+//      symbolTable.put("java.lang.Runnable", runnableSd);
+//
+//      id3.visit(_btc);
+//      assertEquals("There should be 3 errors now", 3, errors.size());
+//      assertEquals("The error message should be correct", "JimesH extends the Runnable interface, which is not allowed at any language level", errors.get(2).getFirst());
 
-      id3.visit(_btc);
-      assertEquals("There should be 3 errors now", 3, errors.size());
-      assertEquals("The error message should be correct", "JimesH extends the Runnable interface, which is not allowed at any language level", errors.get(2).getFirst());
-
-      //Test that an error is thrown if you implement a class
+      // Test that an error is thrown if you implement a class
 
       InterfaceDef id4 = new InterfaceDef(SourceInfo.NO_INFO, _publicMav, new Word(SourceInfo.NO_INFO, "Bart"),
                                          new TypeParameter[0], new ReferenceType[] {new ClassOrInterfaceType(SourceInfo.NO_INFO, "superC", new Type[0])}, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
@@ -2257,24 +2251,28 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       result = id4.visit(_btc);
       
       
-      assertEquals("There should be 4 errors now ", 4, errors.size());
-      assertEquals("The error message should be correct", "superC is not an interface and thus cannot appear after the keyword 'extends' here", errors.get(3).getFirst());
+      assertEquals("There should be 3 errors now ", 3, errors.size());
+      assertEquals("The error message should be correct", 
+                   "superC is not an interface and thus cannot appear after the keyword 'extends' here", 
+                   errors.getLast().getFirst());
 
-      //Test that no error is thrown if you implement an interface
+      // Test that no error is thrown if you implement an interface
       superC.setInterface(true);
       result = id4.visit(_btc);
-      assertEquals("There should still just be 4 errors", 4, errors.size());
+      assertEquals("There should still just be 3 errors", 3, errors.size());
       
-      //Test that if a public interface is in a file of the wrong name, an error is thrown.
+      // Test that if a public interface is in a file of the wrong name, an error is thrown.
       me.addModifier("public");
       result = id4.visit(_btc);
-      assertEquals("There should be 5 errorrs", 5, errors.size());
-      assertEquals("The error message should be correct", "Bart is public thus must be defined in a file with the same name.", errors.get(4).getFirst());
+      assertEquals("There should be 4 errorrs", 4, errors.size());
+      assertEquals("The error message should be correct", 
+                   "Bart is public thus must be defined in a file with the same name.", 
+                   errors.getLast().getFirst());
       
-      //Test that if a public interface is in a file of the right name, no error is thrown.
+      // Test that if a public interface is in a file of the right name, no error is thrown.
       _btc._file = new File("Bart.dj1");
       result = id4.visit(_btc);
-      assertEquals("There should still just be 5 errors", 5, errors.size());
+      assertEquals("There should still just be 4 errors", 4, errors.size());
     }
     
     public void testForClassImportStatement() {

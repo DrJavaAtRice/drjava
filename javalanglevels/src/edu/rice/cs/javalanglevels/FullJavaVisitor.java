@@ -347,8 +347,13 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
 
     String className = getQualifiedClassName(that.getName().getText());
 //    if (className.equals("listFW.IList")) System.err.println("Attempting to define symbol " + className);
-    SymbolData sd = defineSymbolData(that, className);  //TODO: should this statement follow interface processing in 345
-  
+    
+    SymbolData sd = defineSymbolData(that, className);  
+    // TODO: should the preceding statement follow interface processing in 345
+        
+    // Note: sd can only be null if an error occurs in defineSymbol
+    if (sd != null) sd.setInterface(true);
+    
     that.getMav().visit(this);
     that.getName().visit(this); 
     

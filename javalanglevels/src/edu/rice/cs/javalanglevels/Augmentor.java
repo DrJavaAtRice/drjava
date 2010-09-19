@@ -350,9 +350,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
 //    return null;
 //  }
   
-  /** Look up this top level interface in the symbolTable, and then visit its body.
-    * Write any necessary extra variable definitions at the end of the file.
-    * InterfaceDefs can only appear at the top level of a source file.
+  /** Look up this top level interface in the symbolTable, and then visit its body.  Write any necessary extra variable
+    * definitions at the end of the file.  InterfaceDefs can only appear at the top level of a source file.
     * @param cd  The InterfaceDef being augmented.
     */
   public Void forInterfaceDef(InterfaceDef cd) {
@@ -360,7 +359,6 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     SymbolData sd = _llv.symbolTable.get(_llv.getQualifiedClassName(interfaceName));
     if (sd == null) { throw new RuntimeException("Internal Program Error: Can't find SymbolData for " +
                                                  cd.getName().getText() + ".  Please report this bug."); }
-
     ModifiersAndVisibility m = cd.getMav();
     
     /* Make interfaces public by default? */

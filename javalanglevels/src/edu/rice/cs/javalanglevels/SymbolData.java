@@ -860,19 +860,20 @@ public class SymbolData extends TypeData {
     return false;
   }
   
-  /**
-   * Returns the method with the given name.
-   * @param name  The name of the method to return
-   * @param paramTypes  Array of the TypeDatas correpsonding to the parameters to the method.
-   * @return  The MethodData or null if it is not found
-   */
+  /** Returns the method with the given name and param types.
+    * @param name  The name of the method to return
+    * @param paramTypes  Array of the TypeDatas correpsonding to the parameters to the method.
+    * @return  The matched MethodData or null if it is not found
+    */
   public MethodData getMethod(String name, TypeData[] paramTypes) {
     for (int i = 0; i < _methods.size(); i++) {
       MethodData currMd = _methods.get(i);
       if (currMd.getName().equals(name)) {
         if (paramTypes.length == currMd.getParams().length) {
           boolean match = true;
-          for (int j = 0; j < paramTypes.length; j++) {
+          for (int j = 0; j < paramTypes.length; j++) {  // TODO; clean up this coding!
+            if (paramTypes[j] == null || paramTypes[j].getSymbolData() == null || currMd.getParams()[j].getType() == null)
+              continue;  // prevents a null pointer exception
             if (! paramTypes[j].getSymbolData().equals(currMd.getParams()[j].getType().getSymbolData())) { 
               match = false; 
               break; 

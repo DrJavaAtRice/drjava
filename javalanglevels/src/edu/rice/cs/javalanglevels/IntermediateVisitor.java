@@ -452,9 +452,11 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
 
     SymbolData sd = defineSymbolData(that, className);
+    // Note: sd can only be null if an error occurs in defineSymbol
+    
     if (sd != null) {
-      identifyInnerClasses(that);  // inner interfaces??
       sd.setInterface(true);
+      identifyInnerClasses(that);  // inner interfaces??
       that.getBody().visit(new InterfaceBodyIntermediateVisitor(sd, _file, _package, _importedFiles, _importedPackages, 
                                                                 _classesInThisFile, continuations, fixUps));
     }

@@ -609,7 +609,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
         if (sD != null) {
           if (resultSD == null || resultSD.equals(sD)) resultSD = sD;
           else {  // sD is NOT the first match; flag an error
-            if (addError) {
+            if (addError) {  // TODO: why do we suppress this error in some cases?
               _addAndIgnoreError("The class name " + qualClassName + " is ambiguous.  It could be " + resultSD.getName()
                                    + " or " + sD.getName(), new NullLiteral(si));
               return null;
@@ -713,7 +713,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     * @param resolve        Whether to return a continuation or fully parse the class.
     * @param fromClassFile  Whether this was called from the class file reader.
     * @param addError       Whether to add errors.  We don't add errors when iterating through a qualified class name's
-    *                       package.
+    *                       package.  (??)
     */
   protected SymbolData getQualifiedSymbolData(String qualClassName, SourceInfo si, boolean resolve, boolean fromClassFile, 
                                            boolean addError) {
@@ -856,6 +856,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     * any special inner class initialization.
     * @param typeDefBase  The AST node for the class def, interface def, inner class def, or inner interface def.
     * @param qualifiedTypeName  The fully qualified name of the class or interface
+    * @return the defined SymbolData or null if the type has already been defined
     */
   protected SymbolData defineSymbolData(final TypeDefBase typeDefBase, final String qualifiedTypeName,
                                         final String enclosingClassName /*, final HashSet<String> classesInThisFile*/) {
@@ -895,7 +896,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       boolean forwardRef = false;
       SymbolData iD = _lookupTypeFromWithinClass(rt, enclosingClassName);
       if (iD != null && ! iD.isContinuation() && ! iD.isInterface()) {
-        _addError("The symbol " + rtName + " is not an interface", typeDefBase);
+        _addAndIgnoreError("The symbol " + rtName + " is not an interface", typeDefBase);
       }
       if (iD == null || iD.isContinuation())  { // create a dummy symbol pending fixUp TODO: is this necessary?
         iD = new SymbolData(rtName);
@@ -909,9 +910,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
         Command fixUp = new Command() {
           public void execute() {
             SymbolData newID = _lookupTypeFromWithinClass(rt, enclosingClassName);
-            if (newID == null) _addError("The symbol " + rtName + " is not defined", typeDefBase);
+            if (newID == null) _addAndIgnoreError("The symbol " + rtName + " is not defined", typeDefBase);
             else if (! newID.isInterface()) 
-              _addError("The symbol " + rtName + " is not an interface", typeDefBase);
+              _addAndIgnoreError("The symbol " + rtName + " is not an interface", typeDefBase);
             interfaces.set(j, newID);
             sd.addEnclosingData(newID);
           }
@@ -948,7 +949,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
           public void execute() { 
             SymbolData newSuperSD = _lookupTypeFromWithinClass(rt, enclosingClassName);
             if (newSuperSD == null)
-              _addError("The class " + sd + " has an undefined superclass " + rt, typeDefBase);
+              _addAndIgnoreError("The class " + sd + " has an undefined superclass " + rt, typeDefBase);
             else  // TODO: Does not check that newSuperSD is not an interace  
               sd.setSuperClass(newSuperSD); 
           }
@@ -1121,7 +1122,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
         new VariableData(name, new ModifiersAndVisibility(SourceInfo.NO_INFO, mav), sd, true, enclosing);
       
       assert ! varData[i].isPrivate();
-      if (sd == null) { // TODO !!!: can this happen? 
+      
+      if (sd == null || sd == SymbolData.NOT_FOUND) { // a forward Type reference
         // To establish a reference to a not-yet-defined type, create a fixup
         final int j = i;
         /* The following is a kludge to make method signature collision detection work (unless different
@@ -1131,7 +1133,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
           public void execute() { 
             SymbolData newSd = _identifyType(typeName, si, enclosingClassName);
             assert newSd != null && newSd != SymbolData.NOT_FOUND;  // TODO !!!: Expand to error message?
-            varData[j].setType(newSd);
+            if (newSd != null) varData[j].setType(newSd);
           }
         };
         fixUps.add(fixUp);
@@ -1833,14 +1835,14 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //    }
 //    
     if (sd.isContinuation()) {
-      _addError("Could not generate constructor for class " + sd + " because it has no definition", 
+      _addAndIgnoreError("Could not generate constructor for class " + sd + " because it has no definition", 
                 new NullLiteral(SourceInfo.NO_INFO));
       return;
     }
     
     SymbolData superSd = sd.getSuperClass();
     if (superSd == null) {
-      _addError("Could not generate constructor for class " + sd + " because it has no superclass", 
+      _addAndIgnoreError("Could not generate constructor for class " + sd + " because it has no superclass", 
                 new NullLiteral(SourceInfo.NO_INFO));
       return;
     }

@@ -196,7 +196,11 @@ public class VariableData {
   public void setMav(ModifiersAndVisibility mav) { _modifiersAndVisibility = mav; }
   
   /** @return the SymbolData representing the type of this variable. */
-  public SymbolData getType() { return _type; }
+  public SymbolData getType() { return _type;
+    /* The following appears to break the Augmentor visitor.  Why? */
+//    if (_type != null) return _type; 
+//    return SymbolData.NOT_FOUND;
+  }
   
   /** Sets the SymbolData representing the type of this variable. */
   public void setType(SymbolData type) { _type = type; }
