@@ -2853,7 +2853,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //          return getSaveFile(_interactionsHistoryChooser);
           _interactionsHistoryChooser.setMultiSelectionEnabled(false);
           int rc = _interactionsHistoryChooser.showSaveDialog(MainFrame.this);
-          File c = getChosenFile(_interactionsHistoryChooser, rc, null);
+          File c = getChosenFile(_interactionsHistoryChooser, rc, null, false);
           //Moved from history itself to here to account for bug #989232, non-existant default
           //history file found
           if ((c != null) && (c.getName().indexOf('.') == -1)) {
@@ -4426,7 +4426,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     jfc.setFileFilter(getSourceFileFilter());
     jfc.setMultiSelectionEnabled(false);
     int rc = jfc.showSaveDialog(this);
-    return getChosenFile(jfc, rc, previous);
+    return getChosenFile(jfc, rc, previous, true);
   }
   
   /** Returns the current DefinitionsPane. */
@@ -5934,11 +5934,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param fc File chooser presented to the user
     * @param choice return value from fc
     * @param previous previous file (or null if none)
+    * @param addSourceFileExtension whether .java (or another appropriate extension) should be added to files without extension
     * @return Selected File
     * @throws OperationCanceledException if file choice canceled
     * @throws RuntimeException if fc returns a bad file or choice
     */
-  private File getChosenFile(JFileChooser fc, int choice, File previous) throws OperationCanceledException {
+  private File getChosenFile(JFileChooser fc, int choice, File previous,
+                             boolean addSourceFileExtension) throws OperationCanceledException {
     switch (choice) {
       case JFileChooser.CANCEL_OPTION:
       case JFileChooser.ERROR_OPTION:
@@ -5947,14 +5949,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         File chosen = fc.getSelectedFile();
         if (chosen != null) {
           //append the appropriate language level extension if not written by user
-          if (fc.getFileFilter() instanceof JavaSourceFilter) {
+          if (addSourceFileExtension) {
             if (chosen.getName().indexOf(".") == -1) {
               // no file extension
               String previousName = (previous!=null)?previous.getName():"";
               if (!DrJavaFileUtils.isSourceFile(previousName)) {
                 // previous file name doesn't have a file extension either
-                return new File(chosen.getAbsolutePath() + OptionConstants.
-                                  LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
+                File newFile = new File(chosen.getAbsolutePath() + OptionConstants.
+                                            LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
+                return newFile;
               }
               else {
                 // use previous file's extension
