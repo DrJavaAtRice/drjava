@@ -97,12 +97,25 @@ public class AppletComponent extends JComponent {
   
   private void updateState() {
     if (!_state.equals(State.RUNNING)) {
-      if (_state.equals(State.FRESH)) { _applet.init(); _state = State.PAUSED; }
-      _applet.start();
-      _state = State.RUNNING;
+      if (_state.equals(State.FRESH)) {
+        _state = State.PAUSED;
+        // run Applet.init() outside teh event thread, as per bug report 3069101:
+        // https://sourceforge.net/tracker/?func=detail&atid=438935&aid=3069101&group_id=44253
+        edu.rice.cs.plt.concurrent.ConcurrentUtil.runInThread(new Runnable() {
+          public void run() {
+            _applet.init();
+            _applet.start();
+            _state = State.RUNNING;
+            if (!_applet.getSize().equals(getSize())) { _applet.setSize(getSize()); }
+            validate();
+          }
+        });
+      }
     }
-    // lazily update size rather than trying to intercept all resizing methods
-    if (!_applet.getSize().equals(getSize())) { _applet.setSize(getSize()); }
+    if (_state.equals(State.RUNNING)) {
+      // lazily update size rather than trying to intercept all resizing methods
+      if (!_applet.getSize().equals(getSize())) { _applet.setSize(getSize()); }
+    }
   }
   
   private class Stub implements AppletStub, AppletContext {

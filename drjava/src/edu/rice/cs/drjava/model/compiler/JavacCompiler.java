@@ -304,7 +304,7 @@ public abstract class JavacCompiler implements CompilerInterface {
     
     // we pass MyClass.class just to get a "Static Error: Undefined class 'MyClass'"
     String ret = JavacCompiler.class.getName()+".runCommand(\""+s.toString()+"\", "+className+".class)";
-    System.out.println(ret);
+    // System.out.println(ret);
     return ret;
   }
 

@@ -255,7 +255,10 @@ public class MintCompiler extends Javac160FilteringCompiler {
     if (classPath != null) { options.put("-classpath", IOUtil.pathToString(classPath)); }
     if (sourcePath != null) { options.put("-sourcepath", IOUtil.pathToString(sourcePath)); }
     if (destination != null) { options.put("-d", destination.getPath()); }
-    if (bootClassPath != null) { System.out.println("bootClassPath: "+IOUtil.pathToString(bootClassPath)); options.put("-bootclasspath", IOUtil.pathToString(bootClassPath)); }
+    if (bootClassPath != null) {
+      // System.out.println("bootClassPath: "+IOUtil.pathToString(bootClassPath));
+      options.put("-bootclasspath", IOUtil.pathToString(bootClassPath));
+    }
     if (sourceVersion != null) { options.put("-source", sourceVersion); }
     if (!showWarnings) { options.put("-nowarn", ""); }
     
