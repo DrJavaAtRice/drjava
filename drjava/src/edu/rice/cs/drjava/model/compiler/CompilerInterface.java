@@ -103,6 +103,10 @@ public interface CompilerInterface {
   /** Return the set of source file extensions that this compiler supports.
     * @return the set of source file extensions that this compiler supports. */
   Set<String> getSourceFileExtensions();
+
+  /** Return the suggested file extension that will be appended to a file without extension.
+    * @return the suggested file extension */
+  public String getSuggestedFileExtension();
   
   /** Return a file filter that can be used to open files this compiler supports.
     * @return file filter for appropriate source files for this compiler. */

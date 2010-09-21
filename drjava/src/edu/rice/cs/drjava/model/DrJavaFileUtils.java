@@ -39,8 +39,9 @@ package edu.rice.cs.drjava.model;
 import java.io.File;
 import java.util.Set;
 import java.util.HashSet;
-import edu.rice.cs.plt.io.IOUtil;
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.plt.io.IOUtil;
 
 /** Some common methods for determining Java source files, language level files, etc.
   * @version $Id$
@@ -57,6 +58,13 @@ public class DrJavaFileUtils  {
     extensions.add(OptionConstants.OLD_DJ2_FILE_EXTENSION);
     return extensions;
   }
+  
+  /** Return the suggested file extension that will be appended to a file without extension.
+    * @return the suggested file extension */
+  public static String getSuggestedFileExtension() {
+    return OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL)];
+  }
+
   
   /** .java --> true
     * .dj   --> true

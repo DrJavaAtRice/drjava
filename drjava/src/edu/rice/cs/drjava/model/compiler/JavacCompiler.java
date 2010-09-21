@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Collections;
 import java.io.File;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -63,6 +64,15 @@ public abstract class JavacCompiler implements CompilerInterface {
   protected final JavaVersion.FullVersion _version;
   protected final String _location;
   protected List<? extends File> _defaultBootClassPath;
+  
+  /** The set of class names that are run as ACM Java Task Force library programs. */
+  protected static final Set<String> ACM_PROGRAM_CLASSES = new HashSet<String>();
+  static {
+    Collections.addAll(ACM_PROGRAM_CLASSES, new String[] {
+      "acm.program.Program",
+        "acm.graphics.GTurtle"
+    });
+  }
   
   protected JavacCompiler(JavaVersion.FullVersion version, String location, List<? extends File> defaultBootClassPath) {
     _version = version;
@@ -126,177 +136,176 @@ public abstract class JavacCompiler implements CompilerInterface {
     return _transformCommand(s,"edu.rice.cs.plt.swing.SwingUtil.showApplet(new {0}({1}), 400, 300);");
   }
   
-  // This is a command that automatically detects if
-  // a) the class is an ACM Java Task Force program (subclass of acm.program.Program or acm.graphics.GTurtle)
-  // b) an applet
-  // c) a class with a static main method
-  //
-  // If a), then DrJava inserts "code=MyClass" as argument 0.
-  // If b), then DrJava performs the same as "applet MyClass" (see above).
-  // If c), then DrJava executes MyClass.main (traditional java behavior).
-  public static String transformRunCommand(String s) {
+  /** This method performs the "smart run". Unfortunately, we don't get the right static error messages.
+    * @param s full command line, i.e. "run MyClass 1 2 3"
+    * @param c class to be run, i.e. MyClass.class
+    */
+  @SuppressWarnings("unchecked")
+  public static void runCommand(String s, Class c) throws Throwable {
     if (s.endsWith(";"))  s = _deleteSemiColon(s);
     List<String> tokens = ArgumentTokenizer.tokenize(s, true);
     final String classNameWithQuotes = tokens.get(1); // this is "MyClass"
     final String className =
       classNameWithQuotes.substring(1, classNameWithQuotes.length() - 1); // removes quotes, becomes MyClass
     String[] args = new String[tokens.size() - 2];
-    final StringBuilder argsString = new StringBuilder();
-    boolean seenArg = false;
     for (int i = 2; i < tokens.size(); i++) {
-      String t = tokens.get(i); // with quotes
+      String t = tokens.get(i);
       args[i - 2] = t.substring(1, t.length() - 1);
-      
-      if (seenArg) argsString.append(",");
-      else seenArg = true;
-      argsString.append(t);
     }
     
-    StringBuilder command = new StringBuilder();
-    
-    command.append("{\n"+
-       "boolean isProgram = false;\n" +
-       "boolean isApplet = false;\n" +
-       "Class c = ").append(className).append(".class;\n" +
-       "while(c != null) {\n" +
-       "  if (\"acm.program.Program\".equals(c.getName()) ||\n" +
-       "      \"acm.graphics.GTurtle\".equals(c.getName())) { isProgram = true; break; }\n" +
-       "  c = c.getSuperclass();\n" +
-       "}\n" +
-       "c = ").append(className).append(".class;\n" +
-       "if (!isProgram) {\n" +
-       "  try {\n" +
-       "    // if this doesn't throw, c is a subclass of Applet\n" +
-       "    c.asSubclass(java.applet.Applet.class);\n" +
-       "    isApplet = true;\n" +
-       "  } catch(ClassCastException cce) { }\n" +
-       "}\n" +
-       "java.lang.reflect.Method m = null;\n" +
-       "String[] args = new String[] {").append(argsString.toString()).append("};\n" +
-       "if (isApplet) {\n" +
-       "  try {\n" +
-       "    m = c.getMethod(\"main\", java.lang.String[].class);\n" +
-       "    if (!m.getReturnType().equals(void.class)) { m = null; }\n" +
-       "  }\n" +
-       "  catch (java.lang.NoSuchMethodException e) { m = null; }\n" +
-       "  if (m==null) {\n" +
-       "    java.applet.Applet instance = null;\n" +
-       "    boolean fail = false;\n");
-    if (args.length==0) {
-      command.append(
-       "    try {\n" +
-       "      // try default (nullary) constructor first\n" +
-       "      java.lang.reflect.Constructor ctor = c.getConstructor();\n" +
-       "      instance = java.applet.Applet.class.cast(ctor.newInstance());\n" +
-       "    }\n" +
-       "    catch(NoSuchMethodException nsme) { instance = null; }\n" +
-       "    catch(InstantiationException ie) { instance = null; }\n" +
-       "    catch(IllegalAccessException iae) { instance = null; }\n" +
-       "    catch(java.lang.reflect.InvocationTargetException ite) {\n" +
-       "      if (ite.getCause()!=null) {\n" +
-       "        throw ite.getCause();\n" +
-       "      }\n" +
-       "      else {\n" +
-       "        System.err.println(\"Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.\");\n" +
-       "      }\n" +
-       "    }\n" +
-       "    if (instance==null) {\n" +
-       "      try {\n" +
-       "        // try String[] constructor next\n" +
-       "        java.lang.reflect.Constructor ctor = c.getConstructor(String[].class);\n" +
-       "        instance = java.applet.Applet.class.cast(ctor.newInstance(new Object[] { new String[0] }));\n" +
-       "      }\n" +
-       "      catch(NoSuchMethodException nsme) { instance = null; }\n" +
-       "      catch(InstantiationException ie) { instance = null; }\n" +
-       "      catch(IllegalAccessException iae) { instance = null; }\n" +
-       "      catch(java.lang.reflect.InvocationTargetException ite) {\n" +
-       "        if (ite.getCause()!=null) {\n" +
-       "          throw ite.getCause();\n" +
-       "        }\n" +
-       "        else {\n" +
-       "          System.err.println(\"Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.\");\n" +
-       "          fail = true;\n" +
-       "        }\n" +
-       "      }\n" +
-       "    }\n" +
-       "    if (!fail && (instance==null)) {\n" +
-       "      System.err.println(\"Error: This applet does not have a default constructor or a constructor \"+\n" +
-       "                         \"accepting String[].\");\n" +
-       "      fail = true;\n" +
-       "    }\n");
+    boolean isProgram = false;
+    boolean isApplet = false;
+    Class oldC = c;
+    while(c != null) {
+      if (ACM_PROGRAM_CLASSES.contains(c.getName())) { isProgram = true; break; }
+      c = c.getSuperclass();
+    }
+    c = oldC;
+    if (!isProgram) {
+      try {
+        // if this doesn't throw, c is a subclass of Applet
+        c.asSubclass(java.applet.Applet.class);
+        isApplet = true;
+      } catch(ClassCastException cce) { }
+    }
+
+    java.lang.reflect.Method m = null;
+    if (isApplet) {
+      try {
+        m = c.getMethod("main", java.lang.String[].class);
+        if (!m.getReturnType().equals(void.class)) { m = null; }
+      }
+      catch (java.lang.NoSuchMethodException e) { m = null; }
+      if (m==null) {
+        java.applet.Applet instance = null;
+        if (args.length==0) {
+          try {
+            // try default (nullary) constructor first
+            Constructor ctor = c.getConstructor();
+            instance = java.applet.Applet.class.cast(ctor.newInstance());
+          }
+          catch(NoSuchMethodException nsme) { instance = null; }
+          catch(InstantiationException ie) { instance = null; }
+          catch(IllegalAccessException iae) { instance = null; }
+          catch(java.lang.reflect.InvocationTargetException ite) {
+            if (ite.getCause()!=null) {
+              throw ite.getCause();
+            }
+            else {
+              System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
+            }
+          }
+          if (instance==null) {
+            try {
+              // try String[] constructor next
+              Constructor ctor = c.getConstructor(String[].class);
+              instance = java.applet.Applet.class.cast(ctor.newInstance(new Object[] { new String[0] }));
+            }
+            catch(NoSuchMethodException nsme) { instance = null; }
+            catch(InstantiationException ie) { instance = null; }
+            catch(IllegalAccessException iae) { instance = null; }
+            catch(java.lang.reflect.InvocationTargetException ite) {
+              if (ite.getCause()!=null) {
+                throw ite.getCause();
+              }
+              else {
+                System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
+                return;
+              }
+            }
+          }
+          if (instance==null) {
+            System.err.println("Static Error: This applet does not have a default constructor or a constructor "+
+                               "accepting String[].");
+            return;
+          }
+        }
+        else {
+          try {
+            // try String[] constructor
+            Constructor ctor = c.getConstructor(String[].class);
+            instance = java.applet.Applet.class.cast(ctor.newInstance(new Object[] { args }));
+          }
+          catch(NoSuchMethodException nsme) { instance = null; }
+          catch(InstantiationException ie) { instance = null; }
+          catch(IllegalAccessException iae) { instance = null; }
+          catch(java.lang.reflect.InvocationTargetException ite) {
+            if (ite.getCause()!=null) {
+              throw ite.getCause();
+            }
+            else {
+              System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
+              return;
+            }
+          }
+          if (instance==null) {
+            System.err.println("Static Error: This applet does not have a constructor accepting String[].");
+            return;
+          }
+        }
+        edu.rice.cs.plt.swing.SwingUtil.showApplet(instance, 400, 300);
+      }
     }
     else {
-      command.append(
-       "    try {\n" +
-       "      // try String[] constructor\n" +
-       "      java.lang.reflect.Constructor ctor = c.getConstructor(String[].class);\n" +
-       "      instance = java.applet.Applet.class.cast(ctor.newInstance(new Object[] { args }));\n" +
-       "    }\n" +
-       "    catch(NoSuchMethodException nsme) { instance = null; }\n" +
-       "    catch(InstantiationException ie) { instance = null; }\n" +
-       "    catch(IllegalAccessException iae) { instance = null; }\n" +
-       "    catch(java.lang.reflect.InvocationTargetException ite) {\n" +
-       "      if (ite.getCause()!=null) {\n" +
-       "        throw ite.getCause();\n" +
-       "      }\n" +
-       "      else {\n" +
-       "        System.err.println(\"Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.\");\n" +
-       "        fail = true;\n" +
-       "      }\n" +
-       "    }\n" +
-       "    if (!fail && (instance==null)) {\n" +
-       "      System.err.println(\"Error: This applet does not have a constructor accepting String[].\");\n" +
-       "      fail = true;\n" +
-       "    }\n");
+      try {
+        m = c.getMethod("main", java.lang.String[].class);
+        if (!m.getReturnType().equals(void.class)) {
+          System.err.println("Static Error: This class does not have a static void main method accepting String[].");
+          m = null;
+        }
+      }
+      catch (java.lang.NoSuchMethodException e) {
+        System.err.println("Static Error: This class does not have a static void main method accepting String[].");
+        m = null;
+      }
     }
-    command.append(
-       "    if (!fail) { edu.rice.cs.plt.swing.SwingUtil.showApplet(instance, 400, 300); }\n" +
-       "  } // if (m==null)\n" +
-       "} // if (isApplet)\n" +
-       "else {\n" +
-       "  try {\n" +
-       "    m = c.getMethod(\"main\", java.lang.String[].class);\n" +
-       "    if (!m.getReturnType().equals(void.class)) {\n" +
-       "      System.err.println(\"Error: This class does not have a static void main method accepting String[].\");\n" +
-       "      m = null;\n" +
-       "    }\n" +
-       "  }\n" +
-       "  catch (java.lang.NoSuchMethodException e) {\n" +
-       "    System.err.println(\"Error: This class does not have a static void main method accepting String[].\");\n" +
-       "    m = null;\n" +
-       "  }\n" +
-       "} // else\n" +
-       "if (m != null) {\n" +
-       "  if (isProgram) {\n" +
-       "    String[] newArgs = new String[args.length+1];\n" +
-       "    newArgs[0] = \"code=\"+c.getName();\n" +
-       "    System.arraycopy(args, 0, newArgs, 1, args.length);\n" +
-       "    args = newArgs;\n" +
-       "  }\n" +
-       "  try {\n" +
-       "    m.setAccessible(true);\n" +
-       "    m.invoke(null, new Object[] { args });\n" +
-       "  }\n" +
-       "  catch(SecurityException se) {\n" +
-       "    System.err.println(\"Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.\");\n" +
-       "  }\n" +
-       "  catch(IllegalAccessException iae) {\n" +
-       "    System.err.println(\"Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.\");\n" +
-       "  }\n" +
-       "  catch(java.lang.reflect.InvocationTargetException ite) {\n" +
-       "    if (ite.getCause()!=null) {\n" +
-       "      throw ite.getCause();\n" +
-       "    }\n" +
-       "    else {\n" +
-       "      System.err.println(\"Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.\");\n" +
-       "    }\n" +
-       "  }\n" +
-       "}\n" +
-    "}");
+    if (m != null) {
+      if (isProgram) {
+        String[] newArgs = new String[args.length+1];
+        newArgs[0] = "code="+c.getName();
+        System.arraycopy(args, 0, newArgs, 1, args.length);
+        args = newArgs;
+      }
+      try {
+        m.setAccessible(true);
+        m.invoke(null, new Object[] { args });
+      }
+      catch(SecurityException se) {
+        System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
+      }
+      catch(IllegalAccessException iae) {
+        System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
+      }
+      catch(java.lang.reflect.InvocationTargetException ite) {
+        if (ite.getCause()!=null) {
+          throw ite.getCause();
+        }
+        else {
+          System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
+        }
+      }
+    }
+  }
+  
+  // This is a command that automatically detects if
+  // a) the class is an ACM Java Task Force program (subclass of acm.program.Program)
+  // b) an applet
+  // c) a class with a static main method
+  //
+  // If a), then DrJava inserts "code=MyClass" as argument 0.
+  // If b), then DrJava performs the same as "applet MyClass" (see above).
+  // If c), then DrJava executes MyClass.main (traditional java behavior).
+  public static String transformRunCommand(String s) {    
+    if (s.endsWith(";"))  s = _deleteSemiColon(s);
+    List<String> args = ArgumentTokenizer.tokenize(s, true);
+    final String classNameWithQuotes = args.get(1); // this is "MyClass"
+    final String className =
+      classNameWithQuotes.substring(1, classNameWithQuotes.length() - 1); // removes quotes, becomes MyClass
     
-    // System.out.println(command);
-
-    return command.toString();
+    // we pass MyClass.class just to get a "Static Error: Undefined class 'MyClass'"
+    String ret = JavacCompiler.class.getName()+".runCommand(\""+s.toString()+"\", "+className+".class)";
+    System.out.println(ret);
+    return ret;
   }
 
   /** Assumes a trimmed String. Returns a string of the call that the interpreter can use.
@@ -348,6 +357,12 @@ public abstract class JavacCompiler implements CompilerInterface {
     * @return the set of source file extensions that this compiler supports. */
   public Set<String> getSourceFileExtensions() { return DrJavaFileUtils.getSourceFileExtensions(); }
   
+  /** Return the suggested file extension that will be appended to a file without extension.
+    * @return the suggested file extension */
+  public String getSuggestedFileExtension() {
+    return DrJavaFileUtils.getSuggestedFileExtension();
+  }
+  
   /** Return a file filter that can be used to open files this compiler supports.
     * @return file filter for appropriate source files for this compiler */
   public FileFilter getFileFilter() { return new SmartSourceFilter(); }
@@ -379,176 +394,176 @@ public abstract class JavacCompiler implements CompilerInterface {
     for(String s: words) { JAVA_KEYWORDS.add(s); }
   }
   
-//  /** This method performs the "smart run". Unfortunately, we don't get the right static error messages.
-//    * @param s full command line, i.e. "run MyClass 1 2 3"
-//    * @param c class to be run, i.e. MyClass.class
-//    */
-//  @SuppressWarnings("unchecked")
-//  public static void runCommand(String s, Class c) throws Throwable {
-//    if (s.endsWith(";"))  s = _deleteSemiColon(s);
-//    List<String> tokens = ArgumentTokenizer.tokenize(s, true);
-//    final String classNameWithQuotes = tokens.get(1); // this is "MyClass"
-//    final String className =
-//      classNameWithQuotes.substring(1, classNameWithQuotes.length() - 1); // removes quotes, becomes MyClass
-//    String[] args = new String[tokens.size() - 2];
-//    for (int i = 2; i < tokens.size(); i++) {
-//      String t = tokens.get(i);
-//      args[i - 2] = t.substring(1, t.length() - 1);
-//    }
-//    
-//    boolean isProgram = false;
-//    boolean isApplet = false;
-//    Class oldC = c;
-//    while(c != null) {
-//      if ("acm.program.Program".equals(c.getName()) ||
-//          "acm.graphics.GTurtle".equals(c.getName())) { isProgram = true; break; }
-//      c = c.getSuperclass();
-//    }
-//    c = oldC;
-//    if (!isProgram) {
-//      try {
-//        // if this doesn't throw, c is a subclass of Applet
-//        c.asSubclass(java.applet.Applet.class);
-//        isApplet = true;
-//      } catch(ClassCastException cce) { }
-//    }
-//
-//    java.lang.reflect.Method m = null;
-//    if (isApplet) {
-//      try {
-//        m = c.getMethod("main", java.lang.String[].class);
-//        if (!m.getReturnType().equals(void.class)) { m = null; }
-//      }
-//      catch (java.lang.NoSuchMethodException e) { m = null; }
-//      if (m==null) {
-//        java.applet.Applet instance = null;
-//        if (args.length==0) {
-//          try {
-//            // try default (nullary) constructor first
-//            Constructor ctor = c.getConstructor();
-//            instance = java.applet.Applet.class.cast(ctor.newInstance());
-//          }
-//          catch(NoSuchMethodException nsme) { instance = null; }
-//          catch(InstantiationException ie) { instance = null; }
-//          catch(IllegalAccessException iae) { instance = null; }
-//          catch(java.lang.reflect.InvocationTargetException ite) {
-//            if (ite.getCause()!=null) {
-//              throw ite.getCause();
-//            }
-//            else {
-//              System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
-//            }
-//          }
-//          if (instance==null) {
-//            try {
-//              // try String[] constructor next
-//              Constructor ctor = c.getConstructor(String[].class);
-//              instance = java.applet.Applet.class.cast(ctor.newInstance(new Object[] { new String[0] }));
-//            }
-//            catch(NoSuchMethodException nsme) { instance = null; }
-//            catch(InstantiationException ie) { instance = null; }
-//            catch(IllegalAccessException iae) { instance = null; }
-//            catch(java.lang.reflect.InvocationTargetException ite) {
-//              if (ite.getCause()!=null) {
-//                throw ite.getCause();
-//              }
-//              else {
-//                System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
-//                return;
-//              }
-//            }
-//          }
-//          if (instance==null) {
-//            System.err.println("Error: This applet does not have a default constructor or a constructor "+
-//                               "accepting String[].");
-//            return;
-//          }
-//        }
-//        else {
-//          try {
-//            // try String[] constructor
-//            Constructor ctor = c.getConstructor(String[].class);
-//            instance = java.applet.Applet.class.cast(ctor.newInstance(new Object[] { args }));
-//          }
-//          catch(NoSuchMethodException nsme) { instance = null; }
-//          catch(InstantiationException ie) { instance = null; }
-//          catch(IllegalAccessException iae) { instance = null; }
-//          catch(java.lang.reflect.InvocationTargetException ite) {
-//            if (ite.getCause()!=null) {
-//              throw ite.getCause();
-//            }
-//            else {
-//              System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
-//              return;
-//            }
-//          }
-//          if (instance==null) {
-//            System.err.println("Error: This applet does not have a constructor accepting String[].");
-//            return;
-//          }
-//        }
-//        edu.rice.cs.plt.swing.SwingUtil.showApplet(instance, 400, 300);
-//      }
-//    }
-//    else {
-//      try {
-//        m = c.getMethod("main", java.lang.String[].class);
-//        if (!m.getReturnType().equals(void.class)) {
-//          System.err.println("Error: This class does not have a static void main method accepting String[].");
-//          m = null;
-//        }
-//      }
-//      catch (java.lang.NoSuchMethodException e) {
-//        System.err.println("Error: This class does not have a static void main method accepting String[].");
-//        m = null;
-//      }
-//    }
-//    if (m != null) {
-//      if (isProgram) {
-//        String[] newArgs = new String[args.length+1];
-//        newArgs[0] = "code="+c.getName();
-//        System.arraycopy(args, 0, newArgs, 1, args.length);
-//        args = newArgs;
-//      }
-//      try {
-//        m.setAccessible(true);
-//        m.invoke(null, new Object[] { args });
-//      }
-//      catch(SecurityException se) {
-//        System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
-//      }
-//      catch(IllegalAccessException iae) {
-//        System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
-//      }
-//      catch(java.lang.reflect.InvocationTargetException ite) {
-//        if (ite.getCause()!=null) {
-//          throw ite.getCause();
-//        }
-//        else {
-//          System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
-//        }
-//      }
-//    }
-//  }
-//  
 //  // This is a command that automatically detects if
-//  // a) the class is an ACM Java Task Force program (subclass of acm.program.Program)
+//  // a) the class is an ACM Java Task Force program (subclass of acm.program.Program or acm.graphics.GTurtle)
 //  // b) an applet
 //  // c) a class with a static main method
 //  //
 //  // If a), then DrJava inserts "code=MyClass" as argument 0.
 //  // If b), then DrJava performs the same as "applet MyClass" (see above).
 //  // If c), then DrJava executes MyClass.main (traditional java behavior).
-//  public static String transformRunCommand(String s) {    
+//  public static String transformRunCommand(String s) {
 //    if (s.endsWith(";"))  s = _deleteSemiColon(s);
-//    List<String> args = ArgumentTokenizer.tokenize(s, true);
-//    final String classNameWithQuotes = args.get(1); // this is "MyClass"
+//    List<String> tokens = ArgumentTokenizer.tokenize(s, true);
+//    final String classNameWithQuotes = tokens.get(1); // this is "MyClass"
 //    final String className =
 //      classNameWithQuotes.substring(1, classNameWithQuotes.length() - 1); // removes quotes, becomes MyClass
+//    String[] args = new String[tokens.size() - 2];
+//    final StringBuilder argsString = new StringBuilder();
+//    boolean seenArg = false;
+//    for (int i = 2; i < tokens.size(); i++) {
+//      String t = tokens.get(i); // with quotes
+//      args[i - 2] = t.substring(1, t.length() - 1);
+//      
+//      if (seenArg) argsString.append(",");
+//      else seenArg = true;
+//      argsString.append(t);
+//    }
 //    
-//    // we pass MyClass.class just to get a "Static Error: Undefined class 'MyClass'"
-//    String ret = JavacCompiler.class.getName()+".runCommand(\""+s.toString()+"\", "+className+".class)";
-//    System.out.println(ret);
-//    return ret;
+//    StringBuilder command = new StringBuilder();
+//    
+//    command.append("{\n"+
+//       "boolean isProgram = false;\n" +
+//       "boolean isApplet = false;\n" +
+//       "Class c = ").append(className).append(".class;\n" +
+//       "while(c != null) {\n" +
+//       "  if (\"acm.program.Program\".equals(c.getName()) ||\n" +
+//       "      \"acm.graphics.GTurtle\".equals(c.getName())) { isProgram = true; break; }\n" +
+//       "  c = c.getSuperclass();\n" +
+//       "}\n" +
+//       "c = ").append(className).append(".class;\n" +
+//       "if (!isProgram) {\n" +
+//       "  try {\n" +
+//       "    // if this doesn't throw, c is a subclass of Applet\n" +
+//       "    c.asSubclass(java.applet.Applet.class);\n" +
+//       "    isApplet = true;\n" +
+//       "  } catch(ClassCastException cce) { }\n" +
+//       "}\n" +
+//       "java.lang.reflect.Method m = null;\n" +
+//       "String[] args = new String[] {").append(argsString.toString()).append("};\n" +
+//       "if (isApplet) {\n" +
+//       "  try {\n" +
+//       "    m = c.getMethod(\"main\", java.lang.String[].class);\n" +
+//       "    if (!m.getReturnType().equals(void.class)) { m = null; }\n" +
+//       "  }\n" +
+//       "  catch (java.lang.NoSuchMethodException e) { m = null; }\n" +
+//       "  if (m==null) {\n" +
+//       "    java.applet.Applet instance = null;\n" +
+//       "    boolean fail = false;\n");
+//    if (args.length==0) {
+//      command.append(
+//       "    try {\n" +
+//       "      // try default (nullary) constructor first\n" +
+//       "      java.lang.reflect.Constructor ctor = c.getConstructor();\n" +
+//       "      instance = java.applet.Applet.class.cast(ctor.newInstance());\n" +
+//       "    }\n" +
+//       "    catch(NoSuchMethodException nsme) { instance = null; }\n" +
+//       "    catch(InstantiationException ie) { instance = null; }\n" +
+//       "    catch(IllegalAccessException iae) { instance = null; }\n" +
+//       "    catch(java.lang.reflect.InvocationTargetException ite) {\n" +
+//       "      if (ite.getCause()!=null) {\n" +
+//       "        throw ite.getCause();\n" +
+//       "      }\n" +
+//       "      else {\n" +
+//       "        System.err.println(\"Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.\");\n" +
+//       "      }\n" +
+//       "    }\n" +
+//       "    if (instance==null) {\n" +
+//       "      try {\n" +
+//       "        // try String[] constructor next\n" +
+//       "        java.lang.reflect.Constructor ctor = c.getConstructor(String[].class);\n" +
+//       "        instance = java.applet.Applet.class.cast(ctor.newInstance(new Object[] { new String[0] }));\n" +
+//       "      }\n" +
+//       "      catch(NoSuchMethodException nsme) { instance = null; }\n" +
+//       "      catch(InstantiationException ie) { instance = null; }\n" +
+//       "      catch(IllegalAccessException iae) { instance = null; }\n" +
+//       "      catch(java.lang.reflect.InvocationTargetException ite) {\n" +
+//       "        if (ite.getCause()!=null) {\n" +
+//       "          throw ite.getCause();\n" +
+//       "        }\n" +
+//       "        else {\n" +
+//       "          System.err.println(\"Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.\");\n" +
+//       "          fail = true;\n" +
+//       "        }\n" +
+//       "      }\n" +
+//       "    }\n" +
+//       "    if (!fail && (instance==null)) {\n" +
+//       "      System.err.println(\"Error: This applet does not have a default constructor or a constructor \"+\n" +
+//       "                         \"accepting String[].\");\n" +
+//       "      fail = true;\n" +
+//       "    }\n");
+//    }
+//    else {
+//      command.append(
+//       "    try {\n" +
+//       "      // try String[] constructor\n" +
+//       "      java.lang.reflect.Constructor ctor = c.getConstructor(String[].class);\n" +
+//       "      instance = java.applet.Applet.class.cast(ctor.newInstance(new Object[] { args }));\n" +
+//       "    }\n" +
+//       "    catch(NoSuchMethodException nsme) { instance = null; }\n" +
+//       "    catch(InstantiationException ie) { instance = null; }\n" +
+//       "    catch(IllegalAccessException iae) { instance = null; }\n" +
+//       "    catch(java.lang.reflect.InvocationTargetException ite) {\n" +
+//       "      if (ite.getCause()!=null) {\n" +
+//       "        throw ite.getCause();\n" +
+//       "      }\n" +
+//       "      else {\n" +
+//       "        System.err.println(\"Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.\");\n" +
+//       "        fail = true;\n" +
+//       "      }\n" +
+//       "    }\n" +
+//       "    if (!fail && (instance==null)) {\n" +
+//       "      System.err.println(\"Error: This applet does not have a constructor accepting String[].\");\n" +
+//       "      fail = true;\n" +
+//       "    }\n");
+//    }
+//    command.append(
+//       "    if (!fail) { edu.rice.cs.plt.swing.SwingUtil.showApplet(instance, 400, 300); }\n" +
+//       "  } // if (m==null)\n" +
+//       "} // if (isApplet)\n" +
+//       "else {\n" +
+//       "  try {\n" +
+//       "    m = c.getMethod(\"main\", java.lang.String[].class);\n" +
+//       "    if (!m.getReturnType().equals(void.class)) {\n" +
+//       "      System.err.println(\"Error: This class does not have a static void main method accepting String[].\");\n" +
+//       "      m = null;\n" +
+//       "    }\n" +
+//       "  }\n" +
+//       "  catch (java.lang.NoSuchMethodException e) {\n" +
+//       "    System.err.println(\"Error: This class does not have a static void main method accepting String[].\");\n" +
+//       "    m = null;\n" +
+//       "  }\n" +
+//       "} // else\n" +
+//       "if (m != null) {\n" +
+//       "  if (isProgram) {\n" +
+//       "    String[] newArgs = new String[args.length+1];\n" +
+//       "    newArgs[0] = \"code=\"+c.getName();\n" +
+//       "    System.arraycopy(args, 0, newArgs, 1, args.length);\n" +
+//       "    args = newArgs;\n" +
+//       "  }\n" +
+//       "  try {\n" +
+//       "    m.setAccessible(true);\n" +
+//       "    m.invoke(null, new Object[] { args });\n" +
+//       "  }\n" +
+//       "  catch(SecurityException se) {\n" +
+//       "    System.err.println(\"Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.\");\n" +
+//       "  }\n" +
+//       "  catch(IllegalAccessException iae) {\n" +
+//       "    System.err.println(\"Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.\");\n" +
+//       "  }\n" +
+//       "  catch(java.lang.reflect.InvocationTargetException ite) {\n" +
+//       "    if (ite.getCause()!=null) {\n" +
+//       "      throw ite.getCause();\n" +
+//       "    }\n" +
+//       "    else {\n" +
+//       "      System.err.println(\"Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.\");\n" +
+//       "    }\n" +
+//       "  }\n" +
+//       "}\n" +
+//    "}");
+//    
+//    // System.out.println(command);
+//
+//    return command.toString();
 //  }
 }

@@ -174,9 +174,13 @@ public class HjCompiler extends Javac160FilteringCompiler {
     * @return the set of source file extensions that this compiler supports. */
   public Set<String> getSourceFileExtensions() {
     HashSet<String> extensions = new HashSet<String>();
-    extensions.add(HJ_FILE_EXTENSION);
+    extensions.add(getSuggestedFileExtension());
     return extensions;
   }
+  
+  /** Return the suggested file extension that will be appended to a file without extension.
+    * @return the suggested file extension */
+  public String getSuggestedFileExtension() { return HJ_FILE_EXTENSION; }
   
   /** Return a file filter that can be used to open files this compiler supports.
     * @return file filter for appropriate source files for this compiler */

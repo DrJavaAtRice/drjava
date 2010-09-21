@@ -344,6 +344,18 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       return cm.getActiveCompiler().getFileFilter();
     }
   }
+
+  /** Return the suggested file extension that will be appended to a file without extension.
+    * @return the suggested file extension */
+  private String getSuggestedFileExtension() {
+    edu.rice.cs.drjava.model.compiler.CompilerModel cm = _model.getCompilerModel();
+    if (cm==null) {
+      return DrJavaFileUtils.getSuggestedFileExtension();
+    }
+    else {
+      return cm.getActiveCompiler().getSuggestedFileExtension();
+    }
+  }
   
   /** Returns the files to open to the model (command pattern). */
   private final FileOpenSelector _openSelector = new FileOpenSelector() {
@@ -5955,8 +5967,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               String previousName = (previous!=null)?previous.getName():"";
               if (!DrJavaFileUtils.isSourceFile(previousName)) {
                 // previous file name doesn't have a file extension either
-                File newFile = new File(chosen.getAbsolutePath() + OptionConstants.
-                                            LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
+                File newFile = new File(chosen.getAbsolutePath() + getSuggestedFileExtension());
                 return newFile;
               }
               else {
