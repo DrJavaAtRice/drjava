@@ -518,9 +518,10 @@ public class LanguageLevelConverter {
         SourceInfo si = triple.getFirst();   // SourceInfo in continuation
         LanguageLevelVisitor llv = triple.getSecond();
         SymbolData sD = triple.getThird();  // SymbolData in continuation
+//        System.err.println("Attempting to resolve " + name + " with source info " + si + " and SymbolData " + sD);
         SymbolData newSD = sD.resolve(si, llv);
         _log.log("Attempting to resolve " + sD + " with source info " + si + "\n  Result = " + newSD);
-//        System.err.println("Attempting to resolve " + name + " with source info " + si + "\n  Result = " + newSD);
+//        System.err.println("Result = " + newSD);
         if (newSD == null) {
 //          if (name.equals("listFW.IList")) {
 //            System.err.println("Cannot resolve listFW.List\nsymbolTable is:\n" + symbolTable);

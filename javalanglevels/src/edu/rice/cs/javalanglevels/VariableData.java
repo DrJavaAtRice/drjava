@@ -42,7 +42,7 @@ import edu.rice.cs.javalanglevels.util.*;
 import java.util.*;
 import junit.framework.TestCase;
 
-/** Represents the data for a given variable. */
+/** Represents the data for a given variable (including fields). */
 public class VariableData {
   
   /**The name of this variable*/

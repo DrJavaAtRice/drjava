@@ -126,8 +126,9 @@ public class MethodData extends BodyData {
 
     return _name.equals(md.getName()) &&
       _modifiersAndVisibility.equals(md.getMav()) &&
-      LanguageLevelVisitor.arrayEquals(_typeParameters, md.getTypeParameters()) &&
-      LanguageLevelVisitor.arrayEquals(_params, md.getParams()) &&
+      // Type parameters are not used in functional code, but names are irrelevant anyway
+//      LanguageLevelVisitor.arrayEquals(_typeParameters, md.getTypeParameters()) &&
+      LanguageLevelVisitor.arrayEquals(_params, md.getParams()) &&  // TODO: this comparison should be less stringnet; names don't matter
       LanguageLevelVisitor.arrayEquals(_thrown, md.getThrown()) &&
       _enclosingData.get(0) == md.getEnclosingData().get(0) &&
       _vars.equals(md.getVars());
@@ -250,14 +251,15 @@ public class MethodData extends BodyData {
                            new String[] {"I throw this"}, SymbolData.BOOLEAN_TYPE, mdef);
      assertFalse("Two MethodDatas with different MAVs are not equal", _md.equals(_md2));
      
-    //different type parameters
-     TypeParameter[] tp2 = 
-       new TypeParameter[] { new TypeParameter(SourceInfo.NO_INFO, new TypeVariable(SourceInfo.NO_INFO,"tv"), 
-                                               new TypeVariable(SourceInfo.NO_INFO,"i"))};
-   
-     _md2 = new MethodData("m", _publicMav2, tp2, SymbolData.INT_TYPE, new VariableData[]{vd},
-                           new String[] {"I throw this"}, SymbolData.BOOLEAN_TYPE, mdef);
-     assertFalse("Two MethodDatas with different type parameters are not equal", _md.equals(_md2));
+     /* The different type parameters test is quoted out because the particular names do not matter. */
+     // Different type parameters
+//     TypeParameter[] tp2 = 
+//       new TypeParameter[] { new TypeParameter(SourceInfo.NO_INFO, new TypeVariable(SourceInfo.NO_INFO,"tv"), 
+//                                               new TypeVariable(SourceInfo.NO_INFO,"i"))};
+//   
+//     _md2 = new MethodData("m", _publicMav2, tp2, SymbolData.INT_TYPE, new VariableData[]{vd},
+//                           new String[] {"I throw this"}, SymbolData.BOOLEAN_TYPE, mdef);
+//     assertFalse("Two MethodDatas with different type parameters are not equal", _md.equals(_md2));
      
     //different thrown
     _md2 = new MethodData("m", _publicMav2, tp, SymbolData.INT_TYPE, new VariableData[]{vd},

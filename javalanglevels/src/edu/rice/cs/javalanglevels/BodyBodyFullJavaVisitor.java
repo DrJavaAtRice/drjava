@@ -155,7 +155,7 @@ public class BodyBodyFullJavaVisitor extends FullJavaVisitor {
     assert _enclosingClassName.equals(getQualifiedClassName(enclosingClass.getName()));
     
     String relName = that.getName().getText();
-    String fullName = _enclosingClassName + '.' + enclosingClass.preincrementLocalClassNum() + relName;
+    String fullName = _enclosingClassName + '$' + enclosingClass.preincrementLocalClassNum() + relName;
 //    System.err.println("***ALARM*** Processing local class '" + relName + "' in class " + _enclosingClassName
 //                         + " with flattened class name " + fullName);
     handleInnerClassDef(that, _bodyData, relName, fullName);

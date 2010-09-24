@@ -60,11 +60,11 @@ public class ElementaryLevelTest extends TestCase {
     directory = new File("testFiles" + File.separatorChar + "forElementaryLevelTest");
   }
   
-  public void assertEquals(String s, Data answer, Data testValue) {
-    if (! answer.equals(testValue)) 
-      System.err.println("Unit test '" + s + "' failed. Expected '" + 
-                         answer.getName() + "'.  Found '" + testValue.getName() + "'.");
-  }
+//  public void assertEquals(String s, Data answer, Data testValue) {
+//    if (! answer.equals(testValue)) 
+//      System.err.println("Unit test '" + s + "' failed. Expected '" + 
+//                         answer.getName() + "'.  Found '" + testValue.getName() + "'.");
+//  }
   
   /** Tests some files that should be handled without errors, and ensures the resulting augmented
    * file is correct.*/

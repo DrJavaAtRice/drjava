@@ -131,6 +131,8 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     return null;
   }
 
+  // TODO: lift the following two methods to LLV since they are identical in ClassBodyFullJavaVisitor. 
+  
   /** Call the method in FullJavaVisitor since it's common to this and FullJavaBodyFullJavaVisitor. */
   public Void forInnerInterfaceDef(InnerInterfaceDef that) {
     String relName = that.getName().getText();

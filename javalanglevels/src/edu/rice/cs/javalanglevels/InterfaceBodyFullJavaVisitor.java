@@ -48,7 +48,7 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
   /**The SymbolData corresponding to this interface. */
   private SymbolData _symbolData;
   
-  /** Constructor for InterfaceBodyFullJavaVisitor.
+  /** Old constructor for InterfaceBodyFullJavaVisitor.
     * @param sd             The SymbolData that encloses the context we are visiting.
     * @param file           The source file this came from.
     * @param packageName    The package the source file is in
@@ -70,10 +70,34 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     _symbolData = sd;
   }
   
+  /** Preferred constructor for InterfaceBodyFullJavaVisitor.
+    * @param sd             The SymbolData that encloses the context we are visiting.
+    * @param file           The source file this came from.
+    * @param packageName    The package the source file is in
+    * @importedFiles        A list of classes that were specifically imported
+    * @param importedPackages   A list of package names that were specifically imported
+    * @param classesInThisFile  A list of the classes that are yet to be defined in this source file
+    * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need to 
+    *                       be resolved
+    * @param genericTypes   A HashMap mapping in scope generic type names to their bounds (SymbolDatas).
+    */
+  public InterfaceBodyFullJavaVisitor(SymbolData sd, 
+                                      File file, 
+                                      String packageName,
+                                      LinkedList<String> importedFiles, 
+                                      LinkedList<String> importedPackages, 
+                                      HashSet<String> classesInThisFile,
+                                      Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations,
+                                      LinkedList<Command> fixUps,
+                                      HashMap<String, SymbolData> genericTypes) {
+    super(file, packageName, sd.getName(), importedFiles, importedPackages, classesInThisFile, continuations, fixUps,
+          genericTypes);
+    _symbolData = sd;
+  }
+  
   /** Ignore Statement. */
   public Void forStatementDoFirst(Statement that) { return null; }
   
-    
   /*Throw an appropriate error*/
   public Void forConcreteMethodDefDoFirst(ConcreteMethodDef that) {
     _addError("You cannot have concrete methods definitions in interfaces", that);
@@ -128,14 +152,14 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     return null;
   }
   
-  /** Call the method in FullJavaVisitor since it's common to this, d ClassBodyIntermediateVisitor. */
+  /** Call the method in FullJavaVisitor since it's common to this ClassBodyFullJavaVisitor. */
   public Void forInnerInterfaceDef(InnerInterfaceDef that) {
     String relName = that.getName().getText();
     handleInnerInterfaceDef(that, _symbolData, relName, getQualifiedClassName(_symbolData.getName()) + '.' + relName);
     return null;
   }
   
-  /**Call the method in FullJavaVisitor; it's common to this, ClassBodyIntermediateVisitor, ClassBodyAdvancedVisitor.*/
+  /**Call the method in FullJavaVisitor; it's common to this ClassBodyAdvancedVisitor.*/
   public Void forInnerClassDef(InnerClassDef that) {
     String relName = that.getName().getText();
     handleInnerClassDef(that, _symbolData, relName, getQualifiedClassName(_symbolData.getName()) + '.' + relName);

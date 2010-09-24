@@ -53,7 +53,7 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
   /**The SymbolData corresponding to this class.*/
   private SymbolData _enclosing;
   
-  /** Constructor for ClassBodyFullJavaVisitor.
+  /** Deprecated onstructor for ClassBodyFullJavaVisitor.
     * @param sd  The SymbolData that encloses the context we are visiting.  Must be non-null.
     * @param className The name of the enclosing class.  Must be non-null and non-empty.
     * @param file  The source file this came from.
@@ -78,7 +78,33 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
     _enclosing = sd;
     assert sd != null && className != null &&  ! className.equals("");
   }
-
+  
+  /** Preferred constructor for ClassBodyFullJavaVisitor.
+    * @param sd  The SymbolData that encloses the context we are visiting.  Must be non-null.ty.
+    * @param file  The source file this came from.
+    * @param packageName  The package the source file is in
+    * @importedFiles  A list of classes that were specifically imported
+    * @param importedPackages  A list of package names that were specifically imported
+    * @param classesInThisFile  A list of the classes that are yet to be defined in this source file
+    * @param continuations  A hashtable corresponding to the continuations (unresolved Symbol Datas) that will need to 
+    *                       be resolved
+    * TODO: coalesce className and enclosingClassName
+    */
+  public ClassBodyFullJavaVisitor(SymbolData sd, 
+                                  File file, 
+                                  String packageName,
+                                  LinkedList<String> importedFiles, 
+                                  LinkedList<String> importedPackages,
+                                  HashSet<String> classesInThisFile, 
+                                  Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations,
+                                  LinkedList<Command> fixUps,
+                                  HashMap<String, SymbolData> genericTypes) {
+    super(file, packageName, sd.getName(), importedFiles, importedPackages, classesInThisFile, continuations, fixUps, 
+          genericTypes);
+    _enclosing = sd;
+    assert sd != null;
+  }
+  
   /* Ignore ForStatement. */
   public Void forStatementDoFirst(Statement that) { return null; }
   
@@ -86,7 +112,7 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
   
   /** Ignore AbstractMake sure that this abstract method def is declared to be abstract. */
   public Void forAbstractMethodDefDoFirst(AbstractMethodDef that) {
-
+    
 //    ModifiersAndVisibility mav = that.getMav();
 //    String[] modifiers = mav.getModifiers();
     if (! _enclosing.isInterface() && ! _enclosing.hasModifier("abstract")) { // interfaces not yet marked abstract
@@ -94,7 +120,7 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
     }
     return super.forAbstractMethodDefDoFirst(that);
   }
-
+  
   /*Add an appropriate error*/
   public Void forInstanceInitializerDoFirst(InstanceInitializer that) {
     _addError("This open brace must mark the beginning of a method or class body", that);
@@ -108,11 +134,11 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
 //    System.err.println("forVariableDeclarationOnly called in ClassBodyFullJavaVisitor for " + that);
     VariableData[] vds = _variableDeclaration2VariableData(that, _enclosing);
 //    System.err.println(" ## generated vds = " + Arrays.toString(vds));
-
+    
     // Add the variable datas to the symbol data
 //    LinkedList<VariableData> vdsList = new LinkedList<VariableData>();
 //    for (VariableData vd: vds) { vdsList.addLast(vd); }
-
+    
     if (! _enclosing.addVars(vds)) {
       _addAndIgnoreError("You cannot have two fields with the same name.  Either you already have a field by that " 
                            + "name in this class, or one of your superclasses or interfaces has a field by that name", 
@@ -142,14 +168,14 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
                                                      _classesInThisFile, continuations, fixUps, new HashSet<String>()));
     return null;
   }
-
+  
   /** Creates a MethodData corresponding to this method declaration. Ensures that the method name is different from the 
     * class name.
     */
   public Void forAbstractMethodDef(AbstractMethodDef that) {
     forAbstractMethodDefDoFirst(that);
     if (prune(that)) return null;
-
+    
     MethodData md = createMethodData(that, _enclosing);
     String className = getUnqualifiedClassName(_enclosing.getName());
     if (className.equals(md.getName())) {
@@ -174,7 +200,7 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
     handleInnerClassDef(that, _enclosing, relName, getQualifiedClassName(_enclosing.getName()) + '.' + relName);
     return null;
   }
-
+  
   /** Create a constructor corresponding to the specifications in the ConstructorDef, and then
     * visit the constructor body, passing the constructor as the enclosing data.
     */
@@ -188,14 +214,14 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
           || ! name.equals(getUnqualifiedClassName(_enclosing.getName()))) {
       _addAndIgnoreError("The constructor return type and class name must match", that);
     }
-
+    
     // Turn the thrown exceptions from a ReferenceType[] to a String[]
     String[] throwStrings = referenceType2String(that.getThrows());
     
     SymbolData returnType = _enclosing;
     MethodData md = MethodData.make(name, that.getMav(), new TypeParameter[0], returnType, 
                                     new VariableData[0], throwStrings, _enclosing, that);  // VariableData is dummy
-
+    
     _checkError(); // reset check flag
     // Turn the parameters from a FormalParameterList to a VariableData[]
     VariableData[] vds = formalParameters2VariableData(that.getParameters(), _enclosing);
@@ -210,7 +236,7 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
     that.getStatements().visit(new BodyBodyFullJavaVisitor(md, _file, _package, _enclosingClassName, _importedFiles, 
                                                            _importedPackages, _classesInThisFile, continuations, fixUps,
                                                            new HashSet<String>()));
-
+    
     //note that we have seen a constructor.
     _enclosing.incrementConstructorCount();
     return null;
@@ -221,13 +247,13 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
     complexAnonymousClassInstantiationHelper(that, _enclosing);  // TODO: the wrong enclosing context?
     return null;
   }
-
+  
   /**Delegate to method in LanguageLevelVisitor */
   public Void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
     simpleAnonymousClassInstantiationHelper(that, _enclosing);
     return null;
   }
-   
+  
   /** Check for problems with modifiers that are specific to method definitions. */
   public Void forModifiersAndVisibilityDoFirst(ModifiersAndVisibility that) {
     String[] modifiers = that.getModifiers();
@@ -264,7 +290,7 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
     
     public void setUp() {
       _sd1 = new SymbolData("i.like.monkey");  // creates a continuation
-
+      
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       LanguageLevelConverter.symbolTable.clear();
       LanguageLevelConverter.symbolTable.put("i.like.monkey", _sd1);
@@ -284,7 +310,7 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
       _cbfjv.continuations = new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(); // no _sd1
 //      _cbfjv._resetNonStaticFields();
       _cbfjv._importedPackages.addFirst("java.lang");
-
+      
       _errorAdded = false;
     }
     
@@ -371,7 +397,7 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
                    "Illegal combination of modifiers. Can't use static and abstract together.", 
                    errors.get(1).getFirst());
     }
-
+    
     public void testForInstanceInitializerDoFirst() {
       InstanceInitializer ii = new InstanceInitializer(SourceInfo.NO_INFO, 
                                                        new Block(SourceInfo.NO_INFO, 
@@ -402,7 +428,7 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
 //      System.err.println("Traversal of VariableDeclaration above is complete");
       assertEquals("There should be no errors", 0, errors.size());
 //      System.err.println("That error is: " + errors.getLast().getFirst());
- 
+      
       SymbolData bob = LanguageLevelConverter.symbolTable.get("java.lang.String[]");
 //      System.err.println("Getting READY to fail");
 //      try { Thread.sleep(1000); } catch (Exception e) { };
@@ -414,14 +440,14 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
     public void testForVariableDeclarationOnly() {
       // Check one that works
       VariableDeclaration vdecl = new VariableDeclaration(SourceInfo.NO_INFO,
-                                                       _packageMav,
-                                                       new VariableDeclarator[] {
+                                                          _packageMav,
+                                                          new VariableDeclarator[] {
         new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                               new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                               new Word (SourceInfo.NO_INFO, "field1")),
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                               new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
-                               new Word (SourceInfo.NO_INFO, "field2"))});
+                                            new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                                            new Word (SourceInfo.NO_INFO, "field1")),
+          new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                              new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
+                                              new Word (SourceInfo.NO_INFO, "field2"))});
       VariableData vd1 = new VariableData("field1", _packageMav, SymbolData.DOUBLE_TYPE, false, _cbfjv._enclosing);
       VariableData vd2 = new VariableData("field2", _packageMav, SymbolData.BOOLEAN_TYPE, false, _cbfjv._enclosing);
       vdecl.visit(_cbfjv);
@@ -468,7 +494,7 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
 //                   errors.get(1).getFirst());
 //      System.err.println("_sd1 vars =  " + _sd1.getVars());
       assertTrue("field4 was added.", _sd1.getVars().contains(vd4));
-           
+      
       //Check a non-static field that has been assigned.  (will work);
       VariableDeclaration vdecl5 = new VariableDeclaration(SourceInfo.NO_INFO,
                                                            _publicMav,
@@ -504,21 +530,21 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
 //                   errors.get(1).getFirst());
       
     }
- 
+    
     public void testFormalParameters2VariableData() {
       FormalParameter[] fps = new FormalParameter[] {
         new FormalParameter(SourceInfo.NO_INFO, 
                             new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                              new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                                              new Word (SourceInfo.NO_INFO, "field1")),
+                                                                new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                                                                new Word (SourceInfo.NO_INFO, "field1")),
                             false),
-        new FormalParameter(SourceInfo.NO_INFO, 
-                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                              new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
-                                                              new Word (SourceInfo.NO_INFO, "field2")),
-                            false)};
-
-            
+          new FormalParameter(SourceInfo.NO_INFO, 
+                              new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                                                  new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
+                                                                  new Word (SourceInfo.NO_INFO, "field2")),
+                              false)};
+      
+      
       VariableData vd1 = new VariableData("field1", _packageMav, SymbolData.DOUBLE_TYPE, true, _cbfjv._enclosing);
       VariableData vd2 = new VariableData("field2", _packageMav, SymbolData.BOOLEAN_TYPE, true, _cbfjv._enclosing);
       
@@ -532,16 +558,16 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
                                           new String[0], 
                                           _cbfjv._enclosing,
                                           null);
-
+      
       VariableData[] vds = _cbfjv.formalParameters2VariableData(fps, _cbfjv._enclosing);
       assertEquals("There should not be any errors.", 0, errors.size());
       assertEquals("vd1 should be the first entry in vds.", vd1, vds[0]);
       assertEquals("vd2 should be the second entry in vds.", vd2, vds[1]);
     }
     
-
     
-
+    
+    
     
     public void xtestForConcreteMethodDef() {
       // Test one that works.
@@ -557,13 +583,13 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
       assertEquals("There should not be any errors.", 0, errors.size());
       // Test one that doesn't work.
       mdef = new ConcreteMethodDef(SourceInfo.NO_INFO, 
-                                             _packageMav, 
-                                             new TypeParameter[0], 
-                                             new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                             new Word(SourceInfo.NO_INFO, "monkey"),
-                                             new FormalParameter[0],
-                                             new ReferenceType[0], 
-                                             new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                   _packageMav, 
+                                   new TypeParameter[0], 
+                                   new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                   new Word(SourceInfo.NO_INFO, "monkey"),
+                                   new FormalParameter[0],
+                                   new ReferenceType[0], 
+                                   new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       mdef.visit(_cbfjv);
       assertEquals("There should be one error.", 1, errors.size());
       assertEquals("The error message should be correct.", 
@@ -585,12 +611,12 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
       assertEquals("There should not be any errors.", 0, errors.size());
       // Test one that doesn't work.
       mdef = new AbstractMethodDef(SourceInfo.NO_INFO, 
-                                             _abstractMav, 
-                                             new TypeParameter[0], 
-                                             new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                             new Word(SourceInfo.NO_INFO, "monkey"),
-                                             new FormalParameter[0],
-                                             new ReferenceType[0]);
+                                   _abstractMav, 
+                                   new TypeParameter[0], 
+                                   new PrimitiveType(SourceInfo.NO_INFO, "int"), 
+                                   new Word(SourceInfo.NO_INFO, "monkey"),
+                                   new FormalParameter[0],
+                                   new ReferenceType[0]);
       mdef.visit(_cbfjv);
       assertEquals("There should be one error.", 1, errors.size());
       assertEquals("The error message should be correct.", 
@@ -598,7 +624,7 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
                    errors.get(0).getFirst());
     }
     
-   
+    
     public void xtestForInitializedVariableDeclaratorDoFirst() {
       InitializedVariableDeclarator ivd = new InitializedVariableDeclarator(SourceInfo.NO_INFO,
                                                                             new PrimitiveType(SourceInfo.NO_INFO, "int"),
@@ -609,17 +635,17 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
       
       assertEquals("There should be no errors now", 0, errors.size());
     }
-
+    
     public void xtestForInnerClassDef() {
       SymbolData obj = new SymbolData("java.lang.Object");
       LanguageLevelConverter.symbolTable.put("java.lang.Object", obj);
       InnerClassDef cd1 = new InnerClassDef(SourceInfo.NO_INFO, _packageMav, new Word(SourceInfo.NO_INFO, "Bart"),
-                                       new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], 
-                                       new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                            new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], 
+                                            new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       InnerClassDef cd0 = new InnerClassDef(SourceInfo.NO_INFO, _packageMav, new Word(SourceInfo.NO_INFO, "Lisa"),
-                                       new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], 
+                                            new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), new ReferenceType[0], 
                                             new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {cd1}));
-
+      
       
       SymbolData sd0 = new SymbolData(_cbfjv._enclosing.getName() + "$Lisa", _packageMav, new TypeParameter[0], obj, 
                                       new ArrayList<SymbolData>(), null); 
@@ -629,17 +655,17 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
                                       obj, new ArrayList<SymbolData>(), null); 
       sd0.addInnerClass(sd1);
       sd1.setOuterData(sd0);
-
+      
       sd0.setIsContinuation(true);
       sd1.setIsContinuation(true);
-
       
-            
+      
+      
       LanguageLevelConverter.symbolTable.put(_cbfjv._enclosing.getName() + "$Lisa", sd0);
 //      LanguageLevelConverter.symbolTable.put(_cbfjv._enclosing.getName() + "$Lisa$Bart", sd1);
-
+      
       cd0.visit(_cbfjv);
-
+      
 //      sd0.setName("Lisa");
 //      sd1.setName("Bart");
       
@@ -652,19 +678,19 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
       
       
       assertEquals("Lisa should have 0 methods", 0, sd0.getMethods().size());
-           
+      
     }
     
     public void xtestForInnerInterfaceDef() {
 //      SymbolData obj = new SymbolData("java.lang.Object");
 //      LanguageLevelConverter.symbolTable.put("java.lang.Object", obj);
       InnerInterfaceDef cd1 = new InnerInterfaceDef(SourceInfo.NO_INFO, _packageMav, new Word(SourceInfo.NO_INFO, "Bart"),
-                                       new TypeParameter[0], new ReferenceType[0], 
-                                       new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                                    new TypeParameter[0], new ReferenceType[0], 
+                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       
       InnerInterfaceDef cd0 = new InnerInterfaceDef(SourceInfo.NO_INFO, _packageMav, new Word(SourceInfo.NO_INFO, "Lisa"),
-                                       new TypeParameter[0], new ReferenceType[0], 
-                                            new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {cd1}));
+                                                    new TypeParameter[0], new ReferenceType[0], 
+                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {cd1}));
       
       SymbolData sd0 = new SymbolData(_cbfjv._enclosing.getName() + "$Lisa", _packageMav, new TypeParameter[0], 
                                       new ArrayList<SymbolData>(), null); 
@@ -676,18 +702,18 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
       
       _cbfjv._enclosing.addInnerInterface(sd0);
       sd0.setOuterData(_cbfjv._enclosing);
-
+      
       sd0.addInnerInterface(sd1);
       sd1.setOuterData(sd0);
-
+      
 //    
 //      LanguageLevelConverter.symbolTable.put(_cbfjv._enclosing.getName() + "$Lisa", sd0);
 //      LanguageLevelConverter.symbolTable.put(_cbfjv._enclosing.getName() + "$Lisa$Bart", sd1);
-
+      
       cd0.visit(_cbfjv);
-
+      
       SymbolData sd = _cbfjv._enclosing.getInnerClassOrInterface("Lisa");
-
+      
       assertEquals("There should be no errors", 0, errors.size());
       assertEquals("This symbolData should now have sd0 as an inner interface", sd0, sd);
       assertEquals("sd0 should have the correct outer data", _cbfjv._enclosing, sd0.getOuterData());
@@ -695,8 +721,8 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
       assertEquals("Sd should now have sd1 as an inner interface", sd1, sd.getInnerClassOrInterface("Bart"));
       assertTrue("Lisa should be an interface", sd0.isInterface());
       assertTrue("Bart should be an interface", sd1.isInterface());
-
-    
+      
+      
     }
     
     public void xtestForConstructorDef() {
@@ -750,11 +776,11 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
       MethodData constructor2 = new MethodData("MyClass", _publicMav, new TypeParameter[0], _cbfjv._enclosing, 
                                                new VariableData[] {vd}, 
                                                new String[] {"MyMadeUpException"}, 
-                                              _cbfjv._enclosing,
-                                              null);
-                                              
-
-                                              
+                                               _cbfjv._enclosing,
+                                               null);
+      
+      
+      
       constructor2.addVar(vd);
       cd2.visit(_cbfjv);
       vd.setEnclosingData(_cbfjv._enclosing.getMethods().getLast());                                        
@@ -763,24 +789,39 @@ public class ClassBodyFullJavaVisitor extends FullJavaVisitor {
       
       assertTrue("SymbolData should have new constructor", _cbfjv._enclosing.getMethods().contains(constructor2));
       
-                                              
-      //If two variable names are duplicated, should throw an error.
-      FormalParameter fp2 = new FormalParameter(SourceInfo.NO_INFO, new UninitializedVariableDeclarator(SourceInfo.NO_INFO, new PrimitiveType(SourceInfo.NO_INFO, "double"), new Word(SourceInfo.NO_INFO, "i")), false);
       
-      ConstructorDef cd3 = new ConstructorDef(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "MyClass"), _publicMav, new FormalParameter[] {fp, fp2}, new ReferenceType[] {rt}, 
-                                             new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+      //If two variable names are duplicated, should throw an error.
+      FormalParameter fp2 = 
+        new FormalParameter(SourceInfo.NO_INFO, 
+                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
+                                                                new PrimitiveType(SourceInfo.NO_INFO, "double"), 
+                                                                new Word(SourceInfo.NO_INFO, "i")), 
+                            false);
+      
+      ConstructorDef cd3 = 
+        new ConstructorDef(SourceInfo.NO_INFO, 
+                           new Word(SourceInfo.NO_INFO, "MyClass"), 
+                           _publicMav,
+                           new FormalParameter[] {fp, fp2}, 
+                           new ReferenceType[] {rt}, 
+                           new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       cd3.visit(_cbfjv);
       
       assertEquals("Should now be 2 errors", 2, errors.size());
-      assertEquals("Error message should be correct","You cannot have two method parameters with the same name" , errors.getLast().getFirst());
+      assertEquals("Error message should be correct","You cannot have two method parameters with the same name" , 
+                   errors.getLast().getFirst());
       
       //Test that an error is thrown if the class name and constructor name are packaged differently
       _cbfjv._enclosing.setName("package.MyClass2");
-      ConstructorDef cd4 = new ConstructorDef(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "different.MyClass2"), _publicMav, new FormalParameter[0], new ReferenceType[0], 
-                                             new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
-      
+      ConstructorDef cd4 = 
+        new ConstructorDef(SourceInfo.NO_INFO, 
+                           new Word(SourceInfo.NO_INFO, "different.MyClass2"), 
+                           _publicMav, 
+                           new FormalParameter[0], 
+                           new ReferenceType[0], 
+                           new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
       cd4.visit(_cbfjv);
-
+      
       assertEquals("There should now be 3 errors", 3, errors.size());
       assertEquals("Error message should be correct", "The constructor return type and class name must match", errors.getLast().getFirst());
     }

@@ -282,7 +282,7 @@ public abstract class Data {
     * @return the SymbolData for next anonymous inner class of this data; null if it cannot be found
     */
   public SymbolData getNextAnonymousInnerClass() {
-    String name = getSymbolData().getName() + "$" + getSymbolData().preincrementAnonymousInnerClassNum();
+    String name = getSymbolData().getName() + '$' + getSymbolData().preincrementAnonymousInnerClassNum();
 //    System.err.println("**** Looking up anonymous inner class " + name);
     LinkedList<SymbolData> myDatas = getInnerClasses();
     SymbolData myData = null;

@@ -51,9 +51,33 @@ import junit.framework.TestCase;
   */
 public class FullJavaVisitor extends LanguageLevelVisitor {
   
-  /** This constructor is called from the subclasses of FullJavaVisitor when creating a new instance of FullJavaVisitor.  
-    * The default value for className is the empty string.
-    */
+  /* Inheriting the following fields:
+   * 
+   File _file;
+   String _package;
+   String _enclosingClassName;
+   LinkedList<String> _importedFiles;
+   LinkedList<String> _importedPackages;
+   HashMap<String, SymbolData> _generic types
+   *
+   */
+
+  /** Main constructor, which is called from sites where the genericTypes table is not empty. */
+  public FullJavaVisitor(File file, 
+                         String packageName, 
+                         String enclosingClassName,
+                         LinkedList<String> importedFiles, 
+                         LinkedList<String> importedPackages,
+                         HashSet<String> classesInThisFile, 
+                         Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations,
+                         LinkedList<Command> fixUps,
+                         HashMap<String, SymbolData> genericTypes) {
+    super(file, packageName, enclosingClassName, importedFiles, importedPackages, classesInThisFile, continuations, 
+          fixUps, genericTypes);
+  }
+  
+  
+  /** This constructor is called from sites where no generic type variables are in scope. */
   public FullJavaVisitor(File file, 
                          String packageName, 
                          String enclosingClassName,
@@ -62,10 +86,11 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
                          HashSet<String> classesInThisFile, 
                          Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations,
                          LinkedList<Command> fixUps) {
-    super(file, packageName, enclosingClassName, importedFiles, importedPackages, classesInThisFile, continuations, fixUps);
+    this(file, packageName, enclosingClassName, importedFiles, importedPackages, classesInThisFile, continuations, 
+         fixUps, new HashMap<String, SymbolData>());
   }
   
-  /** This constructor is called when testing.  It initializes all of the static fields of LanguageLevelVisitor. */
+  /** This constructor is called only in testing.  It initializes all of the static fields of LanguageLevelVisitor. */
   public FullJavaVisitor(File file) {
     this(file, 
          new LinkedList<Pair<String, JExpressionIF>>(),
@@ -75,7 +100,8 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
   }
   
   /** This constructor is called from LanguageLevelConverter when it is instantiating a new
-    * FullJavaVisitor to visit a new file.  Package is set to "" by default.
+    * FullJavaVisitor to visit a new file.  Package is set to "" by default.  The generic
+    * types table (_genericTypes) is set to an emtpy HashMap by default.
     * @param file  The File corresponding to the source file we are visiting
     * @param errors  The list of errors that have been encountered so far.
     * @param continuations  The table of classes we have encountered but still need to resolve
@@ -103,9 +129,9 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
                          Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations,
                          LinkedList<Command> fixUps,
                          LinkedList<Pair<LanguageLevelVisitor, SourceFile>> visitedFiles) {
-    super(file, "", null, new LinkedList<String>(), importedPackages, new HashSet<String>(), continuations, fixUps);
+    this(file, "", null, new LinkedList<String>(), importedPackages, new HashSet<String>(), continuations, fixUps);
     this.errors = errors;
-    this.visitedFiles= visitedFiles;//new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();
+    this.visitedFiles= visitedFiles; //new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>();
 //    _hierarchy = new Hashtable<String, TypeDefBase>();//hierarchy;
   }
 
@@ -140,7 +166,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
                                     null);
 
     addGeneratedMethod(sd, md);
-    LanguageLevelConverter._newSDs.remove(sd); //this won't do anything if sd is not in _newSDs.
+    LanguageLevelConverter._newSDs.remove(sd); // does nothing if sd is not in _newSDs.
   }
   
   /** Process the inner class def and then resolve it and store it in
@@ -159,7 +185,8 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     *              name should be "A$1C".
     */
   protected void handleInnerClassDef(InnerClassDef that, Data data, String relName, String name) {
-//    System.err.println("Processing InnerClassDef for " + name + " defined in " + data.getName());
+//    if (_file.getName().endsWith("MultipleNested.dj2")) 
+//      System.err.println("********** Processing InnerClassDef for " + name + " defined in " + data.getName());
     
     assert (data instanceof SymbolData) || (data instanceof MethodData);
 //    assert (data instanceof SymbolData) ? data.getName().equals(_enclosingClassName) : true;
@@ -170,15 +197,37 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     that.getMav().visit(this);
     that.getName().visit(this);
     
-    for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
-    that.getSuperclass().visit(this);  // formerly commented out.  Why?
+    // Create a new generic types table for visiting this inner class.
+    HashMap<String, SymbolData> genericTypes = (HashMap<String, SymbolData>) _genericTypes.clone();
+    TypeParameter[] tps = that.getTypeParameters();
+    for (TypeParameter tp: tps) {
+      final String typeName = tp.getVariable().getName();
+      final String boundName = tp.getBound().getName();
+      SymbolData boundSD = _identifyType(boundName, that.getSourceInfo(), _enclosingClassName);
+      if (boundSD == null) { // create a dummy SymbolData 
+        boundSD = SymbolData.NOT_FOUND; //  TODO: could create a separate SymbolData.NOT_BOUND singleton class?
+//        System.err.println("Creating dummy SymbolData for bounding type " + typeName + " in inner class " + name);
+      }
+      genericTypes.put(typeName, boundSD);
+    }
+    
+    /* The following two lines apparently do nothing.  Note that they are NOT in the scope of the new generic types
+     * table.  TODO: confirm that these two lines do nothing and eliminate them. */
+    that.getSuperclass().visit(this);
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
-        
+    
+    /* The following line is NOT in the scope of the new generic type table but should be.  Since we are not
+     * performing generic type checking, we may get away with the error.  TODO: refactor this code to
+     * create a new LLV for processing a generic class. */
     SymbolData sd = defineInnerSymbolData(that, relName, name, data);
-    if (sd != null) { // We have a symbol data to work with, so visit the body and augment
-
-      that.getBody().visit(new ClassBodyFullJavaVisitor(sd, sd.getName(), _file, _package, _importedFiles,
-                                                        _importedPackages, _classesInThisFile, continuations, fixUps));
+    // The preceding only fails if there is an error in the program
+    
+    if (sd != null) { // We have a symbol data to work with, so visit the body using the new generic types table
+      identifyInnerClasses(that);
+      ClassBodyFullJavaVisitor cbfjv =
+        new ClassBodyFullJavaVisitor(sd, _file, _package, _importedFiles, _importedPackages, _classesInThisFile, 
+                                     continuations, fixUps, genericTypes);
+      that.getBody().visit(cbfjv);
     }
    
     // Inner classes are not put into _classesInThisFile since they are parsed whenever their outer classes are parsed.
@@ -201,15 +250,37 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     that.getMav().visit(this);
     that.getName().visit(this);
 
-     // The following assert should be true because interfaces can't have fields!
-    assert that.getTypeParameters().length == 0;
+    // Create a new generic types table for visiting this inner class.
+    // TODO: refactor this code to combine common code patterns in this method and forInnerClassDef
+    HashMap<String, SymbolData> genericTypes = (HashMap<String, SymbolData>) _genericTypes.clone();
+    TypeParameter[] tps = that.getTypeParameters();
+    for (TypeParameter tp: tps) {
+      final String typeName = tp.getVariable().getName();
+      final String boundName = tp.getBound().getName();
+      SymbolData boundSD = _identifyType(boundName, that.getSourceInfo(), _enclosingClassName);
+      if (boundSD == null) { // create a dummy SymbolData 
+        boundSD = SymbolData.NOT_FOUND; //  TODO: could create a separate SymbolData.NOT_BOUND singleton class?
+//        System.err.println("Creating dummy SymbolData for bounding type " + typeName + " in inner class " + name);
+      }
+      genericTypes.put(typeName, boundSD);
+    }
     
+    /* The following line apparently does nothing.  Note that it is NOT in the scope of the new generic types
+     * table.  TODO: confirm that this line does nothing and eliminate it. */
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
     
-    SymbolData sd = defineInnerSymbolData(that, relName, name, data);
-    if (sd != null) {
-      that.getBody().visit(new InterfaceBodyFullJavaVisitor(sd, _file, _package, _importedFiles, _importedPackages,
-                                                            _classesInThisFile, continuations, fixUps));
+    /* The following line is NOT in the scope of the new generic type table but should be.  Since we are not
+     * performing generic type checking, we may get away with the error.  TODO: refactor this code to
+     * create a new LLV for processing a generic class. */
+    SymbolData sd = defineInnerSymbolData(that, relName, name, data);  // only returns null if error is encountered
+    
+    if (sd != null) { // We have a symbol data to work with, so visit the body using the new generic types table
+      sd.setInterface(true);
+      identifyInnerClasses(that);
+      InterfaceBodyFullJavaVisitor ibfjv = 
+        new InterfaceBodyFullJavaVisitor(sd, _file, _package, _importedFiles, _importedPackages, _classesInThisFile, 
+                                         continuations, fixUps, genericTypes);
+      that.getBody().visit(ibfjv);
     }
 
     forInnerInterfaceDefOnly(that);
@@ -299,31 +370,46 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
   public Void forClassDef(ClassDef that) {    
     forClassDefDoFirst(that);
     if (prune(that)) return null;
-
-    String className = getQualifiedClassName(that.getName().getText());
-//    System.err.println("Processing class " + className);
-    SymbolData sd = defineSymbolData(that, className);
-    assert getQualifiedSymbolData(className, SourceInfo.NO_INFO, false) != null;
-//    _enclosingClassName = className;
-//    System.err.println("Setting _enclosingClassName to " + className);
     
     that.getMav().visit(this);
     that.getName().visit(this);
-    that.getSuperclass().visit(this);  // formerly commented out.  Why?
+
+    String className = getQualifiedClassName(that.getName().getText());
+
+    // Create a new generic types table for visiting this inner class.
+    // TODO: refactor this code to combine common code patterns in this method and forInnerClassDef
+    HashMap<String, SymbolData> genericTypes = (HashMap<String, SymbolData>) _genericTypes.clone();
+    TypeParameter[] tps = that.getTypeParameters();
+    for (TypeParameter tp: tps) {
+      final String typeName = tp.getVariable().getName();
+      final String boundName = tp.getBound().getName();
+      SymbolData boundSD = _identifyType(boundName, that.getSourceInfo(), _enclosingClassName);
+      if (boundSD == null) { // create a dummy SymbolData 
+        boundSD = SymbolData.NOT_FOUND; //  TODO: could create a separate SymbolData.NOT_BOUND singleton class?
+//        System.err.println("Creating dummy SymbolData for bounding type " + typeName + " in inner class " + name);
+      }
+      genericTypes.put(typeName, boundSD);
+    }
     
+    /* The following line is NOT in the scope of the new generic type table but should be.  Since we are not
+     * performing generic type checking, we may get away with the error.  TODO: refactor this code to
+     * create a new LLV for processing a generic class. */
+    SymbolData sd = defineSymbolData(that, className);
     
-    if (sd != null) identifyInnerClasses(that);
-    
-    // Process fields of this ClassDef (the get method is misnamed!)
-    for (int i = 0; i < that.getTypeParameters().length; i++) that.getTypeParameters()[i].visit(this);
-    
+    /* The following two lines apparently do nothing. They are in the wrong generic type scope. */
+    that.getSuperclass().visit(this);
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
     
     if (sd != null) {
-      that.getBody().visit(new ClassBodyFullJavaVisitor(sd, className, _file, _package, _importedFiles, 
-                                                        _importedPackages, _classesInThisFile, continuations, fixUps));
+//      System.err.println("********** Calling identifyInnerClasses for SymbolData " + sd.getName());
+      identifyInnerClasses(that);
+      ClassBodyFullJavaVisitor cbfjv = 
+        new ClassBodyFullJavaVisitor(sd, _file, _package, _importedFiles, _importedPackages, _classesInThisFile, 
+                                     continuations, fixUps, genericTypes);
+      that.getBody().visit(cbfjv);
     }
     forClassDefOnly(that);
+    
     return null;
   }
 
@@ -357,16 +443,32 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     that.getMav().visit(this);
     that.getName().visit(this); 
     
-    // The following assert should be true because interfaces can't have fields!
-    assert that.getTypeParameters().length == 0;
+    // Create a new generic types table for visiting this inner class.
+    // TODO: refactor this code to combine common code patterns in this method and forInnerClassDef
+    HashMap<String, SymbolData> genericTypes = (HashMap<String, SymbolData>) _genericTypes.clone();
+    TypeParameter[] tps = that.getTypeParameters();
+    for (TypeParameter tp: tps) {
+      final String typeName = tp.getVariable().getName();
+      final String boundName = tp.getBound().getName();
+      SymbolData boundSD = _identifyType(boundName, that.getSourceInfo(), _enclosingClassName);
+      if (boundSD == null) { // create a dummy SymbolData 
+        boundSD = SymbolData.NOT_FOUND; //  TODO: could create a separate SymbolData.NOT_BOUND singleton class?
+//        System.err.println("Creating dummy SymbolData for bounding type " + typeName + " in inner class " + name);
+      }
+      genericTypes.put(typeName, boundSD);
+    }
     
+    /* The following line apparently does nothing.  Note that it is NOT in the scope of the new generic types
+     * table.  TODO: confirm that this line does nothing and eliminate it. */
     for (int i = 0; i < that.getInterfaces().length; i++) that.getInterfaces()[i].visit(this);
     
     if (sd != null) {
       sd.setInterface(true);
-      identifyInnerClasses(that);  // inner interfaces??
-      that.getBody().visit(new InterfaceBodyFullJavaVisitor(sd, _file, _package, _importedFiles, _importedPackages,
-                                                            _classesInThisFile, continuations, fixUps));
+      identifyInnerClasses(that);
+      InterfaceBodyFullJavaVisitor ibfjv =
+        new InterfaceBodyFullJavaVisitor(sd, _file, _package, _importedFiles, _importedPackages, _classesInThisFile, 
+                                         continuations, fixUps, genericTypes);
+      that.getBody().visit(ibfjv);
     }
     
     forInterfaceDefOnly(that);
@@ -478,6 +580,10 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
 
       _sd1.setSuperClass(_objectSD);
       _errorAdded = false;  // static field of this.  TODO: fix this!
+    }
+    
+    public void initTopLevel() {
+      _fv._enclosingClassName = null;
     }
     
     public void testForModifiersAndVisibilityDoFirst() {
@@ -793,7 +899,10 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     public void testForClassDef() {
 //      System.err.println("**** Starting testForClassDef");
       //check an example that's not abstract
-      _fv._package = "myPackage";
+      
+      // Top-level init
+      initTopLevel();
+      
       ClassDef cd0 = 
         new ClassDef(SourceInfo.NO_INFO, _packageMav, 
                      new Word(SourceInfo.NO_INFO, "Lisa"),
@@ -802,20 +911,19 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
                      new ReferenceType[0], 
                      new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0])); 
       
-      
       cd0.visit(_fv);
       assertEquals("There should be no errors", 0, errors.size());
       assertTrue("Should have resolved java.lang.Object", 
                  LanguageLevelConverter.symbolTable.containsKey("java.lang.Object"));
       assertFalse("Should not be a continuation", 
                   LanguageLevelConverter.symbolTable.get("java.lang.Object").isContinuation());
-      SymbolData sd = LanguageLevelConverter.symbolTable.get("myPackage.Lisa");
+      SymbolData sd = LanguageLevelConverter.symbolTable.get("Lisa");
       assertTrue("Lisa should be in _newSDs", LanguageLevelConverter._newSDs.containsKey(sd));
       assertEquals("sd should have no methods", 0, sd.getMethods().size());
-      assertEquals("sd's package should be correct", "myPackage", sd.getPackage());
+      assertEquals("sd's package should be correct", "", sd.getPackage());
       
       // check an example that's abstract
-      _fv._package = "";
+      assert _fv._package == "";
       ClassDef cd1 = 
         new ClassDef(SourceInfo.NO_INFO, _abstractMav, new Word(SourceInfo.NO_INFO, "Bart"),
                      new TypeParameter[0], 
@@ -851,12 +959,13 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
                      new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {cmd}));
 
 
-      _fv._file=new File("TestSuper2.dj2");
+      _fv._file = new File("TestSuper2.dj2");
       _fv._importedFiles.addLast("junit.framework.TestCase");
       LanguageLevelConverter.symbolTable.put("junit.framework.TestCase", new SymbolData("junit.framework.TestCase"));
       cd3.visit(_fv);
       assertEquals("There should still just be no errors", 0, errors.size());
-      assertNotNull("Should have looked up TestSuper2", LanguageLevelConverter.symbolTable.get("TestSuper2"));
+      assertNotNull("Should have looked up TestSuper2", 
+                    LanguageLevelConverter.symbolTable.get("TestSuper2"));
       
       //Check a method with void return, but name not starting with test, so it's not okay.
       //This is now checked in the type checker!
@@ -878,7 +987,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
                      new ReferenceType[0], 
                      new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { cmd2 }));
 
-      _fv._file=new File("TestVoidNoTestMethod.dj2");
+      _fv._file = new File("TestVoidNoTestMethod.dj2");
       cd4.visit(_fv);
 
       assertEquals("There should still be 0 errors", 0, errors.size());
@@ -917,7 +1026,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
                          new TypeParameter[0], 
                          new ReferenceType[] { new ClassOrInterfaceType(SourceInfo.NO_INFO, "id", new Type[0]) }, 
                          new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { amd2 }));
-      SymbolData sd = new SymbolData("id", _publicMav, new TypeParameter[0], new ArrayList<SymbolData>(), null);
+      SymbolData sd = new SymbolData("i.like.monkey.id", _publicMav, new TypeParameter[0], new ArrayList<SymbolData>(), null);
       sd.setIsContinuation(true);
       MethodData md = 
         new MethodData("myMethod", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[0], 
@@ -925,20 +1034,22 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
 
       ArrayList<SymbolData> interfaces = new ArrayList<SymbolData>();
       interfaces.add(sd);
-      SymbolData sd2 = new SymbolData("id2", _publicMav, new TypeParameter[0], interfaces, null);
+      SymbolData sd2 = new SymbolData("i.like.monkey.id2", _publicMav, new TypeParameter[0], interfaces, null);
       sd2.setIsContinuation(true);
       MethodData md2 = 
         new MethodData("myMethod", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE, new VariableData[0], 
                        new String[0], sd2, amd2);
       
-      LanguageLevelConverter.symbolTable.put("id", sd);
-      LanguageLevelConverter.symbolTable.put("id2", sd2);
+      LanguageLevelConverter.symbolTable.put("i.like.monkey.id", sd);
+      LanguageLevelConverter.symbolTable.put("i.like.monkey.id2", sd2);
 
       id.visit(_fv);
       id2.visit(_fv);
       assertEquals("Should be no errors", 0, errors.size());
-      assertEquals("Should return the same symbol datas: id", sd, LanguageLevelConverter.symbolTable.get("id"));
-      assertEquals("Should return the same symbol datas:id2 ", sd2, LanguageLevelConverter.symbolTable.get("id2"));
+      assertEquals("Should return the same symbol datas: id", sd, 
+                   LanguageLevelConverter.symbolTable.get("i.like.monkey.id"));
+      assertEquals("Should return the same symbol datas:id2 ", sd2, 
+                   LanguageLevelConverter.symbolTable.get("i.like.monkey.id2"));
     }
     
     public void testHandleInnerClassDef() { 

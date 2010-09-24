@@ -196,6 +196,8 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   public SymbolData getSymbolData(String className, JExpression jexpr, boolean giveException, boolean runnableNotOkay) {
     // Check qualified class name (which is no different at elementary level)
     SourceInfo si = jexpr.getSourceInfo();
+    
+    // Create a dummy LLV; this seems awkward.  TODO:  refactor
     LanguageLevelVisitor llv = 
       new LanguageLevelVisitor(_file, 
                                _package,
@@ -204,7 +206,8 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
                                _importedPackages, 
                                new HashSet<String>(), 
                                new Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>>(),
-                               new LinkedList<Command>());
+                               new LinkedList<Command>(),
+                               new HashMap<String, SymbolData>());
 
     LanguageLevelConverter._newSDs.clear();
     assert LanguageLevelConverter.symbolTable.containsKey("java.lang.Object");
