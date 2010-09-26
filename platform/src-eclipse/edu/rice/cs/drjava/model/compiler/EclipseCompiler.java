@@ -58,6 +58,7 @@ import javax.tools.StandardLocation;
 // DJError class is not in the same package as this
 import edu.rice.cs.drjava.model.DJError;
 
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.compiler.Javac160FilteringCompiler;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.io.IOUtil;
@@ -183,10 +184,29 @@ public class EclipseCompiler extends Javac160FilteringCompiler {
     if (bootClassPath == null) { bootClassPath = _defaultBootClassPath; }
     
     List<String> options = new ArrayList<String>();
-    for (Map.Entry<String, String> e : CompilerOptions.getOptions(showWarnings).entrySet()) {
-      addOption(options,e.getKey());
-      addOption(options,e.getValue());
-    }
+//    for (Map.Entry<String, String> e : CompilerOptions.getOptions(showWarnings).entrySet()) {
+//      addOption(options,e.getKey());
+//      addOption(options,e.getValue());
+//    }
+    boolean isEnabled = DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.SHOW_UNCHECKED_WARNINGS);
+    addOption(options,"-warn:"+(isEnabled?"+":"-")+"unchecked");
+    addOption(options,"-warn:"+(isEnabled?"+":"-")+"raw");
+    
+    isEnabled = DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.SHOW_DEPRECATION_WARNINGS);
+    addOption(options,"-warn:"+(isEnabled?"+":"-")+"allDeprecation");
+    
+    // -Xlint:path doesn't seem to exist for Eclipse compiler
+//    isEnabled = DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.SHOW_PATH_WARNINGS);
+//    addOption(options,"-warn:"+(isEnabled?"+":"-")+"unchecked");
+    
+    isEnabled = DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.SHOW_SERIAL_WARNINGS);
+    addOption(options,"-warn:"+(isEnabled?"+":"-")+"serial");
+    
+    isEnabled = DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.SHOW_FINALLY_WARNINGS);
+    addOption(options,"-warn:"+(isEnabled?"+":"-")+"finally");
+    
+    isEnabled = DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.SHOW_FALLTHROUGH_WARNINGS);
+    addOption(options,"-warn:"+(isEnabled?"+":"-")+"fallthrough");
     
     //Should be setable some day?
     addOption(options,"-g");

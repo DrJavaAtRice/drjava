@@ -1478,6 +1478,10 @@ public class ConfigFrame extends SwingFrame {
                                                   "<html>Warn about <code>switch</code> block cases that fall through to the next case.</html>", 
                                                   false)
                          .setEntireColumn(true));
+    addOptionComponent(panel, 
+                       new LabelComponent("<html><br><br>Note: Some of these options may not be effective, depending on the<br>"+
+                                          "compiler you are using.</html>",
+                                          this, true));
     /*
      * The drop down box containing the compiler names
      */
