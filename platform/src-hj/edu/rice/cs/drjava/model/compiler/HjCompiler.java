@@ -263,26 +263,44 @@ public class HjCompiler extends Javac160FilteringCompiler {
     }
     if (s.length()>0) { s = s.substring(1); }
     
-    String [] testCommand = new String[11];    
-    testCommand[0] = "-hj";
-    testCommand[1] = "-info";
-    testCommand[2] = "-sp";
-    testCommand[4] = "-cp";
-    testCommand[5] = s;
-    testCommand[6] = "-d";
-    testCommand[8] = "-w";
-    testCommand[9] = "-pp";    
+//    System.out.println("-------------------------------------");
+//    System.out.println("-------------------------------------");
+//    System.out.println("files = "+files);
+//    System.out.println("sourcePath = "+sourcePath);
+//    System.out.println("-------------------------------------");
+    ArrayList<String> testCommand = new ArrayList<String>();
+    testCommand.add("-hj");
+    testCommand.add("-info");
+    testCommand.add("-sp");
+    int spIndex = testCommand.size();
+    testCommand.add("<sp filled in here>");
+    testCommand.add("-cp");
+    testCommand.add(s);
+    testCommand.add("-d");
+    int destIndex = testCommand.size();
+    if (destination != null) {
+      testCommand.add(destination.getAbsolutePath());
+    }
+    else {
+      testCommand.add("<dest dir filled in here>");
+    }
+    testCommand.add("-w");
+    testCommand.add("-pp");
+    int sourceFileIndex = testCommand.size();
+    testCommand.add("<source file filled in here>");
     
     for(File next: files) {
-      testCommand[3] = next.getParentFile().getAbsolutePath();
-      testCommand[7] = next.getParentFile().getAbsolutePath();
-      testCommand[10] = next.getName();
+      testCommand.set(spIndex, next.getParentFile().getAbsolutePath());
+      if (destination == null) {
+        testCommand.set(destIndex, next.getParentFile().getAbsolutePath());
+      }
+      testCommand.set(sourceFileIndex, next.getName());
       
-      // for(String cmd: testCommand) System.out.print(" "+cmd);
-      // System.out.println();
+//      for(String cmd: testCommand) System.out.print(" "+cmd);
+//      System.out.println();
       
       try {
-        soot.Main.mainEntry(testCommand); 
+        soot.Main.mainEntry(testCommand.toArray(new String[testCommand.size()])); 
       }
       catch(Exception e) {
         e.printStackTrace();
