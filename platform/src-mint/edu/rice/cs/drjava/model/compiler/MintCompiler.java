@@ -67,6 +67,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Iterator;
 
+import java.lang.reflect.*;
+
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -91,7 +93,17 @@ public class MintCompiler extends Javac160FilteringCompiler {
     super(version, location, defaultBootClassPath);
   }
 
-  public String getName() { return "Mint " + _version.versionString(); }
+  public String getName() {
+      try {
+          // use reflection to be compatible with older versions of Mint
+          Class<?> c = Class.forName("edu.rice.cs.mint.Version");
+          Method m = c.getMethod("getRevisionNumber");
+          return "Mint r" + m.invoke(null);
+      }
+      catch(Exception e) {
+          return "Mint " + _version.versionString();
+      }
+  }
   
   /** A compiler can instruct DrJava to include additional elements for the boot
     * class path of the Interactions JVM. This is necessary for the Mint compiler,

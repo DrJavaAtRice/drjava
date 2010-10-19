@@ -76,7 +76,7 @@ public class HjCompiler extends Javac160FilteringCompiler {
     super(version, location, defaultBootClassPath);
   }
   
-  public String getName() { return "HJ " + _version.versionString(); }
+  public String getName() { return "HJ " + polyglot.ext.hj.Version.getVersion(); }
   
   /** A compiler can instruct DrJava to include additional elements for the boot
     * class path of the Interactions JVM. This is necessary for the Mint compiler,

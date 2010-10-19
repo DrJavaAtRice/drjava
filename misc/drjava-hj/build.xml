@@ -86,18 +86,25 @@
 	   dest="${combine.jars.temp.dir}" overwrite="true"/>
     
     <java classname="DrJavaHJPropertyFile"
-	  classpath="drjavaHJPropertyFile"
+	  classpath="drjavaHJPropertyFile:${input1}:${input2}:${input3}:${input4}:${input5}:${input6}:${input7}:${input8}:${drjava.jar}"
 	  fork="true"
 	  dir="."
 	  failonerror="true">
       <arg value="${combine.jars.temp.dir}/edu/rice/cs/drjava/config/options.properties"/>
     </java>
+
+    <java classname="DrJavaHJPropertyFile$GetFileName"
+	  classpath="drjavaHJPropertyFile:${input1}:${input2}:${input3}:${input4}:${input5}:${input6}:${input7}:${input8}:drjava.jar"
+	  fork="true"
+	  dir="."
+	  failonerror="true"
+          outputproperty="drjava.hj.file"/>
     
-    <manifest file="${combine.jars.temp.dir}/META-INF/MANIFEST.MF" mode="update">
+<!--    <manifest file="${combine.jars.temp.dir}/META-INF/MANIFEST.MF" mode="update">
       <attribute name="Created-By" value="1.5.0-drjavahj"/>
-    </manifest>
+    </manifest> -->
     
-    <jar destfile="drjava-hj.jar" basedir="${combine.jars.temp.dir}"
+    <jar destfile="${drjava.hj.file}" basedir="${combine.jars.temp.dir}"
 	 manifest="${combine.jars.temp.dir}/META-INF/MANIFEST.MF"/>
     <delete dir="${combine.jars.temp.dir}" failonerror="false"/>
   </target>

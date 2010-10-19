@@ -129,6 +129,19 @@ public class HjDescriptor extends JDKDescriptor {
                        "polyglot/ext/hj/Version.class",
                        "polyglot/ext/hj/visit/HjTranslator.class");
   }
+
+  /** Return the guessed version for the compiler in the specified file (jar file or directory).
+    * Note that this is the Java version that this compiler is compatible to, not the internal compiler version.
+    * For full (non-compound) JDKs, this is equal to the version, i.e. JDK6 should guess Java 6.0.
+    * For compound JDKs, this is equal to the version of the full JDK that the compound JDK needs, i.e.
+    * if a version of the HJ compiler requires JDK6, it should guess JDK6.
+    * @return guessed version */
+  public JavaVersion.FullVersion guessVersion(File f) {
+      return JavaVersion.parseFullVersion(JavaVersion.JAVA_6.fullVersion().versionString(),
+                                          "Habanero Research Group",
+                                          "Habanero Research Group",
+                                          f);
+  }
   
   /** Return the class name of the compiler adapter.
     * @return class name of compiler, or null if no compiler */
@@ -140,7 +153,7 @@ public class HjDescriptor extends JDKDescriptor {
   
   /** Return the minimum Java version required to use this JDK.
     * @return minimum version */
-  public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_5; }
+  public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_6; }
   
   /** Return the list of additional files required to use the compiler.
     * The compiler was found in the specified file. This method may have to search the user's hard drive, e.g.

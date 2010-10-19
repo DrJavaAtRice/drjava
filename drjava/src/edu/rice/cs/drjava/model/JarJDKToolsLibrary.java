@@ -151,7 +151,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     Debugger debugger = NoDebuggerAvailable.ONLY;
     JavadocModel javadoc = new NoJavadocAvailable(model);
     
-    FullVersion version = guessVersion(f, desc);
+    FullVersion version = desc.guessVersion(f);
     JDKToolsLibrary.msg("makeFromFile: "+f+" --> "+version+", vendor: "+version.vendor());
     JDKToolsLibrary.msg("    desc = "+desc);
     

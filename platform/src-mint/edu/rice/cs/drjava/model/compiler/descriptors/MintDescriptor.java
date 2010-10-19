@@ -139,6 +139,20 @@ public class MintDescriptor extends JDKDescriptor {
                        "edu/rice/cs/mint/comp/com/sun/source/tree/EscapeStatTree.class");
   }
   
+
+  /** Return the guessed version for the compiler in the specified file (jar file or directory).
+    * Note that this is the Java version that this compiler is compatible to, not the internal compiler version.
+    * For full (non-compound) JDKs, this is equal to the version, i.e. JDK6 should guess Java 6.0.
+    * For compound JDKs, this is equal to the version of the full JDK that the compound JDK needs, i.e.
+    * if a version of the HJ compiler requires JDK6, it should guess JDK6.
+    * @return guessed version */
+  public JavaVersion.FullVersion guessVersion(File f) {
+      return JavaVersion.parseFullVersion(JavaVersion.JAVA_6.fullVersion().versionString(),
+                                          "Rice JavaPLT",
+                                          "Rice JavaPLT",
+                                          f);
+  }
+  
   /** Return the class name of the compiler adapter.
     * @return class name of compiler, or null if no compiler */
   public String getAdapterForCompiler() { return "edu.rice.cs.drjava.model.compiler.MintCompiler"; }
