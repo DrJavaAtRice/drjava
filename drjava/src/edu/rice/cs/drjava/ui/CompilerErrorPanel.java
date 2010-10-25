@@ -45,7 +45,6 @@ import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.plt.iter.IterUtil;
 
 import javax.swing.*;
@@ -171,7 +170,7 @@ public class CompilerErrorPanel extends ErrorPanel {
   class CompilerErrorListPane extends ErrorPanel.ErrorListPane {
     
     protected void _updateWithErrors() throws BadLocationException {
-      SwingDocument doc = new SwingDocument();
+      ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
       if (_excludedFiles.length != 0) {
         final StringBuilder msgBuffer = 
           new StringBuilder("Compilation completed.  The following files were not compiled:\n");
@@ -192,7 +191,7 @@ public class CompilerErrorPanel extends ErrorPanel {
       _errorListPositions = new Position[0];
       _compileHasOccurred = true;
       
-      SwingDocument doc = new SwingDocument();
+      ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
        
       try { doc.insertString(0, "Compilation in progress, please wait...", NORMAL_ATTRIBUTES); }
       catch (BadLocationException ble) { throw new UnexpectedException(ble); }
@@ -205,7 +204,7 @@ public class CompilerErrorPanel extends ErrorPanel {
      *  @param done ignored: we assume that this is only called after compilation is completed
      */
     protected void _updateNoErrors(boolean done) throws BadLocationException {
-      SwingDocument doc = new SwingDocument();
+      ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
       String message;
       if (_compileHasOccurred) {
         if (_excludedFiles.length == 0) message = "Compilation completed.";
@@ -228,5 +227,6 @@ public class CompilerErrorPanel extends ErrorPanel {
       _updateScrollButtons();
       selectNothing();
     }
+    public String getErrorDocumentTitle() { return "Compiler Errors"; }
   }
 }

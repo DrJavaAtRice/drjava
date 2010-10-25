@@ -38,7 +38,6 @@ package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
-import edu.rice.cs.util.text.SwingDocument;
 
 import javax.swing.text.*;
 
@@ -108,7 +107,7 @@ public class JavadocErrorPanel extends ErrorPanel {
     public void setJavadocInProgress() {
       _errorListPositions = new Position[0];
 
-      SwingDocument doc = new SwingDocument();
+      ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
       doc.append("Generating Javadoc.  Please wait...\n", NORMAL_ATTRIBUTES);
       setDocument(doc);
       selectNothing();
@@ -119,7 +118,7 @@ public class JavadocErrorPanel extends ErrorPanel {
 
     /** Used to show that the last javadoc command was unsuccessful. */
     protected void _updateWithErrors() throws BadLocationException {
-      SwingDocument doc = new SwingDocument();
+      ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
       String failureName = "error";
       if (getErrorModel().hasOnlyWarnings()) failureName = "warning";
       _updateWithErrors(failureName, "found", doc);
@@ -127,7 +126,7 @@ public class JavadocErrorPanel extends ErrorPanel {
 
     /** Used to show that the last compile was successful. */
     protected void _updateNoErrors(boolean done) throws BadLocationException {
-      SwingDocument doc = new SwingDocument();
+      ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
       String msg = "";
       if (done) {
         if (_wasSuccessful) msg = "Javadoc generated successfully.";
@@ -141,7 +140,6 @@ public class JavadocErrorPanel extends ErrorPanel {
 //     public JavadocError getError() {
 //       return _error;
 //     }
-
+    public String getErrorDocumentTitle() { return "Javadoc Errors"; }
   }
-
 }

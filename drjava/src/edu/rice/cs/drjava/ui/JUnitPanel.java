@@ -42,7 +42,6 @@ import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.junit.JUnitErrorModel;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
-import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
 
 import javax.swing.*;
@@ -256,7 +255,7 @@ public class JUnitPanel extends ErrorPanel {
       String className = _getClassFromName(name);
       String fullName = className + "." + testName;
       if (fullName.equals(JUNIT_WARNING)) return;
-      SwingDocument doc = getSwingDocument();
+      ErrorDocument doc = getErrorDocument();
       try {
         int len = doc.getLength();
         // Insert the classname if it has changed
@@ -288,7 +287,7 @@ public class JUnitPanel extends ErrorPanel {
       String fullName = _getClassFromName(name) + "." + testName;
       if (fullName.equals(JUNIT_WARNING)) return;
       
-      SwingDocument doc = getSwingDocument();
+      ErrorDocument doc = getErrorDocument();
       Position namePos = _runningTestNamePositions.get(fullName);
       AttributeSet set;
       if (! wasSuccessful || causedError) set = TEST_FAIL_ATTRIBUTES;
@@ -309,7 +308,7 @@ public class JUnitPanel extends ErrorPanel {
       _runningTestName = null;
       _warnedOutOfSync = false;
       
-      SwingDocument doc = new SwingDocument();
+      ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
 //      _checkSync(doc);
       
       doc.append(START_JUNIT_MSG, BOLD_ATTRIBUTES);
@@ -320,7 +319,7 @@ public class JUnitPanel extends ErrorPanel {
     /** Used to show that testing was unsuccessful. */
     protected void _updateWithErrors() throws BadLocationException {
       //DefaultStyledDocument doc = new DefaultStyledDocument();
-      SwingDocument doc = getSwingDocument();
+      ErrorDocument doc = getErrorDocument();
 //      _checkSync(doc);
       _updateWithErrors("test", "failed", doc);
     }
@@ -349,7 +348,7 @@ public class JUnitPanel extends ErrorPanel {
       return numErrMsg.toString();
     }
     
-    protected void _updateWithErrors(String failureName, String failureMeaning, SwingDocument doc)
+    protected void _updateWithErrors(String failureName, String failureMeaning, ErrorDocument doc)
       throws BadLocationException {
       // Print how many errors
       _replaceInProgressText(_getNumErrorsMessage(failureName, failureMeaning));
@@ -368,7 +367,7 @@ public class JUnitPanel extends ErrorPanel {
       int start = 0;
       if (_warnedOutOfSync) { start = TEST_OUT_OF_SYNC.length(); }
       int len = START_JUNIT_MSG.length();
-      SwingDocument doc = getSwingDocument();
+      ErrorDocument doc = getErrorDocument();
       if (doc.getLength() >= len + start) {
         doc.remove(start, len);
         doc.insertString(start, msg, BOLD_ATTRIBUTES);
@@ -514,6 +513,7 @@ public class JUnitPanel extends ErrorPanel {
         */
       protected void _popupAction(MouseEvent e) { _popMenu.show(e.getComponent(), e.getX(), e.getY()); }
     }
+    public String getErrorDocumentTitle() { return "Javadoc Errors"; }
   }
   
   

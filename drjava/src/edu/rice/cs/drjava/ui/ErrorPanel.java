@@ -49,6 +49,9 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.text.SwingDocument;
+import edu.rice.cs.drjava.model.print.DrJavaBook;
+  
+import edu.rice.cs.util.swing.RightClickMouseAdapter;
 
 import java.util.HashMap;
 import java.util.Vector;
@@ -65,6 +68,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.print.*;
 import java.io.IOException;
 
 /** This class contains common code and interfaces from CompilerErrorPanel, JUnitPanel, and JavadocErrorPanel.
@@ -99,6 +103,10 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   
   private JButton _nextErrorButton;
   private JButton _prevErrorButton;
+  
+  /** _popupMenu and _popupMenuListener are either both null or both non-null. */
+  protected JPopupMenu _popupMenu = null;
+  protected RightClickMouseAdapter _popupMenuListener = null;
   
   /** Highlight painter for selected list items. */
   static ReverseHighlighter.DrJavaHighlightPainter _listHighlightPainter =
@@ -173,10 +181,57 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     
     _mainPanel.add(_leftPanel, BorderLayout.CENTER);
     _mainPanel.add(_rightPanel, BorderLayout.EAST);
+    
+    /** Default copy action.  Returns focus to the correct pane. */
+    final Action copyAction = new AbstractAction("Copy contents to clipboard", MainFrame.getIcon("Copy16.gif")) {
+      public void actionPerformed(ActionEvent e) {
+        getErrorListPane().selectAll();
+        String t = getErrorListPane().getSelectedText();
+        if (t != null) {
+          if (t.length() != 0) {
+            StringSelection stringSelection = new StringSelection(t);
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(stringSelection, getErrorListPane());
+            ClipboardHistoryModel.singleton().put(t);
+          }
+        }
+      }
+    };
+    addPopupMenu(copyAction);
+    getPopupMenu().add(new AbstractAction("Save Copy of Contents...", MainFrame.getIcon("Save16.gif")) {
+      public void actionPerformed(ActionEvent e) {
+        _frame._saveDocumentCopy(getErrorListPane().getErrorDocument());
+      }
+    });
+    getPopupMenu().addSeparator();
+    getPopupMenu().add(new AbstractAction("Print...", MainFrame.getIcon("Print16.gif")) {
+      public void actionPerformed(ActionEvent e) {
+        getErrorListPane().getErrorDocument().print();
+      }
+    });
+    getPopupMenu().add(new AbstractAction("Print Preview...", MainFrame.getIcon("PrintPreview16.gif")) {
+      public void actionPerformed(ActionEvent e) {
+        getErrorListPane().getErrorDocument().preparePrintJob();
+        new PreviewErrorFrame();
+      }
+    });
   }
   
   protected void setErrorListPane(final ErrorListPane elp) {
+    if (_popupMenuListener!=null) {
+      if ((_scroller!=null) &&
+          (_scroller.getViewport()!=null) &&
+          (_scroller.getViewport().getView()!=null)) {
+        _scroller.getViewport().getView().removeMouseListener(_popupMenuListener);
+      }
+    }
+    
     _scroller.setViewportView(elp);
+    
+    if (_popupMenuListener!=null) {
+      _scroller.getViewport().getView().addMouseListener(_popupMenuListener);
+    }
+    
     _nextErrorButton.setEnabled(false);
     _nextErrorButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -207,7 +262,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     
     getErrorListPane().setFont(f);
     
-    SwingDocument doc = getErrorListPane().getSwingDocument();
+    ErrorDocument doc = getErrorListPane().getErrorDocument();
     doc.setCharacterAttributes(0, doc.getLength() + 1, set, false); 
   }
 
@@ -274,7 +329,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
 //      // as opposed to based on characters.
       
       setContentType("text/rtf");
-      setDocument(new SwingDocument());
+      setDocument(new ErrorDocument(getErrorDocumentTitle()));
       setHighlighter(new ReverseHighlighter());
       
       addMouseListener(defaultMouseListener);
@@ -345,13 +400,13 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       });
     }
     
-    /** Gets the SwingDocument associated with this ErrorListPane.  The inherited getDocument method must be preserved
-      * because the ErrorListPane constructor uses it fetch a Document that is NOT a SwingDocument.  ErrorListPane 
-      * immediately sets the Document corresponding to this JEditorPane to a SwingDocument and strictly maintains it as 
-      * a SwingDocument, but the JEditorPane constructor binds its document to a PlainDocument and uses getDocument 
-      * before ErrorListPane can set this field to a SwingDocument.
+    /** Gets the ErrorDocument associated with this ErrorListPane.  The inherited getDocument method must be preserved
+      * because the ErrorListPane constructor uses it fetch a Document that is NOT an ErrorDocument.  ErrorListPane 
+      * immediately sets the Document corresponding to this JEditorPane to an ErrorDocument and strictly maintains it as 
+      * an ErrorDocument, but the JEditorPane constructor binds its document to a PlainDocument and uses getDocument 
+      * before ErrorListPane can set this field to an ErrorDocument.
       */
-    public SwingDocument getSwingDocument() { return (SwingDocument) getDocument(); }
+    public ErrorDocument getErrorDocument() { return (ErrorDocument) getDocument(); }
     
     /** Assigns the given keystroke to the given action in this pane.
      *  @param stroke keystroke that triggers the action
@@ -505,7 +560,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     }
         
     /** Used to show that the last compile was unsuccessful.*/
-    protected void _updateWithErrors(String failureName, String failureMeaning, SwingDocument doc)
+    protected void _updateWithErrors(String failureName, String failureMeaning, ErrorDocument doc)
       throws BadLocationException {
       // Print how many errors
       String numErrsMsg = _getNumErrorsMessage(failureName, failureMeaning);
@@ -547,7 +602,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     /** Inserts all of the errors into the given document.
      *  @param doc the document into which to insert the errors
      */
-    protected void _insertErrors(SwingDocument doc) throws BadLocationException {
+    protected void _insertErrors(ErrorDocument doc) throws BadLocationException {
       CompilerErrorModel cem = getErrorModel();
       int numErrors = cem.getNumErrors();
       
@@ -594,7 +649,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
      *  @param error the error to print
      *  @param doc the document in the error pane
      */
-    protected void _insertErrorText(DJError error, SwingDocument doc) throws BadLocationException {
+    protected void _insertErrorText(DJError error, ErrorDocument doc) throws BadLocationException {
       // Show file and line number
       doc.append("File: ", BOLD_ATTRIBUTES);
       String fileAndLineNumber = error.getFileMessage() + "  [line: " + error.getLineMessage() + "]";
@@ -823,7 +878,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         StyleConstants.setForeground(BOLD_ATTRIBUTES, oce.value);
         
         // Re-attribute the existing text with the new color.
-        SwingDocument doc = getErrorListPane().getSwingDocument();
+        ErrorDocument doc = getErrorListPane().getErrorDocument();
         SimpleAttributeSet set = new SimpleAttributeSet();
         set.addAttribute(StyleConstants.Foreground, oce.value);
         doc.setCharacterAttributes(0, doc.getLength(), set, false); 
@@ -835,6 +890,70 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       public void optionChanged(OptionEvent<Color> oce) {
         setBackground(oce.value);
         ErrorListPane.this.repaint();
+      }
+    }
+    public String getErrorDocumentTitle() { return "Errors"; }
+  }
+  
+  public class ErrorDocument extends SwingDocument {
+    protected volatile DrJavaBook _book;
+    protected final String _title;
+    public ErrorDocument(String t) { _title = t; }
+    public Pageable getPageable() throws IllegalStateException { return _book; }
+    public void preparePrintJob() {
+      _book = new DrJavaBook(getDocText(0, getLength()), _title, new PageFormat());
+    }
+    public void print() {
+      preparePrintJob();
+      PrinterJob printJob = PrinterJob.getPrinterJob();
+      printJob.setPageable(_book);
+      try {
+        if (printJob.printDialog()) printJob.print();
+      }
+      catch(PrinterException e) {
+        MainFrameStatics.showError(_frame, e, "Print Error", "An error occured while printing.");
+      }
+      cleanUpPrintJob();
+    }
+    public void cleanUpPrintJob() { _book = null; }
+  }
+  
+  public class PreviewErrorFrame extends PreviewFrame {
+    public PreviewErrorFrame() throws IllegalStateException {
+      super(ErrorPanel.this._model, ErrorPanel.this._frame, false);
+    }
+    protected Pageable setUpDocument(SingleDisplayModel model, boolean interactions) {
+      return getErrorListPane().getErrorDocument().getPageable();
+    }    
+    protected void _print() {
+      getErrorListPane().getErrorDocument().print();
+    }
+  }
+  
+  public JPopupMenu getPopupMenu() { return _popupMenu; }
+  
+  public void addPopupMenu(Action... actions) {
+    if (_popupMenu==null) {
+      _popupMenu = new JPopupMenu();
+    }
+    else {
+      _popupMenu.removeAll();
+      removeMouseListener(_popupMenuListener);
+      _scroller.removeMouseListener(_popupMenuListener);
+      _scroller.getViewport().getView().removeMouseListener(_popupMenuListener);      
+    }
+    for(Action a: actions) { _popupMenu.add(a); }
+    _popupMenuListener = new RightClickMouseAdapter() {
+      protected void _popupAction(MouseEvent e) {
+        requestFocusInWindow();
+        _popupMenu.show(e.getComponent(), e.getX(), e.getY());
+      }
+    };
+    addMouseListener(_popupMenuListener);
+    if (_scroller!=null) {
+      _scroller.addMouseListener(_popupMenuListener);
+      if (_scroller.getViewport().getView()!=null) {
+        _scroller.getViewport().getView().addMouseListener(_popupMenuListener);
       }
     }
   }

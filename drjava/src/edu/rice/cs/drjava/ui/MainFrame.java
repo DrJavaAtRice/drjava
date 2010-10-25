@@ -2172,6 +2172,67 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
+  /** Saves a copy of an error pane to a file. */
+  public void _saveDocumentCopy(final edu.rice.cs.util.text.SwingDocument doc) {
+    assert EventQueue.isDispatchThread();
+    
+    _saveChooser.resetChoosableFileFilters();
+    _saveChooser.setFileFilter(_txtFileFilter);    
+    _saveChooser.setMultiSelectionEnabled(false);
+    _saveChooser.setSelectedFile(new File(""));
+    try {
+      FileSaveSelector selector = new FileSaveSelector() {
+        public File getFile() throws OperationCanceledException {
+          int rc = _saveChooser.showSaveDialog(MainFrame.this);
+          switch (rc) {
+            case JFileChooser.CANCEL_OPTION:
+            case JFileChooser.ERROR_OPTION:
+              throw new OperationCanceledException();
+            case JFileChooser.APPROVE_OPTION:
+              File chosen = _saveChooser.getSelectedFile();
+              if (chosen != null) {
+                // append the .txt extension if no . written by user
+                if (chosen.getName().indexOf(".") == -1)
+                  return new File(chosen.getAbsolutePath() + TEXT_FILE_EXTENSION);
+                return chosen;
+              }
+              else
+                throw new RuntimeException("Filechooser returned null file");
+          }
+          // impossible since rc must be one of these
+          throw new RuntimeException("Filechooser returned bad rc " + rc);
+        }
+        public boolean warnFileOpen(File f) { return _warnFileOpen(f); }
+        public boolean verifyOverwrite(File f) { return MainFrameStatics.verifyOverwrite(MainFrame.this, f); }
+        public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
+        public boolean shouldUpdateDocumentState() { return false; }
+      };
+      
+      try {
+        final File file = selector.getFile().getCanonicalFile();
+        if (! file.exists() || selector.verifyOverwrite(file)) {  // confirm that existing file can be overwritten        
+          FileOps.saveFile(new FileOps.DefaultFileSaver(file) {
+            /** Only runs in event thread so no read lock is necessary. */
+            public void saveTo(OutputStream os) throws IOException {
+              final String text = doc.getText();
+              OutputStreamWriter osw = new OutputStreamWriter(os);
+              osw.write(text,0,text.length());
+              osw.flush();
+            }
+          });
+        }
+      }
+      catch (OperationCanceledException oce) {
+        // Thrown by selector.getFile() if the user cancels.
+        // We don't do anything if this happens.
+        return;
+      }
+    }
+    catch (IOException ioe) {
+      MainFrameStatics.showIOError(MainFrame.this, new IOException("An error occured writing the contents to a file"));
+    }
+  }
+  
   /** Clears DrJava's output console. */
   private final Action _clearConsoleAction = new AbstractAction("Clear Console") {
     public void actionPerformed(ActionEvent ae) { _model.resetConsole(); }
