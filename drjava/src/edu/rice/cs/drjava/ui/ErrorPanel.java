@@ -183,7 +183,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     _mainPanel.add(_rightPanel, BorderLayout.EAST);
     
     /** Default copy action.  Returns focus to the correct pane. */
-    final Action copyAction = new AbstractAction("Copy contents to clipboard", MainFrame.getIcon("Copy16.gif")) {
+    final Action copyAction = new AbstractAction("Copy Contents to Clipboard", MainFrame.getIcon("Copy16.gif")) {
       public void actionPerformed(ActionEvent e) {
         getErrorListPane().selectAll();
         String t = getErrorListPane().getSelectedText();
