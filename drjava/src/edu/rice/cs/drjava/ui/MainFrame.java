@@ -4870,8 +4870,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     */
   public void openFolder(DirectoryChooser chooser) {
     String ext = _model.getOpenAllFilesInFolderExtension();
-    String type = "'" + ext + "' ";
+    final String type = "'" + ext + "' ";
     chooser.setDialogTitle("Open All " + type + "Files in ...");
+    javax.swing.filechooser.FileFilter ff = new javax.swing.filechooser.FileFilter() {
+      public boolean accept(File f) { return true; }
+      public String getDescription() { return "All "+type+" Files in Folder Selected"; }
+    };
+    chooser.resetChoosableFileFilters();
+    chooser.setAcceptAllFileFilterUsed(false);
+    chooser.setFileFilter(ff);
     
     File openDir = FileOps.NULL_FILE;
     try { 
@@ -4882,6 +4889,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     catch(FileMovedException e) { /* do nothing */ }
     
     int result = chooser.showDialog(openDir);
+    chooser.removeChoosableFileFilter(ff);
     if (result != DirectoryChooser.APPROVE_OPTION)  return; // canceled or error
     
     File dir = chooser.getSelectedDirectory();
