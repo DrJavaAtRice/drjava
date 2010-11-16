@@ -2327,13 +2327,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
   
-  /** Asks whether DrJava may contact the DrJava developers and send system information. */
-  private final Action _drjavaSurveyAction = new AbstractAction("Send System Information") {
-    public void actionPerformed(ActionEvent ae) {
-      DrJavaSurveyPopup popup = new DrJavaSurveyPopup(MainFrame.this);
-      popup.setVisible(true);
-    }
-  };
+//  /** Asks whether DrJava may contact the DrJava developers and send system information. */
+//  private final Action _drjavaSurveyAction = new AbstractAction("Send System Information") {
+//    public void actionPerformed(ActionEvent ae) {
+//      DrJavaSurveyPopup popup = new DrJavaSurveyPopup(MainFrame.this);
+//      popup.setVisible(true);
+//    }
+//  };
   
   /** Action that pops up the DrJava errors dialog.  Only runs in the event thread. */
   private final Action _errorsAction = new AbstractAction("DrJava Errors") {
@@ -3799,24 +3799,24 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           }
         }
       }
-      if (!alreadyShowedDialog) {
-        // ask if the user wants to submit the survey
-        // but only if we haven't just asked if the user wants to download a new version
-        // two dialogs on program start is too much clutter
-        if (DrJava.getConfig().getSetting(DIALOG_DRJAVA_SURVEY_ENABLED) && 
-            ! edu.rice.cs.util.swing.Utilities.TEST_MODE) {
-          if (DrJavaSurveyPopup.maySubmitSurvey()) {
-            // either enough days have passed, or the configuration has changed
-            alreadyShowedDialog = true;
-            EventQueue.invokeLater(new Runnable() {
-              public void run() {
-                DrJavaSurveyPopup popup = new DrJavaSurveyPopup(MainFrame.this);
-                popup.setVisible(true);
-              }
-            });
-          }
-        }
-      }
+//      if (!alreadyShowedDialog) {
+//        // ask if the user wants to submit the survey
+//        // but only if we haven't just asked if the user wants to download a new version
+//        // two dialogs on program start is too much clutter
+//        if (DrJava.getConfig().getSetting(DIALOG_DRJAVA_SURVEY_ENABLED) && 
+//            ! edu.rice.cs.util.swing.Utilities.TEST_MODE) {
+//          if (DrJavaSurveyPopup.maySubmitSurvey()) {
+//            // either enough days have passed, or the configuration has changed
+//            alreadyShowedDialog = true;
+//            EventQueue.invokeLater(new Runnable() {
+//              public void run() {
+//                DrJavaSurveyPopup popup = new DrJavaSurveyPopup(MainFrame.this);
+//                popup.setVisible(true);
+//              }
+//            });
+//          }
+//        }
+//      }
       
       initDone();  // call mandated by SwingFrame contract
       
@@ -6360,8 +6360,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_aboutAction, "About", "About DrJava");
     _setUpAction(_checkNewVersionAction, "Check for New Version", "Find", "Check for New Version");
     _checkNewVersionAction.setEnabled(DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_ALLOWED));
-    _setUpAction(_drjavaSurveyAction, "Send System Information", "About", 
-                 "Send anonymous system information to DrJava developers");
+//    _setUpAction(_drjavaSurveyAction, "Send System Information", "About", 
+//                 "Send anonymous system information to DrJava developers");
     _setUpAction(_errorsAction, "DrJava Errors", "drjavaerror", "Show a window with internal DrJava errors");
     _setUpAction(_forceQuitAction, "Force Quit", "Stop", "Force DrJava to quit without cleaning up");
     _setUpAction(_generateCustomDrJavaJarAction, "Generate Custom drjava.jar...",
@@ -7045,7 +7045,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(helpMenu, _quickStartAction, KEY_QUICKSTART, updateKeyboardManager);
     helpMenu.addSeparator();
     _addMenuItem(helpMenu, _aboutAction, KEY_ABOUT, updateKeyboardManager);
-    _addMenuItem(helpMenu, _drjavaSurveyAction, KEY_DRJAVA_SURVEY, updateKeyboardManager);
+//    _addMenuItem(helpMenu, _drjavaSurveyAction, KEY_DRJAVA_SURVEY, updateKeyboardManager);
     _addMenuItem(helpMenu, _checkNewVersionAction, KEY_CHECK_NEW_VERSION, updateKeyboardManager);
     _addMenuItem(helpMenu, _errorsAction, KEY_DRJAVA_ERRORS, updateKeyboardManager);
     helpMenu.addSeparator();
