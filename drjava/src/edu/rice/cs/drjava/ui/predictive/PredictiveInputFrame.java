@@ -755,6 +755,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
       @SuppressWarnings("unchecked") 
       T item = (T)_matchList.getSelectedValue();
       _infoLabel.setText("Path:   " + _info.value(item));
+      _infoLabel.setToolTipText(_info.value(item));
     }
     else _infoLabel.setText("No file selected");
   }

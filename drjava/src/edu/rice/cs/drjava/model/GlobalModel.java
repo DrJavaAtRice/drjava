@@ -41,6 +41,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.rice.cs.util.AbsRelFile;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
@@ -61,6 +62,7 @@ import edu.rice.cs.util.docnavigation.IDocumentNavigator;
 import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
+import edu.rice.cs.drjava.config.OptionParser;
 
 /** Handles the bulk of DrJava's program logic.  The UI components interface with the GlobalModel through its 
   * public methods, and GlobalModel responds via the GlobalModelListener interface.  This removes the dependency 
@@ -460,6 +462,12 @@ public interface GlobalModel extends ILoadDocuments {
   
   /** Sets autorefresh status of the project */
   public void setAutoRefreshStatus(boolean b);
+  
+  /** @return the stored preferences. */
+  public Map<OptionParser,String> getPreferencesStoredInProject();
+  
+  /** Set the preferences stored in the project. */
+  public void setPreferencesStoredInProject(Map<OptionParser,String> sp);
   
   /** @return the working directory for the Master JVM. */
   public File getMasterWorkingDirectory();

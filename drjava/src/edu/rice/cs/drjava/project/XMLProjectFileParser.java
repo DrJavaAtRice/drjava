@@ -39,6 +39,8 @@ package edu.rice.cs.drjava.project;
 import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 import org.w3c.dom.Node;
@@ -52,6 +54,13 @@ import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
 import edu.rice.cs.util.XMLConfig;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.plt.text.TextUtil;
+
+import edu.rice.cs.drjava.config.Option;
+import edu.rice.cs.drjava.config.OptionMap;
+import edu.rice.cs.drjava.config.OptionParser;
+import edu.rice.cs.drjava.config.OptionParseException;
+import edu.rice.cs.drjava.DrJava;
 
 import static edu.rice.cs.util.XMLConfig.XMLConfigException;
 
@@ -196,6 +205,9 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
 
         // read bookmarks
         pfir.setBookmarks(readBookmarks());
+        
+        // read stored preferences
+        pfir.setPreferencesStoredInProject(readStoredPreferences());
       }
       catch(XMLConfigException e) { throw new MalformedProjectFileException("XML Parse Error: " + e.getMessage() + "\n" + StringOps.getStackTrace(e)); }
     }
@@ -366,5 +378,34 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       rList.add(new DummyDocumentRegion(f, from, to));
     }
     return rList;
+  }
+  
+  @SuppressWarnings("unchecked")
+  protected Map<OptionParser,String> readStoredPreferences() {
+    HashMap<OptionParser,String> storedPreferences = new HashMap<OptionParser,String>();
+    List<Node> prefs = _xc.getNodes("preferences/preference");
+       
+    for(Node n: prefs) {
+      // now all path names are relative to node n...
+      String name = TextUtil.xmlUnescape(_xc.get(".name", n));
+      String value = TextUtil.xmlUnescape(_xc.get(".value", n));
+      
+      OptionMap map = DrJava.getConfig().getOptionMap();
+      for (OptionParser<?> option : map.keys()) {
+        if (option.name.equals(name)) {
+          try {
+            map.setString(option, value);
+            storedPreferences.put(option, value);
+            if (option instanceof Option) {
+              DrJava.getConfig().setSetting((Option)option, map.getOption(option));
+            }
+          }
+          catch(OptionParseException ope) { /* ignore, just do not restore */ }
+          break;
+        }
+      }
+    }
+    
+    return storedPreferences;
   }
 }

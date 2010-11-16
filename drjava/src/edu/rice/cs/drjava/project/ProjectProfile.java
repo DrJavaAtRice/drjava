@@ -39,7 +39,8 @@ package edu.rice.cs.drjava.project;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-//import java.util.Vector;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -48,6 +49,7 @@ import java.io.*;
 import org.w3c.dom.Node;
 import edu.rice.cs.plt.tuple.Pair;
 
+import edu.rice.cs.drjava.config.OptionParser;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.AbsRelFile;
 import edu.rice.cs.plt.io.IOUtil;
@@ -97,6 +99,8 @@ public class ProjectProfile implements ProjectFileIR {
   private int _createJarFlags = 0;
   
   private boolean _autoRefreshStatus = false;
+  
+  private HashMap<OptionParser,String> _storedPreferences = new HashMap<OptionParser,String>();
   
   private List<FileRegion> _bookmarks = new ArrayList<FileRegion>();
   private List<DebugBreakpointData> _breakpoints = new ArrayList<DebugBreakpointData>();
@@ -199,6 +203,11 @@ public class ProjectProfile implements ProjectFileIR {
   public DebugWatchData[] getWatches() { return _watches.toArray(new DebugWatchData[_watches.size()]); }
   
   public boolean getAutoRefreshStatus() { return _autoRefreshStatus; }
+
+  /** @return the stored preferences. */
+  public Map<OptionParser,String> getPreferencesStoredInProject() {
+    return new HashMap<OptionParser,String>(_storedPreferences);
+  }
   
   /** Public setters, modifiers */
   
@@ -266,6 +275,11 @@ public class ProjectProfile implements ProjectFileIR {
   public void setWatches(List<? extends DebugWatchData> ws) { _watches = new ArrayList<DebugWatchData>(ws); }
   
   public void setAutoRefreshStatus(boolean status) { _autoRefreshStatus = status;}
+
+  public void setPreferencesStoredInProject(Map<OptionParser,String> sp) {
+    _storedPreferences.clear();
+    _storedPreferences.putAll(sp);
+  }
   
   /** Write project file in XML format. */
   public void write() throws IOException {
@@ -457,6 +471,14 @@ public class ProjectProfile implements ProjectFileIR {
         xc.set(".file", path, n, true);
         xc.set(".from", String.valueOf(bm.getStartOffset()), n, true);
         xc.set(".to", String.valueOf(bm.getEndOffset()), n, true);
+      }
+    }
+    xc.createNode("drjava/project/preferences");
+    if (!_storedPreferences.isEmpty()) {
+      for(Map.Entry<OptionParser,String> e: _storedPreferences.entrySet()) {
+        Node n = xc.createNode("drjava/project/preferences/preference", null, false);
+        xc.set(".name", TextUtil.xmlEscape(e.getKey().getName()), n, true);
+        xc.set(".value", TextUtil.xmlEscape(e.getValue()), n, true);
       }
     }
     xc.save(os);

@@ -42,13 +42,20 @@ import java.io.IOException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Vector;
+import java.util.Map;
+import java.util.HashMap;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.border.EmptyBorder;
 
 import edu.rice.cs.drjava.model.SingleDisplayModel;
+import edu.rice.cs.drjava.config.Option;
+import edu.rice.cs.drjava.config.OptionParser;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.OptionListener;
+import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.ui.config.*;
+import edu.rice.cs.drjava.DrJava;
 
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
@@ -78,6 +85,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
   private final JButton _okButton;
   private final JButton _applyButton;
   private final JButton _cancelButton;
+  private final JButton _advancedButton;
   //  private JButton _saveSettingsButton;
   private JPanel _mainPanel;
 
@@ -90,6 +98,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
 
   private VectorAbsRelFileOptionComponent _extraClassPathList;
   private VectorFileOptionComponent _excludedFilesList;
+  private Map<OptionParser,String> _storedPreferences = new HashMap<OptionParser,String>();
   
   /** Constructs project properties frame for a new project and displays it.  Assumes that a project is active. */
   public ProjectPropertiesFrame(MainFrame mf) {
@@ -111,6 +120,13 @@ public class ProjectPropertiesFrame extends SwingFrame {
       }
     };
     _okButton = new JButton(okAction);
+
+    Action advancedAction = new AbstractAction("Advanced") {
+      public void actionPerformed(ActionEvent e) {
+        advancedSettings();
+      }
+    };
+    _advancedButton = new JButton(advancedAction);
 
     Action applyAction = new AbstractAction("Apply") {
       public void actionPerformed(ActionEvent e) {
@@ -154,6 +170,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
     bottom.setBorder(new EmptyBorder(5,5,5,5));
     bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
     bottom.add(Box.createHorizontalGlue());
+    bottom.add(_advancedButton);
     bottom.add(_applyButton);
     bottom.add(_okButton);
     bottom.add(_cancelButton);
@@ -214,6 +231,10 @@ public class ProjectPropertiesFrame extends SwingFrame {
     ArrayList<File> ef = new ArrayList<File>();
     for(File f: _model.getExclFiles()) { ef.add(f); }
     _excludedFilesList.setValue(ef);
+    
+    _storedPreferences.clear();
+    _storedPreferences.putAll(_model.getPreferencesStoredInProject());
+    
     _applyButton.setEnabled(false);
   }
 
@@ -253,7 +274,8 @@ public class ProjectPropertiesFrame extends SwingFrame {
       try {
         _model.reloadProject(_mainFrame.getCurrentProject(), _mainFrame.gatherProjectDocInfo());
       } catch(IOException e) { throw new edu.rice.cs.util.UnexpectedException(e, "I/O error while reloading project"); }
-    }
+    }    
+    _model.setPreferencesStoredInProject(_storedPreferences);
     
     return true;
   }
@@ -683,5 +705,37 @@ public class ProjectPropertiesFrame extends SwingFrame {
       _mainFrame.toFront();
     }
     super.setVisible(vis);
+  }
+  
+  // advanced settings
+  protected void advancedSettings() {
+    _mainFrame.removeModalWindowAdapter(ProjectPropertiesFrame.this);
+    ProjectAdvancedPropertiesFrame ppf = new ProjectAdvancedPropertiesFrame(_mainFrame, this) {
+      public void setVisible(boolean vis) {
+        assert EventQueue.isDispatchThread();
+        validate();
+        if (vis) {
+          _mainFrame.hourglassOn();
+          _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
+          toFront();
+        }
+        else {
+          _mainFrame.removeModalWindowAdapter(this);
+          _mainFrame.hourglassOff();
+          _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, LambdaUtil.NO_OP, CANCEL);
+          toFront();
+          Map<OptionParser,String> newValues = this.getPreferencesStoredInProject();
+          if (!newValues.keySet().equals(_storedPreferences.keySet())) {            
+            _storedPreferences.clear();
+            _storedPreferences.putAll(newValues);
+            _applyButton.setEnabled(true);
+          }
+        }
+        super.setVisible(vis);
+      }
+    };
+    ppf.reset(_storedPreferences);
+    ppf.setVisible(true);
+    ppf.toFront();  // ppf actions save state of ppf in global model
   }
 }

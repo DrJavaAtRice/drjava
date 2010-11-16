@@ -38,7 +38,9 @@ package edu.rice.cs.drjava.project;
 
 import java.io.*;
 import java.util.List;
+import java.util.Map;
 
+import edu.rice.cs.drjava.config.OptionParser;
 import edu.rice.cs.drjava.model.FileRegion;
 import edu.rice.cs.drjava.model.debug.DebugBreakpointData;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
@@ -102,6 +104,9 @@ public interface ProjectFileIR {
   
   public boolean getAutoRefreshStatus();
   
+  /** @return the stored preferences. */
+  public Map<OptionParser,String> getPreferencesStoredInProject();
+  
   public void setSourceFiles(List<DocFile> sf);
   public void setAuxiliaryFiles(List<DocFile> aux);
   public void setExcludedFiles(List<DocFile> ef);
@@ -117,6 +122,7 @@ public interface ProjectFileIR {
   public void setBreakpoints(List<? extends DebugBreakpointData> bps);
   public void setWatches(List<? extends DebugWatchData> ws);
   public void setAutoRefreshStatus(boolean b);
+  public void setPreferencesStoredInProject(Map<OptionParser,String> sp);
   
   /**
    * The version of dr java that created this project (as determined from its serialization as a .pjt or .drjava or .xml file)

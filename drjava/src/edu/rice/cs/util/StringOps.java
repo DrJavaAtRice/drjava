@@ -48,6 +48,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.io.IOException;
+import java.io.*;
+import javax.swing.text.html.*;
+import javax.swing.text.html.parser.*;
 
 /**
  * A class to provide some convenient String operations as static methods.
@@ -1022,5 +1025,27 @@ public abstract class StringOps {
       }
     }
     return sw.toString();
+  }
+  
+  /** Remove HTML tags from the string.
+    * Based on http://stackoverflow.com/questions/240546/removing-html-from-a-java-string
+    * @param s string with HTML tags
+    * @return string without HTML tags. */
+  public static String removeHTML(String s) {
+    try {
+      StringReader in = new StringReader(s);
+      final StringBuilder sb = new StringBuilder();
+      HTMLEditorKit.ParserCallback parser = new HTMLEditorKit.ParserCallback() {
+        public void handleText(char[] text, int pos) {
+          sb.append(text);
+        }
+      };
+      ParserDelegator delegator = new ParserDelegator();
+      // the third parameter is TRUE to ignore charset directive
+      delegator.parse(in, parser, Boolean.TRUE);
+      in.close();
+      return sb.toString();
+    }
+    catch(IOException ioe) { throw new UnexpectedException(ioe); }
   }
 }

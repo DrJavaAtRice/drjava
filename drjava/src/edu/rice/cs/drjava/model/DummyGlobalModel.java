@@ -40,6 +40,7 @@ import java.awt.print.PageFormat;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 
@@ -64,6 +65,7 @@ import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
 import edu.rice.cs.drjava.project.DocumentInfoGetter;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
+import edu.rice.cs.drjava.config.OptionParser;
 
 /** Concrete implementation of GlobalModel that always throws UnsupportedOperationExceptions.
   * @version $Id$
@@ -190,6 +192,12 @@ public class DummyGlobalModel implements GlobalModel {
   
   public boolean getAutoRefreshStatus() {
     throw new UnsupportedOperationException("Tried to call getAutoRefreshStatus on a Dummy"); }
+  
+  public Map<OptionParser,String> getPreferencesStoredInProject() {
+    throw new UnsupportedOperationException("Tried to call getPreferencesStoredInProject on a Dummy"); }
+
+  public void setPreferencesStoredInProject(Map<OptionParser,String> sp) {
+    throw new UnsupportedOperationException("Tried to call setPreferencesStoredInProject on a Dummy"); }
   
   public void saveAllFiles(FileSaveSelector com) throws IOException {
     throw new UnsupportedOperationException("Tried to call saveAllFiles on a Dummy");

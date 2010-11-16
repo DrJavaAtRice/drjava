@@ -2527,13 +2527,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Action that calls the ConfigFrame to edit preferences.  Only runs in the event thread. */
   private final Action _editPreferencesAction = new AbstractAction("Preferences ...") {
     public void actionPerformed(ActionEvent ae) {
-      
-      _configFrame.setUp();
-      setPopupLoc(_configFrame);
-      _configFrame.setVisible(true);
-      _configFrame.toFront();
+      editPreferences();
     }
   };
+  
+  public void editPreferences() {    
+    _configFrame.setUp();
+    setPopupLoc(_configFrame);
+    _configFrame.resetToCurrent();
+    _configFrame.setVisible(true);
+    _configFrame.toFront();
+  }
   
   private volatile AbstractAction _projectPropertiesAction = new AbstractAction("Project Properties") {
     { _addGUIAvailabilityListener(this,
@@ -7012,10 +7016,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           case OptionConstants.INTERMEDIATE_LEVEL:
           case OptionConstants.FUNCTIONAL_JAVA_LEVEL: {
             rbFunctionalMenuItem.setSelected(true);
+            System.out.println("rbFunctionalMenuItem.setSelected(true);");
             break;
           }
           default: {
             rbFullJavaMenuItem.setSelected(true);
+            System.out.println("rbFullJavaMenuItem.setSelected(true);");
             break;
           }
         }

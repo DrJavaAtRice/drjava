@@ -68,6 +68,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 import java.util.WeakHashMap;
+import java.util.Map;
 
 import javax.swing.*;
 import javax.swing.event.DocumentListener;
@@ -83,6 +84,8 @@ import javax.swing.ProgressMonitor;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.DrJavaRoot;
+import edu.rice.cs.drjava.config.Option;
+import edu.rice.cs.drjava.config.OptionParser;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
@@ -391,6 +394,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _notifier.projectRunnableChanged();
     _notifier.projectBuildDirChanged();
     _notifier.projectWorkDirChanged();
+    
 //    _notifier.projectModified();  // not currently used
   }
   
@@ -406,10 +410,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   protected FileGroupingState
     makeProjectFileGroupingState(File pr, String main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, 
-                                 File[] excludedFiles, Iterable<AbsRelFile> cp, File cjf, int cjflags, boolean refresh, String manifest) {
+                                 File[] excludedFiles, Iterable<AbsRelFile> cp, File cjf, int cjflags, boolean refresh,
+                                 String manifest, Map<OptionParser,String> storedPreferences) {
     
     return new ProjectFileGroupingState(pr, main, bd, wd, project, srcFiles, auxFiles, excludedFiles, cp, cjf, cjflags,
-                                        refresh, manifest);
+                                        refresh, manifest, storedPreferences);
   }
   
   /** @return true if the class path state has been changed. */
@@ -530,6 +535,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** @return the build directory for the project (assuming one exists). */
   public File getBuildDirectory() { return _state.getBuildDirectory(); }
   
+  /** @return the stored preferences. */
+  public Map<OptionParser,String> getPreferencesStoredInProject() { return _state.getPreferencesStoredInProject(); }
+
+  public void setPreferencesStoredInProject(Map<OptionParser,String> sp) { _state.setPreferencesStoredInProject(sp); }
+  
   /** Sets the class with the project's main method.  Degenerate version overridden in DefaultGlobalModel. */
   public void setBuildDirectory(File f) {
     _state.setBuildDirectory(f);
@@ -598,6 +608,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     volatile File _createJarFile;
     volatile int _createJarFlags;
     volatile boolean _autoRefreshStatus;
+    final Map<OptionParser,String> _storedPreferences = new HashMap<OptionParser,String>();
     
     volatile String _manifest = null;
     
@@ -606,12 +617,17 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Degenerate constructor for a new project; only the file project name is known. */
     ProjectFileGroupingState(File project) {
       this(project.getParentFile(), null, null, null, project, new File[0], new File[0], new File[0], 
-           IterUtil.<AbsRelFile>empty(), null, 0, false, null);
+           IterUtil.<AbsRelFile>empty(), null, 0, false, null, new HashMap<OptionParser,String>());
+      HashMap<OptionParser,String> defaultStoredPreferences = new HashMap<OptionParser,String>();
+      // by default, put INDENT_LEVEL AND LANGUAGE_LEVEL into the project file
+      defaultStoredPreferences.put(INDENT_LEVEL, DrJava.getConfig().getOptionMap().getString(INDENT_LEVEL));      
+      defaultStoredPreferences.put(LANGUAGE_LEVEL, DrJava.getConfig().getOptionMap().getString(LANGUAGE_LEVEL));
+      setPreferencesStoredInProject(defaultStoredPreferences);
     }
     
     ProjectFileGroupingState(File pr, String main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, 
                              File[] excludedFiles, Iterable<AbsRelFile> cp, File cjf, int cjflags, boolean refreshStatus, 
-                             String customManifest) {
+                             String customManifest, Map<OptionParser,String> storedPreferences) {
       _projRoot = pr;
       _mainClass = main;
       _buildDir = bd;
@@ -633,6 +649,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _createJarFlags = cjflags;
       _autoRefreshStatus = refreshStatus;
       _manifest = customManifest;
+      setPreferencesStoredInProject(storedPreferences); 
     }
     
     public boolean isProjectActive() { return true; }
@@ -820,6 +837,21 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public boolean getAutoRefreshStatus() { return _autoRefreshStatus; }
     public void setAutoRefreshStatus(boolean status) { _autoRefreshStatus = status; }
     
+    /** @return the stored preferences. */
+    public Map<OptionParser,String> getPreferencesStoredInProject() {
+      return new HashMap<OptionParser,String>(_storedPreferences);
+    }
+
+    public void setPreferencesStoredInProject(Map<OptionParser,String> sp) {
+      // remove previous listeners
+      removePreviousListeners();
+      
+      _storedPreferences.clear();
+      _storedPreferences.putAll(sp); 
+      
+      // add new listeners
+      addNewListeners(sp);
+    }
     
     // This only starts the process. It is all done asynchronously.
     public void cleanBuildDirectory() {
@@ -923,6 +955,37 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void setCustomManifest(String manifest) { _manifest = manifest; }
   }
   
+  @SuppressWarnings("unchecked")
+  protected void removePreviousListeners() {
+    for(Map.Entry<OptionParser, OptionListener<?>> e: LISTENERS_TO_REMOVE.entrySet()) {
+      // all keys should be full Option instances, not just OptionParser instances
+      if (e.getKey() instanceof Option) {
+        DrJava.getConfig().removeOptionListener((Option)e.getKey(), e.getValue());
+      }
+    }
+    LISTENERS_TO_REMOVE.clear();
+  }
+  
+  @SuppressWarnings("unchecked")
+  protected void addNewListeners(Map<OptionParser,String> newValues) {
+    for(OptionParser key: newValues.keySet()) {
+      // all keys should be full Option instances, not just OptionParser instances
+      if (key instanceof Option) {
+        DrJava.getConfig().addOptionListener((Option)key, STORED_PREFERENCES_LISTENER);
+        LISTENERS_TO_REMOVE.put(key, STORED_PREFERENCES_LISTENER);
+      }
+    }
+  }
+  
+  protected static final HashMap<OptionParser, OptionListener<? extends Object>> LISTENERS_TO_REMOVE =
+    new HashMap<OptionParser, OptionListener<? extends Object>>();
+  
+  public final OptionListener<? extends Object> STORED_PREFERENCES_LISTENER = new OptionListener<Object>() {
+    public void optionChanged(OptionEvent<Object> oce) {
+      setProjectChanged(true);
+    }
+  };
+  
   protected FileGroupingState makeFlatFileGroupingState() { return new FlatFileGroupingState(); }
   
   class FlatFileGroupingState implements FileGroupingState {
@@ -1007,7 +1070,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void setExcludedFiles(File[] fs) { }
     public boolean getAutoRefreshStatus() {return false;}
     public void setAutoRefreshStatus(boolean b) { }
-    
+    public void setPreferencesStoredInProject(Map<OptionParser,String> sp) { /* do nothing */ }
+    public Map<OptionParser,String> getPreferencesStoredInProject() { return new HashMap<OptionParser,String>(); }
+
     public void cleanBuildDirectory() { }
     
     public List<File> getClassFiles() { return new LinkedList<File>(); }
@@ -1592,6 +1657,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @param file where to save the project
     * @param info
     */
+  @SuppressWarnings("unchecked")
   public ProjectProfile _makeProjectProfile(File file, HashMap<OpenDefinitionsDocument, DocumentInfoGetter> info) 
     throws IOException {    
     ProjectProfile builder = new ProjectProfile(file);
@@ -1663,6 +1729,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     //add custom manifest
     builder.setCustomManifest(_state.getCustomManifest());
     
+    // update preference values here
+    Map<OptionParser,String> sp = _state.getPreferencesStoredInProject();
+    for(OptionParser key: sp.keySet()) {
+      sp.put(key, DrJava.getConfig().getOptionMap().getString(key));
+    }
+    builder.setPreferencesStoredInProject(sp);
+    _state.setPreferencesStoredInProject(sp);
+    
     return builder;
   }
   
@@ -1693,7 +1767,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
                                                       builder.getSourceFiles(), builder.getAuxiliaryFiles(), 
                                                       builder.getExcludedFiles(),
                                                       builder.getClassPaths(), builder.getCreateJarFile(), 
-                                                      builder.getCreateJarFlags(), builder.getAutoRefreshStatus(), builder.getCustomManifest()));
+                                                      builder.getCreateJarFlags(), builder.getAutoRefreshStatus(),
+                                                      builder.getCustomManifest(),
+                                                      builder.getPreferencesStoredInProject()));
   }
   
   /** Writes the project profile in the old project format.  Assumes DrJava is in project mode.
@@ -1715,7 +1791,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
                                                       builder.getSourceFiles(), builder.getAuxiliaryFiles(),
                                                       builder.getExcludedFiles(),
                                                       builder.getClassPaths(), builder.getCreateJarFile(), 
-                                                      builder.getCreateJarFlags(), builder.getAutoRefreshStatus(), builder.getCustomManifest()));
+                                                      builder.getCreateJarFlags(), builder.getAutoRefreshStatus(),
+                                                      builder.getCustomManifest(),
+                                                      builder.getPreferencesStoredInProject()));
   }
   
   public void reloadProject(File file, HashMap<OpenDefinitionsDocument, DocumentInfoGetter> info) throws IOException {
@@ -1760,6 +1838,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     int createJarFlags = ir.getCreateJarFlags();
     final boolean autoRefresh = ir.getAutoRefreshStatus();
     final String manifest = ir.getCustomManifest();
+    final Map<OptionParser,String> storedPreferences = ir.getPreferencesStoredInProject();
     
     // clear browser, breakpoint, and bookmark histories
     
@@ -1808,7 +1887,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     setFileGroupingState(makeProjectFileGroupingState(projectRoot, mainClass, buildDir, workDir, projectFile, srcFiles,
                                                       auxFiles, excludedFiles, projectClassPaths, createJarFile, 
-                                                      createJarFlags, autoRefresh, manifest));
+                                                      createJarFlags, autoRefresh, manifest, storedPreferences));
     
     resetInteractions(getWorkingDirectory());  // Reset interactions pane in new working directory
     
@@ -1925,6 +2004,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     setDocumentNavigator(new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().
                            makeListNavigator(getDocumentNavigator()));
     setFileGroupingState(makeFlatFileGroupingState());
+    
+    // remove previous listeners
+    removePreviousListeners();
     
     if (! suppressReset) resetInteractions(getWorkingDirectory());
     _notifier.projectClosed();

@@ -38,7 +38,9 @@ package edu.rice.cs.drjava.model;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import edu.rice.cs.util.AbsRelFile;
+import edu.rice.cs.drjava.config.OptionParser;
 
 /** This state pattern is used by the global model to store any information pertaining to the currently open project.  
   * The state pattern is used because most project information is not needed in list view. (Elspeth Rocks)
@@ -170,7 +172,12 @@ public interface FileGroupingState {
   public boolean getAutoRefreshStatus();
   
   public void setAutoRefreshStatus(boolean b);
-  
+
+  /** @return the stored preferences. */
+  public Map<OptionParser,String> getPreferencesStoredInProject();
+
+  public void setPreferencesStoredInProject(Map<OptionParser,String> sp);
+
   /** Sets the custom manifest on the project */
   public void setCustomManifest(String manifest);
   
