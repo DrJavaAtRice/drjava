@@ -3576,7 +3576,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       OptionListener<String> link13OptionListener = new OptionListener<String>() {
         public void optionChanged(OptionEvent<String> oce) {
           String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
-          if (linkVersion.equals(JAVADOC_1_3_TEXT)) {
+          if (linkVersion.equals(JAVADOC_1_3_TEXT) ||
+              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
             clearJavaAPISet();
           }
         }
@@ -3585,7 +3586,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       OptionListener<String> link14OptionListener = new OptionListener<String>() {
         public void optionChanged(OptionEvent<String> oce) {
           String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
-          if (linkVersion.equals(JAVADOC_1_4_TEXT)) {
+          if (linkVersion.equals(JAVADOC_1_4_TEXT) ||
+              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
             clearJavaAPISet();
           }
         }
@@ -3594,7 +3596,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       OptionListener<String> link15OptionListener = new OptionListener<String>() {
         public void optionChanged(OptionEvent<String> oce) {
           String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
-          if (linkVersion.equals(JAVADOC_1_5_TEXT)) {
+          if (linkVersion.equals(JAVADOC_1_5_TEXT) ||
+              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
             clearJavaAPISet();
           }
         }
@@ -3603,7 +3606,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       OptionListener<String> link16OptionListener = new OptionListener<String>() {
         public void optionChanged(OptionEvent<String> oce) {
           String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
-          if (linkVersion.equals(JAVADOC_1_6_TEXT)) {
+          if (linkVersion.equals(JAVADOC_1_6_TEXT) ||
+              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
             clearJavaAPISet();
           }
         }

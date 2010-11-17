@@ -1263,13 +1263,13 @@ public interface OptionConstants {
   
   /** Constants for the URLs of Sun's system class documentation for different versions of Java. */
   public static final StringOption JAVADOC_1_3_LINK =
-    new StringOption("javadoc.1.3.link", "http://java.sun.com/j2se/1.3/docs/api");
+    new StringOption("javadoc.1.3.link", "http://download.oracle.com/javase/1.3/docs/api");
   public static final StringOption JAVADOC_1_4_LINK =
-    new StringOption("javadoc.1.4.link", "http://java.sun.com/j2se/1.4/docs/api");
+    new StringOption("javadoc.1.4.link", "http://download.oracle.com/javase/1.4.2/docs/api");
   public static final StringOption JAVADOC_1_5_LINK =
-    new StringOption("javadoc.1.5.link", "http://java.sun.com/j2se/1.5/docs/api");
+    new StringOption("javadoc.1.5.link", "http://download.oracle.com/javase/1.5.0/docs/api");
   public static final StringOption JAVADOC_1_6_LINK =
-    new StringOption("javadoc.1.6.link", "http://java.sun.com/javase/6/docs/api");
+    new StringOption("javadoc.1.6.link", "http://download.oracle.com/javase/6/docs/api");
   
   /** The version of Java to use for links to Javadoc for system classes. */
   public static final ForcedChoiceOption JAVADOC_LINK_VERSION =
