@@ -996,6 +996,29 @@ public abstract class StandardTypeSystem extends TypeSystem {
         try {
           Expression result = makePrimitive(e);
           Type source = NodeProperties.getType(result);
+          
+          // type check valid conversions, see ExpressionEvaluator.convert          
+          if (target.equals(BOOLEAN)) {
+              if (!source.equals(BOOLEAN)) { throw new UnsupportedConversionException(); }
+          }
+          else if (target.equals(CHAR) ||
+                   target.equals(BYTE) ||
+                   target.equals(SHORT) ||
+                   target.equals(INT) ||
+                   target.equals(LONG) ||
+                   target.equals(FLOAT) ||
+                   target.equals(DOUBLE)) {
+              if ((!source.equals(CHAR)) &&
+                  (!source.equals(BYTE)) &&
+                  (!source.equals(DOUBLE)) &&
+                  (!source.equals(FLOAT)) &&
+                  (!source.equals(INT)) &&
+                  (!source.equals(LONG)) &&
+                  (!source.equals(SHORT))) { throw new UnsupportedConversionException(); }
+          }
+          else { throw new IllegalArgumentException(); }
+          // end type check valid conversions
+          
           if (!isEqual(target, source)) { NodeProperties.setConvertedType(result, erasedClass(target)); }
           return result;
         }

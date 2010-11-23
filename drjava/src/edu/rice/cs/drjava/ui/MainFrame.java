@@ -7020,12 +7020,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           case OptionConstants.INTERMEDIATE_LEVEL:
           case OptionConstants.FUNCTIONAL_JAVA_LEVEL: {
             rbFunctionalMenuItem.setSelected(true);
-            System.out.println("rbFunctionalMenuItem.setSelected(true);");
             break;
           }
           default: {
             rbFullJavaMenuItem.setSelected(true);
-            System.out.println("rbFullJavaMenuItem.setSelected(true);");
             break;
           }
         }
