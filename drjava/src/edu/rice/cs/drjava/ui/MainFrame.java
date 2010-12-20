@@ -4895,12 +4895,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       else openDir = _model.getProjectRoot();
     }
     catch(FileMovedException e) { /* do nothing */ }
+
+    File dir = chooser.getSelectedDirectory();
     
     int result = chooser.showDialog(openDir);
     chooser.removeChoosableFileFilter(ff);
     if (result != DirectoryChooser.APPROVE_OPTION)  return; // canceled or error
     
-    File dir = chooser.getSelectedDirectory();
     boolean rec = _openRecursiveCheckBox.isSelected();
     DrJava.getConfig().setSetting(OptionConstants.OPEN_FOLDER_RECURSIVE, Boolean.valueOf(rec));
     updateStatusField("Opening folder " + dir);
