@@ -4896,9 +4896,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     catch(FileMovedException e) { /* do nothing */ }
 
-    File dir = chooser.getSelectedDirectory();
-    
     int result = chooser.showDialog(openDir);
+    File dir = chooser.getSelectedDirectory();    
     chooser.removeChoosableFileFilter(ff);
     if (result != DirectoryChooser.APPROVE_OPTION)  return; // canceled or error
     
