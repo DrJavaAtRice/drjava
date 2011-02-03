@@ -36,8 +36,8 @@
 
 package edu.rice.cs.drjava.model;
 
-/** The minimal interface for all region classes.  Excludes a document field because DummyDocumentRegions are created before
-  * their corresponding document.
+/** The minimal interface for all region classes.  Excludes a document field because DummyDocumentRegions are created 
+  * before their corresponding document.
   * @version $Id$
   */
 public interface Region {

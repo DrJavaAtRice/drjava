@@ -41,6 +41,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.io.File;
+import javax.swing.text.BadLocationException;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -172,8 +173,17 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     // runJUnit waits until the thread started in DefaultJUnitModel._rawJUnitOpenDefDocs has called notify
     
     listener.assertJUnitStartCount(1);
-    // Clear document so we can make sure it's written to after startJUnit
-    _model.getJUnitModel().getJUnitDocument().remove(0, _model.getJUnitModel().getJUnitDocument().getLength() - 1);
+    // Clear document so we can make sure it's written to after startJUnit; 
+    // ?? When does the clear operation happen?  How is the timing of this clear operation controlled?
+    // Perform the clear operation atomically in the event thread.
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { 
+        try {
+          _model.getJUnitModel().getJUnitDocument().remove(0, _model.getJUnitModel().getJUnitDocument().getLength() - 1);
+        }
+        catch(BadLocationException e) { fail("BadLocationException in clearing JUnitDocument"); }
+      }
+    });
     //final TestResult testResults = doc.startJUnit();
     
     //_m = new JUnitErrorModel(doc.getDocument(), "MonkeyTestFail", testResults);

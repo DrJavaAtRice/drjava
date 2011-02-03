@@ -43,13 +43,13 @@ import java.util.*;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.util.swing.Utilities;
 
-/** Browser history manager for the entire model.  Follows readers/writers locking protocol of EventNotifier.
-  */
+/** Browser history manager for the entire model.  Follows readers/writers locking protocol of EventNotifier. */
 public class BrowserHistoryManager extends EventNotifier<RegionManagerListener<BrowserDocumentRegion>> {
   /** Two regions are similar if they are in the same document and not more than DIFF_THRESHOLD lines apart. */
   public static final int DIFF_THRESHOLD = 5;
 
-  /** List of regions. */
+  /** List of regions.  In Java 6, ArrayDeque is a better choice than Stack; should be changed once compatibility
+    * with Java 5 is abandoned. */
   private volatile Stack<BrowserDocumentRegion> _pastRegions = new Stack<BrowserDocumentRegion>();
   private volatile Stack<BrowserDocumentRegion> _futureRegions = new Stack<BrowserDocumentRegion>();
   

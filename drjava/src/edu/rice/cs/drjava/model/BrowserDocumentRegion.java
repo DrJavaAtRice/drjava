@@ -42,11 +42,11 @@ import java.io.File;
 
 /** Class for document regions that totally ordered by allocation chronology.  They do not conform to the invariants
   * required for OrderedDocumentRegions.
-  * Warning: this class defines compareTo which implicits defines a coarser equality relation than equals
+  * Warning: this class defines compareTo which implicitly defines a coarser equality relation than equals
   * @version $Id$
   */
 public class BrowserDocumentRegion implements IDocumentRegion, Comparable<BrowserDocumentRegion> {
-  private static volatile int _indexCounter = 0;  // sequence number counter for browser regions
+  private static volatile int _indexCounter = 0;   // sequence number counter for browser regions
   private final int _index;                        // unique sequence number for this region
   protected final OpenDefinitionsDocument _doc;    // document for this region
   protected final File _file;                      // file for this region
@@ -54,18 +54,17 @@ public class BrowserDocumentRegion implements IDocumentRegion, Comparable<Browse
   protected Position _endPosition;                 // final position for this region
   protected volatile DefaultMutableTreeNode _treeNode;
   
-  /** Create a new simple document region.
+  /** Create a new simple document region with a bona fide document.
     * @param doc document that contains this region
     * @param file file that contains the region
     * @param sp start position of the region 
     * @param ep end position of the region
     */
-  /** Create a new simple document region with a bona fide document */
   public BrowserDocumentRegion(OpenDefinitionsDocument doc, Position sp, Position ep) {
     assert doc != null;
     _index = _indexCounter++;    // sequence number records allocation order
     _doc = doc;
-    _file = doc.getRawFile();  // don't check the validity of _file here
+    _file = doc.getRawFile();    // don't check the validity of _file here
     _startPosition = sp;
     _endPosition = ep;
     _treeNode = null;
@@ -92,6 +91,12 @@ public class BrowserDocumentRegion implements IDocumentRegion, Comparable<Browse
 
   /** @return the end offset */
   public int getEndOffset() { return _endPosition.getOffset(); }
+  
+  /* The following are commented out because a Position object includes a reference to the corresponding object,
+   * preventing it from being garbage-collected.  We cannot retain any Position objects for documents that have
+   * been kicked out the document cache assuming we want such documents to be garbage-collected (which is the
+   * primary motivation for creating the document cache).
+   */
   
 //  /** @return the start position */
 //  public Position getStartPosition() { return _startPosition; }

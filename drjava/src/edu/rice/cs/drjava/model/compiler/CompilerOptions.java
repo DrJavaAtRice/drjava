@@ -54,8 +54,7 @@ public class CompilerOptions implements OptionConstants {
    
   private static WarningOptionListener wol = new WarningOptionListener();
   
-  /** The OptionListener for the Warning Options
-   */
+  /** The OptionListener for the Warning Options */
   private static class WarningOptionListener implements OptionListener<Boolean> {
     public void optionChanged(OptionEvent<Boolean> oce) {
       updateWarnings();

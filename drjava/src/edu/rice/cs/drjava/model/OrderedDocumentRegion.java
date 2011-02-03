@@ -43,7 +43,7 @@ package edu.rice.cs.drjava.model;
   * of lexicographic ordering on the name), then by start Position and then by end Position.
   * 
   * All implementations of this interface should be immutable (at the level of the field bindings in those classes), 
-  * but a given document Postion can "move" when the associated document is modified.  As a result, hashing on 
+  * but a given document Position can "move" when the associated document is modified.  As a result, hashing on 
   * OrderedDocumentRegions will produce upredictable results (WiLL NOT WORK) unless hashing on Positions works 
   * (which this design does NOT presume).  On the other hand, the relative ordering of Positions is invariant 
   * (except for possible coalescing of formerly distinct Positions) regardless of how the associated document is 

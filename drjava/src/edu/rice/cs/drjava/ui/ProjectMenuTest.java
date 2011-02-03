@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.ui;
 
-import edu.rice.cs.drjava.model.MultiThreadedTestCase;
+import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.project.DocFile;
@@ -51,12 +51,14 @@ import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 
+import java.awt.EventQueue;
+import java.awt.Toolkit;
 import java.io.*;
 import java.util.List;
 
 /** Test functions of Project Facility working through the main frame and model. */
-public final class ProjectMenuTest extends MultiThreadedTestCase {
-
+public final class ProjectMenuTest extends DrJavaTestCase {
+  
   private volatile MainFrame _frame;
   
   private volatile SingleDisplayModel _model;
@@ -84,7 +86,7 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
   public void setUp() throws Exception {
     // Perform Swing setup in event thread because the event thread is ALREADY running
     superSetUp(); // super.setUp() should be called first; contains an embedded invokeAndWait
-
+    
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
         try {
@@ -124,13 +126,23 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
       }
     });
   }
-
+  
   public void tearDown() throws Exception {
+    
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
         IOUtil.deleteOnExitRecursively(_parent);
         _auxFile.delete();
         //FileOps.deleteDirectory(_parent);
+      }
+    });
+    
+    /* Ensure that all pending actions in the event queue have completed. */  
+    EventQueue current = java.awt.Toolkit.getDefaultToolkit().getSystemEventQueue();
+    while (current.peekEvent() != null) { Thread.sleep(200); }
+    
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {   
         _frame.dispose();
         _projFile = FileOps.NULL_FILE;
         _model = null;
@@ -144,92 +156,84 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     
 //    Utilities.showDebug("executing testSetBuildDirectory");
     
-    //test set build directory when not in project mode
-    File f = FileOps.NULL_FILE;
-    _model.setBuildDirectory(f);
-    Utilities.clearEventQueue();  // ensure that listener tasks have completed
-    assertEquals("Build directory should not have been set", FileOps.NULL_FILE, _model.getBuildDirectory());
-    
-//    System.err.println("Opening Project File");
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() { 
-        try { _model.openProject(_projFile); }
-        catch(Exception e) { throw new UnexpectedException(e); }
-      } 
-    });
-//    System.err.println("Completed Opening Project File");
-//    System.err.println("Project documents are: " + _model.getProjectDocuments());
-    
-    Utilities.clearEventQueue();
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        try {
+//        Test set build directory when not in project mode
+          File f = FileOps.NULL_FILE;
+          _model.setBuildDirectory(f);
+          assertEquals("Build directory should not have been set", FileOps.NULL_FILE, _model.getBuildDirectory());
+          
+//          System.err.println("Opening Project File");
+          _model.openProject(_projFile);
 
-    assertEquals("Build directory should not have been set", FileOps.NULL_FILE, _model.getBuildDirectory());
-    
-    _model.setBuildDirectory(f);
-    Utilities.clearEventQueue();
-    assertEquals("Build directory should have been set", f, _model.getBuildDirectory());
+//          System.err.println("Completed Opening Project File");
+//          System.err.println("Project documents are: " + _model.getProjectDocuments());
+          
+          assertEquals("Build directory should not have been set", FileOps.NULL_FILE, _model.getBuildDirectory());
+          
+          _model.setBuildDirectory(f);
+          assertEquals("Build directory should have been set", f, _model.getBuildDirectory());
+        }
+        catch(Exception e) { throw new UnexpectedException(e); }
+      }
+    });
   }
   
-  public void testCloseAllClosesProject()  throws MalformedProjectFileException, IOException {
-    
+  public void testCloseAllClosesProject() {
 //    Utilities.showDebug("executing testCloseAllClosesProject");
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() { 
-        try { _model.openProject(_projFile); }
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        try { 
+          _model.openProject(_projFile);
+          assertTrue("Project should have been opened", _model.isProjectActive());
+          
+          _frame.closeAll(); 
+          assertFalse("Project should have been closed", _model.isProjectActive());
+        }
         catch(Exception e) { throw new UnexpectedException(e); }
-      } 
+      }
     });
-    Utilities.clearEventQueue();
-    
-    assertTrue("Project should have been opened", _model.isProjectActive());
-    
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() { 
-        try { _frame.closeAll(); }
-        catch(Exception e) { throw new UnexpectedException(e); }
-      } 
-    });
-    Utilities.clearEventQueue();
-    
-    assertFalse("Project should have been closed", _model.isProjectActive());
   }
   
-  public void testSaveProject() throws IOException, MalformedProjectFileException {
-    
+  public void testSaveProject() {  
 //     Utilities.showDebug("executing testSaveProject");
     
     Utilities.invokeAndWait(new Runnable() { 
-      public void run() { 
-        _frame.openProject(new FileOpenSelector() {
-          public File[] getFiles() throws OperationCanceledException { return new File[] {_projFile}; }
-        });
-        
-        // open a new file and make it an auxiliary file
-        _frame.open(new FileOpenSelector() {
-          public File[] getFiles() throws OperationCanceledException { return new File[] {_auxFile}; }
-        });
-        _frame._moveToAuxiliary();
-
-        List<OpenDefinitionsDocument> auxDocs = _model.getAuxiliaryDocuments();
-        assertEquals("One auxiliary document", 1, auxDocs.size());
-        _frame.saveProject();
-        _frame._closeProject();
-      } 
+      public void run() {
+        try {
+          _frame.openProject(new FileOpenSelector() {
+            public File[] getFiles() throws OperationCanceledException { return new File[] { _projFile}; }
+          });
+          
+          // open a new file and make it an auxiliary file
+          _frame.open(new FileOpenSelector() {
+            public File[] getFiles() throws OperationCanceledException { return new File[] { _auxFile}; }
+          });
+          _frame._moveToAuxiliary();
+          
+          List<OpenDefinitionsDocument> auxDocs = _model.getAuxiliaryDocuments();
+          assertEquals("One auxiliary document", 1, auxDocs.size());
+          _frame.saveProject();
+          _frame._closeProject();
+          
+          List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+          assertEquals("One empty document remaining", 1, docs.size());
+          assertEquals("Name is (Untitled)", "(Untitled)", _model.getActiveDocument().toString());
+          
+          ProjectFileIR pfir = ProjectFileParserFacade.ONLY.parse(_projFile);
+          DocFile[] src = pfir.getSourceFiles();
+//          System.err.println(Arrays.toString(src));
+          DocFile[] aux = pfir.getAuxiliaryFiles();
+//          System.err.println(Arrays.toString(aux));
+          assertEquals("Number of saved src files", 2, src.length);
+          assertEquals("Number of saved aux files", 1, aux.length);
+          assertEquals("wrong name for _file2", _file2.getCanonicalPath(), src[1].getCanonicalPath()); // assumes same (not reverse) order
+          assertEquals("Wrong name for _file1", _file1.getCanonicalPath(), src[0].getCanonicalPath());
+          assertEquals("Wrong aux file", _auxFile.getCanonicalPath(), aux[0].getCanonicalPath());
+        }
+        catch(Exception e) { throw new UnexpectedException(e); }
+      }
     });
-    Utilities.clearEventQueue();
-    
-    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
-    assertEquals("One empty document remaining", 1, docs.size());
-    assertEquals("Name is (Untitled)", "(Untitled)", _model.getActiveDocument().toString());
-    
-    ProjectFileIR pfir = ProjectFileParserFacade.ONLY.parse(_projFile);
-    DocFile[] src = pfir.getSourceFiles();
-//    System.err.println(Arrays.toString(src));
-    DocFile[] aux = pfir.getAuxiliaryFiles();
-//    System.err.println(Arrays.toString(aux));
-    assertEquals("Number of saved src files", 2, src.length);
-    assertEquals("Number of saved aux files", 1, aux.length);
-    assertEquals("wrong name for _file2", _file2.getCanonicalPath(), src[1].getCanonicalPath()); // assumes same (not reverse) order
-    assertEquals("Wrong name for _file1", _file1.getCanonicalPath(), src[0].getCanonicalPath());
-    assertEquals("Wrong aux file", _auxFile.getCanonicalPath(), aux[0].getCanonicalPath());
   }
 }
