@@ -66,7 +66,7 @@ public class ArrayData extends SymbolData {
     
     // Arrays only have one field called length, and it is automatically given a value
     addVar(new VariableData("length", 
-                            new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public", "final"}),
+                            new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public", "final"}),
                             SymbolData.INT_TYPE, true, this)); 
     
     // All arrays are a subclass of Object
@@ -82,7 +82,7 @@ public class ArrayData extends SymbolData {
     
     //And, since they implement Cloneable, all arrays overwrite the clone method so that it does not throw exceptions
     addMethod(new MethodData("clone", 
-                             new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}), 
+                             new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"}), 
                              new TypeParameter[0],
                              object,
                              new VariableData[0],
@@ -109,7 +109,7 @@ public class ArrayData extends SymbolData {
       for (int i = 0; i < elementMavs.length; i++) { newMavs[i] = elementMavs[i]; }
       newMavs[elementMavs.length] = "final";
       
-      return new ModifiersAndVisibility(SourceInfo.NO_INFO, newMavs);
+      return new ModifiersAndVisibility(SourceInfo.NONE, newMavs);
     }
   }
   
@@ -213,21 +213,21 @@ public class ArrayData extends SymbolData {
     
     private ArrayData _ad;
     
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"});
     private ModifiersAndVisibility _protectedMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"protected"});
     private ModifiersAndVisibility _privateMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"private"});
     private ModifiersAndVisibility _packageMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[0]);
     private ModifiersAndVisibility _abstractMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"abstract"});
     private ModifiersAndVisibility _finalMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"final"});
     private ModifiersAndVisibility _publicFinalMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[]{"public", "final"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[]{"public", "final"});
     private ModifiersAndVisibility _privateFinalMav =
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private", "final"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"private", "final"});
     
     private LanguageLevelVisitor llv;
     private SourceInfo si;
@@ -247,7 +247,7 @@ public class ArrayData extends SymbolData {
       
       LanguageLevelConverter.symbolTable.clear();
       LanguageLevelConverter._newSDs.clear();
-      si = SourceInfo.NO_INFO;
+      si = SourceInfo.NONE;
       SymbolData e = new SymbolData("elementType");
       e.setIsContinuation(false);
       _ad = new ArrayData(e, llv, si);

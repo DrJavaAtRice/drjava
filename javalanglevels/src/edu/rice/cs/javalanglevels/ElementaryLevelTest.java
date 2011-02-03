@@ -67,8 +67,8 @@ public class ElementaryLevelTest extends TestCase {
 //  }
   
   /** Tests some files that should be handled without errors, and ensures the resulting augmented
-   * file is correct.*/
-  public void xtestSuccessful() {
+    * file is correct.*/
+  public void testSuccessful() {
     File[] testFiles = directory.listFiles(new FileFilter() {
       public boolean accept(File pathName) { return pathName.getAbsolutePath().endsWith(".dj0"); }
     });
@@ -125,6 +125,7 @@ public class ElementaryLevelTest extends TestCase {
     }
   }
   
+  // TODO: !!! Reinstate this test
   /** Tests that when some files have already been compiled, the .java files are not generated for those files,
     * and files that reference those files are augmented correctly.
     */
@@ -143,7 +144,7 @@ public class ElementaryLevelTest extends TestCase {
     assertEquals("should be no visitor exceptions", new LinkedList<Pair<String, JExpressionIF>>(), result.getSecond());
     
     /**Now make sure that the resulting java files are correct.*/
-    for(int i = 0; i < testFiles.length; i++) {
+    for (int i = 0; i < testFiles.length; i++) {
       File currFile = testFiles[i];
       String fileName = currFile.getAbsolutePath();
       fileName = fileName.substring(0, fileName.length() -4);

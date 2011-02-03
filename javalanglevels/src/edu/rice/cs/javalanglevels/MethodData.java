@@ -91,8 +91,8 @@ public class MethodData extends BodyData {
   
   /** Constructor used by the LanguageLevelConverter, where only the name and params matter*/
   public MethodData(String name, VariableData[] params) { 
-    this(name, new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]), new TypeParameter[0], null, 
-         params, new String[0], null, new NullLiteral(SourceInfo.NO_INFO));
+    this(name, new ModifiersAndVisibility(SourceInfo.NONE, new String[0]), new TypeParameter[0], null, 
+         params, new String[0], null, new NullLiteral(SourceInfo.NONE));
   }
   
   /** Factory methods used for debugging purposes among other things. */
@@ -192,11 +192,11 @@ public class MethodData extends BodyData {
     private MethodData _md;
     private MethodData _md2;
     
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _publicMav2 = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"});
+    private ModifiersAndVisibility _publicMav2 = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"});
     private ModifiersAndVisibility _protectedMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"protected"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"final"});
     
     public MethodDataTest() { this(""); }
     
@@ -207,14 +207,14 @@ public class MethodData extends BodyData {
       VariableData vd2 = new VariableData("v2", _protectedMav, SymbolData.BOOLEAN_TYPE, true, _md);
       TypeParameter[] tp = new TypeParameter[0];
       
-      Type t = new PrimitiveType(SourceInfo.NO_INFO, "int");
-      Word name = new Word(SourceInfo.NO_INFO, "m");
-      Word paramName = new Word(SourceInfo.NO_INFO, "i");
+      Type t = new PrimitiveType(SourceInfo.NONE, "int");
+      Word name = new Word(SourceInfo.NONE, "m");
+      Word paramName = new Word(SourceInfo.NONE, "i");
       FormalParameter fp = 
-        new FormalParameter(SourceInfo.NO_INFO, new UninitializedVariableDeclarator(SourceInfo.NO_INFO, t, paramName), 
+        new FormalParameter(SourceInfo.NONE, new UninitializedVariableDeclarator(SourceInfo.NONE, t, paramName), 
                             false);
       MethodDef mdef = 
-        new AbstractMethodDef(SourceInfo.NO_INFO, _publicMav, tp, t, name, new FormalParameter[] {fp}, 
+        new AbstractMethodDef(SourceInfo.NONE, _publicMav, tp, t, name, new FormalParameter[] {fp}, 
                               new ReferenceType[0]);
       _md = new MethodData("m", _publicMav, tp, SymbolData.INT_TYPE, new VariableData[] {vd},
                              new String[] {"I throw this"}, SymbolData.BOOLEAN_TYPE, mdef);
@@ -254,8 +254,8 @@ public class MethodData extends BodyData {
      /* The different type parameters test is quoted out because the particular names do not matter. */
      // Different type parameters
 //     TypeParameter[] tp2 = 
-//       new TypeParameter[] { new TypeParameter(SourceInfo.NO_INFO, new TypeVariable(SourceInfo.NO_INFO,"tv"), 
-//                                               new TypeVariable(SourceInfo.NO_INFO,"i"))};
+//       new TypeParameter[] { new TypeParameter(SourceInfo.NONE, new TypeVariable(SourceInfo.NONE,"tv"), 
+//                                               new TypeVariable(SourceInfo.NONE,"i"))};
 //   
 //     _md2 = new MethodData("m", _publicMav2, tp2, SymbolData.INT_TYPE, new VariableData[]{vd},
 //                           new String[] {"I throw this"}, SymbolData.BOOLEAN_TYPE, mdef);

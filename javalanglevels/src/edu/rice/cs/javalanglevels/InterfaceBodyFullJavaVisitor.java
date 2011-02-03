@@ -32,6 +32,8 @@ package edu.rice.cs.javalanglevels;
 
 import edu.rice.cs.javalanglevels.tree.*;
 import edu.rice.cs.javalanglevels.parser.*;
+import edu.rice.cs.javalanglevels.util.Utilities;
+
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.IterUtil;
 import java.util.*;
@@ -45,8 +47,8 @@ import junit.framework.TestCase;
   */
 public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
   
-  /**The SymbolData corresponding to this interface. */
-  private SymbolData _symbolData;
+  /**The SymbolData corresponding to this interface, which encloses the body of the interface. */
+  private SymbolData _enclosing;
   
   /** Old constructor for InterfaceBodyFullJavaVisitor.
     * @param sd             The SymbolData that encloses the context we are visiting.
@@ -67,7 +69,9 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
                                       Hashtable<String, Triple<SourceInfo, LanguageLevelVisitor, SymbolData>> continuations,
                                       LinkedList<Command> fixUps) {
     super(file, packageName, sd.getName(), importedFiles, importedPackages, classesInThisFile, continuations, fixUps);
-    _symbolData = sd;
+    _enclosing = sd;
+//    if (_enclosingClassName != sd.getName()) Utilities.show("enclosingClassName does not equal sd.getName(). Trace follows.\n" +
+//                                                            Utilities.getStackTrace());
   }
   
   /** Preferred constructor for InterfaceBodyFullJavaVisitor.
@@ -92,7 +96,9 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
                                       HashMap<String, SymbolData> genericTypes) {
     super(file, packageName, sd.getName(), importedFiles, importedPackages, classesInThisFile, continuations, fixUps,
           genericTypes);
-    _symbolData = sd;
+    _enclosing = sd;
+//    if (_enclosingClassName != sd.getName()) Utilities.show("enclosingClassName does not equal sd.getName(). Trace follows.\n" +
+//                                                            Utilities.getStackTrace());
   }
   
   /** Ignore Statement. */
@@ -130,7 +136,41 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     forAbstractMethodDefDoFirst(that);
     if (_checkError()) return null;
     
-    MethodData md = createMethodData(that, _symbolData);
+    assert _enclosing != null;
+    
+      // Process type parameters
+    TypeParameter[] tps = that.getTypeParams();
+
+    // TODO !!! pass genericTypes as a parameter to createMethod and critical submethods.  The scope of the
+    // new generic types table includes all of createMethodData processing, notably processing the return type.
+    // Passing an extended generic types table to BodyBodyFullJavaVisitor is insufficient
+      
+    // Save a snapshot of _genericTypes
+    HashMap<String, SymbolData> oldGenericTypes = _genericTypes;
+    
+    // Rebind _genericTypes to a shallow copy of itself for use in processing this method. The temporary variable copy
+    // gets around a bug in javac in processing the SuppressWarnings statement.
+    @SuppressWarnings("unchecked")
+    HashMap<String, SymbolData> copy = (HashMap<String, SymbolData>)_genericTypes.clone();
+    _genericTypes = copy;
+    
+    if (tps != null) {  // extend genericTypes by new type variable bindings
+      for (TypeParameter tp: tps) {
+        final String typeName = tp.getVariable().getName();
+        final String boundName = tp.getBound().getName();
+        SymbolData boundSD = _identifyType(boundName, that.getSourceInfo(), _enclosingClassName);
+        if (boundSD == null) { // create a dummy SymbolData 
+          boundSD = symbolTable.get("java.lang.Object"); //  TODO: could create a separate unbound type variable singleton class?
+//        System.err.println("Creating dummy SymbolData for bounding type " + typeName + " in inner class " + name);
+          // TODO!  !!!!! Create an appropriate fixUp mechanism
+        }
+//        System.err.println("In method " + _enclosing + "." + that.getName().getText() + ", type " + typeName 
+//                             + " is bound to " + boundSD);
+        _genericTypes.put(typeName, boundSD);
+      }
+    }
+    
+    MethodData md = createMethodData(that, _enclosing);
     
     //All interface methods are considered public by default: enforce this.
     if (md.hasModifier("private")) {
@@ -143,26 +183,28 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     // All interface methods are considered public by default.
     md.addModifier("public");
     md.addModifier("abstract"); // and all interface methods are abstract. 
-    String className = getUnqualifiedClassName(_symbolData.getName());
+    String className = getUnqualifiedClassName(_enclosing.getName());
     if (className.equals(md.getName())) {
       _addAndIgnoreError("Only constructors can have the same name as the class they appear in, " + 
                          "and constructors cannot appear in interfaces.", that);
     }
-    else _symbolData.addMethod(md);
+    else _enclosing.addMethod(md);
+
+    _genericTypes = oldGenericTypes;
     return null;
   }
   
   /** Call the method in FullJavaVisitor since it's common to this ClassBodyFullJavaVisitor. */
   public Void forInnerInterfaceDef(InnerInterfaceDef that) {
     String relName = that.getName().getText();
-    handleInnerInterfaceDef(that, _symbolData, relName, getQualifiedClassName(_symbolData.getName()) + '.' + relName);
+    handleInnerInterfaceDef(that, _enclosing, relName, getQualifiedClassName(_enclosing.getName()) + '.' + relName);
     return null;
   }
   
   /**Call the method in FullJavaVisitor; it's common to this ClassBodyAdvancedVisitor.*/
   public Void forInnerClassDef(InnerClassDef that) {
     String relName = that.getName().getText();
-    handleInnerClassDef(that, _symbolData, relName, getQualifiedClassName(_symbolData.getName()) + '.' + relName);
+    handleInnerClassDef(that, _enclosing, relName, getQualifiedClassName(_enclosing.getName()) + '.' + relName);
     return null;
   }
   
@@ -171,17 +213,30 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     _addAndIgnoreError("Constructor definitions cannot appear in interfaces", that);
     return null;
   }
+  
+  /** Processes a static field declaration within an interface. Calls the super method to convert the VariableDeclaration
+    * to a VariableData array, then makes sure that each VariableData is final and static, as required in an
+    * interface.
+    * @param enclosingData  The Data immediately enclosing the variables
+    */
+  protected VariableData[] _variableDeclaration2VariableData(VariableDeclaration vd, Data enclosingData) {
+    VariableData[] vds = super._variableDeclaration2VariableData(vd, enclosingData);
+    for (int i = 0; i < vds.length; i++) {
+      vds[i].setFinalAndStatic();
+    }
+    return vds;
+  }
 
   /** Delegate to method in LLV */
   public Void forComplexAnonymousClassInstantiation(ComplexAnonymousClassInstantiation that) {
-    complexAnonymousClassInstantiationHelper(that, _symbolData);  // TODO: the wrong enclosing context?
+    complexAnonymousClassInstantiationHelper(that, _enclosing);  // TODO: the wrong enclosing context?
     return null;
   }
 
   /** Delegate to method in LLV*/
   public Void forSimpleAnonymousClassInstantiation(SimpleAnonymousClassInstantiation that) {
 //    System.err.println("Calling simpleAnonymousClassInstantiation Helper from InterfaceBody " + that.getSourceInfo());
-    simpleAnonymousClassInstantiationHelper(that, _symbolData);
+    simpleAnonymousClassInstantiationHelper(that, _enclosing);
     return null;
   }
 
@@ -193,12 +248,12 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     private SymbolData _sd1;
     private SymbolData _objectSD;
      
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[0]);
+    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"final"});
     
     public InterfaceBodyFullJavaVisitorTest() { this(""); }
     public InterfaceBodyFullJavaVisitorTest(String name) { super(name);  }
@@ -242,14 +297,14 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     
     public void testForConcreteMethodDefDoFirst() {
       // Check that an error is thrown
-      ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NO_INFO, 
+      ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NONE, 
                                                     _publicMav, 
                                                     new TypeParameter[0], 
-                                                    new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                                    new Word(SourceInfo.NO_INFO, "methodName"),
+                                                    new PrimitiveType(SourceInfo.NONE, "int"), 
+                                                    new Word(SourceInfo.NONE, "methodName"),
                                                     new FormalParameter[0],
                                                     new ReferenceType[0], 
-                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                                    new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       cmd.visit(_ibfv);
       assertEquals("There should not be 1 error", 1, errors.size());
       assertEquals("The error message should be correct", "You cannot have concrete methods definitions in interfaces", 
@@ -259,26 +314,26 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     
     public void testForAbstractMethodDefDoFirst() {
       // Check one that works
-      _ibfv._symbolData.setMav(_abstractMav);
-      AbstractMethodDef amd2 = new AbstractMethodDef(SourceInfo.NO_INFO, 
+      _ibfv._enclosing.setMav(_abstractMav);
+      AbstractMethodDef amd2 = new AbstractMethodDef(SourceInfo.NONE, 
                                                      _abstractMav, 
                                                      new TypeParameter[0], 
-                                                     new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                                     new Word(SourceInfo.NO_INFO, "methodName"),
+                                                     new PrimitiveType(SourceInfo.NONE, "double"), 
+                                                     new Word(SourceInfo.NONE, "methodName"),
                                                      new FormalParameter[0],
                                                      new ReferenceType[0]);
       amd2.visit(_ibfv);
       assertEquals("There should be no errors", 0, errors.size());
       assertTrue("The method def should be public", 
-                 _ibfv._symbolData.getMethods().get(0).hasModifier("public"));
+                 _ibfv._enclosing.getMethods().get(0).hasModifier("public"));
 
     }
 
     public void testForInstanceInitializerDoFirst() {
       InstanceInitializer ii = 
-        new InstanceInitializer(SourceInfo.NO_INFO, 
-                                new Block(SourceInfo.NO_INFO, 
-                                          new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0])));
+        new InstanceInitializer(SourceInfo.NONE, 
+                                new Block(SourceInfo.NONE, 
+                                          new BracedBody(SourceInfo.NONE, new BodyItemI[0])));
       ii.visit(_ibfv);
       assertEquals("There should be one error.", 1, errors.size());
       assertEquals("The error message should be correct.", 
@@ -287,7 +342,7 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     }
 
     public void testForSimpleThisReferenceDoFirst() {
-     SimpleThisReference tl = new SimpleThisReference(SourceInfo.NO_INFO);
+     SimpleThisReference tl = new SimpleThisReference(SourceInfo.NONE);
      tl.visit(_ibfv);
      assertEquals("There should be one error", 1, errors.size());
      assertEquals("The error message should be correct", 
@@ -296,8 +351,8 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     }
     
     public void testForComplexThisReferenceDoFirst() {
-     ComplexThisReference tl = new ComplexThisReference(SourceInfo.NO_INFO, 
-                                                        new NullLiteral(SourceInfo.NO_INFO));
+     ComplexThisReference tl = new ComplexThisReference(SourceInfo.NONE, 
+                                                        new NullLiteral(SourceInfo.NONE));
      tl.visit(_ibfv);
      assertEquals("There should be one error", 1, errors.size());
      assertEquals("The error message should be correct", 
@@ -307,7 +362,7 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     }
     
     public void testForSimpleSuperReferenceDoFirst() {
-     SimpleSuperReference sr = new SimpleSuperReference(SourceInfo.NO_INFO);
+     SimpleSuperReference sr = new SimpleSuperReference(SourceInfo.NONE);
      sr.visit(_ibfv);
      assertEquals("There should be one error", 1, errors.size());
      assertEquals("The error message should be correct", 
@@ -316,8 +371,8 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     }
     
     public void testForComplexSuperReferenceDoFirst() {
-      ComplexSuperReference cr = new ComplexSuperReference(SourceInfo.NO_INFO, 
-                                                           new NullLiteral(SourceInfo.NO_INFO));
+      ComplexSuperReference cr = new ComplexSuperReference(SourceInfo.NONE, 
+                                                           new NullLiteral(SourceInfo.NONE));
       cr.visit(_ibfv);
       assertEquals("There should be one error", 1, errors.size());
       assertEquals("The error message should be correct", 
@@ -327,29 +382,29 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     
     public void xtestForVariableDeclarationDoFirst() {
       //Check that if a field is initialized, no error is thrown
-      VariableDeclaration vdecl0 = new VariableDeclaration(SourceInfo.NO_INFO,
+      VariableDeclaration vdecl0 = new VariableDeclaration(SourceInfo.NONE,
                                                        _packageMav,
                                                        new VariableDeclarator[] {
-        new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                          new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                          new Word (SourceInfo.NO_INFO, "field0"), 
-                                          new DoubleLiteral(SourceInfo.NO_INFO, 2.345))});
+        new InitializedVariableDeclarator(SourceInfo.NONE, 
+                                          new PrimitiveType(SourceInfo.NONE, "double"), 
+                                          new Word (SourceInfo.NONE, "field0"), 
+                                          new DoubleLiteral(SourceInfo.NONE, 2.345))});
 
       vdecl0.visit(_ibfv);
       assertEquals("There should be no errors", 0, errors.size());
                                                            
       
       // Check that an error is thrown if the fields are not initialized
-      VariableDeclaration vdecl = new VariableDeclaration(SourceInfo.NO_INFO,
+      VariableDeclaration vdecl = new VariableDeclaration(SourceInfo.NONE,
                                                        _packageMav,
                                                        new VariableDeclarator[] {
-        new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                               new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                               new Word (SourceInfo.NO_INFO, "field1"),
-                               new DoubleLiteral(SourceInfo.NO_INFO, 2.45)),
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                               new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
-                               new Word (SourceInfo.NO_INFO, "field2"))});
+        new InitializedVariableDeclarator(SourceInfo.NONE, 
+                               new PrimitiveType(SourceInfo.NONE, "double"), 
+                               new Word (SourceInfo.NONE, "field1"),
+                               new DoubleLiteral(SourceInfo.NONE, 2.45)),
+        new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                               new PrimitiveType(SourceInfo.NONE, "boolean"), 
+                               new Word (SourceInfo.NONE, "field2"))});
       vdecl.visit(_ibfv);
       assertEquals("There should be one error", 1, errors.size());
       assertEquals("The error message should be correct", 
@@ -359,23 +414,23 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     
     public void testForAbstractMethodDef() {
       // Test one that works.
-      MethodDef mdef = new AbstractMethodDef(SourceInfo.NO_INFO, 
+      MethodDef mdef = new AbstractMethodDef(SourceInfo.NONE, 
                                              _abstractMav, 
                                              new TypeParameter[0], 
-                                             new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                             new Word(SourceInfo.NO_INFO, "methodName"),
+                                             new PrimitiveType(SourceInfo.NONE, "int"), 
+                                             new Word(SourceInfo.NONE, "methodName"),
                                              new FormalParameter[0],
                                              new ReferenceType[0]);
-      _ibfv._symbolData.setMav(_abstractMav);
+      _ibfv._enclosing.setMav(_abstractMav);
       mdef.visit(_ibfv);
       assertEquals("There should not be any errors.", 0, errors.size());
       
       // Test one that doesn't work.
-      mdef = new AbstractMethodDef(SourceInfo.NO_INFO, 
+      mdef = new AbstractMethodDef(SourceInfo.NONE, 
                                              _abstractMav, 
                                              new TypeParameter[0], 
-                                             new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                             new Word(SourceInfo.NO_INFO, "MyInterface"),
+                                             new PrimitiveType(SourceInfo.NONE, "int"), 
+                                             new Word(SourceInfo.NONE, "MyInterface"),
                                              new FormalParameter[0],
                                              new ReferenceType[0]);
       mdef.visit(_ibfv);
@@ -386,23 +441,23 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
                    errors.get(0).getFirst());
       
       //It's okay for the method to be public
-      AbstractMethodDef amd3 = new AbstractMethodDef(SourceInfo.NO_INFO, 
+      AbstractMethodDef amd3 = new AbstractMethodDef(SourceInfo.NONE, 
                                                      _publicMav, 
                                                      new TypeParameter[0], 
-                                                     new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                                     new Word(SourceInfo.NO_INFO, "methodName2"),
+                                                     new PrimitiveType(SourceInfo.NONE, "double"), 
+                                                     new Word(SourceInfo.NONE, "methodName2"),
                                                      new FormalParameter[0],
                                                      new ReferenceType[0]);
       amd3.visit(_ibfv);
       assertEquals("There should still be one error", 1, errors.size());
-      assertTrue("The method def should be public", _ibfv._symbolData.getMethods().get(1).hasModifier("public"));
+      assertTrue("The method def should be public", _ibfv._enclosing.getMethods().get(1).hasModifier("public"));
 
       //What if the method is called private? Should throw error
-      AbstractMethodDef amd4 = new AbstractMethodDef(SourceInfo.NO_INFO, 
+      AbstractMethodDef amd4 = new AbstractMethodDef(SourceInfo.NONE, 
                                                      _privateMav, 
                                                      new TypeParameter[0], 
-                                                     new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                                     new Word(SourceInfo.NO_INFO, "methodName3"),
+                                                     new PrimitiveType(SourceInfo.NONE, "double"), 
+                                                     new Word(SourceInfo.NONE, "methodName3"),
                                                      new FormalParameter[0],
                                                      new ReferenceType[0]);
       amd4.visit(_ibfv);
@@ -412,11 +467,11 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
                    errors.get(1).getFirst());
     
       //What if the method is protected: Should throw error
-      AbstractMethodDef amd5 = new AbstractMethodDef(SourceInfo.NO_INFO, 
+      AbstractMethodDef amd5 = new AbstractMethodDef(SourceInfo.NONE, 
                                                      _protectedMav, 
                                                      new TypeParameter[0], 
-                                                     new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                                     new Word(SourceInfo.NO_INFO, "methodName4"),
+                                                     new PrimitiveType(SourceInfo.NONE, "double"), 
+                                                     new Word(SourceInfo.NONE, "methodName4"),
                                                      new FormalParameter[0],
                                                      new ReferenceType[0]);
       amd5.visit(_ibfv);
@@ -428,38 +483,38 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     
 
     public void testForInnerClassDef() {
-      _ibfv._symbolData = new SymbolData("MyInterface");
-      _ibfv._symbolData.setInterface(true);
+      _ibfv._enclosing = new SymbolData("MyInterface");
+      _ibfv._enclosing.setInterface(true);
       
 //      SymbolData obj = new SymbolData("java.lang.Object");
       LanguageLevelConverter._newSDs.clear();
 //      LanguageLevelConverter.symbolTable.put("java.lang.Object", obj);
       
       InnerClassDef cd1 = 
-        new InnerClassDef(SourceInfo.NO_INFO, 
+        new InnerClassDef(SourceInfo.NONE, 
                           _packageMav, 
-                          new Word(SourceInfo.NO_INFO, "Bart"),
+                          new Word(SourceInfo.NONE, "Bart"),
                           new TypeParameter[0], 
-                          new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+                          new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
                           new ReferenceType[0], 
-                          new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                          new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       InnerClassDef cd0 = 
-        new InnerClassDef(SourceInfo.NO_INFO, 
+        new InnerClassDef(SourceInfo.NONE, 
                           _packageMav, 
-                          new Word(SourceInfo.NO_INFO, "Lisa"),
+                          new Word(SourceInfo.NONE, "Lisa"),
                           new TypeParameter[0], 
-                          new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+                          new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
                           new ReferenceType[0], 
-                          new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {cd1}));
+                          new BracedBody(SourceInfo.NONE, new BodyItemI[] {cd1}));
      
-//      SymbolData sd0 = new SymbolData(_ibfv._symbolData.getName() + "$Lisa", _packageMav, new TypeParameter[0], obj, 
+//      SymbolData sd0 = new SymbolData(_ibfv._enclosing.getName() + "$Lisa", _packageMav, new TypeParameter[0], obj, 
 //                                      new ArrayList<SymbolData>(), null); 
 //      SymbolData sd1 = 
-//        new SymbolData(_ibfv._symbolData.getName() + "$Lisa$Bart", _packageMav, new TypeParameter[0], obj, 
+//        new SymbolData(_ibfv._enclosing.getName() + "$Lisa$Bart", _packageMav, new TypeParameter[0], obj, 
 //                       new ArrayList<SymbolData>(), null); 
       
-//      _ibfv._symbolData.addInnerClass(sd0);
-//      sd0.setOuterData(_ibfv._symbolData);
+//      _ibfv._enclosing.addInnerClass(sd0);
+//      sd0.setOuterData(_ibfv._enclosing);
 
 //      sd0.addInnerClass(sd1);
 //      sd1.setOuterData(sd0);
@@ -467,14 +522,14 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
 //      sd0.setIsContinuation(true);
 //      sd1.setIsContinuation(true);
 //      LanguageLevelConverter._newSDs.clear();
-//      LanguageLevelConverter.symbolTable.put(_ibfv._symbolData.getName() + "$Lisa", sd0);
+//      LanguageLevelConverter.symbolTable.put(_ibfv._enclosing.getName() + "$Lisa", sd0);
 
       cd0.visit(_ibfv);
 
-      SymbolData sd0 = _ibfv._symbolData.getInnerClassOrInterface("Lisa");
+      SymbolData sd0 = _ibfv._enclosing.getInnerClassOrInterface("Lisa");
       assertNotNull("Inner class Lisa exists", sd0);
       
-      assertEquals("Lisa should have the correct outer data", _ibfv._symbolData, sd0.getOuterData());
+      assertEquals("Lisa should have the correct outer data", _ibfv._enclosing, sd0.getOuterData());
       assertTrue("_sd1 should be an interface", _sd1.isInterface());
       assertFalse("sd0 should be a class", sd0.isInterface());
       assertEquals("Lisa should have 0 methods", 0, sd0.getMethods().size());  
@@ -490,24 +545,24 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     public void testForInnerInterfaceDef() {
 
       InnerInterfaceDef cd1 = 
-        new InnerInterfaceDef(SourceInfo.NO_INFO, _packageMav, new Word(SourceInfo.NO_INFO, "Bart"),
+        new InnerInterfaceDef(SourceInfo.NONE, _packageMav, new Word(SourceInfo.NONE, "Bart"),
                               new TypeParameter[0], new ReferenceType[0], 
-                              new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                              new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       
       InnerInterfaceDef cd0 = 
-        new InnerInterfaceDef(SourceInfo.NO_INFO, _packageMav, new Word(SourceInfo.NO_INFO, "Lisa"),
+        new InnerInterfaceDef(SourceInfo.NONE, _packageMav, new Word(SourceInfo.NONE, "Lisa"),
                               new TypeParameter[0], new ReferenceType[0], 
-                              new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {cd1}));
+                              new BracedBody(SourceInfo.NONE, new BodyItemI[] {cd1}));
       
-//      SymbolData sd0 = new SymbolData(_ibfv._symbolData.getName() + "$Lisa", _packageMav, new TypeParameter[0], 
+//      SymbolData sd0 = new SymbolData(_ibfv._enclosing.getName() + "$Lisa", _packageMav, new TypeParameter[0], 
 //                                      new ArrayList<SymbolData>(), null); 
-//      SymbolData sd1 = new SymbolData(_ibfv._symbolData.getName() + "$Lisa$Bart", _packageMav, new TypeParameter[0], 
+//      SymbolData sd1 = new SymbolData(_ibfv._enclosing.getName() + "$Lisa$Bart", _packageMav, new TypeParameter[0], 
 //                                      new ArrayList<SymbolData>(), null);
 //      sd0.addInnerInterface(sd1);
 //
 //      
-//      _ibfv._symbolData.addInnerInterface(sd0);
-//      sd0.setOuterData(_ibfv._symbolData);
+//      _ibfv._enclosing.addInnerInterface(sd0);
+//      sd0.setOuterData(_ibfv._enclosing);
 //
 //      sd0.addInnerInterface(sd1);
 //      sd1.setOuterData(sd0);
@@ -516,16 +571,16 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
 //      sd0.setIsContinuation(true);
 //      sd1.setIsContinuation(true);
 //      LanguageLevelConverter._newSDs.clear();
-//      LanguageLevelConverter.symbolTable.put(_ibfv._symbolData.getName() + "$Lisa", sd0);
+//      LanguageLevelConverter.symbolTable.put(_ibfv._enclosing.getName() + "$Lisa", sd0);
 //      LanguageLevelConverter._newSDs.clear();
-//      LanguageLevelConverter.symbolTable.put(_ibfv._symbolData.getName() + "$Lisa$Bart", sd1);
+//      LanguageLevelConverter.symbolTable.put(_ibfv._enclosing.getName() + "$Lisa$Bart", sd1);
 
       cd0.visit(_ibfv);
 
-      SymbolData sd0 = _ibfv._symbolData.getInnerClassOrInterface("Lisa");
+      SymbolData sd0 = _ibfv._enclosing.getInnerClassOrInterface("Lisa");
       assertNotNull("Inner interfacae Lisa exists", sd0);
       
-      assertEquals("Lisa should have the correct outer data", _ibfv._symbolData, sd0.getOuterData());
+      assertEquals("Lisa should have the correct outer data", _ibfv._enclosing, sd0.getOuterData());
       assertTrue("_sd1 should be an interface", _sd1.isInterface());
       assertTrue("sd0 should be a interface", sd0.isInterface());
       assertEquals("Lisa should have 0 methods", 0, sd0.getMethods().size());  
@@ -541,9 +596,9 @@ public class InterfaceBodyFullJavaVisitor extends FullJavaVisitor {
     public void testForConstructorDef() {
      ///this is a ConstructorDef with no formal paramaters and no throws
       ConstructorDef cd =
-        new ConstructorDef(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "MyClass"),
+        new ConstructorDef(SourceInfo.NONE, new Word(SourceInfo.NONE, "MyClass"),
                            _publicMav, new FormalParameter[0], new ReferenceType[0], 
-                            new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                            new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
 
       // Check that the appropriate error is thrown.
       cd.visit(_ibfv);

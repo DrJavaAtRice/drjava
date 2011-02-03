@@ -95,7 +95,7 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
       SymbolData sd = p.getFirst();
       // Iterate over the caught array and see if the current thrown exception is a subclass of one of the exceptions.
       for (SymbolData currCaughtSD : caught_array) {
-        if (sd.isSubClassOf(currCaughtSD) || (!isUncaughtCheckedException(sd, new NullLiteral(SourceInfo.NO_INFO)))) {
+        if (sd.isSubClassOf(currCaughtSD) || (!isUncaughtCheckedException(sd, new NullLiteral(SourceInfo.NONE)))) {
           thrown.remove(p);
         }
       }
@@ -119,15 +119,15 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
     private SymbolData _sd4;
     private SymbolData _sd5;
     private SymbolData _sd6;
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"});
     private ModifiersAndVisibility _protectedMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"protected"});
     private ModifiersAndVisibility _privateMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[0]);
     private ModifiersAndVisibility _abstractMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"final"});
     
     
     public TryCatchBodyTypeCheckerTest() { this(""); }
@@ -170,14 +170,14 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
     
     public void testForBracedBody() {
       //make sure it is okay to have a uncaught exception in a braced body
-      BracedBody bb = new BracedBody(SourceInfo.NO_INFO, 
+      BracedBody bb = new BracedBody(SourceInfo.NONE, 
                                      new BodyItemI[] { 
-        new ThrowStatement(SourceInfo.NO_INFO, 
-                           new SimpleNamedClassInstantiation(SourceInfo.NO_INFO, 
-                                         new ClassOrInterfaceType(SourceInfo.NO_INFO, 
+        new ThrowStatement(SourceInfo.NONE, 
+                           new SimpleNamedClassInstantiation(SourceInfo.NONE, 
+                                         new ClassOrInterfaceType(SourceInfo.NONE, 
                                                                  "java.util.prefs.BackingStoreException", 
                                                                  new Type[0]), 
-                                                             new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[] {new StringLiteral(SourceInfo.NO_INFO, "arg")})))});
+                                                             new ParenthesizedExpressionList(SourceInfo.NONE, new Expression[] {new StringLiteral(SourceInfo.NONE, "arg")})))});
       
       LanguageLevelVisitor llv = 
         new LanguageLevelVisitor(new File(""), 
@@ -209,7 +209,7 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
       string.setSuperClass(o);   // a white lie for this test   
       symbolTable.put("java.lang.String", string);
 
-      SymbolData e = llv.getSymbolData("java.util.prefs.BackingStoreException", SourceInfo.NO_INFO, true);
+      SymbolData e = llv.getSymbolData("java.util.prefs.BackingStoreException", SourceInfo.NONE, true);
       
       bb.visit(_tcbtc);
       assertEquals("There should be no errors because it's ok to have uncaught exceptions in this visitor", 
@@ -218,18 +218,18 @@ public class TryCatchBodyTypeChecker extends BodyTypeChecker {
     }
     
     public void testCompareThrownAndCaught() {
-      BracedBody emptyBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
-      Block b = new Block(SourceInfo.NO_INFO, emptyBody);
+      BracedBody emptyBody = new BracedBody(SourceInfo.NONE, new BodyItemI[0]);
+      Block b = new Block(SourceInfo.NONE, emptyBody);
 
-      PrimitiveType intt = new PrimitiveType(SourceInfo.NO_INFO, "int");
+      PrimitiveType intt = new PrimitiveType(SourceInfo.NONE, "int");
       UninitializedVariableDeclarator uvd = 
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "i"));
+        new UninitializedVariableDeclarator(SourceInfo.NONE, intt, new Word(SourceInfo.NONE, "i"));
       FormalParameter param = 
-        new FormalParameter(SourceInfo.NO_INFO, 
-                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "j")), 
+        new FormalParameter(SourceInfo.NONE, 
+                            new UninitializedVariableDeclarator(SourceInfo.NONE, intt, new Word(SourceInfo.NONE, "j")), 
                             false);
 
-      NormalTryCatchStatement ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[] {new CatchBlock(SourceInfo.NO_INFO,  param, b)});
+      NormalTryCatchStatement ntcs = new NormalTryCatchStatement(SourceInfo.NONE, b, new CatchBlock[] {new CatchBlock(SourceInfo.NONE,  param, b)});
 
       SymbolData javaLangThrowable = _tcbtc.getSymbolData("java.lang.Throwable", ntcs, false, true); 
       _tcbtc.symbolTable.put("java.lang.Throwable", javaLangThrowable);

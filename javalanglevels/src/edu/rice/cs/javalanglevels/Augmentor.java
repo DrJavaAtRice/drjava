@@ -46,7 +46,7 @@ import junit.framework.TestCase;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.iter.*;
 
-import static edu.rice.cs.javalanglevels.SourceInfo.NO_INFO;
+import static edu.rice.cs.javalanglevels.SourceInfo.NONE;
 
 public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
 //  public static final Log _log = new Log("Augmentor.txt", true);
@@ -647,9 +647,9 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     
     String flagName = sd.createUniqueName("__toStringFlag");
     VariableData toStringFlag = new VariableData(flagName, 
-                                                 new ModifiersAndVisibility(NO_INFO, 
+                                                 new ModifiersAndVisibility(NONE, 
                                                                             new String[]{ "private", "static" }),
-                                 _llv.getQualifiedSymbolData("java.util.LinkedList", SourceInfo.NO_INFO, false),
+                                 _llv.getQualifiedSymbolData("java.util.LinkedList", SourceInfo.NONE, false),
                                  true, sd);
     toStringFlag.setGenerated(true);
     sd.addVar(toStringFlag);
@@ -754,8 +754,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     String listName = sd.createUniqueName("__equalsList");
     
     VariableData equalsList = 
-      new VariableData(listName, new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[]{ "private", "static" }),
-                       _llv.getQualifiedSymbolData("java.util.LinkedList", SourceInfo.NO_INFO, false),
+      new VariableData(listName, new ModifiersAndVisibility(SourceInfo.NONE, new String[]{ "private", "static" }),
+                       _llv.getQualifiedSymbolData("java.util.LinkedList", SourceInfo.NONE, false),
                        true, sd);
     equalsList.setGenerated(true);
     sd.addVar(equalsList);
@@ -949,8 +949,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
     String listName = "__hashCodeList";
     listName = sd.createUniqueName(listName);
     VariableData hashCodeList =
-      new VariableData(listName, new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[]{ "private", "static" }),
-                       _llv.getQualifiedSymbolData("java.util.LinkedList", SourceInfo.NO_INFO, false),
+      new VariableData(listName, new ModifiersAndVisibility(SourceInfo.NONE, new String[]{ "private", "static" }),
+                       _llv.getQualifiedSymbolData("java.util.LinkedList", SourceInfo.NONE, false),
                        true, sd);
     hashCodeList.setGenerated(true);
     
@@ -1549,7 +1549,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
       VariableData vd = accessorMappings.get(i).getFirst();
       MethodData md = accessorMappings.get(i).getSecond();
       boolean canSeeMethod =
-        TypeChecker.checkAccessibility(new NullLiteral(SourceInfo.NO_INFO), md.getMav(), md.getName(), 
+        TypeChecker.checkAccess(new NullLiteral(SourceInfo.NONE), md.getMav(), md.getName(), 
                                        md.getSymbolData(), currClass, "method", false);
       //TODO: it is okay to throw Runtime exceptions or Errors) {
       if (canSeeMethod && (! md.hasModifier("static")) && (md.getThrown().length == 0) &&
@@ -1718,19 +1718,19 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
       TypeData[] result = formalParameters2TypeDatas(fp, _a._enclosingData);
       assertEquals("The result is empty", 0, result.length);
       
-      PrimitiveType intt = new PrimitiveType(SourceInfo.NO_INFO, "int");
+      PrimitiveType intt = new PrimitiveType(SourceInfo.NONE, "int");
       FormalParameter param = 
-        new FormalParameter(SourceInfo.NO_INFO,
-                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, 
-                                                                new Word(SourceInfo.NO_INFO, "j")), false);
+        new FormalParameter(SourceInfo.NONE,
+                            new UninitializedVariableDeclarator(SourceInfo.NONE, intt, 
+                                                                new Word(SourceInfo.NONE, "j")), false);
       SymbolData intData = SymbolData.INT_TYPE;
       _s.put("int", intData);
       
-      ClassOrInterfaceType stringt = new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.String", new Type[0]);
+      ClassOrInterfaceType stringt = new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.String", new Type[0]);
       FormalParameter param2 =
-        new FormalParameter(SourceInfo.NO_INFO, 
-                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, stringt, 
-                                                                new Word(SourceInfo.NO_INFO, "j")), false);
+        new FormalParameter(SourceInfo.NONE, 
+                            new UninitializedVariableDeclarator(SourceInfo.NONE, stringt, 
+                                                                new Word(SourceInfo.NONE, "j")), false);
       SymbolData stringData = new SymbolData("java.lang.String");
       _s.put("java.lang.String", stringData);
 
@@ -1740,12 +1740,12 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
                  LanguageLevelVisitor.arrayEquals(result, new TypeData[]{ intData, stringData }));
       
       UninitializedVariableDeclarator vd =
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                            new ClassOrInterfaceType(SourceInfo.NO_INFO, "Inner", new Type[0]), 
-                                            new Word(SourceInfo.NO_INFO, "t"));
+        new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                            new ClassOrInterfaceType(SourceInfo.NONE, "Inner", new Type[0]), 
+                                            new Word(SourceInfo.NONE, "t"));
       //test an inner class
       FormalParameter param3 = 
-        new FormalParameter(SourceInfo.NO_INFO, vd, false);
+        new FormalParameter(SourceInfo.NONE, vd, false);
       fp = new FormalParameter[] {param3};
       SymbolData inner = new SymbolData("Inner");
       inner.setIsContinuation(false);
@@ -1842,8 +1842,8 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
 //    }
 //    
     public void testGetVariableAccessorListHelper() {
-      ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
-      ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+      ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"});
+      ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"private"});
 
       SymbolData houston = new SymbolData("Houston");
       SymbolData texas = new SymbolData("Texas");
@@ -1855,7 +1855,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
                                             new TypeParameter[0], SymbolData.INT_TYPE, 
                                             new VariableData[0], 
                                             new String[0], texas, 
-                                            new NullLiteral(SourceInfo.NO_INFO));
+                                            new NullLiteral(SourceInfo.NONE));
       texas.addMethod(lone_star); 
 
       //no gettor for cool, therefore, it should not be returned.
@@ -1869,7 +1869,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
                                             SymbolData.BOOLEAN_TYPE,
                                             new VariableData[0], 
                                             new String[0], texas, 
-                                            new NullLiteral(SourceInfo.NO_INFO));
+                                            new NullLiteral(SourceInfo.NONE));
       texas.addMethod(armadillo);
       
       // Now add a field badRoad to Houston.  Its gettor returns a supertype of its type, so it is okay to call.  
@@ -1880,7 +1880,7 @@ public class Augmentor extends JExpressionIFDepthFirstVisitor<Void> {
                                           SymbolData.INT_TYPE,
                                           new VariableData[0], 
                                           new String[0], houston, 
-                                          new NullLiteral(SourceInfo.NO_INFO));
+                                          new NullLiteral(SourceInfo.NONE));
       houston.addMethod(badRoad);
       
       LinkedList<MethodData> expected = new LinkedList<MethodData>();

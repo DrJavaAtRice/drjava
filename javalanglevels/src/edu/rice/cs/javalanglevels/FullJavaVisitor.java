@@ -157,7 +157,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     
     // otherwise, it doesn't have a constructor, so let's add it!
     MethodData md = MethodData.make(name,
-                                    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}), 
+                                    new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"}), 
                                     new TypeParameter[0], 
                                     sd, 
                                     new VariableData[0], // No Parameters
@@ -198,6 +198,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     that.getName().visit(this);
     
     // Create a new generic types table for visiting this inner class.
+    @SuppressWarnings("unchecked")
     HashMap<String, SymbolData> genericTypes = (HashMap<String, SymbolData>) _genericTypes.clone();
     TypeParameter[] tps = that.getTypeParameters();
     for (TypeParameter tp: tps) {
@@ -205,7 +206,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       final String boundName = tp.getBound().getName();
       SymbolData boundSD = _identifyType(boundName, that.getSourceInfo(), _enclosingClassName);
       if (boundSD == null) { // create a dummy SymbolData 
-        boundSD = SymbolData.NOT_FOUND; //  TODO: could create a separate SymbolData.NOT_BOUND singleton class?
+        boundSD = symbolTable.get("java.lang.Object"); //  TODO: could create a separate SymbolData.NOT_BOUND singleton class?
 //        System.err.println("Creating dummy SymbolData for bounding type " + typeName + " in inner class " + name);
       }
       genericTypes.put(typeName, boundSD);
@@ -252,6 +253,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
 
     // Create a new generic types table for visiting this inner class.
     // TODO: refactor this code to combine common code patterns in this method and forInnerClassDef
+    @SuppressWarnings("unchecked")
     HashMap<String, SymbolData> genericTypes = (HashMap<String, SymbolData>) _genericTypes.clone();
     TypeParameter[] tps = that.getTypeParameters();
     for (TypeParameter tp: tps) {
@@ -259,8 +261,9 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       final String boundName = tp.getBound().getName();
       SymbolData boundSD = _identifyType(boundName, that.getSourceInfo(), _enclosingClassName);
       if (boundSD == null) { // create a dummy SymbolData 
-        boundSD = SymbolData.NOT_FOUND; //  TODO: could create a separate SymbolData.NOT_BOUND singleton class?
+        boundSD = symbolTable.get("java.lang.Object"); //  TODO: could create a separate SymbolData.NOT_BOUND singleton class?
 //        System.err.println("Creating dummy SymbolData for bounding type " + typeName + " in inner class " + name);
+        // TODO!  !!!!! Create an appropriate fixUp mechanism
       }
       genericTypes.put(typeName, boundSD);
     }
@@ -376,8 +379,9 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
 
     String className = getQualifiedClassName(that.getName().getText());
 
-    // Create a new generic types table for visiting this inner class.
+    // Create a new generic types table for visiting this class.
     // TODO: refactor this code to combine common code patterns in this method and forInnerClassDef
+    @SuppressWarnings("unchecked")
     HashMap<String, SymbolData> genericTypes = (HashMap<String, SymbolData>) _genericTypes.clone();
     TypeParameter[] tps = that.getTypeParameters();
     for (TypeParameter tp: tps) {
@@ -385,7 +389,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       final String boundName = tp.getBound().getName();
       SymbolData boundSD = _identifyType(boundName, that.getSourceInfo(), _enclosingClassName);
       if (boundSD == null) { // create a dummy SymbolData 
-        boundSD = SymbolData.NOT_FOUND; //  TODO: could create a separate SymbolData.NOT_BOUND singleton class?
+        boundSD = symbolTable.get("java.lang.Object"); //  TODO: could create a separate SymbolData.NOT_BOUND singleton class?
 //        System.err.println("Creating dummy SymbolData for bounding type " + typeName + " in inner class " + name);
       }
       genericTypes.put(typeName, boundSD);
@@ -443,8 +447,9 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     that.getMav().visit(this);
     that.getName().visit(this); 
     
-    // Create a new generic types table for visiting this inner class.
+    // Create a new generic types table for visiting this interface.
     // TODO: refactor this code to combine common code patterns in this method and forInnerClassDef
+    @SuppressWarnings("unchecked")
     HashMap<String, SymbolData> genericTypes = (HashMap<String, SymbolData>) _genericTypes.clone();
     TypeParameter[] tps = that.getTypeParameters();
     for (TypeParameter tp: tps) {
@@ -452,7 +457,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       final String boundName = tp.getBound().getName();
       SymbolData boundSD = _identifyType(boundName, that.getSourceInfo(), _enclosingClassName);
       if (boundSD == null) { // create a dummy SymbolData 
-        boundSD = SymbolData.NOT_FOUND; //  TODO: could create a separate SymbolData.NOT_BOUND singleton class?
+        boundSD = symbolTable.get("java.lang.Object"); //  TODO: could create a separate SymbolData.NOT_BOUND singleton class?
 //        System.err.println("Creating dummy SymbolData for bounding type " + typeName + " in inner class " + name);
       }
       genericTypes.put(typeName, boundSD);
@@ -526,18 +531,18 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     private SymbolData _sd6;
     private SymbolData _objectSD;
     
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"});
     private ModifiersAndVisibility _protectedMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"protected"});
     private ModifiersAndVisibility _privateMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[0]);
     private ModifiersAndVisibility _abstractMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _staticMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"static"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"abstract"});
+    private ModifiersAndVisibility _staticMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"static"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"final"});
     private ModifiersAndVisibility _volatileMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[]{"volatile"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[]{"volatile"});
     
     public FullJavaVisitorTest() { this(""); }
     public FullJavaVisitorTest(String name) { super(name); }
@@ -596,7 +601,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       _fv.forModifiersAndVisibilityDoFirst(_staticMav);
       _fv.forModifiersAndVisibilityDoFirst(_finalMav);
       
-      ModifiersAndVisibility mavs = new ModifiersAndVisibility(SourceInfo.NO_INFO, 
+      ModifiersAndVisibility mavs = new ModifiersAndVisibility(SourceInfo.NONE, 
                                                                new String[] {"private", "static"});
        _fv.forModifiersAndVisibilityDoFirst(mavs);
       assertEquals("there should still be 0 errors", 0, errors.size());
@@ -609,7 +614,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
 //                   "The keyword \"volatile\" cannot be used at the Advanced level", 
 //                   errors.get(0).getFirst());
 
-      ModifiersAndVisibility mavs2 = new ModifiersAndVisibility(SourceInfo.NO_INFO, 
+      ModifiersAndVisibility mavs2 = new ModifiersAndVisibility(SourceInfo.NONE, 
                                                                 new String[] {"final", "volatile"});
      
       _fv.forModifiersAndVisibilityDoFirst(mavs2);
@@ -618,7 +623,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
                    "Illegal combination of modifiers. Can't use final and volatile together.", 
                    errors.get(0).getFirst());
 
-      ModifiersAndVisibility mavs3 = new ModifiersAndVisibility(SourceInfo.NO_INFO, 
+      ModifiersAndVisibility mavs3 = new ModifiersAndVisibility(SourceInfo.NONE, 
                                                                 new String[] {"synchronized", "native"});
      
       _fv.forModifiersAndVisibilityDoFirst(mavs3);
@@ -631,31 +636,31 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     public void testForClassDefDoFirst() {
 //      System.err.println("*** Starting testForClassDefDoFirst");
       // check an example that works
-      ClassDef cd0 = new ClassDef(SourceInfo.NO_INFO, _publicMav,
-                                  new Word(SourceInfo.NO_INFO, "Lisa"),
+      ClassDef cd0 = new ClassDef(SourceInfo.NONE, _publicMav,
+                                  new Word(SourceInfo.NONE, "Lisa"),
                                   new TypeParameter[0], 
-                                  new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+                                  new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
                                   new ReferenceType[0], 
-                                  new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                  new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       
       _fv.forClassDefDoFirst(cd0);
       assertEquals("should be no errors", 0, errors.size());
       
       // check that an error is not thrown if a class doesn't explicitely extend another class
-      ClassDef cd1 = new ClassDef(SourceInfo.NO_INFO, _publicMav, 
-                                  new Word(SourceInfo.NO_INFO, "Test"), new TypeParameter[0], JExprParser.NO_TYPE,
-                                  new ReferenceType[0], new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+      ClassDef cd1 = new ClassDef(SourceInfo.NONE, _publicMav, 
+                                  new Word(SourceInfo.NONE, "Test"), new TypeParameter[0], JExprParser.NO_TYPE,
+                                  new ReferenceType[0], new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
 
       _fv.forClassDefDoFirst(cd1);
       assertEquals("there should still be 0 errors", 0, errors.size());
        
       //check that an error is not thrown if a class implements any interfaces.
-      ReferenceType rt2 = new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]);
-      ClassDef cd2 = new ClassDef(SourceInfo.NO_INFO, _publicMav, 
-                                   new Word(SourceInfo.NO_INFO, "Test"), new TypeParameter[0], 
-                                   new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]),
+      ReferenceType rt2 = new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]);
+      ClassDef cd2 = new ClassDef(SourceInfo.NONE, _publicMav, 
+                                   new Word(SourceInfo.NONE, "Test"), new TypeParameter[0], 
+                                   new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]),
                                    new ReferenceType[] { rt2 }, 
-                                   new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                   new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
 
                                  
       _fv.forClassDefDoFirst(cd2);
@@ -664,29 +669,29 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     }
     
     public void testForFormalParameterDoFirst() {
-      PrimitiveType pt = new PrimitiveType(SourceInfo.NO_INFO, "int");
-      Word w = new Word(SourceInfo.NO_INFO, "param");
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, pt, w);
+      PrimitiveType pt = new PrimitiveType(SourceInfo.NONE, "int");
+      Word w = new Word(SourceInfo.NONE, "param");
+      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NONE, pt, w);
       
       // check an example that works
-      FormalParameter fp = new FormalParameter(SourceInfo.NO_INFO, uvd, false);
+      FormalParameter fp = new FormalParameter(SourceInfo.NONE, uvd, false);
       _fv.forFormalParameterDoFirst(fp);
       assertEquals("should be no errors", 0, errors.size());
       
       // check that no errors are thrown if the FormalParameter is final
-      FormalParameter fp2 = new FormalParameter(SourceInfo.NO_INFO, uvd, true);  
+      FormalParameter fp2 = new FormalParameter(SourceInfo.NONE, uvd, true);  
       _fv.forFormalParameterDoFirst(fp2);
       assertEquals("should still be no errors", 0, errors.size());
     }
     
     public void test_NotAllowed() {
-      SourceInfo noInfo = SourceInfo.NO_INFO;
-      Word w = new Word(SourceInfo.NO_INFO, "word");
+      SourceInfo noInfo = SourceInfo.NONE;
+      Word w = new Word(SourceInfo.NONE, "word");
       TypeParameter[] tps = new TypeParameter[0];
       ReferenceType[] rts = new ReferenceType[0];
-      BracedBody emptyBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
-      UnbracedBody emptyUnbracedBody = new UnbracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
-      ClassOrInterfaceType superClass = new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]);
+      BracedBody emptyBody = new BracedBody(SourceInfo.NONE, new BodyItemI[0]);
+      UnbracedBody emptyUnbracedBody = new UnbracedBody(SourceInfo.NONE, new BodyItemI[0]);
+      ClassOrInterfaceType superClass = new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]);
       FormalParameter[] fps = new FormalParameter[0];
       CompoundWord cw = new CompoundWord(noInfo, new Word[0]);
       Statement stmt = new EmptyStatement(noInfo);
@@ -709,9 +714,9 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       ConditionalExpression ce = new ConditionalExpression(noInfo, snr, snr, snr);
       
       TryCatchStatement tcs = new NormalTryCatchStatement(noInfo, b, new CatchBlock[0]);
-      SwitchCase defaultSc = new DefaultCase(SourceInfo.NO_INFO, emptyUnbracedBody);
+      SwitchCase defaultSc = new DefaultCase(SourceInfo.NONE, emptyUnbracedBody);
       SwitchStatement ssBadDefault = 
-        new SwitchStatement(noInfo, new IntegerLiteral(SourceInfo.NO_INFO, 5), new SwitchCase[]{defaultSc, defaultSc});
+        new SwitchStatement(noInfo, new IntegerLiteral(SourceInfo.NONE, 5), new SwitchCase[]{defaultSc, defaultSc});
      
      si.visit(_fv);
      assertEquals("There should be 0 errors", 0, errors.size());
@@ -743,7 +748,7 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     
     public void testForPrimitiveTypeDoFirst() {
       
-      SourceInfo noInfo = SourceInfo.NO_INFO;
+      SourceInfo noInfo = SourceInfo.NONE;
       
       //only primative types boolean, char, int, and double are allowed at Intermediate level. 
       PrimitiveType i = new PrimitiveType(noInfo, "int");
@@ -794,9 +799,9 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       sd.setSuperClass(LanguageLevelConverter.symbolTable.get("java.lang.Object"));
       LanguageLevelConverter.symbolTable.put("Name", sd);
                        
-      ArrayInitializer ai = new ArrayInitializer(SourceInfo.NO_INFO, new VariableInitializerI[0]);
-      TypeVariable tv = new TypeVariable(SourceInfo.NO_INFO, "Name");
-      ArrayType at = new ArrayType(SourceInfo.NO_INFO, "Name[]", tv);
+      ArrayInitializer ai = new ArrayInitializer(SourceInfo.NONE, new VariableInitializerI[0]);
+      TypeVariable tv = new TypeVariable(SourceInfo.NONE, "Name");
+      ArrayType at = new ArrayType(SourceInfo.NONE, "Name[]", tv);
       
       at.visit(_fv);
       assertEquals("There should be no errors", 0, errors.size());
@@ -806,9 +811,9 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       assertEquals("ad should have an elt sd of name 'Name'", "Name", ad.getElementType().getName());
       
       //Test a multi-dimensional array
-      tv = new TypeVariable(SourceInfo.NO_INFO, "java.lang.Object");
-      at = new ArrayType(SourceInfo.NO_INFO, "Object[]", tv);
-      ArrayType at2 = new ArrayType(SourceInfo.NO_INFO, "Object[][]", at);
+      tv = new TypeVariable(SourceInfo.NONE, "java.lang.Object");
+      at = new ArrayType(SourceInfo.NONE, "Object[]", tv);
+      ArrayType at2 = new ArrayType(SourceInfo.NONE, "Object[][]", at);
 
       at2.visit(_fv);
       assertEquals("There should be no errors", 0, errors.size());
@@ -904,12 +909,12 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       initTopLevel();
       
       ClassDef cd0 = 
-        new ClassDef(SourceInfo.NO_INFO, _packageMav, 
-                     new Word(SourceInfo.NO_INFO, "Lisa"),
+        new ClassDef(SourceInfo.NONE, _packageMav, 
+                     new Word(SourceInfo.NONE, "Lisa"),
                      new TypeParameter[0], 
-                     new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+                     new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
                      new ReferenceType[0], 
-                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0])); 
+                     new BracedBody(SourceInfo.NONE, new BodyItemI[0])); 
       
       cd0.visit(_fv);
       assertEquals("There should be no errors", 0, errors.size());
@@ -925,11 +930,11 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       // check an example that's abstract
       assert _fv._package == "";
       ClassDef cd1 = 
-        new ClassDef(SourceInfo.NO_INFO, _abstractMav, new Word(SourceInfo.NO_INFO, "Bart"),
+        new ClassDef(SourceInfo.NONE, _abstractMav, new Word(SourceInfo.NONE, "Bart"),
                      new TypeParameter[0], 
-                     new ClassOrInterfaceType(SourceInfo.NO_INFO, "System", new Type[0]), 
+                     new ClassOrInterfaceType(SourceInfo.NONE, "System", new Type[0]), 
                      new ReferenceType[0], 
-                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                     new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       cd1.visit(_fv);
       assertEquals("There should be no errors", 0, errors.size());
       assertTrue("Should have resolved java.lang.System", 
@@ -941,22 +946,22 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       assertEquals("There should be 0 methods", 0, sd.getMethods().size()); //(no code augmentation is done)
       
       //Check an example where the class extends TestCase, and has a test method that returns void.
-      ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NO_INFO, 
+      ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NONE, 
                                                     _packageMav, 
                                                     new TypeParameter[0], 
-                                                    new VoidReturn(SourceInfo.NO_INFO, "void"), 
-                                                    new Word(SourceInfo.NO_INFO, "testMethodName"),
+                                                    new VoidReturn(SourceInfo.NONE, "void"), 
+                                                    new Word(SourceInfo.NONE, "testMethodName"),
                                                     new FormalParameter[0],
                                                     new ReferenceType[0], 
-                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                                    new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
 
       ClassDef cd3 = 
-        new ClassDef(SourceInfo.NO_INFO, 
+        new ClassDef(SourceInfo.NONE, 
                      _abstractMav, 
-                     new Word(SourceInfo.NO_INFO, "TestSuper2"),
-                     new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NO_INFO, "TestCase", new Type[0]), 
+                     new Word(SourceInfo.NONE, "TestSuper2"),
+                     new TypeParameter[0], new ClassOrInterfaceType(SourceInfo.NONE, "TestCase", new Type[0]), 
                      new ReferenceType[0], 
-                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {cmd}));
+                     new BracedBody(SourceInfo.NONE, new BodyItemI[] {cmd}));
 
 
       _fv._file = new File("TestSuper2.dj2");
@@ -969,23 +974,23 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       
       //Check a method with void return, but name not starting with test, so it's not okay.
       //This is now checked in the type checker!
-      ConcreteMethodDef cmd2 = new ConcreteMethodDef(SourceInfo.NO_INFO, 
+      ConcreteMethodDef cmd2 = new ConcreteMethodDef(SourceInfo.NONE, 
                                                     _packageMav, 
                                                     new TypeParameter[0], 
-                                                    new VoidReturn(SourceInfo.NO_INFO, "void"), 
-                                                    new Word(SourceInfo.NO_INFO, "uhOh"),
+                                                    new VoidReturn(SourceInfo.NONE, "void"), 
+                                                    new Word(SourceInfo.NONE, "uhOh"),
                                                     new FormalParameter[0],
                                                     new ReferenceType[0], 
-                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                                    new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
 
       ClassDef cd4 = 
-        new ClassDef(SourceInfo.NO_INFO, 
+        new ClassDef(SourceInfo.NONE, 
                      _abstractMav, 
-                     new Word(SourceInfo.NO_INFO, "TestVoidNoTestMethod"),
+                     new Word(SourceInfo.NONE, "TestVoidNoTestMethod"),
                      new TypeParameter[0], 
-                     new ClassOrInterfaceType(SourceInfo.NO_INFO,"junit.framework.TestCase", new Type[0]), 
+                     new ClassOrInterfaceType(SourceInfo.NONE,"junit.framework.TestCase", new Type[0]), 
                      new ReferenceType[0], 
-                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { cmd2 }));
+                     new BracedBody(SourceInfo.NONE, new BodyItemI[] { cmd2 }));
 
       _fv._file = new File("TestVoidNoTestMethod.dj2");
       cd4.visit(_fv);
@@ -997,35 +1002,35 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     
     public void testForInterfaceDef() {
       AbstractMethodDef amd = 
-        new AbstractMethodDef(SourceInfo.NO_INFO, 
+        new AbstractMethodDef(SourceInfo.NONE, 
                               _publicMav, 
                               new TypeParameter[0], 
-                              new PrimitiveType(SourceInfo.NO_INFO, "int"),
-                              new Word(SourceInfo.NO_INFO, "myMethod"), 
+                              new PrimitiveType(SourceInfo.NONE, "int"),
+                              new Word(SourceInfo.NONE, "myMethod"), 
                               new FormalParameter[0], 
                               new ReferenceType[0]);
       AbstractMethodDef amd2 = 
-        new AbstractMethodDef(SourceInfo.NO_INFO, 
+        new AbstractMethodDef(SourceInfo.NONE, 
                               _publicMav, 
                               new TypeParameter[0], 
-                              new PrimitiveType(SourceInfo.NO_INFO, "int"),
-                              new Word(SourceInfo.NO_INFO, "myMethod"), 
+                              new PrimitiveType(SourceInfo.NONE, "int"),
+                              new Word(SourceInfo.NONE, "myMethod"), 
                               new FormalParameter[0], 
                               new ReferenceType[0]);
       InterfaceDef id = 
-        new InterfaceDef(SourceInfo.NO_INFO, 
+        new InterfaceDef(SourceInfo.NONE, 
                          _publicMav, 
-                         new Word(SourceInfo.NO_INFO, "id"), 
+                         new Word(SourceInfo.NONE, "id"), 
                          new TypeParameter[0], 
                          new ReferenceType[0], 
-                         new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { amd }));
+                         new BracedBody(SourceInfo.NONE, new BodyItemI[] { amd }));
       InterfaceDef id2 = 
-        new InterfaceDef(SourceInfo.NO_INFO, 
+        new InterfaceDef(SourceInfo.NONE, 
                          _publicMav, 
-                         new Word(SourceInfo.NO_INFO, "id2"), 
+                         new Word(SourceInfo.NONE, "id2"), 
                          new TypeParameter[0], 
-                         new ReferenceType[] { new ClassOrInterfaceType(SourceInfo.NO_INFO, "id", new Type[0]) }, 
-                         new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { amd2 }));
+                         new ReferenceType[] { new ClassOrInterfaceType(SourceInfo.NONE, "id", new Type[0]) }, 
+                         new BracedBody(SourceInfo.NONE, new BodyItemI[] { amd2 }));
       SymbolData sd = new SymbolData("i.like.monkey.id", _publicMav, new TypeParameter[0], new ArrayList<SymbolData>(), null);
       sd.setIsContinuation(true);
       MethodData md = 
@@ -1058,21 +1063,21 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       
 //      LanguageLevelConverter.symbolTable.put("java.lang.Object", _objectSD);
       InnerClassDef cd1 = 
-        new InnerClassDef(SourceInfo.NO_INFO, 
+        new InnerClassDef(SourceInfo.NONE, 
                           _packageMav, 
-                          new Word(SourceInfo.NO_INFO, "Bart"),
+                          new Word(SourceInfo.NONE, "Bart"),
                           new TypeParameter[0], 
-                          new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+                          new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
                           new ReferenceType[0], 
-                          new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                          new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       InnerClassDef cd0 = 
-        new InnerClassDef(SourceInfo.NO_INFO, 
+        new InnerClassDef(SourceInfo.NONE, 
                           _packageMav, 
-                          new Word(SourceInfo.NO_INFO, "Lisa"),
+                          new Word(SourceInfo.NONE, "Lisa"),
                           new TypeParameter[0], 
-                          new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+                          new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
                           new ReferenceType[0], 
-                          new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { cd1 }));
+                          new BracedBody(SourceInfo.NONE, new BodyItemI[] { cd1 }));
 
 //      SymbolData outerData = new SymbolData("i.eat.potato");
 //      outerData.setIsContinuation(false);
@@ -1118,14 +1123,14 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     
     public void xtestHandleInnerInterfaceDef() {
       InnerInterfaceDef cd1 = 
-        new InnerInterfaceDef(SourceInfo.NO_INFO, _packageMav, new Word(SourceInfo.NO_INFO, "Bart"),
+        new InnerInterfaceDef(SourceInfo.NONE, _packageMav, new Word(SourceInfo.NONE, "Bart"),
                               new TypeParameter[0], new ReferenceType[0], 
-                              new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                              new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       
       InnerInterfaceDef cd0 = 
-        new InnerInterfaceDef(SourceInfo.NO_INFO, _packageMav, new Word(SourceInfo.NO_INFO, "Lisa"),
+        new InnerInterfaceDef(SourceInfo.NONE, _packageMav, new Word(SourceInfo.NONE, "Lisa"),
                               new TypeParameter[0], new ReferenceType[0], 
-                              new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { cd1 }));
+                              new BracedBody(SourceInfo.NONE, new BodyItemI[] { cd1 }));
 
       SymbolData outerData = new SymbolData("i.drink.vanilla.coke");
 
@@ -1166,14 +1171,14 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     
     public void testCreateMethodData() {
       // Test one that doesn't work at the old advanced level
-      MethodDef mdef = new ConcreteMethodDef(SourceInfo.NO_INFO, 
+      MethodDef mdef = new ConcreteMethodDef(SourceInfo.NONE, 
                                                     _volatileMav, 
                                                     new TypeParameter[0], 
-                                                    new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                                    new Word(SourceInfo.NO_INFO, "methodName"),
+                                                    new PrimitiveType(SourceInfo.NONE, "int"), 
+                                                    new Word(SourceInfo.NONE, "methodName"),
                                                     new FormalParameter[0],
                                                     new ReferenceType[0], 
-                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                                    new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       
       MethodData mdata = new MethodData("methodName", _volatileMav, new TypeParameter[0], SymbolData.INT_TYPE, 
                                    new VariableData[0], 
@@ -1183,14 +1188,14 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       assertEquals("Should return the correct MethodData", mdata, _fv.createMethodData(mdef, _sd1));
       assertEquals("There should be no errors", 0, errors.size());
 
-      mdef = new ConcreteMethodDef(SourceInfo.NO_INFO, 
+      mdef = new ConcreteMethodDef(SourceInfo.NONE, 
                                                     _finalMav, 
                                                     new TypeParameter[0], 
-                                                    new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                                    new Word(SourceInfo.NO_INFO, "methodName2"),
+                                                    new PrimitiveType(SourceInfo.NONE, "int"), 
+                                                    new Word(SourceInfo.NONE, "methodName2"),
                                                     new FormalParameter[0],
                                                     new ReferenceType[0], 
-                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                                    new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       
       mdata = new MethodData("methodName2", _finalMav, new TypeParameter[0], SymbolData.INT_TYPE, 
                                    new VariableData[0], 
@@ -1203,35 +1208,35 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       
       // Test one that does work.
       FormalParameter fp1 =
-        new FormalParameter(SourceInfo.NO_INFO, 
-                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                                new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                                                new Word (SourceInfo.NO_INFO, "field1")),
+        new FormalParameter(SourceInfo.NONE, 
+                            new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                                                new PrimitiveType(SourceInfo.NONE, "double"), 
+                                                                new Word (SourceInfo.NONE, "field1")),
                             false);
       FormalParameter fp2 =
-        new FormalParameter(SourceInfo.NO_INFO, 
-                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                                new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                                                new Word (SourceInfo.NO_INFO, "field1")),
+        new FormalParameter(SourceInfo.NONE, 
+                            new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                                                new PrimitiveType(SourceInfo.NONE, "int"), 
+                                                                new Word (SourceInfo.NONE, "field1")),
                             false);
       mdef =
-        new AbstractMethodDef(SourceInfo.NO_INFO, 
+        new AbstractMethodDef(SourceInfo.NONE, 
                               _abstractMav, 
-                              new TypeParameter[] { new TypeParameter(SourceInfo.NO_INFO,
-                                                                      new TypeVariable(SourceInfo.NO_INFO, "T"),
-                                                                      new TypeVariable(SourceInfo.NO_INFO, "U"))},
-                              new VoidReturn(SourceInfo.NO_INFO, "void"), 
-                              new Word(SourceInfo.NO_INFO, "methodName"),
+                              new TypeParameter[] { new TypeParameter(SourceInfo.NONE,
+                                                                      new TypeVariable(SourceInfo.NONE, "T"),
+                                                                      new TypeVariable(SourceInfo.NONE, "U"))},
+                              new VoidReturn(SourceInfo.NONE, "void"), 
+                              new Word(SourceInfo.NONE, "methodName"),
                               new FormalParameter[] {fp1, fp2},
-                              new ReferenceType[] { new TypeVariable(SourceInfo.NO_INFO, "X") });
+                              new ReferenceType[] { new TypeVariable(SourceInfo.NONE, "X") });
       VariableData[] vardatas =
         new VariableData[] { new VariableData("field1", _finalMav, SymbolData.DOUBLE_TYPE, true, null),
                              new VariableData("field1", _finalMav, SymbolData.INT_TYPE, true, null) };
       mdata = new MethodData("methodName", 
                              _abstractMav, 
-                             new TypeParameter[] { new TypeParameter(SourceInfo.NO_INFO,
-                                                                     new TypeVariable(SourceInfo.NO_INFO, "T"),
-                                                                     new TypeVariable(SourceInfo.NO_INFO, "U"))}, 
+                             new TypeParameter[] { new TypeParameter(SourceInfo.NONE,
+                                                                     new TypeVariable(SourceInfo.NONE, "T"),
+                                                                     new TypeVariable(SourceInfo.NONE, "U"))}, 
                              SymbolData.VOID_TYPE, 
                              vardatas, 
                              new String[] { "X" },
@@ -1260,10 +1265,10 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     public void xtestSimpleAnonymousClassInstantiationHelper() {
 //      System.err.println("**** Starting testSimpleAnonymousClassInstantiationHelper");
       SimpleAnonymousClassInstantiation basic = 
-        new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, 
-                                              new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
-                                              new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
-                                              new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+        new SimpleAnonymousClassInstantiation(SourceInfo.NONE, 
+                                              new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
+                                              new ParenthesizedExpressionList(SourceInfo.NONE, new Expression[0]),
+                                              new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       
 
      _fv._package = "i.like";
@@ -1284,12 +1289,12 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
     /* NOTE: This is test excluded because the tested method is now a no-op. */
     public void xtestComplexAnonymousClassInstantiationHelper() {
       ComplexAnonymousClassInstantiation basic = 
-        new ComplexAnonymousClassInstantiation(SourceInfo.NO_INFO, 
-                                               new SimpleNameReference(SourceInfo.NO_INFO,
-                                                                       new Word(SourceInfo.NO_INFO, "java.lang.Object")),
-                                               new ClassOrInterfaceType(SourceInfo.NO_INFO, "Inner", new Type[0]), 
-                                               new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
-                                               new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+        new ComplexAnonymousClassInstantiation(SourceInfo.NONE, 
+                                               new SimpleNameReference(SourceInfo.NONE,
+                                                                       new Word(SourceInfo.NONE, "java.lang.Object")),
+                                               new ClassOrInterfaceType(SourceInfo.NONE, "Inner", new Type[0]), 
+                                               new ParenthesizedExpressionList(SourceInfo.NONE, new Expression[0]),
+                                               new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
 
      _fv._package = "i.like";
      _fv._enclosingClassName = "i.like.monkey";
@@ -1312,16 +1317,16 @@ public class FullJavaVisitor extends LanguageLevelVisitor {
       // Make sure that if forVariableDeclaration is called with a AnonymousClassInstantiation, the symbolData is only 
       // added once.  This is to make sure an old bug stays fixed.
       SimpleAnonymousClassInstantiation basic = 
-        new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, 
-                                              new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
-                                              new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
-                                              new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+        new SimpleAnonymousClassInstantiation(SourceInfo.NONE, 
+                                              new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
+                                              new ParenthesizedExpressionList(SourceInfo.NONE, new Expression[0]),
+                                              new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       VariableDeclarator[] d1 = {
-        new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                          new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
-                                          new Word(SourceInfo.NO_INFO, "b"), basic)
+        new InitializedVariableDeclarator(SourceInfo.NONE, 
+                                          new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
+                                          new Word(SourceInfo.NONE, "b"), basic)
       };
-      VariableDeclaration vd1 = new VariableDeclaration(SourceInfo.NO_INFO,_publicMav, d1); 
+      VariableDeclaration vd1 = new VariableDeclaration(SourceInfo.NONE,_publicMav, d1); 
       
       ClassBodyFullJavaVisitor cbav = 
         new ClassBodyFullJavaVisitor(_sd1, _sd1.getName(), _fv._file, _fv._package, _fv._importedFiles, _fv._importedPackages, 

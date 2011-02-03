@@ -63,15 +63,15 @@ import junit.framework.TestCase;
 public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor {
   
   public static final ModifiersAndVisibility PUBLIC_MAV = 
-    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"});
   public static final ModifiersAndVisibility PROTECTED_MAV = 
-    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+    new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"protected"});
   public static final ModifiersAndVisibility PRIVATE_MAV = 
-    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
+    new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"private"});
   public static final ModifiersAndVisibility PACKAGE_MAV = 
-    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    new ModifiersAndVisibility(SourceInfo.NONE, new String[0]);
   public static final ModifiersAndVisibility FINAL_MAV = 
-    new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[]{"final"});
+    new ModifiersAndVisibility(SourceInfo.NONE, new String[]{"final"});
     
   /** Errors we have encountered during this pass: string is the text of the error, JExpressionIF is the part of
     * the AST where the error occurs. */
@@ -713,7 +713,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
   /** Tries to find (or in some cases creates) the SymbolData for the fiven fully qualified class name.  It
     * searches imported files, primitive types, as well as types in the symbol table. */
   protected SymbolData getQualifiedSymbolData(String qualClassName) {
-    return getQualifiedSymbolData(qualClassName, SourceInfo.NO_INFO);
+    return getQualifiedSymbolData(qualClassName, SourceInfo.NONE);
   }
   
   /** Tries to find (or in some cases creates) the SymbolData for the fiven fully qualified class name.  It
@@ -756,8 +756,20 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     assert (qualClassName != null && ! qualClassName.equals(""));
     
     // Check for primitive types.
+//    System.err.println("***** Checking for primitive symbol " + qualClassName);
     SymbolData sd = LanguageLevelConverter._getPrimitiveSymbolData(qualClassName);
-    if (sd != null) { return sd; }
+    if (sd != null) { 
+//      System.err.println("***** Matched for primitive symbol " + sd);
+      return sd; 
+    }
+    
+    // Check for references to generic types  (only happens in FullJava code)
+    // TODO !!! Does not handle forward references
+    String name = getUnqualifiedClassName(qualClassName);
+    if (_genericTypes.containsKey(name)) {
+//      Utilities.show("Return type " + name + " is generic and value is " + _genericTypes.get(name));
+      return _genericTypes.get(name);
+    }
     
     // Check for already defined types
     SymbolData existingSD = symbolTable.get(qualClassName);
@@ -856,16 +868,16 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //    if (rtName.equals("Object") && sD == null)
 //      System.err.println("Looking up 'Object' in '" + qualifiedClassName + "' yields null");
     if (sD == null && qualifiedClassName != null) { // check if rt refers to an inner type of qualifiedClassName
-      SymbolData sd = getQualifiedSymbolData(qualifiedClassName, SourceInfo.NO_INFO);
+      SymbolData sd = getQualifiedSymbolData(qualifiedClassName, SourceInfo.NONE);
       sD = sd.getInnerClassOrInterface(rtName);
-      assert sD == getQualifiedSymbolData(qualifiedClassName + '.' + rtName, SourceInfo.NO_INFO);
+      assert sD == getQualifiedSymbolData(qualifiedClassName + '.' + rtName, SourceInfo.NONE);
     }  // The following case should be unncessary because getInnerClassOrInterface should look back through enclosing classes
     else if (qualifiedClassName != null) {
       int prefixLen = qualifiedClassName.lastIndexOf('.');
       if (sD == null && prefixLen >= 0) { // check if rt refers to an inner class of the class enclosing sd 
         // Check to see if this is an inner class referencing an inner interface
         String qualifyingBase = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf('.'));
-        SymbolData outerSD = getQualifiedSymbolData(qualifyingBase, SourceInfo.NO_INFO);
+        SymbolData outerSD = getQualifiedSymbolData(qualifyingBase, SourceInfo.NONE);
         if (outerSD != null) {
           sD = outerSD.getInnerClassOrInterface(rtName);
           assert sD == getQualifiedSymbolData(qualifyingBase + '.' + rtName, si);
@@ -1028,8 +1040,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       ((SymbolData) enclosing).addInnerInterface(sd); 
     }
     else if (! enclosing.getName().equals(_enclosingClassName)) {  
-      // sd is a local class embedded in a method.  We need to add sd to  the innerclasses of _enclosingClassName
-      if (! (enclosing instanceof MethodData))
+      // sd is a local class embedded in a method.  We need to add sd to the innerclasses of _enclosingClassName
+//      if (! (enclosing instanceof MethodData))
 //        System.err.println("***** In defineInnerSymbolData, enclosing = " + enclosing 
 //                             + " but _enclosingClassName = " + _enclosingClassName);
       assert enclosing instanceof MethodData;
@@ -1072,7 +1084,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //    sd.setTypeParameters(anonInst.getTypeParameters()); 
     
     if (_enclosingClassName != null) {
-      SymbolData enclosingSD = getQualifiedSymbolData(_enclosingClassName, SourceInfo.NO_INFO);
+      SymbolData enclosingSD = getQualifiedSymbolData(_enclosingClassName, SourceInfo.NONE);
       assert (enclosingSD != null); 
       enclosingSD.addInnerClass(sd);
       
@@ -1148,7 +1160,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       SymbolData sd = _identifyType(typeName, si, enclosingClassName);
 
       varData[i] = 
-        new VariableData(name, new ModifiersAndVisibility(SourceInfo.NO_INFO, mav), sd, true, enclosing);
+        new VariableData(name, new ModifiersAndVisibility(SourceInfo.NONE, mav), sd, true, enclosing);
       
       assert ! varData[i].isPrivate();
       
@@ -1161,7 +1173,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
         Command fixUp = new Command() {
           public void execute() { 
             SymbolData newSd = _identifyType(typeName, si, enclosingClassName);
-            assert newSd != null && newSd != SymbolData.NOT_FOUND;  // TODO !!!: Expand to error message?
+            if (newSd == null || newSd == SymbolData.NOT_FOUND) 
+              System.err.println("****** In fixUp, the type " + typeName + " at " + si + " was NOT found.");
+//            assert newSd != null && newSd != SymbolData.NOT_FOUND;  // TODO !!!: Expand to error message?
             if (newSd != null) varData[j].setType(newSd);
           }
         };
@@ -1181,7 +1195,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //  private SymbolData _identifyVarType(String typeName, SourceInfo si) {
 //    SymbolData sd = getSymbolData(typeName, si);
 //    if (sd != null) return sd;
-//    SymbolData enclosingSD = getQualifiedSymbolData(_enclosingClassName, SourceInfo.NO_INFO);
+//    SymbolData enclosingSD = getQualifiedSymbolData(_enclosingClassName, SourceInfo.NONE);
 //    assert enclosingSD != null;
 //    return _enclosingClass.getInnerClassOrInterface(typeName);
 //    // TODO: fails for nested inner classes
@@ -1210,12 +1224,13 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 
     // Identify the return type
     final SourceInfo si = that.getResult().getSourceInfo();
-//    if (! sd.equals(getQualifiedSymbolData(_enclosingClassName, SourceInfo.NO_INFO))) {
+//    if (! sd.equals(getQualifiedSymbolData(_enclosingClassName, SourceInfo.NONE))) {
 //      System.err.println("sd = " + sd);
-//      System.err.println("other = " + getQualifiedSymbolData(_enclosingClassName, SourceInfo.NO_INFO));
+//      System.err.println("other = " + getQualifiedSymbolData(_enclosingClassName, SourceInfo.NONE));
 //      assert false;
 //    }
-    // Note: rtString cannot be a local type; no such type is in scope
+    // Note: rtString cannot be a local type; no such type is in scope.  BUT it can be a type variable or
+    // a forward reference.
     SymbolData returnType = _identifyType(rtString, si, _enclosingClassName);
     
     final String name = that.getName().getText();
@@ -1230,10 +1245,16 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       Command fixUp = new Command() {
         public void execute() {
           SymbolData newReturnType = _identifyType(rtString, si, enclosingClassName);
-          if (newReturnType == null && (! (LanguageLevelVisitor.this instanceof FullJavaVisitor))) // TODO: fix this instanceof kludge
+          if (newReturnType == null && (! (LanguageLevelVisitor.this instanceof FullJavaVisitor))) {
             _addAndIgnoreError("The return type " + rtString + " for method " + name + " in type " + sd + " is undefined.", 
                                that);
-          else md.setReturnType(newReturnType);
+//            System.err.println("The return type " + rtString + " for method " + name + " in type " + sd + " is undefined.");
+//            assert false;
+          }
+          else {
+//            System.err.println("FixUp set the returnType of " + name + "in type " + sd + " to " + newReturnType);
+            md.setReturnType(newReturnType);
+          }
         }
       };
       fixUps.add(fixUp);
@@ -1281,7 +1302,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       final Type type = declarator.getType();
       final String name = declarator.getName().getText();
       final String typeName = type.getName();
-//      assert enclosing == getQualifiedSymbolData(_enclosingClassName, SourceInfo.NO_INFO);
+//      assert enclosing == getQualifiedSymbolData(_enclosingClassName, SourceInfo.NONE);
       // TODO: if enclosing is a MethodData, we should first look for a local class!!!  This search will always
       // succeed if a matching local class exists because no forward reference is possible. (Confirm this!) !!!
       /* TODO: do we need to worry about case when enclosing is a MethodData?  Yes. defineInnerSymbolData 
@@ -1316,22 +1337,31 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     return vds.toArray(new VariableData[vds.size()]);
   }                       
                                   
-  /** Identifies the SymbolData matching name in symbolTable.  Returns null if no match is
-    * found.  Searches for typeName as a fully qualified Name and as a relative name within
-    * the enclosing class.  TODO !!!: enclosingClassName should be sd of enclosing data.  Methods can
-    * introduce local types.  Make sure that we can match inner classes of the chain of enclosing
-    * datas.  We need to use the relative inner class name to do this. */
+  /** Identifies the SymbolData matching name in symbolTable.  Returns null if no match is found.  Searches for typeName
+    * as a fully qualified Name and as a relative name within the enclosing class.  enclosingClassName is null if type 
+    * is part of the header for a class or interface.  Methods can introduce local types.  Make sure that we can match
+    * inner classes of the chain of enclosing datas.  We need to use the relative inner class name to do this. */
   protected SymbolData _identifyType(String name, SourceInfo si, String enclosingClassName) {
-//    System.err.println("Calling _identifyType(" + name  + ") within " + enclosingClassName);
+//    System.err.println("***** Calling _identifyType(" + name  + ") within " + enclosingClassName);
+    
+    // If name is a type variable, return the binding
+    if (_genericTypes.containsKey(name)) return _genericTypes.get(name);
     
     SymbolData sd = getSymbolData(name, si);  // TODO: uses wrong enclosingClassName!!!
     if (sd != null) return sd;
     
-    SymbolData enclosingSD = getQualifiedSymbolData(enclosingClassName, SourceInfo.NO_INFO);
-    if (enclosingSD == null) {
+//    if (name.equals("ResType") && sd == null) 
+//      Utilities.show("_genericTypes = " + _genericTypes + "Trace follows.\n" + Utilities.getStackTrace());
+        
+//    if (enclosingClassName == null) Utilities.show("_identifyType called with null enclosingClassName. Trace follows.\n" +
+//                                                   Utilities.getStackTrace());
+   
 //      System.err.println("***ERROR*** in _identifyType " + enclosingClassName + " NOT FOUND");
-      return null;  // should only happen in tests
-    }
+    if (enclosingClassName == null) return null;  // happens for binding occurrences of type variables?
+    
+    SymbolData enclosingSD = getQualifiedSymbolData(enclosingClassName, SourceInfo.NONE);   
+    if (enclosingSD == null) return null;
+    
     sd = enclosingSD.getInnerClassOrInterface(name);
      
 //    // Create continuation for new type
@@ -1340,7 +1370,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //      // reference to an inner class that will subsequently be defined
 //      sd = addInnerSymbolData(si, qualifiedTypeName, enclosingSD);
 //    }
-    
+   
+//    System.err.println("***** _identifyType(" + name  + ") within " + enclosingClassName + " RETURNED " + sd);
     return sd;  // Note: sd is null if name is not identified.
   }
                                
@@ -1549,7 +1580,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     assert enclosingType != null;
     // Process the members of this class
 //    System.err.println("Finding inner classes in " + enclosingType);
-    SymbolData sd = getSymbolData(enclosingType, SourceInfo.NO_INFO);
+    SymbolData sd = getSymbolData(enclosingType, SourceInfo.NONE);
 //    System.err.println("SymbolData for " + enclosingType + " is " + sd);
     enclosingType = sd.getName(); // that may be a local class, which has a more elaborate name
     BracedBody body = that.getBody();
@@ -1578,7 +1609,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //  public Void forBracedBodyDoFirst(BracedBody that) {
 //    if (! (this instanceof BodyBodyFullJavaVisitor)) {  // full Java method bodies are excluded by this test
 //      // Process the members of this class
-//      SymbolData sd = getSymbolData(_enclosingClassName, SourceInfo.NO_INFO);
+//      SymbolData sd = getSymbolData(_enclosingClassName, SourceInfo.NONE);
 //      for (BodyItemI bi: that.getStatements()) {
 //        if (bi instanceof TypeDefBase) {
 //          TypeDefBase type = (TypeDefBase) bi;
@@ -1869,14 +1900,14 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //    
     if (sd.isContinuation()) {
       _addAndIgnoreError("Could not generate constructor for class " + sd + " because it has no definition", 
-                new NullLiteral(SourceInfo.NO_INFO));
+                new NullLiteral(SourceInfo.NONE));
       return;
     }
     
     SymbolData superSd = sd.getSuperClass();
     if (superSd == null) {
       _addAndIgnoreError("Could not generate constructor for class " + sd + " because it has no superclass", 
-                new NullLiteral(SourceInfo.NO_INFO));
+                new NullLiteral(SourceInfo.NONE));
       return;
     }
     
@@ -1908,7 +1939,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       if (superConstructor == null) {
         _addAndIgnoreError("Could not generate constructor for class " + sd + " superclass has no constructor, perhaps"
                            + " because the class hierarchy is cyclic.",
-                           new NullLiteral(SourceInfo.NO_INFO));
+                           new NullLiteral(SourceInfo.NONE));
         return;
       }
 //      if (superConstructor == null) {
@@ -2231,7 +2262,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       assertTrue("Should have found method substring(int) in java.lang.String", found);
       
       assertEquals("java.lang.String should be packaged correctly", "java.lang", 
-                   testLLVisitor.getSymbolData("java.lang.String", SourceInfo.NO_INFO).getPackage());
+                   testLLVisitor.getSymbolData("java.lang.String", SourceInfo.NONE).getPackage());
       
       //now, test that a second call to the same method won't replace the symbol data that is already there.
       SymbolData newStringSD = LanguageLevelConverter._classFile2SymbolData("java.lang.String", "");
@@ -2277,12 +2308,12 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //      // JExprParser.NO_TYPE since otherwise the ElementaryVisitor will complain that the
 //      // user must explicitly extend Object.
 //      ClassDef cd = 
-//        new ClassDef(SourceInfo.NO_INFO, PUBLIC_MAV, 
-//                     new Word(SourceInfo.NO_INFO, "Lisa"),
+//        new ClassDef(SourceInfo.NONE, PUBLIC_MAV, 
+//                     new Word(SourceInfo.NONE, "Lisa"),
 //                     new TypeParameter[0], 
-//                     new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+//                     new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
 //                     new ReferenceType[0], 
-//                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+//                     new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
 //      
 //      // Use a ElementaryVisitor so lookupFromClassesToBeParsed will actually visit the ClassDef.
 //      IntermediateVisitor bv = new IntermediateVisitor(new File(""), 
@@ -2292,14 +2323,14 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //      
 //      // Test that passing resolve equals false returns a continuation.
 ////      assertTrue("Should return a continuation", 
-////                 testLLVisitor._identifyTypeFromClassesToBeParsed("Lisa", SourceInfo.NO_INFO, false).isContinuation());
+////                 testLLVisitor._identifyTypeFromClassesToBeParsed("Lisa", SourceInfo.NONE, false).isContinuation());
 //      // Put Lisa in the hierarchy and test that there is one error and that the message
 //      // says that there is cyclic inheritance.
 ////      _hierarchy.put("Lisa", cd);
 ////      _classesInThisFile.put("Lisa", new Pair<TypeDefBase, LanguageLevelVisitor>(cd, bv));
 ////      assertEquals("Should return null because Lisa is in the hierarchy", 
 ////                   null,
-////                   _llv._identifyTypeFromClassesToBeParsed("Lisa", SourceInfo.NO_INFO, true));
+////                   _llv._identifyTypeFromClassesToBeParsed("Lisa", SourceInfo.NONE, true));
 ////      assertEquals("Should be one error", 1, errors.size());
 ////      assertEquals("Error message should be correct", "Cyclic inheritance involving Lisa", errors.get(0).getFirst());
 ////      _hierarchy.remove("Lisa");
@@ -2308,7 +2339,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //      testLLVisitor._classesInThisFile.put("Lisa", new Pair<TypeDefBase, LanguageLevelVisitor>(cd, bv));
 //      assertFalse("Should return a non-continuation", 
 //                  testLLVisitor._identifyTypeFromClassesToBeParsed("Lisa", 
-//                                                    SourceInfo.NO_INFO,
+//                                                    SourceInfo.NONE,
 //                                                    true).isContinuation());
 //    }
     
@@ -2352,15 +2383,15 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //      
 //      //Test that classes not in the symbol table are handled correctly.
 //      assertEquals("should the continuation symbol", sd, 
-//                   testLLVisitor._getQualifiedSymbolData("testPackage.File", SourceInfo.NO_INFO, true, false, true));
+//                   testLLVisitor._getQualifiedSymbolData("testPackage.File", SourceInfo.NONE, true, false, true));
 ////      assertEquals("should be one error so far.", 1, errors.size());
 //      
 //      
-//      SymbolData sd2 = testLLVisitor._getQualifiedSymbolData("java.lang.Integer", SourceInfo.NO_INFO, true, true, true);
+//      SymbolData sd2 = testLLVisitor._getQualifiedSymbolData("java.lang.Integer", SourceInfo.NONE, true, true, true);
 //      assertEquals("should return non-continuation java.lang.Integer", "java.lang.Integer", sd2.getName());
 //      assertFalse("should not be a continuation.", sd2.isContinuation());
 //      
-//      SymbolData sd3 = testLLVisitor._getQualifiedSymbolData("Wow", SourceInfo.NO_INFO, true, true, true);
+//      SymbolData sd3 = testLLVisitor._getQualifiedSymbolData("Wow", SourceInfo.NONE, true, true, true);
 //      assertEquals("search should fail", null, sd3);
 ////      assertEquals("should return Wow", "Wow", sd3.getName());
 ////      assertFalse("Should not be a continuation.", sd3.isContinuation());
@@ -2368,16 +2399,16 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //      // "testPackage.File" has been entered as a continuation in symbolTable.  Why should the following lookup fail?
 ////      //Test that classes in the symbol table are handled correctly
 ////      assertEquals("should return null sd--does not exist", null, 
-////                   _llv._getQualifiedSymbolData("testPackage.File", SourceInfo.NO_INFO, false, false, true));
+////                   _llv._getQualifiedSymbolData("testPackage.File", SourceInfo.NONE, false, false, true));
 ////      assertEquals("Should be 1 error", 1, errors.size());
 //      
 //      sd.setIsContinuation(false);
 //      assertEquals("should return non-continuation sd", sd, 
-//                   testLLVisitor._getQualifiedSymbolData("testPackage.File", SourceInfo.NO_INFO, true, false,  true));
+//                   testLLVisitor._getQualifiedSymbolData("testPackage.File", SourceInfo.NONE, true, false,  true));
 //      
 //      
 //      assertEquals("Should return sd1.", sd1, 
-//                   testLLVisitor._getQualifiedSymbolData("java.lang.String", SourceInfo.NO_INFO, true, false, true));
+//                   testLLVisitor._getQualifiedSymbolData("java.lang.String", SourceInfo.NONE, true, false, true));
 //      assertFalse("sd1 should no longer be a continuation.", sd1.isContinuation());
 //      
 //      
@@ -2385,27 +2416,27 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //      //check that stuff not in symbol table and packaged incorrectly is handled right.
 //      assertEquals("should return null-because it's not a valid class", null, 
 //                   testLLVisitor._getQualifiedSymbolData("testPackage.not.in.symboltable", 
-//                                                   SourceInfo.NO_INFO, true, false, true));
+//                                                   SourceInfo.NONE, true, false, true));
 //      
 //      assertEquals("should be two errors so far.", 2, errors.size());
 //      assertNull("should return null", 
 //                 testLLVisitor._getQualifiedSymbolData("testPackage.not.in.symboltable", 
-//                                                 SourceInfo.NO_INFO, false, false, false));
+//                                                 SourceInfo.NONE, false, false, false));
 //      
 //      assertNull("should return null.", 
-//                 testLLVisitor._getQualifiedSymbolData("notRightPackage", SourceInfo.NO_INFO, false, false, false));
+//                 testLLVisitor._getQualifiedSymbolData("notRightPackage", SourceInfo.NONE, false, false, false));
 //      assertEquals("should still be two errors.", 2, errors.size());
 //    }
     
     public void testGetArraySymbolData() {
       //Initially, force the inner sd of this array type to be null, to test that.
       assertEquals("Should return null, because inner sd is null.", null, 
-                   testLLVisitor.getArraySymbolData("TestFile", SourceInfo.NO_INFO, false, false));
+                   testLLVisitor.getArraySymbolData("TestFile", SourceInfo.NONE, false, false));
       
       /**Now, put a real SymbolData base in the table.*/
       SymbolData sd = new SymbolData("Iexist");
       LanguageLevelConverter.symbolTable.put("Iexist", sd);
-      testLLVisitor.getArraySymbolData("Iexist", SourceInfo.NO_INFO, false, false).getName();
+      testLLVisitor.getArraySymbolData("Iexist", SourceInfo.NONE, false, false).getName();
       assertTrue("Should have created an array data and add it to symbol table.", 
                  LanguageLevelConverter.symbolTable.containsKey("Iexist[]"));
       SymbolData ad = LanguageLevelConverter.symbolTable.get("Iexist[]");
@@ -2429,16 +2460,16 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       /**Now try it with the full thing already in the symbol table.*/
       assertEquals("Since it's already in symbol table now, should just return it.", ad, 
-                   testLLVisitor.getArraySymbolData("Iexist", SourceInfo.NO_INFO, false, false));
+                   testLLVisitor.getArraySymbolData("Iexist", SourceInfo.NONE, false, false));
       
       /**Now, try it with a multiple dimension array.*/
-      testLLVisitor.getArraySymbolData("Iexist[]", SourceInfo.NO_INFO, false, false);
+      testLLVisitor.getArraySymbolData("Iexist[]", SourceInfo.NONE, false, false);
       assertTrue("Should have added a multidimensional array to the table.", 
                  LanguageLevelConverter.symbolTable.containsKey("Iexist[][]"));
       
       SymbolData sd2 = new SymbolData("java.lang.String");
       LanguageLevelConverter.symbolTable.put("java.lang.String", sd2);
-      testLLVisitor.getArraySymbolData("String[]", SourceInfo.NO_INFO, false, true);
+      testLLVisitor.getArraySymbolData("String[]", SourceInfo.NONE, false, true);
       assertTrue("Should have added java.lang.String[] to table", 
                  LanguageLevelConverter.symbolTable.containsKey("java.lang.String[]"));
       assertTrue("Should have added java.lang.String[][] to table", 
@@ -2454,26 +2485,26 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       // Test if it's already in the symbol table and doesn't need to be resolved not stopping when it should.  
       // get error b/c not in classes to be parsed 
       assertEquals("symbol data is a not a continuation, but resolve is false so should just be returned", _sd6, 
-         testLLVisitor._getSymbolDataFromFileSystem("cebu", SourceInfo.NO_INFO, false, true));
+         testLLVisitor._getSymbolDataFromFileSystem("cebu", SourceInfo.NONE, false, true));
       assertEquals("symbol data is a continuation, but resolve is false, so should just be returned.", _sd4, 
-                   testLLVisitor._getSymbolDataFromFileSystem("u.like.emu", SourceInfo.NO_INFO, false, true));
+                   testLLVisitor._getSymbolDataFromFileSystem("u.like.emu", SourceInfo.NONE, false, true));
       
       // Lookup a name not in the file system with resolve equal to false, to confirm that null is returned.
       
       assertEquals("Should return SymbolData.NOT_FOUND", SymbolData.NOT_FOUND, 
-                   testLLVisitor._getSymbolDataFromFileSystem("Corky", SourceInfo.NO_INFO, false, true));
+                   testLLVisitor._getSymbolDataFromFileSystem("Corky", SourceInfo.NONE, false, true));
         // TODO: fix this test             
-//      SymbolData matchCorky = testLLVisitor._getSymbolDataFromFileSystem("Corky", SourceInfo.NO_INFO, true);
+//      SymbolData matchCorky = testLLVisitor._getSymbolDataFromFileSystem("Corky", SourceInfo.NONE, true);
 //      assertFalse("Should return a non-continuation", matchCorky.isContinuation());
       
       // Test if it needs to be resolved:
       ClassDef cd = 
-        new ClassDef(SourceInfo.NO_INFO, PUBLIC_MAV, 
-                     new Word(SourceInfo.NO_INFO, "Lisa"),
+        new ClassDef(SourceInfo.NONE, PUBLIC_MAV, 
+                     new Word(SourceInfo.NONE, "Lisa"),
                      new TypeParameter[0], 
-                     new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+                     new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
                      new ReferenceType[0], 
-                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                     new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       
       // Use a ElementaryVisitor so lookupFromClassesToBeParsed will actually visit the ClassDef.
       IntermediateVisitor bv = new IntermediateVisitor(new File(""));
@@ -2481,7 +2512,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       testLLVisitor._classesInThisFile.add("Lisa" /*, new Pair<TypeDefBase, LanguageLevelVisitor>(cd, bv)*/);
       assert testLLVisitor._classesInThisFile.contains("Lisa");
       SymbolData matchLisa = 
-        testLLVisitor.getQualifiedSymbolData("Lisa", SourceInfo.NO_INFO, true);
+        testLLVisitor.getQualifiedSymbolData("Lisa", SourceInfo.NONE, true);
       assertTrue("Should return a continuation", matchLisa.isContinuation());
     }
     
@@ -2495,18 +2526,18 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       testLLVisitor.symbolTable.put("fully.qualified.Woah", sd2);
       
       SymbolData result = 
-        testLLVisitor._getSymbolDataFromFileSystem("fully.qualified.Woah", SourceInfo.NO_INFO, false, true);
+        testLLVisitor._getSymbolDataFromFileSystem("fully.qualified.Woah", SourceInfo.NONE, false, true);
       
       assertEquals("Should return sd2, unresolved.", sd2, result);
       assertTrue("sd2 should still be unresolved", sd2.isContinuation());
       assertEquals("Should be no errors", 0, errors.size());
       
-//      result = _llv._getSymbolDataFromFileSystem("fully.qualified.Woah", SourceInfo.NO_INFO, false, true);
+//      result = _llv._getSymbolDataFromFileSystem("fully.qualified.Woah", SourceInfo.NONE, false, true);
 //      assertEquals("Should return sd2, now unresolved.", sd2, result);
 //      assertTrue("sd2 should not be resolved", sd2.isContinuation());
 //      assertEquals("Should be no errors", 0, errors.size());
       
-//      result = _llv._getSymbolDataFromFileSystem("fully.qualified.Woah", SourceInfo.NO_INFO, true, true);
+//      result = _llv._getSymbolDataFromFileSystem("fully.qualified.Woah", SourceInfo.NONE, true, true);
 //      assertEquals("Should return sd2, now resolved.", sd2, result);
 //      assertFalse("sd2 should now be resolved", sd2.isContinuation());   
 //      assertEquals("Should be no errors", 0, errors.size());
@@ -2520,13 +2551,13 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       sd2 = new SymbolData("fully.qualified.Woah");
       testLLVisitor.symbolTable.put("fully.qualified.Woah", sd2);
       
-      result = testLLVisitor._getSymbolDataFromFileSystem("fully.qualified.Woah", SourceInfo.NO_INFO, false, true);
+      result = testLLVisitor._getSymbolDataFromFileSystem("fully.qualified.Woah", SourceInfo.NONE, false, true);
       
       assertEquals("Should return sd2, unresolved.", sd2, result);
       assertTrue("sd2 should still be unresolved", sd2.isContinuation());
       assertEquals("Should be no errors", 0, errors.size());
       
-//      result = _llv._getSymbolDataFromFileSystem("fully.qualified.Woah", SourceInfo.NO_INFO, true, true);
+//      result = _llv._getSymbolDataFromFileSystem("fully.qualified.Woah", SourceInfo.NONE, true, true);
 //      assertEquals("Should return sd2, now resolved.", sd2, result);
       
 //      assertFalse("sd2 should be resolved", sd2.isContinuation());
@@ -2539,28 +2570,28 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       //unqualified
       SymbolData sd1 = new SymbolData("Wow");
-      SymbolData obj = testLLVisitor._getSymbolDataFromFileSystem("java.lang.Object", SourceInfo.NO_INFO, true, true);
+      SymbolData obj = testLLVisitor._getSymbolDataFromFileSystem("java.lang.Object", SourceInfo.NONE, true, true);
       sd1.setSuperClass(obj);
       testLLVisitor.symbolTable.put("Wow", sd1);
       
-      result = testLLVisitor._getSymbolDataFromFileSystem("Wow", SourceInfo.NO_INFO, false, true);
+      result = testLLVisitor._getSymbolDataFromFileSystem("Wow", SourceInfo.NONE, false, true);
       assertEquals("Should return sd1, unresolved.", sd1, result);
       assertTrue("sd1 should still be unresolved.", sd1.isContinuation());
       assertEquals("Should be no errors", 0, errors.size());
       
-      result = testLLVisitor._getSymbolDataFromFileSystem("Wow", SourceInfo.NO_INFO, true, true);
+      result = testLLVisitor._getSymbolDataFromFileSystem("Wow", SourceInfo.NONE, true, true);
       assertEquals("Should return sd1, resolved.", sd1, result);
       assertFalse("sd1 should be resolved.", sd1.isContinuation());
       assertEquals("Should be no errors", 0, errors.size());
       
-      result = testLLVisitor._getSymbolDataFromFileSystem("Wow", SourceInfo.NO_INFO, true, true);
+      result = testLLVisitor._getSymbolDataFromFileSystem("Wow", SourceInfo.NONE, true, true);
       assertEquals("Should return sd1.", sd1, result);
       assertFalse("sd1 should still be resolved.", sd1.isContinuation());
       assertEquals("Should be no errors", 0, errors.size());
       
       
       //finding the most recent file
-      result = testLLVisitor._getSymbolDataFromFileSystem("James", SourceInfo.NO_INFO, true, true);
+      result = testLLVisitor._getSymbolDataFromFileSystem("James", SourceInfo.NONE, true, true);
       assertEquals("Search for James should fail", null, result);
 //      assertEquals("Result should have 3 variables.", 3, result.getVars().size());
 //      assertEquals("Should be no errors", 0, errors.size());
@@ -2570,14 +2601,14 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       assertEquals("Should return NOT_FOUND-does not exist.", 
                    SymbolData.NOT_FOUND, 
                    testLLVisitor._getSymbolDataFromFileSystem("WrongPackage.className", 
-                                                               SourceInfo.NO_INFO, true, false));
+                                                               SourceInfo.NONE, true, false));
       assertEquals("Should be no errors", 0, errors.size());
       
       // Now, test case where class file still exists, but java file is gone.
       testLLVisitor._package = "";
       testLLVisitor._file = new File("testFiles/Fake.dj0");
       LinkedList<VariableData> vds = new LinkedList<VariableData>();
-      result = testLLVisitor._getSymbolDataFromFileSystem("Doh", SourceInfo.NO_INFO, true, true);
+      result = testLLVisitor._getSymbolDataFromFileSystem("Doh", SourceInfo.NONE, true, true);
       vds.addLast(new VariableData("i", PACKAGE_MAV, SymbolData.INT_TYPE, true, result));
       vds.addLast(new VariableData("o", PACKAGE_MAV, obj, true, result));
 // Since some list elements are arrays, comparison test is suspect
@@ -2596,11 +2627,11 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       SymbolData sd1 = new SymbolData("Wow");
       testLLVisitor.symbolTable.put("Wow", sd1);
       assertEquals("Should return an equal SymbolData", 
-                   sd1, testLLVisitor.getQualifiedSymbolData("Wow", SourceInfo.NO_INFO, true));
+                   sd1, testLLVisitor.getQualifiedSymbolData("Wow", SourceInfo.NONE, true));
       assertFalse("Should not be a continuation", sd1.isContinuation());  // There is a pre-existing class file Wow!
       
       // Invalid case
-      SymbolData result = testLLVisitor.getSymbolData("ima.invalid", SourceInfo.NO_INFO, true, false);
+      SymbolData result = testLLVisitor.getSymbolData("ima.invalid", SourceInfo.NONE, true, false);
       assertEquals("Should return null-invalid class name", null, result);
       assertEquals("There should not be any errors", 0, testLLVisitor.errors.size());
       
@@ -2610,7 +2641,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       SymbolData sd2 = new SymbolData("fully.qualified.Symbol");
       testLLVisitor.symbolTable.put("fully.qualified.Symbol", sd2);
       
-      result = testLLVisitor.getSymbolData("fully.qualified.Symbol", SourceInfo.NO_INFO, true, false);
+      result = testLLVisitor.getSymbolData("fully.qualified.Symbol", SourceInfo.NONE, true, false);
       
       assertEquals("Should return sd2, resolved.", sd2, result);
       assertTrue("sd2 should be resolved", sd2.isContinuation());
@@ -2622,7 +2653,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       testLLVisitor.symbolTable.put("fully.qualified.Woah.Wow", sd1);
       testLLVisitor.symbolTable.remove("Wow");
       sd1.setIsContinuation(false);
-      result = testLLVisitor.getSymbolData("fully.qualified.Woah.Wow", SourceInfo.NO_INFO, true, false);
+      result = testLLVisitor.getSymbolData("fully.qualified.Woah.Wow", SourceInfo.NONE, true, false);
       assertEquals("Should return sd1 (the inner class!)", sd1, result);
       
       // Inner inner class
@@ -2632,20 +2663,20 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //                         _llv.symbolTable.get("fully.qualified.Woah.Wow.James"));
       sd3.setOuterData(sd1);
 //      System.err.println("INNER CLASS LOOKUP YIELDS: " + sd1.getInnerClassOrInterface("James"));
-      result = testLLVisitor.getSymbolData("fully.qualified.Woah.Wow.James", SourceInfo.NO_INFO, true, false);
+      result = testLLVisitor.getSymbolData("fully.qualified.Woah.Wow.James", SourceInfo.NONE, true, false);
       assertEquals("Should return sd3", sd3, result);
     }
     
     public void testGetQualifiedSymbolData() {
       // Primitive types
       assertEquals("should return the int SymbolData", SymbolData.INT_TYPE, 
-                   testLLVisitor.getQualifiedSymbolData("int", SourceInfo.NO_INFO, true, true, true));
+                   testLLVisitor.getQualifiedSymbolData("int", SourceInfo.NONE, true, true, true));
       assertEquals("should return the byte SymbolData", SymbolData.BYTE_TYPE, 
-                   testLLVisitor.getQualifiedSymbolData("byte", SourceInfo.NO_INFO, false, false, false));
+                   testLLVisitor.getQualifiedSymbolData("byte", SourceInfo.NONE, false, false, false));
       
       // Array types
-      ArrayData ad = new ArrayData(SymbolData.INT_TYPE, testLLVisitor, SourceInfo.NO_INFO);
-      SymbolData result = testLLVisitor.getQualifiedSymbolData("int[]", SourceInfo.NO_INFO, true, true, true);
+      ArrayData ad = new ArrayData(SymbolData.INT_TYPE, testLLVisitor, SourceInfo.NONE);
+      SymbolData result = testLLVisitor.getQualifiedSymbolData("int[]", SourceInfo.NONE, true, true, true);
       ad.getVars().get(0).setEnclosingData(result);  //.equals(...) on VariableData compares enclosing datas with ==.
       ad.getMethods().get(0).setEnclosingData(result.getMethods().get(0).getEnclosingData()); //similar hack
       assertEquals("should return the array type", ad, result);
@@ -2654,10 +2685,10 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       SymbolData sd = new SymbolData("java.lang.System");
       LanguageLevelConverter.symbolTable.put("java.lang.System", sd);
       assertEquals("should return the same sd", sd, 
-                   testLLVisitor.getQualifiedSymbolData("java.lang.System", SourceInfo.NO_INFO, false, true, true));
+                   testLLVisitor.getQualifiedSymbolData("java.lang.System", SourceInfo.NONE, false, true, true));
       assertTrue("should be a continuation", sd.isContinuation());
       assertEquals("should return the now resolved sd", sd, 
-                   testLLVisitor.getQualifiedSymbolData("java.lang.System", SourceInfo.NO_INFO, true, false, true));
+                   testLLVisitor.getQualifiedSymbolData("java.lang.System", SourceInfo.NONE, true, false, true));
       assertFalse("should not be a continuation", sd.isContinuation());
       
       // In this file
@@ -2672,19 +2703,19 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
                                                        new LinkedList<Pair<LanguageLevelVisitor, SourceFile>>());
       bv._package = "fully.qualified";
       bv._file = new File("testFiles/fully/qualified/Fake.dj0");
-      ClassDef cd = new ClassDef(SourceInfo.NO_INFO, 
+      ClassDef cd = new ClassDef(SourceInfo.NONE, 
                                  PACKAGE_MAV, 
-                                 new Word(SourceInfo.NO_INFO, "Qwerty"),
+                                 new Word(SourceInfo.NONE, "Qwerty"),
                                  new TypeParameter[0],
-                                 new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]),
+                                 new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]),
                                  new ReferenceType[0], 
-                                 new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                 new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       bv._classesInThisFile.add("fully.qualified.Qwerty" /*, new Pair<TypeDefBase, LanguageLevelVisitor>(cd, bv)*/);
       assertEquals("should return sd the continuation", sd, 
-                   bv.getSymbolData("Qwerty", SourceInfo.NO_INFO, true, true));
+                   bv.getSymbolData("Qwerty", SourceInfo.NONE, true, true));
       assertTrue("should be a continuation", sd.isContinuation());
       assertEquals("should also return a continuation", sd, 
-                   bv.getQualifiedSymbolData("fully.qualified.Qwerty", SourceInfo.NO_INFO, false, false, true));
+                   bv.getQualifiedSymbolData("fully.qualified.Qwerty", SourceInfo.NONE, false, false, true));
       assertTrue("should be a continuation", sd.isContinuation());
       
       // Imported files
@@ -2696,7 +2727,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //      LanguageLevelConverter.symbolTable.put("foobar", new SymbolData("This is strange"));
 //      System.err.println("SymbolTable entry for 'foobar' is " + LanguageLevelConverter.symbolTable.get("foobar"));
       assertEquals("should find the continuation in the symbol table", sd, 
-                   testLLVisitor.getQualifiedSymbolData("a.b.c", SourceInfo.NO_INFO, false, true, true));
+                   testLLVisitor.getQualifiedSymbolData("a.b.c", SourceInfo.NONE, false, true, true));
       // TODO: create an import table to look at when no match is found in symbolTable.
       assertTrue("should be a continuation", sd.isContinuation());
       
@@ -2706,7 +2737,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       SymbolData sd2 = new SymbolData("fully.qualified.Woah");
       sd2.setIsContinuation(false);
       LanguageLevelConverter.symbolTable.put("fully.qualified.Woah", sd2);
-      result = testLLVisitor.getQualifiedSymbolData("fully.qualified.Woah", SourceInfo.NO_INFO, true, false, true);
+      result = testLLVisitor.getQualifiedSymbolData("fully.qualified.Woah", SourceInfo.NONE, true, false, true);
 //      System.err.println("result for 'fully.qualifed.Woah' is " + result);
       assertEquals("should find the resolved symbol data in the symbol table", sd2, result);
       assertFalse("should not be a continuation", sd2.isContinuation());
@@ -2720,20 +2751,20 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
 //      System.err.println("_llv.getSymbolData for fully.qualified.Woah = " +
 //                         _llv.getQualifiedSymbolData("fully.qualified.Woah", 
-//      SourceInfo.NO_INFO, true, true, true));
+//      SourceInfo.NONE, true, true, true));
      
-      result = testLLVisitor.getQualifiedSymbolData("fully.qualified.Woah", SourceInfo.NO_INFO, false, false, true);
+      result = testLLVisitor.getQualifiedSymbolData("fully.qualified.Woah", SourceInfo.NONE, false, false, true);
       
       assertEquals("Should return sd2, unresolved.", sd2, result);
       assertTrue("sd2 should still be unresolved", sd2.isContinuation());
       
-      result = testLLVisitor.getQualifiedSymbolData("fully.qualified.Woah", SourceInfo.NO_INFO, false, false, true);
+      result = testLLVisitor.getQualifiedSymbolData("fully.qualified.Woah", SourceInfo.NONE, false, false, true);
       assertEquals("Should return sd2, now unresolved.", sd2, result);
       assertTrue("sd2 should not be resolved", sd2.isContinuation());
       
       // The following "test" forces the definition of "Woah" to be retrieved from the file system but THERE IS NO CLASS
       // FILE so the file system search returns null!
-      result = testLLVisitor.getQualifiedSymbolData("fully.qualified.Woah", SourceInfo.NO_INFO, true, false, true);
+      result = testLLVisitor.getQualifiedSymbolData("fully.qualified.Woah", SourceInfo.NONE, true, false, true);
       assertEquals("Should return sd2, now resolved.", sd2, result);
       assertFalse("sd2 should now be resolved", sd2.isContinuation());
       
@@ -2746,18 +2777,18 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       sd2 = new SymbolData("fully.qualified.Woah");
       LanguageLevelConverter.symbolTable.put("fully.qualified.Woah", sd2);
       assertEquals("should find the unresolved symbol data in the symbol table", sd2, 
-                   testLLVisitor.getQualifiedSymbolData("fully.qualified.Woah", SourceInfo.NO_INFO, false, false, true));
+                   testLLVisitor.getQualifiedSymbolData("fully.qualified.Woah", SourceInfo.NONE, false, false, true));
       assertTrue("should not be a continuation", sd2.isContinuation());
       
       sd2.setIsContinuation(false);
-      result = testLLVisitor.getQualifiedSymbolData("fully.qualified.Woah", SourceInfo.NO_INFO, true, false, true);
+      result = testLLVisitor.getQualifiedSymbolData("fully.qualified.Woah", SourceInfo.NONE, true, false, true);
       assertEquals("should find the resolved symbol data in the symbol table", sd2, result);
       assertFalse("should not be a continuation", sd2.isContinuation());
       
       //test java.lang classes that need to be looked up
       //want to resolve
       SymbolData stringSD = new SymbolData("java.lang.String");
-      SymbolData newsd1 = testLLVisitor.getQualifiedSymbolData("java.lang.String", SourceInfo.NO_INFO, true, true, true);
+      SymbolData newsd1 = testLLVisitor.getQualifiedSymbolData("java.lang.String", SourceInfo.NONE, true, true, true);
       assertEquals("should have correct name.", stringSD.getName(), newsd1.getName());
       assertFalse("should not be a continuation", newsd1.isContinuation());
       
@@ -2765,7 +2796,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       LanguageLevelConverter.symbolTable.put("random.package.String", new SymbolData("random.package.String"));
 //      LanguageLevelConverter.symbolTable.put("java.lang.Object", new SymbolData("java.lang.Object"));
       testLLVisitor._importedPackages.addLast("random.package");
-      result = testLLVisitor.getSymbolData("String", SourceInfo.NO_INFO);
+      result = testLLVisitor.getSymbolData("String", SourceInfo.NONE);
       assertEquals("Result should be null", null, result);
       assertEquals("There should be 1 error", 1, errors.size());
       assertEquals("The error message should be correct", "The class name String is ambiguous." + 
@@ -2788,40 +2819,40 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       // Test "public", "private"
       ModifiersAndVisibility testMav = 
-        new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public", "private"});
+        new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public", "private"});
       testLLVisitor.forModifiersAndVisibility(testMav);
       assertEquals("There should be one error.", 1, errors.size());
       assertEquals("The error message should be correct.", "Illegal combination of modifiers." + 
                    " Can't use private and public together.", errors.get(0).getFirst());
       
       // Test "public", "abstract"
-      testMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public", "abstract"});
+      testMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public", "abstract"});
       testLLVisitor.forModifiersAndVisibility(testMav);
       assertEquals("Still only one error.", 1, errors.size());
       
       // Test "abstract", "final"
-      testMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract", "final"});
+      testMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"abstract", "final"});
       testLLVisitor.forModifiersAndVisibility(testMav);
       assertEquals("There should be two errors.", 2, errors.size());
       assertEquals("The error message should be correct.", "Illegal combination of modifiers." + 
                    " Can't use final and abstract together.", errors.get(1).getFirst());
       
       // Test "final", "abstract"
-      testMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final", "abstract"});
+      testMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"final", "abstract"});
       testLLVisitor.forModifiersAndVisibility(testMav);
       assertEquals("There should still be two errors.", 2, errors.size());  // Generated error is duplicate
       assertEquals("The error message should be correct.", "Illegal combination of modifiers." + 
                    " Can't use final and abstract together.", errors.get(1).getFirst());
       
       // Test "volatile", "final"
-      testMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"volatile", "final"});
+      testMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"volatile", "final"});
       testLLVisitor.forModifiersAndVisibility(testMav);
       assertEquals("There should be three errors.", 3, errors.size());  // Generated one new error
       assertEquals("The error message should be correct.", "Illegal combination of modifiers." + 
                    " Can't use final and volatile together.", errors.get(2).getFirst());
       
       // Test "static", "final", "static"
-      testMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"static", "final", "static"});
+      testMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"static", "final", "static"});
       testLLVisitor.forModifiersAndVisibility(testMav);
       assertEquals("There should be four errors.", 4, errors.size());  // Generated one new error
       assertEquals("The error message should be correct.", "Duplicate modifier: static", errors.get(3).getFirst());
@@ -2851,11 +2882,11 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //      LanguageLevelConverter.symbolTable.put("java.lang.Object", obj);
       
       ClassDef cd = 
-        new ClassDef(SourceInfo.NO_INFO, PUBLIC_MAV, new Word(SourceInfo.NO_INFO, "Awesome"),
+        new ClassDef(SourceInfo.NONE, PUBLIC_MAV, new Word(SourceInfo.NONE, "Awesome"),
                      new TypeParameter[0], 
-                     new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+                     new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
                      new ReferenceType[0], 
-                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                     new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       
       SymbolData sd = new SymbolData("Awesome"); /**Create a continuation and store it in table.*/
       sd.setSuperClass(LanguageLevelConverter.symbolTable.get("java.lang.Object"));
@@ -2880,24 +2911,24 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     
     public void test_variableDeclaration2VariableData() {
       VariableDeclarator[] d1 = {
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                            new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                            new Word(SourceInfo.NO_INFO, "i")) };
-      VariableDeclaration vd1 = new VariableDeclaration(SourceInfo.NO_INFO,PUBLIC_MAV, d1); 
+        new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                            new PrimitiveType(SourceInfo.NONE, "int"), 
+                                            new Word(SourceInfo.NONE, "i")) };
+      VariableDeclaration vd1 = new VariableDeclaration(SourceInfo.NONE,PUBLIC_MAV, d1); 
       VariableData[] vdata1 = { new VariableData("i", PUBLIC_MAV, SymbolData.INT_TYPE, false, _sd1) };
       
       assertTrue("Should properly recognize a basic VariableDeclaration", 
                  arrayEquals(vdata1, testLLVisitor._variableDeclaration2VariableData(vd1, _sd1)));
       
       VariableDeclarator[] d2 = {
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                            new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                            new Word(SourceInfo.NO_INFO, "i")), 
-        new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                          new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
-                                          new Word(SourceInfo.NO_INFO, "b"), 
-                                          new BooleanLiteral(SourceInfo.NO_INFO, true)) };
-      VariableDeclaration vd2 = new VariableDeclaration(SourceInfo.NO_INFO,PRIVATE_MAV, d2); 
+        new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                            new PrimitiveType(SourceInfo.NONE, "int"), 
+                                            new Word(SourceInfo.NONE, "i")), 
+        new InitializedVariableDeclarator(SourceInfo.NONE, 
+                                          new PrimitiveType(SourceInfo.NONE, "boolean"), 
+                                          new Word(SourceInfo.NONE, "b"), 
+                                          new BooleanLiteral(SourceInfo.NONE, true)) };
+      VariableDeclaration vd2 = new VariableDeclaration(SourceInfo.NONE,PRIVATE_MAV, d2); 
       VariableData bData = new VariableData("b", PRIVATE_MAV, SymbolData.BOOLEAN_TYPE, true, _sd1);
       bData.setHasInitializer(true);
       VariableData[] vdata2 = {new VariableData("i", PRIVATE_MAV, SymbolData.INT_TYPE, false, _sd1),
@@ -2908,10 +2939,10 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       //check that if the type cannot be found, no error is thrown.
       VariableDeclarator[] d3 = { 
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                            new ClassOrInterfaceType(SourceInfo.NO_INFO, "LinkedList", new Type[0]), 
-                                            new Word(SourceInfo.NO_INFO, "myList"))};
-      VariableDeclaration vd3 = new VariableDeclaration(SourceInfo.NO_INFO, PRIVATE_MAV, d3);
+        new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                            new ClassOrInterfaceType(SourceInfo.NONE, "LinkedList", new Type[0]), 
+                                            new Word(SourceInfo.NONE, "myList"))};
+      VariableDeclaration vd3 = new VariableDeclaration(SourceInfo.NONE, PRIVATE_MAV, d3);
       testLLVisitor._variableDeclaration2VariableData(vd3, _sd1);
       assertEquals("There should now be no errors", 0, errors.size());
 //     assertEquals("The error message should be correct", "Class or Interface LinkedList not found", 
@@ -2922,8 +2953,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     public void test_addError() {
       LinkedList<Pair<String, JExpressionIF>> e = new LinkedList<Pair<String, JExpressionIF>>();
       
-      NullLiteral nl = new NullLiteral(SourceInfo.NO_INFO);
-      NullLiteral nl2 = new NullLiteral(SourceInfo.NO_INFO);
+      NullLiteral nl = new NullLiteral(SourceInfo.NONE);
+      NullLiteral nl2 = new NullLiteral(SourceInfo.NONE);
       
       e.addLast(new Pair<String,JExpressionIF>("Boy, is this an error!", nl));
       _addError("Boy, is this an error!", nl);
@@ -2941,8 +2972,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     public void test_addAndIgnoreError() {
       LinkedList<Pair<String, JExpressionIF>> e = new LinkedList<Pair<String, JExpressionIF>>();
       
-      NullLiteral nl = new NullLiteral(SourceInfo.NO_INFO);
-      NullLiteral nl2 = new NullLiteral(SourceInfo.NO_INFO);
+      NullLiteral nl = new NullLiteral(SourceInfo.NONE);
+      NullLiteral nl2 = new NullLiteral(SourceInfo.NONE);
       
       _errorAdded = false;
       
@@ -2983,12 +3014,12 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     
     public void testForClassDefDoFirst() {      
       ClassDef cd = 
-        new ClassDef(SourceInfo.NO_INFO, PUBLIC_MAV, 
-                     new Word(SourceInfo.NO_INFO, "Awesome"),
+        new ClassDef(SourceInfo.NONE, PUBLIC_MAV, 
+                     new Word(SourceInfo.NONE, "Awesome"),
                      new TypeParameter[0], 
-                     new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+                     new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
                      new ReferenceType[0], 
-                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                     new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       testLLVisitor.forClassDefDoFirst(cd);
       assertEquals("There should be no errors.", 0, errors.size());
       testLLVisitor._importedFiles.addLast(new File("Awesome").getAbsolutePath());
@@ -2997,12 +3028,12 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       assertEquals("The error message should be correct.", "The class Awesome was already imported.", 
                    errors.get(0).getFirst());
       
-      ClassDef cd2 = new ClassDef(SourceInfo.NO_INFO, PRIVATE_MAV, 
-                                  new Word(SourceInfo.NO_INFO, "privateClass"),
+      ClassDef cd2 = new ClassDef(SourceInfo.NONE, PRIVATE_MAV, 
+                                  new Word(SourceInfo.NONE, "privateClass"),
                                   new TypeParameter[0], 
-                                  new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+                                  new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
                                   new ReferenceType[0], 
-                                  new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                  new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       testLLVisitor.forClassDefDoFirst(cd2);
       assertEquals("There should be 2 errors", 2, errors.size());
       assertEquals("The 2nd error message should be correct", "Top level classes cannot be private", 
@@ -3011,53 +3042,53 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     }
     
     public void testForInterfaceDefDoFirst() {
-      InterfaceDef id = new InterfaceDef(SourceInfo.NO_INFO, PUBLIC_MAV, 
-                                         new Word(SourceInfo.NO_INFO, "Awesome"),
+      InterfaceDef id = new InterfaceDef(SourceInfo.NONE, PUBLIC_MAV, 
+                                         new Word(SourceInfo.NONE, "Awesome"),
                                          new TypeParameter[0], new ReferenceType[0], 
-                                         new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                         new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       testLLVisitor.forInterfaceDefDoFirst(id);
       assertEquals("There should be no errors.", 0, errors.size());
       
-      InterfaceDef id2 = new InterfaceDef(SourceInfo.NO_INFO, PRIVATE_MAV, 
-                                          new Word(SourceInfo.NO_INFO, "privateinterface"),
+      InterfaceDef id2 = new InterfaceDef(SourceInfo.NONE, PRIVATE_MAV, 
+                                          new Word(SourceInfo.NONE, "privateinterface"),
                                           new TypeParameter[0], new ReferenceType[0], 
-                                          new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                          new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       testLLVisitor.forInterfaceDefDoFirst(id2);
       assertEquals("There should be 1 errors", 1, errors.size());
       assertEquals("The error message should be correct", "Top level interfaces cannot be private", 
                    errors.get(0).getFirst());
       
-      InterfaceDef id3 = new InterfaceDef(SourceInfo.NO_INFO, FINAL_MAV, 
-                                          new Word(SourceInfo.NO_INFO, "finalinterface"),
+      InterfaceDef id3 = new InterfaceDef(SourceInfo.NONE, FINAL_MAV, 
+                                          new Word(SourceInfo.NONE, "finalinterface"),
                                           new TypeParameter[0], new ReferenceType[0], 
-                                          new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                          new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       testLLVisitor.forInterfaceDefDoFirst(id3);
       assertEquals("There should be 2 errors", 2, errors.size());
       assertEquals("The error message should be correct", "Interfaces cannot be final", errors.get(1).getFirst());      
     }
     
     public void testForInnerInterfaceDefDoFirst() {
-      InterfaceDef id = new InterfaceDef(SourceInfo.NO_INFO, PUBLIC_MAV, 
-                                         new Word(SourceInfo.NO_INFO, "Awesome"),
+      InterfaceDef id = new InterfaceDef(SourceInfo.NONE, PUBLIC_MAV, 
+                                         new Word(SourceInfo.NONE, "Awesome"),
                                          new TypeParameter[0], new ReferenceType[0], 
-                                         new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                         new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       id.visit(testLLVisitor);
       assertEquals("There should be no errors.", 0, errors.size());
       
       InnerInterfaceDef id2 = 
-        new InnerInterfaceDef(SourceInfo.NO_INFO, FINAL_MAV, new Word(SourceInfo.NO_INFO, "finalinterface"),
+        new InnerInterfaceDef(SourceInfo.NONE, FINAL_MAV, new Word(SourceInfo.NONE, "finalinterface"),
                               new TypeParameter[0], new ReferenceType[0], 
-                              new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                              new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       id2.visit(testLLVisitor);
       assertEquals("There should be 1 error", 1, errors.size());
       assertEquals("The error message should be correct", "Interfaces cannot be final", errors.get(0).getFirst());   
     }
     
     public void testForPackageStatementOnly() {
-      Word[] words = new Word[] {new Word(SourceInfo.NO_INFO, "alpha"),
-        new Word(SourceInfo.NO_INFO, "beta")};
-      CompoundWord cw = new CompoundWord(SourceInfo.NO_INFO, words);
-      PackageStatement ps = new PackageStatement(SourceInfo.NO_INFO, cw);
+      Word[] words = new Word[] {new Word(SourceInfo.NONE, "alpha"),
+        new Word(SourceInfo.NONE, "beta")};
+      CompoundWord cw = new CompoundWord(SourceInfo.NONE, words);
+      PackageStatement ps = new PackageStatement(SourceInfo.NONE, cw);
       testLLVisitor._file = new File("alpha/beta/delta");
       testLLVisitor.forPackageStatementOnly(ps);
       assertEquals("_package should be set correctly.", "alpha.beta", testLLVisitor._package);
@@ -3073,9 +3104,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     public void testForClassImportStatementOnly() {
       
       //Test one that works
-      Word[] words = new Word[] { new Word(SourceInfo.NO_INFO, "alpha"), new Word(SourceInfo.NO_INFO, "beta")};
-      CompoundWord cw = new CompoundWord(SourceInfo.NO_INFO, words);
-      ClassImportStatement cis = new ClassImportStatement(SourceInfo.NO_INFO, cw);
+      Word[] words = new Word[] { new Word(SourceInfo.NONE, "alpha"), new Word(SourceInfo.NONE, "beta")};
+      CompoundWord cw = new CompoundWord(SourceInfo.NONE, words);
+      ClassImportStatement cis = new ClassImportStatement(SourceInfo.NONE, cw);
       SymbolData sd = new SymbolData("alpha.beta");
       testLLVisitor.forClassImportStatementOnly(cis);
       assertTrue("imported files should contain alpha.beta", testLLVisitor._importedFiles.contains("alpha.beta"));
@@ -3085,9 +3116,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       // Test one that should throw an error: Class has already been imported. alpha.beta should now be in the 
       // symbolTable, and alpha should be in the list of packages, so this will throw an error
-      Word[] words2 = new Word[] { new Word(SourceInfo.NO_INFO, "gamma"), new Word(SourceInfo.NO_INFO, "beta")};
-      CompoundWord cw2 = new CompoundWord(SourceInfo.NO_INFO, words2);
-      ClassImportStatement cis2 = new ClassImportStatement(SourceInfo.NO_INFO, cw2);
+      Word[] words2 = new Word[] { new Word(SourceInfo.NONE, "gamma"), new Word(SourceInfo.NONE, "beta")};
+      CompoundWord cw2 = new CompoundWord(SourceInfo.NONE, words2);
+      ClassImportStatement cis2 = new ClassImportStatement(SourceInfo.NONE, cw2);
       cis2.visit(testLLVisitor);
       
       assertEquals("There should be one error", 1, errors.size());
@@ -3098,9 +3129,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     // Consistent with javac,  the following test no longer throws an error.
 //      //Test one that should throw an error: Importing a class from the current package
 //      testLLVisitor._package = "myPackage";
-//      Word[] words3 =  new Word[] { new Word(SourceInfo.NO_INFO, "myPackage"), new Word(SourceInfo.NO_INFO, "cookie")};
-//      CompoundWord cw3 = new CompoundWord(SourceInfo.NO_INFO, words3);
-//      ClassImportStatement cis3 = new ClassImportStatement(SourceInfo.NO_INFO, cw3);
+//      Word[] words3 =  new Word[] { new Word(SourceInfo.NONE, "myPackage"), new Word(SourceInfo.NONE, "cookie")};
+//      CompoundWord cw3 = new CompoundWord(SourceInfo.NONE, words3);
+//      ClassImportStatement cis3 = new ClassImportStatement(SourceInfo.NONE, cw3);
 //      cis3.visit(testLLVisitor);
 //      
 //      assertEquals("There should now be 2 errors", 2, errors.size());
@@ -3111,10 +3142,10 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     
     public void testForPackageImportStatementOnly() {
       //Test one that works
-      Word[] words = new Word[] {new Word(SourceInfo.NO_INFO, "alpha"),
-        new Word(SourceInfo.NO_INFO, "beta")};
-      CompoundWord cw = new CompoundWord(SourceInfo.NO_INFO, words);
-      PackageImportStatement cis = new PackageImportStatement(SourceInfo.NO_INFO, cw);
+      Word[] words = new Word[] {new Word(SourceInfo.NONE, "alpha"),
+        new Word(SourceInfo.NONE, "beta")};
+      CompoundWord cw = new CompoundWord(SourceInfo.NONE, words);
+      PackageImportStatement cis = new PackageImportStatement(SourceInfo.NONE, cw);
       SymbolData sd = new SymbolData("alpha.beta");
       testLLVisitor.forPackageImportStatementOnly(cis);
       assertEquals("There should be no errorrs", 0, errors.size());
@@ -3123,10 +3154,10 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       //Test one that should not throw an error: Importing a subpackage of the current package
       testLLVisitor._package = "myPackage";
-      Word[] words3 = new Word[] {new Word(SourceInfo.NO_INFO, "myPackage"), new Word(SourceInfo.NO_INFO, 
+      Word[] words3 = new Word[] {new Word(SourceInfo.NONE, "myPackage"), new Word(SourceInfo.NONE, 
                                                                                               "cookie")};
-      CompoundWord cw3 = new CompoundWord(SourceInfo.NO_INFO, words3);
-      PackageImportStatement pis = new PackageImportStatement(SourceInfo.NO_INFO, cw3);
+      CompoundWord cw3 = new CompoundWord(SourceInfo.NONE, words3);
+      PackageImportStatement pis = new PackageImportStatement(SourceInfo.NONE, cw3);
       pis.visit(testLLVisitor);
       
       assertEquals("There should be no errors", 0, errors.size());
@@ -3136,9 +3167,9 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       
       //Test one that should throw an error: Importing the current package
-      Word[] words2 = new Word[] {new Word(SourceInfo.NO_INFO, "myPackage")};
-      CompoundWord cw2 = new CompoundWord(SourceInfo.NO_INFO, words2);
-      PackageImportStatement pis2 = new PackageImportStatement(SourceInfo.NO_INFO, cw2);
+      Word[] words2 = new Word[] {new Word(SourceInfo.NONE, "myPackage")};
+      CompoundWord cw2 = new CompoundWord(SourceInfo.NONE, words2);
+      PackageImportStatement pis2 = new PackageImportStatement(SourceInfo.NONE, cw2);
       pis2.visit(testLLVisitor);
       
       assertEquals("There should now be 1 errors", 1, errors.size());
@@ -3148,23 +3179,23 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     }
     
     public void testForSourceFile() {
-      ClassDef cd = new ClassDef(SourceInfo.NO_INFO, PUBLIC_MAV, new Word(SourceInfo.NO_INFO, "Awesome"),
+      ClassDef cd = new ClassDef(SourceInfo.NONE, PUBLIC_MAV, new Word(SourceInfo.NONE, "Awesome"),
                                  new TypeParameter[0], 
-                                 new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+                                 new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
                                  new ReferenceType[0], 
-                                 new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
-      ClassDef cd2 = new ClassDef(SourceInfo.NO_INFO, PUBLIC_MAV, new Word(SourceInfo.NO_INFO, "Gnarly"),
+                                 new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
+      ClassDef cd2 = new ClassDef(SourceInfo.NONE, PUBLIC_MAV, new Word(SourceInfo.NONE, "Gnarly"),
                                   new TypeParameter[0], 
-                                  new ClassOrInterfaceType(SourceInfo.NO_INFO, "Awesome", new Type[0]), 
+                                  new ClassOrInterfaceType(SourceInfo.NONE, "Awesome", new Type[0]), 
                                   new ReferenceType[0], 
-                                  new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
-      InterfaceDef id = new InterfaceDef(SourceInfo.NO_INFO, PUBLIC_MAV, 
-                                         new Word(SourceInfo.NO_INFO, "NiftyWords"),
+                                  new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
+      InterfaceDef id = new InterfaceDef(SourceInfo.NONE, PUBLIC_MAV, 
+                                         new Word(SourceInfo.NONE, "NiftyWords"),
                                          new TypeParameter[0], 
                                          new ReferenceType[0], 
-                                         new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                         new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       
-      SourceFile sf = new SourceFile(SourceInfo.NO_INFO,
+      SourceFile sf = new SourceFile(SourceInfo.NONE,
                                      new PackageStatement[0],
                                      new ImportStatement[0],
                                      new TypeDefBase[] {cd, cd2, id});
@@ -3188,17 +3219,17 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     
     public void testReferenceType2String() {
       // Try a TypeVariable
-      TypeVariable tv = new TypeVariable(SourceInfo.NO_INFO, "T");
+      TypeVariable tv = new TypeVariable(SourceInfo.NONE, "T");
       String[] result = testLLVisitor.referenceType2String(new ReferenceType[] { tv });
       assertEquals("There should not be any errors.", 0, errors.size());
       assertEquals("Results should have one String.", 1, result.length);
       assertEquals("The String should be \"T\".", "T", result[0]);
       
       // Try a ClassOrInterfaceType
-      ClassOrInterfaceType coit = new ClassOrInterfaceType(SourceInfo.NO_INFO, 
+      ClassOrInterfaceType coit = new ClassOrInterfaceType(SourceInfo.NONE, 
                                                            "MyClass", 
-                                                           new Type[] { new TypeVariable(SourceInfo.NO_INFO, "T"),
-        new TypeVariable(SourceInfo.NO_INFO, "U")}
+                                                           new Type[] { new TypeVariable(SourceInfo.NONE, "T"),
+        new TypeVariable(SourceInfo.NONE, "U")}
       );
       result = testLLVisitor.referenceType2String(new ReferenceType[] { tv, coit });
       assertEquals("There should not be any errors.", 0, errors.size());
@@ -3207,10 +3238,10 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       assertEquals("The second String should be \"MyClass\".", "MyClass", result[1]);
       
       // Try a MemberType
-      MemberType mt = new MemberType(SourceInfo.NO_INFO,
+      MemberType mt = new MemberType(SourceInfo.NONE,
                                      "MyClass.MyClass2",
                                      coit,
-                                     new ClassOrInterfaceType(SourceInfo.NO_INFO, 
+                                     new ClassOrInterfaceType(SourceInfo.NONE, 
                                                               "MyClass2", 
                                                               new Type[0]));
       result = testLLVisitor.referenceType2String(new ReferenceType[] { mt });
@@ -3224,13 +3255,13 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
             
       // Make sure that exceptions are being added to symbol table 
       ClassOrInterfaceType exceptionType = 
-        new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.util.prefs.BackingStoreException", new Type[0]);
-      ParenthesizedExpressionList expList = new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]);
+        new ClassOrInterfaceType(SourceInfo.NONE, "java.util.prefs.BackingStoreException", new Type[0]);
+      ParenthesizedExpressionList expList = new ParenthesizedExpressionList(SourceInfo.NONE, new Expression[0]);
       
       BracedBody bb = 
-        new BracedBody(SourceInfo.NO_INFO, 
-                       new BodyItemI[] { new ThrowStatement(SourceInfo.NO_INFO, 
-                                                            new SimpleNamedClassInstantiation(SourceInfo.NO_INFO, 
+        new BracedBody(SourceInfo.NONE, 
+                       new BodyItemI[] { new ThrowStatement(SourceInfo.NONE, 
+                                                            new SimpleNamedClassInstantiation(SourceInfo.NONE, 
                                                                                               exceptionType, 
                                                                                               expList))});
       bb.visit(testLLVisitor);
@@ -3242,16 +3273,16 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     public void testShouldBreak() {
       //shift assignment expressions:
       LeftShiftAssignmentExpression shift1 = 
-        new LeftShiftAssignmentExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), 
-                                          new NullLiteral(SourceInfo.NO_INFO));
+        new LeftShiftAssignmentExpression(SourceInfo.NONE, new NullLiteral(SourceInfo.NONE), 
+                                          new NullLiteral(SourceInfo.NONE));
       RightUnsignedShiftAssignmentExpression shift2 = 
-        new RightUnsignedShiftAssignmentExpression(SourceInfo.NO_INFO, 
-                                                   new NullLiteral(SourceInfo.NO_INFO), 
-                                                   new NullLiteral(SourceInfo.NO_INFO));
+        new RightUnsignedShiftAssignmentExpression(SourceInfo.NONE, 
+                                                   new NullLiteral(SourceInfo.NONE), 
+                                                   new NullLiteral(SourceInfo.NONE));
       RightSignedShiftAssignmentExpression shift3 = 
-        new RightSignedShiftAssignmentExpression(SourceInfo.NO_INFO, 
-                                                 new NullLiteral(SourceInfo.NO_INFO), 
-                                                 new NullLiteral(SourceInfo.NO_INFO));
+        new RightSignedShiftAssignmentExpression(SourceInfo.NONE, 
+                                                 new NullLiteral(SourceInfo.NONE), 
+                                                 new NullLiteral(SourceInfo.NONE));
       
       
       shift1.visit(testLLVisitor);
@@ -3274,14 +3305,14 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     
       //BitwiseAssignmentExpressions
       BitwiseAndAssignmentExpression bit1 = 
-        new BitwiseAndAssignmentExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), 
-                                           new NullLiteral(SourceInfo.NO_INFO));
+        new BitwiseAndAssignmentExpression(SourceInfo.NONE, new NullLiteral(SourceInfo.NONE), 
+                                           new NullLiteral(SourceInfo.NONE));
       BitwiseOrAssignmentExpression bit2 = 
-        new BitwiseOrAssignmentExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), 
-                                          new NullLiteral(SourceInfo.NO_INFO));
+        new BitwiseOrAssignmentExpression(SourceInfo.NONE, new NullLiteral(SourceInfo.NONE), 
+                                          new NullLiteral(SourceInfo.NONE));
       BitwiseXorAssignmentExpression bit3 = 
-        new BitwiseXorAssignmentExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), 
-                                           new NullLiteral(SourceInfo.NO_INFO));
+        new BitwiseXorAssignmentExpression(SourceInfo.NONE, new NullLiteral(SourceInfo.NONE), 
+                                           new NullLiteral(SourceInfo.NONE));
       
       bit1.visit(testLLVisitor);
       assertEquals("Should be no errors", 0, errors.size());
@@ -3300,16 +3331,16 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       //BitwiseExpressions
       BitwiseAndExpression bit4 = 
-        new BitwiseAndExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), 
-                                 new NullLiteral(SourceInfo.NO_INFO));
+        new BitwiseAndExpression(SourceInfo.NONE, new NullLiteral(SourceInfo.NONE), 
+                                 new NullLiteral(SourceInfo.NONE));
       BitwiseOrExpression bit5 = 
-        new BitwiseOrExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), 
-                                new NullLiteral(SourceInfo.NO_INFO));
+        new BitwiseOrExpression(SourceInfo.NONE, new NullLiteral(SourceInfo.NONE), 
+                                new NullLiteral(SourceInfo.NONE));
       BitwiseXorExpression bit6 = 
-        new BitwiseXorExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), 
-                                 new NullLiteral(SourceInfo.NO_INFO));
+        new BitwiseXorExpression(SourceInfo.NONE, new NullLiteral(SourceInfo.NONE), 
+                                 new NullLiteral(SourceInfo.NONE));
       BitwiseNotExpression bit7 = 
-        new BitwiseNotExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO));
+        new BitwiseNotExpression(SourceInfo.NONE, new NullLiteral(SourceInfo.NONE));
       
       
       bit4.visit(testLLVisitor);
@@ -3340,14 +3371,14 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       //shift binary expressions
       LeftShiftExpression shift4 = 
-        new LeftShiftExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), 
-                                new NullLiteral(SourceInfo.NO_INFO));
+        new LeftShiftExpression(SourceInfo.NONE, new NullLiteral(SourceInfo.NONE), 
+                                new NullLiteral(SourceInfo.NONE));
       RightUnsignedShiftExpression shift5 = 
-        new RightUnsignedShiftExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), 
-                                         new NullLiteral(SourceInfo.NO_INFO));
+        new RightUnsignedShiftExpression(SourceInfo.NONE, new NullLiteral(SourceInfo.NONE), 
+                                         new NullLiteral(SourceInfo.NONE));
       RightSignedShiftExpression shift6 = 
-        new RightSignedShiftExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), 
-                                       new NullLiteral(SourceInfo.NO_INFO));
+        new RightSignedShiftExpression(SourceInfo.NONE, new NullLiteral(SourceInfo.NONE), 
+                                       new NullLiteral(SourceInfo.NONE));
       
       shift4.visit(testLLVisitor);
       assertEquals("Should be no errors", 0, errors.size());
@@ -3365,7 +3396,7 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
 //                   errors.getLast().getFirst());
       
       //empty expression
-      EmptyExpression e = new EmptyExpression(SourceInfo.NO_INFO);
+      EmptyExpression e = new EmptyExpression(SourceInfo.NONE);
       e.visit(testLLVisitor);
       assertEquals("Should be 1 error", 1, errors.size());
       assertEquals("Error message should be correct", "You appear to be missing an expression here", 
@@ -3373,8 +3404,8 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
       
       //noop expression
       NoOpExpression noop = 
-        new NoOpExpression(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO), 
-                           new NullLiteral(SourceInfo.NO_INFO));
+        new NoOpExpression(SourceInfo.NONE, new NullLiteral(SourceInfo.NONE), 
+                           new NullLiteral(SourceInfo.NONE));
       noop.visit(testLLVisitor);
       assertEquals("Should be 2 errors", 2, errors.size());
       assertEquals("Error message should be correct", "You are missing a binary operator here", 
@@ -3384,18 +3415,18 @@ public class LanguageLevelVisitor extends JExpressionIFPrunableDepthFirstVisitor
     public void testIsConstructor() {
       MethodData constr = 
         new MethodData("monkey", PUBLIC_MAV, new TypeParameter[0], _sd1, new VariableData[0], new String[0], _sd1, 
-                       new NullLiteral(SourceInfo.NO_INFO));
+                       new NullLiteral(SourceInfo.NONE));
       MethodData notRightOuter = 
         new MethodData("monkey", PUBLIC_MAV, new TypeParameter[0], _sd1, new VariableData[0], new String[0], _sd2, 
-                       new NullLiteral(SourceInfo.NO_INFO));
+                       new NullLiteral(SourceInfo.NONE));
       _sd2.setOuterData(_sd1);
       _sd1.addInnerClass(_sd2);
       MethodData notRightName = 
         new MethodData("chimp", PUBLIC_MAV, new TypeParameter[0], _sd1, new VariableData[0], new String[0], _sd1, 
-                       new NullLiteral(SourceInfo.NO_INFO));
+                       new NullLiteral(SourceInfo.NONE));
       MethodData notRightReturnType = 
         new MethodData("monkey", PUBLIC_MAV, new TypeParameter[0], _sd2, new VariableData[0], new String[0], _sd1, 
-                       new NullLiteral(SourceInfo.NO_INFO));
+                       new NullLiteral(SourceInfo.NONE));
       
       //try one that works
       assertTrue(testLLVisitor.isConstructor(constr));

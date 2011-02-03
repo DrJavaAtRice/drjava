@@ -103,8 +103,8 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     return null;
   }
     
-  /** Convert Variable [Field] declaration to variable datas.  Then, make sure that no fields are declared to be 
-    * abstract. Finally, add the variable datas to the symbol data, and emit an 
+  /** Processes a field declaration. Converts VariableDeclaration to VariableData[].  Ensures that no fields are 
+    * declared to be abstract. Finally, adds the variable datas to the symbol data, and emits an 
     * error if two fields have the same names. */
   public Void forVariableDeclarationOnly(VariableDeclaration that) {
 //    System.err.println("Calling _variableDeclaration2VariableData on " + that);
@@ -114,12 +114,10 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
 //    LinkedList<VariableData> vdsList = new LinkedList<VariableData>();
     for (int i = 0; i < vds.length; i++) {
       if (! vds[i].isStatic()) vds[i].setPrivate();
-      // TODO: where is abstract check?
-//      else if (that.getDeclarators()[i] instanceof UninitializedVariableDeclarator) {  
-//        _addAndIgnoreError("All static fields must be initialized", that);
-//      }
-      
-//      vdsList.addLast(vds[i]);
+      else if (that.getDeclarators()[i] instanceof UninitializedVariableDeclarator) {  
+        _addAndIgnoreError("All static fields must be initialized", that);
+      }
+// TODO: where is abstract check?     
     }
 //    System.err.println("Processed vds array = " + Arrays.toString(vds));
     if (! _enclosing.addFinalVars(vds /* vdsList.toArray(new VariableData[vdsList.size()]) */)) {
@@ -209,7 +207,7 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
 
     that.getMav().visit(this);
     String name = getUnqualifiedClassName(that.getName().getText());
-    if (!name.equals(getUnqualifiedClassName(_enclosing.getName()))) {
+    if (! name.equals(getUnqualifiedClassName(_enclosing.getName()))) {
       _addAndIgnoreError("The constructor return type and class name must match", that);
     }
 
@@ -226,6 +224,7 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     }
     
     _checkError(); // reset check flag
+    
     // Turn the parameters from a FormalParameterList to a VariableData[]
     VariableData[] vds = formalParameters2VariableData(that.getParameters(), _enclosing);
     if (! _checkError()) {  // if there was an error converting the formalParameters, don't use them.
@@ -269,30 +268,30 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     private ClassBodyIntermediateVisitor _cbiv;
     
     private SymbolData _sd1;
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"});
     private ModifiersAndVisibility _publicFinalMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public", "final"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public", "final"});
     private ModifiersAndVisibility _protectedMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"protected"});
     private ModifiersAndVisibility _privateMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[0]);
     private ModifiersAndVisibility _abstractMav =
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
-    private ModifiersAndVisibility _staticMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"static"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"final"});
+    private ModifiersAndVisibility _staticMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"static"});
     private ModifiersAndVisibility _abstractStaticMav =
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract", "static"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"abstract", "static"});
     private ModifiersAndVisibility _privateAbstractMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private", "abstract"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"private", "abstract"});
     private ModifiersAndVisibility _staticFinalMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"static", "final"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"static", "final"});
      private ModifiersAndVisibility _finalStaticMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final", "static"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"final", "static"});
     private ModifiersAndVisibility _finalPrivateMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final", "private"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"final", "private"});
     private ModifiersAndVisibility _privateFinalMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private", "final"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"private", "final"});
     
     
     public ClassBodyIntermediateVisitorTest() { this(""); }
@@ -325,28 +324,28 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     
     public void testForConcreteMethodDefDoFirst() {
       // Check one that works
-      ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NO_INFO, 
+      ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NONE, 
                                                     _privateMav, 
                                                     new TypeParameter[0], 
-                                                    new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                                    new Word(SourceInfo.NO_INFO, "methodName"),
+                                                    new PrimitiveType(SourceInfo.NONE, "int"), 
+                                                    new Word(SourceInfo.NONE, "methodName"),
                                                     new FormalParameter[0],
                                                     new ReferenceType[0], 
-                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                                    new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       cmd.visit(_cbiv);
       assertEquals("There should not be any errors", 0, errors.size());
       
       
       
       // Check one that doesn't work because it is declared abstract but is actually a concrete method
-      ConcreteMethodDef cmd2 = new ConcreteMethodDef(SourceInfo.NO_INFO, 
+      ConcreteMethodDef cmd2 = new ConcreteMethodDef(SourceInfo.NONE, 
                                                      _abstractMav, 
                                                      new TypeParameter[0], 
-                                                     new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                                     new Word(SourceInfo.NO_INFO, "methodName"),
+                                                     new PrimitiveType(SourceInfo.NONE, "double"), 
+                                                     new Word(SourceInfo.NONE, "methodName"),
                                                      new FormalParameter[0],
                                                      new ReferenceType[0], 
-                                                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                                     new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       cmd2.visit(_cbiv);
       assertEquals("There should be one error", 1, errors.size());
       assertEquals("The error message should be correct", 
@@ -354,14 +353,14 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
                    errors.get(0).getFirst());
       
 //      // Check one that doesn't work because it is static
-//      ConcreteMethodDef cmd3 = new ConcreteMethodDef(SourceInfo.NO_INFO, 
+//      ConcreteMethodDef cmd3 = new ConcreteMethodDef(SourceInfo.NONE, 
 //                                                     _staticMav, 
 //                                                     new TypeParameter[0], 
-//                                                     new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-//                                                     new Word(SourceInfo.NO_INFO, "methodName"),
+//                                                     new PrimitiveType(SourceInfo.NONE, "double"), 
+//                                                     new Word(SourceInfo.NONE, "methodName"),
 //                                                     new FormalParameter[0],
 //                                                     new ReferenceType[0], 
-//                                                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+//                                                     new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
 //      cmd3.visit(_cbiv);
 //      assertEquals("There should be two errors", 2, errors.size());
 //      assertEquals("The error message should be correct", 
@@ -373,11 +372,11 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     
     public void testForAbstractMethodDefDoFirst() {
       // Check one that doesn't work
-      AbstractMethodDef amd = new AbstractMethodDef(SourceInfo.NO_INFO, 
+      AbstractMethodDef amd = new AbstractMethodDef(SourceInfo.NONE, 
                                                     _abstractMav, 
                                                     new TypeParameter[0], 
-                                                    new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                                    new Word(SourceInfo.NO_INFO, "methodName"),
+                                                    new PrimitiveType(SourceInfo.NONE, "int"), 
+                                                    new Word(SourceInfo.NONE, "methodName"),
                                                     new FormalParameter[0],
                                                     new ReferenceType[0]);
       amd.visit(_cbiv);
@@ -387,22 +386,22 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
       
       // Check one that works
       _cbiv._enclosing.setMav(_abstractMav);
-      AbstractMethodDef amd2 = new AbstractMethodDef(SourceInfo.NO_INFO, 
+      AbstractMethodDef amd2 = new AbstractMethodDef(SourceInfo.NONE, 
                                                      _abstractMav, 
                                                      new TypeParameter[0], 
-                                                     new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                                     new Word(SourceInfo.NO_INFO, "methodName"),
+                                                     new PrimitiveType(SourceInfo.NONE, "double"), 
+                                                     new Word(SourceInfo.NONE, "methodName"),
                                                      new FormalParameter[0],
                                                      new ReferenceType[0]);
       amd2.visit(_cbiv);
       assertEquals("There should still be one error", 1, errors.size());
       
 //      // Check one that doesn't work because it is static
-//      AbstractMethodDef amd3 = new AbstractMethodDef(SourceInfo.NO_INFO, 
+//      AbstractMethodDef amd3 = new AbstractMethodDef(SourceInfo.NONE, 
 //                                                     _abstractStaticMav, 
 //                                                     new TypeParameter[0], 
-//                                                     new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-//                                                     new Word(SourceInfo.NO_INFO, "methodName"),
+//                                                     new PrimitiveType(SourceInfo.NONE, "double"), 
+//                                                     new Word(SourceInfo.NONE, "methodName"),
 //                                                     new FormalParameter[0],
 //                                                     new ReferenceType[0]);
 //      amd3.visit(_cbiv);
@@ -412,9 +411,9 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     }
 
     public void testForInstanceInitializerDoFirst() {
-      InstanceInitializer ii = new InstanceInitializer(SourceInfo.NO_INFO, 
-                                                       new Block(SourceInfo.NO_INFO, 
-                                                                 new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0])));
+      InstanceInitializer ii = new InstanceInitializer(SourceInfo.NONE, 
+                                                       new Block(SourceInfo.NONE, 
+                                                                 new BracedBody(SourceInfo.NONE, new BodyItemI[0])));
       ii.visit(_cbiv);
       assertEquals("There should be one error.", 1, errors.size());
       assertEquals("The error message should be correct.", 
@@ -427,15 +426,15 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     
     public void testForVariableDeclarationOnly() {
       // Check one that works
-      VariableDeclaration vdecl = new VariableDeclaration(SourceInfo.NO_INFO,
+      VariableDeclaration vdecl = new VariableDeclaration(SourceInfo.NONE,
                                                           _packageMav,
                                                           new VariableDeclarator[] {
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                            new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                            new Word (SourceInfo.NO_INFO, "field1")),
-          new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                              new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
-                                              new Word (SourceInfo.NO_INFO, "field2"))});
+        new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                            new PrimitiveType(SourceInfo.NONE, "double"), 
+                                            new Word (SourceInfo.NONE, "field1")),
+          new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                              new PrimitiveType(SourceInfo.NONE, "boolean"), 
+                                              new Word (SourceInfo.NONE, "field2"))});
       VariableData vd1 = 
         new VariableData("field1", _privateFinalMav, SymbolData.DOUBLE_TYPE, false, _cbiv._enclosing);
       VariableData vd2 = 
@@ -463,15 +462,15 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
       //TODO: Test that static fields are made public
       
       // Check one that doesn't work
-      VariableDeclaration vdecl2 = new VariableDeclaration(SourceInfo.NO_INFO,
+      VariableDeclaration vdecl2 = new VariableDeclaration(SourceInfo.NONE,
                                                         _packageMav,
                                                         new VariableDeclarator[] {
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                            new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                            new Word (SourceInfo.NO_INFO, "field3")),
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                            new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                            new Word (SourceInfo.NO_INFO, "field3"))});
+        new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                            new PrimitiveType(SourceInfo.NONE, "double"), 
+                                            new Word (SourceInfo.NONE, "field3")),
+        new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                            new PrimitiveType(SourceInfo.NONE, "int"), 
+                                            new Word (SourceInfo.NONE, "field3"))});
       VariableData vd3 = 
         new VariableData("field3", _privateFinalMav, SymbolData.DOUBLE_TYPE, false, _cbiv._enclosing);
       vdecl2.visit(_cbiv);
@@ -484,32 +483,32 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
 //      System.err.println("vd3 = " + vd3);
       assertTrue("field3 was added.", _sd1.getVars().contains(vd3));
       
-      //Check a static field that has not been assigned (won't work)
-      VariableDeclaration vdecl3 = new VariableDeclaration(SourceInfo.NO_INFO,
+      //Check a static field that has not been assigned is an error
+      VariableDeclaration vdecl3 = new VariableDeclaration(SourceInfo.NONE,
                                                            _staticMav,
                                                            new VariableDeclarator[] {
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                            new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                            new Word (SourceInfo.NO_INFO, "field4"))});
+        new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                            new PrimitiveType(SourceInfo.NONE, "double"), 
+                                            new Word (SourceInfo.NONE, "field4"))});
       VariableData vd4 = 
         new VariableData("field4", _staticFinalMav, SymbolData.DOUBLE_TYPE, false, _cbiv._enclosing);  
       
       vdecl3.visit(_cbiv);
-//      System.err.println("vd4 = " + vd4);
-      assertEquals("There should still be one error", 1, errors.size());
-//      assertEquals("The error message should be correct", "All static fields must be initialized", 
-//                   errors.get(1).getFirst());
+//      System.err.println("vd4 = " + vd4);;
+//      assertEquals("There should still be one error", 1, errors.size());
+      assertEquals("The error message should be correct", "All static fields must be initialized", 
+                   errors.get(1).getFirst());
 //      System.err.println("_sd1 vars =  " + _sd1.getVars());
       assertTrue("field4 was added.", _sd1.getVars().contains(vd4));   
       
       // Check a non-static field that has been assigned.
-      VariableDeclaration vdecl5 = new VariableDeclaration(SourceInfo.NO_INFO,
+      VariableDeclaration vdecl5 = new VariableDeclaration(SourceInfo.NONE,
                                                         _packageMav,
                                                         new VariableDeclarator[] {
-        new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                            new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                            new Word (SourceInfo.NO_INFO, "field5"), 
-                                          new DoubleLiteral(SourceInfo.NO_INFO, 2.4))});
+        new InitializedVariableDeclarator(SourceInfo.NONE, 
+                                            new PrimitiveType(SourceInfo.NONE, "double"), 
+                                            new Word (SourceInfo.NONE, "field5"), 
+                                          new DoubleLiteral(SourceInfo.NONE, 2.4))});
       vdecl5.visit(_cbiv);
       VariableData vd5 = 
         new VariableData("field5", _privateFinalMav, SymbolData.DOUBLE_TYPE, true, _cbiv._enclosing);
@@ -526,13 +525,13 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
 //      assertEquals("vd5.equals(vd0)", vd5, vd0);
       assertTrue("Field 5 was added.", _sd1.getVars().contains(vd5));
       
-      //check one that overrides the super class's field
-      VariableDeclaration vdecl6 = new VariableDeclaration(SourceInfo.NO_INFO,
+      // Check one that overrides the super class's field
+      VariableDeclaration vdecl6 = new VariableDeclaration(SourceInfo.NONE,
                                                        _packageMav,
                                                            new VariableDeclarator[] {
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                            new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                            new Word (SourceInfo.NO_INFO, "field6"))});
+        new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                            new PrimitiveType(SourceInfo.NONE, "double"), 
+                                            new Word (SourceInfo.NONE, "field6"))});
       
       
       VariableData vd6 = 
@@ -541,25 +540,25 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
       myData.addVar(vd6);
       _cbiv._enclosing.setSuperClass(myData);
       vdecl6.visit(_cbiv);
-      assertEquals("There should be two errors.", 2, errors.size());
+      assertEquals("There should be three errors.", 3, errors.size());
       assertEquals("The error message should be correct", "You cannot have two fields with the same name.  Either you" +
                    " already have a field by that name in this class, or one of your superclasses or interfaces has a" +
                    " field by that name", 
-                   errors.get(1).getFirst());
+                   errors.getLast().getFirst());
 
     }
     
     public void testFormalParameters2VariableData() {
       FormalParameter[] fps = new FormalParameter[] {
-        new FormalParameter(SourceInfo.NO_INFO, 
-                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                              new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                                              new Word (SourceInfo.NO_INFO, "field1")),
+        new FormalParameter(SourceInfo.NONE, 
+                            new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                                              new PrimitiveType(SourceInfo.NONE, "double"), 
+                                                              new Word (SourceInfo.NONE, "field1")),
                             false),
-        new FormalParameter(SourceInfo.NO_INFO, 
-                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                              new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
-                                                              new Word (SourceInfo.NO_INFO, "field2")),
+        new FormalParameter(SourceInfo.NONE, 
+                            new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                                              new PrimitiveType(SourceInfo.NONE, "boolean"), 
+                                                              new Word (SourceInfo.NONE, "field2")),
                             false)};
 
       MethodData md = new MethodData("methodName", 
@@ -588,27 +587,27 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     
     public void testForConcreteMethodDef() {
       // Test one that works.
-      MethodDef mdef = new ConcreteMethodDef(SourceInfo.NO_INFO, 
+      MethodDef mdef = new ConcreteMethodDef(SourceInfo.NONE, 
                                              _privateMav, 
                                              new TypeParameter[0], 
-                                             new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                             new Word(SourceInfo.NO_INFO, "methodName"),
+                                             new PrimitiveType(SourceInfo.NONE, "int"), 
+                                             new Word(SourceInfo.NONE, "methodName"),
                                              new FormalParameter[0],
                                              new ReferenceType[0], 
-                                             new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                             new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       mdef.visit(_cbiv);
       assertEquals("There should not be any errors.", 0, errors.size());
 
       
       //Check one that works but needs to be augmented with public
-      ConcreteMethodDef cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO,
+      ConcreteMethodDef cmd1 = new ConcreteMethodDef(SourceInfo.NONE,
                                                     _packageMav,
                                                     new TypeParameter[0],
-                                                    new PrimitiveType(SourceInfo.NO_INFO, "int"),
-                                                    new Word(SourceInfo.NO_INFO, "noMavMethod"),
+                                                    new PrimitiveType(SourceInfo.NONE, "int"),
+                                                    new Word(SourceInfo.NONE, "noMavMethod"),
                                                     new FormalParameter[0],
                                                     new ReferenceType[0],
-                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                                    new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       
       cmd1.visit(_cbiv);
       assertEquals("There should not be any errors", 0, errors.size());
@@ -618,14 +617,14 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
       
       
       // Test one that doesn't work.
-      mdef = new ConcreteMethodDef(SourceInfo.NO_INFO, 
+      mdef = new ConcreteMethodDef(SourceInfo.NONE, 
                                              _packageMav, 
                                              new TypeParameter[0], 
-                                             new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                             new Word(SourceInfo.NO_INFO, "monkey"),
+                                             new PrimitiveType(SourceInfo.NONE, "int"), 
+                                             new Word(SourceInfo.NONE, "monkey"),
                                              new FormalParameter[0],
                                              new ReferenceType[0], 
-                                             new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                             new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       mdef.visit(_cbiv);
       assertEquals("There should be one error.", 1, errors.size());
       assertEquals("The error message should be correct.", 
@@ -636,11 +635,11 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     
     public void testForAbstractMethodDef() {
       // Test one that works but needs to be augmented with public.
-      MethodDef mdef = new AbstractMethodDef(SourceInfo.NO_INFO, 
+      MethodDef mdef = new AbstractMethodDef(SourceInfo.NONE, 
                                              _abstractMav, 
                                              new TypeParameter[0], 
-                                             new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                             new Word(SourceInfo.NO_INFO, "methodName"),
+                                             new PrimitiveType(SourceInfo.NONE, "int"), 
+                                             new Word(SourceInfo.NONE, "methodName"),
                                              new FormalParameter[0],
                                              new ReferenceType[0]);
       _cbiv._enclosing.setMav(_abstractMav);
@@ -654,11 +653,11 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
       
       
       // Test one that doesn't work.
-      mdef = new AbstractMethodDef(SourceInfo.NO_INFO, 
+      mdef = new AbstractMethodDef(SourceInfo.NONE, 
                                              _abstractMav, 
                                              new TypeParameter[0], 
-                                             new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                             new Word(SourceInfo.NO_INFO, "monkey"),
+                                             new PrimitiveType(SourceInfo.NONE, "int"), 
+                                             new Word(SourceInfo.NONE, "monkey"),
                                              new FormalParameter[0],
                                              new ReferenceType[0]);
       mdef.visit(_cbiv);
@@ -675,9 +674,9 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
 //    public void testForOtherExpressionOnly() {
 //      // Test that if the OtherExpression contains a Word, that the Word is resolved.
 //      assertFalse("java.lang.System should not be in the symbolTable.", symbolTable.containsKey("java.lang.System"));
-//      Expression ex = new Expression( SourceInfo.NO_INFO,
-//                                     new ExpressionPiece[] { new OtherExpression(SourceInfo.NO_INFO, 
-//                                                                                 new Word(SourceInfo.NO_INFO,
+//      Expression ex = new Expression( SourceInfo.NONE,
+//                                     new ExpressionPiece[] { new OtherExpression(SourceInfo.NONE, 
+//                                                                                 new Word(SourceInfo.NONE,
 //                                                                                          "System"))});
 //      ex.visit(_cbiv);
 //      assertEquals("There should not be any errors.", 0, errors.size());
@@ -686,10 +685,10 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     
     public void testForInitializedVariableDeclaratorDoFirst() {
       InitializedVariableDeclarator ivd = 
-        new InitializedVariableDeclarator(SourceInfo.NO_INFO,
-                                          new PrimitiveType(SourceInfo.NO_INFO, "int"),
-                                          new Word(SourceInfo.NO_INFO, "i"),
-                                          new IntegerLiteral(SourceInfo.NO_INFO, 5));
+        new InitializedVariableDeclarator(SourceInfo.NONE,
+                                          new PrimitiveType(SourceInfo.NONE, "int"),
+                                          new Word(SourceInfo.NONE, "i"),
+                                          new IntegerLiteral(SourceInfo.NONE, 5));
       
       ivd.visit(_cbiv);
       
@@ -702,15 +701,15 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
 
 
     public void testForInnerInterfaceDef() {
-      InnerInterfaceDef cd1 = new InnerInterfaceDef(SourceInfo.NO_INFO, _packageMav, 
-                                                    new Word(SourceInfo.NO_INFO, "Bart"),
+      InnerInterfaceDef cd1 = new InnerInterfaceDef(SourceInfo.NONE, _packageMav, 
+                                                    new Word(SourceInfo.NONE, "Bart"),
                                        new TypeParameter[0], new ReferenceType[0], 
-                                       new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                       new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       
-      InnerInterfaceDef cd0 = new InnerInterfaceDef(SourceInfo.NO_INFO, _packageMav, 
-                                                    new Word(SourceInfo.NO_INFO, "Lisa"),
+      InnerInterfaceDef cd0 = new InnerInterfaceDef(SourceInfo.NONE, _packageMav, 
+                                                    new Word(SourceInfo.NONE, "Lisa"),
                                        new TypeParameter[0], new ReferenceType[0], 
-                                            new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {cd1}));
+                                            new BracedBody(SourceInfo.NONE, new BodyItemI[] {cd1}));
       
       SymbolData sd0 = new SymbolData(_cbiv._enclosing.getName() + "$Lisa", _packageMav, new TypeParameter[0], 
                                       new ArrayList<SymbolData>(), null); 
@@ -734,10 +733,10 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
     
     public void testForConstructorDef() {
       //this is a ConstructorDef with no formal parameters and no throws
-      ConstructorDef cd = new ConstructorDef(SourceInfo.NO_INFO, 
-                                             new Word(SourceInfo.NO_INFO, "MyClass"), _publicMav, 
+      ConstructorDef cd = new ConstructorDef(SourceInfo.NONE, 
+                                             new Word(SourceInfo.NONE, "MyClass"), _publicMav, 
                                              new FormalParameter[0], new ReferenceType[0], 
-                                             new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                             new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       
       //What if constructor name and SymbolData name don't match?  Should throw an error.
       _cbiv._enclosing = new SymbolData("NotRightName");
@@ -765,17 +764,17 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
       
       //With a ConstructorDef with more throws and variables, should work okay.
       FormalParameter fp = 
-        new FormalParameter(SourceInfo.NO_INFO, 
-                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                                new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                                                new Word(SourceInfo.NO_INFO, "i")), false);
-      ReferenceType rt = new TypeVariable(SourceInfo.NO_INFO, "MyMadeUpException");
-      ConstructorDef cd2 = new ConstructorDef(SourceInfo.NO_INFO, 
-                                              new Word(SourceInfo.NO_INFO, "MyClass"), 
+        new FormalParameter(SourceInfo.NONE, 
+                            new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                                                new PrimitiveType(SourceInfo.NONE, "int"), 
+                                                                new Word(SourceInfo.NONE, "i")), false);
+      ReferenceType rt = new TypeVariable(SourceInfo.NONE, "MyMadeUpException");
+      ConstructorDef cd2 = new ConstructorDef(SourceInfo.NONE, 
+                                              new Word(SourceInfo.NONE, "MyClass"), 
                                               _publicMav, 
                                               new FormalParameter[] {fp}, 
                                               new ReferenceType[] {rt}, 
-                                              new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                              new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       
       VariableData vd = new VariableData("i", _finalMav, SymbolData.INT_TYPE, true, _cbiv._enclosing);
       MethodData constructor2 = new MethodData("MyClass", 
@@ -799,15 +798,15 @@ public class ClassBodyIntermediateVisitor extends IntermediateVisitor {
                                               
       //If two variable names are duplicated, should throw an error.
       FormalParameter fp2 = 
-        new FormalParameter(SourceInfo.NO_INFO, 
-                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                                new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                                                new Word(SourceInfo.NO_INFO, "i")), false);
+        new FormalParameter(SourceInfo.NONE, 
+                            new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                                                new PrimitiveType(SourceInfo.NONE, "double"), 
+                                                                new Word(SourceInfo.NONE, "i")), false);
       
-      ConstructorDef cd3 = new ConstructorDef(SourceInfo.NO_INFO, 
-                                              new Word(SourceInfo.NO_INFO, "MyClass"), _publicMav, 
+      ConstructorDef cd3 = new ConstructorDef(SourceInfo.NONE, 
+                                              new Word(SourceInfo.NONE, "MyClass"), _publicMav, 
                                               new FormalParameter[] {fp, fp2}, new ReferenceType[] {rt}, 
-                                             new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                             new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       cd3.visit(_cbiv);
       
       assertEquals("Should now be 2 errors", 2, errors.size());

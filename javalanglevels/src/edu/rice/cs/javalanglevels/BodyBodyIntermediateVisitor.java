@@ -134,7 +134,7 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     SymbolData enclosing = getQualifiedSymbolData(_enclosingClassName);
    
     VariableData exceptionVar = 
-      formalParameters2VariableData(new FormalParameter[]{ that.getException() }, enclosing)[0];
+      formalParameters2VariableData(new FormalParameter[]{ that.getException() }, enclosing)[0];  // !!!!!! Wny not bd?
     if (prune(that.getException())) return null;
     bd.addVar(exceptionVar);
     
@@ -215,8 +215,8 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     return null;
   }
 
-  /** Call the super method to convert these to a VariableData array, then make sure that
-    * each VariableData is set to be final, as required at the Intermediate level.
+  /** Process a local variable declaration within a method.  Calls the super method to convert these to a VariableData
+    * array, then makes sure that each VariableData is set to be final, as required at the Intermediate level.
     * @param enclosingData  The Data which contains the variables
     */
   protected VariableData[] _variableDeclaration2VariableData(VariableDeclaration vd, Data enclosingData) {
@@ -229,7 +229,7 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
         _addAndIgnoreError("You cannot use " + s + "to declare a local variable", vd);
       }
       if (! vds[i].isFinal()) vds[i].setFinal();
-//      vds[i].setIsLocalVariable(true);
+      vds[i].setIsLocalVariable(true);  // Was commented out.  Why ????
     }
 //    System.err.println("Return VariableDatas " + vds);
     return vds;
@@ -249,15 +249,15 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     
     private SymbolData _sd1;
     private MethodData _md1;
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"});
     private ModifiersAndVisibility _protectedMav =
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"protected"});
     private ModifiersAndVisibility _privateMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[0]);
     private ModifiersAndVisibility _abstractMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"final"});
     
     
     public BodyBodyIntermediateVisitorTest() { this(""); }
@@ -306,14 +306,14 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     }
     
     public void testForMethodDefDoFirst() {
-      ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NO_INFO, 
+      ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NONE, 
                                                     _packageMav, 
                                                     new TypeParameter[0], 
-                                                    new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                                    new Word(SourceInfo.NO_INFO, "methodName"),
+                                                    new PrimitiveType(SourceInfo.NONE, "int"), 
+                                                    new Word(SourceInfo.NONE, "methodName"),
                                                     new FormalParameter[0],
                                                     new ReferenceType[0], 
-                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                                    new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       cmd.visit(_bbv);
       assertEquals("There should be one error.", 1, errors.size());
       assertEquals("The error message should be correct.", 
@@ -325,15 +325,15 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     
     public void testForVariableDeclarationOnly() {
       // Check one that works
-      VariableDeclaration vdecl = new VariableDeclaration(SourceInfo.NO_INFO,
+      VariableDeclaration vdecl = new VariableDeclaration(SourceInfo.NONE,
                                                        _packageMav,
                                                        new VariableDeclarator[] {
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                               new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                               new Word (SourceInfo.NO_INFO, "field1")),
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                               new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
-                               new Word (SourceInfo.NO_INFO, "field2"))});
+        new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                               new PrimitiveType(SourceInfo.NONE, "double"), 
+                               new Word (SourceInfo.NONE, "field1")),
+        new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                               new PrimitiveType(SourceInfo.NONE, "boolean"), 
+                               new Word (SourceInfo.NONE, "field2"))});
       VariableData vd1 = new VariableData("field1", _finalMav, SymbolData.DOUBLE_TYPE, false, _bbv._bodyData);
       VariableData vd2 = new VariableData("field2", _finalMav, SymbolData.BOOLEAN_TYPE, false, _bbv._bodyData);
       vdecl.visit(_bbv);
@@ -343,15 +343,15 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
       assertTrue("field2 was added.", _md1.getVars().contains(vd2));
       
       // Check one that doesn't work
-      VariableDeclaration vdecl2 = new VariableDeclaration(SourceInfo.NO_INFO,
+      VariableDeclaration vdecl2 = new VariableDeclaration(SourceInfo.NONE,
                                                         _packageMav,
                                                         new VariableDeclarator[] {
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                            new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                            new Word (SourceInfo.NO_INFO, "field3")),
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                            new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                            new Word (SourceInfo.NO_INFO, "field3"))});
+        new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                            new PrimitiveType(SourceInfo.NONE, "double"), 
+                                            new Word (SourceInfo.NONE, "field3")),
+        new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                            new PrimitiveType(SourceInfo.NONE, "int"), 
+                                            new Word (SourceInfo.NONE, "field3"))});
       VariableData vd3 = new VariableData("field3", _finalMav, SymbolData.DOUBLE_TYPE, false, _bbv._bodyData);
       vdecl2.visit(_bbv);
       assertEquals("There should be one error.", 1, errors.size());
@@ -365,9 +365,9 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
 //      assertFalse("java.lang.System should not be in the symbolTable.", 
 //                  LanguageLevelConverter.symbolTable.containsKey("java.lang.System"));
 //      Expression ex = 
-//        new Expression( SourceInfo.NO_INFO,
-//                       new ExpressionPiece[] { new OtherExpression(SourceInfo.NO_INFO, 
-//                                                                   new Word(SourceInfo.NO_INFO, "System"))});
+//        new Expression( SourceInfo.NONE,
+//                       new ExpressionPiece[] { new OtherExpression(SourceInfo.NONE, 
+//                                                                   new Word(SourceInfo.NONE, "System"))});
 //      ex.visit(_bbv);
 //////      System.out.println(errors.get(0).getFirst());
 ////      for (int i = 0; i < errors.size(); i++)
@@ -381,7 +381,7 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
       * to generate error blocks with distinct literal data to avoid generating duplicate error messages
       * which are suppressed in the cumulative errors table. */
     private Block _generateErrorBlock(int litValue) {
-      final SourceInfo si = SourceInfo.NO_INFO;
+      final SourceInfo si = SourceInfo.NONE;
       BracedBody errorBody = new BracedBody(si, new BodyItemI[] {
         new ExpressionStatement(si, 
                                 new BitwiseOrExpression(si, 
@@ -394,24 +394,24 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
       
     public void testForTryCatchStatement() {
       //Make sure that no error is thrown
-      BracedBody emptyBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
-      Block b = new Block(SourceInfo.NO_INFO, emptyBody);
+      BracedBody emptyBody = new BracedBody(SourceInfo.NONE, new BodyItemI[0]);
+      Block b = new Block(SourceInfo.NONE, emptyBody);
 
-      NormalTryCatchStatement ntcs = new NormalTryCatchStatement(SourceInfo.NO_INFO, b, new CatchBlock[0]);
-      TryCatchFinallyStatement tcfs = new TryCatchFinallyStatement(SourceInfo.NO_INFO, b, new CatchBlock[0], b);
+      NormalTryCatchStatement ntcs = new NormalTryCatchStatement(SourceInfo.NONE, b, new CatchBlock[0]);
+      TryCatchFinallyStatement tcfs = new TryCatchFinallyStatement(SourceInfo.NONE, b, new CatchBlock[0], b);
       ntcs.visit(_bbv);
       tcfs.visit(_bbv);
       assertEquals("After visiting both NormalTryCatchStatement and TryCatchFinallyStatement, there should be no " 
                      + "errors", 0, errors.size());
       
 //      //make sure that if there is an error in one of the bodies, it is caught:
-//      BracedBody errorBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {
-//        new ExpressionStatement(SourceInfo.NO_INFO, 
-//                                new BitwiseOrExpression(SourceInfo.NO_INFO, 
-//                                                        new SimpleNameReference(SourceInfo.NO_INFO, 
-//                                                                                new Word(SourceInfo.NO_INFO, "i")), 
-//                                                        new IntegerLiteral(SourceInfo.NO_INFO, 10)))});
-//      Block errorBlock = new Block(SourceInfo.NO_INFO, errorBody);
+//      BracedBody errorBody = new BracedBody(SourceInfo.NONE, new BodyItemI[] {
+//        new ExpressionStatement(SourceInfo.NONE, 
+//                                new BitwiseOrExpression(SourceInfo.NONE, 
+//                                                        new SimpleNameReference(SourceInfo.NONE, 
+//                                                                                new Word(SourceInfo.NONE, "i")), 
+//                                                        new IntegerLiteral(SourceInfo.NONE, 10)))});
+//      Block errorBlock = new Block(SourceInfo.NONE, errorBody);
       
 //      assert ! SourceInfo.TEST_0.equals(SourceInfo.TEST_1);
       ntcs = new NormalTryCatchStatement(SourceInfo.TEST_0, _generateErrorBlock(0), new CatchBlock[0]);
@@ -443,10 +443,10 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
     }
     
     public void testForThisReferenceDoFirst() {
-      SimpleThisReference str = new SimpleThisReference(SourceInfo.NO_INFO);
+      SimpleThisReference str = new SimpleThisReference(SourceInfo.NONE);
       ComplexThisReference ctr = 
-        new ComplexThisReference(SourceInfo.NO_INFO, 
-                                 new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "field")));
+        new ComplexThisReference(SourceInfo.NONE, 
+                                 new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "field")));
 
       //if a this reference occurs outside of a constructor, no error
       _bbv._bodyData = _md1;
@@ -483,13 +483,13 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
       SymbolData obj = new SymbolData("ILikeMonkey");
       LanguageLevelConverter.symbolTable.put("ILikeMonkey", obj);
       InnerClassDef cd0 = 
-        new InnerClassDef(SourceInfo.NO_INFO, 
+        new InnerClassDef(SourceInfo.NONE, 
                           _packageMav, 
-                          new Word(SourceInfo.NO_INFO, "Rod"),
+                          new Word(SourceInfo.NONE, "Rod"),
                           new TypeParameter[0], 
-                          new ClassOrInterfaceType(SourceInfo.NO_INFO, "ILikeMonkey", new Type[0]), 
+                          new ClassOrInterfaceType(SourceInfo.NONE, "ILikeMonkey", new Type[0]), 
                           new ReferenceType[0], 
-                          new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                          new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       cd0.visit(_bbv);
       assertEquals("There should be no errors", 0, errors.size());
       SymbolData innerClass1 = _bbv._bodyData.getInnerClassOrInterface("Rod");
@@ -497,13 +497,13 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
       
       // Test one with explicit modifiers
       InnerClassDef cd1 = 
-        new InnerClassDef(SourceInfo.NO_INFO, 
+        new InnerClassDef(SourceInfo.NONE, 
                           _publicMav, 
-                          new Word(SourceInfo.NO_INFO, "Todd"),
+                          new Word(SourceInfo.NONE, "Todd"),
                           new TypeParameter[0], 
-                          new ClassOrInterfaceType(SourceInfo.NO_INFO, "ILikeMonkey", new Type[0]), 
+                          new ClassOrInterfaceType(SourceInfo.NONE, "ILikeMonkey", new Type[0]), 
                           new ReferenceType[0], 
-                          new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                          new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       cd1.visit(_bbv);
       assertEquals("There should be no errors", 0, errors.size());  // modifiers are allowed
       SymbolData innerClass2 = _bbv._bodyData.getInnerClassOrInterface("Todd");
@@ -513,12 +513,12 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
      public void testForInnerInterfaceDef() {       
        //Test a trivial inner interface definition
        InnerInterfaceDef iid = 
-         new InnerInterfaceDef(SourceInfo.NO_INFO, 
+         new InnerInterfaceDef(SourceInfo.NONE, 
                                _packageMav, 
-                               new Word(SourceInfo.NO_INFO, "Broken"),
+                               new Word(SourceInfo.NONE, "Broken"),
                                new TypeParameter[0], 
                                new ReferenceType[0], 
-                               new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                               new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
        iid.visit(_bbv);
        assertEquals("There should be one error", 1, errors.size());
        assertEquals("The error message should be correct", 
@@ -528,12 +528,12 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
        
        // Test a inner interface definition and reference
        InnerInterfaceDef id0 = 
-         new InnerInterfaceDef(SourceInfo.NO_INFO, 
+         new InnerInterfaceDef(SourceInfo.NONE, 
                                _packageMav, 
-                               new Word(SourceInfo.NO_INFO, "RodInterface"),
+                               new Word(SourceInfo.NONE, "RodInterface"),
                                new TypeParameter[0], 
                                new ReferenceType[0], 
-                               new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                               new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
        id0.visit(_bbv);
        assertEquals("There should be 2 errors", 2, errors.size());
        assertEquals("The error message should be correct", 
@@ -543,12 +543,12 @@ public class BodyBodyIntermediateVisitor extends IntermediateVisitor {
        
        // Test one with explicit modifiers
        InnerInterfaceDef id1 = 
-         new InnerInterfaceDef(SourceInfo.NO_INFO, 
+         new InnerInterfaceDef(SourceInfo.NONE, 
                                _publicMav, 
-                               new Word(SourceInfo.NO_INFO, "Todd"),
+                               new Word(SourceInfo.NONE, "Todd"),
                                new TypeParameter[0], 
                                new ReferenceType[0], 
-                               new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                               new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
        id1.visit(_bbv);
        assertEquals("There should be three errors", 3, errors.size());  // class modifiers are allowed
        assertEquals("The error message should be correct", 

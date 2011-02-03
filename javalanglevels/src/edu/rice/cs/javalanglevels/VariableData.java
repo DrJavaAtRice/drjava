@@ -60,9 +60,8 @@ public class VariableData {
   /** True if this variable has an initializer*/
   private boolean _hasInitializer;
   
-  /** The data that this variable belongs to.  For a formal parameter, it is the enclosing class, since
-    * nothing in a formal parameter declaration can refer to bindings introduced in the method or the
-    * catch clause. */
+  /** The data that this variable belongs to.  For a formal parameter, it is the enclosing class rather than the
+    * enclosing method. */
   private Data _enclosingData;
   
   /** True iff this is a field we had generated. */
@@ -99,7 +98,7 @@ public class VariableData {
     */
   public VariableData(SymbolData type) {
     _name = "";
-    _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+    _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NONE, new String[0]);
     _type = type;
     _hasBeenAssigned = false;
     _isLocalVariable = true;
@@ -121,7 +120,7 @@ public class VariableData {
       }
     }
     String[] newMavStrings = newMavList.toArray(new String[size]);
-    ModifiersAndVisibility newMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, newMavStrings);
+    ModifiersAndVisibility newMav = new ModifiersAndVisibility(SourceInfo.NONE, newMavStrings);
     return new VariableData(_name, newMav, _type, true, _enclosingData);
   }
   
@@ -229,7 +228,7 @@ public class VariableData {
   public void setFinal() {
     String[] newModifiers = Utilities.catenate(_modifiersAndVisibility.getModifiers(), new String[]{"final"});
 //    System.err.println("modifiers with 'final' = " + Arrays.toString(newModifiers));
-    _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NO_INFO, newModifiers);
+    _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NONE, newModifiers);
   }
   
   /** Adds "private" to the modifiers and visibility for this class, if it is not already there. */
@@ -241,7 +240,7 @@ public class VariableData {
       for (int i = 1; i <= modifiers.length; i++) {
         newModifiers[i] = modifiers[i-1];
       }
-      _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NO_INFO, newModifiers);
+      _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NONE, newModifiers);
     }
   }
   
@@ -254,7 +253,7 @@ public class VariableData {
       for (int i = 1; i <= modifiers.length; i++) {
         newModifiers[i] = modifiers[i-1];
       }
-      _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NO_INFO, newModifiers);
+      _modifiersAndVisibility = new ModifiersAndVisibility(SourceInfo.NONE, newModifiers);
     }
   }
   
@@ -335,11 +334,11 @@ public class VariableData {
     private VariableData _vd;
     private VariableData _vd2;
     
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"});
     private ModifiersAndVisibility 
-      _publicMav2 = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+      _publicMav2 = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"});
     private ModifiersAndVisibility 
-      _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});    
+      _protectedMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"protected"});    
     public VariableDataTest() { this(""); }
     public VariableDataTest(String name) { super(name); }
     

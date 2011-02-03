@@ -52,7 +52,7 @@ public class PrimitiveData extends SymbolData {
   public PrimitiveData(String name) {
     super(name);
     setIsContinuation(false);
-    setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"}));
+    setMav(new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"}));
   }
   
   /** All primitives are primitive types.

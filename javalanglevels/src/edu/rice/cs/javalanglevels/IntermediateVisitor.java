@@ -639,18 +639,18 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     private SymbolData _sd5;
     private SymbolData _sd6;
     public static final ModifiersAndVisibility PUBLIC_MAV = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] { "public" });
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] { "public" });
     public static final ModifiersAndVisibility PROTECTED_MAV = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] { "protected" });
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] { "protected" });
     public static final ModifiersAndVisibility PRIVATE_MAV = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] { "private" });
-    public static final ModifiersAndVisibility PACKAGE_MAV = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] { "private" });
+    public static final ModifiersAndVisibility PACKAGE_MAV = new ModifiersAndVisibility(SourceInfo.NONE, new String[0]);
     public static final ModifiersAndVisibility ABSTRACT_MAV = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"abstract"});
     public static final ModifiersAndVisibility PRIVATE_ABSTRACT_MAV = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract", "private"});  // illegal
-    public static final ModifiersAndVisibility STATIC_MAV = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"static"});
-    public static final ModifiersAndVisibility FINAL_MAV = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"abstract", "private"});  // illegal
+    public static final ModifiersAndVisibility STATIC_MAV = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"static"});
+    public static final ModifiersAndVisibility FINAL_MAV = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"final"});
     
     public IntermediateVisitorTest() { this(""); }
     public IntermediateVisitorTest(String name) {
@@ -695,7 +695,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       
       _iv._enclosingClassName = "i.like.monkey";
       _iv.symbolTable.put("i.like.monkey", _sd1);
-      SymbolData objectSD = _iv.getQualifiedSymbolData("java.lang.Object", SourceInfo.NO_INFO);
+      SymbolData objectSD = _iv.getQualifiedSymbolData("java.lang.Object", SourceInfo.NONE);
       _sd1.setSuperClass(objectSD);
       _errorAdded = false;  // static field of this.  TODO: fix this!
     }
@@ -713,7 +713,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       _iv.forModifiersAndVisibilityDoFirst(PROTECTED_MAV);
       _iv.forModifiersAndVisibilityDoFirst(STATIC_MAV);
       
-      ModifiersAndVisibility mavs = new ModifiersAndVisibility(SourceInfo.NO_INFO, 
+      ModifiersAndVisibility mavs = new ModifiersAndVisibility(SourceInfo.NONE, 
                                                                new String[] {"private", "static"});
       _iv.forModifiersAndVisibilityDoFirst(mavs);
       assertEquals("there should still be 0 errors", 0, errors.size());
@@ -725,13 +725,13 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
 //      assertEquals("The error message should be correct for private modifier:", 
 //                   "The keyword \"final\" cannot be used at the Intermediate level", errors.get(0).getFirst());
       
-      ModifiersAndVisibility mavs2 = new ModifiersAndVisibility(SourceInfo.NO_INFO, 
+      ModifiersAndVisibility mavs2 = new ModifiersAndVisibility(SourceInfo.NONE, 
                                                                 new String[] {"private", "final"});
       
       _iv.forModifiersAndVisibilityDoFirst(mavs2);
       assertEquals("There should still be 0 errors", 0, errors.size());
       
-      ModifiersAndVisibility mavs3 = new ModifiersAndVisibility(SourceInfo.NO_INFO, 
+      ModifiersAndVisibility mavs3 = new ModifiersAndVisibility(SourceInfo.NONE, 
                                                                 new String[] {"final", "native"});
       
       _iv.forModifiersAndVisibilityDoFirst(mavs3);
@@ -743,31 +743,31 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     
     public void testForClassDefDoFirst() {
       //check an example that works
-      ClassDef cd0 = new ClassDef(SourceInfo.NO_INFO, PUBLIC_MAV, new Word(SourceInfo.NO_INFO, "Lisa"),
+      ClassDef cd0 = new ClassDef(SourceInfo.NONE, PUBLIC_MAV, new Word(SourceInfo.NONE, "Lisa"),
                                   new TypeParameter[0], 
-                                  new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+                                  new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
                                   new ReferenceType[0], 
-                                  new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                  new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       
       _iv.forClassDefDoFirst(cd0);
       assertEquals("should be no errors", 0, errors.size());
       
       //check that an error is not thrown if a class doesn't explicitely extend another class
-      ClassDef cd1 = new ClassDef(SourceInfo.NO_INFO, PUBLIC_MAV, 
-                                  new Word(SourceInfo.NO_INFO, "Test"), new TypeParameter[0], JExprParser.NO_TYPE,
-                                  new ReferenceType[0], new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+      ClassDef cd1 = new ClassDef(SourceInfo.NONE, PUBLIC_MAV, 
+                                  new Word(SourceInfo.NONE, "Test"), new TypeParameter[0], JExprParser.NO_TYPE,
+                                  new ReferenceType[0], new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       
       _iv.forClassDefDoFirst(cd1);
       assertEquals("there should still be 0 errors", 0, errors.size());
       
       //check that an error is not thrown if a class implements any interfaces.
       ClassDef cd2 = 
-        new ClassDef(SourceInfo.NO_INFO, PUBLIC_MAV, 
-                     new Word(SourceInfo.NO_INFO, "Test"),
+        new ClassDef(SourceInfo.NONE, PUBLIC_MAV, 
+                     new Word(SourceInfo.NONE, "Test"),
                      new TypeParameter[0],
-                     new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
-                     new ReferenceType[] {new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0])}, 
-                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                     new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
+                     new ReferenceType[] {new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0])}, 
+                     new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       
       
       _iv.forClassDefDoFirst(cd2);
@@ -775,28 +775,28 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     }
     
     public void testForFormalParameterDoFirst() {
-      PrimitiveType pt = new PrimitiveType(SourceInfo.NO_INFO, "int");
-      Word w = new Word(SourceInfo.NO_INFO, "param");
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, pt, w);
+      PrimitiveType pt = new PrimitiveType(SourceInfo.NONE, "int");
+      Word w = new Word(SourceInfo.NONE, "param");
+      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NONE, pt, w);
       
       // check an example that works
-      FormalParameter fp = new FormalParameter(SourceInfo.NO_INFO, uvd, false);
+      FormalParameter fp = new FormalParameter(SourceInfo.NONE, uvd, false);
       _iv.forFormalParameterDoFirst(fp);
       assertEquals("should be no errors", 0, errors.size());
       
       // check that an error is thrown if the FormalParameter is final
-      FormalParameter fp2 = new FormalParameter(SourceInfo.NO_INFO, uvd, true);  
+      FormalParameter fp2 = new FormalParameter(SourceInfo.NONE, uvd, true);  
       _iv.forFormalParameterDoFirst(fp2);
       assertEquals("should be no errors", 0, errors.size());
     }
     
     public void test_NotAllowed() {
-      SourceInfo noInfo = SourceInfo.NO_INFO;
-      Word w = new Word(SourceInfo.NO_INFO, "word");
+      SourceInfo noInfo = SourceInfo.NONE;
+      Word w = new Word(SourceInfo.NONE, "word");
       TypeParameter[] tps = new TypeParameter[0];
       ReferenceType[] rts = new ReferenceType[0];
-      BracedBody emptyBody = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]);
-      ClassOrInterfaceType superClass = new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]);
+      BracedBody emptyBody = new BracedBody(SourceInfo.NONE, new BodyItemI[0]);
+      ClassOrInterfaceType superClass = new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]);
       FormalParameter[] fps = new FormalParameter[0];
       CompoundWord cw = new CompoundWord(noInfo, new Word[0]);
       Statement stmt = new EmptyStatement(noInfo);
@@ -826,13 +826,13 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       ConditionalExpression ce = new ConditionalExpression(noInfo, e, e, e);
       
       BracedBody hasBitOperator = 
-        new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { 
-        new ExpressionStatement(SourceInfo.NO_INFO, 
-                                new BitwiseOrAssignmentExpression(SourceInfo.NO_INFO, 
-                                                                  new SimpleNameReference(SourceInfo.NO_INFO, 
-                                                                                          new Word(SourceInfo.NO_INFO, 
+        new BracedBody(SourceInfo.NONE, new BodyItemI[] { 
+        new ExpressionStatement(SourceInfo.NONE, 
+                                new BitwiseOrAssignmentExpression(SourceInfo.NONE, 
+                                                                  new SimpleNameReference(SourceInfo.NONE, 
+                                                                                          new Word(SourceInfo.NONE, 
                                                                                                    "i")), 
-                                                                  new IntegerLiteral(SourceInfo.NO_INFO, 5)))});
+                                                                  new IntegerLiteral(SourceInfo.NONE, 5)))});
       
       TryCatchStatement tcs = new NormalTryCatchStatement(noInfo, b, new CatchBlock[0]);
       
@@ -874,14 +874,14 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       
       tp.visit(_iv);
       assertEquals("After visiting type parameter, errors should now be 2", 2, errors.size());
-      assertEquals("TypeParameters is not allowed", 
+      assertEquals("TypeParameters are not allowed", 
                    "Type Parameters cannot be used at the Intermediate level", 
                    errors.getLast().getFirst());
     }
     
     public void testForPrimitiveTypeDoFirst() {
       
-      SourceInfo noInfo = SourceInfo.NO_INFO;
+      SourceInfo noInfo = SourceInfo.NONE;
       
       //only primative types boolean, char, int, and double are allowed at Intermediate level. 
       PrimitiveType i = new PrimitiveType(noInfo, "int");
@@ -1122,11 +1122,11 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       //check an example that's not abstract
       initTopLevel();
       ClassDef cd0 = 
-        new ClassDef(SourceInfo.NO_INFO, PACKAGE_MAV, new Word(SourceInfo.NO_INFO, "Lisa"),
+        new ClassDef(SourceInfo.NONE, PACKAGE_MAV, new Word(SourceInfo.NONE, "Lisa"),
                      new TypeParameter[0], 
-                     new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+                     new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
                      new ReferenceType[0], 
-                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0])); 
+                     new BracedBody(SourceInfo.NONE, new BodyItemI[0])); 
       
       cd0.visit(_iv);
       assertEquals("There should be no errors", 0, errors.size());
@@ -1154,13 +1154,13 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       
       //check an example that's abstract
       _iv._package = "";
-      ClassDef cd1 = new ClassDef(SourceInfo.NO_INFO, 
+      ClassDef cd1 = new ClassDef(SourceInfo.NONE, 
                                   ABSTRACT_MAV, 
-                                  new Word(SourceInfo.NO_INFO, "Bart"),
+                                  new Word(SourceInfo.NONE, "Bart"),
                                   new TypeParameter[0],
-                                  new ClassOrInterfaceType(SourceInfo.NO_INFO, "System", new Type[0]), 
+                                  new ClassOrInterfaceType(SourceInfo.NONE, "System", new Type[0]), 
                                   new ReferenceType[0], 
-                                  new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                  new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       cd1.visit(_iv);
       assertEquals("There should be no errors", 0, errors.size());
       assertTrue("Should have resolved java.lang.System", 
@@ -1173,22 +1173,22 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       
       
       //Check an example where the class extends TestCase, and has a test method that returns void.
-      ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NO_INFO, 
+      ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NONE, 
                                                     PACKAGE_MAV, 
                                                     new TypeParameter[0], 
-                                                    new VoidReturn(SourceInfo.NO_INFO, "void"), 
-                                                    new Word(SourceInfo.NO_INFO, "testMethodName"),
+                                                    new VoidReturn(SourceInfo.NONE, "void"), 
+                                                    new Word(SourceInfo.NONE, "testMethodName"),
                                                     new FormalParameter[0],
                                                     new ReferenceType[0], 
-                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                                    new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       
-      ClassDef cd3 = new ClassDef(SourceInfo.NO_INFO, 
+      ClassDef cd3 = new ClassDef(SourceInfo.NONE, 
                                   ABSTRACT_MAV, 
-                                  new Word(SourceInfo.NO_INFO, "TestSuper2"),
+                                  new Word(SourceInfo.NONE, "TestSuper2"),
                                   new TypeParameter[0], 
-                                  new ClassOrInterfaceType(SourceInfo.NO_INFO, "TestCase", new Type[0]), 
+                                  new ClassOrInterfaceType(SourceInfo.NONE, "TestCase", new Type[0]), 
                                   new ReferenceType[0], 
-                                  new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { cmd }));
+                                  new BracedBody(SourceInfo.NONE, new BodyItemI[] { cmd }));
       
       _iv._file=new File("TestSuper2.dj0");
       _iv._importedFiles.addLast("junit.framework.TestCase");
@@ -1199,22 +1199,22 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       
       // Check a method with void return, but name not starting with test, but it's still okay.
       //This is now checked in the type checker!
-      ConcreteMethodDef cmd2 = new ConcreteMethodDef(SourceInfo.NO_INFO, 
+      ConcreteMethodDef cmd2 = new ConcreteMethodDef(SourceInfo.NONE, 
                                                      PACKAGE_MAV, 
                                                      new TypeParameter[0], 
-                                                     new VoidReturn(SourceInfo.NO_INFO, "void"), 
-                                                     new Word(SourceInfo.NO_INFO, "uhOh"),
+                                                     new VoidReturn(SourceInfo.NONE, "void"), 
+                                                     new Word(SourceInfo.NONE, "uhOh"),
                                                      new FormalParameter[0],
                                                      new ReferenceType[0], 
-                                                     new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                                     new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       
-      ClassDef cd4 = new ClassDef(SourceInfo.NO_INFO, 
+      ClassDef cd4 = new ClassDef(SourceInfo.NONE, 
                                   ABSTRACT_MAV, 
-                                  new Word(SourceInfo.NO_INFO, "TestVoidNoTestMethod"),
+                                  new Word(SourceInfo.NONE, "TestVoidNoTestMethod"),
                                   new TypeParameter[0], 
-                                  new ClassOrInterfaceType(SourceInfo.NO_INFO, "junit.framework.TestCase", new Type[0]), 
+                                  new ClassOrInterfaceType(SourceInfo.NONE, "junit.framework.TestCase", new Type[0]), 
                                   new ReferenceType[0], 
-                                  new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { cmd2 }));
+                                  new BracedBody(SourceInfo.NONE, new BodyItemI[] { cmd2 }));
       
       
       
@@ -1228,33 +1228,33 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     
     public void testForInterfaceDef() {
       initTopLevel();
-      AbstractMethodDef amd = new AbstractMethodDef(SourceInfo.NO_INFO, 
+      AbstractMethodDef amd = new AbstractMethodDef(SourceInfo.NONE, 
                                                     PUBLIC_MAV, 
                                                     new TypeParameter[0], 
-                                                    new PrimitiveType(SourceInfo.NO_INFO, "int"),
-                                                    new Word(SourceInfo.NO_INFO, "myMethod"), 
+                                                    new PrimitiveType(SourceInfo.NONE, "int"),
+                                                    new Word(SourceInfo.NONE, "myMethod"), 
                                                     new FormalParameter[0], 
                                                     new ReferenceType[0]);
-      AbstractMethodDef amd2 = new AbstractMethodDef(SourceInfo.NO_INFO, 
+      AbstractMethodDef amd2 = new AbstractMethodDef(SourceInfo.NONE, 
                                                      PUBLIC_MAV, 
                                                      new TypeParameter[0], 
-                                                     new PrimitiveType(SourceInfo.NO_INFO, "int"),
-                                                     new Word(SourceInfo.NO_INFO, "myMethod"), 
+                                                     new PrimitiveType(SourceInfo.NONE, "int"),
+                                                     new Word(SourceInfo.NONE, "myMethod"), 
                                                      new FormalParameter[0], 
                                                      new ReferenceType[0]);
-      InterfaceDef id = new InterfaceDef(SourceInfo.NO_INFO, 
+      InterfaceDef id = new InterfaceDef(SourceInfo.NONE, 
                                          PUBLIC_MAV, 
-                                         new Word(SourceInfo.NO_INFO, "id"), 
+                                         new Word(SourceInfo.NONE, "id"), 
                                          new TypeParameter[0], 
                                          new ReferenceType[0], 
-                                         new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {amd}));
+                                         new BracedBody(SourceInfo.NONE, new BodyItemI[] {amd}));
       InterfaceDef id2 = 
-        new InterfaceDef(SourceInfo.NO_INFO, 
+        new InterfaceDef(SourceInfo.NONE, 
                          PUBLIC_MAV, 
-                         new Word(SourceInfo.NO_INFO, "id2"), 
+                         new Word(SourceInfo.NONE, "id2"), 
                          new TypeParameter[0], 
-                         new ReferenceType[] { new ClassOrInterfaceType(SourceInfo.NO_INFO, "id", new Type[0]) }, 
-                         new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { amd2 }));
+                         new ReferenceType[] { new ClassOrInterfaceType(SourceInfo.NONE, "id", new Type[0]) }, 
+                         new BracedBody(SourceInfo.NONE, new BodyItemI[] { amd2 }));
       SymbolData sd = new SymbolData("id", PUBLIC_MAV, new TypeParameter[0], new ArrayList<SymbolData>(), null);
       sd.setIsContinuation(true);
       MethodData md = 
@@ -1283,11 +1283,11 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     
     public void testCreateMethodData() {
       // Test one that doesn't work.
-      MethodDef mdef = new AbstractMethodDef(SourceInfo.NO_INFO, 
+      MethodDef mdef = new AbstractMethodDef(SourceInfo.NONE, 
                                              PRIVATE_ABSTRACT_MAV, 
                                              new TypeParameter[0], 
-                                             new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                             new Word(SourceInfo.NO_INFO, "methodName"),
+                                             new PrimitiveType(SourceInfo.NONE, "int"), 
+                                             new Word(SourceInfo.NONE, "methodName"),
                                              new FormalParameter[0],
                                              new ReferenceType[0]); 
       
@@ -1299,7 +1299,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       _iv._package = "i.like";
       _iv._enclosingClassName = "i.like.monkey";
       _iv.symbolTable.put("i.like.monkey", _sd1);
-//      System.err.println("SymbolData for i.like.monkey = " + _iv.getQualifiedSymbolData("i.like.monkey", SourceInfo.NO_INFO));
+//      System.err.println("SymbolData for i.like.monkey = " + _iv.getQualifiedSymbolData("i.like.monkey", SourceInfo.NONE));
       assertEquals("Should return the correct MethodData", mdata, _iv.createMethodData(mdef, _sd1));
       assertEquals("There should be one errors.", 1, errors.size());
 //      assertEquals("The error message should be correct.", 
@@ -1308,38 +1308,38 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       
       // Test one that does work.
       UninitializedVariableDeclarator uvd1 =
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                            new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                            new Word(SourceInfo.NO_INFO, "field1"));
+        new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                            new PrimitiveType(SourceInfo.NONE, "double"), 
+                                            new Word(SourceInfo.NONE, "field1"));
       UninitializedVariableDeclarator uvd2 =
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                            new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                            new Word(SourceInfo.NO_INFO, "field1"));
+        new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                            new PrimitiveType(SourceInfo.NONE, "int"), 
+                                            new Word(SourceInfo.NONE, "field1"));
       mdef = 
-        new AbstractMethodDef(SourceInfo.NO_INFO, 
+        new AbstractMethodDef(SourceInfo.NONE, 
                               ABSTRACT_MAV, 
-                              new TypeParameter[] { new TypeParameter(SourceInfo.NO_INFO,
-                                                                      new TypeVariable(SourceInfo.NO_INFO, "T"),
-                                                                      new TypeVariable(SourceInfo.NO_INFO, "U"))},
-                              new VoidReturn(SourceInfo.NO_INFO, "void"), 
-                              new Word(SourceInfo.NO_INFO, "methodName"),
+                              new TypeParameter[] { new TypeParameter(SourceInfo.NONE,
+                                                                      new TypeVariable(SourceInfo.NONE, "T"),
+                                                                      new TypeVariable(SourceInfo.NONE, "U"))},
+                              new VoidReturn(SourceInfo.NONE, "void"), 
+                              new Word(SourceInfo.NONE, "methodName"),
                               new FormalParameter[] {
-                                new FormalParameter(SourceInfo.NO_INFO, 
+                                new FormalParameter(SourceInfo.NONE, 
                                                     uvd1,
                                                     false
                                                    ),
-                                  new FormalParameter(SourceInfo.NO_INFO, 
+                                  new FormalParameter(SourceInfo.NONE, 
                                                       uvd2,
                                                       false
                                                      )},
-                              new ReferenceType[] { new TypeVariable(SourceInfo.NO_INFO, "X") }
+                              new ReferenceType[] { new TypeVariable(SourceInfo.NONE, "X") }
                               );
       mdata = 
         new MethodData("methodName", 
                        ABSTRACT_MAV, 
-                       new TypeParameter[] { new TypeParameter(SourceInfo.NO_INFO,
-                                                               new TypeVariable(SourceInfo.NO_INFO, "T"),
-                                                               new TypeVariable(SourceInfo.NO_INFO, "U"))}, 
+                       new TypeParameter[] { new TypeParameter(SourceInfo.NONE,
+                                                               new TypeVariable(SourceInfo.NONE, "T"),
+                                                               new TypeVariable(SourceInfo.NONE, "U"))}, 
                        SymbolData.VOID_TYPE, 
                        new VariableData[] { new VariableData("field1", FINAL_MAV, SymbolData.DOUBLE_TYPE, true, _sd1),
                          new VariableData("field1", FINAL_MAV, SymbolData.INT_TYPE, true, _sd1) }, 
@@ -1370,14 +1370,14 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     
     public void testSimpleAnonymousClassInstantiationHelper() {
       SimpleAnonymousClassInstantiation basic = 
-        new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, 
-                                              new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
-                                              new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
-                                              new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+        new SimpleAnonymousClassInstantiation(SourceInfo.NONE, 
+                                              new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
+                                              new ParenthesizedExpressionList(SourceInfo.NONE, new Expression[0]),
+                                              new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       _iv._package = "i.like";
       _iv._enclosingClassName = "i.like.monkey";
       _iv.symbolTable.put("i.like.monkey", _sd1);
-//      System.err.println("SymbolData for i.like.monkey = " + _iv.getQualifiedSymbolData("i.like.monkey", SourceInfo.NO_INFO));
+//      System.err.println("SymbolData for i.like.monkey = " + _iv.getQualifiedSymbolData("i.like.monkey", SourceInfo.NONE));
       _iv.simpleAnonymousClassInstantiationHelper(basic, _sd1);
       assertEquals("There should be no errors", 0, errors.size());
       SymbolData obj = LanguageLevelConverter.symbolTable.get("java.lang.Object");
@@ -1393,13 +1393,13 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     
     public void testComplexAnonymousClassInstantiationHelper() {
       SimpleNameReference snr =
-        new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "java.lang.Object"));
+        new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "java.lang.Object"));
       ComplexAnonymousClassInstantiation basic = 
-        new ComplexAnonymousClassInstantiation(SourceInfo.NO_INFO, 
+        new ComplexAnonymousClassInstantiation(SourceInfo.NONE, 
                                                snr,
-                                               new ClassOrInterfaceType(SourceInfo.NO_INFO, "Inner", new Type[0]), 
-                                               new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
-                                               new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+                                               new ClassOrInterfaceType(SourceInfo.NONE, "Inner", new Type[0]), 
+                                               new ParenthesizedExpressionList(SourceInfo.NONE, new Expression[0]),
+                                               new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       _iv._package = "i.like";
       _iv._enclosingClassName = "i.like.monkey";
       _iv.complexAnonymousClassInstantiationHelper(basic, _sd1); // TODO: the wrong enclosing context?
@@ -1420,19 +1420,19 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
       // Confirm that if forVariableDeclaration is called with a AnonymousClassInstantiation, the symboldata is only 
       // added once. This is to make sure an old bug stays fixed.
       SimpleAnonymousClassInstantiation basic = 
-        new SimpleAnonymousClassInstantiation(SourceInfo.NO_INFO, 
-                                              new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
-                                              new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]),
-                                              new BracedBody(SourceInfo.NO_INFO, new BodyItemI[0]));
+        new SimpleAnonymousClassInstantiation(SourceInfo.NONE, 
+                                              new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
+                                              new ParenthesizedExpressionList(SourceInfo.NONE, new Expression[0]),
+                                              new BracedBody(SourceInfo.NONE, new BodyItemI[0]));
       
       
       
       VariableDeclarator[] d1 = { 
-        new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                          new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
-                                          new Word(SourceInfo.NO_INFO, "b"), basic)};
+        new InitializedVariableDeclarator(SourceInfo.NONE, 
+                                          new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
+                                          new Word(SourceInfo.NONE, "b"), basic)};
       
-      VariableDeclaration vd1 = new VariableDeclaration(SourceInfo.NO_INFO,PUBLIC_MAV, d1); 
+      VariableDeclaration vd1 = new VariableDeclaration(SourceInfo.NONE,PUBLIC_MAV, d1); 
       
       ClassBodyIntermediateVisitor cbiv = 
         new ClassBodyIntermediateVisitor(_sd1,
@@ -1450,7 +1450,7 @@ public class IntermediateVisitor extends LanguageLevelVisitor {
     }
     
     public void testForPackageStatementDoFirst() {
-      PackageStatement ps = new PackageStatement(SourceInfo.NO_INFO, new CompoundWord(SourceInfo.NO_INFO, new Word[0]));
+      PackageStatement ps = new PackageStatement(SourceInfo.NONE, new CompoundWord(SourceInfo.NONE, new Word[0]));
       ps.visit(_iv);
       assertEquals("Should be no errors", 0, errors.size());
 //      assertEquals("Error message should be correct", "Package statements cannot be used at the Intermediate level."

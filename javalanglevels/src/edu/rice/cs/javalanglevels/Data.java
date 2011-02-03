@@ -178,7 +178,7 @@ public abstract class Data {
   public boolean addVars(VariableData[] vars) {
     boolean success = true;
     for (int i = 0; i < vars.length; i++) {
-//      if (vars[i] == null) {System.out.println("Var " + i + " was null!");}
+//      if (vars[i] == null) { System.out.println("Var " + i + " was null!"); }
       if (! _repeatedName(vars[i])) {
         _vars.addLast(vars[i]);
       }
@@ -240,13 +240,11 @@ public abstract class Data {
     }
   }
   
-  /**@return true if d is an outer data of this data. TODO: What if d is a library class? */
+  /** @return true if d is an outer data of this data. TODO: What if d is a library class? */
   public boolean isOuterData(Data d) {
     Data outerData = _outerData;
-    while ((outerData != null) && !LanguageLevelVisitor.isJavaLibraryClass(outerData.getName())) {
-      if (outerData == d) {
-        return true;
-      }
+    while ((outerData != null) && ! LanguageLevelVisitor.isJavaLibraryClass(outerData.getName())) {
+      if (outerData == d) return true;
       outerData = outerData.getOuterData();
     }
     return false;
@@ -318,18 +316,17 @@ public abstract class Data {
   /** Takes in a relative name and tries to match it with one of this Data's inner classes or inner interfaces.  The 
     * relName argument is a name relative to this SymbolData (such as B to request the the class with this
     * relative name within some enclosing symbol data or B$C to request the class A.B.C from class A) and
-    * may be delimited by '.' or '$' (??).  If the name is not found in this Data, checks the outer data (if there is one),
-    * which will recursively such up the chain of enclosing Datas.
-    * If no matching visible inner classes or interfaces are found, but one or more that are not visible are found, 
-    * one of the non-visible ones will be returned. This means that checkAccessibility should be called after this 
-    * method.
+    * may be delimited by '.' or '$' (??).  If the name is not found in this Data, checks the outer data (if there is 
+    * one), which will recursively search up the chain of enclosing Datas. If no matching visible inner classes or 
+    * interfaces are found, but one or more that are not visible are found, one of the non-visible ones will be 
+    * returned. This means that checkAccess should be called after this method.
     * TODO: Is support for '$' delimiter required to process inner classes in class files?  Yes. 
     * !!! Eliminate the kludge in this method.
     * @param relName  The name of the inner class or interface to find RELATIVE to this SymbolData
     * @return  The SymbolData for the matching inner class or interface is null if there isn't one.
     */
   public SymbolData getInnerClassOrInterface(String relName) {
-//    if (relName.endsWith("Rod")) System.err.println("getInnerClass('" + relName + "') called on '" + this + "'");
+//    if (relName.equals("MyInner")) System.err.println("getInnerClass('" + relName + "') called on '" + this + "'");
     int firstIndexOfDot = relName.indexOf('.');
     int firstIndexOfDollar = relName.indexOf("$");
     if (firstIndexOfDot == -1) firstIndexOfDot = firstIndexOfDollar;
@@ -338,9 +335,10 @@ public abstract class Data {
     // First, look through the inner classes/interfaces of this class
     SymbolData privateResult = null;
     SymbolData result = getInnerClassOrInterfaceHelper(relName, firstIndexOfDot);
-    if (relName.endsWith("Rod")) {
+    if (relName.equals("MyInner")) {
 //      System.err.println("getInnerClassOrInterfaceHelper('" + relName + "', " + firstIndexOfDot + ")");
 //      System.err.println("_innerClasses = " + _innerClasses);
+//      System.err.println("Result is: '" + result + "'");
     }
     if (result != null) {
 //      System.err.println("Result is: '" + result + "'");
@@ -349,17 +347,18 @@ public abstract class Data {
         outerPiece = getInnerClassOrInterfaceHelper(relName.substring(0, firstIndexOfDot), -1);
       }
       else { outerPiece = result; }
-      if (TypeChecker.checkAccessibility(outerPiece.getMav(), outerPiece, getSymbolData())) return result;
+      if (TypeChecker.checkAccess(outerPiece.getMav(), outerPiece, getSymbolData())) return result;
       else {
         privateResult = result; 
         result = null;
       }
     }
     
-    // Call this method recursively on the outer data
-    // anything our outer class can see we can see, so there is no reason to check accessibility here
+    // Call this method recursively on the outer data; anything our outer class can see we can see, so there is no 
+    // eason to check accessibility here
     if (_outerData != null) {
       result = _outerData.getInnerClassOrInterface(relName);
+//      if (relName.equals("MyInner")) System.err.println("outerResult = " + result);
       if (result != null) return result;
     }
     
@@ -381,7 +380,8 @@ public abstract class Data {
       String sdName = sd.getName();
 
       sdName = LanguageLevelVisitor.getUnqualifiedClassName(sdName);
-//      if (sdName.equals("Rod")) System.err.println("In getInnerClass, sdName = 'Rod'; relName = '" + relName +"'");
+//      if (sdName.equals("MyInner")) System.err.println("In getInnerClass, sdName = '" + sdName + "'; relName = '"
+//                                                         + relName +"'");
       if (firstIndexOfDot == -1) {
         if (sdName.equals(relName)) return sd;
       }
@@ -425,7 +425,7 @@ public abstract class Data {
     */
   public void addModifier(String modifier) {
     if (! hasModifier(modifier)) {
-      if (_modifiersAndVisibility == null) { setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0])); }
+      if (_modifiersAndVisibility == null) { setMav(new ModifiersAndVisibility(SourceInfo.NONE, new String[0])); }
       String[] modifiers = _modifiersAndVisibility.getModifiers();
       String[] newModifiers = new String[modifiers.length + 1];
       newModifiers[0] = modifier;
@@ -443,18 +443,17 @@ public abstract class Data {
     */
   public String createUniqueName(String varName) {
     VariableData vd = 
-      TypeChecker.getFieldOrVariable(varName, this, getSymbolData(), new NullLiteral(SourceInfo.NO_INFO), getVars(), 
+      TypeChecker.getFieldOrVariable(varName, this, getSymbolData(), new NullLiteral(SourceInfo.NONE), getVars(), 
                                      true, false);
     String newName = varName;
     int counter = 0;  // Note: counter overflow is effectively impossible; 2G anonymous classes would blow memory
     while (vd != null && counter != -1) {
       newName = varName + counter; counter++;
-      vd = TypeChecker.getFieldOrVariable(newName, this, getSymbolData(), new NullLiteral(SourceInfo.NO_INFO), 
+      vd = TypeChecker.getFieldOrVariable(newName, this, getSymbolData(), new NullLiteral(SourceInfo.NONE), 
                                           getVars(), true, false);
     }
-    if (counter == -1) {throw new RuntimeException("Internal Program Error: Unable to rename variable " + varName
-                                                     + ".  All possible names were taken.  Please report this bug");}
-
+    if (counter == -1) { throw new RuntimeException("Internal Program Error: Unable to rename variable " + varName
+                                                      + ".  All possible names were taken.  Please report this bug");}
     return newName; 
   }
 
@@ -465,15 +464,15 @@ public abstract class Data {
     private Data _d;
     
     private ModifiersAndVisibility _publicMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] { "public" });
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] { "public" });
     private ModifiersAndVisibility _staticMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] { "static" });
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] { "static" });
     private ModifiersAndVisibility _lotsaMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] { "public", "final", "abstract" });
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] { "public", "final", "abstract" });
     private ModifiersAndVisibility _protectedMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] { "protected" });
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] { "protected" });
     private ModifiersAndVisibility _privateMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] { "private" });
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] { "private" });
     
     public DataTest() { this("");}
     public DataTest(String name) { super(name); }
@@ -621,9 +620,9 @@ public abstract class Data {
       result = sd1.getInnerClassOrInterface("testing.notYourInnerClass");
       assertEquals("null should be returned", null, result);
 
-    
       SymbolData sd4 = new SymbolData("testing");
       SymbolData sd5 = new SymbolData("testing$test123");
+      sd5.setInterface(true);
       SymbolData sd6 = new SymbolData("testing$test123$2test1234");
       sd4.addInnerInterface(sd5);
       sd5.addInnerClass(sd6);
@@ -646,17 +645,24 @@ public abstract class Data {
       
       //Test a class defined in the context of a method
       SymbolData sd7 = new SymbolData("test123.myMethod$bob");
+      sd7.setIsContinuation(false);
       MethodData md = new MethodData("myMethod", _publicMav, new TypeParameter[0], 
                     SymbolData.INT_TYPE, new VariableData[0], new String[0], sd1, 
-                    new NullLiteral(SourceInfo.NO_INFO));
+                    new NullLiteral(SourceInfo.NONE));
       md.addInnerClass(sd7);
       assertEquals("Should return sd7", sd7, md.getInnerClassOrInterface("bob"));
       
       //Test an ambiguous case, where the inner class is in both the super interface and the super class.
       SymbolData interfaceInner = new SymbolData("MyInterface$MyInner");
+      interfaceInner.setIsContinuation(false);
+      interfaceInner.setInterface(true);
+
       SymbolData superInner = new SymbolData("MySuper$MyInner");
+      superInner.setIsContinuation(false);
       
       SymbolData myInterface = new SymbolData("MyInterface");
+      myInterface.setInterface(true);
+      myInterface.setIsContinuation(false);
       myInterface.addInnerClass(interfaceInner);
       interfaceInner.setOuterData(myInterface);
       

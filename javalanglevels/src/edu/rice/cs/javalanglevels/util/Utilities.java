@@ -57,7 +57,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 
-
+import edu.rice.cs.javalanglevels.tree.ModifiersAndVisibility;
+  
 public class Utilities {
   
   /** A file copy method taken from the web. */
@@ -213,8 +214,33 @@ public class Utilities {
   /** @return true iff that has "public" as a modifier. */
   public static boolean isPublic(String[] modifiers) { return contains(modifiers, "public"); }
   
+  /** @return true iff that has "protected" as a modifier. */
+  public static boolean isProtected(String[] modifiers) { return contains(modifiers, "protected"); }
+  
+  /** @return true iff that has "protected" as a modifier. */
+  public static boolean isPrivate(String[] modifiers) { return contains(modifiers, "private"); }
+  
   /** @return true iff that has "abstract" as a modifier. */
   public static boolean isAbstract(String[] modifiers) { return contains(modifiers, "abstract"); }
+  
+  // TODO: move the following to ModifiersAndVisibility
+  /** @return true iff that has "final" as a modifier. */
+  public static boolean isFinal(ModifiersAndVisibility mav) { return contains(mav.getModifiers(), "final"); }
+   
+  /** @return true iff that has "final" as a modifier. */
+  public static boolean isStatic(ModifiersAndVisibility mav) { return contains(mav.getModifiers(), "static"); }
+  
+  /** @return true iff that has "public" as a modifier. */
+  public static boolean isPublic(ModifiersAndVisibility mav) { return contains(mav.getModifiers(), "public"); }
+  
+  /** @return true iff that has "public" as a modifier. */
+  public static boolean isProtected(ModifiersAndVisibility mav) { return contains(mav.getModifiers(), "protected"); }
+  
+  /** @return true iff that has "public" as a modifier. */
+  public static boolean isPrivate(ModifiersAndVisibility mav) { return contains(mav.getModifiers(), "private"); }
+  
+  /** @return true iff that has "abstract" as a modifier. */
+  public static boolean isAbstract(ModifiersAndVisibility mav) { return contains(mav.getModifiers(), "abstract"); }
   
   public static <T> T[] catenate(T[] A, T[] B) {
 //   T[] C = Arrays.copyOf(A, A.length + B.length);  /* depends on Java 6 */

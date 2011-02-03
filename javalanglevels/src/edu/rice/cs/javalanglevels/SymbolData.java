@@ -315,7 +315,7 @@ public class SymbolData extends TypeData {
 
   /** Do some initialization*/
   static {
-    ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"});
     VOID_TYPE.setIsContinuation(false);    
     VOID_TYPE.setMav(_publicMav);
     NOT_FOUND.setIsContinuation(false);
@@ -434,7 +434,7 @@ public class SymbolData extends TypeData {
   }
 
   /** Creates a continuation symbol for the specified name; does not enter this name in any table. */
-  public SymbolData(String name) { this(name, SourceInfo.NO_INFO); }
+  public SymbolData(String name) { this(name, SourceInfo.NONE); }
   
   /** Creates a continuation symbol for the specified name and source info; does not enter this name in any table. */ 
   public SymbolData(String name, SourceInfo si) {
@@ -692,7 +692,7 @@ public class SymbolData extends TypeData {
           outerPiece = _superClass.getInnerClassOrInterfaceHelper(nameToMatch.substring(0, firstIndexOfDot), -1);
         else outerPiece = newResult;
         
-        if (TypeChecker.checkAccessibility(outerPiece.getMav(), outerPiece, this)) {result = newResult;}
+        if (TypeChecker.checkAccess(outerPiece.getMav(), outerPiece, this)) {result = newResult;}
         else privateResult = newResult;
       }
     }
@@ -712,7 +712,7 @@ public class SymbolData extends TypeData {
           outerPiece = _superClass.getInnerClassOrInterfaceHelper(nameToMatch.substring(0, firstIndexOfDot), -1);
         }
         else { outerPiece = newResult; }        
-        if (TypeChecker.checkAccessibility(outerPiece.getMav(), outerPiece, this)) {
+        if (TypeChecker.checkAccess(outerPiece.getMav(), outerPiece, this)) {
           if (result == null) {result = newResult;}
           else {return SymbolData.AMBIGUOUS_REFERENCE;}
         }
@@ -763,18 +763,20 @@ public class SymbolData extends TypeData {
   /**Return the anonymous inner class num, and then decrement it*/
   public int postdecrementAnonymousInnerClassNum() { return _anonymousInnerClassNum--; }  
   
-  /** Adds a (perhaps mutable) field to a SymbolData. */
+  /** Adds a (perhaps mutable) variable or field to a SymbolData. */
   public boolean addVar(VariableData var) {
+    // Next line commented out because local variables do not have a initial value
 //    if (! var.isFinal()) var.setHasValue();
     return super.addVar(var); 
   }
   
-  /** When you add fields to a SymboLData, they are given an initial value.*/
+  /** Adds fields or variables to a SymboLData.*/
   public boolean addVars(VariableData[] vars) {
    boolean success = true;
     for (int i = 0; i<vars.length; i++) {
       LinkedList<SymbolData> seen = new LinkedList<SymbolData>();
       if (! _repeatedName(vars[i], seen)) {
+        // Next line commented out because local variables do not have a initial value
 //        if (! vars[i].isFinal()) vars[i].setHasValue();
         _vars.addLast(vars[i]);
       }
@@ -866,8 +868,7 @@ public class SymbolData extends TypeData {
     * @return  The matched MethodData or null if it is not found
     */
   public MethodData getMethod(String name, TypeData[] paramTypes) {
-    for (int i = 0; i < _methods.size(); i++) {
-      MethodData currMd = _methods.get(i);
+    for (MethodData currMd: _methods) {
       if (currMd.getName().equals(name)) {
         if (paramTypes.length == currMd.getParams().length) {
           boolean match = true;
@@ -1384,17 +1385,17 @@ public class SymbolData extends TypeData {
     
     private SymbolData _sd;
     
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"});
     private ModifiersAndVisibility _protectedMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"protected"});
     private ModifiersAndVisibility _privateMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[0]);
     private ModifiersAndVisibility _abstractMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"final"});
     private ModifiersAndVisibility _publicFinalMav = 
-      new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[]{"public", "final"});
+      new ModifiersAndVisibility(SourceInfo.NONE, new String[]{"public", "final"});
     
     public SymbolDataTest() {
       this("");
@@ -1910,9 +1911,9 @@ public class SymbolData extends TypeData {
       _sd2 = 
         new SymbolData("i.like.monkey", 
                        _publicMav, 
-                       new TypeParameter[] { new TypeParameter(SourceInfo.NO_INFO, 
-                                                               new TypeVariable(SourceInfo.NO_INFO,"tv"), 
-                                                               new TypeVariable(SourceInfo.NO_INFO,"i")) }, 
+                       new TypeParameter[] { new TypeParameter(SourceInfo.NONE, 
+                                                               new TypeVariable(SourceInfo.NONE,"tv"), 
+                                                               new TypeVariable(SourceInfo.NONE,"i")) }, 
                        superSd, 
                        new ArrayList<SymbolData>(), null);
       assertFalse("Equals should return false if class type parameters are different", _sd.equals(_sd2));
@@ -1982,10 +1983,10 @@ public class SymbolData extends TypeData {
     public void test_isAssignable() {
       MethodData md = 
         new MethodData("Overwritten", _publicMav, new TypeParameter[0], _sd, new VariableData[0], new String[0], _sd, 
-                       new NullLiteral(SourceInfo.NO_INFO));
+                       new NullLiteral(SourceInfo.NONE));
       MethodData md2 = 
         new MethodData("Overwriting", _publicMav, new TypeParameter[0], _sd, new VariableData[0], new String[0], _sd, 
-                       new NullLiteral(SourceInfo.NO_INFO));
+                       new NullLiteral(SourceInfo.NONE));
 
       //tests a wide variety of possibilities, but not all possibilities.
       assertTrue("Should be assignable", _isCompatible(md, md2));
@@ -2140,7 +2141,7 @@ public class SymbolData extends TypeData {
       SymbolData outer2 = new SymbolData("outer2");
       outer2.addInnerClass(outer1);
       outer1.setOuterData(outer2);
-      outer2.setMav(new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"static"}));
+      outer2.setMav(new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"static"}));
       SymbolData outer3 = new SymbolData("outer3");
       outer3.addInnerClass(outer2);
       outer2.setOuterData(outer3);

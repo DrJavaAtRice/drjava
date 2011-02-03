@@ -167,23 +167,23 @@ public class SpecialTypeChecker extends TypeChecker {
 /** Makes sure that the initializedvariable declarator is correct (the types match)
  * Also, add the Variable Data corresponding to this initializiation to the _vars list, so
  * that it can be referenced within this scope.
- * Assumes type_result is a SymbolData.
+ * Assumes typeRes is a SymbolData.
  * @param that  The InitializedVariableDeclarator being visited
- * @param type_result  The TypeData (should be a SymbolData) corresponding to the type on the lhs of the assignment
- * @param name_result  Not used.
+ * @param typeRes  The TypeData (should be a SymbolData) corresponding to the type on the lhs of the assignment
+ * @param nameRes  Not used.
  * @param initializer_result  The type of what we are initializing the varaible with
  */
-  public TypeData forInitializedVariableDeclaratorOnly(InitializedVariableDeclarator that, TypeData type_result, 
-                                                       TypeData name_result, TypeData initializer_result) {
+  public TypeData forInitializedVariableDeclaratorOnly(InitializedVariableDeclarator that, TypeData typeRes, 
+                                                       TypeData nameRes, TypeData initializer_result) {
     if (initializer_result != null && assertFound(initializer_result, that.getInitializer())) {
       if (!initializer_result.isInstanceType()) {
         _addError("Field or variable " + that.getName().getText() + 
                   " cannot be initialized with the class or interface name " + initializer_result.getName() + 
                   ".  Perhaps you meant to create an instance or use " + initializer_result.getName() + ".class", that);
       }
-      //we know type_result is always a SymbolData.
-      else if (!_isAssignableFrom(type_result.getSymbolData(), initializer_result.getSymbolData())) {
-        _addError("Type: \"" + type_result.getName() + "\" expected, instead found type: \"" + 
+      //we know typeRes is always a SymbolData.
+      else if (!_isAssignableFrom(typeRes.getSymbolData(), initializer_result.getSymbolData())) {
+        _addError("Type: \"" + typeRes.getName() + "\" expected, instead found type: \"" + 
                   initializer_result.getName() + '"', that);
       }
     }
@@ -224,12 +224,12 @@ public class SpecialTypeChecker extends TypeChecker {
   public TypeData forExpressionStatement(ExpressionStatement that) {
     ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages,
                                                           _vars, _thrown);
-    final TypeData expression_result = that.getExpression().visit(etc);
+    final TypeData exprRes = that.getExpression().visit(etc);
 
     //do this so that we can keep track of anything that got assigned
     thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned);
     
-    return expression_result;
+    return exprRes;
   }
   
   /**
@@ -294,7 +294,7 @@ public class SpecialTypeChecker extends TypeChecker {
     * @param that  The VariableDeclaration we are visiting.
     */
   public TypeData forVariableDeclaration(VariableDeclaration that) {
-    final TypeData mav_result = that.getMav().visit(this);
+    final TypeData mavRes = that.getMav().visit(this);
     final TypeData[] declarators_result = makeArrayOfRetType(that.getDeclarators().length);
     for (int i = 0; i < that.getDeclarators().length; i++) {
       declarators_result[i] = that.getDeclarators()[i].visit(this);
@@ -307,9 +307,9 @@ public class SpecialTypeChecker extends TypeChecker {
     * @param that  The UninitializedVariableDeclarator we are visiting.
     */
   public TypeData forUninitializedVariableDeclarator(UninitializedVariableDeclarator that) {
-    final TypeData type_result = getSymbolData(that.getType().getName(), _data, that.getType());
-    final TypeData name_result = that.getName().visit(this);
-    return forUninitializedVariableDeclaratorOnly(that, type_result, name_result);
+    final TypeData typeRes = getSymbolData(that.getType().getName(), _data, that.getType());
+    final TypeData nameRes = that.getName().visit(this);
+    return forUninitializedVariableDeclaratorOnly(that, typeRes, nameRes);
   }
   
   /** If the VariableDeclarator is initialized, things get a little bit more complicated.
@@ -319,12 +319,12 @@ public class SpecialTypeChecker extends TypeChecker {
     * @param that  The InitializedVariableDeclarator we are visiting.
     */
   public TypeData forInitializedVariableDeclarator(InitializedVariableDeclarator that) {
-    final SymbolData type_result = getSymbolData(that.getType().getName(), _data, that.getType());
-    final TypeData name_result = that.getName().visit(this); //we think this is always null
+    final SymbolData typeRes = getSymbolData(that.getType().getName(), _data, that.getType());
+    final TypeData nameRes = that.getName().visit(this); //we think this is always null
 
     TypeData initializer_result;
     if (that.getInitializer() instanceof ArrayInitializer) {
-      initializer_result = forArrayInitializerHelper((ArrayInitializer) that.getInitializer(), type_result);
+      initializer_result = forArrayInitializerHelper((ArrayInitializer) that.getInitializer(), typeRes);
     }
     else {
       ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages,
@@ -332,7 +332,7 @@ public class SpecialTypeChecker extends TypeChecker {
       initializer_result = that.getInitializer().visit(etc);
       thingsThatHaveBeenAssigned.addAll(etc.thingsThatHaveBeenAssigned); //incorporate this list here
     }
-    return forInitializedVariableDeclaratorOnly(that, type_result, name_result, initializer_result);
+    return forInitializedVariableDeclaratorOnly(that, typeRes, nameRes, initializer_result);
   }
 
   /** A variable data can be assigned to if it is not final or if it does not have a value.
@@ -399,18 +399,18 @@ public class SpecialTypeChecker extends TypeChecker {
 
     // Check for cyclic inheritance
     if (checkForCyclicInheritance(sd, new LinkedList<SymbolData>(), that)) { return null; }
-    final TypeData mav_result = that.getMav().visit(this);
-    final TypeData name_result = that.getName().visit(this);
-    final TypeData[] typeParameters_result = makeArrayOfRetType(that.getTypeParameters().length);
+    final TypeData mavRes = that.getMav().visit(this);
+    final TypeData nameRes = that.getName().visit(this);
+    final TypeData[] typeParamRes = makeArrayOfRetType(that.getTypeParameters().length);
     for (int i = 0; i < that.getTypeParameters().length; i++) {
-      typeParameters_result[i] = that.getTypeParameters()[i].visit(this);
+      typeParamRes[i] = that.getTypeParameters()[i].visit(this);
     }
-    final TypeData superclass_result = that.getSuperclass().visit(this);
-    final TypeData[] interfaces_result = makeArrayOfRetType(that.getInterfaces().length);
+    final TypeData superClassRes = that.getSuperclass().visit(this);
+    final TypeData[] interfacesRes = makeArrayOfRetType(that.getInterfaces().length);
     for (int i = 0; i < that.getInterfaces().length; i++) {
-      interfaces_result[i] = that.getInterfaces()[i].visit(this);
+      interfacesRes[i] = that.getInterfaces()[i].visit(this);
     }
-    final TypeData body_result = 
+    final TypeData bodyRes = 
       that.getBody().visit(new ClassBodyTypeChecker(sd, _file, _package, _importedFiles, _importedPackages, _vars, 
                                                     _thrown));
     return null;
@@ -423,28 +423,28 @@ public class SpecialTypeChecker extends TypeChecker {
   public TypeData forInnerInterfaceDef(InnerInterfaceDef that) {
     String className = that.getName().getText();
     SymbolData sd = _data.getInnerClassOrInterface(className); // className is a relative name
-//    if (sd == null) { System.out.println("I tried to look up " + className + " in " + _data.getName() + " but I got back null");}
+//    if (sd == null) System.out.println("Tried to look up " + className + " in " + _data.getName() 
+//                                           + " but I got back null");
 
     // Check for cyclic inheritance
     if (checkForCyclicInheritance(sd, new LinkedList<SymbolData>(), that)) {
       return null;
     }
-    final TypeData mav_result = that.getMav().visit(this);
-    final TypeData name_result = that.getName().visit(this);
-    final TypeData[] typeParameters_result = makeArrayOfRetType(that.getTypeParameters().length);
+    final TypeData mavRes = that.getMav().visit(this);
+    final TypeData nameRes = that.getName().visit(this);
+    final TypeData[] typeParamRes = makeArrayOfRetType(that.getTypeParameters().length);
     for (int i = 0; i < that.getTypeParameters().length; i++) {
-      typeParameters_result[i] = that.getTypeParameters()[i].visit(this);
+      typeParamRes[i] = that.getTypeParameters()[i].visit(this);
     }
-    final TypeData[] interfaces_result = makeArrayOfRetType(that.getInterfaces().length);
+    final TypeData[] interfacesRes = makeArrayOfRetType(that.getInterfaces().length);
     for (int i = 0; i < that.getInterfaces().length; i++) {
-      interfaces_result[i] = that.getInterfaces()[i].visit(this);
+      interfacesRes[i] = that.getInterfaces()[i].visit(this);
     }
 
-    final TypeData body_result = 
+    final TypeData bodyRes = 
       that.getBody().visit(new InterfaceBodyTypeChecker(sd, _file, _package, _importedFiles, _importedPackages, _vars, 
                                                         _thrown));
     return null;
-
   }
     
   
@@ -601,14 +601,14 @@ public class SpecialTypeChecker extends TypeChecker {
       
 //      LanguageLevelConverter.symbolTable.clear();
       
-      SourceInfo si = SourceInfo.NO_INFO;
+      SourceInfo si = SourceInfo.NONE;
       Expression e1 = new IntegerLiteral(si, 1);
       Expression e2 = new IntegerLiteral(si, 2);
       Expression e3 = new PlusExpression(si, new IntegerLiteral(si, 3), new CharLiteral(si, 'e'));
       Expression e4 = new CharLiteral(si, 'c');
 
       ArrayType intArrayType = 
-        new ArrayType(SourceInfo.NO_INFO, "int[]", new PrimitiveType(SourceInfo.NO_INFO, "int"));
+        new ArrayType(SourceInfo.NONE, "int[]", new PrimitiveType(SourceInfo.NONE, "int"));
 
       //make sure it works -- most testing done in testArrayInitializerHelper
       ArrayData intArray = new ArrayData(SymbolData.INT_TYPE, llv, si);
@@ -618,8 +618,8 @@ public class SpecialTypeChecker extends TypeChecker {
       
       _stc._data.addVar(new VariableData("foozle", _publicMav, intArray, false, _stc._data));
       InitializedVariableDeclarator ivd = 
-        new InitializedVariableDeclarator(SourceInfo.NO_INFO, intArrayType,
-                                          new Word(SourceInfo.NO_INFO, "foozle"),
+        new InitializedVariableDeclarator(SourceInfo.NONE, intArrayType,
+                                          new Word(SourceInfo.NONE, "foozle"),
                                           new ArrayInitializer(si, new VariableInitializerI[] {e1, e2, e3, e4}));
 
       assertEquals("Should return null", null, ivd.visit(_stc));
@@ -633,10 +633,10 @@ public class SpecialTypeChecker extends TypeChecker {
       _stc._data.addVar(new VariableData("j", _publicMav, SymbolData.DOUBLE_TYPE, false, _stc._data));
       
       InitializedVariableDeclarator ivd = 
-        new InitializedVariableDeclarator(SourceInfo.NO_INFO,
+        new InitializedVariableDeclarator(SourceInfo.NONE,
                                           JExprParser.NO_TYPE,
-                                          new Word(SourceInfo.NO_INFO, "j"),
-                                          new DoubleLiteral(SourceInfo.NO_INFO, 1.0));
+                                          new Word(SourceInfo.NONE, "j"),
+                                          new DoubleLiteral(SourceInfo.NONE, 1.0));
       
 
       assertEquals("Two assignable types should not throw an error; return null.", null, 
@@ -659,7 +659,7 @@ public class SpecialTypeChecker extends TypeChecker {
     }
         
     public void testForThrowStatementOnly() {
-      ThrowStatement s = new ThrowStatement(SourceInfo.NO_INFO, new NullLiteral(SourceInfo.NO_INFO));
+      ThrowStatement s = new ThrowStatement(SourceInfo.NONE, new NullLiteral(SourceInfo.NONE));
       SymbolData exception = _stc.getSymbolData("java.lang.Throwable", s, false, true); 
       InstanceData exceptionInstance = exception.getInstanceData();
       
@@ -696,14 +696,14 @@ public class SpecialTypeChecker extends TypeChecker {
                                  new LinkedList<Command>());
 //      LanguageLevelConverter.symbolTable = llv.symbolTable = _stc.symbolTable;
       
-      SourceInfo si = SourceInfo.NO_INFO;
+      SourceInfo si = SourceInfo.NONE;
       
       Expression e1 = new IntegerLiteral(si, 1);
       Expression e2 = new IntegerLiteral(si, 2);
       Expression e3 = new PlusExpression(si, new IntegerLiteral(si, 3), new CharLiteral(si, 'e'));
       Expression e4 = new CharLiteral(si, 'c');
       Expression e5 = new DoubleLiteral(si, 5.8);
-      Expression e6 = new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "int"));
+      Expression e6 = new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "int"));
 
       ArrayInitializer a1 = new ArrayInitializer(si, new VariableInitializerI[] {e1, e3, e4});
       ArrayInitializer a2 = new ArrayInitializer(si, new VariableInitializerI[] {e2, e3, e1});
@@ -785,23 +785,23 @@ public class SpecialTypeChecker extends TypeChecker {
       
       //if lhs is null, just look up SymbolData
       assertEquals("Should return string", string,
-                   _stc.findClassReference(null, "java.lang.String", new NullLiteral(SourceInfo.NO_INFO)));
+                   _stc.findClassReference(null, "java.lang.String", new NullLiteral(SourceInfo.NONE)));
       assertEquals("Should not be an error", 0, errors.size());
       
       //if SymbolData cannot be found, do not add error--just return null
       assertEquals("Should return null", null, 
-                   _stc.findClassReference(null, "non-existant", new NullLiteral(SourceInfo.NO_INFO)));
+                   _stc.findClassReference(null, "non-existant", new NullLiteral(SourceInfo.NONE)));
       assertEquals("Should be no errors", 0, errors.size());
       
       //if LHS is package data, try to look up fully qualified name
       assertEquals("Should return string", string,
-                   _stc.findClassReference(new PackageData("java.lang"), "String", new NullLiteral(SourceInfo.NO_INFO)));
+                   _stc.findClassReference(new PackageData("java.lang"), "String", new NullLiteral(SourceInfo.NONE)));
       assertEquals("Should not be an error", 0, errors.size());
       
       //if symbol data cannot be found, do not give error
       assertEquals("Should return null", null, 
                    _stc.findClassReference(new PackageData("nonsense"), "non-existant", 
-                                         new NullLiteral(SourceInfo.NO_INFO)));
+                                         new NullLiteral(SourceInfo.NONE)));
       assertEquals("Should be no errors", 0, errors.size());
       
       //otherwise, try to look up symbolData from context of lhs
@@ -811,12 +811,12 @@ public class SpecialTypeChecker extends TypeChecker {
       inner.setOuterData(string);
       string.addInnerClass(inner);
       assertEquals("Should return inner", inner,
-                   _stc.findClassReference(string, "Inner", new NullLiteral(SourceInfo.NO_INFO)));
+                   _stc.findClassReference(string, "Inner", new NullLiteral(SourceInfo.NONE)));
       assertEquals("Should be no errors", 0, errors.size());
       
       //do not give error if it could not be found
       assertEquals("Should return null", null, 
-                   _stc.findClassReference(string, "non-existant", new NullLiteral(SourceInfo.NO_INFO)));
+                   _stc.findClassReference(string, "non-existant", new NullLiteral(SourceInfo.NONE)));
       assertEquals("Should be no errors", 0, errors.size());
     }
   }

@@ -51,12 +51,8 @@ public class InterfaceBodyTypeChecker extends SpecialTypeChecker {
   /**The SymbolData corresponding to this interface.*/
   private SymbolData _symbolData;
   
-  
-    /*
-   * Constructor for InterfaceBodyTypeChecker.
-   * Adds all the variables in the symbol data to the list of what can be seen from this context,
-   * since interface fields can always be seen.
-   * 
+  /* Constructor for InterfaceBodyTypeChecker.  Adds all the variables in the symbol data to the list of what can be 
+   * seen from this context, since interface fields can always be seen.
    * @param sd  The SymbolData of the interface we are type checking.
    * @param file  The File corresponding to the source file we are checking.
    * @param packageName  The package of the source file.
@@ -89,28 +85,28 @@ public class InterfaceBodyTypeChecker extends SpecialTypeChecker {
    * method doesn't resolve another method with a different return type.
    */
   public TypeData forAbstractMethodDef(AbstractMethodDef that) {
-    final TypeData mav_result = that.getMav().visit(this);
-    final TypeData[] typeParams_result = makeArrayOfRetType(that.getTypeParams().length);
+    final TypeData mavRes = that.getMav().visit(this);
+    final TypeData[] typeParamsRes = makeArrayOfRetType(that.getTypeParams().length);
     for (int i = 0; i < that.getTypeParams().length; i++) {
-      typeParams_result[i] = that.getTypeParams()[i].visit(this);
+      typeParamsRes[i] = that.getTypeParams()[i].visit(this);
     }
-    final TypeData result_result = getSymbolData(that.getResult().getName(), _symbolData, that);//that.getResult().visit(this);
-    final TypeData name_result = that.getName().visit(this);
-    final TypeData[] params_result = makeArrayOfRetType(that.getParams().length);
-    for (int i = 0; i<params_result.length; i++) {
-      params_result[i] = getSymbolData(that.getParams()[i].getDeclarator().getType().getName(), _symbolData, that.getParams()[i]);
+    final TypeData resRes = getSymbolData(that.getResult().getName(), _symbolData, that);//that.getResult().visit(this);
+    final TypeData nameRes = that.getName().visit(this);
+    final TypeData[] paramsRes = makeArrayOfRetType(that.getParams().length);
+    for (int i = 0; i<paramsRes.length; i++) {
+      paramsRes[i] = getSymbolData(that.getParams()[i].getDeclarator().getType().getName(), _symbolData, that.getParams()[i]);
     }
-    final TypeData[] throws_result = makeArrayOfRetType(that.getThrows().length);
+    final TypeData[] throwsRes = makeArrayOfRetType(that.getThrows().length);
     for (int i = 0; i < that.getThrows().length; i++) {
-      throws_result[i] = getSymbolData(that.getThrows()[i].getName(), _symbolData, that.getThrows()[i]);//that.getThrows()[i].visit(this);
+      throwsRes[i] = getSymbolData(that.getThrows()[i].getName(), _symbolData, that.getThrows()[i]);//that.getThrows()[i].visit(this);
     }
     // Ensure that this method doesn't override another method with a different return type.
-    MethodData md = _symbolData.getMethod(that.getName().getText(), params_result);
+    MethodData md = _symbolData.getMethod(that.getName().getText(), paramsRes);
     if (md == null) {
       throw new RuntimeException("Internal Program Error: Could not find the method " + that.getName().getText() + " in interface " + _symbolData.getName() + ".  Please report this bug.");
     }
     SymbolData.checkDifferentReturnTypes(md, _symbolData, LanguageLevelConverter.OPT.javaVersion());
-    return result_result;
+    return resRes;
   }
   
 
@@ -127,7 +123,7 @@ public class InterfaceBodyTypeChecker extends SpecialTypeChecker {
     Data sd = getSymbolData(that.getName(), _symbolData, that);
     if (sd != null) {sd = sd.getOuterData();}
     while (sd != null && !LanguageLevelVisitor.isJavaLibraryClass(sd.getSymbolData().getName())) {
-      if (!checkAccessibility(that, sd.getMav(), sd.getName(), sd.getSymbolData(), _symbolData, "class or interface")) {
+      if (!checkAccess(that, sd.getMav(), sd.getName(), sd.getSymbolData(), _symbolData, "class or interface")) {
         return null;
       }
       sd = sd.getOuterData();
@@ -149,12 +145,12 @@ public class InterfaceBodyTypeChecker extends SpecialTypeChecker {
     private SymbolData _sd4;
     private SymbolData _sd5;
     private SymbolData _sd6;
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[0]);
+    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"final"});
     
     
     public InterfaceBodyTypeCheckerTest() {
@@ -188,9 +184,9 @@ public class InterfaceBodyTypeChecker extends SpecialTypeChecker {
       VariableData vd1 = new VariableData("Mojo", _publicMav, SymbolData.INT_TYPE, false, _sd1);
       _sd1.addVar(vd1);
       UninitializedVariableDeclarator uvd = 
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                            new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                            new Word(SourceInfo.NO_INFO, "Mojo"));
+        new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                            new PrimitiveType(SourceInfo.NONE, "int"), 
+                                            new Word(SourceInfo.NONE, "Mojo"));
       uvd.visit(_ibbtc);
       _ibbtc.forUninitializedVariableDeclaratorOnly(uvd, SymbolData.INT_TYPE, null);
       assertEquals("There should be one error", 1, errors.size());
@@ -202,17 +198,17 @@ public class InterfaceBodyTypeChecker extends SpecialTypeChecker {
       VariableData vd1 = new VariableData("Mojo", _publicMav, SymbolData.INT_TYPE, false, _sd1);
       _sd1.addVar(vd1);
       InitializedVariableDeclarator ivd = 
-        new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                          new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                          new Word(SourceInfo.NO_INFO, "Mojo"), 
-                                          new IntegerLiteral(SourceInfo.NO_INFO, 1));
+        new InitializedVariableDeclarator(SourceInfo.NONE, 
+                                          new PrimitiveType(SourceInfo.NONE, "int"), 
+                                          new Word(SourceInfo.NONE, "Mojo"), 
+                                          new IntegerLiteral(SourceInfo.NONE, 1));
       ivd.visit(_ibbtc);
       assertEquals("There should be no errors.", 0, errors.size());
       assertTrue("_vars should contain Mojo.", _ibbtc._vars.contains(vd1));
-      ivd = new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                              new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                              new Word(SourceInfo.NO_INFO, "Santa's Little Helper"), 
-                                              new IntegerLiteral(SourceInfo.NO_INFO, 1));
+      ivd = new InitializedVariableDeclarator(SourceInfo.NONE, 
+                                              new PrimitiveType(SourceInfo.NONE, "int"), 
+                                              new Word(SourceInfo.NONE, "Santa's Little Helper"), 
+                                              new IntegerLiteral(SourceInfo.NONE, 1));
       try {
         ivd.visit(_ibbtc);
         fail("Should have thrown a RuntimeException because there's no field named Santa's Little Helper.");
@@ -225,28 +221,28 @@ public class InterfaceBodyTypeChecker extends SpecialTypeChecker {
     
     public void testForConcreteMethodDef() {
       FormalParameter[] fps = new FormalParameter[] {
-        new FormalParameter(SourceInfo.NO_INFO, 
-                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                                new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                                                new Word (SourceInfo.NO_INFO, "field1")),
+        new FormalParameter(SourceInfo.NONE, 
+                            new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                                                new PrimitiveType(SourceInfo.NONE, "double"), 
+                                                                new Word (SourceInfo.NONE, "field1")),
                             false),
-        new FormalParameter(SourceInfo.NO_INFO, 
-                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                                new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
-                                                                new Word (SourceInfo.NO_INFO, "field2")),
+        new FormalParameter(SourceInfo.NONE, 
+                            new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                                                new PrimitiveType(SourceInfo.NONE, "boolean"), 
+                                                                new Word (SourceInfo.NONE, "field2")),
                             false)};
       
       ConcreteMethodDef cmd = 
-        new ConcreteMethodDef(SourceInfo.NO_INFO, 
+        new ConcreteMethodDef(SourceInfo.NONE, 
                               _packageMav, 
                               new TypeParameter[0], 
-                              new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                              new Word(SourceInfo.NO_INFO, "methodName"),
+                              new PrimitiveType(SourceInfo.NONE, "int"), 
+                              new Word(SourceInfo.NONE, "methodName"),
                               fps,
                               new ReferenceType[0], 
-                              new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {
-        new ValueReturnStatement(SourceInfo.NO_INFO, 
-                                 new IntegerLiteral(SourceInfo.NO_INFO, 5))}));
+                              new BracedBody(SourceInfo.NONE, new BodyItemI[] {
+        new ValueReturnStatement(SourceInfo.NONE, 
+                                 new IntegerLiteral(SourceInfo.NONE, 5))}));
       
       MethodData md = new MethodData("methodName", 
                                      _packageMav, 
@@ -268,7 +264,7 @@ public class InterfaceBodyTypeChecker extends SpecialTypeChecker {
     }
     
     public void testForTypeOnly() {
-      Type t = new PrimitiveType(SourceInfo.NO_INFO, "double");
+      Type t = new PrimitiveType(SourceInfo.NONE, "double");
       t.visit(_ibbtc);
       assertEquals("There should be no errors", 0, errors.size());
       
@@ -276,7 +272,7 @@ public class InterfaceBodyTypeChecker extends SpecialTypeChecker {
       sd.setIsContinuation(false);
       symbolTable.put("Adam", sd);
       sd.setMav(_publicMav);
-      t = new ClassOrInterfaceType(SourceInfo.NO_INFO, "Adam", new Type[0]);
+      t = new ClassOrInterfaceType(SourceInfo.NONE, "Adam", new Type[0]);
       t.visit(_ibbtc);
       assertEquals("There should still be no errors", 0, errors.size());
       
@@ -286,26 +282,26 @@ public class InterfaceBodyTypeChecker extends SpecialTypeChecker {
       innerSd.setOuterData(sd);
       innerSd.setMav(_publicMav);
       _ibbtc.symbolTable.put("USaigehgihdsgslghdlighs", innerSd);
-      t = new ClassOrInterfaceType(SourceInfo.NO_INFO, "Adam.Wulf", new Type[0]);
+      t = new ClassOrInterfaceType(SourceInfo.NONE, "Adam.Wulf", new Type[0]);
       t.visit(_ibbtc);
       assertEquals("There should still be no errors", 0, errors.size());
       
       innerSd.setMav(_privateMav);
-      t = new ClassOrInterfaceType(SourceInfo.NO_INFO, "Adam.Wulf", new Type[0]);
+      t = new ClassOrInterfaceType(SourceInfo.NONE, "Adam.Wulf", new Type[0]);
       t.visit(_ibbtc);
+      String tcSDName =  _ibbtc._symbolData.getName();
       assertEquals("There should be one error", 1, errors.size());
       assertEquals("The error message should be correct", 
-                   "The class or interface Adam.Wulf is private and cannot be accessed from " + 
-                     _ibbtc._symbolData.getName(),
+                   "The class or interface Adam.Wulf in Adam.Wulf is private and cannot be accessed from " + tcSDName,
                    errors.get(0).getFirst());
       
       sd.setMav(_privateMav);
       innerSd.setMav(_publicMav);
-      t = new ClassOrInterfaceType(SourceInfo.NO_INFO, "Adam.Wulf", new Type[0]);
+      t = new ClassOrInterfaceType(SourceInfo.NONE, "Adam.Wulf", new Type[0]);
       t.visit(_ibbtc);
       assertEquals("There should be two errors", 2, errors.size());
       assertEquals("The error message should be correct", 
-                   "The class or interface Adam is private and cannot be accessed from " + _ibbtc._symbolData.getName(),
+                   "The class or interface Adam in Adam is private and cannot be accessed from " + tcSDName,
                    errors.get(1).getFirst());
     }
   }

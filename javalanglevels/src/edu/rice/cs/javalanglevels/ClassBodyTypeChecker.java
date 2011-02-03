@@ -73,13 +73,17 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
     hasConstructor = false;
     assert _vars == vars;
     
-    _vars.addAll(sd.getVars());
+    LinkedList<VariableData> classVars = sd.getVars();
+    
+//    for (VariableData vd: classVars) {
+//      if (vd.isFinal() && vd.gotValue()) thingsThatHaveBeenAssigned.addLast(vd);
+//    }
+    
+    _vars.addAll(classVars);
     
     LinkedList<VariableData> superVars = sd.getAllSuperVars();
-    for (int i = 0; i<superVars.size(); i++) {
-      VariableData tempVD = superVars.get(i);
-      if (tempVD.isFinal() && tempVD.gotValue())
-        thingsThatHaveBeenAssigned.addLast(tempVD);
+    for (VariableData vd: superVars) {
+      if (vd.isFinal() && vd.gotValue()) thingsThatHaveBeenAssigned.addLast(vd);
     }
     _vars.addAll(superVars);
   }
@@ -91,8 +95,8 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
     * initializer blocks) can know which fields have already been declared
     */
   public TypeData forUninitializedVariableDeclaratorOnly(UninitializedVariableDeclarator that, 
-                                                         TypeData type_result, 
-                                                         TypeData name_result) {
+                                                         TypeData typeRes, 
+                                                         TypeData nameRes) {
     Word name = that.getName();
     String text = that.getName().getText();
     VariableData vd = getFieldOrVariable(text, _symbolData, _symbolData, name);
@@ -127,11 +131,11 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
     */
   public TypeData forConstructorDef(ConstructorDef that) {
     hasConstructor = true;
-    final TypeData mav_result = that.getMav().visit(this);
+    final TypeData mavRes = that.getMav().visit(this);
     final TypeData[] parameters_result = makeArrayOfRetType(that.getParameters().length);
-    final TypeData[] throws_result = makeArrayOfRetType(that.getThrows().length);
+    final TypeData[] throwsRes = makeArrayOfRetType(that.getThrows().length);
     for (int i = 0; i < that.getThrows().length; i++) {
-      throws_result[i] = getSymbolData(that.getThrows()[i].getName(), _symbolData, that);     //that.getThrows()[i].visit(this);
+      throwsRes[i] = getSymbolData(that.getThrows()[i].getName(), _symbolData, that);     //that.getThrows()[i].visit(this);
     }
 
     // We need to match the name and params.
@@ -166,8 +170,9 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
         }
       }
     }
-    if (md == null) {
-      throw new RuntimeException("The constructor " + LanguageLevelVisitor.getUnqualifiedClassName(_symbolData.getName()) + " was not in the class " + _symbolData.getName() + '.');
+    if (md == null) { throw
+      new RuntimeException("The constructor " + LanguageLevelVisitor.getUnqualifiedClassName(_symbolData.getName()) + 
+                           " was not in the class " + _symbolData.getName() + '.');
     }
 
     LinkedList<VariableData> ll = new LinkedList<VariableData>();// = cloneVariableDataList(_vars);
@@ -178,12 +183,12 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
     ll.addAll(cloneVariableDataList(_vars));
 
     ConstructorBodyTypeChecker btc = new ConstructorBodyTypeChecker(md, _file, _package, _importedFiles, _importedPackages, ll, new LinkedList<Pair<SymbolData, JExpression>>());
-    final TypeData body_result = that.getStatements().visit(btc);
+    final TypeData bodyRes = that.getStatements().visit(btc);
     
     //make sure the constructor assigns a value to any uninitialized fields (i.e. final fields)
     LinkedList<VariableData> sdVars = _symbolData.getVars();
-    for (int i = 0; i<sdVars.size(); i++) { //Since non-final fields are automatically given a value, this in effect just checks the final fields.
-      if (!sdVars.get(i).hasValue()) {
+    for (int i = 0; i < sdVars.size(); i++) { // Non-finals automatically get values, so only need to check finals
+      if (! sdVars.get(i).hasValue()) {
         _addError("The final field " + sdVars.get(i).getName() + " has not been initialized.  Make sure you give it a value in this constructor", that);
         return null;
       }
@@ -196,12 +201,12 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
       unassignVariableDatas(btc.thingsThatHaveBeenAssigned);
     }
     
-    return forConstructorDefOnly(that, mav_result, parameters_result, throws_result, body_result);
+    return forConstructorDefOnly(that, mavRes, parameters_result, throwsRes, bodyRes);
   }
   
 
   /*Basically, a no-op*/
-  public TypeData forConstructorDefOnly(ConstructorDef that, TypeData mav_result, TypeData[] parameters_result, TypeData[] throws_result, TypeData body_result) {
+  public TypeData forConstructorDefOnly(ConstructorDef that, TypeData mavRes, TypeData[] parameters_result, TypeData[] throwsRes, TypeData bodyRes) {
     return forJExpressionOnly(that);
   }
   
@@ -212,16 +217,16 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
     * for which the assignment should not be visible outside the scope of the method.
     */
   public TypeData forConcreteMethodDef(ConcreteMethodDef that) {
-    final TypeData mav_result = that.getMav().visit(this);
-    final TypeData[] typeParams_result = makeArrayOfRetType(that.getTypeParams().length);
+    final TypeData mavRes = that.getMav().visit(this);
+    final TypeData[] typeParamsRes = makeArrayOfRetType(that.getTypeParams().length);
     for (int i = 0; i < that.getTypeParams().length; i++) {
-      typeParams_result[i] = that.getTypeParams()[i].visit(this);
+      typeParamsRes[i] = that.getTypeParams()[i].visit(this);
     }
-    final SymbolData result_result = getSymbolData(that.getResult().getName(), _symbolData, that);
-    final TypeData name_result = that.getName().visit(this);
-    final TypeData[] throws_result = makeArrayOfRetType(that.getThrows().length);
+    final SymbolData resRes = getSymbolData(that.getResult().getName(), _symbolData, that);
+    final TypeData nameRes = that.getName().visit(this);
+    final TypeData[] throwsRes = makeArrayOfRetType(that.getThrows().length);
     for (int i = 0; i < that.getThrows().length; i++) {
-      throws_result[i] = getSymbolData(that.getThrows()[i].getName(), _symbolData, that.getThrows()[i]);
+      throwsRes[i] = getSymbolData(that.getThrows()[i].getName(), _symbolData, that.getThrows()[i]);
     }
     // We need to match the name and params.
     // First find the correct MethodData.
@@ -263,7 +268,7 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
     
     LinkedList<VariableData> ll = new LinkedList<VariableData>();
     VariableData[] vds = md.getParams();
-    for (int i = 0; i<vds.length; i++) {
+    for (int i = 0; i < vds.length; i++) {
       ll.addLast(vds[i]);
     }
     ll.addAll(cloneVariableDataList(_vars));
@@ -279,58 +284,56 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
     BodyTypeChecker btc = new BodyTypeChecker(md, _file, _package, _importedFiles, _importedPackages, ll, 
                                               new LinkedList<Pair<SymbolData, JExpression>>());
     
-    TypeData body_result = that.getBody().visit(btc); // We assume that this will return an InstanceData -- the return type of the body
+    TypeData bodyRes = that.getBody().visit(btc); // We assume that this will return an InstanceData -- the return type of the body
     
     // This checks to see that the method returns the correct type.  It throws its own errors.
-    if (body_result != null) {body_result = body_result.getSymbolData();}
-    _checkReturnType(md.getReturnType(), (SymbolData) body_result, that);
+    if (bodyRes != null) {bodyRes = bodyRes.getSymbolData();}
+    _checkReturnType(md.getReturnType(), (SymbolData) bodyRes, that);
     if (md.getReturnType() != null) {
       // Ensure that this method doesn't override another method with a different return type.
       SymbolData.checkDifferentReturnTypes(md, _symbolData, LanguageLevelConverter.OPT.javaVersion());
     }
     
     // This is not used because this call eventually invokes the forUninitializedVariableDeclarator method above.
-    final TypeData[] params_result = makeArrayOfRetType(that.getParams().length);
-
-    for (int i = 0; i<thingsWeAssigned.size(); i++) {
-      thingsWeAssigned.get(i).lostValue();
-    }
-    
-    return result_result;
-
+    final TypeData[] paramsRes = makeArrayOfRetType(that.getParams().length);
+//
+//    // Why oh why is this necessary; these variables aren't even in scope elsewhere; they should be invisible!!!!
+//    for (int i = 0; i < thingsWeAssigned.size(); i++) {
+//      thingsWeAssigned.get(i).lostValue();
+//    }
+    return resRes;
   }
-
   
   /*
    * Make sure that this method does not override another method with a different return type,
    * since this is not allowed in java.
    */
   public TypeData forAbstractMethodDef(AbstractMethodDef that) {
-    final TypeData mav_result = that.getMav().visit(this);
-    final TypeData[] typeParams_result = makeArrayOfRetType(that.getTypeParams().length);
+    final TypeData mavRes = that.getMav().visit(this);
+    final TypeData[] typeParamsRes = makeArrayOfRetType(that.getTypeParams().length);
     for (int i = 0; i < that.getTypeParams().length; i++) {
-      typeParams_result[i] = that.getTypeParams()[i].visit(this);
+      typeParamsRes[i] = that.getTypeParams()[i].visit(this);
     }
-    final SymbolData result_result = getSymbolData(that.getResult().getName(), _symbolData, that);
-    final TypeData name_result = that.getName().visit(this);
+    final SymbolData resRes = getSymbolData(that.getResult().getName(), _symbolData, that);
+    final TypeData nameRes = that.getName().visit(this);
 
     // This is not used because this call eventually invokes the forUninitializedVariableDeclarator method above.
-    final TypeData[] params_result = makeArrayOfRetType(that.getParams().length);
-    for (int i = 0; i<params_result.length; i++) {
-      params_result[i] = getSymbolData(that.getParams()[i].getDeclarator().getType().getName(), _symbolData, that.getParams()[i]);
+    final TypeData[] paramsRes = makeArrayOfRetType(that.getParams().length);
+    for (int i = 0; i<paramsRes.length; i++) {
+      paramsRes[i] = getSymbolData(that.getParams()[i].getDeclarator().getType().getName(), _symbolData, that.getParams()[i]);
     }
-    final TypeData[] throws_result = makeArrayOfRetType(that.getThrows().length);
+    final TypeData[] throwsRes = makeArrayOfRetType(that.getThrows().length);
     for (int i = 0; i < that.getThrows().length; i++) {
-      throws_result[i] = getSymbolData(that.getThrows()[i].getName(), _symbolData, that.getThrows()[i]);
+      throwsRes[i] = getSymbolData(that.getThrows()[i].getName(), _symbolData, that.getThrows()[i]);
     }
     // Ensure that this method doesn't override another method with a different return type.
-    MethodData md = _symbolData.getMethod(that.getName().getText(), params_result);
+    MethodData md = _symbolData.getMethod(that.getName().getText(), paramsRes);
     if (md == null) {
       throw new RuntimeException("Internal Program Error: Could not find the method " + that.getName().getText() + " in class " + _symbolData.getName() +".  Please report this bug.");
     }
     SymbolData.checkDifferentReturnTypes(md, _symbolData, LanguageLevelConverter.OPT.javaVersion());
 
-    return result_result;
+    return resRes;
   }
   
   /*Try to resolve the type, and then make sure it can be seen from where we are. */
@@ -338,7 +341,7 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
     Data sd = getSymbolData(that.getName(), _symbolData, that);
     if (sd != null) {sd = sd.getOuterData();}
     while (sd != null && !LanguageLevelVisitor.isJavaLibraryClass(sd.getSymbolData().getName())) {
-      if (!checkAccessibility(that, sd.getMav(), sd.getName(), sd.getSymbolData(), _symbolData, "class or interface")) {
+      if (!checkAccess(that, sd.getMav(), sd.getName(), sd.getSymbolData(), _symbolData, "class or interface")) {
         return null;
       }
       sd = sd.getOuterData();
@@ -359,12 +362,12 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
     private SymbolData _sd4;
     private SymbolData _sd5;
     private SymbolData _sd6;
-    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"public"});
-    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"protected"});
-    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"private"});
-    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[0]);
-    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"abstract"});
-    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NO_INFO, new String[] {"final"});
+    private ModifiersAndVisibility _publicMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"});
+    private ModifiersAndVisibility _protectedMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"protected"});
+    private ModifiersAndVisibility _privateMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"private"});
+    private ModifiersAndVisibility _packageMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[0]);
+    private ModifiersAndVisibility _abstractMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"abstract"});
+    private ModifiersAndVisibility _finalMav = new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"final"});
     
     
     public ClassBodyTypeCheckerTest() {
@@ -396,9 +399,9 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
       VariableData vd1 = new VariableData("Mojo", _publicMav, SymbolData.INT_TYPE, false, _cbbtc._data);
       _sd1.addVar(vd1);
       UninitializedVariableDeclarator uvd = 
-        new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                            new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                            new Word(SourceInfo.NO_INFO, "Mojo"));
+        new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                            new PrimitiveType(SourceInfo.NONE, "int"), 
+                                            new Word(SourceInfo.NONE, "Mojo"));
 //      uvd.visit(_cbbtc);
       _cbbtc.forUninitializedVariableDeclaratorOnly(uvd, SymbolData.INT_TYPE, null);
       assertTrue("_vars should contain Mojo.", _cbbtc._vars.contains(vd1));      
@@ -407,17 +410,17 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
     public void testForInitializedVariableDeclaratorOnly() {
       VariableData vd1 = new VariableData("Mojo", _publicMav, SymbolData.INT_TYPE, false, _cbbtc._data);
       _sd1.addVar(vd1);
-      InitializedVariableDeclarator ivd = new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                                            new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                                                            new Word(SourceInfo.NO_INFO, "Mojo"), 
-                                                                            new IntegerLiteral(SourceInfo.NO_INFO, 1));
+      InitializedVariableDeclarator ivd = new InitializedVariableDeclarator(SourceInfo.NONE, 
+                                                                            new PrimitiveType(SourceInfo.NONE, "int"), 
+                                                                            new Word(SourceInfo.NONE, "Mojo"), 
+                                                                            new IntegerLiteral(SourceInfo.NONE, 1));
       ivd.visit(_cbbtc);
       assertEquals("There should be no errors.", 0, errors.size());
       assertTrue("_vars should contain Mojo.", _cbbtc._vars.contains(vd1));
-      ivd = new InitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                              new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                              new Word(SourceInfo.NO_INFO, "Santa's Little Helper"), 
-                                              new IntegerLiteral(SourceInfo.NO_INFO, 1));
+      ivd = new InitializedVariableDeclarator(SourceInfo.NONE, 
+                                              new PrimitiveType(SourceInfo.NONE, "int"), 
+                                              new Word(SourceInfo.NONE, "Santa's Little Helper"), 
+                                              new IntegerLiteral(SourceInfo.NONE, 1));
       try {
         ivd.visit(_cbbtc);
         fail("Should have thrown a RuntimeException because there's no field named Santa's Little Helper.");
@@ -445,25 +448,25 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
     
     public void testForConcreteMethodDef() {
       FormalParameter[] fps = new FormalParameter[] {
-        new FormalParameter(SourceInfo.NO_INFO, 
-                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                              new PrimitiveType(SourceInfo.NO_INFO, "double"), 
-                                                              new Word (SourceInfo.NO_INFO, "field1")),
+        new FormalParameter(SourceInfo.NONE, 
+                            new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                                              new PrimitiveType(SourceInfo.NONE, "double"), 
+                                                              new Word (SourceInfo.NONE, "field1")),
                             false),
-        new FormalParameter(SourceInfo.NO_INFO, 
-                            new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                              new PrimitiveType(SourceInfo.NO_INFO, "boolean"), 
-                                                              new Word (SourceInfo.NO_INFO, "field2")),
+        new FormalParameter(SourceInfo.NONE, 
+                            new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                                              new PrimitiveType(SourceInfo.NONE, "boolean"), 
+                                                              new Word (SourceInfo.NONE, "field2")),
                             false)};
-      ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NO_INFO, 
+      ConcreteMethodDef cmd = new ConcreteMethodDef(SourceInfo.NONE, 
                                                     _packageMav, 
                                                     new TypeParameter[0], 
-                                                    new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                                    new Word(SourceInfo.NO_INFO, "methodName"),
+                                                    new PrimitiveType(SourceInfo.NONE, "int"), 
+                                                    new Word(SourceInfo.NONE, "methodName"),
                                                     fps,
                                                     new ReferenceType[0], 
-                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {
-        new ValueReturnStatement(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 5) )}));
+                                                    new BracedBody(SourceInfo.NONE, new BodyItemI[] {
+        new ValueReturnStatement(SourceInfo.NONE, new IntegerLiteral(SourceInfo.NONE, 5) )}));
       MethodData md = new MethodData("methodName", 
                                      _packageMav, 
                                      new TypeParameter[0], 
@@ -476,16 +479,16 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
       cmd.visit(_cbbtc);
       assertEquals("There should be no errors.", 0, errors.size());
       
-      cmd = new ConcreteMethodDef(SourceInfo.NO_INFO, 
+      cmd = new ConcreteMethodDef(SourceInfo.NONE, 
                                                     _packageMav, 
                                                     new TypeParameter[0], 
-                                                    new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                                    new Word(SourceInfo.NO_INFO, "Selma"),
+                                                    new PrimitiveType(SourceInfo.NONE, "int"), 
+                                                    new Word(SourceInfo.NONE, "Selma"),
                                                     fps,
                                                     new ReferenceType[0], 
-                                                    new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {
-                                                          new ValueReturnStatement(SourceInfo.NO_INFO, 
-                                                                                   new IntegerLiteral(SourceInfo.NO_INFO, 5))}));
+                                                    new BracedBody(SourceInfo.NONE, new BodyItemI[] {
+                                                          new ValueReturnStatement(SourceInfo.NONE, 
+                                                                                   new IntegerLiteral(SourceInfo.NONE, 5))}));
       
       try {
         cmd.visit(_cbbtc);
@@ -497,13 +500,13 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
       
       
       //Check that an uninitialized variable is caught:
-      PrimitiveType intt = new PrimitiveType(SourceInfo.NO_INFO, "int");
-      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "i"));
+      PrimitiveType intt = new PrimitiveType(SourceInfo.NONE, "int");
+      UninitializedVariableDeclarator uvd = new UninitializedVariableDeclarator(SourceInfo.NONE, intt, new Word(SourceInfo.NONE, "i"));
 
-      Statement s = new ValueReturnStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")));
-      ConcreteMethodDef cmd0 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], intt,
-                                                    new Word(SourceInfo.NO_INFO, "invalidMethod"), new FormalParameter[0],
-                                                    new ReferenceType[0], new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), s}));
+      Statement s = new ValueReturnStatement(SourceInfo.NONE, new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "i")));
+      ConcreteMethodDef cmd0 = new ConcreteMethodDef(SourceInfo.NONE, _publicMav, new TypeParameter[0], intt,
+                                                    new Word(SourceInfo.NONE, "invalidMethod"), new FormalParameter[0],
+                                                    new ReferenceType[0], new BracedBody(SourceInfo.NONE, new BodyItemI[] {new VariableDeclaration(SourceInfo.NONE,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), s}));
       VariableData vd = new VariableData("i", _packageMav, SymbolData.INT_TYPE, false, null);
       MethodData md0 = new MethodData("invalidMethod", _publicMav, new TypeParameter[0], SymbolData.INT_TYPE,
                                      new VariableData[0], new String[0], _sd1, cmd0);
@@ -519,19 +522,19 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
 
       
       //Check that the lexical scope of an if then statement is handled correctly.
-      Expression te = new LessThanExpression(SourceInfo.NO_INFO,
-                                             new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")),
-                                             new IntegerLiteral(SourceInfo.NO_INFO, 5));
-      Statement ts = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10)));
-      IfThenStatement ift = new IfThenStatement(SourceInfo.NO_INFO, te, ts);
+      Expression te = new LessThanExpression(SourceInfo.NONE,
+                                             new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "j")),
+                                             new IntegerLiteral(SourceInfo.NONE, 5));
+      Statement ts = new ExpressionStatement(SourceInfo.NONE, new SimpleAssignmentExpression(SourceInfo.NONE, new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "i")), new IntegerLiteral(SourceInfo.NONE, 10)));
+      IfThenStatement ift = new IfThenStatement(SourceInfo.NONE, te, ts);
       
       
-      FormalParameter param = new FormalParameter(SourceInfo.NO_INFO, new UninitializedVariableDeclarator(SourceInfo.NO_INFO, intt, new Word(SourceInfo.NO_INFO, "j")), false);
-      BracedBody bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift,
-        new ValueReturnStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")))});
+      FormalParameter param = new FormalParameter(SourceInfo.NONE, new UninitializedVariableDeclarator(SourceInfo.NONE, intt, new Word(SourceInfo.NONE, "j")), false);
+      BracedBody bb = new BracedBody(SourceInfo.NONE, new BodyItemI[] {new VariableDeclaration(SourceInfo.NONE,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), ift,
+        new ValueReturnStatement(SourceInfo.NONE, new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "i")))});
       
-      ConcreteMethodDef cmd1 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
-                                   intt, new Word(SourceInfo.NO_INFO, "myMethod"), new FormalParameter[] {param}, 
+      ConcreteMethodDef cmd1 = new ConcreteMethodDef(SourceInfo.NONE, _publicMav, new TypeParameter[0], 
+                                   intt, new Word(SourceInfo.NONE, "myMethod"), new FormalParameter[] {param}, 
                                                      new ReferenceType[0], bb);
 
       VariableData vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -552,29 +555,29 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
                    errors.get(0).getFirst());
       
       //Check that a final variable cannot be reassigned to
-      s = new ValueReturnStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, 
-                                                                               new Word(SourceInfo.NO_INFO, "i")));
+      s = new ValueReturnStatement(SourceInfo.NONE, new SimpleNameReference(SourceInfo.NONE, 
+                                                                               new Word(SourceInfo.NONE, "i")));
       VariableDeclaration i = 
-        new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd});
+        new VariableDeclaration(SourceInfo.NONE,  _packageMav, new UninitializedVariableDeclarator[]{uvd});
       ExpressionStatement se = 
-        new ExpressionStatement(SourceInfo.NO_INFO, 
-                                new SimpleAssignmentExpression(SourceInfo.NO_INFO, 
-                                                               new SimpleNameReference(SourceInfo.NO_INFO, 
-                                                                                       new Word(SourceInfo.NO_INFO, "i")), 
-                                                               new IntegerLiteral(SourceInfo.NO_INFO, 2)));
+        new ExpressionStatement(SourceInfo.NONE, 
+                                new SimpleAssignmentExpression(SourceInfo.NONE, 
+                                                               new SimpleNameReference(SourceInfo.NONE, 
+                                                                                       new Word(SourceInfo.NONE, "i")), 
+                                                               new IntegerLiteral(SourceInfo.NONE, 2)));
       ExpressionStatement se2 = 
-        new ExpressionStatement(SourceInfo.NO_INFO, 
-                                new SimpleAssignmentExpression(SourceInfo.NO_INFO, 
-                                                               new SimpleNameReference(SourceInfo.NO_INFO, 
-                                                                                       new Word(SourceInfo.NO_INFO, "i")), 
-                                                               new IntegerLiteral(SourceInfo.NO_INFO, 5)));
+        new ExpressionStatement(SourceInfo.NONE, 
+                                new SimpleAssignmentExpression(SourceInfo.NONE, 
+                                                               new SimpleNameReference(SourceInfo.NONE, 
+                                                                                       new Word(SourceInfo.NONE, "i")), 
+                                                               new IntegerLiteral(SourceInfo.NONE, 5)));
       
-      BracedBody b = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {i, se, se2, s});
+      BracedBody b = new BracedBody(SourceInfo.NONE, new BodyItemI[] {i, se, se2, s});
       ConcreteMethodDef cmd2 = 
-        new ConcreteMethodDef(SourceInfo.NO_INFO, 
+        new ConcreteMethodDef(SourceInfo.NONE, 
                               _publicMav, 
                               new TypeParameter[0], intt,
-                              new Word(SourceInfo.NO_INFO, "doubleAssignmentMethod"), 
+                              new Word(SourceInfo.NONE, "doubleAssignmentMethod"), 
                               new FormalParameter[0],
                               new ReferenceType[0], b);
       
@@ -595,20 +598,20 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
  
        
       //test that if a variable is assigned in a branch of the if, and then returned, it is okay.
-      te = new LessThanExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")),
-       new IntegerLiteral(SourceInfo.NO_INFO, 5));
-      Statement assignStatement = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")), new IntegerLiteral(SourceInfo.NO_INFO, 10)));
-      Statement returnStatement = new ValueReturnStatement(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i")));
-      ts = new Block(SourceInfo.NO_INFO, new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {assignStatement, returnStatement}));
-      ift = new IfThenStatement(SourceInfo.NO_INFO, te, ts);
+      te = new LessThanExpression(SourceInfo.NONE, new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "j")),
+       new IntegerLiteral(SourceInfo.NONE, 5));
+      Statement assignStatement = new ExpressionStatement(SourceInfo.NONE, new SimpleAssignmentExpression(SourceInfo.NONE, new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "i")), new IntegerLiteral(SourceInfo.NONE, 10)));
+      Statement returnStatement = new ValueReturnStatement(SourceInfo.NONE, new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "i")));
+      ts = new Block(SourceInfo.NONE, new BracedBody(SourceInfo.NONE, new BodyItemI[] {assignStatement, returnStatement}));
+      ift = new IfThenStatement(SourceInfo.NONE, te, ts);
       
-      bb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new VariableDeclaration(SourceInfo.NO_INFO,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), 
+      bb = new BracedBody(SourceInfo.NONE, new BodyItemI[] {new VariableDeclaration(SourceInfo.NONE,  _packageMav, new UninitializedVariableDeclarator[]{uvd}), 
         ift, 
-        new ValueReturnStatement(SourceInfo.NO_INFO, 
-                                 new IntegerLiteral(SourceInfo.NO_INFO, 5))});
+        new ValueReturnStatement(SourceInfo.NONE, 
+                                 new IntegerLiteral(SourceInfo.NONE, 5))});
       
-      ConcreteMethodDef cmd4 = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], 
-                                   intt, new Word(SourceInfo.NO_INFO, "myMethod3"), new FormalParameter[] {param}, 
+      ConcreteMethodDef cmd4 = new ConcreteMethodDef(SourceInfo.NONE, _publicMav, new TypeParameter[0], 
+                                   intt, new Word(SourceInfo.NONE, "myMethod3"), new FormalParameter[] {param}, 
                                    new ReferenceType[0], bb);
 
       vd1 = new VariableData("j", _packageMav, SymbolData.INT_TYPE, true, null);
@@ -651,17 +654,17 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
                                      new String[0],
                                      superSd,
                                      null);
-      MethodDef mDef = new ConcreteMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                             new Word(SourceInfo.NO_INFO, "methodName"), new FormalParameter[0], new ReferenceType[0], 
-                                             new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new ValueReturnStatement(SourceInfo.NO_INFO, new IntegerLiteral(SourceInfo.NO_INFO, 76))}));
+      MethodDef mDef = new ConcreteMethodDef(SourceInfo.NONE, _publicMav, new TypeParameter[0], new PrimitiveType(SourceInfo.NONE, "int"), 
+                                             new Word(SourceInfo.NONE, "methodName"), new FormalParameter[0], new ReferenceType[0], 
+                                             new BracedBody(SourceInfo.NONE, new BodyItemI[] {new ValueReturnStatement(SourceInfo.NONE, new IntegerLiteral(SourceInfo.NONE, 76))}));
       _sd1.addMethod(md4);
       _cbbtc._symbolData = _sd1;
       mDef.visit(_cbbtc);
       assertEquals("There should be one error.", 1, errors.size());
       assertEquals("The error message should be correct", "methodName() in " + _sd1.getName() + " cannot override methodName() in aiya; attempting to use different return types",
                    errors.get(0).getFirst());
-      mDef = new AbstractMethodDef(SourceInfo.NO_INFO, _publicMav, new TypeParameter[0], new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                   new Word(SourceInfo.NO_INFO, "methodName"), new FormalParameter[0], new ReferenceType[0]);
+      mDef = new AbstractMethodDef(SourceInfo.NONE, _publicMav, new TypeParameter[0], new PrimitiveType(SourceInfo.NONE, "int"), 
+                                   new Word(SourceInfo.NONE, "methodName"), new FormalParameter[0], new ReferenceType[0]);
       
       mDef.visit(_cbbtc);
       assertEquals("There should be two errors.", 2, errors.size());
@@ -670,7 +673,7 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
     }
     
     public void testForTypeOnly() {
-      Type t = new PrimitiveType(SourceInfo.NO_INFO, "double");
+      Type t = new PrimitiveType(SourceInfo.NONE, "double");
       t.visit(_cbbtc);
       assertEquals("There should be no errors", 0, errors.size());
       
@@ -678,7 +681,7 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
       sd.setIsContinuation(false);
       symbolTable.put("Adam", sd);
       sd.setMav(_publicMav);
-      t = new ClassOrInterfaceType(SourceInfo.NO_INFO, "Adam", new Type[0]);
+      t = new ClassOrInterfaceType(SourceInfo.NONE, "Adam", new Type[0]);
       t.visit(_cbbtc);
       assertEquals("There should still be no errors", 0, errors.size());
       
@@ -688,55 +691,58 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
       innerSd.setOuterData(sd);
       innerSd.setMav(_publicMav);
       _cbbtc.symbolTable.put("USaigehgihdsgslghdlighs", innerSd);
-      t = new ClassOrInterfaceType(SourceInfo.NO_INFO, "Adam.Wulf", new Type[0]);
+      t = new ClassOrInterfaceType(SourceInfo.NONE, "Adam.Wulf", new Type[0]);
       t.visit(_cbbtc);
       assertEquals("There should still be no errors", 0, errors.size());
       
       innerSd.setMav(_privateMav);
-      t = new ClassOrInterfaceType(SourceInfo.NO_INFO, "Adam.Wulf", new Type[0]);
+      t = new ClassOrInterfaceType(SourceInfo.NONE, "Adam.Wulf", new Type[0]);
       t.visit(_cbbtc);
       
+      String tcSD = _cbbtc._symbolData.getName();
       assertEquals("There should be one error", 1, errors.size());
-      assertEquals("The error message should be correct", "The class or interface Adam.Wulf is private and cannot be accessed from " + _cbbtc._symbolData.getName(),
+      assertEquals("The error message should be correct", 
+                   "The class or interface Adam.Wulf in Adam.Wulf is private and cannot be accessed from " + tcSD,
                    errors.get(0).getFirst());
       
       sd.setMav(_privateMav);
       innerSd.setMav(_publicMav);
-      t = new ClassOrInterfaceType(SourceInfo.NO_INFO, "Adam.Wulf", new Type[0]);
+      t = new ClassOrInterfaceType(SourceInfo.NONE, "Adam.Wulf", new Type[0]);
       t.visit(_cbbtc);
       assertEquals("There should be two errors", 2, errors.size());
-      assertEquals("The error message should be correct", "The class or interface Adam is private and cannot be accessed from " + _cbbtc._symbolData.getName(),
+      assertEquals("The error message should be correct", 
+                     "The class or interface Adam in Adam is private and cannot be accessed from " + tcSD,
                    errors.get(1).getFirst());
     }
     
     public void testForConstructorDef() {
       VariableDeclarator[] vds = 
-        new VariableDeclarator[] { new UninitializedVariableDeclarator(SourceInfo.NO_INFO, 
-                                                                       new PrimitiveType(SourceInfo.NO_INFO, "int"), 
-                                                                       new Word(SourceInfo.NO_INFO, "i"))};
+        new VariableDeclarator[] { new UninitializedVariableDeclarator(SourceInfo.NONE, 
+                                                                       new PrimitiveType(SourceInfo.NONE, "int"), 
+                                                                       new Word(SourceInfo.NONE, "i"))};
       
-      VariableDeclaration vd =  new VariableDeclaration(SourceInfo.NO_INFO, _finalMav, vds);
+      VariableDeclaration vd =  new VariableDeclaration(SourceInfo.NONE, _finalMav, vds);
       SimpleNameReference snr =  
-        new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "i"));
+        new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "i"));
       ExpressionStatement es = 
-        new ExpressionStatement(SourceInfo.NO_INFO, 
-                                new SimpleAssignmentExpression(SourceInfo.NO_INFO, 
+        new ExpressionStatement(SourceInfo.NONE, 
+                                new SimpleAssignmentExpression(SourceInfo.NONE, 
                                                                snr, 
-                                                               new IntegerLiteral(SourceInfo.NO_INFO, 1)));      
-      BracedBody cbb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] { es });
-      ConstructorDef cd =  new ConstructorDef(SourceInfo.NO_INFO, 
-                                              new Word(SourceInfo.NO_INFO, "Jimes"), 
+                                                               new IntegerLiteral(SourceInfo.NONE, 1)));      
+      BracedBody cbb = new BracedBody(SourceInfo.NONE, new BodyItemI[] { es });
+      ConstructorDef cd =  new ConstructorDef(SourceInfo.NONE, 
+                                              new Word(SourceInfo.NONE, "Jimes"), 
                                               _publicMav, 
                                               new FormalParameter[0], 
                                               new ReferenceType[0], 
                                               cbb);
-      BracedBody b = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {vd, cd});
+      BracedBody b = new BracedBody(SourceInfo.NONE, new BodyItemI[] {vd, cd});
       ClassDef classDef = 
-        new ClassDef(SourceInfo.NO_INFO, 
+        new ClassDef(SourceInfo.NONE, 
                      _publicMav, 
-                     new Word(SourceInfo.NO_INFO, "Jimes"), 
+                     new Word(SourceInfo.NONE, "Jimes"), 
                      new TypeParameter[0], 
-                     new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.io.StreamTokenizer", new Type[0]), 
+                     new ClassOrInterfaceType(SourceInfo.NONE, "java.io.StreamTokenizer", new Type[0]), 
                      new ReferenceType[0], 
                      b);
 
@@ -749,8 +755,8 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
 
       symbolTable.put("Jimes", jimes);
 
-//      SymbolData obj = _cbbtc.getSymbolData("java.lang.Object", new NullLiteral(SourceInfo.NO_INFO), false, true);
-      SymbolData tokenizer = _cbbtc.getSymbolData("java.io.StreamTokenizer", new NullLiteral(SourceInfo.NO_INFO), false, true);
+//      SymbolData obj = _cbbtc.getSymbolData("java.lang.Object", new NullLiteral(SourceInfo.NONE), false, true);
+      SymbolData tokenizer = _cbbtc.getSymbolData("java.io.StreamTokenizer", new NullLiteral(SourceInfo.NONE), false, true);
       jimes.setSuperClass(tokenizer);
       SymbolData jutc = defineTestCaseClass();
       
@@ -783,19 +789,19 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
       errors.clear();
       // test that if the constructor does not assign a value to the final field, then an error is thrown
       vData.lostValue();
-      cbb = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {});
-      cd = new ConstructorDef(SourceInfo.NO_INFO, 
-                              new Word(SourceInfo.NO_INFO, "Jimes"), 
+      cbb = new BracedBody(SourceInfo.NONE, new BodyItemI[] {});
+      cd = new ConstructorDef(SourceInfo.NONE, 
+                              new Word(SourceInfo.NONE, "Jimes"), 
                               _publicMav, 
                               new FormalParameter[0], 
                               new ReferenceType[0], 
                               cbb);
-      b = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {vd, cd});
-      classDef = new ClassDef(SourceInfo.NO_INFO, 
+      b = new BracedBody(SourceInfo.NONE, new BodyItemI[] {vd, cd});
+      classDef = new ClassDef(SourceInfo.NONE, 
                               _publicMav, 
-                              new Word(SourceInfo.NO_INFO, "Jimes"), 
+                              new Word(SourceInfo.NONE, "Jimes"), 
                               new TypeParameter[0], 
-                              new ClassOrInterfaceType(SourceInfo.NO_INFO, "java.lang.Object", new Type[0]), 
+                              new ClassOrInterfaceType(SourceInfo.NONE, "java.lang.Object", new Type[0]), 
                               new ReferenceType[0], b);
  
 //      System.err.println("***** Starting traversal of classDef");
@@ -818,9 +824,9 @@ public class ClassBodyTypeChecker extends SpecialTypeChecker {
       LinkedList<VariableData> vs = new LinkedList<VariableData>();
       vs.addLast(vData);
       _cbbtc = new ClassBodyTypeChecker(jimes, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), vs, new LinkedList<Pair<SymbolData, JExpression>>());
-      ExpressionStatement assign = new ExpressionStatement(SourceInfo.NO_INFO, new SimpleAssignmentExpression(SourceInfo.NO_INFO, new SimpleNameReference(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "j")), new IntegerLiteral(SourceInfo.NO_INFO, 45)));
-      b = new BracedBody(SourceInfo.NO_INFO, new BodyItemI[] {new ExpressionStatement(SourceInfo.NO_INFO, new SimpleThisConstructorInvocation(SourceInfo.NO_INFO, new ParenthesizedExpressionList(SourceInfo.NO_INFO, new Expression[0]))), assign});
-      cd = new ConstructorDef(SourceInfo.NO_INFO, new Word(SourceInfo.NO_INFO, "name"), _publicMav, new FormalParameter[0], new ReferenceType[0], b);
+      ExpressionStatement assign = new ExpressionStatement(SourceInfo.NONE, new SimpleAssignmentExpression(SourceInfo.NONE, new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "j")), new IntegerLiteral(SourceInfo.NONE, 45)));
+      b = new BracedBody(SourceInfo.NONE, new BodyItemI[] {new ExpressionStatement(SourceInfo.NONE, new SimpleThisConstructorInvocation(SourceInfo.NONE, new ParenthesizedExpressionList(SourceInfo.NONE, new Expression[0]))), assign});
+      cd = new ConstructorDef(SourceInfo.NONE, new Word(SourceInfo.NONE, "name"), _publicMav, new FormalParameter[0], new ReferenceType[0], b);
       cd.visit(_cbbtc);
       assertEquals("There should now be 3 errors", 3, errors.size());
       assertEquals("The error message should be correct","You cannot assign a value to j because it is immutable and has already been given a value" , errors.getLast().getFirst());
