@@ -8,7 +8,51 @@
 <chapter id="projectAdministration">
   <title>Project Administration</title>
   <para>This section contains instructions for project administrators.</para>
+    <formalpara>Note: Our build process is currently broken for
+Windows machines (see "Making a File Release",
+step 6, "Make the release and put it into Subversion".)</formalpara>
   
+  <section>
+    <title>Building All Parts of DrJava from Scratch</title>
+    <para>These are the instructions to create a fresh build of all parts of DrJava, including the constituent libraries.</para>
+    <formalpara>
+      <orderedlist>
+	<listitem><para>Check out trunk (<filename>svn co https://drjava.svn.sourceforge.net/svnroot/drjava/trunk</filename>), or if you have trunk checked out, update it.</para></listitem>
+	<listitem><para><filename>cd drjava</filename></para></listitem>
+	<listitem><para><filename>ant clean jar</filename></para></listitem>
+	<listitem><para><filename>cd ../platform</filename></para></listitem>
+	<listitem><para><filename>export DRJAVA_JAR=../drjava/drjava.jar</filename></para></listitem>
+	<listitem><para><filename>ant clean compile-??? jar</filename></para>
+<formalpara>
+
+Note: Which <filename>compile-???</filename> targets you can run depends on the platform
+you are compiling on. You need to be on a Mac to run compile-mac and
+on Windows to run compile-windows. Since the compiled classes are
+stored in Subversion, you can always do</formalpara>
+<formalpara>
+<filename>ant clean jar</filename>
+</formalpara>
+<formalpara>
+to just get all the class files without recompiling.</formalpara></listitem>
+<listitem><para><filename>cp platform.jar ../drjava/lib</filename></para></listitem>
+<listitem><para><filename>cd ../plt</filename></para></listitem>
+<listitem><para><filename>ant clean test jar</filename></para></listitem>
+<listitem><para>Copy the generated new <filename>plt.jar</filename> file over all other <filename>plt.jar</filename> files.
+This can be done using</para>
+<formalpara>
+<filename>find .. -name plt.jar -not -samefile plt.jar | xargs -n 1 cp -v plt.jar</filename></formalpara></listitem>
+<listitem><para><filename>cd ../dynamicjava</filename></para></listitem>
+<listitem><para><filename>ant clean test jar-base</filename></para></listitem>
+<listitem><para><filename>cp dynamicjava-base.jar ../drjava/lib</filename></para></listitem>
+<listitem><para><filename>cd ../javalanglevels</filename></para></listitem>
+<listitem><para><filename>ant clean test jar-base</filename></para></listitem>
+<listitem><para><filename>cp javalanglevels-base.jar ../drjava/lib</filename></para></listitem>
+<listitem><para><filename>cd ..</filename></para></listitem>
+<listitem><para>Continue with the instructions below for building just DrJava, but not
+plt.jar, etc. from scrach.</para></listitem>
+      </orderedlist>
+    </formalpara>
+  </section>
   
   <section>
     <title>Making a File Release</title>
@@ -16,59 +60,229 @@
       <orderedlist>
       
       <listitem><para>Make sure you have a clean, up-to-date local copy without any local modifications (<literal>ant update</literal>).</para></listitem>
-      
-      <listitem><para>Run <literal>ant release</literal> to generate the release files and create a tag in the repository (use <literal>ant release-beta</literal> or <literal>ant release-stable</literal> instead, if necessary).  This will run the tests in order to double-check that there is really nothing wrong with the current code.  Note that, to help identify the application's origin, the jar file will include your user name in its manifest.</para></listitem>
-      
-      <listitem><para>You may want to verify that the program runs and behaves as expected.</para></listitem>
-      
-      <listitem><para>Connect to your personal space on the SourceForge FTP server and upload the files.  The FTP URL includes your user name: for example, <filename>https://frs.sourceforge.net/s/so/someuser/uploads</filename>.  In OS X, you can do this in Finder using the "Connect to Server" command.  When releasing DrJava, the following files should be uploaded:
-        <itemizedlist>
-          <listitem><para>Application jar: <filename>drjava-<replaceable>version-tag</replaceable>.jar</filename></para></listitem>
-          <listitem><para>Windows application: <filename>drjava-<replaceable>version-tag</replaceable>.exe</filename></para></listitem>
-          <listitem><para>Mac application: <filename>drjava-<replaceable>version-tag</replaceable>-osx.tar.gz</filename></para></listitem>
-          <listitem><para>Sources: <filename>drjava-<replaceable>version-tag</replaceable>-src.zip</filename></para></listitem>
-        </itemizedlist>
-      Note that the javadocs should not be included in the file release (they will be posted on the Web site later).  While waiting for files to copy, you may want to assemble the release notes (see below).</para></listitem>
-      
-      <listitem><para>Go to the <ulink url="https://sourceforge.net/projects/drjava/">SourceForge project page</ulink> and, after making sure you are logged in, go to "Admin", then "File Releases".  Click "Add Release" next to the appropriate package.</para></listitem>
-      
-      <listitem><para>Set the release name to the version tag (which is the name of the <filename>.jar</filename> file).</para></listitem>
-      
-      <listitem><para>Insert the Release Notes and Change Log, check "Preserve my preformatted text," and click "Submit/Refresh."  The Release Notes is typically a one- or two-paragraph summary of the important changes since the last release of the same type (e.g., stable releases should summarize all changes since the last stable).  The Change Log, on the other hand, is an itemized list of all significant user-visible changes.  You may want to look at some older notes to help preserve a consistent style.  The best way to put together these notes is by consulting the Subversion logs, either via <literal>svn log</literal> or by clicking on a directory's version number in the <ulink url="http://drjava.svn.sourceforge.net/viewvc/drjava/trunk/">browsable source tree</ulink>.  Note that Subversion has an annoying habit of not wrapping lines when change logs are displayed.  As a result, you must manually insert line breaks, keeping the lines relatively short (no more than 80 characters).  Checking the "Preserve my preformatted text" box prevents the system from discarding these manual breaks.</para></listitem>
-      
-      <listitem><para>Check the box next to each of the four uploaded files and click "Add Files and/or Refresh View".  It is <emphasis>essential</emphasis> that the upload be complete before you take this step.  Otherwise, you'll end up releasing corrupted files.</para></listitem>
-      
-      <listitem><para>For <emphasis>each</emphasis> of the released files, select a processor and file type, then click "Update/Refresh".  Unfortunately, the interface does not allow this to be done in one step: you must submit the settings for one file before moving on to the next one.  For DrJava releases, use the following settings:
-        <itemizedlist>
-          <listitem><para>Windows application: i386, .exe (32-bit Windows)</para></listitem>
-          <listitem><para>Application jar: Platform-independent, .jar</para></listitem>
-          <listitem><para>Mac application: Mac Universal (PPC/x86), .gz</para></listitem>
-          <listitem><para>Sources: Platform-independent, Source .zip</para></listitem>
-        </itemizedlist>
-      </para></listitem>
-      
-      <listitem><para>Keep this page open with the "Email Release Notice" section ready to go, but don't send the email until you've finished the other steps.</para></listitem>
-      
-      <listitem><para>Post a news item announcing the new release (follow the "News" link).  This can contain the same text as the Release Notes, but should <emphasis>not</emphasis> contain manual line breaks.  Again, you may want to look at some older announcements to help maintain a consistent style.</para></listitem>
-      
-      <listitem><para>If necessary, upload the javadoc zip file to CSNet.</para></listitem>
-      
-      <listitem><para>Log in to the javaplt account on CSNet: <literal>ssh javaplt@plt06.cs.rice.edu</literal>.</para></listitem>
-      
-      <listitem><para>Change to the javadoc directory (<filename>/home/javaplt/public_html/drjava/javadoc</filename>).  For backup, temporarily move the old javadocs somewhere (<filename>drjava-old</filename> works).  Now copy the new javadoc zip to this directory, <command>unzip</command> it, move/rename the unzipped <filename>javadoc</filename> directory (<literal>mv drjava-<replaceable>version-tag</replaceable>/javadoc drjava</literal>), and clean up all the remaining junk (an empty unzipped directory, the zip file, and the old javadocs).</para></listitem>
-      
-      <listitem><para>In the top-level DrJava site directory (<filename>/home/javaplt/public_html/drjava</filename>), update <filename>LATEST_VERSION.TXT</filename> (or whichever of the <filename>*VERSION.TXT</filename> files is applicable).  In order to avoid inserting extraneous line breaks in the file, use the <command>echo</command>: <literal>echo -n <replaceable>version-tag</replaceable> &gt; LATEST_VERSION.TXT</literal>.  It is important <emphasis>not</emphasis> to manually edit these files, as doing so will probably insert newlines, which will break the links on the Web site.</para></listitem>
-      
-      <listitem><para>If releasing a beta, changing from a beta to a stable, or otherwise changing which releases should be publicly displayed, edit the <filename>main.shtml</filename> and <filename>download.shtml</filename> files to hide or show the appropriate sections.  <literal>include</literal> statements can be hidden by simply changing the space character immediately preceding "<literal>include</literal>" to a hash (<literal>#</literal>) character, and vice versa.</para></listitem>
-      
-      <listitem><para>Run the <command>drjava-update-news</command> script, which updates the copy of news items on the DrJava Web site.</para></listitem>
-      
-      <listitem><para>Make sure everything on the updated Web site looks good: <ulink url="http://www.cs.rice.edu/~javaplt/drjava">http://www.cs.rice.edu/~javaplt/drjava</ulink>.  Verify that the linked-to files are the correct versions, and that they can be successfully downloaded and run.</para></listitem>
-      
-      <listitem><para>Copy the <literal>javaplt</literal> version of the site to <ulink url="http://drjava.org">http://drjava.org</ulink> using the script <command>drjava-cs-to-sf</command> (do <emphasis>not</emphasis> type this command backwards, or you'll end up copying from the main site instead of to it, overwriting your changes!).</para></listitem>
-      
-      <listitem><para>Finally, announce the changes.  Submit the "Email Release Notice" option from the SourceForge File Release page.  Send a brief announcement to <literal>drjava-hackers@lists.sf.net</literal>, <literal>javaplt@rice.edu</literal>, <literal>drjava@rice.edu</literal>, and, for beta and stable releases, <literal>drjava-users@lists.sf.net</literal>.  While we're not consistent about it, it may also be useful to update catalog sites like <ulink url="http://freshmeat.net/projects/drjava/">FreshMeat.net</ulink>.</para></listitem>
-      
+
+	<listitem><filename>cd drjava</filename></listitem>
+	<listitem><para>Create the release locally. It's a good idea to do this first, without touching Subversion or SourceForge. To create a development release:</para>
+<formalpara><filename>ant clean release-local</filename></formalpara>
+<formalpara>To create a beta release:</formalpara>
+<formalpara><filename>ant clean release-local-beta</filename></formalpara>
+<formalpara>To create a stable release:</formalpara>
+<formalpara><filename>ant clean release-local-stable</filename></formalpara></listitem>
+
+	<listitem><para>This cleans, compiles, runs the unit tests, builds the jar, exe and
+Mac application, and it also generates the Javadoc and a zip file with
+source code.</para></listitem>
+
+	<listitem><para>It makes sense to test the three different variants of DrJava: Run
+the jar on some platform, run the exe on Windows, and run the Mac
+application on a Mac, because sometimes one of them may be corrupted.
+This can has happened sometimes for the exe file when building on a
+Mac, or for the Mac application when building on Windows or Linux.</para></listitem>
+
+	<listitem><para><filename>ant clean</filename></para>
+<formalpara>This deletes the locally built release again.</formalpara></listitem>
+
+	<listitem><para>Make the release and put it into Subversion. Run one of:</para>
+<formalpara><filename>ant release</filename></formalpara>
+<formalpara><filename>ant release-beta</filename></formalpara>
+<formalpara><filename>ant release-stable</filename></formalpara>
+<formalpara>You may want to add <filename>-Dtest-repeat=0</filename> to the command line (e.g. <filename>ant
+-Dtest-repeat=0 release</filename>). That tells Ant not to run the unit tests.
+You can leave it out, but we just ran the unit tests, so it should not
+be necessary to run them again.</formalpara>
+<formalpara>Note that this step may ask you for your SourceForge password if you
+have never committed code to Subversion from the computer you are
+working on.</formalpara></listitem>
+
+	<listitem><para>The build script will now create a "tag" of DrJava that will
+contain exactly the source code versions and libraries used to build
+this release of DrJava. This is useful in analyzing bugs that users
+report in a specific version.</para></listitem>
+
+	<listitem><para>Make note of that tag. It should be something like this:
+<filename>drjava-20110205-r5425</filename></para></listitem>
+	<listitem><para>To upload files to SourceForge, we will follow this guide written by <ulink url="https://sourceforge.net/apps/trac/sourceforge/wiki/Release%20files%20for%20download">SourceForge</ulink>. I find that using SFTP is the easiest.</para></listitem>
+
+	<listitem><para>Log into SFTP. In the following command, replace <filename>&lt;username&gt;</filename> with your SourceForge username:</para>
+<formalpara><filename>sftp &lt;username&gt;,drjava@frs.sourceforge.net</filename></formalpara>
+<formalpara>Example: <filename>sftp mgricken,drjava@frs.sourceforge.net</filename></formalpara></listitem>
+
+	<listitem><para>On the SFTP server: <filename>cd /home/frs/project/d/dr/drjava</filename></para></listitem>
+
+	<listitem><para>If you are building a stable or beta release, type:</para>
+<formalpara><filename>cd "1. DrJava Stable Releases"</filename></formalpara>
+<formalpara>If you are building a development release, type:</formalpara>
+<formalpara><filename>cd "2. DrJava Development Releases"</filename></formalpara></listitem>
+
+	<listitem><para>Create a directory with the name of the tag from step 8 above.</para>
+<formalpara>Example: <filename>mkdir drjava-20110205-r5425</filename></formalpara></listitem>
+
+	<listitem><para>Change into that directory.</para>
+<formalpara>Example: <filename>cd drjava-20110205-r5425</filename></formalpara></listitem>
+
+	<listitem><para>Upload the files. You can do that with the command:</para>
+<formalpara><filename>put &lt;tag&gt;*</filename></formalpara>
+<formalpara>Example: <filename>put drjava-20110205-r5425*</filename></formalpara></listitem>
+
+	<listitem><para>Exit SFTP:</para>
+<formalpara><filename>exit</filename></formalpara></listitem>
+
+	<listitem><para>Browse to DrJava's SourceForge site at
+<ulink url="http://sourceforge.net/projects/drjava/develop">http://sourceforge.net/projects/drjava/develop</ulink> and log in.</para></listitem>
+
+	<listitem><para>Click on the "Files" tab (or go to
+<ulink url="https://sourceforge.net/projects/drjava/files/">https://sourceforge.net/projects/drjava/files/</ulink>).</para></listitem>
+
+	<listitem><para>Click on <filename>1. DrJava Stable Releases</filename> or <filename>2. DrJava Development Releases</filename>, find the tag, and enter that directory. You should see the
+files you uploaded.</para></listitem>
+
+	<listitem><para>Click on the <filename>(i)</filename> (Info) button next to the exe file, check the
+Windows checkbox, and press save.</para>
+<formalpara>Click on the <filename>(i)</filename> (Info) button next to the Mac application, check the
+Mac checkbox, and press save.</formalpara>
+<formalpara>Click on the <filename>(i)</filename> (Info) button next to the jar file, check all the
+other checkboxes (except Windows and Mac), and press save.</formalpara>
+<formalpara>This step changes the default download on DrJava's SourceForge page
+(in the "Download Now!" button on <ulink url="https://sourceforge.net/projects/drjava/">https://sourceforge.net/projects/drjava/</ulink>). People downloading
+directly from the SourceForge page will start getting the new release.</formalpara></listitem>
+
+	<listitem><para>Prepare the release notes text file called <filename>readme.txt</filename>. I start
+with a template that looks like the one below. To determine the lists
+of new features and bug fixes, you can look up the revision number of
+the last release you're comparing to, and then you can go through the
+Subversion log and look at the descriptions of the commits, which
+should hopefully be good enough to tell you what was done. Unless the
+last version was a stable release, I usually include a comparison to
+the last stable release as well, which is easy to create just by
+copying and pasting the lists from individual release notes together.</para>
+
+<formalpara><programlisting>
+Available for download at http://drjava.org  .
+
+DrJava is a lightweight programming environment for Java designed to
+foster test-driven software development. It includes an intelligent
+program editor, an interactions pane for evaluating program text, a
+source level debugger, and a unit testing tool.
+
+In addition to bug fixes, this &lt;stable/beta/development&gt; release
+includes a number of new features introduced after the last
+&lt;stable/beta/development&gt; release:
+
+&lt;brief description of MAJOR features&gt;
+
+Note: Java 1.4 compatibility has been dropped. To use DrJava, you will
+need Java 5 or newer.
+
+
+New features since the last &lt;beta/development&gt; release:
+ - list of new features since the last beta/development release
+
+
+
+Bug fixes since last &lt;beta/development&gt; release:
+ - list of bug fixes since the last beta/development release
+
+
+
+New features since the last stable release:
+ - list of new features since the last stable release
+
+
+
+Bug fixes since the last stable release:
+ - list of bug fixes since the last stable release
+</programlisting></formalpara></listitem>
+
+	<listitem><para>On the DrJava SourceForge page, upload the release notes into the
+new release's folder. You can do that either using SFTP again or using
+the web upload by clicking on "Add File". I just find that SFTP works
+better for uploading the multiple large files earlier in step 16.</para></listitem>
+	<listitem><para>On the DrJava SourceForge page, hover over "Develop" and click on
+"News" (or go to <ulink url="https://sourceforge.net/news/?group_id=44253">https://sourceforge.net/news/?group_id=44253</ulink>, but that link has changed frequently). Click on "Submit" and paste the contents of the <filename>readme.txt</filename> file into the "Details" part. In the "Subject" line, I usually put something like "DrJava Development
+Release 20110205-r5425". Press "Submit".</para></listitem>
+	<listitem><para>Send an email to the following addresses: <filename>drjava@rice.edu,
+drjava-hackers@lists.sf.net, drjava-users@lists.sf.net</filename></para></listitem>
+	<listitem><para>I use the same text that was used in step 22 for the SourceForge news,
+but I let the following text precede the email:</para>
+<formalpara><programlisting>
+Dear DrJava Users:
+
+We have made a new &lt;stable/beta/development&gt; version available: &lt;tag&gt;
+
+You can download it from the DrJava website at http://drjava.org/
+or from SourceForge.net by following this link:
+
+&lt;link&gt;
+
+You receive this email because you have subscribed to a DrJava mailing list.
+</programlisting></formalpara>
+
+<formalpara>Replace the <filename>&lt;link&gt;</filename> part with the link to the SourceForge page that has
+the files for this release, i.e. the website you navigated to in step
+20. Example: <filename><ulink url="https://sourceforge.net/projects/drjava/files/2.%20DrJava%20Development%20Releases/drjava-20110205-r5425/">https://sourceforge.net/projects/drjava/files/2.%20DrJava%20Development%20Releases/drjava-20110205-r5425/</ulink></filename></formalpara></listitem>
+
+	<listitem><para>SSH into CSnet as <filename>javaplt</filename> (e.g. <filename>ssh javaplt@finland.cs.rice.edu</filename>).</para></listitem>
+
+	<listitem><para><filename>cd ~/public_html/drjava</filename></para></listitem>
+
+	<listitem><para>Run the <filename>drjava-update-news</filename> script. This pulls the SourceForge news
+onto the DrJava website. Note that for now, this only happens on our
+CSnet mirror at <ulink url="http://www.cs.rice.edu/~javaplt/drjava/">http://www.cs.rice.edu/~javaplt/drjava/</ulink></para>
+<formalpara><filename>drjava-update-news</filename></formalpara></listitem>
+
+	<listitem><para>Edit the <filename>LATEST_DEV_VERSION.TXT</filename>, <filename>LATEST_BETA_VERSION.TXT</filename> or
+<filename>LATEST_VERSION.TXT</filename> file, depending on whether you have a development,
+beta, or stable version. Put the new tag into the file. Make sure
+there is no newline at the end of the file!</para></listitem>
+
+	<listitem><para>If you made a stable release, you will want to remove the download
+links for the beta and development releases. Edit <filename>main.shtml</filename> and
+change the line</para>
+
+<formalpara><filename>&lt;!--#include virtual="beta.shtml"--&gt;</filename></formalpara>
+
+<formalpara>to</formalpara>
+
+<formalpara><filename>&lt;!--include virtual="beta.shtml"--&gt;</filename></formalpara>
+
+<formalpara>and</formalpara>
+
+<formalpara><filename>&lt;!--#include virtual="devrelease.shtml"--&gt;</filename></formalpara>
+
+<formalpara>to</formalpara>
+
+<formalpara><filename>&lt;!--include virtual="devrelease.shtml"--&gt;</filename></formalpara>
+
+<formalpara>If you made a beta release, you want the hash mark for the <filename>#include</filename> of
+the <filename>beta.shtml</filename> file, but not for the <filename>devrelease.shtml</filename> file. If you
+made a development release, you probably want the hash mark for the
+<filename>devrelease.shtml</filename> file, but not for the <filename>beta.shtml</filename> file.</formalpara></listitem>
+	<listitem><para>Do a similar thing as in step 31 for <filename>download.shtml</filename>. The
+corresponding lines are</para>
+
+<formalpara><filename>&lt;!--include virtual="beta_long.shtml" --&gt;</filename></formalpara>
+
+<formalpara>and</formalpara>
+
+<formalpara><filename>&lt;!--include virtual="devrelease_long.shtml" --&gt;</filename></formalpara>
+
+</listitem>
+
+	<listitem><para>Go to <ulink url="http://www.cs.rice.edu/~javaplt/drjava/">http://www.cs.rice.edu/~javaplt/drjava/</ulink> and check that the
+download buttons link to the right files, the ones that you have just
+released. It's a good idea to download them all and run them, to make
+sure there were no upload errors.</para></listitem>
+
+	<listitem><para>Delete backup files:</para>
+<formalpara><filename>rm *~</filename></formalpara></listitem>
+
+	<listitem><para>Copy the website to the SourceForge server using the
+<filename>drjava-cs-to-sf</filename> script. Note that it may also update Javadocs, test
+coverage, and other files.</para>
+<formalpara><filename>drjava-cs-to-sf</filename></formalpara></listitem>
+
+	<listitem><para>That's it! Thanks for helping make DrJava even better.</para></listitem>
+
       </orderedlist>
     </para>
     
