@@ -127,13 +127,18 @@ public abstract class AbstractDJPane extends JTextPane
     
     // Add listener that checks if highlighting matching braces must be updated
     addCaretListener(_matchListener);
-    disableAltCntlMetaChars(this);
+    // caused bug 3280955: Reoccurrence of French keyboard problem
+    // commented out
+    // disableAltCntlMetaChars(this);
   }
   
   //--------- METHODS -----------
   
   /** Create a null default action for Cntl/Alt/Meta chars in the keymap for p. */
   public static void disableAltCntlMetaChars(JTextComponent p) {
+    // caused bug 3280955: Reoccurrence of French keyboard problem
+    // calls to this method have been commented out
+    // https://sourceforge.net/tracker/index.php?func=detail&aid=3280955&group_id=44253&atid=438935
     Keymap km = p.getKeymap();
     final Action defaultAction = km.getDefaultAction();
     km.setDefaultAction(new AbstractAction() {

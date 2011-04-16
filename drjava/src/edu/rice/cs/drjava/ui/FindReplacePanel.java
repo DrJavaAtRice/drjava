@@ -219,8 +219,10 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _replaceField = new JTextPane(new SwingDocument());
     
     // Make a null action the default for Cntl/Alt/Meta chars entered in Find/Replace fields
-    AbstractDJPane.disableAltCntlMetaChars(_findField);
-    AbstractDJPane.disableAltCntlMetaChars(_replaceField);
+    // caused bug 3280955: Reoccurrence of French keyboard problem
+    // commented out
+    // AbstractDJPane.disableAltCntlMetaChars(_findField);
+    // AbstractDJPane.disableAltCntlMetaChars(_replaceField);
     
     //Install document traversal listeners in Find/Replace fields
     _findField.addKeyListener(frame._historyListener);
