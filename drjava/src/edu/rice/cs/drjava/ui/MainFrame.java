@@ -2209,8 +2209,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       };
       
       try {
-        final File file = selector.getFile().getCanonicalFile();
-        if (! file.exists() || selector.verifyOverwrite(file)) {  // confirm that existing file can be overwritten        
+        final File file = selector.getFile();
+        // by getting the canonical file, we make sure that we get an IOException if the filename is illegal
+        if (! file.getCanonicalFile().exists() || selector.verifyOverwrite(file)) {  // confirm that existing file can be overwritten        
           FileOps.saveFile(new FileOps.DefaultFileSaver(file) {
             /** Only runs in event thread so no read lock is necessary. */
             public void saveTo(OutputStream os) throws IOException {
@@ -5189,7 +5190,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _saveChooser.setFileFilter(_projectFilter);
     _saveChooser.setMultiSelectionEnabled(false);
     int rc = _saveChooser.showSaveDialog(this);
-    if (rc == JFileChooser.APPROVE_OPTION) {      
+    if (rc == JFileChooser.APPROVE_OPTION) {
       File projectFile = _saveChooser.getSelectedFile();
       
       if (projectFile == null || projectFile.getParentFile() == null) { return; }
@@ -5202,18 +5203,22 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         else projectFile = new File(projectFile.getParentFile(), fileName.substring(0, lastIndex) + 
                                     OptionConstants.PROJECT_FILE_EXTENSION);
       }
-      if (projectFile == null ||
-          projectFile.getParentFile() == null ||
-          (projectFile.exists() && ! MainFrameStatics.verifyOverwrite(MainFrame.this, projectFile))) { return; }
-      
-      _model.createNewProject(projectFile); // sets model to a new FileGroupingState for project file pf
+      try {
+        // by getting the canonical file, we make sure that we get an IOException if the filename is illegal
+        if (projectFile == null ||
+            projectFile.getParentFile() == null ||
+            (projectFile.getCanonicalFile().exists() && ! MainFrameStatics.verifyOverwrite(MainFrame.this, projectFile))) { return; }        
+        _model.createNewProject(projectFile); // sets model to a new FileGroupingState for project file pf
 //      ProjectPropertiesFrame ppf = new ProjectPropertiesFrame(MainFrame.this, file);
 //      ppf.saveSettings();  // Saves new project profile in global model
-      _editProject();  // edits the properties of the new FileGroupingState
-      try { _model.configNewProject(); }  // configures the new project in the model
-      catch(IOException e) { throw new UnexpectedException(e); }
-      _setUpProjectButtons(projectFile);
-      _currentProjFile = projectFile;
+        _model.configNewProject(); // configures the new project in the model
+        _editProject();  // edits the properties of the new FileGroupingState
+        _setUpProjectButtons(projectFile);
+        _currentProjFile = projectFile;
+      }
+      catch(IOException e) {
+        MainFrameStatics.showIOError(MainFrame.this, e);
+      }
     }
   }
   
@@ -5229,9 +5234,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {
       File file = _saveChooser.getSelectedFile();
-      if ((file != null) && (! file.exists() || MainFrameStatics.verifyOverwrite(MainFrame.this, file))) { 
-        _model.setProjectFile(file);
-        _currentProjFile = file;
+      try {
+        // by getting the canonical file, we make sure that we get an IOException if the filename is illegal
+        if ((file != null) && (! file.getCanonicalFile().exists() || MainFrameStatics.verifyOverwrite(MainFrame.this, file))) { 
+          _model.setProjectFile(file);
+          _currentProjFile = file;
+        }
+      }
+      catch(IOException e) {
+        MainFrameStatics.showIOError(MainFrame.this, e);
+        return false;
       }
     }
     
@@ -5266,6 +5278,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           }
         }
       }
+      // by getting the canonical file, we make sure that we get an IOException if the filename is illegal
       fileName = file.getCanonicalPath();
       if (fileName.endsWith(OLD_PROJECT_FILE_EXTENSION)) {
         file = proposeToChangeExtension(MainFrame.this, file,
@@ -8891,8 +8904,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _fnfCount += files.length;
       
       if (files.length == 1) {
+        // TODO: bad error message, may not be in project mode
         JOptionPane.showMessageDialog(MainFrame.this,
-                                      "The following file could not be found and has been removed from the project.\n"
+                                      // "The following file could not be found and has been removed from the project.\n"
+                                      "The following file could not be found.\n"
                                         + files[0].getPath(),
                                       "File Not Found",
                                       JOptionPane.ERROR_MESSAGE);
@@ -8901,10 +8916,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         final List<String> filePaths = new ArrayList<String>();
         for (File f : files) { filePaths.add(f.getPath()); }
         
+        // TODO: bad error message, may not be in project mode
         ScrollableListDialog<String> dialog = new ScrollableListDialog.Builder<String>()
           .setOwner(MainFrame.this)
           .setTitle("Files Not Found")
-          .setText("The following files could not be found and have been removed from the project.")
+          .setText("The following files could not be found.")
+          // .setText("The following files could not be found and have been removed from the project.")
           .setItems(filePaths)
           .setMessageType(JOptionPane.ERROR_MESSAGE)
           .build();

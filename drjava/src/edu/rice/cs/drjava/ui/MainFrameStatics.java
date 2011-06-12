@@ -106,15 +106,26 @@ public class MainFrameStatics {
   }
   
   public static void showProjectFileParseError(Component parent, MalformedProjectFileException mpfe) {
-    showError(parent, mpfe, "Invalid Project File", "DrJava could not read the given project file.");
+    showError(parent, "Invalid Project File", "DrJava could not read the given project file.");
   }
   
   public static void showFileNotFoundError(Component parent, FileNotFoundException fnf) {
-    showError(parent, fnf, "File Not Found", "The specified file was not found on disk.");
+    showErrorWithMessageIfAvailable(parent, fnf, "File Not Found", 
+                                    "The specified file was not found on disk.");
   }
   
   public static void showIOError(Component parent, IOException ioe) {
-    showError(parent, ioe, "Input/output error", "An I/O exception occurred during the last operation.");
+    showErrorWithMessageIfAvailable(parent, ioe, "Input/output error",
+                                    "An I/O exception occurred during the last operation.");
+  }
+  
+  public static void showErrorWithMessageIfAvailable(Component parent, Throwable e, String title, String message) {
+    if ((null != e.getMessage()) && (e.getMessage().length() > 0)) {
+      showError(parent, title, message+"\n"+e.getMessage());
+    }
+    else {
+      showError(parent, e, title, message);
+    }
   }
   
   public static void showClassNotFoundError(Component parent, ClassNotFoundException cnfe) {
@@ -145,6 +156,10 @@ public class MainFrameStatics {
   public static void showError(Component parent, Throwable e, String title, String message) {    
     JOptionPane.showMessageDialog(parent, message + "\n" + e + "\n"+ StringOps.getStackTrace(e),
                                   title, JOptionPane.ERROR_MESSAGE);
+  }
+  
+  public static void showError(Component parent, String title, String message) {    
+    JOptionPane.showMessageDialog(parent, message, title, JOptionPane.ERROR_MESSAGE);
   }
   
   public static void showWarning(Component parent, Throwable e, String title, String message) {
