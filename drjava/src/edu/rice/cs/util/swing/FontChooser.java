@@ -38,6 +38,7 @@ package edu.rice.cs.util.swing;
 
 import edu.rice.cs.util.swing.Utilities;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
@@ -86,7 +87,7 @@ public class FontChooser extends JDialog {
     _sizeList.setSelectedItem(font.getSize() + "");
     _styleList.setSelectedItem(STYLES[font.getStyle()]);
     //this.setResizable(false);
-    resize();
+    //resize();
   }
 
   /** Method used to show the font chooser, and select a new font.
@@ -118,60 +119,80 @@ public class FontChooser extends JDialog {
   }
 
   private void initAll() {
-    getContentPane().setLayout(null);
-    setBounds(50, 50, 425, 400);
-    _sampleText = new JLabel();
-    addLists();
-    addButtons();
-    _sampleText.setForeground(Color.black);
-    getContentPane().add(_sampleText);
-    addWindowListener(new WindowAdapter() {
-      public void windowClosing(java.awt.event.WindowEvent e) {
-        setVisible(false);
-      }
-    });
-    addComponentListener(new ComponentAdapter() {
-      public void componentResized(ComponentEvent evt) {
-        resize();
-      }
-    });
-  }
+    Container cp = getContentPane();
+    GridBagLayout cpLayout = new GridBagLayout();
+    GridBagConstraints c = new GridBagConstraints();
+    cp.setLayout(cpLayout);
 
-  private void resize() {
-    int w = getWidth();
-    int h = getHeight();
-    double wf = (double) w / 425;
-    int w2 = (int) (80 * wf);
-    int w3 = (int) (50 * wf);
-    if (w3 < 30) w3 = 30;
-    int w1 = w - w2 - w3 - 25;
-    _fontList.setBounds(5, 5, w1, h - 91);
-    _styleList.setBounds(w1 + 10, 5, w2, h - 91);
-    _sizeList.setBounds(w1 + w2 + 15, 5, w3, h - 91);
-    _sampleText.setBounds(10, h - 78, w - 20, 45);
-    _okButton.setBounds(w - 165, h - 55, 70, 20);
-    _cancelButton.setBounds(w - 81, h - 55, 70, 20);
-    validate();
-  }
-
-  private void addLists() {
+    // lists
+    c.fill = GridBagConstraints.BOTH;
+    c.anchor = GridBagConstraints.NORTH;
+    c.gridwidth = 1;
+    c.gridheight = 1;
+    c.gridx = 0;
+    c.gridy = 0;
+    c.weightx = 1.0;
+    c.weighty = 1.0;
     _fontList = new NwList(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames());
+    cpLayout.setConstraints(_fontList, c);
+    cp.add(_fontList);
+//    JPanel fontListPanel = new JPanel();
+//    fontListPanel.setBackground(Color.RED);
+//    cpLayout.setConstraints(fontListPanel, c);
+//    cp.add(fontListPanel);
+    
+    c.fill = GridBagConstraints.VERTICAL;
+    c.anchor = GridBagConstraints.NORTH;
+    c.gridwidth = GridBagConstraints.RELATIVE;
+    c.gridheight = 1;
+    c.gridx = 1;
+    c.gridy = 0;
+    c.weightx = 0.3;
+    c.weighty = 1.0;
     _styleList = new NwList(STYLES);
+    cpLayout.setConstraints(_styleList , c);
+    cp.add(_styleList);
+//    JPanel styleListPanel = new JPanel();
+//    styleListPanel.setBackground(Color.GREEN);
+//    cpLayout.setConstraints(styleListPanel, c);
+//    cp.add(styleListPanel);
+    
+    c.fill = GridBagConstraints.BOTH;
+    c.anchor = GridBagConstraints.NORTH;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.gridheight = 1;
+    c.gridx = 2;
+    c.gridy = 0;
+    c.weightx = 0.3;
+    c.weighty = 1.0;
     _sizeList = new NwList(SIZES);
-    getContentPane().add(_fontList);
-    getContentPane().add(_styleList);
-    getContentPane().add(_sizeList);
-  }
+    cpLayout.setConstraints(_sizeList, c);
+    cp.add(_sizeList);    
 
-  private void addButtons() {
+    // sample text
+    c.fill = GridBagConstraints.BOTH;
+    c.anchor = GridBagConstraints.WEST;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.gridheight = 1;
+    c.gridx = 0;
+    c.gridy = 1;
+    c.weightx = 0.0;
+    c.weighty = 0.0;
+    _sampleText = new JLabel();
+    _sampleText.setForeground(Color.black);
+    cpLayout.setConstraints(_sampleText, c);
+    cp.add(_sampleText);
+    
+    // buttons
+    JPanel bottom = new JPanel();
+    bottom.setBorder(new EmptyBorder(5,5,5,5));
+    bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
+    bottom.add(Box.createHorizontalGlue());
+    
     _okButton = new JButton("OK");
-    _okButton.setMargin(new Insets(0, 0, 0, 0));
     _cancelButton = new JButton("Cancel");
-    _cancelButton.setMargin(new Insets(0, 0, 0, 0));
-    _okButton.setFont(new Font(" ", 1, 11));
-    _cancelButton.setFont(new Font(" ", 1, 12));
-    getContentPane().add(_okButton);
-    getContentPane().add(_cancelButton);
+    bottom.add(_okButton);
+    bottom.add(_cancelButton);
     _okButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         setVisible(false);
@@ -184,6 +205,26 @@ public class FontChooser extends JDialog {
         _clickedOK = false;
       }
     });
+    bottom.add(Box.createHorizontalGlue());
+
+    c.fill = GridBagConstraints.NONE;
+    c.anchor = GridBagConstraints.PAGE_END;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.gridheight = 1;
+    c.gridx = 0;
+    c.gridy = 2;
+    c.weightx = 0.0;
+    c.weighty = 0.0;
+    cpLayout.setConstraints(bottom, c);
+    cp.add(bottom);
+    
+    addWindowListener(new WindowAdapter() {
+      public void windowClosing(java.awt.event.WindowEvent e) {
+        setVisible(false);
+      }
+    });
+    
+    setSize(425, 400);
   }
 
   private void showSample() {
@@ -216,7 +257,10 @@ public class FontChooser extends JDialog {
     String si = " ";
 
     public NwList(String[] values) {
-      setLayout(null);
+      GridBagLayout cpLayout = new GridBagLayout();
+      GridBagConstraints c = new GridBagConstraints();
+      setLayout(cpLayout);
+     
       jl = new JList(values);
       sp = new JScrollPane(jl);
       jt = new JLabel();
@@ -232,15 +276,28 @@ public class FontChooser extends JDialog {
           showSample();
         }
       });
-      add(sp);
+      
+      c.fill = GridBagConstraints.HORIZONTAL;
+      c.anchor = GridBagConstraints.NORTH;
+      c.gridwidth = GridBagConstraints.REMAINDER;
+      c.gridheight = 1;
+      c.gridx = 0;
+      c.gridy = 0;
+      c.weightx = 1.0;
+      c.weighty = 0.0;
+      cpLayout.setConstraints(jt, c);
       add(jt);
-    }
 
-    public void setBounds(int x, int y, int w, int h) {
-      super.setBounds(x, y, w, h);
-      sp.setBounds(0, y + 16, w, h - 23);
-      sp.revalidate();
-      jt.setBounds(0, 0, w, 20);
+      c.fill = GridBagConstraints.BOTH;
+      c.anchor = GridBagConstraints.NORTH;
+      c.gridwidth = GridBagConstraints.REMAINDER;
+      c.gridheight = 1;
+      c.gridx = 0;
+      c.gridy = 1;
+      c.weightx = 1.0;
+      c.weighty = 1.0;
+      cpLayout.setConstraints(sp, c);
+      add(sp);
     }
 
     public String getSelectedValue() { return (si); }
