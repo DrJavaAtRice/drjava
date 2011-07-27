@@ -229,14 +229,20 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       String debuggerPackage = "edu.rice.cs.drjava.model.debug.jpda";
       if (debuggerAdapter != null) {
         try {
+          JDKToolsLibrary.msg("                 loading debugger: "+debuggerAdapter);
           Class<?>[] sig = { GlobalModel.class };
           // can't use loadLibraryAdapter because we need to preempt the whole package
           ClassLoader debugLoader = new PreemptingClassLoader(new PathClassLoader(loader, path), debuggerPackage);
           Debugger attempt = (Debugger) ReflectUtil.loadObject(debugLoader, debuggerAdapter, sig, model);        
+          JDKToolsLibrary.msg("                 debugger="+attempt.getClass().getName());
           if (attempt.isAvailable()) { debugger = attempt; }
         }
-        catch (ReflectException e) { /* can't load */ }
-        catch (LinkageError e) { /* can't load */ }
+        catch (ReflectException e) {
+          JDKToolsLibrary.msg("                 no debugger, ReflectException "+e); /* can't load */
+        }
+        catch (LinkageError e) {
+          JDKToolsLibrary.msg("                 no debugger, LinkageError "+e);  /* can't load */
+        }
       }
       
       try {

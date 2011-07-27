@@ -148,6 +148,10 @@ public abstract class JDKDescriptor {
     return getName() + " library " + version.versionString();
   }
   
+  public String toString() {
+    return this.getClass().getName()+": "+getName();
+  }
+  
   /** Singleton representing a JDK that doesn't have a descriptor. */
   public static final JDKDescriptor NONE = new None();
     
@@ -176,8 +180,8 @@ public abstract class JDKDescriptor {
       return JDKToolsLibrary.adapterForCompiler(guessedVersion);
     }
     public String getAdapterForDebugger() { return ""; }
-    public String adapterForDebugger(JavaVersion.FullVersion guessedVersion) {
-      return JDKToolsLibrary.adapterForCompiler(guessedVersion);
+    public String getAdapterForDebugger(JavaVersion.FullVersion guessedVersion) {
+      return JDKToolsLibrary.adapterForDebugger(guessedVersion);
     }
     public boolean containsCompiler(File f) { return true; }
     public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_1_1; }

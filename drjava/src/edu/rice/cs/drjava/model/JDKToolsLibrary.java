@@ -125,6 +125,7 @@ public class JDKToolsLibrary {
       List<File> bootClassPath = null;
       String bootProp = System.getProperty("sun.boot.class.path");
       if (bootProp != null) { bootClassPath = CollectUtil.makeList(IOUtil.parsePath(bootProp)); }
+      File toolsJar = edu.rice.cs.drjava.DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.JAVAC_LOCATION);
       try {
         Class<?>[] sig = { FullVersion.class, String.class, List.class };
         Object[] args = { version, "the runtime class path", bootClassPath };
@@ -153,11 +154,13 @@ public class JDKToolsLibrary {
     String debuggerAdapter = adapterForDebugger(version);
     if (debuggerAdapter != null) {
       try {
+        msg("                 loading debugger: "+debuggerAdapter);
         Debugger attempt = (Debugger) ReflectUtil.loadObject(debuggerAdapter, new Class<?>[]{GlobalModel.class}, model);
+        msg("                 debugger="+attempt.getClass().getName());
         if (attempt.isAvailable()) { debugger = attempt; }
       }
-      catch (ReflectException e) { /* can't load */ }
-      catch (LinkageError e) { /* can't load */ }
+      catch (ReflectException e) { msg("                 no debugger, ReflectException "+e); /* can't load */ }
+      catch (LinkageError e) { msg("                 no debugger, LinkageError "+e);  /* can't load */ }
     }
     
     JavadocModel javadoc = new NoJavadocAvailable(model);
