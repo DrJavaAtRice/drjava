@@ -71,7 +71,8 @@
     <section id="gs-requirements">
       <title>System Requirements</title>
       <para>DrJava requires Java version 5 or later. Note that you will need to have the JDK (not the JRE) installed if you wish to use the debugger or create Javadoc within DrJava.</para>
-      <para>We recommend downloading and using Sun's JDK 6 (from <ulink url="http://java.sun.com">http://java.sun.com</ulink>) for Solaris, Linux, and Windows.  Other users should use the Java virtual machine that comes with their operating system (including Mac OS X).</para>
+      <para>We recommend downloading and using Oracle's JDK 6 (from <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/index.html">http://www.oracle.com/technetwork/java/javase/downloads/index.html</ulink>) for Solaris, Linux, and Windows.  Other users should use the Java virtual machine that comes with their operating system (including Mac OS X).</para>
+      <para>Mac OS X 10.7 "Lion" does not include a default Java runtime anymore. Therefore, the operating system may prompt you to install Java if you have not installed it before. You can also download <ulink url="http://support.apple.com/kb/DL1421">Java for OS X Lion</ulink> from Apple's website, or <ulink url="http://support.apple.com/kb/index?page=search&amp;fac=Downloads&amp;q=java%20for%20os%20x&amp;src=support_site.kbase.search.advanced">search for Java downloads for Mac OS X</ulink>.</para>
       <para>DrJava uses two Java Virtual Machines (one for the main program, and one for the Interactions Pane) that use Java's Remote Method Invocation (RMI) to communicate with each other. RMI uses TCP/IP as the default transport mechanism, so you must have those drivers installed. Without TCP/IP, DrJava will not start properly.</para>
       <para>Note that there is an incompatibility between Java's Swing
 GUI library and the Compiz window manager on Linux. We, the developers
@@ -79,7 +80,7 @@ of DrJava, cannot do anything to fix this problem. We hope that future
 versions of Java and Compiz will address the incompatibility. In the
 meantime, we recommend that you disable Compiz if you experience
 problems. We also suggest that you use the latest versions of Compiz
-and Java, so you can benefit from possible bug fixes made by Sun and
+and Java, so you can benefit from possible bug fixes made by Oracle and
 the Compiz developers. For more information, see <ulink url="http://drjava.org/compiz/">http://drjava.org/compiz/</ulink>.</para>
     </section>
 
@@ -957,9 +958,9 @@ can be compiled by the regular Java compiler.</para>
   <!-- Chapter: Javadoc Integration -->
   <chapter id="javadoc">
     <title>Documentation with Javadoc</title>
-    <para>Documenting your code is crucial to help others understand it, and even to remind yourself how your own older programs work.  Unfortunately, it is easy for most external documentation to become out of date as a program changes.  For this reason, it is useful to write documentation as comments in the code itself, where they can be easily updated with other changes.  Javadoc is a documentation tool which defines a standard format for such comments, and which can generate HTML files to view the documentation from a web broswer.  (As an example, see Sun's Javadoc documentation for the Java libraries at <ulink url="http://java.sun.com/j2se/1.4/docs/api/index.html">http://java.sun.com/j2se/1.4/docs/api/index.html</ulink>.)</para>
+    <para>Documenting your code is crucial to help others understand it, and even to remind yourself how your own older programs work.  Unfortunately, it is easy for most external documentation to become out of date as a program changes.  For this reason, it is useful to write documentation as comments in the code itself, where they can be easily updated with other changes.  Javadoc is a documentation tool which defines a standard format for such comments, and which can generate HTML files to view the documentation from a web broswer.  (As an example, see Oracle's Javadoc documentation for the Java libraries at <ulink url="http://download.oracle.com/javase/6/docs/api/">http://download.oracle.com/javase/6/docs/api/</ulink>.)</para>
 
-    <para>You can easily run Javadoc over your programs from within DrJava, using the "Javadoc All Documents" and "Preview Javadoc for Current Document" commands in the Tools menu.  These commands will generate Javadoc HTML files from the comments you have written and display them in a browser.  This chapter gives a brief overview of these commands and how to write Javadoc comments.  More detailed information on writing Javadoc comments can be found online at <ulink url="http://java.sun.com/j2se/javadoc/writingdoccomments/">http://java.sun.com/j2se/javadoc/writingdoccomments/</ulink>.</para>
+    <para>You can easily run Javadoc over your programs from within DrJava, using the "Javadoc All Documents" and "Preview Javadoc for Current Document" commands in the Tools menu.  These commands will generate Javadoc HTML files from the comments you have written and display them in a browser.  This chapter gives a brief overview of these commands and how to write Javadoc comments.  More detailed information on writing Javadoc comments can be found online at <ulink url="http://www.oracle.com/technetwork/java/javase/documentation/index-137868.html">http://www.oracle.com/technetwork/java/javase/documentation/index-137868.html</ulink>.</para>
 
 
     <section id="javadoc-writing">
@@ -1034,7 +1035,7 @@ public class Student {
 
     <formalpara>
       <title>Configuring Javadoc</title>
-      <para>You can configure many aspects of how Javadoc files are generated.  Most prominent is the ability to hide fields and methods below a particular access level (eg. <literal>public</literal> or <literal>protected</literal>).  By default, no private fields or methods are shown.  Other options include specifying a URL to link to the Java library API (which defaults to Sun's own website), specifying a default destination directory for all Javadoc files, and specifying any custom parameters to pass to the Javadoc tool itself.  Finally, for programs with many nested packages (folders), DrJava provides an option to always generate Javadoc for all packages in the program, rather than just the sub-packages of the open documents.</para>
+      <para>You can configure many aspects of how Javadoc files are generated.  Most prominent is the ability to hide fields and methods below a particular access level (eg. <literal>public</literal> or <literal>protected</literal>).  By default, no private fields or methods are shown.  Other options include specifying a URL to link to the Java library API (which defaults to Oracle's own website), specifying a default destination directory for all Javadoc files, and specifying any custom parameters to pass to the Javadoc tool itself.  Finally, for programs with many nested packages (folders), DrJava provides an option to always generate Javadoc for all packages in the program, rather than just the sub-packages of the open documents.</para>
     </formalpara>    
 
     </section>
@@ -1168,13 +1169,13 @@ pane (see <link linkend="configuration">Configuring DrJava</link>).</para>
     <section id="other-dialogs-compiz">
       <title>Compiz Detected</title>
       <para>DrJava suffers from an incompatibility between the Linux
-window manager Compiz and Sun's Swing Java GUI library. We, the
+window manager Compiz and Oracle's Swing Java GUI library. We, the
 developers of DrJava, cannot do anything to fix this problem. We hope
 that future versions of Java and Compiz will address the
 incompatibility. In the meantime, we recommend that you disable Compiz
 if you experience problems. We also suggest that you use the latest
 versions of Compiz and Java, so you can benefit from possible bug
-fixes made by Sun and the Compiz developers. For more information, see
+fixes made by Oracle and the Compiz developers. For more information, see
 <ulink
 url="http://drjava.org/compiz/">http://drjava.org/compiz/</ulink>.</para>
       <para>When DrJava detects that you are using Compiz, it will
@@ -2105,13 +2106,13 @@ to.</para>
    <listitem>
      <para>Whether DrJava should warn the user if Compiz is
 detected (see <link linkend="other-dialogs-compiz">Compiz Detected</link> dialog). DrJava suffers from an incompatibility between the Linux
-window manager Compiz and Sun's Swing Java GUI library. We, the
+window manager Compiz and Oracle's Swing Java GUI library. We, the
 developers of DrJava, cannot do anything to fix this problem. We hope
 that future versions of Java and Compiz will address the
 incompatibility. In the meantime, we recommend that you disable Compiz
 if you experience problems. We also suggest that you use the latest
 versions of Compiz and Java, so you can benefit from possible bug
-fixes made by Sun and the Compiz developers. For more information, see
+fixes made by Oracle and the Compiz developers. For more information, see
 <ulink
 url="http://drjava.org/compiz/">http://drjava.org/compiz/</ulink>.</para>
    </listitem>

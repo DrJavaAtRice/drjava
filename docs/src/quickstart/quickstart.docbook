@@ -35,14 +35,14 @@ introduce you to some of its key features.</para>
 
     <section id="downloadJDK">
       <title>Downloading the JDK</title>
-      <para> To compile programs in DrJava, you must make sure you have a Java JDK (Java Development Kit) installed on your machine.  All Java distributions available for downloading come in two forms: a JDK and a JRE (Java Runtime Environment).  A JDK distribution consists of a JRE distribution (a Java Virtual Machine implementation) plus a collection of development tools including <command>javac</command>, a Java compiler, and <command>javadoc</command>, Java documentation generator. DrJava requires a JDK installation because it uses both <command>javac</command> and <command>javadoc</command> as plugin components.  Without these components, DrJava can only edit Java programs; it cannot execute them or generate documentation for them. If you do not have a JDK installed already, you can download one for Windows, Linux, or Solaris computers directly from the Sun Microsystems webite.  Apple Macintosh machines running Mac OS X already have a JDK installed.  To download a JDK from the Sun website, just follow these steps!  </para>
+      <para> To compile programs in DrJava, you must make sure you have a Java JDK (Java Development Kit) installed on your machine.  All Java distributions available for downloading come in two forms: a JDK and a JRE (Java Runtime Environment).  A JDK distribution consists of a JRE distribution (a Java Virtual Machine implementation) plus a collection of development tools including <command>javac</command>, a Java compiler, and <command>javadoc</command>, Java documentation generator. DrJava requires a JDK installation because it uses both <command>javac</command> and <command>javadoc</command> as plugin components.  Without these components, DrJava can only edit Java programs; it cannot execute them or generate documentation for them. If you do not have a JDK installed already, you can download one for Windows, Linux, or Solaris computers directly from the Oracle webite.  Apple Macintosh machines running Mac OS X already have a JDK installed.  To download a JDK from the Oracle website, just follow these steps!  </para>
 
 <itemizedlist mark="number">
 	<listitem> <para>
-   	 Go to <ulink url="http://java.sun.com">http://java.sun.com.</ulink>
+   	 Go to <ulink url="http://www.oracle.com/technetwork/java/javase/downloads/index.html">http://www.oracle.com/technetwork/java/javase/downloads/index.html</ulink>,
 	</para> </listitem>
 	<listitem> <para>
-	Do a search for "Download Java JDK"
+	Do a search for "JDK"
 	</para> </listitem>
 	<listitem> <para>
 	Select the most recent build of Java from the list of options you see.  We recommend Java 6, assuming that you are using a current release of DrJava.  Recent releases of DrJava are not compatible with versions of the JDK prior to Java 5 (previously called Java 1.5.0).  Older versions of DrJava are compatible with Java 1.3 and Java 1.4.
@@ -347,7 +347,7 @@ read -1, indicating of the end of the stream.</para>
 
     <section id="javadocgen">
       <title>Generating JavaDoc Documentation</title>
-	<para>DrJava offers the ability to generate JavaDoc documentation for the user's java files.  For information about what JavaDoc is and how to format your comments to take advantage of it, see <ulink url="http://java.sun.com/j2se/javadoc/writingdoccomments/index.html">http://java.sun.com/j2se/javadoc/writingdoccomments/index.html</ulink>.</para>
+	<para>DrJava offers the ability to generate JavaDoc documentation for the user's java files.  For information about what JavaDoc is and how to format your comments to take advantage of it, see <ulink url="http://www.oracle.com/technetwork/java/javase/documentation/index-137868.html">http://www.oracle.com/technetwork/java/javase/documentation/index-137868.html</ulink>.</para>
 
 	<para>To generate JavaDoc for all files in the same directories as your open files, click the "JavaDoc" button on the toolbar.  You will then be asked where you want to save the javadoc files.  Select a location and click OK.  Your JavaDoc will be generated for you.</para>
 
