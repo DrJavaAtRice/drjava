@@ -301,7 +301,7 @@ public abstract class PreviewFrame extends SwingFrame {
     try {
       Class<?> spinnerClass = Class.forName("javax.swing.JSpinner");
       final JComponent spinner = (JComponent) spinnerClass.newInstance();
-      final Method getter = spinnerClass.getMethod("getValue",new Class[0]);
+      final Method getter = spinnerClass.getMethod("getValue",new Class<?>[0]);
       Object model = callMethod(spinner, spinnerClass, "getModel",null,null);
       Class<?> modelClass = model.getClass();
       Class<?>[] ca = new Class<?>[] {Comparable.class};

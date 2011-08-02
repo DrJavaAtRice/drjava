@@ -56,12 +56,12 @@ public class CheckBoxJList extends JList implements ListSelectionListener {
     init(listData, selData);
   }
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked"})
   public CheckBoxJList(ListModel lm) {
     super(lm);
-    Vector listData = new Vector();
+    Vector<Object> listData = new Vector<Object>();
     for(int i = 0; i < lm.getSize(); ++i) listData.add(lm.getElementAt(i));
-    init(listData, new Vector());
+    init(listData, new Vector<Object>());
   }
   
   // ListSelectionListener implementation

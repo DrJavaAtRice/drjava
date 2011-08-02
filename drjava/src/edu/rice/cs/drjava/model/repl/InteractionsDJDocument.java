@@ -227,10 +227,10 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   /** Accessor method used to copy contents of _stylesList to an array.  Used in test cases. */
   public Pair<Pair<Integer, Integer>, String>[] getStyles() { 
     synchronized(_stylesList) {
-        // TODO: file javac bug report concerning placement of @SuppressWarnings.  Fails if rhs of result binding is used as body of return statement.
-        @SuppressWarnings("unchecked")
-        Pair<Pair<Integer, Integer>, String>[] result = _stylesList.toArray(new Pair[0]);
-        return result;
+      // TODO: file javac bug report concerning placement of @SuppressWarnings.  Fails if rhs of result binding is used as body of return statement.
+      @SuppressWarnings({"unchecked", "rawtypes"})
+      Pair<Pair<Integer, Integer>, String>[] result = _stylesList.toArray(new Pair[0]);
+      return result;
     }
   }
   

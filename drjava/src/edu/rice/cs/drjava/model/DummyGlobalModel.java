@@ -193,10 +193,10 @@ public class DummyGlobalModel implements GlobalModel {
   public boolean getAutoRefreshStatus() {
     throw new UnsupportedOperationException("Tried to call getAutoRefreshStatus on a Dummy"); }
   
-  public Map<OptionParser,String> getPreferencesStoredInProject() {
+  public Map<OptionParser<?>,String> getPreferencesStoredInProject() {
     throw new UnsupportedOperationException("Tried to call getPreferencesStoredInProject on a Dummy"); }
 
-  public void setPreferencesStoredInProject(Map<OptionParser,String> sp) {
+  public void setPreferencesStoredInProject(Map<OptionParser<?>,String> sp) {
     throw new UnsupportedOperationException("Tried to call setPreferencesStoredInProject on a Dummy"); }
   
   public void saveAllFiles(FileSaveSelector com) throws IOException {

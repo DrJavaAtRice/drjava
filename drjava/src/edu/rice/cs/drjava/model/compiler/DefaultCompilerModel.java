@@ -115,8 +115,12 @@ public class DefaultCompilerModel implements CompilerModel {
     String dCompName = DrJava.getConfig().getSetting(OptionConstants.DEFAULT_COMPILER_PREFERENCE);
     
     if (_compilers.size() > 0) {
-      if(!dCompName.equals(OptionConstants.COMPILER_PREFERENCE_CONTROL.NO_PREFERENCE) && compilerNames.contains(dCompName))
-        _active = _compilers.get(compilerNames.indexOf(dCompName));
+      if (!dCompName.equals(OptionConstants.COMPILER_PREFERENCE_CONTROL.NO_PREFERENCE)) {
+        // preference was set
+        if (compilerNames.contains(dCompName)) {
+          _active = _compilers.get(compilerNames.indexOf(dCompName));
+        }
+      }
       else 
         _active = _compilers.get(0);
     }

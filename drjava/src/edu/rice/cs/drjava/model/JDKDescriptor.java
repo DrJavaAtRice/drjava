@@ -160,8 +160,8 @@ public abstract class JDKDescriptor {
     public String getName() { return "none"; }
     public String getDescription(JavaVersion.FullVersion version) {
       switch(version.vendor()) {
-        case SUN:
-          return "Sun JDK library " + version.toString();
+        case ORACLE:
+          return "Oracle JDK library " + version.toString();
         case OPENJDK:
           return "OpenJDK library " + version.toString();
         case APPLE:

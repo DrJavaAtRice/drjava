@@ -174,9 +174,9 @@ public interface FileGroupingState {
   public void setAutoRefreshStatus(boolean b);
 
   /** @return the stored preferences. */
-  public Map<OptionParser,String> getPreferencesStoredInProject();
+  public Map<OptionParser<?>,String> getPreferencesStoredInProject();
 
-  public void setPreferencesStoredInProject(Map<OptionParser,String> sp);
+  public void setPreferencesStoredInProject(Map<OptionParser<?>,String> sp);
 
   /** Sets the custom manifest on the project */
   public void setCustomManifest(String manifest);

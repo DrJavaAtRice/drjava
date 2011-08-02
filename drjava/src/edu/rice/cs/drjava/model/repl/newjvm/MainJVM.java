@@ -60,6 +60,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.reflect.ReflectUtil;
+import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.tuple.Option;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.concurrent.JVMBuilder;
@@ -585,11 +586,13 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     do {
       repeat = false;
       File junitLocation = DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION);
+      boolean javaVersion7 = JavaVersion.CURRENT.supports(JavaVersion.JAVA_7);
       // ConcJUnit is available if (a) the built-in framework is used, or (b) the external
-      // framework is a valid ConcJUnit jar file.
+      // framework is a valid ConcJUnit jar file, AND the compiler is not Java 7 or newer.
       boolean concJUnitAvailable =
-        !DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION_ENABLED) ||
-        edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(junitLocation);
+        !javaVersion7 &&
+        (!DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION_ENABLED) ||
+        edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(junitLocation));
       
       File rtLocation = DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION);
       boolean rtLocationConfigured =

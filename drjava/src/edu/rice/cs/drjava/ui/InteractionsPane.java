@@ -174,7 +174,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
       endCompoundEdit();
     }
     
-    if ((e.getModifiers() & e.SHIFT_MASK)!=0 && e.getKeyCode()==KeyEvent.VK_ENTER) endCompoundEdit();  //ends compound edit on line change
+    if ((e.getModifiers() & InputEvent.SHIFT_MASK)!=0 && e.getKeyCode()==KeyEvent.VK_ENTER) endCompoundEdit();  //ends compound edit on line change
     
     super.processKeyEvent(e);
   }

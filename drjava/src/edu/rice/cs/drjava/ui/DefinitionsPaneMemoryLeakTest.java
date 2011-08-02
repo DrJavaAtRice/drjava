@@ -53,6 +53,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Vector;
 import java.util.Date;
 
@@ -168,11 +170,11 @@ public final class DefinitionsPaneMemoryLeakTest extends MultiThreadedTestCase {
       sbIdHashCodes.append("d["+i+"]   = "+d[i].getClass().getName()+"@0x"+hexIdentityHashCode(d[i])+"\n");
     }
 
-    WeakReference[] wd = new WeakReference[PANE_COUNT];
-    WeakReference[] wp = new WeakReference[PANE_COUNT];
+    List<WeakReference<OpenDefinitionsDocument>> wd = new ArrayList<WeakReference<OpenDefinitionsDocument>>(PANE_COUNT);
+    List<WeakReference<DefinitionsPane>> wp = new ArrayList<WeakReference<DefinitionsPane>>(PANE_COUNT);
     for(int i=0; i<PANE_COUNT;++i) {
-      wd[i] = new WeakReference<OpenDefinitionsDocument>(d[i]);
-      wp[i] = new WeakReference<DefinitionsPane>(p[i]);
+      wd.add(new WeakReference<OpenDefinitionsDocument>(d[i]));
+      wp.add(new WeakReference<DefinitionsPane>(p[i]));
     }
     
     // all the panes have a listener, so lets close all files
@@ -198,8 +200,8 @@ public final class DefinitionsPaneMemoryLeakTest extends MultiThreadedTestCase {
     Utilities.clearEventQueue();
     
     for(int i=0; i<PANE_COUNT; ++i) {
-      assertGC("Document "+i+" leaked", wd[i]);
-      assertGC("Pane "+i+" leaked", wp[i]);
+      assertGC("Document "+i+" leaked", wd.get(i));
+      assertGC("Pane "+i+" leaked", wp.get(i));
     }
   }
     

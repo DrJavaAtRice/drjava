@@ -411,7 +411,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   protected FileGroupingState
     makeProjectFileGroupingState(File pr, String main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, 
                                  File[] excludedFiles, Iterable<AbsRelFile> cp, File cjf, int cjflags, boolean refresh,
-                                 String manifest, Map<OptionParser,String> storedPreferences) {
+                                 String manifest, Map<OptionParser<?>,String> storedPreferences) {
     
     return new ProjectFileGroupingState(pr, main, bd, wd, project, srcFiles, auxFiles, excludedFiles, cp, cjf, cjflags,
                                         refresh, manifest, storedPreferences);
@@ -536,9 +536,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public File getBuildDirectory() { return _state.getBuildDirectory(); }
   
   /** @return the stored preferences. */
-  public Map<OptionParser,String> getPreferencesStoredInProject() { return _state.getPreferencesStoredInProject(); }
+  public Map<OptionParser<?>,String> getPreferencesStoredInProject() { return _state.getPreferencesStoredInProject(); }
 
-  public void setPreferencesStoredInProject(Map<OptionParser,String> sp) { _state.setPreferencesStoredInProject(sp); }
+  public void setPreferencesStoredInProject(Map<OptionParser<?>,String> sp) { _state.setPreferencesStoredInProject(sp); }
   
   /** Sets the class with the project's main method.  Degenerate version overridden in DefaultGlobalModel. */
   public void setBuildDirectory(File f) {
@@ -608,7 +608,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     volatile File _createJarFile;
     volatile int _createJarFlags;
     volatile boolean _autoRefreshStatus;
-    final Map<OptionParser,String> _storedPreferences = new HashMap<OptionParser,String>();
+    final Map<OptionParser<?>,String> _storedPreferences = new HashMap<OptionParser<?>,String>();
     
     volatile String _manifest = null;
     
@@ -617,8 +617,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** Degenerate constructor for a new project; only the file project name is known. */
     ProjectFileGroupingState(File project) {
       this(project.getParentFile(), null, null, null, project, new File[0], new File[0], new File[0], 
-           IterUtil.<AbsRelFile>empty(), null, 0, false, null, new HashMap<OptionParser,String>());
-      HashMap<OptionParser,String> defaultStoredPreferences = new HashMap<OptionParser,String>();
+           IterUtil.<AbsRelFile>empty(), null, 0, false, null, new HashMap<OptionParser<?>,String>());
+      HashMap<OptionParser<?>,String> defaultStoredPreferences = new HashMap<OptionParser<?>,String>();
       // by default, put INDENT_LEVEL AND LANGUAGE_LEVEL into the project file
       defaultStoredPreferences.put(INDENT_LEVEL, DrJava.getConfig().getOptionMap().getString(INDENT_LEVEL));      
       defaultStoredPreferences.put(LANGUAGE_LEVEL, DrJava.getConfig().getOptionMap().getString(LANGUAGE_LEVEL));
@@ -627,7 +627,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     ProjectFileGroupingState(File pr, String main, File bd, File wd, File project, File[] srcFiles, File[] auxFiles, 
                              File[] excludedFiles, Iterable<AbsRelFile> cp, File cjf, int cjflags, boolean refreshStatus, 
-                             String customManifest, Map<OptionParser,String> storedPreferences) {
+                             String customManifest, Map<OptionParser<?>,String> storedPreferences) {
       _projRoot = pr;
       _mainClass = main;
       _buildDir = bd;
@@ -838,11 +838,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void setAutoRefreshStatus(boolean status) { _autoRefreshStatus = status; }
     
     /** @return the stored preferences. */
-    public Map<OptionParser,String> getPreferencesStoredInProject() {
-      return new HashMap<OptionParser,String>(_storedPreferences);
+    public Map<OptionParser<?>,String> getPreferencesStoredInProject() {
+      return new HashMap<OptionParser<?>,String>(_storedPreferences);
     }
 
-    public void setPreferencesStoredInProject(Map<OptionParser,String> sp) {
+    public void setPreferencesStoredInProject(Map<OptionParser<?>,String> sp) {
       // remove previous listeners
       removePreviousListeners();
       
@@ -957,7 +957,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   @SuppressWarnings("unchecked")
   protected void removePreviousListeners() {
-    for(Map.Entry<OptionParser, OptionListener<?>> e: LISTENERS_TO_REMOVE.entrySet()) {
+    for(Map.Entry<OptionParser<?>, OptionListener<?>> e: LISTENERS_TO_REMOVE.entrySet()) {
       // all keys should be full Option instances, not just OptionParser instances
       if (e.getKey() instanceof Option) {
         DrJava.getConfig().removeOptionListener((Option)e.getKey(), e.getValue());
@@ -967,8 +967,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   @SuppressWarnings("unchecked")
-  protected void addNewListeners(Map<OptionParser,String> newValues) {
-    for(OptionParser key: newValues.keySet()) {
+  protected void addNewListeners(Map<OptionParser<?>,String> newValues) {
+    for(OptionParser<?> key: newValues.keySet()) {
       // all keys should be full Option instances, not just OptionParser instances
       if (key instanceof Option) {
         DrJava.getConfig().addOptionListener((Option)key, STORED_PREFERENCES_LISTENER);
@@ -977,8 +977,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
   }
   
-  protected static final HashMap<OptionParser, OptionListener<? extends Object>> LISTENERS_TO_REMOVE =
-    new HashMap<OptionParser, OptionListener<? extends Object>>();
+  protected static final HashMap<OptionParser<?>, OptionListener<? extends Object>> LISTENERS_TO_REMOVE =
+    new HashMap<OptionParser<?>, OptionListener<? extends Object>>();
   
   public final OptionListener<? extends Object> STORED_PREFERENCES_LISTENER = new OptionListener<Object>() {
     public void optionChanged(OptionEvent<Object> oce) {
@@ -1070,8 +1070,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void setExcludedFiles(File[] fs) { }
     public boolean getAutoRefreshStatus() {return false;}
     public void setAutoRefreshStatus(boolean b) { }
-    public void setPreferencesStoredInProject(Map<OptionParser,String> sp) { /* do nothing */ }
-    public Map<OptionParser,String> getPreferencesStoredInProject() { return new HashMap<OptionParser,String>(); }
+    public void setPreferencesStoredInProject(Map<OptionParser<?>,String> sp) { /* do nothing */ }
+    public Map<OptionParser<?>,String> getPreferencesStoredInProject() { return new HashMap<OptionParser<?>,String>(); }
 
     public void cleanBuildDirectory() { }
     
@@ -1730,8 +1730,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     builder.setCustomManifest(_state.getCustomManifest());
     
     // update preference values here
-    Map<OptionParser,String> sp = _state.getPreferencesStoredInProject();
-    for(OptionParser key: sp.keySet()) {
+    Map<OptionParser<?>,String> sp = _state.getPreferencesStoredInProject();
+    for(OptionParser<?> key: sp.keySet()) {
       sp.put(key, DrJava.getConfig().getOptionMap().getString(key));
     }
     builder.setPreferencesStoredInProject(sp);
@@ -1838,7 +1838,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     int createJarFlags = ir.getCreateJarFlags();
     final boolean autoRefresh = ir.getAutoRefreshStatus();
     final String manifest = ir.getCustomManifest();
-    final Map<OptionParser,String> storedPreferences = ir.getPreferencesStoredInProject();
+    final Map<OptionParser<?>,String> storedPreferences = ir.getPreferencesStoredInProject();
     
     // clear browser, breakpoint, and bookmark histories
     
@@ -2116,7 +2116,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     // The following copy operation is dictated by the silly "no comodification" constraint on Collection iterators
     @SuppressWarnings("unchecked")
-    RegionManager<MovingDocumentRegion>[] managers = _findResultsManagers.toArray(new RegionManager[0]);
+    List<RegionManager<MovingDocumentRegion>> managers = new ArrayList<RegionManager<MovingDocumentRegion>>(_findResultsManagers);
     for (RegionManager<MovingDocumentRegion> rm: managers) rm.removeRegions(doc);
     doc.clearBrowserRegions();
     
@@ -2388,7 +2388,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         // a class file; therefore, it cannot ever be out of sync.
         try {
           boolean b = doc.containsClassOrInterfaceOrEnum();
-          System.out.println("Checking contents of "+doc+": "+b);
           if (b) outOfSync.add(doc);
         }
         catch(BadLocationException e) {

@@ -103,7 +103,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   /** Make sure interpreting simple constants works.
     * Note that strings and characters are quoted.
     */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public void testConstants() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
       Pair.make("5", new Integer(5)),
@@ -120,7 +120,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   }
 
   /** Test simple operations with Booleans */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public void testBooleanOps() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
       //and
@@ -142,7 +142,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   }
 
   /** Tests short circuiting */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public void testShortCircuit() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
       Pair.make("false && (3 == 1/0)", Boolean.FALSE),
@@ -152,7 +152,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   }
 
   /** Tests integer operations. */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public void testIntegerOps() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
       // plus
@@ -203,7 +203,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   /**
    * Test double operations.
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public void testDoubleOps() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
       // less than
@@ -239,7 +239,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   /**
    * Test string operations
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public void testStringOps() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
       // concatenation
@@ -254,7 +254,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   /**
    * Test character operations.
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public void testCharacterOps()  throws InterpreterException{
     Pair<String,Object>[] cases = new Pair[] {
       // equals
@@ -267,7 +267,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
    * Tests that String and character declarations do not return
    * a result, while the variables themselves return a quoted result.
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public void testSemicolon() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
       Pair.make("'c' == 'c'", Boolean.valueOf('c' == 'c')),
@@ -286,7 +286,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   /**
    * Tests that null can be used in instanceof expressions.
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public void testNullInstanceOf() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
       Pair.make("null instanceof Object", Boolean.valueOf(null instanceof Object)),
@@ -310,7 +310,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   /**
    * Tests that variables are assigned default values.
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public void testVariableDefaultValues() throws InterpreterException {
     _interpreter.interpret("byte b");
     _interpreter.interpret("short s");

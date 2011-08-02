@@ -141,7 +141,7 @@ public abstract class JavacCompiler implements CompilerInterface {
     * @param c class to be run, i.e. MyClass.class
     */
   @SuppressWarnings("unchecked")
-  public static void runCommand(String s, Class c) throws Throwable {
+  public static void runCommand(String s, Class<?> c) throws Throwable {
     if (s.endsWith(";"))  s = _deleteSemiColon(s);
     List<String> tokens = ArgumentTokenizer.tokenize(s, true);
     final String classNameWithQuotes = tokens.get(1); // this is "MyClass"
@@ -155,7 +155,7 @@ public abstract class JavacCompiler implements CompilerInterface {
     
     boolean isProgram = false;
     boolean isApplet = false;
-    Class oldC = c;
+    Class<?> oldC = c;
     while(c != null) {
       if (ACM_PROGRAM_CLASSES.contains(c.getName())) { isProgram = true; break; }
       c = c.getSuperclass();
@@ -181,7 +181,7 @@ public abstract class JavacCompiler implements CompilerInterface {
         if (args.length==0) {
           try {
             // try default (nullary) constructor first
-            Constructor ctor = c.getConstructor();
+            Constructor<?> ctor = c.getConstructor();
             instance = java.applet.Applet.class.cast(ctor.newInstance());
           }
           catch(NoSuchMethodException nsme) { instance = null; }
@@ -198,7 +198,7 @@ public abstract class JavacCompiler implements CompilerInterface {
           if (instance==null) {
             try {
               // try String[] constructor next
-              Constructor ctor = c.getConstructor(String[].class);
+              Constructor<?> ctor = c.getConstructor(String[].class);
               instance = java.applet.Applet.class.cast(ctor.newInstance(new Object[] { new String[0] }));
             }
             catch(NoSuchMethodException nsme) { instance = null; }
@@ -223,7 +223,7 @@ public abstract class JavacCompiler implements CompilerInterface {
         else {
           try {
             // try String[] constructor
-            Constructor ctor = c.getConstructor(String[].class);
+            Constructor<?> ctor = c.getConstructor(String[].class);
             instance = java.applet.Applet.class.cast(ctor.newInstance(new Object[] { args }));
           }
           catch(NoSuchMethodException nsme) { instance = null; }

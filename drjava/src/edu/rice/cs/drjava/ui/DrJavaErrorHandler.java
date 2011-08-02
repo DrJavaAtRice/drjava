@@ -141,7 +141,7 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
   public static boolean isSwingBugArrayIndexOufOfBoundsExceptionInCharWidth(Throwable thrown) {
     // only ignore on Sun/Oracle JVMs
     if (!edu.rice.cs.plt.reflect.JavaVersion.CURRENT_FULL.vendor().
-          equals(edu.rice.cs.plt.reflect.JavaVersion.VendorType.SUN)) return false;
+          equals(edu.rice.cs.plt.reflect.JavaVersion.VendorType.ORACLE)) return false;
     
     // only ignore if current version is older than 6.0_18 (6.0_18 > JavaVersion.CURRENT_FULL)
     if (edu.rice.cs.plt.reflect.JavaVersion.parseFullVersion("6.0_18","Sun","Sun").

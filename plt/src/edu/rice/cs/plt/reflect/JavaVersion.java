@@ -184,7 +184,7 @@ public enum JavaVersion {
       }
       else if (java_vm_vendor.toLowerCase().contains("sun") ||
                java_vm_vendor.toLowerCase().contains("oracle")) {
-        vendor = VendorType.SUN;
+        vendor = VendorType.ORACLE;
         vendorString = "Sun";
       }
     }
@@ -428,7 +428,7 @@ public enum JavaVersion {
     
     private String stringSuffixWithVendor() {
       StringBuilder result = new StringBuilder(stringSuffix());
-      if ((!_vendor.equals(VendorType.SUN)) && 
+      if ((!_vendor.equals(VendorType.ORACLE)) && 
           (!_vendor.equals(VendorType.APPLE)) &&
           (!_vendor.equals(VendorType.UNKNOWN))) {
         result.append('-').append(_vendorString);
@@ -446,5 +446,5 @@ public enum JavaVersion {
   private static enum ReleaseType { UNRECOGNIZED, EARLY_ACCESS, BETA, RELEASE_CANDIDATE, STABLE; }
   
   /** The vendor of this version. */
-  public static enum VendorType { UNKNOWN, OPENJDK, APPLE, SUN; }
+  public static enum VendorType { UNKNOWN, OPENJDK, APPLE, ORACLE; }
 }

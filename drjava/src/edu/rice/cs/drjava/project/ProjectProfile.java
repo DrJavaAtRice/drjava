@@ -100,7 +100,7 @@ public class ProjectProfile implements ProjectFileIR {
   
   private boolean _autoRefreshStatus = false;
   
-  private HashMap<OptionParser,String> _storedPreferences = new HashMap<OptionParser,String>();
+  private HashMap<OptionParser<?>,String> _storedPreferences = new HashMap<OptionParser<?>,String>();
   
   private List<FileRegion> _bookmarks = new ArrayList<FileRegion>();
   private List<DebugBreakpointData> _breakpoints = new ArrayList<DebugBreakpointData>();
@@ -205,8 +205,8 @@ public class ProjectProfile implements ProjectFileIR {
   public boolean getAutoRefreshStatus() { return _autoRefreshStatus; }
 
   /** @return the stored preferences. */
-  public Map<OptionParser,String> getPreferencesStoredInProject() {
-    return new HashMap<OptionParser,String>(_storedPreferences);
+  public Map<OptionParser<?>,String> getPreferencesStoredInProject() {
+    return new HashMap<OptionParser<?>,String>(_storedPreferences);
   }
   
   /** Public setters, modifiers */
@@ -276,7 +276,7 @@ public class ProjectProfile implements ProjectFileIR {
   
   public void setAutoRefreshStatus(boolean status) { _autoRefreshStatus = status;}
 
-  public void setPreferencesStoredInProject(Map<OptionParser,String> sp) {
+  public void setPreferencesStoredInProject(Map<OptionParser<?>,String> sp) {
     _storedPreferences.clear();
     _storedPreferences.putAll(sp);
   }
@@ -475,7 +475,7 @@ public class ProjectProfile implements ProjectFileIR {
     }
     xc.createNode("drjava/project/preferences");
     if (!_storedPreferences.isEmpty()) {
-      for(Map.Entry<OptionParser,String> e: _storedPreferences.entrySet()) {
+      for(Map.Entry<OptionParser<?>,String> e: _storedPreferences.entrySet()) {
         Node n = xc.createNode("drjava/project/preferences/preference", null, false);
         xc.set(".name", TextUtil.xmlEscape(e.getKey().getName()), n, true);
         xc.set(".value", TextUtil.xmlEscape(e.getValue()), n, true);

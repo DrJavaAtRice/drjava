@@ -1038,7 +1038,7 @@ public class XMLConfigTest extends TestCase {
                                         + " <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
                                         + "</concutest>")); 
     
-    Assert.assertEquals("Null does not return empty string", "", xc.getNodePath(null));
+    Assert.assertEquals("Null does not return empty string", "", XMLConfig.getNodePath(null));
     
     Node concutest = xc.getNodes("concutest").get(0);
     
@@ -1047,7 +1047,7 @@ public class XMLConfigTest extends TestCase {
     while(!name.getNodeName().equals("name"))
       name = name.getNextSibling();
     
-    Assert.assertEquals("Path to name is not concutest/name", "concutest/name", xc.getNodePath(name));
+    Assert.assertEquals("Path to name is not concutest/name", "concutest/name", XMLConfig.getNodePath(name));
   }
   
   /**

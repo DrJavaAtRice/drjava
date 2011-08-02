@@ -1063,7 +1063,7 @@ public abstract class FileOps {
     File parent = f.getParentFile();
     
     // find what file system root this file is on
-    File[] roots = f.listRoots();
+    File[] roots = File.listRoots();
     File root = new File(File.separator);
     for(File r: roots) {
       if (f.getCanonicalPath().startsWith(r.getAbsolutePath())) {

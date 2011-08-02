@@ -381,8 +381,8 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
   }
   
   @SuppressWarnings("unchecked")
-  protected Map<OptionParser,String> readStoredPreferences() {
-    HashMap<OptionParser,String> storedPreferences = new HashMap<OptionParser,String>();
+  protected Map<OptionParser<?>,String> readStoredPreferences() {
+    HashMap<OptionParser<?>,String> storedPreferences = new HashMap<OptionParser<?>,String>();
     List<Node> prefs = _xc.getNodes("preferences/preference");
        
     for(Node n: prefs) {

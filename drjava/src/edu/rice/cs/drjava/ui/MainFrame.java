@@ -9976,9 +9976,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     kbm.put(KEY_BEGIN_LINE, _beginLineAction, null, "Cursor Begin Line");
     kbm.put(KEY_BEGIN_LINE_SELECT, _selectionBeginLineAction, null, "Cursor Begin Line (Select)");
     
-    kbm.put(KEY_PREVIOUS_WORD, actionMap.get(_currentDefDoc.getEditor().previousWordAction), null, 
+    kbm.put(KEY_PREVIOUS_WORD, actionMap.get(DefaultEditorKit.previousWordAction), null, 
             "Cursor Previous Word");
-    kbm.put(KEY_PREVIOUS_WORD_SELECT, actionMap.get(_currentDefDoc.getEditor().selectionPreviousWordAction), null, 
+    kbm.put(KEY_PREVIOUS_WORD_SELECT, actionMap.get(DefaultEditorKit.selectionPreviousWordAction), null, 
             "Cursor Previous Word (Select)");
     
     kbm.put(KEY_DOWN, actionMap.get(DefaultEditorKit.downAction), null, "Cursor Down");
@@ -9992,8 +9992,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     kbm.put(KEY_END_LINE_SELECT, actionMap.get(DefaultEditorKit.selectionEndLineAction), null, 
             "Cursor End Line (Select)");
     
-    kbm.put(KEY_NEXT_WORD, actionMap.get(_currentDefDoc.getEditor().nextWordAction), null, "Cursor Next Word");
-    kbm.put(KEY_NEXT_WORD_SELECT, actionMap.get(_currentDefDoc.getEditor().selectionNextWordAction), null, 
+    kbm.put(KEY_NEXT_WORD, actionMap.get(DefaultEditorKit.nextWordAction), null, "Cursor Next Word");
+    kbm.put(KEY_NEXT_WORD_SELECT, actionMap.get(DefaultEditorKit.selectionNextWordAction), null, 
             "Cursor Next Word (Select)");
     
     kbm.put(KEY_FORWARD, actionMap.get(DefaultEditorKit.forwardAction), null, "Cursor Forward");

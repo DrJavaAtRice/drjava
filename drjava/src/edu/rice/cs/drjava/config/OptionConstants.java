@@ -1251,10 +1251,11 @@ public interface OptionConstants {
   static final String JAVADOC_1_4_TEXT = "1.4";
   static final String JAVADOC_1_5_TEXT = "1.5";
   static final String JAVADOC_1_6_TEXT = "1.6";
+  static final String JAVADOC_1_7_TEXT = "1.7";
   static final String JAVADOC_AUTO_TEXT = "use compiler version"; // for "Open Java API Javadoc"
   
   static final String[] linkChoices = new String[]{
-    JAVADOC_NONE_TEXT, JAVADOC_1_5_TEXT, JAVADOC_1_6_TEXT };
+    JAVADOC_NONE_TEXT, JAVADOC_1_5_TEXT, JAVADOC_1_6_TEXT, JAVADOC_1_7_TEXT };
   static final ArrayList<String> linkVersionChoices = new ArrayList<String>(Arrays.asList(linkChoices));
 
   static final String[] linkDeprecated = new String[]{
@@ -1270,16 +1271,19 @@ public interface OptionConstants {
     new StringOption("javadoc.1.5.link", "http://download.oracle.com/javase/1.5.0/docs/api");
   public static final StringOption JAVADOC_1_6_LINK =
     new StringOption("javadoc.1.6.link", "http://download.oracle.com/javase/6/docs/api");
+  public static final StringOption JAVADOC_1_7_LINK =
+    new StringOption("javadoc.1.7.link", "http://download.oracle.com/javase/7/docs/api/");
   
   /** The version of Java to use for links to Javadoc for system classes. */
   public static final ForcedChoiceOption JAVADOC_LINK_VERSION =
     new ForcedChoiceOption("javadoc.link.version",
                            (System.getProperty("java.specification.version").startsWith("1.5") ? JAVADOC_1_5_TEXT : 
-                              JAVADOC_1_6_TEXT),
+                              (System.getProperty("java.specification.version").startsWith("1.6") ? JAVADOC_1_6_TEXT : 
+                                 JAVADOC_1_7_TEXT)),
                            linkVersionChoices, linkVersionDeprecated);
   
   static final String[] apiJavadocChoices = new String[] {
-    JAVADOC_1_5_TEXT, JAVADOC_1_6_TEXT, JAVADOC_AUTO_TEXT};
+    JAVADOC_1_5_TEXT, JAVADOC_1_6_TEXT, JAVADOC_1_7_TEXT, JAVADOC_AUTO_TEXT};
   static final ArrayList<String> apiJavadocVersionChoices = new ArrayList<String>(Arrays.asList(apiJavadocChoices));
 
   static final String[] apiJavadocDeprecated = new String[] {
@@ -1473,25 +1477,23 @@ public interface OptionConstants {
    * compilers that it has
    * Must store the selected name into DEFAULT_COMPILER_PREFERENCE to save the setting
    */
-  public static final class COMPILER_PREFERENCE_CONTROL
-  {
+  public static final class COMPILER_PREFERENCE_CONTROL {
     public static final String NO_PREFERENCE = "No Preference";
     public static ArrayList<String> _list = new ArrayList<String>();
     
-    public static void setList(ArrayList<String> list) {_list = list;}
-    public static ForcedChoiceOption evaluate() 
-    {
-      _list.add(NO_PREFERENCE);
+    public static void setList(ArrayList<String> list) { _list = list; }
+    public static ForcedChoiceOption evaluate() {
+      if (!_list.contains(NO_PREFERENCE)) {
+        _list.add(NO_PREFERENCE);
+      }
       
       ForcedChoiceOption fco;
       String defaultC = edu.rice.cs.drjava.DrJava.getConfig().getSetting(DEFAULT_COMPILER_PREFERENCE);
  
-      if(_list.contains(defaultC)) 
-      {
-        fco = new ForcedChoiceOption("default.compiler.preference.control", defaultC, _list);
+      if (_list.contains(defaultC))  {
+        fco = new ForcedChoiceOption("compiler.preference.control", defaultC, _list);
       }
-      else
-      {
+      else {
         fco = new ForcedChoiceOption("compiler.preference.control", NO_PREFERENCE, _list);
         edu.rice.cs.drjava.DrJava.getConfig().setSetting(DEFAULT_COMPILER_PREFERENCE,NO_PREFERENCE);
       }

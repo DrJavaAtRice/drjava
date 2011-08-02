@@ -77,13 +77,13 @@ public class ProjectAdvancedPropertiesFrame extends SwingFrame {
   private SwingFrame _parentFrame;
   private SingleDisplayModel _model; 
   private VectorOptionComponent<PreferencesRecord> _preferencesList;
-  private volatile Map<OptionParser,String> _unmodifiedStoredPreferences = new HashMap<OptionParser,String>();
+  private volatile Map<OptionParser<?>,String> _unmodifiedStoredPreferences = new HashMap<OptionParser<?>,String>();
   
   protected static class PreferencesRecord implements Comparable<PreferencesRecord> {
-    public final OptionParser option;
+    public final OptionParser<?> option;
     public final String shortDesc;
     public final String longDesc;
-    public PreferencesRecord(OptionParser o, String s, String l) {
+    public PreferencesRecord(OptionParser<?> o, String s, String l) {
       option = o;
       shortDesc = s;
       longDesc = StringOps.removeHTML(l);
@@ -105,8 +105,8 @@ public class ProjectAdvancedPropertiesFrame extends SwingFrame {
 
   static {
     ArrayList<PreferencesRecord> list = new ArrayList<PreferencesRecord>();
-    for(Map.Entry<OptionParser,String> e: edu.rice.cs.drjava.ui.config.ConfigDescriptions.CONFIG_DESCRIPTIONS.entrySet()) {
-      OptionParser o = e.getKey();
+    for(Map.Entry<OptionParser<?>,String> e: edu.rice.cs.drjava.ui.config.ConfigDescriptions.CONFIG_DESCRIPTIONS.entrySet()) {
+      OptionParser<?> o = e.getKey();
       String shortDesc = e.getValue();
       String longDesc = edu.rice.cs.drjava.ui.config.ConfigDescriptions.CONFIG_LONG_DESCRIPTIONS.get(o);
       list.add(new PreferencesRecord(o, shortDesc, longDesc));
@@ -203,14 +203,14 @@ public class ProjectAdvancedPropertiesFrame extends SwingFrame {
     setPreferencesStoredInProject(_unmodifiedStoredPreferences);
   }
   
-  public void reset(Map<OptionParser,String> sp) {
-    _unmodifiedStoredPreferences = new HashMap<OptionParser,String>(sp);
+  public void reset(Map<OptionParser<?>,String> sp) {
+    _unmodifiedStoredPreferences = new HashMap<OptionParser<?>,String>(sp);
     setPreferencesStoredInProject(_unmodifiedStoredPreferences);
   }
   
   @SuppressWarnings("unchecked")
-  public Map<OptionParser,String> getPreferencesStoredInProject() {
-    Map<OptionParser,String> sp = new HashMap<OptionParser,String>();
+  public Map<OptionParser<?>,String> getPreferencesStoredInProject() {
+    Map<OptionParser<?>,String> sp = new HashMap<OptionParser<?>,String>();
     for(PreferencesRecord pr: _preferencesList.getValue()) {
       sp.put(pr.option, DrJava.getConfig().getOptionMap().getString(pr.option));
     }
@@ -218,9 +218,9 @@ public class ProjectAdvancedPropertiesFrame extends SwingFrame {
   }
 
   @SuppressWarnings("unchecked")
-  public void setPreferencesStoredInProject(Map<OptionParser,String> sp) {
+  public void setPreferencesStoredInProject(Map<OptionParser<?>,String> sp) {
     ArrayList<PreferencesRecord> list = new ArrayList<PreferencesRecord>();
-    for(OptionParser o: sp.keySet()) {
+    for(OptionParser<?> o: sp.keySet()) {
       list.add(new PreferencesRecord
                  (o,
                   edu.rice.cs.drjava.ui.config.ConfigDescriptions.CONFIG_DESCRIPTIONS.get(o),

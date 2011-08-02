@@ -98,7 +98,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
 
   private VectorAbsRelFileOptionComponent _extraClassPathList;
   private VectorFileOptionComponent _excludedFilesList;
-  private Map<OptionParser,String> _storedPreferences = new HashMap<OptionParser,String>();
+  private Map<OptionParser<?>,String> _storedPreferences = new HashMap<OptionParser<?>,String>();
   
   /** Constructs project properties frame for a new project and displays it.  Assumes that a project is active. */
   public ProjectPropertiesFrame(MainFrame mf) {
@@ -724,7 +724,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
           _mainFrame.hourglassOff();
           _mainFrame.installModalWindowAdapter(ProjectPropertiesFrame.this, LambdaUtil.NO_OP, CANCEL);
           toFront();
-          Map<OptionParser,String> newValues = this.getPreferencesStoredInProject();
+          Map<OptionParser<?>,String> newValues = this.getPreferencesStoredInProject();
           if (!newValues.keySet().equals(_storedPreferences.keySet())) {            
             _storedPreferences.clear();
             _storedPreferences.putAll(newValues);

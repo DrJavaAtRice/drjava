@@ -101,8 +101,8 @@ class DefaultPlatform implements PlatformSupport {
    *
    * @param main Class object for com.sun.tools.javadoc.Main
    */
-  @SuppressWarnings("unchecked")
-  private boolean _javadocMainHasExecuteMethod(Class main) {
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  private boolean _javadocMainHasExecuteMethod(Class<?> main) {
     try {
       Class<String[]>[] arr = new Class[]{String[].class};
       main.getMethod("execute", arr);

@@ -38,6 +38,7 @@
   <property name="drjava-jar" value="${env.DRJAVA_JAR}" />
   <property name="java5-home" value="${env.JAVA5_HOME}" />
   <property name="java6-home" value="${env.JAVA6_HOME}" />
+  <property name="java7-home" value="${env.JAVA7_HOME}" />
   <property name="openjdk6-home" value="${env.OPENJDK6_HOME}" />
   <property name="mint-home" value="${env.MINT_HOME}" />
   <property name="nextgen-home" value="${env.NGC_HOME}" />
@@ -86,6 +87,7 @@
     <echo message="            implement interfaces defined there)." />
     <echo message="JAVA5_HOME: Home folder of the Java 5 JDK" />
     <echo message="JAVA6_HOME: Home folder of the Java 6 JDK" />
+    <echo message="JAVA7_HOME: Home folder of the Java 7 JDK" />
     <echo message="OPENJDK6_HOME: Home folder of the OpenJDK 6" />
     <echo message="MINT_HOME: Home folder of the Mint distribution" />
     <echo message="NEXTGEN_HOME: Home folder of the NextGen distribution" />
@@ -169,6 +171,16 @@
       <param name="source-version" value="1.6" />
       <param name="runtime-jar" value="${java6-runtime}" />
       <param name="extra-classpath" value="${java6-tools}" />
+    </antcall>
+  </target>
+  
+  <target name="compile-jdk7" depends="resolve-java7-runtime, resolve-java7-tools" 
+          description="Compile the 'jdk7' sources">
+    <antcall target="do-compile">
+      <param name="platform-tag" value="jdk7" />
+      <param name="source-version" value="1.7" />
+      <param name="runtime-jar" value="${java7-runtime}" />
+      <param name="extra-classpath" value="${java7-tools}" />
     </antcall>
   </target>
   
@@ -353,6 +365,15 @@
       <param name="platform-tag" value="jdk6" />
       <param name="extra-classpath" value="${java6-tools}" />
       <param name="test-jvm" value="${java6-exec}" />
+    </antcall>
+  </target>
+
+  <target name="test-jdk7" depends="compile-jdk7, resolve-java7-exec, resolve-java7-tools" 
+          description="Run all 'jdk7' tests (after compiling); use -Dtest-spec=... to filter">
+    <antcall target="iterate-tests">
+      <param name="platform-tag" value="jdk7" />
+      <param name="extra-classpath" value="${java7-tools}" />
+      <param name="test-jvm" value="${java7-exec}" />
     </antcall>
   </target>
 
@@ -552,6 +573,7 @@
       <fileset dir="classes/lib" />
       <fileset dir="classes/base-jdk5" />
       <fileset dir="classes/base-jdk6" />
+      <fileset dir="classes/base-jdk7" />
       <fileset dir="classes/base-openjdk6" />
       <fileset dir="classes/base-mint" />
       <fileset dir="classes/base-nextgen" />
@@ -572,6 +594,7 @@
       </manifest>
       <fileset dir="classes/base-jdk5" />
       <fileset dir="classes/base-jdk6" />
+      <fileset dir="classes/base-jdk7" />
       <fileset dir="classes/base-openjdk6" />
       <fileset dir="classes/base-mint" />
       <fileset dir="classes/base-nextgen" />
@@ -598,6 +621,7 @@
     <delete dir="classes/lib" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-jdk5" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-jdk6" failonerror="${clean-can-fail}" />
+    <delete dir="classes/test-jdk7" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-openjdk6" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-mint" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-nextgen" failonerror="${clean-can-fail}" />
@@ -934,6 +958,56 @@
     <available property="java6-tools" value="${java6-tools-3}" file="${java6-tools-3}" />
 
     <fail message="Can't find tools.jar in the Java 6 home: ${java6-home}" unless="java6-tools" />
+  </target>
+
+  <target name="resolve-java7-runtime">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java7-runtime will only be set the *first* time. -->
+
+    <property name="java7-runtime-1" location="${java7-home}/lib/rt.jar" />
+    <available property="java7-runtime" value="${java7-runtime-1}" file="${java7-runtime-1}" />
+
+    <property name="java7-runtime-2" location="${java7-home}/jre/lib/rt.jar" />
+    <available property="java7-runtime" value="${java7-runtime-2}" file="${java7-runtime-2}" />
+
+    <property name="java7-runtime-3" location="${java7-home}/../Classes/classes.jar" />
+    <available property="java7-runtime" value="${java7-runtime-3}" file="${java7-runtime-3}" />
+
+    <fail message="Can't find rt.jar in the Java 7 home: ${java7-home}" unless="java7-runtime" />
+  </target>
+  
+  <target name="resolve-java7-exec">
+    <!-- We rely on "location" to generate a platform-specific path -->
+
+    <property name="java7-exec-1" location="${java7-home}/bin/java.exe" />
+    <condition property="java7-exec" value="${java7-exec-1}">
+      <and>
+        <available file="${java7-exec-1}" />
+        <os family="windows" />
+      </and>
+    </condition>
+    
+    <property name="java7-exec-2" location="${java7-home}/bin/java" />
+    <available property="java7-exec" value="${java7-exec-2}" file="${java7-exec-2}" />
+
+    <fail message="Can't find the java executable in the Java 7 home: ${java7-home}" unless="java7-exec" />
+    <echo message="${java7-exec}"/>
+  </target>
+  
+  <target name="resolve-java7-tools">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java7-tools will only be set the *first* time. -->
+
+    <property name="java7-tools-1" location="${java7-home}/lib/tools.jar" />
+    <available property="java7-tools" value="${java7-tools-1}" file="${java7-tools-1}" />
+
+    <property name="java7-tools-2" location="${java7-home}/jre/lib/tools.jar" />
+    <available property="java7-tools" value="${java7-tools-2}" file="${java7-tools-2}" />
+
+    <property name="java7-tools-3" location="${java7-home}/../Classes/classes.jar" />
+    <available property="java7-tools" value="${java7-tools-3}" file="${java7-tools-3}" />
+
+    <fail message="Can't find tools.jar in the Java 7 home: ${java7-home}" unless="java7-tools" />
   </target>
 
   <target name="resolve-openjdk6-runtime">

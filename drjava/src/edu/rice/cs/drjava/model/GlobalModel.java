@@ -464,10 +464,10 @@ public interface GlobalModel extends ILoadDocuments {
   public void setAutoRefreshStatus(boolean b);
   
   /** @return the stored preferences. */
-  public Map<OptionParser,String> getPreferencesStoredInProject();
+  public Map<OptionParser<?>,String> getPreferencesStoredInProject();
   
   /** Set the preferences stored in the project. */
-  public void setPreferencesStoredInProject(Map<OptionParser,String> sp);
+  public void setPreferencesStoredInProject(Map<OptionParser<?>,String> sp);
   
   /** @return the working directory for the Master JVM. */
   public File getMasterWorkingDirectory();

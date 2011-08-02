@@ -42,6 +42,8 @@ import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
 
+import edu.rice.cs.plt.reflect.JavaVersion;
+
 import java.io.File;
 
 /** Tests the functionality of the InteractionsDJDocument. */

@@ -23,7 +23,6 @@
   <property name="test-repeat" value="1" />
   <property name="test-timeout" value="1440" />
   <property name="test-formatter" value="oneline" />
-  <property name="use-concjunit" value="true" />
   <property name="findbugs-formatter" value="html" />
   <property name="test-halt" value="false" />
   <property name="force-server" value="no" />
@@ -41,6 +40,7 @@
   <property name="drjava.test.config" value="testFiles/drjava.basic.config" />
   
   <property environment="env" />
+  <property name="java7-home" value="${env.JAVA7_HOME}" />
   <property name="java6-home" value="${env.JAVA6_HOME}" />
   <property name="java5-home" value="${env.JAVA5_HOME}" />
   <property name="launch4j-home" value="${env.LAUNCH4J_HOME}" />
@@ -68,7 +68,18 @@
 
   <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
   
-  
+  <!-- Use ConcJUnit if use-concjunit is not defined and we are not running Java 7. -->
+  <!-- ConcJUnit is currently incompatible with Java 7. -->
+  <if>
+    <contains string="${java.version}" substring="1.7"/>
+    <then>
+      <echo message="ConcJUnit is currently incompatible with Java 7."/>
+      <property name="use-concjunit" value="false" />
+    </then>
+    <else>
+      <property name="use-concjunit" value="true" />
+    </else>
+  </if>
   
   <!-- ************
        Help Targets
@@ -91,6 +102,8 @@
     <echo message="            compiling and '-5' targets)" />
     <echo message="JAVA6_HOME: Home folder of the Java 6 JRE or JDK (required for" />
     <echo message="            '-6' targets)" />
+    <echo message="JAVA7_HOME: Home folder of the Java 7 JRE or JDK (required for" />
+    <echo message="            '-7' targets)" />
     <echo message="LAUNCH4J_HOME: Location of the Launch4j installation (used to " />
     <echo message="               release a Windows application)" />
     <echo message="CLOVER_JAR: Location of the Clover jar file" />
@@ -296,6 +309,17 @@
     <antcall target="iterate-tests">
       <param name="test-jvm" value="java" />
       <param name="test-tools" value="${current-tools}" />
+      <param name="test-force-disable-concjunit" value="false" />
+    </antcall>
+  </target>
+
+  <target name="test-7" depends="compile, resolve-java7-exec, resolve-java7-tools" unless="skip-test"
+          description="Run all tests under Java 7 (after compiling); use -Dtest-spec=... to filter">
+    <echo message="ConcJUnit is currently incompatible with Java 7."/>
+    <antcall target="iterate-tests">
+      <param name="test-jvm" value="${java7-exec}" />
+      <param name="test-tools" value="${java7-tools}" />
+      <param name="test-force-disable-concjunit" value="true" />
     </antcall>
   </target>
 
@@ -304,6 +328,7 @@
     <antcall target="iterate-tests">
       <param name="test-jvm" value="${java6-exec}" />
       <param name="test-tools" value="${java6-tools}" />
+      <param name="test-force-disable-concjunit" value="false" />
     </antcall>
   </target>
   
@@ -312,6 +337,7 @@
     <antcall target="iterate-tests">
       <param name="test-jvm" value="${java5-exec}" />
       <param name="test-tools" value="${java5-tools}" />
+      <param name="test-force-disable-concjunit" value="false" />
     </antcall>
   </target>
   
@@ -401,7 +427,7 @@
   
   
   <target name="do-test" depends="resolve-jvm-args, resolve-junit-jar">
-    <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}'" />
+    <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}' and '${test-tools}'" />
     <extendclasspath path="${junit-jar}" />
     <junit haltonfailure="${test-halt}" failureproperty="test-failed"
            fork="yes" forkmode="perTest" maxmemory="800M" jvm="${test-jvm}" dir="${basedir}">
@@ -442,6 +468,13 @@
     </antcall>
   </target>
   
+  <target name="run-7" depends="compile, resolve-java7-exec"
+          description="Run the main class under Java 7 (after compiling)">
+    <antcall target="do-run">
+      <param name="run-jvm" value="${java7-exec}" />
+    </antcall>
+  </target>
+  
   <target name="run-6" depends="compile, resolve-java6-exec"
           description="Run the main class under Java 6 (after compiling)">
     <antcall target="do-run">
@@ -478,6 +511,13 @@
   <target name="run-jar" depends="jar" description="Run the jar file (after building it)">
     <antcall target="do-run-jar">
       <param name="run-jvm" value="java" />
+    </antcall>
+  </target>
+  
+  <target name="run-jar-7" depends="jar, resolve-java7-exec"
+          description="Run the jar file under Java 7 (after building it)">
+    <antcall target="do-run-jar">
+      <param name="run-jvm" value="${java7-exec}" />
     </antcall>
   </target>
   
@@ -591,6 +631,9 @@
   
   <target name="clover" depends="clean, setup-clover, test, report-clover" 
           description="Generate a Clover test coverage report" />
+  
+  <target name="clover-7" depends="clean, setup-clover, test-7, report-clover" 
+          description="Generate a Clover test coverage report under Java 7" />
   
   <target name="clover-6" depends="clean, setup-clover, test-6, report-clover" 
           description="Generate a Clover test coverage report under Java 6" />
@@ -1209,6 +1252,39 @@
        Property-resolution Targets 
        *************************** -->
   
+  <target name="resolve-java7-runtime">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java7-runtime will only be set the *first* time. -->
+
+    <property name="java7-runtime-1" location="${java7-home}/lib/rt.jar" />
+    <available property="java7-runtime" value="${java7-runtime-1}" file="${java7-runtime-1}" />
+
+    <property name="java7-runtime-2" location="${java7-home}/jre/lib/rt.jar" />
+    <available property="java7-runtime" value="${java7-runtime-2}" file="${java7-runtime-2}" />
+
+    <property name="java7-runtime-3" location="${java7-home}/../Classes/classes.jar" />
+    <available property="java7-runtime" value="${java7-runtime-3}" file="${java7-runtime-3}" />
+
+    <fail message="Can't find rt.jar in the Java 7 home: ${java7-home}" unless="java7-runtime" />
+  </target>
+  
+  <target name="resolve-java7-exec">
+    <!-- We rely on "location" to generate a platform-specific path -->
+
+    <property name="java7-exec-1" location="${java7-home}/bin/java.exe" />
+    <condition property="java7-exec" value="${java7-exec-1}">
+      <and>
+        <available file="${java7-exec-1}" />
+        <os family="windows" />
+      </and>
+    </condition>
+    
+    <property name="java7-exec-2" location="${java7-home}/bin/java" />
+    <available property="java7-exec" value="${java7-exec-2}" file="${java7-exec-2}" />
+
+    <fail message="Can't find the java executable in the Java 7 home: ${java7-home}" unless="java7-exec" />
+  </target>
+  
   <target name="resolve-java6-runtime">
     <!-- We rely on "location" to generate a platform-specific path; note that properties
          are immutable and so java6-runtime will only be set the *first* time. -->
@@ -1275,6 +1351,19 @@
     <fail message="Can't find the java executable in the Java 5 home: ${java5-home}" unless="java5-exec" />
   </target>
     
+  <target name="resolve-java7-tools">
+    <property name="java7-tools-1" location="${java7-home}/lib/tools.jar" />
+    <available property="java7-tools" value="${java7-tools-1}" file="${java7-tools-1}" />
+
+    <property name="java7-tools-2" location="${java7-home}/../lib/tools.jar" />
+    <available property="java7-tools" value="${java7-tools-2}" file="${java7-tools-2}" />
+
+    <property name="java7-tools-3" location="${java7-home}/../Classes/classes.jar" />
+    <available property="java7-tools" value="${java7-tools-3}" file="${java7-tools-3}" />
+
+    <fail message="Can't find tools.jar in the Java 7 home: ${java7-home}" unless="java7-tools" />
+  </target>
+  
   <target name="resolve-java6-tools">
     <property name="java6-tools-1" location="${java6-home}/lib/tools.jar" />
     <available property="java6-tools" value="${java6-tools-1}" file="${java6-tools-1}" />
@@ -1468,7 +1557,10 @@
        ***************** -->
   <target name="resolve-junit-jar">
     <if>
-      <istrue value="${use-concjunit}" />
+      <and>
+        <istrue value="${use-concjunit}" />
+        <isfalse value="${test-force-disable-concjunit}" />
+      </and>
       <then>
         <property name="junit-jar-1" location="lib/buildlib/concutest-junit-4.7-withrt-nodep.jar" />
         <available property="junit-jar" value="${junit-jar-1}" file="${junit-jar-1}" />

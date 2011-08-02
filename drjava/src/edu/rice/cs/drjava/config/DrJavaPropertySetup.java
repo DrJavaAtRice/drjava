@@ -707,7 +707,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       public Boolean value(Double op1, Double op2) { return (op1>op2); }
     };
     
-    BinaryOpProperty prop17 = 
+    BinaryOpProperty<Double,Double,Boolean> prop17 = 
       new BinaryOpProperty<Double,Double,Boolean>("gt", 
                                                   msg17, 
                                                   lam17,
@@ -727,7 +727,7 @@ public class DrJavaPropertySetup implements OptionConstants {
       public Boolean value(Double op1, Double op2) { return (op1<op2); }
     };
     
-    BinaryOpProperty prop18 =  
+    BinaryOpProperty<Double,Double,Boolean> prop18 =  
       new BinaryOpProperty<Double,Double,Boolean>("lt",
                                                   msg18,
                                                   lam18,

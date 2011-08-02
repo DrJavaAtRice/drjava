@@ -62,6 +62,7 @@ import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.swing.ProcessingDialog;
 import edu.rice.cs.plt.lambda.Runnable1;
+import edu.rice.cs.plt.reflect.JavaVersion;
 
 import static edu.rice.cs.drjava.ui.config.ConfigDescriptions.*;
 
@@ -862,6 +863,8 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, 
                        newStringOptionComponent(OptionConstants.JAVADOC_1_6_LINK));
     addOptionComponent(panel, 
+                       newStringOptionComponent(OptionConstants.JAVADOC_1_7_LINK));
+    addOptionComponent(panel, 
                        newStringOptionComponent(OptionConstants.JUNIT_LINK));
 
     VectorStringOptionComponent additionalJavadoc =
@@ -1363,174 +1366,181 @@ public class ConfigFrame extends SwingFrame {
 
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
 
-    final ForcedChoiceOptionComponent concJUnitChecksEnabledComponent =
-      newForcedChoiceOptionComponent(OptionConstants.CONCJUNIT_CHECKS_ENABLED);
-    addOptionComponent(panel, concJUnitChecksEnabledComponent);
-
-    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));    
-
-    final FileOptionComponent rtConcJUnitLoc =
-      newFileOptionComponent(OptionConstants.RT_CONCJUNIT_LOCATION,
-                             new FileSelectorComponent(this, _jarChooser, 30, 10f) {
-      public void setFileField(File file) {
-        if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidRTConcJUnitFile(file)) {
-          super.setFileField(file);
-        }
-        else if (file.exists()) { // invalid but exists
-          JOptionPane.showMessageDialog(_parent, "The file '"+ file.getName() + "'\nis not a valid ConcJUnit Runtime file.",
-                                        "Invalid ConcJUnit Runtime File", JOptionPane.ERROR_MESSAGE);
-          resetFileField(); // revert if not valid          
-        }
-      }
-      public boolean validateTextField() {
-        String newValue = _fileField.getText().trim();
-        
-        File newFile = FileOps.NULL_FILE;
-        if (!newValue.equals(""))
-          newFile = new File(newValue);
-        
-        if (newFile != FileOps.NULL_FILE && !newFile.exists()) {
-          JOptionPane.showMessageDialog(_parent, "The file '"+ newFile.getName() + "'\nis invalid because it does not exist.",
-                                        "Invalid File Name", JOptionPane.ERROR_MESSAGE);
-          if (_file != null && ! _file.exists()) _file = FileOps.NULL_FILE;
-          resetFileField(); // revert if not valid
-          
-          return false;
-        }
-        else {
-          if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidRTConcJUnitFile(newFile) ||
-              FileOps.NULL_FILE.equals(newFile)) {
-            setFileField(newFile);
-            return true;
+    boolean javaVersion7 = JavaVersion.CURRENT.supports(JavaVersion.JAVA_7);
+    if (!javaVersion7) {
+      final ForcedChoiceOptionComponent concJUnitChecksEnabledComponent =
+        newForcedChoiceOptionComponent(OptionConstants.CONCJUNIT_CHECKS_ENABLED);
+      addOptionComponent(panel, concJUnitChecksEnabledComponent);
+      
+      addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));    
+      
+      final FileOptionComponent rtConcJUnitLoc =
+        newFileOptionComponent(OptionConstants.RT_CONCJUNIT_LOCATION,
+                               new FileSelectorComponent(this, _jarChooser, 30, 10f) {
+        public void setFileField(File file) {
+          if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidRTConcJUnitFile(file)) {
+            super.setFileField(file);
           }
-          else {
-            JOptionPane.showMessageDialog(_parent, "The file '"+ newFile.getName() + "'\nis not a valid ConcJUnit Runtime file.",
+          else if (file.exists()) { // invalid but exists
+            JOptionPane.showMessageDialog(_parent, "The file '"+ file.getName() + "'\nis not a valid ConcJUnit Runtime file.",
                                           "Invalid ConcJUnit Runtime File", JOptionPane.ERROR_MESSAGE);
+            resetFileField(); // revert if not valid          
+          }
+        }
+        public boolean validateTextField() {
+          String newValue = _fileField.getText().trim();
+          
+          File newFile = FileOps.NULL_FILE;
+          if (!newValue.equals(""))
+            newFile = new File(newValue);
+          
+          if (newFile != FileOps.NULL_FILE && !newFile.exists()) {
+            JOptionPane.showMessageDialog(_parent, "The file '"+ newFile.getName() + "'\nis invalid because it does not exist.",
+                                          "Invalid File Name", JOptionPane.ERROR_MESSAGE);
+            if (_file != null && ! _file.exists()) _file = FileOps.NULL_FILE;
             resetFileField(); // revert if not valid
             
             return false;
           }
-        }
-      }    
-    });
-    rtConcJUnitLoc.setFileFilter(ClassPathFilter.ONLY);
-    
-    ActionListener processRTListener = new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        File concJUnitJarFile = FileOps.getDrJavaFile();
-        if (junitLocEnabled.getComponent().isSelected()) {
-          concJUnitJarFile = junitLoc.getComponent().getFileFromField();
-        }
-        File rtFile = rtConcJUnitLoc.getComponent().getFileFromField();
-        edu.rice.cs.drjava.model.junit.ConcJUnitUtils.
-          showGenerateRTConcJUnitJarFileDialog(ConfigFrame.this,
-                                               rtFile,
-                                               concJUnitJarFile,
-                                               new Runnable1<File>() {
-          public void run(File targetFile) {
-            rtConcJUnitLoc.getComponent().setFileField(targetFile);
+          else {
+            if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidRTConcJUnitFile(newFile) ||
+                FileOps.NULL_FILE.equals(newFile)) {
+              setFileField(newFile);
+              return true;
+            }
+            else {
+              JOptionPane.showMessageDialog(_parent, "The file '"+ newFile.getName() + "'\nis not a valid ConcJUnit Runtime file.",
+                                            "Invalid ConcJUnit Runtime File", JOptionPane.ERROR_MESSAGE);
+              resetFileField(); // revert if not valid
+              
+              return false;
+            }
           }
-        },
-                                               new Runnable() { public void run() { } });
-      }
-    };
-    final ButtonComponent processRT =
-      new ButtonComponent(processRTListener, "Generate ConcJUnit Runtime File", this,
-                          "<html>Generate the ConcJUnit Runtime file specified above.<br>"+
-                          "This setting is deactivated if the path to ConcJUnit has not been specified above.</html>");
-    
-    OptionComponent.ChangeListener rtConcJUnitListener = new OptionComponent.ChangeListener() {
-      public Object value(Object oc) {
-        File f = junitLoc.getComponent().getFileFromField();
-        boolean enabled = (!junitLocEnabled.getComponent().isSelected()) ||
-          edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(f);
-        rtConcJUnitLoc.getComponent().setEnabled(enabled);
-        processRT.getComponent().setEnabled(enabled);
-        concJUnitChecksEnabledComponent.getComponent().setEnabled(enabled);
-        return null;
-      }
-    };
-
-    OptionComponent.ChangeListener junitLocListener = new OptionComponent.ChangeListener() {
-      public Object value(Object oc) {
-        boolean enabled = junitLocEnabled.getComponent().isSelected();
-        junitLoc.getComponent().setEnabled(enabled);
-        return null;
-      }
-    };
-    junitLocEnabled.addChangeListener(junitLocListener);
-    junitLocEnabled.addChangeListener(rtConcJUnitListener);
-    junitLoc.addChangeListener(rtConcJUnitListener);
-    addOptionComponent(panel, rtConcJUnitLoc);
-    addOptionComponent(panel, processRT);
-    
-    addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
-    final LabelComponent internalExternalStatus = new LabelComponent("<html>&nbsp;</html>", this, true);
-    final LabelComponent threadsStatus = new LabelComponent("<html>&nbsp;</html>", this, true);
-    final LabelComponent joinStatus = new LabelComponent("<html>&nbsp;</html>", this, true);
-    final LabelComponent luckyStatus = new LabelComponent("<html>&nbsp;</html>", this, true);
-    OptionComponent.ChangeListener junitStatusChangeListener = new OptionComponent.ChangeListener() {
-      public Object value(Object oc) {
-        File f = junitLoc.getComponent().getFileFromField();
-        String[] s = new String[] { " ", " ", " ", " " };
-        boolean isConcJUnit = true;
-        if ((!junitLocEnabled.getComponent().isSelected()) || (f==null) || FileOps.NULL_FILE.equals(f) || !f.exists()) {
-          s[0] = "DrJava uses the built-in ConcJUnit framework.";
-        }
-        else {
-          String type = "ConcJUnit";
-          if (!edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(f)) {
-            type = "JUnit";
-            isConcJUnit = false;
+        }    
+      });
+      rtConcJUnitLoc.setFileFilter(ClassPathFilter.ONLY);
+      
+      ActionListener processRTListener = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          File concJUnitJarFile = FileOps.getDrJavaFile();
+          if (junitLocEnabled.getComponent().isSelected()) {
+            concJUnitJarFile = junitLoc.getComponent().getFileFromField();
           }
-          s[0] = "DrJava uses an external "+type+" framework.";
+          File rtFile = rtConcJUnitLoc.getComponent().getFileFromField();
+          edu.rice.cs.drjava.model.junit.ConcJUnitUtils.
+            showGenerateRTConcJUnitJarFileDialog(ConfigFrame.this,
+                                                 rtFile,
+                                                 concJUnitJarFile,
+                                                 new Runnable1<File>() {
+            public void run(File targetFile) {
+              rtConcJUnitLoc.getComponent().setFileField(targetFile);
+            }
+          },
+                                                 new Runnable() { public void run() { } });
         }
-        if (!isConcJUnit) {
-          s[1] = "JUnit does not support all-thread, no-join";
-          s[2] = "or lucky checks. They are all disabled.";
+      };
+      final ButtonComponent processRT =
+        new ButtonComponent(processRTListener, "Generate ConcJUnit Runtime File", this,
+                            "<html>Generate the ConcJUnit Runtime file specified above.<br>"+
+                            "This setting is deactivated if the path to ConcJUnit has not been specified above.</html>");
+      
+      OptionComponent.ChangeListener rtConcJUnitListener = new OptionComponent.ChangeListener() {
+        public Object value(Object oc) {
+          File f = junitLoc.getComponent().getFileFromField();
+          boolean enabled = (!junitLocEnabled.getComponent().isSelected()) ||
+            edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(f);
+          rtConcJUnitLoc.getComponent().setEnabled(enabled);
+          processRT.getComponent().setEnabled(enabled);
+          concJUnitChecksEnabledComponent.getComponent().setEnabled(enabled);
+          return null;
         }
-        else {
-          s[1] = "All-thread checks are disabled.";
-          s[2] = "No-join checks are disabled.";
-          s[3] = "Lucky checks are disabled.";
-          if (!concJUnitChecksEnabledComponent.getCurrentComboBoxValue().
-                equals(OptionConstants.ConcJUnitCheckChoices.NONE)) {
-            s[1] = "All-thread checks are enabled.";
-            if (concJUnitChecksEnabledComponent.getCurrentComboBoxValue().
-                  equals(OptionConstants.ConcJUnitCheckChoices.ALL) ||
-                concJUnitChecksEnabledComponent.getCurrentComboBoxValue().
-                  equals(OptionConstants.ConcJUnitCheckChoices.NO_LUCKY)) {
-              s[2] = "No-join checks are enabled.";
+      };
+      
+      OptionComponent.ChangeListener junitLocListener = new OptionComponent.ChangeListener() {
+        public Object value(Object oc) {
+          boolean enabled = junitLocEnabled.getComponent().isSelected();
+          junitLoc.getComponent().setEnabled(enabled);
+          return null;
+        }
+      };
+      junitLocEnabled.addChangeListener(junitLocListener);
+      junitLocEnabled.addChangeListener(rtConcJUnitListener);
+      junitLoc.addChangeListener(rtConcJUnitListener);
+      addOptionComponent(panel, rtConcJUnitLoc);
+      addOptionComponent(panel, processRT);
+      
+      addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
+      final LabelComponent internalExternalStatus = new LabelComponent("<html>&nbsp;</html>", this, true);
+      final LabelComponent threadsStatus = new LabelComponent("<html>&nbsp;</html>", this, true);
+      final LabelComponent joinStatus = new LabelComponent("<html>&nbsp;</html>", this, true);
+      final LabelComponent luckyStatus = new LabelComponent("<html>&nbsp;</html>", this, true);
+      OptionComponent.ChangeListener junitStatusChangeListener = new OptionComponent.ChangeListener() {
+        public Object value(Object oc) {
+          File f = junitLoc.getComponent().getFileFromField();
+          String[] s = new String[] { " ", " ", " ", " " };
+          boolean isConcJUnit = true;
+          if ((!junitLocEnabled.getComponent().isSelected()) || (f==null) || FileOps.NULL_FILE.equals(f) || !f.exists()) {
+            s[0] = "DrJava uses the built-in ConcJUnit framework.";
+          }
+          else {
+            String type = "ConcJUnit";
+            if (!edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(f)) {
+              type = "JUnit";
+              isConcJUnit = false;
+            }
+            s[0] = "DrJava uses an external "+type+" framework.";
+          }
+          if (!isConcJUnit) {
+            s[1] = "JUnit does not support all-thread, no-join";
+            s[2] = "or lucky checks. They are all disabled.";
+          }
+          else {
+            s[1] = "All-thread checks are disabled.";
+            s[2] = "No-join checks are disabled.";
+            s[3] = "Lucky checks are disabled.";
+            if (!concJUnitChecksEnabledComponent.getCurrentComboBoxValue().
+                  equals(OptionConstants.ConcJUnitCheckChoices.NONE)) {
+              s[1] = "All-thread checks are enabled.";
               if (concJUnitChecksEnabledComponent.getCurrentComboBoxValue().
-                    equals(OptionConstants.ConcJUnitCheckChoices.ALL)) {
-                File rtf = rtConcJUnitLoc.getComponent().getFileFromField();
-                if ((rtf!=null) && !FileOps.NULL_FILE.equals(rtf) && rtf.exists() &&
-                    edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidRTConcJUnitFile(rtf)) {
-                  s[3] = "Lucky checks are enabled.";
+                    equals(OptionConstants.ConcJUnitCheckChoices.ALL) ||
+                  concJUnitChecksEnabledComponent.getCurrentComboBoxValue().
+                    equals(OptionConstants.ConcJUnitCheckChoices.NO_LUCKY)) {
+                s[2] = "No-join checks are enabled.";
+                if (concJUnitChecksEnabledComponent.getCurrentComboBoxValue().
+                      equals(OptionConstants.ConcJUnitCheckChoices.ALL)) {
+                  File rtf = rtConcJUnitLoc.getComponent().getFileFromField();
+                  if ((rtf!=null) && !FileOps.NULL_FILE.equals(rtf) && rtf.exists() &&
+                      edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidRTConcJUnitFile(rtf)) {
+                    s[3] = "Lucky checks are enabled.";
+                  }
                 }
               }
             }
           }
+          internalExternalStatus.getComponent().setText(s[0]);
+          threadsStatus.getComponent().setText(s[1]);
+          joinStatus.getComponent().setText(s[2]);
+          luckyStatus.getComponent().setText(s[3]);
+          return null;
         }
-        internalExternalStatus.getComponent().setText(s[0]);
-        threadsStatus.getComponent().setText(s[1]);
-        joinStatus.getComponent().setText(s[2]);
-        luckyStatus.getComponent().setText(s[3]);
-        return null;
-      }
-    };
-    concJUnitChecksEnabledComponent.addChangeListener(junitStatusChangeListener);
-    junitLocEnabled.addChangeListener(junitStatusChangeListener);
-    junitLoc.addChangeListener(junitStatusChangeListener);
-    rtConcJUnitLoc.addChangeListener(junitStatusChangeListener);
-    addOptionComponent(panel, internalExternalStatus);
-    addOptionComponent(panel, threadsStatus);
-    addOptionComponent(panel, joinStatus);
-    addOptionComponent(panel, luckyStatus);
-
-    junitLocListener.value(null);
-    rtConcJUnitListener.value(null);
-    junitStatusChangeListener.value(null);
+      };
+      concJUnitChecksEnabledComponent.addChangeListener(junitStatusChangeListener);
+      junitLocEnabled.addChangeListener(junitStatusChangeListener);
+      junitLoc.addChangeListener(junitStatusChangeListener);
+      rtConcJUnitLoc.addChangeListener(junitStatusChangeListener);
+      addOptionComponent(panel, internalExternalStatus);
+      addOptionComponent(panel, threadsStatus);
+      addOptionComponent(panel, joinStatus);
+      addOptionComponent(panel, luckyStatus);
+      
+      junitLocListener.value(null);
+      rtConcJUnitListener.value(null);
+      junitStatusChangeListener.value(null);
+    }
+    else {
+      addOptionComponent(panel, 
+                         new LabelComponent("<html><br><br>ConcJUnit is currently not supported on Java 7.<br><br></html>", this, true));
+    }
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     final BooleanOptionComponent forceTestSuffix  =

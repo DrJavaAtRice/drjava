@@ -100,6 +100,7 @@ public class JDKToolsLibrary {
   
   public static String adapterForCompiler(JavaVersion.FullVersion version) {
     switch (version.majorVersion()) {
+      case JAVA_7: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
       case JAVA_6: {
         switch (version.vendor()) {
           case OPENJDK: return "edu.rice.cs.drjava.model.compiler.Javac160OpenJDKCompiler";
@@ -114,7 +115,8 @@ public class JDKToolsLibrary {
   
   public static String adapterForDebugger(JavaVersion.FullVersion version) {
     switch (version.majorVersion()) {
-      case JAVA_6: return "edu.rice.cs.drjava.model.debug.jpda.JPDADebugger";
+      case JAVA_7:
+      case JAVA_6:
       case JAVA_5: return "edu.rice.cs.drjava.model.debug.jpda.JPDADebugger";
       default: return null;
     }
@@ -179,21 +181,6 @@ public class JDKToolsLibrary {
       list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, compiler, debugger, javadoc));
     }
       
-//    if (JavaVersion.JAVA_6.compareTo(version.majorVersion())>=0) {
-//      // at least Java 6, try Eclipse compiler
-//      msg("                 at least Java 6, try EclipseCompiler");
-//      // provide "UNKNOWN 6.0" as version
-//      FullVersion eclipseVersion = JavaVersion.parseFullVersion(JavaVersion.JAVA_6.fullVersion().versionString(),
-//                                                                "Eclipse","");
-//      msg("                 version for Eclipse: "+eclipseVersion);
-//      compiler = getCompilerInterface("edu.rice.cs.drjava.model.compiler.EclipseCompiler", eclipseVersion);
-//      msg("                 compiler="+compiler.getClass().getName());
-//      if (compiler!=NoCompilerAvailable.ONLY) {
-//        // if we have found a compiler, add it
-//        msg("                 compiler found");
-//        list.add(new JDKToolsLibrary(eclipseVersion, null, compiler, debugger, javadoc));
-//      }
-//    }
     msg("                 compilers found: "+list.size());
     
     if (list.size()==0) {

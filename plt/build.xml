@@ -30,6 +30,7 @@
   <property name="link-source" value="no" />
   
   <property environment="env" />
+  <property name="java7-home" value="${env.JAVA7_HOME}" />
   <property name="java6-home" value="${env.JAVA6_HOME}" />
   <property name="java5-home" value="${env.JAVA5_HOME}" />
   <property name="clover-jar" value="${env.CLOVER_JAR}" />
@@ -78,6 +79,8 @@
     <echo message="            compiling and '-5' targets)" />
     <echo message="JAVA6_HOME: Home folder of the Java 6 JRE or JDK (required for" />
     <echo message="            '-6' targets)" />
+    <echo message="JAVA7_HOME: Home folder of the Java 7 JRE or JDK (required for" />
+    <echo message="            '-7' targets)" />
     <echo message="CLOVER_JAR: Location of the Clover jar file" />
     <echo message="FINDBUGS_HOME: Location of the FindBugs installation" />
     <echo message="" />
@@ -232,6 +235,13 @@
           description="Run all tests (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
       <param name="test-jvm" value="java" />
+    </antcall>
+  </target>
+
+  <target name="test-7" depends="compile, resolve-java7-exec" unless="skip-test"
+          description="Run all tests under Java 7 (after compiling); use -Dtest-spec=... to filter">
+    <antcall target="iterate-tests">
+      <param name="test-jvm" value="${java7-exec}" />
     </antcall>
   </target>
 
@@ -749,16 +759,49 @@
   <!-- ***************************
        Property-resolution Targets 
        *************************** -->
+
+  <target name="resolve-java7-runtime">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java7-runtime will only be set the *first* time. -->
+
+    <property name="java7-runtime-1" location="${java7-home}/lib/rt.jar" />
+    <available property="java7-runtime" value="${java7-runtime-1}" file="${java7-runtime-1}" />
+
+    <property name="java7-runtime-2" location="${java7-home}/jre/lib/rt.jar" />
+    <available property="java7-runtime" value="${java7-runtime-2}" file="${java7-runtime-2}" />
+
+    <property name="java7-runtime-3" location="${java7-home}/../Classes/classes.jar" />
+    <available property="java7-runtime" value="${java6-runtime-3}" file="${java7-runtime-3}" />
+
+    <fail message="Can't find rt.jar in the Java 7 home: ${java7-home}" unless="java7-runtime" />
+  </target>
   
+  <target name="resolve-java7-exec">
+    <!-- We rely on "location" to generate a platform-specific path -->
+
+    <property name="java7-exec-1" location="${java7-home}/bin/java.exe" />
+    <condition property="java7-exec" value="${java7-exec-1}">
+      <and>
+        <available file="${java7-exec-1}" />
+        <os family="windows" />
+      </and>
+    </condition>
+    
+    <property name="java7-exec-2" location="${java7-home}/bin/java" />
+    <available property="java7-exec" value="${java7-exec-2}" file="${java7-exec-2}" />
+
+    <fail message="Can't find the java executable in the Java 7 home: ${java7-home}" unless="java7-exec" />
+  </target>
+ 
   <target name="resolve-java6-runtime">
     <!-- We rely on "location" to generate a platform-specific path; note that properties
          are immutable and so java6-runtime will only be set the *first* time. -->
 
     <property name="java6-runtime-1" location="${java6-home}/lib/rt.jar" />
-    <available property="java5-runtime" value="${java6-runtime-1}" file="${java6-runtime-1}" />
+    <available property="java6-runtime" value="${java6-runtime-1}" file="${java6-runtime-1}" />
 
     <property name="java6-runtime-2" location="${java6-home}/jre/lib/rt.jar" />
-    <available property="java5-runtime" value="${java6-runtime-2}" file="${java6-runtime-2}" />
+    <available property="java6-runtime" value="${java6-runtime-2}" file="${java6-runtime-2}" />
 
     <property name="java6-runtime-3" location="${java6-home}/../Classes/classes.jar" />
     <available property="java6-runtime" value="${java6-runtime-3}" file="${java6-runtime-3}" />

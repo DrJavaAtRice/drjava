@@ -44,11 +44,11 @@ import edu.rice.cs.drjava.config.*;
   *  @version $Id$
   */
 public class ConfigDescriptions {
-  public static final HashMap<OptionParser,String> CONFIG_DESCRIPTIONS = new HashMap<OptionParser,String>();
-  public static final HashMap<OptionParser,String> CONFIG_LONG_DESCRIPTIONS = new HashMap<OptionParser,String>();
+  public static final HashMap<OptionParser<?>,String> CONFIG_DESCRIPTIONS = new HashMap<OptionParser<?>,String>();
+  public static final HashMap<OptionParser<?>,String> CONFIG_LONG_DESCRIPTIONS = new HashMap<OptionParser<?>,String>();
   protected static final String SEPS = " \t\n-,;.(";
   
-  public static void add(Option o, String s, String l) {
+  public static void add(Option<?> o, String s, String l) {
     CONFIG_DESCRIPTIONS.put(o, s);
     CONFIG_LONG_DESCRIPTIONS.put(o, l);
   }
@@ -292,6 +292,9 @@ public class ConfigDescriptions {
     add(OptionConstants.JAVADOC_1_6_LINK,
         "Javadoc 1.6 URL",
         "URL for the Java 1.6 API, for generating links to library classes.");
+    add(OptionConstants.JAVADOC_1_7_LINK,
+        "Javadoc 1.7 URL",
+        "URL for the Java 1.7 API, for generating links to library classes.");
     add(OptionConstants.JUNIT_LINK,
         "JUnit URL",
         "URL for the JUnit API, for \"Open Java API Javadoc\".");
