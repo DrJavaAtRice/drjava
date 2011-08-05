@@ -1019,7 +1019,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     
     public void resetConsoleResetCount() { consoleResetCount = 0; }
     
-    public void logInteractionStart() {
+    public synchronized void logInteractionStart() {
       _interactionDone.reset();
       _resetDone.reset();
     }
@@ -1044,7 +1044,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     private volatile boolean _compileDone = false;        // records when compilaton is done
     private final Object _compileLock = new Object();     // lock for _compileDone
     
-    public void logCompileStart() { 
+    public synchronized void logCompileStart() { 
       logInteractionStart();
       _compileDone = false; 
     }
@@ -1190,8 +1190,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       this.printMessages = printListenerMessages;
     }
     
-    public void logJUnitStart() { 
-      logCompileStart();
+    public synchronized void logJUnitStart() { 
+//      logCompileStart();
       _junitDone = false; 
     }
     
@@ -1219,7 +1219,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     private void _notifyJUnitDone() {
       synchronized(_junitLock) {
         _junitDone = true;
-        _junitLock.notify();
+        _junitLock.notifyAll();
       }
     }
     
@@ -1229,7 +1229,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       activeCompilerChangedCount = 0;
     }
     
-    public void resetJUnitCounts() { 
+    public synchronized void resetJUnitCounts() {
       junitStartCount = 0;
       junitSuiteStartedCount = 0;
       junitTestStartedCount = 0;
@@ -1281,7 +1281,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   /** Listener class for failing JUnit invocation. */
   public static class JUnitNonTestListener extends JUnitTestListener {
     private volatile boolean _shouldBeTestAll;
-    public JUnitNonTestListener() {  this(false); }
+    public JUnitNonTestListener() { this(false); }
     public JUnitNonTestListener(boolean shouldBeTestAll) { _shouldBeTestAll = shouldBeTestAll; }
     public void nonTestCase(boolean isTestAll, boolean didCompileFail) {
       synchronized(this) { nonTestCaseCount++; }

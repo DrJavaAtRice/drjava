@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.model.junit;
 import edu.rice.cs.drjava.model.GlobalModelTestCase;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.Log;
 
 import java.io.File;
 import javax.swing.text.BadLocationException;
@@ -51,6 +52,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public final class JUnitErrorModelTest extends GlobalModelTestCase {
   
   private JUnitErrorModel _m;
+  protected static final Log _log = new Log("JUnitError.txt", true);
   
   private static final String MONKEYTEST_FAIL_TEXT =
     "import junit.framework.*; \n" +
@@ -154,39 +156,59 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
   /** Tests that the errors array contains all encountered failures and error in the right order. */
   public void testErrorsArrayInOrder_NOJOIN() throws Exception {
     debug.logStart();
-    _m = new JUnitErrorModel(new JUnitError[0], _model, false);
+    _log.log("testErrorArrayInOrder_NOJOIN started");
+    final JUnitTestListener listener = new JUnitTestListener();
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
-    final File file = new File(_tempDir, "MonkeyTestFail.java");
-    saveFile(doc, new FileSelector(file));
+    _log.log("doc setUp");
     
-    JUnitTestListener listener = new JUnitTestListener();
-    _model.addListener(listener);
-    
-    testStartCompile(doc);
-    
-    listener.waitCompileDone();
-    
-    if (_model.getCompilerModel().getNumErrors() > 0) fail("compile failed: " + getCompilerErrorString());
-    listener.checkCompileOccurred();
-    
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { 
+        try {
+          _m = new JUnitErrorModel(new JUnitError[0], _model, false);
+
+          final File file = new File(_tempDir, "MonkeyTestFail.java");
+          saveFile(doc, new FileSelector(file));
+          
+          _model.addListener(listener);
+          
+          testStartCompile(doc);
+          _log.log("Compile started");
+          
+          listener.waitCompileDone();
+          _log.log("Compile done");
+          
+          if (_model.getCompilerModel().getNumErrors() > 0) fail("compile failed: " + getCompilerErrorString());
+          listener.checkCompileOccurred();
+          _log.log("Done with first block");
+        }
+        catch(Exception e) { fail("The following exception was thrown in the first block of testErrorsArrayInOrder: /n" + e); }
+      }
+    });
+         
     listener.runJUnit(doc);
     // runJUnit waits until the thread started in DefaultJUnitModel._rawJUnitOpenDefDocs has called notify
     
     listener.assertJUnitStartCount(1);
-    // Clear document so we can make sure it's written to after startJUnit; 
-    // ?? When does the clear operation happen?  How is the timing of this clear operation controlled?
-    // Perform the clear operation atomically in the event thread.
+    
     Utilities.invokeAndWait(new Runnable() {
       public void run() { 
-        try {
+        try {     
+          // Clear document so we can make sure it's written to after startJUnit; 
+          // ?? When does the clear operation happen?  How is the timing of this clear operation controlled?
+          // Performing the clear operation atomically in the event thread.
+          
           _model.getJUnitModel().getJUnitDocument().remove(0, _model.getJUnitModel().getJUnitDocument().getLength() - 1);
+          assertEquals("Confirm document is empty", 0, _model.getJUnitModel().getJUnitDocument().getLength());
+          _log.log("JUnitDocument is empty");
         }
         catch(BadLocationException e) { fail("BadLocationException in clearing JUnitDocument"); }
+        catch(Exception e) { fail("The following exception was thrown in testErrorsArrayInOrder: /n" + e); }
       }
     });
-    //final TestResult testResults = doc.startJUnit();
     
-    //_m = new JUnitErrorModel(doc.getDocument(), "MonkeyTestFail", testResults);
+    // Wait until events triggered by running unit tests have cleared ? (should be done by code above)
+    Utilities.clearEventQueue();
+    _log.log("Event queue cleared");
     _m = _model.getJUnitModel().getJUnitErrorModel();
     
     //JUnitError[] errorsWithPositions = _m.getErrorsWithPositions();
@@ -199,6 +221,11 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     
     assertEquals("test case has one failure reported" + _m.getError(1).message(), _m.getError(1).isWarning(), true);
     //_model.setResetAfterCompile(true);
+    
+    //final TestResult testResults = doc.startJUnit();
+    
+    _log.log("testErrorArrayInOrder complete");
+    //_m = new JUnitErrorModel(doc.getDocument(), "MonkeyTestFail", testResults);
     debug.logEnd();
   }
   
@@ -208,34 +235,51 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
    * blow up in the other JVM and never notify us that it's finished.
    */
   public void testVerifyErrorHandledCorrectly_NOJOIN() throws Exception {
-    OpenDefinitionsDocument doc = setupDocument(ABC_CLASS_ONE);
+    _log.log("testVerifyErrorHandledCorrectly_NOJOIN started");
+    
+    final OpenDefinitionsDocument doc = setupDocument(ABC_CLASS_ONE);
     final File file = new File(_tempDir, "ABC1.java");
-    saveFile(doc, new FileSelector(file));
-    
-    Utilities.clearEventQueue();
-    
-    OpenDefinitionsDocument doc2 = setupDocument(ABC_TEST);
+    final OpenDefinitionsDocument doc2 = setupDocument(ABC_TEST);
     final File file2 = new File(_tempDir, "ABCTest.java");
-    saveFile(doc2, new FileSelector(file2));
     
-    // Compile the correct ABC and the test
-//    JUnitTestListener listener = new JUnitTestListener(false);
-//      System.out.println("compiling all");
-    _model.getCompilerModel().compileAll();
-    Utilities.clearEventQueue();
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { 
+        try {     
+          saveFile(doc, new FileSelector(file));
+          saveFile(doc2, new FileSelector(file2));
+          
+          // Compile the correct ABC and the test
+//          JUnitTestListener listener = new JUnitTestListener(false);
+//          System.out.println("compiling all");
+          _model.getCompilerModel().compileAll();
+        }
+        catch(Exception e) { fail("The following exception was thrown in testVerifyErrorHandledCorrectly_NOJOIN location 1: /n" + e); }
+      } 
+    });
     
+   _log.log("First compile in  testVerifyErrorHandledCorrectly_NOJOIN comlete");
+   
     final OpenDefinitionsDocument doc3 = setupDocument(ABC_CLASS_TWO);
     final File file3 = new File(_tempDir, "ABC2.java");
-    saveFile(doc3, new FileSelector(file3));
     
-    JUnitTestListener listener = new JUnitNonTestListener();
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { saveFile(doc3, new FileSelector(file3)); }
+    });
+    
+    final JUnitTestListener listener = new JUnitNonTestListener();
     // Compile the incorrect ABC
 //      System.out.println("compiling doc3");
     
     _model.addListener(listener);
     
-    listener.compile(doc3);
-
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { 
+        try { listener.compile(doc3); }
+        catch(Exception e) { fail("The following exception was thrown in testVerifyErrorHandledCorrectly_NOJOIN location 2: /n" + e); }
+      }
+    });
+    
+    _log.log("Second compile complete");
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
@@ -248,12 +292,15 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     listener.runJUnit(doc2);
     listener.waitJUnitDone();
     
+    _log.log("JUnit execution complete");
+    
     double version = Double.valueOf(System.getProperty("java.specification.version"));
     if (version < 1.5) listener.assertClassFileErrorCount(1);
     else 
       assertEquals("Should report one error", 1, _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     
     _model.removeListener(listener);
+    _log.log("testVerifyErrorHandledCorrectly_NOJOIN comlete");
   }
   
 
@@ -298,22 +345,40 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
   
   /** Test errors that occur in superclass. */
   public void testErrorInSuperClass_NOJOIN() throws Exception {
+    _log.log("testErrorInSuperClass_NOJOIN started");
     debug.logStart();
-    OpenDefinitionsDocument doc1 = setupDocument(TEST_ONE);
-    OpenDefinitionsDocument doc2 = setupDocument(TEST_TWO);
+    final OpenDefinitionsDocument doc1 = setupDocument(TEST_ONE);
+    final OpenDefinitionsDocument doc2 = setupDocument(TEST_TWO);
     final File file1 = new File(_tempDir, "TestOne.java");
     final File file2 = new File(_tempDir, "TestTwo.java");
-    saveFile(doc1, new FileSelector(file1));
-    saveFile(doc2, new FileSelector(file2));
     
-    JUnitTestListener listener = new JUnitTestListener();
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        try {
+          saveFile(doc1, new FileSelector(file1));
+          saveFile(doc2, new FileSelector(file2));
+        }
+        catch(Exception e) { fail("The following exception was thrown in testErrorInSuperClass_NOJOIN location 1: /n" + e); }
+      }
+    });    
+    JUnitTestListener listener = new JUnitTestListener(true);
     _model.addListener(listener);
-    _model.getCompilerModel().compileAll();
+    
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { 
+        try { _model.getCompilerModel().compileAll(); }
+        catch(Exception e) { fail("The following exception was thrown in testErrorInSuperClass_NOJOIN location 12: /n" + e); }
+      }
+    });
 //        doc1.startCompile();
 //        doc2.startCompile();
     
     listener.waitCompileDone();
+    
+    Utilities.clearEventQueue();
+    
     _log.log("Testing the first document");
+    
     listener.runJUnit(doc1); //  waits until JUnit is done
     
     Utilities.clearEventQueue();
@@ -332,14 +397,17 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     assertEquals("The first error is on line 5", 19, _m.getError(1).lineNumber());
     assertEquals("The first error is on line 5", 22, _m.getError(2).lineNumber());
     
+    Utilities.clearEventQueue();
+    Utilities.clearEventQueue();
+    
     _log.log("Testing the second document");
     listener.resetJUnitCounts();
-    
+
     listener.runJUnit(doc2);
     // runJUnit waits until the thread started in DefaultJUnitModel._rawJUnitOpenDefDocs has called notify
-    _log.log("Second document testing should be complete");
     
     Utilities.clearEventQueue();
+    _log.log("Second document testing should be complete");
     
     listener.assertJUnitStartCount(1);
     
@@ -351,6 +419,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     
     _model.removeListener(listener);
     debug.logEnd();
+     _log.log("testErrorInSuperClass_NOJOIN complete");
   }
 }
 

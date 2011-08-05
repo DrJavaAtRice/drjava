@@ -46,7 +46,7 @@ import java.util.Stack;
   */
 public class ReducedModelBrace extends AbstractReducedModel {
   
-  private ReducedModelControl _parent;  // contains the walker which is moved by moveWalkerGetState
+  private volatile ReducedModelControl _parent;  // contains the walker which is moved by moveWalkerGetState
   
   public ReducedModelBrace(ReducedModelControl parent) {
     super();

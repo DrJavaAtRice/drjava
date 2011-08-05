@@ -46,7 +46,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 public class ReducedModelComment extends AbstractReducedModel {
   
   /** Can be used by other classes to walk through the list of comment chars*/
-  TokenList.Iterator _walker;
+  volatile TokenList.Iterator _walker;
   
   /** Constructor.  Creates a new reduced model with the cursor at the start of a blank "page." */
   public ReducedModelComment() {

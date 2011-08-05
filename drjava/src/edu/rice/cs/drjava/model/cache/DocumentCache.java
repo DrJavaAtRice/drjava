@@ -213,7 +213,6 @@ public class DocumentCache {
       return doc.getLength();
     }
     
-    
     /** Gets the text of this document using the cached reconstructor if document is not resident or it is unchanged.
       * If document is not locked, may return stale data. */
     public String getText() {

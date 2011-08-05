@@ -68,7 +68,7 @@ import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
   */
 public class JUnitTestManager {
  
-  protected static final Log _log = new Log("/home/jfc1/drjava/JUnitTestManager.txt", false);
+  protected static final Log _log = new Log("JUnitTestManager.txt", false);
   
   /** The interface to the master JVM via RMI. */
   private final JUnitModelCallback _jmc;

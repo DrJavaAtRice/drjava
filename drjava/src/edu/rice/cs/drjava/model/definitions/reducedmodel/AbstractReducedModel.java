@@ -47,7 +47,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
   public static final char PTR_CHAR = '#';
   
   /** The reduced model for a document is a list of ReducedTokens (braces and gaps). */
-  TokenList _tokens;
+  volatile TokenList _tokens;
   
   /** Keeps track of cursor position in document. */
   TokenList.Iterator _cursor;
