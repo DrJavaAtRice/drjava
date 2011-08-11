@@ -111,6 +111,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /** After how many columns to display the right margin. */
   private volatile int _numRightMarginColumns = 120;
 
+  /** Maximum character width of the current main font. */
+  private volatile int _maxCharWidth = 0;
+  
   /** Color of the right margin. */
   private volatile Color _rightMarginColor = Color.red;
   
@@ -618,6 +621,12 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     _colorOptionListeners.add(pair);
     DrJava.getConfig().addOptionListener(OptionConstants.RIGHT_MARGIN_COLOR, temp);
     
+    OptionListener<Font> fontListener = new OptionListener<Font>() {
+      public void optionChanged(OptionEvent<Font> oce) { updateMaxCharWidth(oce.value); }
+    };
+    DrJava.getConfig().addOptionListener(OptionConstants.FONT_MAIN, fontListener);
+    updateMaxCharWidth(DrJava.getConfig().getSetting(FONT_MAIN));
+    
     createPopupMenu();
 
     //Add listener to components that can bring up popup menus.
@@ -763,6 +772,16 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    */
   public static void setEditorKit(DefinitionsEditorKit editorKit) { EDITOR_KIT = editorKit; }
 
+  /** Update the maximum character width of the current font. */
+  protected void updateMaxCharWidth(Font font) {
+    FontMetrics metrics = getFontMetrics(font);
+    int[] widths = metrics.getWidths();
+    _maxCharWidth = 0;
+    for(int w: widths) {
+      if (w > _maxCharWidth) { _maxCharWidth = w; }
+    }
+  }
+  
   /** Enable anti-aliased text by overriding paintComponent. */
   protected void paintComponent(Graphics g) {
     if (_antiAliasText && g instanceof Graphics2D) {
@@ -773,11 +792,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     // paint the right margin line, if enabled
     if (_displayRightMargin) {
       g.setColor(_rightMarginColor);
-      FontMetrics metrics = getFontMetrics(getFont());
-      int width = new Double(metrics.getMaxCharBounds(g).getWidth()).intValue();
       Rectangle view = _scrollPane.getViewport().getViewRect();
-      g.drawLine(_numRightMarginColumns*width, view.y,
-                 _numRightMarginColumns*width, view.y+view.height);
+      g.drawLine(2 + _numRightMarginColumns*_maxCharWidth, view.y,
+                 2 + _numRightMarginColumns*_maxCharWidth, view.y+view.height);
     }
   }
 
