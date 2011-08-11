@@ -55,16 +55,10 @@ public class NumberAtom implements Atom {
    * @param v the visitor
    * @return result of the given algorithm
    */
-  public <Ret> Ret accept(SExpVisitor<Ret> v){
-    return v.forNumberAtom(this);
-  }
+  public <Ret> Ret accept(SExpVisitor<Ret> v) { return v.forNumberAtom(this); }
   
-  public String toString(){ 
-    if (_hasDecimals) {
-      return "" + doubleValue();
-    }
-    else {
-      return "" + intValue();
-    }
+  public String toString() { 
+    if (_hasDecimals) return "" + doubleValue();
+    else return "" + intValue();
   }
 }

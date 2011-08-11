@@ -43,7 +43,7 @@ import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
   * @version $Id$
   */
 public class JUnitErrorModel extends CompilerErrorModel {
-  private boolean _testsHaveRun = false;
+  private volatile boolean _testsHaveRun = false;
   
   /** Constructs a new JUnitErrorModel to be maintained by a particular OpenDefinitionsDocument.
     * @param errors the errors this JUnitErrorModel represents
@@ -55,8 +55,6 @@ public class JUnitErrorModel extends CompilerErrorModel {
     _testsHaveRun = testsHaveRun;
   }
   
-  /** Accessor
-    * @return whether tests have been run before.
-    */
+  /** Returns whether tests have been run before. */
   public boolean haveTestsRun() { return _testsHaveRun; }
 }

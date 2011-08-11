@@ -52,6 +52,8 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
   */
 public class DefinitionsEditorKit extends StyledEditorKit {
   
+  public static final String DELIMITERS = "!@%^&*()-=+[]{};:'\",.<>/?";
+  
   private GlobalEventNotifier _notifier;
   private Action[] _actions;
   
@@ -65,27 +67,20 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     for(int i = 0; i < _actions.length; ++i) {
       Action a = supActions[i];
       Object name = a.getValue("Name");
-      if (name.equals(beginWordAction)) {
+      if (name.equals(beginWordAction))
         _actions[i] = new BeginWordAction(beginWordAction, false);
-      }
-      else if (name.equals(endWordAction)) {
+      else if (name.equals(endWordAction))
         _actions[i] = new EndWordAction(endWordAction, false);
-      }
-      else if (name.equals(nextWordAction)){
+      else if (name.equals(nextWordAction))
         _actions[i] = new NextWordAction(nextWordAction, false);
-      }
-      else if (name.equals(previousWordAction)) {
+      else if (name.equals(previousWordAction))
         _actions[i] = new PreviousWordAction(previousWordAction, false);
-      }
-      else if (name.equals(selectionNextWordAction)){
+      else if (name.equals(selectionNextWordAction))
         _actions[i] = new NextWordAction(selectionNextWordAction, true);
-      }
-      else if (name.equals(selectionPreviousWordAction)) {
+      else if (name.equals(selectionPreviousWordAction))
         _actions[i] = new PreviousWordAction(selectionPreviousWordAction, true);
-      }
-      else if (name.equals(selectWordAction)) {
+      else if (name.equals(selectWordAction))
         _actions[i] = new SelectWordAction();
-      }
       else _actions[i] = a;
     }
   }
@@ -145,14 +140,14 @@ public class DefinitionsEditorKit extends StyledEditorKit {
           final String text = target.getDocument().getText(0, offs);
           while(offs > 0) {
             char chPrev = text.charAt(offs - 1);
-            if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev) >= 0) || (Character.isWhitespace(chPrev))) {
+            if ((DELIMITERS.indexOf(chPrev) >= 0) || (Character.isWhitespace(chPrev))) {
               break;
             }
             --offs;
             if (offs == 0) break; // otherwise offs-1 below generates an index out of bounds
             char ch = text.charAt(offs);
             chPrev = text.charAt(offs - 1);
-            if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch) >= 0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev) >= 0) 
+            if ((DELIMITERS.indexOf(ch) >= 0) || (DELIMITERS.indexOf(chPrev) >= 0) 
                   || Character.isWhitespace(ch) || Character.isWhitespace(chPrev)) {
               break;
             }
@@ -187,7 +182,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
           while((offs-iOffs)<text.length()-1) {
             ++offs;
             char ch = text.charAt(offs-iOffs);
-            if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch) >= 0) || Character.isWhitespace(ch)) {
+            if ((DELIMITERS.indexOf(ch) >= 0) || Character.isWhitespace(ch)) {
               break;
             }
           }
@@ -213,7 +208,7 @@ public class DefinitionsEditorKit extends StyledEditorKit {
       super(nm);
       _select = b;
     }
-    
+   
     public void actionPerformed(ActionEvent e) {
       AbstractDJPane target = (AbstractDJPane) getTextComponent(e);
       if (target != null) {
@@ -222,26 +217,17 @@ public class DefinitionsEditorKit extends StyledEditorKit {
           final String text = target.getDocument().getText(0,offs);
           while(offs > 0) {
             --offs;
-            if (offs == 0)
-              break;
+            if (offs == 0) break;
             char ch = text.charAt(offs);
             char chPrev = text.charAt(offs - 1);
-            if (Character.isWhitespace(ch) && Character.isWhitespace(chPrev) && ch!='\n'){
-              continue;
-            }
-            else if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch) >= 0) || ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev) >= 0) || 
-                     ((offs>=2) && Character.isWhitespace(chPrev) && !Character.isWhitespace(text.charAt(offs - 2)) && ch!='\n')) {
+            if (Character.isWhitespace(ch) && Character.isWhitespace(chPrev) && ch!='\n') continue;
+            else if (DELIMITERS.indexOf(ch) >= 0 || DELIMITERS.indexOf(chPrev) >= 0 || 
+                     (offs >= 2 && Character.isWhitespace(chPrev) && !Character.isWhitespace(text.charAt(offs-2)) && ch!='\n'))
               break;
-            }
-            else if (Character.isWhitespace(chPrev) && !Character.isWhitespace(ch)){
-              break;
-            }
-            else if (!Character.isWhitespace(chPrev) && ch == '\n'){
-              break;
-            }
-            //used to fix incorrect behavior when a space is at the end of a line
-            else if (Character.isWhitespace(chPrev) && ch=='\n'){
-              while(Character.isWhitespace(chPrev) && (offs>0)){
+            else if (Character.isWhitespace(chPrev) && !Character.isWhitespace(ch)) break;
+            else if (!Character.isWhitespace(chPrev) && ch == '\n') break;
+            else if (Character.isWhitespace(chPrev) && ch=='\n') {  // compensate for space at the end of a line
+              while(Character.isWhitespace(chPrev) && (offs > 0)) {
                 --offs;
                 ch = text.charAt(offs);
                 chPrev = text.charAt(offs - 1);
@@ -249,11 +235,8 @@ public class DefinitionsEditorKit extends StyledEditorKit {
               break;
             }
           }
-          if (_select) {
-            target.moveCaretPosition(offs);
-          } else {
-            target.setCaretPosition(offs);
-          }
+          if (_select) target.moveCaretPosition(offs);
+          else target.setCaretPosition(offs);
         }
         catch(BadLocationException ble) { throw new UnexpectedException(ble); }
       }
@@ -285,41 +268,34 @@ public class DefinitionsEditorKit extends StyledEditorKit {
               break;
             char ch = text.charAt(offs-iOffs);
             char chPrev = text.charAt(offs-iOffs - 1);
-            if (("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(ch) >= 0) ||
-                ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev) >= 0) ||
+            if ((DELIMITERS.indexOf(ch) >= 0) ||
+                (DELIMITERS.indexOf(chPrev) >= 0) ||
                 Character.isWhitespace(chPrev) ||
                 ch == '\n') {
-              while((offs-iOffs<len) && Character.isWhitespace(ch) && ch != '\n'){
-                if ("!@%^&*()-=+[]{};:'\",.<>/?".indexOf(chPrev) >= 0)
+              while((offs-iOffs<len) && Character.isWhitespace(ch) && ch != '\n') {
+                if (DELIMITERS.indexOf(chPrev) >= 0)
                   break;
                 ++offs;
                 ch = text.charAt(offs-iOffs);
               }
-              if (ch == '\n' && Character.isWhitespace(text.charAt(offs - iOffs - 1)))
-                continue;
-              else
-                break;
+              if (ch == '\n' && Character.isWhitespace(text.charAt(offs - iOffs - 1))) continue;
+              else break;
             }
             //used to fix incorrect behavior when a space is at the end of a line
-            if (!Character.isWhitespace(chPrev) && Character.isWhitespace(ch)){
+            if (!Character.isWhitespace(chPrev) && Character.isWhitespace(ch)) {
               int offs0 = offs;
-              while((offs-iOffs)<(len-1) && ch!='\n' && Character.isWhitespace(ch)){
+              while((offs-iOffs)<(len-1) && ch!='\n' && Character.isWhitespace(ch)) {
                 ++offs; 
                 ch = text.charAt(offs-iOffs);
                 chPrev = text.charAt(offs-iOffs - 1);               
               }
               offs = offs0;
-              if(ch=='\n')
-                break;
-              else
-                continue;
+              if (ch=='\n') break;
+              else continue;
             }   
           }
-          if (_select) {
-            target.moveCaretPosition(offs);
-          } else {
-            target.setCaretPosition(offs);
-          }
+          if (_select) target.moveCaretPosition(offs);
+          else target.setCaretPosition(offs);
         }
         catch(BadLocationException ble) { throw new UnexpectedException(ble); }
       }

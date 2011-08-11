@@ -52,14 +52,15 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.Set;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
+import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
@@ -78,6 +79,7 @@ import edu.rice.cs.drjava.platform.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
+import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.definitions.NoSuchDocumentException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DocumentUIListener;
@@ -94,9 +96,10 @@ import edu.rice.cs.drjava.ui.ClipboardHistoryFrame;
 import edu.rice.cs.drjava.ui.RegionsTreePanel;
 import edu.rice.cs.drjava.project.*;
 
-import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.*;
+import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.plt.tuple.Pair;
 
 import edu.rice.cs.util.XMLConfig;
 import edu.rice.cs.util.FileOpenSelector;
@@ -282,7 +285,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   final DefaultGUIAvailabilityNotifier _guiAvailabilityNotifier = new DefaultGUIAvailabilityNotifier();
   
   /** Window adapter for "pseudo-modal" dialogs, i.e. non-modal dialogs that insist on keeping the focus. */
-  protected java.util.HashMap<Window,WindowAdapter> _modalWindowAdapters 
+  protected volatile java.util.HashMap<Window,WindowAdapter> _modalWindowAdapters 
     = new java.util.HashMap<Window,WindowAdapter>();
   
   /** The owner of the modal window listener has already been taken by another window. */
@@ -300,10 +303,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Filter for drjava project files (.drjava and .xml and .pjt) */
   private final javax.swing.filechooser.FileFilter _projectFilter = new javax.swing.filechooser.FileFilter() {
     public boolean accept(File f) {
-      return f.isDirectory() || 
-        f.getPath().endsWith(PROJECT_FILE_EXTENSION) ||
-        f.getPath().endsWith(PROJECT_FILE_EXTENSION2) ||
-        f.getPath().endsWith(OLD_PROJECT_FILE_EXTENSION);
+      return f.isDirectory() || f.getPath().endsWith(PROJECT_FILE_EXTENSION) ||
+        f.getPath().endsWith(PROJECT_FILE_EXTENSION2) || f.getPath().endsWith(OLD_PROJECT_FILE_EXTENSION);
     }
     public String getDescription() { 
       return "DrJava Project Files (*" + PROJECT_FILE_EXTENSION + ", *" + PROJECT_FILE_EXTENSION2 + ", *" + 
@@ -313,13 +314,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Filter for text files (.txt) */
   private final javax.swing.filechooser.FileFilter _txtFileFilter = new javax.swing.filechooser.FileFilter() {
-    public boolean accept(File f) {
-      return f.isDirectory() || 
-        f.getPath().endsWith(TEXT_FILE_EXTENSION);
-    }
-    public String getDescription() { 
-      return "Text Files (*"+TEXT_FILE_EXTENSION+")";
-    }
+    public boolean accept(File f) { return f.isDirectory() || f.getPath().endsWith(TEXT_FILE_EXTENSION); }
+    public String getDescription() { return "Text Files (*"+TEXT_FILE_EXTENSION+")"; }
   };
   
   /** Filter for any files (*.*) */
@@ -328,33 +324,24 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public String getDescription() { return "All files (*.*)"; }
   };
   
-  
   /** Thread pool for executing asynchronous tasks. */
-  private ExecutorService _threadPool = Executors.newCachedThreadPool();
+  private volatile ExecutorService _threadPool = Executors.newCachedThreadPool();
   
   // ------ End Field Declarations ------
   
   /** @return the source file filter as directed by the currently selected compiler. */
   private javax.swing.filechooser.FileFilter getSourceFileFilter() {
-    edu.rice.cs.drjava.model.compiler.CompilerModel cm = _model.getCompilerModel();
-    if (cm==null) {
-      return new SmartSourceFilter();
-    }
-    else {
-      return cm.getActiveCompiler().getFileFilter();
-    }
+    CompilerModel cm = _model.getCompilerModel();
+    if (cm == null) return new SmartSourceFilter();
+    else return cm.getActiveCompiler().getFileFilter();
   }
 
   /** Return the suggested file extension that will be appended to a file without extension.
     * @return the suggested file extension */
   private String getSuggestedFileExtension() {
-    edu.rice.cs.drjava.model.compiler.CompilerModel cm = _model.getCompilerModel();
-    if (cm==null) {
-      return DrJavaFileUtils.getSuggestedFileExtension();
-    }
-    else {
-      return cm.getActiveCompiler().getSuggestedFileExtension();
-    }
+    CompilerModel cm = _model.getCompilerModel();
+    if (cm == null) return DrJavaFileUtils.getSuggestedFileExtension();
+    else return cm.getActiveCompiler().getSuggestedFileExtension();
   }
   
   /** Returns the files to open to the model (command pattern). */
@@ -378,10 +365,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Returns the project file to open. */
   private final FileOpenSelector _openProjectSelector = new FileOpenSelector() {
-    public File[] getFiles() throws OperationCanceledException {
-      File[] retFiles = getOpenFiles(_openProjectChooser);
-      return retFiles;
-    }
+    public File[] getFiles() throws OperationCanceledException { return getOpenFiles(_openProjectChooser); }
   };
   
   /** Returns the files to open. */
@@ -421,8 +405,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {
       _model.setActiveDocument(doc);
       String text = "File " + oldFile.getAbsolutePath() +
-        "\ncould not be found on disk!  It was probably moved\n" +
-        "or deleted.  Would you like to save it in a new file?";
+        "\ncould not be found on disk!  It was probably moved\nor deleted.  Would you like to save it in a new file?";
       int rc = JOptionPane.showConfirmDialog(MainFrame.this, text, "File Moved or Deleted", JOptionPane.YES_NO_OPTION);
       return (rc == JOptionPane.YES_OPTION);
     }
@@ -455,7 +438,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final JavadocDialog _javadocSelector = new JavadocDialog(this);
   
   /** Provides a chooser to open a directory */  
-  private DirectoryChooser _folderChooser;
+  private volatile DirectoryChooser _folderChooser;
   private final JCheckBox _openRecursiveCheckBox = new JCheckBox("Open folders recursively");
   
   private final Action _moveToAuxiliaryAction = new AbstractAction("Include With Project") {
@@ -469,7 +452,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) { _moveToAuxiliary(); }
   };
   private final Action _removeAuxiliaryAction = new AbstractAction("Do Not Include With Project") {
-    { putValue(Action.LONG_DESCRIPTION, "Do not open this document next time this project is opened."); }
+    { putValue(Action.LONG_DESCRIPTION, "Do not open this document next time this project is opened."); } // init
     public void actionPerformed(ActionEvent ae) { _removeAuxiliary(); }
   };
   private final Action _moveAllToAuxiliaryAction = new AbstractAction("Include All With Project") {
@@ -484,43 +467,38 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };
   
   private final Action _removeAllAuxiliaryAction = new AbstractAction("Do Not Include Any With Project") {
-    { putValue(Action.LONG_DESCRIPTION, "Do not open these documents next time this project is opened."); }
+    { putValue(Action.LONG_DESCRIPTION, "Do not open these documents next time this project is opened."); } // init
     public void actionPerformed(ActionEvent ae) { _removeAllAuxiliary(); }
   };
   
   /** Creates a new blank document and select it in the definitions pane. */
   private final Action _newAction = new AbstractAction("New") {
-    public void actionPerformed(ActionEvent ae) {
-      _new();
-    }
+    public void actionPerformed(ActionEvent ae) { _new(); }
   };
-  
   
   //newclass addition
   /** Creates a new Java class file. */
   private final Action _newClassAction = new AbstractAction("New Java Class...") {
-    public void actionPerformed(ActionEvent ae) {         
-      _newJavaClass();
-    }
+    public void actionPerformed(ActionEvent ae) { _newJavaClass(); }
   };
-  
-  //newclass addition
-  public void _newJavaClass(){
+  public void _newJavaClass() {
     NewJavaClassDialog njc = new NewJavaClassDialog(this);
     njc.setVisible(true);
   }
   
   private final Action _newProjectAction = new AbstractAction("New") {
-    { putValue(Action.SHORT_DESCRIPTION, "New DrJava project"); }
+    { putValue(Action.SHORT_DESCRIPTION, "New DrJava project"); }  // init
     public void actionPerformed(ActionEvent ae) { _newProject(); }
   };
   
   private volatile AbstractAction _runProjectAction = new AbstractAction("Run Main Class of Project") {
-    { _addGUIAvailabilityListener(this,
-                                 GUIAvailabilityListener.ComponentType.PROJECT,
-                                 GUIAvailabilityListener.ComponentType.PROJECT_MAIN_CLASS,
-                                 GUIAvailabilityListener.ComponentType.COMPILER,
-                                 GUIAvailabilityListener.ComponentType.INTERACTIONS); }
+    { /* initalization block */
+      _addGUIAvailabilityListener(this,
+                                  GUIAvailabilityListener.ComponentType.PROJECT,
+                                  GUIAvailabilityListener.ComponentType.PROJECT_MAIN_CLASS,
+                                  GUIAvailabilityListener.ComponentType.COMPILER,
+                                  GUIAvailabilityListener.ComponentType.INTERACTIONS); 
+    }
     public void actionPerformed(ActionEvent ae) { _runProject(); }
   };
   
@@ -693,10 +671,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) { 
       _closeFolder();
       _findReplace.updateFirstDocInSearch();
-      // set the document currently visible in the definitions pane as active
-      // document in the document navigator
-      // this makes sure that something is selected in the navigator after the
-      // folder was closed
+      // Set the document currently visible in the definitions pane as active document in the document navigator.
+      // This action makes sure that something is selected in the navigator after the folder was closed.
       _model.getDocumentNavigator().selectDocument(_currentDefPane.getOpenDefDocument());
     }
   };
@@ -783,7 +759,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };  
   
   private final Action _saveProjectAction = new AbstractAction("Save") {
-    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT); 
+    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT);  // init
       putValue(Action.SHORT_DESCRIPTION, "Save DrJava project"); }
     public void actionPerformed(ActionEvent ae) {
       _saveAll();  // saves project file and all modified project source files; does not save external files
@@ -791,7 +767,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };
   
   private final Action _saveProjectAsAction = new AbstractAction("Save As...") {
-    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT);
+    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT);  // init
       putValue(Action.SHORT_DESCRIPTION, "Save DrJava project As");
       putValue(Action.LONG_DESCRIPTION, "Save DrJava project under different name"); }
     public void actionPerformed(ActionEvent ae) {
@@ -803,7 +779,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   private final Action _exportProjectInOldFormatAction = 
     new AbstractAction("Export Project In Old \"" + OLD_PROJECT_FILE_EXTENSION + "\" Format") {
-    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT); }
+    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT); } // init
     public void actionPerformed(ActionEvent ae) {
       File cpf = _currentProjFile;
       _currentProjFile = FileOps.NULL_FILE;
@@ -824,22 +800,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       // update message to reflect the number of files
       int count = _model.getDocumentNavigator().getDocumentSelectedCount();
       String message;
-      if (count==1) {
-        message = "Are you sure you want to revert the current " +
-          "file to the version on disk?";
-      }
-      else {
-        message = "Are you sure you want to revert the " + count +
-          " selected files to the versions on disk?";
-      }
-      
+      if (count==1)
+        message = "Are you sure you want to revert the current file to the version on disk?";
+      else
+        message = "Are you sure you want to revert the " + count + " selected files to the versions on disk?";
       int rc;
       Object[] options = {"Yes", "No"};  
       rc = JOptionPane.showOptionDialog(MainFrame.this, message, title, JOptionPane.YES_NO_OPTION,
                                         JOptionPane.QUESTION_MESSAGE, null, options, options[1]);
-      if (rc == JOptionPane.YES_OPTION) {
-        _revert();
-      }
+      if (rc == JOptionPane.YES_OPTION) _revert();
     }
   };
   
@@ -915,7 +884,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Compiles all the project. */
   private volatile AbstractAction _compileProjectAction = new AbstractAction("Compile Project") {
-    { _addGUIAvailabilityListener(this,
+    { _addGUIAvailabilityListener(this,                                             // init
                                  GUIAvailabilityListener.ComponentType.PROJECT,
                                  GUIAvailabilityListener.ComponentType.COMPILER); }
     public void actionPerformed(ActionEvent ae) {
@@ -930,8 +899,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Compiles all documents in the navigators active group. */
   private volatile AbstractAction _compileFolderAction = new AbstractAction("Compile Folder") {
-    { _addGUIAvailabilityListener(this,
-                                 GUIAvailabilityListener.ComponentType.COMPILER); }
+    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.COMPILER); }  // init
     public void actionPerformed(ActionEvent ae) { 
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
@@ -944,8 +912,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Compiles all open documents. */
   private volatile AbstractAction _compileAllAction = new AbstractAction("Compile All Documents") {
-    { _addGUIAvailabilityListener(this,
-                                 GUIAvailabilityListener.ComponentType.COMPILER); }
+    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.COMPILER); }  // init
     public void actionPerformed(ActionEvent ae) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
@@ -956,7 +923,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** cleans the build directory */
   private volatile AbstractAction _cleanAction = new AbstractAction("Clean Build Directory") {
-    { _addGUIAvailabilityListener(this,
+    { _addGUIAvailabilityListener(this,                                             // init
                                  GUIAvailabilityListener.ComponentType.COMPILER,
                                  GUIAvailabilityListener.ComponentType.PROJECT,
                                  GUIAvailabilityListener.ComponentType.PROJECT_BUILD_DIR); }
@@ -965,7 +932,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** auto-refresh the project and open new files */
   private volatile AbstractAction _autoRefreshAction = new AbstractAction("Auto-Refresh Project") {
-    { _addGUIAvailabilityListener(this,
+    { _addGUIAvailabilityListener(this,                                             // init
                                  GUIAvailabilityListener.ComponentType.PROJECT,
                                  GUIAvailabilityListener.ComponentType.COMPILER); }
     public void actionPerformed(ActionEvent ae) { _model.autoRefreshProject(); }
@@ -973,7 +940,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Finds and runs the main method of the current document, if it exists. */
   private volatile AbstractAction _runAction = new AbstractAction("Run Document's Main Method") {
-    { _addGUIAvailabilityListener(this,
+    { _addGUIAvailabilityListener(this,                                             // init
                                  GUIAvailabilityListener.ComponentType.COMPILER,
                                  GUIAvailabilityListener.ComponentType.INTERACTIONS); }
     public void actionPerformed(ActionEvent ae) { _runMain(); }
@@ -981,7 +948,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Tries to run the current document as an applet. */
   private volatile AbstractAction _runAppletAction = new AbstractAction("Run Document as Applet") {
-    { _addGUIAvailabilityListener(this,
+    { _addGUIAvailabilityListener(this,                                             // init
                                  GUIAvailabilityListener.ComponentType.COMPILER,
                                  GUIAvailabilityListener.ComponentType.INTERACTIONS); }
     public void actionPerformed(ActionEvent ae) { _runApplet(); }
@@ -989,7 +956,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Runs JUnit on the document in the definitions pane. */
   private volatile AbstractAction _junitAction = new AbstractAction("Test Current Document") {
-    { _addGUIAvailabilityListener(this,
+    { _addGUIAvailabilityListener(this,                                             // init
                                  GUIAvailabilityListener.ComponentType.JUNIT,
                                  GUIAvailabilityListener.ComponentType.COMPILER,
                                  GUIAvailabilityListener.ComponentType.INTERACTIONS); }
@@ -1001,7 +968,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Runs JUnit over all open JUnit tests. */
   private volatile AbstractAction _junitAllAction = new AbstractAction("Test All Documents") {
-    { _addGUIAvailabilityListener(this,
+    { _addGUIAvailabilityListener(this,                                             // init
                                  GUIAvailabilityListener.ComponentType.JUNIT,
                                  GUIAvailabilityListener.ComponentType.COMPILER,
                                  GUIAvailabilityListener.ComponentType.INTERACTIONS); }
@@ -1015,7 +982,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Runs JUnit over all open JUnit tests in the project directory. */
   private volatile AbstractAction _junitProjectAction = new AbstractAction("Test Project") {
-    { _addGUIAvailabilityListener(this,
+    { _addGUIAvailabilityListener(this,                                             // init
                                  GUIAvailabilityListener.ComponentType.PROJECT,
                                  GUIAvailabilityListener.ComponentType.JUNIT,
                                  GUIAvailabilityListener.ComponentType.COMPILER,
@@ -1029,7 +996,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Runs Javadoc on all open documents (and the files in their packages). */
   private volatile AbstractAction _javadocAllAction = new AbstractAction("Javadoc All Documents") {
-    { _addGUIAvailabilityListener(this,
+    { _addGUIAvailabilityListener(this,                                             // init
                                  GUIAvailabilityListener.ComponentType.JAVADOC,
                                  GUIAvailabilityListener.ComponentType.COMPILER); }
     public void actionPerformed(ActionEvent ae) {
@@ -1047,7 +1014,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Runs Javadoc on the current document. */
   private volatile AbstractAction _javadocCurrentAction = new AbstractAction("Preview Javadoc for Current Document") {
-    { _addGUIAvailabilityListener(this,
+    { _addGUIAvailabilityListener(this,                                             // init
                                  GUIAvailabilityListener.ComponentType.JAVADOC,
                                  GUIAvailabilityListener.ComponentType.COMPILER); }
     public void actionPerformed(ActionEvent ae) {
@@ -1142,7 +1109,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** The "Clipboard History" dialog. */
-  private ClipboardHistoryFrame _clipboardHistoryDialog = null;
+  private volatile ClipboardHistoryFrame _clipboardHistoryDialog = null;
   
   /** Asks the user for a file name and goes there. */
   private final Action _pasteHistoryAction = new AbstractAction("Paste from History...") {
@@ -1213,8 +1180,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _putTextIntoDefinitions(_interactionsController.getDocument().getCurrentInput() + "\n");
     }
     };*/
-  
-  
+   
   /** Undoes the last change to the active definitions document. */
   private final DelegatingAction _undoAction = new DelegatingAction() {
     public void actionPerformed(ActionEvent e) {
@@ -1222,21 +1188,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       // _interactionsPane.hasFocus(), because the focus will be lost when the user clicks
       // on the menu bar.
       final boolean intPaneFocused = (getDelegatee()==_interactionsController.getUndoAction());
-      if (intPaneFocused) {
-        _interactionsPane.endCompoundEdit();
-      }
-      else {
-        _currentDefPane.endCompoundEdit();  
-      }
-      
+      if (intPaneFocused) _interactionsPane.endCompoundEdit();
+      else _currentDefPane.endCompoundEdit();  
+           
       super.actionPerformed(e);
       
-      if (intPaneFocused) {
-        _interactionsPane.requestFocusInWindow();
-      }
+      if (intPaneFocused) _interactionsPane.requestFocusInWindow();
       else {
         _currentDefPane.requestFocusInWindow();
-        
         OpenDefinitionsDocument doc = _model.getActiveDocument();
         _saveAction.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
       }
@@ -1252,9 +1211,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       final boolean intPaneFocused = (getDelegatee()==_interactionsController.getRedoAction());
       
       super.actionPerformed(e);
-      if (intPaneFocused) {
-        _interactionsPane.requestFocusInWindow();
-      }
+      if (intPaneFocused)_interactionsPane.requestFocusInWindow();
       else {
         _currentDefPane.requestFocusInWindow();
         OpenDefinitionsDocument doc = _model.getActiveDocument();
@@ -1267,7 +1224,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _quitAction = new AbstractAction("Quit") {
     public void actionPerformed(ActionEvent ae) { quit(); }
   };
-  
   
   /** Quits DrJava.  Optionally displays a prompt before quitting. */
   private final Action _forceQuitAction = new AbstractAction("Force Quit") {
@@ -1425,8 +1381,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           return null;
         }
       };
-      java.util.ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>> strategies =
-        new java.util.ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>>();
+      ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>> strategies =
+        new ArrayList<PredictiveInputModel.MatchingStrategy<GoToFileListEntry>>();
       strategies.add(new PredictiveInputModel.FragmentLineNumStrategy<GoToFileListEntry>());
       strategies.add(new PredictiveInputModel.PrefixLineNumStrategy<GoToFileListEntry>());
       strategies.add(new PredictiveInputModel.RegExLineNumStrategy<GoToFileListEntry>());
@@ -1535,8 +1491,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if ((docs == null) || (docs.size() == 0)) return; // do nothing
     
     GoToFileListEntry currentEntry = null;
-    ArrayList<GoToFileListEntry> list;
-    list = new ArrayList<GoToFileListEntry>(docs.size());
+    ArrayList<GoToFileListEntry> list = new ArrayList<GoToFileListEntry>(docs.size());
     for(OpenDefinitionsDocument d: docs) {
       GoToFileListEntry entry = new GoToFileListEntry(d, d.toString());
       if (d.equals(_model.getActiveDocument())) currentEntry = entry;
@@ -1614,7 +1569,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) { _gotoFileUnderCursor(); }
   };
   
-  
   /** Reset the position of the "Open Javadoc" dialog. */
   public void resetOpenJavadocDialogPosition() {
     initOpenJavadocDialog();
@@ -1625,8 +1579,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Initialize dialog if necessary.
-    * Should NOT be called in the event thread. */
+    * Should NOT be called in the event thread. ???*/
   void initOpenJavadocDialog() {
+//    assert (!EventQueue.isDispatchThread()); 
     if (_openJavadocDialog == null) {
       PredictiveInputFrame.InfoSupplier<JavaAPIListEntry> info = 
         new PredictiveInputFrame.InfoSupplier<JavaAPIListEntry>() {
@@ -1640,9 +1595,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         public KeyStroke getKeyStroke() { return KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0); }
         public String getToolTipText() { return null; }
         public Object value(PredictiveInputFrame<JavaAPIListEntry> p) {
-          if (p.getItem() != null) {
-            PlatformFactory.ONLY.openURL(p.getItem().getURL());
-          }
+          if (p.getItem() != null) PlatformFactory.ONLY.openURL(p.getItem().getURL());
           hourglassOff();
           return null;
         }
@@ -1658,8 +1611,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       };
       // Note: PredictiveInputModel.* is statically imported
-      java.util.ArrayList<MatchingStrategy<JavaAPIListEntry>> strategies =
-        new java.util.ArrayList<MatchingStrategy<JavaAPIListEntry>>();
+      ArrayList<MatchingStrategy<JavaAPIListEntry>> strategies = new ArrayList<MatchingStrategy<JavaAPIListEntry>>();
       strategies.add(new FragmentStrategy<JavaAPIListEntry>());
       strategies.add(new PrefixStrategy<JavaAPIListEntry>());
       strategies.add(new RegExStrategy<JavaAPIListEntry>());
@@ -1676,8 +1628,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                    strategies,
                                                    actions, 1, // cancel is action 1
                                                    new JavaAPIListEntry("dummyJavadoc", "dummyJavadoc", null)) {
-        public void setOwnerEnabled(boolean b) {
-          if (b) { hourglassOff(); } else { hourglassOn(); }
+        public void setOwnerEnabled(boolean b) { 
+          if (b) hourglassOff(); 
+          else hourglassOn();
         }
       }; 
       // putting one dummy entry in the list; it will be changed later anyway
@@ -1689,19 +1642,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
-  
   /** Generate Java API class list. */
-  public static Set<JavaAPIListEntry> _generateJavaAPISet(String base,
-                                                          String stripPrefix,
-                                                          String suffix) {
+  public static Set<JavaAPIListEntry> _generateJavaAPISet(String base, String stripPrefix, String suffix) {
     URL url = MainFrame.class.getResource("/edu/rice/cs/drjava/docs/javaapi"+suffix);
     return _generateJavaAPISet(base, stripPrefix, url);
   }
   
   /** Generate Java API class list. */
-  public static Set<JavaAPIListEntry> _generateJavaAPISet(String base,
-                                                          String stripPrefix,
-                                                          URL url) {
+  public static Set<JavaAPIListEntry> _generateJavaAPISet(String base, String stripPrefix, URL url) {
     Set<JavaAPIListEntry> s = new HashSet<JavaAPIListEntry>();
     if (url==null) return s;
     try {
@@ -1742,25 +1690,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
 
   /** @return the set of all classes, scanned after the last compile. */
-  public Set<GoToFileListEntry> getCompleteClassSet() {
-    return _completeClassSet;
-  }
+  public Set<GoToFileListEntry> getCompleteClassSet() { return _completeClassSet; }
 
   /** Clear the set of all classes. */
-  public void clearCompleteClassSet() {
-    _completeClassSet.clear();
-  }
+  public void clearCompleteClassSet() { _completeClassSet.clear(); }
   
   /** Clears the Java API class set. */
-  public void clearJavaAPISet() {
-    _javaAPISet.clear(); 
-  }
+  public void clearJavaAPISet() { _javaAPISet.clear(); }
   
   /** @return the Java API class set. */
   public Set<JavaAPIListEntry> getJavaAPISet() {
-    if (_javaAPISet.size() == 0) {
-      generateJavaAPISet();
-    }
+    if (_javaAPISet.size() == 0) generateJavaAPISet();
     return _javaAPISet;
   }
   
@@ -1768,7 +1708,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public void generateJavaAPISet() {
     // should NOT be called in the event thread
     // otherwise the processing frame will not work correctly and the event thread will block
-    // assert (!EventQueue.isDispatchThread());
+    // assert (!EventQueue.isDispatchThread());  // Why is this commented out???
     if (_javaAPISet.size() == 0) {
       final edu.rice.cs.util.swing.ProcessingDialog pd =
         new edu.rice.cs.util.swing.ProcessingDialog(this, "Java API Classes", "Loading, please wait.", false);
@@ -1786,19 +1726,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       String suffix = "";
       if (linkVersion.equals(JAVADOC_AUTO_TEXT)) {
         // use the compiler's version of the Java API Javadoc
-        edu.rice.cs.plt.reflect.JavaVersion ver = _model.getCompilerModel().getActiveCompiler().version();
-        if (ver==edu.rice.cs.plt.reflect.JavaVersion.JAVA_1_4) {
-          linkVersion = JAVADOC_1_4_TEXT;
-        }
-        else if (ver==edu.rice.cs.plt.reflect.JavaVersion.JAVA_5) {
-          linkVersion = JAVADOC_1_5_TEXT;
-        }
-        else if (ver==edu.rice.cs.plt.reflect.JavaVersion.JAVA_6) {
-          linkVersion = JAVADOC_1_6_TEXT;
-        }
-        else {
-          linkVersion = JAVADOC_1_3_TEXT;
-        }
+        JavaVersion ver = _model.getCompilerModel().getActiveCompiler().version();
+        if (ver == JavaVersion.JAVA_1_4) linkVersion = JAVADOC_1_4_TEXT;
+        else if (ver == JavaVersion.JAVA_5) linkVersion = JAVADOC_1_5_TEXT;
+        else if (ver == JavaVersion.JAVA_6) linkVersion = JAVADOC_1_6_TEXT;
+        else if (ver == JavaVersion.JAVA_7) linkVersion = JAVADOC_1_7_TEXT;
+        else linkVersion = JAVADOC_1_3_TEXT;   // ???? This looks like the wrong default; I would version 7.
       }
       if (linkVersion.equals(JAVADOC_1_3_TEXT)) {
         base = DrJava.getConfig().getSetting(JAVADOC_1_3_LINK) + "/";
@@ -1862,13 +1795,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** The "Open Javadoc" dialog instance. */
-  PredictiveInputFrame<JavaAPIListEntry> _openJavadocDialog = null;
+  volatile PredictiveInputFrame<JavaAPIListEntry> _openJavadocDialog = null;
   
   /** The list of Java API classes. */
-  Set<JavaAPIListEntry> _javaAPISet = new HashSet<JavaAPIListEntry>();
+  volatile Set<JavaAPIListEntry> _javaAPISet = new HashSet<JavaAPIListEntry>();
   
   /** Action that asks the user for a file name and goes there.  Only executes in the event thread. */
-  private Action _openJavadocAction = new AbstractAction("Open Java API Javadoc...") {
+  private volatile Action _openJavadocAction = new AbstractAction("Open Java API Javadoc...") {
     public void actionPerformed(ActionEvent ae) {
       hourglassOn();
       new Thread() {
@@ -8936,7 +8869,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (files.length == 0) return new File[0];
       _fnfCount += files.length;
       
-      final ArrayList<String> choices = new java.util.ArrayList<String>();
+      final ArrayList<String> choices = new ArrayList<String>();
       choices.add("Yes");
       choices.add("No");
       final List<String> filePaths = new ArrayList<String>();
@@ -10145,7 +10078,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           fileList = textURIListToFileList(data);
         }
         java.util.Iterator<File> iterator = fileList.iterator();
-        List<File> filteredFileList = new java.util.ArrayList<File>();
+        List<File> filteredFileList = new ArrayList<File>();
         while (iterator.hasNext()) {
           File file = iterator.next();
           if (file.isFile() && (DrJavaFileUtils.isSourceFile(file) || file.getName().endsWith(".txt"))) {
@@ -10220,8 +10153,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @return list of files
     */
   private static List<File> textURIListToFileList(String data) {
-    List<File> list = new java.util.ArrayList<File>();
-    java.util.StringTokenizer st = new java.util.StringTokenizer(data, "\r\n");
+    List<File> list = new ArrayList<File>();
+    StringTokenizer st = new StringTokenizer(data, "\r\n");
     while(st.hasMoreTokens()) {
       String s = st.nextToken();
       if (s.startsWith("#")) continue; // the line is a comment (as per the RFC 2483)

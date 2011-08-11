@@ -64,12 +64,12 @@ import java.util.Vector;
 public class CompilerErrorPanel extends ErrorPanel {
   
   /** Whether a compile has occurred since the last compiler change. */
-  private boolean _compileHasOccurred;
-  private CompilerErrorListPane _errorListPane;
+  private volatile boolean _compileHasOccurred;
+  private volatile CompilerErrorListPane _errorListPane;
   private final JComboBox _compilerChoiceBox;
   
   /** The list of files from the last compilation unit that were not compiled because they were not source files. */
-  private File[] _excludedFiles = new File[0];
+  private volatile File[] _excludedFiles = new File[0];
   
   /** Constructor.
    *  @param model SingleDisplayModel in which we are running

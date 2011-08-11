@@ -620,27 +620,19 @@ public class BalancingStreamTokenizerTest extends TestCase {
   }
   
   /* Tests for making a keyword */
-  public void testAddKeywordWhitespace(){
+  public void testAddKeywordWhitespace() {
     BalancingStreamTokenizer tok = make("abc def\\ ghi 123\n456");
     tok.defaultWhitespaceSetup();
-    try{
-      tok.addKeyword("   key");
-    } catch (Exception e)
-    {
-      return;
-    }
+    try { tok.addKeyword("   key"); } 
+    catch (Exception e) { return; }
     fail("Expected Exception");
   }
   
-  public void testAddKeywordQuotes(){
+  public void testAddKeywordQuotes() {
     BalancingStreamTokenizer tok = make("abc def\\ ghi `key 123\n456");
     tok.defaultThreeQuoteDollarCurlySetup();
-    try{
-      tok.addKeyword("`");
-    } catch (Exception e)
-    {
-      return;
-    }
+    try { tok.addKeyword("`"); } 
+    catch (Exception e) { return; }
     fail("Expected Exception");
   }
   
@@ -667,27 +659,19 @@ public class BalancingStreamTokenizerTest extends TestCase {
   }
   
   /* Testing adding new quotes */
-  public void testAddQuotesWhitespace(){
+  public void testAddQuotesWhitespace() {
     BalancingStreamTokenizer tok = make("abc def\\ ghi 123\n456");
     tok.defaultThreeQuoteDollarCurlySetup();
-    try{
-      tok.addQuotes(" ","#");
-    } catch (Exception e)
-    {
-      return;
-    }
+    try { tok.addQuotes(" ","#"); } 
+    catch (Exception e) { return; }
     fail("Expected Exception");
   }
   
-  public void testAddQuotesRepeat(){
+  public void testAddQuotesRepeat() {
     BalancingStreamTokenizer tok = make("abc def\\ ghi 123\n456");
     tok.defaultThreeQuoteDollarCurlySetup();
-    try{
-      tok.addQuotes("#","'");
-    } catch (Exception e)
-    {
-      return;
-    }
+    try { tok.addQuotes("#","'"); } 
+    catch (Exception e) { return; }
     fail("Expected Exception");
   }
   

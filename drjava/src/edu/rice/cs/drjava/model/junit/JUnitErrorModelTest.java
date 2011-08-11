@@ -51,7 +51,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public final class JUnitErrorModelTest extends GlobalModelTestCase {
   
-  private JUnitErrorModel _m;
+  private volatile JUnitErrorModel _m;
   protected static final Log _log = new Log("JUnitError.txt", true);
   
   private static final String MONKEYTEST_FAIL_TEXT =

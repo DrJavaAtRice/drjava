@@ -466,15 +466,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public String getMainClass() { return _state.getMainClass(); }
   
   /** @return the file containing the project's main class. */
-  public File getMainClassContainingFile(){
+  public File getMainClassContainingFile() {
     String path = getMainClass();
     
-    if (path == null){
-      return null;
-    }
+    if (path == null) return null;
     
     // TODO: What about language level file extensions? What about Habanero Java extension?
-    if (path.toLowerCase().endsWith(OptionConstants.JAVA_FILE_EXTENSION)){
+    if (path.toLowerCase().endsWith(OptionConstants.JAVA_FILE_EXTENSION)) {
       return new File(getProjectFile().getParent(), path);
     } //if
     
@@ -486,13 +484,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // some/package/SomeClass.java (not found)
     path = path.replace('.', File.separatorChar);
     File tempFile = new File(getProjectRoot(), path+OptionConstants.JAVA_FILE_EXTENSION);
-    while (path.length() > 0){
-      if (tempFile.exists()){
-        return tempFile;
-      } //if
+    while (path.length() > 0) {
+      if (tempFile.exists()) return tempFile;
       
-      if (path.indexOf(File.separatorChar) == -1)
-        break;
+      if (path.indexOf(File.separatorChar) == -1) break;
       
       path = path.substring(0, path.lastIndexOf(File.separatorChar));
       tempFile = new File(getProjectRoot(), path + OptionConstants.JAVA_FILE_EXTENSION);
@@ -885,9 +880,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
             accumulator.add(file);
           }
         }
-        else if ( file.getName().endsWith(".class")){
-          accumulator.add(file);
-        }
+        else if ( file.getName().endsWith(".class")) accumulator.add(file);
       }
     };    
     
@@ -1077,7 +1070,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public List<File> getClassFiles() { return new LinkedList<File>(); }
     
-    public String getCustomManifest(){ return null; }
+    public String getCustomManifest() { return null; }
     public void setCustomManifest(String manifest) { }
   }
   
@@ -4306,6 +4299,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _state.setProjectChanged(true);
     _state.setCustomManifest(manifest); 
   }
-  public String getCustomManifest(){ return _state.getCustomManifest(); }
+  public String getCustomManifest() { return _state.getCustomManifest(); }
 }
 

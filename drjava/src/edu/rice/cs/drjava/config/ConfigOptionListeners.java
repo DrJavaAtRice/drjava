@@ -507,7 +507,7 @@ public class ConfigOptionListeners implements OptionConstants {
         // clean up
         String[] params = value.split("(-private|-protected|-package|-public)");
         sb = new StringBuilder();
-        for(int i = 0; i < params.length; i++){
+        for(int i = 0; i < params.length; i++) {
           if(!params[i].trim().equals("")) { sb.append(params[i].trim()); sb.append(' '); }
         }
         DrJava.getConfig().setSetting(JAVADOC_CUSTOM_PARAMS, sb.toString().trim());

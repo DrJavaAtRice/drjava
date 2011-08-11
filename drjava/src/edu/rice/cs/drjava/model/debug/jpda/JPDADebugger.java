@@ -731,7 +731,7 @@ public class JPDADebugger implements Debugger {
       ArrayList<DebugStackData> frames = new ArrayList<DebugStackData>();
       // get a list of language level files whose line numbers need to be translated 
       final List<File> files = new ArrayList<File>();
-      for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()){ files.add(odd.getRawFile()); }
+      for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
       for (StackFrame f : thread.frames()) {
         // map Java line numbers to LL line numbers
         String method = JPDAStackData.methodName(f);
@@ -764,7 +764,7 @@ public class JPDADebugger implements Debugger {
     String fileName;
     try {
       final List<File> files = new ArrayList<File>();
-      for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()){ files.add(odd.getRawFile()); }
+      for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
       Location lll = getLLLocation(location, files);
       
       fileName = lll.sourcePath();
@@ -783,7 +783,7 @@ public class JPDADebugger implements Debugger {
     catch(AbsentInformationException e) {
       // No stored doc, look on the source root set (later, also the sourcepath)
       final List<File> files = new ArrayList<File>();
-      for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()){ files.add(odd.getRawFile()); }
+      for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
 
       ReferenceType rt = location.declaringType();
       fileName = null;
@@ -858,7 +858,7 @@ public class JPDADebugger implements Debugger {
     }
 
     final List<File> files = new ArrayList<File>();
-    for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()){ files.add(odd.getRawFile()); }
+    for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
     
     // map Java to LL line numbers using LanguageLevelStackTraceMapper
     while (i.hasNext()) {
@@ -1664,7 +1664,7 @@ public class JPDADebugger implements Debugger {
       try {
         if (currThread.frameCount() > 0) {
           final List<File> files = new ArrayList<File>();
-          for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()){ files.add(odd.getRawFile()); }
+          for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
           scrollToSource(getLLLocation(currThread.frame(0).location(), files));
         }
       }
@@ -1951,14 +1951,10 @@ public class JPDADebugger implements Debugger {
   }
   
   
-  /**
-   * Gets the LanguageLevelStackTraceMapper
-   * @return the LanguageLevelStackTraceMapper used by JPDADebugger
-   */
-  public LanguageLevelStackTraceMapper getLLSTM(){
-    // use LLSTM from compiler model.
-    return _model.getCompilerModel().getLLSTM();
-  }
+  /** Gets the LanguageLevelStackTraceMapper
+    * @return the LanguageLevelStackTraceMapper used by JPDADebugger in the compiler model
+    */
+  public LanguageLevelStackTraceMapper getLLSTM() { return _model.getCompilerModel().getLLSTM(); }
   
   /** A Location that delegates to another location in all cases except for line number,
     * source path and source name. */

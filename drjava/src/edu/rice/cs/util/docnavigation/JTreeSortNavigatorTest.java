@@ -74,10 +74,10 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
           File f = File.createTempFile("project-",".pjt").getCanonicalFile();
           tree = new JTreeSortNavigator<DummyINavigatorItem>(f.getCanonicalPath());
           
-          tree.addTopLevelGroup(SOURCE_BIN_NAME, new INavigatorItemFilter<INavigatorItem>(){
+          tree.addTopLevelGroup(SOURCE_BIN_NAME, new INavigatorItemFilter<INavigatorItem>() {
             public boolean accept(INavigatorItem n) { return !n.getName().startsWith("aux"); }
           });
-          tree.addTopLevelGroup(EXTERNAL_BIN_NAME, new INavigatorItemFilter<INavigatorItem>(){
+          tree.addTopLevelGroup(EXTERNAL_BIN_NAME, new INavigatorItemFilter<INavigatorItem>() {
             public boolean accept(INavigatorItem n) { return n.getName().startsWith("aux"); }
           });
 

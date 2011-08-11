@@ -84,32 +84,32 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   protected volatile int _numErrors;
   protected volatile JCheckBox _showHighlightsCheckBox;
   
-  protected SingleDisplayModel _model;
+  protected volatile SingleDisplayModel _model;
   
-  private JScrollPane _scroller;
+  private volatile JScrollPane _scroller;
   
   /** This contains the _scroller and the _errorNavPanel. */
-  private JPanel _leftPanel;
+  private volatile JPanel _leftPanel;
   
   /** This contains the label, showHighlightsCheckBox, and the customPanel. */
-  private JPanel _rightPanel;
+  private volatile JPanel _rightPanel;
   
-  private JPanel _errorNavPanel;
+  private volatile JPanel _errorNavPanel;
   
-  private JPanel _errorNavButtonsPanel;
+  private volatile JPanel _errorNavButtonsPanel;
   
   /** This JPanel contains each child panel's specific UI components. **/
-  protected JPanel customPanel;
+  protected volatile JPanel customPanel;
   
-  private JButton _nextErrorButton;
-  private JButton _prevErrorButton;
+  private volatile JButton _nextErrorButton;
+  private volatile JButton _prevErrorButton;
   
   /** _popupMenu and _popupMenuListener are either both null or both non-null. */
-  protected JPopupMenu _popupMenu = null;
-  protected RightClickMouseAdapter _popupMenuListener = null;
+  protected volatile JPopupMenu _popupMenu = null;
+  protected volatile RightClickMouseAdapter _popupMenuListener = null;
   
   /** Highlight painter for selected list items. */
-  static ReverseHighlighter.DrJavaHighlightPainter _listHighlightPainter =
+  static volatile ReverseHighlighter.DrJavaHighlightPainter _listHighlightPainter =
     new ReverseHighlighter.DrJavaHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
   
   protected static final SimpleAttributeSet _getBoldAttributes() {
@@ -266,7 +266,6 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     doc.setCharacterAttributes(0, doc.getLength() + 1, set, false); 
   }
 
-  
   /** Updates all document styles with the attributes contained in newSet.
    *  @param newSet Style containing new attributes to use.
    */
@@ -278,37 +277,61 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   
   abstract protected ErrorListPane getErrorListPane();
   
-  protected SingleDisplayModel getModel() {
-    return _model;
-  }
+  protected SingleDisplayModel getModel() { return _model; }
   
-  /** This function returns the correct error model
-   */
+  /** This function returns the correct error model  */
   abstract protected CompilerErrorModel getErrorModel();
   
   /** Pane to show compiler errors. Similar to a listbox (clicking selects an item) but items can each wrap, etc. */
   public abstract class ErrorListPane extends JEditorPane implements ClipboardOwner {
     /** The custom keymap for the error list pane. */
-    protected Keymap _keymap;
+    protected volatile Keymap _keymap;
     
     /** Index into _errorListPositions of the currently selected error. */
-    private int _selectedIndex;
+    private volatile int _selectedIndex;
     
     /**
      * The start position of each error in the list. This position is the place
      * where the error starts in the error list, as opposed to the place where
      * the error exists in the source.
      */
-    protected Position[] _errorListPositions;
+    protected volatile Position[] _errorListPositions;
     
     /** Table mapping Positions in the error list to CompilerErrors. */
     protected final HashMap<Position, DJError> _errorTable = new HashMap<Position, DJError>();
     
     // when we create a highlight we get back a tag we can use to remove it
-    private HighlightManager.HighlightInfo _listHighlightTag = null;
+    private volatile HighlightManager.HighlightInfo _listHighlightTag = null;
     
-    private HighlightManager _highlightManager = new HighlightManager(this);
+    private volatile HighlightManager _highlightManager = new HighlightManager(this);
     
+    /** Default cut action. */
+    volatile Action cutAction = new DefaultEditorKit.CutAction() {
+      public void actionPerformed(ActionEvent e) {
+        if (getSelectedText() != null) {
+          super.actionPerformed(e);
+          String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(ErrorListPane.this);
+          if ((s != null) && (s.length() != 0)) { ClipboardHistoryModel.singleton().put(s); }
+        }
+      }
+    };
+    
+    /** Default copy action. */
+    volatile Action copyAction = new DefaultEditorKit.CopyAction() {
+      public void actionPerformed(ActionEvent e) {
+        if (getSelectedText() != null) {
+          super.actionPerformed(e);
+          String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(ErrorListPane.this);
+          if (s != null && s.length() != 0) { ClipboardHistoryModel.singleton().put(s); }
+        }
+      }
+    };
+    
+    /** No-op paste action. */
+    volatile Action pasteAction = new DefaultEditorKit.PasteAction() {
+      public void actionPerformed(ActionEvent e) { }
+    };
+     
     protected MouseAdapter defaultMouseListener = new MouseAdapter() {
       public void mousePressed(MouseEvent e) { selectNothing(); }
       public void mouseReleased(MouseEvent e) {
@@ -431,33 +454,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       // ignore
     }
 
-    /** Default cut action. */
-    Action cutAction = new DefaultEditorKit.CutAction() {
-      public void actionPerformed(ActionEvent e) {
-        if (getSelectedText() != null) {
-          super.actionPerformed(e);
-          String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(ErrorListPane.this);
-          if ((s != null) && (s.length() != 0)) { ClipboardHistoryModel.singleton().put(s); }
-        }
-      }
-    };
-    
-    /** Default copy action. */
-    Action copyAction = new DefaultEditorKit.CopyAction() {
-      public void actionPerformed(ActionEvent e) {
-        if (getSelectedText() != null) {
-          super.actionPerformed(e);
-          String s = edu.rice.cs.util.swing.Utilities.getClipboardSelection(ErrorListPane.this);
-          if ((s != null) && (s.length() != 0)){ ClipboardHistoryModel.singleton().put(s); }
-        }
-      }
-    };
-    
-    /** No-op paste action. */
-    Action pasteAction = new DefaultEditorKit.PasteAction() {
-      public void actionPerformed(ActionEvent e) { }
-    };
-    
+  
     /** Returns true if the errors should be highlighted in the source
      *  @return the status of the JCheckBox _showHighlightsCheckBox
      */
@@ -541,9 +538,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       return numErrMsg.toString();
     }
     
-    /**
-     * Gets the message to title the block containing only errors.
-     */
+    /** Gets the message to title the block containing only errors. */
     protected String _getErrorTitle() {
       CompilerErrorModel cem = getErrorModel();
       if (cem.getNumCompErrors() > 1) return "--------------\n*** Errors ***\n--------------\n";
@@ -619,7 +614,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         int startPos = doc.getLength();
         DJError err = cem.getError(errorNum);
         
-        if (!err.isWarning()){
+        if (!err.isWarning()) {
           _insertErrorText(err, doc);
           Position pos = doc.createPosition(startPos);
           _errorListPositions[errorPositionInListOfErrors] = pos;
@@ -635,7 +630,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         int startPos = doc.getLength();
         DJError err = cem.getError(errorNum);
         
-        if (err.isWarning()){
+        if (err.isWarning()) {
           _insertErrorText(err, doc);
           Position pos = doc.createPosition(startPos);
           _errorListPositions[errorPositionInListOfErrors] = pos;

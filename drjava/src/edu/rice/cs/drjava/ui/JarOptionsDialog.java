@@ -441,7 +441,7 @@ public class JarOptionsDialog extends SwingFrame {
   }
   
   /** Open a dialog to allow editing of the manifest file for the jar, returns only when the user has closed the dialog. */
-  private void _editManifest(){
+  private void _editManifest() {
     final JDialog editDialog = new JDialog(this, "Custom Manifest", true);
     editDialog.setSize(300,400);
     
@@ -500,7 +500,7 @@ public class JarOptionsDialog extends SwingFrame {
   }
   
   /** Toggles the enabled state on _editManifest */
-  private void _toggleCustomManifest(){
+  private void _toggleCustomManifest() {
     _editManifest.setEnabled(_customManifest.isSelected() && (_jarClasses.isSelected() || _jarAll.isSelected()));
     _setEnableExecutable(!_customManifest.isSelected() && (_jarClasses.isSelected() || _jarAll.isSelected()));
   }
@@ -701,12 +701,13 @@ public class JarOptionsDialog extends SwingFrame {
         File[] files = dir.listFiles(allFilter);
         
         if(files != null) {
-          for(int i = 0; i < files.length; i++){
+          for(int i = 0; i < files.length; i++) {
             try {
-              if(files[i].isDirectory()){
+              if (files[i].isDirectory()) {
                 LOG.log("jarFile.addDirectoryRecursive(" + files[i] + ")");
                 jarFile.addDirectoryRecursive(files[i], files[i].getName(), allFilter);
-              }else{
+              }
+              else {
                 LOG.log("jarFile.addFile(" + files[i] + ")");
                 jarFile.addFile(files[i], "", files[i].getName());
               }
@@ -714,7 +715,6 @@ public class JarOptionsDialog extends SwingFrame {
             catch(IOException ioe) { _exceptions.add(ioe.getMessage()); }
           }
         }
-        
         return true;
       }
       
@@ -835,14 +835,14 @@ public class JarOptionsDialog extends SwingFrame {
             
             File sourceJarFile = File.createTempFile(prefix, ".jar");
             
-            if(!_jarAll.isSelected()){
+            if(!_jarAll.isSelected()) {
               JarBuilder sourceJar = new JarBuilder(sourceJarFile);
               jarSources(_model, sourceJar);
               sourceJar.close();
               mainJar.addFile(sourceJarFile, "", "source.jar");
             }
             
-            if(_jarAll.isSelected()){
+            if(_jarAll.isSelected()) {
               LOG.log("jarAll");
               LOG.log("binRoot=" + binRoot);
               LOG.log("root=" + _model.getProjectRoot());

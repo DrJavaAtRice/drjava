@@ -52,10 +52,10 @@ public class DropDownButton extends JButton {
   private boolean popupVisible = false; 
   
   /** Constructor. */
-  public DropDownButton(){ 
+  public DropDownButton() { 
     addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent ae){ 
-        JPopupMenu popup = getPopupMenu(); 
+      public void actionPerformed(ActionEvent ae) { 
+        final JPopupMenu popup = getPopupMenu(); 
         popup.addPopupMenuListener(new PopupMenuListener() {
           public void popupMenuWillBecomeVisible(PopupMenuEvent e){ 
             popupVisible = true; 

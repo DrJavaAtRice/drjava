@@ -13,19 +13,15 @@ import java.io.FileFilter;
  */
 public class RecursiveFileListPropertyTest extends TestCase {
   
-  /**
-   * Test the RegexFilter inner class.
-   */
+  /** Test the RegexFilter inner class. */
   public void testRegexFilter() {
     FileFilter filter = new RecursiveFileListProperty.RegexFilter(".");
     Assert.assertTrue("Does not accept single char strings", filter.accept(new File("a")));
     Assert.assertFalse("Does not reject non-length 1 strings", filter.accept(new File("abc")));
   }
   
-  /**
-   * Test the FileMaskFilter inner class.
-   */
-  public void testFileMaskFilter(){
+  /** Test the FileMaskFilter inner class. */
+  public void testFileMaskFilter() {
      RecursiveFileListProperty.FileMaskFilter filter = new RecursiveFileListProperty.FileMaskFilter("?");
      
      filter.addIncludedFile(new File("abc"));

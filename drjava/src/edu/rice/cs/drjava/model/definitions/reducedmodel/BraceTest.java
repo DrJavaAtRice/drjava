@@ -157,7 +157,7 @@ public final class BraceTest extends DrJavaTestCase implements ReducedModelState
     }catch(BraceException b){ };
   }
   
-  public void testIsSlashStar(){
+  public void testIsSlashStar() {
     assertEquals(false, lparen.isSlash());
     Brace slash = Brace.MakeBrace("/",FREE);
     assertEquals(true, slash.isSlash());

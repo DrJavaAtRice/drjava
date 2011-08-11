@@ -60,12 +60,8 @@ public class LayeredIcon implements Icon {
       }
     }
   }
-  public int getIconHeight(){
-    return _h;
-  }
-  public int getIconWidth(){
-    return _w;
-  }
+  public int getIconHeight() { return _h; }
+  public int getIconWidth() { return _w; }
   public void paintIcon(Component c, Graphics g, int x, int y){
     for (int i = 0; i < _layers.length; i++) {
       Icon ico = _layers[i];
@@ -73,13 +69,7 @@ public class LayeredIcon implements Icon {
     }
   }
   
-  public Icon[] getLayers(){
-    return _layers;
-  }
-  public int[] getXOffsets() {
-    return _xoffs;
-  }
-  public int[] getYOffsets(){
-    return _xoffs;
-  }
+  public Icon[] getLayers() { return _layers; }
+  public int[] getXOffsets() { return _xoffs; }
+  public int[] getYOffsets() { return _xoffs; }
 }

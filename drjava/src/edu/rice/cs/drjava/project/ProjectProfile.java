@@ -159,17 +159,17 @@ public class ProjectProfile implements ProjectFileIR {
   public String getMainClass() { return _mainClass; }
   
   /** @return the file containing the project's main class. */
-  public File getMainClassContainingFile(){
+  public File getMainClassContainingFile() {
     DocFile[] possibleContainers = getSourceFiles();
     
     String main = getMainClass();
     // TODO: What about language level file extensions? What about Habanero Java extension?
-    if(main.toLowerCase().endsWith(OptionConstants.JAVA_FILE_EXTENSION)){
+    if (main.toLowerCase().endsWith(OptionConstants.JAVA_FILE_EXTENSION)) {
       main = main.substring(0, main.length()-OptionConstants.JAVA_FILE_EXTENSION.length());
       main = main.replace(File.separatorChar,'.');
     }
     
-    for(int i = 0; i < possibleContainers.length; i++){
+    for (int i = 0; i < possibleContainers.length; i++) {
       String toMatch = possibleContainers[i].getAbsolutePath();
       toMatch = toMatch.substring(0, toMatch.lastIndexOf(OptionConstants.JAVA_FILE_EXTENSION));
       toMatch = toMatch.replace(File.separatorChar,'.');

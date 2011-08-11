@@ -295,23 +295,21 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     assertEquals("Did not reset cursor correctly.", entry1, _history.getCurrent());
   }
   
-  public void testSanityCheckConstructor(){
+  public void testSanityCheckConstructor() {
    
     History his =  new History(-1);
     his.add("Test String");
     assertEquals("History size is not 0", 0, his.size());
-    
   }
   
-  public void testOptionListenerToString(){
+  public void testOptionListenerToString() {
    
     History his = new History(10);
     String toS = his.historyOptionListener.toString();
     assertTrue("Did not return correct string representation",toS.startsWith("HISTORY_MAX_SIZE OptionListener #"));
-    
   }
   
-  public void testRemoveLast(){
+  public void testRemoveLast() {
    
     History his = new History(5);
     
@@ -330,19 +328,17 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     assertEquals("Did not return expected last value","test string 4",his.removeLast());
     
     assertEquals("Did not return expected last value","test string 2",his.lastEntry());
-    
   }
   
-  public void testMoveMethods(){
+  public void testMoveMethods() {
     
     History his = new History(0);
     
-    try{
+    try {
       his.movePrevious("3");
       fail("Should not have moved previous, empty history");
     }
-    catch(ArrayIndexOutOfBoundsException e){
-      
+    catch(ArrayIndexOutOfBoundsException e) { 
     }
     
     try{ 
@@ -350,7 +346,6 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
       fail("Should not have moved next, empty history");
     }
     catch(ArrayIndexOutOfBoundsException e){
-      
     }
   }
 }

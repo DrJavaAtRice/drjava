@@ -137,7 +137,7 @@ public class LanguageLevelStackTraceMapper {
   
   
   /** Clears the TreeMap cache */
-  public void clearCache(){
+  public void clearCache() {
     cache = new HashMap<String,TreeMap<Integer,Integer>>();
   }
   
@@ -151,7 +151,7 @@ public class LanguageLevelStackTraceMapper {
     if (s.getFileName() == null) return false;
     OpenDefinitionsDocument d;      
     try { d = aGModel.getDocumentForFile(f); }
-    catch(java.io.IOException e){ return false; }
+    catch(java.io.IOException e) { return false; }
     
     String dn = d.getRawFile().getName();
     
@@ -281,7 +281,7 @@ public class LanguageLevelStackTraceMapper {
     int djNum;
     int javaNum;
 
-    for(int i = 0; i < mapSize; i++){
+    for(int i = 0; i < mapSize; i++) {
       if (temp.length() < 2)  temp = readLLLineBlockHelper(bufReader);
       if (temp == null) break;
       

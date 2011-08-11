@@ -49,14 +49,15 @@ import java.awt.event.KeyEvent;
 import java.awt.datatransfer.*;
 import java.util.Vector;
 
+import edu.rice.cs.util.OperationCanceledException;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.swing.*;
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import edu.rice.cs.drjava.model.DJDocument;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
-import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.drjava.model.repl.*;
 
 /** The view component for repl interaction.
@@ -64,7 +65,7 @@ import edu.rice.cs.drjava.model.repl.*;
   */
 public abstract class InteractionsPane extends AbstractDJPane implements OptionConstants, ClipboardOwner {
   
-  public static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("InteractionsPane.txt", false);
+  public static Log LOG = new Log("InteractionsPane.txt", false);
   
   /** fields for use in undo/redo functionality */
   private volatile UndoAction _undoAction;
@@ -423,7 +424,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   }
   
   /** discards edits and resets undoManager **/
-  public void discardUndoEdits(){
+  public void discardUndoEdits() {
     endCompoundEdit();
     resetUndo();
   }

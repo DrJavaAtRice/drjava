@@ -156,9 +156,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Returns the document's editor */
-  public DefinitionsEditorKit getEditor(){
-    return _editor;
-  }
+  public DefinitionsEditorKit getEditor() { return _editor; }
   
   /** Returns a new indenter. */
   protected Indenter makeNewIndenter(int indentLevel) { return new Indenter(indentLevel); }

@@ -468,7 +468,7 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call getMainClass on a Dummy");
   }
   
-  public File getMainClassContainingFile(){
+  public File getMainClassContainingFile() {
     throw new UnsupportedOperationException("Tried to call getMainClass on a Dummy");
   }
   
@@ -528,7 +528,7 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call getOutOfSyncDocuments on a Dummy");
   }
   
-  public void cleanBuildDirectory(){
+  public void cleanBuildDirectory() {
     throw new UnsupportedOperationException("Tried to call cleanBuildDirectory on a Dummy");
   }
   

@@ -92,7 +92,7 @@ public class JUnitPanel extends ErrorPanel {
   private int _testCount;
   private boolean _testsSuccessful;
   
-  private JUnitProgressBar _progressBar;
+  private volatile JUnitProgressBar _progressBar;
   
   private Action _showStackTraceAction = new AbstractAction("Show Stack Trace") {
     public void actionPerformed(ActionEvent ae) {
@@ -102,12 +102,12 @@ public class JUnitPanel extends ErrorPanel {
     }
   };
   
-  private JButton _showStackTraceButton;
+  private volatile JButton _showStackTraceButton;
   
   /** The currently selected error. */
-  private JUnitError _error = null;
-  private Window _stackFrame = null;
-  private JTextArea _stackTextArea;
+  private volatile JUnitError _error = null;
+  private volatile Window _stackFrame = null;
+  private volatile JTextArea _stackTextArea;
   private final JLabel _errorLabel = new JLabel();
   private final JLabel _testLabel = new JLabel();
   private final JLabel _fileLabel = new JLabel();

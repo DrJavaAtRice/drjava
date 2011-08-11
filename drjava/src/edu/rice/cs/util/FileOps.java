@@ -804,9 +804,9 @@ public abstract class FileOps {
     
     public DefaultFileSaver(File file){ outputFile = file.getAbsoluteFile(); }
     
-    public boolean continueWhenTempFileCreationFails(){ return true; }
+    public boolean continueWhenTempFileCreationFails() { return true; }
     
-    public File getBackupFile() throws IOException{ return new File(getTargetFile().getPath() + "~"); }
+    public File getBackupFile() throws IOException { return new File(getTargetFile().getPath() + "~"); }
     
     public boolean shouldBackup() throws IOException{
       if (! backupsEnabled) return false;

@@ -402,23 +402,19 @@ public class DefaultCompilerModel implements CompilerModel {
         File javaFile = new File(DrJavaFileUtils.getJavaForLLFile(fileName));
         
         //checks if .dj? file has a matching .java file open in project. Eventually warns user (later on in code)
-        if(files.contains(javaFile)){          
-          filesToBeClosed.add(javaFile);
+        if (files.contains(javaFile)) filesToBeClosed.add(javaFile);
           // delete file later so closeFiles doesn't complain about missing files
-        }
-        else {
+        else
           // Delete the stale .java file now (if it exists), a file with this name will subsequently be generated
           javaFile.delete();
-        }
+        
         javaFileSet.add(javaFile);
         newFiles.add(javaFile);
       }   
-      else{  
-        javaFileSet.add(canonicalFile);
-      }
+      else javaFileSet.add(canonicalFile);
     }
     
-    for(File f: filesToBeClosed) {
+    for (File f: filesToBeClosed) {
       if (files.contains(DrJavaFileUtils.getDJForJavaFile(f)) ||
           files.contains(DrJavaFileUtils.getDJ0ForJavaFile(f)) ||
           files.contains(DrJavaFileUtils.getDJ1ForJavaFile(f)) ||
@@ -427,7 +423,7 @@ public class DefaultCompilerModel implements CompilerModel {
       }
     }
     
-    if(!filesToBeClosed.isEmpty()){
+    if (!filesToBeClosed.isEmpty()) {
       final JButton closeButton = new JButton(new AbstractAction("Close Files") {
         public void actionPerformed(ActionEvent e) {
           // no op, i.e. delete everything
@@ -699,12 +695,8 @@ public class DefaultCompilerModel implements CompilerModel {
     }
   }
   
-  
   /** returns the LanguageLevelStackTraceMapper
     * @return the LanguageLevelStackTraceMapper
     * */
-  public LanguageLevelStackTraceMapper getLLSTM(){
-    return _LLSTM;
-  }
-  
+  public LanguageLevelStackTraceMapper getLLSTM() { return _LLSTM; } 
 }

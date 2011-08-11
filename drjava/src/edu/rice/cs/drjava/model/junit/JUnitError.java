@@ -45,10 +45,10 @@ import java.io.Serializable;
   * @version $Id$
   */
 public class JUnitError extends DJError implements Serializable {
-  private String _test;
-  private String _className;
-  private String _exception;
-  private StackTraceElement[] _stackTrace;
+  private volatile String _test;
+  private volatile String _className;
+  private volatile String _exception;
+  private volatile StackTraceElement[] _stackTrace;
   
   /** Constructor.
    * @param file the file where the error occurred

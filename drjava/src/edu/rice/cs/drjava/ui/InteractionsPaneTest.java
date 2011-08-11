@@ -356,7 +356,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     final String oldText = _doc.getText();
     final InteractionsDJDocument doc = (InteractionsDJDocument)_pane.getDJDocument();
     Utilities.invokeAndWait(new Runnable(){
-      public void run(){
+      public void run() {
         _doc.append("Undo test text 1",InteractionsDocument.DEFAULT_STYLE);
         String newText = _doc.getText();
         doc.getUndoManager().undo();
@@ -369,15 +369,13 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
     });
   }
  
-  /**
-   *Tests to see if SHIFT_ENTER starts a new undo action 
-   */
-  public void testUndoRedoNewLine(){
+  /** Tests to see if SHIFT_ENTER starts a new undo action  */
+  public void testUndoRedoNewLine() {
     final String oldText = _doc.getText();
     final InteractionsDJDocument doc = (InteractionsDJDocument)_pane.getDJDocument();
     
     Utilities.invokeAndWait(new Runnable(){
-      public void run(){
+      public void run() {
         _doc.append("Undo test text",InteractionsDocument.DEFAULT_STYLE);
         
         

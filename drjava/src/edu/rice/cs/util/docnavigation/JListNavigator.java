@@ -330,7 +330,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   }
   
   /** @return the renderer for this object. */
-  public Component getRenderer(){ return _renderer; }
+  public Component getRenderer() { return _renderer; }
   
   /** @return the number of selected items. Always 1 for JListNavigator */
   public int getSelectionCount() { return 1; } // return getSelectedIndices().length; }

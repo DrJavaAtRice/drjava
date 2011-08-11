@@ -47,20 +47,20 @@ import edu.rice.cs.drjava.DrJavaRoot;
   * which calls the _close method. This method can be overwritten in a subclass if needed.
   * @version $Id$
   */
-public abstract class TabbedPanel extends JPanel 
-  implements DropTargetListener{
+public abstract class TabbedPanel extends JPanel implements DropTargetListener {
+  
   /** indicates whether this tab is displayed in the tabbed pane. */
-  protected boolean _displayed;
+  protected volatile boolean _displayed;
   /** button which removes this pane's tab. */
-  protected JButton _closeButton;
+  protected volatile JButton _closeButton;
   // panel that has _closeButton in the north so it can't be stretched vertically
-  protected JPanel _closePanel;
+  protected volatile JPanel _closePanel;
   // the panel that the subclasses of TabbedPanel can use
-  protected JPanel _mainPanel;
+  protected volatile JPanel _mainPanel;
   // used to be able to reference removeTab
-  protected MainFrame _frame;
+  protected volatile MainFrame _frame;
   // string to be displayed on the tab
-  private String _name;
+  private volatile String _name;
 
   /** Constructor.
     * @param frame MainFrame displaying the tab
@@ -129,7 +129,7 @@ public abstract class TabbedPanel extends JPanel
   }
   
   /** Drag and drop target. */
-  DropTarget dropTarget = new DropTarget(this, this);  
+  volatile DropTarget dropTarget = new DropTarget(this, this);  
 
   /** User dragged something into the component. */
   public void dragEnter(DropTargetDragEvent dropTargetDragEvent) {

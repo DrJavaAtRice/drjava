@@ -64,17 +64,17 @@ public interface Tokens {
   
   class LeftParenToken extends SExpToken {
     public static final LeftParenToken ONLY = new LeftParenToken();
-    private LeftParenToken(){ super("("); }
+    private LeftParenToken() { super("("); }
   }
   
   class RightParenToken extends SExpToken {
     public static final RightParenToken ONLY = new RightParenToken();
-    private RightParenToken(){ super(")"); }
+    private RightParenToken() { super(")"); }
   }
   
   class BackSlashToken extends SExpToken {
     public static final BackSlashToken ONLY = new BackSlashToken();
-    private BackSlashToken(){ super("\\"); }
+    private BackSlashToken() { super("\\"); }
   }
   
   ////////////// General Tokens //////////////////

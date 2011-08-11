@@ -82,11 +82,10 @@ public class CompilerErrorModel {
   private final int _numErrors;
   
   /** The number of compile errors. Used for display purposes only.*/
-  private int _numCompilerErrors;
+  private volatile int _numCompilerErrors;
   
   /** The number of compile warnings. Used for display purposes only.*/
-  private int _numWarnings;
-  
+  private volatile int _numWarnings;
   
   /** Cached result of hasOnlyWarnings.
     * Three-state enum:
@@ -94,7 +93,7 @@ public class CompilerErrorModel {
     *   0 => false
     *   1 => true
     */
-  private int _onlyWarnings = -1;
+  private volatile int _onlyWarnings = -1;
   
   /** Used internally in building _positions.  The file used as the index *must* be a canonical file, or else
     * errors won't always be associated with the right documents.
@@ -173,7 +172,7 @@ public class CompilerErrorModel {
     
     _numWarnings = 0;
     _numCompilerErrors = 0;
-    for (int i =0; i < errors.length; i++){
+    for (int i =0; i < errors.length; i++) {
       if (errors[i].isWarning()) _numWarnings++;
       else _numCompilerErrors++;
     }

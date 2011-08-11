@@ -165,7 +165,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   protected void changeDocumentText(final String s, final OpenDefinitionsDocument doc) /*throws BadLocationException */{
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
-        try{
+        try {
           doc.clear();
           assertLength(0, doc);
           doc.append(s, null);
@@ -967,8 +967,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
   public static class InteractionListener extends TestListener {
     private static final int WAIT_TIMEOUT = 20000; // time to wait for _interactionDone or _resetDone 
-    private CompletionMonitor _interactionDone;
-    private CompletionMonitor _resetDone;
+    private volatile CompletionMonitor _interactionDone;
+    private volatile CompletionMonitor _resetDone;
     
     private volatile int _lastExitStatus = -1;
     

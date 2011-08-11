@@ -1214,7 +1214,7 @@ public class ConfigFrame extends SwingFrame {
      */
     ActionListener CPCActionListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        if(!edu.rice.cs.drjava.DrJava.getConfig().getSetting(OptionConstants.DEFAULT_COMPILER_PREFERENCE).equals(CPC.getCurrentComboBoxValue())){
+        if(!edu.rice.cs.drjava.DrJava.getConfig().getSetting(OptionConstants.DEFAULT_COMPILER_PREFERENCE).equals(CPC.getCurrentComboBoxValue())) {
           edu.rice.cs.drjava.DrJava.getConfig().setSetting(OptionConstants.DEFAULT_COMPILER_PREFERENCE,CPC.getCurrentComboBoxValue());
         }
       }

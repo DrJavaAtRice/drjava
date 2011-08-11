@@ -51,12 +51,8 @@ public class CenteredIcon implements Icon {
     _w = width;
     _h = height;
   }
-  public int getIconHeight(){
-    return _h;
-  }
-  public int getIconWidth(){
-    return _w;
-  }
+  public int getIconHeight() { return _h; }
+  public int getIconWidth() { return _w; }
   public void paintIcon(Component c, Graphics g, int x, int y){
     Shape oldClip = g.getClip();
     g.setClip(x, y, _w, _h);

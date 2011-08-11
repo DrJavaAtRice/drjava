@@ -600,7 +600,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) called", "", "").show();
     
     List<File> files = new ArrayList<File>();
-    for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()){ files.add(odd.getRawFile()); }
+    for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
 //    Utilities.show("errors.length = " + errors.length + " files = " + files);
     for(JUnitError e: errors){
       try {

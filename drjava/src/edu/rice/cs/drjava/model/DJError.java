@@ -48,10 +48,10 @@ import edu.rice.cs.util.UnexpectedException;
   * @version $Id$
   */
 public class DJError implements Comparable<DJError>, Serializable {
-  private File _file;
+  private volatile File _file;
   
   /** zero-based line number. */
-  private int _lineNumber;
+  private volatile int _lineNumber;
   
   /** zero-based column number. */
   private final int _startColumn;
@@ -59,7 +59,7 @@ public class DJError implements Comparable<DJError>, Serializable {
   private final boolean _isWarning;
   
   /** This boolean is true when the DJError does not have a location (lineNumber is -1). */
-  private boolean _noLocation;
+  private volatile boolean _noLocation;
   
   /** Constructor.
     * @param     file the file where the error occurred

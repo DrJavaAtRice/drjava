@@ -71,10 +71,10 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   private volatile boolean _toClear = false;
   
  // fields for use by undo/redo functionality
-  private volatile CompoundUndoManager _undoManager;
   private static final int UNDO_LIMIT = 100;
+  private volatile CompoundUndoManager _undoManager;
   private volatile boolean _isModifiedSinceSave = false;
-  private GlobalEventNotifier _notifier;
+  private volatile GlobalEventNotifier _notifier;
   
   /** Standard constructor. */
   public InteractionsDJDocument() { 
@@ -157,13 +157,9 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
     chng.addEdit(new CommandUndoableEdit(undoCommand, doCommand));    
   }
   
-  public boolean undoManagerCanUndo() {
-   return _undoManager.canUndo();
-  }
+  public boolean undoManagerCanUndo() { return _undoManager.canUndo(); }
   
-  public boolean undoManagerCanRedo(){
-    return _undoManager.canRedo();
-  }
+  public boolean undoManagerCanRedo() { return _undoManager.canRedo(); }
   
   public void updateModifiedSinceSave() {
     _isModifiedSinceSave = _undoManager.isModified();

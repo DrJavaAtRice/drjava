@@ -66,10 +66,10 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
   }
   
   /** the list of errors */
-  private static ArrayList<Throwable> _errors = new ArrayList<Throwable>();
+  private static volatile ArrayList<Throwable> _errors = new ArrayList<Throwable>();
   
   /** the button to show */
-  private static JButton _errorsButton;
+  private static volatile JButton _errorsButton;
   
   /** Sets the button to show. */
   public static void setButton(JButton b) { _errorsButton = b; }  
@@ -82,12 +82,9 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
   
   /** Returns the error with the given index. */
   public static Throwable getError(int index) {
-    if ((index >= 0) && (index < _errors.size())) {
-      return _errors.get(index);
-    }
-    else {
-      return new UnexpectedException("Error in DrJavaErrorHandler");
-    }
+    
+    if (index >= 0 && index < _errors.size()) return _errors.get(index);
+    else return new UnexpectedException("Error in DrJavaErrorHandler");
   }
   
   /** Clears the list of errors. */
