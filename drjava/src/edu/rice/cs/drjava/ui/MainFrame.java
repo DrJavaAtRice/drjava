@@ -3494,6 +3494,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       config.addOptionListener(DEFINITIONS_LINE_NUMBER_BACKGROUND_COLOR, new LineEnumColorOptionListener());
       config.addOptionListener(QUIT_PROMPT, new QuitPromptOptionListener());
       config.addOptionListener(RECENT_FILES_MAX_SIZE, new RecentFilesOptionListener());
+
+      // Add a listener to the main font to keep the right margin in the definitions pane at the right place.
+      OptionListener<Font> fontListener = new OptionListener<Font>() {
+        public void optionChanged(OptionEvent<Font> oce) {
+          FontMetrics metrics = getFontMetrics(oce.value);
+          DefinitionsPane.updateMaxCharWidth(metrics);
+        }
+      };
+      DrJava.getConfig().addOptionListener(OptionConstants.FONT_MAIN, fontListener);
+      DefinitionsPane.updateMaxCharWidth(getFontMetrics(DrJava.getConfig().getSetting(FONT_MAIN)));
       
       config.addOptionListener(FORCE_TEST_SUFFIX, new OptionListener<Boolean>() {
         public void optionChanged(OptionEvent<Boolean> oce) {

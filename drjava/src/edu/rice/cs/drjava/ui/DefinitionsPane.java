@@ -112,7 +112,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   private volatile int _numRightMarginColumns = 120;
 
   /** Maximum character width of the current main font. */
-  private volatile int _maxCharWidth = 0;
+  private static volatile int _maxCharWidth = 0;
   
   /** Color of the right margin. */
   private volatile Color _rightMarginColor = Color.red;
@@ -621,12 +621,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     _colorOptionListeners.add(cPair);
     DrJava.getConfig().addOptionListener(OptionConstants.RIGHT_MARGIN_COLOR, cListener);
     
-    OptionListener<Font> fontListener = new OptionListener<Font>() {
-      public void optionChanged(OptionEvent<Font> oce) { updateMaxCharWidth(oce.value); }
-    };
-    DrJava.getConfig().addOptionListener(OptionConstants.FONT_MAIN, fontListener);
-    updateMaxCharWidth(DrJava.getConfig().getSetting(FONT_MAIN));
-    
     createPopupMenu();
 
     //Add listener to components that can bring up popup menus.
@@ -772,9 +766,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    */
   public static void setEditorKit(DefinitionsEditorKit editorKit) { EDITOR_KIT = editorKit; }
 
-  /** Update the maximum character width of the current font. */
-  protected void updateMaxCharWidth(Font font) {
-    FontMetrics metrics = getFontMetrics(font);
+  /** Update the maximum character width of the current font. We can make this static, because DrJava
+    * only supports one font for all panes anyway. */
+  public static void updateMaxCharWidth(FontMetrics metrics) {
     int[] widths = metrics.getWidths();
     _maxCharWidth = 0;
     for(int w: widths) {
