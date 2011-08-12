@@ -146,7 +146,6 @@ public class ReaderWriterLock {
     }
   }
   
-  
   /** Must be called by each writer thread before starting to write.  The calling method must <i>not</i> be 
     * synchronized. This method blocks the writer if there are any active readers or writers, and prevents any new 
     * readers from starting to read until this writer gets a chance to write.

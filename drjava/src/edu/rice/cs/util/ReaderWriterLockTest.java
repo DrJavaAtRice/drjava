@@ -46,7 +46,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
   */
 public class ReaderWriterLockTest extends DrJavaTestCase {
 
-  protected ReaderWriterLock _lock;
+  protected volatile ReaderWriterLock _lock;
 
   /** Creates a new lock for the tests. */
   public void setUp() throws Exception {
@@ -57,7 +57,7 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
   // TO DO: Pull the next few lines out into a Semaphore class
 
   /** Number of notifications expected before we actually notify. */
-  private int _notifyCount = 0;
+  private volatile int _notifyCount = 0;
 
   /** Object to provide semaphore-like synchronization. */
   private final Object _notifyObject = new Object();
@@ -312,9 +312,9 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
   /** Command pattern class to print to a buffer. */
   public class PrintCommand {
     /** Number of times to print */
-    int _numIterations = 3;
+    volatile int _numIterations = 3;
     /** Number of milliseconds to wait between iterations */
-    int _waitMillis = 5;
+    volatile int _waitMillis = 5;
     /** Buffer to print to */
     final StringBuilder _buf;
     /** Message to print */

@@ -76,15 +76,16 @@ import edu.rice.cs.drjava.DrJavaRoot;
 import edu.rice.cs.drjava.RemoteControlClient;
 import edu.rice.cs.drjava.RemoteControlServer;
 import edu.rice.cs.drjava.platform.*;
+import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
-import edu.rice.cs.drjava.model.definitions.NoSuchDocumentException;
+import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DocumentUIListener;
-import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
+import edu.rice.cs.drjava.model.definitions.NoSuchDocumentException;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.javadoc.JavadocModel;
@@ -96,22 +97,29 @@ import edu.rice.cs.drjava.ui.ClipboardHistoryFrame;
 import edu.rice.cs.drjava.ui.RegionsTreePanel;
 import edu.rice.cs.drjava.project.*;
 
+import edu.rice.cs.plt.concurrent.JVMBuilder;
+import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.lambda.DelayedThunk;
 import edu.rice.cs.plt.lambda.*;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.tuple.Pair;
 
-import edu.rice.cs.util.XMLConfig;
-import edu.rice.cs.util.FileOpenSelector;
-import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.OperationCanceledException;
-import edu.rice.cs.util.StringOps;
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.docnavigation.*;
+import edu.rice.cs.drjava.model.FileMovedException;
+import edu.rice.cs.util.FileOpenSelector;
+import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.Log;
+import edu.rice.cs.util.OperationCanceledException;
+import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.swing.*;
+import edu.rice.cs.util.swing.ProcessingDialog;
 import edu.rice.cs.util.text.ConsoleDocument;
+import edu.rice.cs.util.text.SwingDocument;
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.XMLConfig;
 
 import static edu.rice.cs.drjava.config.OptionConstants.KEY_NEW_CLASS_FILE;
 import static edu.rice.cs.drjava.ui.RecentFileManager.*;
@@ -122,7 +130,7 @@ import static edu.rice.cs.drjava.ui.MainFrameStatics.*;
 
 /** DrJava's main window. */
 public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetListener {
-  private static final edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("MainFrame.txt", false);
+  private static final Log _log = new Log("MainFrame.txt", false);
   
   private static final int INTERACTIONS_TAB = 0;
   private static final int CONSOLE_TAB = 1;
@@ -1318,7 +1326,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               try { sb.append(FileOps.stringMakeRelativeTo(doc.getRawFile(), doc.getSourceRoot())); }
               catch(IOException e) { sb.append(doc.getFile()); }
             }
-            catch(edu.rice.cs.drjava.model.FileMovedException e) { sb.append(entry + " was moved"); }
+            catch(FileMovedException e) { sb.append(entry + " was moved"); }
 //            catch(java.lang.IllegalStateException e) { sb.append(entry); }
             catch(InvalidPackageException e) { sb.append(entry); }
           } 
@@ -1443,7 +1451,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               }
             }
             catch(IOException e) { /* ignore */ }
-            catch(edu.rice.cs.drjava.model.definitions.InvalidPackageException e) { /* ignore */ }
+            catch(InvalidPackageException e) { /* ignore */ }
           }
           catch(IllegalStateException e) { /* ignore */ }
         }
@@ -1710,8 +1718,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // otherwise the processing frame will not work correctly and the event thread will block
     // assert (!EventQueue.isDispatchThread());  // Why is this commented out???
     if (_javaAPISet.size() == 0) {
-      final edu.rice.cs.util.swing.ProcessingDialog pd =
-        new edu.rice.cs.util.swing.ProcessingDialog(this, "Java API Classes", "Loading, please wait.", false);
+      final ProcessingDialog pd =
+        new ProcessingDialog(this, "Java API Classes", "Loading, please wait.", false);
       if (!EventQueue.isDispatchThread()) { pd.setVisible(true); }
       // generate list
       String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
@@ -1954,7 +1962,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Complete the word the cursor is on.  Only executes in the event thread. */
   private void _completeWordUnderCursor() {
     initCompleteWordDialog();
-    
     hourglassOn();
     
     final OpenDefinitionsDocument odd = getCurrentDefPane().getOpenDefDocument();
@@ -1965,23 +1972,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                "Complete Word",
                                initial,
                                loc,
-                               edu.rice.cs.plt.iter.IterUtil.make("OK", "Fully Qualified"),
-                               edu.rice.cs.plt.iter.IterUtil.
-                                 make(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
-                                      KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, OptionConstants.MASK)),
+                               IterUtil.make("OK", "Fully Qualified"),
+                               IterUtil.make(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+                                             KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, OptionConstants.MASK)),
                                0, // simple class name action if just one match
                                new Runnable() {
-        public void run() {
-          // canceled
-          hourglassOff();
-          MainFrame.this.toFront();
-        }
-      },
-                               edu.rice.cs.plt.iter.IterUtil.
-                                 make(new Runnable3<AutoCompletePopupEntry,Integer,Integer>() {
-                                 public void run(AutoCompletePopupEntry entry,
-                                                 Integer from,
-                                                 Integer to) {
+                                 public void run() {
+                                   // canceled
+                                   hourglassOff();
+                                   MainFrame.this.toFront();
+                                 }
+                               },
+                               IterUtil.make(new Runnable3<AutoCompletePopupEntry,Integer,Integer>() {
+                                 public void run(AutoCompletePopupEntry entry, Integer from, Integer to) {
                                    // accepted
                                    try {
                                      odd.remove(from, to-from);
@@ -2106,7 +2109,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Saves a copy of an error pane to a file. */
-  public void _saveDocumentCopy(final edu.rice.cs.util.text.SwingDocument doc) {
+  public void _saveDocumentCopy(final SwingDocument doc) {
     assert EventQueue.isDispatchThread();
     
     _saveChooser.resetChoosableFileFilters();
@@ -2290,8 +2293,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _newDrJavaInstanceAction = new AbstractAction("New DrJava Instance...") {
     public void actionPerformed(ActionEvent ae) {
       try {
-        Process p = edu.rice.cs.plt.concurrent.JVMBuilder.DEFAULT.classPath(FileOps.getDrJavaFile()).
-          start(edu.rice.cs.drjava.DrJava.class.getName(), "-new");
+        Process p = JVMBuilder.DEFAULT.classPath(FileOps.getDrJavaFile()).
+          start(DrJava.class.getName(), "-new");
       }
       catch(IOException ioe) { MainFrameStatics.showIOError(MainFrame.this, ioe); }
     }
@@ -3631,7 +3634,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       });
       
-      if (DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED)) {
+      if (DrJava.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_ENABLED)) {
         // start remote control server if no server is running
         try {
           if (! RemoteControlClient.isServerRunning()) {
@@ -3658,7 +3661,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                  options,
                                                  options[1]);
             if (n==JOptionPane.YES_OPTION) {
-              DrJava.getConfig().setSetting(edu.rice.cs.drjava.config.OptionConstants.REMOTE_CONTROL_ENABLED, false);
+              DrJava.getConfig().setSetting(OptionConstants.REMOTE_CONTROL_ENABLED, false);
             }
           }
         }
@@ -3680,7 +3683,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
         else if (DrJava.getConfig().getSetting(OptionConstants.FILE_EXT_REGISTRATION)
                    .equals(OptionConstants.FileExtRegistrationChoices.ASK_ME) && // Ask me
-                 !edu.rice.cs.util.swing.Utilities.TEST_MODE &&
+                 ! Utilities.TEST_MODE &&
                  ((!PlatformFactory.ONLY.areDrJavaFileExtensionsRegistered()) ||
                   (!PlatformFactory.ONLY.isJavaFileExtensionRegistered()))) {
           alreadyShowedDialog = true;
@@ -3720,8 +3723,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         // two dialogs on program start is too much clutter    
         if (DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_ALLOWED) &&
             !DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
-              .equals(OptionConstants.VersionNotificationChoices.DISABLED) &&
-            !edu.rice.cs.util.swing.Utilities.TEST_MODE) {
+              .equals(OptionConstants.VersionNotificationChoices.DISABLED) && ! Utilities.TEST_MODE) {
           int days = DrJava.getConfig().getSetting(NEW_VERSION_NOTIFICATION_DAYS);
           java.util.Date nextCheck = 
             new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_NEW_VERSION_NOTIFICATION)
@@ -4135,7 +4137,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       public void update(PropertyMaps pm) {
         // could not use _clean(), since ProjectFileGroupingState.cleanBuildDirectory()
         // is implemented as an asynchronous task, and DrJava would not wait for its completion
-        edu.rice.cs.plt.io.IOUtil.deleteRecursively(_model.getBuildDirectory());
+        IOUtil.deleteRecursively(_model.getBuildDirectory());
       }
       public boolean isCurrent() { return false; }
     });
@@ -6109,7 +6111,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     frame.setLocationByPlatform(true);
     frame.getContentPane().setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.PAGE_AXIS));
     for(final GUIAvailabilityListener.ComponentType c: GUIAvailabilityListener.ComponentType.values()) {
-      final edu.rice.cs.plt.lambda.DelayedThunk<JButton> buttonThunk = edu.rice.cs.plt.lambda.DelayedThunk.make();  
+      final DelayedThunk<JButton> buttonThunk = DelayedThunk.make();  
       final JButton button = new JButton(new AbstractAction(c.toString()+" "+_guiAvailabilityNotifier.getCount(c)) {
         public void actionPerformed(ActionEvent e) {
           _guiAvailabilityNotifier.availabilityChanged(c, !buttonThunk.value().getText().endsWith(" 0"));
@@ -6710,7 +6712,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                 _executeExternalDialog.
                   runCommand(names.get(i),cmdlines.get(i),workdirs.get(i),enclosingfiles.get(i),pm);
               }
-              catch(CloneNotSupportedException e) { throw new edu.rice.cs.util.UnexpectedException(e); }
+              catch(CloneNotSupportedException e) { throw new UnexpectedException(e); }
             }
           },i+2);
         }
@@ -9070,8 +9072,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
       final InteractionsModel im = _model.getInteractionsModel();
       final String lastError = im.getLastError();
-      final edu.rice.cs.drjava.config.FileConfiguration config = DrJava.getConfig();
-      if (config != null && config.getSetting(edu.rice.cs.drjava.config.OptionConstants.DIALOG_AUTOIMPORT_ENABLED)) {
+      final FileConfiguration config = DrJava.getConfig();
+      if (config != null && config.getSetting(OptionConstants.DIALOG_AUTOIMPORT_ENABLED)) {
         if (lastError != null) {
           // the interaction ended and there was an error
           // check that this error is different than the last one (second to last may be null):
