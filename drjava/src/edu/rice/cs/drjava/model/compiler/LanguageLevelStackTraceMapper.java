@@ -71,23 +71,26 @@ public class LanguageLevelStackTraceMapper {
     cache = new HashMap<String,TreeMap<Integer,Integer>>();
   }
   
-  
   public StackTraceElement replaceStackTraceElement(StackTraceElement s, File d, TreeMap<Integer,Integer> m) {
-    if (! matches(d,s)) return s;
     
-    StackTraceElement NewS = 
-      new StackTraceElement(s.getClassName(), s.getMethodName(),d.getName(), m.get(s.getLineNumber()));
-    
-    return NewS;
+    int jl = s.getLineNumber();
+    int lll = m.containsKey(jl) ? m.get(jl) : -1;
+      
+    return new StackTraceElement(s.getClassName(), s.getMethodName(), d.getName(), lll);
   }
   
-  
-  /** Replaces the dj* file name and line number in a given stacktrace element.
-    * @param s the StackTraceElement to do the replacing in
-    * @param d the dj* file whose name and line numbers need replacing in the StackTraceElement
+  /** Converts java file and line number to corresponding dj* file name and line number in a given stacktrace element.
+    * @param s the StackTraceElement to do be converted
+    * @param d the dj* file whose name and line numbers are required in the StackTraceElement
     */
-  public StackTraceElement replaceStackTraceElement(StackTraceElement s,
-                                                    File d) {
+  public StackTraceElement replaceStackTraceElement(StackTraceElement s, File d) {
+      
+// If the file name in s matches d, check if n already exists in the cache.
+// If it does, call the above replaceStackTraceElement with the cached TreeMap
+// Otherwise load the TreeMap from the *.java file, store it in the cache, and then
+// call the above replaceStackTraceElement.
+// If the file name does not match, just return s
+    
     if (! matches(d, s)) return s;
     String fileName = d.getAbsolutePath();
     if (cache.containsKey(fileName)) return replaceStackTraceElement(s, d, cache.get(fileName));
@@ -96,25 +99,19 @@ public class LanguageLevelStackTraceMapper {
     dn = dn.substring(0, dn.lastIndexOf('.')) + edu.rice.cs.drjava.config.OptionConstants.JAVA_FILE_EXTENSION;
     File javaFile = new File(d.getParentFile(), dn);
     
-    cache.put(fileName, readLLLineBlock(javaFile));  
+    TreeMap<Integer, Integer> djToJavaMap = readLLLineBlock(javaFile);
     
-    return replaceStackTraceElement(s,d,cache.get(fileName));
+    cache.put(fileName, djToJavaMap);  
     
-    
+    return replaceStackTraceElement(s, d, djToJavaMap);
   }
-// If the file name in s matches f, check if n already exists in the cache.
-// If it does, call the above replaceStackTraceElement with the cached TreeMap
-// Otherwise load the TreeMap from the *.java file, store it in the cache, and then
-// call the above replaceStackTraceElement.
-// If the file name does not match, just return s
-  
-  
+
   /** Replaces the dj* file name and line numbers in a given stacktrace element.
     * @param s the StackTraceElement to do the replacing in
     * @param ds a list of the dj* file whose names and line numbers need replacing in the StackTraceElement
     */
   public StackTraceElement replaceStackTraceElement(StackTraceElement s, List<File> ds) {
-    for(int i = 0; i < ds.size(); i++) {
+    for (int i = 0; i < ds.size(); i++) {
       s = replaceStackTraceElement(s, ds.get(i)); 
     }
     return s;
@@ -126,7 +123,7 @@ public class LanguageLevelStackTraceMapper {
     * @param ss an array of StackTraceElement to do the replacing in
     * @param ds a list of the dj* file whose names and line numbers need replacing in the StackTraceElement
     */
-  public StackTraceElement[] replaceStackTrace(StackTraceElement[] ss, List<File> ds){
+  public StackTraceElement[] replaceStackTrace(StackTraceElement[] ss, List<File> ds) {
     for(int i = 0; i < ss.length; i++) {
       ss[i] = replaceStackTraceElement(ss[i], ds);
     }
@@ -141,37 +138,42 @@ public class LanguageLevelStackTraceMapper {
     cache = new HashMap<String,TreeMap<Integer,Integer>>();
   }
   
-  
-  /** Ensures the given file and StackTraceElement match
+  /** Ensures the given file and StackTraceElement match.  The extension on the file f may be a LL extension while the
+    * extension in the StackTraceElement is the corresponding .java file. 
     * @param f the file
     * @param s the StackTraceElement
     */
   private boolean matches(File f, StackTraceElement s) {
     LOG.log("matches(" + f + ", " + s + ")");
     if (s.getFileName() == null) return false;
-    OpenDefinitionsDocument d;      
-    try { d = aGModel.getDocumentForFile(f); }
-    catch(java.io.IOException e) { return false; }
+//    OpenDefinitionsDocument d;      
+//    try { d = aGModel.getDocumentForFile(f); }
+//    catch(java.io.IOException e) { return false; }
+//    
+//    String dn = d.getRawFile().getName();
     
-    String dn = d.getRawFile().getName();
+    String fn = f.getPath();  // a relative path because traces use relative paths for files.
     
 // make sure that the document is a LL document
-    if (!DrJavaFileUtils.isLLFile(dn)) return false;
+    if (! DrJavaFileUtils.isLLFile(fn)) return false;
     
 // replace suffix with ".java"
-    dn = DrJavaFileUtils.getJavaForLLFile(dn);
+    String javaFn = DrJavaFileUtils.getJavaForLLFile(fn);
     
-// make sure packages match
-    String dp = d.getPackageName();
-    int dotPos = s.getClassName().lastIndexOf('.');
-    if ((dp.length() == 0) && (dotPos >= 0)) return false; // d in default package, s not
-    if ((dp.length() > 0) && (dotPos < 0)) return false; // s in default package, d not
-    String sp = "";
-    if (dotPos >= 0) sp = s.getClassName().substring(0, dotPos);
-    if (! dp.equals(sp)) return false; // packages do not match
+//    Utilities.show("Document file name is: " + fn + "\nJava file name is: " + javaFn + "\nStack file name is: " + 
+//                   s.getFileName() + "\nResult is: " + javaFn.endsWith(s.getFileName()));
+    
+//// make sure packages match
+//    String dp = d.getPackageName();
+//    int dotPos = s.getClassName().lastIndexOf('.');
+//    if ((dp.length() == 0) && (dotPos >= 0)) return false; // d in default package, s not
+//    if ((dp.length() > 0) && (dotPos < 0)) return false; // s in default package, d not
+//    String sp = "";
+//    if (dotPos >= 0) sp = s.getClassName().substring(0, dotPos);
+//    if (! dp.equals(sp)) return false; // packages do not match
     
 // make sure the file names match
-    return s.getFileName().equals(dn);
+    return javaFn.endsWith(s.getFileName());  // names in trace elements are relative
   }
   
   private TreeMap<Integer, Integer> createOneToOneMap(BufferedReader bufReader) {
@@ -194,8 +196,7 @@ public class LanguageLevelStackTraceMapper {
     catch(java.io.IOException e) { /* ignore, just return incomplete map */ }
     return oneToOne;
   }
-  
-  
+    
   /** Reads the LanguageLevel header from a LL file and pulls the line number conversion map out.
     * @return <java line, dj* line>
     */
@@ -208,40 +209,43 @@ public class LanguageLevelStackTraceMapper {
     
     try { rdLine = bufReader.readLine();  }  catch(java.io.IOException e){ }
     
-    if (!rdLine.startsWith("// Language Level Converter line number map: dj*->java. Entries:")) {
+    if (! rdLine.startsWith("// Language Level Converter line number map: dj*->java. Entries:")) {
       // no language level header, create a 1-to-1 mapping
       return createOneToOneMap(bufReader);
     }
     
+    // Process header line of block
     LOG.log("rdLine = '" + rdLine + "'");
     LOG.log("\tlastIndex = " + rdLine.lastIndexOf(" "));
     Integer mapSize = new Integer (rdLine.substring(rdLine.lastIndexOf(" ") + 1));
     
     try { rdLine = bufReader.readLine();  }  catch(java.io.IOException e){ }
     
-    if (rdLine.indexOf("//") != 0) mapSize = 0;  //Kills the for loop if read line is not of correct format
-    
-    String temp = "";
-    String numRnum = "";
+    if (rdLine.indexOf("//") != 0) mapSize = 0;  // Kills the for loop if read line is not of correct format
+   
+    // Create the LL map
     TreeMap<Integer,Integer> javaDJMap = new TreeMap<Integer,Integer>();
     
-    temp = rdLine.substring(2).trim() + " ";
+    // Process block lines containing map entries; rdLine is first such line
+    // Invariant for text: text has no leading whitespace and trailing whitespace consisting of a single blank
+    String text = rdLine.substring(2).trim() + " ";
     
     Integer djNum;
     Integer javaNum;
     
 //    Utilities.show("read " + mapSize + " entries from bufReader");
     for (int i = 0; i < mapSize; i++) {
-      if (temp.length() < 2)  temp = readLLLineBlockHelper(bufReader);
-      if (temp == null) break;
-//      Utilities.show("i = " + i + "     temp = '" + temp + "'");
-      numRnum = temp.substring(0, temp.indexOf(" "));
+      if (text.length() < 2)  text = readNextLLBlockLine(bufReader);
+      if (text == null) break;  // no more entries in block; mapSize is wrong  // ERROR should be raised !!!
+
+      int firstBlankPos = text.indexOf(" ");
+      String numRnum = text.substring(0, firstBlankPos);
+      text = text.substring(firstBlankPos).trim() + " ";  // Only need to trim leading blanks here; String API is clumsy
       
       djNum = new Integer(numRnum.substring(0, numRnum.indexOf("->")));
       javaNum = new Integer(numRnum.substring(numRnum.indexOf("->") + 2));
       
       javaDJMap.put(javaNum,djNum);
-      temp = temp.substring(temp.indexOf(" ")).trim() + " ";
     }
     return javaDJMap;
   }
@@ -251,7 +255,7 @@ public class LanguageLevelStackTraceMapper {
   /** Reads the LanguageLevel header from a LL file and pulls the line number conversion map out.
     * @return <dj* line, java line>
     */
-  public TreeMap<Integer, Integer> ReadLanguageLevelLineBlockRev(File LLFile) {
+  public TreeMap<Integer, Integer> readLLBlock(File LLFile) {
     
     BufferedReader bufReader = null;
     String rdLine = "";
@@ -260,7 +264,7 @@ public class LanguageLevelStackTraceMapper {
     
     try { rdLine = bufReader.readLine(); } catch(java.io.IOException e){ }
     
-    if (!rdLine.startsWith("// Language Level Converter line number map: dj*->java. Entries:")) {
+    if (! rdLine.startsWith("// Language Level Converter line number map: dj*->java. Entries:")) {
       // no language level header, create a 1-to-1 mapping
       return createOneToOneMap(bufReader);
     }
@@ -269,29 +273,29 @@ public class LanguageLevelStackTraceMapper {
     LOG.log("\tlastIndex = " + rdLine.lastIndexOf(" "));
     Integer mapSize = new Integer (rdLine.substring(rdLine.lastIndexOf(" ") + 1));
     
-    try{ rdLine = bufReader.readLine(); } catch(java.io.IOException e){ }
+    try { rdLine = bufReader.readLine(); } catch(java.io.IOException e){ }
     
     if(rdLine.indexOf("//") != 0) mapSize = 0;  // Kills the for loop if read line is not of correct format
 
     TreeMap<Integer,Integer> map = new TreeMap<Integer,Integer>();
     
-    String temp = rdLine.substring(2).trim() + " ";  // invariant: temp has no leading spaces and a single trailing space
+    String text = rdLine.substring(2).trim() + " ";  // invariant: temp has no leading spaces and a single trailing space
     String numRnum = "";
     
     int djNum;
     int javaNum;
 
     for(int i = 0; i < mapSize; i++) {
-      if (temp.length() < 2)  temp = readLLLineBlockHelper(bufReader);
-      if (temp == null) break;
+      if (text.length() < 2)  text = readNextLLBlockLine(bufReader);
+      if (text == null) break;
       
-      numRnum = temp.substring(0, temp.indexOf(" "));
+      numRnum = text.substring(0, text.indexOf(" "));
       
       djNum = Integer.parseInt(numRnum.substring(0, numRnum.indexOf("->")), 10);
       javaNum = Integer.parseInt(numRnum.substring(numRnum.indexOf("->") + 2), 10);
       
       map.put(djNum, javaNum);
-      temp = temp.substring(temp.indexOf(" ")).trim() + " ";  // slices off first non-blank section
+      text = text.substring(text.indexOf(" ")).trim() + " ";  // slices off first non-blank section
       // NOTE: it would more efficient to simply remove all leading whitespace instead of trimming and adding a space.
     }
     return map;
@@ -299,7 +303,7 @@ public class LanguageLevelStackTraceMapper {
   
   /** Helper method to read the next comment line in a file.  Returns null if no new comment line exists. 
     * Line is trimmed and padded by a single blank on the end. */
-  private String readLLLineBlockHelper(BufferedReader br) {
+  private String readNextLLBlockLine(BufferedReader br) {
     String line = "";
     try { line = br.readLine(); } catch(java.io.IOException e){ }
     

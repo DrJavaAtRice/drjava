@@ -37,11 +37,11 @@
 package edu.rice.cs.drjava.model.debug.jpda;
 
 import edu.rice.cs.drjava.model.OrderedDocumentRegion;
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.IDocumentRegion;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.debug.DebugException;
+import edu.rice.cs.util.UnexpectedException;
 
 import java.awt.EventQueue;
 import java.util.List;
@@ -120,7 +120,7 @@ public class JPDABreakpoint extends DocumentDebugAction<BreakpointRequest> imple
       for (int i = 0; i < refTypes.size(); i++) {
         ReferenceType rt = refTypes.get(i);
         
-        if (!rt.isPrepared()) {
+        if (! rt.isPrepared()) {
           // Not prepared, so skip this one
           continue;
         }

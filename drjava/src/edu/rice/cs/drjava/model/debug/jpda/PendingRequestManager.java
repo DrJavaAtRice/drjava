@@ -133,7 +133,7 @@ public class PendingRequestManager {
     
     if (DrJavaFileUtils.isLLFile(f)) {
       f = DrJavaFileUtils.getJavaForLLFile(f);
-      TreeMap<Integer, Integer> tM = _manager.getLLSTM().ReadLanguageLevelLineBlockRev(f);
+      TreeMap<Integer, Integer> tM = _manager.getLLSTM().readLLBlock(f);
       line = tM.get(dda.getLineNumber());
     }
     return line;

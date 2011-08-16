@@ -141,7 +141,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Number of milliseconds to wait before displaying "Stepping..." message after a step is requested in 
     * the debugger.
     */
-  private static final int DEBUG_STEP_TIMER_VALUE = 2000;
+  private static final int DEBUG_STEP_TIMER_VALUE = 3000;
   
   // ------ Field Declarations -------
   
@@ -3221,9 +3221,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       // Timer to display a message if a debugging step takes a long time
       _debugStepTimer = new Timer(DEBUG_STEP_TIMER_VALUE, new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          _model.printDebugMessage("Stepping...");
-        }
+        public void actionPerformed(ActionEvent e) { _model.printDebugMessage("Stepping..."); }
       });
       _debugStepTimer.setRepeats(false);
       
@@ -5773,6 +5771,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               if (_model.getDebugger().isAutomaticTraceEnabled()) {
                 // hasn't been disabled in the meantime
                 debuggerStep(Debugger.StepType.STEP_INTO);
+                _debugStepTimer.restart();  // _debugStepTimer prints "Stepping..." when timer expires
               }
             }
           });
@@ -5782,12 +5781,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           debuggerStep(Debugger.StepType.STEP_INTO);
         }
         catch (IllegalStateException ise) {
-          // This may happen if the user if stepping very frequently,
-          // and is even more likely if they are using both hotkeys
-          // and UI buttons. Ignore it in this case.
-          // Hopefully, there are no other situations where
-          // the user can be trying to step while there are no
-          // suspended threads.
+          /* This may happen if the user if stepping very frequently, and is even more likely if they are using both 
+           * hotkeys and UI buttons. Ignore it in this case. Hopefully, there are no other situations where the user 
+           * can be trying to step while there are no suspended threads. */
         }        
       }
       else {
@@ -5803,12 +5799,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (isDebuggerReady()) {
       try { _model.getDebugger().step(type); }
       catch (IllegalStateException ise) {
-        // This may happen if the user if stepping very frequently,
-        // and is even more likely if they are using both hotkeys
-        // and UI buttons. Ignore it in this case.
-        // Hopefully, there are no other situations where
-        // the user can be trying to step while there are no
-        // suspended threads.
+        /* This may happen if the user if stepping very frequently,and is even more likely if they are using both
+         * hotkeys and UI buttons. Ignore it in this case.  Hopefully, there are no other situations where the user 
+         * can be trying to step while there are no suspended threads. */
       }
       catch (DebugException de) {
         MainFrameStatics.showError(MainFrame.this, de, "Debugger Error",
@@ -8552,26 +8545,27 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     Runnable command = new Runnable() {
       public void run() {
-        
-        if (shouldHighlight) {
-          removeCurrentLocationHighlight();
-          int startOffset = doc._getLineStartPos(offset);
-          if (startOffset >= 0) {
-            int endOffset = doc._getLineEndPos(offset);
-            if (endOffset >= 0) {
-              _currentLocationHighlight = _currentDefPane.getHighlightManager().
-                addHighlight(startOffset, endOffset, DefinitionsPane.THREAD_PAINTER);
+        if (offset >= 0) {  // offset is negative when there is no corresponding coordinate in document
+          if (shouldHighlight) {
+            removeCurrentLocationHighlight();
+            int startOffset = doc._getLineStartPos(offset);
+            if (startOffset >= 0) {
+              int endOffset = doc._getLineEndPos(offset);
+              if (endOffset >= 0) {
+                _currentLocationHighlight = _currentDefPane.getHighlightManager().
+                  addHighlight(startOffset, endOffset, DefinitionsPane.THREAD_PAINTER);
+              }
             }
           }
-        }
-        // Is the following test necessary?
-        if (_currentDefPane.getSize().getWidth() > 0 && _currentDefPane.getSize().getHeight() > 0) {
-          EventQueue.invokeLater(new Runnable() { 
-            public void run() {
-              _currentDefPane.centerViewOnOffset(offset);
-              _currentDefPane.requestFocusInWindow();
-            }
-          });
+          // Is the following test necessary?
+          if (_currentDefPane.getSize().getWidth() > 0 && _currentDefPane.getSize().getHeight() > 0) {
+            EventQueue.invokeLater(new Runnable() { 
+              public void run() {
+                _currentDefPane.centerViewOnOffset(offset);
+                _currentDefPane.requestFocusInWindow();
+              }
+            });
+          }
         }
         
         if (_showDebugger) {
@@ -8627,7 +8621,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     /** Called when a step is requested on the current thread.  Must be executed in event thread. */
     public void stepRequested() {
-      // Print a message if step takes a long time
+      // Print a message if step takes a long time; timer must be restarted on every step (automatic trace)
       synchronized(_debugStepTimer) { if (! _debugStepTimer.isRunning()) _debugStepTimer.start(); }
     }
     
@@ -8639,7 +8633,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if(_model.getDebugger().isAutomaticTraceEnabled()) {
         //System.out.println("new _automaticTraceTimer AUTO_STEP_RATE=" + AUTO_STEP_RATE + ", " + 
         //                   System.identityHashCode(_automaticTraceTimer);                                
-        if((_automaticTraceTimer != null) && (!_automaticTraceTimer.isRunning()))
+        if ((_automaticTraceTimer != null) && (! _automaticTraceTimer.isRunning()))
           _automaticTraceTimer.start();
       }
     }

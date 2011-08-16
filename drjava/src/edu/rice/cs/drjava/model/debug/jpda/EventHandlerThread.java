@@ -45,7 +45,9 @@ import com.sun.jdi.request.*;
 import java.io.*;
 import javax.swing.SwingUtilities;  // used in instead of java.awt.EventQueue because of class name clash
 
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.DebugException;
+import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.UnexpectedException;
 
 /** A thread that listens and responds to events from JPDA when the debugger has attached to another JVM.
@@ -163,7 +165,7 @@ public class EventHandlerThread extends Thread {
     * @param e breakpoint event from JPDA
     */
   private void _handleBreakpointEvent(final BreakpointEvent e) /* throws DebugException */ {
-//    synchronized(_debugger) {
+    // To ensure non-interference, run in Event Thread
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
 //        System.err.println("handleBreakpointEvent(" + e + ") called");
@@ -171,9 +173,7 @@ public class EventHandlerThread extends Thread {
           if (_isSuspendedWithFrames(e.thread()) && _debugger.setCurrentThread(e.thread())) {
 //        Utilities.showDebug("EventHandlerThread._handleBreakpointEvent(" + e + ") called");
             _debugger.currThreadSuspended((BreakpointRequest) e.request());
-//        _debugger.scrollToSource(e);
             _debugger.reachedBreakpoint((BreakpointRequest) e.request());
-//      }
           }
         }
         catch(DebugException e) { throw new UnexpectedException(e); }
@@ -185,25 +185,22 @@ public class EventHandlerThread extends Thread {
     * @param e step event from JPDA
     */
   private void _handleStepEvent(final StepEvent e) /* throws DebugException */ {
-    // preload document without holding _debugger lock to avoid deadlock
-    // in bug [ 1696060 ] Debugger Infinite Loop
-    // if the document is not already open, the event thread may load the document and then call a
-    // synchronized method in the debugger, so we must do this before we hold the _debugger lock
+    /* Note: all synchronized methods have been removed from JPDADebugger except for locks on instances of the
+     * private class RandomAccessStack.  The non-interference policy is confinement to the Event thread. */
+
+    // To ensure non-interference, run in Event thread.
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         try {
-          _debugger.preloadDocument(e.location());
-          // now acquire _debugger lock, the event thread won't need tge _debugger lock anymore
-//    synchronized(_debugger) {
+          Pair<Location,OpenDefinitionsDocument> locAndDoc = _debugger.preloadDocument(e.location());
+          Location lll = locAndDoc.first();
           if (_isSuspendedWithFrames(e.thread()) && _debugger.setCurrentThread(e.thread())) {
-            _debugger.printMessage("Stepped to " + e.location().declaringType().name() + "." + e.location().method().name()
-                                     + "(...)  [line " + e.location().lineNumber() + "]");
+            _debugger.printMessage("Stepped to " + lll.declaringType().name() + "." + lll.method().name()
+                                     + "(...)  [line " + lll.lineNumber() + "]");
             _debugger.currThreadSuspended();
-//        _debugger.scrollToSource(e);
           }
           // Delete the step request so it doesn't happen again
           _debugger.getEventRequestManager().deleteEventRequest(e.request());
-//    }
         }
         catch(DebugException e) { throw new UnexpectedException(e); }
       }
@@ -223,20 +220,17 @@ public class EventHandlerThread extends Thread {
   /** Responds when a class of interest has been prepared. Allows the debugger to set a pending breakpoint before any 
     * code in the class is executed.
     * @param e class prepare event from JPDA
-    * @throws UnexpectedException wrapping a DebugException if actions performed on the prepared class fail
     */
   private void _handleClassPrepareEvent(final ClassPrepareEvent e) /* throws DebugException */ {
-//    synchronized(_debugger) {
+    // To ensure non-interference, run in Event thread
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         try {
           _debugger.getPendingRequestManager().classPrepared(e);
-          // resume this thread which was suspended because its
-          // suspend policy was SUSPEND_EVENT_THREAD
+          // resume this thread which was suspended because its suspend policy was SUSPEND_EVENT_THREAD
           e.thread().resume();
         }
         catch(DebugException e) { throw new UnexpectedException(e); }
-//    }
       }
     });
   }
@@ -245,18 +239,18 @@ public class EventHandlerThread extends Thread {
     * @param e thread start event from JPDA
     */
   private void _handleThreadStartEvent(ThreadStartEvent e) { 
-//    synchronized(_debugger) { 
-      _debugger.threadStarted(); 
-//    } 
+    // To ensure non-interference, run in Event thread
+    SwingUtilities.invokeLater(new Runnable() {
+      public void run() { _debugger.threadStarted(); }
+    });
   }
   
   /** Reponds to a thread death event.
     * @param e thread death event from JPDA
     */
   private void _handleThreadDeathEvent(final ThreadDeathEvent e) /* throws DebugException */ {
-    // no need to check if there are suspended threads on the stack
-    // because all that logic should be in the debugger
-//    synchronized(_debugger) {
+    // No need to check if there are suspended threads on the stack because all that logic should be in the debugger.
+    // To ensure non-interference, run in Event thread
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         try {
@@ -276,7 +270,6 @@ public class EventHandlerThread extends Thread {
             _debugger.currThreadDied();
           }
           else _debugger.nonCurrThreadDied();
-//    }
           
           // Thread is suspended on death, so resume it now.
           e.thread().resume();
@@ -301,7 +294,7 @@ public class EventHandlerThread extends Thread {
     * @param e JPDA event indicating the debugging session has ended
     */
   private void _cleanUp(Event e) throws DebugException {
-//    synchronized(_debugger) {
+    // To ensure non-interference, run in Event thread.
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         _connected = false;
@@ -310,7 +303,6 @@ public class EventHandlerThread extends Thread {
           // if (_debugger.hasSuspendedThreads()) _debugger.currThreadDied();
           _debugger.shutdown();
         }
-//    }
       }
     });
   }
@@ -326,7 +318,7 @@ public class EventHandlerThread extends Thread {
         while (iter.hasNext()) {
           Event event = iter.nextEvent();
           if (event instanceof VMDeathEvent) _handleVMDeathEvent((VMDeathEvent)event);
-          else if (event instanceof VMDisconnectEvent)  _handleVMDisconnectEvent((VMDisconnectEvent)event);
+          else if (event instanceof VMDisconnectEvent) _handleVMDisconnectEvent((VMDisconnectEvent)event);
           // else ignore the event
         }
         eventSet.resume(); // Resume the VM

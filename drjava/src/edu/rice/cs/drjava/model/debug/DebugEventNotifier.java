@@ -132,9 +132,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener> implements 
         _listeners.get(i).breakpointReached(bp);
       }
     }
-    finally {
-      _lock.endRead();
-    }
+    finally { _lock.endRead(); }
   }
 
   /** Called when a breakpoint is changed during execution. Must be executed in event thread.

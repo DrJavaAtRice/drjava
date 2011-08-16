@@ -110,27 +110,23 @@ public class DefaultCompilerModel implements CompilerModel {
     
     for (CompilerInterface i : compilers) { _compilers.add(i); compilerNames.add(i.getName());}
     
-    OptionConstants.COMPILER_PREFERENCE_CONTROL.setList(compilerNames); //populates the compiler list for preference panel
+    OptionConstants.COMPILER_PREFERENCE_CONTROL.setList(compilerNames); // populates the compiler list for preference panel
     
     String dCompName = DrJava.getConfig().getSetting(OptionConstants.DEFAULT_COMPILER_PREFERENCE);
     
     if (_compilers.size() > 0) {
-      if (!dCompName.equals(OptionConstants.COMPILER_PREFERENCE_CONTROL.NO_PREFERENCE)) {
-        // preference was set
-        if (compilerNames.contains(dCompName)) {
-          _active = _compilers.get(compilerNames.indexOf(dCompName));
-        }
-      }
+      if (! dCompName.equals(OptionConstants.COMPILER_PREFERENCE_CONTROL.NO_PREFERENCE) &&
+           compilerNames.contains(dCompName)) 
+        _active = _compilers.get(compilerNames.indexOf(dCompName));
       else 
         _active = _compilers.get(0);
     }
     else
       _active = NoCompilerAvailable.ONLY;
     
-    
     _model = m;
     _compilerErrorModel = new CompilerErrorModel(new DJError[0], _model);
-    _LLSTM = new LanguageLevelStackTraceMapper(m);
+    _LLSTM = new LanguageLevelStackTraceMapper(_model);
   }
   
   
