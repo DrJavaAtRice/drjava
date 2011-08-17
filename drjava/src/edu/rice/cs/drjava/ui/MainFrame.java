@@ -8622,7 +8622,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     /** Called when a step is requested on the current thread.  Must be executed in event thread. */
     public void stepRequested() {
       // Print a message if step takes a long time; timer must be restarted on every step (automatic trace)
-      synchronized(_debugStepTimer) { if (! _debugStepTimer.isRunning()) _debugStepTimer.start(); }
+      synchronized(_debugStepTimer) { 
+        if (! _debugStepTimer.isRunning()) _debugStepTimer.start();
+        else _debugStepTimer.restart();
+      }
     }
     
     public void currThreadSuspended() {
@@ -10065,7 +10068,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public void dropActionChanged(DropTargetDragEvent dropTargetDragEvent){}
   
   /** User dropped something on the component. */
-  public /* synchronized */ void drop(DropTargetDropEvent dropTargetDropEvent) {
+  public void drop(DropTargetDropEvent dropTargetDropEvent) {
     assert EventQueue.isDispatchThread();
     try {
       Transferable tr = dropTargetDropEvent.getTransferable();
@@ -10571,9 +10574,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     */
   public /* synchronized */ void removeModalWindowAdapter(Window w) {
     assert EventQueue.isDispatchThread();
-    if (! _modalWindowAdapters.containsKey(w)) { // the specified window does not have a modal windowadapter
-      return;
-    }
+    if (! _modalWindowAdapters.containsKey(w)) return; // the specified window does not have a modal windowadapter
+
     w.removeWindowListener(_modalWindowAdapters.get(w));
     w.removeWindowFocusListener(_modalWindowAdapters.get(w));
     _modalWindowAdapterOwner = null;

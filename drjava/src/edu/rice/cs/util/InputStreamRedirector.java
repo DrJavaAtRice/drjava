@@ -47,7 +47,7 @@ public abstract class InputStreamRedirector extends InputStream {
     * TODO: perhaps this should use an array for efficiency
     * This is only used as a char queue.
     */
-  protected ArrayList<Character> _buffer;
+  protected volatile ArrayList<Character> _buffer;
 
   /** Constructs a new InputStreamRedirector. */
   public InputStreamRedirector() { _buffer = new ArrayList<Character>(60); }

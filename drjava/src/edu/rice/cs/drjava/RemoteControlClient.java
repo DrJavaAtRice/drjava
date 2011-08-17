@@ -48,30 +48,26 @@ public class RemoteControlClient {
    */
   protected static Boolean _serverRunning = null;
   
-  /** Contains the name of the user running the server, or is null if no server is running.
-   */
+  /** Contains the name of the user running the server, or is null if no server is running. */
   protected static String _serverUser = null;
   
-  /** Time in ms until the client decides the server is not running.
-   */
+  /** Time in ms until the client decides the server is not running. */
   public static final int REMOTE_CONTROL_TIMEOUT = 250;
   
   /** Return true if a DrJava remote control server is running.
-   * @return true if running
-   */
+    * @return true if running
+    */
   public static synchronized boolean isServerRunning() {
     if (_serverRunning == null) {
-      try {
-        openFile(null);
-      }
+      try { openFile(null); }
       catch(IOException e) { _serverRunning = false; }
     }
     return _serverRunning;
   }
   
   /** Return the name of the user running the server, or null if no server is running.
-   * @return user name or null
-   */
+    * @return user name or null
+    */
   public static String getServerUser() { return _serverUser; }
   
   /** Tell the existing DrJava instance to open a file.

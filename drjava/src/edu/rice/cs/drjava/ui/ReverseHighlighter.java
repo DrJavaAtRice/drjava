@@ -657,7 +657,7 @@ public class ReverseHighlighter extends DefaultHighlighter {
         TextUI mapper = component.getUI();
         if (mapper != null && lastDoc == component.getDocument()) { // Doc must match to properly display highlights
           int len = p0.size();
-          for (int i = 0; i < len; i++){
+          for (int i = 0; i < len; i++) {
             mapper.damageRange(component, p0.get(i).getOffset(), p1.get(i).getOffset());
           }
         }

@@ -189,10 +189,10 @@ public class JoinInputStream extends InputStream {
 class ReaderThread extends Thread { 
   volatile int    available;
   volatile int    pos;
-  byte[]          buffer; 
-  InputStream     stream;
-  IOException     exception;
-  JoinInputStream monitor;
+  volatile byte[]          buffer; 
+  volatile InputStream     stream;
+  volatile IOException     exception;
+  volatile JoinInputStream monitor;
   
   ReaderThread(JoinInputStream monitor, InputStream stream, int bufferSize) { 
     this.stream = stream;

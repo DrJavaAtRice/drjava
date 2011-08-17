@@ -482,6 +482,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         // _debugger.getPendingRequestManager().classPrepared(e); (which presumably
         // deals with preparing the class) on the event thread using invokeLater.
         // This, however, doesn't get executed because the event thread is still blocking --> deadlock.
+        
         synchronized(_compilerModel.getCompilerLock()) {
           // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
           /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
@@ -596,29 +597,31 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** Called when a full suite of tests has finished running.  Does not necessarily run in event thread.
     * @param errors The array of errors from all failed tests in the suite.
     */
-  public void testSuiteEnded(JUnitError[] errors) {
+  public void testSuiteEnded(final JUnitError[] errors) {
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) called", "", "").show();
-    
-    List<File> files = new ArrayList<File>();
-    for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
+    Utilities.invokeLater(new Runnable() { public void run() { 
+      List<File> files = new ArrayList<File>();
+      for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
 //    Utilities.show("errors.length = " + errors.length + " files = " + files);
-    for(JUnitError e: errors){
-      try {
-        e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
-      } catch(Exception ex) { DrJavaErrorHandler.record(ex); }
-      File f = e.file();
-      if ((f != null) && (DrJavaFileUtils.isLLFile(f))) {
-        String dn = DrJavaFileUtils.getJavaForLLFile(f.getName());
-        StackTraceElement ste = new StackTraceElement(e.className(), "", dn, e.lineNumber());
-        ste = _compilerModel.getLLSTM().replaceStackTraceElement(ste, f);
-        e.setLineNumber(ste.getLineNumber());
+      for(JUnitError e: errors){
+        try {
+          e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
+        } catch(Exception ex) { DrJavaErrorHandler.record(ex); }
+        File f = e.file();
+        if ((f != null) && (DrJavaFileUtils.isLLFile(f))) {
+          String dn = DrJavaFileUtils.getJavaForLLFile(f.getName());
+          StackTraceElement ste = new StackTraceElement(e.className(), "", dn, e.lineNumber());
+          ste = _compilerModel.getLLSTM().replaceStackTraceElement(ste, f);
+          e.setLineNumber(ste.getLineNumber());
+        }
       }
-    }
-    _junitErrorModel = new JUnitErrorModel(errors, _model, true);
-    _notifyJUnitEnded();
-    _testInProgress = false;
+      _junitErrorModel = new JUnitErrorModel(errors, _model, true);
+      _notifyJUnitEnded();
+      _testInProgress = false;
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) finished", "", "").show();
+    }});
   }
+
   
   /** Called when the JUnitTestManager wants to open a file that is not currently open.
     * @param className the name of the class for which we want to find the file
@@ -634,12 +637,14 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** Called when the JVM used for unit tests has registered.  Does not necessarily run in even thread. */
   public void junitJVMReady() {
-    if (! _testInProgress) return;
-    
-    JUnitError[] errors = new JUnitError[1];
-    errors[0] = new JUnitError("Previous test suite was interrupted", true, "");
-    _junitErrorModel = new JUnitErrorModel(errors, _model, true);
-    _notifyJUnitEnded();
-    _testInProgress = false;
+    Utilities.invokeLater(new Runnable() { public void run() { 
+      if (! _testInProgress) return;
+      
+      JUnitError[] errors = new JUnitError[1];
+      errors[0] = new JUnitError("Previous test suite was interrupted", true, "");
+      _junitErrorModel = new JUnitErrorModel(errors, _model, true);
+      _notifyJUnitEnded();
+      _testInProgress = false;
+    }});
   }
 }

@@ -73,7 +73,6 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
     for (int i = 0; i < 5; i++)  _testMaster.runImmediateQuitTest();
   }
   
-  
   private static class TestMasterJVM extends AbstractMasterJVM implements TestMasterRemote {
     
     private static final int WAIT_TIMEOUT = 10000; 
@@ -83,7 +82,7 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
     
     /** Field and lock used to signal slave connected events. */
     private volatile TestSlaveRemote _slave;                    // non-null when slave is connected
-    private final Object _slaveLock = new Object();
+//    private final Object _slaveLock = new Object();           // nothing waits on this lock
     
     /** Field and lock used to signal letter change events. */
     private volatile char _letter;
@@ -146,10 +145,10 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
     @Override protected void handleSlaveConnected(SlaveRemote slave) {
       // getLetter should have never been called.
       assertEquals("letter value", 'a', _letter);
-      synchronized(_slaveLock) {
-        _slave = (TestSlaveRemote) slave;
-        _slaveLock.notify();
-      }
+//      synchronized(_slaveLock) {
+      _slave = (TestSlaveRemote) slave;
+//        _slaveLock.notify();
+//    }
     }
     
     @Override protected void handleSlaveQuit(int status) {
@@ -185,6 +184,7 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
     
     private CounterSlave() { }
     
+    /* Some inherited methods are synchronized */
     public synchronized int getNumber() { return _counter++; }
     
     protected void handleStart(MasterRemote m) { _master = (TestMasterRemote) m; }
@@ -221,3 +221,4 @@ public class IntegratedMasterSlaveTest extends DrJavaTestCase {
     public char getLetter() throws RemoteException;
   }
 }
+  

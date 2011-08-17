@@ -1216,7 +1216,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       synchronized(_junitLock) { while (! _junitDone) { _junitLock.wait(); } }
     }
     
-    private void _notifyJUnitDone() {
+    protected void _notifyJUnitDone() {  // access in subclass JUnitNonTestListener
       synchronized(_junitLock) {
         _junitDone = true;
         _junitLock.notifyAll();
@@ -1270,7 +1270,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       _notifyJUnitDone();
     }
     @Override public void junitEnded() {
-      //assertJUnitSuiteStartedCount(1);
+      // assertJUnitSuiteStartedCount(1);
       if (printMessages) System.out.println("junitEnded event!");
       synchronized(this) { junitEndCount++; }
       _log.log("junitEnded() called; notifying JUnitDone");
@@ -1287,11 +1287,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       synchronized(this) { nonTestCaseCount++; }
       assertEquals("Non test case heard the wrong value for test current/test all", _shouldBeTestAll, isTestAll);
 //      Utilities.show("synchronizing on _junitLock");
-      synchronized(_junitLock) {
-//        System.err.println("JUnit aborted as nonTestCase");
-        _junitDone = true;
-        _junitLock.notify();
-      }
+      _notifyJUnitDone();
     }
   }
   

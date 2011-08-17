@@ -271,8 +271,8 @@ public abstract class AbstractDJPane extends JTextPane
   public void dragOver(DropTargetDragEvent dropTargetDragEvent) { }
   public void dropActionChanged(DropTargetDragEvent dropTargetDragEvent){ }
   
-  /** User dropped something on the component. */
-  public synchronized void drop(DropTargetDropEvent dropTargetDropEvent) {
+  /** User dropped something on the component.  Only runs in event thread. */
+  public /* synchronized */ void drop(DropTargetDropEvent dropTargetDropEvent) {
     DrJavaRoot.drop(dropTargetDropEvent);
   }
 }

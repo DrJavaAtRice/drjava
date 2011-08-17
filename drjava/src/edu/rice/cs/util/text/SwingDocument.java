@@ -65,11 +65,6 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   /** Determines which edits are legal on this document. */
   protected DocumentEditCondition _condition;
   
-  /** Lock that protects _wrappedPosListLock in DefinitionsDocument.  Placed here to ensure that it initialized before
-    * use! 
-    */
-  protected static final Object _wrappedPosListLock = new Object();
-  
   /** Creates a new document adapter for a Swing StyledDocument. TODO: convert _styles and _condition to lazily 
     * initialized volatiles as soon as support for Java 1.4 is dropped and the double-check idiom is safe. */
   public SwingDocument() { 

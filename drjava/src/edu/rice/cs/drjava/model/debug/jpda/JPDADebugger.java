@@ -1933,11 +1933,13 @@ public class JPDADebugger implements Debugger {
       throw new NoSuchElementException("Thread " + id + " not found in debugger suspended threads stack!");
     }
     
-    public synchronized boolean contains(long id) {
-      for (int i = 0; i < size(); i++) {
-        if (get(i).uniqueID() == id) return true;
+    public boolean contains(long id) {
+      synchronized(this) {
+        for (int i = 0; i < size(); i++) {
+          if (get(i).uniqueID() == id) return true;
+        }
+        return false;
       }
-      return false;
     }
     
     public boolean isEmpty() { return empty(); }

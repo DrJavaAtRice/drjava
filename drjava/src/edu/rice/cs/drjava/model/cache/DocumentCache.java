@@ -176,11 +176,12 @@ public class DocumentCache {
         _doc = _rec.make();
         assert _doc != null;
         // update documents if necessary
-        if (_keywords!=null) {
+        if (_keywords != null) {
           _doc.setKeywords(_keywords); _keywords.clear(); _keywords = null;
         }
       }
-      catch(Exception e) { throw new UnexpectedException(e); }
+      catch(IOException e) { throw new UnexpectedException(e); }
+      catch(BadLocationException e) { throw new UnexpectedException(e); }      
 //        Utilities.showDebug("Document " + _doc + " reconstructed; _stat = " + _stat);
 //      System.err.println("Making document for " + this);
       if (_stat == NOT_IN_QUEUE) add();       // add this to queue 
@@ -321,13 +322,15 @@ public class DocumentCache {
     /** Set the specified keywords as keywords for syntax highlighting.
       * @param keywords keywords to highlight */
     public void setKeywords(Set<String> keywords) {
-      if (_doc != null) {
-        // resident
-        _doc.setKeywords(keywords);
-      }
-      else {
-        // virtualized
-        _keywords = new HashSet<String>(keywords);
+      synchronized(_cacheLock) {
+        if (_doc != null) {
+          // resident
+          _doc.setKeywords(keywords);
+        }
+        else {
+          // virtualized
+          _keywords = new HashSet<String>(keywords);
+        }
       }
     }
   }

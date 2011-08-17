@@ -345,6 +345,7 @@ public class DefaultCompilerModel implements CompilerModel {
       if (errors.isEmpty()) {
         CompilerInterface compiler = getActiveCompiler();
         
+        // Mutual exclusion with JUnit code that finds all test classes (in DefaultJUnitModel)
         synchronized(_compilerLock) {
           if (preprocessedFiles == null) {
             errors.addAll(compiler.compile(files, classPath, null, buildDir, bootClassPath, null, true));

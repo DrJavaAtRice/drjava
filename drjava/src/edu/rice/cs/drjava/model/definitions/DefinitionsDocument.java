@@ -50,10 +50,12 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.IOException;
 
-import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import koala.dynamicjava.parser.impl.Parser;
 import koala.dynamicjava.parser.impl.ParseException;
 import koala.dynamicjava.parser.impl.TokenMgrError;
+
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
@@ -115,44 +117,49 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Uses an updated version of the DefaultEditorKit */
   private final DefinitionsEditorKit _editor;
   
-  /* Relying on the following definition in AbstractDJDocument.  It must be placed there to be initialized before use!
-   protected static final Object _wrappedPosListLock = new Object();
-   */
+  /* Unfortunately, we must use "this" as the lock object for Lock for _wrappedPosList because there is no lightweight
+   * way to dynamically construct a dedicated lock for this variable.  The lock is accessed by a super*-class during
+   * object initialization (when no initialization has yet been performed for this class).  In particular, 
+   * AbstractDocument calls createPosition in its <init> method.  Java inexplicably forbids access to uninitialized
+   * volatile variables.  (Why?  They have blank values just like blank final fields!) so a demand-driven
+   * initialization scheme like double-check cannot be used.  The locking expression could execute static code that uses
+   * the value of "this" (passed as a parameter) to index a hashtable of locks that allocates new locks on demand
+   * (simulating double check without the benefits of dynamic dispatch), but his is incredibly heavyweight. */
   
   /** List with weak references to positions. */
   private volatile LinkedList<WeakReference<WrappedPosition>> _wrappedPosList;
   
-  /** Convenience constructor for using a custom indenter.
+  /** Root constructor that other constructors call; not used directly
     * @param indenter custom indenter class
     * @param notifier used by CompoundUndoManager to announce undoable edits
     */
-  public DefinitionsDocument(Indenter indenter, GlobalEventNotifier notifier) {
+  private DefinitionsDocument(Indenter indenter, GlobalEventNotifier notifier, CompoundUndoManager undoManager) {
     super(indenter);
     _notifier = notifier;
     _editor = new DefinitionsEditorKit(notifier);
-    resetUndoManager();
+    _undoManager = undoManager;
   }
   
-  /** Main constructor.  This has an obnoxious dependency on GlobalEventNotifier, which is passed through here only 
-    * for a single usage in CompoundUndoManager.  TODO: find a better way.
+  /** Convenience constructor used ?? */
+  public DefinitionsDocument(Indenter indenter, GlobalEventNotifier notifier) {
+    // initialize _indenter, _notifier, _undoManager, _wrappedPosListLock, _editor
+    this(indenter, notifier, new CompoundUndoManager(notifier));
+    // finish setting up _undomanager
+    _undoManager.setLimit(UNDO_LIMIT);
+  }
+  
+  /** Convenience constructor.  
     * @param notifier used by CompoundUndoManager to announce undoable edits
     */
   public DefinitionsDocument(GlobalEventNotifier notifier) {
-    super();
-    _notifier = notifier;
-    _editor = new DefinitionsEditorKit(notifier);
-    resetUndoManager();
+    this(new Indenter(DrJava.getConfig().getSetting(INDENT_LEVEL).intValue()), notifier);
   }
   
-  /** Main constructor.  This has an obnoxious dependency on GlobalEventNotifier, which is passed through here only 
-    * for a single usage in CompoundUndoManager.  TODO: find a better way.
+  /** Main constructor.
     * @param notifier used by CompoundUndoManager to announce undoable edits
     */
   public DefinitionsDocument(GlobalEventNotifier notifier, CompoundUndoManager undoManager) {
-    super();
-    _notifier = notifier;
-    _editor = new DefinitionsEditorKit(notifier);
-    _undoManager = undoManager;
+    this(new Indenter(DrJava.getConfig().getSetting(INDENT_LEVEL).intValue()), notifier, undoManager);
   }
   
   /** Returns the document's editor */
@@ -176,13 +183,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Recolors the rest of the document based on the change that triggered this call. */
   protected void _styleChanged() {    
     
-      int length = getLength() - _currentLocation;
-      
-      //DrJava.consoleErr().println("Changed: " + _currentLocation + ", " + length);
-      DocumentEvent evt = new DefaultDocumentEvent(_currentLocation, length, DocumentEvent.EventType.CHANGE);
-      fireChangedUpdate(evt);
+    int length = getLength() - _currentLocation;
+    
+    //DrJava.consoleErr().println("Changed: " + _currentLocation + ", " + length);
+    DocumentEvent evt = new DefaultDocumentEvent(_currentLocation, length, DocumentEvent.EventType.CHANGE);
+    fireChangedUpdate(evt);
   } 
-   
+  
 //  /** Returns whether this document is currently untitled
 //    * (indicating whether it has a file yet or not).
 //    * @return true if the document is untitled and has no file
@@ -268,7 +275,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     _setModifiedSinceSave();
     super.insertString(offset, str, a);
   }
-    
+  
   /** Removes a block of text from the specified location. We don't update the reduced model here; that happens
     * in {@link #removeUpdate}.
     */
@@ -297,7 +304,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * Assumes that write lock is already held. 
     */
   private void _setModifiedSinceSave() {
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     if (! _isModifiedSinceSave) {
       _isModifiedSinceSave = true;
       if (_odd != null) _odd.documentModified();  // null test required for some unit tests
@@ -318,9 +325,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   /** Return the current column of the cursor position. Uses a 0 based index. */
   public int getCurrentCol() {
-      Element root = getDefaultRootElement();
-      int line = root.getElementIndex(_currentLocation);
-      return _currentLocation - root.getElement(line).getStartOffset();
+    Element root = getDefaultRootElement();
+    int line = root.getElementIndex(_currentLocation);
+    return _currentLocation - root.getElement(line).getStartOffset();
   }
   
   /** Return the current line of the cursor position.  Uses a 1-based index. */
@@ -339,24 +346,24 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     if (lineNum == 1) return 0;
     
 //    synchronized(_reduced) {
-      final int origPos = getCurrentLocation();
-      try {
-        final int docLen = getLength();
-        
-        setCurrentLocation(0); // _currentLocation is candidate offset to return
-        int i;
-        for (i = 1; (i < lineNum) && (_currentLocation < docLen); i++) {
-          int dist = _reduced.getDistToNextNewline();     // or end of doc
-          if (_currentLocation + dist < docLen) dist++;  // skip newline
-          move(dist);  // updates _currentLocation to beginning of line # (i + 1)
-        }
-        if (i == lineNum) return _currentLocation;
-        else return -1;
+    final int origPos = getCurrentLocation();
+    try {
+      final int docLen = getLength();
+      
+      setCurrentLocation(0); // _currentLocation is candidate offset to return
+      int i;
+      for (i = 1; (i < lineNum) && (_currentLocation < docLen); i++) {
+        int dist = _reduced.getDistToNextNewline();     // or end of doc
+        if (_currentLocation + dist < docLen) dist++;  // skip newline
+        move(dist);  // updates _currentLocation to beginning of line # (i + 1)
       }
-      finally { setCurrentLocation(origPos); }
+      if (i == lineNum) return _currentLocation;
+      else return -1;
+    }
+    finally { setCurrentLocation(origPos); }
 //    }
   }
-
+  
   
   /** Returns true iff tabs are to removed on text insertion. */
   public boolean tabsRemoved() { return _tabsRemoved; }
@@ -484,7 +491,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     remove(pos1, 2);
     return WING_COMMENT_OFFSET;
   }
-
+  
   /** Goes to a particular line in the document. */
   public void gotoLine(int line) {
     
@@ -493,46 +500,46 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     int actualLine = 1;
     
     int len = getLength();
-      setCurrentLocation(0);
-      for (int i = 1; (i < line) && (_currentLocation < len); i++) {
-        dist = _reduced.getDistToNextNewline();
-        if (_currentLocation + dist < len) dist++;
-        actualLine++;
-        move(dist);  // updates _currentLocation
-      }
+    setCurrentLocation(0);
+    for (int i = 1; (i < line) && (_currentLocation < len); i++) {
+      dist = _reduced.getDistToNextNewline();
+      if (_currentLocation + dist < len) dist++;
+      actualLine++;
+      move(dist);  // updates _currentLocation
+    }
   }  
   
   /** Assumes that read lock is already held. */
   private int _findNextOpenCurly(String text, int pos) throws BadLocationException {
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     int i;
     int reducedPos = pos;
     
 //    synchronized(_reduced) {
-      final int origLocation = _currentLocation;
-      // Move reduced model to location pos
-      _reduced.move(pos - origLocation);  // reduced model points to pos == reducedPos
+    final int origLocation = _currentLocation;
+    // Move reduced model to location pos
+    _reduced.move(pos - origLocation);  // reduced model points to pos == reducedPos
+    
+    // Walk forward from specificed position
+    i = text.indexOf('{', reducedPos);
+    while (i >- 1) {
+      // Move reduced model to walker's location
+      _reduced.move(i - reducedPos);  // reduced model points to i
+      reducedPos = i;                 // reduced model points to reducedPos
       
-      // Walk forward from specificed position
-      i = text.indexOf('{', reducedPos);
-      while (i >- 1) {
-        // Move reduced model to walker's location
-        _reduced.move(i - reducedPos);  // reduced model points to i
-        reducedPos = i;                 // reduced model points to reducedPos
-        
-        // Check if matching keyword should be ignored because it is within a comment, or quotes
-        ReducedModelState state = _reduced.getStateAtCurrent();
-        if (!state.equals(FREE) || _isStartOfComment(text, i)
-              || ((i > 0) && _isStartOfComment(text, i - 1))) {
-          i = text.indexOf('{', reducedPos+1);
-          continue;  // ignore matching brace
-        }
-        else {
-          break; // found our brace
-        }        
-      }  
-      _reduced.move(origLocation - reducedPos);    // Restore the state of the reduced model;
+      // Check if matching keyword should be ignored because it is within a comment, or quotes
+      ReducedModelState state = _reduced.getStateAtCurrent();
+      if (!state.equals(FREE) || _isStartOfComment(text, i)
+            || ((i > 0) && _isStartOfComment(text, i - 1))) {
+        i = text.indexOf('{', reducedPos+1);
+        continue;  // ignore matching brace
+      }
+      else {
+        break; // found our brace
+      }        
+    }  
+    _reduced.move(origLocation - reducedPos);    // Restore the state of the reduced model;
 //    } // end synchronized
     
     if (i == -1) reducedPos = -1; // No matching brace was found
@@ -544,50 +551,50 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     */
   public int _findPrevKeyword(String text, String kw, int pos) throws BadLocationException {
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     int i;
     int reducedPos = pos;
     
 //    synchronized(_reduced) {
-      final int origLocation = _currentLocation;
-      // Move reduced model to location pos
-      _reduced.move(pos - origLocation);  // reduced model points to pos == reducedPos
-      
-      // Walk backwards from specificed position
-      i = text.lastIndexOf(kw, reducedPos);
-      while (i >- 1) {
-        // Check that this is the beginning of a word
-        if (i > 0) {
-          if (Character.isJavaIdentifierPart(text.charAt(i-1))) {
-            // not begining
-            i = text.lastIndexOf(kw, i - 1);
-            continue;  // ignore matching keyword 
-          }
-        }
-        // Check that this not just the beginning of a longer word
-        if (i + kw.length() < text.length()) {
-          if (Character.isJavaIdentifierPart(text.charAt(i+kw.length()))) {
-            // not begining
-            i = text.lastIndexOf(kw, i-1);
-            continue;  // ignore matching keyword 
-          }
-        }
-        
-        // Move reduced model to walker's location
-        _reduced.move(i - reducedPos);  // reduced model points to i
-        reducedPos = i;                 // reduced model points to reducedPos
-        
-        // Check if matching keyword should be ignored because it is within a comment, or quotes
-        ReducedModelState state = _reduced.getStateAtCurrent();
-        if (!state.equals(FREE) || _isStartOfComment(text, i) || ((i > 0) && _isStartOfComment(text, i - 1))) {
-          i = text.lastIndexOf(kw, reducedPos-1);
+    final int origLocation = _currentLocation;
+    // Move reduced model to location pos
+    _reduced.move(pos - origLocation);  // reduced model points to pos == reducedPos
+    
+    // Walk backwards from specificed position
+    i = text.lastIndexOf(kw, reducedPos);
+    while (i >- 1) {
+      // Check that this is the beginning of a word
+      if (i > 0) {
+        if (Character.isJavaIdentifierPart(text.charAt(i-1))) {
+          // not begining
+          i = text.lastIndexOf(kw, i - 1);
           continue;  // ignore matching keyword 
         }
-        else break; // found our keyword   
-      }  // end synchronized/
+      }
+      // Check that this not just the beginning of a longer word
+      if (i + kw.length() < text.length()) {
+        if (Character.isJavaIdentifierPart(text.charAt(i+kw.length()))) {
+          // not begining
+          i = text.lastIndexOf(kw, i-1);
+          continue;  // ignore matching keyword 
+        }
+      }
       
-      _reduced.move(origLocation - reducedPos);    // Restore the state of the reduced model;
+      // Move reduced model to walker's location
+      _reduced.move(i - reducedPos);  // reduced model points to i
+      reducedPos = i;                 // reduced model points to reducedPos
+      
+      // Check if matching keyword should be ignored because it is within a comment, or quotes
+      ReducedModelState state = _reduced.getStateAtCurrent();
+      if (!state.equals(FREE) || _isStartOfComment(text, i) || ((i > 0) && _isStartOfComment(text, i - 1))) {
+        i = text.lastIndexOf(kw, reducedPos-1);
+        continue;  // ignore matching keyword 
+      }
+      else break; // found our keyword   
+    }  // end synchronized/
+    
+    _reduced.move(origLocation - reducedPos);    // Restore the state of the reduced model;
 //    }
     
     if (i == -1) reducedPos = -1; // No matching keyword was found
@@ -603,7 +610,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * @return name of the enclosing named class or interface
     */
   public String getEnclosingClassName(int pos, boolean qual) throws BadLocationException, ClassNameNotFoundException {
-      return _getEnclosingClassName(pos, qual);
+    return _getEnclosingClassName(pos, qual);
   }
   
   /** Searches backwards to find the name of the enclosing named class or interface. NB: ignores comments. Only runs in
@@ -616,7 +623,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public String _getEnclosingClassName(final int pos, final boolean qual) throws BadLocationException, 
     ClassNameNotFoundException {    
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     // Check cache
     final Query key = new Query.EnclosingClassName(pos, qual);
@@ -657,7 +664,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           }
         }
       }
-
+      
       while (classPos != -1 || interPos != -1 || newPos != -1) {
         if (newPos != -1) {
           classPos = -1;
@@ -730,7 +737,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * @param openCurlyPos position of the next '{'
     * @return true if anonymous inner class instantiation
     */
-
+  
   public boolean _isAnonymousInnerClass(final int pos, final int openCurlyPos) throws BadLocationException {
 //    String t = getText(0, openCurlyPos+1);
 //    System.err.print("_isAnonymousInnerClass(" + pos + ", " + openCurlyPos + ")");
@@ -746,57 +753,57 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
     int newPos = pos;
 //    synchronized(_reduced) {
-      cached = false;
-
-      String text = getText(0, openCurlyPos + 1);  // includes open Curly brace
-      newPos += "new".length();
-      int classStart = getFirstNonWSCharPos(newPos);
-      if (classStart != -1) { 
-        int classEnd = classStart + 1;
-        while (classEnd < text.length()) {
-          if (! Character.isJavaIdentifierPart(text.charAt(classEnd)) && text.charAt(classEnd) != '.') {
-            // delimiter found
-            break;
-          }
-          ++classEnd;
+    cached = false;
+    
+    String text = getText(0, openCurlyPos + 1);  // includes open Curly brace
+    newPos += "new".length();
+    int classStart = getFirstNonWSCharPos(newPos);
+    if (classStart != -1) { 
+      int classEnd = classStart + 1;
+      while (classEnd < text.length()) {
+        if (! Character.isJavaIdentifierPart(text.charAt(classEnd)) && text.charAt(classEnd) != '.') {
+          // delimiter found
+          break;
         }
-        
-        /* Determine parenStart, the postion immediately before the open parenthesis following the superclass name. */
+        ++classEnd;
+      }
+      
+      /* Determine parenStart, the postion immediately before the open parenthesis following the superclass name. */
 //         System.err.println("\tclass = `" + text.substring(classStart,classEnd) + "`");
-        int parenStart = getFirstNonWSCharPos(classEnd);
-        if (parenStart != -1) {
-          int origParenStart = parenStart;
-          
-//           System.err.println("\tfirst non-whitespace after class = " + parenStart + " `" + text.charAt(parenStart) + "`");
-          if (text.charAt(origParenStart) == '<') {
-            parenStart = -1;
-            // might be a generic class
-            int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>');
-            if (closePointyBracket != -1) {
-              if (text.charAt(closePointyBracket) == '>') {
-                parenStart = getFirstNonWSCharPos(closePointyBracket+1);
-              }
-            }
-          }
-        }
+      int parenStart = getFirstNonWSCharPos(classEnd);
+      if (parenStart != -1) {
+        int origParenStart = parenStart;
         
-        if (parenStart != -1) {
-          if (text.charAt(parenStart) == '(') {
-            setCurrentLocation(parenStart + 1);   // reduced model points to pos == parenStart + 1
-            int parenEnd = balanceForward();
-            if (parenEnd > -1) {
-              parenEnd = parenEnd + parenStart + 1;
-//               System.err.println("\tafter closing paren = " + parenEnd);
-              int afterParen = getFirstNonWSCharPos(parenEnd);
-//               System.err.println("\tfirst non-whitespace after paren = " + parenStart + " `" + text.charAt(afterParen) + "`");
-              cached = (afterParen == openCurlyPos); 
+//           System.err.println("\tfirst non-whitespace after class = " + parenStart + " `" + text.charAt(parenStart) + "`");
+        if (text.charAt(origParenStart) == '<') {
+          parenStart = -1;
+          // might be a generic class
+          int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>');
+          if (closePointyBracket != -1) {
+            if (text.charAt(closePointyBracket) == '>') {
+              parenStart = getFirstNonWSCharPos(closePointyBracket+1);
             }
           }
         }
       }
-      _storeInCache(key, cached, openCurlyPos);
+      
+      if (parenStart != -1) {
+        if (text.charAt(parenStart) == '(') {
+          setCurrentLocation(parenStart + 1);   // reduced model points to pos == parenStart + 1
+          int parenEnd = balanceForward();
+          if (parenEnd > -1) {
+            parenEnd = parenEnd + parenStart + 1;
+//               System.err.println("\tafter closing paren = " + parenEnd);
+            int afterParen = getFirstNonWSCharPos(parenEnd);
+//               System.err.println("\tfirst non-whitespace after paren = " + parenStart + " `" + text.charAt(afterParen) + "`");
+            cached = (afterParen == openCurlyPos); 
+          }
+        }
+      }
+    }
+    _storeInCache(key, cached, openCurlyPos);
 //      System.err.println(" ==> " + cached);
-      return cached;
+    return cached;
 //    }
   }
   
@@ -836,7 +843,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   int _getAnonymousInnerClassIndex(final int pos) throws BadLocationException, ClassNameNotFoundException {   
 //    boolean oldLog = true; // log; log = false;
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     // Check cache
     final Query key = new Query.AnonymousInnerClassIndex(pos);
@@ -845,11 +852,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //      log = oldLog;
       return cached.intValue();
     }
-
+    
     int newPos = pos; // formerly pos -1 // move outside the curly brace?  Corrected to do nothing since already outside
-
+    
 //    final char[] delims = {'{','}','(',')','[',']','+','-','/','*',';',':','=','!','@','#','$','%','^','~','\\','"','`','|'};
-
+    
     final String className = _getEnclosingClassName(newPos - 2 , true);  // class name must be followed by at least "()"
     final String text = getText(0, newPos - 2);  // excludes miminal (empty) argument list after class name
     int index = 1;
@@ -915,42 +922,42 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * @throws ClassNameNotFoundException if no enclosing class found
     */
   public String getEnclosingTopLevelClassName(int pos) throws ClassNameNotFoundException {
-      int oldPos = _currentLocation;
-      try {
-        setCurrentLocation(pos);
-        BraceInfo info = _getEnclosingBrace();
-        
-        // Find top level open brace
-        int topLevelBracePos = -1;
-        String braceType = info.braceType();
-        while (! braceType.equals(BraceInfo.NONE)) {
-          if (braceType.equals(BraceInfo.OPEN_CURLY)) {
-            topLevelBracePos = _currentLocation - info.distance();
-          }
-          move(-info.distance());
-          info = _getEnclosingBrace();
-          braceType = info.braceType();
+    int oldPos = _currentLocation;
+    try {
+      setCurrentLocation(pos);
+      BraceInfo info = _getEnclosingBrace();
+      
+      // Find top level open brace
+      int topLevelBracePos = -1;
+      String braceType = info.braceType();
+      while (! braceType.equals(BraceInfo.NONE)) {
+        if (braceType.equals(BraceInfo.OPEN_CURLY)) {
+          topLevelBracePos = _currentLocation - info.distance();
         }
-        if (topLevelBracePos == -1) {
-          // No top level brace was found, so we can't find a top level class name
-          setCurrentLocation(oldPos);
-          throw new ClassNameNotFoundException("no top level brace found");
-        }
-        
-        char[] delims = {'{', '}', ';'};
-        int prevDelimPos = findPrevDelimiter(topLevelBracePos, delims);
-        if (prevDelimPos == -1) {
-          // Search from start of doc
-          prevDelimPos = 0;
-        }
-        else prevDelimPos++;
-        setCurrentLocation(oldPos);
-        
-        // Parse out the class name
-        return getNextTopLevelClassName(prevDelimPos, topLevelBracePos);
+        move(-info.distance());
+        info = _getEnclosingBrace();
+        braceType = info.braceType();
       }
-      catch (BadLocationException ble) { throw new UnexpectedException(ble); }
-      finally { setCurrentLocation(oldPos); }
+      if (topLevelBracePos == -1) {
+        // No top level brace was found, so we can't find a top level class name
+        setCurrentLocation(oldPos);
+        throw new ClassNameNotFoundException("no top level brace found");
+      }
+      
+      char[] delims = {'{', '}', ';'};
+      int prevDelimPos = findPrevDelimiter(topLevelBracePos, delims);
+      if (prevDelimPos == -1) {
+        // Search from start of doc
+        prevDelimPos = 0;
+      }
+      else prevDelimPos++;
+      setCurrentLocation(oldPos);
+      
+      // Parse out the class name
+      return getNextTopLevelClassName(prevDelimPos, topLevelBracePos);
+    }
+    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
+    finally { setCurrentLocation(oldPos); }
   }
   
   /** Gets the name of first class/interface/enum declared in file among the definitions anchored at:
@@ -992,39 +999,39 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Gets the name of the document's main class: the document's only public class/interface or 
     * first top level class if document contains no public classes or interfaces. */
   public String getMainClassName() throws ClassNameNotFoundException {
-      final int oldPos = _currentLocation;
+    final int oldPos = _currentLocation;
+    
+    try {
+      setCurrentLocation(0);
+      final String text = getText();  // getText() is cheap if document is not resident
       
-      try {
-        setCurrentLocation(0);
-        final String text = getText();  // getText() is cheap if document is not resident
-        
-        final int indexOfClass = _findKeywordAtToplevel("class", text, 0);
-        final int indexOfInterface = _findKeywordAtToplevel("interface", text, 0);
-        final int indexOfEnum = _findKeywordAtToplevel("enum", text, 0);
-        final int indexOfPublic = _findKeywordAtToplevel("public", text, 0);
-        
-        if (indexOfPublic == -1)  return getFirstClassName(indexOfClass, indexOfInterface, indexOfEnum);
-        
+      final int indexOfClass = _findKeywordAtToplevel("class", text, 0);
+      final int indexOfInterface = _findKeywordAtToplevel("interface", text, 0);
+      final int indexOfEnum = _findKeywordAtToplevel("enum", text, 0);
+      final int indexOfPublic = _findKeywordAtToplevel("public", text, 0);
+      
+      if (indexOfPublic == -1)  return getFirstClassName(indexOfClass, indexOfInterface, indexOfEnum);
+      
 //        _log.log("text =\n" + text);
 //        _log.log("indexOfClass = " + indexOfClass + "; indexOfPublic = " + indexOfPublic);
-        
-        // There is an explicit public declaration
-        final int afterPublic = indexOfPublic + "public".length();
-        final String subText = text.substring(afterPublic);
-        setCurrentLocation(afterPublic);
+      
+      // There is an explicit public declaration
+      final int afterPublic = indexOfPublic + "public".length();
+      final String subText = text.substring(afterPublic);
+      setCurrentLocation(afterPublic);
 //        _log.log("After public text = '" + subText + "'");
-        int indexOfPublicClass  = _findKeywordAtToplevel("class", subText, afterPublic);  // relative offset
-        if (indexOfPublicClass != -1) indexOfPublicClass += afterPublic;
-        int indexOfPublicInterface = _findKeywordAtToplevel("interface", subText, afterPublic); // relative offset
-        if (indexOfPublicInterface != -1) indexOfPublicInterface += afterPublic;
-        int indexOfPublicEnum = _findKeywordAtToplevel("enum", subText, afterPublic); // relative offset
-        if (indexOfPublicEnum != -1) indexOfPublicEnum += afterPublic;
+      int indexOfPublicClass  = _findKeywordAtToplevel("class", subText, afterPublic);  // relative offset
+      if (indexOfPublicClass != -1) indexOfPublicClass += afterPublic;
+      int indexOfPublicInterface = _findKeywordAtToplevel("interface", subText, afterPublic); // relative offset
+      if (indexOfPublicInterface != -1) indexOfPublicInterface += afterPublic;
+      int indexOfPublicEnum = _findKeywordAtToplevel("enum", subText, afterPublic); // relative offset
+      if (indexOfPublicEnum != -1) indexOfPublicEnum += afterPublic;
 //        _log.log("indexOfPublicClass = " + indexOfPublicClass + " indexOfPublicInterface = " + indexOfPublicInterface);
-        
-        return getFirstClassName(indexOfPublicClass, indexOfPublicInterface, indexOfPublicEnum);
-        
-      }
-      finally { setCurrentLocation(oldPos); }
+      
+      return getFirstClassName(indexOfPublicClass, indexOfPublicInterface, indexOfPublicEnum);
+      
+    }
+    finally { setCurrentLocation(oldPos); }
   }
   
   /** Gets the name of the top level class in this source file by finding the first declaration of a class or interface.
@@ -1037,44 +1044,44 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   // note: need to update this to work with pos
   public String getNextTopLevelClassName(int startPos, int endPos) throws ClassNameNotFoundException {
-      int oldPos = _currentLocation;
+    int oldPos = _currentLocation;
+    
+    try {
+      setCurrentLocation(startPos);
+      final int textLength = endPos - startPos;
+      final String text = getText(startPos, textLength);
       
-      try {
-        setCurrentLocation(startPos);
-        final int textLength = endPos - startPos;
-        final String text = getText(startPos, textLength);
-        
-        int index;
-        
-        int indexOfClass = _findKeywordAtToplevel("class", text, startPos);
-        int indexOfInterface = _findKeywordAtToplevel("interface", text, startPos);
-        int indexOfEnum = _findKeywordAtToplevel("enum",text,startPos);
-        
-        //If class exists at top level AND either there is no interface at top level or the index of class precedes the index of the top
-        //level interface, AND the same for top level enum, then the class is the first top level declaration
-        if (indexOfClass > -1 && (indexOfInterface <= -1 || indexOfClass < indexOfInterface) 
-              && (indexOfEnum <= -1 || indexOfClass < indexOfEnum)) {
-          index = indexOfClass + "class".length();
-        }
-        else if (indexOfInterface > -1 && (indexOfClass <= -1 || indexOfInterface < indexOfClass) 
-                   && (indexOfEnum <= -1 || indexOfInterface < indexOfEnum)) {
-          index = indexOfInterface + "interface".length();
-        }
-        else if (indexOfEnum > -1 && (indexOfClass <= -1 || indexOfEnum < indexOfClass)   
-                   && (indexOfInterface <= -1 || indexOfEnum < indexOfInterface)) {
-          index = indexOfEnum + "enum".length();
-        }
-        else {
-          // no index was valid
-          throw ClassNameNotFoundException.DEFAULT;
-        }
-        
-        // we have a valid index
-        return getNextIdentifier(startPos + index);
+      int index;
+      
+      int indexOfClass = _findKeywordAtToplevel("class", text, startPos);
+      int indexOfInterface = _findKeywordAtToplevel("interface", text, startPos);
+      int indexOfEnum = _findKeywordAtToplevel("enum",text,startPos);
+      
+      //If class exists at top level AND either there is no interface at top level or the index of class precedes the index of the top
+      //level interface, AND the same for top level enum, then the class is the first top level declaration
+      if (indexOfClass > -1 && (indexOfInterface <= -1 || indexOfClass < indexOfInterface) 
+            && (indexOfEnum <= -1 || indexOfClass < indexOfEnum)) {
+        index = indexOfClass + "class".length();
       }
-      catch (BadLocationException ble) { throw new UnexpectedException(ble); }
-      catch (IllegalStateException e) { throw new ClassNameNotFoundException("No top level class name found"); }
-      finally { setCurrentLocation(oldPos); }
+      else if (indexOfInterface > -1 && (indexOfClass <= -1 || indexOfInterface < indexOfClass) 
+                 && (indexOfEnum <= -1 || indexOfInterface < indexOfEnum)) {
+        index = indexOfInterface + "interface".length();
+      }
+      else if (indexOfEnum > -1 && (indexOfClass <= -1 || indexOfEnum < indexOfClass)   
+                 && (indexOfInterface <= -1 || indexOfEnum < indexOfInterface)) {
+        index = indexOfEnum + "enum".length();
+      }
+      else {
+        // no index was valid
+        throw ClassNameNotFoundException.DEFAULT;
+      }
+      
+      // we have a valid index
+      return getNextIdentifier(startPos + index);
+    }
+    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
+    catch (IllegalStateException e) { throw new ClassNameNotFoundException("No top level class name found"); }
+    finally { setCurrentLocation(oldPos); }
   }
   
   /** Finds the next identifier (following a non-whitespace character) in the document starting at start. Assumes that
@@ -1181,7 +1188,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //      }
 //    }));
     WrappedPosition wp = new WrappedPosition(createUnwrappedPosition(offset));
-    synchronized(_wrappedPosListLock) {
+    synchronized(this) {
       if (_wrappedPosList == null) _wrappedPosList = new LinkedList<WeakReference<WrappedPosition>>(); 
       _wrappedPosList.add(new WeakReference<WrappedPosition>(wp));
     }
@@ -1194,7 +1201,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     */
   public WeakHashMap<WrappedPosition, Integer> getWrappedPositionOffsets() {
     LinkedList<WeakReference<WrappedPosition>> newList = new LinkedList<WeakReference<WrappedPosition>>();
-    synchronized(_wrappedPosListLock) {
+    synchronized(this) {
       if (_wrappedPosList == null) { _wrappedPosList = new LinkedList<WeakReference<WrappedPosition>>(); }
       WeakHashMap<WrappedPosition, Integer> ret = new WeakHashMap<WrappedPosition, Integer>(_wrappedPosList.size());
       
@@ -1215,7 +1222,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * @param whm weakly-linked hashmap of wrapped positions and their offsets
     */
   public void setWrappedPositionOffsets(WeakHashMap<WrappedPosition, Integer> whm) throws BadLocationException {
-    synchronized(_wrappedPosListLock) {
+    synchronized(this) {
       if (_wrappedPosList == null) { _wrappedPosList = new LinkedList<WeakReference<WrappedPosition>>(); }
       _wrappedPosList.clear();
       
@@ -1272,7 +1279,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   /** Informs this document's undo manager that the document has been saved. */
   public void documentSaved() { _undoManager.documentSaved(); }
-
+  
   protected int startCompoundEdit() { return _undoManager.startCompoundEdit(); }
   
   protected void endCompoundEdit(int key) { _undoManager.endCompoundEdit(key); }
@@ -1392,7 +1399,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * in non-comment text. */
   public boolean containsClassOrInterfaceOrEnum() throws BadLocationException {
     
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     int i, j;
     int reducedPos = 0;
     

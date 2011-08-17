@@ -328,9 +328,7 @@ public class ScrollableListSelectionDialog extends JDialog {
         if (column == CHECKBOXES_COLUMN_INDEX) {
           assert row >= 0;
           assert row < numItems;
-          synchronized(selectedItems) {
-            return selectedItems.get(row);
-          }
+          synchronized(selectedItems) { return selectedItems.get(row); }
         } else if (column == STRINGS_COLUMN_INDEX) {
           assert row >= 0;
           assert row < numItems;
@@ -379,9 +377,7 @@ public class ScrollableListSelectionDialog extends JDialog {
         
         final Boolean booleanValue = (Boolean)newValue;
         
-        synchronized(selectedItems) {
-          selectedItems.set(rowIndex, booleanValue);
-        }
+        synchronized(selectedItems) { selectedItems.set(rowIndex, booleanValue); }
       }
     };
     

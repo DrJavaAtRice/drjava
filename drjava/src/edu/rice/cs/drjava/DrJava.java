@@ -159,7 +159,7 @@ public class DrJava {
   
   /** Returns the configuration object with all customized and default values. */
   public static synchronized FileConfiguration getConfig() {
-    if (_config==null) {
+    if (_config == null) {
       _config = _initConfig();  // read specified .djrava file into _config
     }
     return _config;
@@ -201,9 +201,9 @@ public class DrJava {
     * @return true if successful
     */
   public static synchronized boolean openWithRemoteControl(ArrayList<String> files, int numAttempts) {
-    if (!DrJava.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_ENABLED) ||
-        !_restartedDrJavaUsesRemoteControl ||
-        (files.size()==0)) return false;
+    if (! DrJava.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_ENABLED) ||
+        ! _restartedDrJavaUsesRemoteControl ||
+        files.size() == 0) return false;
     
     ArrayList<String> fs = new ArrayList<String>(files);
     int failCount = 0;
@@ -227,9 +227,7 @@ public class DrJava {
           catch(InterruptedException ie) { /* just try again now */ }
         }
       }
-      catch(IOException ioe) {
-        ioe.printStackTrace();
-      }
+      catch(IOException ioe) { ioe.printStackTrace(); }
     }
     return false; // failure
   }
