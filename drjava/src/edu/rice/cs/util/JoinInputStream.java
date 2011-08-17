@@ -212,7 +212,7 @@ class ReaderThread extends Thread {
         exception = ex;
         len = -1;
       }
-      synchronized (monitor) { 
+      synchronized(monitor) { 
         available = len;
         pos = 0;
         monitor.notify();

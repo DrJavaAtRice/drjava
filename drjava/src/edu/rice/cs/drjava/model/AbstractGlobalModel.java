@@ -2807,7 +2807,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public void updateSyntaxHighlighting() {
       // can't be called in AbstractGlobalModel.ConcreteOpenDefDoc because getCompilerModel is not supported
       CompilerModel cm = getCompilerModel();
-      if (cm==null) {
+      if (cm == null) {
         // use the cache adapter so setting the keywords doesn't load the document
         _cacheAdapter.setKeywords(edu.rice.cs.drjava.model.compiler.JavacCompiler.JAVA_KEYWORDS);
       }

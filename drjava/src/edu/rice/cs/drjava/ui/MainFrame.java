@@ -3221,7 +3221,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       // Timer to display a message if a debugging step takes a long time
       _debugStepTimer = new Timer(DEBUG_STEP_TIMER_VALUE, new ActionListener() {
-        public void actionPerformed(ActionEvent e) { _model.printDebugMessage("Stepping..."); }
+        public void actionPerformed(ActionEvent e) { _model.printDebugMessage("Stepping ..."); }
       });
       _debugStepTimer.setRepeats(false);
       
@@ -5761,17 +5761,18 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Automatically traces through the entire program with a defined rate for stepping into each line of code*/
   void debuggerAutomaticTrace() {
-    if(isDebuggerReady())  {
+    if (isDebuggerReady())  {
       if(!_model.getDebugger().isAutomaticTraceEnabled()) {
         try {
           int rate = DrJava.getConfig().getSetting(OptionConstants.AUTO_STEP_RATE);
           
           _automaticTraceTimer = new Timer(rate, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+              _debugStepTimer.stop();
               if (_model.getDebugger().isAutomaticTraceEnabled()) {
                 // hasn't been disabled in the meantime
                 debuggerStep(Debugger.StepType.STEP_INTO);
-                _debugStepTimer.restart();  // _debugStepTimer prints "Stepping..." when timer expires
+//                _debugStepTimer.restart();  // _debugStepTimer prints "Stepping..." when timer expires
               }
             }
           });
@@ -5779,6 +5780,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           _model.getDebugger().setAutomaticTraceEnabled(true);
           _debugPanel.setAutomaticTraceButtonText();
           debuggerStep(Debugger.StepType.STEP_INTO);
+          _debugStepTimer.stop();
         }
         catch (IllegalStateException ise) {
           /* This may happen if the user if stepping very frequently, and is even more likely if they are using both 
@@ -7985,7 +7987,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _threadPool.submit(new Runnable() {
           public void run() {
             Thread.currentThread().setPriority(UPDATER_PRIORITY);
-            synchronized (_updateLock) {
+            synchronized(_updateLock) {
               try { // _pendingUpdate can be updated during waits
                 do { 
                   _waitAgain = false;
@@ -8623,8 +8625,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void stepRequested() {
       // Print a message if step takes a long time; timer must be restarted on every step (automatic trace)
       synchronized(_debugStepTimer) { 
-        if (! _debugStepTimer.isRunning()) _debugStepTimer.start();
-        else _debugStepTimer.restart();
+        if (! _automaticTraceTimer.isRunning()) {
+          if (! _debugStepTimer.isRunning()) _debugStepTimer.start();
+          else _debugStepTimer.restart();
+        }
       }
     }
     
@@ -8636,8 +8640,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if(_model.getDebugger().isAutomaticTraceEnabled()) {
         //System.out.println("new _automaticTraceTimer AUTO_STEP_RATE=" + AUTO_STEP_RATE + ", " + 
         //                   System.identityHashCode(_automaticTraceTimer);                                
-        if ((_automaticTraceTimer != null) && (! _automaticTraceTimer.isRunning()))
-          _automaticTraceTimer.start();
+        if ((_automaticTraceTimer != null) && (! _automaticTraceTimer.isRunning())) _automaticTraceTimer.start();
       }
     }
     
@@ -8660,9 +8663,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     /* Must be executed in event thread. */
     public void currThreadDied() {
       assert EventQueue.isDispatchThread();
-      _disableStepTimer();
       _model.getDebugger().setAutomaticTraceEnabled(false);
-      if (_automaticTraceTimer != null) _automaticTraceTimer.stop();
+      if (_automaticTraceTimer != null) {
+        _automaticTraceTimer.stop();
+      }
+      _disableStepTimer();
       if (isDebuggerReady()) {
         try {        
           if (!_model.getDebugger().hasSuspendedThreads()) {

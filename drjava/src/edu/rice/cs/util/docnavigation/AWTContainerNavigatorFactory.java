@@ -67,7 +67,7 @@ public class AWTContainerNavigatorFactory<ItemT extends INavigatorItem> implemen
     final IDocumentNavigator<ItemT> child = makeListNavigator();
     Utilities.invokeLater(new Runnable() { 
       public void run() {
-//          synchronized (child.getModelLock()) { // dropped because of cost; each atomic action is still synchronized
+//          synchronized(child.getModelLock()) { // dropped because of cost; each atomic action is still synchronized
         migrateNavigatorItems(child, parent);
         migrateListeners(child, parent);
       }
@@ -88,7 +88,7 @@ public class AWTContainerNavigatorFactory<ItemT extends INavigatorItem> implemen
     final IDocumentNavigator<ItemT> child = makeTreeNavigator(name);
     Utilities.invokeLater(new Runnable() { 
       public void run() { 
-//          synchronized (child.getModelLock()) { // dropped because of cost; each atomic action is still synchronized
+//          synchronized(child.getModelLock()) { // dropped because of cost; each atomic action is still synchronized
         for(Pair<String, INavigatorItemFilter<ItemT>> p: l) { child.addTopLevelGroup(p.first(), p.second()); }
         migrateNavigatorItems(child, parent);
         migrateListeners(child, parent);

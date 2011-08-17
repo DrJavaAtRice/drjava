@@ -117,14 +117,15 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Uses an updated version of the DefaultEditorKit */
   private final DefinitionsEditorKit _editor;
   
-  /* Unfortunately, we must use "this" as the lock object for Lock for _wrappedPosList because there is no lightweight
-   * way to dynamically construct a dedicated lock for this variable.  The lock is accessed by a super*-class during
-   * object initialization (when no initialization has yet been performed for this class).  In particular, 
-   * AbstractDocument calls createPosition in its <init> method.  Java inexplicably forbids access to uninitialized
-   * volatile variables.  (Why?  They have blank values just like blank final fields!) so a demand-driven
-   * initialization scheme like double-check cannot be used.  The locking expression could execute static code that uses
-   * the value of "this" (passed as a parameter) to index a hashtable of locks that allocates new locks on demand
-   * (simulating double check without the benefits of dynamic dispatch), but his is incredibly heavyweight. */
+  /* Unfortunately, we must use the following shared static lock as the lock object for Lock for _wrappedPosList because 
+   * here is no lightweight way to dynamically construct a dedicated lock for this variable.  The lock is accessed by a 
+   * super*-class (AbstractDocument calls createPostion) during object initialization (when no initialization has yet 
+   * been performed for this class).  Java inexplicably forbids access to uninitialized volatile variables.  (Why?  
+   * hey have blank values just like blank final fields!) so a demand-driven initialization scheme like double-check 
+   * cannot be used.  Using "this" as a lock appear to create a deadlock.  The "this" lock may be used for other
+   * purposes. */
+  
+  private static final Object _wrappedPosListLock = new Object();
   
   /** List with weak references to positions. */
   private volatile LinkedList<WeakReference<WrappedPosition>> _wrappedPosList;
@@ -1188,7 +1189,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //      }
 //    }));
     WrappedPosition wp = new WrappedPosition(createUnwrappedPosition(offset));
-    synchronized(this) {
+    synchronized(_wrappedPosListLock) {
       if (_wrappedPosList == null) _wrappedPosList = new LinkedList<WeakReference<WrappedPosition>>(); 
       _wrappedPosList.add(new WeakReference<WrappedPosition>(wp));
     }
@@ -1201,7 +1202,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     */
   public WeakHashMap<WrappedPosition, Integer> getWrappedPositionOffsets() {
     LinkedList<WeakReference<WrappedPosition>> newList = new LinkedList<WeakReference<WrappedPosition>>();
-    synchronized(this) {
+    synchronized(_wrappedPosListLock) {
       if (_wrappedPosList == null) { _wrappedPosList = new LinkedList<WeakReference<WrappedPosition>>(); }
       WeakHashMap<WrappedPosition, Integer> ret = new WeakHashMap<WrappedPosition, Integer>(_wrappedPosList.size());
       
@@ -1222,7 +1223,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * @param whm weakly-linked hashmap of wrapped positions and their offsets
     */
   public void setWrappedPositionOffsets(WeakHashMap<WrappedPosition, Integer> whm) throws BadLocationException {
-    synchronized(this) {
+    synchronized(_wrappedPosListLock) {
       if (_wrappedPosList == null) { _wrappedPosList = new LinkedList<WeakReference<WrappedPosition>>(); }
       _wrappedPosList.clear();
       

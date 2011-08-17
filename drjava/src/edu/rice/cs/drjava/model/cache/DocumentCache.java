@@ -176,7 +176,7 @@ public class DocumentCache {
         _doc = _rec.make();
         assert _doc != null;
         // update documents if necessary
-        if (_keywords != null) {
+        if (_keywords != null) {  // copy cached keywords to new copy of doc
           _doc.setKeywords(_keywords); _keywords.clear(); _keywords = null;
         }
       }

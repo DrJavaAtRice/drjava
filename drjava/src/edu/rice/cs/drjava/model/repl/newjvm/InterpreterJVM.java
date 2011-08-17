@@ -77,7 +77,8 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
 /** This is the main class for the interpreter JVM.  All public methods except those involving remote calls (callbacks) 
-  * synchronized (unless synchronization has no effect).  This class is loaded in the Interpreter JVM, not the Main JVM. 
+  * use synchronizazion on _stateLock (unless synchronization has no effect).  The class is not ready for remote
+  * calls until handleStart has been executed.  This class is loaded in the Interpreter JVM, not the Main JVM. 
   * (Do not use DrJava's config framework here.)
   * <p>
   * Note that this class is specific to DynamicJava. It must be refactored to accommodate other interpreters.
@@ -96,10 +97,14 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   private final Interpreter _defaultInterpreter;
   private final Map<String, Interpreter> _interpreters;
   private final Set<Interpreter> _busyInterpreters;
-  private final Map<String, Pair<TypeContext, RuntimeBindings>> _environments;
+  // The following variable appears to be useless.
+//  private final Map<String, Pair<TypeContext, RuntimeBindings>> _environments;
   
   private final ClassPathManager _classPathManager;
   private final ClassLoader _interpreterLoader;
+  
+  // Lock object for ensuring mutual exclusion on updates and compound accesses
+  private final Object _stateLock = new Object();
   
   /** Responsible for running JUnit tests in this JVM. */
   private final JUnitTestManager _junitTestManager;
@@ -123,11 +128,12 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _defaultInterpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
     _interpreters = new HashMap<String,Interpreter>();
     _busyInterpreters = new HashSet<Interpreter>();
-    _environments = new HashMap<String, Pair<TypeContext, RuntimeBindings>>();
+//    _environments = new HashMap<String, Pair<TypeContext, RuntimeBindings>>();
     _activeInterpreter = Pair.make("", _defaultInterpreter);
   }
   
-  /** Actions to perform when this JVM is started (through its superclass, AbstractSlaveJVM). */
+  /** Actions to perform when this JVM is started (through its superclass, AbstractSlaveJVM). Not synchronized
+    * because "this" is not initialized for general access until this method has run. */
   protected void handleStart(MasterRemote mainJVM) {
     //_dialog("handleStart");
     _mainJVM = (MainJVMRemoteI) mainJVM;
@@ -178,8 +184,37 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     //_dialog("interpreter JVM started");
   }
   
+  /* Concurrent operations on _interpreters. */ 
+  private Interpreter getInterpreter(String name) {
+    synchronized(_interpreters) {return _interpreters.get(name); }
+  }
+  private boolean isInterpreterName(String name) {
+    synchronized(_interpreters) {return _interpreters.containsKey(name); }
+  }
+  private Interpreter putInterpreter(String name, Interpreter i) {
+    synchronized(_interpreters) { return _interpreters.put(name, i); }
+  }
+  // This method must be public because it is part of a declared interface
+  public void removeInterpreter(String name) {
+    synchronized(_interpreters) { _interpreters.remove(name); }
+  }
+  
+  /* Concurrent operations on _busyInterpreters. */ 
+  private boolean addBusyInterpreter(Interpreter i) {
+    synchronized(_busyInterpreters) { return _busyInterpreters.add(i); }
+  }
+  
+  private boolean removeBusyInterpreter(Interpreter i) {
+    synchronized(_busyInterpreters) { return _busyInterpreters.remove(i); }
+  }
+  
+  private boolean isBusyInterpreter(Interpreter i) {
+    synchronized(_busyInterpreters) { return _busyInterpreters.contains(i); }
+  }
+  
   /** Interprets the given string of source code in the active interpreter. The result is returned to MainJVM via 
-    * the interpretResult method.
+    * the interpretResult method.  No synchronization necessary; the code only contains a single read of
+    * local state.
     * @param s Source code to interpret.
     */
   public InterpretResult interpret(String s) { return interpret(s, _activeInterpreter.second()); }
@@ -190,10 +225,10 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     * @param interpreterName Name of the interpreter to use
     * @throws IllegalArgumentException if the named interpreter does not exist
     */
-  public InterpretResult interpret(String s, String interpreterName) {
-    Interpreter i = _interpreters.get(interpreterName);
+  public InterpretResult interpret(String s, String name) {
+    Interpreter i = getInterpreter(name);
     if (i == null) {
-      throw new IllegalArgumentException("Interpreter '" + interpreterName + "' does not exist.");
+      throw new IllegalArgumentException("Interpreter '" + name + "' does not exist.");
     }
     return interpret(s, i);
   }
@@ -201,17 +236,17 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   private InterpretResult interpret(String input, Interpreter interpreter) {
     debug.logStart("Interpret " + input);
     
-    boolean available = _busyInterpreters.add(interpreter);
-    if (!available) { debug.logEnd(); return InterpretResult.busy(); }
+    boolean available = addBusyInterpreter(interpreter);
+    if (! available) { debug.logEnd(); return InterpretResult.busy(); }
     
     // set the thread context class loader, this way NextGen and Mint can use the interpreter's class loader
-    Thread.currentThread().setContextClassLoader(_interpreterLoader);
+    Thread.currentThread().setContextClassLoader(_interpreterLoader);  // _interpreterLoader is final
     
     Option<Object> result = null;
     try { result = interpreter.interpret(input); }
     catch (InterpreterException e) { debug.logEnd(); return InterpretResult.exception(e); }
     catch (Throwable e) { debug.logEnd(); return InterpretResult.unexpectedException(e); }
-    finally { _busyInterpreters.remove(interpreter); }
+    finally { removeBusyInterpreter(interpreter); }
     
     return result.apply(new OptionVisitor<Object, InterpretResult>() {
       public InterpretResult forNone() { return InterpretResult.noValue(); }
@@ -252,7 +287,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     */
   public Object[] getVariableValue(String var) {
     Pair<Object,String>[] arr = getVariable(var);
-    if (arr.length==0) return new Object[0];
+    if (arr.length == 0) return new Object[0];
     else return new Object[] { arr[0].first() };
   }
   
@@ -263,8 +298,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     */
   @SuppressWarnings("unchecked")
   public Pair<Object,String>[] getVariable(String var) {
-    InterpretResult ir = interpret(var);
-    return ir.apply(new InterpretResult.Visitor<Pair<Object,String>[]>() {
+    synchronized(_stateLock) {
+      InterpretResult ir = interpret(var);
+      return ir.apply(new InterpretResult.Visitor<Pair<Object,String>[]>() {
         public Pair<Object,String>[] fail() { return new Pair[0]; }
         public Pair<Object,String>[] value(Object val) {
           return new Pair[] { new Pair<Object,String>(val, getClassName(val.getClass())) };
@@ -275,12 +311,13 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
         public Pair<Object,String>[] forNumberValue(Number val) { return value(val); }
         public Pair<Object,String>[] forBooleanValue(Boolean val) { return value(val); }
         public Pair<Object,String>[] forObjectValue(String valString, String objTypeString) {
-            return new Pair[] { new Pair<Object,String>(valString, objTypeString) }; }
+          return new Pair[] { new Pair<Object,String>(valString, objTypeString) }; }
         public Pair<Object,String>[] forException(String message) { return fail(); }
         public Pair<Object,String>[] forEvalException(String message, StackTraceElement[] stackTrace) { return fail(); }
         public Pair<Object,String>[] forUnexpectedException(Throwable t) { return fail(); }
         public Pair<Object,String>[] forBusy() { return fail(); }
-    });
+      });
+    }
   }
 
   /** Gets the string representation of the value of a variable in the current interpreter.
@@ -289,13 +326,15 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     * otherwise its string representation; the second part is the string representation of the variable's type
     */
   public Pair<String,String> getVariableToString(String var) {
+    synchronized(_stateLock) {
 //    if (!isValidFieldName(var)) { return "<error in watch name>"; }
-    Pair<Object,String>[] val = getVariable(var);
-    if (val.length == 0) { return new Pair<String,String>(null,null); }
-    else {
-      Object o = val[0].first();
-      try { return new Pair<String,String>(TextUtil.toString(o),val[0].second()); }
-      catch (Throwable t) { return new Pair<String,String>("<error in toString()>",""); }
+      Pair<Object,String>[] val = getVariable(var);  // recursive locking
+      if (val.length == 0) { return new Pair<String,String>(null,null); }
+      else {
+        Object o = val[0].first();
+        try { return new Pair<String,String>(TextUtil.toString(o),val[0].second()); }
+        catch (Throwable t) { return new Pair<String,String>("<error in toString()>",""); }
+      }
     }
   }
 
@@ -332,11 +371,13 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     * @throws IllegalArgumentException if the name is not unique
     */
   public void addInterpreter(String name) {
-    if (_interpreters.containsKey(name)) {
-      throw new IllegalArgumentException("'" + name + "' is not a unique interpreter name");
+    synchronized(_stateLock) {
+      if (isInterpreterName(name)) {
+        throw new IllegalArgumentException("'" + name + "' is not a unique interpreter name");
+      }
+      Interpreter i = new Interpreter(_interpreterOptions, _interpreterLoader);
+      putInterpreter(name, i);
     }
-    Interpreter i = new Interpreter(_interpreterOptions, _interpreterLoader);
-    _interpreters.put(name, i);
   }
   
   /** Adds a named Interpreter in the given environment to the list.  Invoked reflectively by
@@ -355,44 +396,46 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     */
   public void addInterpreter(String name, Object thisVal, Class<?> thisClass, Object[] localVars,
                              String[] localVarNames, Class<?>[] localVarClasses) {
-    debug.logValues(new String[]{ "name", "thisVal", "thisClass", "localVars", "localVarNames",
-      "localVarClasses" }, name, thisVal, thisClass, localVars, localVarNames, localVarClasses);
-    if (_interpreters.containsKey(name)) {
-      throw new IllegalArgumentException("'" + name + "' is not a unique interpreter name");
-    }
-    if (localVars.length != localVarNames.length || localVars.length != localVarClasses.length) {
-      throw new IllegalArgumentException("Local variable arrays are inconsistent");
-    }
-    
-    // TODO: handle inner classes
-    // TODO: enforce final vars?
-    Package pkg = thisClass.getPackage();
-    DJClass c = SymbolUtil.wrapClass(thisClass);
-    List<LocalVariable> vars = new LinkedList<LocalVariable>();
-    for (int i = 0; i < localVars.length; i++) {
-      if (localVarClasses[i] == null) {
-        try { localVarClasses[i] = (Class<?>) localVars[i].getClass().getField("TYPE").get(null); }
-        catch (IllegalAccessException e) { throw new IllegalArgumentException(e); }
-        catch (NoSuchFieldException e) { throw new IllegalArgumentException(e); }
+    synchronized(_stateLock) {
+      debug.logValues(new String[]{ "name", "thisVal", "thisClass", "localVars", "localVarNames",
+        "localVarClasses" }, name, thisVal, thisClass, localVars, localVarNames, localVarClasses);
+      if (isInterpreterName(name)) {
+        throw new IllegalArgumentException("'" + name + "' is not a unique interpreter name");
       }
-      Type varT = SymbolUtil.typeOfGeneralClass(localVarClasses[i], _interpreterOptions.typeSystem());
-      vars.add(new LocalVariable(localVarNames[i], varT, false));
+      if (localVars.length != localVarNames.length || localVars.length != localVarClasses.length) {
+        throw new IllegalArgumentException("Local variable arrays are inconsistent");
+      }
+      
+      // TODO: handle inner classes
+      // TODO: enforce final vars?
+      Package pkg = thisClass.getPackage();
+      DJClass c = SymbolUtil.wrapClass(thisClass);
+      List<LocalVariable> vars = new LinkedList<LocalVariable>();
+      for (int i = 0; i < localVars.length; i++) {
+        if (localVarClasses[i] == null) {
+          try { localVarClasses[i] = (Class<?>) localVars[i].getClass().getField("TYPE").get(null); }
+          catch (IllegalAccessException e) { throw new IllegalArgumentException(e); }
+          catch (NoSuchFieldException e) { throw new IllegalArgumentException(e); }
+        }
+        Type varT = SymbolUtil.typeOfGeneralClass(localVarClasses[i], _interpreterOptions.typeSystem());
+        vars.add(new LocalVariable(localVarNames[i], varT, false));
+      }
+      
+      TypeContext ctx = new ImportContext(_interpreterLoader, _interpreterOptions);
+      if (pkg != null) { ctx = ctx.setPackage(pkg.getName()); }
+      ctx = new ClassSignatureContext(ctx, c, _interpreterLoader);
+      ctx = new ClassContext(ctx, c);
+      ctx = new DebugMethodContext(ctx, thisVal == null);
+      ctx = new LocalContext(ctx, vars);
+      
+      RuntimeBindings bindings = RuntimeBindings.EMPTY;
+      if (thisVal != null) { bindings = new RuntimeBindings(bindings, c, thisVal); }
+      bindings = new RuntimeBindings(bindings, vars, IterUtil.asIterable(localVars));
+      
+      Interpreter i = new Interpreter(_interpreterOptions, ctx, bindings);
+//      _environments.put(name, Pair.make(ctx, bindings));
+      putInterpreter(name, i);
     }
-    
-    TypeContext ctx = new ImportContext(_interpreterLoader, _interpreterOptions);
-    if (pkg != null) { ctx = ctx.setPackage(pkg.getName()); }
-    ctx = new ClassSignatureContext(ctx, c, _interpreterLoader);
-    ctx = new ClassContext(ctx, c);
-    ctx = new DebugMethodContext(ctx, thisVal == null);
-    ctx = new LocalContext(ctx, vars);
-    
-    RuntimeBindings bindings = RuntimeBindings.EMPTY;
-    if (thisVal != null) { bindings = new RuntimeBindings(bindings, c, thisVal); }
-    bindings = new RuntimeBindings(bindings, vars, IterUtil.asIterable(localVars));
-    
-    Interpreter i = new Interpreter(_interpreterOptions, ctx, bindings);
-    _environments.put(name, Pair.make(ctx, bindings));
-    _interpreters.put(name, i);
   }
   
   /** A custom context for interpreting within the body of a defined method. */
@@ -407,52 +450,65 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   }
   
   
-  /** Removes the interpreter with the given name, if it exists. */
-  public void removeInterpreter(String name) {
-    _interpreters.remove(name);
-    _environments.remove(name);
-  }
-  
+//  /** Removes the interpreter with the given name, if it exists. */
+//  public void removeInterpreter(String name) {
+//    synchronized(_stateLock) {
+//      _interpreters.remove(name)
+////      _environments.remove(name);
+//    }
+//  }
   
   /** Sets the current interpreter to be the one specified by the given name
     * @param name the unique name of the interpreter to set active
     * @return Status flags: whether the current interpreter changed, and whether it is busy
     */
-  public synchronized Pair<Boolean, Boolean> setActiveInterpreter(String name) {
-    Interpreter i = _interpreters.get(name);
-    if (i == null) { throw new IllegalArgumentException("Interpreter '" + name + "' does not exist."); }
-    boolean changed = (i != _activeInterpreter.second());
-    _activeInterpreter = Pair.make(name, i);
-    return Pair.make(changed, _busyInterpreters.contains(i));
+  public Pair<Boolean, Boolean> setActiveInterpreter(String name) {
+    synchronized(_stateLock) {
+      Interpreter i = getInterpreter(name);
+      if (i == null) { throw new IllegalArgumentException("Interpreter '" + name + "' does not exist."); }
+      boolean changed = (i != _activeInterpreter.second());
+      _activeInterpreter = Pair.make(name, i);
+      return Pair.make(changed, isBusyInterpreter(i));
+    }
   }
   
   /** Sets the default interpreter to be active.
     * @return Status flags: whether the current interpreter changed, and whether it is busy
     */
-  public synchronized Pair<Boolean, Boolean> setToDefaultInterpreter() {
-    boolean changed = (_defaultInterpreter != _activeInterpreter.second());
-    _activeInterpreter = Pair.make("", _defaultInterpreter);
-    return Pair.make(changed, _busyInterpreters.contains(_defaultInterpreter));
+  public Pair<Boolean, Boolean> setToDefaultInterpreter() {
+    synchronized(_stateLock) {
+      boolean changed = (_defaultInterpreter != _activeInterpreter.second());
+      _activeInterpreter = Pair.make("", _defaultInterpreter);
+      return Pair.make(changed, isBusyInterpreter(_defaultInterpreter));
+    }
   }
   
   /** Check that all access of class members is permitted by accessibility controls. */
-  public synchronized void setEnforceAllAccess(boolean enforce) {
-    _interpreterOptions.setEnforceAllAccess(enforce);
+  public void setEnforceAllAccess(boolean enforce) {
+    synchronized(_stateLock) {
+      _interpreterOptions.setEnforceAllAccess(enforce);
+    }
   }
   
   /** Check that access of private class members is permitted (irrelevant if setEnforceAllAccess() is set to true). */
-  public synchronized void setEnforcePrivateAccess(boolean enforce) {
-    _interpreterOptions.setEnforcePrivateAccess(enforce);
+  public void setEnforcePrivateAccess(boolean enforce) {
+    synchronized(_stateLock) {
+      _interpreterOptions.setEnforcePrivateAccess(enforce);
+    }
   }
 
   /** Require a semicolon at the end of statements. */
-  public synchronized void setRequireSemicolon(boolean require) {
-    _interpreterOptions.setRequireSemicolon(require);
+  public void setRequireSemicolon(boolean require) {
+    synchronized(_stateLock) {
+      _interpreterOptions.setRequireSemicolon(require);
+    }
   }
   
   /** Require variable declarations to include an explicit type. */
-  public synchronized void setRequireVariableType(boolean require) {
-    _interpreterOptions.setRequireVariableType(require);
+  public void setRequireVariableType(boolean require) {
+    synchronized(_stateLock) {
+      _interpreterOptions.setRequireVariableType(require);
+    }
   }
   
   // ---------- JUnit methods ----------

@@ -387,7 +387,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   /** Sets the specified document to be active (current).  Only executes in the event thread. */
   public void selectDocument(ItemT doc) {
     assert EventQueue.isDispatchThread();
-//    synchronized (_model) {  // lock out mutation
+//    synchronized(_model) {  // lock out mutation
     DefaultMutableTreeNode node = _doc2node.get(doc);
     if (node == null) return; // doc is not in the navigator
     if (node == _current) return;  // current doc is the active doc
@@ -907,7 +907,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     assert (EventQueue.isDispatchThread() || Utilities.TEST_MODE);
     
     ArrayList<String> list = new ArrayList<String>();
-//    synchronized (_model) {
+//    synchronized(_model) {
     DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)_model.getRoot();
     // We use a raw type here because depthFirstEnumeration() has a raw type signature
     Enumeration<?> nodes = rootNode.depthFirstEnumeration(); /** This warning is expected **/
@@ -931,7 +931,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
     */
   public String generatePathString(TreePath tp) {
     String path = "";
-//    synchronized (_model) {
+//    synchronized(_model) {
     TreeNode root = (TreeNode) _model.getRoot();
     
     while (tp != null) {
@@ -947,7 +947,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   
   /** If the currently selected item is not an INavigatorItem, select the one given. Only runs in event thread. */
   public void requestSelectionUpdate(ItemT ini) {
-//    synchronized (_model) {
+//    synchronized(_model) {
     // This code checked if the selected node was a leaf, i.e. a Java source file,
     // and if it wasn't, reverts the selection. The code was commented out to allow
     // selection of file nodes (i.e. folders) and string nodes (i.e. [ Source Files ], etc.)

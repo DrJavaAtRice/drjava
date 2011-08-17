@@ -73,7 +73,7 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
     new Thread(_quitSlaveThreadName) {
       public void run() {
         // ensure (as best we can) that the quit() RMI call has returned cleanly
-        synchronized (AbstractSlaveJVM.this) {
+        synchronized(AbstractSlaveJVM.this) {
           try { System.exit(0); }
           catch (RuntimeException e) { error.log("Can't invoke System.exit", e); }
         }
