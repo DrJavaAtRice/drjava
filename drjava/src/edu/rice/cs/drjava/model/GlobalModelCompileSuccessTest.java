@@ -77,11 +77,9 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
 
     // Make sure .class exists for both files
     File compiled = classForJava(file, "DrJavaTestFoo");
-    assertTrue(_name() + "Foo Class file doesn't exist after compile",
-               compiled.exists());
+    assertTrue(_name() + "Foo Class file doesn't exist after compile", compiled.exists());
     File compiled2 = classForJava(file2, "DrJavaTestBar");
-    assertTrue(_name() + "Bar Class file doesn't exist after compile",
-               compiled2.exists());
+    assertTrue(_name() + "Bar Class file doesn't exist after compile", compiled2.exists());
     _model.removeListener(listener);
   }
   

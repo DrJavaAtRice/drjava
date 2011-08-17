@@ -105,7 +105,9 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
                  _adapter.getStyles()[0].toString());
     
     // Insert some text
-    _doc.append("5", InteractionsDocument.NUMBER_RETURN_STYLE);
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { _doc.append("5", InteractionsDocument.NUMBER_RETURN_STYLE); } 
+    });
     
     /* Third element pushed StylesList stack before reset */
     String styleElt3 = "((" + (blen + 2) + ", " + (blen + 3) + "), number.return.style)";
@@ -154,7 +156,7 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
 //    System.err.println("Text length: " + _adapter.getLength());
 //    System.err.println("The styles list is: " + _adapter.getStylesList());
    
-    Utilities.clearEventQueue();  // assures that pending updates to _pane have been performed
+//    Utilities.clearEventQueue();  // assures that pending updates to _pane have been performed
     assertEquals("StylesList after reset should contain 2 pairs", 2, _adapter.getStyles().length);
     
     assertEquals("The first element pushed on StylesList after reset should be", styleElt1,
@@ -175,14 +177,18 @@ public final class InteractionsDJDocumentTest extends DrJavaTestCase {
     assertEquals("StylesList before insert should contain 2 pairs", 2, _adapter.getStyles().length);
 
     // Insert some text
-    _doc.append("5", InteractionsDocument.NUMBER_RETURN_STYLE);
-    Utilities.clearEventQueue();
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {_doc.append("5", InteractionsDocument.NUMBER_RETURN_STYLE);}
+    });
+//    Utilities.clearEventQueue();
 
     assertEquals("StylesList should contain 3 pairs", 3, _adapter.getStyles().length);
 
     // Insert some text with a null style
-    _doc.append("6", null);
-     Utilities.clearEventQueue();
+     Utilities.invokeAndWait(new Runnable() {
+       public void run() { _doc.append("6", null); }
+     });
+//     Utilities.clearEventQueue();
 
     assertEquals("StylesList should still contain 3 pairs - null string should not have been inserted",
                  3, _adapter.getStyles().length);

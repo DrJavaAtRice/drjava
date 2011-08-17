@@ -74,7 +74,7 @@ public class Utilities {
     catch(Exception e) { throw new UnexpectedException(e); }
   }
   
-  public static void main(String[] args) { clearEventQueue(); }
+//  public static void main(String[] args) { clearEventQueue(); }
 
   /** Clears the event queue by waiting until all events currently in the queue
     * have been processed. Calls clearEventQueue(true);

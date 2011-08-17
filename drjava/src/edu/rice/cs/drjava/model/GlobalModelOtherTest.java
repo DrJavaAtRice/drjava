@@ -110,7 +110,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
         _model.removeListener(listener);
       }
     });
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     _log.log("testUndoEventsOccur() completed");
     debug.logEnd();
   }

@@ -69,8 +69,8 @@ public final class ConfigFileTest extends DrJavaTestCase {
         DrJava._initConfig(); 
       } 
     });
-    Utilities.clearEventQueue();
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     
     FileConfiguration config = DrJava.getConfig();
     assertEquals("custom indent level", 5, config.getSetting(OptionConstants.INDENT_LEVEL).intValue());

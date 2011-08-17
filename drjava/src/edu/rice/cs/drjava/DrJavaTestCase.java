@@ -105,6 +105,6 @@ public class DrJavaTestCase extends TestCase {
         catch(BadLocationException e) { throw new UnexpectedException(e); }
       }
     });
-    Utilities.clearEventQueue();  // make sure that all listener actions triggered by this document update have completed
+    Utilities.clearEventQueue();  // ensure that all listener actions triggered by this document update have completed
   }
 }

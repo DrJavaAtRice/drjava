@@ -52,7 +52,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public final class JUnitErrorModelTest extends GlobalModelTestCase {
   
   private volatile JUnitErrorModel _m;
-  protected static final Log _log = new Log("JUnitError.txt", true);
+  protected static final Log _log = new Log("JUnitError.txt", false);
   
   private static final String MONKEYTEST_FAIL_TEXT =
     "import junit.framework.*; \n" +
@@ -207,7 +207,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     });
     
     // Wait until events triggered by running unit tests have cleared ? (should be done by code above)
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     _log.log("Event queue cleared");
     _m = _model.getJUnitModel().getJUnitErrorModel();
     
@@ -375,13 +375,13 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     
     listener.waitCompileDone();
     
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     
     _log.log("Testing the first document");
     
     listener.runJUnit(doc1); //  waits until JUnit is done
     
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     
     _log.log("First document test should be complete");
     listener.assertJUnitStartCount(1);  
@@ -397,8 +397,8 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     assertEquals("The first error is on line 5", 19, _m.getError(1).lineNumber());
     assertEquals("The first error is on line 5", 22, _m.getError(2).lineNumber());
     
-    Utilities.clearEventQueue();
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     
     _log.log("Testing the second document");
     listener.resetJUnitCounts();
@@ -406,7 +406,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     listener.runJUnit(doc2);
     // runJUnit waits until the thread started in DefaultJUnitModel._rawJUnitOpenDefDocs has called notify
     
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     _log.log("Second document testing should be complete");
     
     listener.assertJUnitStartCount(1);

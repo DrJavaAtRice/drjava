@@ -652,7 +652,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
       }
     });
     
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     assertEquals("documents should equal", doc.toString(), frm.getDocument().toString());
     assertEquals("findNext return value", found, _result.getFoundOffset());
     _assertOffsets(frm, start, found);

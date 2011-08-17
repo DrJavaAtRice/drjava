@@ -114,7 +114,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, Integer.valueOf(maxLength)); }
     });
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     
     int i;
     for (i = 0; i < maxLength + 100; i++) {
@@ -136,7 +136,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { config.setSetting(HISTORY_MAX_SIZE, Integer.valueOf(20)); }
     });
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
 
     for (int i = 0; i < maxLength; i++) {
       _history.add("testing " + i);
@@ -147,7 +147,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
 //    System.err.println("Setting HISTORY_MAX_SIZE to 10");
 
     Utilities.invokeAndWait(new Runnable() { public void run() { config.setSetting(HISTORY_MAX_SIZE, 10); } });
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     
     assertEquals("History size should be 10", 10, _history.size());
     _history.setMaxSize(100);
@@ -161,7 +161,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
       public void run() { config.setSetting(HISTORY_MAX_SIZE, Integer.valueOf(-1)); }
     });
 
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     assertEquals("History size should still be 0", 0, _history.size());
   }
 
@@ -170,7 +170,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     final FileConfiguration config = DrJava.getConfig();
     
     Utilities.invokeAndWait(new Runnable() { public void run() { config.setSetting(HISTORY_MAX_SIZE, 10); } });
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
 
     assertEquals("testGetHistoryAsString:", "", _history.getHistoryAsString());
 
@@ -196,7 +196,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     _history.moveNext(newEntry);
     _history.movePrevious("");
 
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     assertEquals("Did not remember the edited entry correctly.", newEntry, _history.getCurrent());
   }
 
@@ -212,12 +212,12 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
     _history.movePrevious(newEntry1);
     _history.moveNext(newEntry2);
 
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     assertEquals("Did not remember the edited entry correctly.", newEntry1, _history.getCurrent());
 
     _history.movePrevious(newEntry1);
     
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     assertEquals("Did not remember the edited entry correctly.", newEntry2, _history.getCurrent());
   }
 
@@ -234,12 +234,12 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
 
     _history.movePrevious("");
     
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     assertEquals("Did not add edited entry to end of history.", newEntry, _history.getCurrent());
 
     _history.movePrevious(newEntry);
     
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     assertEquals("Did not keep a copy of the original entry.", entry, _history.getCurrent());
   }
 
@@ -253,12 +253,12 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
 
     _history.reverseSearch("s");
     
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     assertEquals("Did not find the correct entry in history.", entry1, _history.getCurrent());
 
     _history.forwardSearch("b");
     
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     assertEquals("Did not find the correct entry in history.", entry2, _history.getCurrent());
   }
 
@@ -272,7 +272,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
 
     _history.reverseSearch("a");
 
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     assertEquals("Did not reset cursor correctly.", "a", _history.getCurrent());
   }
 
@@ -286,12 +286,12 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
 
     _history.reverseSearch("s");
     
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     assertEquals("Did not reset cursor correctly.", entry2, _history.getCurrent());
 
     _history.reverseSearch(_history.getCurrent());
     
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     assertEquals("Did not reset cursor correctly.", entry1, _history.getCurrent());
   }
   

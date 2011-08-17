@@ -98,11 +98,13 @@ public final class InteractionsModelTest extends DrJavaTestCase {
         doc.append(typed, InteractionsDocument.DEFAULT_STYLE); 
       }
     });
-    Utilities.clearEventQueue();
+    
+//    Utilities.clearEventQueue();
     model._logInteractionStart();
     model.interpretCurrentInteraction();
     model._waitInteractionDone();
-    Utilities.clearEventQueue();
+    
+//    Utilities.clearEventQueue();
     assertEquals("processed output should match expected", expected, model.toEval);
   }
   
@@ -136,7 +138,8 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     model._logInteractionStart();
     model.interpretCurrentInteraction();
     model._waitInteractionDone();
-    Utilities.clearEventQueue();
+    
+//    Utilities.clearEventQueue();
     assertEquals("string being interpreted", "", model.toEval);
     
     final String code = "int x = 3;";
@@ -146,18 +149,20 @@ public final class InteractionsModelTest extends DrJavaTestCase {
         doc.append(code, InteractionsDocument.DEFAULT_STYLE); // spawns an event queue task
       } 
     });
-    Utilities.clearEventQueue();
+    
+//    Utilities.clearEventQueue();
 //    System.err.println("doc = '" + doc.getText() + "'");
     assertTrue("Code appended correctly to interactions document", doc.getText().endsWith(code));
 //    System.err.println("currentInteraction = '" + doc.getCurrentInteraction() + "'");
-    Utilities.clearEventQueue();
+    
+//    Utilities.clearEventQueue();
     assertTrue("Current interaction text is correct", doc.getCurrentInteraction().equals(code));
     
     model._logInteractionStart();
     model.interpretCurrentInteraction(); // runs in the event queue 
     model._waitInteractionDone();
 
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     assertEquals("string being interpreted", code, model.toEval);
     _log.log("testInterpretCurrentInteraction ended");
   }
@@ -187,14 +192,16 @@ public final class InteractionsModelTest extends DrJavaTestCase {
         doc.append(code, InteractionsDocument.DEFAULT_STYLE);
       }
     });
-    Utilities.clearEventQueue();
+    
+//    Utilities.clearEventQueue();
     model._logInteractionStart();
     model.interpretCurrentInteraction();
-    Utilities.clearEventQueue();
+    
+//    Utilities.clearEventQueue();
     _log.log("Waiting for InteractionDone()");
     model._waitInteractionDone();
 
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     assertTrue("Code '" + code + "' should generate a continuation exception but not a syntax exception",
                (model.isContinuationException() == true) && (model.isSyntaxException() == false));
   }
@@ -210,13 +217,13 @@ public final class InteractionsModelTest extends DrJavaTestCase {
         doc.append(code, InteractionsDocument.DEFAULT_STYLE);
       }
     });
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
 
     model._logInteractionStart();
     model.interpretCurrentInteraction();
     model._waitInteractionDone();
 
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     assertTrue("Code '" + code +  "' should generate a syntax exception but not a continuation exception",
                (model.isSyntaxException() == true) && (model.isContinuationException() == false));
   }
@@ -472,45 +479,50 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     
     // Should not be able to get the previous interaction
     assertTrue("Should have no previous", !ism.hasPrevInteraction());
-    try {
-      ism.prevInteraction();
-      fail("Should not have been able to get previous interaction!");
-    }
-    catch (IllegalStateException ise) {
-      // good, continue
-    }
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        try {
+          ism.prevInteraction();
+          fail("Should not have been able to get previous interaction!");
+        }
+        catch (IllegalStateException ise) { /* good, continue */ }
+      }
+    });
     
     // Get the next (first) interaction
     assertTrue("Should have next", ism.hasNextInteraction());
-    ism.nextInteraction();
-    Utilities.clearEventQueue();
+    Utilities.invokeAndWait(new Runnable() { public void run() { ism.nextInteraction(); } });
+    
+//    Utilities.clearEventQueue();
     assertEquals("Should have put the first line into the document.", line1, doc.getCurrentInteraction());
     
     // Still should not be able to get the previous interaction
     assertTrue("Should have no previous", !ism.hasPrevInteraction());
-    try {
-      ism.prevInteraction();
-      fail("Should not have been able to get previous interaction!");
-    }
-    catch (IllegalStateException ise) {
-      // good, continue
-    }
     
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        try {
+          ism.prevInteraction();
+          fail("Should not have been able to get previous interaction!");
+        }
+        catch (IllegalStateException ise) { /* good, continue */ }
+      }
+    });
     // Skip it; get the next (second) interaction
     assertTrue("Should have next", ism.hasNextInteraction());
-    ism.nextInteraction();
-    Utilities.clearEventQueue();
+    Utilities.invokeAndWait(new Runnable() { public void run() { ism.nextInteraction(); } });
+//    Utilities.clearEventQueue();
     assertEquals("Should have put the second line into the document.", line2, doc.getCurrentInteraction());
     
     // Now we should be able to get the previous interaction
     assertTrue("Should have previous", ism.hasPrevInteraction());
-    ism.prevInteraction();
-    Utilities.clearEventQueue();
+    Utilities.invokeAndWait(new Runnable() { public void run() { ism.prevInteraction(); } });
+//    Utilities.clearEventQueue();
     assertEquals("Should have put the first line into the document.", line1, doc.getCurrentInteraction());
     
     // Go back to the second line and execute it
     Utilities.invokeAndWait(new Runnable() { public void run() { ism.nextInteraction(); } });
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     
     model._logInteractionStart();
     Utilities.invokeAndWait(new Runnable() { 
@@ -522,25 +534,30 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     
     // Should not be able to get the next interaction, since we're at the end
     assertTrue("Should have no next", !ism.hasNextInteraction());
-    try {
-      ism.nextInteraction();
-      fail("Should not have been able to get next interaction!");
-    }
-    catch (IllegalStateException ise) {
-      // good, continue
-    }
     
-    Utilities.clearEventQueue();
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        try {
+          ism.nextInteraction();
+          fail("Should not have been able to get next interaction!");
+        }
+        catch (IllegalStateException ise) { /* good, continue */ }
+      }
+    });
+    
+//    Utilities.clearEventQueue();
     // Get Previous should return the most recently executed interaction
     assertTrue("Should have previous", ism.hasPrevInteraction());
-    ism.prevInteraction();
-    Utilities.clearEventQueue();
+    
+    Utilities.invokeAndWait(new Runnable() { public void run() { ism.prevInteraction(); } });
+//    Utilities.clearEventQueue();
     assertEquals("Should have put the second line into the document.", line2, doc.getCurrentInteraction());
     
     // Get Previous should now return the first interaction
     assertTrue("Should have previous", ism.hasPrevInteraction());
-    ism.prevInteraction();
-    Utilities.clearEventQueue();
+    
+    Utilities.invokeAndWait(new Runnable() { public void run() { ism.prevInteraction(); } });
+//    Utilities.clearEventQueue();
 //    System.err.println("Interaction is '" + doc.getCurrentInteraction() + "'");
     assertEquals("Should have put the first line into the document.", line1, doc.getCurrentInteraction());
     
@@ -559,21 +576,29 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     
     // Get Previous should return the most recent (first) interaction
     assertTrue("Should have previous", ism.hasPrevInteraction());
-    ism.prevInteraction();
-    Utilities.clearEventQueue();
+    
+    Utilities.invokeAndWait(new Runnable() { public void run() { ism.prevInteraction(); } });
+//    Utilities.clearEventQueue();
     assertEquals("Should have put the first line into the document.", line1, doc.getCurrentInteraction());
     
     // Should not be able to get the previous interaction this time
     assertTrue("Should have no previous", !ism.hasPrevInteraction());
-    try {
-      ism.prevInteraction();
-      fail("Should not have been able to get previous interaction!");
-    }
-    catch (IllegalStateException ise) { /* good, continue */ }
+    
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        try {
+          ism.prevInteraction();
+          fail("Should not have been able to get previous interaction!");
+        }
+        catch (IllegalStateException ise) { /* good, continue */ }
+      }
+    });
+    
     _log.log("testScriptLoading ended");
   }
   
-  /** Tests that setting and changing an input listener works correctly. */
+  /** Tests that setting and changing an input listener works correctly. Many actions should be moved to the
+    * event thread. */
   public void testSetChangeInputListener() {
     _log.log("testSetChangeInputListener started");
     InputListener listener1 = new InputListener() {
@@ -618,7 +643,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
         model.setSyntaxErrorStrings("Encountered Unexpected \"<EOF>\"", "public class A {\n");
       }
     });
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     model.interpretCurrentInteraction();
     model._waitInteractionDone();
     
@@ -640,7 +665,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { doc.insertText(doc.getLength(), code1, InteractionsDocument.DEFAULT_STYLE); }
     });
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     _model.interpretCurrentInteraction();
     model._waitInteractionDone();
     

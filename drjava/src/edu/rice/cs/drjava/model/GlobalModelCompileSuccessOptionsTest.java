@@ -149,9 +149,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
    * the config before running the tests.  We have a guess where the jar
    * is -- the lib directory -- but how can we get a URL for that?)
    */
-  public void testCompileWithGenerics()
-    throws BadLocationException, IOException, InterruptedException
-  {
+  public void testCompileWithGenerics()throws BadLocationException, IOException, InterruptedException {
 //    System.out.println("testCompileWithGenerics()");
     // Only run this test if using a compiler with generics
     if (_isGenericCompiler()) {
@@ -162,8 +160,9 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
       
       CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
       _model.addListener(listener);
-      _model.getCompilerModel().compileAll();
-      Utilities.clearEventQueue();
+//      _model.getCompilerModel().compileAll();
+      listener.compile(doc);
+
       if (_model.getCompilerModel().getNumErrors() > 0) {
         fail("compile failed: " + getCompilerErrorString());
       }

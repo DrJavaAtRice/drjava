@@ -55,7 +55,7 @@ public class UtilitiesTest extends TestCase {
     final int N = 10;
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-        System.out.println("Runnable 0");
+//        System.out.println("Runnable 0");
         ++count[0];
         try {
           Thread.sleep(1000);
@@ -72,7 +72,7 @@ public class UtilitiesTest extends TestCase {
     for(int i=1; i < N; ++i) {
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-          System.out.println("Runnable 1");
+//          System.out.println("Runnable 1");
           ++count[0];
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
@@ -83,9 +83,9 @@ public class UtilitiesTest extends TestCase {
         }
       });
     }
-    System.out.println("Before clearEventQueue");
-    Utilities.clearEventQueue(true);
-    System.out.println("After clearEventQueue");
+//    System.out.println("Before clearEventQueue");
+    Utilities.clearEventQueue();
+//    System.out.println("After clearEventQueue");
     assertEquals(2*N, count[0]);
   }
 }

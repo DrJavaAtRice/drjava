@@ -952,7 +952,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     
     _doc.addUndoableEditListener(_doc.getUndoManager());
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,Integer.valueOf(2));
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     _doc.insertString(0, text, null);
     assertEquals("insertion",text, _doc.getText()); 
     /* This is necessary here and other places where indenting or commenting takes place because the undoListener in DefinitionsPane 
@@ -994,7 +994,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     
     _doc.addUndoableEditListener(_doc.getUndoManager());
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,Integer.valueOf(2));
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     _doc.insertString(0,text,null);
     assertEquals("insertion",text, _doc.getText());
     
@@ -1043,7 +1043,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     
     _doc.addUndoableEditListener(undoManager);
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,Integer.valueOf(2));
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     // 1
     
     // Start a compound edit and verify the returned key

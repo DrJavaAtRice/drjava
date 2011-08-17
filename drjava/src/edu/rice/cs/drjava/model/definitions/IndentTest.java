@@ -1126,20 +1126,20 @@ public final class IndentTest extends DrJavaTestCase {
     
     _assertContents(text, _doc);
     safeIndentLines(0, _doc.getLength());
-    Utilities.clearEventQueue();
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
     _assertContents(indentedBefore, _doc);
 //    System.err.println("Changing INDENT_LEVEL option constant to 8");
     setConfigSetting(OptionConstants.INDENT_LEVEL, 8);
     
-    Utilities.clearEventQueue();
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
 //    System.err.println("level is " + DrJava.getConfig().getSetting(OptionConstants.INDENT_LEVEL));
 //    System.err.println("doc = " + _doc);
     safeIndentLines(0, _doc.getLength());
         
-    Utilities.clearEventQueue();
-    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
+//    Utilities.clearEventQueue();
 //    System.err.println("Performing failing assertion");
     _assertContents(indentedAfter, _doc);
   }

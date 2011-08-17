@@ -96,6 +96,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
 
     // Close file so it won't be in source root set
     _model.closeFile(doc);
+    
     Utilities.clearEventQueue();
     debugListener.assertRegionRemovedCount(1);
 
@@ -318,6 +319,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
 
     // Close doc and make sure breakpoints are removed
     _model.closeFile(doc);
+    
     Utilities.clearEventQueue();
     debugListener.assertRegionRemovedCount(2);  //fires (no waiting)
 
@@ -458,6 +460,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     _debugger.addWatch("asdf");
     _debugger.addWatch("nullString");
     _debugger.addWatch("localVar");
+    
     Utilities.clearEventQueue();
     debugListener.assertWatchSetCount(7);
 
@@ -626,6 +629,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
 
     // Close doc and make sure breakpoints are removed
     _model.closeFile(doc);
+    
     Utilities.clearEventQueue();
     debugListener.assertRegionRemovedCount(2);  //fires (no waiting)
 
@@ -666,6 +670,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
     _debugger.addWatch("twoDeepFoo");
     _debugger.addWatch("threeDeepFoo");
     _debugger.addWatch("asdf");
+    
     Utilities.clearEventQueue();
     debugListener.assertWatchSetCount(5);
     
