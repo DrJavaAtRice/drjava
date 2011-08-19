@@ -66,6 +66,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
  *  @version $Id$
  */
 public class Javac170Compiler extends JavacCompiler { // Javac170FilteringCompiler {
+  
   public Javac170Compiler(JavaVersion.FullVersion version, String location, List<? extends File> defaultBootClassPath) {
     super(version, location, defaultBootClassPath);
   }
@@ -81,12 +82,15 @@ public class Javac170Compiler extends JavacCompiler { // Javac170FilteringCompil
       // javax.tools.Diagnostic and javax.lang.model.SourceVersion are also found in rt.jar;
       // to test if tools.jar is available, we need to test for a class only found in tools.jar
       Class.forName("com.sun.tools.javac.main.JavaCompiler");
-      return true;
+      
+      // Make sure the compiler returned is not null; this can happen if we have the JRE's library, not the JDK's.
+      JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+      
+      return (compiler != null);
     }
     catch (Exception e) { return false; }
     catch (LinkageError e) { return false; }
   }
-  
 
   /** Compile the given files.
     *  @param files  Source files to compile.
