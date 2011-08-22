@@ -83,8 +83,11 @@ public class Javac170Compiler extends JavacCompiler { // Javac170FilteringCompil
       // to test if tools.jar is available, we need to test for a class only found in tools.jar
       Class.forName("com.sun.tools.javac.main.JavaCompiler");
       
-      // Make sure the compiler returned is not null; this can happen if we have the JRE's library, not the JDK's.
-      JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+      // This is the class that javax.tools.ToolProvider.getSystemJavaCompiler() uses
+      // We create an instance of that class directly, bypassing ToolProvider, because ToolProvider returns null
+      // if DrJava is started with just the JRE, instead of with the JDK, even if tools.jar is later made available
+      // to the class loader.
+      JavaCompiler compiler = (JavaCompiler)(Class.forName("com.sun.tools.javac.api.JavacTool").newInstance());
       
       return (compiler != null);
     }
@@ -114,8 +117,30 @@ public class Javac170Compiler extends JavacCompiler { // Javac170FilteringCompil
 
     Iterable<String> options = _createOptions(classPath, sourcePath, destination, bootClassPath, sourceVersion, showWarnings);
     LinkedList<DJError> errors = new LinkedList<DJError>();
-    
-    JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+
+    // This is the class that javax.tools.ToolProvider.getSystemJavaCompiler() uses.
+    // We create an instance of that class directly, bypassing ToolProvider, because ToolProvider returns null
+    // if DrJava is started with just the JRE, instead of with the JDK, even if tools.jar is later made available
+    // to the class loader.
+    JavaCompiler compiler = null;
+    try {
+      compiler = (JavaCompiler)(Class.forName("com.sun.tools.javac.api.JavacTool").newInstance());
+    }
+    catch(ClassNotFoundException e) {
+      errors.addFirst(new DJError("Compile exception: " + e, false));
+      error.log(e);
+      return errors;
+    }
+    catch(InstantiationException e) {
+      errors.addFirst(new DJError("Compile exception: " + e, false));
+      error.log(e);
+      return errors;
+    }
+    catch(IllegalAccessException e) {
+      errors.addFirst(new DJError("Compile exception: " + e, false));
+      error.log(e);
+      return errors;
+    }
     
     /** Default FileManager provided by Context class */
     DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<JavaFileObject>();
