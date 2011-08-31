@@ -1767,6 +1767,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         stripPrefix = ""; // nothing needs to be stripped, links in 1.6 Javadoc are relative
         suffix = "/allclasses-1.6.html";
       }
+      else if (linkVersion.equals(JAVADOC_1_7_TEXT)) {
+        base = DrJava.getConfig().getSetting(JAVADOC_1_7_LINK) + "/";
+        stripPrefix = ""; // nothing needs to be stripped, links in 1.7 Javadoc are relative
+        suffix = "/allclasses-1.7.html";
+      }
       
       if (!suffix.equals("")) {
         _javaAPISet.addAll(_generateJavaAPISet(base, stripPrefix, suffix));
