@@ -1403,7 +1403,7 @@ to.</para>
  </varlistentry>
  
  <varlistentry>
-   <term>Show All Line Numbers (<varname>linenum.enabled = false</varname>)</term>
+   <term>Show All Line Numbers (<varname>lineenum.enabled = false</varname>)</term>
    <listitem>
      <para>Whether to display all line numbers along the left margin of the Definitions Pane.</para>
    </listitem>
