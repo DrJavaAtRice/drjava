@@ -3226,7 +3226,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       // Timer to display a message if a debugging step takes a long time
       _debugStepTimer = new Timer(DEBUG_STEP_TIMER_VALUE, new ActionListener() {
-        public void actionPerformed(ActionEvent e) { _model.printDebugMessage("Stepping ..."); }
+        public void actionPerformed(ActionEvent e) {
+          if (!_model.getDebugger().isAutomaticTraceEnabled()) { _model.printDebugMessage("Stepping ..."); }
+        }
       });
       _debugStepTimer.setRepeats(false);
       
@@ -5766,39 +5768,51 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Automatically traces through the entire program with a defined rate for stepping into each line of code*/
   void debuggerAutomaticTrace() {
+    _log.log("debuggerAutomaticTrace(): isDebuggerReady() = "+isDebuggerReady()); 
     if (isDebuggerReady())  {
       if(!_model.getDebugger().isAutomaticTraceEnabled()) {
-        try {
-          int rate = DrJava.getConfig().getSetting(OptionConstants.AUTO_STEP_RATE);
-          
-          _automaticTraceTimer = new Timer(rate, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              _debugStepTimer.stop();
-              if (_model.getDebugger().isAutomaticTraceEnabled()) {
-                // hasn't been disabled in the meantime
-                debuggerStep(Debugger.StepType.STEP_INTO);
-//                _debugStepTimer.restart();  // _debugStepTimer prints "Stepping..." when timer expires
-              }
-            }
-          });
-          _automaticTraceTimer.setRepeats(false);
-          _model.getDebugger().setAutomaticTraceEnabled(true);
-          _debugPanel.setAutomaticTraceButtonText();
-          debuggerStep(Debugger.StepType.STEP_INTO);
-          _debugStepTimer.stop();
-        }
-        catch (IllegalStateException ise) {
-          /* This may happen if the user if stepping very frequently, and is even more likely if they are using both 
-           * hotkeys and UI buttons. Ignore it in this case. Hopefully, there are no other situations where the user 
-           * can be trying to step while there are no suspended threads. */
-        }        
+        enableAutomaticTrace();
       }
       else {
-        _model.getDebugger().setAutomaticTraceEnabled(false);
-        _debugPanel.setAutomaticTraceButtonText();
-        if (_automaticTraceTimer != null) _automaticTraceTimer.stop();
+        disableAutomaticTrace();
       }
     }    
+  }
+
+  /** Enable automatic trace. Assumes that the debugger is ready. */
+  private void enableAutomaticTrace() {
+    try {
+      int rate = DrJava.getConfig().getSetting(OptionConstants.AUTO_STEP_RATE);
+      
+      _automaticTraceTimer = new Timer(rate, new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          _debugStepTimer.stop();
+          if (_model.getDebugger().isAutomaticTraceEnabled()) {
+            // hasn't been disabled in the meantime
+            debuggerStep(Debugger.StepType.STEP_INTO);
+//                _debugStepTimer.restart();  // _debugStepTimer prints "Stepping..." when timer expires
+          }
+        }
+      });
+      _automaticTraceTimer.setRepeats(false);
+      _model.getDebugger().setAutomaticTraceEnabled(true);
+      _debugPanel.setAutomaticTraceButtonText();
+      debuggerStep(Debugger.StepType.STEP_INTO);
+      _debugStepTimer.stop();
+    }
+    catch (IllegalStateException ise) {
+      /* This may happen if the user if stepping very frequently, and is even more likely if they are using both 
+       * hotkeys and UI buttons. Ignore it in this case. Hopefully, there are no other situations where the user 
+       * can be trying to step while there are no suspended threads. */
+    }        
+  }
+
+  /** Disable the automatic trace. Assumes that the debugger is ready. */
+  private void disableAutomaticTrace() {
+    _log.log("disableAutomaticTrace(): isDebuggerReady() = "+isDebuggerReady()); 
+    _model.getDebugger().setAutomaticTraceEnabled(false);
+    _debugPanel.setAutomaticTraceButtonText();
+    if (_automaticTraceTimer != null) _automaticTraceTimer.stop();
   }
   
   /** Steps in the debugger. */
@@ -8615,7 +8629,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     /* Must be executed in evevt thread.*/
     public void debuggerStarted() { EventQueue.invokeLater(new Runnable() { public void run() { showDebugger(); } }); }
     
-    /* Must be executed in eventt thread.*/
+    /* Must be executed in event thread.*/
     public void debuggerShutdown() {
       EventQueue.invokeLater(new Runnable() {
         public void run() {
@@ -8630,7 +8644,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void stepRequested() {
       // Print a message if step takes a long time; timer must be restarted on every step (automatic trace)
       synchronized(_debugStepTimer) { 
-        if (! _automaticTraceTimer.isRunning()) {
+        // only print the stepping message if we're not doing automatic trace
+        // i.e. do it if the _automaticTraceTimer is null, or if the _automaticTraceTimer is not running
+        if ((_automaticTraceTimer == null) || (! _automaticTraceTimer.isRunning())) {
           if (! _debugStepTimer.isRunning()) _debugStepTimer.start();
           else _debugStepTimer.restart();
         }
@@ -9080,6 +9096,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     public void interactionStarted() {
+      _log.log("interactionStarted()");
+      disableAutomaticTrace();
       _interactionsPane.endCompoundEdit();
       _disableInteractionsPane();
       _guiAvailabilityNotifier.unavailable(GUIAvailabilityListener.ComponentType.INTERACTIONS);
