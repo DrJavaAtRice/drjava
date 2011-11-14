@@ -5781,6 +5781,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 
   /** Enable automatic trace. Assumes that the debugger is ready. */
   private void enableAutomaticTrace() {
+    if (!isDebuggerEnabled()) return; // debugger isn't used
     try {
       int rate = DrJava.getConfig().getSetting(OptionConstants.AUTO_STEP_RATE);
       
@@ -5809,6 +5810,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 
   /** Disable the automatic trace. Assumes that the debugger is ready. */
   private void disableAutomaticTrace() {
+    if (!isDebuggerEnabled()) return; // debugger isn't used
     _log.log("disableAutomaticTrace(): isDebuggerReady() = "+isDebuggerReady()); 
     _model.getDebugger().setAutomaticTraceEnabled(false);
     _debugPanel.setAutomaticTraceButtonText();
@@ -6945,7 +6947,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private void _setThreadDependentDebugMenuItems(boolean isSuspended) {
     _guiAvailabilityNotifier.ensureAvailabilityIs(GUIAvailabilityListener.ComponentType.DEBUGGER_SUSPENDED,
                                                   isSuspended);
-    _debugPanel.setAutomaticTraceButtonText();
+    if (_showDebugger) { _debugPanel.setAutomaticTraceButtonText(); }
   }
   
   /** Creates and returns the language levels menu.
