@@ -47,6 +47,7 @@ import java.rmi.RemoteException;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -246,22 +247,22 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     * to _rawJUnitOpenTestDocs. */
   private void junitOpenDefDocs(final List<OpenDefinitionsDocument> lod, final boolean allTests) {
     // If a test is running, don't start another one.
-    
-//    Utilities.show("junitOpenDefDocs(" + lod + "," + allTests + ")");
+
+//    System.err.println("junitOpenDefDocs(" + lod + ", " + allTests + ", " + _testInProgress + ")");
     
     // Check_testInProgress flag
     if (_testInProgress) return;
     
     // Reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
-    
-//    Utilities.show("Retrieved JUnit error model");
+
+    //    System.err.println("Retrieved JUnit error model");
     final List<OpenDefinitionsDocument> outOfSync = _model.getOutOfSyncDocuments(lod);
     if ((outOfSync.size() > 0) || _model.hasModifiedDocuments(lod)) {
       /* hasOutOfSyncDocments(lod) can return false when some documents have not been successfully compiled; the 
        * granularity of time-stamping and the presence of multiple classes in a file (some of which compile 
        * successfully) can produce false reports.  */
-//      Utilities.show("Out of sync documents exist");
+//      System.err.println("Out of sync documents exist");
       CompilerListener testAfterCompile = new DummyCompilerListener() {
         @Override public void compileAborted(Exception e) {
           // gets called if there are modified files and the user chooses NOT to save the files
@@ -296,7 +297,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         }
       };
       
-//        Utilities.show("Notifying JUnitModelListener");
+//        System.err.println("Notifying JUnitModelListener");
       _testInProgress = true;
       _notifyCompileBeforeJUnit(testAfterCompile, outOfSync);
       _testInProgress = false;
@@ -327,6 +328,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     for (OpenDefinitionsDocument doc: lod) /* for all nonEmpty documents in lod */ {
       if (doc.isSourceFile())  { // excludes Untitled documents and open non-source files
         try {
+//          System.err.println("Processing " + doc);
           File sourceRoot = doc.getSourceRoot(); // may throw an InvalidPackageException
           
           // doc has valid package name; add it to list of open java source doc files
@@ -487,6 +489,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
           /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
           List<String> tests = _jvm.findTestClasses(classNames, files).unwrap(null);
+//          System.err.println("tests = " + tests);
           if (tests == null || tests.isEmpty()) {
             nonTestCase(allTests, false);
             return;
