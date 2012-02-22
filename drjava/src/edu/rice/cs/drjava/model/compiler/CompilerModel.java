@@ -124,9 +124,10 @@ public interface CompilerModel {
     * @see #getActiveCompiler
     */
   public void setActiveCompiler(CompilerInterface compiler);
-  
-  /** Add a compiler to the active list */
-  public void addCompiler(CompilerInterface compiler);
+
+  /* The following method is no longer used. */
+//  /** Add a compiler to the active list */
+//  public void addCompiler(CompilerInterface compiler);
   
   /** Gets the LanguageLevelStackTraceMapper from the model */
   public LanguageLevelStackTraceMapper getLLSTM();

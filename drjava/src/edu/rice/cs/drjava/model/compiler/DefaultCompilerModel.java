@@ -625,13 +625,13 @@ public class DefaultCompilerModel implements CompilerModel {
     }
   }
   
-  /** Add a compiler to the active list */
-  public void addCompiler(CompilerInterface compiler) {
-    if (_compilers.isEmpty()) {
-      _active = compiler;
-    }
-    _compilers.add(compiler);
-  }
+//  /** Add a compiler to the active list */
+//  public void addCompiler(CompilerInterface compiler) {
+//    if (_compilers.isEmpty()) {
+//      _active = compiler;
+//    }
+//    _compilers.add(compiler);
+//  }
   
   /** Delete the .class files that match the following pattern:
     * XXX.dj? --> XXX.class

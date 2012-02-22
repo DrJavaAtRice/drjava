@@ -1,0 +1,29 @@
+<!-- DrJava Build Script for Scala Tools -->
+
+<!-- *** This is a dummy build file.  If DrJava develops its own version of Scala tools, then
+     this ant script should be used to build that tool set.  For now, we are simply copying
+     the jars from the latest Scala Distribution (currently 2.9.1) *** -->
+     
+<!-- This build script templated located in "trunk/misc/build-template.xml" in the DrJava Subversion repository
+     may be a good starting point for writing a real build script. -->
+     
+<!-- *** Project name should be customized (used in version tags and file names) *** -->
+<project name="Scala Tools" default="help">
+
+  
+  <!-- ************
+       Help Targets
+       ************ -->
+  
+  <!-- *** Modify with any project-specific environment dependencies *** -->
+  <target name="help" description="Dummy build file for constructing the Scala tool set">
+    <echo message="----------------------------------------------------------------------" />
+    <echo message="$Dummy Build Script for the Scala tool set" />
+    <echo message="----------------------------------------------------------------------" />
+    <echo message="Type 'ant -projecthelp' or 'ant -p' to see the list of targets." />
+    <echo message="Type 'ant options' to see the list of customizable options." />
+    <echo message="" />
+  </target>
+  
+
+</project>
