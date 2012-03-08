@@ -13,6 +13,8 @@
      
 <project name="platform" default="help">
 
+  <taskdef name="if" classname="net.sf.antcontrib.logic.IfTask"  classpath="lib/buildlib/ant-contrib.jar"/>
+
   <property name="readable-project-name" value="DrJava Platform-Specific Classes" />
   <property name="svn-repository" value="https://svn.sourceforge.net/svnroot/drjava" />
 
@@ -42,7 +44,26 @@
   <property name="openjdk6-home" value="${env.OPENJDK6_HOME}" />
   <property name="mint-home" value="${env.MINT_HOME}" />
   <property name="nextgen-home" value="${env.NGC_HOME}" />
-  <property name="hj-home" value="${env.HJ_HOME}" />
+
+  <if>
+        <equals arg1="${env.HJ_HOME}" arg2=""/>
+        <then>
+        	  <property name="hj-home" value="${env.HJ_HOME}" />
+        </then>
+        <else>
+            <property name="hj-home" value="${basedir}/../misc/drjava-hj/input"/>
+        </else>
+  </if>
+
+  <if>
+        <equals arg1="${env.SCALA_HOME}" arg2=""/>
+        <then>
+        	  <property name="scala-home" value="${env.ANT_SCALA_HOME}" />
+        </then>
+        <else>
+            <property name="scala-home" value="${basedir}/../misc/drscala/lib"/>
+        </else>
+  </if>
   
   <property name="is-development" value="yes" /> <!-- Development or stable release -->
   <property name="tag-append" value="" /> <!-- "stable", "beta", or none -->
@@ -221,6 +242,16 @@
       <param name="source-version" value="1.5" />
       <param name="runtime-jar" value="${java5-runtime}" />
       <param name="extra-classpath" value="${hj-tools}:${hj-home}/lib/sootclasses-2.3.0.jar:${hj-home}/lib/polyglot.jar:${hj-home}/lib/hjc.jar" />
+    </antcall>
+  </target>
+
+  <target name="compile-scala" depends="resolve-java7-runtime, resolve-scala-tools" 
+          description="Compile the 'scala' sources">
+    <antcall target="do-compile">
+      <param name="platform-tag" value="scala" />
+      <param name="source-version" value="1.7" />
+      <param name="runtime-jar" value="${java7-runtime}" />
+      <param name="extra-classpath" value="${scala-home}/scala-compiler.jar:${scala-home}/scala-library.jar:${basedir}/../drjava/drjava.jar" />
     </antcall>
   </target>
 
@@ -405,10 +436,19 @@
   </target>
 
   <target name="test-hj" depends="compile-hj,  resolve-hj-tools" 
-          description="Run all 'mint' tests (after compiling); use -Dtest-spec=... to filter">
+          description="Run all 'hj' tests (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
       <param name="platform-tag" value="hj" />
       <param name="extra-classpath" value="${hj-tools}" />
+      <param name="test-jvm" value="" />
+    </antcall>
+  </target>
+
+  <target name="test-scala" depends="compile-scala,  resolve-scala-tools" 
+          description="Run all 'scala' tests (after compiling); use -Dtest-spec=... to filter">
+    <antcall target="iterate-tests">
+      <param name="platform-tag" value="scala" />
+      <param name="extra-classpath" value="${scala-tools}" />
       <param name="test-jvm" value="" />
     </antcall>
   </target>
@@ -578,6 +618,7 @@
       <fileset dir="classes/base-mint" />
       <fileset dir="classes/base-nextgen" />
       <fileset dir="classes/base-hj" />
+      <fileset dir="classes/base-scala" />
       <fileset dir="classes/base-eclipse" />
       <fileset dir="classes/base-mac" />
       <fileset dir="classes/base-windows" />
@@ -599,6 +640,7 @@
       <fileset dir="classes/base-mint" />
       <fileset dir="classes/base-nextgen" />
       <fileset dir="classes/base-hj" />
+      <fileset dir="classes/base-scala" />
       <fileset dir="classes/base-eclipse" />
       <fileset dir="classes/base-mac" />
       <fileset dir="classes/base-windows" />
@@ -1132,19 +1174,33 @@
     <property name="nextgen-tools-3" location="${nextgen-home}/built" />
     <available property="nextgen-tools" value="${nextgen-tools-3}" file="${nextgen-tools-3}/edu/rice/cs/nextgen2/compiler/Main.class" />
 
-    <fail message="Can't find nextgen2.jar in the Nextgen home: ${nextgen-home}" unless="nextgen-tools" />
+    <fail message="Can't find nextgen.jar, nextgen2.jar in the Nextgen home: ${nextgen-home}" unless="nextgen-tools" />
   </target>
 
   <target name="resolve-hj-tools">
     <!-- We rely on "location" to generate a platform-specific path; note that properties
          are immutable and so hj-tools will only be set the *first* time. -->
 
+    <echo message="putative location of hj.jar is ${hj-home}/lib/hj.jar" />
     <property name="hj-tools-1" location="${hj-home}/lib/hj.jar" />
     <available property="hj-tools" value="${hj-tools-1}" file="${hj-tools-1}" />
 
     <fail message="Can't find hj.jar in the hj home: ${hj-home}" unless="hj-tools" />
   </target>
-  
+
+  <target name="resolve-scala-tools">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so scala-tools will only be set the *first* time. -->
+    <echo message="scala-home = ${scala-home}" />
+    <property name="scala-tools-1" location="${scala-home}/scala-compiler.jar" />
+    <available property="scala-tools" value="${scala-tools-1}" file="${scala-tools-1}" />
+    <echo message="scala-tools-1=${scala-tools-1}  scala-tools=${scala-tools}" />
+<!--    <property name="scala-tools-2" location="${scala-home}/scala-library.jar" />
+    <available property="scala-tools" value="${scala-tools-2}" file="${scala-tools-2}" /> -->
+
+    <fail message="Can't find scala-compiler.jar in the scala home: ${scala-home}" unless="scala-tools" />
+  </target>
+
   <target name="assert-jar-exists">
     <available property="jar-exists" file="${ant.project.name}.jar" />
     <fail message="Can't find ${ant.project.name}.jar" unless="jar-exists" />
