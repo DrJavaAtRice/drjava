@@ -194,8 +194,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _debugger = null;
     _javadocModel = null;
     for (JDKToolsLibrary t : tools) {
-      // only add compiler if it supports JAVA_5
-      if (t.compiler().isAvailable() && t.version().supports(JavaVersion.JAVA_5)) {
+      // drop check for support of JAVA_5; Scala compilers do NOT
+      if (t.compiler().isAvailable() /* && t.version().supports(JavaVersion.JAVA_5) */) {
           compilers.add(t.compiler());
       }
       if (_debugger == null && t.debugger().isAvailable()) { _debugger = t.debugger(); }
@@ -375,6 +375,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       else { JarJDKToolsLibrary.msg("\tduplicate"); }
     }
     
+    Utilities.show("compiler results = " + results.values());
     return IterUtil.reverse(results.values());
   }
   
