@@ -77,6 +77,8 @@ import edu.rice.cs.drjava.model.javadoc.DefaultJavadocModel;
 import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
 import edu.rice.cs.drjava.model.JDKDescriptor;
 
+import edu.rice.cs.util.swing.Utilities;
+
 /** A JDKToolsLibrary that was loaded from a specific jar file. */
 public class JarJDKToolsLibrary extends JDKToolsLibrary {
   
@@ -467,11 +469,13 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         assert desc != null;
 
         boolean containsCompiler = desc.containsCompiler(jar.getKey());
+        Utilities.show("Checking file " + jar.getKey() + " for " + desc);
         JDKToolsLibrary.msg("Checking file "+jar.getKey()+" for "+desc);
         JDKToolsLibrary.msg("    "+containsCompiler);
         if (!containsCompiler) continue;
 
         JarJDKToolsLibrary lib = makeFromFile(jar.getKey(), model, desc);
+        Utilities.show("Is file " + lib + " valid?  "  + lib.isValid());
         if (lib.isValid()) {
           FullVersion v = lib.version();
           Map<FullVersion, Iterable<JarJDKToolsLibrary>> mapToAddTo = results;
@@ -583,6 +587,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     
     // search for jar files in roots and, if found, transfer them to the jars collection
     searchRootsForJars(roots, jars);
+    
+    Utilities.show("jars list in JarJDKToolsLibrary is: " + jars);
 
     // check which jars are valid JDKs, and determine if they are compound or full (non-compound) JDKs
     Map<FullVersion, Iterable<JarJDKToolsLibrary>> results = 

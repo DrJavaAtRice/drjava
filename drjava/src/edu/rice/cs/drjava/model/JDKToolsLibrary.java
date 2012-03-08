@@ -50,6 +50,7 @@ import edu.rice.cs.plt.object.ObjectUtil;
 
 import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
+import edu.rice.cs.drjava.model.compiler.ScalaCompiler;
 import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
 import edu.rice.cs.drjava.model.javadoc.JavadocModel;
@@ -93,7 +94,9 @@ public class JDKToolsLibrary {
   public JavadocModel javadoc() { return _javadoc; }
   
   public boolean isValid() {
-    return _compiler.isAvailable() || _debugger.isAvailable() || _javadoc.isAvailable();
+    return 
+      _compiler instanceof ScalaCompiler ||  /* This is an ugly hack.  TODO: refactor compiler adapters framework */
+      _compiler.isAvailable() || _debugger.isAvailable() || _javadoc.isAvailable();
   }
   
   public String toString() { return _jdkDescriptor.getDescription(_version); }
@@ -175,7 +178,7 @@ public class JDKToolsLibrary {
 
     List<JDKToolsLibrary> list = new ArrayList<JDKToolsLibrary>();
     
-    if (compiler!=NoCompilerAvailable.ONLY) {
+    if (compiler != NoCompilerAvailable.ONLY) {
       // if we have found a compiler, add it
       msg("                 compiler found");
       list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, compiler, debugger, javadoc));
@@ -196,13 +199,13 @@ public class JDKToolsLibrary {
   protected static final java.io.PrintWriter LOG_PW = new java.io.PrintWriter(LOG_STRINGWRITER);
   
   public static void msg(String s) {   
-//    try {   
-//      java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(new File(new File(System.getProperty("user.home")),   
-//                                                                                       "mintcompiler.txt").getAbsolutePath(),true));   
-//      pw.println(s);
+    try {   
+      java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(new File(new File(System.getProperty("user.home")),   
+                                                                                       "scalacompiler.txt").getAbsolutePath(),true));   
+      pw.println(s);
       LOG_PW.println(s);
-//      pw.close();   
-//    }   
-//    catch(java.io.IOException ioe) { }   
+      pw.close();   
+    }   
+    catch(java.io.IOException ioe) { }   
   }
 }

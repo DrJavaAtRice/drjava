@@ -39,10 +39,14 @@ package edu.rice.cs.drjava.model.compiler.descriptors;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Set;
-import java.util.HashSet;
+
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.jar.Attributes;
 import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 import edu.rice.cs.drjava.model.JDKDescriptor;
 import edu.rice.cs.drjava.model.JDKToolsLibrary;
@@ -98,9 +102,31 @@ public class ScalaDescriptor extends JDKDescriptor {
     }
     catch(Exception e) { /* ignore SCALA_HOME variable */ }
     
+//    try {
+//      // Open the JAR file
+//      JarFile jarfile = new JarFile("/C:/Scala/scala-2.9.1.final/lib/scala-compiler.jar");
+//      
+//      // Get the manifest
+//      Manifest manifest = jarfile.getManifest();
+//      
+//      // Get the main attributes in the manifest
+//      Attributes attrs = (Attributes)manifest.getMainAttributes();
+//      
+//      // Enumerate each attribute
+//      for (Iterator it=attrs.keySet().iterator(); it.hasNext(); ) {
+//        // Get attribute name
+//        Attributes.Name attrName = (Attributes.Name)it.next();
+//        
+//        // Get attribute value
+//        String attrValue = attrs.getValue(attrName);
+//        Utilities.show("getValue() for scala-compiler.jar = " + attrValue);
+//      }
+//    } 
+//    catch (IOException e) { /* ignore */ }
+    
     // drjava.jar file itself; check if it's a combined Scala/DrJava jar
     files = IterUtil.compose(edu.rice.cs.util.FileOps.getDrJavaFile(), files); 
-    Utilities.show("getSearchFiles is returning " + files);
+    Utilities.show("ScalaDescriptor.getSearchFiles is returning " + files);
     return files;
   }
   
