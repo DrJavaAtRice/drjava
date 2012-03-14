@@ -513,19 +513,19 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     
     // now we have the JDK libraries in collapsed and the compound libraries in compoundCollapsed
     for(JarJDKToolsLibrary compoundLib: compoundCollapsed) {
-      JDKToolsLibrary.msg("compoundLib: "+compoundLib);
-      JDKToolsLibrary.msg("    "+compoundLib.location());
+      JDKToolsLibrary.msg("compoundLib: " + compoundLib);
+      JDKToolsLibrary.msg("    " + compoundLib.location());
       FullVersion compoundVersion = compoundLib.version();
       JarJDKToolsLibrary found = null;
       // try to find a JDK in results that matches compoundVersion exactly, except for vendor
       for(JarJDKToolsLibrary javaLib: collapsed) {
-        if (!javaLib.jdkDescriptor().isBaseForCompound()) continue; // javaLib not suitable as base
-        JDKToolsLibrary.msg("    exact? "+javaLib);
+        if (! javaLib.jdkDescriptor().isBaseForCompound()) continue; // javaLib not suitable as base
+        JDKToolsLibrary.msg("    exact? " + javaLib);
         FullVersion javaVersion = javaLib.version();
         if ((javaVersion.majorVersion().equals(compoundVersion.majorVersion())) &&
-            (javaVersion.maintenance()==compoundVersion.maintenance()) &&
-            (javaVersion.update()==compoundVersion.update()) &&
-            (javaVersion.release()==compoundVersion.release()) &&
+            (javaVersion.maintenance() == compoundVersion.maintenance()) &&
+            (javaVersion.update() == compoundVersion.update()) &&
+            (javaVersion.release() == compoundVersion.release()) &&
             (javaVersion.supports(compoundLib.jdkDescriptor().getMinimumMajorVersion()))) {
           JDKToolsLibrary.msg("        found");
           found = javaLib;
@@ -533,11 +533,13 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         }
       }
       // if we didn't find one, take the best JDK that matches the major version
-      if (found==null) {
-        for(JarJDKToolsLibrary javaLib: collapsed) {
-          if (!javaLib.jdkDescriptor().isBaseForCompound()) continue; // javaLib not suitable as base
-          JDKToolsLibrary.msg("    major? "+javaLib);
+      if (found == null) {
+        for (JarJDKToolsLibrary javaLib: collapsed) {
+          msg("javaLib suitable as base? = " + javaLib.jdkDescriptor().isBaseForCompound());
+          if (! javaLib.jdkDescriptor().isBaseForCompound()) continue; // javaLib not suitable as base
           FullVersion javaVersion = javaLib.version();
+          JDKToolsLibrary.msg("    major? " + javaLib + " javaLib.majorversion = " + javaVersion.majorVersion() + 
+                              " compoundJDK.majorVersion = " + compoundVersion.majorVersion());
           if (javaVersion.majorVersion().equals(compoundVersion.majorVersion()) &&
               javaVersion.supports(compoundLib.jdkDescriptor().getMinimumMajorVersion())) {
             JDKToolsLibrary.msg("        found");
@@ -547,11 +549,11 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         }
       }
       // if we found a JDK, then create a new compound library
-      if (found!=null) {
+      if (found != null) {
         JarJDKToolsLibrary lib = makeFromFile(compoundLib.location(), model, compoundLib.jdkDescriptor(),
                                               found.bootClassPath());
         if (lib.isValid()) {
-          JDKToolsLibrary.msg("    ==> "+lib.version());
+          JDKToolsLibrary.msg("    ==> " + lib.version());
           FullVersion v = lib.version();
           if (completedResults.containsKey(v)) {
             completedResults.put(v, IterUtil.compose(lib, completedResults.get(v)));
@@ -619,7 +621,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     Iterable<JarJDKToolsLibrary> result = IterUtil.
       compose(collapsed,IterUtil.reverse(IterUtil.collapse(completedResults.values())));
     for(JarJDKToolsLibrary lib: result) {
-      JDKToolsLibrary.msg("Found library: "+lib);
+      JDKToolsLibrary.msg("Found library: " + lib);
     }
     
     return result;

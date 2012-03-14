@@ -47,6 +47,7 @@ public enum JavaVersion {
   JAVA_5 { public String versionString() { return "5"; } },
   JAVA_6 { public String versionString() { return "6"; } },
   JAVA_7 { public String versionString() { return "7"; } },
+  SCALA { public String versionString() { return "7"; } },
   FUTURE { public String versionString() { return ">7"; } };
   
   /**
@@ -81,17 +82,16 @@ public enum JavaVersion {
     return new FullVersion(this, 0, 0, ReleaseType.STABLE, null, VendorType.UNKNOWN, "", null);
   }
   
-  /**
-   * Produce the {@code JavaVersion} corresponding to the given class version string.  For example,
-   * {@code "49.0"} maps to {@code JAVA_5}.  If the text cannot be parsed, {@code UNRECOGNIZED} will be
-   * returned.
-   */
+  /** Produce the {@code JavaVersion} corresponding to the given class version string.  For example,
+    * {@code "49.0"} maps to {@code JAVA_5}.  If the text cannot be parsed, {@code UNRECOGNIZED} will be
+    * returned.
+    */
   public static JavaVersion parseClassVersion(String text) {
     int dot = text.indexOf('.');
     if (dot == -1) { return UNRECOGNIZED; }
     try {
       int major = Integer.parseInt(text.substring(0, dot));
-      int minor = Integer.parseInt(text.substring(dot+1));
+      int minor = Integer.parseInt(text.substring(dot + 1));
       
       return parseClassVersion(major, minor);
     }

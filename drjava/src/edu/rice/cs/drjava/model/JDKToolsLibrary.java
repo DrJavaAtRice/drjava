@@ -150,8 +150,8 @@ public class JDKToolsLibrary {
   }
   
   /** Create a JDKToolsLibrary from the runtime class path (or, more accurately, from the class
-   * loader that loaded this class.
-   */
+    * loader that loaded this class.
+    */
   public static Iterable<JDKToolsLibrary> makeFromRuntime(GlobalModel model) {
     FullVersion version = JavaVersion.CURRENT_FULL;
 
