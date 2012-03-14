@@ -375,7 +375,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       else { JarJDKToolsLibrary.msg("\tduplicate"); }
     }
     
-    Utilities.show("compiler results = " + results.values());
+    JarJDKToolsLibrary.msg("compiler results = " + results.values());
     return IterUtil.reverse(results.values());
   }
   

@@ -91,7 +91,7 @@ public class Utilities {
     assert ! EventQueue.isDispatchThread();
     final EventQueue q = Toolkit.getDefaultToolkit().getSystemEventQueue();
     do {
-      // it is an error to be in the event queue, so Utilties.invokeAndWait shouldn't be used
+      // it is an error to be in the event queue, so Utilities.invokeAndWait shouldn't be used
       try { EventQueue.invokeAndWait(LambdaUtil.NO_OP); }
       catch (Exception e) { throw new UnexpectedException(e); }
     } while (newEvents && (null != q.peekEvent()));

@@ -128,8 +128,7 @@ public class DefaultCompilerModel implements CompilerModel {
     _compilerErrorModel = new CompilerErrorModel(new DJError[0], _model);
     _LLSTM = new LanguageLevelStackTraceMapper(_model);
   }
-  
-  
+   
   //--------------------------------- Locking -------------------------------//
   
   /** Returns the lock used to prevent simultaneous compilation and JUnit testing */

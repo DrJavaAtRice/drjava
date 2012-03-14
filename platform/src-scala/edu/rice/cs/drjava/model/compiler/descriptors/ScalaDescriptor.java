@@ -126,7 +126,7 @@ public class ScalaDescriptor extends JDKDescriptor {
     
     // drjava.jar file itself; check if it's a combined Scala/DrJava jar
     files = IterUtil.compose(edu.rice.cs.util.FileOps.getDrJavaFile(), files); 
-    Utilities.show("ScalaDescriptor.getSearchFiles is returning " + files);
+    JDKToolsLibrary.msg("ScalaDescriptor.getSearchFiles is returning " + files);
     return files;
   }
   
@@ -149,7 +149,7 @@ public class ScalaDescriptor extends JDKDescriptor {
     * if a version of the HJ compiler requires JDK6, it should guess JDK6.
     * @return guessed version */
   public JavaVersion.FullVersion guessVersion(File f) {
-      return JavaVersion.parseFullVersion(JavaVersion.JAVA_7.fullVersion().versionString(),
+      return JavaVersion.parseFullVersion(JavaVersion.JAVA_7.fullVersion().versionString(), /* TODO: add SCALA to ENUM definition */
                                           "Java PLT Research Group",
                                           "Java PLT Research Group",
                                           f);
@@ -188,5 +188,5 @@ public class ScalaDescriptor extends JDKDescriptor {
     }
   }
   
-  public String toString() { return getClass().getSimpleName()+" --> "+getAdapterForCompiler(); }
+  public String toString() { return getClass().getSimpleName() + " --> " + getAdapterForCompiler(); }
 }

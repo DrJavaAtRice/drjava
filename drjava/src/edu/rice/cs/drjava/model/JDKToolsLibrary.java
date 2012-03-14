@@ -94,15 +94,18 @@ public class JDKToolsLibrary {
   public JavadocModel javadoc() { return _javadoc; }
   
   public boolean isValid() {
-    return 
+    boolean result =
       _compiler instanceof ScalaCompiler ||  /* This is an ugly hack.  TODO: refactor compiler adapters framework */
       _compiler.isAvailable() || _debugger.isAvailable() || _javadoc.isAvailable();
+    JDKToolsLibrary.msg("Invoking isValid() for " + _compiler.getClass() + " returned " + result);
+    return result;
   }
   
   public String toString() { return _jdkDescriptor.getDescription(_version); }
   
   public static String adapterForCompiler(JavaVersion.FullVersion version) {
     switch (version.majorVersion()) {
+      case FUTURE: return "edu.rice.cs.drjava.model.compiler.ScalaCompiler";
       case JAVA_7: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
       case JAVA_6: {
         switch (version.vendor()) {
@@ -125,7 +128,9 @@ public class JDKToolsLibrary {
     }
   }
 
+  /** Only called in making compilers from runtime? */
   protected static CompilerInterface getCompilerInterface(String className, FullVersion version) {
+    msg("JDKToolsLibrary.getCompilerInterface(" + className + ", " + version + ") called");
     if (className != null) {
       List<File> bootClassPath = null;
       String bootProp = System.getProperty("sun.boot.class.path");
@@ -135,7 +140,7 @@ public class JDKToolsLibrary {
         Class<?>[] sig = { FullVersion.class, String.class, List.class };
         Object[] args = { version, "the runtime class path", bootClassPath };
         CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadObject(className, sig, args);
-        msg("                 attempt = "+attempt+", isAvailable() = "+attempt.isAvailable());
+        msg("                 attempt = " + attempt + ", isAvailable() = " + attempt.isAvailable());
         if (attempt.isAvailable()) { return attempt; }
       }
       catch (ReflectException e) { /* can't load */ }
@@ -151,9 +156,9 @@ public class JDKToolsLibrary {
     FullVersion version = JavaVersion.CURRENT_FULL;
 
     String compilerAdapter = adapterForCompiler(version);
-    msg("makeFromRuntime: compilerAdapter="+compilerAdapter);
+    msg("makeFromRuntime: compilerAdapter=" + compilerAdapter);
     CompilerInterface compiler = getCompilerInterface(compilerAdapter, version);
-    msg("                 compiler="+compiler.getClass().getName());
+    msg("                 compiler=" + compiler.getClass().getName());
     
     Debugger debugger = NoDebuggerAvailable.ONLY;
     String debuggerAdapter = adapterForDebugger(version);
@@ -164,8 +169,8 @@ public class JDKToolsLibrary {
         msg("                 debugger="+attempt.getClass().getName());
         if (attempt.isAvailable()) { debugger = attempt; }
       }
-      catch (ReflectException e) { msg("                 no debugger, ReflectException "+e); /* can't load */ }
-      catch (LinkageError e) { msg("                 no debugger, LinkageError "+e);  /* can't load */ }
+      catch (ReflectException e) { msg("                 no debugger, ReflectException " + e); /* can't load */ }
+      catch (LinkageError e) { msg("                 no debugger, LinkageError " + e);  /* can't load */ }
     }
     
     JavadocModel javadoc = new NoJavadocAvailable(model);

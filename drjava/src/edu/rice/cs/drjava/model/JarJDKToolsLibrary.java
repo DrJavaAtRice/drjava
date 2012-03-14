@@ -88,6 +88,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     * least in OS X's classes.jar, can only be loaded by the JVM.)
     */
   private static final Set<String> TOOLS_PACKAGES = new HashSet<String>();
+  private static final Set<String> SCALA_PACKAGES = new HashSet<String>();
   static {
     Collections.addAll(TOOLS_PACKAGES, new String[] {
       // From 1.4 tools.jar:
@@ -117,7 +118,6 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     });
   }
 
-  
   private final File _location;
   private final List<File> _bootClassPath; // may be null (i.e. compiler's internal behavior)
   
@@ -131,7 +131,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   
   public File location() { return _location; }
   public List<File> bootClassPath() { // may be null
-    if (_bootClassPath!=null) return new ArrayList<File>(_bootClassPath);
+    if (_bootClassPath != null) return new ArrayList<File>(_bootClassPath);
     else return null;
   }
   
@@ -154,8 +154,10 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     JavadocModel javadoc = new NoJavadocAvailable(model);
     
     FullVersion version = desc.guessVersion(f);
-    JDKToolsLibrary.msg("makeFromFile: "+f+" --> "+version+", vendor: "+version.vendor());
-    JDKToolsLibrary.msg("    desc = "+desc);
+    JDKToolsLibrary.msg("makeFromFile: " + f + " --> " + version + ", vendor: " + version.vendor());
+    JDKToolsLibrary.msg("    desc = " + desc);
+    boolean isScala = f.toString().contains("scala-compiler");
+    msg("isScala = " + isScala);
     
     boolean isSupported = JavaVersion.CURRENT.supports(version.majorVersion());
     Iterable<File> additionalCompilerFiles = IterUtil.empty();
@@ -165,23 +167,26 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     isSupported |= JavaVersion.CURRENT.supports(desc.getMinimumMajorVersion());
     try {
       additionalCompilerFiles = desc.getAdditionalCompilerFiles(f);
+      msg("Additional compiler files for " + f + " = " + additionalCompilerFiles);
     }
     catch(FileNotFoundException fnfe) {
       // not all additional compiler files were found
       isSupported = false;
     }
-    
+//    msg("additionalCompilerFiles = " + additionalCompilerFiles);
     // We can't execute code that was possibly compiled for a later Java API version.
     List<File> bootClassPath = null;
     if (isSupported) {
+      ClassLoader currentLoader = JarJDKToolsLibrary.class.getClassLoader();
       // block tools.jar classes, so that references don't point to a different version of the classes
-      ClassLoader loader =
-        new ShadowingClassLoader(JarJDKToolsLibrary.class.getClassLoader(), true, TOOLS_PACKAGES, true);
+      ClassLoader loader = isScala ? new ShadowingClassLoader(currentLoader, true, SCALA_PACKAGES, true) : 
+        new ShadowingClassLoader(currentLoader, true, TOOLS_PACKAGES, true);
       Iterable<File> path = IterUtil.map(IterUtil.compose(additionalCompilerFiles, f), new Lambda<File,File>() {
         public File value(File arg) { return IOUtil.attemptAbsoluteFile(arg); }
       });
       
       String compilerAdapter = desc.getAdapterForCompiler(version);
+      msg("CREATING COMPILER ADAPTER " + compilerAdapter);
       
       if (compilerAdapter != null) {
         // determine boot class path
@@ -206,44 +211,47 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           if (jars != null) { bootClassPath.addAll(Arrays.asList(jars)); }
         }
         else {
-          // could not determine boot classpath because the file was not named classes.jar or tools.jar
+          // Could not determine boot classpath because the file was not named classes.jar or tools.jar
           // at least put the compiler file itself and the additional compiler files on the boot classpath
           bootClassPath.add(f);
           for(File acf: additionalCompilerFiles) { bootClassPath.add(acf); };
         }
-        if (additionalBootClassPath!=null) { bootClassPath.addAll(additionalBootClassPath); }
+        if (additionalBootClassPath != null) { bootClassPath.addAll(additionalBootClassPath); }
         if (bootClassPath.isEmpty()) { bootClassPath = null; } // null defers to the compiler's default behavior
 
         try {
           Class<?>[] sig = { FullVersion.class, String.class, List.class };
           Object[] args = { version, f.toString(), bootClassPath };
-          // JDKToolsLibrary.msg("classpath for compiler: "+IterUtil.multilineToString(path));
-          // JDKToolsLibrary.msg("boot classpath for compiler: "+IterUtil.multilineToString(bootClassPath));                
-          CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadLibraryAdapter(loader, path, compilerAdapter, 
-                                                                                         sig, args);
+          JDKToolsLibrary.msg("classpath for compiler: " + IterUtil.multilineToString(path));
+          JDKToolsLibrary.msg("boot classpath for compiler: " + IterUtil.multilineToString(bootClassPath));
+          msg("loader = " + loader + "; path = " + path + "; compilerAdapter = " + compilerAdapter + "; sig = " +
+              sig + "; args = " + args);
+          CompilerInterface attempt = 
+            (CompilerInterface) ReflectUtil.loadLibraryAdapter(loader, path, compilerAdapter, sig, args);
+          msg("attempt = " + attempt + ";   availability = " + attempt.isAvailable());
           if (attempt.isAvailable()) { compiler = attempt; }
         }
-        catch (ReflectException e) { /* can't load */ }
-        catch (LinkageError e) { /* can't load */ }
+        catch (ReflectException e) { msg("Class loader threw " + e); /* can't load */ }
+        catch (LinkageError e) { msg("Class loader threw " + e); /* can't load */ }
       }
       
       String debuggerAdapter = desc.getAdapterForDebugger(version);
       String debuggerPackage = "edu.rice.cs.drjava.model.debug.jpda";
       if (debuggerAdapter != null) {
         try {
-          JDKToolsLibrary.msg("                 loading debugger: "+debuggerAdapter);
+          JDKToolsLibrary.msg("                 loading debugger: " + debuggerAdapter);
           Class<?>[] sig = { GlobalModel.class };
           // can't use loadLibraryAdapter because we need to preempt the whole package
           ClassLoader debugLoader = new PreemptingClassLoader(new PathClassLoader(loader, path), debuggerPackage);
           Debugger attempt = (Debugger) ReflectUtil.loadObject(debugLoader, debuggerAdapter, sig, model);        
-          JDKToolsLibrary.msg("                 debugger="+attempt.getClass().getName());
+          JDKToolsLibrary.msg("                 debugger = " + attempt.getClass().getName());
           if (attempt.isAvailable()) { debugger = attempt; }
         }
         catch (ReflectException e) {
-          JDKToolsLibrary.msg("                 no debugger, ReflectException "+e); /* can't load */
+          JDKToolsLibrary.msg("                 no debugger, ReflectException " + e); /* can't load */
         }
         catch (LinkageError e) {
-          JDKToolsLibrary.msg("                 no debugger, LinkageError "+e);  /* can't load */
+          JDKToolsLibrary.msg("                 no debugger, LinkageError " + e);  /* can't load */
         }
       }
       
@@ -341,9 +349,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     }
     
     if ((result == null) || (result.vendor()==JavaVersion.VendorType.UNKNOWN)) {
-      if (!forceUnknown) {
-        if (result.majorVersion().compareTo(JavaVersion.JAVA_6)<0) {
-          // Java 5 or earlier, assume Sun
+      if (! forceUnknown) {
+        if (result.majorVersion().compareTo(JavaVersion.JAVA_6) < 0) {
+          // Java 5, assume Sun
           vendor = "sun";
         }
         else {
@@ -469,13 +477,13 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         assert desc != null;
 
         boolean containsCompiler = desc.containsCompiler(jar.getKey());
-        Utilities.show("Checking file " + jar.getKey() + " for " + desc);
-        JDKToolsLibrary.msg("Checking file "+jar.getKey()+" for "+desc);
-        JDKToolsLibrary.msg("    "+containsCompiler);
-        if (!containsCompiler) continue;
+//        Utilities.show("Checking file " + jar.getKey() + " for " + desc);
+        JDKToolsLibrary.msg("Checking file " + jar.getKey() + " for " + desc);
+        JDKToolsLibrary.msg("    " + containsCompiler);
+        if (! containsCompiler) continue;
 
         JarJDKToolsLibrary lib = makeFromFile(jar.getKey(), model, desc);
-        Utilities.show("Is file " + lib + " valid?  "  + lib.isValid());
+        JDKToolsLibrary.msg("Is file " + lib + " of class " + lib.getClass() + " valid?  "  + lib.isValid());
         if (lib.isValid()) {
           FullVersion v = lib.version();
           Map<FullVersion, Iterable<JarJDKToolsLibrary>> mapToAddTo = results;
@@ -485,8 +493,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           else { mapToAddTo.put(v, IterUtil.singleton(lib)); }
         }
         else {
-          JDKToolsLibrary.msg("    library is not valid: compiler="+lib.compiler().isAvailable()+
-                              " debugger="+lib.debugger().isAvailable()+" javadoc="+lib.javadoc().isAvailable());
+          JDKToolsLibrary.msg("    library is not valid: compiler=" + lib.compiler().isAvailable()+
+                              " debugger=" + lib.debugger().isAvailable() + " javadoc=" + lib.javadoc().isAvailable());
         }
       }
     }
@@ -588,7 +596,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     // search for jar files in roots and, if found, transfer them to the jars collection
     searchRootsForJars(roots, jars);
     
-    Utilities.show("jars list in JarJDKToolsLibrary is: " + jars);
+    JarJDKToolsLibrary.msg("jars list in JarJDKToolsLibrary is: " + jars);
 
     // check which jars are valid JDKs, and determine if they are compound or full (non-compound) JDKs
     Map<FullVersion, Iterable<JarJDKToolsLibrary>> results = 

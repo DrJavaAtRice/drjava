@@ -53,6 +53,7 @@ import javax.tools.ToolProvider;
 
 // DJError class is not in the same package as this
 import edu.rice.cs.drjava.model.DJError;
+import edu.rice.cs.util.swing.Utilities;
 
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.plt.io.IOUtil;
@@ -88,7 +89,7 @@ public class Javac170Compiler extends JavacCompiler { // Javac170FilteringCompil
       // if DrJava is started with just the JRE, instead of with the JDK, even if tools.jar is later made available
       // to the class loader.
       JavaCompiler compiler = (JavaCompiler)(Class.forName("com.sun.tools.javac.api.JavacTool").newInstance());
-      
+//      Utilities.show("isAvailable() for JDK7.0 is returning " + (compiler != null));
       return (compiler != null);
     }
     catch (Exception e) { return false; }
