@@ -283,7 +283,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     do {
       String name = current.getName();
       String path = current.getAbsolutePath();
-      if (!forceUnknown) {
+      if (! forceUnknown) {
         if (path.startsWith("/System/Library/Frameworks/JavaVM.framework")) vendor = "apple";
         else if (path.toLowerCase().contains("openjdk")) vendor = "openjdk";
         else if (path.toLowerCase().contains("sun")) vendor = "sun";
@@ -300,6 +300,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       else if (name.matches("\\d+\\.\\d+\\.\\d+")) {
         result = JavaVersion.parseFullVersion(parsedVersion = name,vendor,vendor,f);
       }
+      else if (name.contains("Scala")) result = JavaVersion.JAVA_7.fullVersion();
+      
       current = current.getParentFile();
     } while (current != null && result == null);
     if (result == null || result.majorVersion().equals(JavaVersion.UNRECOGNIZED) ||
@@ -418,15 +420,19 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     
     if (programFiles != null) {
       addIfDir(new File(programFiles, "Java"), roots);
+      addIfDir(new File(programFiles, "Scala"), roots);
       addIfDir(new File(programFiles), roots);
     }
     addIfDir(new File("/C:/Program Files/Java"), roots);
+    addIfDir(new File("/C:/Program Files/Scala"), roots);
     addIfDir(new File("/C:/Program Files"), roots);
     if (systemDrive != null) {
       addIfDir(new File(systemDrive, "Java"), roots);
+      addIfDir(new File(systemDrive, "Scala"), roots);
       addIfDir(new File(systemDrive), roots);
     }
     addIfDir(new File("/C:/Java"), roots);
+    addIfDir(new File("/C:/Scala"), roots);
     addIfDir(new File("/C:"), roots);
     
     addIfDir(new File("/System/Library/Frameworks/JavaVM.framework/Versions"), roots);
@@ -541,7 +547,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           JDKToolsLibrary.msg("    major? " + javaLib + " javaLib.majorversion = " + javaVersion.majorVersion() + 
                               " compoundJDK.majorVersion = " + compoundVersion.majorVersion());
           if (javaVersion.majorVersion().equals(compoundVersion.majorVersion()) &&
-              javaVersion.supports(compoundLib.jdkDescriptor().getMinimumMajorVersion())) {
+              javaVersion.supports(compoundLib.jdkDescriptor().getMinimumMajorVersion()) ||
+              compoundLib.toString().contains("Scala"))  { // a transparent hack to get Scala past this platform vetting
             JDKToolsLibrary.msg("        found");
             found = javaLib;
             break;

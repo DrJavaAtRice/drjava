@@ -335,14 +335,15 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     // map is sorted by version, lowest-to-highest
     Map<LibraryKey, JDKToolsLibrary> results = new TreeMap<LibraryKey, JDKToolsLibrary>();
     
+    JarJDKToolsLibrary.msg("Creating DefaultGlobalModel; " + JavaVersion.CURRENT + " is running");
     File configTools = DrJava.getConfig().getSetting(JAVAC_LOCATION);
     if (configTools != FileOps.NULL_FILE) {
       JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this, JDKDescriptor.NONE);
       if (fromConfig.isValid()) { 
-        JarJDKToolsLibrary.msg("From config: "+fromConfig);
+        JarJDKToolsLibrary.msg("From config: " + fromConfig);
         results.put(getLibraryKey(LibraryKey.PRIORITY_CONFIG, fromConfig), fromConfig);
       }
-      else { JarJDKToolsLibrary.msg("From config: invalid "+fromConfig); }
+      else { JarJDKToolsLibrary.msg("From config: invalid " + fromConfig); }
     }
     else { JarJDKToolsLibrary.msg("From config: not set"); }
     

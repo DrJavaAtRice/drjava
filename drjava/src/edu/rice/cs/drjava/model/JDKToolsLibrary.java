@@ -205,11 +205,11 @@ public class JDKToolsLibrary {
   
   public static void msg(String s) {   
     try {   
-      java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(new File(new File(System.getProperty("user.home")),   
-                                                                                       "scalacompiler.txt").getAbsolutePath(),true));   
-      pw.println(s);
-      LOG_PW.println(s);
-      pw.close();   
+//      java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(new File(new File(System.getProperty("user.home")),   
+//                                                                                       "scalacompiler.txt").getAbsolutePath(),true));   
+//      pw.println(s);
+//      LOG_PW.println(s);
+//      pw.close();   
     }   
     catch(java.io.IOException ioe) { }   
   }

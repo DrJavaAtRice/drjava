@@ -41,6 +41,7 @@
   
   <property environment="env" />
   <property name="java7-home" value="${env.JAVA7_HOME}" />
+  <echo message="JAVA7_HOME=${java7-home}'"/>
   <property name="java6-home" value="${env.JAVA6_HOME}" />
   <property name="java5-home" value="${env.JAVA5_HOME}" />
   <property name="launch4j-home" value="${env.LAUNCH4J_HOME}" />
@@ -216,7 +217,7 @@
           description="Compile all source files (after generating the source)">
   </target>
   
-  <target name="do-compile" depends="resolve-java5-runtime, resolve-java5-tools">
+  <target name="do-compile" depends="resolve-java7-runtime, resolve-java7-tools">
   
     <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
     
@@ -228,14 +229,14 @@
       <fileset dir="classes/test" includes="**/*" />
     </move>
     
-    <javac srcdir="src" destdir="classes/base" source="1.5" target="1.5"
-           bootclasspath="${java5-runtime}" sourcepath="" includeAntRuntime="no"
+    <javac srcdir="src" destdir="classes/base" source="1.7" target="1.7"
+           bootclasspath="${java7-runtime}" sourcepath="" includeAntRuntime="no"
            executable="javac" fork="yes" memoryMaximumSize="512M"
            debug="on" optimize="off" deprecation="on"	>
       <classpath>
         <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
              debugger code into the "platform" module -->
-        <pathelement location="${java5-tools}" />
+        <pathelement location="${java7-tools}" />
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
@@ -1362,6 +1363,7 @@
     <available property="java7-tools" value="${java7-tools-3}" file="${java7-tools-3}" />
 
     <fail message="Can't find tools.jar in the Java 7 home: ${java7-home}" unless="java7-tools" />
+    <echo message="java7-tools='${java7-tools}'"/>
   </target>
   
   <target name="resolve-java6-tools">
