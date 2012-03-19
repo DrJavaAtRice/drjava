@@ -57,8 +57,8 @@ import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.swing.Utilities;
 
-
 import scala.tools.nsc.Global;
+import scala.tools.nsc.Settings;
 import scala.tools.nsc.io.PlainFile;
 import scala.tools.nsc.io.Path;
 
@@ -254,9 +254,16 @@ public class ScalaCompiler extends Javac160FilteringCompiler {
     /** DrJava error table, which is passed to our compilation reporter and embedded in it. */
     LinkedList<DJError> errors = new LinkedList<DJError>();
     
-    scala.tools.nsc.reporters.Reporter reporter = new DrJavaReporter(errors);
-    Global compiler = new Global(reporter);
+//    Utilities.show("compile command for Scala called");
     
+
+    // Create a Settings object that captures the Java class path as the Scala class path!
+    Settings settings = new Settings();
+    settings.processArgumentString("-usejavacp");
+    scala.tools.nsc.reporters.Reporter reporter = new DrJavaReporter(errors);
+    Global compiler = new Global(settings, reporter);
+    
+//    Utilities.show("Scala compiler object constructed");
     /* Create a run of the Scala compiler. */
     Global.Run run = compiler.new Run();
     
@@ -265,7 +272,6 @@ public class ScalaCompiler extends Javac160FilteringCompiler {
     scala.collection.immutable.List fileObjects =   
       scala.collection.immutable.Nil$.MODULE$;  // the empty list in Scala
     for (File f : files) fileObjects = fileObjects.$colon$colon(new PlainFile(Path.jfile2path(f)));
-    
     try { run.compileFiles(fileObjects); }  // fileObjects has raw type List
     catch(Throwable t) {  // compiler threw an exception/error (typically out of memory error)
       errors.addFirst(new DJError("Compile exception: " + t, false));
@@ -275,99 +281,4 @@ public class ScalaCompiler extends Javac160FilteringCompiler {
 //    debug.logEnd("compile()");
     return errors;
   }
-  
-//  public java.util.List<? extends DJError> compile(java.util.List<? extends File> files,
-//          java.util.List<? extends File> classPath, 
-//          java.util.List<? extends File> sourcePath,
-//          File destination, 
-//          java.util.List<? extends File> bootClassPath,
-//          String sourceVersion,
-//          boolean showWarnings) { 
-//      String s ="";
-//      if (bootClassPath == null) { bootClassPath = _defaultBootClassPath; }
-//
-//      for(File f: bootClassPath) {
-//          s += File.pathSeparator + f.getAbsolutePath();
-//      }
-//      if (s.length()>0) { s = s.substring(1); }
-//
-//      List<String> testCommand = new ArrayList<String>();
-//
-//       Handling Scala options 
-//      for (String optName : CompilerOptions.getScalaOptions().keySet()) {
-//          testCommand.add(optName);
-//      }
-//      testCommand.add("-rt");
-//      testCommand.add(CompilerOptions.selectedHjRuntime());
-//      testCommand.add("-sp");
-//      int spIndex = testCommand.size();
-//      testCommand.add("<sp filled in here>");
-//      testCommand.add("-cp");
-//      testCommand.add(s);
-//      testCommand.add("-d");
-//      int destIndex = testCommand.size();
-//      if (destination != null) {
-//          testCommand.add(destination.getAbsolutePath());
-//      }
-//      else {
-//          testCommand.add("<dest dir filled in here>");
-//      }
-//      testCommand.add("-w");
-//      testCommand.add("-pp");
-//       System.out.println(testCommand);
-//      int sourceFileIndex = testCommand.size();
-//      testCommand.add("<source file filled in here>");
-//
-//      List<DJError> djErrors = new LinkedList<DJError>();
-//
-//      for(File next: files) {
-//          testCommand.set(spIndex, next.getParentFile().getAbsolutePath());
-//          if (destination == null) {
-//              testCommand.set(destIndex, next.getParentFile().getAbsolutePath());
-//          }
-//          testCommand.set(sourceFileIndex, next.getName());
-//          int retCode = -1;
-//          try {
-//              retCode = soot.hj.HjSootMain.mainEntryNoReset(testCommand.toArray(new String[testCommand.size()])); 
-//          } catch(Throwable t) {
-//              djErrors.add(new DJError(t.getMessage(), false));
-//          }
-//
-//          if (retCode != soot.CompilationDeathException.COMPILATION_SUCCEEDED) {
-//              // collect errors
-//              collectCompilationErrors(djErrors);          
-//          }
-//          // reset soot data-structures and co for a new compilation
-//          soot.hj.HjSootMain.reset();
-//      }
-//      return djErrors;
-//  }
-
-//  private void collectCompilationErrors(List<DJError> djErrors) {
-//      soot.javaToJimple.InitialResolver resolver = soot.javaToJimple.InitialResolver.v();
-//      soot.hj.HjToJimple.HJErrorQueue errorQueue = ((soot.hj.HjToJimple.HjInitialResolver) resolver).getErrorQueue();
-//      List<polyglot.util.ErrorInfo> errors = errorQueue.getErrorList();
-//      if(errorQueue != null) {
-//          DJError djError = null;
-//          if (errors.isEmpty()) {
-//              // There's been an error but it is not in the error list
-//              // Add a dummy error to notice the user to check the DrHJ console
-//              djError = new DJError("Internal error in hjc, check the console for error", false);
-//              djErrors.add(djError);
-//          } else {
-//              for(polyglot.util.ErrorInfo error : errors) {
-//                  polyglot.util.Position pos = error.getPosition();
-//                  boolean isWarning = (error.getErrorKind() == error.WARNING);
-//                  if (pos != null) {
-//                      djError = new DJError(new File(pos.file()), pos.line() -1, pos.column(), 
-//                              error.getMessage(), isWarning);              
-//                  } else {
-//                      djError = new DJError(error.getMessage(), isWarning);              
-//                  }
-//                  djErrors.add(djError);
-//              }
-//          }
-//      }
-//  }
-  //////////////////////////////////////////////////////////////
 }

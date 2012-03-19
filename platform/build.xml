@@ -45,6 +45,7 @@
   <property name="mint-home" value="${env.MINT_HOME}" />
   <property name="nextgen-home" value="${env.NGC_HOME}" />
 
+<!--  HJ stuff is irrelevant in scala branch 
   <if>
         <equals arg1="${env.HJ_HOME}" arg2=""/>
         <then>
@@ -54,7 +55,7 @@
             <property name="hj-home" value="${basedir}/../misc/drjava-hj/input"/>
         </else>
   </if>
-
+-->
   <if>
         <equals arg1="${env.SCALA_HOME}" arg2=""/>
         <then>
@@ -251,7 +252,8 @@
       <param name="platform-tag" value="scala" />
       <param name="source-version" value="1.7" />
       <param name="runtime-jar" value="${java7-runtime}" />
-      <param name="extra-classpath" value="${scala-home}/scala-compiler.jar:${scala-home}/scala-library.jar:${basedir}/../drjava/drjava.jar" />
+<!--      <param name="extra-classpath" value="${scala-home}/scala-compiler.jar:${scala-home}/scala-library.jar:${basedir}/../drjava/drjava.jar" />  Note that the foolowing depends on scala.jar in lib directory of this branch's drjava tree -->
+      <param name="extra-classpath" value="${basedir}/../drjava/lib/scala.jar:${basedir}/../drjava/drjava.jar" />
     </antcall>
   </target>
 
