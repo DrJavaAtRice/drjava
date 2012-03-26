@@ -112,6 +112,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   /** Remote reference to the MainJVM class in DrJava's primary JVM.  Assigned ONLY once. */
   private volatile MainJVMRemoteI _mainJVM;
   
+  private boolean scalaInterpreterStarted = false;
+
+
   /** Private constructor; use the singleton ONLY instance. */
   private InterpreterJVM() {
     super("Reset Interactions Thread", "Poll DrJava Thread");
@@ -125,13 +128,16 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     
     // _interpreterOptions = Options.DEFAULT;
     _interpreterOptions = new InteractionsPaneOptions();
-    _defaultInterpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
+
+    //_defaultInterpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
+    _defaultInterpreter = new Interpreter();
+
     _interpreters = new HashMap<String,Interpreter>();
     _busyInterpreters = new HashSet<Interpreter>();
 //    _environments = new HashMap<String, Pair<TypeContext, RuntimeBindings>>();
     _activeInterpreter = Pair.make("", _defaultInterpreter);
   }
-  
+ 
   /** Actions to perform when this JVM is started (through its superclass, AbstractSlaveJVM). Not synchronized
     * because "this" is not initialized for general access until this method has run. */
   protected void handleStart(MasterRemote mainJVM) {
@@ -171,6 +177,11 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       }
     }));
     
+    if (_defaultInterpreter == null)
+      System.out.println("_defaultInterpreter is not yet fully initialized when handleStart is called in the InterpreterJVM instance?");
+    else 
+      _defaultInterpreter.start();
+
     /* On Windows, any frame or dialog opened from Interactions pane will appear *behind* DrJava's frame, unless a 
      * previous frame or dialog is shown here.  Not sure what the difference is, but this hack seems to work.  (I'd
      * be happy to find a better solution, though.)  Only necessary on Windows, since frames and dialogs on other 
@@ -241,40 +252,58 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     
     // set the thread context class loader, this way NextGen and Mint can use the interpreter's class loader
     Thread.currentThread().setContextClassLoader(_interpreterLoader);  // _interpreterLoader is final
-    
-    Option<Object> result = null;
+
+//    Option<Object> result = null;
+    String result = null;
     try { result = interpreter.interpret(input); }
-    catch (InterpreterException e) { debug.logEnd(); return InterpretResult.exception(e); }
-    catch (Throwable e) { debug.logEnd(); return InterpretResult.unexpectedException(e); }
+    catch (InterpreterException e) {
+
+      // DEBUGGING PRINTLINE
+      System.out.println(e);
+      // DEBUGGING PRINTLINE
+      
+      debug.logEnd(); return InterpretResult.exception(e);
+    }
+    catch (Throwable e) {
+      
+      // DEBUGGING PRINTLINE
+      System.out.println(e);
+      // DEBUGGING PRINTLINE
+      
+       debug.logEnd(); return InterpretResult.unexpectedException(e);
+    }
     finally { removeBusyInterpreter(interpreter); }
-    
-    return result.apply(new OptionVisitor<Object, InterpretResult>() {
-      public InterpretResult forNone() { return InterpretResult.noValue(); }
-      public InterpretResult forSome(Object obj) {
-        if (obj instanceof String) { debug.logEnd(); return InterpretResult.stringValue((String) obj); }
-        else if (obj instanceof Character) { debug.logEnd(); return InterpretResult.charValue((Character) obj); }
-        else if (obj instanceof Number) { debug.logEnd(); return InterpretResult.numberValue((Number) obj); }
-        else if (obj instanceof Boolean) { debug.logEnd(); return InterpretResult.booleanValue((Boolean) obj); }
-        else {
-          try {
-            String resultString = TextUtil.toString(obj);
-            String resultTypeStr = null;
-            if (obj!=null) {
-                Class<?> c = obj.getClass();
-                resultTypeStr = getClassName(c);
-            }
-            debug.logEnd();
-            return InterpretResult.objectValue(resultString,resultTypeStr);
-          }
-          catch (Throwable t) {
-            // an exception occurred during toString
-            debug.logEnd(); 
-            return InterpretResult.exception(new EvaluatorException(t));
-          }
-        }
-      }
-    });
+
+    return InterpretResult.objectValue(result,getClassName(String.class));
   }
+
+//    return result.apply(new OptionVisitor<Object, InterpretResult>() {
+//      public InterpretResult forNone() { return InterpretResult.noValue(); }
+//      public InterpretResult forSome(Object obj) {
+//        if (obj instanceof String) { debug.logEnd(); return InterpretResult.stringValue((String) obj); }
+//        else if (obj instanceof Character) { debug.logEnd(); return InterpretResult.charValue((Character) obj); }
+//        else if (obj instanceof Number) { debug.logEnd(); return InterpretResult.numberValue((Number) obj); }
+//        else if (obj instanceof Boolean) { debug.logEnd(); return InterpretResult.booleanValue((Boolean) obj); }
+//        else {
+//          try {
+//            String resultString = TextUtil.toString(obj);
+//            String resultTypeStr = null;
+//            if (obj!=null) {
+//                Class<?> c = obj.getClass();
+//                resultTypeStr = getClassName(c);
+//            }
+//            debug.logEnd();
+//            return InterpretResult.objectValue(resultString,resultTypeStr);
+//          }
+//          catch (Throwable t) {
+//            // an exception occurred during toString
+//            debug.logEnd(); 
+//            return InterpretResult.exception(new EvaluatorException(t));
+//          }
+//        }
+//      }
+//    });
+//  }
   
   /** Gets the value of the variable with the given name in the current interpreter.
     * Invoked reflectively by the debugger.  To simplify the inter-process exchange,
@@ -606,5 +635,4 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     // need to make a serializable snapshot
     return IterUtil.snapshot(_classPathManager.getClassPath());
   }
-  
 }
