@@ -62,7 +62,7 @@
         	  <property name="scala-home" value="${env.ANT_SCALA_HOME}" />
         </then>
         <else>
-            <property name="scala-home" value="${basedir}/../misc/drscala/lib"/>
+            <property name="scala-home" value="${env.SCALA_HOME}" />
         </else>
   </if>
   
@@ -247,14 +247,17 @@
   </target>
 
   <target name="compile-scala" depends="resolve-java7-runtime, resolve-scala-tools" 
-          description="Compile the 'scala' sources">
+          description="Compile the 'scala-specific' sources">
+    <echo message="scala-home = ${scala-home}"/>
+    <echo message="extra-classpath = ${scala-tools}" />
     <antcall target="do-compile">
       <param name="platform-tag" value="scala" />
       <param name="source-version" value="1.7" />
       <param name="runtime-jar" value="${java7-runtime}" />
 <!--      <param name="extra-classpath" value="${scala-home}/scala-compiler.jar:${scala-home}/scala-library.jar:${basedir}/../drjava/drjava.jar" />  Note that the foolowing depends on scala.jar in lib directory of this branch's drjava tree -->
-      <param name="extra-classpath" value="${basedir}/../drjava/lib/scala.jar:${basedir}/../drjava/drjava.jar" />
+      <param name="extra-classpath" value="${scala-tools}" />
     </antcall>
+
   </target>
 
   <target name="compile-eclipse" depends="resolve-java6-runtime, resolve-java6-tools, unjar-libs" 
@@ -1191,16 +1194,10 @@
   </target>
 
   <target name="resolve-scala-tools">
-    <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so scala-tools will only be set the *first* time. -->
+    <!-- scala-tools is the path to our monolithic scala jar. -->
     <echo message="scala-home = ${scala-home}" />
-    <property name="scala-tools-1" location="${scala-home}/scala-compiler.jar" />
-    <available property="scala-tools" value="${scala-tools-1}" file="${scala-tools-1}" />
-    <echo message="scala-tools-1=${scala-tools-1}  scala-tools=${scala-tools}" />
-<!--    <property name="scala-tools-2" location="${scala-home}/scala-library.jar" />
-    <available property="scala-tools" value="${scala-tools-2}" file="${scala-tools-2}" /> -->
-
-    <fail message="Can't find scala-compiler.jar in the scala home: ${scala-home}" unless="scala-tools" />
+    <property name="scala-tools" value="${scala-home}/lib/scala.jar" />
+    <echo message="scala-tools = ${scala-tools}" />
   </target>
 
   <target name="assert-jar-exists">

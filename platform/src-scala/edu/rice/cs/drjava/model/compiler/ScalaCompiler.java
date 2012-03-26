@@ -51,7 +51,8 @@ import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.JDKDescriptor;
 import edu.rice.cs.drjava.model.JDKDescriptor.Util;
 import edu.rice.cs.drjava.model.JDKToolsLibrary;
-import edu.rice.cs.drjava.model.compiler.JavacCompiler;
+import edu.rice.cs.drjava.model.compiler.Javac160FilteringCompiler;
+import edu.rice.cs.drjava.model.compiler.ScalaCompilerInterface;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.FileOps;
@@ -63,17 +64,27 @@ import scala.tools.nsc.io.PlainFile;
 import scala.tools.nsc.io.Path;
 
 /** An implementation of JavacCompiler that supports compiling with the Scala 2.9.x compiler based on Java 1.7.0.
-  * Must be compiled using javac 1.7.0 and with Scala compiler jar on the boot classpath.
+  * Must be compiled using javac 1.7.0 and with Scala compiler jar on the boot classpath.  The class 
+  * Javac160FilteringCompiler filters .exe files out of the class path because the JVM does not recognize such files
+  * on its classpath after early builds of Java 6.
   *
   *  @version $Id$
   */
-public class ScalaCompiler extends Javac160FilteringCompiler { 
+public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCompilerInterface {
+  
+  private File _outputDir = null;
+    
   public ScalaCompiler(JavaVersion.FullVersion version, String location, java.util.List<? extends File> defaultBootClassPath) {
     super(version, location, defaultBootClassPath);
   }
   
   public String getName() { return "Scala " + scala.tools.nsc.Properties.versionString(); }  // Properties$.MODULE$.versionString()
   
+  /** returns the output directory for the Scala compiler.  This method is not an override! */
+  public File getOutputDir() { return _outputDir; }
+  /** sets the output directory for the Scala compiler. */
+  public void setOutputDir(File f) { _outputDir = f; }
+   
   /** A compiler can instruct DrJava to include additional elements for the boot class path of the Interactions JVM. 
     * This feature is necessary for the Scala compiler, since the Scala interpreter needs to be invoked at runtime. */
   public java.util.List<File> additionalBootClassPathForInteractions() {
@@ -99,51 +110,17 @@ public class ScalaCompiler extends Javac160FilteringCompiler {
   }
   
   /** Transform the command line to be interpreted into something the Interactions JVM can use.
-    * This replaces "java MyClass a b c" with Java code to call MyClass.main(new String[]{"a","b","c"}).
+    * This replaces "scala MyClass a b c" with Java code to call MyClass.main(new String[]{"a","b","c"}).
     * "import MyClass" is not handled here.
     * @param interactionsString unprocessed command line
     * @return command line with commands transformed */
   public String transformCommands(String interactionsString) {
-//    // System.out.println(interactionsString);
-//    if (interactionsString.startsWith("scala ")){
-//      interactionsString = interactionsString.replace("hj ", "hj hj.lang.Runtime ");
-//      interactionsString = transformHJCommand(interactionsString);
-//      // System.out.println(interactionsString);
-//    }
-//    if (interactionsString.startsWith("java "))  {
-//      interactionsString = interactionsString.replace("java ", "java hj.lang.Runtime ");
-//      interactionsString = transformHJCommand(interactionsString);
-//    }
-    
-    if (interactionsString.startsWith("run "))  {
-      interactionsString = interactionsString.replace("run ", "scala ");
-//      interactionsString = transformHJCommand(interactionsString);
-      // System.out.println(interactionsString);
+    // System.out.println(interactionsString);
+    if (interactionsString.startsWith("scala ")) {
+      interactionsString = interactionsString.replace("scala ", "java ");
     }
-    
-    return interactionsString;
+   return super.transformCommands(interactionsString);
   }
-    
-//  public static String transformHJCommand(String s) {
-//    String HJcommand = "hj.lang.Runtime.mainEntryWithRetCode(new String[]{" +
-//      "\"-INIT_THREADS_PER_PLACE="+DrJava.getConfig().getSetting(OptionConstants.HJ_NB_WORKERS).intValue() +"\", \"-NUMBER_OF_LOCAL_PLACES=1\"";
-//    boolean perfValue= DrJava.getConfig().getSetting(OptionConstants.HJ_SHOW_ABSTRACT_METRICS);
-//    HJcommand += ", \"-perf="+perfValue+"\"";
-//    //  HJcommand += ", \"-info\"";
-//    if (CompilerOptions.isWorkSharingFJSelected()) {
-//        HJcommand += ", \"-fj\""; 
-//    }
-//    
-//    if (s.endsWith(";"))  s = _deleteSemiColon(s);
-//    java.util.List<String> args = ArgumentTokenizer.tokenize(s, true);
-//    final StringBuilder argsString = new StringBuilder(HJcommand);
-//    for (int i = 2; i < args.size(); i++) {
-//      argsString.append(",");
-//      argsString.append(args.get(i));
-//    }
-//    argsString.append("});");
-//    return argsString.toString();   
-//  } 
   
   public boolean isAvailable() {
     JDKToolsLibrary.msg("Testing scala-compiler.jar to determine if it contains scala.tools.nsc.Main");

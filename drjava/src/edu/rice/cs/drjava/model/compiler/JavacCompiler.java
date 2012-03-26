@@ -110,10 +110,10 @@ public abstract class JavacCompiler implements CompilerInterface {
       interactionsString = transformJavaCommand(interactionsString);
     }
     else if (interactionsString.startsWith("applet ")) {
-        interactionsString = transformAppletCommand(interactionsString);
+      interactionsString = transformAppletCommand(interactionsString);
     }
     else if (interactionsString.startsWith("run ")) {
-        interactionsString = transformRunCommand(interactionsString);
+      interactionsString = transformRunCommand(interactionsString);
     }
     return interactionsString;
   }
@@ -176,9 +176,9 @@ public abstract class JavacCompiler implements CompilerInterface {
         if (!m.getReturnType().equals(void.class)) { m = null; }
       }
       catch (java.lang.NoSuchMethodException e) { m = null; }
-      if (m==null) {
+      if (m == null) {
         java.applet.Applet instance = null;
-        if (args.length==0) {
+        if (args.length == 0) {
           try {
             // try default (nullary) constructor first
             Constructor<?> ctor = c.getConstructor();
@@ -188,14 +188,14 @@ public abstract class JavacCompiler implements CompilerInterface {
           catch(InstantiationException ie) { instance = null; }
           catch(IllegalAccessException iae) { instance = null; }
           catch(java.lang.reflect.InvocationTargetException ite) {
-            if (ite.getCause()!=null) {
+            if (ite.getCause() != null) {
               throw ite.getCause();
             }
             else {
               System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
             }
           }
-          if (instance==null) {
+          if (instance == null) {
             try {
               // try String[] constructor next
               Constructor<?> ctor = c.getConstructor(String[].class);

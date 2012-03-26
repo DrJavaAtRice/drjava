@@ -437,13 +437,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** @return true if the model has a project open, false otherwise. */
   public boolean isProjectActive() { return _state.isProjectActive(); }
   
-  /** @return the file that points to the current project file. Null if not currently in project view
-    */
+  /** @return the file that points to the current project file. Null if not currently in project model. */
   public File getProjectFile() { return _state.getProjectFile(); }
   
   /** @return all files currently saved as source files in the project file.
-    * If _state not in project mode, returns null
-    */
+    * If _state not in project mode, returns null. */
   public File[] getProjectFiles() { return _state.getProjectFiles(); }
   
   /** @return true the given file is in the current project file. */
@@ -542,6 +540,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     setProjectChanged(true);
   }
   
+//  /** Queries the use for the build directory. */
+//  File askForBuildDirectory(MainFrame frame) { return frame.askForBuildDirectory(); }
+  
   /** Gets autorfresh status of the project */
   public boolean getAutoRefreshStatus() { return _state.getAutoRefreshStatus(); }
   
@@ -568,7 +569,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** @return the working directory for the Slave (Interactions) JVM */
   public File getWorkingDirectory() { return _state.getWorkingDirectory(); }
   
-  /** Sets the working directory for the project; ignored in flat file model. */
+  /** Sets the working directory for the Slave JVM. Ignored in flat file mode. */
   public void setWorkingDirectory(File f) {
     _state.setWorkingDirectory(f);
     _notifier.projectWorkDirChanged();
@@ -2292,7 +2293,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // Note: verifyExists prompts user for location of the file if it is not found
     int rc = JOptionPane.showConfirmDialog(frame, "Files not found, continue to next document?", "Continue?",
                                            JOptionPane.YES_NO_OPTION); 
-    if(rc==JOptionPane.NO_OPTION)
+    if (rc == JOptionPane.NO_OPTION)
       return null;
     // cannot find nextdoc; move on to next document
     return getNextDocument(nextdoc, frame);
@@ -2939,7 +2940,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         }
         File dir = getFile().getParentFile();
         for (String p : IterUtil.reverse(IterUtil.asIterable(packages))) {
-          if (dir == null || !dir.getName().equals(p)) {
+          if (dir == null || ! dir.getName().equals(p)) {
             String m = "File is in the wrong directory or is declared part of the wrong package.  " +
               "Directory name " + ((dir == null) ? "(root)" : "'" + dir.getName() + "'") +
               " does not match package name '" + p + "'.";

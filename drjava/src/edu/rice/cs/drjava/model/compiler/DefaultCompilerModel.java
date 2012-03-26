@@ -48,6 +48,7 @@ import java.util.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.Option;
+import edu.rice.cs.drjava.model.AbstractGlobalModel;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -62,6 +63,7 @@ import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.javalanglevels.*;
 import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
+import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.util.swing.ScrollableListDialog;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -230,7 +232,7 @@ public class DefaultCompilerModel implements CompilerModel {
     return ! _model.hasModifiedDocuments();
   }
   
-  /** Compile the given documents. */
+  /** Compile the given documents. All compile commands invoke this private method! */
   private void _doCompile(List<OpenDefinitionsDocument> docs) throws IOException {
     _LLSTM.clearCache();
     final ArrayList<File> filesToCompile = new ArrayList<File>();
@@ -252,6 +254,7 @@ public class DefaultCompilerModel implements CompilerModel {
     }
     
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.compileStarted(); } });
+    
     try {
       if (! packageErrors.isEmpty()) { _distributeErrors(packageErrors); }
       else {
@@ -263,7 +266,7 @@ public class DefaultCompilerModel implements CompilerModel {
           
 //          File workDir = _model.getWorkingDirectory();
 //          if (workDir == FileOps.NULL_FILE) workDir = null;
-//          if (workDir != null && ! workDir.exists() && ! workDir.mkdirs()) {
+//          if (workDir != null && ! workDir.exists() && ! workDir.mkdirs()) {h
 //            throw new IOException("Could not create working directory: " + workDir);
 //          }
           
@@ -330,6 +333,27 @@ public class DefaultCompilerModel implements CompilerModel {
       if (buildDir == FileOps.NULL_FILE) buildDir = null; // compiler interface wants null pointer if no build directory
       if (buildDir != null) buildDir = IOUtil.attemptCanonicalFile(buildDir);
       
+      CompilerInterface compiler = getActiveCompiler();
+      if (compiler.getName().contains("Scala") && buildDir == null) {
+        /* The interface ScalaCompilerInterface contains two extra methods that we need to call from
+         * this method (getOutputDir and setOutputDir).  We cannot simply cast to the class of the
+         * Scala compiler adapater because it is loaded with a DIFFERENT class loader. 
+         */
+
+        ScalaCompilerInterface scalaCompiler = (ScalaCompilerInterface) compiler;
+        buildDir = scalaCompiler.getOutputDir();
+        if (buildDir == null) { 
+          /* Determine a plausible outputDir */
+          File initialDir = null;
+          try { initialDir =_model.getDocumentForFile(files.get(0)).getSourceRoot(); }  // File must exist 
+          catch (InvalidPackageException e) { /* ignore; next line recovers */ }
+          if (initialDir == null) initialDir = _model.getWorkingDirectory();
+          buildDir = _askForOutputDir(initialDir);
+          scalaCompiler.setOutputDir(buildDir);
+          if (_model.isProjectActive()) _model.setBuildDirectory(buildDir);  // Update project file if project exists
+        }
+      }
+      
       List<File> classPath = CollectUtil.makeList(_model.getClassPath());
       
       // Temporary hack to allow a boot class path to be specified
@@ -342,8 +366,6 @@ public class DefaultCompilerModel implements CompilerModel {
       List<? extends File> preprocessedFiles = _compileLanguageLevelsFiles(files, errors, classPath, bootClassPath);
       
       if (errors.isEmpty()) {
-        CompilerInterface compiler = getActiveCompiler();
-        
         // Mutual exclusion with JUnit code that finds all test classes (in DefaultJUnitModel)
         synchronized(_compilerLock) {
           if (preprocessedFiles == null) {
@@ -363,6 +385,14 @@ public class DefaultCompilerModel implements CompilerModel {
       _distributeErrors(Collections.<DJError>emptyList());
     }
   }
+  
+  private File _askForOutputDir(File defaultOutputDir) {
+    DirectoryChooser outputDirChooser = new DirectoryChooser(null /* No parent component */, defaultOutputDir);
+    outputDirChooser.setDialogTitle("Choose an output directory for compiled Scala code");
+    outputDirChooser.showDialog();
+    return outputDirChooser.getSelectedDirectory();
+  }
+    
   
   /** Reorders files so that all file names containing "Test" are at the end.  */
   private static List<File> _testFileSort(List<File> files) {
