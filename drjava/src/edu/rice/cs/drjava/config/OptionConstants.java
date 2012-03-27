@@ -1469,7 +1469,7 @@ public interface OptionConstants {
    * the ForcedChoiceOption created by COMPILER_PREFERENCE_CONTROL.evaluate()
    */
   public static final StringOption DEFAULT_COMPILER_PREFERENCE = 
-    new StringOption("default.compiler.preference", COMPILER_PREFERENCE_CONTROL.NO_PREFERENCE);
+    new StringOption("default.compiler.preference", COMPILER_PREFERENCE_CONTROL.SCALA);  // NO_PREFERENCE in vanilla DrJava
   
   /**
    * Class that is used to dynamically populate the ForcedChoiceOption.
@@ -1479,11 +1479,12 @@ public interface OptionConstants {
    */
   public static final class COMPILER_PREFERENCE_CONTROL {
     public static final String NO_PREFERENCE = "No Preference";
+    public static final String SCALA = "Scala version 2.9.1.final";
     public static ArrayList<String> _list = new ArrayList<String>();
     
     public static void setList(ArrayList<String> list) { _list = list; }
     public static ForcedChoiceOption evaluate() {
-      if (!_list.contains(NO_PREFERENCE)) {
+      if (! _list.contains(NO_PREFERENCE)) {
         _list.add(NO_PREFERENCE);
       }
       

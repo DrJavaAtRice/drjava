@@ -108,7 +108,7 @@ public class CheckBoxJList extends JList implements ListSelectionListener {
     }
   }
     
-  private static class CheckBoxListCellRenderer extends JComponent implements ListCellRenderer {
+  private static class CheckBoxListCellRenderer extends JComponent implements ListCellRenderer<Object> {
     DefaultListCellRenderer defaultComp;
     JCheckBox checkbox;
     public CheckBoxListCellRenderer() {
@@ -120,12 +120,11 @@ public class CheckBoxJList extends JList implements ListSelectionListener {
     }
     
     public Component getListCellRendererComponent(JList list,
-                                                  Object  value,
+                                                  Object value,
                                                   int index,
                                                   boolean isSelected,
-                                                  boolean cellHasFocus){
-      defaultComp.getListCellRendererComponent (list, value, index,
-                                                isSelected, cellHasFocus);
+                                                  boolean cellHasFocus) {
+      defaultComp.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
       checkbox.setSelected(isSelected);
       Component[] comps = getComponents();
       for (int i = 0; i < comps.length; ++i) {

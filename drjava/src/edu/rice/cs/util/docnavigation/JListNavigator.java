@@ -351,7 +351,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   public int getDocumentSelectedCount() { return getSelectionCount(); }
   
   /** @return the documents currently selected. Only runs in event thread. */
-  @SuppressWarnings("unchecked") public java.util.List<ItemT> getSelectedDocuments() {
+  public java.util.List<ItemT> getSelectedDocuments() {
 //    Object[] selected = getSelectedValues();
 //    ArrayList<ItemT> l = new ArrayList<ItemT>(selected.length);
 //    for (Object o: selected) { l.add((ItemT)o); }
@@ -394,7 +394,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
 //  
   public String toString() { synchronized(_model) { return _model.toString(); } }
   
-  /** The cell renderer for this list. */
+  /** The cell renderer for this list. Note: DefaultListCellRenderer should by parameterised by cell value type, but isn't. */
   private static class CustomListCellRenderer extends DefaultListCellRenderer {
     
     /** Rreturns the renderer component for a cell

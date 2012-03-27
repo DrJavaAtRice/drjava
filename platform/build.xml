@@ -86,8 +86,6 @@
 
   <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
   
-  
-  
   <!-- ************
        Help Targets
        ************ -->
@@ -248,14 +246,12 @@
 
   <target name="compile-scala" depends="resolve-java7-runtime, resolve-scala-tools" 
           description="Compile the 'scala-specific' sources">
-    <echo message="scala-home = ${scala-home}"/>
-    <echo message="extra-classpath = ${scala-tools}" />
     <antcall target="do-compile">
       <param name="platform-tag" value="scala" />
       <param name="source-version" value="1.7" />
       <param name="runtime-jar" value="${java7-runtime}" />
 <!--      <param name="extra-classpath" value="${scala-home}/scala-compiler.jar:${scala-home}/scala-library.jar:${basedir}/../drjava/drjava.jar" />  Note that the foolowing depends on scala.jar in lib directory of this branch's drjava tree -->
-      <param name="extra-classpath" value="${scala-tools}" />
+      <param name="extra-classpath" value="" />
     </antcall>
 
   </target>

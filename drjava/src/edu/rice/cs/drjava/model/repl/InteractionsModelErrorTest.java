@@ -50,6 +50,7 @@ import edu.rice.cs.plt.tuple.Pair;
 
 
 import edu.rice.cs.drjava.model.repl.newjvm.*;
+import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
 import edu.rice.cs.drjava.DrJavaTestCase;
 
 import edu.rice.cs.plt.tuple.OptionVisitor;
@@ -58,6 +59,7 @@ import edu.rice.cs.plt.text.TextUtil;
 
 import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.interpreter.*;
+import edu.rice.cs.dynamicjava.interpreter.Interpreter;
 import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
 
@@ -65,6 +67,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.lang.ClassLoader;
 import java.util.List;
 import java.util.ArrayList;
 

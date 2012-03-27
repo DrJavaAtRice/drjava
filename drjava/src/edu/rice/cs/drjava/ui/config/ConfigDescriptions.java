@@ -558,16 +558,12 @@ public class ConfigDescriptions {
     add(OptionConstants.SHOW_FINALLY_WARNINGS, "Show Finally Warnings",
         "<html>Warn about <code>finally</code> clauses that cannot complete normally.</html>");
     
-    
     add(OptionConstants.SHOW_FALLTHROUGH_WARNINGS, "Show Fall-Through Warnings",
         "<html>Warn about <code>switch</code> block cases that fall through to the next case.</html>");
     
-    /*
-     * The drop down box containing the compiler names
-     */
+    /* The drop down box containing the compiler names */
     add(OptionConstants.COMPILER_PREFERENCE_CONTROL.evaluate(), "Compiler Preference", 
         "Which compiler is prefered?");
-    
     
     /** Add all of the components for the Interactions panel of the preferences window. */
     add(OptionConstants.FIXED_INTERACTIONS_DIRECTORY,

@@ -14,6 +14,9 @@ junit.jar:                JUnit 4.4
 looks-2.2.2.jar:          JGoodies Looks
 platform.jar:             platform-20090812-r4985
 plt.jar:                  plt-20090812-r4961
+scala-*.jar		  scala-2.9.1.final
+jline.jar		  scala-2.9.1.final
+scalap.jar		  scala-2.9.1.final
 
 buildlib/ant-contrib.jar:           ANT Contrib 1.0b3
 buildlib/cenquatasks.jar:           Distributed with Clover 1.3.9

@@ -82,7 +82,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   protected JButton _goToButton;
   protected JButton _bookmarkButton;
   protected JButton _removeButton;
-  protected JComboBox _colorBox;
+  protected JComboBox<Color> _colorBox;  // hold both Colors and Strings (Why?)
   protected int _lastIndex;
   
   /** Saved option listeners kept in this field so they can be removed for garbage collection  */
@@ -151,7 +151,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
   }
   
-  class ColorComboRenderer extends JPanel implements ListCellRenderer {
+  class ColorComboRenderer extends JPanel implements ListCellRenderer<Color> {
     private Color _color = DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_colorBox.getSelectedIndex()]);
     private DefaultListCellRenderer _defaultRenderer = new DefaultListCellRenderer();
     private final Dimension _size = new Dimension(0, 20);  
@@ -164,9 +164,10 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       setBorder(_compoundBorder);
     }
     
-    public Component getListCellRendererComponent(JList list, Object value, int row, boolean sel, boolean hasFocus) {
+    // Value is either a bonafide Color or null (formerly Color or "None")
+    public Component getListCellRendererComponent(JList list, Color value, int row, boolean sel, boolean hasFocus) {
       JComponent renderer;
-      if (value instanceof Color) {
+      if (value != null) {
         _color = (Color) value;
         renderer = this;
       }
@@ -214,7 +215,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     final Color normalColor = highlightPanel.getBackground();
     highlightPanel.add(new JLabel("Highlight:"));
     
-    // find the first available color, or choose "None"
+    // find the first available color, or choose null (formerly "None")
     int smallestIndex = 0;
     int smallestUsage = DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[smallestIndex];
     for(_lastIndex = 0; _lastIndex < OptionConstants.FIND_RESULTS_COLORS.length; ++_lastIndex) {
@@ -225,11 +226,11 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
     _lastIndex = smallestIndex;
     ++DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex];
-    _colorBox = new JComboBox();    
+    _colorBox = new JComboBox<Color>();   // formerly <Object> because it held both Color values and "None" (since changed to null)
     for (int i = 0; i < OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
       _colorBox.addItem(DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[i]));
     }
-    _colorBox.addItem("None");
+    _colorBox.addItem(null);  // formerly "None"
     _colorBox.setRenderer(new ColorComboRenderer());
     _colorBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {

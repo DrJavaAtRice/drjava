@@ -351,7 +351,7 @@ public class AutoCompletePopup {
       }
     };
     
-    List<PredictiveInputFrame.CloseAction<AutoCompletePopupEntry>> actions
+    ArrayList<PredictiveInputFrame.CloseAction<AutoCompletePopupEntry>> actions
       = new ArrayList<PredictiveInputFrame.CloseAction<AutoCompletePopupEntry>>();
 
     Iterator<String> nameIt = actionNames.iterator();
@@ -401,8 +401,8 @@ public class AutoCompletePopup {
     actions.add(cancelAction);
 
     // Note: PredictiveInputModel.* is statically imported
-    java.util.ArrayList<MatchingStrategy<AutoCompletePopupEntry>> strategies =
-      new java.util.ArrayList<MatchingStrategy<AutoCompletePopupEntry>>();
+    ArrayList<MatchingStrategy<AutoCompletePopupEntry>> strategies =
+      new ArrayList<MatchingStrategy<AutoCompletePopupEntry>>();
     strategies.add(new FragmentStrategy<AutoCompletePopupEntry>());
     strategies.add(new PrefixStrategy<AutoCompletePopupEntry>());
     strategies.add(new RegExStrategy<AutoCompletePopupEntry>());

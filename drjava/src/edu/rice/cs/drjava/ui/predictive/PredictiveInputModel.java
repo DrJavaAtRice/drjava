@@ -47,6 +47,37 @@ import java.util.regex.PatternSyntaxException;
 /** Model class for predictive string input. */
 public class PredictiveInputModel<T extends Comparable<? super T>> {
   
+    /** Create a new predictive input model.
+    * @param ignoreCase true if case should be ignored
+    * @param pim other predictive input model
+    */
+  public PredictiveInputModel(boolean ignoreCase, PredictiveInputModel<T> pim) {
+    this(ignoreCase, pim._strategy, pim._items);
+    setMask(pim.getMask());
+  }
+
+  /** Create a new predictive input model.
+    * @param ignoreCase true if case should be ignored
+    * @param strategy matching strategy to use
+    * @param items list of items
+    */
+  public PredictiveInputModel(boolean ignoreCase, MatchingStrategy<T> strategy, Collection<T> items) {
+    _ignoreCase = ignoreCase;
+    _strategy = strategy;
+    setItems(items);
+  }
+
+  /** Create a new predictive input model.
+   * @param ignoreCase true if case should be ignored
+   * @param strategy matching strategy to use
+   * @param items varargs/array of items
+   */
+  public PredictiveInputModel(boolean ignoreCase, MatchingStrategy<T> strategy, T... items) {
+    _ignoreCase = ignoreCase;
+    _strategy = strategy;
+    setItems(items);
+  }
+  
   /** Strategy used for matching and mask extension. */
   public static interface MatchingStrategy<X extends Comparable<? super X>> {
     
@@ -558,37 +589,6 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
   /** Matching strategy. */
   private volatile MatchingStrategy<T> _strategy;
 
-  /** Create a new predictive input model.
-    * @param ignoreCase true if case should be ignored
-    * @param pim other predictive input model
-    */
-  public PredictiveInputModel(boolean ignoreCase, PredictiveInputModel<T> pim) {
-    this(ignoreCase, pim._strategy, pim._items);
-    setMask(pim.getMask());
-  }
-
-  /** Create a new predictive input model.
-    * @param ignoreCase true if case should be ignored
-    * @param strategy matching strategy to use
-    * @param items list of items
-    */
-  public PredictiveInputModel(boolean ignoreCase, MatchingStrategy<T> strategy, Collection<T> items) {
-    _ignoreCase = ignoreCase;
-    _strategy = strategy;
-    setItems(items);
-  }
-
-  /** Create a new predictive input model.
-   * @param ignoreCase true if case should be ignored
-   * @param strategy matching strategy to use
-   * @param items varargs/array of items
-   */
-  public PredictiveInputModel(boolean ignoreCase, MatchingStrategy<T> strategy, T... items) {
-    _ignoreCase = ignoreCase;
-    _strategy = strategy;
-    setItems(items);
-  }
-
   /** Sets the strategy
    */
   public void setStrategy(MatchingStrategy<T> strategy) {
@@ -735,7 +735,7 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
   /** Get matching items.
    * @return list of matching items
    */
-  public List<T> getMatchingItems() {
+  public ArrayList<T> getMatchingItems() {
     return new ArrayList<T>(_matchingItems);
   }
 

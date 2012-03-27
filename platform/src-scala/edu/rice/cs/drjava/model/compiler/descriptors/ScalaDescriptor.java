@@ -88,46 +88,28 @@ public class ScalaDescriptor extends JDKDescriptor {
   /** Returns a list of files that should be searched if they contain a compiler.
     * @return list of files to search */
   public Iterable<File> getSearchFiles() {
-    Iterable<File> files = IterUtil.asIterable(new File[] {
-      new File("/C:/Scala/scala-2.9.1.final/lib/scala-compiler.jar")
-    });
-    try {
-      String scala_home = System.getenv("SCALA_HOME");
-      if (scala_home != null) {
-        files = IterUtil.compose(files, new File(new File(scala_home), "lib/scala-compiler.jar"));
-      }
-      else {
-        JDKToolsLibrary.msg("SCALA_HOME not set");
-      }
-    }
-    catch(Exception e) { /* ignore SCALA_HOME variable */ }
-    
+    /* Code that looks for compiler outside of drjava.jar */
+//    Iterable<File> files = IterUtil.asIterable(new File[] {
+//      new File("/C:/Scala/scala-2.9.1.final/lib/scala-compiler.jar")
+//    });
 //    try {
-//      // Open the JAR file
-//      JarFile jarfile = new JarFile("/C:/Scala/scala-2.9.1.final/lib/scala-compiler.jar");
-//      
-//      // Get the manifest
-//      Manifest manifest = jarfile.getManifest();
-//      
-//      // Get the main attributes in the manifest
-//      Attributes attrs = (Attributes)manifest.getMainAttributes();
-//      
-//      // Enumerate each attribute
-//      for (Iterator it=attrs.keySet().iterator(); it.hasNext(); ) {
-//        // Get attribute name
-//        Attributes.Name attrName = (Attributes.Name)it.next();
-//        
-//        // Get attribute value
-//        String attrValue = attrs.getValue(attrName);
-//        Utilities.show("getValue() for scala-compiler.jar = " + attrValue);
+//      String scala_home = System.getenv("SCALA_HOME");
+//      if (scala_home != null) {
+//        files = IterUtil.compose(files, new File(new File(scala_home), "lib/scala-compiler.jar"));
 //      }
-//    } 
-//    catch (IOException e) { /* ignore */ }
+//      else {
+//        JDKToolsLibrary.msg("SCALA_HOME not set");
+//      }
+//    }
+//    catch(Exception e) { /* ignore SCALA_HOME variable */ }
+//    
+//    
+//    // drjava.jar file itself; check if it's a combined Scala/DrJava jar
+//    files = IterUtil.compose(edu.rice.cs.util.FileOps.getDrJavaFile(), files); 
+//    JDKToolsLibrary.msg("ScalaDescriptor.getSearchFiles is returning " + files);
+//    return files;
     
-    // drjava.jar file itself; check if it's a combined Scala/DrJava jar
-    files = IterUtil.compose(edu.rice.cs.util.FileOps.getDrJavaFile(), files); 
-    JDKToolsLibrary.msg("ScalaDescriptor.getSearchFiles is returning " + files);
-    return files;
+    return IterUtil.asIterable(new File[] {edu.rice.cs.util.FileOps.getDrJavaFile()});
   }
   
   /** True if this is a compound JDK and needs a fully featured JDK to operate.

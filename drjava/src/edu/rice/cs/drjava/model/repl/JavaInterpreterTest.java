@@ -46,6 +46,7 @@ import edu.rice.cs.plt.text.TextUtil;
 
 import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.interpreter.*;
+import edu.rice.cs.dynamicjava.interpreter.Interpreter;
 import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
 
