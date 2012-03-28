@@ -1,0 +1,9 @@
+1.  Extend Sclala language levels to support a notion of Core Scala.  Create
+    a simplified compiler using scalac plugins to support it.
+
+2.  Create a DrScala logo and webpage.
+
+
+
+
+

@@ -1,0 +1,9 @@
+1.  In flat file mode, the implied source roots are not correclty
+    placed on the class path.
+
+    (i) getSourceRoot does not appear to work correctly on scala files
+    (ii) flat file build directory is not added to interactions class path
+
+2.  The initial class declaration line in a file is indented two spaces.  It
+    should be 0.
+

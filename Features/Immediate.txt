@@ -1,0 +1,19 @@
+0.  Add a low priority thread that loads the compiler classes (by compiling
+    some simple code with output to /dev/null?)
+
+1.  Add support for some form of unit testing.  (JUnit?)
+
+2.  Add support for some form of run command.
+
+3.  Support both Scala and Java interpreters via independent
+    Scala Interactions and Java Interactions panes.
+
+4.  Support two language levels: (i) Scala and (ii) Scala + Java
+    Java interactions pane only appears for Scala + Java level
+
+5.  Create a separate DrScala project at Sourceforge, java.net, or elsewhere?
+
+6.  Write paper "A lightweight IDE for Scala"
+
+
+
