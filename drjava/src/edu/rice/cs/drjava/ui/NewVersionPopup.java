@@ -50,12 +50,15 @@ import edu.rice.cs.drjava.*;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.platform.*;
 import edu.rice.cs.util.swing.Utilities;
+
+import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.lambda.Box;
 import edu.rice.cs.plt.lambda.SimpleBox;
 import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.util.FileOps;
+
 
 /** Displays whether a new version of DrJava is available.
   *  @version $Id$
@@ -91,8 +94,7 @@ public class NewVersionPopup extends JDialog {
     _mainFrame = parent;
     _mainFrame.setPopupLoc(this);
     this.setSize(500,150);
-    @SuppressWarnings("unchecked")
-    String[] choices = (String[]) OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.toArray();  // An ugly hack that fails with first class generics
+    String[] choices = IterUtil.toArray(OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES, String.class);
     _modeBox = new JComboBox<String>(choices);
     for (int i = 0; i < OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.size(); ++i) {
       if (DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)

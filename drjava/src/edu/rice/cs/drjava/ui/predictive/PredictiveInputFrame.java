@@ -49,6 +49,8 @@ import java.util.Arrays;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
 
+
+import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
@@ -59,66 +61,17 @@ import edu.rice.cs.drjava.DrJavaRoot;
 /** Frame with predictive string input based on a list of strings. */
 public class PredictiveInputFrame<T extends Comparable<? super T>> extends SwingFrame {
   
-  /** Create a new predictive string input frame.
-    *  @param owner owner frame
-    *  @param force true if the user is forced to select one of the items
-    *  @param ignoreCase true if case should be ignored
-    *  @param info information supplier to use for additional information display
-    *  @param strategies array of matching strategies
-    *  @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
-    *  @param items list of items
-    */
-  public PredictiveInputFrame(SwingFrame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
-                              List<PredictiveInputModel.MatchingStrategy<T>> strategies,
-                              List<CloseAction<T>> actions, int cancelIndex, T item) {
-    super(title);
-    _strategies = strategies;
-    @SuppressWarnings("unchecked")
-    T[] strategyArray = (T[]) _strategies.toArray();  // An ugly hack that would fail with first class generics
-    _strategyBox = new JComboBox<T>(strategyArray);  
-    _currentStrategy = _strategies.get(0);
-    _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, item);
-
-    @SuppressWarnings("unchecked")
-    T[] itemArray = (T[]) _pim.getMatchingItems().toArray(); // An ugly hack that would fail if generics were first-class.
-    _matchList = new JList<T>(itemArray); 
-    _force = force;
-    _info = info;
-    _lastState = null;
-    _owner = owner;
-    _actions = new ArrayList<CloseAction<T>>(actions);
-    _buttons = new JButton[actions.size()];
-    _cancelIndex = cancelIndex;
-    init(_info != null);
-    initDone(); // call mandated by SwingFrame contract
-  }
-  
-//  /** Create a new predictive string input frame.
-//    *  @param owner owner frame
-//    *  @param force true if the user is forced to select one of the items
-//    *  @param info information supplier to use for additional information display
-//    *  @param strategies array of matching strategies
-//    *  @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
-//    *  @param items varargs/array of items
-//    */
-//  @SuppressWarnings({"unchecked","varargs"})
-//  public PredictiveInputFrame(SwingFrame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
-//                              List<PredictiveInputModel.MatchingStrategy<T>> strategies,
-//                              List<CloseAction<T>> actions, int cancelIndex, T... items) {
-//    this(owner, title, force, ignoreCase, info, strategies, actions, cancelIndex, Arrays.asList(items));
-//  }
-//  
   /** Interface that is used to generate additional information about an item. */
   public static interface InfoSupplier<X> extends Lambda<X,String> { }
-  
+
 //  /** General information supplier that just uses toString(). */
 //  public static final InfoSupplier<Object> GET_LAZY_SUPPLIER = new InfoSupplier<Object>() {
 //    public String apply(Object param) { return param.toString(); }
 //  };
   
   /** Interface for an action to be performed when the user closes the frame,
-    *  either by using "OK" or "Cancel".
-    */
+   *  either by using "OK" or "Cancel".
+   */
   public static interface CloseAction<X extends Comparable<? super X>> extends Lambda<PredictiveInputFrame<X>,Object> {
     public Object value(PredictiveInputFrame<X> param);
     public String getName();
@@ -179,13 +132,13 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     public Point getLocation() { return _loc; }
     public int getCurrentStrategyIndex() { return _currentStrategyIndex; }
   }
-  
+
   /** Predictive input model */
   private volatile PredictiveInputModel<T> _pim;
-  
+
   /** Code for the last button that was pressed.*/
   private volatile String _buttonPressed;
-  
+
   /** Action buttons.*/
   private final JButton[] _buttons;
   
@@ -200,22 +153,22 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   
   /** Label with "Tab completes:" string. */
   private final JLabel _tabCompletesLabel = new JLabel("Tab completes: ");
-  
-  /** List with matches.  Generified for Java 7*/
+
+  /** List with matches. */
   private final JList<T> _matchList;
-  
+
   /** True if the user is forced to select one of the items. */
   private final boolean _force;
   
   /** Label with shared extension.*/
   private final JLabel _sharedExtLabel = new JLabel("");
-  
+
   /** Listener for several events. */
   private final PredictiveInputListener _listener = new PredictiveInputListener();
-  
+
   /** Info supplier. */
   private final InfoSupplier<? super T> _info;
-  
+
   /** Text area for additional information. */
   private final JLabel _infoLabel = new JLabel("");
   
@@ -229,25 +182,74 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   private final int _cancelIndex;
   
   /** Array of strategies. */
-  private final List<PredictiveInputModel.MatchingStrategy<T>> _strategies;
+  private final java.util.List<PredictiveInputModel.MatchingStrategy<T>> _strategies;
   
   /** Combo box. */
-  private final JComboBox<T> _strategyBox;
+  private final JComboBox<PredictiveInputModel.MatchingStrategy<T>> _strategyBox;
   
   /** Last frame state. It can be stored and restored. */
   private volatile FrameState _lastState;
   
   /** Currently used strategy. */
   private volatile PredictiveInputModel.MatchingStrategy<T> _currentStrategy;
+
+  /** Create a new predictive string input frame.
+   *  @param owner owner frame
+   *  @param force true if the user is forced to select one of the items
+   *  @param ignoreCase true if case should be ignored
+   *  @param info information supplier to use for additional information display
+   *  @param strategies array of matching strategies
+   *  @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
+   *  @param items list of items
+   */
+  public PredictiveInputFrame(SwingFrame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
+                              List<PredictiveInputModel.MatchingStrategy<T>> strategies,
+                              List<CloseAction<T>> actions, int cancelIndex, Collection<T> items) {
+    super(title);
+    _strategies = strategies;
+    @SuppressWarnings("unchecked")
+    PredictiveInputModel.MatchingStrategy<T>[] strategyArray =  // UGLY
+      (PredictiveInputModel.MatchingStrategy<T>[]) IterUtil.toArray(_strategies, PredictiveInputModel.MatchingStrategy.class);
+    _strategyBox = new JComboBox<PredictiveInputModel.MatchingStrategy<T>>(strategyArray);
+    _currentStrategy = _strategies.get(0);
+    _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, items);
+    @SuppressWarnings("unchecked")
+    T[] matchingItems = (T[]) _pim.getMatchingItems().toArray();  // UGLY
+    _matchList = new JList<T>(matchingItems);
+    _force = force;
+    _info = info;
+    _lastState = null;
+    _owner = owner;
+    _actions = new ArrayList<CloseAction<T>>(actions);
+    _buttons = new JButton[actions.size()];
+    _cancelIndex = cancelIndex;
+    init(_info != null);
+    initDone(); // call mandated by SwingFrame contract
+  }
+  
+  /** Create a new predictive string input frame.
+   *  @param owner owner frame
+   *  @param force true if the user is forced to select one of the items
+   *  @param info information supplier to use for additional information display
+   *  @param strategies array of matching strategies
+   *  @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
+   *  @param items varargs/array of items
+   */
+  @SafeVarargs
+  public PredictiveInputFrame(SwingFrame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
+                              List<PredictiveInputModel.MatchingStrategy<T>> strategies,
+                              java.util.List<CloseAction<T>> actions, int cancelIndex, T... items) {
+    this(owner, title, force, ignoreCase, info, strategies, actions, cancelIndex, Arrays.asList(items));
+  }
   
   /** Returns the last state of the frame, i.e. the location and dimension.
-    *  @return frame state
-    */
+   *  @return frame state
+   */
   public FrameState getFrameState() { return _lastState; }
   
   /** Sets state of the frame, i.e. the location and dimension of the frame for the next use.
-    *  @param ds  State to update to, or {@code null} to reset
-    */
+   *  @param ds  State to update to, or {@code null} to reset
+   */
   public void setFrameState(FrameState ds) {
     _lastState = ds;
     if (_lastState != null) {
@@ -264,8 +266,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   }  
   
   /** Sets state of the frame, i.e. the location and dimension of the frame for the next use.
-    *  @param s  State to update to, or {@code null} to reset
-    */
+   *  @param s  State to update to, or {@code null} to reset
+   */
   public void setFrameState(String s) {
     try { _lastState = new FrameState(s); }
     catch(IllegalArgumentException e) { _lastState = null; }
@@ -292,11 +294,11 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
       selectStrategy();
     }
   }
-  
+
   /** Return a copy of the list of items in the model.
     * @return list of items */
   public List<T> getItems() { return _pim.getItems(); }
-  
+
   /** Set the predictive input model.
     * @param ignoreCase true if case should be ignored
     * @param pim predictive input model
@@ -309,7 +311,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     updateList();
     addListener();
   }
-  
+
   /** Set the items.
     * @param ignoreCase true if case should be ignored
     * @param items list of items
@@ -334,23 +336,21 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     updateList();
     addListener();
   }
-  
+
   /** Set the items.
     * @param ignoreCase true if case should be ignored
     * @param items varargs/array of items
     */
-  @SafeVarargs
+  @SuppressWarnings({"unchecked", "varargs"})
   public final void setItems(boolean ignoreCase, T... items) {
-    @SuppressWarnings("varargs")
-    T[] itemsArray = items;
-    _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, Arrays.asList(itemsArray));
+    _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, items);
     removeListener();
     updateTextField();
     updateExtensionLabel();
     updateList();
     addListener();
   }
-  
+
   /** Return the name for the last button that was pressed.
     * @return button name
     */
@@ -363,7 +363,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   public String getMask() {
     return _textField.getText();
   }
-  
+
   /** Set the mask in the text field.
     * @param mask for text field*/
   public void setMask(String mask) {
@@ -374,32 +374,33 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     updateList();
     addListener();
   }
-  
+
   /** Return the string that was entered in the text field.
     * If the user is forced to select an item, then the text of the item will be returned.
     * @return text in text field
     */
   public String getText() {
     if (_force) {
-//      @SuppressWarnings("unchecked") 
+      @SuppressWarnings("unchecked") 
       T item = _matchList.getSelectedValue();
       return (item == null) ? "" : _currentStrategy.force(item,_textField.getText());
     }
     return _textField.getText();
   }
-  
+
   /** Return the item that was selected or null the user entered a mask not in the list and force == false.
     * @return item that was selected or null
     */
   public T getItem() {
-    if (!_force && _pim.getMatchingItems().size() == 0) return null; 
+    if (!_force && _pim.getMatchingItems().size() == 0) return null;
+    @SuppressWarnings("unchecked") 
     T item = _matchList.getSelectedValue();
     return item;
   }
-  
+
   /** Initialize the frame.
-    *  @param info true if additional information is desired
-    */
+   *  @param info true if additional information is desired
+   */
   private void init(boolean info) {
     _buttonPressed = null;
     addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -408,7 +409,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
         _matchList.ensureIndexIsVisible(_matchList.getSelectedIndex());
       }
     });
-    
+
     // buttons
     int i = 0;
     for (final CloseAction<T> a: _actions) {
@@ -420,9 +421,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
       });
       ++i;
     }
-    
+
     getRootPane().setDefaultButton(_buttons[0]);
-    
+
     _strategyBox.setEditable(false);
     _strategyBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -431,7 +432,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
       }
     });
     _strategyBox.addFocusListener(new FocusAdapter() {
-      
+
       public void focusLost(FocusEvent e) {
         boolean bf = false;
         for (JButton b: _buttons) { if (e.getOppositeComponent() == b) { bf = true; break; } }
@@ -443,13 +444,13 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
         }
       }
     });
-    
+
     // text field
     _textField.setDragEnabled(false);
     _textField.setFocusTraversalKeysEnabled(false);
-    
+
     addListener();
-    
+
     Keymap ourMap = JTextComponent.addKeymap("PredictiveInputFrame._textField", _textField.getKeymap());
     for (final CloseAction<T> a: _actions) {
       KeyStroke ks = a.getKeyStroke();
@@ -539,7 +540,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
       }
     });
     _textField.setKeymap(ourMap);
-    
+
     _textField.addFocusListener(new FocusAdapter() {
       public void focusLost(FocusEvent e) {
         boolean bf = false;
@@ -552,7 +553,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
         }
       }
     });
-    
+
     _matchList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     _matchList.addListSelectionListener(new ListSelectionListener() {
       public void valueChanged(ListSelectionEvent e) {
@@ -588,7 +589,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
       c.fill = GridBagConstraints.NONE;
       contentPane.add(_infoLabel, c);
     }
-    
+
     c.fill = GridBagConstraints.BOTH;
     c.weighty = 1.0;
     contentPane.add(new JScrollPane(_matchList, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
@@ -634,7 +635,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     for(JButton b: _buttons) { buttonPanel.add(b, bc); }
     
     contentPane.add(buttonPanel, c);
-    
+
     pack();
 //    Dimension parentDim = (_owner != null) ? _owner.getSize() : getToolkit().getScreenSize();
 //    //int xs = (int) parentDim.getWidth()/3;
@@ -642,7 +643,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
 //    // in line below, parentDim was _owner.getSize(); changed because former could generate NullPointerException
 //    setSize(new Dimension((int) getSize().getWidth(), (int)Math.min(parentDim.getHeight(), Math.max(ys, 300)))); 
     if (_owner!=null) { setLocationRelativeTo(_owner); }
-    
+
     removeListener();
     updateTextField();
     addListener();
@@ -669,7 +670,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     c.anchor = GridBagConstraints.NORTH;
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.weightx = 1.0;
-    
+
     for (JComponent b: components) { gbLayout.setConstraints(b, c); }
     
     c.fill = GridBagConstraints.BOTH;
@@ -683,8 +684,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   }
   
   /** Enable or disable owner. Can be overridden to toggle the hourglass, etc.
-    * @param b whether the owner should be enabled (true) or disabled
-    */
+   * @param b whether the owner should be enabled (true) or disabled
+   */
   public void setOwnerEnabled(boolean b) {
     // do nothing by default
   }
@@ -712,19 +713,19 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   protected final Runnable1<WindowEvent> CANCEL = new Runnable1<WindowEvent>() {
     public void run(WindowEvent e) { cancel(); }
   };
-  
+
   /** Add the listener. */
   private void addListener() {
     _textField.getDocument().addDocumentListener(_listener);
     _textField.addCaretListener(_listener);
   }
-  
+
   /** Remove the listener. */
   private void removeListener() {
     _textField.getDocument().removeDocumentListener(_listener);
     _textField.removeCaretListener(_listener);
   }
-  
+
   /** Update the text field based on the model. */
   private void updateTextField() {
     _textField.setText(_pim.getMask());
@@ -735,19 +736,18 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   public void resetFocus() {
     _textField.requestFocus();
   }
-  
+
   /** Update the extension label based on the model. */
   private void updateExtensionLabel() {
     _sharedExtLabel.setText(_pim.getSharedMaskExtension() + " ");
     _tabCompletesLabel.setVisible(_pim.getSharedMaskExtension().length() > 0);
   }
-  
-  /** Update the match list based on the model. */
 
+  /** Update the match list based on the model. */
   private void updateList() {
-    @SuppressWarnings("unchecked") 
-    T[] items = (T[]) _pim.getMatchingItems().toArray(); // An ugly hack that would fail with first-class generics
-    _matchList.setListData(items);  
+    @SuppressWarnings("unchecked")
+    T[] matchingItems = (T[]) _pim.getMatchingItems().toArray();
+    _matchList.setListData(matchingItems);
     _matchList.setSelectedValue(_pim.getCurrentItem(), true);
     updateExtensionLabel();
     updateInfo();
@@ -757,11 +757,12 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
       }
     }
   }
-  
+
   /** Update the information. */
   private void updateInfo() {
     if (_info == null) return;
     if (_matchList.getModel().getSize() > 0) {
+      @SuppressWarnings("unchecked") 
       T item = _matchList.getSelectedValue();
       _infoLabel.setText("Path:   " + _info.value(item));
       _infoLabel.setToolTipText(_info.value(item));
@@ -793,7 +794,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     addListener();
     _textField.requestFocus();
   }
-  
+
   /** Listener for several events. */
   private class PredictiveInputListener implements CaretListener, DocumentListener {
     public void insertUpdate(DocumentEvent e) {
@@ -801,43 +802,43 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
 //      System.out.println("insertUpdate fired!");
 //      Utilities.invokeLater(new Runnable() {
 //        public void run() { 
-      removeListener();
-      _pim.setMask(_textField.getText());
-      updateExtensionLabel();
-      updateList();
-      addListener();
+          removeListener();
+          _pim.setMask(_textField.getText());
+          updateExtensionLabel();
+          updateList();
+          addListener();
 //        }
 //      });
     }
-    
+
     public void removeUpdate(DocumentEvent e) {
       assert EventQueue.isDispatchThread();
 //      System.err.println("removeUpdate fired!");
 //      Utilities.invokeLater(new Runnable() {
 //        public void run() { 
-      removeListener();
-      _pim.setMask(_textField.getText());
-      updateExtensionLabel();
-      updateList();
-      addListener();
+          removeListener();
+          _pim.setMask(_textField.getText());
+          updateExtensionLabel();
+          updateList();
+          addListener();
 //        }
 //      });
     }
-    
+
     public void changedUpdate(DocumentEvent e) {
       assert EventQueue.isDispatchThread();
 //      System.err.println("changedUpdate fired!");
 //      Utilities.invokeLater(new Runnable() {
 //        public void run() {
-      removeListener();
-      _pim.setMask(_textField.getText());
-      updateExtensionLabel();
-      updateList();
-      addListener();
+          removeListener();
+          _pim.setMask(_textField.getText());
+          updateExtensionLabel();
+          updateList();
+          addListener();
 //        }
 //      });
     }
-    
+
     public void caretUpdate(CaretEvent e) { }
   }
 }

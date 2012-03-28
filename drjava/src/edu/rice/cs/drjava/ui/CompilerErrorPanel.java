@@ -44,8 +44,8 @@ import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.compiler.CompilerInterface;
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.util.UnexpectedException;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
