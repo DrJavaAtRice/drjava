@@ -4,6 +4,8 @@ import java.io.*;
 import scala.tools.nsc.interpreter.ILoop;
 import scala.tools.nsc.Settings;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import edu.rice.cs.dynamicjava.interpreter.RuntimeBindings;
 import edu.rice.cs.dynamicjava.interpreter.TypeContext;
@@ -63,6 +65,16 @@ public class Interpreter {
    *           turn contains blocking "take" calls on this queue
    */
   final ArrayBlockingQueue<String> outputStrings = new ArrayBlockingQueue<String>(100);
+
+  /**
+   * Used to catch scala interpreter commands.
+   *
+   * The Scala ILoop interpreter accepts colon command interface for a variety
+   * of functions, such as ":paste", ":run", and ":quit".  The ":quit" command
+   * can kill the interpreter, thus leaving the interactions pane unusable.
+   * This regex is used to catch those colon commands so they can be ignored.
+   */
+  final private Pattern scalaColonCmd = Pattern.compile("^\\s*:.*$");
 
   /* 
    * dummy Reader for iLoopReader constructor -- these methods should NEVER be called! 
@@ -170,6 +182,11 @@ public class Interpreter {
    * e.g. for formatting multiline expressions)
    */
   public String interpret(String input) throws InterpreterException {
+    Matcher match = scalaColonCmd.matcher(input);
+
+    if (match.matches()) 
+      return "Error:  Scala interpreter colon commands not accepted.\n";
+
     try{
       /* clear out any leftovers -- there should never be any, however */
       outputStrings.clear();
