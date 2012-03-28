@@ -179,10 +179,7 @@ public class Interpreter {
       String s = outputStrings.take();
 
       /* if the prompt or continuation string is returned, we're done */
-      if (s.equals("\nscala> "))
-        return "";
-      if (s.equals("     | "))
-        return s;
+      if (s.equals("\nscala> ") || s.equals("     | ")) return "";
 
       /* 
        * otherwise, we keep taking strings from the return queue until
