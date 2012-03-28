@@ -70,7 +70,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Banner prefix. */
-  public static final String BANNER_PREFIX = "Welcome to DrScala.";
+  public static final String BANNER_PREFIX = "Welcome to DrJava.";
 
   /** Number of milliseconds to wait after each println, to prevent the JVM from being flooded
     * with print calls. */
@@ -371,7 +371,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       for (String curr: interactions) {
         int len = curr.length();
         buf.append(curr);
-//        if (len > 0 && curr.charAt(len - 1) != ';')  buf.append(';');
+        if (len > 0 && curr.charAt(len - 1) != ';')  buf.append(';');
         buf.append(StringOps.EOL);
       }
     }
@@ -594,7 +594,19 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     });
     scrollToCaret();
   }
-  
+
+  public void _intermediateInteractionIsOver() {
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        _document.addToHistory(_toAddToHistory);
+        _document.setInProgress(false);
+        _document.insertContinuationString();
+        _notifyInteractionEnded();
+      }
+    });
+    scrollToCaret();
+  }
+
   /** Notifies listeners that an interaction has ended. (Subclasses must maintain listeners.) */
   protected abstract void _notifyInteractionEnded();
   
@@ -635,10 +647,16 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 //    Utilities.show("InteractionsModel.replReturned(...) passed '" + result + "'");
     _secondToLastError = _lastError;
     _lastError = null;
-    append(result + "\n", style);
-    _interactionIsOver();
+    if (result.equals("     | ")) {
+      append("", style);
+      _intermediateInteractionIsOver();
+    }
+    else {
+      append(result + "", style);
+      _interactionIsOver();
+    }
   }
-  
+
   /**
    * Default behavior set to return what it's given. 
    * Used to replace line number and file name in a throwable when the error
