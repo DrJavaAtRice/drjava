@@ -1044,9 +1044,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     _model.addListener(listener);
     File f = tempFile();
     FileSelector fs = new FileSelector(f);
-    String s1 = "int x = 5;";
-    String s2 = "System.out.println(\"x = \" + x)";
-    String s3 = "int y;" + newLine + "int z;";
+    String s1 = "val x = 5";
+    String s2 = "println(\"x = \" + x);";
+    String s3 = "val y = 12" + newLine + "val z = 7";
     listener.assertInteractionStartCount(0);
     listener.assertInteractionEndCount(0);
     
@@ -1099,6 +1099,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     // check that output of loaded history is correct
     ConsoleDocument con = _model.getConsoleDocument();
     debug.log(con.getDocText(0, con.getLength()).trim());
+    System.out.println("Output text is '" + con.getDocText(0, con.getLength()).trim() + "'");
     assertEquals("Output of loaded history is not correct", "x = 5", con.getDocText(0, con.getLength()).trim());
     listener.assertInteractionStartCount(4);
     listener.assertInteractionEndCount(4);
@@ -1119,19 +1120,21 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     File f2 = tempFile(2);
     FileSelector fs1 = new FileSelector(f1);
     FileSelector fs2 = new FileSelector(f2);
-    String s1 = "int x = 5;";
-    String s2 = "System.out.println(\"x = \" + x)";
-    String s3 = "x = 5;";
-    String s4 = "System.out.println(\"x = \" + x)";
+    String s1 = "val x = 5";
+    String s2 = "println(\"x = \" + x);";
+    String s3 = "val x = 5;";
+    String s4 = "println(\"x = \" + x)";
     IOUtil.writeStringToFile(f1, s1 + '\n' + s2 + '\n');
     IOUtil.writeStringToFile(f2, s3 + '\n' + s4 + '\n');
     
     listener.assertInteractionStartCount(0);
     safeLoadHistory(fs1);
+    System.out.println("fs1[" + fs1 + "]");
     listener.waitInteractionDone();
     
     listener.logInteractionStart();
     safeLoadHistory(fs2);
+    System.out.println("fs2[" + fs2 + "]");
     listener.waitInteractionDone();
     
     // check that output of loaded history is correct

@@ -49,8 +49,8 @@ import java.util.Iterator;
   * with the OptionComponent's label.
   * @version $Id$
   */
-public class ForcedChoiceOptionComponent extends OptionComponent<String,JComboBox> {
-  private volatile JComboBox _comboBox;
+public class ForcedChoiceOptionComponent extends OptionComponent<String,JComboBox<String>> {
+  private volatile JComboBox<String> _comboBox;
 
   /** Main constructor builds a panel containing a set of radio buttons for the
     * legal values of the ForcedChoiceOption.
@@ -60,7 +60,7 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String,JComboBo
 
     // Build the combo box from the Iterator of legal values
     Iterator<String> values = option.getLegalValues();
-    _comboBox = new JComboBox();
+    _comboBox = new JComboBox<String>();
     
     _comboBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) { notifyChangeListeners(); }
@@ -112,7 +112,7 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String,JComboBo
     */
   public boolean updateConfig() {
     String oldValue = DrJava.getConfig().getSetting(_option);
-    String newValue = _comboBox.getSelectedItem().toString();
+    String newValue = _comboBox.getSelectedItem().toString();  // An ugly workaround; toString() should be unnecessary.
 
     if (! newValue.equals(oldValue)) { DrJava.getConfig().setSetting(_option, newValue); }
 
@@ -121,7 +121,7 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String,JComboBo
   
   /** @return the value currently displayed in the combo box. */
   public String getCurrentComboBoxValue() {
-    return _comboBox.getSelectedItem().toString();
+    return _comboBox.getSelectedItem().toString();  // An ugly workaround; toString() should be unnecessary.
   }
 
   /** Displays the given value. */

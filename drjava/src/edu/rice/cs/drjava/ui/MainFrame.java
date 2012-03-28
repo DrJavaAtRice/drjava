@@ -1405,7 +1405,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                     true, // ignore case
                                                     info,
                                                     strategies,
-                                                    actions, 1, // cancel is action 1
+                                                    actions, 
+                                                    1, // cancel is action 1
                                                     new GoToFileListEntry(null, "dummyGoto")) {
         public void setOwnerEnabled(boolean b) {
           if (b) { hourglassOff(); } else { hourglassOn(); }

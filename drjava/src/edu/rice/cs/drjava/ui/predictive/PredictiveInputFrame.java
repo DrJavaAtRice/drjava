@@ -68,16 +68,20 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     *  @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
     *  @param items list of items
     */
-  
   public PredictiveInputFrame(SwingFrame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
                               List<PredictiveInputModel.MatchingStrategy<T>> strategies,
-                              List<CloseAction<T>> actions, int cancelIndex, Collection<T> items) {
+                              List<CloseAction<T>> actions, int cancelIndex, T item) {
     super(title);
     _strategies = strategies;
-    _strategyBox = new JComboBox<T>((T[]) _strategies.toArray());  // An ugly hack that would fail with first class generics
+    @SuppressWarnings("unchecked")
+    T[] strategyArray = (T[]) _strategies.toArray();  // An ugly hack that would fail with first class generics
+    _strategyBox = new JComboBox<T>(strategyArray);  
     _currentStrategy = _strategies.get(0);
-    _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, items);
-    _matchList = new JList<T>((T[]) _pim.getMatchingItems().toArray());  // This is a hack and would fail if generics were first-class.
+    _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, item);
+
+    @SuppressWarnings("unchecked")
+    T[] itemArray = (T[]) _pim.getMatchingItems().toArray(); // An ugly hack that would fail if generics were first-class.
+    _matchList = new JList<T>(itemArray); 
     _force = force;
     _info = info;
     _lastState = null;
@@ -89,20 +93,21 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     initDone(); // call mandated by SwingFrame contract
   }
   
-  /** Create a new predictive string input frame.
-    *  @param owner owner frame
-    *  @param force true if the user is forced to select one of the items
-    *  @param info information supplier to use for additional information display
-    *  @param strategies array of matching strategies
-    *  @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
-    *  @param items varargs/array of items
-    */
-  public PredictiveInputFrame(SwingFrame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
-                              List<PredictiveInputModel.MatchingStrategy<T>> strategies,
-                              List<CloseAction<T>> actions, int cancelIndex, T... items) {
-    this(owner, title, force, ignoreCase, info, strategies, actions, cancelIndex, Arrays.asList(items));
-  }
-  
+//  /** Create a new predictive string input frame.
+//    *  @param owner owner frame
+//    *  @param force true if the user is forced to select one of the items
+//    *  @param info information supplier to use for additional information display
+//    *  @param strategies array of matching strategies
+//    *  @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
+//    *  @param items varargs/array of items
+//    */
+//  @SuppressWarnings({"unchecked","varargs"})
+//  public PredictiveInputFrame(SwingFrame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
+//                              List<PredictiveInputModel.MatchingStrategy<T>> strategies,
+//                              List<CloseAction<T>> actions, int cancelIndex, T... items) {
+//    this(owner, title, force, ignoreCase, info, strategies, actions, cancelIndex, Arrays.asList(items));
+//  }
+//  
   /** Interface that is used to generate additional information about an item. */
   public static interface InfoSupplier<X> extends Lambda<X,String> { }
   
@@ -334,8 +339,11 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     * @param ignoreCase true if case should be ignored
     * @param items varargs/array of items
     */
-  public void setItems(boolean ignoreCase, T... items) {
-    _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, items);
+  @SafeVarargs
+  public final void setItems(boolean ignoreCase, T... items) {
+    @SuppressWarnings("varargs")
+    T[] itemsArray = items;
+    _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, Arrays.asList(itemsArray));
     removeListener();
     updateTextField();
     updateExtensionLabel();
@@ -373,8 +381,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     */
   public String getText() {
     if (_force) {
-      @SuppressWarnings("unchecked") 
-      T item = (T)_matchList.getSelectedValue();
+//      @SuppressWarnings("unchecked") 
+      T item = _matchList.getSelectedValue();
       return (item == null) ? "" : _currentStrategy.force(item,_textField.getText());
     }
     return _textField.getText();
@@ -384,9 +392,8 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     * @return item that was selected or null
     */
   public T getItem() {
-    if (!_force && _pim.getMatchingItems().size() == 0) return null;
-    @SuppressWarnings("unchecked") 
-    T item = (T)_matchList.getSelectedValue();
+    if (!_force && _pim.getMatchingItems().size() == 0) return null; 
+    T item = _matchList.getSelectedValue();
     return item;
   }
   
@@ -736,8 +743,11 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   }
   
   /** Update the match list based on the model. */
+
   private void updateList() {
-    _matchList.setListData((T[]) _pim.getMatchingItems().toArray());  // An ugly hack that would fail with first-class generics
+    @SuppressWarnings("unchecked") 
+    T[] items = (T[]) _pim.getMatchingItems().toArray(); // An ugly hack that would fail with first-class generics
+    _matchList.setListData(items);  
     _matchList.setSelectedValue(_pim.getCurrentItem(), true);
     updateExtensionLabel();
     updateInfo();
@@ -752,8 +762,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   private void updateInfo() {
     if (_info == null) return;
     if (_matchList.getModel().getSize() > 0) {
-      @SuppressWarnings("unchecked") 
-      T item = (T)_matchList.getSelectedValue();
+      T item = _matchList.getSelectedValue();
       _infoLabel.setText("Path:   " + _info.value(item));
       _infoLabel.setToolTipText(_info.value(item));
     }

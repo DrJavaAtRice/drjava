@@ -101,7 +101,9 @@ public class ProjectAdvancedPropertiesFrame extends SwingFrame {
   }
   
   public static final PredictiveInputModel<PreferencesRecord> STORED_PROPERTIES_PIM =
-    new PredictiveInputModel<PreferencesRecord>(true, new PredictiveInputModel.FragmentStrategy<PreferencesRecord>());
+    new PredictiveInputModel<PreferencesRecord>(true, 
+                                                new PredictiveInputModel.FragmentStrategy<PreferencesRecord>(), 
+                                                new ArrayList<PreferencesRecord>());
 
   static {
     ArrayList<PreferencesRecord> list = new ArrayList<PreferencesRecord>();

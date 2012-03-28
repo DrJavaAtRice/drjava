@@ -165,18 +165,18 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
     
     // Value is either a bonafide Color or null (formerly Color or "None")
-    public Component getListCellRendererComponent(JList list, Color value, int row, boolean sel, boolean hasFocus) {
+    public Component getListCellRendererComponent(JList<? extends Color> list, Color color, int row, boolean sel, boolean hasFocus) {
       JComponent renderer;
-      if (value != null) {
-        _color = (Color) value;
+      if (color != null) {
+        _color = color;
         renderer = this;
       }
-      else {
-        JLabel l = (JLabel) _defaultRenderer.getListCellRendererComponent(list, value, row, sel, hasFocus);
+      else { // color is null meaning "none"
+        JLabel l = (JLabel) _defaultRenderer.getListCellRendererComponent(list, color, row, sel, hasFocus);
         l.setHorizontalAlignment(JLabel.CENTER);
         renderer = l;
       }
-      // Taken out because this is a 1.5 method; not sure if it's necessary
+      // Taken out because this is a Java 5 method; not sure if it's necessary
       renderer.setPreferredSize(_size);
       return renderer;
     }

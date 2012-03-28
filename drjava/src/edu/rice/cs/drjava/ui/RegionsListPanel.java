@@ -60,8 +60,8 @@ import edu.rice.cs.util.swing.RightClickMouseAdapter;
 public abstract class RegionsListPanel<R extends IDocumentRegion> extends TabbedPanel {
   protected JPanel _leftPane;
   
-  protected JList _list;
-  protected DefaultListModel _listModel;
+  protected JList<RegionListUserObj<R>> _list;
+  protected DefaultListModel<RegionListUserObj<R>> _listModel;
   protected String _title;
   
   protected final SingleDisplayModel _model;
@@ -119,13 +119,13 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
   
   /** Creates the region list. */
   private void _setupRegionList() {
-    _listModel = new DefaultListModel();
-    _list = new JList(_listModel) {
+    _listModel = new DefaultListModel<RegionListUserObj<R>>();
+    _list = new JList<RegionListUserObj<R>>(_listModel) {
       public String getToolTipText(MouseEvent evt) {
         // Get item
         int index = locationToIndex(evt.getPoint());
         
-        @SuppressWarnings("unchecked") RegionListUserObj<R> node = (RegionListUserObj<R>)getModel().getElementAt(index);
+        RegionListUserObj<R> node = getModel().getElementAt(index);
         R r = node.region();
         String tooltip = null;
         
@@ -227,7 +227,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
     int[] indices = _list.getSelectedIndices();
     if (indices != null) {
       for (int index: indices) {
-        @SuppressWarnings("unchecked") RegionListUserObj<R> userObj = ((RegionListUserObj<R>)_listModel.elementAt(index));
+        RegionListUserObj<R> userObj = _listModel.elementAt(index);
         R r = userObj.region();
         regs.add(r);
       }
@@ -248,8 +248,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
   /** @return the usser object in the list associated with the region, or null if not found */
   protected RegionListUserObj<R> getUserObjForRegion(R r) {
     for(int i = 0; i < _listModel.size(); ++i) {
-      @SuppressWarnings("unchecked") 
-      RegionListUserObj<R> userObj = (RegionListUserObj<R>)_listModel.get(i);
+      RegionListUserObj<R> userObj = _listModel.get(i);
       if ((userObj.region().getStartOffset() == r.getStartOffset()) &&
           (userObj.region().getEndOffset() == r.getEndOffset()) &&
           (userObj.region().getDocument().equals(r.getDocument()))) {
@@ -301,7 +300,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
 //        }
     
     for (int i = 0; i < _listModel.size(); ++i) {
-      @SuppressWarnings("unchecked") RegionListUserObj<R> userObj = (RegionListUserObj<R>)_listModel.get(i);
+      RegionListUserObj<R> userObj = _listModel.get(i);
       if (userObj.region() == r) {
         _listModel.removeElementAt(i);
         break;
@@ -324,7 +323,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
 ////        catch (ClassNameNotFoundException cnnfe) { name = odd.toString(); }
 //        
 //        for (int i = 0; i < _listModel.size(); ++i) {
-//          @SuppressWarnings("unchecked") RegionListUserObj<R> userObj = (RegionListUserObj<R>)_listModel.get(i);
+//          RegionListUserObj<R> userObj = _listModel.get(i);
 //          
 //          if (userObj.region().getDocument().equals(odd)) {
 //            _listModel.removeElementAt(i);
@@ -363,7 +362,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
     }
 //    public boolean equals(Object other) {
 //      if ((other == null) || ! (other instanceof RegionListUserObj)) { return false; }
-//      @SuppressWarnings("unchecked") RegionListUserObj<R> o = (RegionListUserObj<R>)other;
+//      RegionListUserObj<R> o = other;
 //      return (o.region().getDocument().equals(region().getDocument())) &&
 //        (o.region().getStartOffset() == region().getStartOffset()) &&
 //        (o.region().getEndOffset() == region().getEndOffset());

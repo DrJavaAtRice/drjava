@@ -50,14 +50,12 @@ import edu.rice.cs.util.swing.Utilities;
   * the model.  However, all of the public methods that access and modify the model (the latter only running
   * in the event thread) must be atomic relative to each other, so synchronization is required in most
   * cases.
-  * 
-  * TODO: generify this class and IDocumentNavigator with respect to its element type once JList is. 
   */
 
-class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDocumentNavigator<ItemT> {
+class JListNavigator<ItemT extends INavigatorItem> extends JList<ItemT> implements IDocumentNavigator<ItemT> {
   
   /** The list model (extending AbstractListModel) for this JList. */
-  protected DefaultListModel _model;
+  protected DefaultListModel<ItemT> _model;
   
   /** The current selection value.  A cached copy of getSelectedValue(). */
   private volatile ItemT _current = null;
@@ -74,10 +72,10 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   /** Standard constructor. */
   public JListNavigator() { 
     super();
-    init(new DefaultListModel());
+    init(new DefaultListModel<ItemT>());
   }
   
-  private void init(DefaultListModel m) {
+  private void init(DefaultListModel<ItemT> m) {
     _model = m;
     setModel(m);
     setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -90,7 +88,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
 //        Utilities.invokeLater( new Runnable() {
 //          public void run() {
         if (!e.getValueIsAdjusting() && !_model.isEmpty()) {
-          @SuppressWarnings("unchecked") final ItemT newItem = (ItemT) getSelectedValue();
+          final ItemT newItem = getSelectedValue();
 //              final int newIndex = getSelectedIndex();
           if (_current != newItem) {                                
             final ItemT oldItem = _current;                                
@@ -140,7 +138,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
     * is fixed.
     */
   protected ItemT getFromModel(int i) {
-    @SuppressWarnings("unchecked") ItemT result = (ItemT) _model.get(i);
+    ItemT result = _model.get(i);
     return result;
   }
   
@@ -247,7 +245,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   public ArrayList<ItemT> getDocuments() { 
     synchronized(_model) {
 //    Cast forced by lousy generic typing of DefaultListModel in Java 1.5
-      @SuppressWarnings("unchecked") Enumeration<ItemT> items = (Enumeration<ItemT>) _model.elements();
+      Enumeration<ItemT> items = _model.elements();
       ArrayList<ItemT> result = new ArrayList<ItemT>(_model.size());
       while (items.hasMoreElements()) result.add(items.nextElement());
       return result;                               
@@ -356,7 +354,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
 //    ArrayList<ItemT> l = new ArrayList<ItemT>(selected.length);
 //    for (Object o: selected) { l.add((ItemT)o); }
     ArrayList<ItemT> l = new ArrayList<ItemT>(1);
-    l.add((ItemT)getSelectedValue());
+    l.add(getSelectedValue());
     return l;
   }
   
@@ -404,7 +402,8 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
       * @param isSelected
       * @param hasFocus
       */
-    public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean hasFocus) {
+    @Override
+    public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean hasFocus) {
       
       super.getListCellRendererComponent(list, value, index, isSelected, hasFocus);
       setText(((INavigatorItem)value).getName());

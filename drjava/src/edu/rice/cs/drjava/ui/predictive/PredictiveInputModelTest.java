@@ -38,6 +38,8 @@ package edu.rice.cs.drjava.ui.predictive;
 
 import edu.rice.cs.drjava.DrJavaTestCase;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -45,13 +47,12 @@ import java.util.Set;
  * Unit tests for PredictiveInputModel class.
  */
 public class PredictiveInputModelTest extends DrJavaTestCase {
+  final String[] names = new String[] {"AboutDialog.java", "FileOps.java", "FileOpsTest.java", "Utilities.java"};
+  final List<String> namesList = Arrays.asList(names);
+  
   public void testInitial() {
-    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false,
-                                                                        new PredictiveInputModel.PrefixStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+    PredictiveInputModel<String> pim = 
+      new PredictiveInputModel<String>(false, new PredictiveInputModel.PrefixStrategy<String>(), namesList);
     assertEquals("AboutDialog.java", pim.getCurrentItem());
     assertEquals("", pim.getMask());
     assertEquals(4, pim.getMatchingItems().size());
@@ -59,8 +60,8 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   }
 
   public void testEmpty() {
-    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false,
-                                                                        new PredictiveInputModel.PrefixStrategy<String>());
+    PredictiveInputModel<String> pim = 
+      new PredictiveInputModel<String>(false, new PredictiveInputModel.PrefixStrategy<String>(), new ArrayList<String>());
     assertEquals(null, pim.getCurrentItem());
     assertEquals("", pim.getMask());
     assertEquals(0, pim.getMatchingItems().size());
@@ -132,12 +133,8 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   }
   
   public void testNarrowingWithExtend() {
-    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false,
-                                                                        new PredictiveInputModel.PrefixStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+    PredictiveInputModel<String> pim = 
+      new PredictiveInputModel<String>(false, new PredictiveInputModel.PrefixStrategy<String>(), namesList);
     pim.setMask("F");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F", pim.getMask());
@@ -170,12 +167,8 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   }
 
   public void testNarrowingWithSet() {
-    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false,
-                                                                        new PredictiveInputModel.PrefixStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+    PredictiveInputModel<String> pim = 
+      new PredictiveInputModel<String>(false, new PredictiveInputModel.PrefixStrategy<String>(), namesList);
     pim.setMask("F");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F", pim.getMask());
@@ -208,12 +201,8 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   }
 
   public void testWidening() {
-    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false,
-                                                                        new PredictiveInputModel.PrefixStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+    PredictiveInputModel<String> pim = 
+      new PredictiveInputModel<String>(false, new PredictiveInputModel.PrefixStrategy<String>(), namesList);
     pim.setMask("FileOps.");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("FileOps.", pim.getMask());
@@ -240,12 +229,8 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   }
 
   public void testSetMatching() {
-    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false,
-                                                                        new PredictiveInputModel.PrefixStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+    PredictiveInputModel<String> pim = 
+      new PredictiveInputModel<String>(false, new PredictiveInputModel.PrefixStrategy<String>(), namesList);
     pim.setMask("F");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F", pim.getMask());
@@ -268,12 +253,8 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   }
 
   public void testSetNotMatching() {
-    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false,
-                                                                        new PredictiveInputModel.PrefixStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+    PredictiveInputModel<String> pim = 
+      new PredictiveInputModel<String>(false, new PredictiveInputModel.PrefixStrategy<String>(), namesList);
     pim.setMask("F");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F", pim.getMask());
@@ -294,12 +275,8 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   }
 
   public void testSetNotInList() {
-    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false,
-                                                                        new PredictiveInputModel.PrefixStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+    PredictiveInputModel<String> pim = 
+      new PredictiveInputModel<String>(false, new PredictiveInputModel.PrefixStrategy<String>(), namesList);
     pim.setMask("F");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F", pim.getMask());
@@ -328,10 +305,7 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   public void testIgnoreCaseNarrowingWithExtend() {
     PredictiveInputModel<String> pim = new PredictiveInputModel<String>(true,
                                                                         new PredictiveInputModel.PrefixStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+namesList);
     pim.setMask("f");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("f", pim.getMask());
@@ -366,10 +340,7 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   public void testIgnoreCaseNarrowingWithSet() {
     PredictiveInputModel<String> pim = new PredictiveInputModel<String>(true,
                                                                         new PredictiveInputModel.PrefixStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+namesList);
     pim.setMask("f");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("f", pim.getMask());
@@ -402,12 +373,8 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   }
 
   public void testIgnoreCaseWidening() {
-    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(true,
-                                                                        new PredictiveInputModel.PrefixStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+    PredictiveInputModel<String> pim = 
+      new PredictiveInputModel<String>(true, new PredictiveInputModel.PrefixStrategy<String>(), namesList);
     pim.setMask("fILEOPS.");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("fILEOPS.", pim.getMask());
@@ -434,12 +401,8 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   }
 
   public void testIgnoreCaseSetMatching() {
-    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(true,
-                                                                        new PredictiveInputModel.PrefixStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+    PredictiveInputModel<String> pim = 
+      new PredictiveInputModel<String>(true, new PredictiveInputModel.PrefixStrategy<String>(), namesList);
     pim.setMask("f");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("f", pim.getMask());
@@ -468,12 +431,8 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   }
 
   public void testIgnoreCaseSetNotMatching() {
-    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(true,
-                                                                        new PredictiveInputModel.PrefixStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+    PredictiveInputModel<String> pim = 
+      new PredictiveInputModel<String>(true, new PredictiveInputModel.PrefixStrategy<String>(), namesList);
     pim.setMask("f");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("f", pim.getMask());
@@ -508,10 +467,7 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   public void testIgnoreCaseSetNotInList() {
     PredictiveInputModel<String> pim = new PredictiveInputModel<String>(true,
                                                                         new PredictiveInputModel.PrefixStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+namesList);
     pim.setMask("f");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("f", pim.getMask());
@@ -550,12 +506,8 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   }
   
   public void testFragmentInitial() {
-    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false,
-                                                                        new PredictiveInputModel.FragmentStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+    PredictiveInputModel<String> pim = 
+      new PredictiveInputModel<String>(false, new PredictiveInputModel.FragmentStrategy<String>(), namesList);
     assertEquals("AboutDialog.java", pim.getCurrentItem());
     assertEquals("", pim.getMask());
     assertEquals(4, pim.getMatchingItems().size());
@@ -563,8 +515,8 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   }
 
   public void testFragmentEmpty() {
-    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false,
-                                                                        new PredictiveInputModel.FragmentStrategy<String>());
+    PredictiveInputModel<String> pim = 
+      new PredictiveInputModel<String>(false, new PredictiveInputModel.FragmentStrategy<String>(), new ArrayList<String>());
     assertEquals(null, pim.getCurrentItem());
     assertEquals("", pim.getMask());
     assertEquals(0, pim.getMatchingItems().size());
@@ -637,10 +589,7 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   public void testFragmentNarrowingWithExtend() {
     PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false,
                                                                         new PredictiveInputModel.FragmentStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+namesList);
     pim.setMask("F");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F", pim.getMask());
@@ -670,10 +619,7 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   public void testFragmentNarrowingWithSet() {
     PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false,
                                                                         new PredictiveInputModel.FragmentStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+namesList);
     pim.setMask("F");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F", pim.getMask());
@@ -703,10 +649,7 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   public void testFragmentWidening() {
     PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false,
                                                                         new PredictiveInputModel.FragmentStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+namesList);
     pim.setMask("File Ops.");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("File Ops.", pim.getMask());
@@ -731,10 +674,7 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   public void testFragmentSetMatching() {
     PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false,
                                                                         new PredictiveInputModel.FragmentStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+namesList);
     pim.setMask("F");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F", pim.getMask());
@@ -756,10 +696,7 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   public void testFragmentSetNotMatching() {
     PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false,
                                                                         new PredictiveInputModel.FragmentStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+namesList);
     pim.setMask("F");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F", pim.getMask());
@@ -779,10 +716,7 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   public void testFragmentSetNotInList() {
     PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false,
                                                                         new PredictiveInputModel.FragmentStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+namesList);
     pim.setMask("F");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F", pim.getMask());
@@ -805,8 +739,8 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   }
 
   public void testFragmentIgnoreCaseEmpty() {
-    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(true,
-                                                                        new PredictiveInputModel.FragmentStrategy<String>());
+    PredictiveInputModel<String> pim = 
+      new PredictiveInputModel<String>(true, new PredictiveInputModel.FragmentStrategy<String>(), new ArrayList<String>());
     assertEquals(null, pim.getCurrentItem());
     assertEquals("", pim.getMask());
     assertEquals(0, pim.getMatchingItems().size());
@@ -874,10 +808,7 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   public void testFragmentIgnoreCaseNarrowingWithExtend() {
     PredictiveInputModel<String> pim = new PredictiveInputModel<String>(true,
                                                                         new PredictiveInputModel.FragmentStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+namesList);
     pim.setMask("F");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F", pim.getMask());
@@ -907,10 +838,7 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   public void testFragmentIgnoreCaseNarrowingWithSet() {
     PredictiveInputModel<String> pim = new PredictiveInputModel<String>(true,
                                                                         new PredictiveInputModel.FragmentStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+namesList);
     pim.setMask("F");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F", pim.getMask());
@@ -940,10 +868,7 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   public void testFragmentIgnoreCaseWidening() {
     PredictiveInputModel<String> pim = new PredictiveInputModel<String>(true,
                                                                         new PredictiveInputModel.FragmentStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+namesList);
     pim.setMask("FiLE oPS.");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("FiLE oPS.", pim.getMask());
@@ -966,12 +891,10 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   }
 
   public void testFragmentIgnoreCaseSetMatching() {
-    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(true,
-                                                                        new PredictiveInputModel.FragmentStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+    PredictiveInputModel<String> pim = 
+      new PredictiveInputModel<String>(true,
+                                       new PredictiveInputModel.FragmentStrategy<String>(),
+                                       namesList);
     pim.setMask("F");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F", pim.getMask());
@@ -993,10 +916,7 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   public void testFragmentIgnoreCaseSetNotMatching() {
     PredictiveInputModel<String> pim = new PredictiveInputModel<String>(true,
                                                                         new PredictiveInputModel.FragmentStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+namesList);
     pim.setMask("F");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F", pim.getMask());
@@ -1014,12 +934,8 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   }
 
   public void testFragmentIgnoreCaseSetNotInList() {
-    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(true,
-                                                                        new PredictiveInputModel.FragmentStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java");
+    PredictiveInputModel<String> pim = 
+      new PredictiveInputModel<String>(true, new PredictiveInputModel.FragmentStrategy<String>(), namesList);
     pim.setMask("F");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("F", pim.getMask());
@@ -1042,13 +958,9 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   }
   
   public void testRegExStrategy() {
-    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false,
-                                                                        new PredictiveInputModel.RegExStrategy<String>(),
-                                                                        "AboutDialog.java",
-                                                                        "FileOps.java",
-                                                                        "FileOpsTest.java",
-                                                                        "Utilities.java",
-                                                                        "NewFileOps.java");
+    final String[] names2 = new String[] {"AboutDialog.java", "FileOps.java", "FileOpsTest.java", "Utilities.java", "NewFileOps.java"};
+    final List<String> names2List = Arrays.asList(names2);
+    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(false, new PredictiveInputModel.RegExStrategy<String>(), names2List);
     pim.setMask("^F.*");
     assertEquals("FileOps.java", pim.getCurrentItem());
     assertEquals("^F.*", pim.getMask());
@@ -1073,13 +985,11 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
   }
 
   public void testFragmentLineNumStrategy() {
-    PredictiveInputModel<String> pim = new PredictiveInputModel<String>(true,
-                                                                        new PredictiveInputModel.FragmentLineNumStrategy<String>(),
-                                                                        "Frame",
-                                                                        "JFrame",
-                                                                        "Window",
-                                                                        "JWindow",
-                                                                        "Test");
+    final String[] names3 = new String[] {"Frame", "JFrame", "Window", "JWindow", "Test"};
+    final List<String> names3List = Arrays.asList(names3);
+    
+    PredictiveInputModel<String> pim = 
+      new PredictiveInputModel<String>(true, new PredictiveInputModel.FragmentLineNumStrategy<String>(), names3List);
     pim.setMask("");
     assertEquals(5, pim.getMatchingItems().size());
     assertTrue(pim.getMatchingItems().contains("Frame"));

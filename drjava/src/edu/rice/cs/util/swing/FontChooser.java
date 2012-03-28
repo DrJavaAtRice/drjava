@@ -251,7 +251,7 @@ public class FontChooser extends JDialog {
     * selected item.
     */
   public class NwList extends JPanel {
-    JList jl;
+    JList<String> jl;
     JScrollPane sp;
     JLabel jt;
     String si = " ";
@@ -261,7 +261,7 @@ public class FontChooser extends JDialog {
       GridBagConstraints c = new GridBagConstraints();
       setLayout(cpLayout);
      
-      jl = new JList(values);
+      jl = new JList<String>(values);
       sp = new JScrollPane(jl);
       jt = new JLabel();
       jt.setBackground(Color.white);
@@ -271,8 +271,8 @@ public class FontChooser extends JDialog {
       jt.setFont(getFont());
       jl.addListSelectionListener(new ListSelectionListener() {
         public void valueChanged(ListSelectionEvent e) {
-          jt.setText((String) jl.getSelectedValue());
-          si = (String) jl.getSelectedValue();
+          jt.setText(jl.getSelectedValue());
+          si = jl.getSelectedValue();
           showSample();
         }
       });

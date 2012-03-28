@@ -72,11 +72,22 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
    * @param strategy matching strategy to use
    * @param items varargs/array of items
    */
-  public PredictiveInputModel(boolean ignoreCase, MatchingStrategy<T> strategy, T... items) {
+  public PredictiveInputModel(boolean ignoreCase, MatchingStrategy<T> strategy, T item) {
     _ignoreCase = ignoreCase;
     _strategy = strategy;
-    setItems(items);
+    setItems(item);
   }
+  
+//  /** Create a new predictive input model.
+//   * @param ignoreCase true if case should be ignored
+//   * @param strategy matching strategy to use
+//   * @param items varargs/array of items
+//   */
+//  public PredictiveInputModel(boolean ignoreCase, MatchingStrategy<T> strategy, T... items) {
+//    _ignoreCase = ignoreCase;
+//    _strategy = strategy;
+//    setItems(items);
+//  }
   
   /** Strategy used for matching and mask extension. */
   public static interface MatchingStrategy<X extends Comparable<? super X>> {
@@ -615,7 +626,8 @@ public class PredictiveInputModel<T extends Comparable<? super T>> {
   /** Sets the list
     * @param items varargs/array of items
     */
-  public void setItems(T... items) {
+  @SafeVarargs
+  public final void setItems(T... items) {
     _items = new ArrayList<T>(items.length);
     for(T s: items) _items.add(s);
     Collections.sort(_items);

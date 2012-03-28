@@ -70,7 +70,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Banner prefix. */
-  public static final String BANNER_PREFIX = "Welcome to DrJava.";
+  public static final String BANNER_PREFIX = "Welcome to DrScala.";
 
   /** Number of milliseconds to wait after each println, to prevent the JVM from being flooded
     * with print calls. */
@@ -371,7 +371,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       for (String curr: interactions) {
         int len = curr.length();
         buf.append(curr);
-        if (len > 0 && curr.charAt(len - 1) != ';')  buf.append(';');
+//        if (len > 0 && curr.charAt(len - 1) != ';')  buf.append(';');
         buf.append(StringOps.EOL);
       }
     }

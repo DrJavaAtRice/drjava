@@ -62,7 +62,7 @@ import edu.rice.cs.util.FileOps;
   */
 public class NewVersionPopup extends JDialog {
   /** whether to keep displaying this dialog, and for which releases */
-  private JComboBox _modeBox;
+  private JComboBox<String> _modeBox;
   /** the button that closes this window */
   private JButton _closeButton;
   /** the button that updates to the new version */
@@ -91,9 +91,10 @@ public class NewVersionPopup extends JDialog {
     _mainFrame = parent;
     _mainFrame.setPopupLoc(this);
     this.setSize(500,150);
-    
-    _modeBox = new JComboBox(OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.toArray());
-    for(int i = 0; i < OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.size(); ++i) {
+    @SuppressWarnings("unchecked")
+    String[] choices = (String[]) OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.toArray();  // An ugly hack that fails with first class generics
+    _modeBox = new JComboBox<String>(choices);
+    for (int i = 0; i < OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.size(); ++i) {
       if (DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
             .equals(OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.get(i))) {
         _modeBox.setSelectedIndex(i);

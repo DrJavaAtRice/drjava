@@ -120,7 +120,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
   /** Ok button. */
   private JButton _okButton;
   /** List of commands. */
-  private JList _list;
+  private JList<String> _list;
   /** Completion monitor to simulate modal behavior. */
   protected CompletionMonitor _editExternalDialogMonitor = new CompletionMonitor();
   
@@ -268,7 +268,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
     bottom.add(Box.createHorizontalGlue());
     mainPanel.add(bottom, BorderLayout.SOUTH);
 
-    _list = new JList();
+    _list = new JList<String>();
     _list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     _list.addListSelectionListener(new ListSelectionListener() {
       public void valueChanged(ListSelectionEvent e) {
@@ -525,20 +525,14 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
     _list.setListData(names);
     _editButton.setEnabled(names.size() > 0);
     _removeButton.setEnabled(names.size() > 0);
-    if (names.size() > 0) {
-      _list.setSelectedIndex(selectedIndex);
-    }
-    else {
-      _list.clearSelection();
-    }
-    _upButton.setEnabled((_list.getModel().getSize() > 0) &&
-                         (_list.getSelectedIndex() > 0));
-    _upAction.setEnabled((_list.getModel().getSize() > 0) &&
-                         (_list.getSelectedIndex() > 0));
-    _downButton.setEnabled((_list.getModel().getSize() > 0) &&
-                           (_list.getSelectedIndex() < _list.getModel().getSize()-1));
-    _downAction.setEnabled((_list.getModel().getSize() > 0) &&
-                           (_list.getSelectedIndex() < _list.getModel().getSize()-1));
+    
+    if (names.size() > 0) _list.setSelectedIndex(selectedIndex);
+    else _list.clearSelection();
+
+    _upButton.setEnabled((_list.getModel().getSize() > 0) && (_list.getSelectedIndex() > 0));
+    _upAction.setEnabled((_list.getModel().getSize() > 0) && (_list.getSelectedIndex() > 0));
+    _downButton.setEnabled((_list.getModel().getSize() > 0) && (_list.getSelectedIndex() < _list.getModel().getSize()-1));
+    _downAction.setEnabled((_list.getModel().getSize() > 0) && (_list.getSelectedIndex() < _list.getModel().getSize()-1));
     _exportButton.setEnabled(names.size() > 0);
     _exportAction.setEnabled(names.size() > 0);
   }

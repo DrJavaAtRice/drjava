@@ -5,8 +5,8 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.util.*;
 
-/** A JList with checkboxes for each item. */
-public class CheckBoxJList extends JList implements ListSelectionListener {
+/** A JList with checkboxes (represented as Strings) for each item. */
+public class CheckBoxJList extends JList<String> implements ListSelectionListener {
   static Color listForeground;
   static Color listBackground;
   static Color listSelectionForeground;
@@ -22,12 +22,12 @@ public class CheckBoxJList extends JList implements ListSelectionListener {
   
   HashSet<Integer> selectionCache = new HashSet<Integer>();
   
-  protected void init(Vector<?> listData, Vector<?> selData) {
+  protected void init(Vector<String> listData, Vector<String> selData) {
     setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     CheckBoxListCellRenderer r = new CheckBoxListCellRenderer();
     if (selData != null) {
       int i = 0;
-      for(Object t: listData) {
+      for(String t: listData) {
         boolean sel = false;
         if (selData.contains(t)) {
           selectionCache.add(i);
@@ -46,22 +46,22 @@ public class CheckBoxJList extends JList implements ListSelectionListener {
     addListSelectionListener(this);
   }
 
-  public CheckBoxJList(Vector<?> listData) {
+  public CheckBoxJList(Vector<String> listData) {
     super(listData);
     init(listData, null);
   }
 
-  public CheckBoxJList(Vector<?> listData, Vector<?> selData) {
+  public CheckBoxJList(Vector<String> listData, Vector<String> selData) {
     super(listData);
     init(listData, selData);
   }
   
   @SuppressWarnings({"unchecked"})
-  public CheckBoxJList(ListModel lm) {
+  public CheckBoxJList(ListModel<String> lm) {
     super(lm);
-    Vector<Object> listData = new Vector<Object>();
+    Vector<String> listData = new Vector<String>();
     for(int i = 0; i < lm.getSize(); ++i) listData.add(lm.getElementAt(i));
-    init(listData, new Vector<Object>());
+    init(listData, new Vector<String>());
   }
   
   // ListSelectionListener implementation
@@ -108,7 +108,7 @@ public class CheckBoxJList extends JList implements ListSelectionListener {
     }
   }
     
-  private static class CheckBoxListCellRenderer extends JComponent implements ListCellRenderer<Object> {
+  private static class CheckBoxListCellRenderer extends JComponent implements ListCellRenderer<String> {
     DefaultListCellRenderer defaultComp;
     JCheckBox checkbox;
     public CheckBoxListCellRenderer() {
@@ -119,8 +119,8 @@ public class CheckBoxJList extends JList implements ListSelectionListener {
       add(defaultComp, BorderLayout.CENTER);
     }
     
-    public Component getListCellRendererComponent(JList list,
-                                                  Object value,
+    public Component getListCellRendererComponent(JList<? extends String> list,
+                                                  String value,
                                                   int index,
                                                   boolean isSelected,
                                                   boolean cellHasFocus) {
