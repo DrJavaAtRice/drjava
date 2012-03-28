@@ -61,6 +61,8 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   /** The default prompt to use in the console. */
   public static final String DEFAULT_CONSOLE_PROMPT = "";
   
+  public static final String DEFAULT_CONTINUATION_STRING = "";
+  
   /** Default text style. */
   public static final String DEFAULT_STYLE = "default";
   
@@ -85,6 +87,9 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
   /** String to use for the prompt. */
   protected volatile String _prompt;
   
+  /** String to use in multiline expressions */
+  protected volatile String _continuationString;
+  
   /** The book object used for printing that represents several pages */
   protected volatile DrJavaBook _book;
   
@@ -96,6 +101,9 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     
     _beep = new Runnable() { public void run() { } };
     _prompt = DEFAULT_CONSOLE_PROMPT;
+    
+    _continuationString = DEFAULT_CONTINUATION_STRING;
+    
     _promptPos = DEFAULT_CONSOLE_PROMPT.length();
     _document.setHasPrompt(false);
     _document.setEditCondition(new ConsoleEditCondition()); // Prevent any edits before the prompt!
@@ -164,6 +172,18 @@ public class ConsoleDocument implements ConsoleDocumentInterface {
     }
     catch (EditDocumentException e) { throw new UnexpectedException(e);  }
   }
+  
+  /** Prints a continuation string for new input in a multiline expression. */
+  public void insertContinuationString() {
+    try {
+      int len = _document.getLength();
+      // Update _promptPos before updating _document because insertText runs insertUpdate to adjust caret
+      _promptPos = len + _continuationString.length();
+      forceInsertText(len, _continuationString, DEFAULT_STYLE); // need forceAppend!
+      _document.setHasPrompt(true);
+    }
+    catch (EditDocumentException e) { throw new UnexpectedException(e);  }
+  }  
   
   /** Disables the prompt in this document. */
   public void disablePrompt() {
