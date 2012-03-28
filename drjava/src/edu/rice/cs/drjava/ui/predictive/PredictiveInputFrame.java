@@ -49,7 +49,6 @@ import java.util.Arrays;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
 
-
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Runnable1;
@@ -58,7 +57,8 @@ import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.DrJavaRoot;
 
-/** Frame with predictive string input based on a list of strings. */
+/** Frame with predictive string input based on a list of strings.  NOTE: the Comparable bound on type variable T
+  * implies that the erasure of T is Comparable not Object! */
 public class PredictiveInputFrame<T extends Comparable<? super T>> extends SwingFrame {
   
   /** Interface that is used to generate additional information about an item. */
@@ -214,7 +214,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     _currentStrategy = _strategies.get(0);
     _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, items);
     @SuppressWarnings("unchecked")
-    T[] matchingItems = (T[]) _pim.getMatchingItems().toArray();  // UGLY
+    T[] matchingItems = (T[]) IterUtil.toArray(_pim.getMatchingItems(), Comparable.class);  // T erases to Comparable!
     _matchList = new JList<T>(matchingItems);
     _force = force;
     _info = info;
@@ -746,7 +746,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   /** Update the match list based on the model. */
   private void updateList() {
     @SuppressWarnings("unchecked")
-    T[] matchingItems = (T[]) _pim.getMatchingItems().toArray();
+    T[] matchingItems = (T[]) IterUtil.toArray(_pim.getMatchingItems(), Comparable.class);  // T erases to Comparable!
     _matchList.setListData(matchingItems);
     _matchList.setSelectedValue(_pim.getCurrentItem(), true);
     updateExtensionLabel();
