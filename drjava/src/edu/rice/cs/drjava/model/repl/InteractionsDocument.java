@@ -58,7 +58,10 @@ public class InteractionsDocument extends ConsoleDocument {
   
   /** Default prompt. */
   public static final String DEFAULT_PROMPT = "> ";
-  
+
+  /** continuation string for multiline expressions */
+  public static final String CONTINUATION_STRING = "     | ";
+
   /** Style for error messages */
   public static final String ERROR_STYLE = "error";
   
@@ -103,6 +106,7 @@ public class InteractionsDocument extends ConsoleDocument {
     _history = history;
     _document.setHasPrompt(true);
     _prompt = DEFAULT_PROMPT;
+    _continuationString = CONTINUATION_STRING;
   }
   
   /** Lets this document know whether an interaction is in progress.
