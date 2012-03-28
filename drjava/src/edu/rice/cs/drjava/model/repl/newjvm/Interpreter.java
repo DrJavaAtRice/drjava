@@ -69,7 +69,7 @@ public class Interpreter {
   /**
    * Used to catch scala interpreter commands.
    *
-   * The Scala ILoop interpreter accepts colon command interface for a variety
+   * The Scala ILoop interpreter accepts colon command for a variety
    * of functions, such as ":paste", ":run", and ":quit".  The ":quit" command
    * can kill the interpreter, thus leaving the interactions pane unusable.
    * This regex is used to catch those colon commands so they can be ignored.
@@ -196,7 +196,8 @@ public class Interpreter {
       String s = outputStrings.take();
 
       /* if the prompt or continuation string is returned, we're done */
-      if (s.equals("\nscala> ") || s.equals("     | ")) return "";
+      if (s.equals("\nscala> ")) return "";
+      if (s.equals("     | "))   return s;
 
       /* 
        * otherwise, we keep taking strings from the return queue until
