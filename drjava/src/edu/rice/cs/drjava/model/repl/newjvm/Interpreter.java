@@ -76,6 +76,8 @@ public class Interpreter {
    */
   final private Pattern scalaColonCmd = Pattern.compile("^\\s*:.*$");
 
+  private boolean _isInitialized = false;
+
   /* 
    * dummy Reader for iLoopReader constructor -- these methods should NEVER be called! 
    * in addition to compilation requirements, the methods below are added for debugging
@@ -182,6 +184,32 @@ public class Interpreter {
    * e.g. for formatting multiline expressions)
    */
   public String interpret(String input) throws InterpreterException {
+
+    /*
+     * hack to avoid returning the initial "Welcome to scala message..." which
+     * ILoop sends over upon construction.  This hack should never make any
+     * difference if the first call to "interpret" is made by a real user; but
+     * if it is invoked programatically (i.e. for testing purposes), then it
+     * could arrive quickly enough that the initial call to "outputStrings.clear()",
+     * below, might miss scala's welcome message.  Or, it could catch that message,
+     * but then immediately return after reading the initial "scala> " prompt.
+     * 
+     * Essentially, anytime "interpret" is programatically invoked very shortly
+     * (in machine terms) after an Interpreter instance has been constructed,
+     * there is a race condition regarding the order in which the initial welcome
+     * messages are written into the ouput buffer and the call to clear the output
+     * buffer, which executes at the beginning of every interpretation, is made --
+     * since this method's protocol is to poll the output buffer until it encounters
+     * a "scala> " prompt, this hack should ensure that the rest of this method
+     * executes ONLY once the scala repl's initial message and prompt have been
+     * consumed.
+     *
+     */
+    if (!_isInitialized){
+      _isInitialized = true;
+      interpret("");
+    }
+
     Matcher match = scalaColonCmd.matcher(input);
 
     if (match.matches()) 
