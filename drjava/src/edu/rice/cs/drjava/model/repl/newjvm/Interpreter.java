@@ -185,43 +185,45 @@ public class Interpreter {
    */
   public String interpret(String input) throws InterpreterException {
 
-    /*
-     * hack to avoid returning the initial "Welcome to scala message..." which
-     * ILoop sends over upon construction.  This hack should never make any
-     * difference if the first call to "interpret" is made by a real user; but
-     * if it is invoked programatically (i.e. for testing purposes), then it
-     * could arrive quickly enough that the initial call to "outputStrings.clear()",
-     * below, might miss scala's welcome message.  Or, it could catch that message,
-     * but then immediately return after reading the initial "scala> " prompt.
-     * 
-     * Essentially, anytime "interpret" is programatically invoked very shortly
-     * (in machine terms) after an Interpreter instance has been constructed,
-     * there is a race condition regarding the order in which the initial welcome
-     * messages are written into the ouput buffer and the call to clear the output
-     * buffer, which executes at the beginning of every interpretation, is made --
-     * since this method's protocol is to poll the output buffer until it encounters
-     * a "scala> " prompt, this hack should ensure that the rest of this method
-     * executes ONLY once the scala repl's initial message and prompt have been
-     * consumed.
-     *
-     */
-    if (!_isInitialized){
-      _isInitialized = true;
-      interpret("");
-    }
-
     Matcher match = scalaColonCmd.matcher(input);
 
     if (match.matches()) 
       return "Error:  Scala interpreter colon commands not accepted.\n";
 
+    String s = null;
     try{
+
+      /*
+       * hack to avoid returning the initial "Welcome to scala message..." which
+       * ILoop sends over upon construction.  This hack should never make any
+       * difference if the first call to "interpret" is made by a real user; but
+       * if it is invoked programatically (i.e. for testing purposes), then it
+       * could arrive quickly enough that the initial call to "outputStrings.clear()",
+       * below, might miss scala's welcome message.  Or, it could catch that message,
+       * but then immediately return after reading the initial "scala> " prompt.
+       * 
+       * Essentially, anytime "interpret" is programatically invoked very shortly
+       * (in machine terms) after an Interpreter instance has been constructed,
+       * there is a race condition regarding the order in which the initial welcome
+       * messages are written into the ouput buffer and the call to clear the output
+       * buffer, which executes at the beginning of every interpretation, is made --
+       * this hack should ensure that the rest of this method executes ONLY once the 
+       * scala repl's initial message and prompt have been consumed.
+       *
+       */
+      if (!_isInitialized){
+        s = outputStrings.take();
+        while (!s.equals("\nscala> "))
+          s = outputStrings.take();
+        _isInitialized = true;
+      }
+
       /* clear out any leftovers -- there should never be any, however */
       outputStrings.clear();
        /* write the current line of code into the inputStrings queue */
       inputStrings.add(input + '\n');
        /* this call blocks until the first line of the return has been received */
-      String s = outputStrings.take();
+      s = outputStrings.take();
 
       /* if the prompt or continuation string is returned, we're done */
       if (s.equals("\nscala> ")) return "";
