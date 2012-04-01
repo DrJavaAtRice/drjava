@@ -12,7 +12,7 @@ import edu.rice.cs.dynamicjava.interpreter.TypeContext;
 import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
 import edu.rice.cs.dynamicjava.Options;
 
-/*
+/**
  * Class for providing interpretation services in the Interactions pane. Code
  * submitted for interpretation (from the Interactions pane) is submitted to
  * an "ILoop" instance, which interprets the code and returns a String result.
@@ -76,7 +76,8 @@ public class Interpreter {
    */
   final private Pattern scalaColonCmd = Pattern.compile("^\\s*:.*$");
 
-  private boolean _isInitialized = false;
+  /* used to catch the scala repl's initial "Welcome..." message */
+  private volatile boolean _isInitialized = false;
 
   /* 
    * dummy Reader for iLoopReader constructor -- these methods should NEVER be called! 
@@ -174,7 +175,7 @@ public class Interpreter {
     iLoopThread.start();
   }
 
-  /* 
+  /** 
    * the class's primary public method: returns whatever String is returned 
    * by ILoop in response to input code, or "" if there is no return.
    * 
