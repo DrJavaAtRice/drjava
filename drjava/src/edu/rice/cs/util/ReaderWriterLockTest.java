@@ -76,7 +76,7 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
   /** Tests that multiple readers can run without causing deadlock. We can't really impose any ordering on their output.
     */
   public void testMultipleReaders() throws InterruptedException {
-    final StringBuilder buf = new StringBuilder();
+    final StringBuffer buf = new StringBuffer();
 
     // Create three threads
     ReaderThread r1 = new PrinterReaderThread("r1 ", buf);
@@ -102,7 +102,7 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
 
   /** Tests that multiple writers run in mutually exclusive intervals without causing deadlock. */
   public void testMultipleWriters() throws InterruptedException {
-    final StringBuilder buf = new StringBuilder();
+    final StringBuffer buf = new StringBuffer();
 
     // Create three threads
     WriterThread w1 = new PrinterWriterThread("w1 ", buf);
@@ -224,9 +224,22 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
    *
    * So, instead, we'll just set up these threads, let them run, and
    * enforce that no one interferes with output from a writer.
+   * 
+   * NOTE: this test occasionally generated an error 
+   * 
+   * java.lang.StringIndexOutOfBoundsException: String index out of range: 72
+   * 
+   * on line 263 (fetching the contents of buf for testing) when the code used a 
+   * StringBuilder instead of a STringBuffer.  Shy?  Could the _notify operation 
+   * in print threads be reordered with respect to appending to buf?  If so, does
+   * using StringBuffer instead of StringBuilder completely fix the bug?  Can two
+   * synchronized operations within a thread be reordered?  Prior to the 
+   * Builder/Buffer change, the fact that _buf is final presumably did not ensure 
+   * sequential consistency in operatoins on _buf (accessing _buf is distinct from
+   * performing operations on its value).
    */
   public void testMultipleReadersAndWriters() throws InterruptedException {
-    final StringBuilder buf = new StringBuilder();
+    final StringBuffer buf = new StringBuffer();
 
     // Create threads
     WriterThread w1 = new PrinterWriterThread("w1 ", buf);
@@ -259,8 +272,8 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
 
     // Writer output should never be interspersed.
     assertTrue("w1 writes should happen in order", output.indexOf("w1 w1 w1 ") != -1);
-    assertTrue("w2 writes should happen in order",  output.indexOf("w2 w2 w2 ") != -1);
-    assertTrue("w1 writes should happen in order", output.indexOf("w3 w3 w3 ") != -1);
+    assertTrue("w2 writes should happen in order", output.indexOf("w2 w2 w2 ") != -1);
+    assertTrue("w3 writes should happen in order", output.indexOf("w3 w3 w3 ") != -1);
     
     w1.join();
     w2.join();
@@ -298,14 +311,14 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
   /** A ReaderThread which repeatedly prints to a buffer. */
   public class PrinterReaderThread extends ReaderThread {
     PrintCommand _command;
-    public PrinterReaderThread(String msg, final StringBuilder buf) { _command = new PrintCommand(msg, buf); }
+    public PrinterReaderThread(String msg, final StringBuffer buf) { _command = new PrintCommand(msg, buf); }
     public void read() { _command.print(); }
   }
 
   /** A WriterThread which repeatedly prints to a buffer. */
   public class PrinterWriterThread extends WriterThread {
     PrintCommand _command;
-    public PrinterWriterThread(String msg, final StringBuilder buf) { _command = new PrintCommand(msg, buf); }
+    public PrinterWriterThread(String msg, final StringBuffer buf) { _command = new PrintCommand(msg, buf); }
     public void write() { _command.print(); }
   }
 
@@ -316,11 +329,11 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
     /** Number of milliseconds to wait between iterations */
     volatile int _waitMillis = 5;
     /** Buffer to print to */
-    final StringBuilder _buf;
+    final StringBuffer _buf;
     /** Message to print */
     final String _msg;
     /** Creates a new command to print to a buffer during a read or write. */
-    public PrintCommand(String msg, StringBuilder buf) {
+    public PrintCommand(String msg, StringBuffer buf) {
       _msg = msg;
       _buf = buf;
     }

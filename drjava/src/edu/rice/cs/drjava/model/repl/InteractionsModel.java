@@ -70,7 +70,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Banner prefix. */
-  public static final String BANNER_PREFIX = "Welcome to DrJava.";
+  public static final String BANNER_PREFIX = "Welcome to DrScala.";
 
   /** Number of milliseconds to wait after each println, to prevent the JVM from being flooded
     * with print calls. */
@@ -799,10 +799,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   public static String getBanner(File wd) { return BANNER_PREFIX + "  Working directory is " + wd + '\n'; }
   
-  private String generateBanner(File wd) {
-    _banner = getBanner(wd);
-    return _banner;
-  }
+  /* The method repackages getBanner as an instance method.  (Why?) */
+  private String generateBanner(File wd) { return getBanner(wd); }
   
 //  /** Initializes the caret in a new or reset InteractionsModel. */
 //  private void _caretInit() { advanceCaret(_document.getLength()); }

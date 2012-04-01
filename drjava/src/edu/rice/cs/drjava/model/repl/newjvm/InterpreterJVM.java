@@ -45,7 +45,6 @@ import java.rmi.*;
 // NOTE: Do NOT import/use the config framework in this class!
 //  (This class runs in a different JVM, and will not share the config object)
 
-
 import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.InputStreamRedirector;
 import edu.rice.cs.util.UnexpectedException;
@@ -113,7 +112,6 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   private volatile MainJVMRemoteI _mainJVM;
   
   private boolean scalaInterpreterStarted = false;
-
 
   /** Private constructor; use the singleton ONLY instance. */
   private InterpreterJVM() {
@@ -197,10 +195,10 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   
   /* Concurrent operations on _interpreters. */ 
   private Interpreter getInterpreter(String name) {
-    synchronized(_interpreters) {return _interpreters.get(name); }
+    synchronized(_interpreters) { return _interpreters.get(name); }
   }
   private boolean isInterpreterName(String name) {
-    synchronized(_interpreters) {return _interpreters.containsKey(name); }
+    synchronized(_interpreters) { return _interpreters.containsKey(name); }
   }
   private Interpreter putInterpreter(String name, Interpreter i) {
     synchronized(_interpreters) { return _interpreters.put(name, i); }
@@ -274,7 +272,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
     finally { removeBusyInterpreter(interpreter); }
 
-    return InterpretResult.objectValue(result,getClassName(String.class));
+    return InterpretResult.objectValue(result, getClassName(String.class));
   }
 
 //    return result.apply(new OptionVisitor<Object, InterpretResult>() {

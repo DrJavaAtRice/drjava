@@ -126,8 +126,8 @@ public abstract class InterpretResult implements Serializable {
     private final String _val;
     public StringValueResult(String val) { _val = val; }
     public <T> T apply(Visitor<T> v) { return v.forStringValue(_val); }
+    public String toString() { return "StringValueResult(" + _val + ")"; }
   }
-  
   
   public static InterpretResult charValue(Character c) { return new CharValueResult(c); }
   
@@ -136,7 +136,6 @@ public abstract class InterpretResult implements Serializable {
     public CharValueResult(Character val) { _val = val; }
     public <T> T apply(Visitor<T> v) { return v.forCharValue(_val); }
   }
-  
 
   public static InterpretResult numberValue(Number n) { return new NumberValueResult(n); }
   
@@ -146,7 +145,6 @@ public abstract class InterpretResult implements Serializable {
     public <T> T apply(Visitor<T> v) { return v.forNumberValue(_val); }
   }
   
-
   public static InterpretResult booleanValue(Boolean b) { return new BooleanValueResult(b); }
   
   private static class BooleanValueResult extends InterpretResult {
@@ -155,8 +153,9 @@ public abstract class InterpretResult implements Serializable {
     public <T> T apply(Visitor<T> v) { return v.forBooleanValue(_val); }
   }
   
-
-  public static InterpretResult objectValue(String objS, String objTS) { return new ObjectValueResult(objS, objTS); }
+  public static InterpretResult objectValue(String objS, String objTS) { 
+    return new ObjectValueResult(objS, objTS); 
+  }
 
   private static class ObjectValueResult extends InterpretResult {
     private final String _objString;
@@ -166,6 +165,7 @@ public abstract class InterpretResult implements Serializable {
         _objTypeStr = objTypeStr;
     }
     public <T> T apply(Visitor<T> v) { return v.forObjectValue(_objString, _objTypeStr); }
+    public String toString() { return "ObjectValueResult(" + _objString + ")"; }
   } 
   
 }

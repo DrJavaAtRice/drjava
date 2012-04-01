@@ -56,6 +56,7 @@ import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
 
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
@@ -90,6 +91,8 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  * @version $Id$
  */
 public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
+  /** Debugging log. */
+  private static final Log _log  = new Log("MasterSlave.txt", true);
   
   /** Number of slave startup failures allowed before aborting the startup process. */
   private static final int MAX_STARTUP_FAILURES = 3;
@@ -144,7 +147,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   
   /** Starts the interpreter if it's not running already. */
-  public void startInterpreterJVM() { _state.value().start(); }
+  public void startInterpreterJVM() { _state.value().start(); /* waitUntilReady(); */ }
   
   /**
    * Stop the interpreter if it's current running.  (Note that, until {@link #startInterpreterJVM} is called
@@ -157,7 +160,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * is running.  If a currently-running JVM is already "fresh", it is still stopped and restarted when
    * {@code force} is true.
    */
-  public void restartInterpreterJVM(boolean force) { _state.value().restart(force); }
+  public void restartInterpreterJVM(boolean force) { _state.value().restart(force); /* waitUntilReady(); */ }
     
   /**
    * Stop the interpreter JVM, do not restart it, and terminate the RMI server associated with this object.
@@ -339,6 +342,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /* === Wrappers for InterpreterJVMRemoteI methods === */
 
   /** Interprets string s in the remote JVM.  Blocks until the interpreter is connected and evaluation completes.
+    * The result of interpretation is processed by resultHandler(), a visitor on type InterpreterResult.  If
+    * result processing is performed by a single thread, this processing is done before the method returns.v
     * @return  {@code true} if successful; {@code false} if the subprocess is unavailable, the subprocess dies
     *          during the call, or an unexpected exception occurs.
     */
@@ -347,9 +352,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     if (remote == null) { return false; }
     try {
       debug.logStart("Interpreting " + s);
+      _log.log("Main JVM interpreting " + s);
       InterpretResult result = remote.interpret(s);
       result.apply(resultHandler());
       debug.logEnd("result", result);
+      _log.log("result returned to MainJVM is " + result.toString());
       return true;
     }
     catch (RemoteException e) { debug.logEnd(); _handleRemoteException(e); return false; }
@@ -432,13 +439,15 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
   }
   
-  /** Sets the Interpreter to be in the given package.  Blocks until the interpreter is connected.
-    * @param packageName Name of the package to enter.
-    */
-  public boolean setPackageScope(String packageName) {
+  /** Interprets the string "".  Blocks until the interpreter is connected. */
+  public boolean waitUntilReady() {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
-    try { remote.interpret("package " + packageName + ";"); return true; }
+    try { 
+      InterpretResult result = remote.interpret("");
+      _log.log("Initial InterpreterResult = " + result);
+      return true; 
+    }
     catch (RemoteException e) { _handleRemoteException(e); return false; }
   }
   
