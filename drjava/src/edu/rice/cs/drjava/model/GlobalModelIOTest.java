@@ -1190,15 +1190,15 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
       }
     });
     
-    String result = interpret("System.in.read()");
-    String expected = /* DefaultInteractionsModel.INPUT_REQUIRED_MESSAGE + */  String.valueOf((int)'i');
+    String result = interpret("val z = System.in.read()");
+    String expected = "z: Int = " + String.valueOf((int)'i');
     assertEquals("read() should prompt for input and return the first byte of \"input\"", expected, result);
     
-    interpret("import java.io.*;");
-    interpret("BufferedReader br = new BufferedReader(new InputStreamReader(System.in))");
-    result = interpret("br.readLine()");
+    interpret("import java.io._");
+    interpret("val br = new BufferedReader(new InputStreamReader(System.in))");
+    result = interpret("val text = br.readLine()");
     assertEquals("readLine() should return the rest of \"input\" without prompting for input",
-                 "\"nput\"", result);
+                 "val br: java.lang.String = nput", result);
     
     
     _log.log("testConsoleInput completed");

@@ -11,6 +11,9 @@ import edu.rice.cs.dynamicjava.interpreter.RuntimeBindings;
 import edu.rice.cs.dynamicjava.interpreter.TypeContext;
 import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
 import edu.rice.cs.dynamicjava.Options;
+import edu.rice.cs.util.UnexpectedException;
+
+import edu.rice.cs.util.swing.Utilities;
 
 /**
  * Class for providing interpretation services in the Interactions pane. Code
@@ -52,15 +55,13 @@ import edu.rice.cs.dynamicjava.Options;
  */
 public class Interpreter {
 
-  /* 
-   * producer: slave JVM's main thread sends code from the interactions pane for 
+  /* producer: slave JVM's main thread sends code from the interactions pane for 
    *           interpretation, by calling "interpret"
-   * consumer: ILoop calls "iLoopReader.readLine", which blocks while this is empty
+   * consumer: ILoop calls "_iLoopReader.readLine", which blocks while this is empty
    */
   final ArrayBlockingQueue<String> inputStrings = new ArrayBlockingQueue<String>(100);
 
-  /*
-   * producer: ILoop writes its output to this queue via iLoopWriter
+  /* producer: ILoop writes its output to this queue via _iLoopWriter
    * consumer: slave JVM's main thread waits for "interpret" to return, which in 
    *           turn contains blocking "take" calls on this queue
    */
@@ -76,13 +77,12 @@ public class Interpreter {
    */
   final private Pattern scalaColonCmd = Pattern.compile("^\\s*:.*$");
 
-  /* used to catch the scala repl's initial "Welcome..." message */
+  /* Used to record whether the interpreter has been initialized */
   private volatile boolean _isInitialized = false;
 
-  /* 
-   * dummy Reader for iLoopReader constructor -- these methods should NEVER be called! 
+  /* dummy Reader for _iLoopReader constructor -- these methods should NEVER be called! 
    * in addition to compilation requirements, the methods below are added for debugging
-   * purposes -- iLoopReader does not route any calls to dummyReader, so a call to any 
+   * purposes -- _iLoopReader does not route any calls to dummyReader, so a call to any 
    * method in this object has "fallen through"
    */
   final Reader dummyReader = new Reader(){
@@ -95,7 +95,7 @@ public class Interpreter {
    * 1) BufferedReader which overrides "readLine" (which is called by ILoop, via its internal "SimpleReader")
    * 2) "readLine" calls "take" on "inputStrings", blocking until the next line is submitted for interpretation
    */
-  final BufferedReader iLoopReader = new BufferedReader(dummyReader){
+  private final BufferedReader _iLoopReader = new BufferedReader(dummyReader){
     @Override
     public String readLine() throws IOException{
       try {
@@ -108,13 +108,12 @@ public class Interpreter {
     }
   };
 
-  /* 
-   * dummy OutStream for iLoopWriter constructor -- these methods should NEVER be called! 
+  /* dummy OutStream for _iLoopWriter constructor -- these methods should NEVER be called! 
    * in addition to compilation requirements, the methods below are added for debugging
-   * purposes -- iLoopWriter does not route any calls to dummyOutStream, so a call to any 
+   * purposes -- _iLoopWriter does not route any calls to dummyOutStream, so a call to any 
    * method in this object has "fallen through"
    */
-  final OutputStream dummyOutStream = new OutputStream(){
+  final OutputStream dummyOutStream = new OutputStream() {
     @Override public void write(byte[] b) throws IOException { System.out.println("dummyOutStream.write(byte b) called"); }
     @Override public void write(byte[] b, int off, int len) throws IOException { System.out.println("dummyOutStream.write(byte[] b, int off, int len) called"); }
     @Override public void write(int b) throws IOException { System.out.println("dummyOutStream.write(int b) called"); }
@@ -122,21 +121,23 @@ public class Interpreter {
     @Override public void flush() { System.out.println("dummyOutStream.flush() called"); }
   };
 
-  /* 
-   * PrintWriter used by ILoop to write return strings; iLoopWriter simply
+  /* PrintWriter used by ILoop to write return strings; _iLoopWriter simply
    * forwards every string it receives to the output queue, "outputStrings"
    * 
    * since scala print statements are sent to stdout, everything sent here is 
-   * known to be part of the "returned" output from each interpretation call
+   * known to be part of the "returned" output from each interpretation call.
+   * 
+   * This field can ONLY by accessed by the Scala interpreter; operations on it
+   * are NOT threadsafe.
    */
-  final PrintWriter iLoopWriter = new PrintWriter(dummyOutStream){
+  private final PrintWriter _iLoopWriter = new PrintWriter(dummyOutStream){
     @Override
     public void print(String s) {
       outputStrings.add(s); 
     }
-    /* this method added because ILoop/IMain calls it (though from where, I can't say) */
+    /* this method added because ILoop/IMain calls it, probably for console print commands */
     @Override
-    public void write (String s, int off, int len){ 
+    public void write(String s, int off, int len){ 
       outputStrings.add(s.substring(off, off + len));
     }
     @Override
@@ -148,9 +149,9 @@ public class Interpreter {
   };
 
   /* thread in which ILoop runs */
-  final Thread iLoopThread = new Thread(new Runnable(){
-    public void run(){
-      ILoop iLoop = new ILoop(iLoopReader, iLoopWriter);
+  private final Thread _iLoopThread = new Thread(new Runnable(){
+    public void run() {
+      ILoop iLoop = new ILoop(_iLoopReader, _iLoopWriter);
       Settings s = new Settings();
       s.processArgumentString("-usejavacp");
       iLoop.process(s);
@@ -168,68 +169,82 @@ public class Interpreter {
   public Interpreter(Options opt) { this(); }
   public Interpreter(Options o,TypeContext typeC,RuntimeBindings b) { this(); }
   public Interpreter(Options opt, ClassLoader loader) { this(); }
-  public Interpreter() {}
+  public Interpreter() {  }
   
-  /* this method is called by InterpreterJVM after stderr/stdout are redirected */
-  public void start(){
-    iLoopThread.start();
+  /** Initialize the interpreter for use in the interactions pane. */
+  private void _init() {
+  
+    // Purge the "Welcome to scala ..." message from the interpreter output stream
+    String s = null;
+    try {
+      /* The following code discards the initial "Welcome to scala ..." message which
+       * ILoop sends over upon construction.
+       */
+      s = outputStrings.take();
+      while (! s.equals("\nscala> ")) s = outputStrings.take();
+    }
+    catch(InterruptedException ie) { 
+      /* should never happen. */
+      throw new UnexpectedException(ie);
+    }
+     
+    // Perform a trivial computation, forcing it to load most of its classes.
+    inputStrings.add("val _$$$$$__$$$$$$_ = 2+2\n");
+    /* this call blocks until the first line of the return has been received */
+    try { outputStrings.take(); }
+    catch(InterruptedException ie) {
+      /* should never happen. */
+      throw new UnexpectedException(ie);
+    }
+    
+    // Record that initialization has been performed
+    _isInitialized = true;
+  }
+  
+  /* Initialize the interpreter for use in the interactions pane.  This method is called by InterpreterJVM after 
+   * stderr/stdout are redirected */
+  public void start() { 
+    _iLoopThread.start();
+    
+    /* If not in test mode, initialize the interpreter for use in the interactions pane */
+    if (! Utilities.TEST_MODE) _init();
   }
 
-  /** 
-   * the class's primary public method: returns whatever String is returned 
-   * by ILoop in response to input code, or "" if there is no return.
-   * 
-   * (note: this method used to return an "InterpretResult", as does the wrapping 
-   * caller in InterpreterJVM. We may need to revert to that convention if 
-   * diagnostic information is needed about interpretation results elsewhere -- 
-   * e.g. for formatting multiline expressions)
-   */
-  public String interpret(String input) throws InterpreterException {
+  /** The primary method of the Scala Interpreter class: returns whatever String is returned 
+    * by ILoop in response to input code, or "" if there is no return.
+    * 
+    * Note: this method returns an InterpretResult in vanilla DrJava, as does the wrapping 
+    * caller in InterpreterJVM.  We may need to revert to that convention if 
+    * diagnostic information is needed about interpretation results elsewhere -- 
+    * e.g. for formatting multiline expressions.
+    * 
+    * This method is synchronized because there is a race condition between writing the initial 
+    * welcome message into the ouput buffer and clearing the output buffer, which executes at the 
+    * beginning of every interpretation.  In fact, without the synchronized qualifier,
+    * there is a potential race condition on internal actions of this method if it is called from 
+    * multiple threads.
+    */
+  public synchronized String interpret(String input) throws InterpreterException {
 
     Matcher match = scalaColonCmd.matcher(input);
 
-    if (match.matches()) 
-      return "Error:  Scala interpreter colon commands not accepted.\n";
+    if (match.matches()) return "Error:  Scala interpreter colon commands not accepted.\n";
+    
+    // Perform deferred initialization if necessary
+    if (! _isInitialized) _init(); 
 
-    String s = null;
-    try{
-
-      /*
-       * hack to avoid returning the initial "Welcome to scala message..." which
-       * ILoop sends over upon construction.  This hack should never make any
-       * difference if the first call to "interpret" is made by a real user; but
-       * if it is invoked programatically (i.e. for testing purposes), then it
-       * could arrive quickly enough that the initial call to "outputStrings.clear()",
-       * below, might miss scala's welcome message.  Or, it could catch that message,
-       * but then immediately return after reading the initial "scala> " prompt.
-       * 
-       * Essentially, anytime "interpret" is programatically invoked very shortly
-       * (in machine terms) after an Interpreter instance has been constructed,
-       * there is a race condition regarding the order in which the initial welcome
-       * messages are written into the ouput buffer and the call to clear the output
-       * buffer, which executes at the beginning of every interpretation, is made --
-       * this hack should ensure that the rest of this method executes ONLY once the 
-       * scala repl's initial message and prompt have been consumed.
-       *
-       */
-      if (!_isInitialized){
-        s = outputStrings.take();
-        while (!s.equals("\nscala> "))
-          s = outputStrings.take();
-        _isInitialized = true;
-      }
-
+    try {
       /* clear out any leftovers -- there should never be any, however */
       outputStrings.clear();
-       /* write the current line of code into the inputStrings queue */
+      /* write the current line of code into the inputStrings queue */
       inputStrings.add(input + '\n');
-       /* this call blocks until the first line of the return has been received */
-      s = outputStrings.take();
-
+      /* this call blocks until the first line of the return has been received */
+      String s = outputStrings.take();
+      
       /* if the prompt or continuation string is returned, we're done */
       if (s.equals("\nscala> ")) return "";
       if (s.equals("     | "))   return s;
-
+      
       /* 
        * otherwise, we keep taking strings from the return queue until
        * the prompt is encountered.
@@ -241,14 +256,14 @@ public class Interpreter {
       StringBuilder returnString = new StringBuilder(s);
       while (true){
         s = outputStrings.take();
-        if(s.equals("\nscala> "))
+        if (s.equals("\nscala> "))
           break;
         returnString.append(s);
       }
       return returnString.toString();
     }
-    catch(InterruptedException iE){
-      iE.printStackTrace(); // this should probably be replaced with actual error handling where "take" calls are made -- i.e. attempting to restart these calls
+    catch (InterruptedException ie){
+      ie.printStackTrace(); // TODO: probably need real error handling here (i.e. restart the blocking call)
     }
     return null;
   }

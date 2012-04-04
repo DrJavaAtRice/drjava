@@ -37,8 +37,9 @@
 package edu.rice.cs.drjava.model.repl.newjvm;
 
 import java.lang.reflect.*;
-import java.util.*;
 import java.io.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import java.rmi.*;
 
@@ -88,17 +89,15 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   /** Singleton instance of this class. */
   public static final InterpreterJVM ONLY = new InterpreterJVM();
   
-  // As RMI can lead to parallel threads, all fields must be thread-safe.  Collections are wrapped
-  // in synchronized versions.
+  // As RMI can lead to parallel threads, all fields must be thread-safe.  Consequently, we use
+  // concurrent Collections
   
   private final InteractionsPaneOptions _interpreterOptions;
   private volatile Pair<String, Interpreter> _activeInterpreter;
   private final Interpreter _defaultInterpreter;
-  private final Map<String, Interpreter> _interpreters;
-  private final Set<Interpreter> _busyInterpreters;
-  // The following variable appears to be useless.
-//  private final Map<String, Pair<TypeContext, RuntimeBindings>> _environments;
-  
+  private final ConcurrentHashMap<String, Interpreter> _interpreters;
+  private final /* CONCURRENT */ Set<Interpreter> _busyInterpreters;
+
   private final ClassPathManager _classPathManager;
   private final ClassLoader _interpreterLoader;
   
@@ -111,7 +110,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   /** Remote reference to the MainJVM class in DrJava's primary JVM.  Assigned ONLY once. */
   private volatile MainJVMRemoteI _mainJVM;
   
-  private boolean scalaInterpreterStarted = false;
+  private volatile boolean scalaInterpreterStarted = false;
 
   /** Private constructor; use the singleton ONLY instance. */
   private InterpreterJVM() {
@@ -130,8 +129,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     //_defaultInterpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
     _defaultInterpreter = new Interpreter();
 
-    _interpreters = new HashMap<String,Interpreter>();
-    _busyInterpreters = new HashSet<Interpreter>();
+    _interpreters = new ConcurrentHashMap<String,Interpreter>();
+    _busyInterpreters = Collections.synchronizedSet(new HashSet<Interpreter>());
 //    _environments = new HashMap<String, Pair<TypeContext, RuntimeBindings>>();
     _activeInterpreter = Pair.make("", _defaultInterpreter);
   }
@@ -195,30 +194,30 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   
   /* Concurrent operations on _interpreters. */ 
   private Interpreter getInterpreter(String name) {
-    synchronized(_interpreters) { return _interpreters.get(name); }
+    return _interpreters.get(name);
   }
   private boolean isInterpreterName(String name) {
-    synchronized(_interpreters) { return _interpreters.containsKey(name); }
+    return _interpreters.containsKey(name);
   }
   private Interpreter putInterpreter(String name, Interpreter i) {
-    synchronized(_interpreters) { return _interpreters.put(name, i); }
+    return _interpreters.put(name, i);
   }
   // This method must be public because it is part of a declared interface
   public void removeInterpreter(String name) {
-    synchronized(_interpreters) { _interpreters.remove(name); }
+    _interpreters.remove(name);
   }
   
   /* Concurrent operations on _busyInterpreters. */ 
   private boolean addBusyInterpreter(Interpreter i) {
-    synchronized(_busyInterpreters) { return _busyInterpreters.add(i); }
+    return _busyInterpreters.add(i);
   }
   
   private boolean removeBusyInterpreter(Interpreter i) {
-    synchronized(_busyInterpreters) { return _busyInterpreters.remove(i); }
+    return _busyInterpreters.remove(i);
   }
   
   private boolean isBusyInterpreter(Interpreter i) {
-    synchronized(_busyInterpreters) { return _busyInterpreters.contains(i); }
+     return _busyInterpreters.contains(i);
   }
   
   /** Interprets the given string of source code in the active interpreter. The result is returned to MainJVM via 
@@ -272,7 +271,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
     finally { removeBusyInterpreter(interpreter); }
 
-    return InterpretResult.objectValue(result, getClassName(String.class));
+    return InterpretResult.stringValue(result);
   }
 
 //    return result.apply(new OptionVisitor<Object, InterpretResult>() {
@@ -475,15 +474,6 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     @Override public Type getReturnType() { return null; }
     @Override public Iterable<Type> getDeclaredThrownTypes() { return IterUtil.empty(); }
   }
-  
-  
-//  /** Removes the interpreter with the given name, if it exists. */
-//  public void removeInterpreter(String name) {
-//    synchronized(_stateLock) {
-//      _interpreters.remove(name)
-////      _environments.remove(name);
-//    }
-//  }
   
   /** Sets the current interpreter to be the one specified by the given name
     * @param name the unique name of the interpreter to set active

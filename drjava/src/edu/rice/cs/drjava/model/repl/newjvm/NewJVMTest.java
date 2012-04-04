@@ -51,13 +51,16 @@ import java.io.StringWriter;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
 
+import java.util.Collections;
+import java.lang.StringBuffer;
+
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Tests the functionality of the new JVM manager.
  *  @version $Id$
  */
 public final class NewJVMTest extends DrJavaTestCase {
-  private static final Log _log  = new Log("MasterSlave.txt", true);
+  private static final Log _log  = new Log("MasterSlave.txt", false);
   
   private static volatile TestJVMExtension _jvm;
   
@@ -68,33 +71,40 @@ public final class NewJVMTest extends DrJavaTestCase {
     TestSetup setup = new TestSetup(suite) {
       protected void setUp() throws Exception { 
         super.setUp();
+        _log.log("Executing setUp()");
         _jvm = new TestJVMExtension();
       }
-      protected void tearDown() throws Exception { _jvm.dispose(); }
+      protected void tearDown() throws Exception { 
+        _log.log("Executing tearDown()");
+        _jvm.dispose(); 
+      }
     };
 
     return setup;
   }
 
   public void testPrintln() throws Throwable {
+    /* BEWARE: in Scala, System.out.println and System.err.println print Windows style newline strings. */
     debug.logStart();
     _log.log("NewJVMTest.testPrintln executing");
-    try { Thread.sleep(1000); } catch(InterruptedException e) { /* proceed */ }  // Workaround potential race condition
     
-    // How do you write to System.err in Scala?
-    _jvm.resetFlags();
-    assertTrue(_jvm.interpret("System.err.print(\"err\");"));
-    assertEquals("system err buffer", "err", _jvm.errBuf());
+    // How do you write to System.err in Scala?  As we have configured the Scala interpreter you don't; it goes to the 
+    // same output stream as System.out.
+    _jvm.resetState();
+    assertTrue(_jvm.interpret("System.err.print(\"err\")"));
+    assertEquals("err message length", 3, _jvm.errBuffer().length());
+    assertEquals("system err buffer", "err", _jvm.errBuffer());
 //    assertEquals("void return flag", true, _jvm.voidReturnFlag());
 //
-//    _jvm.resetFlags();
+//    _jvm.resetState();
 //    assertTrue(_jvm.interpret("System.err.print(\"err2\");"));
-//    assertEquals("system err buffer", "err2", _jvm.errBuf());
+//    assertEquals("system err buffer", "err2", _jvm.errBuffer());
 //    assertEquals("void return flag", true, _jvm.voidReturnFlag());
 
-    _jvm.resetFlags();
-    assertTrue(_jvm.interpret("println(\"out\");"));
-    assertEquals("system out buffer", "out\n", _jvm.outBuf());
+    _jvm.resetState();
+    assertTrue(_jvm.interpret("print(\"out\");"));
+    assertEquals("out buffer length", 3, _jvm.outBuffer().length());
+    assertEquals("system out buffer", "out", _jvm.outBuffer());
 //    assertEquals("void return flag", true, _jvm.voidReturnFlag());
     
     debug.logEnd();
@@ -104,39 +114,33 @@ public final class NewJVMTest extends DrJavaTestCase {
     debug.logStart();
    _log.log("NewJVMTest.testReturnConstant executing");
    
-//   try { Thread.sleep(1000); } catch(InterruptedException e) { /* proceed */ }  // Workaround potential race condition
-   
-   _jvm.resetFlags();
-//   String banner = _jvm.returnBuf();
+   _jvm.resetState();
+//   String banner = _jvm.returnBuffer();
 //   _log.log("Returned banned = ' + " + banner + "'");
    assertTrue(_jvm.interpret("val x = 5"));
-   assertEquals("result", "x: Int = 5\n", _jvm.returnBuf());
+   assertEquals("result", "x: Int = 5\n", _jvm.returnBuffer());
    debug.logEnd();
   }
 
   public void testWorksAfterRestartConstant() throws Throwable {
     debug.logStart();
     _log.log("NewJVMTest.testWorksAfterRestartConstant executing");
-    
-//    try { Thread.sleep(1000); } catch(InterruptedException e) { /* proceed */ }  // Workaround potential race condition
 
     // Check that a constant is returned
-    _jvm.resetFlags();
+    _jvm.resetState();
 
     assertTrue(_jvm.interpret("val x = 5"));
-//    String banner = _jvm.returnBuf();
+//    String banner = _jvm.returnBuffer();
 //    _log.log("Returned banner = ' + " + banner + "'");
-    assertEquals("result", "x: Int = 5\n", _jvm.returnBuf());
+    assertEquals("result", "x: Int = 5\n", _jvm.returnBuffer());
     
     // Now restart interpreter
     _jvm.restartInterpreterJVM(true);
-    
-//    try { Thread.sleep(1000); } catch(InterruptedException e) { /* proceed */ }  // Workaround potential race condition
        
     // Now evaluate another constant
-    _jvm.resetFlags();
+    _jvm.resetState();
     assertTrue(_jvm.interpret("val x = 4"));
-    assertEquals("result", "x: Int = 4\n", _jvm.returnBuf());
+    assertEquals("result", "x: Int = 4\n", _jvm.returnBuffer());
     
     debug.logEnd();
   }
@@ -146,11 +150,9 @@ public final class NewJVMTest extends DrJavaTestCase {
     debug.logStart();
     _log.log("NewJVMTest.testThrowRuntimeException executing");
     
-//    try { Thread.sleep(1000); } catch(InterruptedException e) { /* proceed */ }  // Workaround potential race condition
-    
-    _jvm.resetFlags();
+    _jvm.resetState();
     assertTrue(_jvm.interpret("throw new RuntimeException();"));
-    assertTrue("exception message", _jvm.returnBuf().startsWith("java.lang.RuntimeException"));
+    assertTrue("exception message", _jvm.returnBuffer().startsWith("java.lang.RuntimeException"));
 
     debug.logEnd();
   }
@@ -158,15 +160,12 @@ public final class NewJVMTest extends DrJavaTestCase {
   public void testToStringThrowsRuntimeException() throws Throwable {
     debug.logStart();
     _log.log("NewJVMTest.testToStringThrowsRuntimeException executing");
-    
-    try { Thread.sleep(1000); } catch(InterruptedException e) { /* proceed */ }  // Workaround potential race condition
 
-    
-    _jvm.resetFlags();
+    _jvm.resetState();
     assertTrue(_jvm.interpret("class A { override def toString() = { throw new RuntimeException(); } };" +
                               "new A()"));
-    String result = _jvm.returnBuf();
-    System.err.println("returnBuf() returns " + result);
+    String result = _jvm.returnBuffer();
+    System.err.println("returnBuffer() returns " + result);
     assertTrue("exception should have been thrown by toString",
                result.contains("java.lang.RuntimeException"));
     
@@ -177,11 +176,9 @@ public final class NewJVMTest extends DrJavaTestCase {
   public void testSwitchToNonExistantInterpreter() {
     debug.logStart();
     
-//    try { Thread.sleep(1000); } catch(InterruptedException e) { /* proceed */ }  // Workaround potential race condition
-       
     try {
       _jvm.setActiveInterpreter("thisisabadname");
-//      System.err.println("outbuf: " + _jvm.outBuf);
+//      System.err.println("outbuf: " + _jvm.outBuffer);
       fail("Should have thrown an exception!");
     }
     catch (IllegalArgumentException e) {
@@ -191,36 +188,34 @@ public final class NewJVMTest extends DrJavaTestCase {
   }
 
   /* The following method is commented out because switching interpreters apparently hangs the Interpreter JVM. */
-//  /** Ensure that MainJVM can correctly switch the active interpreter used by
-//   * the interpreter JVM.
-//   */
-//  public void testSwitchActiveInterpreter() throws InterruptedException {
-//    debug.logStart();
-//    
-////    try { Thread.sleep(1000); } catch(InterruptedException e) { /* proceed */ }  // Workaround potential race condition
-//       
-//    assertTrue(_jvm.interpret("val x = 6;"));
-//    _jvm.addInterpreter("monkey");
-//
-//    // x should be defined in active interpreter
-//    _jvm.resetFlags();
-//    assertTrue(_jvm.interpret("val y = x"));
-//    assertEquals("result", "y: Int = 6\n", _jvm.returnBuf());
-//
-//    // switch interpreter
+  /** Ensure that MainJVM can correctly switch the active interpreter used by
+   * the interpreter JVM.
+   */
+  public void xtestSwitchActiveInterpreter() throws InterruptedException {
+    debug.logStart();
+       
+    assertTrue(_jvm.interpret("val x = 6;"));
+    _jvm.addInterpreter("monkey");
+
+    // x should be defined in active interpreter
+    _jvm.resetState();
+    assertTrue(_jvm.interpret("val y = x"));
+    assertEquals("result", "y: Int = 6\n", _jvm.returnBuffer());
+
+    // switch interpreter
 //    _jvm.setActiveInterpreter("monkey");
-//    _jvm.resetFlags();
+//    _jvm.resetState();
 //    assertTrue(_jvm.interpret("x"));
-//    assertTrue(_jvm.returnBuf().contains("exception"));
+//    assertTrue(_jvm.returnBuffer().contains("error"));
 //
 //    // define x to 3 and switch back
 //    assertTrue(_jvm.interpret("val x = 3"));
 //    _jvm.setToDefaultInterpreter();
 //
 //    // x should have its old value
-//    _jvm.resetFlags();
-//    assertTrue(_jvm.interpret("x"));
-//    assertEquals("result", "x: Int = 5\n", _jvm.returnBuf());
+//    _jvm.resetState();
+//    assertTrue(_jvm.interpret("val y = x"));
+//    assertEquals("result", "y: Int = 5\n", _jvm.returnBuffer());
 //
 //    // test syntax error handling
 //    //  (temporarily disabled until bug 750605 fixed)
@@ -228,17 +223,17 @@ public final class NewJVMTest extends DrJavaTestCase {
 ////       assertTrue("syntax error was reported",
 ////                  ! _jvm.syntaxErrorMsgBuf.equals("") );
 ////     }
-//    debug.logEnd();
-//  }
+    debug.logEnd();
+  }
 
   private static class TestJVMExtension extends MainJVM {
     private static final int WAIT_TIMEOUT = 30000; // time to wait for an interaction to complete
     
-    private final CompletionMonitor _done;
-    private volatile String _outBuf;
-    private volatile String _errBuf;
-    private volatile String _returnBuf;
-    private volatile String _exceptionMsgBuf;
+    private volatile CompletionMonitor _done;
+    private volatile StringBuffer _outBuffer;
+    private volatile StringBuffer _errBuffer;
+    private volatile StringBuffer _returnBuffer;
+    private volatile StringBuffer _exceptionMsgBuffer;
     private volatile boolean _voidReturnFlag;
 
     private volatile InterpretResult.Visitor<Void> _testHandler;
@@ -248,53 +243,64 @@ public final class NewJVMTest extends DrJavaTestCase {
       _done = new CompletionMonitor();
       _testHandler = new TestResultHandler();
       startInterpreterJVM();
-      resetFlags();
+      resetState();
     }
 
     @Override protected InterpretResult.Visitor<Void> resultHandler() {
       return _testHandler;
     }
 
-    public void resetFlags() {
-      _done.reset();
-      _outBuf = "";
-      _errBuf = "";
-      _returnBuf = null;
-      _exceptionMsgBuf = null;
+    /** Resets the state of this TestJVMExtension.  Only called within TestJVM. */
+    public void resetState() { 
+      _done.signal();  // Release any blocked attempts to read _outBuffer or _errBuffer 
+      _done = new CompletionMonitor();
+      _outBuffer = new StringBuffer();
+      _errBuffer = new StringBuffer();
+      _returnBuffer = new StringBuffer();
+      _exceptionMsgBuffer = new StringBuffer();
       _voidReturnFlag = false;
     }
     
-    public String outBuf() {
-      assertTrue(_done.attemptEnsureSignaled(WAIT_TIMEOUT));
-      return _outBuf;
+    public String outBuffer() {
+//      assertTrue(_done.attemptEnsureSignaled(WAIT_TIMEOUT));
+      return _outBuffer.toString();
     }
 
-    public String errBuf() {
-      assertTrue(_done.attemptEnsureSignaled(WAIT_TIMEOUT));
-      return _errBuf;
+    public String errBuffer() {
+//      assertTrue(_done.attemptEnsureSignaled(WAIT_TIMEOUT));
+      return _errBuffer.toString();
     }
 
-    public String returnBuf() {
-      try {
-        assertTrue(_done.attemptEnsureSignaled(WAIT_TIMEOUT));
-        return _returnBuf;
-      }
-      finally { debug.logValue("_returnBuf", _returnBuf); }
+    public String returnBuffer() {
+//      try {
+//        assertTrue(_done.attemptEnsureSignaled(WAIT_TIMEOUT));
+        return _returnBuffer.toString();
+//      }
+//      finally { debug.logValue("_returnBuffer", _returnBuffer); }
     }
-
+    
     public String exceptionMsgBuf() {
-      assertTrue(_done.attemptEnsureSignaled(WAIT_TIMEOUT));
-      return _exceptionMsgBuf;
+//      assertTrue(_done.attemptEnsureSignaled(WAIT_TIMEOUT));
+      return _exceptionMsgBuffer.toString();
     }
-
+    
     public boolean voidReturnFlag() {
-      assertTrue(_done.attemptEnsureSignaled(WAIT_TIMEOUT));
+      /* copy current state */
       return _voidReturnFlag;
     }
-
-    public void systemErrPrint(String s) { _errBuf += s; }
-    public void systemOutPrint(String s) { _outBuf += s; }
-
+    
+    public void systemErrPrint(String s) {
+      _log.log("systemErrPrint(" + '"' + s + '"' + ") in NewJVMTest");
+      _errBuffer.append(s);
+    }
+    
+    public void systemOutPrint(String s) {
+      _log.log("systemOutPrint("   + '"' + s  + '"' +") in NewJVMTest");
+      _outBuffer.append(s); 
+    }
+    
+    /* InterpretResult handler for this test.  Note that Scala only creates StringValue results so most of
+     * the methods in this visitor interface can never be called. */
     private class TestResultHandler implements InterpretResult.Visitor<Void> {
       public Void forNoValue() {
         debug.log();
@@ -303,17 +309,17 @@ public final class NewJVMTest extends DrJavaTestCase {
         _log.log("NewJVMTest: void returned by interpretResult callback");
         return null;
       }
-      public Void forStringValue(String s) { handleValueResult('"' + s + '"'); return null; }
-      public Void forCharValue(Character c) { handleValueResult("'" + c + "'"); return null; }
+      public Void forStringValue(String s) { handleValueResult(s); return null; }
+      public Void forCharValue(Character c) { handleValueResult(c.toString()); return null; }
       public Void forNumberValue(Number n) { handleValueResult(n.toString()); return null; }
       public Void forBooleanValue(Boolean b) { handleValueResult(b.toString()); return null; }
       public Void forObjectValue(String objString, String objTypeString) { handleValueResult(objString); return null; }
       
       private void handleValueResult(String s) {
         debug.log();
-        _returnBuf = s;
+        _returnBuffer.append(s);
         _done.signal();
-        _log.log("NewJVMTest: " + _returnBuf + " returned by interpretResult callback");
+        _log.log("NewJVMTest: " + _returnBuffer + " returned by interpretResult callback");
       }
       
       public Void forEvalException(String message, StackTraceElement[] stackTrace) {
@@ -323,7 +329,7 @@ public final class NewJVMTest extends DrJavaTestCase {
           sb.append("\n\tat ");
           sb.append(ste);
         }
-        _exceptionMsgBuf = sb.toString().trim();
+        _exceptionMsgBuffer.append(sb.toString().trim());
         _done.signal();
         _log.log("NewJVMTest: interpreterResult callback produced EvalException:" + message);
         return null;
@@ -331,7 +337,7 @@ public final class NewJVMTest extends DrJavaTestCase {
       
       public Void forException(String message) {
         debug.log();
-        _exceptionMsgBuf = message;
+        _exceptionMsgBuffer.append(message);
         _done.signal();
         _log.log("NewJVMTest: interpreterResult callback produced Exception:" + message);
         return null;

@@ -259,7 +259,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     //    System.err.println("Retrieved JUnit error model");
     final List<OpenDefinitionsDocument> outOfSync = _model.getOutOfSyncDocuments(lod);
     if ((outOfSync.size() > 0) || _model.hasModifiedDocuments(lod)) {
-      /* hasOutOfSyncDocments(lod) can return false when some documents have not been successfully compiled; the 
+      /* hasOutOfSyncDocuments(lod) can return false when some documents have not been successfully compiled; the 
        * granularity of time-stamping and the presence of multiple classes in a file (some of which compile 
        * successfully) can produce false reports.  */
 //      System.err.println("Out of sync documents exist");

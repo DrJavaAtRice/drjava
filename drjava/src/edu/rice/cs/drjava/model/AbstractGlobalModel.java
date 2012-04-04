@@ -3410,7 +3410,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       
       // Look for cached class file
       File classFile = getCachedClassFile();
-      _log.log("In checkIfClassFileInSync cacched value of classFile = " + classFile);
+      _log.log("In checkIfClassFileInSync cached value of classFile = " + classFile);
       if (classFile == FileOps.NULL_FILE) {
         // Not cached, so locate the file
         classFile = _locateClassFile();

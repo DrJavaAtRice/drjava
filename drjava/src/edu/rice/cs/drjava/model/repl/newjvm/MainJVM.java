@@ -92,7 +92,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  */
 public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Debugging log. */
-  private static final Log _log  = new Log("MasterSlave.txt", true);
+  private static final Log _log  = new Log("MasterSlave.txt", false);
   
   /** Number of slave startup failures allowed before aborting the startup process. */
   private static final int MAX_STARTUP_FAILURES = 3;
@@ -362,11 +362,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { debug.logEnd(); _handleRemoteException(e); return false; }
   }
   
-  /**
-   * Gets the string representation of the value of a variable in the current interpreter, or "none"
-   * if the remote JVM is unavailable or an error occurs.  Blocks until the interpreter is connected.
-   * @param var the name of the variable
-   */
+  /** Gets the string representation of the value of a variable in the current interpreter, or "none"
+    * if the remote JVM is unavailable or an error occurs.  Blocks until the interpreter is connected.
+    * @param var the name of the variable
+    */
   public Option<Pair<String,String>> getVariableToString(String var) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return Option.none(); }
@@ -374,10 +373,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
   }
   
-  /**
-   * Blocks until the interpreter is connected.  Returns {@code true} if the change was successfully passed to
-   * the remote JVM.
-   */
+  /** Blocks until the interpreter is connected.  Returns {@code true} if the change was successfully passed to
+    * the remote JVM.
+    */
   public boolean addProjectClassPath(File f) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
@@ -1013,13 +1011,13 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     
     /** Calls replReturnedResult() */
     public Void forStringValue(String s) {
-      _interactionsModel.replReturnedResult('"' + s + '"', InteractionsDocument.STRING_RETURN_STYLE);
+      _interactionsModel.replReturnedResult(s, InteractionsDocument.STRING_RETURN_STYLE);
       return null;
     }
     
     /** Calls replReturnedResult() */
     public Void forCharValue(Character c) {
-      _interactionsModel.replReturnedResult("'" + c + "'", InteractionsDocument.CHARACTER_RETURN_STYLE);
+      _interactionsModel.replReturnedResult(c.toString(), InteractionsDocument.CHARACTER_RETURN_STYLE);
       return null;
     }
     
