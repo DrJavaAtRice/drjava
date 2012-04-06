@@ -66,9 +66,9 @@ public class CompletionMonitor implements Condition {
   
   /** Sets the state to signaled and alerts all blocked threads */
   public void signal() {
-    if (!_signal) {
+    if (! _signal) {
       synchronized (this) {
-        if (!_signal) {
+        if (! _signal) {
           _signal = true;
           this.notifyAll();
         }
@@ -78,7 +78,7 @@ public class CompletionMonitor implements Condition {
   
   /** Ensures that the monitor has been signaled before continuing.  Blocks if necessary. */
   public void ensureSignaled() throws InterruptedException {
-    if (!_signal) {
+    if (! _signal) {
       synchronized (this) {
         while (!_signal) { this.wait(); }
       }
@@ -101,7 +101,7 @@ public class CompletionMonitor implements Condition {
    * @param unit  Units for {@code timeout}.
    */
   public void ensureSignaled(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
-    if (!_signal) {
+    if (! _signal) {
       long timeoutTime = ConcurrentUtil.futureTimeNanos(timeout, unit);
       synchronized (this) {
         while (!_signal) { ConcurrentUtil.waitUntilNanos(this, timeoutTime); }
