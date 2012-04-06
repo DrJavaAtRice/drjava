@@ -222,16 +222,17 @@ public class DefaultJavadocModel implements JavadocModel {
         // This will throw an IllegalStateException if no file can be found
         File docFile = _getFileFromDocument(doc, saver);
         final File file = IOUtil.attemptCanonicalFile(docFile);
-
-        // If this is a language level file, make sure it has been compiled
-        if (DrJavaFileUtils.isLLFile(file)) {
-          // Utilities.showDebug("isLLFile=true: "+file);
-          llDocs.add(doc);
-          docFiles.add(DrJavaFileUtils.getJavaForLLFile(file).getPath());
-        }
-        else {
-          docFiles.add(file.getPath());
-        }
+        
+        // Java language levels is disabled
+//        // If this is a language level file, make sure it has been compiled
+//        if (DrJavaFileUtils.isLLFile(file)) {
+//          // Utilities.showDebug("isLLFile=true: "+file);
+//          llDocs.add(doc);
+//          docFiles.add(DrJavaFileUtils.getJavaForLLFile(file).getPath());
+//        }
+//        else {
+        docFiles.add(file.getPath());
+//        }
       }
       catch (IllegalStateException e) {
         // Something wrong with _getFileFromDocument; ignore
@@ -321,73 +322,16 @@ public class DefaultJavadocModel implements JavadocModel {
     
     // Try to get the file from the document
     File docFile = _getFileFromDocument(doc, saver);
-    final File file = IOUtil.attemptCanonicalFile(docFile);
-    final File javaFile = DrJavaFileUtils.getJavaForLLFile(file);
+    final File javaFile = IOUtil.attemptCanonicalFile(docFile);
+//    final File javaFile = DrJavaFileUtils.getJavaForLLFile(file);
 
-    Utilities.invokeLater(new Runnable() { public void run() {
-      // If this is a language level file, make sure it has been compiled
-      if (DrJavaFileUtils.isLLFile(file)) {
-        // Utilities.showDebug("isLLFile = true");
-        final List<OpenDefinitionsDocument> singleton = new ArrayList<OpenDefinitionsDocument>();
-        singleton.add(doc);
-        if (_model.hasOutOfSyncDocuments(singleton)) {
-          // Utilities.showDebug("out of date");
-          CompilerListener javadocAfterCompile = new DummyCompilerListener() {
-            @Override public void compileAborted(Exception e) {
-              // gets called if there are modified files and the user chooses NOT to save the files
-              // see bug report 2582488: Hangs If Testing Modified File, But Choose "No" for Saving
-              final CompilerListener listenerThis = this;
-              // always remove this listener after its first execution
-              EventQueue.invokeLater(new Runnable() { 
-                public void run() { 
-                  _model.getCompilerModel().removeListener(listenerThis);
-                  // fail Javadoc
-                  _notifier.javadocEnded(false, null, false);
-                }
-              });
-            }
-            @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
-              final CompilerListener listenerThis = this;
-              try {
-                // Utilities.showDebug("compile ended");
-                if (_model.hasOutOfSyncDocuments(singleton) || _model.getNumCompErrors() > 0) {
-                  // Utilities.showDebug("still out of date, fail");
-                  // fail Javadoc
-                  EventQueue.invokeLater(new Runnable() { public void run() { _notifier.javadocEnded(false, null, false); } });
-                  return;
-                }
-                EventQueue.invokeLater(new Runnable() {  // defer running this code; would prefer to waitForInterpreter
-                  public void run() {
-                    try {
-                      // Utilities.showDebug("running Javadoc");
-                      _rawJavadocDocument(javaFile);
-                    }
-                    catch(IOException ioe) {
-                      // fail Javadoc
-                      EventQueue.invokeLater(new Runnable() { public void run() { _notifier.javadocEnded(false, null, false); } });
-                    }
-                  }
-                });
-              }
-              finally {  // always remove this listener after its first execution
-                EventQueue.invokeLater(new Runnable() { 
-                  public void run() { _model.getCompilerModel().removeListener(listenerThis); }
-                });
-              }
-            }
-          };
-          
-          _notifyCompileBeforeJavadoc(javadocAfterCompile);
-          return;
+    Utilities.invokeLater(new Runnable() { 
+      public void run() {
+        try { _rawJavadocDocument(javaFile); }
+        catch(IOException ioe) {
+          // fail Javadoc
+          EventQueue.invokeLater(new Runnable() { public void run() { _notifier.javadocEnded(false, null, false); } });
         }
-      }
-      try {
-        _rawJavadocDocument(javaFile);
-      }
-      catch(IOException ioe) {
-        // fail Javadoc
-        EventQueue.invokeLater(new Runnable() { public void run() { _notifier.javadocEnded(false, null, false); } });
-      }
     } });
   }
     

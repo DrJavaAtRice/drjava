@@ -370,12 +370,12 @@ public abstract class JavacCompiler implements CompilerInterface {
   /** Return the extension of the files that should be opened with the "Open Folder..." command.
     * @return file extension for the "Open Folder..." command for this compiler. */
   public String getOpenAllFilesInFolderExtension() {
-    return OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL)];
+    return OptionConstants.SCALA_FILE_EXTENSION;
   }
 
   /** Return true if this compiler can be used in conjunction with the language level facility.
     * @return true if language levels can be used. */
-  public boolean supportsLanguageLevels() { return true; }
+  public boolean supportsLanguageLevels() { return false; }  // Not in DrScala
   
   /** Return the set of keywords that should be highlighted in the specified file.
     * @param f file for which to return the keywords

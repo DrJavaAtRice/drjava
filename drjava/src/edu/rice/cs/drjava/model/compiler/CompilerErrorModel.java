@@ -146,21 +146,21 @@ public class CompilerErrorModel {
       for(OpenDefinitionsDocument odd: model.getOpenDefinitionsDocuments()) {
         odds.add(odd.getRawFile());
       }
-      for(int i=0; i<errors.length; ++i) {
-        DJError e = errors[i];
-        if (e.fileName().endsWith(edu.rice.cs.drjava.config.OptionConstants.JAVA_FILE_EXTENSION)) {
-          // only needs to be done for .java files
-          File javaFile = e.file();
-          if (!odds.contains(javaFile)) {
-            // .java file is not open
-            File dj2File = DrJavaFileUtils.getDJ2ForJavaFile(javaFile);
-            if (odds.contains(dj2File)) {
-              // but corresponding .dj2 file is open, change error to refer to .dj2 file
-              errors[i] = new DJError(dj2File, e.lineNumber(), e.startColumn(), e.message(), e.isWarning());
-            }
-          }
-        }
-      }
+//      for(int i=0; i < errors.length; ++i) {
+//        DJError e = errors[i];
+//        if (e.fileName().endsWith(edu.rice.cs.drjava.config.OptionConstants.JAVA_FILE_EXTENSION)) {
+//          // only needs to be done for .java files
+//          File javaFile = e.file();
+//          if (! odds.contains(javaFile)) {
+//            // .java file is not open
+//            File dj2File = DrJavaFileUtils.getDJ2ForJavaFile(javaFile);
+//            if (odds.contains(dj2File)) {
+//              // but corresponding .dj2 file is open, change error to refer to .dj2 file
+//              errors[i] = new DJError(dj2File, e.lineNumber(), e.startColumn(), e.message(), e.isWarning());
+//            }
+//          }
+//        }
+//      }
     }
 
     

@@ -52,10 +52,12 @@ public class DrJavaFileUtils  {
   public static Set<String> getSourceFileExtensions() {
     HashSet<String> extensions = new HashSet<String>();
     extensions.add(OptionConstants.JAVA_FILE_EXTENSION);
-    extensions.add(OptionConstants.DJ_FILE_EXTENSION);
-    extensions.add(OptionConstants.OLD_DJ0_FILE_EXTENSION);
-    extensions.add(OptionConstants.OLD_DJ1_FILE_EXTENSION);
-    extensions.add(OptionConstants.OLD_DJ2_FILE_EXTENSION);
+    extensions.add(OptionConstants.SCALA_FILE_EXTENSION);
+    // Java language levels support is disabled
+//    extensions.add(OptionConstants.DJ_FILE_EXTENSION);
+//    extensions.add(OptionConstants.OLD_DJ0_FILE_EXTENSION);
+//    extensions.add(OptionConstants.OLD_DJ1_FILE_EXTENSION);
+//    extensions.add(OptionConstants.OLD_DJ2_FILE_EXTENSION);
     return extensions;
   }
   
@@ -67,18 +69,16 @@ public class DrJavaFileUtils  {
 
   
   /** .java --> true
-    * .dj   --> true
-    * .dj0  --> true
-    * .dj1  --> true
-    * .dj2  --> true
+    * .scala --> true
     * otherwise false
     * @return true if the file is a Java or language level file. */
   public static boolean isSourceFile(String fileName) {
     return fileName.endsWith(OptionConstants.JAVA_FILE_EXTENSION)
-      || fileName.endsWith(OptionConstants.DJ_FILE_EXTENSION)
-      || fileName.endsWith(OptionConstants.OLD_DJ0_FILE_EXTENSION)
-      || fileName.endsWith(OptionConstants.OLD_DJ1_FILE_EXTENSION)
-      || fileName.endsWith(OptionConstants.OLD_DJ2_FILE_EXTENSION);
+      || fileName.endsWith(OptionConstants.SCALA_FILE_EXTENSION);
+//      || fileName.endsWith(OptionConstants.DJ_FILE_EXTENSION)
+//      || fileName.endsWith(OptionConstants.OLD_DJ0_FILE_EXTENSION)
+//      || fileName.endsWith(OptionConstants.OLD_DJ1_FILE_EXTENSION)
+//      || fileName.endsWith(OptionConstants.OLD_DJ2_FILE_EXTENSION);
   }
   
   /** @return true if the file is a Java or language level file. */
@@ -88,44 +88,8 @@ public class DrJavaFileUtils  {
     return isSourceFile(fileName);
   }
   
-  /** .dj   --> true
-    * .dj0  --> true
-    * .dj1  --> true
-    * .dj2  --> true
-    * otherwise false
-    * @return true if the file is a language level file. */
-  public static boolean isLLFile(String fileName) {
-    return fileName.endsWith(OptionConstants.DJ_FILE_EXTENSION)
-      || fileName.endsWith(OptionConstants.OLD_DJ0_FILE_EXTENSION)
-      || fileName.endsWith(OptionConstants.OLD_DJ1_FILE_EXTENSION)
-      || fileName.endsWith(OptionConstants.OLD_DJ2_FILE_EXTENSION);
-  }
-  
-  /** @return true if the file is a language level file. */
-  public static boolean isLLFile(File f) {
-    File canonicalFile = IOUtil.attemptCanonicalFile(f);
-    String fileName = canonicalFile.getPath();
-    return isLLFile(fileName);
-  }
-  
-  /** .dj0  --> true
-    * .dj1  --> true
-    * .dj2  --> true
-    * otherwise false
-    * @return true if the file is an old language level file. */
-  public static boolean isOldLLFile(String fileName) {
-    return fileName.endsWith(OptionConstants.OLD_DJ0_FILE_EXTENSION)
-      || fileName.endsWith(OptionConstants.OLD_DJ1_FILE_EXTENSION)
-      || fileName.endsWith(OptionConstants.OLD_DJ2_FILE_EXTENSION);
-  }
-  
-  /** @return true if the file is an old language level file. */
-  public static boolean isOldLLFile(File f) {
-    File canonicalFile = IOUtil.attemptCanonicalFile(f);
-    String fileName = canonicalFile.getPath();
-    return isOldLLFile(fileName);
-  }
-  
+  // Java language levels is disabled
+
   /** .pjt  --> true
     * otherwise false
     * @return true if the file is an old project file. */
@@ -158,123 +122,6 @@ public class DrJavaFileUtils  {
     return isProjectFile(fileName);
   }
 
-  /** A.dj   --> A.java
-    * A.dj0  --> A.java
-    * A.dj1  --> A.java
-    * A.dj2  --> A.java
-    * otherwise unchanged
-    * @return matching Java file for a language level file. */
-  public static String getJavaForLLFile(String fileName) {
-    if (fileName.endsWith(OptionConstants.DJ_FILE_EXTENSION)) {
-      return fileName.substring(0, fileName.lastIndexOf(OptionConstants.DJ_FILE_EXTENSION))
-        + OptionConstants.JAVA_FILE_EXTENSION;
-    }
-    else if (fileName.endsWith(OptionConstants.OLD_DJ0_FILE_EXTENSION)) {
-      return fileName.substring(0, fileName.lastIndexOf(OptionConstants.OLD_DJ0_FILE_EXTENSION))
-        + OptionConstants.JAVA_FILE_EXTENSION;
-    }
-    else if (fileName.endsWith(OptionConstants.OLD_DJ1_FILE_EXTENSION)) {
-      return fileName.substring(0, fileName.lastIndexOf(OptionConstants.OLD_DJ1_FILE_EXTENSION))
-        + OptionConstants.JAVA_FILE_EXTENSION;
-    }
-    else if (fileName.endsWith(OptionConstants.OLD_DJ2_FILE_EXTENSION)) {
-      return fileName.substring(0, fileName.lastIndexOf(OptionConstants.OLD_DJ2_FILE_EXTENSION))
-        + OptionConstants.JAVA_FILE_EXTENSION;
-    }
-    else return fileName;
-  }
-  
-  /** @return matching Java file for a language level file. */
-  public static File getJavaForLLFile(File f) {
-    File canonicalFile = IOUtil.attemptCanonicalFile(f);
-    String fileName = canonicalFile.getPath();
-    return new File(getJavaForLLFile(fileName));
-  }
-  
-  /** A.java --> A.dj
-    * otherwise unchanged
-    * @return matching .dj file for a .java file. */
-  public static File getDJForJavaFile(File f) {
-    return getFileWithDifferentExt(f, OptionConstants.JAVA_FILE_EXTENSION, OptionConstants.DJ_FILE_EXTENSION);
-  }
-
-  /** A.java --> A.dj0
-    * otherwise unchanged
-    * @return matching .dj0 file for a .java file. */
-  public static File getDJ0ForJavaFile(File f) {
-    return getFileWithDifferentExt(f, OptionConstants.JAVA_FILE_EXTENSION, OptionConstants.OLD_DJ0_FILE_EXTENSION);
-  }
-  
-  /** A.java --> A.dj1
-    * otherwise unchanged
-    * @return matching .dj1 file for a .java file. */
-  public static File getDJ1ForJavaFile(File f) {
-    return getFileWithDifferentExt(f, OptionConstants.JAVA_FILE_EXTENSION, OptionConstants.OLD_DJ1_FILE_EXTENSION);
-  }
-  
-  /** A.java --> A.dj2
-    * otherwise unchanged
-    * @return matching .dj2 file for a .java file. */
-  public static File getDJ2ForJavaFile(File f) {
-    return getFileWithDifferentExt(f, OptionConstants.JAVA_FILE_EXTENSION, OptionConstants.OLD_DJ2_FILE_EXTENSION);
-  }
-  
-  /** A.java --> A.dj
-    * otherwise unchanged
-    * @return matching .dj file for a .java file. */
-  public static String getDJForJavaFile(String f) {
-    return getFileWithDifferentExt(f, OptionConstants.JAVA_FILE_EXTENSION, OptionConstants.DJ_FILE_EXTENSION);
-  }
-
-  /** A.java --> A.dj0
-    * otherwise unchanged
-    * @return matching .dj0 file for a .java file. */
-  public static String getDJ0ForJavaFile(String f) {
-    return getFileWithDifferentExt(f, OptionConstants.JAVA_FILE_EXTENSION, OptionConstants.OLD_DJ0_FILE_EXTENSION);
-  }
-  
-  /** A.java --> A.dj1
-    * otherwise unchanged
-    * @return matching .dj1 file for a .java file. */
-  public static String getDJ1ForJavaFile(String f) {
-    return getFileWithDifferentExt(f, OptionConstants.JAVA_FILE_EXTENSION, OptionConstants.OLD_DJ1_FILE_EXTENSION);
-  }
-  
-  /** A.java --> A.dj2
-    * otherwise unchanged
-    * @return matching .dj2 file for a .java file. */
-  public static String getDJ2ForJavaFile(String f) {
-    return getFileWithDifferentExt(f, OptionConstants.JAVA_FILE_EXTENSION, OptionConstants.OLD_DJ2_FILE_EXTENSION);
-  }
-  
-  /** A.dj0 -> A.dj
-    * A.dj1 -> A.dj
-    * A.dj2 -> A.java
-    * otherwise unchanged
-    * @return new language level file matching an old language level file. */
-  public static String getNewLLForOldLLFile(String fileName) {
-    if (fileName.endsWith(OptionConstants.OLD_DJ0_FILE_EXTENSION)) {
-      return fileName.substring(0, fileName.lastIndexOf(OptionConstants.OLD_DJ0_FILE_EXTENSION))
-        + OptionConstants.DJ_FILE_EXTENSION;
-    }
-    else if (fileName.endsWith(OptionConstants.OLD_DJ1_FILE_EXTENSION)) {
-      return fileName.substring(0, fileName.lastIndexOf(OptionConstants.OLD_DJ1_FILE_EXTENSION))
-        + OptionConstants.DJ_FILE_EXTENSION;
-    }
-    else if (fileName.endsWith(OptionConstants.OLD_DJ2_FILE_EXTENSION)) {
-      return fileName.substring(0, fileName.lastIndexOf(OptionConstants.OLD_DJ2_FILE_EXTENSION))
-        + OptionConstants.JAVA_FILE_EXTENSION;
-    }
-    else return fileName;
-  }
-  
-  /** @return new language level file matching an old language level file. */
-  public static File getNewLLForOldLLFile(File f) {
-    File canonicalFile = IOUtil.attemptCanonicalFile(f);
-    String fileName = canonicalFile.getPath();
-    return new File(getNewLLForOldLLFile(fileName));
-  }
-
   /** getFileWithDifferentExt("A.java", ".java", ".dj") --> "A.dj"
     * @return matching file with extension dest for a file with extension source. */
   public static String getFileWithDifferentExt(String fileName, String source, String dest) {
@@ -291,8 +138,7 @@ public class DrJavaFileUtils  {
     String fileName = canonicalFile.getPath();
     return new File(getFileWithDifferentExt(fileName, source, dest));
   }
-  
-  
+   
   /** Returns the relative directory (from the source root) that the source file with this qualifed name will be in, 
     * given its package. Returns the empty string for classes without packages.
     * @param className The fully qualified class name

@@ -58,7 +58,7 @@ import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
 import edu.rice.cs.drjava.model.repl.DummyInteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
-import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
+//import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.plt.lambda.Lambda;
@@ -596,8 +596,6 @@ public class JPDADebugger implements Debugger {
     }
   }
 
-  
-  
   /** Sets a breakpoint.
     * @param breakpoint The new breakpoint to set
     */
@@ -607,47 +605,50 @@ public class JPDADebugger implements Debugger {
     _model.getBreakpointManager().addRegion(breakpoint);
   }
   
-  /** Returns the line number of the breakpoint, possibly mapped from LL to Java
-    * if the breakpoint is set in a language level file. */
-  public int LLBreakpointLineNum(Breakpoint breakpoint){
+  /** Returns the line number of the breakpoint. */
+  public int getBreakpointLineNumber(Breakpoint breakpoint){
     int line = breakpoint.getLineNumber();
     File f = breakpoint.getFile();
     
-    if (DrJavaFileUtils.isLLFile(f)) {
-      f = DrJavaFileUtils.getJavaForLLFile(f);
-      TreeMap<Integer, Integer> tM = getLLSTM().readLLBlock(f);
-      line = tM.get(breakpoint.getLineNumber());
-    }
+    // disable Java language level processing
+//    if (DrJavaFileUtils.isLLFile(f)) {
+//      f = DrJavaFileUtils.getJavaForLLFile(f);
+//      TreeMap<Integer, Integer> tM = getLLSTM().readLLBlock(f);
+//      line = tM.get(breakpoint.getLineNumber());
+//    }
     return line;
   }
   
-  /** Return a stack trace element that matches the given location, but Java line numbers
-    * have been mapped to LL line numbers.
+  // Disable Java language levels processing
+  
+  /** Return a stack trace element that matches the given location
     * @param l location with Java line numbers
     * @param files open LL files
     * @return stack trace element with LL line numbers
     */
-  public StackTraceElement getLLStackTraceElement(Location l, List<File> files) {
+  public StackTraceElement getStackTraceElement(Location l, List<File> files) {
     // map Java line numbers to LL line numbers
-    int lineNum = l.lineNumber();
+//    int lineNum = l.lineNumber();
     String sourceName = null;
     try { sourceName = l.sourceName(); }
     catch(com.sun.jdi.AbsentInformationException aie) { sourceName = null; }
     StackTraceElement ste = 
       new StackTraceElement(l.declaringType().name(), l.method().name(), sourceName, l.lineNumber());
-    return getLLSTM().replaceStackTraceElement(ste, files);
+    return ste;
+//    return getLLSTM().replaceStackTraceElement(ste, files);
   }
   
-  /** Return a JDI location that matches the given location, but Java line numbers
-    * have been mapped to LL line numbers.
-    * @param l location with Java line numbers
-    * @param files open LL files
-    * @return JDI location with LL line numbers
-    */
-  public Location getLLLocation(Location l, List<File> files) {
-    StackTraceElement ste = getLLStackTraceElement(l, files); 
-    return new DelegatingLocation(ste.getFileName(), ste.getLineNumber(), l);
-  }
+  //   Java language levels mapping has been disabled
+//  /** Return a JDI location that matches the given location, but Java line numbers
+//    * have been mapped to LL line numbers.
+//    * @param l location with Java line numbers
+//    * @param files open LL files
+//    * @return JDI location with LL line numbers
+//    */
+//  public Location getLLLocation(Location l, List<File> files) {
+//    StackTraceElement ste = getLLStackTraceElement(l, files); 
+//    return new DelegatingLocation(ste.getFileName(), ste.getLineNumber(), l);
+//  }
   
   /** Removes a breakpoint. Called from toggleBreakpoint -- even with BPs that are not active.
     * @param bp The breakpoint to remove.
@@ -727,11 +728,12 @@ public class JPDADebugger implements Debugger {
       ArrayList<DebugStackData> frames = new ArrayList<DebugStackData>();
       // get a list of language level files whose line numbers need to be translated 
       final List<File> files = new ArrayList<File>();
-      for (OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
+      // Java language level processing has been disabled
+//      for (OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
       for (StackFrame f : thread.frames()) {
         // map Java line numbers to LL line numbers
         String method = JPDAStackData.methodName(f);
-        StackTraceElement ste = getLLStackTraceElement(f.location(), files);
+        StackTraceElement ste = getStackTraceElement(f.location(), files);
         frames.add(new JPDAStackData(method, ste.getLineNumber()));
       }
       return frames;
@@ -750,23 +752,23 @@ public class JPDADebugger implements Debugger {
     }
   }
   
-  /** Return the adjusted location (identical to input unless the matching document is a LL file) and document 
-    * associated with this location generated by the JVM and hence associated with a conventional Java (not an LL)
+  /** Return the location (identical to input) and document 
+    * associated with this location generated by the JVM and hence associated with a conventional source
     * file.  A document is preloaded when a debugger step occurs.  This method was originally intended to avoid 
     * the deadlock described in [ 1696060 ] Debugger Infinite Loop. but all debugger actions now occur in the Event
     * thread and synchronization has been elided. */
   public Pair<Location, OpenDefinitionsDocument> preloadDocument(Location location) {
     assert EventQueue.isDispatchThread();
     OpenDefinitionsDocument doc = null;
-    Location lll = null;  /* Location in source file; adjusted for LL file if necessary. */
+    Location lll = location;  /* Location in source file. */
     
     String fileName;
     try {
       final List<File> files = new ArrayList<File>();
-      for (OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
-      lll = getLLLocation(location, files);
-      
-      
+      // LL has been disabled
+//      for (OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
+//      lll = getLLLocation(location, files);
+          
       fileName = lll.sourcePath();
 
       // Check source root set (open files)
@@ -780,7 +782,7 @@ public class JPDADebugger implements Debugger {
     catch(AbsentInformationException e) {
       // No stored doc, look on the source root set (later, also the sourcepath)
       final List<File> files = new ArrayList<File>();
-      for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
+//      for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
 
       ReferenceType rt = location.declaringType();
       fileName = null;
@@ -797,7 +799,7 @@ public class JPDADebugger implements Debugger {
           className = className.substring(0, indexOfDollar);
         }
         
-        for(File f: files) {
+        for (File f: files) {
           // TODO: What about Habanero Java extension?
           for(String ext: DrJavaFileUtils.getSourceFileExtensions()) {
             if (f.getName().equals(className + ext)) {
@@ -855,13 +857,15 @@ public class JPDADebugger implements Debugger {
     }
 
     final List<File> files = new ArrayList<File>();
-    for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
+//    for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
     
     // map Java to LL line numbers using LanguageLevelStackTraceMapper
     while (i.hasNext()) {
       StackFrame frame = i.next();
-
-      Location lll = getLLLocation(frame.location(), files);
+      
+      // Disable Java language level processing
+//      Location lll = getLLLocation(frame.location(), files); 
+      Location lll = frame.location();
       
       if (lll.lineNumber() == stackData.getLine() &&
           stackData.getMethod().equals(frame.location().declaringType().name() + "." +
@@ -896,7 +900,7 @@ public class JPDADebugger implements Debugger {
     assert EventQueue.isDispatchThread();
     for (int i = 0; i < _model.getBreakpointManager().getRegions().size(); i++) {
       Breakpoint bp = _model.getBreakpointManager().getRegions().get(i);
-      if ((LLBreakpointLineNum(bp) ==  line) && (bp.getClassName().equals(className))) {
+      if ((getBreakpointLineNumber(bp) ==  line) && (bp.getClassName().equals(className))) {
         return bp;
       }
     }
@@ -1295,7 +1299,7 @@ public class JPDADebugger implements Debugger {
     // } catch(AbsentInformationException aie) { }
     assert EventQueue.isDispatchThread();
     Pair<Location, OpenDefinitionsDocument> locAndDoc = preloadDocument(location);  // adjusts location
-    Location lll = locAndDoc.first();  // Location has been adjusted to LL if necessary
+    Location lll = locAndDoc.first(); 
     OpenDefinitionsDocument doc = locAndDoc.second();
     openAndScroll(doc, lll, shouldHighlight);
   }
@@ -1325,9 +1329,9 @@ public class JPDADebugger implements Debugger {
     // Open and scroll if doc was found
     if (doc != null) { 
       doc.checkIfClassFileInSync();
-      if (DrJavaFileUtils.isLLFile(doc.getRawFile())) {
-        // map J
-      }
+//      if (DrJavaFileUtils.isLLFile(doc.getRawFile())) {
+//        // map J
+//      }
       final int llLine = line;
       // change UI if in sync in MainFrame listener
       EventQueue.invokeLater(new Runnable() {
@@ -1661,8 +1665,8 @@ public class JPDADebugger implements Debugger {
       try {
         if (currThread.frameCount() > 0) {
           final List<File> files = new ArrayList<File>();
-          for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
-          scrollToSource(getLLLocation(currThread.frame(0).location(), files));
+//          for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
+          scrollToSource(/* getLLLocation( */ currThread.frame(0).location() /*, files) */ );  // LL has been disabled
         }
       }
       catch (IncompatibleThreadStateException itse) {
@@ -1945,11 +1949,12 @@ public class JPDADebugger implements Debugger {
     public boolean isEmpty() { return empty(); }
   }
   
+  // Disable Java language levels processing
   
-  /** Gets the LanguageLevelStackTraceMapper
-    * @return the LanguageLevelStackTraceMapper used by JPDADebugger in the compiler model
-    */
-  public LanguageLevelStackTraceMapper getLLSTM() { return _model.getCompilerModel().getLLSTM(); }
+//  /** Gets the LanguageLevelStackTraceMapper
+//    * @return the LanguageLevelStackTraceMapper used by JPDADebugger in the compiler model
+//    */
+//  public LanguageLevelStackTraceMapper getLLSTM() { return _model.getCompilerModel().getLLSTM(); }
   
   /** A Location that delegates to another location in all cases except for line number,
     * source path and source name. */

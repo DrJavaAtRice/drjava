@@ -43,49 +43,23 @@ import edu.rice.cs.drjava.DrJavaRoot;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 
-/** A file filter for files with extensions ".java" and ".dj?". Used in the file choosers for open and save. 
+/** A file filter for files with extensions ".java" and ".scala". Used in the file choosers for open and save. 
  *  @version $Id$
  */
 public class JavaSourceFilter extends FileFilter {
   
-  /** Returns true if the file's extension matches Java or GJ. */
+  /** Returns true if the file's extension matches Java or Scala. */
   public boolean accept(File f) {
-    if (f.isDirectory()) {
-      return true;
-    }
-    String extension = getExtension(f);
-    if (extension != null) {
-      switch (DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL)) {
-        case (OptionConstants.FULL_JAVA):
-          return (extension.equals(OptionConstants.JAVA_FILE_EXTENSION));
-        case (OptionConstants.ELEMENTARY_LEVEL):
-          return extension.equals(OptionConstants.OLD_DJ0_FILE_EXTENSION);
-        case (OptionConstants.INTERMEDIATE_LEVEL):
-          return extension.equals(OptionConstants.OLD_DJ1_FILE_EXTENSION);
-        case (OptionConstants.ADVANCED_LEVEL):
-          return extension.equals(OptionConstants.OLD_DJ2_FILE_EXTENSION);
-        case (OptionConstants.FUNCTIONAL_JAVA_LEVEL):
-          return extension.equals(OptionConstants.DJ_FILE_EXTENSION);
-      }
-    }
-    return false;
+    if (f.isDirectory()) return true;
+    
+    String ext = getExtension(f);
+    return ext.equals(OptionConstants.JAVA_FILE_EXTENSION) || ext.equals(OptionConstants.SCALA_FILE_EXTENSION);
   }
 
   /** @return A description of this filter to display. */
   public String getDescription() {
-    switch (DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL)) {
-        case (OptionConstants.FULL_JAVA):
-          return "Java source files (*"+OptionConstants.JAVA_FILE_EXTENSION+")";
-        case (OptionConstants.ELEMENTARY_LEVEL):
-          return "Elementary source files (*"+OptionConstants.OLD_DJ0_FILE_EXTENSION+")";
-        case (OptionConstants.INTERMEDIATE_LEVEL):
-          return "Intermediate source files (*"+OptionConstants.OLD_DJ1_FILE_EXTENSION+")";
-        case (OptionConstants.ADVANCED_LEVEL):
-          return "Advanced source files (*"+OptionConstants.OLD_DJ2_FILE_EXTENSION+")";
-        case (OptionConstants.FUNCTIONAL_JAVA_LEVEL):
-          return "Functional Java source files (*"+OptionConstants.DJ_FILE_EXTENSION+")";
-      }
-    return "Java source files";
+    return "Java source files (*" + OptionConstants.SCALA_FILE_EXTENSION + ", *" +
+      OptionConstants.JAVA_FILE_EXTENSION + ")";
   }
 
   /* Get the extension of a file. */

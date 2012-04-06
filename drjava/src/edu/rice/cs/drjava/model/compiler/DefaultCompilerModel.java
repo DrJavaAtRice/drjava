@@ -76,7 +76,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public class DefaultCompilerModel implements CompilerModel {
   
   /** for logging debug info */
-  private static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("DefaultCompilerModel.txt", false);
+  private static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("DefaultCompilerModel.txt", true);
   
   /** The available compilers */
   private final List<CompilerInterface> _compilers;
@@ -96,9 +96,9 @@ public class DefaultCompilerModel implements CompilerModel {
   /** The lock providing mutual exclustion between compilation and unit testing */
   private Object _compilerLock = new Object();
   
-  /** The LanguageLevelStackTraceMapper that helps translate .java line 
-    * numbers to .dj* line numbers when an error is thrown */
-  public LanguageLevelStackTraceMapper _LLSTM;
+//  /** The LanguageLevelStackTraceMapper that helps translate .java line 
+//    * numbers to .dj* line numbers when an error is thrown */
+//  public LanguageLevelStackTraceMapper _LLSTM;
   
   /** Main constructor.  
     * @param m the GlobalModel that is the source of documents for this CompilerModel
@@ -128,7 +128,7 @@ public class DefaultCompilerModel implements CompilerModel {
     
     _model = m;
     _compilerErrorModel = new CompilerErrorModel(new DJError[0], _model);
-    _LLSTM = new LanguageLevelStackTraceMapper(_model);
+//    _LLSTM = new LanguageLevelStackTraceMapper(_model);
   }
    
   //--------------------------------- Locking -------------------------------//
@@ -234,7 +234,7 @@ public class DefaultCompilerModel implements CompilerModel {
   
   /** Compile the given documents. All compile commands invoke this private method! */
   private void _doCompile(List<OpenDefinitionsDocument> docs) throws IOException {
-    _LLSTM.clearCache();
+//    _LLSTM.clearCache();
     final ArrayList<File> filesToCompile = new ArrayList<File>();
     final ArrayList<File> excludedFiles = new ArrayList<File>();
     final ArrayList<DJError> packageErrors = new ArrayList<DJError>();
@@ -289,17 +289,18 @@ public class DefaultCompilerModel implements CompilerModel {
   
   //-------------------------------- Helpers --------------------------------//
   
-  /** Converts JExprParseExceptions thrown by the JExprParser in language levels to CompilerErrors. */
-  private LinkedList<DJError> _parseExceptions2CompilerErrors(LinkedList<JExprParseException> pes) {
-    final LinkedList<DJError> errors = new LinkedList<DJError>();
-    Iterator<JExprParseException> iter = pes.iterator();
-    while (iter.hasNext()) {
-      JExprParseException pe = iter.next();
-      errors.addLast(new DJError(pe.getFile(), pe.currentToken.beginLine-1, pe.currentToken.beginColumn-1, 
-                                 pe.getMessage(), false));
-    }
-    return errors;
-  }
+  // Disable Java language levels processing
+//  /** Converts JExprParseExceptions thrown by the JExprParser in language levels to CompilerErrors. */
+//  private LinkedList<DJError> _parseExceptions2CompilerErrors(LinkedList<JExprParseException> pes) {
+//    final LinkedList<DJError> errors = new LinkedList<DJError>();
+//    Iterator<JExprParseException> iter = pes.iterator();
+//    while (iter.hasNext()) {
+//      JExprParseException pe = iter.next();
+//      errors.addLast(new DJError(pe.getFile(), pe.currentToken.beginLine-1, pe.currentToken.beginColumn-1, 
+//                                 pe.getMessage(), false));
+//    }
+//    return errors;
+//  }
   
   /** Converts errors thrown by the language level visitors to CompilerErrors. */
   private LinkedList<DJError> _visitorErrors2CompilerErrors(LinkedList<Pair<String, JExpressionIF>> visitorErrors) {
@@ -328,6 +329,7 @@ public class DefaultCompilerModel implements CompilerModel {
     *                 directory as the source file
     */
   private void _compileFiles(List<File> files, File buildDir) throws IOException {
+    _log.log("DefaultCompilerModel._compileFiles called with files = " + files);
     if (! files.isEmpty()) {
       /* Canonicalize buildDir */
       if (buildDir == FileOps.NULL_FILE) buildDir = null; // compiler interface wants null pointer if no build directory
@@ -363,21 +365,27 @@ public class DefaultCompilerModel implements CompilerModel {
       
       final LinkedList<DJError> errors = new LinkedList<DJError>();
       
-      List<? extends File> preprocessedFiles = _compileLanguageLevelsFiles(files, errors, classPath, bootClassPath);
+      // Disable DrJava language levels processing
       
-      if (errors.isEmpty()) {
-        // Mutual exclusion with JUnit code that finds all test classes (in DefaultJUnitModel)
-        synchronized(_compilerLock) {
-          if (preprocessedFiles == null) {
-            errors.addAll(compiler.compile(files, classPath, null, buildDir, bootClassPath, null, true));
-          }
-          else {
-            /** If compiling a language level file, do not show warnings, as these are not caught by the language level 
-              * parser */
-            errors.addAll(compiler.compile(preprocessedFiles, classPath, null, buildDir, bootClassPath, null, false));
-          }
-        }
+//      List<? extends File> preprocessedFiles = _compileLanguageLevelsFiles(files, errors, classPath, bootClassPath);
+      
+//      if (errors.isEmpty()) {
+      // Mutual exclusion with JUnit code that finds all test classes (in DefaultJUnitModel)
+      synchronized(_compilerLock) {
+//          if (preprocessedFiles == null) {
+        _log.log("Calling the compiler adapter on: \n  files = " + files + "\n classPath = " + classPath +
+                 "\n buildDir = " + buildDir + "\n  bootClassPath = " + bootClassPath);
+        errors.addAll(compiler.compile(files, classPath, null, buildDir, bootClassPath, null, true));
       }
+//          else {
+//            /** If compiling a language level file, do not show warnings, as these are not caught by the language level 
+//              * parser */
+//              _log.log("Calling the compiler adapter with language level files on: \n  files = " + files + 
+//                       "\n classPath = " + classPath + "\n buildDir = " + buildDir + "\n  bootClassPath = " + 
+//                       bootClassPath);
+//            errors.addAll(compiler.compile(preprocessedFiles, classPath, null, buildDir, bootClassPath, null, false));
+//          }
+//    }
       _distributeErrors(errors);
     }
     else { 
@@ -410,183 +418,184 @@ public class DefaultCompilerModel implements CompilerModel {
     * @return  An updated list for compilation containing no Language Levels files, or @code{null}
     *          if there were no Language Levels files to process.
     */
-  private List<File> _compileLanguageLevelsFiles(List<File> files, List<DJError> errors,
-                                                 Iterable<File> classPath, Iterable<File> bootClassPath) {
-    /* Construct the collection of files to be compild by javac, renaming any language levels (.dj*) files to the 
-     * corresponding java (.java) files.  By using a HashSet, we avoid creating duplicates in this collection.
-     */
-    HashSet<File> javaFileSet = new HashSet<File>();
-    LinkedList<File> newFiles = new LinkedList<File>();  // Used to record the LL files that must be converted
-    final LinkedList<File> filesToBeClosed = new LinkedList<File>();  // Used to record .java files that are open at 
-    // the same time as their .dj? files.
-    boolean containsLanguageLevels = false;
-    for (File f : files) {
-      File canonicalFile = IOUtil.attemptCanonicalFile(f);
-      String fileName = canonicalFile.getPath();
-      if (DrJavaFileUtils.isLLFile(fileName)) {
-        containsLanguageLevels = true;
-        File javaFile = new File(DrJavaFileUtils.getJavaForLLFile(fileName));
-        
-        //checks if .dj? file has a matching .java file open in project. Eventually warns user (later on in code)
-        if (files.contains(javaFile)) filesToBeClosed.add(javaFile);
-          // delete file later so closeFiles doesn't complain about missing files
-        else
-          // Delete the stale .java file now (if it exists), a file with this name will subsequently be generated
-          javaFile.delete();
-        
-        javaFileSet.add(javaFile);
-        newFiles.add(javaFile);
-      }   
-      else javaFileSet.add(canonicalFile);
-    }
-    
-    for (File f: filesToBeClosed) {
-      if (files.contains(DrJavaFileUtils.getDJForJavaFile(f)) ||
-          files.contains(DrJavaFileUtils.getDJ0ForJavaFile(f)) ||
-          files.contains(DrJavaFileUtils.getDJ1ForJavaFile(f)) ||
-          files.contains(DrJavaFileUtils.getDJ2ForJavaFile(f))) {
-        files.remove(f);
-      }
-    }
-    
-    if (!filesToBeClosed.isEmpty()) {
-      final JButton closeButton = new JButton(new AbstractAction("Close Files") {
-        public void actionPerformed(ActionEvent e) {
-          // no op, i.e. delete everything
-        }
-      });
-      final JButton keepButton = new JButton(new AbstractAction("Keep Open") {
-        public void actionPerformed(ActionEvent e) {
-          // clear the set, i.e. do not delete anything
-          filesToBeClosed.clear();
-        }
-      });
-      ScrollableListDialog<File> dialog = new ScrollableListDialog.Builder<File>()
-        .setTitle("Java File" + (filesToBeClosed.size() == 1?"":"s") + " Need to Be Closed")
-        .setText("The following .java " + (filesToBeClosed.size() == 1?
-                                             "file has a matching .dj? file":
-                                             "files have matching .dj? files") + " open.\n" + 
-                 (filesToBeClosed.size() == 1?
-                    "This .java file needs":
-                    "These .java files need") + " to be closed for proper compiling.")
-        .setItems(filesToBeClosed)
-        .setMessageType(JOptionPane.WARNING_MESSAGE)
-        .setFitToScreen(true)
-        .clearButtons()
-        .addButton(closeButton)
-        .addButton(keepButton)
-        .build();
-      
-      dialog.showDialog();
-      
-      LinkedList<OpenDefinitionsDocument> docsToBeClosed = new LinkedList<OpenDefinitionsDocument>();
-      for(File f: filesToBeClosed) {
-        try {
-          docsToBeClosed.add(_model.getDocumentForFile(f));
-        }
-        catch(IOException ioe) { /* ignore, just don't close this document */ }
-      }
-      _model.closeFiles(docsToBeClosed);
-      // delete the files now because closeFiles has executed and won't complain about missing files anymore
-      for(File f: filesToBeClosed) {        
-        // Delete the stale .java file now (if it exists), a file with this name will subsequently be generated
-        f.delete();
-      }
-    }
-    
-    if (containsLanguageLevels) {
-      /* Check if we should delete class files in directories with language level files. */
-      final File buildDir = _model.getBuildDirectory();
-      final File sourceDir = _model.getProjectRoot();
-      if (!DrJava.getConfig().getSetting(OptionConstants.DELETE_LL_CLASS_FILES)
-            .equals(OptionConstants.DELETE_LL_CLASS_FILES_CHOICES.get(0))) {
-        // not "never"
-        final HashSet<File> dirsWithLLFiles = new HashSet<File>();
-        for(File f: newFiles) {
-          try {
-            File dir = f.getParentFile();
-            if (buildDir != null && buildDir != FileOps.NULL_FILE &&
-                sourceDir != null && sourceDir != FileOps.NULL_FILE) {
-              // build directory set
-              String rel = edu.rice.cs.util.FileOps.stringMakeRelativeTo(dir,sourceDir);
-              dir = new File(buildDir,rel);
-            }            
-            dirsWithLLFiles.add(dir);
-          }
-          catch(IOException ioe) { /* just don't add this directory */ }
-        }
-        
-        if (DrJava.getConfig().getSetting(OptionConstants.DELETE_LL_CLASS_FILES)
-              .equals(OptionConstants.DELETE_LL_CLASS_FILES_CHOICES.get(1))) {
-          // "ask me"
-          final JButton deleteButton = new JButton(new AbstractAction("Delete Class Files") {
-            public void actionPerformed(ActionEvent e) {
-              // no op
-            }
-          });
-          final JButton keepButton = new JButton(new AbstractAction("Keep Class Files") {
-            public void actionPerformed(ActionEvent e) {
-              // clear the set, i.e. do not delete anything
-              dirsWithLLFiles.clear();
-            }
-          });
-          ScrollableListDialog<File> dialog = new ScrollableListDialog.Builder<File>()
-            .setTitle("Delete Class Files")
-            .setText("We suggest that you delete all class files in the directories with language\n" +
-                     "level files. Do you want to delete the class files in the following director" +
-                     (dirsWithLLFiles.size() == 1?"y":"ies") + "?")
-            .setItems(new ArrayList<File>(dirsWithLLFiles))
-            .setMessageType(JOptionPane.QUESTION_MESSAGE)
-            .setFitToScreen(true)
-            .clearButtons()
-            .addButton(deleteButton)
-            .addButton(keepButton)
-            .build();
-          
-          dialog.showDialog();
-        }
-        
-        // Delete all class files in the directories listed. If the user was asked and said "keep",
-        // then the set will be empty
-        for(File f: dirsWithLLFiles) {
-          f.listFiles(new java.io.FilenameFilter() {
-            public boolean accept(File dir, String name) {
-              int endPos = name.lastIndexOf(".class");
-              if (endPos < 0) return false; // can't be a class file
-              new File(dir, name).delete();
-              // don't need to return true, we're deleting the file here already
-              return false;
-            }
-          });
-        }
-      }
-      
-      /* Perform language levels conversion, creating corresponding .java files. */
-      LanguageLevelConverter llc = new LanguageLevelConverter();
-      Options llOpts;
-      if (bootClassPath == null) { llOpts = new Options(getActiveCompiler().version(), classPath); }
-      else { llOpts = new Options(getActiveCompiler().version(), classPath, bootClassPath); }
-      
-      // NOTE: the following workaround ("_testFileSort(files)" instead of simply "files") may no longer be necessary.
-      /* Perform the conversion incorporating the following Bug Workaround:  Forward references can generate spurious 
-       * conversion errors in some cases.  This problem can be mitigated by compiling JUnit test files (with names
-       * containing the substring "Test") last.  
-       */
-      Map<File,Set<String>> sourceToTopLevelClassMap = new HashMap<File,Set<String>>();
-      Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> llErrors = 
-        llc.convert(_testFileSort(files).toArray(new File[0]), llOpts, sourceToTopLevelClassMap);
-      /* Add any errors encountered in conversion to the compilation error log. */
-      errors.addAll(_parseExceptions2CompilerErrors(llErrors.getFirst()));
-      errors.addAll(_visitorErrors2CompilerErrors(llErrors.getSecond()));
-      
-      // Since we (optionally) delete all class files in LL directories, we don't need the code
-      // to smart-delete class files anymore.
-      // smartDeleteClassFiles(sourceToTopLevelClassMap);
-    }
-    
-    if (containsLanguageLevels) { return new LinkedList<File>(javaFileSet); }
-    else { return null; }
-  }
+//  private List<File> _compileLanguageLevelsFiles(List<File> files, List<DJError> errors,
+//                                                 Iterable<File> classPath, Iterable<File> bootClassPath) {
+//    /* Construct the collection of files to be compild by javac, renaming any language levels (.dj*) files to the 
+//     * corresponding java (.java) files.  By using a HashSet, we avoid creating duplicates in this collection.
+//     */
+//    HashSet<File> javaFileSet = new HashSet<File>();
+//    LinkedList<File> newFiles = new LinkedList<File>();  // Used to record the LL files that must be converted
+//    final LinkedList<File> filesToBeClosed = new LinkedList<File>();  // Used to record .java files that are open at 
+//    // the same time as their .dj? files.
+//    boolean containsLanguageLevels = false;
+//    for (File f : files) {
+//      File canonicalFile = IOUtil.attemptCanonicalFile(f);
+//      String fileName = canonicalFile.getPath();
+//      if (DrJavaFileUtils.isLLFile(fileName)) {
+//        containsLanguageLevels = true;
+//        File javaFile = new File(DrJavaFileUtils.getJavaForLLFile(fileName));
+//        
+//        //checks if .dj? file has a matching .java file open in project. Eventually warns user (later on in code)
+//        if (files.contains(javaFile)) filesToBeClosed.add(javaFile);
+//          // delete file later so closeFiles doesn't complain about missing files
+//        else
+//          // Delete the stale .java file now (if it exists), a file with this name will subsequently be generated
+//          javaFile.delete();
+//        
+//        javaFileSet.add(javaFile);
+//        newFiles.add(javaFile);
+//      }   
+//      else javaFileSet.add(canonicalFile);
+//  }
+//    
+//    for (File f: filesToBeClosed) {
+//      if (files.contains(DrJavaFileUtils.getDJForJavaFile(f)) ||
+//          files.contains(DrJavaFileUtils.getDJ0ForJavaFile(f)) ||
+//          files.contains(DrJavaFileUtils.getDJ1ForJavaFile(f)) ||
+//          files.contains(DrJavaFileUtils.getDJ2ForJavaFile(f))) {
+//        files.remove(f);
+//      }
+//    }
+//    
+//    if (!filesToBeClosed.isEmpty()) {
+//      final JButton closeButton = new JButton(new AbstractAction("Close Files") {
+//        public void actionPerformed(ActionEvent e) {
+//          // no op, i.e. delete everything
+//        }
+//      });
+//      final JButton keepButton = new JButton(new AbstractAction("Keep Open") {
+//        public void actionPerformed(ActionEvent e) {
+//          // clear the set, i.e. do not delete anything
+//          filesToBeClosed.clear();
+//        }
+//      });
+//      ScrollableListDialog<File> dialog = new ScrollableListDialog.Builder<File>()
+//        .setTitle("Java File" + (filesToBeClosed.size() == 1?"":"s") + " Need to Be Closed")
+//        .setText("The following .java " + (filesToBeClosed.size() == 1?
+//                                             "file has a matching .dj? file":
+//                                             "files have matching .dj? files") + " open.\n" + 
+//                 (filesToBeClosed.size() == 1?
+//                    "This .java file needs":
+//                    "These .java files need") + " to be closed for proper compiling.")
+//        .setItems(filesToBeClosed)
+//        .setMessageType(JOptionPane.WARNING_MESSAGE)
+//        .setFitToScreen(true)
+//        .clearButtons()
+//        .addButton(closeButton)
+//        .addButton(keepButton)
+//        .build();
+//      
+//      dialog.showDialog();
+//      
+//      LinkedList<OpenDefinitionsDocument> docsToBeClosed = new LinkedList<OpenDefinitionsDocument>();
+//      for(File f: filesToBeClosed) {
+//        try {
+//          docsToBeClosed.add(_model.getDocumentForFile(f));
+//        }
+//        catch(IOException ioe) { /* ignore, just don't close this document */ }
+//      }
+//      _model.closeFiles(docsToBeClosed);
+//      // delete the files now because closeFiles has executed and won't complain about missing files anymore
+//      for(File f: filesToBeClosed) {        
+//        // Delete the stale .java file now (if it exists), a file with this name will subsequently be generated
+//        f.delete();
+//      }
+//    }
+//    
+//    if (containsLanguageLevels) {
+//      /* Check if we should delete class files in directories with language level files. */
+//      final File buildDir = _model.getBuildDirectory();
+//      final File sourceDir = _model.getProjectRoot();
+//      if (!DrJava.getConfig().getSetting(OptionConstants.DELETE_LL_CLASS_FILES)
+//            .equals(OptionConstants.DELETE_LL_CLASS_FILES_CHOICES.get(0))) {
+//        // not "never"
+//        final HashSet<File> dirsWithLLFiles = new HashSet<File>();
+//        for(File f: newFiles) {
+//          try {
+//            File dir = f.getParentFile();
+//            if (buildDir != null && buildDir != FileOps.NULL_FILE &&
+//                sourceDir != null && sourceDir != FileOps.NULL_FILE) {
+//              // build directory set
+//              String rel = edu.rice.cs.util.FileOps.stringMakeRelativeTo(dir,sourceDir);
+//              dir = new File(buildDir,rel);
+//            }            
+//            dirsWithLLFiles.add(dir);
+//          }
+//          catch(IOException ioe) { /* just don't add this directory */ }
+//        }
+//        
+//        if (DrJava.getConfig().getSetting(OptionConstants.DELETE_LL_CLASS_FILES)
+//              .equals(OptionConstants.DELETE_LL_CLASS_FILES_CHOICES.get(1))) {
+//          // "ask me"
+//          final JButton deleteButton = new JButton(new AbstractAction("Delete Class Files") {
+//            public void actionPerformed(ActionEvent e) {
+//              // no op
+//            }
+//          });
+//          final JButton keepButton = new JButton(new AbstractAction("Keep Class Files") {
+//            public void actionPerformed(ActionEvent e) {
+//              // clear the set, i.e. do not delete anything
+//              dirsWithLLFiles.clear();
+//            }
+//          });
+//          ScrollableListDialog<File> dialog = new ScrollableListDialog.Builder<File>()
+//            .setTitle("Delete Class Files")
+//            .setText("We suggest that you delete all class files in the directories with language\n" +
+//                     "level files. Do you want to delete the class files in the following director" +
+//                     (dirsWithLLFiles.size() == 1?"y":"ies") + "?")
+//            .setItems(new ArrayList<File>(dirsWithLLFiles))
+//            .setMessageType(JOptionPane.QUESTION_MESSAGE)
+//            .setFitToScreen(true)
+//            .clearButtons()
+//            .addButton(deleteButton)
+//            .addButton(keepButton)
+//            .build();
+//          
+//          dialog.showDialog();
+//        }
+//        
+//        // Delete all class files in the directories listed. If the user was asked and said "keep",
+//        // then the set will be empty
+//        for(File f: dirsWithLLFiles) {
+//          f.listFiles(new java.io.FilenameFilter() {
+//            public boolean accept(File dir, String name) {
+//              int endPos = name.lastIndexOf(".class");
+//              if (endPos < 0) return false; // can't be a class file
+//              new File(dir, name).delete();
+//              // don't need to return true, we're deleting the file here already
+//              return false;
+//            }
+//          });
+//        }
+//      }
+//      
+//      // Disable Java language levels processing
+////      /* Perform language levels conversion, creating corresponding .java files. */
+////      LanguageLevelConverter llc = new LanguageLevelConverter();
+////      Options llOpts;
+////      if (bootClassPath == null) { llOpts = new Options(getActiveCompiler().version(), classPath); }
+////      else { llOpts = new Options(getActiveCompiler().version(), classPath, bootClassPath); }
+////      
+////      // NOTE: the following workaround ("_testFileSort(files)" instead of simply "files") may no longer be necessary.
+////      /* Perform the conversion incorporating the following Bug Workaround:  Forward references can generate spurious 
+////       * conversion errors in some cases.  This problem can be mitigated by compiling JUnit test files (with names
+////       * containing the substring "Test") last.  
+////       */
+////      Map<File,Set<String>> sourceToTopLevelClassMap = new HashMap<File,Set<String>>();
+////      Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> llErrors = 
+////        llc.convert(_testFileSort(files).toArray(new File[0]), llOpts, sourceToTopLevelClassMap);
+////      /* Add any errors encountered in conversion to the compilation error log. */
+////      errors.addAll(_parseExceptions2CompilerErrors(llErrors.getFirst()));
+////      errors.addAll(_visitorErrors2CompilerErrors(llErrors.getSecond()));
+//      
+//      // Since we (optionally) delete all class files in LL directories, we don't need the code
+//      // to smart-delete class files anymore.
+//      // smartDeleteClassFiles(sourceToTopLevelClassMap);
+//    }
+//    
+////    if (containsLanguageLevels) { return new LinkedList<File>(javaFileSet); }
+//    else { return null; }
+//  }
   
   /** Sorts the given array of CompilerErrors and divides it into groups based on the file, giving each group to the
     * appropriate OpenDefinitionsDocument, opening files if necessary.  Called immediately after compilations finishes.
@@ -721,8 +730,8 @@ public class DefaultCompilerModel implements CompilerModel {
     }
   }
   
-  /** returns the LanguageLevelStackTraceMapper
-    * @return the LanguageLevelStackTraceMapper
-    * */
-  public LanguageLevelStackTraceMapper getLLSTM() { return _LLSTM; } 
+//  /** returns the LanguageLevelStackTraceMapper
+//    * @return the LanguageLevelStackTraceMapper
+//    * */
+//  public LanguageLevelStackTraceMapper getLLSTM() { return _LLSTM; } 
 }

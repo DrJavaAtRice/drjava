@@ -547,8 +547,11 @@ public interface GlobalModel extends ILoadDocuments {
     * @return a List of the open definitions documents.
     */
   public List<OpenDefinitionsDocument> getOpenDefinitionsDocuments();
-  /** Returns a collection of language level documents. */
-  public List<OpenDefinitionsDocument> getLLOpenDefinitionsDocuments();
+  
+  // Java language levels processing is disabled
+//  /** Returns a collection of language level documents. */
+//  public List<OpenDefinitionsDocument> getLLOpenDefinitionsDocuments();
+  
   public List<OpenDefinitionsDocument> getAuxiliaryDocuments();  
 
   /** Checks if any open definitions documents have been modified since last being saved.

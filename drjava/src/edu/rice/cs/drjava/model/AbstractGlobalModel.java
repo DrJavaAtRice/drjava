@@ -1450,7 +1450,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     debug.logStart();
     
     final File[] sfiles =  getFilesInFolder(dir, rec, ext); 
-    if(sfiles == null) return;
+    if (sfiles == null) return;
     openFiles(new FileOpenSelector() { public File[] getFiles() { return sfiles; } });
     
     if (sfiles.length > 0 && _state.inProjectPath(dir)) setProjectChanged(true);
@@ -2337,19 +2337,19 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
   }
   
-  /** Returns a new collection of all language level documents currently open for editing.
-    * @return a random-access List of the open definitions documents..
-    */
-  public List<OpenDefinitionsDocument> getLLOpenDefinitionsDocuments() {
-    synchronized(_documentsRepos) {
-      ArrayList<OpenDefinitionsDocument> docs = new ArrayList<OpenDefinitionsDocument>(_documentsRepos.size());
-      for (OpenDefinitionsDocument doc: _documentsRepos.values()) {
-        File f = doc.getRawFile();
-        if (DrJavaFileUtils.isLLFile(f.getName())) docs.add(doc);
-      }
-      return docs;
-    }
-  }
+//  /** Returns a new collection of all language level documents currently open for editing.
+//    * @return a random-access List of the open definitions documents..
+//    */
+//  public List<OpenDefinitionsDocument> getLLOpenDefinitionsDocuments() {
+//    synchronized(_documentsRepos) {
+//      ArrayList<OpenDefinitionsDocument> docs = new ArrayList<OpenDefinitionsDocument>(_documentsRepos.size());
+//      for (OpenDefinitionsDocument doc: _documentsRepos.values()) {
+//        File f = doc.getRawFile();
+//        if (DrJavaFileUtils.isLLFile(f.getName())) docs.add(doc);
+//      }
+//      return docs;
+//    }
+//  }
   
   /* Returns a sorted (by time of insertion) collection of all open documents. */
   public List<OpenDefinitionsDocument> getSortedOpenDefinitionsDocuments() { return getOpenDefinitionsDocuments(); }
@@ -4009,30 +4009,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   private static class TrivialFSS implements FileSaveSelector {
     private File _file;
     private TrivialFSS(File file) { _file = file; }
-    public File getFile() throws OperationCanceledException {
-      return proposeBetterFileName(_file);
-    }
+    public File getFile() throws OperationCanceledException { return proposeBetterFileName(_file); }
     public boolean warnFileOpen(File f) { return true; }
     public boolean verifyOverwrite(File f) { return true; }
     public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
     public boolean shouldUpdateDocumentState() { return true; }
-    private File proposeBetterFileName(File f) {
-      if (DrJavaFileUtils.isOldLLFile(f) && DrJava.getConfig().getSetting(OptionConstants.PROMPT_RENAME_LL_FILES)) {
-        File newFile = DrJavaFileUtils.getNewLLForOldLLFile(f);
-        String newExt = DrJavaFileUtils.getExtension(newFile.getName());
-        return edu.rice.cs.drjava.ui.MainFrameStatics.proposeToChangeExtension
-          (null, // TODO: better parent component
-           f,
-           "Change Extension?",
-           f.getPath() + "\nThis file still has an old Language Level extension."
-             + "\nDo you want to change the file's extension to \""
-             + newExt + "\"?",
-           "Change to \"" + newExt + "\"",
-           "Keep \"" + DrJavaFileUtils.getExtension(f.getName()) + "\"",
-           newExt);
-      }
-      else return f;
-    }
+    private File proposeBetterFileName(File f) { return f; }
   }
   
   /** Creates a ConcreteOpenDefDoc for a NullFile object f (corresponding to a new empty document)

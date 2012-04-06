@@ -46,7 +46,7 @@ import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.DefaultGlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
+//import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.text.ConsoleDocument;
@@ -205,20 +205,19 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   
   public ConsoleDocument getConsoleDocument() { return _model.getConsoleDocument(); }
   
-  /**
-   * overides method in InteractionModel.java and changes stackTrace for a
-   * throwable if LL files are present
-   * @param stackTrace the stack trace to change files name and line number in
-   * @return stack trace with replaced file name and line number (if throwable occured in a .dj* file)
-   */
-  public StackTraceElement[] replaceLLException(StackTraceElement[] stackTrace) {
-    // use LLSTM from compiler model.
-    LanguageLevelStackTraceMapper LLSTM = _model.getCompilerModel().getLLSTM();
-    final List<File> files = new ArrayList<File>();
-    for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
-    
-   return (LLSTM.replaceStackTrace(stackTrace,files));
-  }  
+//  /** overides method in InteractionModel.java and changes stackTrace for a
+//    * throwable if LL files are present
+//    * @param stackTrace the stack trace to change files name and line number in
+//    * @return stack trace with replaced file name and line number (if throwable occured in a .dj* file)
+//    */
+//  public StackTraceElement[] replaceLLException(StackTraceElement[] stackTrace) {
+//    // use LLSTM from compiler model.
+//    LanguageLevelStackTraceMapper LLSTM = _model.getCompilerModel().getLLSTM();
+//    final List<File> files = new ArrayList<File>();
+//    for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
+//    
+//   return (LLSTM.replaceStackTrace(stackTrace,files));
+//  }  
   
   /** A compiler can instruct DrJava to include additional elements for the boot
     * class path of the Interactions JVM. */

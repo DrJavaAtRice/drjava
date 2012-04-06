@@ -119,10 +119,11 @@ public class NewJavaClassDialog extends SwingFrame {
     super("New Java Class");
 
     //  Utilities.show("NewJavaClass(" + mf + ")");
+    // Java language levels disabled
     int currentLL = DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL);
-    _isElementaryOrFunctionalJava = 
-      (currentLL == OptionConstants.ELEMENTARY_LEVEL) ||
-      (currentLL == OptionConstants.FUNCTIONAL_JAVA_LEVEL);
+    _isElementaryOrFunctionalJava = false;
+//      (currentLL == OptionConstants.ELEMENTARY_LEVEL) ||
+//      (currentLL == OptionConstants.FUNCTIONAL_JAVA_LEVEL);
 
     _mainFrame = mf;
     _model = _mainFrame.getModel();

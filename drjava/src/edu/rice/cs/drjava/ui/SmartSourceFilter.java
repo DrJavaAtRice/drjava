@@ -43,41 +43,17 @@ import edu.rice.cs.drjava.DrJavaRoot;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
 
-/** A file filter for all source files. If a ".dj?" file exists, the corresponding ".java" file is not
-  * shown. 
+/** A file filter for all source files. Java language levels support has been disabled.
  *  @version $Id$
  */
 public class SmartSourceFilter extends JavaSourceFilter {
   
-  /** Returns true if the file's extension matches ".java" or ".dj?". */
-  public boolean accept(File f) {
-    if (f.isDirectory()) {
-      return true;
-    }
-    
-    String name = f.getName();
-    if (DrJavaFileUtils.isLLFile(name)) { return true; }
-    if (!name.endsWith(OptionConstants.JAVA_FILE_EXTENSION)) { return false; }
-
-    // this is a ".java" file
-    File parent = f.getParentFile();
-    if (parent==null) {
-      // can't do the smart thing; but since this is a ".java" file, accept it
-      return true;
-    }
-    
-    if (new File(parent,DrJavaFileUtils.getDJForJavaFile(name)).exists()) return false;
-    if (new File(parent,DrJavaFileUtils.getDJ0ForJavaFile(name)).exists()) return false;
-    if (new File(parent,DrJavaFileUtils.getDJ1ForJavaFile(name)).exists()) return false;
-    if (new File(parent,DrJavaFileUtils.getDJ2ForJavaFile(name)).exists()) return false;
-
-    return true; // ".java" and no matching ".dj?"
-  }
+  /** Returns true if the file's extension matches ".scala" or ".java". */
+  public boolean accept(File f) { return true; }
 
   /** @return A description of this filter to display. */
   public String getDescription() {
-    return "DrJava source files (*"+OptionConstants.JAVA_FILE_EXTENSION+", *"+
-      OptionConstants.DJ_FILE_EXTENSION+", *"+OptionConstants.OLD_DJ0_FILE_EXTENSION+", *"+
-      OptionConstants.OLD_DJ1_FILE_EXTENSION+", *"+OptionConstants.OLD_DJ2_FILE_EXTENSION+")";
+    return "DrJava source files (*" + OptionConstants.SCALA_FILE_EXTENSION + ", *" + OptionConstants.JAVA_FILE_EXTENSION 
+      + ")";
   }
 }

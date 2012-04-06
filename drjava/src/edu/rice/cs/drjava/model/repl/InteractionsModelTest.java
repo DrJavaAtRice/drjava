@@ -172,12 +172,12 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     RemoteException {
     _log.log("testInterpretCurrentInteractionWithIncompleteInput started");
     _model = new IncompleteInputInteractionsModel(_adapter);   // override the one initialized in setUp()
-    assertReplThrewContinuationException("void m() {");
-    assertReplThrewContinuationException("void m() {;");
+    assertReplThrewContinuationException("def m() = {");
+    assertReplThrewContinuationException("def m() {");
     assertReplThrewContinuationException("1 + ");
     assertReplThrewContinuationException("(1+2");
     assertReplThrewSyntaxException("(1+2;");
-    assertReplThrewContinuationException("for (;;");
+    assertReplThrewContinuationException("val x = ");
     _log.log("testInterpretCurrentInteractionWithIncompleteInput ended");
   }
   

@@ -85,7 +85,7 @@ import edu.rice.cs.util.Log;
 import org.objectweb.asm.*;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
-import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
+//import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
 
 /** Manages unit testing via JUnit.
   * @version $Id$
@@ -444,14 +444,16 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               String sourceFileName;
               
               if (openDocFiles.contains(javaSourceFileName)) sourceFileName = javaSourceFileName;
-              else if (openDocFiles.contains(strippedName + OptionConstants.DJ_FILE_EXTENSION))
-                sourceFileName = strippedName + OptionConstants.DJ_FILE_EXTENSION;
-              else if (openDocFiles.contains(strippedName + OptionConstants.OLD_DJ0_FILE_EXTENSION))
-                sourceFileName = strippedName + OptionConstants.OLD_DJ0_FILE_EXTENSION;
-              else if (openDocFiles.contains(strippedName + OptionConstants.OLD_DJ1_FILE_EXTENSION))
-                sourceFileName = strippedName + OptionConstants.OLD_DJ1_FILE_EXTENSION;
-              else if (openDocFiles.contains(strippedName + OptionConstants.OLD_DJ2_FILE_EXTENSION))
-                sourceFileName = strippedName + OptionConstants.OLD_DJ2_FILE_EXTENSION;
+              else if (openDocFiles.contains(strippedName + OptionConstants.SCALA_FILE_EXTENSION))
+                sourceFileName = strippedName + OptionConstants.SCALA_FILE_EXTENSION;
+//              else if (openDocFiles.contains(strippedName + OptionConstants.DJ_FILE_EXTENSION))
+//                sourceFileName = strippedName + OptionConstants.DJ_FILE_EXTENSION;
+//              else if (openDocFiles.contains(strippedName + OptionConstants.OLD_DJ0_FILE_EXTENSION))
+//                sourceFileName = strippedName + OptionConstants.OLD_DJ0_FILE_EXTENSION;
+//              else if (openDocFiles.contains(strippedName + OptionConstants.OLD_DJ1_FILE_EXTENSION))
+//                sourceFileName = strippedName + OptionConstants.OLD_DJ1_FILE_EXTENSION;
+//              else if (openDocFiles.contains(strippedName + OptionConstants.OLD_DJ2_FILE_EXTENSION))
+//                sourceFileName = strippedName + OptionConstants.OLD_DJ2_FILE_EXTENSION;
               else continue; // no matching source file is open
               
               File sourceFile = new File(sourceFileName);
@@ -601,24 +603,25 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     * @param errors The array of errors from all failed tests in the suite.
     */
   public void testSuiteEnded(final JUnitError[] errors) {
+    //Disable Java language level processing
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) called", "", "").show();
     Utilities.invokeLater(new Runnable() { public void run() { 
-      List<File> files = new ArrayList<File>();
-      for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
-//    Utilities.show("errors.length = " + errors.length + " files = " + files);
-      for(JUnitError e: errors){
-        try {
-          e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
-        } catch(Exception ex) { DrJavaErrorHandler.record(ex); }
-        File f = e.file();
-        if ((f != null) && (DrJavaFileUtils.isLLFile(f))) {
-          String dn = DrJavaFileUtils.getJavaForLLFile(f.getName());
-          StackTraceElement ste = new StackTraceElement(e.className(), "", dn, e.lineNumber());
-          ste = _compilerModel.getLLSTM().replaceStackTraceElement(ste, f);
-          e.setLineNumber(ste.getLineNumber());
-        }
-      }
-      _junitErrorModel = new JUnitErrorModel(errors, _model, true);
+//      List<File> files = new ArrayList<File>();
+//      for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
+////    Utilities.show("errors.length = " + errors.length + " files = " + files);
+//      for(JUnitError e: errors){
+//        try {
+//          e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
+//        } catch(Exception ex) { DrJavaErrorHandler.record(ex); }
+//        File f = e.file();
+//        if ((f != null) && (DrJavaFileUtils.isLLFile(f))) {
+//          String dn = DrJavaFileUtils.getJavaForLLFile(f.getName());
+//          StackTraceElement ste = new StackTraceElement(e.className(), "", dn, e.lineNumber());
+//          ste = _compilerModel.getLLSTM().replaceStackTraceElement(ste, f);
+//          e.setLineNumber(ste.getLineNumber());
+//        }
+//      }
+//      _junitErrorModel = new JUnitErrorModel(errors, _model, true);
       _notifyJUnitEnded();
       _testInProgress = false;
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) finished", "", "").show();

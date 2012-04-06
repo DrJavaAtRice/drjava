@@ -386,22 +386,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };
 
   /** @return possibly renamed file, if it used an old LL extension and the user wanted it. */
-  private File proposeBetterFileName(File f) {
-    if (DrJavaFileUtils.isOldLLFile(f) && DrJava.getConfig().getSetting(PROMPT_RENAME_LL_FILES)) {
-      File newFile = DrJavaFileUtils.getNewLLForOldLLFile(f);
-      String newExt = DrJavaFileUtils.getExtension(newFile.getName());
-      return proposeToChangeExtension(this,
-                                      f,
-                                      "Change Extension?",
-                                      f.getPath() + "\nThis file still has an old Language Level extension."
-                                        + "\nDo you want to change the file's extension to \""
-                                        + newExt + "\"?",
-                                      "Change to \"" + newExt + "\"",
-                                      "Keep \"" + DrJavaFileUtils.getExtension(f.getName()) + "\"",
-                                      newExt);
-    }
-    else return f;
-  }
+  private File proposeBetterFileName(File f) { return f; }
   
   /** Returns the file to save to the model (command pattern).  */
   private final FileSaveSelector _saveSelector = new FileSaveSelector() {
@@ -2939,23 +2924,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private static final Icon _djProjectIcon;
   
   static {
-    Icon java, dj0, dj1, dj2, dj, other, star, jup, juf;
+    Icon java, scala, other, star, jup, juf;
     
     java = MainFrame.getIcon("JavaIcon20.gif");
-    dj0 = MainFrame.getIcon("ElementaryIcon20.gif");
-    dj1 = MainFrame.getIcon("IntermediateIcon20.gif");
-    dj2 = MainFrame.getIcon("AdvancedIcon20.gif");
-    dj = MainFrame.getIcon("FunctionalIcon20.gif");
+    scala = MainFrame.getIcon("FunctionalIcon20.gif");
     other = MainFrame.getIcon("OtherIcon20.gif");
-    _djFileDisplayManager20 = new DJFileDisplayManager(java,dj0,dj1,dj2,dj,other);
+    _djFileDisplayManager20 = new DJFileDisplayManager(java, scala, other);
     
     java = MainFrame.getIcon("JavaIcon30.gif");
-    dj0 = MainFrame.getIcon("ElementaryIcon30.gif");
-    dj1 = MainFrame.getIcon("IntermediateIcon30.gif");
-    dj2 = MainFrame.getIcon("AdvancedIcon30.gif");
-    dj = MainFrame.getIcon("FunctionalIcon30.gif");
+    scala = MainFrame.getIcon("FunctionalIcon30.gif");
     other = MainFrame.getIcon("OtherIcon30.gif");
-    _djFileDisplayManager30 = new DJFileDisplayManager(java,dj0,dj1,dj2,dj,other);
+    _djFileDisplayManager30 = new DJFileDisplayManager(java, scala, other);
     
     star = MainFrame.getIcon("ModStar20.gif");
     jup = MainFrame.getIcon("JUnitPass20.gif");
@@ -2970,26 +2949,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _djProjectIcon = MainFrame.getIcon("ProjectIcon.gif");
   }
   
-  
   /** This manager is meant to retrieve the correct icons for the given filename. The only files recognized 
-    * are the files obviously listed below in the function (.java, .dj0, .dj1, .dj2, .dj). The icons that represent 
+    * are the files obviously listed below in the function (.java, .scala). The icons that represent 
     * each filetype are given into the managers constructor upon instantiation.  This class is static since
     * it currently does not depend of the main frame for information.
     */
   private static class DJFileDisplayManager extends DefaultFileDisplayManager {
     private final Icon _java;
-    private final Icon _dj0;
-    private final Icon _dj1;
-    private final Icon _dj2;
-    private final Icon _dj;
+    private final Icon _scala;
     private final Icon _other;
     
-    public DJFileDisplayManager(Icon java, Icon dj0, Icon dj1, Icon dj2, Icon dj, Icon other) {
+    public DJFileDisplayManager(Icon java, Icon scala, Icon other) {
       _java = java;
-      _dj0 = dj0;
-      _dj1 = dj1;
-      _dj2 = dj2;
-      _dj = dj;
+      _scala = scala;
       _other = other;
     }
     /** This method chooses the custom icon only for the known filetypes. If these filetypes are not receiving 
@@ -3002,10 +2974,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (! f.isDirectory()) {
         String name = f.getName().toLowerCase();
         if (name.endsWith(OptionConstants.JAVA_FILE_EXTENSION)) ret = _java;
-        else if (name.endsWith(OptionConstants.DJ_FILE_EXTENSION)) ret = _dj;
-        else if (name.endsWith(OptionConstants.OLD_DJ0_FILE_EXTENSION)) ret = _dj0;
-        else if (name.endsWith(OptionConstants.OLD_DJ1_FILE_EXTENSION)) ret = _dj1;
-        else if (name.endsWith(OptionConstants.OLD_DJ2_FILE_EXTENSION)) ret = _dj2;
+        else if (name.endsWith(OptionConstants.SCALA_FILE_EXTENSION)) ret = _scala;
         // TODO: What about Habanero Java extension?
       }
       if (ret == null) {
@@ -3333,13 +3302,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _projectMenu = _setUpProjectMenu(mask, true);
       _debugMenu = null;
       if (_showDebugger) _debugMenu = _setUpDebugMenu(mask, true);
-      _languageLevelMenu = _setUpLanguageLevelMenu(mask, true);
+//      _languageLevelMenu = _setUpLanguageLevelMenu(mask, true);
       _helpMenu = _setUpHelpMenu(mask, true);
       
       // initialize menu bar and actions
       _setUpActions();
       _setUpMenuBar(_menuBar,
-                    _fileMenu, _editMenu, _toolsMenu, _projectMenu, _debugMenu, _languageLevelMenu, _helpMenu);
+                    _fileMenu, _editMenu, _toolsMenu, _projectMenu, _debugMenu, /* _languageLevelMenu, */ _helpMenu);
       setJMenuBar(_menuBar);
       
       //    _setUpDocumentSelector();
@@ -6403,7 +6372,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpMenuBar(menuBar,
                   _setUpFileMenu(mask, false), _setUpEditMenu(mask, false), _setUpToolsMenu(mask, false),
                   _setUpProjectMenu(mask, false), _showDebugger?_setUpDebugMenu(mask, false):null,
-                  _setUpLanguageLevelMenu(mask, false), _setUpHelpMenu(mask, false));
+                  /* _setUpLanguageLevelMenu(mask, false), */ _setUpHelpMenu(mask, false));
   }
 
   void _setUpMenuBar(JMenuBar menuBar,
@@ -6412,14 +6381,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                      JMenu toolsMenu,
                      JMenu projectMenu,
                      JMenu debugMenu,
-                     JMenu languageLevelMenu,
+                    /* JMenu languageLevelMenu, */
                      JMenu helpMenu) {
     menuBar.add(fileMenu);
     menuBar.add(editMenu);
     menuBar.add(toolsMenu);
     menuBar.add(projectMenu);
     if (_showDebugger && (debugMenu!=null)) menuBar.add(debugMenu);
-    menuBar.add(languageLevelMenu);
+//    menuBar.add(languageLevelMenu);
     menuBar.add(helpMenu);
     // Plastic-specific style hints
     if(Utilities.isPlasticLaf()) {
@@ -6951,65 +6920,65 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (_showDebugger) { _debugPanel.setAutomaticTraceButtonText(); }
   }
   
-  /** Creates and returns the language levels menu.
-    * @param mask the keystroke modifier to be used
-    * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
-    */
-  private JMenu _setUpLanguageLevelMenu(int mask, boolean updateKeyboardManager) {
-    JMenu languageLevelMenu = new JMenu("Language Level");
-    PlatformFactory.ONLY.setMnemonic(languageLevelMenu,KeyEvent.VK_L);
-    ButtonGroup group = new ButtonGroup();
-    
-    final Configuration config = DrJava.getConfig();
-    int currentLanguageLevel = config.getSetting(LANGUAGE_LEVEL);
-    
-    final AbstractAction rbFullJavaAction = new AbstractAction("Full Java") {
-      { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.LANGUAGE_LEVELS); }
-      public void actionPerformed(ActionEvent e) {
-        config.setSetting(LANGUAGE_LEVEL, OptionConstants.FULL_JAVA);
-      }
-    };
-    final JRadioButtonMenuItem rbFullJavaMenuItem = new JRadioButtonMenuItem(rbFullJavaAction);
-    rbFullJavaMenuItem.setToolTipText("Use full Java syntax");
-    if (currentLanguageLevel != OptionConstants.FUNCTIONAL_JAVA_LEVEL) { rbFullJavaMenuItem.setSelected(true); }
-    group.add(rbFullJavaMenuItem);
-    languageLevelMenu.add(rbFullJavaMenuItem);
-    languageLevelMenu.addSeparator();
-    
-    final AbstractAction rbFunctionalAction = new AbstractAction("Functional Java") {
-      { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.LANGUAGE_LEVELS); }
-      public void actionPerformed(ActionEvent e) {
-        config.setSetting(LANGUAGE_LEVEL, OptionConstants.FUNCTIONAL_JAVA_LEVEL);
-      }
-    };
-    final JRadioButtonMenuItem rbFunctionalMenuItem = new JRadioButtonMenuItem(rbFunctionalAction);
-    rbFunctionalMenuItem.setToolTipText("Use Functional Java language-level features");
-    if (currentLanguageLevel == OptionConstants.FUNCTIONAL_JAVA_LEVEL) { rbFunctionalMenuItem.setSelected(true); }
-    group.add(rbFunctionalMenuItem);
-    languageLevelMenu.add(rbFunctionalMenuItem);
-    
-    config.addOptionListener(LANGUAGE_LEVEL, new OptionListener<Integer>() {
-      public void optionChanged(OptionEvent<Integer> oce) {
-        switch(oce.value) {
-          case OptionConstants.ELEMENTARY_LEVEL:
-          case OptionConstants.INTERMEDIATE_LEVEL:
-          case OptionConstants.FUNCTIONAL_JAVA_LEVEL: {
-            rbFunctionalMenuItem.setSelected(true);
-            break;
-          }
-          default: {
-            rbFullJavaMenuItem.setSelected(true);
-            break;
-          }
-        }
-      }
-    });
-    _guiAvailabilityNotifier.ensureAvailabilityIs
-      (GUIAvailabilityListener.ComponentType.LANGUAGE_LEVELS,
-       _model.getCompilerModel().getActiveCompiler().supportsLanguageLevels());
-    
-    return languageLevelMenu;
-  }
+//  /** Creates and returns the language levels menu.
+//    * @param mask the keystroke modifier to be used
+//    * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
+//    */
+//  private JMenu _setUpLanguageLevelMenu(int mask, boolean updateKeyboardManager) {
+//    JMenu languageLevelMenu = new JMenu("Language Level");
+//    PlatformFactory.ONLY.setMnemonic(languageLevelMenu,KeyEvent.VK_L);
+//    ButtonGroup group = new ButtonGroup();
+//    
+//    final Configuration config = DrJava.getConfig();
+//    int currentLanguageLevel = config.getSetting(LANGUAGE_LEVEL);
+//    
+//    final AbstractAction rbFullJavaAction = new AbstractAction("Full Java") {
+//      { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.LANGUAGE_LEVELS); }
+//      public void actionPerformed(ActionEvent e) {
+//        config.setSetting(LANGUAGE_LEVEL, OptionConstants.FULL_JAVA);
+//      }
+//    };
+//    final JRadioButtonMenuItem rbFullJavaMenuItem = new JRadioButtonMenuItem(rbFullJavaAction);
+//    rbFullJavaMenuItem.setToolTipText("Use full Java syntax");
+//    if (currentLanguageLevel != OptionConstants.FUNCTIONAL_JAVA_LEVEL) { rbFullJavaMenuItem.setSelected(true); }
+//    group.add(rbFullJavaMenuItem);
+//    languageLevelMenu.add(rbFullJavaMenuItem);
+//    languageLevelMenu.addSeparator();
+//    
+//    final AbstractAction rbFunctionalAction = new AbstractAction("Functional Java") {
+//      { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.LANGUAGE_LEVELS); }
+//      public void actionPerformed(ActionEvent e) {
+//        config.setSetting(LANGUAGE_LEVEL, OptionConstants.FUNCTIONAL_JAVA_LEVEL);
+//      }
+//    };
+//    final JRadioButtonMenuItem rbFunctionalMenuItem = new JRadioButtonMenuItem(rbFunctionalAction);
+//    rbFunctionalMenuItem.setToolTipText("Use Functional Java language-level features");
+//    if (currentLanguageLevel == OptionConstants.FUNCTIONAL_JAVA_LEVEL) { rbFunctionalMenuItem.setSelected(true); }
+//    group.add(rbFunctionalMenuItem);
+//    languageLevelMenu.add(rbFunctionalMenuItem);
+//    
+//    config.addOptionListener(LANGUAGE_LEVEL, new OptionListener<Integer>() {
+//      public void optionChanged(OptionEvent<Integer> oce) {
+//        switch(oce.value) {
+//          case OptionConstants.ELEMENTARY_LEVEL:
+//          case OptionConstants.INTERMEDIATE_LEVEL:
+//          case OptionConstants.FUNCTIONAL_JAVA_LEVEL: {
+//            rbFunctionalMenuItem.setSelected(true);
+//            break;
+//          }
+//          default: {
+//            rbFullJavaMenuItem.setSelected(true);
+//            break;
+//          }
+//        }
+//      }
+//    });
+//    _guiAvailabilityNotifier.ensureAvailabilityIs
+//      (GUIAvailabilityListener.ComponentType.LANGUAGE_LEVELS,
+//       _model.getCompilerModel().getActiveCompiler().supportsLanguageLevels());
+//    
+//    return languageLevelMenu;
+//  }
   
   /** Creates and returns a help menu.
     * @param mask the keystroke modifier to be used

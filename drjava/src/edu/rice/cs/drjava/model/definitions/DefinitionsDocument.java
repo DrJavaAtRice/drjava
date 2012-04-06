@@ -48,11 +48,7 @@ import java.lang.ref.WeakReference;
 
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.IOException;
-
-import koala.dynamicjava.parser.impl.Parser;
-import koala.dynamicjava.parser.impl.ParseException;
-import koala.dynamicjava.parser.impl.TokenMgrError;
+import java.io.StreamTokenizer;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
@@ -815,25 +811,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     */
   public String getPackageName() {
     // assert EventQueue.isDispatchThread();
-    Reader r;
-    r = new StringReader(getText()); // getText() is cheap if document is not resident
-    try { return new Parser(r).packageDeclaration(Parser.DeclType.TOP).getName(); }
-    catch (ParseException e) { return ""; }
-    // addresses bug [ 1815387 ] Editor should discard parse errors for now
-    // we should upgrade our parser to handle @
-    catch (TokenMgrError e) { return ""; }
-    catch (Error e) {
-      // JavaCharStream does not use a useful exception type for escape character errors
-      String msg = e.getMessage();
-      if (msg != null && msg.startsWith("Invalid escape character")) {
-        return "";
-      }
-      else { throw e; }
-    }
-    finally {
-      try { r.close(); }
-      catch (IOException e) { /* ignore */ }
-    }
+    String text = getText(); // getText() is cheap if document is not resident
+    return new PackageLexer(text).getPackageName();
   }
   
   /** Returns the index of the anonymous inner class being instantiated at the specified position (where openining brace
