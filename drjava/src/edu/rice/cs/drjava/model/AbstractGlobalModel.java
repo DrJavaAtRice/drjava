@@ -164,7 +164,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants, DocumentIterator {
   
-  public static final Log _log = new Log("GlobalModel.txt", false);
+  public static final Log _log = new Log("GlobalModel.txt", true);
   
   /** A document cache that manages how many unmodified documents are open at once. */
   protected DocumentCache _cache;  
@@ -582,12 +582,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   public List<File> getClassFiles() { return _state.getClassFiles(); }
   
-  /** Helper method used in subsequent anonymous inner class */
-  protected static String getPackageName(String classname) {
-    int index = classname.lastIndexOf(".");
-    if (index != -1) return classname.substring(0, index);
-    else return "";
-  }
+  // No longer used
+//  /** Helper method used in subsequent anonymous inner class */
+//  protected static String getPackageName(String classname) {
+//    int index = classname.lastIndexOf(".");
+//    if (index != -1) return classname.substring(0, index);
+//    else return "";
+//  }
   
   class ProjectFileGroupingState implements FileGroupingState {
     
@@ -1627,7 +1628,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       
       File f = doc.getFile();
       
-      if (!doc.isUntitled()) {
+      if (! doc.isUntitled()) {
         if (IOUtil.isMember(f, projectRoot)) {
           DocFile file = new DocFile(f);
           file.setPackage(doc.getPackageName());  // must save _packageName so it is correct when project is loaded
@@ -2059,7 +2060,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public boolean closeFiles(List<OpenDefinitionsDocument> docs) {
     if (docs.size() == 0) return true;
     
-    _log.log("closeFiles(" + docs + ") called");
+//    _log.log("closeFiles(" + docs + ") called");
     /* Force the user to save or discard all modified files in docs */
     for (OpenDefinitionsDocument doc : docs) { 
       if (! doc.canAbandonFile()) return false; }
@@ -2094,13 +2095,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public boolean closeFileWithoutPrompt(final OpenDefinitionsDocument doc) {
     //    new Exception("Closed document " + doc).printStackTrace();
     
-    _log.log("closeFileWithoutPrompt(" + doc + ") called; getRawFile() = " + doc.getRawFile());
-    _log.log("_documentsRepos = " + _documentsRepos);
+//    _log.log("closeFileWithoutPrompt(" + doc + ") called; getRawFile() = " + doc.getRawFile());
+//    _log.log("_documentsRepos = " + _documentsRepos);
     boolean found;
     synchronized(_documentsRepos) { found = (_documentsRepos.remove(doc.getRawFile()) != null); }
     
     if (! found) {
-      _log.log("Cannot close " + doc + "; not found!");
+//      _log.log("Cannot close " + doc + "; not found!");
       return false;
     }
     
@@ -2763,16 +2764,21 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       _timestamp = stamp;
       _image = null;
 //      _lexiName = null;
-      if (_file instanceof NullFile)
-        _lexiName = ((NullFile) _file).getLexiName();  // multiple untitled files must have distinct lexiNames
-      else 
-        _lexiName = _file.getPath().replace(File.separatorChar, ' ');
-      
+    
+      // Create reconstructor for document
       try {
         DDReconstructor ddr = makeReconstructor();
 //        System.err.println("Registering " + this);
         _cacheAdapter = _cache.register(this, ddr);
       } catch(IllegalStateException e) { throw new UnexpectedException(e); }
+      
+      if (_file instanceof NullFile)
+        _lexiName = ((NullFile) _file).getLexiName();  // multiple untitled files must have distinct lexiNames
+      else {
+        _lexiName = _file.getPath().replace(File.separatorChar, ' ');
+        // _packageName will be set from document (assuming document is not a fresh empty document) in rawOpenFile
+//        _packageName = getPackageNameFromDocument(); // performs a lightweight scan of the file using StreamTokenizer
+      }
       
       /* The following table is not affected by inconsistency between hashCode/equals in DocumentRegion, because
        * BrowserDocumentRegion is NOT a subclass of DocumentRegion. */
@@ -2965,11 +2971,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public String getPackageName() { return _packageName; }
     
     /** Sets the cached _packageName for the preceding method. */  
-    public void setPackage(String name)   { _packageName = name; }
+    public void setPackage(String name)   {
+      try {
+      _log.log("In AbstractGlobalModel, setting package for " + getFile() + "to '" + name + "'");
+      _packageName = name; 
+      }
+      catch(Exception e) { }
+    }
     
     /**  @return the name of the package currently embedded in document. */
-    public String getPackageNameFromDocument() { return getDocument().getPackageName(); }
-    
+    public String getPackageNameFromDocument() {
+      return getDocument().getPackageName(); 
+    }
     
     /** Originally designed to allow undoManager to set the current document to be modified whenever an undo
       * or redo is performed.  Now it actually does this.
@@ -3091,11 +3104,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           /* Initialize doc text contents */
           String image = getText();  // retrieves _image if it has already been set
           assert image != null;  // getText() never returns null
-          
           _editorKit.read(new StringReader(image), newDefDoc, 0);
+          
           //  Set document property to write out document using newLine conventions of the host platform.
           newDefDoc.putProperty(DefaultEditorKit.EndOfLineStringProperty, StringOps.EOL);
-          _log.log("Reading from image for " + _file + " containing " + _image.length() + " chars");    
+//          _log.log("Reading from image for " + _file + " containing " + _image.length() + " chars");    
           
           _loc = Math.min(_loc, image.length()); // make sure not past end
           _loc = Math.max(_loc, 0); // make sure not less than 0
@@ -3117,7 +3130,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //          System.err.println ("_packageName in make() = " + _packageName);
 //          System.err.println("tempDoc.getLength() = " + tempDoc.getLength());
           _packageName = newDefDoc.getPackageName();
-//          System.err.println("make() returned " + newDefDoc);
+          _log.log("Setting _packageName for " + newDefDoc + " in make() to " + _packageName);
           return newDefDoc;
         }
         
@@ -3211,7 +3224,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         final OpenDefinitionsDocument openDoc = this;
         final File file = com.getFile().getCanonicalFile();
         
-        _log.log("saveFileAs called on " + file);
+//        _log.log("saveFileAs called on " + file);
         OpenDefinitionsDocument otherDoc = _getOpenDocument(file);
         
         // Check if file is already open in another document
@@ -3397,24 +3410,24 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       * the class file to that of the source file.  An empty untitled document is consider to be "in sync".
       */
     public boolean checkIfClassFileInSync() {
-      _log.log("checkIfClassFileInSync() called for " + this);
+//      _log.log("checkIfClassFileInSync() called for " + this);
       if (isEmpty()) return true;
       
       // If modified, then definitely out of sync
       
       if (isModifiedSinceSave()) {
         setClassFileInSync(false);
-        _log.log("checkIfClassFileInSync = false because isModifiedSinceSave()");
+//        _log.log("checkIfClassFileInSync = false because isModifiedSinceSave()");
         return false;
       }
       
       // Look for cached class file
       File classFile = getCachedClassFile();
-      _log.log("In checkIfClassFileInSync cached value of classFile = " + classFile);
+//      _log.log("In checkIfClassFileInSync cached value of classFile = " + classFile);
       if (classFile == FileOps.NULL_FILE) {
         // Not cached, so locate the file
         classFile = _locateClassFile();
-        _log.log(this + ": in checkIfClassFileInSync _locateClassFile() = " + classFile);
+//        _log.log(this + ": in checkIfClassFileInSync _locateClassFile() = " + classFile);
         setCachedClassFile(classFile);
         if ((classFile == FileOps.NULL_FILE) || (! classFile.exists())) {
           // couldn't find the class file
@@ -4092,14 +4105,16 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       Pair<Integer,Integer> scroll = df.getScroll();
       Pair<Integer,Integer> sel = df.getSelection();
       String pkg = df.getPackage();
+      _log.log("Setting package name for DocFile " + file);
       doc.setPackage(pkg);  // Trust information in the project file; if it is wrong, _packageName invariant is broken
       doc.setInitialVScroll(scroll.first());
       doc.setInitialHScroll( scroll.second());
       doc.setInitialSelStart(sel.first());
       doc.setInitialSelEnd(sel.second());
     }
-    else {
+    else { // doc is freshly opened file, ostensibly a source file
 //      Utilities.show("Opened a file " + file.getName() + " that is not a DocFile");
+      _log.log("Setting package for file " + file.getName() + " to " + doc.getPackageNameFromDocument());
       doc.setPackage(doc.getPackageNameFromDocument()); // get the package name from the file; forces file to be read
     }
     return doc;

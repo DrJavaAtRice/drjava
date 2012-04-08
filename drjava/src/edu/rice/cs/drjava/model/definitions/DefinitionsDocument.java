@@ -46,12 +46,14 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.lang.ref.WeakReference;
 
+import java.io.File;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.StreamTokenizer;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
@@ -66,7 +68,7 @@ import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStat
   */
 public class DefinitionsDocument extends AbstractDJDocument implements Finalizable<DefinitionsDocument> {
   
-  public static final Log _log = new Log("GlobalModel.txt", false);
+  public static final Log _log = new Log("GlobalModel.txt", true);
   private static final int NO_COMMENT_OFFSET = 0;
   private static final int WING_COMMENT_OFFSET = 2;
   
@@ -811,8 +813,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     */
   public String getPackageName() {
     // assert EventQueue.isDispatchThread();
-    String text = getText(); // getText() is cheap if document is not resident
-    return new PackageLexer(text).getPackageName();
+    try {
+      File file = (_odd == null) ? FileOps.NULL_FILE : _odd.getFile();
+      PackageLexer lexer = new PackageLexer(getText()); // getText() is cheap if document is not resident
+      String packageName = lexer.getPackageName();
+      _log.log("DefinitionsDocument.getPackageName called for file " + file + " result is: '" + packageName + "'");
+      return packageName;
+    }
+    catch(Exception e) { throw new UnexpectedException(e); }
   }
   
   /** Returns the index of the anonymous inner class being instantiated at the specified position (where openining brace
@@ -1035,7 +1043,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       
       int indexOfClass = _findKeywordAtToplevel("class", text, startPos);
       int indexOfInterface = _findKeywordAtToplevel("interface", text, startPos);
-      int indexOfEnum = _findKeywordAtToplevel("enum",text,startPos);
+      int indexOfEnum = _findKeywordAtToplevel("enum", text, startPos);
       
       //If class exists at top level AND either there is no interface at top level or the index of class precedes the index of the top
       //level interface, AND the same for top level enum, then the class is the first top level declaration

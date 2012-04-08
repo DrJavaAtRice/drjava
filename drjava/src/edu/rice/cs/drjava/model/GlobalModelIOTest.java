@@ -1198,7 +1198,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     interpret("val br = new BufferedReader(new InputStreamReader(System.in))");
     result = interpret("val text = br.readLine()");
     assertEquals("readLine() should return the rest of \"input\" without prompting for input",
-                 "val br: java.lang.String = nput", result);
+                 "text: java.lang.String = nput", result);
     
     
     _log.log("testConsoleInput completed");
