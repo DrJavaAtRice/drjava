@@ -346,7 +346,7 @@ public abstract class JavacCompiler implements CompilerInterface {
     * @return true if the specified file is a source file for this compiler. */
   public boolean isSourceFileForThisCompiler(File f) {
     String fileName = f.getName();
-    return fileName.endsWith(OptionConstants.JAVA_FILE_EXTENSION)
+    return fileName.endsWith(OptionConstants.JAVA_FILE_EXTENSION);
   }
   
   /** Return the set of source file extensions that this compiler supports.

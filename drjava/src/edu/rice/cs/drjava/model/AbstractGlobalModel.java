@@ -3490,7 +3490,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       
       File buildDir = getBuildDirectory();
       
-      if (buildDir != FileOps.NULL_FILE && ! roots.contain(buildDir) roots.add(buildDir);
+      if (buildDir != FileOps.NULL_FILE && ! roots.contains(buildDir)) roots.add(buildDir);
       
       // Add the current document to the beginning of the roots list
       try {

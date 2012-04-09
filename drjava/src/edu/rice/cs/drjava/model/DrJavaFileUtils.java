@@ -37,8 +37,9 @@
 package edu.rice.cs.drjava.model;
 
 import java.io.File;
-import java.util.Set;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.plt.io.IOUtil;
@@ -174,8 +175,10 @@ public class DrJavaFileUtils  {
   }
  
   /** Adds element to list provided list does not already contain element. */
-  public static <T> ArrayList<T> addUnique(ArrayList<T> list, T element) {
-    return list.contains(element) ? list : list.add(element);
+  public static <T> boolean addUnique(ArrayList<T> list, T element) {
+    boolean result = ! list.contains(element);
+    if (result) list.add(element);
+    return result;
   }
 
 }
