@@ -53,6 +53,8 @@ import edu.rice.cs.drjava.model.JDKDescriptor.Util;
 import edu.rice.cs.drjava.model.JDKToolsLibrary;
 import edu.rice.cs.drjava.model.compiler.Javac160FilteringCompiler;
 import edu.rice.cs.drjava.model.compiler.ScalaCompilerInterface;
+import edu.rice.cs.plt.iter.IterUtil;
+import edu.rice.cs.plt.lambda.Lambda2;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.FileOps;
@@ -199,7 +201,7 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
   static {
     SCALA_KEYWORDS.addAll(JAVA_KEYWORDS);
     final String[] words =  {
-      "val","var","def", "implicit", "override"
+      "val", "var", "def", "implicit", "override"
     };
     for(String s: words) { SCALA_KEYWORDS.add(s); }
   }
@@ -237,9 +239,11 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
     // Create a Settings object that captures the Java class path as the Scala class path!
     Settings settings = new Settings();
     settings.processArgumentString("-usejavacp");
+    settings.processArgumentString("-d " + '"' + destination.getPath() + '"');
+    settings.processArgumentString("-cp " + '"' + dJPathToPath(classPath) + '"');
     scala.tools.nsc.reporters.Reporter reporter = new DrJavaReporter(errors);
     Global compiler = new Global(settings, reporter);
-    
+ 
 //    Utilities.show("Scala compiler object constructed");
     /* Create a run of the Scala compiler. */
     Global.Run run = compiler.new Run();
@@ -257,5 +261,14 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
     
 //    debug.logEnd("compile()");
     return errors;
+  }
+  
+  /** Converts the DJ path (of type Iterable<File>) to the corresponding platform-dependent String. */
+  public static String dJPathToPath(Iterable<? extends File> dJPath) {
+    Lambda2<StringBuilder, File, StringBuilder> pathAppend = new Lambda2<StringBuilder, File, StringBuilder>() {
+      public StringBuilder value(StringBuilder sb, File f) { return sb.append(File.separator + f.getPath()); }
+    }; 
+        
+    return IterUtil.fold(dJPath, new StringBuilder("."), pathAppend).toString();
   }
 }
