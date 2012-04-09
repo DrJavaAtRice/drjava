@@ -1383,48 +1383,57 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   public String toString() { return "ddoc for " + _odd; }
   
-  /** Returns true if one of the words 'class', 'interface' or 'enum' is found
-    * in non-comment text. */
-  public boolean containsClassOrInterfaceOrEnum() throws BadLocationException {
+  /* Identical to subject.indexOf(pattern, start) except subject.length() is returned instead of -1 when pattern is
+   * not found. */
+  private static int myIndexOf(String subject, String pattern, int start) {
+    int matchIndex = subject.indexOf(pattern, start);
+    return (matchIndex < 0) ? subject.length() : matchIndex;
+  }
+    
+  /** Returns true if one of the words 'class', 'interface', 'object', or 'enum',  is found in non-comment text. */
+  public boolean containsSource() throws BadLocationException {
     
     /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
-    int i, j;
+    int i, j, k, l;
+    int minPos;
     int reducedPos = 0;
     
     final String text = getText();
+    final int length = text.length();
     final int origLocation = _currentLocation;
     try {
-      // Move reduced model to beginning of file
+      // Move reduced model to beginning of file (reducedPos = 0)
       _reduced.move(-origLocation);
       
-      // Walk forward from specificed position
-      i = text.indexOf("class", reducedPos);
-      j = text.indexOf("interface", reducedPos);
-      if (i==-1) i = j; else if (j >= 0) i = Math.min(i,j);
-      j = text.indexOf("enum", reducedPos);
-      if (i==-1) i = j; else if (j >= 0) i = Math.min(i,j);
-      while (i > - 1) {
+      // Find positions of critical keywords
+      i = myIndexOf(text, "class", reducedPos);
+      j = myIndexOf(text, "interface", reducedPos);
+      k = myIndexOf(text, "object", reducedPos);
+      l = myIndexOf(text, "enum", reducedPos);
+      
+      minPos = Math.min(i, Math.min(j, Math.min(k, l)));
+                         
+      while (minPos < length) {
         // Move reduced model to walker's location
-        _reduced.move(i - reducedPos);  // reduced model points to i
-        reducedPos = i;                 // reduced model points to reducedPos
+        _reduced.move(minPos - reducedPos);  // reduced model points to minPos
+        reducedPos = minPos;                 // update reducedPos; reduced model now also points to reducedPos
         
         // Check if matching keyword should be ignored because it is within a comment, or quotes
         ReducedModelState state = _reduced.getStateAtCurrent();
-        if (!state.equals(FREE) || _isStartOfComment(text, i) || ((i > 0) && _isStartOfComment(text, i - 1))) {
-          i = text.indexOf("class", reducedPos+1);
-          j = text.indexOf("interface", reducedPos+1);
-          if (i==-1) i = j; else if (j >= 0) i = Math.min(i,j);
-          j = text.indexOf("enum", reducedPos+1);
-          if (i==-1) i = j; else if (j >= 0) i = Math.min(i,j);
-          continue;  // ignore match
-        }
-        else {
-          return true; // found match
-        }        
-      }  
+        
+        if (state.equals(FREE)) return true;  // keyword cannot be inside comment
+        
+        i = myIndexOf(text, "class", reducedPos + 1);
+        j = myIndexOf(text, "interface", reducedPos + 1);
+        k = myIndexOf(text, "object", reducedPos + 1);   // primary keyword in some Scala source files
+        l = myIndexOf(text, "enum", reducedPos + 1);
+        
+        minPos = Math.min(i, Math.min(j, Math.min(k, l)));
+      }        
       
       return false;
     }
+    
     finally {
       _reduced.move(origLocation - reducedPos);    // Restore the state of the reduced model;
     }

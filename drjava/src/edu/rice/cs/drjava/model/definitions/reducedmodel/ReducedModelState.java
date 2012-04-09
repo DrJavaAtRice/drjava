@@ -38,11 +38,11 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
 
-/** Represents the bstract notion of a shadowing state.  The shadowing state of text is simply its interpretation during
+/** Represents the abstract notion of a shadowing state.  The shadowing state of text is simply its interpretation during
   * compilation.  Commented text is ignored; quoted text is accumulated into string constants.  This classification
   * supports accurate highlighting, indenting, and other analyses of program text.
- *  @version $Id$
- */
+  * @version $Id$
+  */
 public abstract class ReducedModelState {
   
   abstract ReducedModelState update(TokenList.Iterator copyCursor);

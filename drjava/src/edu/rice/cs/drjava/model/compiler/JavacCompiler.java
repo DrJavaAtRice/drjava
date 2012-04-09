@@ -342,15 +342,11 @@ public abstract class JavacCompiler implements CompilerInterface {
   protected static String _deleteSemiColon(String s) { return  s.substring(0, s.length() - 1); }
 
   /** .java --> true
-    * .dj   --> true
-    * .dj0  --> true
-    * .dj1  --> true
-    * .dj2  --> true
     * otherwise false 
     * @return true if the specified file is a source file for this compiler. */
   public boolean isSourceFileForThisCompiler(File f) {
-    // by default, use DrJavaFileUtils.isSourceFile
-    return DrJavaFileUtils.isSourceFile(f);
+    String fileName = f.getName();
+    return fileName.endsWith(OptionConstants.JAVA_FILE_EXTENSION)
   }
   
   /** Return the set of source file extensions that this compiler supports.

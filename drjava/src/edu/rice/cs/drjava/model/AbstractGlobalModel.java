@@ -1016,7 +1016,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       
       // if we can't get the source root of the current document, use the first document
       Iterable<File> roots = getSourceRootSet();
-      if (!IterUtil.isEmpty(roots)) { return IterUtil.first(roots); }
+      if (! IterUtil.isEmpty(roots)) { return IterUtil.first(roots); }
       else {
         // use the last directory saved to the configuration
         if (DrJava.getConfig().getSetting(STICKY_INTERACTIONS_DIRECTORY)) {
@@ -2382,7 +2382,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         // "interface" or "enum". If the file doesn't, we presume it is empty and doesn't generate
         // a class file; therefore, it cannot ever be out of sync.
         try {
-          boolean b = doc.containsClassOrInterfaceOrEnum();
+          boolean b = doc.containsSource();
           if (b) outOfSync.add(doc);
         }
         catch(BadLocationException e) {
@@ -2555,7 +2555,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       try {
         if (! doc.isUntitled()) {
           File root = doc.getSourceRoot();
-          if (root != null) roots.add(root); // Can't create duplicate entries in a Set
+          if (root != null && ! roots.contains(root)) roots.add(root); // Can't create duplicate entries in a Set
         }
       }
       catch (InvalidPackageException e) {
@@ -3488,20 +3488,22 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       
 //      _log.log("build directory = " + getBuildDirectory());
       
-      if (getBuildDirectory() != FileOps.NULL_FILE) roots.add(getBuildDirectory());
+      File buildDir = getBuildDirectory();
+      
+      if (buildDir != FileOps.NULL_FILE && ! roots.contain(buildDir) roots.add(buildDir);
       
       // Add the current document to the beginning of the roots list
       try {
         File root = getSourceRoot();
 //        _log.log("Directory " + root + " added to list of source roots");
-        roots.add(root); 
+        if (! roots.contains(root)) roots.add(root); 
       }
       catch (InvalidPackageException ipe) {
         try {
 //          _log.log(this + " has no source root, using parent directory instead");
           File root = getFile().getParentFile();
-          if (root != FileOps.NULL_FILE) {
-            roots.add(root);
+          if (root != FileOps.NULL_FILE && ! roots.contains(root)) {
+            if (! roots.contains(root)) roots.add(root);
 //            _log.log("Added parent directory " + root + " to list of source roots");
           }
         }
@@ -3510,7 +3512,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           // Moved, but we'll add the old file to the set anyway
           _log.log("File for " + this + "has moved; adding parent directory to list of roots");
           File root = fme.getFile().getParentFile();
-          if (root != FileOps.NULL_FILE) roots.add(root);
+          if (root != FileOps.NULL_FILE && ! roots.contains(root)) roots.add(root);
         }
       }
       
@@ -4014,8 +4016,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Returns true if one of the words 'class', 'interface' or 'enum' is found
       * in non-comment text. */
-    public boolean containsClassOrInterfaceOrEnum() throws BadLocationException {
-      return getDocument().containsClassOrInterfaceOrEnum();
+    public boolean containsSource() throws BadLocationException {
+      return getDocument().containsSource();
     }
   } /* End of ConcreteOpenDefDoc */
   

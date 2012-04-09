@@ -93,7 +93,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** log for use in debugging */
-  private static Log _log = new Log("DefaultJUnitModel.txt", false);
+  private static Log _log = new Log("DefaultJUnitModel.txt", true);
   
   /** Manages listeners to this model. */
   private final JUnitEventNotifier _notifier = new JUnitEventNotifier();
@@ -258,6 +258,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 
     //    System.err.println("Retrieved JUnit error model");
     final List<OpenDefinitionsDocument> outOfSync = _model.getOutOfSyncDocuments(lod);
+    _log.log("outOfSync = " + outOfSync);    
     if ((outOfSync.size() > 0) || _model.hasModifiedDocuments(lod)) {
       /* hasOutOfSyncDocuments(lod) can return false when some documents have not been successfully compiled; the 
        * granularity of time-stamping and the presence of multiple classes in a file (some of which compile 

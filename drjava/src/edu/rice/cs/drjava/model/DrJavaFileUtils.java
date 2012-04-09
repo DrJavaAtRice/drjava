@@ -75,10 +75,6 @@ public class DrJavaFileUtils  {
   public static boolean isSourceFile(String fileName) {
     return fileName.endsWith(OptionConstants.JAVA_FILE_EXTENSION)
       || fileName.endsWith(OptionConstants.SCALA_FILE_EXTENSION);
-//      || fileName.endsWith(OptionConstants.DJ_FILE_EXTENSION)
-//      || fileName.endsWith(OptionConstants.OLD_DJ0_FILE_EXTENSION)
-//      || fileName.endsWith(OptionConstants.OLD_DJ1_FILE_EXTENSION)
-//      || fileName.endsWith(OptionConstants.OLD_DJ2_FILE_EXTENSION);
   }
   
   /** @return true if the file is a Java or language level file. */
@@ -90,19 +86,19 @@ public class DrJavaFileUtils  {
   
   // Java language levels is disabled
 
-  /** .pjt  --> true
-    * otherwise false
-    * @return true if the file is an old project file. */
-  public static boolean isOldProjectFile(String fileName) {
-    return fileName.endsWith(OptionConstants.OLD_PROJECT_FILE_EXTENSION);
-  }
-  
-  /** @return true if the file is an old project file. */
-  public static boolean isOldProjectFile(File f) {
-    File canonicalFile = IOUtil.attemptCanonicalFile(f);
-    String fileName = canonicalFile.getPath();
-    return isOldProjectFile(fileName);
-  }
+//  /** .pjt  --> true
+//    * otherwise false
+//    * @return true if the file is an old project file. */
+//  public static boolean isOldProjectFile(String fileName) {
+//    return fileName.endsWith(OptionConstants.OLD_PROJECT_FILE_EXTENSION);
+//  }
+//  
+//  /** @return true if the file is an old project file. */
+//  public static boolean isOldProjectFile(File f) {
+//    File canonicalFile = IOUtil.attemptCanonicalFile(f);
+//    String fileName = canonicalFile.getPath();
+//    return isOldProjectFile(fileName);
+//  }
   
   /** .pjt    --> true
     * .drjava --> true
@@ -175,6 +171,11 @@ public class DrJavaFileUtils  {
       return "";
     }
     return fileName.substring(lastDotIndex);
+  }
+ 
+  /** Adds element to list provided list does not already contain element. */
+  public static <T> ArrayList<T> addUnique(ArrayList<T> list, T element) {
+    return list.contains(element) ? list : list.add(element);
   }
 
 }
