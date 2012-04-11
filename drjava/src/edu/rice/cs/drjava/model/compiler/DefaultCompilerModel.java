@@ -82,7 +82,7 @@ public class DefaultCompilerModel implements CompilerModel {
   private final List<CompilerInterface> _compilers;
   
   /** Current compiler -- one of _compilers, or a NoCompilerAvailable */
-  private CompilerInterface _active;
+  private volatile CompilerInterface _active;
   
   /** Manages listeners to this model. */
   private final CompilerEventNotifier _notifier = new CompilerEventNotifier();
@@ -91,7 +91,10 @@ public class DefaultCompilerModel implements CompilerModel {
   private final GlobalModel _model;
   
   /** The error model containing all current compiler errors. */
-  private CompilerErrorModel _compilerErrorModel;
+  private volatile CompilerErrorModel _compilerErrorModel;
+  
+  /** The current build directory. */
+  private volatile File _buildDir;
   
   /** The lock providing mutual exclustion between compilation and unit testing */
   private Object _compilerLock = new Object();
@@ -341,20 +344,21 @@ public class DefaultCompilerModel implements CompilerModel {
          * this method (getOutputDir and setOutputDir).  We cannot simply cast to the class of the
          * Scala compiler adapater because it is loaded with a DIFFERENT class loader. 
          */
-
         ScalaCompilerInterface scalaCompiler = (ScalaCompilerInterface) compiler;
-        buildDir = scalaCompiler.getOutputDir();
-        if (buildDir == null) { 
+        File initialDir = scalaCompiler.getOutputDir();
+        if (initialDir == null) { 
           /* Determine a plausible outputDir */
-          File initialDir = null;
           try { initialDir =_model.getDocumentForFile(files.get(0)).getSourceRoot(); }  // File must exist 
           catch (InvalidPackageException e) { /* ignore; next line recovers */ }
-          if (initialDir == null) initialDir = _model.getWorkingDirectory();
+          if (initialDir == null) initialDir = _model.getWorkingDirectory();  // Can working directory be null
+          if (initialDir == null) initialDir = new File(System.getProperty("user.dir"));
           buildDir = _askForOutputDir(initialDir);
           scalaCompiler.setOutputDir(buildDir);
           if (_model.isProjectActive()) _model.setBuildDirectory(buildDir);  // Update project file if project exists
         }
       }
+      
+      _buildDir = buildDir;  // Store build directory in this compiler model
       
       List<File> classPath = CollectUtil.makeList(_model.getClassPath());
       
@@ -662,6 +666,9 @@ public class DefaultCompilerModel implements CompilerModel {
       throw new IllegalArgumentException("Compiler is not in the list of available compilers: " + compiler);
     }
   }
+  
+  /** Returns the current build directory. */
+  public File getBuildDir() { return _buildDir; }
   
 //  /** Add a compiler to the active list */
 //  public void addCompiler(CompilerInterface compiler) {

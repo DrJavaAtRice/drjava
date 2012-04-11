@@ -36,6 +36,7 @@
 
 package edu.rice.cs.drjava.model.compiler;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -124,6 +125,9 @@ public interface CompilerModel {
     * @see #getActiveCompiler
     */
   public void setActiveCompiler(CompilerInterface compiler);
+  
+  /** Gets the current build directory. */
+  public File getBuildDir();
 
   /* The following method is no longer used. */
 //  /** Add a compiler to the active list */

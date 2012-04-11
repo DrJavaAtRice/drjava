@@ -91,7 +91,7 @@ public class CompilerErrorPanel extends ErrorPanel {
     // is later changed somewhere else. This is because there is no way
     // to listen on the active compiler.
     final CompilerModel compilerModel = getModel().getCompilerModel();
-    Iterable<CompilerInterface> iter = getModel().getCompilerModel().getAvailableCompilers();
+    Iterable<CompilerInterface> iter = compilerModel.getAvailableCompilers();
     _compilerChoiceBox = new JComboBox<CompilerInterface>(IterUtil.toArray(iter, CompilerInterface.class));
     _compilerChoiceBox.setEditable(false);
     _compilerChoiceBox.setSelectedItem(compilerModel.getActiveCompiler());
@@ -171,9 +171,11 @@ public class CompilerErrorPanel extends ErrorPanel {
     
     protected void _updateWithErrors() throws BadLocationException {
       ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
+      CompilerModel compilerModel = getModel().getCompilerModel();
       if (_excludedFiles.length != 0) {
         final StringBuilder msgBuffer = 
-          new StringBuilder("Compilation completed.  The following files were not compiled:\n");
+          new StringBuilder("Compilation completed.  Output directory is: " + compilerModel.getBuildDir() + 
+                            "\nThe following files were not compiled:\n");
         for (File f: _excludedFiles) {
           if (f != null) { msgBuffer.append("  ").append(f).append('\n'); } // do not print files from untitled docs
         }
@@ -205,24 +207,22 @@ public class CompilerErrorPanel extends ErrorPanel {
      */
     protected void _updateNoErrors(boolean done) throws BadLocationException {
       ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
-      String message;
+      CompilerModel compilerModel = getModel().getCompilerModel();
+      StringBuilder msgBuffer;
       if (_compileHasOccurred) {
-        if (_excludedFiles.length == 0) message = "Compilation completed.";
-        else {
-          final StringBuilder msgBuffer = 
-            new StringBuilder("Compilation completed.  The following files were not compiled:\n");
-          for (File f: _excludedFiles) {
-            if (f != null) { msgBuffer.append("  ").append(f).append('\n'); } // do not print files from untitled docs
-          }
-          message = msgBuffer.toString();
+        msgBuffer = new StringBuilder("Compilation completed.  Output directory is: " + compilerModel.getBuildDir());
+        if (_excludedFiles.length > 0) 
+          msgBuffer.append("\nThe following files were not compiled:\n");
+        for (File f: _excludedFiles) {
+          if (f != null) { msgBuffer.append("  ").append(f).append('\n'); } // do not print files from untitled docs
         }
       }
-      else if (!getModel().getCompilerModel().getActiveCompiler().isAvailable())
-        message = "No compiler available.";
+      else if (! compilerModel.getActiveCompiler().isAvailable())
+        msgBuffer = new StringBuilder("No compiler available.");
       else 
-        message = "Compiler ready: " + getModel().getCompilerModel().getActiveCompiler().getDescription() + ".";
+        msgBuffer = new StringBuilder("Compiler ready: " + compilerModel.getActiveCompiler().getDescription() + ".");
       
-      doc.insertString(0, message, NORMAL_ATTRIBUTES);
+      doc.insertString(0, msgBuffer.toString(), NORMAL_ATTRIBUTES);
       setDocument(doc);
       _updateScrollButtons();
       selectNothing();

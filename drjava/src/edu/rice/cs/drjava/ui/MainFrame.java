@@ -4367,7 +4367,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _model.getDocCollectionWidget().repaint();
     }
     String path = doc.getCompletePath();
-    
     String text = "Editing " + path;
     
 // Lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
