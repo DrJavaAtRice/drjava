@@ -95,7 +95,64 @@ public final class IndentTest extends DrJavaTestCase {
       } 
     });
   }
-  
+
+  /** test for scala case match */  
+  public void testScalaCaseMatch() throws BadLocationException {
+    String text=
+     "val type = FRUIT match {\n"+
+     "     case APPLE => 1\n"+
+     "   case BANANA => 2\n"+
+     "     case OTHERFRUIT match {\n"+
+     " case GRAPE => 3\n"+
+     " }\n"+
+     "}\n";
+    String indented = 
+     "val type = FRUIT match {\n"+
+     "  case APPLE => 1\n"+
+     "  case BANANA => 2\n"+
+     "  case OTHERFRUIT match {\n"+
+     "    case GRAPE => 3\n"+
+     "  }\n"+
+     "}\n";
+         _doc.insertString(0, text, null);
+    _assertContents(text, _doc);
+    safeIndentLines(9, _doc.getLength());
+    _assertContents(indented, _doc);
+
+   }
+   /** test for scala class def
+   * code borrowed from Rice comp 402 homework boolean simplfier
+   */
+  public void testScalaClassAndDef() throws BadLocationException{
+    String text = 
+     "class Parser(r: Reader) extends StreamTokenizer(r) {\n"+
+     "  import StreamTokenizer.{TT_WORD => WORD, TT_EOF => EOF, TT_EOL => EOL}  \n"+
+     "       def this(text: String) = this(new StringReader(text));\n"+
+     "  def read(): BoolExp = {\n"+
+     " var token:Int=nextToken() \n"+
+     " }\n"+
+     "}\n";
+
+    String indented=
+     "class Parser(r: Reader) extends StreamTokenizer(r) {\n"+
+     "  import StreamTokenizer.{TT_WORD => WORD, TT_EOF => EOF, TT_EOL => EOL}  \n"+
+     "  def this(text: String) = this(new StringReader(text));\n"+
+     "  def read(): BoolExp = {\n"+
+     "    var token:Int=nextToken() \n"+
+     "  }\n"+
+     "}\n";
+_doc.insertString(0, text, null);
+    _assertContents(text, _doc);
+    safeIndentLines(9, _doc.getLength());
+    _assertContents(indented, _doc);
+ }
+
+
+
+
+
+
+
   /** Regression test for comment portion of indent tree. */
   public void testIndentComments() throws BadLocationException {
     String text =
@@ -248,7 +305,7 @@ public final class IndentTest extends DrJavaTestCase {
     String indented =
       "{\n" +
       "  class Foo\n" +     // After open brace
-      "    extends F {\n" +     // Not new statement
+      "  extends F {\n" +     // Not new statement
       "    int i;   \n" +     // After open brace
       "    void foo() {\n" +     // After statement
       "      if (true) {\n" +     // Nested brace
@@ -313,7 +370,7 @@ public final class IndentTest extends DrJavaTestCase {
       "int x;\n" +
       "int y;\n" +
       "class Foo\n" +
-      "  extends F\n" +
+      "extends F\n" +
       "{\n" +
       "}";
     
@@ -323,74 +380,6 @@ public final class IndentTest extends DrJavaTestCase {
     _assertContents(indented, _doc);
   }
   
-  /** Regression test for switch statements.
-   */
-  public void testIndentSwitch() throws BadLocationException {
-    String text =
-      "switch (x) {\n" +
-      "case 1:\n" +
-      "foo();\n" +
-      "break;\n" +
-      "case 2: case 3:\n" +
-      "case 4: case 5:\n" +
-      "bar();\n" +
-      "break;\n" +
-      "}\n";
-    
-    String indented =
-      "switch (x) {\n" +
-      "  case 1:\n" +     // Starting new statement after brace
-      "    foo();\n" +     // Not new statement
-      "    break;\n" +     // Indent to prev statement
-      "  case 2: case 3:\n" +     // Case (indent to stmt of brace)
-      "  case 4: case 5:\n" +     // Case (not new stmt)
-      "    bar();\n" +     // Not new stmt
-      "    break;\n" +     // Indent to prev stmt
-      "}\n";     // Close brace
-    
-    
-    _doc.insertString(0, text, null);
-    _assertContents(text, _doc);
-    safeIndentLines(0, _doc.getLength());
-    _assertContents(indented, _doc);
-  }
-  
-  /** Regression test for ternary operators. */
-  public void testIndentTernary() throws BadLocationException {
-    String text =
-      "test1 = x ? y : z;\n" +
-      "test2 = x ? y :\n" +
-      "z;\n" +
-      "foo();\n" +
-      "test3 =\n" +
-      "x ?\n" +
-      "y :\n" +
-      "z;\n" +
-      "bar();\n" +
-      "test4 = (x ?\n" +
-      "y :\n" +
-      "z);\n";
-    
-    String indented =
-      "test1 = x ? y : z;\n" +     // ternary on one line
-      "test2 = x ? y :\n" +     // ? and : on one line
-      "  z;\n" +     // unfinished ternary
-      "foo();\n" +     // new stmt
-      "test3 =\n" +     // new stmt
-      "  x ?\n" +     // not new stmt
-      "  y :\n" +     // : with ? in stmt
-      "  z;\n" +     // in ternary op
-      "bar();\n" +     // new stmt
-      "test4 = (x ?\n" +     // ternary in paren
-      "           y :\n" +     // : with ? in paren stmt
-      "           z);\n";     // in ternary in paren
-    
-    
-    _doc.insertString(0, text, null);
-    _assertContents(text, _doc);
-    safeIndentLines(0, _doc.getLength());
-    _assertContents(indented, _doc);
-  }
   
   /** Tests getLineEnclosingBrace, getEnclosingBrace
     * @exception BadLocationException
@@ -710,7 +699,7 @@ public final class IndentTest extends DrJavaTestCase {
     // just paren
     _doc.insertString(0, "hello\n", null);
     safeIndentLines(_doc.getCurrentLocation(), _doc.getCurrentLocation());
-    _assertContents("hello\n  ", _doc);
+    _assertContents("hello\n", _doc);
   }
   
   /** put your documentation comment here
@@ -760,18 +749,9 @@ public final class IndentTest extends DrJavaTestCase {
     // just paren
     _doc.insertString(0, "for(;;)\n", null);
     safeIndentLines(_doc.getCurrentLocation(), _doc.getCurrentLocation());
-    _assertContents("for(;;)\n  ", _doc);
+    _assertContents("for(;;)\n", _doc);
   }
   
-  /** put your documentation comment here
-    * @exception BadLocationException
-    */
-  public void testFor2 () throws BadLocationException {
-    // just paren
-    _doc.insertString(0, "{\n  for(;;)\n", null);
-    safeIndentLines(_doc.getCurrentLocation(), _doc.getCurrentLocation());
-    _assertContents("{\n  for(;;)\n    ", _doc);
-  }
   
   /** put your documentation comment here
     * @exception BadLocationException
@@ -870,7 +850,7 @@ public final class IndentTest extends DrJavaTestCase {
     // just paren
     _doc.insertString(0, "\nhello //bal;\n", null);
     safeIndentLines(_doc.getCurrentLocation(), _doc.getCurrentLocation());
-    _assertContents("\nhello //bal;\n  ", _doc);
+    _assertContents("\nhello //bal;\n", _doc);
   }
   
   /** put your documentation comment here
@@ -930,7 +910,7 @@ public final class IndentTest extends DrJavaTestCase {
     // just paren
     _doc.insertString(0, "a\n", null);
     safeIndentLines(_doc.getCurrentLocation(), _doc.getCurrentLocation());
-    _assertContents("a\n  ", _doc);
+    _assertContents("a\n", _doc);
   }
   
   /** put your documentation comment here
@@ -1142,38 +1122,6 @@ public final class IndentTest extends DrJavaTestCase {
 //    Utilities.clearEventQueue();
 //    System.err.println("Performing failing assertion");
     _assertContents(indentedAfter, _doc);
-  }
-  
-  /** tests that an if statment nested in a switch will be indented properly
-   * @throws BadLocationException
-   */
-  public void testNestedIfInSwitch() throws BadLocationException {
-    String text =
-      "switch(cond) {\n" +
-      "case 1:\n" +
-      "object.doStuff();\n" +
-      "if(object.hasDoneStuff()) {\n" +
-      "thingy.doOtherStuff();\n" +
-      "lion.roar(\"raaargh\");\n" +
-      "}\n" +
-      "break;\n" +
-      "}\n";
-    
-    String indented =
-      "switch(cond) {\n" +
-      "  case 1:\n" +
-      "    object.doStuff();\n" +
-      "    if(object.hasDoneStuff()) {\n" +
-      "      thingy.doOtherStuff();\n" +
-      "      lion.roar(\"raaargh\");\n" +
-      "    }\n" +
-      "    break;\n" +
-      "}\n";
-    
-    _doc.insertString(0, text, null);
-    _assertContents(text, _doc);
-    safeIndentLines(0, _doc.getLength());
-    _assertContents(indented, _doc);
   }
   
 //  Commented out because reference files are missing!
@@ -1604,13 +1552,13 @@ public final class IndentTest extends DrJavaTestCase {
       "public class Foo {\n" + 
       "  public void m() {\n" + 
       "    _junitLocationEnabledListener = new ConfigOptionListeners.\n" + 
-      "      RequiresDrJavaRestartListener<Boolean>(this, \"Use External JUnit\"));\n" + 
+      "    RequiresDrJavaRestartListener<Boolean>(this, \"Use External JUnit\"));\n" + 
       "                                         _junitLocationListener = new ConfigOptionListeners.\n" + 
-      "                                           RequiresDrJavaRestartListener<File>(_configFrame, \"JUnit Location\"));\n" + 
+      "                                         RequiresDrJavaRestartListener<File>(_configFrame, \"JUnit Location\"));\n" + 
       "                                         _rtConcJUnitLocationEnabledListener = new ConfigOptionListeners.\n" + 
-      "                                           RequiresInteractionsRestartListener<Boolean>(_configFrame, \"Use ConcJUnit Runtime\"));\n" + 
+      "                                         RequiresInteractionsRestartListener<Boolean>(_configFrame, \"Use ConcJUnit Runtime\"));\n" + 
       "                                         _rtConcJUnitLocationListener = new ConfigOptionListeners.\n" + 
-      "                                           RequiresInteractionsRestartListener<File>(_configFrame, \"ConcJUnit Runtime Location\"));\n" + 
+      "                                         RequiresInteractionsRestartListener<File>(_configFrame, \"ConcJUnit Runtime Location\"));\n" + 
       "  }\n" + 
       "}\n";
     
