@@ -60,7 +60,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  *  @version $Id$
  */
 public final class NewJVMTest extends DrJavaTestCase {
-  private static final Log _log  = new Log("MasterSlave.txt", false);
+  private static final Log _log  = new Log("MasterSlave.txt", true);
   
   private static volatile TestJVMExtension _jvm;
   
@@ -119,6 +119,57 @@ public final class NewJVMTest extends DrJavaTestCase {
 //   _log.log("Returned banned = ' + " + banner + "'");
    assertTrue(_jvm.interpret("val x = 5"));
    assertEquals("result", "x: Int = 5\n", _jvm.returnBuffer());
+   debug.logEnd();
+  }
+
+  public void testSimpleIfExpression() throws Throwable {
+    debug.logStart();
+   _log.log("NewJVMTest.testSimpleIfExpression executing");
+   
+   _jvm.resetState();
+//   String banner = _jvm.returnBuffer();
+//   _log.log("Returned banned = ' + " + banner + "'");
+   assertTrue(_jvm.interpret("if (true)"));
+   assertEquals("result", "     | ", _jvm.returnBuffer());
+   assertTrue(_jvm.interpret("print(\"out\");"));
+   assertEquals("out buffer length", 3, _jvm.outBuffer().length());
+   assertEquals("system out buffer", "out", _jvm.outBuffer());
+   debug.logEnd();
+  }
+
+  public void testIfElseExpression() throws Throwable {
+    debug.logStart();
+   _log.log("NewJVMTest.testIfElseExpression executing");
+   
+   _jvm.resetState();
+//   String banner = _jvm.returnBuffer();
+//   _log.log("Returned banned = ' + " + banner + "'");
+   assertTrue(_jvm.interpret("if (false)"));
+   assertEquals("result", "     | ", _jvm.returnBuffer());
+   _jvm.resetState();
+   assertTrue(_jvm.interpret("print(\"wrong\"); else"));
+   assertEquals("result", "     | ", _jvm.returnBuffer());
+   _jvm.resetState();
+   assertTrue(_jvm.interpret("print(\"right\")"));
+   assertEquals("out buffer length", 5, _jvm.outBuffer().length());
+   assertEquals("system out buffer", "right", _jvm.outBuffer());
+   debug.logEnd();
+  }
+
+  public void testForLoopExpression() throws Throwable {
+    debug.logStart();
+   _log.log("NewJVMTest.testForLoopExpression executing");
+   _jvm.resetState();
+//   String banner = _jvm.returnBuffer();
+//   _log.log("Returned banned = ' + " + banner + "'");
+   assertTrue(_jvm.interpret("for (i <- 1 to 10)"));
+   assertEquals("result", "     | ", _jvm.returnBuffer());
+   _jvm.resetState();
+   assertTrue(_jvm.interpret("if ((i % 2) == 0)"));
+   assertEquals("result", "     | ", _jvm.returnBuffer());
+   assertTrue(_jvm.interpret("print(i)"));
+   assertEquals("out buffer length", 6, _jvm.outBuffer().length());
+   assertEquals("system out buffer", "246810", _jvm.outBuffer());
    debug.logEnd();
   }
 
