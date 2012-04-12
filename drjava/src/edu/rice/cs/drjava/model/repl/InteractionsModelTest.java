@@ -168,7 +168,8 @@ public final class InteractionsModelTest extends DrJavaTestCase {
   }
   
   // this test uses thread pools and starts a THRAD_EXECUTOR-n thread that we cannot join
-  public void testInterpretCurrentInteractionWithIncompleteInput_NOJOIN() throws EditDocumentException, InterruptedException,
+  // NOTE: this test, as written, is not applicable for drscala, as ContinuationExceptions and SyntaxExceptions are not used
+  public void deleteThisVersion_testInterpretCurrentInteractionWithIncompleteInput_NOJOIN() throws EditDocumentException, InterruptedException,
     RemoteException {
     _log.log("testInterpretCurrentInteractionWithIncompleteInput started");
     _model = new IncompleteInputInteractionsModel(_adapter);   // override the one initialized in setUp()
