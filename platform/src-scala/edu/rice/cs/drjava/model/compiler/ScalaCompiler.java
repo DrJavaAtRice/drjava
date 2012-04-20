@@ -58,6 +58,7 @@ import edu.rice.cs.plt.lambda.Lambda2;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.swing.Utilities;
 
 import scala.tools.nsc.Global;
@@ -73,6 +74,8 @@ import scala.tools.nsc.io.Path;
   *  @version $Id$
   */
 public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCompilerInterface {
+  
+  public static final Log _log = new Log("GlobalModel.txt", true);
   
   private File _outputDir = null;
     
@@ -145,6 +148,7 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
     * @return true if the specified file is a source file for this compiler. */
   public boolean isSourceFileForThisCompiler(File f) {
     // by default, use DrJavaFileUtils.isSourceFile
+    _log.log("ScalaCompiler.isSourceFile(" + f + ") called");
     String fileName = f.getName();
     return fileName.endsWith(SCALA_FILE_EXTENSION) || fileName.endsWith(OptionConstants.JAVA_FILE_EXTENSION);
   }

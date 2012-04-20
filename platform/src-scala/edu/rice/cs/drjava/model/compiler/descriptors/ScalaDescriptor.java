@@ -89,27 +89,25 @@ public class ScalaDescriptor extends JDKDescriptor {
     * @return list of files to search */
   public Iterable<File> getSearchFiles() {
     /* Code that looks for compiler outside of drjava.jar */
-//    Iterable<File> files = IterUtil.asIterable(new File[] {
-//      new File("/C:/Scala/scala-2.9.1.final/lib/scala-compiler.jar")
-//    });
-//    try {
-//      String scala_home = System.getenv("SCALA_HOME");
-//      if (scala_home != null) {
-//        files = IterUtil.compose(files, new File(new File(scala_home), "lib/scala-compiler.jar"));
-//      }
-//      else {
-//        JDKToolsLibrary.msg("SCALA_HOME not set");
-//      }
-//    }
-//    catch(Exception e) { /* ignore SCALA_HOME variable */ }
-//    
-//    
-//    // drjava.jar file itself; check if it's a combined Scala/DrJava jar
-//    files = IterUtil.compose(edu.rice.cs.util.FileOps.getDrJavaFile(), files); 
-//    JDKToolsLibrary.msg("ScalaDescriptor.getSearchFiles is returning " + files);
-//    return files;
+    Iterable<File> files = IterUtil.asIterable(new File[] {
+      new File("/C:/Scala/scala-2.9.1.final/lib/scala-compiler.jar")
+    });
+    files = IterUtil.compose(files, new File("/opt/scala/lib/scala-compiler.jar"));
+    try {
+      String scala_home = System.getenv("SCALA_HOME");
+      if (scala_home != null) {
+        files = IterUtil.compose(files, new File(new File(scala_home), "lib/scala-compiler.jar"));
+      }
+      else {
+        JDKToolsLibrary.msg("SCALA_HOME not set");
+      }
+    }
+    catch(Exception e) { /* ignore SCALA_HOME variable */ }
     
-    return IterUtil.asIterable(new File[] {edu.rice.cs.util.FileOps.getDrJavaFile()});
+    // add drjava.jar file itself
+    files = IterUtil.compose(edu.rice.cs.util.FileOps.getDrJavaFile(), files); 
+    JDKToolsLibrary.msg("ScalaDescriptor.getSearchFiles is returning " + files);
+    return files;
   }
   
   /** True if this is a compound JDK and needs a fully featured JDK to operate.
