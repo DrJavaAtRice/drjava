@@ -58,13 +58,17 @@ import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
 import edu.rice.cs.drjava.model.javadoc.DefaultJavadocModel;
 import edu.rice.cs.drjava.model.JDKDescriptor;
 
-/** 
- * Provides dynamic access to the interface of a JDK's tools.jar classes.  This level of indirection
- * eliminates the need to have specific tools.jar classes available statically (and the resulting need
- * to reset the JVM if they are not), and makes it possible to interface with multiple tools.jar
- * libraries simultaneously.
- */
+import edu.rice.cs.util.Log;
+
+/** Provides dynamic access to the interface of a JDK's tools.jar classes.  This level of indirection
+  * eliminates the need to have specific tools.jar classes available statically (and the resulting need
+  * to reset the JVM if they are not), and makes it possible to interface with multiple tools.jar
+  * libraries simultaneously.
+  */
 public class JDKToolsLibrary {
+  
+  /* Create debugging log. */
+  public static final Log _log = new Log("GlobalModel.txt", true);
   
   private final FullVersion _version;
   private final CompilerInterface _compiler;
@@ -97,7 +101,7 @@ public class JDKToolsLibrary {
     boolean result =
       _compiler instanceof ScalaCompiler ||  /* This is an ugly hack.  TODO: refactor compiler adapters framework */
       _compiler.isAvailable() || _debugger.isAvailable() || _javadoc.isAvailable();
-    JDKToolsLibrary.msg("Invoking isValid() for " + _compiler.getClass() + " returned " + result);
+    msg("Invoking isValid() for " + _compiler.getClass() + " returned " + result);
     return result;
   }
   
@@ -106,6 +110,7 @@ public class JDKToolsLibrary {
   public static String adapterForCompiler(JavaVersion.FullVersion version) {
     switch (version.majorVersion()) {
       case FUTURE: return "edu.rice.cs.drjava.model.compiler.ScalaCompiler";
+      case SCALA: return "edu.rice.cs.drjava.model.compiler.ScalaCompiler";
       case JAVA_7: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
       case JAVA_6: {
         switch (version.vendor()) {
@@ -115,7 +120,7 @@ public class JDKToolsLibrary {
         }
       }
       case JAVA_5: return "edu.rice.cs.drjava.model.compiler.Javac150Compiler";
-      default: return null;
+      default: return "edu.rice.cs.drjava.model.compiler.ScalaCompiler";
     }
   }
   
@@ -128,14 +133,15 @@ public class JDKToolsLibrary {
     }
   }
 
-  /** Only called in making compilers from runtime? */
+  /** Only called in making compilers from runtime */
   protected static CompilerInterface getCompilerInterface(String className, FullVersion version) {
+    _log.log("This is a test.  getCompilerInterface called");
     msg("JDKToolsLibrary.getCompilerInterface(" + className + ", " + version + ") called");
     if (className != null) {
       List<File> bootClassPath = null;
       String bootProp = System.getProperty("sun.boot.class.path");
       if (bootProp != null) { bootClassPath = CollectUtil.makeList(IOUtil.parsePath(bootProp)); }
-      File toolsJar = edu.rice.cs.drjava.DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.JAVAC_LOCATION);
+//      File toolsJar = edu.rice.cs.drjava.DrJava.getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.JAVAC_LOCATION);
       try {
         Class<?>[] sig = { FullVersion.class, String.class, List.class };
         Object[] args = { version, "the runtime class path", bootClassPath };
@@ -203,14 +209,15 @@ public class JDKToolsLibrary {
   public static final java.io.StringWriter LOG_STRINGWRITER = new java.io.StringWriter();
   protected static final java.io.PrintWriter LOG_PW = new java.io.PrintWriter(LOG_STRINGWRITER);
   
-  public static void msg(String s) {   
-    try {   
-      java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(new File(new File(System.getProperty("user.home")),   
-                                                                                       "FindCompilers.txt").getAbsolutePath(),true));   
-      pw.println(s);
-//      LOG_PW.println(s);
-      pw.close();   
-    }   
-    catch(java.io.IOException ioe) { }   
+  public static void msg(String s) { 
+    _log.log(s);
+//    try {   
+//      java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(new File(new File(System.getProperty("user.home")),   
+//                                                                                       "FindCompilers.txt").getAbsolutePath(),true));   
+//      pw.println(s);
+////      LOG_PW.println(s);
+//      pw.close();   
+//    }   
+//    catch(java.io.IOException ioe) { }   
   }
 }

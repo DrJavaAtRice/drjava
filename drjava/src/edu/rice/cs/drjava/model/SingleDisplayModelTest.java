@@ -309,8 +309,8 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
           OpenDefinitionsDocument doc = _model.getActiveDocument();
           assertEquals("untitled display filename", "(Untitled)", doc.getCompletePath());
           
-          // Ends in ".java"
-          File file1 = File.createTempFile("DrJava-filename-test", ".java", _tempDir).getCanonicalFile();
+          // Ends in ".scala"
+          File file1 = File.createTempFile("DrScala-filename-test", ".scala", _tempDir).getCanonicalFile();
           file1.deleteOnExit();
           String name = file1.getAbsolutePath();
           doc = _model.openFile(new FileSelector(file1));
@@ -318,7 +318,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
           assertEquals(".java display filename", name, doc.getCompletePath());
           
           // Doesn't contain ".java"
-          File file2 = File.createTempFile("DrJava-filename-test", ".txt", _tempDir).getCanonicalFile();
+          File file2 = File.createTempFile("DrScala-filename-test", ".txt", _tempDir).getCanonicalFile();
           file2.deleteOnExit();
           name = file2.getAbsolutePath();
           
@@ -326,12 +326,12 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
           assertEquals(".txt display filename", name, doc.getCompletePath());
           
           // Modified File
-          File file3 = File.createTempFile("DrJava-filename-test", ".java", _tempDir).getCanonicalFile();
+          File file3 = File.createTempFile("DrScala-filename-test", ".scala", _tempDir).getCanonicalFile();
           file3.deleteOnExit();
           name = file3.getAbsolutePath();
           doc = _model.openFile(new FileSelector(file3));
           changeDocumentText("foo", doc);
-          assertEquals(".java.txt display filename", name + " *", doc.getCompletePath());
+          assertEquals(".scala.txt display filename", name + " *", doc.getCompletePath());
         }
         catch (Exception e) {
           // should never happen

@@ -93,7 +93,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** log for use in debugging */
-  private static Log _log = new Log("DefaultJUnitModel.txt", true);
+  private static Log _log = new Log("GlobalModel.txt", true);
   
   /** Manages listeners to this model. */
   private final JUnitEventNotifier _notifier = new JUnitEventNotifier();
@@ -202,7 +202,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //      try { testClasses = _jvm.findTestClasses(qualifiedClassnames, files); }
 //      catch(IOException e) { throw new UnexpectedException(e); }
 //      
-////      System.err.println("Found test classes: " + testClasses);
+////      _log.log("Found test classes: " + testClasses);
 //      
 //      if (testClasses.isEmpty()) {
 //        nonTestCase(true);
@@ -212,7 +212,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //      _testInProgress = true;
 //      try { _jvm.runTestSuite(); } 
 //      catch(Exception e) {
-////        System.err.println("Threw exception " + e);
+////        _log.log("Threw exception " + e);
 //        _notifier.junitEnded();
 //        _testInProgress = false;
 //        throw new UnexpectedException(e); 
@@ -248,7 +248,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   private void junitOpenDefDocs(final List<OpenDefinitionsDocument> lod, final boolean allTests) {
     // If a test is running, don't start another one.
 
-//    System.err.println("junitOpenDefDocs(" + lod + ", " + allTests + ", " + _testInProgress + ")");
+    _log.log("junitOpenDefDocs(" + lod + ", " + allTests + ", " + _testInProgress + ")");
     
     // Check_testInProgress flag
     if (_testInProgress) return;
@@ -256,14 +256,14 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     // Reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
 
-    //    System.err.println("Retrieved JUnit error model");
+    _log.log("Retrieved JUnit error model.  outOfSync = " +  _model.getOutOfSyncDocuments(lod));
     final List<OpenDefinitionsDocument> outOfSync = _model.getOutOfSyncDocuments(lod);
     _log.log("outOfSync = " + outOfSync);    
     if ((outOfSync.size() > 0) || _model.hasModifiedDocuments(lod)) {
       /* hasOutOfSyncDocuments(lod) can return false when some documents have not been successfully compiled; the 
        * granularity of time-stamping and the presence of multiple classes in a file (some of which compile 
        * successfully) can produce false reports.  */
-//      System.err.println("Out of sync documents exist");
+      _log.log("Out of sync documents exist");
       CompilerListener testAfterCompile = new DummyCompilerListener() {
         @Override public void compileAborted(Exception e) {
           // gets called if there are modified files and the user chooses NOT to save the files
@@ -298,7 +298,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         }
       };
       
-//        System.err.println("Notifying JUnitModelListener");
+        _log.log("Notifying JUnitModelListener");
       _testInProgress = true;
       _notifyCompileBeforeJUnit(testAfterCompile, outOfSync);
       _testInProgress = false;
@@ -329,7 +329,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     for (OpenDefinitionsDocument doc: lod) /* for all nonEmpty documents in lod */ {
       if (doc.isSourceFile())  { // excludes Untitled documents and open non-source files
         try {
-//          System.err.println("Processing " + doc);
+          _log.log("Processing " + doc);
           File sourceRoot = doc.getSourceRoot(); // may throw an InvalidPackageException
           
           // doc has valid package name; add it to list of open java source doc files
@@ -349,20 +349,19 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           
           if (! classDirsAndRoots.containsKey(classFileDir)) {
             classDirsAndRoots.put(classFileDir, sourceDir);
-//          System.err.println("Adding " + classFileDir + " with source root " + sourceRoot + 
-//          " to list of class directories");
+          _log.log("Adding " + classFileDir + " with source root " + sourceRoot + " to list of class directories");
           }
         }
         catch (InvalidPackageException e) { /* Skip the file, since it doesn't have a valid package */ }
       }
     }
 
-//    System.err.println("classDirs = " + classDirsAndRoots.keySet());
+    _log.log("classDirs = " + classDirsAndRoots.keySet());
     
     /** set of dirs potentially containing test classes */
     Set<File> classDirs = classDirsAndRoots.keySet();
     
-//    System.err.println("openDocFiles = " + openDocFiles);
+    _log.log("openDocFiles = " + openDocFiles);
     
     /* Names of test classes. */
     final ArrayList<String> classNames = new ArrayList<String>();
@@ -375,16 +374,16 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
     try {
       for (File dir: classDirs) { // foreach class file directory
-//        System.err.println("Examining directory " + dir);
+        _log.log("Examining directory " + dir);
         
         File[] listing = dir.listFiles();
         
-//        System.err.println("Directory contains the files: " + Arrays.asList(listing));
+        _log.log("Directory contains the files: " + Arrays.asList(listing));
         
         if (listing != null) { // listFiles may return null if there's an IO error
           for (File entry : listing) { /* for each class file in the build directory */        
             
-//            System.err.println("Examining file " + entry);
+            _log.log("Examining file " + entry);
             
             /* ignore non-class files */
             String name = entry.getName();
@@ -395,17 +394,17 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               String noExtName = name.substring(0, name.length() - 6);  // remove ".class" from name
               int indexOfLastDot = noExtName.lastIndexOf('.');
               String simpleClassName = noExtName.substring(indexOfLastDot + 1);
-//            System.err.println("Simple class name is " + simpleClassName);  
+            _log.log("Simple class name is " + simpleClassName);  
               if (/*isProject &&*/ ! simpleClassName.endsWith("Test")) continue;
             }
-            
-//            System.err.println("Found test class: " + noExtName);
             
             /* ignore entries that do not correspond to files?  Can this happen? */
             if (! entry.isFile()) continue;
             
+            _log.log("Found test class: " + name);
+            
             // Add this class and the corrresponding source file to classNames and files, respectively.
-            // Finding the source file is non-trivial because it may be a language-levels file
+            // Finding the source file is non-trivial because it may be a language-levels file (NOT, disabled in DrScala)
             
             try {
               final Box<String> className = new SimpleBox<String>();
@@ -430,23 +429,25 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               
               /** The canonical pathname for the file (including the file name) */
               String javaSourceFileName = getCanonicalPath(rootDir) + File.separator + sourceName.value();
-//              System.err.println("Full java source fileName = " + javaSourceFileName);
+              _log.log("Full java source fileName = " + javaSourceFileName);
               
-              /* The index in fileName of the dot preceding the extension ".java", ".dj", ".dj0*, ".dj1", or ".dj2" */
+              /* The index in fileName of the dot preceding the extension ".java" or ".scala" */
               int indexOfExtDot = javaSourceFileName.lastIndexOf('.');
-//              System.err.println("indexOfExtDot = " + indexOfExtDot);
+              _log.log("indexOfExtDot = " + indexOfExtDot);
               if (indexOfExtDot == -1) continue;  // RMI stub class files return source file names without extensions
-//              System.err.println("File found in openDocFiles = "  + openDocFiles.contains(sourceFileName));
               
+              // Language level processing is disabled in DrScala
               /* Determine if this java source file was generated from a language levels file. */
               String strippedName = javaSourceFileName.substring(0, indexOfExtDot);
-//              System.err.println("Stripped name = " + strippedName);
+              _log.log("Stripped name = " + strippedName);
               
               String sourceFileName;
               
               if (openDocFiles.contains(javaSourceFileName)) sourceFileName = javaSourceFileName;
               else if (openDocFiles.contains(strippedName + OptionConstants.SCALA_FILE_EXTENSION))
-                sourceFileName = strippedName + OptionConstants.SCALA_FILE_EXTENSION;
+                sourceFileName = strippedName + OptionConstants.JAVA_FILE_EXTENSION;
+              else if (openDocFiles.contains(strippedName + OptionConstants.SCALA_FILE_EXTENSION))
+                sourceFileName = strippedName + OptionConstants.JAVA_FILE_EXTENSION;
 //              else if (openDocFiles.contains(strippedName + OptionConstants.DJ_FILE_EXTENSION))
 //                sourceFileName = strippedName + OptionConstants.DJ_FILE_EXTENSION;
 //              else if (openDocFiles.contains(strippedName + OptionConstants.OLD_DJ0_FILE_EXTENSION))
@@ -457,11 +458,11 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //                sourceFileName = strippedName + OptionConstants.OLD_DJ2_FILE_EXTENSION;
               else continue; // no matching source file is open
               
+              _log.log("File found in openDocFiles = "  + openDocFiles.contains(sourceFileName));
               File sourceFile = new File(sourceFileName);
               classNames.add(className.value());
               files.add(sourceFile);
-//              System.err.println("Class " + className + "added to classNames.   File " + sourceFileName + 
-//                                 " added to files.");
+              _log.log("Class " + className + "added to classNames.   File " + sourceFileName + " added to files.");
             }
             catch(IOException e) { /* ignore it; can't read class file */ }
           }
@@ -475,7 +476,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
     /** Run the junit test suite that has already been set up on the slave JVM */
     _testInProgress = true;
-    // System.err.println("Spawning test thread");
+     _log.log("Spawning test thread");
     new Thread(new Runnable() { // this thread is not joined, but the wait/notify scheme guarantees that it ends
       public void run() { 
         // TODO: should we disable compile commands while testing?  Should we use protected flag instead of lock?
@@ -492,7 +493,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
           /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
           List<String> tests = _jvm.findTestClasses(classNames, files).unwrap(null);
-//          System.err.println("tests = " + tests);
+          _log.log("tests = " + tests);
           if (tests == null || tests.isEmpty()) {
             nonTestCase(allTests, false);
             return;

@@ -215,8 +215,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         try {
           Class<?>[] sig = { FullVersion.class, String.class, List.class };
           Object[] args = { version, f.toString(), bootClassPath };
-          // JDKToolsLibrary.msg("classpath for compiler: "+IterUtil.multilineToString(path));
-          // JDKToolsLibrary.msg("boot classpath for compiler: "+IterUtil.multilineToString(bootClassPath));                
+          // JDKToolsLibrary._log.log("classpath for compiler: "+IterUtil.multilineToString(path));
+          // JDKToolsLibrary._log.log("boot classpath for compiler: "+IterUtil.multilineToString(bootClassPath));                
           CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadLibraryAdapter(loader, path, compilerAdapter, 
                                                                                          sig, args);
           if (attempt.isAvailable()) { compiler = attempt; }
@@ -556,10 +556,10 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   }
   
   /** Produce a list of tools libraries discovered on the file system.  A variety of locations are searched;
-   * only those files that can produce a valid library (see {@link #isValid} are returned.  The result is
-   * sorted by version.  Where one library of the same version might be preferred over another, the preferred 
-   * library appears earlier in the result list.
-   */
+    * only those files that can produce a valid library (see {@link #isValid} are returned.  The result is
+    * sorted by version.  Where one library of the same version might be preferred over another, the preferred 
+    * library appears earlier in the result list.
+    */
   public static Iterable<JarJDKToolsLibrary> search(GlobalModel model) {
     JDKToolsLibrary.msg("---- Searching for Libraries ----");
     

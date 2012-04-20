@@ -40,6 +40,8 @@ import java.util.Arrays;
 
 import static edu.rice.cs.plt.object.ObjectUtil.hash;
 
+/** This interface apparently has no methods, so it is merely a convenient wrapper that allows
+  * many similar public classes to be declared in one file. */
 public interface Query {
   
   abstract static class Pos implements Query {

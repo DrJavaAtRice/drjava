@@ -592,24 +592,24 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   class ProjectFileGroupingState implements FileGroupingState {
     
-    volatile File _projRoot;
-    volatile String _mainClass;
-    volatile File _buildDir;
-    volatile File _workDir;
-    volatile File _projectFile;
-    final File[] _projectFiles;
-    volatile ArrayList<File> _auxFiles;            // distinct from _auxiliaryFiles in ProjectProfile
+    private volatile File _projRoot;
+    private volatile String _mainClass;
+    private volatile File _buildDir;
+    private volatile File _workDir;
+    private volatile File _projectFile;
+    private final File[] _projectFiles;
+    private volatile ArrayList<File> _auxFiles;            // distinct from _auxiliaryFiles in ProjectProfile
     private volatile ArrayList<File> _exclFiles;   // distinct from _excludedFiles in ProjectProile and CompilerErrorPanel
-    volatile Iterable<AbsRelFile> _projExtraClassPath;
-    private boolean _isProjectChanged = false;
-    volatile File _createJarFile;
-    volatile int _createJarFlags;
-    volatile boolean _autoRefreshStatus;
-    final Map<OptionParser<?>,String> _storedPreferences = new HashMap<OptionParser<?>,String>();
+    private volatile Iterable<AbsRelFile> _projExtraClassPath;
+    private volatile boolean _isProjectChanged = false;
+    private volatile File _createJarFile;
+    private volatile int _createJarFlags;
+    private volatile boolean _autoRefreshStatus;
+    private final Map<OptionParser<?>,String> _storedPreferences = new HashMap<OptionParser<?>,String>();
     
-    volatile String _manifest = null;
+    private volatile String _manifest = null;
     
-    HashSet<String> _projFilePaths = new HashSet<String>();
+    private final HashSet<String> _projFilePaths = new HashSet<String>();
     
     /** Degenerate constructor for a new project; only the file project name is known. */
     ProjectFileGroupingState(File project) {
@@ -1477,7 +1477,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     Iterable<File> filesIterable;
     
-    String extension = ext.substring(1); // do not include the dot ("java", not ".java")
+    String extension = ext.substring(1); // do not include the dot ("scala", not ".scala")
     
     Predicate<File> match = LambdaUtil.and(IOUtil.IS_FILE, IOUtil.extensionFilePredicate(extension));
     if (rec) { filesIterable = IOUtil.listFilesRecursively(dir, match); }
@@ -2370,8 +2370,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public List<OpenDefinitionsDocument> getOutOfSyncDocuments() { return getOutOfSyncDocuments(getOpenDefinitionsDocuments()); }
   
   public List<OpenDefinitionsDocument> getOutOfSyncDocuments(List<OpenDefinitionsDocument> lod) {
+    _log.log("AbstractGlobalModel.getOutOfSyncDocuments(" + lod + ") called");
     List<OpenDefinitionsDocument> outOfSync = new ArrayList<OpenDefinitionsDocument>();
     for (OpenDefinitionsDocument doc: lod) {
+      _log.log("Inspecting " + doc + " for OUT OF SYNC");
+      _log.log("doc.isSourceFile() returns " + doc.isSourceFile() + " doc.checkIfClassFileInSync returns " + doc.checkIfClassFileInSync() );
       if (doc.isSourceFile() &&
           (! isProjectActive() || doc.inProjectPath() || doc.isAuxiliaryFile()) &&
           (! doc.checkIfClassFileInSync())) {
@@ -3216,7 +3219,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       */
     public boolean saveFileAs(FileSaveSelector com) throws IOException {
       assert EventQueue.isDispatchThread();
-//      System.err.println("AbstractGlobalModel.saveFileAs called on " + this);
+      _log.log("AbstractGlobalModel.saveFileAs called on " + this);
       File oldFile = getRawFile();
       // Update _packageName since modifiedSinceSaved flag will be set to false
       _packageName = getDocument().getPackageName();
@@ -3258,8 +3261,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
             if (res.length == 0) { return false; /* read-only, do not overwrite */ }
           }
           
-          // have FileOps save the file
-//          System.err.println("Calling FileOps.saveFile to save it");
+          _log.log("Calling FileOps.saveFile to save " + file);
+          _log.log("shouldUpdateDocumentState() = " + com.shouldUpdateDocumentState());
           FileOps.saveFile(new FileOps.DefaultFileSaver(file) {
             /** Only runs in event thread so no read lock is necessary. */
             public void saveTo(OutputStream os) throws IOException {
@@ -3475,18 +3478,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         _log.log("_locateClassFile() failed for " + this + " because getQualifedClassName returned ClassNotFound");
         return FileOps.NULL_FILE;  /* No source class name */ 
       }
-//      _log.log("In _locateClassFile, className = " + className);
+      _log.log("In _locateClassFile, className = " + className);
       String ps = System.getProperty("file.separator");
       // replace periods with the System's file separator
       className = StringOps.replace(className, ".", ps);
       String fileName = className + ".class";
       
-//      _log.log("In _locateClassFile, classfileName = " + fileName);
+      _log.log("In _locateClassFile, classfileName = " + fileName);
       
       // Check source root set (open files)
       ArrayList<File> roots = new ArrayList<File>();
       
-//      _log.log("build directory = " + getBuildDirectory());
+      _log.log("In _locateClassFile, build directory = " + getBuildDirectory());
       
       File buildDir = getBuildDirectory();
       

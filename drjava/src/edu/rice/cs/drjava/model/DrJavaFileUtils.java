@@ -67,7 +67,6 @@ public class DrJavaFileUtils  {
   public static String getSuggestedFileExtension() {
     return OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL)];
   }
-
   
   /** .java --> true
     * .scala --> true
@@ -119,22 +118,23 @@ public class DrJavaFileUtils  {
     return isProjectFile(fileName);
   }
 
-  /** getFileWithDifferentExt("A.java", ".java", ".dj") --> "A.dj"
-    * @return matching file with extension dest for a file with extension source. */
-  public static String getFileWithDifferentExt(String fileName, String source, String dest) {
-    if (fileName.endsWith(source)) {
-      return fileName.substring(0, fileName.lastIndexOf(source)) + dest;
-    }
-    else return fileName;
-  }
-
-  /** getFileWithDifferentExt(new File("A.java"), ".java", ".dj") ~= new File("A.dj")
-    * @return matching file with extension dest for a file with extension source. */
-  public static File getFileWithDifferentExt(File f, String source, String dest) {
-    File canonicalFile = IOUtil.attemptCanonicalFile(f);
-    String fileName = canonicalFile.getPath();
-    return new File(getFileWithDifferentExt(fileName, source, dest));
-  }
+  // Language levels processing disabled
+//  /** getFileWithDifferentExt("A.java", ".java", ".dj") --> "A.dj"
+//    * @return matching file with extension dest for a file with extension source. */
+//  public static String getFileWithDifferentExt(String fileName, String source, String dest) {
+//    if (fileName.endsWith(source)) {
+//      return fileName.substring(0, fileName.lastIndexOf(source)) + dest;
+//    }
+//    else return fileName;
+//  }
+//
+//  /** getFileWithDifferentExt(new File("A.java"), ".java", ".dj") ~= new File("A.dj")
+//    * @return matching file with extension dest for a file with extension source. */
+//  public static File getFileWithDifferentExt(File f, String source, String dest) {
+//    File canonicalFile = IOUtil.attemptCanonicalFile(f);
+//    String fileName = canonicalFile.getPath();
+//    return new File(getFileWithDifferentExt(fileName, source, dest));
+//  }
    
   /** Returns the relative directory (from the source root) that the source file with this qualifed name will be in, 
     * given its package. Returns the empty string for classes without packages.

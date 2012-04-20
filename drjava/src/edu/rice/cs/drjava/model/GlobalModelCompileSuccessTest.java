@@ -51,16 +51,16 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
   /** Tests calling compileAll with different source roots works.
    */
   public void testCompileAllDifferentSourceRoots() throws BadLocationException, IOException, InterruptedException {
-//    System.out.println("testCompileAllDifferentSourceRoots()");
+    System.err.println("testCompileAllDifferentSourceRoots() compiler =" + _name());
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
     aDir.mkdir();
     bDir.mkdir();
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
-    final File file = new File(aDir, "DrJavaTestFoo.java");
+    final File file = new File(aDir, "DrScalaTestFoo.scala");
     saveFile(doc, new FileSelector(file));
     OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
-    final File file2 = new File(bDir, "DrJavaTestBar.java");
+    final File file2 = new File(bDir, "DrSclaaTestBar.scala");
     saveFile(doc2, new FileSelector(file2));
     
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
@@ -76,9 +76,9 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     listener.checkCompileOccurred();
 
     // Make sure .class exists for both files
-    File compiled = classForJava(file, "DrJavaTestFoo");
+    File compiled = classForScala(file, "DrScalaTestFoo");
     assertTrue(_name() + "Foo Class file doesn't exist after compile", compiled.exists());
-    File compiled2 = classForJava(file2, "DrJavaTestBar");
+    File compiled2 = classForScala(file2, "DrSclaTestBar");
     assertTrue(_name() + "Bar Class file doesn't exist after compile", compiled2.exists());
     _model.removeListener(listener);
   }
@@ -97,7 +97,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
 //    System.out.println("testCompileClasspathOKDefaultPackage()");
     // Create/compile foo, assuming it works
     OpenDefinitionsDocument doc1 = setupDocument(FOO_PACKAGE_AS_PART_OF_FIELD);
-    final File fooFile = new File(_tempDir, "DrJavaTestFoo.java");
+    final File fooFile = new File(_tempDir, "DrScalaTestFoo.scala");
     
     saveFile(doc1, new FileSelector(fooFile));
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
@@ -111,7 +111,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     _model.removeListener(listener);
 
     OpenDefinitionsDocument doc2 = setupDocument(FOO2_EXTENDS_FOO_TEXT);
-    final File foo2File = new File(_tempDir, "DrJavaTestFoo2.java");
+    final File foo2File = new File(_tempDir, "DrScalaTestFoo2.scala");
     saveFile(doc2, new FileSelector(foo2File));
 
     CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener();
@@ -125,7 +125,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     listener2.checkCompileOccurred();
 
     // Make sure .class exists
-    File compiled = classForJava(foo2File, "DrJavaTestFoo2");
+    File compiled = classForScala(foo2File, "DrScalaTestFoo2");
     assertTrue(_name() + "Class file doesn't exist after compile",
                compiled.exists());
     _model.removeListener(listener2);
@@ -147,8 +147,8 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
 
     // Create/compile foo, assuming it works
     // foo must be public and in DrJavaTestFoo.java!
-    OpenDefinitionsDocument doc1 = setupDocument("package a;\n" + "public " + FOO_TEXT);
-    final File fooFile = new File(aDir, "DrJavaTestFoo.java");
+    OpenDefinitionsDocument doc1 = setupDocument("package a\n" + FOO_TEXT);
+    final File fooFile = new File(aDir, "DrScalaTestFoo.scala");
 //    System.err.println("fooFile = " + fooFile.getCanonicalPath());
     saveFile(doc1, new FileSelector(fooFile));
     // _packageName must be updated on save
@@ -168,8 +168,8 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     _model.removeListener(listener);
     
     OpenDefinitionsDocument doc2 =
-      setupDocument("package b;\nimport a.DrJavaTestFoo;\n" + FOO2_EXTENDS_FOO_TEXT);
-    final File foo2File = new File(bDir, "DrJavaTestFoo2.java");
+      setupDocument("package b\nimport a.ScalaTestFoo\n" + FOO2_EXTENDS_FOO_TEXT);
+    final File foo2File = new File(bDir, "DrScalaTestFoo2.scala");
 //    System.err.println("foo2File = " + foo2File.getCanonicalPath());
     saveFile(doc2, new FileSelector(foo2File));
     // _packageName must be updated on save
@@ -189,7 +189,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     _model.removeListener(listener2);
 
     // Make sure .class exists
-    File compiled = classForJava(foo2File, "DrJavaTestFoo2");
+    File compiled = classForScala(foo2File, "DrScalaTestFoo2");
     assertTrue(_name() + "Class file doesn't exist after compile",
                compiled.exists());
   }

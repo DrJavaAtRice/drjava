@@ -765,7 +765,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   
   /** Create a new temporary file in _tempDir. */
   protected File tempFile(String fileName) throws IOException {
-    File f =  File.createTempFile(fileName, ".java", _tempDir).getCanonicalFile();
+    File f =  File.createTempFile(fileName, ".scala", _tempDir).getCanonicalFile();
     f.deleteOnExit();
     return f;
   }
@@ -832,12 +832,12 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _log.log("gotoFileUnderCursor completed");
   }
   
-  /** Tests that "go to file under cursor" works if unique after appending ".java" */
+  /** Tests that "go to file under cursor" works if unique after appending ".scala" */
   public void testGotoFileUnderCursorAppendJava() throws IOException {
     String user = System.getProperty("user.name");
-    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
+    _tempDir = IOUtil.createAndMarkTempDirectory("DrScala-test-" + user, "");
     
-    final File goto1_file = new File(_tempDir, "GotoFileUnderCursor2Test.java");
+    final File goto1_file = new File(_tempDir, "GotoFileUnderCursor2Test.scala");
     final String goto1_string = "GotoFileUnderCursor2";
     IOUtil.writeStringToFile(goto1_file, goto1_string);
     goto1_file.deleteOnExit();

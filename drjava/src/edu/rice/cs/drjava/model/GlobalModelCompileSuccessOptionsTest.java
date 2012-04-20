@@ -87,8 +87,8 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     assertCompileErrorsPresent(_name(), false);
     
     // Make sure .class exists
-    File compiled = classForJava(file, "DrJavaTestFoo");
-    File compiled2 = classForJava(file, "DrJavaTestFoo2");
+    File compiled = classForScala(file, "DrJavaTestFoo");
+    File compiled2 = classForScala(file, "DrJavaTestFoo2");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());
     assertTrue(_name() + "Class file should exist after compile", compiled2.exists());
   }
@@ -113,33 +113,34 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
       
       assertCompileErrorsPresent(_name(), true);
       listener.checkCompileOccurred();
-      File compiled = classForJava(file, "DrJavaTestFoo");
-      assertTrue(_name() + "Class file exists after compile?!", !compiled.exists());
+      File compiled = classForScala(file, "DrScalaTestFoo");
+      assertTrue(_name() + "Class file exists after compile?!", ! compiled.exists());
       _model.removeListener(listener);
       
-      
-      // Only run assertions test in 1.4
-      String version = System.getProperty("java.version");
-      if ((version != null) && ("1.4.0".compareTo(version) <= 0)) {
-        // Turn on assert support
-        DrJava.getConfig().setSetting(OptionConstants.RUN_WITH_ASSERT,
-                                      Boolean.TRUE);
-        
-        CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener();
-        _model.addListener(listener2);
-        listener2.compile(doc);
-        if (_model.getCompilerModel().getNumErrors() > 0) {
-          fail("compile failed: " + getCompilerErrorString());
-        }
-        _model.removeListener(listener2);
-        assertCompileErrorsPresent(_name(), false);
-        listener2.checkCompileOccurred();
-        
-        // Make sure .class exists
-        compiled = classForJava(file, "DrJavaTestFoo");
-        assertTrue(_name() + "Class file doesn't exist after compile",
-                   compiled.exists());
-      }
+
+      // not releant to DrScala
+//      // Only run assertions test in 1.4
+//      String version = System.getProperty("java.version");
+//      if ((version != null) && ("1.4.0".compareTo(version) <= 0)) {
+//        // Turn on assert support
+//        DrJava.getConfig().setSetting(OptionConstants.RUN_WITH_ASSERT,
+//                                      Boolean.TRUE);
+//        
+//        CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener();
+//        _model.addListener(listener2);
+//        listener2.compile(doc);
+//        if (_model.getCompilerModel().getNumErrors() > 0) {
+//          fail("compile failed: " + getCompilerErrorString());
+//        }
+//        _model.removeListener(listener2);
+//        assertCompileErrorsPresent(_name(), false);
+//        listener2.checkCompileOccurred();
+//        
+//        // Make sure .class exists
+//        compiled = classForJava(file, "DrJavaTestFoo");
+//        assertTrue(_name() + "Class file doesn't exist after compile",
+//                   compiled.exists());
+//      }
     }
   }
 
@@ -155,7 +156,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     if (_isGenericCompiler()) {
       
       OpenDefinitionsDocument doc = setupDocument(FOO_WITH_GENERICS);
-      final File file = new File(_tempDir, "DrJavaTestFooGenerics.java");
+      final File file = new File(_tempDir, "DrScalaTestFooGenerics.java");
       saveFile(doc, new FileSelector(file));
       
       CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
@@ -171,7 +172,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
       _model.removeListener(listener);
       
       // Make sure .class exists
-      File compiled = classForJava(file, "DrJavaTestFooGenerics");
+      File compiled = classForScala(file, "DrScalaTestFooGenerics");
       assertTrue(_name() + "FooGenerics Class file doesn't exist after compile", compiled.exists());
     }
   }

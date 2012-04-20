@@ -43,6 +43,8 @@ import javax.swing.text.Position;
 
 import edu.rice.cs.drjava.model.compiler.*;
 
+import edu.rice.cs.util.Log;
+
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Tests to ensure that compilation fails when expected, and that the errors
@@ -54,35 +56,37 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   
-  private static final String FOO_MISSING_CLOSE_TEXT = "class DrJavaTestFoo {";
-  private static final String BAR_MISSING_SEMI_TEXT = "class DrJavaTestBar { int x }";
-  private static final String FOO_PACKAGE_AFTER_IMPORT = "import java.util.*;\npackage a;\n" + FOO_TEXT;
-  private static final String FOO_PACKAGE_INSIDE_CLASS = "class DrJavaTestFoo { package a; }";
-  private static final String FOO_PACKAGE_AS_FIELD = "class DrJavaTestFoo { int package; }";
-  private static final String FOO_PACKAGE_AS_FIELD_2 = "class DrJavaTestFoo { int package = 5; }";
-  private static final String BAR_MISSING_SEMI_TEXT_MULTIPLE_LINES =
-    "class DrJavaTestFoo {\n  int a = 5;\n  int x\n }";
+  public static final Log _log  = new Log("GlobalModel.txt", true);
+  
+  private static final String FOO_MISSING_CLOSE_TEXT = "class DrScalaTestFoo {\n\n";
+  private static final String BAR_MISSING_DECLARATION_KEYWORD = "class DrScalaTestBar { zz }";
+  private static final String FOO_PACKAGE_AFTER_IMPORT = "import java.util._ \npackage a\n" + FOO_TEXT;
+  private static final String FOO_PACKAGE_INSIDE_CLASS = "class DrScalaTestFoo { package a }";
+  private static final String FOO_PACKAGE_AS_FIELD = "class DrScalaTestFoo { var package: Int }";
+  private static final String FOO_PACKAGE_AS_FIELD_2 = "class DrScalaTestFoo { val package: Int = 5; }";
+  private static final String BAR_MISSING_DECLARATION_KEYWORD_MULTIPLE_LINES =
+    "class DrScalaTestFoo {\n  val a = 5\n  var x: Int\n }";
   protected static final String COMPILER_ERRORS_2872797_TEXT =
-    "/**\n"+
-    " * This is a simple class that really doesn't do anything.\n"+
-    " * We'll use it to explore the kinds of error messages that\n"+
-    " * the compiler will report when it encounters errors in \n"+
-    " * Java source code.\n"+
-    " */\n"+
-    "public class CompilerErrors {\n"+
-    "\n"+
-    "  /**\n"+
-    "   * Some shared storage, an instance variable.\n"+
-    "   */\n"+
-    "  int shared = 5;\n"+
-    "  \n"+
-    "  /**\n"+
-    "   * a sample method. This method has no parameters\n"+
-    "   * and no return value.\n"+
-    "   */\n"+
-    "  public void sampleMethod() {\n"+
-    "    int x = 20;\n"+
-    "    System.out.println(\"This is sampleMethod. x is \" + x);\n"+
+    "/**\n" +
+    " * This is a simple class that really doesn't do anything.\n" +
+    " * We'll use it to explore the kinds of error messages that\n" +
+    " * the compiler will report when it encounters errors in \n" +
+    " * Scala source code.\n" +
+    " */\n" +
+    "class CompilerErrors {\n" +
+    "\n" +
+    "  /**\n" +
+    "   * Some shared storage, an instance variable.\n" +
+    "   */\n" +
+    "  var shared = 5;\n" +
+    "  \n" +
+    "  /**\n" +
+    "   * a sample method. This method has no parameters\n" +
+    "   * and no return value.\n" +
+    "   */\n" +
+    "  def sampleMethod() {\n" +
+    "    val x = 20;\n" +
+    "    println(\"This is sampleMethod. x is \" + x)\n" +
     "  }\n"; // error, end of file, } missing
   
 //  /** Overrides setUp in order to save the Untitled file that resides in the model currently, so that saveBeforeCompile will not cause a failure*/
@@ -120,17 +124,19 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   public void testCompileAllFailsDifferentSourceRoots() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
     
+    _log.log("Starting testCompileAllFailsDifferentSourceRoots");
+    
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
     aDir.mkdir();
     bDir.mkdir();
     
     OpenDefinitionsDocument doc1 = setupDocument(FOO_MISSING_CLOSE_TEXT);
-    final File file1 = new File(aDir, "DrJavaTestFoo.java");
+    final File file1 = new File(aDir, "DrScalaTestFoo.scala");
     saveFile(doc1, new FileSelector(file1));  // runs synchronously in event thread
     
-    OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_SEMI_TEXT);
-    final File file2 = new File(bDir, "DrJavaTestBar.java");
+    OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_DECLARATION_KEYWORD);
+    final File file2 = new File(bDir, "DrScalaTestBar.scala");
     saveFile(doc2, new FileSelector(file2));  // runs synchronously in event thread
     
     CompileShouldFailListener listener = new CompileShouldFailListener();
@@ -141,17 +147,21 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     cm.compileAll();
     listener.waitCompileDone();
     
+    System.err.println("Number of errors = " + cm.getNumErrors());
+    
     assertCompileErrorsPresent(_name(), true);
 //    System.err.println(cm.getCompilerErrorModel());
     assertEquals("Should have 2 compiler errors", 2, cm.getNumErrors());
     listener.checkCompileOccurred();
     
     // Make sure .class does not exist for both files
-    File compiled1 = classForJava(file1, "DrJavaTestFoo");
+    File compiled1 = classForScala(file1, "DrScalaTestFoo");
     assertEquals(_name() + "Class file exists after failing compile (1)", false, compiled1.exists());
-    File compiled2 = classForJava(file2, "DrJavaTestBar");
+    File compiled2 = classForScala(file2, "DrScalaTestBar");
     assertEquals(_name() + "Class file exists after failing compile (2)", false, compiled2.exists());
     _model.removeListener(listener);
+    
+    _log.log("testCompileAllFailsDifferentSourceRoots completed");
     
     debug.logEnd();
   }
@@ -161,6 +171,8 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     */
   public void testCompilePackageAsField() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
+    
+    _log.log("Starting testCompilePackageAsField");
     
     OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD);
     final File file = tempFile();
@@ -177,9 +189,11 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     // There better be an error since "package" can not be an identifier!
     assertCompileErrorsPresent(_name(), true);
     
-    File compiled = classForJava(file, "DrJavaTestFoo");
+    File compiled = classForScala(file, "DrScalaTestFoo");
     assertEquals(_name() + "Class file exists after failing compile", false, compiled.exists());
     _model.removeListener(listener);
+    
+    _log.log("testCompilePackageAsField completed");
     
     debug.logEnd();
   }
@@ -189,6 +203,8 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     */
   public void testCompilePackageAsField2() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
+    
+    _log.log("Starting testCompilePackageAsField2");
     
     final OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD_2);
     final File file = tempFile();
@@ -205,9 +221,11 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     // There better be an error since "package" can not be an identifier!
     assertCompileErrorsPresent(_name(), true);
     
-    File compiled = classForJava(file, "DrJavaTestFoo");
+    File compiled = classForScala(file, "DrScalaTestFoo");
     assertEquals(_name() + "Class file exists after failing compile", false, compiled.exists());
     _model.removeListener(listener);
+    
+    _log.log("testCompilePackageAsField2 completed");
     
     debug.logEnd();
   }
@@ -215,6 +233,8 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   /** Tests compiling an invalid file and checks to make sure the class file was not created.  */
   public void testCompileMissingCloseCurly() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
+    
+    _log.log("Starting testCompileMissingCloseCurly");
     
     final OpenDefinitionsDocument doc = setupDocument(FOO_MISSING_CLOSE_TEXT);
     final File file = tempFile();
@@ -229,9 +249,11 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     assertCompileErrorsPresent(_name(), true);
     listener.checkCompileOccurred();
     
-    File compiled = classForJava(file, "DrJavaTestFoo");
-    assertTrue(_name() + "Class file exists after compile?!", !compiled.exists());
+    File compiled = classForScala(file, "DrScalaTestFoo");
+    assertTrue(_name() + "Class file exists after compile?!", ! compiled.exists());
     _model.removeListener(listener);
+    
+    _log.log("testCompileMissingCloseCurly completed");
     
     debug.logEnd();
   }
@@ -241,16 +263,18 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     InterruptedException {
     debug.logStart();
     
+    _log.log("Starting testCompileWithPackageStatementInsideClass");
+    
     // Create temp file
     File baseTempDir = tempDirectory();
     File subdir = new File(baseTempDir, "a");
-    File fooFile = new File(subdir, "DrJavaTestFoo.java");
-    File compiled = classForJava(fooFile, "DrJavaTestFoo");
+    File fooFile = new File(subdir, "DrScalaTestFoo.scala");
+    File compiled = classForScala(fooFile, "DrScalaTestFoo");
     
     // Now make subdirectory a
     subdir.mkdir();
     
-    // Save the footext to DrJavaTestFoo.java in the subdirectory
+    // Save the footext to DrScalaTestFoo.scala in the subdirectory
     OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_INSIDE_CLASS);
     saveFileAs(doc, new FileSelector(fooFile));
     
@@ -271,6 +295,8 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     assertEquals("CompilerErrorModel has errors after reset", 0, cem.getNumErrors());
     _model.removeListener(listener);
     
+    _log.log("testCompileWithPackageStatementInsideClass completed");
+    
     debug.logEnd();
   }
   
@@ -282,15 +308,17 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   public void testCompileFailsCorrectLineNumbers() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
     
+    _log.log("Starting testCompileFailsCorrectLineNumbers");
+    
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
     aDir.mkdir();
     bDir.mkdir();
     OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AFTER_IMPORT);
-    final File file = new File(aDir, "DrJavaTestFoo.java");
+    final File file = new File(aDir, "DrScalaTestFoo.scala");
     saveFile(doc, new FileSelector(file));
-    OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_SEMI_TEXT_MULTIPLE_LINES);
-    final File file2 = new File(bDir, "DrJavaTestBar.java");
+    OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_DECLARATION_KEYWORD_MULTIPLE_LINES);
+    final File file2 = new File(bDir, "DrScalaTestBar.scala");
     saveFile(doc2, new FileSelector(file2));
     
     // do compile -- should fail since package decl is not valid!
@@ -322,6 +350,8 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
                p1.getOffset() <= 20 && p1.getOffset() <= 29);
     assertTrue("location of error should be after 34 (line 3 or 4)", p2.getOffset() >= 34);
     
+    _log.log("testCompileFailsCorrectLineNumbers completed");
+    
     debug.logEnd();
   }
   
@@ -329,9 +359,11 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   public void testCompileEndWhileParsing() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
     
+    _log.log("Starting testCompileEndWhileParsing");
+    
     final OpenDefinitionsDocument doc = setupDocument(COMPILER_ERRORS_2872797_TEXT);
     final File dir = tempDirectory();
-    final File file = new File(dir, "CompilerErrors.java");
+    final File file = new File(dir, "CompilerErrors.scala");
     saveFile(doc, new FileSelector(file));
     
     CompileShouldFailListener listener = new CompileShouldFailListener();
@@ -343,11 +375,12 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     assertCompileErrorsPresent(_name(), true);
     listener.checkCompileOccurred();
     
-    File compiled = classForJava(file, "CompilerErrors");
-    assertTrue(_name() + "Class file exists after compile?!", !compiled.exists());
+    File compiled = classForScala(file, "CompilerErrors");
+    assertTrue(_name() + "Class file exists after compile?!", ! compiled.exists());
     _model.removeListener(listener);
 
     file.delete();
+    _log.log("testCompileEndWhileParsing completed");
     debug.logEnd();
   }
 }

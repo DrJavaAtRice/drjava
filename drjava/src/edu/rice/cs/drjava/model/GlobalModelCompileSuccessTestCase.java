@@ -47,12 +47,12 @@ import edu.rice.cs.plt.reflect.JavaVersion;
  */
 public abstract class GlobalModelCompileSuccessTestCase extends GlobalModelTestCase {
 
-  protected static final String FOO_PACKAGE_AS_PART_OF_FIELD = "class DrJavaTestFoo { int cur_package = 5; }";
-  protected static final String FOO2_EXTENDS_FOO_TEXT = "class DrJavaTestFoo2 extends DrJavaTestFoo {}";
-  protected static final String FOO_NON_PUBLIC_CLASS_TEXT = "class DrJavaTestFoo {} class Foo{}";
-  protected static final String FOO2_REFERENCES_NON_PUBLIC_CLASS_TEXT = "class DrJavaTestFoo2 extends Foo{}";
-  protected static final String FOO_WITH_ASSERT = "class DrJavaTestFoo { void foo() { assert true; } }";
-  protected static final String FOO_WITH_GENERICS = "class DrJavaTestFooGenerics<T> {}";
+  protected static final String FOO_PACKAGE_AS_PART_OF_FIELD = "class DrScalaTestFoo { val cur_package = 5; }";
+  protected static final String FOO2_EXTENDS_FOO_TEXT = "class DrScalaTestFoo2 extends DrJavaTestFoo {}";
+  protected static final String FOO_NON_PUBLIC_CLASS_TEXT = "class DrScalaTestFoo {} class Foo{}";
+  protected static final String FOO2_REFERENCES_NON_PUBLIC_CLASS_TEXT = "class DrScalaTestFoo2 extends Foo{}";
+  protected static final String FOO_WITH_ASSERT = "class DrScalaTestFoo { def foo() { assert(true, \"a vacuous assert failed!\") } }";
+  protected static final String FOO_WITH_GENERICS = "class DrScalaTestFooGenerics[T] {}";
 
 //  /** Overrides {@link TestCase#runBare} to interactively run this test case for each compiler, without resetting the 
 //    * interactions JVM.  This method is called once per test method, and it magically invokes the method.

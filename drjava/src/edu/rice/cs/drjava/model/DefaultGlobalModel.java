@@ -49,9 +49,10 @@ import java.util.TreeMap;
 
 import edu.rice.cs.drjava.DrJava;
 
+import edu.rice.cs.drjava.config.BooleanOption;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
-import edu.rice.cs.drjava.config.BooleanOption;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
@@ -194,8 +195,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _debugger = null;
     _javadocModel = null;
     for (JDKToolsLibrary t : tools) {
-      // drop check for support of JAVA_5; Scala compilers do NOT
-      if (t.compiler().isAvailable() /* && t.version().supports(JavaVersion.JAVA_5) */) {
+      // check for support of JAVA_6; Scala 2.9.* requires Java 7 in some cases but Mac OS X does not yet offer Java 7. */
+      if (t.compiler().isAvailable() && t.version().supports(JavaVersion.JAVA_6)) {
           compilers.add(t.compiler());
       }
       if (_debugger == null && t.debugger().isAvailable()) { _debugger = t.debugger(); }
@@ -252,10 +253,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   // If the descriptor is something different than JDKDescriptor.NONE, then this pair will always
   // return false for equals(), except if it is compared to the identical pair.
   private static class LibraryKey implements Comparable<LibraryKey> {    
-    public static final int PRIORITY_BUILTIN = 0;
+    public static final int PRIORITY_BUILTIN = 0;  // Other than Scala
     public static final int PRIORITY_SEARCH = 1;
     public static final int PRIORITY_RUNTIME = 2;
     public static final int PRIORITY_CONFIG = 3;
+    public static final int PRIORITY_SCALA = 4;
     protected final int _priority; // 0 = search, 1 = runtime, 2 = config
     protected final JavaVersion.FullVersion _first;
     protected final JDKDescriptor _second;
@@ -329,54 +331,56 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   private Iterable<JDKToolsLibrary> findLibraries() {
     // Order to return: config setting, runtime (if different version), from search (if different versions)
     
-    // We could give priority to libraries that have both available compilers and debuggers, but since this will 
-    // almost always be true, it seems like more trouble than it is worth
+    // We give priority to libraries that support Scala.
     
-    // map is sorted by version, lowest-to-highest
+    // map is sorted first by Scala and second by version, lowest-to-highest
     Map<LibraryKey, JDKToolsLibrary> results = new TreeMap<LibraryKey, JDKToolsLibrary>();
     
-    JarJDKToolsLibrary.msg("Creating DefaultGlobalModel; " + JavaVersion.CURRENT + " is running");
+    JarJDKToolsLibrary._log.log("Creating DefaultGlobalModel; " + JavaVersion.CURRENT + " is running");
     File configTools = DrJava.getConfig().getSetting(JAVAC_LOCATION);
     if (configTools != FileOps.NULL_FILE) {
       JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this, JDKDescriptor.NONE);
       if (fromConfig.isValid()) { 
-        JarJDKToolsLibrary.msg("From config: " + fromConfig);
+        JarJDKToolsLibrary._log.log("From config: " + fromConfig);
         results.put(getLibraryKey(LibraryKey.PRIORITY_CONFIG, fromConfig), fromConfig);
       }
-      else { JarJDKToolsLibrary.msg("From config: invalid " + fromConfig); }
+      else { JarJDKToolsLibrary._log.log("From config: invalid " + fromConfig); }
     }
-    else { JarJDKToolsLibrary.msg("From config: not set"); }
+    else { JarJDKToolsLibrary._log.log("From config: not set"); }
     
     Iterable<JDKToolsLibrary> allFromRuntime = JDKToolsLibrary.makeFromRuntime(this);
 
     for(JDKToolsLibrary fromRuntime: allFromRuntime) {
       if (fromRuntime.isValid()) {
-        if (!results.containsKey(getLibraryKey(LibraryKey.PRIORITY_RUNTIME, fromRuntime))) {
-          JarJDKToolsLibrary.msg("From runtime: "+fromRuntime);
+        if (! results.containsKey(getLibraryKey(LibraryKey.PRIORITY_RUNTIME, fromRuntime))) {
+//          JarJDKToolsLibrary._log.log("From runtime: "+fromRuntime);
           results.put(getLibraryKey(LibraryKey.PRIORITY_RUNTIME, fromRuntime), fromRuntime);
         }
-        else { JarJDKToolsLibrary.msg("From runtime: duplicate "+fromRuntime); }
+//        else { JarJDKToolsLibrary._log.log("From runtime: duplicate "+fromRuntime); }
       }
-      else { JarJDKToolsLibrary.msg("From runtime: invalid "+fromRuntime); }
+//      else { JarJDKToolsLibrary._log.log("From runtime: invalid "+fromRuntime); }
     }
     
     Iterable<JarJDKToolsLibrary> fromSearch = JarJDKToolsLibrary.search(this);
     for (JDKToolsLibrary t : fromSearch) {
       JavaVersion.FullVersion tVersion = t.version();
-      JarJDKToolsLibrary.msg("From search: "+t);
-      JavaVersion.FullVersion coarsenedVersion = coarsenVersion(tVersion);
-      JarJDKToolsLibrary.msg("\ttVersion: "+tVersion+" "+tVersion.vendor());
-      JarJDKToolsLibrary.msg("\tcoarsenedVersion: "+coarsenedVersion+" "+coarsenedVersion.vendor());
+//      JarJDKToolsLibrary._log.log("From search: "+t);
+//      JavaVersion.FullVersion coarsenedVersion = coarsenVersion(tVersion);
+//      JarJDKToolsLibrary._log.log("\ttVersion: "+tVersion+" "+tVersion.vendor());
+//      JarJDKToolsLibrary._log.log("\tcoarsenedVersion: "+coarsenedVersion+" "+coarsenedVersion.vendor());
       // give a lower priority to built-in compilers
-      int priority = (edu.rice.cs.util.FileOps.getDrJavaFile().equals(tVersion.location()))?LibraryKey.PRIORITY_BUILTIN:LibraryKey.PRIORITY_SEARCH;
+      int priority = (edu.rice.cs.util.FileOps.getDrJavaFile().equals(tVersion.location())) ? 
+        LibraryKey.PRIORITY_BUILTIN :
+        LibraryKey.PRIORITY_SEARCH;
+      if (t.compiler().getSuggestedFileExtension().equals(OptionConstants.SCALA_FILE_EXTENSION)) priority = LibraryKey.PRIORITY_SCALA;
       if (!results.containsKey(getLibraryKey(priority, t))) {
-        JarJDKToolsLibrary.msg("\tadded");
+//        JarJDKToolsLibrary._log.log("\tadded");
         results.put(getLibraryKey(priority, t), t);
       }
-      else { JarJDKToolsLibrary.msg("\tduplicate"); }
+//      else { JarJDKToolsLibrary._log.log("\tduplicate"); }
     }
     
-    JarJDKToolsLibrary.msg("compiler results = " + results.values());
+//    JarJDKToolsLibrary._log.log("compiler results = " + results.values());
     return IterUtil.reverse(results.values());
   }
   

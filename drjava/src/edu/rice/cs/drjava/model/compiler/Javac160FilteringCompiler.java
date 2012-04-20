@@ -60,7 +60,7 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 public abstract class Javac160FilteringCompiler extends JavacCompiler {
   protected final boolean _filterExe;
   protected final File _tempJUnit;
-  protected static final String PREFIX = "drjava-junit";
+  protected static final String PREFIX = "drscala-junit";
   protected static final String SUFFIX = ".jar";  
   
   protected Javac160FilteringCompiler(JavaVersion.FullVersion version,

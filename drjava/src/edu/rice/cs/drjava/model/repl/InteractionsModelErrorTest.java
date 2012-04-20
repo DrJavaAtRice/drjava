@@ -83,26 +83,26 @@ import static edu.rice.cs.drjava.model.repl.InteractionsModelTest.IncompleteInpu
   */
 public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   protected static final String UNARY_FUN_NON_PUBLIC_INTERFACE_TEXT = 
-    "interface UnaryFun {\n"+
-    "  public Object apply(final Object arg);\n"+
+    "trait UnaryFun {\n"+
+    "  def apply(arg: Object): Object\n"+
     "}";
   protected static final String UNARY_FUN_PUBLIC_INTERFACE_TEXT = 
-    "public interface UnaryFun {\n"+
-    "  public Object apply(final Object arg);\n"+
+    "trait UnaryFun {\n"+
+    "  def apply(arg: Object): Object\n"+
     "}";
 
   protected static final String UNARY_FUN_NON_PUBLIC_CLASS_TEXT = 
     "abstract class UnaryFun {\n"+
-    "  public abstract Object apply(final Object arg);\n"+
+    "  def apply(arg: Object): Object\n"+
     "}";
   protected static final String UNARY_FUN_PUBLIC_CLASS_TEXT = 
-    "public abstract class UnaryFun {\n"+
-    "  public abstract Object apply(final Object arg);\n"+
+    "abstract class UnaryFun {\n"+
+    "  def apply(arg: Object): Object\n"+
     "}";
   protected static final String CLASS_IN_PACKAGE_CLASS_TEXT = 
-    "package foo;\n"+
-    "public class Bar {\n"+
-    "  public void run() { }\n"+
+    "package foo\n"+
+    "class Bar {\n"+
+    "  def run() { }\n"+
     "}";
 
   private volatile InteractionsPaneOptions _interpreterOptions;
@@ -145,39 +145,40 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     return "compiler=" + _model.getCompilerModel().getActiveCompiler().getName() + ": ";
   }
 
-  /** Tests that we get the correct 'cannot access its superinterface' error for non-public classes. */
-  @SuppressWarnings("unchecked")
-  public void testInterpretExtendNonPublic()
-    throws BadLocationException, IOException, InterruptedException, InterpreterException {
-    _log.log("testInterpretExtendNonPublic started");
-    
-    OpenDefinitionsDocument doc = setupDocument(UNARY_FUN_NON_PUBLIC_INTERFACE_TEXT);
-    final File file = tempFile();
-    saveFile(doc, new FileSelector(file));
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
-    _model.addListener(listener);
-    listener.compile(doc);
-    if (_model.getCompilerModel().getNumErrors() > 0) {
-      fail("compile failed: " + getCompilerErrorString());
-    }
-    listener.checkCompileOccurred();
-    _model.removeListener(listener);
-    assertCompileErrorsPresent(_name(), false);
-    
-    // Make sure .class exists
-    File compiled = classForJava(file, "UnaryFun");
-    assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
-    
-    _classPathManager.addBuildDirectoryCP(compiled.getParentFile());
-    
-    try {
-      _interpreter.interpret("UnaryFun f = new UnaryFun() { Object apply(Object arg) { return (Integer)arg * (Integer)arg; }}");
-      fail("Should fail with 'cannot access its superinterface' exception.");
-    }
-    catch(edu.rice.cs.dynamicjava.interpreter.CheckerException ce) {
-      assertTrue(ce.getMessage().indexOf("cannot access its superinterface")>=0);
-    }
-  }
+    // Not applicable in Scala
+//  /** Tests that we get the correct 'cannot access its superinterface' error for non-public classes. */
+//  @SuppressWarnings("unchecked")
+//  public void testInterpretExtendNonPublic()
+//    throws BadLocationException, IOException, InterruptedException, InterpreterException {
+//    _log.log("testInterpretExtendNonPublic started");
+//    
+//    OpenDefinitionsDocument doc = setupDocument(UNARY_FUN_NON_PUBLIC_INTERFACE_TEXT);
+//    final File file = tempFile();
+//    saveFile(doc, new FileSelector(file));
+//    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
+//    _model.addListener(listener);
+//    listener.compile(doc);
+//    if (_model.getCompilerModel().getNumErrors() > 0) {
+//      fail("compile failed: " + getCompilerErrorString());
+//    }
+//    listener.checkCompileOccurred();
+//    _model.removeListener(listener);
+//    assertCompileErrorsPresent(_name(), false);
+//    
+//    // Make sure .class exists
+//    File compiled = classForScala(file, "UnaryFun");
+//    assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
+//    
+//    _classPathManager.addBuildDirectoryCP(compiled.getParentFile());
+//    
+//    try {
+//      _interpreter.interpret("UnaryFun f = new UnaryFun() { Object apply(Object arg) { return (Integer)arg * (Integer)arg; }}");
+//      fail("Should fail with 'cannot access its superinterface' exception.");
+//    }
+//    catch(edu.rice.cs.dynamicjava.interpreter.CheckerException ce) {
+//      assertTrue(ce.getMessage().indexOf("cannot access its superinterface")>=0);
+//    }
+//  }
   
   /** Tests that we don't get an error for public classes. */
   @SuppressWarnings("unchecked")
@@ -199,12 +200,12 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     assertCompileErrorsPresent(_name(), false);
     
     // Make sure .class exists
-    File compiled = classForJava(file, "UnaryFun");
+    File compiled = classForScala(file, "UnaryFun");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
     
     _classPathManager.addBuildDirectoryCP(compiled.getParentFile());
     
-    _interpreter.interpret("UnaryFun f = new UnaryFun() { Object apply(Object arg) { return (Integer)arg * (Integer)arg; }}");
+    _interpreter.interpret("UnaryFun f = new UnaryFun() { def apply(arg: Object) = arg.as(Int) * arg.as(Int)}"); // FIX!!
   }
   
   /** Tests that we get the correct 'cannot access its superinterface' error for non-public classes. */
@@ -227,7 +228,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     assertCompileErrorsPresent(_name(), false);
     
     // Make sure .class exists
-    File compiled = classForJava(file, "UnaryFun");
+    File compiled = classForScala(file, "UnaryFun");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
     
     _classPathManager.addBuildDirectoryCP(compiled.getParentFile());
@@ -261,7 +262,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     assertCompileErrorsPresent(_name(), false);
     
     // Make sure .class exists
-    File compiled = classForJava(file, "UnaryFun");
+    File compiled = classForScala(file, "UnaryFun");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
     
     _classPathManager.addBuildDirectoryCP(compiled.getParentFile());
@@ -293,7 +294,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     assertCompileErrorsPresent(_name(), false);
     
     // Make sure .class exists
-    File compiled = classForJava(file, "Bar");
+    File compiled = classForScala(file, "Bar");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
     
     _classPathManager.addBuildDirectoryCP(compiled.getParentFile().getParentFile());

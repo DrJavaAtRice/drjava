@@ -63,7 +63,7 @@ import edu.rice.cs.drjava.model.*;
 
 import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
 
-/** The document model for the definitions pane; it contains a reduced model since it extends AbstractDJDocument. 
+/** The document model for the definitions pane; it contains a reduced model since it extends AbstractDJDocument.
   * @see AbstractDJDocument
   */
 public class DefinitionsDocument extends AbstractDJDocument implements Finalizable<DefinitionsDocument> {
@@ -247,6 +247,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * @return the qualified main class/interface name
     */
   public String getQualifiedClassName() throws ClassNameNotFoundException {
+    _log.log("In getQualifedClassName(), packageName = " + getPackageQualifier() + " mainClassName = " + getMainClassName());
     return getPackageQualifier() + getMainClassName();
   }
   
@@ -305,6 +306,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   private void _setModifiedSinceSave() {
     /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     if (! _isModifiedSinceSave) {
+      _log.log("Setting modification for " + this);
       _isModifiedSinceSave = true;
       if (_odd != null) _odd.documentModified();  // null test required for some unit tests
     }    
@@ -312,6 +314,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   /** Resets the modification state of this document.  Used after a document has been saved or reverted. */
   public void resetModification() {
+    _log.log("Resetting modification for " + this);
     _isModifiedSinceSave = false;
     _undoManager.documentSaved();
     if (_odd != null) _odd.documentReset();  // null test required for some unit tests
@@ -612,7 +615,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return _getEnclosingClassName(pos, qual);
   }
   
-  /** Searches backwards to find the name of the enclosing named class or interface. NB: ignores comments. Only runs in
+  /** Searches backwards to find the name of the enclosing named class, trait or object. NB: ignores comments. Only runs in
     * event thread.
     * WARNING: In long source files and when contained in anonymous inner classes, this function might take a LONG time.
     * @param pos Position to start from
@@ -637,15 +640,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     int curPos = pos;
     
     do {
-//        if (text.charAt(curPos) != '{' || text.charAt(curPos) != '}') ++curPos;
-      
-//        if (oldLog) System.err.println("curPos=" + curPos + " `" +
-//                                       text.substring(Math.max(0,curPos-10), Math.min(text.length(), curPos+1)) + "`");
       
       curPos = findPrevEnclosingBrace(curPos, '{', '}');
       if (curPos == -1) { break; }
       int classPos = _findPrevKeyword(text, "class", curPos);
-      int interPos = _findPrevKeyword(text, "interface", curPos);
+      int traitPos = _findPrevKeyword(text, "trait", curPos);
+      int objectPos = _findPrevKeyword(text, "object", curPos);
+      int interfacePos = _findPrevKeyword(text, "interface", curPos);
+      int enumPos = _findPrevKeyword(text, "enum", curPos);
       int otherPos = findPrevDelimiter(curPos, delims);
       int newPos = -1;
       // see if there's a ) closer by
@@ -664,17 +666,23 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         }
       }
       
-      while (classPos != -1 || interPos != -1 || newPos != -1) {
+      while (classPos != -1 || traitPos != -1 || objectPos != -1 || interfacePos != -1 || enumPos != -1 || newPos != -1) {
         if (newPos != -1) {
           classPos = -1;
-          interPos = -1;
+          traitPos = -1;
+          objectPos = -1;
+          interfacePos = -1;
+          enumPos = -1;
           break;
         }
-        else if (otherPos > classPos && otherPos > interPos) {
+        else if (otherPos > classPos && otherPos > traitPos && otherPos > objectPos && otherPos > interfacePos && otherPos > enumPos) {
           if (text.charAt(otherPos) != '{' || text.charAt(otherPos) != '}') ++otherPos;
           curPos = findPrevEnclosingBrace(otherPos, '{', '}');
           classPos = _findPrevKeyword(text, "class", curPos);
-          interPos = _findPrevKeyword(text, "interface", curPos);
+          traitPos = _findPrevKeyword(text, "trait", curPos);
+          objectPos = _findPrevKeyword(text, "object", curPos);
+          interfacePos = _findPrevKeyword(text, "interface", curPos);
+          enumPos = _findPrevKeyword(text, "enum", curPos);
           otherPos = findPrevDelimiter(curPos, delims);
           newPos = -1;
           // see if there's a ) closer by
@@ -691,15 +699,21 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           }
         }
         else {
-          // either class or interface found first            
-          curPos = Math.max(classPos, Math.max(interPos, newPos));
+          // some form of class found first            
+          curPos = Math.max(classPos, Math.max(traitPos, Math.max(objectPos, Math.max(interfacePos, Math.max(enumPos, newPos)))));
           break;
         }
       }
       
-      if (classPos != -1 || interPos != -1) {
-        if (classPos > interPos) curPos += "class".length();  // class found first
-        else curPos += "interface".length();                  // interface found first
+      if (classPos != -1 || traitPos != -1 || objectPos != -1 || interfacePos != -1 || enumPos != -1) {
+        if (classPos >= 0) classPos+="class".length();
+        if (traitPos >= 0) classPos+="trait".length();
+        if (objectPos >= 0) objectPos+="object".length();
+        if (interfacePos >= 0) interfacePos+="interface".length();
+        if (enumPos >= 0) enumPos+="enum".length();
+        
+        // set curPos to end of closest enclosing class keyword
+        curPos = Math.max(classPos, Math.max(traitPos, Math.max(objectPos, Math.max(interfacePos, enumPos))));
         
         int nameStart = getFirstNonWSCharPos(curPos);
         if (nameStart==-1) { throw new ClassNameNotFoundException("Cannot determine enclosing class name"); }
@@ -776,11 +790,21 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //           System.err.println("\tfirst non-whitespace after class = " + parenStart + " `" + text.charAt(parenStart) + "`");
         if (text.charAt(origParenStart) == '<') {
           parenStart = -1;
-          // might be a generic class
-          int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>');
+          // might be a generic Java class
+          int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>'); 
           if (closePointyBracket != -1) {
             if (text.charAt(closePointyBracket) == '>') {
               parenStart = getFirstNonWSCharPos(closePointyBracket+1);
+            }
+          }
+        }
+        else if (text.charAt(origParenStart) == '[') {
+          parenStart = -1;
+          // might be a generic Scala class
+          int closeBracket = findNextEnclosingBrace(origParenStart, '[', ']'); 
+          if (closeBracket != -1) {
+            if (text.charAt(closeBracket) == ']') {
+              parenStart = getFirstNonWSCharPos(closeBracket+1);
             }
           }
         }
@@ -871,11 +895,21 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //      if (oldLog) System.err.println("\tfirst non-whitespace after class = " + parenStart + " `" + text.charAt(parenStart) + "`");
       if (text.charAt(origParenStart) == '<') {
         parenStart = -1;
-        // might be a generic class
+        // might be a generic Java class
         int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>');
         if (closePointyBracket != -1) {
           if (text.charAt(closePointyBracket) == '>') {
             parenStart = getFirstNonWSCharPos(closePointyBracket + 1);
+          }
+        }
+      }
+      if (text.charAt(origParenStart) == '[') {
+        parenStart = -1;
+        // might be a generic Scala class
+        int closeBracket = findNextEnclosingBrace(origParenStart, '[', ']');
+        if (closeBracket != -1) {
+          if (text.charAt(closeBracket) == ']') {
+            parenStart = getFirstNonWSCharPos(closeBracket + 1);
           }
         }
       }
@@ -948,44 +982,32 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     finally { setCurrentLocation(oldPos); }
   }
   
-  /** Gets the name of first class/interface/enum declared in file among the definitions anchored at:
-    * @param indexOfClass  index in this of a top-level occurrence of class 
-    * @param indexOfInterface  index in this of a top-level occurrence of interface
-    * @param indexOfEnum index in this of a top-level occurrence of enum
-    */
-  private String getFirstClassName(int indexOfClass, int indexOfInterface,
-                                   int indexOfEnum) throws ClassNameNotFoundException {
-    try {
-      if ((indexOfClass == -1) && (indexOfInterface == -1) && (indexOfEnum == -1)) throw ClassNameNotFoundException.DEFAULT;
-      
-      // should we convert this to a sorted queue or something like that?
-      // should we have to extend this past three keywords, it will get rather hard to maintain
-      if ((indexOfEnum == -1) || 
-          ((indexOfClass != -1) && (indexOfClass < indexOfEnum)) ||
-          ((indexOfInterface != -1) && (indexOfInterface < indexOfEnum))) {
-        // either "enum" not found, or "enum" found after "class" or "interface"
-        // "enum" is irrelevant
-        // we know that at least one of indexOfClass and indexOfInterface is != -1
-        if ((indexOfInterface == -1) ||
-            ((indexOfClass != -1) && (indexOfClass < indexOfInterface))) {
-          // either "interface" not found, or "interface" found after "class"
-          return getNextIdentifier(indexOfClass + "class".length());
-        }
-        else {
-          // "interface" found, and found before "class"
-          return getNextIdentifier(indexOfInterface + "interface".length());
-        }
-      }
-      else {
-        // "enum" found, and found before "class" and "interface"
-        return getNextIdentifier(indexOfEnum + "enum".length());
-      }    
-    }
-    catch(IllegalStateException ise) { throw ClassNameNotFoundException.DEFAULT; }
-  }
+//  /** Gets the name of first class/trait/object declared in file among the definitions anchored at:
+//    * @param indexOfClass  index in this of a top-level occurrence of class 
+//    * @param indexOfTrait  index in this of a top-level occurrence of trait
+//    * @param indexOfObject index in this of a top-level occurrence of object
+//    */
+//  private String getFirstClassName(int indexOfClass, int indexOfTrait, int indexOfObject) {
+//    try {
+//
+//      
+//      // Determine the offsets of tails of these keywords (or an offset greater than the others when -1)
+//      int endIndex = Math.max(indexOfClass, Math.max(indexOfTrait, indexOfObject)) + 1;
+//      int endOfClass = (indexOfClass < 0) ? endIndex : indexOfClass + "class".length();
+//      int endOfTrait = (indexOfTrait < 0) ? endIndex : indexOfTrait + "trait".length();
+//      int endOfObject = (indexOfObject < 0) ? endIndex : indexOfObject + "object".length();
+//      
+//      int end = Math.min(endOfClass, Math.min(endOfTrait, endOfObject));
+//    
+//      return getNextIdentifier(end);
+//      }
+//    catch(IllegalStateException ise) { throw ClassNameNotFoundException.DEFAULT; }
+//  }
   
-  /** Gets the name of the document's main class: the document's only public class/interface or 
-    * first top level class if document contains no public classes or interfaces. */
+  /** Gets the name of the document's first class, trait, object, interface, or enum.  Should work for syntactically legal Java or
+    * Scala files.  Ignores visibility modifiers. Exceptions: "interface" or "enum" appearing at the end of Scala package name? 
+    * TODO: define and invoke separate predicates for "scala" and "java" files.
+    */
   public String getMainClassName() throws ClassNameNotFoundException {
     final int oldPos = _currentLocation;
     
@@ -994,35 +1016,48 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       final String text = getText();  // getText() is cheap if document is not resident
       
       final int indexOfClass = _findKeywordAtToplevel("class", text, 0);
+      final int indexOfTrait = _findKeywordAtToplevel("trait", text, 0);
+      final int indexOfObject = _findKeywordAtToplevel("object", text, 0);
       final int indexOfInterface = _findKeywordAtToplevel("interface", text, 0);
       final int indexOfEnum = _findKeywordAtToplevel("enum", text, 0);
-      final int indexOfPublic = _findKeywordAtToplevel("public", text, 0);
       
-      if (indexOfPublic == -1)  return getFirstClassName(indexOfClass, indexOfInterface, indexOfEnum);
+      if (indexOfClass == -1 && indexOfTrait == -1 && indexOfObject == -1 && indexOfInterface == -1 && indexOfEnum == -1) 
+            throw ClassNameNotFoundException.DEFAULT;
+      
+      int length = text.length();
+      
+      final int endOfClass = (indexOfClass < 0) ? length : indexOfClass + "class".length();
+      final int endOfTrait = (indexOfTrait < 0) ? length : indexOfTrait + "trait".length();
+      final int endOfObject = (indexOfObject < 0) ? length : indexOfObject + "object".length();
+      final int endOfInterface = (indexOfInterface < 0) ? length : indexOfInterface + "interface".length();
+      final int endOfEnum = (indexOfEnum < 0) ? length : indexOfEnum + "enum".length();
+          
+      return getNextIdentifier(Math.min(endOfClass, Math.min(endOfTrait, Math.min(endOfObject, Math.min(endOfInterface, 
+                                                                                                        endOfEnum)))));
       
 //        _log.log("text =\n" + text);
 //        _log.log("indexOfClass = " + indexOfClass + "; indexOfPublic = " + indexOfPublic);
       
       // There is an explicit public declaration
-      final int afterPublic = indexOfPublic + "public".length();
-      final String subText = text.substring(afterPublic);
-      setCurrentLocation(afterPublic);
+//      final int afterPublic = indexOfPublic + "public".length();
+//      final String subText = text.substring(afterPublic);
+//      setCurrentLocation(afterPublic);
 //        _log.log("After public text = '" + subText + "'");
-      int indexOfPublicClass  = _findKeywordAtToplevel("class", subText, afterPublic);  // relative offset
-      if (indexOfPublicClass != -1) indexOfPublicClass += afterPublic;
-      int indexOfPublicInterface = _findKeywordAtToplevel("interface", subText, afterPublic); // relative offset
-      if (indexOfPublicInterface != -1) indexOfPublicInterface += afterPublic;
-      int indexOfPublicEnum = _findKeywordAtToplevel("enum", subText, afterPublic); // relative offset
-      if (indexOfPublicEnum != -1) indexOfPublicEnum += afterPublic;
+//      int indexOfClass  = _findKeywordAtToplevel("class", subText, afterPublic);  // relative offset
+//      if (indexOfPublicClass != -1) indexOfPublicClass += afterPublic;
+//      int indexOfPublicInterface = _findKeywordAtToplevel("interface", subText, afterPublic); // relative offset
+//      if (indexOfPublicInterface != -1) indexOfPublicInterface += afterPublic;
+//      int indexOfPublicEnum = _findKeywordAtToplevel("enum", subText, afterPublic); // relative offset
+//      if (indexOfPublicEnum != -1) indexOfPublicEnum += afterPublic;
 //        _log.log("indexOfPublicClass = " + indexOfPublicClass + " indexOfPublicInterface = " + indexOfPublicInterface);
       
-      return getFirstClassName(indexOfPublicClass, indexOfPublicInterface, indexOfPublicEnum);
+//      return getFirstClassName(indexOfPublicClass, indexOfPublicInterface, indexOfPublicEnum);
       
     }
     finally { setCurrentLocation(oldPos); }
   }
   
-  /** Gets the name of the top level class in this source file by finding the first declaration of a class or interface.
+  /** Gets the name of the top level class in this source file by finding the first declaration of a class, trait, or object.
     * @return The name of first class in the file
     * @throws ClassNameNotFoundException if no top level class found
     */
@@ -1039,28 +1074,20 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       final int textLength = endPos - startPos;
       final String text = getText(startPos, textLength);
       
-      int index;
+      int length = text.length();
       
       int indexOfClass = _findKeywordAtToplevel("class", text, startPos);
-      int indexOfInterface = _findKeywordAtToplevel("interface", text, startPos);
-      int indexOfEnum = _findKeywordAtToplevel("enum", text, startPos);
+      int indexOfTrait = _findKeywordAtToplevel("trait", text, startPos);
+      int indexOfObject = _findKeywordAtToplevel("object", text, startPos);
       
-      //If class exists at top level AND either there is no interface at top level or the index of class precedes the index of the top
-      //level interface, AND the same for top level enum, then the class is the first top level declaration
-      if (indexOfClass > -1 && (indexOfInterface <= -1 || indexOfClass < indexOfInterface) 
-            && (indexOfEnum <= -1 || indexOfClass < indexOfEnum)) {
-        index = indexOfClass + "class".length();
-      }
-      else if (indexOfInterface > -1 && (indexOfClass <= -1 || indexOfInterface < indexOfClass) 
-                 && (indexOfEnum <= -1 || indexOfInterface < indexOfEnum)) {
-        index = indexOfInterface + "interface".length();
-      }
-      else if (indexOfEnum > -1 && (indexOfClass <= -1 || indexOfEnum < indexOfClass)   
-                 && (indexOfInterface <= -1 || indexOfEnum < indexOfInterface)) {
-        index = indexOfEnum + "enum".length();
-      }
-      else {
-        // no index was valid
+      if (indexOfClass < 0) indexOfClass = length;
+      if (indexOfTrait < 0) indexOfTrait = length;
+      if (indexOfObject < 0) indexOfObject = length;
+      
+      int index = Math.min(indexOfClass, Math.min(indexOfTrait, indexOfObject));
+      
+      if (index == length) {
+        // no class keyword was found
         throw ClassNameNotFoundException.DEFAULT;
       }
       
@@ -1072,17 +1099,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     finally { setCurrentLocation(oldPos); }
   }
   
-  /** Finds the next identifier (following a non-whitespace character) in the document starting at start. Assumes that
+  /** Finds the next identifier (starting with next non-whitespace character) in the document starting at start. Assumes that
     * read lock and _reduced lock are already held. */
   private String getNextIdentifier(final int startPos) throws ClassNameNotFoundException {
     
-//    _log.log("getNextIdentifer(" + startPos + ") called");
-    
-//    int index = 0;
-//    int length = 0;
-//    int endIndex = 0;
-//    String text = "";
-//    int i;
     try {
       // first find index of first non whitespace (from the index in document)
       int index = getFirstNonWSCharPos(startPos);
@@ -1390,11 +1410,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return (matchIndex < 0) ? subject.length() : matchIndex;
   }
     
-  /** Returns true if one of the words 'class', 'interface', 'object', or 'enum',  is found in non-comment text. */
+  /** Returns true if one of the words 'class', 'trait', or 'object', 'interface' or 'enum', is found in non-comment text.  This
+    * method is intended to return true for Scala AND Java source files. */
+  /** TODO: check reduced model locking! */
   public boolean containsSource() throws BadLocationException {
     
     /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
-    int i, j, k, l;
+    int i, j, k, l, m;
     int minPos;
     int reducedPos = 0;
     
@@ -1410,8 +1432,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       j = myIndexOf(text, "interface", reducedPos);
       k = myIndexOf(text, "object", reducedPos);
       l = myIndexOf(text, "enum", reducedPos);
+      m = myIndexOf(text, "trait", reducedPos);
       
-      minPos = Math.min(i, Math.min(j, Math.min(k, l)));
+      minPos = Math.min(i, Math.min(j, Math.min(k, Math.min(l, m))));
                          
       while (minPos < length) {
         // Move reduced model to walker's location
@@ -1427,6 +1450,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         j = myIndexOf(text, "interface", reducedPos + 1);
         k = myIndexOf(text, "object", reducedPos + 1);   // primary keyword in some Scala source files
         l = myIndexOf(text, "enum", reducedPos + 1);
+        m = myIndexOf(text, "trait", reducedPos + 1);
         
         minPos = Math.min(i, Math.min(j, Math.min(k, l)));
       }        

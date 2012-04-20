@@ -86,7 +86,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     assertTrue("should not be in sync after save", ! doc.checkIfClassFileInSync());
     
     // Make sure .class exists
-    File compiled = classForJava(file, "DrJavaTestFoo");
+    File compiled = classForScala(file, "DrJavaTestFoo");
     assertTrue(" Class file should exist after compile", compiled.exists());
   }
   
@@ -147,7 +147,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     assertCompileErrorsPresent("compile should succeed", false);
     
     // Make sure .class exists
-    File compiled = classForJava(file, "DrJavaTestFoo");
+    File compiled = classForScala(file, "DrJavaTestFoo");
     assertTrue("Class file shouldn't exist after compile", !compiled.exists());
     _model.removeListener(listener);
   }

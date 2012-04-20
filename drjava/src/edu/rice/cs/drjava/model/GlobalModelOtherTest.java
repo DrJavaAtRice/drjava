@@ -59,14 +59,13 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public final class GlobalModelOtherTest extends GlobalModelTestCase implements OptionConstants {
   
-  //  _log can be inherited from GlobalModelTestCase
-  Log _log = new Log("GlobalModelOtherTest.txt", false);
+  //  _log is inherited from GlobalModelTestCase
   
   private static final String FOO_CLASS =
-    "package bar;\n" +
-    "public class Foo {\n" +
-    "  public static void main(String[] args) {\n" +
-    "    System.out.println(\"Foo\");\n" +
+    "package bar\n" +
+    "object Foo {\n" +
+    "  def main(args: String[]) {\n" +
+    "    println(\"Foo\")\n" +
     "  }\n" +
     "}\n";
   
@@ -79,6 +78,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   /** Tests that the undoableEditHappened event is fired if the undo manager is in use. */
   public void testUndoEventsOccur() /* throws BadLocationException */ {
     debug.logStart();
+    _log.log("Starting testUndoEventsOccur");
     
     final TestListener listener = new TestListener() { 
       public void undoableEditHappened() { 
@@ -111,7 +111,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
       }
     });
 //    Utilities.clearEventQueue();
-    _log.log("testUndoEventsOccur() completed");
+    _log.log("testUndoEventsOccur completed");
     debug.logEnd();
   }
   
@@ -119,6 +119,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   /** Checks that System.exit is handled appropriately from interactions pane. */
   public void testExitInteractions() throws EditDocumentException, InterruptedException {
     debug.logStart();
+    _log.log("Starting testExitInteractions");
+        
     final InteractionListener listener = new InteractionListener(); /*{
       
       public void consoleReset() { consoleResetCount++; }
@@ -140,7 +142,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     listener.assertInterpreterExitedCount(1);
     assertEquals("exit status", 23, listener.getLastExitStatus());
     
-    _log.log("testExitInteractions() completed");
+    _log.log("testExitInteractions completed");
     debug.logEnd();
   }
   
@@ -151,14 +153,16 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     IOException, InterruptedException {
     debug.logStart();
     
+    _log.log("Starting testInteractinsCanSeeCompiledClasses");
+    
     // Compile Foo
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
     File dir1 = makeCanonical(new File(_tempDir, "dir1"));
     dir1.mkdir();
-    File file1 = makeCanonical(new File(dir1, "TestFile1.java"));
+    File file1 = makeCanonical(new File(dir1, "TestFile1.scala"));
     doCompile(doc1, file1);
     
-    assertEquals("interactions result", "\"DrJavaTestFoo\"", interpret("new DrJavaTestFoo().getClass().getName()"));
+    assertEquals("interactions result", "\"DrScalaTestFoo\"", interpret("new DrScalaTestFoo().getClass().getName()"));
     
     // Add directory 1 to extra classpath and close doc1
     Vector<File> cp = new Vector<File>();
@@ -172,19 +176,21 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     OpenDefinitionsDocument doc2 = setupDocument(BAZ_TEXT);
     File dir2 = makeCanonical(new File(_tempDir, "dir2"));
     dir2.mkdir();
-    File file2 = makeCanonical(new File(dir2, "TestFile1.java"));
+    File file2 = makeCanonical(new File(dir2, "TestFile1.scala"));
     doCompile(doc2, file2);
     
     // Ensure that Baz can use the Foo class from extra classpath
-    assertEquals("interactions result", "\"DrJavaTestBaz\"", interpret("new DrJavaTestBaz().getClass().getName()"));
+    assertEquals("interactions result", "z: java.lang.Class[_ <: object DrScalaTestBaz] = class DrScalaTestBaz$", 
+                 interpret("val z = DrScalaTestBaz.getClass().getName()"));
     
     // Ensure that static fields can be seen
-    assertEquals("result of static field", "3", interpret("DrJavaTestBaz.x"));
+    assertEquals("result of singleton field", "y: Int = 3", interpret("val y = DrScalaTestBaz.x"));
     
     // Also ensure that Foo can be used directly
-    assertEquals("interactions result", "\"DrJavaTestFoo\"", interpret("new DrJavaTestFoo().getClass().getName()"));
+    assertEquals("interactions result", "x: java.lang.String = DrScalaTestFoo", 
+                 interpret("val x = new DrScalaTestFoo().getClass().getName()"));
     
-    _log.log("testInteractionsCanSeeCompletedClasses() completed");
+    _log.log("testInteractionsCanSeeCompletedClasses completed");
     debug.logEnd();
   }
   
@@ -196,14 +202,16 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     IOException, InterruptedException {
     debug.logStart();
     
+    _log.log("Starting testInteractionsVariableWithLowerCaseClassName");
     // Compile a test file
-    OpenDefinitionsDocument doc1 = setupDocument("public class DrJavaTestClass {}");
-    File file1 = makeCanonical(new File(_tempDir, "DrJavaTestClass.java"));
+    OpenDefinitionsDocument doc1 = setupDocument("class DrScalaTestClass {}");
+    File file1 = makeCanonical(new File(_tempDir, "DrScalaTestClass.scala"));
     doCompile(doc1, file1);
     
     // This shouldn't cause an error (no output should be displayed)
-    assertEquals("interactions result", "", interpret("Object drJavaTestClass = new DrJavaTestClass();"));
-    _log.log("testInteractionsVariableWithLowercaseClassName() completed");
+    assertEquals("InteractionsVariableWithLowerCaseLetters result", "flag: Boolean = false", 
+                 interpret("val flag = new DrScalaTestClass().equals(new DrScalaTestClass())"));
+    _log.log("testInteractionsVariableWithLowercaseClassName completed");
     debug.logEnd();
   }
   
@@ -211,9 +219,10 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   public void testInteractionsCanSeeChangedClass() throws BadLocationException, EditDocumentException,
     IOException, InterruptedException {
     debug.logStart();
+    _log.log("Starting testInteractionsCanSeeChangedClass");
     
-    final String text_before = "class DrJavaTestFoo { public int m() { return ";
-    final String text_after = "; } }";
+    final String text_before = "class DrScalaTestFoo { def m():Int = { ";
+    final String text_after = " }";
     final int num_iterations = 3;
     File file;
     OpenDefinitionsDocument doc;
@@ -223,9 +232,10 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
       file = tempFile(i);
       doCompile(doc, file);
       
-      assertEquals("interactions result, i=" + i, String.valueOf(i), interpret("new DrJavaTestFoo().m()"));
+      assertEquals("new DrScalaTestFoo().m() interactions result, i = " + i, "x: Int = " + String.valueOf(i), 
+                   interpret("val x = new DrScalaTestFoo().m()"));
     }
-    _log.log("testInteractionsCanSeeChangedClass() completed");
+    _log.log("testInteractionsCanSeeChangedClass completed");
     debug.logEnd();
   }
   
@@ -234,8 +244,10 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     IOException, InterruptedException {
     debug.logStart();
     
-    final String interface_text = "public interface I { int getValue(); }";
-    final File file = createFile("I.java");
+    _log.log("Starting testInteractionsDefineAnonymousInnerClass");
+    
+    final String interface_text = "trait I { def getValue(): Int }";
+    final File file = createFile("I.scala");
     
     OpenDefinitionsDocument doc;
     
@@ -243,17 +255,17 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     doCompile(doc, file);
     
     for (int i = 0; i < 3; i++) {
-      String s = "new I() { public int getValue() { return " + i + "; } }.getValue()";
-      
-      assertEquals("interactions result, i=" + i, String.valueOf(i), interpret(s));
+      String s = "val a" + i + " = new I { def getValue():Int = " + i + " }.getValue()";
+      assertEquals("interactions result, a=" + i, "a" + i + ": Int = " + String.valueOf(i), interpret(s));
     }
-    _log.log("testInteractionsDefineAnonymousInnerClass() completed");
+    _log.log("testInteractionsDefineAnonymousInnerClass completed");
     debug.logEnd();
   }
   
   public void testGetSourceRootDefaultPackage() throws BadLocationException, IOException {
     debug.logStart();
     
+    _log.log("Starting testGetSourceRootDefaultPackage");
     // Get source root (current directory only)
     Iterable<File> roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 0, IterUtil.sizeOf(roots));
@@ -267,8 +279,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     subdir = makeCanonical(new File(subdir, "c"));
     subdir.mkdirs();
     
-    // Save the footext to DrJavaTestFoo.java in the subdirectory
-    File fooFile = makeCanonical(new File(subdir, "DrJavaTestFoo.java"));
+    // Save the footext to DrScalaTestFoo.scala in the subdirectory
+    File fooFile = makeCanonical(new File(subdir, "DrScalaTestFoo.scala"));
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     saveFileAs(doc, new FileSelector(fooFile));
     
@@ -281,13 +293,13 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     // Get the source root for the new file in directory subdir
     assertEquals("source root", subdir, IterUtil.first(roots));
     
-    _log.log("testGetSourceRootDefaultPackage() completed");
+    _log.log("testGetSourceRootDefaultPackage completed");
     debug.logEnd();
   }
   
   public void testGetSourceRootPackageThreeDeepValid() throws BadLocationException, IOException {
     debug.logStart();
-    
+    _log.log("Starting testGetSourceRootPackageThreeDeepValid");
     // Create temp directory
     File baseTempDir = tempDirectory();
     
@@ -297,9 +309,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     subdir = makeCanonical(new File(subdir, "c").getCanonicalFile());
     subdir.mkdirs();
     
-    // Save the footext to DrJavaTestFoo.java in the subdirectory
-    File fooFile = makeCanonical(new File(subdir, "DrJavaTestFoo.java"));
-    OpenDefinitionsDocument doc = setupDocument("package a.b.c;\n" + FOO_TEXT);
+    // Save the footext to DrScalaTestFoo.scala in the subdirectory
+    File fooFile = makeCanonical(new File(subdir, "DrScalaTestFoo.scala"));
+    OpenDefinitionsDocument doc = setupDocument("package a.b.c\n" + FOO_TEXT);
     saveFileAs(doc, new FileSelector(fooFile));
 //    System.err.println("Package name is: " + _model.getPackageName());
     
@@ -311,13 +323,15 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     assertEquals("number of source roots", 1, IterUtil.sizeOf(roots));
     assertEquals("source root", baseTempDir.getCanonicalFile(), IterUtil.first(roots).getCanonicalFile());
     
-    _log.log("testGetSourceRootPackageThreeDeepValid() completed");
+    _log.log("testGetSourceRootPackageThreeDeepValid completed");
     debug.logEnd();
   }
   
   /** Tests that getSourceRoot works with a relative path when a package name is present. */
   public void testGetSourceRootPackageThreeDeepValidRelative() throws BadLocationException, IOException {
     debug.logStart();
+    
+    _log.log("Starting testGetSourceRootPackageThreeDeepValidRelative");
     
     // Create temp directory
     File baseTempDir = tempDirectory();
@@ -326,12 +340,12 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     subdir = makeCanonical(new File(subdir, "c"));
     subdir.mkdirs();
     
-    // Save the footext to DrJavaTestFoo.java in a relative directory
+    // Save the footext to DrScalaTestFoo.scala in a relative directory
     //   temp/./a/b/../b/c == temp/a/b/c
     File relDir = makeCanonical(new File(baseTempDir, "./a/b/../b/c"));
-    File fooFile = makeCanonical(new File(relDir, "DrJavaTestFoo.java"));
+    File fooFile = makeCanonical(new File(relDir, "DrScalaTestFoo.scala"));
     OpenDefinitionsDocument doc =
-      setupDocument("package a.b.c;\n" + FOO_TEXT);
+      setupDocument("package a.b.c\n" + FOO_TEXT);
     saveFileAs(doc, new FileSelector(fooFile));
     
     // No events should fire
@@ -342,13 +356,14 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     assertEquals("number of source roots", 1, IterUtil.sizeOf(roots));
     assertEquals("source root", baseTempDir.getCanonicalFile(), IterUtil.first(roots).getCanonicalFile());
     
-    _log.log("testGetSourceRootPackageThreeDeepValidRelative() completed");
+    _log.log("testGetSourceRootPackageThreeDeepValidRelative completed");
     debug.logEnd();
   }
   
   public void testGetSourceRootPackageThreeDeepInvalid() throws BadLocationException, IOException {
     debug.logStart();
     
+    _log.log("Starting testGetSourceRootPackageThreeDeepInvalid");
     // Create temp directory
     File baseTempDir = tempDirectory();
     
@@ -358,8 +373,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     subdir = makeCanonical(new File(subdir, "d"));
     subdir.mkdirs();
     
-    // Save the footext to DrJavaTestFoo.java in the subdirectory
-    File fooFile = makeCanonical(new File(subdir, "DrJavaTestFoo.java"));
+    // Save the footext to DrScalaTestFoo.scala in the subdirectory
+    File fooFile = makeCanonical(new File(subdir, "DrScalaTestFoo.scala"));
     OpenDefinitionsDocument doc = setupDocument("package a.b.c;\n" + FOO_TEXT);
     saveFileAs(doc, new FileSelector(fooFile));
     
@@ -370,13 +385,14 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     Iterable<File> roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 0, IterUtil.sizeOf(roots));
     
-    _log.log("testGetSourceRootPackageThreeDeepInvalid() completed");
+    _log.log("testGetSourceRootPackageThreeDeepInvalid completed");
     debug.logEnd();
   }
   
   public void testGetSourceRootPackageOneDeepValid() throws BadLocationException, IOException {
     debug.logStart();
     
+    _log.log("Starting testGetSourceRootPackageOneDeepValid");
     // Create temp directory
     File baseTempDir = tempDirectory();
     
@@ -384,8 +400,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File subdir = makeCanonical(new File(baseTempDir, "a"));
     subdir.mkdir();
     
-    // Save the footext to DrJavaTestFoo.java in the subdirectory
-    File fooFile = makeCanonical(new File(subdir, "DrJavaTestFoo.java"));
+    // Save the footext to DrScalaTestFoo.scala in the subdirectory
+    File fooFile = makeCanonical(new File(subdir, "DrScalaTestFoo.scala"));
     OpenDefinitionsDocument doc = setupDocument("package a;\n" + FOO_TEXT);
     saveFileAs(doc, new FileSelector(fooFile));
     
@@ -397,13 +413,15 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     assertEquals("number of source roots", 1, IterUtil.sizeOf(roots));
     assertEquals("source root", baseTempDir.getCanonicalFile(), IterUtil.first(roots).getCanonicalFile());
     
-    _log.log("testGetSourceRootPackageOneDeepValid() completed");
+    _log.log("testGetSourceRootPackageOneDeepValid completed");
     debug.logEnd();
   }
   
   
   public void testGetMultipleSourceRootsDefaultPackage() throws BadLocationException, IOException {
     debug.logStart();
+    
+    _log.log("Starting testGetMultipleSourceRootsDefaultPackage");
     
     // Create temp directory
     File baseTempDir = tempDirectory();
@@ -414,18 +432,18 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File subdir2 = makeCanonical(new File(baseTempDir, "b"));
     subdir2.mkdir();
     
-    // Save the footext to DrJavaTestFoo.java in subdirectory 1
-    File file1 = makeCanonical(new File(subdir1, "DrJavaTestFoo.java"));
+    // Save the footext to DrScalaTestFoo.scala in subdirectory 1
+    File file1 = makeCanonical(new File(subdir1, "DrScalaTestFoo.scala"));
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
     saveFileAs(doc1, new FileSelector(file1));
     
     // Save the bartext to Bar.java in subdirectory 1
-    File file2 = makeCanonical(new File(subdir1, "Bar.java"));
+    File file2 = makeCanonical(new File(subdir1, "Bar.scala"));
     OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
     saveFileAs(doc2, new FileSelector(file2));
     
     // Save the bartext to Bar.java in subdirectory 2
-    File file3 = makeCanonical(new File(subdir2, "Bar.java"));
+    File file3 = makeCanonical(new File(subdir2, "Bar.scala"));
     OpenDefinitionsDocument doc3 = setupDocument(BAR_TEXT);
     saveFileAs(doc3, new FileSelector(file3));
     
@@ -447,7 +465,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
       fail("source roots did not match");
     }
     
-    _log.log("testGetMultipleSourceRootsDefaultPackage() completed");
+    _log.log("testGetMultipleSourceRootsDefaultPackage completed");
     debug.logEnd();
   }
   
@@ -455,6 +473,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   public void testInteractionsLiveUpdateClassPath() throws BadLocationException, EditDocumentException,
     IOException, InterruptedException {
     debug.logStart();
+    _log.log("Starting testInteractionsLiveUpdateClassPath");
     
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     Utilities.clearEventQueue();
@@ -492,13 +511,15 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     tempDir = makeCanonical(new File(tempPath + "a"));
     tempDir.renameTo(makeCanonical(new File(tempPath)));
     
-    _log.log("testInteractionsLiveUpdateClasspath() completed");
+    _log.log("testInteractionsLiveUpdateClasspath completed");
     debug.logEnd();
   }
   
   /** Tests that the appropriate event is fired when the model's interpreter changes.*/
   public void testSwitchInterpreters() {
     debug.logStart();
+    
+    _log.log("Starting testSwitchInterpreters");
     TestListener listener = new TestListener() {
       public void interpreterChanged(boolean inProgress) {
         assertTrue("should not be in progress", !inProgress);
@@ -513,7 +534,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
-        dim.addInterpreter("testInterpreter");
+        dim.addInterpreter("Starting testInterpreter");
         dim.setActiveInterpreter("testInterpreter", "myPrompt>"); 
       }
     });
@@ -522,13 +543,14 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     listener.assertInterpreterChangedCount(1);
     _model.removeListener(listener);
     
-    _log.log("testSwitchInterpreters() completed");
+    _log.log("testSwitchInterpreters completed");
     debug.logEnd();
   }
   
   public void testRunMainMethod() throws Exception {
     debug.logStart();
     
+    _log.log("Starting testRunMainMethod");
     File dir = makeCanonical(new File(_tempDir, "bar"));
     dir.mkdir();
     File file = makeCanonical(new File(dir, "Foo.java"));
@@ -556,13 +578,14 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     Utilities.clearEventQueue();  
     // Killing time here; Slave JVM may not have released Foo.class so that the file can be deleted on Windows.
     
-    _log.log("testRunMainMethod() completed");
+    _log.log("Starting testRunMainMethod completed");
     debug.logEnd();
   }
   
   public void testBookmark() throws Exception {
     debug.logStart();
     
+    _log.log("Starting testBookmark");
     File dir = makeCanonical(new File(_tempDir, "bar"));
     dir.mkdir();
     final File file = makeCanonical(new File(dir, "Foo.java"));
@@ -623,6 +646,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     bms = _model.getBookmarkManager().getRegions();
     assertEquals("Should be 0 bookmarks", 0, bms.size());
     
+    _log.log("testBookmark completed");
     debug.logEnd();
   }
   

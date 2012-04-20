@@ -456,7 +456,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
     String line1 = "System.out.println(\"hi\")";
     String line2 = "System.out.println(\"bye\")";
 //    String delim = History.INTERACTION_SEPARATOR + StringOps.EOL;
-    final File temp = File.createTempFile("drjava-test", ".hist").getCanonicalFile();
+    final File temp = File.createTempFile("drscala-test", ".hist").getCanonicalFile();
     temp.deleteOnExit();
     History history = new History(5);
     history.add(line1);

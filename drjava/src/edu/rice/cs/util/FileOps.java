@@ -575,7 +575,7 @@ public abstract class FileOps {
     }
   }
   
-  /** This function starts from the given directory and finds all  packages within that directory
+  /** This function starts from the given directory and finds all packages within that directory
     * @param prefix the package name of files in the given root
     * @param root the directory to start exploring from
     * @return a list of valid packages, excluding the root ("") package

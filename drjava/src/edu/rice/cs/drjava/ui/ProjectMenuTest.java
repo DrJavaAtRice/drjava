@@ -97,12 +97,12 @@ public final class ProjectMenuTest extends DrJavaTestCase {
           _srcDir.mkdir(); // create the src directory
           
           // create project in a directory with an auxiliary file outside of it
-          _auxFile = File.createTempFile("aux", ".java").getCanonicalFile();
+          _auxFile = File.createTempFile("aux", ".scala").getCanonicalFile();
           _projFile = new File(_parent, "test.pjt");
           
-          _file1 = new File(_srcDir, "test1.java");
+          _file1 = new File(_srcDir, "test1.scala");
           IOUtil.writeStringToFile(_file1, "");  // create dummy file
-          _file2 = new File(_srcDir, "test2.java");
+          _file2 = new File(_srcDir, "test2.scala");
           IOUtil.writeStringToFile(_file2, "");// create dummy file
           
 //    System.err.println("test1.java and test1.java created");

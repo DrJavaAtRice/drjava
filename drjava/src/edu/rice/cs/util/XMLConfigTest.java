@@ -1080,7 +1080,7 @@ public class XMLConfigTest extends TestCase {
       Assert.fail("Should not have succeeded in saving to non-existant path");
     }catch(XMLConfig.XMLConfigException e){ }
     
-    File saveTo = File.createTempFile("drjava_test", "xml");
+    File saveTo = File.createTempFile("drscala_test", "xml");
     xc.save(saveTo);
     xc.save(saveTo.getAbsolutePath());
     
@@ -1146,7 +1146,7 @@ public class XMLConfigTest extends TestCase {
                                         + " <class name=\"sample.threadCheck.ThreadCheckSample4\"/>\n"
                                         + "</concutest>")); 
     
-    File saveTo = File.createTempFile("drjava_test", "xml");
+    File saveTo = File.createTempFile("drscala_test", "xml");
     xc.save(saveTo);
     
     try{

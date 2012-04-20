@@ -221,8 +221,8 @@ public class FileOpsTest extends DrJavaTestCase {
   }
   
   /** This tests that packageExplore correctly runs through and returns
-   * non-empty packages
-   */
+    * non-empty packages.  This function is no longer used in DrJava/DrScala.
+    */
   public void testPackageExplore() throws IOException {
     File rootDir = FileOps.createTempDirectory("fileOpsTest");
     File subDir0 = new File(rootDir, "sub0");
@@ -376,20 +376,20 @@ public class FileOpsTest extends DrJavaTestCase {
   public void testGetFiles() throws IOException {
     File dir1 = FileOps.createTempDirectory("DrJavaTestTempDir");
     assertTrue("dir1 exists", dir1.exists());
-    File file1a = File.createTempFile("DrJavaTest-", ".temp", dir1).getCanonicalFile();
+    File file1a = File.createTempFile("DrScalaTemp-", ".temp", dir1).getCanonicalFile();
     assertTrue("file1a exists", file1a.exists());
-    File file1b = File.createTempFile("DrJava-", ".temp", dir1).getCanonicalFile();
+    File file1b = File.createTempFile("DrScala-", ".temp", dir1).getCanonicalFile();
     assertTrue("file1b exists", file1b.exists());
-    File dir2 = FileOps.createTempDirectory("DrJavaTestDir-", dir1).getCanonicalFile();
+    File dir2 = FileOps.createTempDirectory("DrScalaTestDir-", dir1).getCanonicalFile();
     assertTrue("dir2 exists", dir2.exists());
-    File file2 = File.createTempFile("DrJavaTest-", ".temp", dir2).getCanonicalFile();
+    File file2 = File.createTempFile("DrScalaTest-", ".temp", dir2).getCanonicalFile();
     assertTrue("file2 exists", file2.exists());
     
     FileFilter ff = new FileFilter() {
       public boolean accept(File f) {
         if (f.isDirectory()) return true;
         String name = f.getName();
-        return name.startsWith("DrJavaTest");
+        return name.startsWith("DrScalaTest");
       }
     };
     

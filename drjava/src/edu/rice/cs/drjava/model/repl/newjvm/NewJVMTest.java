@@ -60,7 +60,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  *  @version $Id$
  */
 public final class NewJVMTest extends DrJavaTestCase {
-  private static final Log _log  = new Log("MasterSlave.txt", true);
+  private static final Log _log  = new Log("GloblaModel.txt", true);
   
   private static volatile TestJVMExtension _jvm;
   

@@ -1370,7 +1370,7 @@ _doc.insertString(0, text, null);
 //  {
 //    File test = null;
 //    try {
-//      test = File.createTempFile("test", ".java");
+//      test = File.createTempFile("test", ".scala");
 //      _copyFile(unindented, test);
 //      test.deleteOnExit();
 //      IndentFiles.main(new String[] {"-silent", test.toString()});

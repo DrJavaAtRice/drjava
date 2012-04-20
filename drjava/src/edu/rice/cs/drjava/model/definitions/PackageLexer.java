@@ -79,7 +79,7 @@ public class PackageLexer extends java.io.StreamTokenizer {
       int token = nextToken();
 
       while (token == TT_WORD && sval.equals("package")) {
-        System.err.println("Performing loop iteration");
+//        System.err.println("Performing loop iteration");
         token = nextToken();
         if (token != TT_WORD || sval.startsWith(".") || sval.endsWith(".") || sval.contains("..")) break;
         name.append(prefix).append(sval);

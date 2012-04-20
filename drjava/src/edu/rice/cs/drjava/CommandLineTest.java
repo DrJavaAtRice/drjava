@@ -121,56 +121,56 @@ public final class CommandLineTest extends DrJavaTestCase {
         _log.log("Created a MainFrame for " + this + "; stating file setup");
         
         try {
-          f1 = File.createTempFile("DrJava-test", ".java").getCanonicalFile();
+          f1 = File.createTempFile("DrScala-test", ".scala").getCanonicalFile();
           f1.deleteOnExit();
           f1_name = f1.getAbsolutePath();
           f1_contents = "abcde";
           FileWriter fw1 = new FileWriter(f1);
           fw1.write(f1_contents,0,f1_contents.length());
           fw1.close();
-          f2 = File.createTempFile("DrJava-test", ".java").getCanonicalFile();
+          f2 = File.createTempFile("DrScala-test", ".scala").getCanonicalFile();
           f2.deleteOnExit();
           f2_name = f2.getAbsolutePath();
           f2_contents = "fghijklm";
           FileWriter fw2 = new FileWriter(f2);
           fw2.write(f2_contents,0,f2_contents.length());
           fw2.close();
-          f3 = File.createTempFile("DrJava-test", ".java").getCanonicalFile();
+          f3 = File.createTempFile("DrScala-test", ".scala").getCanonicalFile();
           f3.deleteOnExit();
           f3_name = f3.getAbsolutePath();
           f3_contents = "nopqrstuvwxyz";
           FileWriter fw3 = new FileWriter(f3);
           fw3.write(f3_contents,0,f3_contents.length());
           fw3.close();
-          f4 = File.createTempFile("DrJava-test", ".java").getCanonicalFile();
+          f4 = File.createTempFile("DrScala-test", ".scala").getCanonicalFile();
           f4.deleteOnExit();
           f4_name = f4.getAbsolutePath();
           f4_contents = "abcde";
           FileWriter fw4 = new FileWriter(f4);
           fw4.write(f4_contents,0,f4_contents.length());
           fw4.close();
-          f5 = File.createTempFile("DrJava-test", ".java").getCanonicalFile();
+          f5 = File.createTempFile("DrScala-test", ".scala").getCanonicalFile();
           f5.deleteOnExit();
           f5_name = f5.getAbsolutePath();
           f5_contents = "fghijklm";
           FileWriter fw5 = new FileWriter(f5);
           fw5.write(f5_contents,0,f5_contents.length());
           fw5.close();
-          f6 = File.createTempFile("DrJava-test", ".java").getCanonicalFile();
+          f6 = File.createTempFile("DrScala-test", ".scala").getCanonicalFile();
           f6.deleteOnExit();
           f6_name = f6.getAbsolutePath();
           f6_contents = "nopqrstuvwxyz";
           FileWriter fw6 = new FileWriter(f6);
           fw6.write(f6_contents,0,f6_contents.length());
           fw6.close();
-          f7 = File.createTempFile("DrJava-test", ".java").getCanonicalFile();
+          f7 = File.createTempFile("DrScala-test", ".scala").getCanonicalFile();
           f7.deleteOnExit();
           f7_name = f7.getAbsolutePath();
           f7_contents = "abcde";
           FileWriter fw7 = new FileWriter(f7);
           fw7.write(f7_contents,0,f7_contents.length());
           fw7.close();
-          f8 = File.createTempFile("DrJava-test", ".java").getCanonicalFile();
+          f8 = File.createTempFile("DrScala-test", ".scala").getCanonicalFile();
           f8.deleteOnExit();
           f8_name = f8.getAbsolutePath();
           f8_contents = "fghijklm";
@@ -178,19 +178,19 @@ public final class CommandLineTest extends DrJavaTestCase {
           fw8.write(f8_contents,0,f8_contents.length());
           fw8.close();
           
-          nof1 = File.createTempFile("DrJava-test", ".java").getCanonicalFile();
+          nof1 = File.createTempFile("DrScala-test", ".scala").getCanonicalFile();
           nof1_name = nof1.getAbsolutePath();
           nof1.delete();
-          nof2 = File.createTempFile("DrJava-test", ".java").getCanonicalFile();
+          nof2 = File.createTempFile("DrScala-test", ".scala").getCanonicalFile();
           nof2_name = nof2.getAbsolutePath();
           nof2.delete();
-          nof3 = File.createTempFile("DrJava-test", ".java").getCanonicalFile();
+          nof3 = File.createTempFile("DrScala-test", ".scala").getCanonicalFile();
           nof3_name = nof3.getAbsolutePath();
           nof3.delete();
-          nof4 = File.createTempFile("DrJava-test", ".java").getCanonicalFile();
+          nof4 = File.createTempFile("DrScala-test", ".scala").getCanonicalFile();
           nof4_name = nof4.getAbsolutePath();
           nof4.delete();
-          nof5 = File.createTempFile("DrJava-test", ".java").getCanonicalFile();
+          nof5 = File.createTempFile("DrScala-test", ".scala").getCanonicalFile();
           nof5_name = nof5.getAbsolutePath();
           nof5.delete();
           
@@ -210,7 +210,7 @@ public final class CommandLineTest extends DrJavaTestCase {
     super.tearDown();
   }
   
-  /** Tests DrJava with no command line arguments. Should open a new, untitled document. */
+  /** Tests DrScala with no command line arguments. Should open a new, untitled document. */
   public void testNone() {
     DrJavaRoot.openCommandLineFiles(_mf, new String[0],false);
     // ListModel<DefinitionsDocument> docs =
@@ -341,9 +341,9 @@ public final class CommandLineTest extends DrJavaTestCase {
     * fix will be to absolutize file paths when opening files.)
     */
   public void testRelativePath() throws IOException, InvalidPackageException {
-    String funnyName = "DrJava_automatically_deletes_this_1";
+    String funnyName = "DrScala_automatically_deletes_this_1";
     File newDirectory = mkTempDir(funnyName);
-    File relativeFile = new File(newDirectory, "X.java");
+    File relativeFile = new File(newDirectory, "X.scala");
     
     assertEquals(relativeFile + " is absolute?", false, relativeFile.isAbsolute());
     
@@ -357,14 +357,14 @@ public final class CommandLineTest extends DrJavaTestCase {
     * converting it to a canonical filename.
     */
   public void testDotPaths() {
-    String funnyName = "DrJava_automatically_deletes_this_2";
+    String funnyName = "DrScala_automatically_deletes_this_2";
     File newDirectory = mkTempDir(funnyName);
     
     assertTrue("child directory created OK", new File(newDirectory, "childDir").mkdir());
     
-    File relativeFile = new File(newDirectory, "." + FS + "X.java");
-    File relativeFile2 = new File(newDirectory, "." + FS + "Y.java");
-    File relativeFile3 = new File(newDirectory, "childDir" + FS + ".." + FS + "Z.java");
+    File relativeFile = new File(newDirectory, "." + FS + "X.scala");
+    File relativeFile2 = new File(newDirectory, "." + FS + "Y.scala");
+    File relativeFile3 = new File(newDirectory, "childDir" + FS + ".." + FS + "Z.scala");
     
     try {
       checkFile(relativeFile, funnyName);

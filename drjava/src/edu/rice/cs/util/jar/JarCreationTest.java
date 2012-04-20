@@ -152,7 +152,7 @@ public class JarCreationTest extends DrJavaTestCase {
       jb = new JarBuilder(f);
       jb.addDirectoryRecursive(dir, "", new FileFilter() {
         public boolean accept(File pathname) {
-          return pathname.getName().endsWith(".java") || pathname.isDirectory();
+          return pathname.getName().endsWith(".scala") || pathname.isDirectory();
         }
       });
       jb.close();
@@ -178,13 +178,13 @@ public class JarCreationTest extends DrJavaTestCase {
     File f = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("test", ".jar");
     File add = null;
     try {
-      String fileContents = "public class JarTest {" +
-              "\tpublic String getClassName() {" +
-              "\t\treturn \"JarTest\";" +
+      String fileContents = "class JarTest {" +
+              "\tdef getClassName() = " +
+              "\t\"JarTest\"" +
               "\t}" +
               "}";
 
-      add = File.createTempFile("JarTest",".java").getCanonicalFile();
+      add = File.createTempFile("JarTest",".scaka").getCanonicalFile();
       add.deleteOnExit();
 
       PrintWriter pw = new PrintWriter(new FileOutputStream(add));

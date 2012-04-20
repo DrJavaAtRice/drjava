@@ -224,7 +224,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
     
     // Make sure .class exists
-    File compiled = classForJava(file, "DrJavaTestFoo");
+    File compiled = classForScala(file, "DrScalaTestFoo");
     assertTrue("Class file doesn't exist after compile", compiled.exists());
     _model.removeListener(listener);
     _log.log("testCompileAnyUnsavedButSaveWhenAsked complete");
@@ -298,7 +298,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     listener.checkCompileOccurred();
     
     // Make sure .class exists
-    File compiled = classForJava(file, "DrJavaTestFoo");
+    File compiled = classForScala(file, "DrScalaTestFoo");
     assertTrue("Class file doesn't exist after compile", compiled.exists());
     _model.removeListener(listener);
     _log.log("testCompileActiveSavedAnyUnsavedButSaveWhenAsked complete");

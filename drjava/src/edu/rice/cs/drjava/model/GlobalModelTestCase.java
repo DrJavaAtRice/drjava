@@ -75,24 +75,24 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  */
 public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
-  public static final Log _log  = new Log("GlobalModel.txt", false);
+  public static final Log _log  = new Log("GlobalModel.txt", true);
 
   protected volatile DefaultGlobalModel _model;
   protected volatile InteractionsController _interactionsController;
   protected volatile File _tempDir;
   protected volatile OpenDefinitionsDocument _doc;  // the working document in some shared set up routines
 
-  protected static final String FOO_TEXT = "class DrJavaTestFoo {}";
-  protected static final String BAR_TEXT = "class DrJavaTestBar {}";
-  protected static final String BAZ_TEXT = "class DrJavaTestBaz extends DrJavaTestFoo { public static int x = 3; }";
-  protected static final String FOO_MISSING_CLOSE_TEXT = "class DrJavaTestFoo {";
-  protected static final String FOO_PACKAGE_AFTER_IMPORT = "import java.util.*;\npackage a;\n" + FOO_TEXT;
-  protected static final String FOO_PACKAGE_INSIDE_CLASS = "class DrJavaTestFoo { package a; }";
-  protected static final String FOO_PACKAGE_AS_FIELD = "class DrJavaTestFoo { int package; }";
-  protected static final String FOO_PACKAGE_AS_FIELD_2 = "class DrJavaTestFoo { int package = 5; }";
-  protected static final String FOO_PACKAGE_AS_PART_OF_FIELD = "class DrJavaTestFoo { int cur_package = 5; }";
+  protected static final String FOO_TEXT = "class DrScalaTestFoo {}";
+  protected static final String BAR_TEXT = "class DrScalaTestBar {}";
+  protected static final String BAZ_TEXT = "object DrScalaTestBaz extends DrScalaTestFoo { val x = 3 }";
+  protected static final String FOO_MISSING_CLOSE_TEXT = "class DrScalaTestFoo {";
+  protected static final String FOO_PACKAGE_AFTER_IMPORT = "import java.util._\npackage a\n" + FOO_TEXT;
+  protected static final String FOO_PACKAGE_INSIDE_CLASS = "class DrScalaTestFoo { package a; }";
+  protected static final String FOO_PACKAGE_AS_FIELD = "class DrScalaTestFoo { var package: Int; }";
+  protected static final String FOO_PACKAGE_AS_FIELD_2 = "class DrScalaTestFoo { val package = 5; }";
+  protected static final String FOO_PACKAGE_AS_PART_OF_FIELD = "class DrScalaTestFoo { val cur_package = 5; }";
   
-  public GlobalModelTestCase() { _log.log("Constructing a " + this); }
+  public GlobalModelTestCase() { _log.log("Constructing a GlobalModelTestCase"); }
 
   /** Setup for each test case, which does the following.
    *  <OL>
@@ -123,7 +123,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
         _log.log("Global model created for " + this);
         DrJava.getConfig().resetToDefaults();
         String user = System.getProperty("user.name");
-        try { _tempDir = FileOps.createTempDirectory("DrJava-test-" + user /*, ""*/); }
+        try { _tempDir = FileOps.createTempDirectory("DrScala-test-" + user /*, ""*/); }
         
         catch(IOException e) {
           fail("IOException thrown with traceback: \n" + e);
@@ -179,7 +179,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
   /** Create a new temporary file in _tempDir. */
   protected File tempFile() throws IOException {
-    File f = File.createTempFile("DrJava-test", ".java", _tempDir).getCanonicalFile();
+    File f = File.createTempFile("DrScala-test", ".scala", _tempDir).getCanonicalFile();
 //    System.err.println("temp file created with name " + f);
     return f;
   }
@@ -188,12 +188,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    *  with different ints will return different filenames.
    */
   protected File tempFile(int i) throws IOException {
-    return File.createTempFile("DrJava-test" + i, ".java", _tempDir).getCanonicalFile();
+    return File.createTempFile("DrScala-test" + i, ".scala", _tempDir).getCanonicalFile();
   }
 
   /** Create a new temporary directory in _tempDir. */
   protected File tempDirectory() throws IOException {
-    return IOUtil.createAndMarkTempDirectory("DrJava-test", "", _tempDir);
+    return IOUtil.createAndMarkTempDirectory("DrScala-test", "", _tempDir);
   }
 
   protected File createFile(String name) { return new File(_tempDir, name); }
@@ -204,7 +204,14 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     String cname = className + ".class";
     return new File(sourceFile.getParent(), cname);
   }
-
+   
+  /** Given a .scala file and a class file name, returns the corresponding .class file. */
+  protected File classForScala(File sourceFile, String className) {
+    assertTrue(sourceFile.getName().endsWith(".scala"));
+    String cname = className + ".class";
+    return new File(sourceFile.getParent(), cname);
+  }
+  
   /** Creates a new temporary file and writes the given text to it.
    *  The File object for the new file is returned.
    */

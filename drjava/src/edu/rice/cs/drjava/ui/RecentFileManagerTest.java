@@ -52,8 +52,8 @@ import java.util.Vector;
   */
 public final class RecentFileManagerTest extends DrJavaTestCase {
   
-  protected static final String FOO_TEXT = "class DrJavaTestFoo {}";
-  protected static final String BAR_TEXT = "class DrJavaTestBar {}";
+  protected static final String FOO_TEXT = "class DrScalaTestFoo {}";
+  protected static final String BAR_TEXT = "class DrScalaTestBar {}";
   private RecentFileManager _rfm;
   private JMenu _menu;
   protected File _tempDir;
@@ -84,7 +84,7 @@ public final class RecentFileManagerTest extends DrJavaTestCase {
     * different ints will return different filenames.
     */
   protected File tempFile() throws IOException {
-    return File.createTempFile("DrJava-test", ".java", _tempDir).getCanonicalFile();
+    return File.createTempFile("DrScala-test", ".scala", _tempDir).getCanonicalFile();
   }
   
   /** Creates a new temporary file and writes the given text to it. The File object for the new file is returned. */
