@@ -623,14 +623,14 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     f = IOUtil.attemptCanonicalFile(f);
     if (IOUtil.attemptIsDirectory(f)) {
       Set<JDKDescriptor> set = map.get(f);
-      if (set==null) {
+      if (set == null) {
         set = new LinkedHashSet<JDKDescriptor>();
         map.put(f, set);
       }
+      if (! set.contains(f)) JDKToolsLibrary.msg("Dir added:     " + f);
       set.add(c);
-      JDKToolsLibrary.msg("Dir added:     "+f);
     }
-    else { JDKToolsLibrary.msg("Dir not added: "+f); }
+    else { JDKToolsLibrary.msg("Dir does not exist: " + f); }
   }
   
   /** Add a canonicalized {@code f} to the given set if it is an existing file */
@@ -670,17 +670,16 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     Iterable<JDKDescriptor> descriptors = IterUtil.empty();
     try {
       File f = edu.rice.cs.util.FileOps.getDrJavaFile();
-      JDKToolsLibrary.msg("drjava.jar: "+f);
+      JDKToolsLibrary.msg("drjava.jar: " + f);
       if (f.isFile()) {
         JarFile jf = new JarFile(f);
-        JDKToolsLibrary.msg("jar file: "+jf);
+        JDKToolsLibrary.msg("jar file: " + jf);
         Enumeration<JarEntry> entries = jf.entries();
-        while(entries.hasMoreElements()) {
+        while (entries.hasMoreElements()) {
           JarEntry je = entries.nextElement();
           String name = je.getName();
           if (name.startsWith("edu/rice/cs/drjava/model/compiler/descriptors/") &&
-              name.endsWith(".class") &&
-              (name.indexOf('$')<0)) {
+              name.endsWith(".class") && name.indexOf('$') < 0) {
             descriptors = attemptToLoadDescriptor(descriptors, name);
           }
         }
@@ -688,14 +687,14 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       else {
         final String DESC_PATH = "edu/rice/cs/drjava/model/compiler/descriptors";
         File dir = new File(f, DESC_PATH);
-        JDKToolsLibrary.msg("directory, enumerating files in "+dir);
+        JDKToolsLibrary.msg("directory, enumerating files in " + dir);
         Iterable<File> files = IOUtil.listFilesRecursively(dir, new Predicate<File>() {
           public boolean contains(File arg) {
-            return (arg.isFile()) && arg.getName().endsWith(".class") && (arg.getName().indexOf('$')<0);
+            return (arg.isFile()) && arg.getName().endsWith(".class") && (arg.getName().indexOf('$') < 0);
           }
         });
-        for(File je: files) {
-          String name = DESC_PATH+"/"+je.getName();
+        for (File je: files) {
+          String name = DESC_PATH + "/" + je.getName();
           descriptors = attemptToLoadDescriptor(descriptors, name);
         }
       }
