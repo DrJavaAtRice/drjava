@@ -65,7 +65,7 @@ public class DrJavaFileUtils  {
   /** Return the suggested file extension that will be appended to a file without extension.
     * @return the suggested file extension */
   public static String getSuggestedFileExtension() {
-    return OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL)];
+    return OptionConstants.SCALA_FILE_EXTENSION;
   }
   
   /** .java --> true
