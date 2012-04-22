@@ -118,8 +118,9 @@ public interface OptionConstants {
   public static final int ADVANCED_LEVEL = 3;
   public static final int FUNCTIONAL_JAVA_LEVEL = 4;
   public static final String[] LANGUAGE_LEVEL_EXTENSIONS = new String[] {
-    JAVA_FILE_EXTENSION, // = .java, do not include the dot.  What?  It does!
-      SCALA_FILE_EXTENSION
+    SCALA_FILE_EXTENSION,
+    JAVA_FILE_EXTENSION 
+
 //      OLD_DJ0_FILE_EXTENSION, // = .dj0
 //      OLD_DJ1_FILE_EXTENSION, // = .dj1
 //      OLD_DJ2_FILE_EXTENSION, // = .dj2
@@ -1475,7 +1476,7 @@ public interface OptionConstants {
    * the ForcedChoiceOption created by COMPILER_PREFERENCE_CONTROL.evaluate()
    */
   public static final StringOption DEFAULT_COMPILER_PREFERENCE = 
-    new StringOption("default.compiler.preference", COMPILER_PREFERENCE_CONTROL.SCALA);  // NO_PREFERENCE in vanilla DrJava
+    new StringOption("default.compiler.preference", COMPILER_PREFERENCE_CONTROL.SCALA);  // NO_PREFERENCE in DrJava
   
   /**
    * Class that is used to dynamically populate the ForcedChoiceOption.
@@ -1512,16 +1513,16 @@ public interface OptionConstants {
   
   /* ---------- UNDISPLAYED OPTIONS ---------- */
   
-  /** The language level to use when starting DrJava.  Stores the most recently used one.  Defaults to full java. */
+  /** The language level to use when starting DrJava.  Stores the most recently used one.  Defaults to Scala. */
   public static final IntegerOption LANGUAGE_LEVEL = new IntegerOption("language.level", Integer.valueOf(0));
   
   /** A vector containing the most recently used files. */
   public static final VectorOption<File> RECENT_FILES =
-    new VectorOption<File>("recent.files",new FileOption("",null),new Vector<File>());
+    new VectorOption<File>("recent.files", new FileOption("", null), new Vector<File>());
   
   /** A vector containing the most recently used projects. */
   public static final VectorOption<File> RECENT_PROJECTS =
-    new VectorOption<File>("recent.projects",new FileOption("",null),new Vector<File>());
+    new VectorOption<File>("recent.projects", new FileOption("", null), new Vector<File>());
   
   /** Whether to enabled the Show Debug Console menu item in the Tools menu. */
   public static final BooleanOption SHOW_DEBUG_CONSOLE = new BooleanOption("show.debug.console", Boolean.FALSE);

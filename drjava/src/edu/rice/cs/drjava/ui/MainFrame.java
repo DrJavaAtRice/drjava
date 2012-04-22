@@ -1513,7 +1513,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
     }
     else {
-      // try appending ".java" and the other file extensions and see if it's unique
+      // try appending ".scala" and ".java" to see if it's unique
       boolean exact = false;
       for (String attemptedExt: OptionConstants.LANGUAGE_LEVEL_EXTENSIONS) {
         pim.setMask(mask);
@@ -1870,7 +1870,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               }
             }
             else {
-              // try appending ".java" and the other file extensions and see if it's unique
+              // try appending ".scala" and ".java" to see if it's unique
               boolean exact = false;
               for(String attemptedExt: OptionConstants.LANGUAGE_LEVEL_EXTENSIONS) {
                 pim.setMask(mask);

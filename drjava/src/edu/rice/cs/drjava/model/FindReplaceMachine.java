@@ -542,7 +542,7 @@ public class FindReplaceMachine {
 //      " ...)");
     boolean inTestCase = false;
     for(String ext: OptionConstants.LANGUAGE_LEVEL_EXTENSIONS) {
-      inTestCase |= doc.getFileName().endsWith("Test"+ext);
+      inTestCase |= doc.getFileName().endsWith("Test" + ext);
     }
     
     if (!_ignoreTestCases || ! inTestCase) {
