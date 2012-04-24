@@ -403,6 +403,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       addIfDir(new File(javaHome), roots);
       addIfDir(new File(javaHome, ".."), roots);
       addIfDir(new File(javaHome, "../.."), roots);
+      addIfDir(new File(javaHome, "../../.."), roots);
     }
     
     // add JAVA environment bindings to roots
@@ -453,17 +454,19 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   /* Search for jar files in roots and, if found, transfer them to the jars collection. */
   protected static void searchRootsForJars(LinkedHashMap<File,Set<JDKDescriptor>> roots,
                                            LinkedHashMap<File,Set<JDKDescriptor>> jars) {
+    JDKToolsLibrary.msg("***** roots = " + roots);
     // matches: starts with "j2sdk", starts with "jdk", has form "[number].[number].[number]" (OS X), or
     // starts with "java-" (Linux)
     Predicate<File> subdirFilter = LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("j2sdk.*"),
                                                  IOUtil.regexCanonicalCaseFilePredicate("jdk.*"),
-                                                 LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("\\d+\\.\\d+\\.\\d+"),
+                                                 LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("\\d+\\.\\d+\\.\\d+.*"),
                                                                IOUtil.regexCanonicalCaseFilePredicate("java-.*"))); 
     for (Map.Entry<File,Set<JDKDescriptor>> root : roots.entrySet()) {
       JDKToolsLibrary.msg("Searching root (for jar files): " + root.getKey());
       for (File subdir : IOUtil.attemptListFilesAsIterable(root.getKey(), subdirFilter)) {
         JDKToolsLibrary.msg("Looking at subdirectory: " + subdir);
         addIfFile(new File(subdir, "lib/tools.jar"), root.getValue(), jars);
+        addIfFile(new File(subdir, "Home/lib/tools.jar"), root.getValue(), jars);
         addIfFile(new File(subdir, "Classes/classes.jar"), root.getValue(), jars);
         addIfFile(new File(subdir, "Contents/Classes/classes.jar"), root.getValue(), jars);  // "Contents/" appears as prefix in new OS X paths
       }
