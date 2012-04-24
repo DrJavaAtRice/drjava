@@ -68,7 +68,7 @@ import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStat
   */
 public class DefinitionsDocument extends AbstractDJDocument implements Finalizable<DefinitionsDocument> {
   
-  public static final Log _log = new Log("GlobalModel.txt", true);
+  public static final Log _log = new Log("GlobalModel.txt", false);
   private static final int NO_COMMENT_OFFSET = 0;
   private static final int WING_COMMENT_OFFSET = 2;
   

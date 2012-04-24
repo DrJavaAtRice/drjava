@@ -159,7 +159,7 @@ public abstract class JDKDescriptor {
   private static final class None extends JDKDescriptor {
     public String getName() { return "none"; }
     public String getDescription(JavaVersion.FullVersion version) {
-      switch(version.vendor()) {
+      switch (version.vendor()) {
         case ORACLE:
           return "Oracle JDK library " + version.toString();
         case OPENJDK:

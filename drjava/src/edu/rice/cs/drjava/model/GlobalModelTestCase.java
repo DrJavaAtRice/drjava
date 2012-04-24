@@ -75,7 +75,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  */
 public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
-  public static final Log _log  = new Log("GlobalModel.txt", true);
+  public static final Log _log  = new Log("GlobalModel.txt", false);
 
   protected volatile DefaultGlobalModel _model;
   protected volatile InteractionsController _interactionsController;

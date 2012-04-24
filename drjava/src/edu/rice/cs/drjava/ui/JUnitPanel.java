@@ -43,6 +43,7 @@ import edu.rice.cs.drjava.model.junit.JUnitErrorModel;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
+import edu.rice.cs.util.swing.Utilities;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -87,10 +88,10 @@ public class JUnitPanel extends ErrorPanel {
   private static final String TEST_OUT_OF_SYNC =
     "The documents being tested have been modified and should be recompiled!\n";
   
-  protected JUnitErrorListPane _errorListPane;
+  protected volatile JUnitErrorListPane _errorListPane;
   private final MainFrame _mainFrame;      // only used in assert statements
-  private int _testCount;
-  private boolean _testsSuccessful;
+  private volatile int _testCount;
+  private volatile boolean _testsSuccessful;
   
   private volatile JUnitProgressBar _progressBar;
   
@@ -194,15 +195,12 @@ public class JUnitPanel extends ErrorPanel {
   public void testStarted(String className, String testName) { }
   
   private void _displayStackTrace (JUnitError e) {
-    _errorLabel.setText((e.isWarning() ? "Error: " : "Failure: ") +
-                        e.message());
+    _errorLabel.setText((e.isWarning() ? "Error: " : "Failure: ") + e.message());
     _fileLabel.setText("File: " + (new File(e.fileName())).getName());
-    if (!e.testName().equals("")) {
+    if (!e.testName().equals(""))
       _testLabel.setText("Test: " + e.testName());
-    }
-    else {
+    else
       _testLabel.setText("");
-    }
     _stackTextArea.setText(e.toString());
     _stackTextArea.setCaretPosition(0);
     _frame.setPopupLoc(_stackFrame);
@@ -211,9 +209,9 @@ public class JUnitPanel extends ErrorPanel {
   
   /** A pane to show JUnit errors. It acts like a listbox (clicking selects an item) but items can each wrap, etc. */
   public class JUnitErrorListPane extends ErrorPanel.ErrorListPane {
-    private JPopupMenu _popMenu;
-    private String _runningTestName;
-    private boolean _warnedOutOfSync;
+    private volatile JPopupMenu _popMenu;
+    private volatile String _runningTestName;
+    private volatile boolean _warnedOutOfSync;
     private static final String JUNIT_WARNING = "junit.framework.TestSuite$1.warning";
     
     /** Maps any test names in the currently running suite to the position that they appear in the list pane. */
@@ -522,7 +520,7 @@ public class JUnitPanel extends ErrorPanel {
    * Adapted from JUnit code.
    */
   static class JUnitProgressBar extends JProgressBar {
-    private boolean _hasError = false;
+    private volatile boolean _hasError = false;
     
     public JUnitProgressBar() {
       super();
@@ -544,15 +542,16 @@ public class JUnitPanel extends ErrorPanel {
       setValue(0);
     }
     
-    public void start(int total) {
+    public void start(final int total) {
       setMaximum(total);
       reset();
     }
     
-    public void step(int value, boolean successful) {
+    public void step(final int value, final boolean successful) {
       setValue(value);
-      if (!_hasError && !successful) {
+      if (! _hasError && ! successful) {
         _hasError= true;
+//        Utilities.show(Thread.currentThread().getStackTrace()));
         setForeground(getStatusColor());
       }
     }

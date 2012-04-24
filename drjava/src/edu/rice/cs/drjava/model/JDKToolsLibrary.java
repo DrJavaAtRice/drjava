@@ -76,9 +76,8 @@ public class JDKToolsLibrary {
   private final JavadocModel _javadoc;
   private final JDKDescriptor _jdkDescriptor; // JDKDescriptor.NONE if none
   
-  protected JDKToolsLibrary(FullVersion version, JDKDescriptor jdkDescriptor,
-                            CompilerInterface compiler, Debugger debugger,
-                            JavadocModel javadoc) {
+  protected JDKToolsLibrary(FullVersion version, JDKDescriptor jdkDescriptor, CompilerInterface compiler, 
+                            Debugger debugger, JavadocModel javadoc) {
     assert jdkDescriptor != null;
     _version = version;
     _compiler = compiler;
