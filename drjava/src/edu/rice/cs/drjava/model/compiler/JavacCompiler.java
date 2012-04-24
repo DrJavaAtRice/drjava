@@ -356,7 +356,7 @@ public abstract class JavacCompiler implements CompilerInterface {
   /** Return the suggested file extension that will be appended to a file without extension.
     * @return the suggested file extension */
   public String getSuggestedFileExtension() {
-    return DrJavaFileUtils.getSuggestedFileExtension();
+    return OptionConstants.JAVA_FILE_EXTENSION;
   }
   
   /** Return a file filter that can be used to open files this compiler supports.
@@ -366,7 +366,7 @@ public abstract class JavacCompiler implements CompilerInterface {
   /** Return the extension of the files that should be opened with the "Open Folder..." command.
     * @return file extension for the "Open Folder..." command for this compiler. */
   public String getOpenAllFilesInFolderExtension() {
-    return OptionConstants.SCALA_FILE_EXTENSION;
+    return OptionConstants.JAVA_FILE_EXTENSION;
   }
 
   /** Return true if this compiler can be used in conjunction with the language level facility.

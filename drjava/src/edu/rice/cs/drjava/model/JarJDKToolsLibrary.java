@@ -115,6 +115,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     });
   }
   
+  /* Fields */
   private final File _location;
   private final List<File> _bootClassPath; // may be null (i.e. compiler's internal behavior)
   
@@ -128,7 +129,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   
   public File location() { return _location; }
   public List<File> bootClassPath() { // may be null
-    if (_bootClassPath!=null) return new ArrayList<File>(_bootClassPath);
+    if (_bootClassPath != null) return new ArrayList<File>(_bootClassPath);
     else return null;
   }
   
@@ -393,7 +394,6 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       // System.getenv is deprecated under 1.3 and 1.4, and may throw a java.lang.Error (!),
       // which we'd rather not have to catch
       envJavaHome = System.getenv("JAVA_HOME");
-      envJava7Home = System.getenv("JAVA7_HOME");
       programFiles = System.getenv("ProgramFiles");
       systemDrive = System.getenv("SystemDrive");
     }
@@ -408,9 +408,6 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     // add JAVA environment bindings to roots
     if (envJavaHome != null) {
       addIfDir(new File(envJavaHome), roots);
-    }
-    if (envJava7Home != null) {
-      addIfDir(new File(envJava7Home), roots);
     }
     
     // Add ProgramFiles to roots

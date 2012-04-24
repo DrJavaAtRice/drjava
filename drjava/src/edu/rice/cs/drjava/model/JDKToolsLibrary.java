@@ -194,9 +194,9 @@ public class JDKToolsLibrary {
       list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, compiler, debugger, javadoc));
     }
       
-    msg("                 compilers found: "+list.size());
+    msg("                 compilers found: " + list.size());
     
-    if (list.size()==0) {
+    if (list.size() == 0) {
       // no compiler found, i.e. compiler == NoCompilerAvailable.ONLY
       msg("                 no compilers found, adding NoCompilerAvailable library");
       list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, NoCompilerAvailable.ONLY, debugger, javadoc));

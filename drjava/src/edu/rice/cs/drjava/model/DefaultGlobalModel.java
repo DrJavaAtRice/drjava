@@ -253,12 +253,13 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   // If the descriptor is something different than JDKDescriptor.NONE, then this pair will always
   // return false for equals(), except if it is compared to the identical pair.
   private static class LibraryKey implements Comparable<LibraryKey> {    
-    public static final int PRIORITY_BUILTIN = 0;  // Other than Scala
+    public static final int PRIORITY_BUILTIN = 0;  // Currently the Eclipse 0.A48 compiler
     public static final int PRIORITY_SEARCH = 1;
     public static final int PRIORITY_RUNTIME = 2;
-    public static final int PRIORITY_CONFIG = 3;
-    public static final int PRIORITY_SCALA = 4;
-    protected final int _priority; // 0 = search, 1 = runtime, 2 = config
+    public static final int PRIORITY_SCALA = 3;
+    public static final int PRIORITY_CONFIG = 4;
+
+    protected final int _priority; // as above
     protected final JavaVersion.FullVersion _first;
     protected final JDKDescriptor _second;
     
@@ -302,8 +303,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         result = _first.compareTo(o._first);
       }
       if (result == 0) {
-        if (_second==JDKDescriptor.NONE) { // identity
-          if (o._second==JDKDescriptor.NONE) { // identity
+        if (_second == JDKDescriptor.NONE) { // identity
+          if (o._second == JDKDescriptor.NONE) { // identity
             result = 0;
           }
           else {
@@ -311,7 +312,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
             result = 1;
           }
         }
-        else if (o._second==JDKDescriptor.NONE) { // identity
+        else if (o._second == JDKDescriptor.NONE) { // identity
           // other is NONE, this is something else; prefer NONE
           result = -1;
         }
@@ -333,7 +334,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     // We give priority to libraries that support Scala.
     
-    // map is sorted first by Scala and second by version, lowest-to-highest
+    // map is sorted first by LibraryKey.priority and second by version, lowest-to-highest
     Map<LibraryKey, JDKToolsLibrary> results = new TreeMap<LibraryKey, JDKToolsLibrary>();
     
     JarJDKToolsLibrary._log.log("Creating DefaultGlobalModel; " + JavaVersion.CURRENT + " is running");
@@ -353,12 +354,12 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     for(JDKToolsLibrary fromRuntime: allFromRuntime) {
       if (fromRuntime.isValid()) {
         if (! results.containsKey(getLibraryKey(LibraryKey.PRIORITY_RUNTIME, fromRuntime))) {
-//          JarJDKToolsLibrary._log.log("From runtime: "+fromRuntime);
+//          JarJDKToolsLibrary._log.log("From runtime: " + fromRuntime);
           results.put(getLibraryKey(LibraryKey.PRIORITY_RUNTIME, fromRuntime), fromRuntime);
         }
 //        else { JarJDKToolsLibrary._log.log("From runtime: duplicate "+fromRuntime); }
       }
-//      else { JarJDKToolsLibrary._log.log("From runtime: invalid "+fromRuntime); }
+//      else { JarJDKToolsLibrary._log.log("From runtime: invalid " + fromRuntime); }
     }
     
     Iterable<JarJDKToolsLibrary> fromSearch = JarJDKToolsLibrary.search(this);
@@ -366,21 +367,20 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       JavaVersion.FullVersion tVersion = t.version();
 //      JarJDKToolsLibrary._log.log("From search: "+t);
 //      JavaVersion.FullVersion coarsenedVersion = coarsenVersion(tVersion);
-//      JarJDKToolsLibrary._log.log("\ttVersion: "+tVersion+" "+tVersion.vendor());
-//      JarJDKToolsLibrary._log.log("\tcoarsenedVersion: "+coarsenedVersion+" "+coarsenedVersion.vendor());
+//      JarJDKToolsLibrary._log.log("\ttVersion: " + tVersion + " " + tVersion.vendor());
+//      JarJDKToolsLibrary._log.log("\tcoarsenedVersion: " + coarsenedVersion + " " + coarsenedVersion.vendor());
       // give a lower priority to built-in compilers
       int priority = (edu.rice.cs.util.FileOps.getDrJavaFile().equals(tVersion.location())) ? 
-        LibraryKey.PRIORITY_BUILTIN :
-        LibraryKey.PRIORITY_SEARCH;
+        LibraryKey.PRIORITY_BUILTIN : LibraryKey.PRIORITY_SEARCH;
       if (t.compiler().getSuggestedFileExtension().equals(OptionConstants.SCALA_FILE_EXTENSION)) priority = LibraryKey.PRIORITY_SCALA;
-      if (!results.containsKey(getLibraryKey(priority, t))) {
-//        JarJDKToolsLibrary._log.log("\tadded");
+      if (! results.containsKey(getLibraryKey(priority, t))) {
+        JarJDKToolsLibrary._log.log("Adding: " + t + "with extension " + t.compiler().getSuggestedFileExtension() + " and priority " + priority);
         results.put(getLibraryKey(priority, t), t);
       }
 //      else { JarJDKToolsLibrary._log.log("\tduplicate"); }
     }
     
-//    JarJDKToolsLibrary._log.log("compiler results = " + results.values());
+    JarJDKToolsLibrary._log.log("***** Compiler results = " + results);
     return IterUtil.reverse(results.values());
   }
   
