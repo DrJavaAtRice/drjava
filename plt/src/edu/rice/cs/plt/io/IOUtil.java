@@ -1312,10 +1312,9 @@ public final class IOUtil {
     public boolean contains(File f) { return _regex.matcher(f.getName()).matches(); }
   }
   
-  /**
-   * Define a {@code FilePredicate} that accepts files whose (simple) names in the
-   * canonical case (see {@link #canonicalCase}) match a regular expression.
-   */
+  /** Define a {@code FilePredicate} that accepts files whose (simple) names in the
+    * canonical case (see {@link #canonicalCase}) match a regular expression.
+    */
   public static FilePredicate regexCanonicalCaseFilePredicate(String regex) {
     return new RegexCanonicalCaseFilePredicate(regex);
   }
@@ -1328,29 +1327,26 @@ public final class IOUtil {
     public boolean contains(File f) { return _regex.matcher(canonicalCase(f).getName()).matches(); }
   }
   
-  /**
-   * Define a {@code FilePredicate} that accepts file objects with the given extension (that is,
-   * for extension {@code txt}, file objects whose canonical-case names (see {@link #canonicalCase}) 
-   * end in {@code .txt}).
-   */
+  /** Define a {@code FilePredicate} that accepts file objects with the given extension (that is,
+    * for extension {@code txt}, file objects whose canonical-case names (see {@link #canonicalCase}) 
+    * end in {@code .txt}).
+    */
   public static FilePredicate extensionFilePredicate(String extension) {
     return new RegexCanonicalCaseFilePredicate(".*\\." + canonicalCase(new File(extension)).getName());
   }
   
-  /**
-   * Define a {@code FilePredicate} that only accepts files with the given name (where both names
-   * are converted to the canonical case; see {@link #canonicalCase}).
-   */
+  /** Define a {@code FilePredicate} that only accepts files with the given name (where both names
+    * are converted to the canonical case; see {@link #canonicalCase}).
+    */
   public static FilePredicate sameNameFilePredicate(String name) {
     return new SamePathFilePredicate(new File(name));
   }
   
-  /**
-   * Define a {@code FilePredicate} that only accepts files with the given path and name (where
-   * both paths are converted to the canonical case; see {@link #canonicalCase}).  If {@code path} is
-   * relative, any file with an absolute path that ends with {@code path} will be accepted.
-   * Otherwise, only a file with the exact same path is accepted.
-   */
+  /** Define a {@code FilePredicate} that only accepts files with the given path and name (where
+    * both paths are converted to the canonical case; see {@link #canonicalCase}).  If {@code path} is
+    * relative, any file with an absolute path that ends with {@code path} will be accepted.
+    * Otherwise, only a file with the exact same path is accepted.
+    */
   public static FilePredicate samePathFilePredicate(File path) {
     return new SamePathFilePredicate(path);
   }
@@ -1371,13 +1367,12 @@ public final class IOUtil {
     public boolean contains(File f) { return accept(f); }
   }
   
-  /**
-   * Define a {@code FilePredicate} that only accepts a file with the same attributes as 
-   * {@code f} (at creation time).  This is useful in detecting changes being made to a file.
-   * The files' modification dates, lengths, and read/write permissions are compared.
-   * @throws FileNotFoundException  If {@code f} is not a normal file, or if access to its attributes
-   *                                is not available.
-   */
+  /** Define a {@code FilePredicate} that only accepts a file with the same attributes as 
+    * {@code f} (at creation time).  This is useful in detecting changes being made to a file.
+    * The files' modification dates, lengths, and read/write permissions are compared.
+    * @throws FileNotFoundException  If {@code f} is not a normal file, or if access to its attributes
+    *                                is not available.
+    */
   public static FilePredicate sameAttributesFilePredicate(File f) throws FileNotFoundException {
     return new SameAttributesFilePredicate(f);
   }
@@ -1413,12 +1408,11 @@ public final class IOUtil {
     public boolean contains(File f) { return accept(f); }
   }
   
-  /**
-   * Define a {@code FilePredicate} that only accepts files with contents matching a CRC-32
-   * hash of {@code f} (at creation time).  This is useful in detecting changes being made to
-   * a file.
-   * @throws IOException  If {@code f} cannot be read.
-   */
+  /** Define a {@code FilePredicate} that only accepts files with contents matching a CRC-32
+    * hash of {@code f} (at creation time).  This is useful in detecting changes being made to
+    * a file.
+    * @throws IOException  If {@code f} cannot be read.
+    */
   public static FilePredicate sameContentsFilePredicate(File f) throws IOException {
     return new SameContentsFilePredicate(f);
   }

@@ -158,14 +158,13 @@ public enum JavaVersion {
     }
   }
   
-  /**
-   * Produce the {@code JavaVersion.FullVersion} corresponding to the given version string.  Accepts
-   * input of the form "1.6.0", "1.4.2_10", or "1.5.0_05-ea".  The underscore may be replaced by a dot.
-   * If the text cannot be parsed, a trivial version with major version UNRECOGNIZED is returned.
-   * The location of the JDK, which may be null, will be stored in the version.
-   * 
-   * @see <a href="http://java.sun.com/j2se/versioning_naming.html#">The Sun version specification</a>
-   */
+  /** Produce the {@code JavaVersion.FullVersion} corresponding to the given version string.  Accepts
+    * input of the form "1.6.0", "1.4.2_10", or "1.5.0_05-ea".  The underscore may be replaced by a dot.
+    * If the text cannot be parsed, a trivial version with major version UNRECOGNIZED is returned.
+    * The location of the JDK, which may be null, will be stored in the version.
+    * 
+    * @see <a href="http://java.sun.com/j2se/versioning_naming.html#">The Sun version specification</a>
+    */
   public static FullVersion parseFullVersion(String java_version,
                                              String java_runtime_name,
                                              String java_vm_vendor,
@@ -271,36 +270,32 @@ public enum JavaVersion {
     }
   }
   
-  /**
-   * Produce the {@code JavaVersion.FullVersion} corresponding to the given version string.  Accepts
-   * input of the form "1.6.0", "1.4.2_10", or "1.5.0_05-ea".  The underscore may be replaced by a dot.
-   * If the text cannot be parsed, a trivial version with major version UNRECOGNIZED is returned.
-   * The location of the JDK is null and will be stored in the version.
-   * 
-   * @see <a href="http://java.sun.com/j2se/versioning_naming.html#">The Sun version specification</a>
-   */
+  /** Produce the {@code JavaVersion.FullVersion} corresponding to the given version string.  Accepts
+    * input of the form "1.6.0", "1.4.2_10", or "1.5.0_05-ea".  The underscore may be replaced by a dot.
+    * If the text cannot be parsed, a trivial version with major version UNRECOGNIZED is returned.
+    * The location of the JDK is null and will be stored in the version.
+    * 
+    * @see <a href="http://java.sun.com/j2se/versioning_naming.html#">The Sun version specification</a>
+    */
   public static FullVersion parseFullVersion(String java_version,
                                              String java_runtime_name,
                                              String java_vm_vendor) {
     return parseFullVersion(java_version, java_runtime_name, java_vm_vendor, null);
   }
   
-  /**
-   * Produce the {@code JavaVersion.FullVersion} corresponding to the given version string.  Accepts
-   * input of the form "1.6.0", "1.4.2_10", or "1.5.0_05-ea".  The underscore may be replaced by a dot.
-   * If the text cannot be parsed, a trivial version with major version UNRECOGNIZED is returned.
-   * 
-   * @see <a href="http://java.sun.com/j2se/versioning_naming.html#">The Sun version specification</a>
-   */
+  /** Produce the {@code JavaVersion.FullVersion} corresponding to the given version string.  Accepts
+    * input of the form "1.6.0", "1.4.2_10", or "1.5.0_05-ea".  The underscore may be replaced by a dot.
+    * If the text cannot be parsed, a trivial version with major version UNRECOGNIZED is returned.
+    * 
+    * @see <a href="http://java.sun.com/j2se/versioning_naming.html#">The Sun version specification</a>
+    */
   public static FullVersion parseFullVersion(String text) {
     return parseFullVersion(text, "", "", null); // vendor = "unrecognized"
   }
   
-  /**
-   * A full Java version, implemented for the sake of comparison between version numbers.
-   * 
-   * @see <a href="http://java.sun.com/j2se/versioning_naming.html">The Sun version specification</a>
-   */
+  /** A full Java version, implemented for the sake of comparison between version numbers.
+    * @see <a href="http://java.sun.com/j2se/versioning_naming.html">The Sun version specification</a>
+    */
   public static class FullVersion implements Comparable<FullVersion>, Serializable {
     private JavaVersion _majorVersion;
     private int _maintenance;

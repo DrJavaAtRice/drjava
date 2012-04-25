@@ -288,8 +288,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       else if (name.startsWith("j2sdk") || name.startsWith("java-")) {
         result = JavaVersion.parseFullVersion(parsedVersion = name.substring(5), vendor, vendor, f);
       }
-      else if (name.startsWith("\\d+\\.\\d+\\.\\d+")) {
-        result = JavaVersion.parseFullVersion(parsedVersion = name, vendor, vendor, f);
+      else if (name.startsWith("\\d+\\.\\d+\\.\\d+")) {  // The d+ fields actually match single digits
+        result = JavaVersion.parseFullVersion(parsedVersion = name.substring(0,5), vendor, vendor, f);
       }
       current = current.getParentFile();
     } while (current != null && result == null);
@@ -340,7 +340,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       parsedVersion = result.versionString();
     }
     
-    if ((result == null) || (result.vendor()==JavaVersion.VendorType.UNKNOWN)) {
+    if ((result == null) || (result.vendor() == JavaVersion.VendorType.UNKNOWN)) {
       if (! forceUnknown) {
         if (result.majorVersion().compareTo(JavaVersion.JAVA_6) < 0) {
           // Java 5 or earlier, assume Sun
@@ -373,6 +373,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       }
       result = JavaVersion.parseFullVersion(parsedVersion,vendor,vendor,f);
     }
+    msg("Guessed version for " + current + " is " + result.versionString());
     return result;
   }
   
