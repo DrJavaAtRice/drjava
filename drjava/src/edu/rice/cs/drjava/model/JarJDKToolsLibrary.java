@@ -268,11 +268,13 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     
     // We could start with f.getParentFile(), but this simplifies the logic
     File current = IOUtil.attemptCanonicalFile(f);
+    String name;  // promoted outward for logging purposes
+    String path;  // promoted outward for logging purposes
     String parsedVersion = "";
     String vendor = "";
     do {
-      String name = current.getName();
-      String path = current.getAbsolutePath();
+      name = current.getName();
+      path = current.getAbsolutePath();
       if (! forceUnknown) {
         if (path.startsWith("/System/Library/Frameworks/JavaVM.framework") || path.startsWith("/Library/Java")) vendor = "apple";
         else if (path.toLowerCase().contains("openjdk")) vendor = "openjdk";
@@ -288,8 +290,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       else if (name.startsWith("j2sdk") || name.startsWith("java-")) {
         result = JavaVersion.parseFullVersion(parsedVersion = name.substring(5), vendor, vendor, f);
       }
-      else if (name.startsWith("\\d+\\.\\d+\\.\\d+")) {  // The d+ fields actually match single digits
-        result = JavaVersion.parseFullVersion(parsedVersion = name.substring(0,5), vendor, vendor, f);
+      else if (name.matches("\\d+\\.\\d+\\.\\d+.*")) {  // The \d+ fields actually match single digits; .* matches an arbitrary suffix
+        msg("invoking parseFullVersion on " + name + ", " + vendor + ", " + vendor + ", " + f);  //Strip off 1.x where x is 6 or 7
+        result = JavaVersion.parseFullVersion(parsedVersion = name, vendor, vendor, f);
       }
       current = current.getParentFile();
     } while (current != null && result == null);
@@ -305,7 +308,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           if (v != null) {
             int space = v.indexOf(' ');
             if (space >= 0) v = v.substring(0,space);
-            result = JavaVersion.parseFullVersion(parsedVersion = v,vendor,vendor,f);
+            result = JavaVersion.parseFullVersion(parsedVersion = v, vendor, vendor, f);
           }
         }
         
@@ -373,7 +376,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       }
       result = JavaVersion.parseFullVersion(parsedVersion,vendor,vendor,f);
     }
-    msg("Guessed version for " + current + " is " + result.versionString());
+    msg("Guessed version for " + path + " is " + result.versionString());
     return result;
   }
   
