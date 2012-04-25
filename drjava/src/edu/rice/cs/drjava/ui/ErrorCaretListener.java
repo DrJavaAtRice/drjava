@@ -70,14 +70,14 @@ public class ErrorCaretListener implements CaretListener {
    */
   public void caretUpdate(final CaretEvent evt) {
     assert EventQueue.isDispatchThread();
-    if (_frame.getSelectedCompilerErrorPanel() == null) return;
+    if (_frame.getSelectedErrorPanel() == null) return;
     updateHighlight(evt.getDot());
   }
   
   /** Update the highlight appropriately. */
   public void updateHighlight(final int curPos) {
     assert EventQueue.isDispatchThread();
-    CompilerErrorPanel panel = _frame.getSelectedCompilerErrorPanel();
+    ErrorPanel panel = _frame.getSelectedErrorPanel();
     if (panel == null) return;  // no error panel is currently selected; redundant!
     
     CompilerErrorModel model =  panel.getErrorModel();

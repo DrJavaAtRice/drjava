@@ -163,6 +163,8 @@ public enum JavaVersion {
     * If the text cannot be parsed, a trivial version with major version UNRECOGNIZED is returned.
     * The location of the JDK, which may be null, will be stored in the version.
     * 
+    * This code is baroque and archaic.  TODO: simplify so that "1.7.0.jdk" is acceptable as java_version.
+    * 
     * @see <a href="http://java.sun.com/j2se/versioning_naming.html#">The Sun version specification</a>
     */
   public static FullVersion parseFullVersion(String java_version,
@@ -192,7 +194,7 @@ public enum JavaVersion {
     String typeString;
     // if version doesn't start with "1." and has only one dot, prefix with "1."
     // example: 6.0 --> 1.6.0
-    if ((!java_version.startsWith("1.")) && (java_version.replaceAll("[^\\.]","").length()==1)) {
+    if ((! java_version.startsWith("1.")) && (java_version.replaceAll("[^\\.]","").length() == 1)) {
       java_version = "1."+java_version;
     }
     int dash = java_version.indexOf('-');
@@ -229,18 +231,18 @@ public enum JavaVersion {
       }
     }
     
-    int dot2 = number.indexOf('.', dot1+1);
-    if (dot2 == -1) { return new FullVersion(UNRECOGNIZED, 0, 0,
-                                             ReleaseType.STABLE, null,
-                                             vendor, vendorString, location); }
-    int underscore = number.indexOf('_', dot2+1);
-    if (underscore == -1) { underscore = number.indexOf('.', dot2+1); }
+    int dot2 = number.indexOf('.', dot1 + 1);
+    if (dot2 == -1) { 
+      return new FullVersion(UNRECOGNIZED, 0, 0, ReleaseType.STABLE, null, vendor, vendorString, location); 
+    }
+    int underscore = number.indexOf('_', dot2 + 1);
+    if (underscore == -1) { underscore = number.indexOf('.', dot2 + 1); }
     if (underscore == -1) { underscore = number.length(); }
     try {
       int major = Integer.parseInt(number.substring(0, dot1));
-      int feature = Integer.parseInt(number.substring(dot1+1, dot2));
+      int feature = Integer.parseInt(number.substring(dot1 + 1, dot2));
       int maintenance = Integer.parseInt(number.substring(dot2+1, underscore));
-      int update = (underscore >= number.length()) ? 0 : Integer.parseInt(number.substring(underscore+1));
+      int update = (underscore >= number.length()) ? 0 : Integer.parseInt(number.substring(underscore + 1));
       
       ReleaseType type;
       if (typeString == null) { type = ReleaseType.STABLE; }

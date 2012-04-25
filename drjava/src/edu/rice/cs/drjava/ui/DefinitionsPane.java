@@ -532,94 +532,127 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     _displayRightMargin = DrJava.getConfig().getSetting(DISPLAY_RIGHT_MARGIN);
     _numRightMarginColumns = DrJava.getConfig().getSetting(RIGHT_MARGIN_COLUMNS);
     _rightMarginColor = DrJava.getConfig().getSetting(RIGHT_MARGIN_COLOR);
-    
-    OptionListener<Color> cListener;
-    Pair<Option<Color>, OptionListener<Color>> cPair;
       
     // Setup the color listeners. NOTE: the Foreground/Background listeners add themselves to DrJava.getConfig() 
-    // in their own constructors. Rather than refactor it, we decided to work with that design decision.
-    cListener = new ForegroundColorListener(this);
-    cPair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEFINITIONS_NORMAL_COLOR, cListener);
-    _colorOptionListeners.add(cPair);
+    // in their own constructors. Rather than refactor it, we decided to work with that design decision. 
+    // A separate block is used for each listener to avoid polluting the variable name space.
+    {
+      final OptionListener<Color> fcListener = new ForegroundColorListener(this);
+      final Pair<Option<Color>, OptionListener<Color>> fcPair = 
+        new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEFINITIONS_NORMAL_COLOR, fcListener);
+      _colorOptionListeners.add(fcPair);
+    }
     
-    cListener = new BackgroundColorListener(this);
-    cPair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEFINITIONS_BACKGROUND_COLOR, cListener);
-    _colorOptionListeners.add(cPair);
-
+    {
+      final OptionListener<Color> bcListener = new BackgroundColorListener(this);
+      final Pair<Option<Color>, OptionListener<Color>> bcPair = 
+        new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEFINITIONS_BACKGROUND_COLOR, bcListener);
+      _colorOptionListeners.add(bcPair);
+    }
+    
     // These listeners do not register themselves in their own constructors.  We do.
-    cListener = new MatchColorOptionListener();
-    cPair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEFINITIONS_MATCH_COLOR, cListener);
-    _colorOptionListeners.add(cPair);
-    DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_MATCH_COLOR, cListener);
+    {
+      final OptionListener<Color> mcListener = new MatchColorOptionListener();
+      final Pair<Option<Color>, OptionListener<Color>> mcPair = 
+        new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEFINITIONS_MATCH_COLOR, mcListener);
+      _colorOptionListeners.add(mcPair);
+      DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_MATCH_COLOR, mcListener);
+    }
     
-    cListener = new ErrorColorOptionListener();
-    cPair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.COMPILER_ERROR_COLOR, cListener);
-    _colorOptionListeners.add(cPair);
-    DrJava.getConfig().addOptionListener(OptionConstants.COMPILER_ERROR_COLOR, cListener);
+    {
+      final OptionListener<Color> ecListener = new ErrorColorOptionListener();
+      final Pair<Option<Color>, OptionListener<Color>> ecPair = 
+        new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.COMPILER_ERROR_COLOR, ecListener);
+      _colorOptionListeners.add(ecPair);
+      DrJava.getConfig().addOptionListener(OptionConstants.COMPILER_ERROR_COLOR, ecListener);
+    }
 
-    cListener = new BookmarkColorOptionListener();
-    cPair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.BOOKMARK_COLOR, cListener);
-    _colorOptionListeners.add(cPair);
-    DrJava.getConfig().addOptionListener(OptionConstants.BOOKMARK_COLOR, cListener);
+    {
+      final OptionListener<Color> bcListener = new BookmarkColorOptionListener();
+      final Pair<Option<Color>, OptionListener<Color>> bcPair = 
+        new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.BOOKMARK_COLOR, bcListener);
+      _colorOptionListeners.add(bcPair);
+      DrJava.getConfig().addOptionListener(OptionConstants.BOOKMARK_COLOR, bcListener);
+    }
 
     for (int i = 0; i < FIND_RESULTS_COLORS.length; ++i) {
-      cListener = new FindResultsColorOptionListener(i);
-      cPair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.FIND_RESULTS_COLORS[i], cListener);
+      final OptionListener<Color> cListener = new FindResultsColorOptionListener(i);
+      final Pair<Option<Color>, OptionListener<Color>> cPair = 
+         new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.FIND_RESULTS_COLORS[i], cListener);
       _colorOptionListeners.add(cPair);
       DrJava.getConfig().addOptionListener(OptionConstants.FIND_RESULTS_COLORS[i], cListener);
     }
     
-    cListener = new BreakpointColorOptionListener();
-    cPair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_BREAKPOINT_COLOR, cListener);
-    _colorOptionListeners.add(cPair);
-    DrJava.getConfig().addOptionListener(OptionConstants.DEBUG_BREAKPOINT_COLOR, cListener);
+    {
+      final OptionListener<Color> bcListener = new BreakpointColorOptionListener();
+      final Pair<Option<Color>, OptionListener<Color>> bcPair = 
+        new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_BREAKPOINT_COLOR, bcListener);
+      _colorOptionListeners.add(bcPair);
+      DrJava.getConfig().addOptionListener(OptionConstants.DEBUG_BREAKPOINT_COLOR, bcListener);
+    }
     
-    cListener = new DisabledBreakpointColorOptionListener();
-    cPair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_BREAKPOINT_DISABLED_COLOR, cListener);
-    _colorOptionListeners.add(cPair);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_BREAKPOINT_DISABLED_COLOR, cListener);
+    {
+      final OptionListener<Color> dbcListener = new DisabledBreakpointColorOptionListener();
+      final Pair<Option<Color>, OptionListener<Color>> dbcPair = 
+        new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_BREAKPOINT_DISABLED_COLOR, dbcListener);
+      _colorOptionListeners.add(dbcPair);
+      DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_BREAKPOINT_DISABLED_COLOR, dbcListener);
+    }
     
-    cListener = new ThreadColorOptionListener();
-    cPair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_THREAD_COLOR, cListener);
-    _colorOptionListeners.add(cPair);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_THREAD_COLOR, cListener);
+    {
+      final OptionListener<Color> tcListener = new ThreadColorOptionListener();
+      final Pair<Option<Color>, OptionListener<Color>> tcPair = 
+        new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_THREAD_COLOR, tcListener);
+      _colorOptionListeners.add(tcPair);
+      DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_THREAD_COLOR, tcListener);
+    }
 
-    OptionListener<Boolean> bListener = new AntiAliasOptionListener();
-    Pair<Option<Boolean>, OptionListener<Boolean>> bPair = 
-      new Pair<Option<Boolean>, OptionListener<Boolean>>(OptionConstants.TEXT_ANTIALIAS, bListener);
-    _booleanOptionListeners.add(bPair);
-    DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS, bListener);
-
-    bListener = new OptionListener<Boolean>() {
-      public void optionChanged(OptionEvent<Boolean> oce) {
-        _displayRightMargin = oce.value;
-        DefinitionsPane.this.repaint();
-      }
-    };
-    bPair = new Pair<Option<Boolean>, OptionListener<Boolean>>(OptionConstants.DISPLAY_RIGHT_MARGIN, bListener);
-    _booleanOptionListeners.add(bPair);
-    DrJava.getConfig().addOptionListener(OptionConstants.DISPLAY_RIGHT_MARGIN, bListener);
-
-    OptionListener<Integer> iTemp = new OptionListener<Integer>() {
-      public void optionChanged(OptionEvent<Integer> oce) {
-        _numRightMarginColumns = oce.value;
-        DefinitionsPane.this.repaint();
-      }
-    };
-    Pair<Option<Integer>, OptionListener<Integer>> iPair = 
-      new Pair<Option<Integer>, OptionListener<Integer>>(OptionConstants.RIGHT_MARGIN_COLUMNS, iTemp);
-    _integerOptionListeners.add(iPair);
-    DrJava.getConfig().addOptionListener(OptionConstants.RIGHT_MARGIN_COLUMNS, iTemp);
+    {
+      final OptionListener<Boolean> aaListener = new AntiAliasOptionListener();
+      final Pair<Option<Boolean>, OptionListener<Boolean>> aaPair = 
+        new Pair<Option<Boolean>, OptionListener<Boolean>>(OptionConstants.TEXT_ANTIALIAS, aaListener);
+      _booleanOptionListeners.add(aaPair);
+      DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS, aaListener);
+    }
     
-    cListener = new OptionListener<Color>() {
-      public void optionChanged(OptionEvent<Color> oce) {
-        _rightMarginColor = oce.value;
-        DefinitionsPane.this.repaint();
-      }
-    };
-    cPair = new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.RIGHT_MARGIN_COLOR, cListener);
-    _colorOptionListeners.add(cPair);
-    DrJava.getConfig().addOptionListener(OptionConstants.RIGHT_MARGIN_COLOR, cListener);
+    {
+      final OptionListener<Boolean> rmListener = new OptionListener<Boolean>() {
+        public void optionChanged(OptionEvent<Boolean> oce) {
+          _displayRightMargin = oce.value;
+          DefinitionsPane.this.repaint();
+        }
+      };
+      final Pair<Option<Boolean>, OptionListener<Boolean>> rmPair = 
+        new Pair<Option<Boolean>, OptionListener<Boolean>>(OptionConstants.DISPLAY_RIGHT_MARGIN, rmListener);
+      _booleanOptionListeners.add(rmPair);
+      DrJava.getConfig().addOptionListener(OptionConstants.DISPLAY_RIGHT_MARGIN, rmListener);
+    }
+
+    {
+      final OptionListener<Integer> iListener = new OptionListener<Integer>() {
+        public void optionChanged(OptionEvent<Integer> oce) {
+          _numRightMarginColumns = oce.value;
+          DefinitionsPane.this.repaint();
+        }
+      };
+      final Pair<Option<Integer>, OptionListener<Integer>> iPair = 
+        new Pair<Option<Integer>, OptionListener<Integer>>(OptionConstants.RIGHT_MARGIN_COLUMNS, iListener);
+      _integerOptionListeners.add(iPair);
+      DrJava.getConfig().addOptionListener(OptionConstants.RIGHT_MARGIN_COLUMNS, iListener);
+    }
+    
+    {
+      final OptionListener<Color> rmcListener = new OptionListener<Color>() {
+        public void optionChanged(OptionEvent<Color> oce) {
+          _rightMarginColor = oce.value;
+          DefinitionsPane.this.repaint();
+        }
+      };
+      final Pair<Option<Color>, OptionListener<Color>> rmcPair = 
+        new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.RIGHT_MARGIN_COLOR, rmcListener);
+      _colorOptionListeners.add(rmcPair);
+      DrJava.getConfig().addOptionListener(OptionConstants.RIGHT_MARGIN_COLOR, rmcListener);
+    }
     
     createPopupMenu();
 

@@ -62,7 +62,7 @@ public class MainController {
    *   PreferencesWindow (to be refactored in another pass)
    *   Configuration
    * 
-   *   All CompilerErrorCaretListeners need to be aware of each other.
+   *   All ErrorCaretListeners need to be aware of each other.
    * 
    * Behaviors that MainController will support:
    *   Lock edits

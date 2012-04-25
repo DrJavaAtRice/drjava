@@ -45,6 +45,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import edu.rice.cs.util.sexp.QuotedTextAtom;
+
 /**
  * This parser is not meant to be instantiated.  It has
  * static methods that do all the work for you.  These

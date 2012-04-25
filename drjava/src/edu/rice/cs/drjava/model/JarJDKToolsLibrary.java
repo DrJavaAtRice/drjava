@@ -282,17 +282,22 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         else if (path.toLowerCase().contains("oracle")) vendor = "oracle";
       }
       if (name.startsWith("jdk-")) {
-        result = JavaVersion.parseFullVersion(parsedVersion = name.substring(4), vendor, vendor, f);
+        parsedVersion = name.substring(4);
+        result = JavaVersion.parseFullVersion(parsedVersion, vendor, vendor, f);
       }
       else if (name.startsWith("jdk")) {
-        result = JavaVersion.parseFullVersion(parsedVersion = name.substring(3), vendor, vendor, f);
+        parsedVersion = name.substring(3); 
+        result = JavaVersion.parseFullVersion(parsedVersion, vendor, vendor, f);
       }
       else if (name.startsWith("j2sdk") || name.startsWith("java-")) {
-        result = JavaVersion.parseFullVersion(parsedVersion = name.substring(5), vendor, vendor, f);
+        parsedVersion = name.substring(5);
+        result = JavaVersion.parseFullVersion(parsedVersion, vendor, vendor, f);
       }
       else if (name.matches("\\d+\\.\\d+\\.\\d+.*")) {  // The \d+ fields actually match single digits; .* matches an arbitrary suffix
-        msg("invoking parseFullVersion on " + name + ", " + vendor + ", " + vendor + ", " + f);  //Strip off 1.x where x is 6 or 7
-        result = JavaVersion.parseFullVersion(parsedVersion = name, vendor, vendor, f);
+        msg("Invoking parseFullVersion on " + name + ", " + vendor + ", " + vendor + ", " + f);  //Strip off 1.x where x is 6 or 7
+        parsedVersion = name.substring(0, 5);  // could be generalized to multi-digit matches by using index of first char in .* instead of 5
+        result = JavaVersion.parseFullVersion(parsedVersion, vendor, vendor, f);
+        msg("Result is: " + result.versionString());
       }
       current = current.getParentFile();
     } while (current != null && result == null);

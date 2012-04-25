@@ -605,13 +605,15 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     * @param errors The array of errors from all failed tests in the suite.
     */
   public void testSuiteEnded(final JUnitError[] errors) {
-    //Disable Java language level processing
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) called", "", "").show();
-    Utilities.invokeLater(new Runnable() { public void run() { 
+   
+    Utilities.invokeLater(new Runnable() { public void run() {
+      // disable languge level processing
 //      List<File> files = new ArrayList<File>();
-//      for(OpenDefinitionsDocument odd: _model.getLLOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
-////    Utilities.show("errors.length = " + errors.length + " files = " + files);
-//      for(JUnitError e: errors){
+//      for (OpenDefinitionsDocument odd: _model.getOpenDefinitionsDocuments()) { files.add(odd.getRawFile()); }
+//    Utilities.show("errors.length = " + errors.length + " files = " + files);
+//      
+//      for(JUnitError e: errors) {
 //        try {
 //          e.setStackTrace(_compilerModel.getLLSTM().replaceStackTrace(e.stackTrace(),files));
 //        } catch(Exception ex) { DrJavaErrorHandler.record(ex); }
@@ -623,7 +625,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //          e.setLineNumber(ste.getLineNumber());
 //        }
 //      }
-//      _junitErrorModel = new JUnitErrorModel(errors, _model, true);
+      _junitErrorModel = new JUnitErrorModel(errors, _model, true);
       _notifyJUnitEnded();
       _testInProgress = false;
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) finished", "", "").show();

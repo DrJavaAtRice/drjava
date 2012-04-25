@@ -4442,10 +4442,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Returns the javadoc error panel. */
   public JavadocErrorPanel getJavadocErrorPanel() { return _javadocErrorPanel; }
   
-  /** Returns the currently shown error panel if there is one. Otherwise returns null. */
-  public CompilerErrorPanel getSelectedCompilerErrorPanel() {
+  /** Returns the currently shown error (Compiler or JUnit) panel if there is one. Otherwise returns null. */
+  public ErrorPanel getSelectedErrorPanel() {
     Component c = _tabbedPane.getSelectedComponent();
-    if (c instanceof CompilerErrorPanel) return (CompilerErrorPanel) c;
+    if (c instanceof ErrorPanel) return (ErrorPanel) c;
     return null;
   }
   
@@ -7439,7 +7439,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //          System.err.println("Console Scroll Selected");
           EventQueue.invokeLater(new Runnable() { public void run() { _consoleScroll.requestFocusInWindow(); } });
         }
-        // Update error highlights?
+        // Update error highlights
         if (_currentDefPane != null) {
           int pos = _currentDefPane.getCaretPosition();
           _currentDefPane.removeErrorHighlight(); // removes highlighting whenever the current tabbed pane is switched
@@ -9239,6 +9239,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
 //      new ScrollableDialog(null, "MainFrame.junitEnded() called", "", "").show();
       _guiAvailabilityNotifier.junitFinished(); // JUNIT and COMPILER
+      
       // Use EventQueue invokeLater to ensure that JUnit panel is "reset" after it is updated with test results
       EventQueue.invokeLater(new Runnable() { public void run() { _junitPanel.reset(); } });
       _model.refreshActiveDocument();

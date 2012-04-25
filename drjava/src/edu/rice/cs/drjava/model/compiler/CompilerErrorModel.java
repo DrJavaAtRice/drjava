@@ -57,7 +57,10 @@ import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 
-/** Contains the CompilerErrors for a set of compiled file after a compile has ended.
+/** Contains the Errors for a set of compiled/tested filea after a compile or test step has ended.
+  * TODO: refactor most of the code in this class into an abstract ErrorModel class.  JUnitErrorModel should inherit
+  * from this abstract class not from CompilerErrorModel!  JavadocErrorModel should also inherit from
+  * this abstract class instead of decorating a CompilerErrorModel!
   * @version $Id$
   */
 public class CompilerErrorModel {
