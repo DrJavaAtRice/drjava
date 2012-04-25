@@ -273,8 +273,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     do {
       String name = current.getName();
       String path = current.getAbsolutePath();
-      if (!forceUnknown) {
-        if (path.startsWith("/System/Library/Frameworks/JavaVM.framework")) vendor = "apple";
+      if (! forceUnknown) {
+        if (path.startsWith("/System/Library/Frameworks/JavaVM.framework") || path.startsWith("/Library/Java")) vendor = "apple";
         else if (path.toLowerCase().contains("openjdk")) vendor = "openjdk";
         else if (path.toLowerCase().contains("sun")) vendor = "sun";
         else if (path.toLowerCase().contains("oracle")) vendor = "oracle";
@@ -288,7 +288,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       else if (name.startsWith("j2sdk") || name.startsWith("java-")) {
         result = JavaVersion.parseFullVersion(parsedVersion = name.substring(5), vendor, vendor, f);
       }
-      else if (name.matches("\\d+\\.\\d+\\.\\d+")) {
+      else if (name.startsWith("\\d+\\.\\d+\\.\\d+")) {
         result = JavaVersion.parseFullVersion(parsedVersion = name, vendor, vendor, f);
       }
       current = current.getParentFile();
@@ -404,11 +404,14 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       addIfDir(new File(javaHome, ".."), roots);
       addIfDir(new File(javaHome, "../.."), roots);
       addIfDir(new File(javaHome, "../../.."), roots);
+      addIfDir(new File(javaHome, "../../../.."), roots);
     }
     
     // add JAVA environment bindings to roots
     if (envJavaHome != null) {
       addIfDir(new File(envJavaHome), roots);
+      addIfDir(new File(envJavaHome, ".."), roots);
+      addIfDir(new File(envJavaHome, "../.."), roots);
     }
     
     // Add ProgramFiles to roots
@@ -428,8 +431,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     addIfDir(new File("/C:"), roots);
     
     /* Entries for Mac OS X */
-    addIfDir(new File("/System/Library/Frameworks/JavaVM.framework/Versions"), roots);
     addIfDir(new File("/System/Library/Java/JavaVirtualMachines"), roots);
+    addIfDir(new File("/Library/Java/JavaVirtualMachines"), roots);
 
     addIfDir(new File("/usr/java"), roots);
     addIfDir(new File("/usr/j2se"), roots);
@@ -466,9 +469,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       for (File subdir : IOUtil.attemptListFilesAsIterable(root.getKey(), subdirFilter)) {
         JDKToolsLibrary.msg("Looking at subdirectory: " + subdir);
         addIfFile(new File(subdir, "lib/tools.jar"), root.getValue(), jars);
-        addIfFile(new File(subdir, "Home/lib/tools.jar"), root.getValue(), jars);
         addIfFile(new File(subdir, "Classes/classes.jar"), root.getValue(), jars);
-        addIfFile(new File(subdir, "Contents/Classes/classes.jar"), root.getValue(), jars);  // "Contents/" appears as prefix in new OS X paths
+        addIfFile(new File(subdir, "Contents/Classes/classes.jar"), root.getValue(), jars);
+        addIfFile(new File(subdir, "Contents/Home/lib/tools.jar"), root.getValue(), jars);
       }
     }
   }
