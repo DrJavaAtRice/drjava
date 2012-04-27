@@ -148,7 +148,7 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
     * @return true if the specified file is a source file for this compiler. */
   public boolean isSourceFileForThisCompiler(File f) {
     // by default, use DrJavaFileUtils.isSourceFile
-    _log.log("ScalaCompiler.isSourceFile(" + f + ") called");
+//    _log.log("ScalaCompiler.isSourceFile(" + f + ") called");
     String fileName = f.getName();
     return fileName.endsWith(SCALA_FILE_EXTENSION) || fileName.endsWith(OptionConstants.JAVA_FILE_EXTENSION);
   }
@@ -243,6 +243,7 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
     // Create a Settings object that captures the Java class path as the Scala class path!
     Settings settings = new Settings();
     settings.processArgumentString("-usejavacp");
+    _log.log("Passing argument string '" + "-d " + '"' + destination.getPath() + '"' + "to the scala compiler (Global)");
     settings.processArgumentString("-d " + '"' + destination.getPath() + '"');
     settings.processArgumentString("-cp " + '"' + dJPathToPath(classPath) + '"');
     scala.tools.nsc.reporters.Reporter reporter = new DrJavaReporter(errors);
