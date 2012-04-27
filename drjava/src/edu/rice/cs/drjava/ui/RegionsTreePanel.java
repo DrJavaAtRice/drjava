@@ -66,30 +66,30 @@ import edu.rice.cs.plt.lambda.Thunk;
   * @version $Id$
   */
 public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends TabbedPanel {
-  protected JPanel _leftPane;
+  protected volatile JPanel _leftPane;
   
-  protected DefaultMutableTreeNode _rootNode;
-  protected DefaultTreeModel _regTreeModel;
-  public JTree _regTree;
-  protected String _title;
-  protected RegionManager<R> _regionManager;
+  protected volatile DefaultMutableTreeNode _rootNode;
+  protected volatile DefaultTreeModel _regTreeModel;
+  public volatile JTree _regTree;
+  protected volatile String _title;
+  protected volatile RegionManager<R> _regionManager;
   
-  protected JPopupMenu _regionPopupMenu;
+  protected volatile JPopupMenu _regionPopupMenu;
   
   protected final SingleDisplayModel _model;
   protected final MainFrame _frame;
   
-  protected JPanel _buttonPanel;
+  protected volatile JPanel _buttonPanel;
   
-  protected DefaultTreeCellRenderer dtcr;
+  protected volatile DefaultTreeCellRenderer dtcr;
   
-  protected boolean _hasNextPrevButtons = true;
+  protected volatile boolean _hasNextPrevButtons = true;
   /** button to go to the previous region (or null if _hasNextPrevButtons==false). */
-  protected JButton _prevButton;
+  protected volatile JButton _prevButton;
   /** button to go to the next region (or null if _hasNextPrevButtons==false). */
-  protected JButton _nextButton;
+  protected volatile JButton _nextButton;
   /** the region that was last selected (may be null). */ 
-  protected R _lastSelectedRegion = null;
+  protected volatile R _lastSelectedRegion = null;
   
   /* _ */
   
@@ -103,7 +103,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   /** State pattern to improve performance when rapid changes are made. */
   protected final IChangeState DEFAULT_STATE = new DefaultState();
 //  protected final IChangeState CHANGING_STATE = new ChangingState();
-  protected IChangeState _changeState = DEFAULT_STATE;
+  protected volatile IChangeState _changeState = DEFAULT_STATE;
   
   /** A table mapping each document entered in this panel to its corresponding MutableTreeNode in _regTreeModel. */
   protected volatile HashMap<OpenDefinitionsDocument, DefaultMutableTreeNode> _docToTreeNode = 
@@ -681,9 +681,9 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   /** Go to next region. */
   public void goToNextRegion() {
     int count = _regionManager.getRegionCount();
-    if (count>0) {
+    if (count > 0) {
       R newRegion = null; // initially not set
-      if (_lastSelectedRegion!=null) {
+      if (_lastSelectedRegion != null) {
         // there are elements and something was selected
         newRegion = getNextRegionInTree(_lastSelectedRegion);
       }
@@ -691,7 +691,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
         // nothing selected, go to first region
         newRegion = _regionManager.getRegions().get(0);
       }
-      if (newRegion!=null) {
+      if (newRegion != null) {
         // a new region was found, select it
         updateNextPreviousRegionButtons(newRegion);
         selectRegion(_lastSelectedRegion);
@@ -980,7 +980,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   
   /** Class that is embedded in each leaf node. The toString() method determines what's displayed in the tree. */
   protected static class RegionTreeUserObj<R extends OrderedDocumentRegion> {
-    protected R _region;
+    protected volatile R _region;
     public int lineNumber() { return _region.getDocument().getLineOfOffset(_region.getStartOffset()) + 1; }
     public R region() { return _region; }
     public RegionTreeUserObj(R r) { _region = r; }

@@ -79,30 +79,30 @@ public class ProjectPropertiesFrame extends SwingFrame {
   private static final int FRAME_WIDTH = 503;
   private static final int FRAME_HEIGHT = 500;
 
-  private MainFrame _mainFrame;      
-  private SingleDisplayModel _model; 
+  private final MainFrame _mainFrame;      
+  private final SingleDisplayModel _model; 
 
   private final JButton _okButton;
   private final JButton _applyButton;
   private final JButton _cancelButton;
   private final JButton _advancedButton;
   //  private JButton _saveSettingsButton;
-  private JPanel _mainPanel;
+  private final JPanel _mainPanel;
 
-  private DirectorySelectorComponent _projRootSelector;
-  private DirectorySelectorComponent _buildDirSelector;
-  private DirectorySelectorComponent _workDirSelector;
-  private JTextField                 _mainDocumentSelector;
+  private volatile DirectorySelectorComponent _projRootSelector;
+  private volatile DirectorySelectorComponent _buildDirSelector;
+  private volatile DirectorySelectorComponent _workDirSelector;
+  private volatile JTextField                 _mainDocumentSelector;
   
-  private JCheckBox _autoRefreshComponent;
+  private volatile JCheckBox _autoRefreshComponent;
 
-  private VectorAbsRelFileOptionComponent _extraClassPathList;
-  private VectorFileOptionComponent _excludedFilesList;
-  private Map<OptionParser<?>,String> _storedPreferences = new HashMap<OptionParser<?>,String>();
+  private volatile VectorAbsRelFileOptionComponent _extraClassPathList;
+  private volatile VectorFileOptionComponent _excludedFilesList;
+  private final Map<OptionParser<?>,String> _storedPreferences = new HashMap<OptionParser<?>,String>();
   
   /** Constructs project properties frame for a new project and displays it.  Assumes that a project is active. */
   public ProjectPropertiesFrame(MainFrame mf) {
-    super("Project Properties");
+    super("Project Properties for " + mf.getModel().getProjectFile().getName());
 
     //  Utilities.show("ProjectPropertiesFrame(" + mf + ", " + projFile + ")");
 

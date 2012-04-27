@@ -32,6 +32,6 @@ package edu.rice.cs.util.text;
 
 import javax.swing.text.StyledDocument;
 
-/** DefaultStyledDocument interface augmented by AbstractDocumentInterface. */
+/** StyledDocument interface augmented by AbstractDocumentInterface. */
 public interface SwingDocumentInterface extends AbstractDocumentInterface, StyledDocument { }
 

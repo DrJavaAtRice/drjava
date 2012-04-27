@@ -48,6 +48,7 @@ import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.plt.reflect.JavaVersion;
+import edu.rice.cs.util.swing.Utilities;
 
 import javax.swing.filechooser.FileFilter;
 import edu.rice.cs.drjava.ui.SmartSourceFilter;

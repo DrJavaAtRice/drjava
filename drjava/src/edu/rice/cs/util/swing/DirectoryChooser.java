@@ -104,7 +104,9 @@ public class DirectoryChooser extends JFileChooser {
     setFileSelectionMode(DIRECTORIES_ONLY);
     setDialogType(CUSTOM_DIALOG);
     setApproveButtonText("Select");
-    setAcceptAllFileFilterUsed(false);
+    
+    // Allow user to stipulate that all files in the folder should be opened
+//    setAcceptAllFileFilterUsed(false);  
     setFileFilter(new FileFilter() {
       public boolean accept(File f) { return true; }
       public String getDescription() { return "All Folders"; }

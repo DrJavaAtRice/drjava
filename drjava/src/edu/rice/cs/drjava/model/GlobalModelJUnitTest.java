@@ -58,7 +58,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   private static Log _log = new Log("GlobalModelJUnit.txt", false);
   
   /** Whether or not to print debugging output. */
-  static final boolean printMessages = false;
+  static final boolean printMessages = true;
   
   private static final String ELSPETH_ERROR_TEXT = 
     "import junit.framework.TestCase;" +
@@ -741,7 +741,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     * an error does not pass unit testing (by running correct class files).
     */
   public void testCorrectFilesAfterIncorrectChanges_NOJOIN() throws Exception {
-//    _log.log("Starting testCorrectFilesAfterIncorrectChanges");
+    if (printMessages) System.err.println("----testCorrectFilesAfterIncorrectChanges-----");
     
 //    OpenDefinitionsDocument doc0 = setupDocument(NON_TESTCASE_TEXT);
 //    JUnitNonTestListener listener0 = new JUnitNonTestListener(true);
@@ -753,7 +753,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //    listener0.checkCompileOccurred();
 //    _model.removeListener(listener0);
 //    // What is the preceding code segment supposed to test; it has already been done!
-    
+        
     final OpenDefinitionsDocument doc1 = setupDocument(MULTI_CLASSES_IN_FILE_TEXT);
     final File file = new File(_tempDir, "DJTest.java");
     saveFile(doc1, new FileSelector(file));

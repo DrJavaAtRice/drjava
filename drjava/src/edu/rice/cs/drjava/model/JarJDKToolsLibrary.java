@@ -77,6 +77,8 @@ import edu.rice.cs.drjava.model.javadoc.DefaultJavadocModel;
 import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
 import edu.rice.cs.drjava.model.JDKDescriptor;
 
+import edu.rice.cs.util.swing.Utilities;
+
 /** A JDKToolsLibrary that was loaded from a specific jar file. */
 public class JarJDKToolsLibrary extends JDKToolsLibrary {
   
@@ -234,7 +236,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           // can't use loadLibraryAdapter because we need to preempt the whole package
           ClassLoader debugLoader = new PreemptingClassLoader(new PathClassLoader(loader, path), debuggerPackage);
           Debugger attempt = (Debugger) ReflectUtil.loadObject(debugLoader, debuggerAdapter, sig, model);        
-          JDKToolsLibrary.msg("                 debugger="+attempt.getClass().getName());
+          JDKToolsLibrary.msg("                 debugger=" + attempt.getClass().getName());
           if (attempt.isAvailable()) { debugger = attempt; }
         }
         catch (ReflectException e) {
@@ -467,8 +469,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         assert desc != null;
 
         boolean containsCompiler = desc.containsCompiler(jar.getKey());
-        JDKToolsLibrary.msg("Checking file "+jar.getKey()+" for "+desc);
-        JDKToolsLibrary.msg("    "+containsCompiler);
+//        Utilities.show("Checking file " + jar.getKey() + " for " + desc);
+        JDKToolsLibrary.msg("Checking file " + jar.getKey() + " for " + desc);
+        JDKToolsLibrary.msg("    " + containsCompiler);
         if (!containsCompiler) continue;
 
         JarJDKToolsLibrary lib = makeFromFile(jar.getKey(), model, desc);

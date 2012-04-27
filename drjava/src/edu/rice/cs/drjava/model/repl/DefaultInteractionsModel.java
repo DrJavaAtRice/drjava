@@ -58,11 +58,11 @@ import edu.rice.cs.util.swing.Utilities;
   * @version $Id$
   */
 public class DefaultInteractionsModel extends RMIInteractionsModel {
-  /** Message to signal that input is required from the console. */
+  /** Message to signal that input is required from the    console. */
 //  public static final String INPUT_REQUIRED_MESSAGE =
 //    "Please enter input in the Console tab." + _newLine;
   
-  /** Model that contains the interpreter to use. */
+  /** The global model that includes this interactions model.  Provides access to interpreter. */
   protected final DefaultGlobalModel _model;
   
   /** Creates a new InteractionsModel.

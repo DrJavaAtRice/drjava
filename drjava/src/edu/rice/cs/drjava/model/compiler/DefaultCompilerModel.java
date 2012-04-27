@@ -57,6 +57,7 @@ import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.Log;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.javalanglevels.*;
@@ -74,7 +75,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public class DefaultCompilerModel implements CompilerModel {
   
   /** for logging debug info */
-  private static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("DefaultCompilerModel.txt", false);
+  private static final Log _log = new edu.rice.cs.util.Log("DefaultCompilerModel.txt", false);
   
   /** The available compilers */
   private final List<CompilerInterface> _compilers;
@@ -625,13 +626,14 @@ public class DefaultCompilerModel implements CompilerModel {
     }
   }
   
-  /** Add a compiler to the active list */
-  public void addCompiler(CompilerInterface compiler) {
-    if (_compilers.isEmpty()) {
-      _active = compiler;
-    }
-    _compilers.add(compiler);
-  }
+  /* This method is no longer used. */
+//  /** Add a compiler to the active list */
+//  public void addCompiler(CompilerInterface compiler) {
+//    if (_compilers.isEmpty()) {
+//      _active = compiler;
+//    }
+//    _compilers.add(compiler);
+//  }
   
   /** Delete the .class files that match the following pattern:
     * XXX.dj? --> XXX.class

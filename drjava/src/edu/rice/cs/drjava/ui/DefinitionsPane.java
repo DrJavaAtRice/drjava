@@ -70,10 +70,10 @@ import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStat
 public class DefinitionsPane extends AbstractDJPane implements Finalizable<DefinitionsPane> {
 
   /** This field NEEDS to be set by setEditorKit() BEFORE any DefinitonsPanes are created. */
-  private static DefinitionsEditorKit EDITOR_KIT;
+  private static volatile DefinitionsEditorKit EDITOR_KIT;
   
   /* Minimum number of characters to trigger indent warning prompt */
-  private static int INDENT_WARNING_THRESHOLD = 200000;
+  private static final int INDENT_WARNING_THRESHOLD = 200000;
     
   /** Our parent window. */
   private final MainFrame _mainFrame;
@@ -143,7 +143,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   static volatile int[] FIND_RESULTS_PAINTERS_USAGE = new int[FIND_RESULTS_COLORS.length];
 
   /** Highlight painter for breakpoints. */
-  static ReverseHighlighter.DrJavaHighlightPainter BREAKPOINT_PAINTER =
+  static volatile ReverseHighlighter.DrJavaHighlightPainter BREAKPOINT_PAINTER =
     new ReverseHighlighter.DrJavaHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
 
   /** Highlight painter for disabled breakpoints. */
@@ -339,7 +339,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 //  /** The menu item for the "Add Watch" option. Stored in field so that it may be enabled and
 //   *  disabled depending on Debug Mode.
 //   */
-//  private JMenuItem _addWatchMenuItem;
+//  private volatile JMenuItem _addWatchMenuItem;
 
   /** The contextual popup menu for the Definitions Pane. */
   private volatile JPopupMenu _popMenu;
@@ -442,7 +442,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   }
 
   /** Special action to take care of case when tab key is pressed. */
-  private volatile Action _indentKeyActionTab = new IndentKeyActionTab();
+  private final Action _indentKeyActionTab = new IndentKeyActionTab();
 
   /** Because the "default" action for the enter key is special, it must be
    *  grabbed from the Keymap using getAction(KeyStroke), which returns the
@@ -657,8 +657,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     */
   public void processKeyEvent(KeyEvent e) {
     if (_mainFrame.getAllowKeyEvents()) {
-      
-      
+
       //Fixes bug ID:2813140 - "Go to Opening/Closing Brace" Shortcut Inserts { or }
       if (((e.getKeyCode() == KeyEvent.VK_OPEN_BRACKET) || (e.getKeyCode() == KeyEvent.VK_CLOSE_BRACKET)) &&
           ((e.getModifiers() & InputEvent.CTRL_MASK) != 0) &&
@@ -878,7 +877,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /* The private MouseAdapter for responding to various clicks concerning the popup menu */
   private class PopupMenuMouseAdapter extends RightClickMouseAdapter {
 
-    private MouseEvent _lastMouseClick = null;
+    private volatile MouseEvent _lastMouseClick = null;
 
     public void mousePressed(MouseEvent e) {
       super.mousePressed(e);
@@ -904,7 +903,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
   /** Comments out the lines contained within the given selection. */
   private void _commentLines() {
-      _mainFrame.commentLines();
+    _mainFrame.commentLines();
 //    _doc.commentLinesInDefinitions(getSelectionStart(), getSelectionEnd());
   }
 
@@ -1256,14 +1255,15 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   }
     
-  /** Saved option listeners kept in this field so they can be removed for garbage collection  */
-  private List<Pair<Option<Color>, OptionListener<Color>>> _colorOptionListeners = 
+  /** Saved option listeners kept in this field so they can be removed for garbage collection.  The bindings
+    * of these variables to Lists are immuatable, but the internals of the data structures are mutated. */
+  private final List<Pair<Option<Color>, OptionListener<Color>>> _colorOptionListeners = 
     new LinkedList<Pair<Option<Color>, OptionListener<Color>>>();
     
-  private List<Pair<Option<Boolean>, OptionListener<Boolean>>> _booleanOptionListeners = 
+  private final List<Pair<Option<Boolean>, OptionListener<Boolean>>> _booleanOptionListeners = 
     new LinkedList<Pair<Option<Boolean>, OptionListener<Boolean>>>();
 
-  private List<Pair<Option<Integer>, OptionListener<Integer>>> _integerOptionListeners = 
+  private final List<Pair<Option<Integer>, OptionListener<Integer>>> _integerOptionListeners = 
     new LinkedList<Pair<Option<Integer>, OptionListener<Integer>>>();
   
   /** Called when the definitions pane is released from duty.  This frees up any option listeners that are holding 
@@ -1424,7 +1424,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 //  }
   
   /** This list of listeners to notify when we are finalized */
-  private List<FinalizationListener<DefinitionsPane>> _finalizationListeners = 
+  private final List<FinalizationListener<DefinitionsPane>> _finalizationListeners = 
     new LinkedList<FinalizationListener<DefinitionsPane>>();
   
   /** Registers a finalization listener with the specific instance of the ddoc. NOTE: this should only be used by test 

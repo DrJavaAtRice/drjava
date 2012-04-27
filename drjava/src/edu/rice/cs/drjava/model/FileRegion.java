@@ -44,10 +44,12 @@ import java.io.File;
   */
 public interface FileRegion extends Region {
   
-  /** @return the start offset */
+  /** *Copied from Region*.
+    * @return the start offset */
   public int getStartOffset();
-
-  /** @return the end offset */
+  
+  /** *Copied from Region*.
+    * @return the end offset */
   public int getEndOffset();
   
   /** @return the file */

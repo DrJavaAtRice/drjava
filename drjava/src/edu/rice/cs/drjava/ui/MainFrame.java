@@ -6203,7 +6203,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_closeAction, "Close", "Close the current document");
     _setUpAction(_closeAllAction, "Close All", "CloseAll", "Close all documents");
     _setUpAction(_closeProjectAction, "Close", "CloseAll", "Close the current project");
-    _setUpAction(_projectPropertiesAction, "Project Properties", "Preferences", "Edit Project Properties");
+    _setUpAction(_projectPropertiesAction, "Project Properties for " + _model.getProjectFile().getName(), "Preferences", "Edit Project Properties");
     _setUpAction(_junitProjectAction, "Test Project", "Test the documents in the project source tree");
     _setUpAction(_compileProjectAction, "Compile Project", "Compile the documents in the project source tree");
     _setUpAction(_runProjectAction, "Run Project", "Run the project's main method");
@@ -7336,9 +7336,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private class PositionListener implements CaretListener {
     
     /* Cached caret coordinates */
-    private int _offset;
-    private int _line;
-    private int _col;
+    private volatile int _offset;
+    private volatile int _line;
+    private volatile int _col;
     
     // The following method should always run in the event thread, because we only access and update documents (and 
     // other text fields) from the event thread.  We formerly used the AbstractDocument locking protocol to access and
@@ -9838,7 +9838,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param showDetachedWindow true if the "Detached Panes" window should be shown
     */
   public void showTab(final Component c, boolean showDetachedWindow) {
-    // TODO: put all of the _tabbedPane components in _tabs. eliminating special cases for interactions, console (which 
+    // TODO: put all of the _tabbedPane components in _tabs, eliminating special cases for interactions, console (which 
     // are always displayed)
     assert EventQueue.isDispatchThread();
     try {

@@ -41,10 +41,12 @@ import javax.swing.text.BadLocationException;
 //import javax.swing.text.Document;
 import javax.swing.text.Position;
 
-/** Swing Document interface augmented by readers/writers locking operations */
-public interface AbstractDocumentInterface /* extends ReadersWritersLocking */ { 
+/** An interface designed to augment the Swing Document interface with useful operations including operations like
+  * append that  cannot be safely implemented in terms of the methods provided by the Document interface.  
+  * Operations like append require write locking the document which cannot be done using the Document interface.  */
+public interface AbstractDocumentInterface { 
   
-  /* Methods from Document interface used in FindReplaceMachine */
+  /* Methods from swing Document interface used in FindReplaceMachine */
   
   /* Returns the length of the document. */
   public int getLength();
@@ -61,11 +63,13 @@ public interface AbstractDocumentInterface /* extends ReadersWritersLocking */ {
   /* Removes the substring of specified length at the specified offset. */
   public void remove(int offset, int length) throws BadLocationException;
   
-  /** Appends given string with specified attributes to end of this document. */
-  public void append(String str, AttributeSet set);
-  
   /** Creates a "sticky" position within a document */
   public Position createPosition(int offs) throws BadLocationException;
+  
+  /* Methods not in swing Document interface. */
+    
+  /** Appends given string with specified attributes to end of this document. */
+  public void append(String str, AttributeSet set);
 }
 
 

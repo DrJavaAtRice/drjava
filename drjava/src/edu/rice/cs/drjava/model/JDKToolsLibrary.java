@@ -132,7 +132,7 @@ public class JDKToolsLibrary {
         Class<?>[] sig = { FullVersion.class, String.class, List.class };
         Object[] args = { version, "the runtime class path", bootClassPath };
         CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadObject(className, sig, args);
-        msg("                 attempt = "+attempt+", isAvailable() = "+attempt.isAvailable());
+        msg("                 attempt = " + attempt + ", isAvailable() = "+attempt.isAvailable());
         if (attempt.isAvailable()) { return attempt; }
       }
       catch (ReflectException e) { /* can't load */ }

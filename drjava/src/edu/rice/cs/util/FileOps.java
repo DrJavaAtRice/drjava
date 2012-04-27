@@ -687,9 +687,9 @@ public abstract class FileOps {
 //    ScrollableDialog sd2 = new ScrollableDialog(null, "backup done in FileOps.saveFile", "", "");
 //    sd2.show();
     
-    //Create a temp file in the same directory as the file to be saved.
-    //From this point forward, enclose in try...finally so that we can clean
-    //up the temp file and restore the file from its backup.
+    // Create a temp file in the same directory as the file to be saved.
+    // From this point forward, enclose in try...finally so that we can clean
+    // up the temp file and restore the file from its backup.
     File parent = file.getParentFile();
     File tempFile = File.createTempFile("drjava", ".temp", parent);
 //    System.err.println("tempfileName = " + tempFile + " for backup file " + backup);

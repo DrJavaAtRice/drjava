@@ -50,11 +50,11 @@ import edu.rice.cs.util.swing.Utilities;
 import java.util.HashMap;
 
 /** A swing implementation of the toolkit-independent EditDocumentInterface.  This document should use the 
-  * readers/writers locking protocol established in its superclasses but it does not.  Under unfavorable
-  * schedules, methods like append will generate run-time errors because the document can change between the
-  * determination of its length and the insertion of the appended text.  An operation in the document is safe 
-  * only if the proper lock is held before it is called OR all update and operations involving multiple reads
-  * are performed in the event thread.
+  * readers/writers locking protocol established in the ReadersWritersDocument interface but it does not.  Hence it is
+  * not thread-safe.  Under unfavorable schedules, methods like append will generate run-time errors because the 
+  * document can change between the determination of its length and the insertion of the appended text.  An operation in
+  * the document is safe only if the proper lock is held before it is called OR all update and operations involving 
+  * multiple read are performed in the event thread.
   * 
   * TODO: create a separate DummySwingDocument class for testing and make SwingDocument abstract.
   * @version $Id$
@@ -195,16 +195,16 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
   
-  /** Appends given string with specified attributes to end of this document. */
+  /** Appends given string with specified attributes to end of this document. NOT THREAD SAFE. */
   public void append(String str, AttributeSet set) {
     try { insertString(getLength(), str, set); }
     catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible
   }
   
-  /** Appends given string with specified named style to end of this document. */
+  /** Appends given string with specified named style to end of this document. NOT THREAD SAFE. */
   public void append(String str, String style) { append(str, style == null ? null : getDocStyle(style)); }
   
-  /** Appends given string with default style to end of this document. */
+  /** Appends given string with default style to end of this document. NOT THREAD SAFE. v*/
   public void append(String str) { append(str, (AttributeSet) null); }
   
   /** A SwingDocument instance does not have a default style */
@@ -214,7 +214,8 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   
   public Pageable getPageable() { throw new UnsupportedOperationException("Printing not supported"); }
 
-  /** Performs the default behavior for createPosition in DefaultStyledDocument. */
+  /** Performs the default behavior for createPosition in DefaultStyledDocument. Since createPosition is not overridden
+    * in this class, super is unnecessary but more robust (in case createPosition is overridden).  */
   public Position createUnwrappedPosition(int offs) throws BadLocationException { return super.createPosition(offs); }
 }
 

@@ -213,7 +213,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     DrJava.getConfig().addOptionListener(AUTO_CLOSE_COMMENTS, _listener2);
   }
   
-  
   /** Create a set of normal endings, i.e., semi-colons and braces for the purposes of indenting.
     * @return the set of normal endings
     */
@@ -1530,7 +1529,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public boolean _inBlockComment(final int pos) {
     final int here = _currentLocation;
     final int distToStart = here - _getLineStartPos(here);
-    _reduced.resetLocation();
+    _reduced.resetLocation();  // Why is this call necessary?
     ReducedModelState state = stateAtRelLocation(-distToStart);
     
     return (state.equals(INSIDE_BLOCK_COMMENT));

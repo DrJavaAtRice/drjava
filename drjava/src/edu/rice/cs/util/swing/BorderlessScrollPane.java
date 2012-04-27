@@ -46,8 +46,7 @@ import java.awt.*;
  * @version $Id$
  */
 public class BorderlessScrollPane extends JScrollPane {
-  /** The default border for a "borderless" scroll pane.
-   */
+  /** The default border for a "borderless" scroll pane. */
   private static final Border DEFAULT = new EtchedBorder();
 
   // note, I can't think of a way to guarantee superclass behavior without

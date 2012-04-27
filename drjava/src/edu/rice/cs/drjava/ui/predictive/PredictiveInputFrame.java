@@ -49,9 +49,11 @@ import java.util.Arrays;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
 
+import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
+
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.DrJavaRoot;
@@ -153,7 +155,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   private final JLabel _tabCompletesLabel = new JLabel("Tab completes: ");
 
   /** List with matches. */
-  private final JList _matchList;
+  private final JList<T> _matchList;
 
   /** True if the user is forced to select one of the items. */
   private final boolean _force;
@@ -206,10 +208,15 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
                               java.util.List<CloseAction<T>> actions, int cancelIndex, Collection<T> items) {
     super(title);
     _strategies = strategies;
-    _strategyBox = new JComboBox(_strategies.toArray());
+    @SuppressWarnings("unchecked")
+    PredictiveInputModel.MatchingStrategy<T>[] strategyArray =  // UGLY
+      (PredictiveInputModel.MatchingStrategy<T>[]) IterUtil.toArray(_strategies, PredictiveInputModel.MatchingStrategy.class);
+    _strategyBox = new JComboBox<PredictiveInputModel.MatchingStrategy<T>>(strategyArray);
     _currentStrategy = _strategies.get(0);
     _pim = new PredictiveInputModel<T>(ignoreCase, _currentStrategy, items);
-    _matchList = new JList(_pim.getMatchingItems().toArray());
+     @SuppressWarnings("unchecked")
+    T[] matchingItems = (T[]) IterUtil.toArray(_pim.getMatchingItems(), Comparable.class);  // T erases to Comparable!
+    _matchList = new JList<T>(matchingItems);
     _force = force;
     _info = info;
     _lastState = null;
@@ -737,7 +744,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
 
   /** Update the match list based on the model. */
   private void updateList() {
-    _matchList.setListData(_pim.getMatchingItems().toArray());
+    @SuppressWarnings("unchecked")
+    T[] matchingItems = (T[]) IterUtil.toArray(_pim.getMatchingItems(), Comparable.class);  // T erases to Comparable!
+    _matchList.setListData(matchingItems);
     _matchList.setSelectedValue(_pim.getCurrentItem(), true);
     updateExtensionLabel();
     updateInfo();

@@ -1180,7 +1180,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * different DefinitionsDocument later. 
     */
   public Position createPosition(final int offset) throws BadLocationException {
-    /* The following attempt to defer document loading did not work because offset became stale.  Postions must be
+    /* The following attempt to defer document loading did not work because offsets became stale.  Positions must be
      * created eagerly. */
 //    WrappedPosition wp = new WrappedPosition(new LazyPosition(new Suspension<Position>() {
 //      public Position eval() {

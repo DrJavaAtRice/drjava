@@ -84,11 +84,11 @@ public class DocumentCache {
   private static final int INIT_CACHE_SIZE = 32;
   
   /** invariant _residentQueue.size() <= CACHE_SIZE */
-  private int CACHE_SIZE;
+  private volatile int CACHE_SIZE;
   
-  private LinkedHashSet<DocManager> _residentQueue;
+  private final LinkedHashSet<DocManager> _residentQueue;
   
-  private Object _cacheLock = new Object();
+  private final Object _cacheLock = new Object();
   
   /* General constructor.  Not currently used except when called by default constructor. */
   public DocumentCache(int size) {

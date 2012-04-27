@@ -73,7 +73,7 @@ public class ScrollableListDialog<T> extends JDialog {
   private static final double HEIGHT_RATIO = .50;
   
   /** The list of items displayed. */
-  protected final JList list;
+  protected final JList<String> list;
   
   /** The number of the button that was pressed to close the dialog. */
   protected int _buttonPressed = -1;
@@ -206,7 +206,7 @@ public class ScrollableListDialog<T> extends JDialog {
       list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     }
     else {
-      list = new JList(dataAsStrings);
+      list = new JList<String>(dataAsStrings);
       //let the user select several
       list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }

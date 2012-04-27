@@ -72,7 +72,7 @@ public class MainFrameStatics {
                                               String newExt) {
     Object[] options = {changeButton, keepButton};  
     int rc = 1;
-    if (!Utilities.TEST_MODE) {
+    if (! Utilities.TEST_MODE) {
       rc = JOptionPane.showOptionDialog(parent, message, title, JOptionPane.YES_NO_OPTION,
                                         JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
     }

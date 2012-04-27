@@ -57,9 +57,9 @@ class ClassPathOption {
       System.out.println(warning);
       System.out.println("using '" + ps.charAt(0) + "' for delimiter.");
     }
-    FileOption fop = new FileOption("",FileOps.NULL_FILE);
+    FileOption fop = new FileOption("", FileOps.NULL_FILE);
     //String name = "extra.classpath";
     char delim = ps.charAt(0);
-    return new VectorOption<File>(optionName,fop,"",delim,"",new Vector<File>());
+    return new VectorOption<File>(optionName, fop, "", delim, "", new Vector<File>());
   }
 }

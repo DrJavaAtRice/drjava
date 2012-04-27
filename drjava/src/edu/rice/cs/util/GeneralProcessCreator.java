@@ -37,6 +37,7 @@
 package edu.rice.cs.util;
 
 import edu.rice.cs.drjava.config.PropertyMaps;
+import edu.rice.cs.plt.iter.IterUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +52,7 @@ import java.util.Map;
  */
 
 public class GeneralProcessCreator extends ProcessCreator {
-  protected List<List<List<String>>> _seqs;
+  protected volatile List<List<List<String>>> _seqs;
     
   /** Constructor for a process creator with the given command line and the work directory.
     * @param cmdline command line
@@ -191,7 +192,7 @@ public class GeneralProcessCreator extends ProcessCreator {
       _evaluatedCmdLine = StringOps.replaceVariables(_cmdline, _props, PropertyMaps.GET_CURRENT);
       _seqs = StringOps.commandLineToLists(_evaluatedCmdLine);
     }
-    LOG.log("\t" + edu.rice.cs.plt.iter.IterUtil.toString(_seqs));
+    LOG.log("\t" + IterUtil.toString(_seqs));
     if (_seqs.size()<1) { throw new IOException("No process to start."); }
     if (_seqs.size() == 1) {
       // only one piping chain, creating a process sequence is not necessary

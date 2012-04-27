@@ -216,7 +216,7 @@
           description="Compile all source files (after generating the source)">
   </target>
   
-  <target name="do-compile" depends="resolve-java5-runtime, resolve-java5-tools">
+  <target name="do-compile" depends="resolve-java7-runtime, resolve-java7-tools">
   
     <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
     
@@ -229,13 +229,13 @@
     </move>
     
     <javac srcdir="src" destdir="classes/base" source="1.5" target="1.5"
-           bootclasspath="${java5-runtime}" sourcepath="" includeAntRuntime="no"
+           bootclasspath="${java7-runtime}" sourcepath="" includeAntRuntime="no"
            executable="javac" fork="yes" memoryMaximumSize="512M"
            debug="on" optimize="off" deprecation="on"	>
       <classpath>
         <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
              debugger code into the "platform" module -->
-        <pathelement location="${java5-tools}" />
+        <pathelement location="${java7-tools}" />
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
@@ -598,7 +598,7 @@
        Documentation Targets
        ********************* -->
   
-  <target name="javadoc" depends="generate-source, resolve-java5-tools, resolve-version-tag"
+  <target name="javadoc" depends="generate-source, resolve-java6-tools, resolve-version-tag"
           description="Generate javadocs from the source folder (after generating the source)"
           unless="skip-javadoc">
     <antcall target="do-javadoc">
@@ -614,12 +614,12 @@
     <javadoc sourcepath="src" packagenames="*" destdir="docs/javadoc" maxmemory="512M"
              access="private" Use="yes" Version="yes" Author="yes" Windowtitle="${readable-project-name} API (${version-tag})" linksource="${link-source}">
       <classpath>
-        <pathelement location="${java5-tools}" />
+        <pathelement location="${java6-tools}" />
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
       </classpath>
-      <link href="http://java.sun.com/j2se/1.5/docs/api" />
+      <link href="http://docs.oracle.com/javase/6/docs/api/"/>
       <link href="http://junit.org/junit/javadoc/3.8.1" />
       <link href="http://drjava.org/javadoc/plt" />
       <link href="http://drjava.org/javadoc/javalanglevels" />
@@ -667,7 +667,7 @@
   </target>
   
   
-  <target name="findbugs" depends="assert-findbugs-exists, compile, resolve-java5-tools"
+  <target name="findbugs" depends="assert-findbugs-exists, compile, resolve-java6-tools"
 	      description="Generate a findbugs report (after compiling)">
     <taskdef name="findbugs" classpath="lib/buildlib/findbugs-ant.jar"
              classname="edu.umd.cs.findbugs.anttask.FindBugsTask" />
@@ -688,7 +688,7 @@
       <class location="classes/base" />
       <class location="classes/test" />
       <auxclasspath>
-        <pathelement location="${java5-tools}" />
+        <pathelement location="${java6-tools}" />
         <pathelement location="classes/lib" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
@@ -1265,6 +1265,8 @@
     <property name="java7-runtime-3" location="${java7-home}/../Classes/classes.jar" />
     <available property="java7-runtime" value="${java7-runtime-3}" file="${java7-runtime-3}" />
 
+    <echo message="java7-runtime = ${java7-runtime}" />
+
     <fail message="Can't find rt.jar in the Java 7 home: ${java7-home}" unless="java7-runtime" />
   </target>
   
@@ -1298,6 +1300,8 @@
     <property name="java6-runtime-3" location="${java6-home}/../Classes/classes.jar" />
     <available property="java6-runtime" value="${java6-runtime-3}" file="${java6-runtime-3}" />
 
+    <echo message="java6-runtime = ${java6-runtime}" />
+
     <fail message="Can't find rt.jar in the Java 6 home: ${java6-home}" unless="java6-runtime" />
   </target>
   
@@ -1330,6 +1334,8 @@
 
     <property name="java5-runtime-3" location="${java5-home}/../Classes/classes.jar" />
     <available property="java5-runtime" value="${java5-runtime-3}" file="${java5-runtime-3}" />
+
+    <echo message="java5-runtime = ${java5-runtime}" />
 
     <fail message="Can't find rt.jar in the Java 5 home: ${java5-home}" unless="java5-runtime" />
   </target>
