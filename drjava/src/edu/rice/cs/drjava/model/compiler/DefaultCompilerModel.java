@@ -270,6 +270,7 @@ public class DefaultCompilerModel implements CompilerModel {
         try {
           File buildDir = _model.getBuildDirectory();
           if (buildDir != null && buildDir != FileOps.NULL_FILE && ! buildDir.exists() && ! buildDir.mkdirs()) {
+            _log.log("Could not create build directory: " + buildDir);
             throw new IOException("Could not create build directory: " + buildDir);
           }
           
@@ -338,7 +339,7 @@ public class DefaultCompilerModel implements CompilerModel {
     *                 directory as the source file
     */
   private void _compileFiles(List<File> files, File buildDir) throws IOException {
-    _log.log("DefaultCompilerModel._compileFiles called with files = " + files);
+    _log.log("DefaultCompilerModel._compileFiles called with files = " + files + " and buildDir = " + buildDir);
     if (! files.isEmpty()) {
       /* Canonicalize buildDir */
       if (buildDir == FileOps.NULL_FILE) buildDir = null; // compiler interface wants null pointer if no build directory
@@ -356,7 +357,7 @@ public class DefaultCompilerModel implements CompilerModel {
         try { buildDir =_model.getDocumentForFile(files.get(0)).getSourceRoot(); }  // File must exist 
         catch (InvalidPackageException e) { /* ignore; next line recovers */ }
         
-        if (buildDir == null) buildDir = _model.getWorkingDirectory();  // Can working directory be null
+        if (buildDir == null) buildDir = _model.getWorkingDirectory();  // Can working directory be null?
         if (buildDir == null) buildDir = new File(System.getProperty("user.dir"));
 
         if (buildDir != null) buildDir = IOUtil.attemptCanonicalFile(buildDir);
@@ -404,12 +405,12 @@ public class DefaultCompilerModel implements CompilerModel {
     }
   }
   
-  private File _askForOutputDir(File defaultOutputDir) {
-    DirectoryChooser outputDirChooser = new DirectoryChooser(null /* No parent component */, defaultOutputDir);
-    outputDirChooser.setDialogTitle("Choose an output directory for compiled Scala code");
-    outputDirChooser.showDialog();
-    return outputDirChooser.getSelectedDirectory();
-  }
+//  private File _askForOutputDir(File defaultOutputDir) {
+//    DirectoryChooser outputDirChooser = new DirectoryChooser(null /* No parent component */, defaultOutputDir);
+//    outputDirChooser.setDialogTitle("Choose an output directory for compiled Scala code");
+//    outputDirChooser.showDialog();
+//    return outputDirChooser.getSelectedDirectory();
+//  }
     
   
   /** Reorders files so that all file names containing "Test" are at the end.  */
