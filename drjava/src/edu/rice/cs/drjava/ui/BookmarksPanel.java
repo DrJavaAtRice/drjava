@@ -59,7 +59,7 @@ public class BookmarksPanel extends RegionsTreePanel<MovingDocumentRegion> {
    */
   public BookmarksPanel(MainFrame frame, RegionManager<MovingDocumentRegion> bookmarkManager) {
     super(frame, "Bookmarks", bookmarkManager);
-    _regionManager.addListener(new RegionManagerListener<MovingDocumentRegion>() {      
+    getRegionManager().addListener(new RegionManagerListener<MovingDocumentRegion>() {      
       public void regionAdded(MovingDocumentRegion r) { addRegion(r); }
       public void regionChanged(MovingDocumentRegion r) { 
         regionRemoved(r);
@@ -92,7 +92,7 @@ public class BookmarksPanel extends RegionsTreePanel<MovingDocumentRegion> {
     Action removeAllAction = new AbstractAction("Remove All") {
       public void actionPerformed(ActionEvent ae) {
 //        startChanging();
-        _regionManager.clearRegions();
+        getRegionManager().clearRegions();
 //        finishChanging();
       }
     };
@@ -112,7 +112,7 @@ public class BookmarksPanel extends RegionsTreePanel<MovingDocumentRegion> {
     ArrayList<MovingDocumentRegion> regs = getSelectedRegions();
     _goToButton.setEnabled(regs.size() == 1);
     _removeButton.setEnabled(regs.size() > 0);
-    _removeAllButton.setEnabled(_rootNode != null && _rootNode.getDepth() > 0);
+    _removeAllButton.setEnabled(getRootNode() != null && getRootNode().getDepth() > 0);
   }
   
   /** Makes the popup menu actions. Should be overridden if additional actions besides "Go to" and "Remove" are added. */
@@ -122,7 +122,7 @@ public class BookmarksPanel extends RegionsTreePanel<MovingDocumentRegion> {
         
       new AbstractAction("Remove") {
         public void actionPerformed(ActionEvent e) {
-          for (MovingDocumentRegion r: getSelectedRegions()) _regionManager.removeRegion(r);
+          for (MovingDocumentRegion r: getSelectedRegions()) getRegionManager().removeRegion(r);
         }
       }
     };

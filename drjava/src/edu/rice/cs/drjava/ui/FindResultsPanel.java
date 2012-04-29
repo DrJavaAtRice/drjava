@@ -275,17 +275,17 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     if (odd != null) {
 
       _regionManager.clearRegions();
-      assert _rootNode == _regTreeModel.getRoot();
-      _rootNode.removeAllChildren();
+      assert getRootNode() == getRegTreeModel().getRoot();
+      getRootNode().removeAllChildren();
       _docToTreeNode.clear();
       _regionToTreeNode.clear();
-      _regTreeModel.nodeStructureChanged(_rootNode);
+      getRegTreeModel().nodeStructureChanged(getRootNode());
       _lastSelectedRegion = null;
 //      _requestFocusInWindow();
-//      System.err.println("Root has been cleared; child count = " + _rootNode.getChildCount());
+//      System.err.println("Root has been cleared; child count = " + getRootNode().getChildCount());
       _findReplace.findAll(_searchString, _searchAll, _searchSelectionOnly, _matchCase, _wholeWord, _noComments, _noTestCases, odd, 
                            _regionManager, _region, this);
-      _regTree.scrollRowToVisible(0);  // Scroll to the first line in the new panel
+      getRegTree().scrollRowToVisible(0);  // Scroll to the first line in the new panel
       _requestFocusInWindow();
     }
   }

@@ -9845,7 +9845,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (c instanceof TabbedPanel) _createTab((TabbedPanel) c);
       if (c instanceof RegionsTreePanel<?>) {
         RegionsTreePanel<?> p = (RegionsTreePanel<?>) c;
-        DefaultTreeModel model = p._regTreeModel;
+        DefaultTreeModel model = p.getRegTreeModel();
         // Update all JTree labels in p (equivalent to performing updateLines on p._regionManager with a [0,0] region)
         model.reload(); 
         p.expandTree();

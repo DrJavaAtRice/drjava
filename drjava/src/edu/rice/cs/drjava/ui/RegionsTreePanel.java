@@ -69,22 +69,21 @@ import edu.rice.cs.plt.lambda.Thunk;
 public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends TabbedPanel {
   protected volatile JPanel _leftPane;
   
-  protected volatile DefaultMutableTreeNode _rootNode;
-  protected volatile DefaultTreeModel _regTreeModel;
-  public volatile JTree _regTree;
-  protected volatile String _title;
-  protected volatile RegionManager<R> _regionManager;
+  private volatile DefaultMutableTreeNode _rootNode;
+  private volatile DefaultTreeModel _regTreeModel;
+  private volatile JTree _regTree;
   
+  private volatile String _title;
+  private volatile RegionManager<R> _regionManager;
   protected volatile JPopupMenu _regionPopupMenu;
-  
   protected final SingleDisplayModel _model;
   protected final MainFrame _frame;
-  
   protected volatile JPanel _buttonPanel;
   
   protected volatile DefaultTreeCellRenderer dtcr;
   
   protected volatile boolean _hasNextPrevButtons = true;
+  
   /** button to go to the previous region (or null if _hasNextPrevButtons==false). */
   protected volatile JButton _prevButton;
   /** button to go to the next region (or null if _hasNextPrevButtons==false). */
@@ -291,6 +290,12 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     
     ToolTipManager.sharedInstance().registerComponent(_regTree);
   }
+  
+  public DefaultMutableTreeNode getRootNode() { return _rootNode; }
+  public JTree getRegTree() { return _regTree; }
+  public JTree getRegTreeModel() { return _regTreeModel; }
+  public String getTitle() { return _title; }
+  public RegionManager<R> getRegionManager() { return _regionManager; }
   
   /** Update button state and text. _updateButtons should be overridden if additional buttons are added besides "Go To",
     * "Remove" and "Remove All". 
@@ -977,6 +982,8 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
       super.setBackground(c);
       if (RegionsTreePanel.this != null && dtcr != null) dtcr.setBackgroundNonSelectionColor(c);
     }
+    
+    public DefaultTreeModel getModel() { return (DefaultTreeModel) getModel(); }
   }
   
   /** Class that is embedded in each leaf node. The toString() method determines what's displayed in the tree. */
