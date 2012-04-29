@@ -185,7 +185,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   private final java.util.List<PredictiveInputModel.MatchingStrategy<T>> _strategies;
   
   /** Combo box. */
-  private final JComboBox _strategyBox;
+  private final JComboBox<PredictiveInputModel.MatchingStrategy<T>> _strategyBox;
   
   /** Last frame state. It can be stored and restored. */
   private volatile FrameState _lastState;
@@ -381,7 +381,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   public String getText() {
     if (_force) {
       @SuppressWarnings("unchecked") 
-      T item = (T)_matchList.getSelectedValue();
+      T item = _matchList.getSelectedValue();
       return (item == null) ? "" : _currentStrategy.force(item,_textField.getText());
     }
     return _textField.getText();
@@ -393,7 +393,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
   public T getItem() {
     if (!_force && _pim.getMatchingItems().size() == 0) return null;
     @SuppressWarnings("unchecked") 
-    T item = (T)_matchList.getSelectedValue();
+    T item = _matchList.getSelectedValue();
     return item;
   }
 
@@ -762,7 +762,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     if (_info == null) return;
     if (_matchList.getModel().getSize() > 0) {
       @SuppressWarnings("unchecked") 
-      T item = (T)_matchList.getSelectedValue();
+      T item = _matchList.getSelectedValue();
       _infoLabel.setText("Path:   " + _info.value(item));
       _infoLabel.setToolTipText(_info.value(item));
     }

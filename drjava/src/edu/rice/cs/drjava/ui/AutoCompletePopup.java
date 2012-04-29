@@ -80,22 +80,22 @@ import static edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame.FrameState;
   */
 public class AutoCompletePopup {
   /** Main frame. */
-  final protected MainFrame _mainFrame;
+  protected final MainFrame _mainFrame;
     
   /** Checkbox that controls whether Java API classes are included. */
   JCheckBox _completeJavaAPICheckbox = new JCheckBox("Java API");
   
   /** Frame state. */
-  protected FrameState _lastState = null;
+  protected volatile FrameState _lastState = null;
   
   /** Complete set of entries. */
-  final protected Set<AutoCompletePopupEntry> _allEntries;  
+  protected final Set<AutoCompletePopupEntry> _allEntries;  
   
   /** Set of the document entries. */
-  final protected Set<AutoCompletePopupEntry> _docEntries;
+  protected final Set<AutoCompletePopupEntry> _docEntries;
   
   /** Set of all the Java API classes. */
-  final protected Set<AutoCompletePopupEntry> _apiEntries;
+  protected final Set<AutoCompletePopupEntry> _apiEntries;
   
   /** Constructor for an auto-complete popup that uses the MainFrame for information.
     * @param mf main frame of DrJava */
@@ -306,9 +306,7 @@ public class AutoCompletePopup {
   /** Sets state of the frame, i.e. the location and dimension of the frame for the next use.
    *  @param ds  State to update to, or {@code null} to reset
    */
-  public void setFrameState(FrameState ds) {
-    _lastState = ds;
-  }  
+  public void setFrameState(FrameState ds) { _lastState = ds; }  
   
   /** Sets state of the frame, i.e. the location and dimension of the frame for the next use.
    *  @param s  State to update to, or {@code null} to reset

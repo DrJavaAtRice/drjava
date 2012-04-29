@@ -82,7 +82,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   protected JButton _goToButton;
   protected JButton _bookmarkButton;
   protected JButton _removeButton;
-  protected JComboBox _colorBox;
+  protected JComboBox<Color> _colorBox;
   protected int _lastIndex;
   
   /** Saved option listeners kept in this field so they can be removed for garbage collection  */
@@ -151,7 +151,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
   }
   
-  class ColorComboRenderer extends JPanel implements ListCellRenderer {
+  class ColorComboRenderer extends JPanel implements ListCellRenderer<Color> {
     private Color _color = DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_colorBox.getSelectedIndex()]);
     private DefaultListCellRenderer _defaultRenderer = new DefaultListCellRenderer();
     private final Dimension _size = new Dimension(0, 20);  
@@ -164,14 +164,14 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       setBorder(_compoundBorder);
     }
     
-    public Component getListCellRendererComponent(JList list, Object value, int row, boolean sel, boolean hasFocus) {
+    public Component getListCellRendererComponent(JList<? extends Color> list, Color color, int row, boolean sel, boolean hasFocus) {
       JComponent renderer;
-      if (value instanceof Color) {
-        _color = (Color) value;
+      if (color != null) {
+        _color = color;
         renderer = this;
       }
       else {
-        JLabel l = (JLabel) _defaultRenderer.getListCellRendererComponent(list, value, row, sel, hasFocus);
+        JLabel l = (JLabel) _defaultRenderer.getListCellRendererComponent(list, color, row, sel, hasFocus);
         l.setHorizontalAlignment(JLabel.CENTER);
         renderer = l;
       }
@@ -225,11 +225,11 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
     _lastIndex = smallestIndex;
     ++DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex];
-    _colorBox = new JComboBox();    
+    _colorBox = new JComboBox<Color>();    
     for (int i = 0; i < OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
       _colorBox.addItem(DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[i]));
     }
-    _colorBox.addItem("None");
+    _colorBox.addItem(null);  // formerly "None"
     _colorBox.setRenderer(new ColorComboRenderer());
     _colorBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {

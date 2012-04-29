@@ -65,7 +65,7 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
   protected volatile boolean _isModifiedSinceSave = false;
   
   /** Maps names to attribute sets */
-  final protected HashMap<String, AttributeSet> _styles;
+  protected final HashMap<String, AttributeSet> _styles;
   
   /** Determines which edits are legal on this document. */
   protected DocumentEditCondition _condition;

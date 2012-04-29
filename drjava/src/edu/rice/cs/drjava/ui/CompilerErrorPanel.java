@@ -66,7 +66,7 @@ public class CompilerErrorPanel extends ErrorPanel {
   /** Whether a compile has occurred since the last compiler change. */
   private volatile boolean _compileHasOccurred;
   private volatile CompilerErrorListPane _errorListPane;
-  private final JComboBox _compilerChoiceBox;
+  private final JComboBox<CompilerInterface> _compilerChoiceBox;
   
   /** The list of files from the last compilation unit that were not compiled because they were not source files. */
   private volatile File[] _excludedFiles = new File[0];
@@ -92,7 +92,7 @@ public class CompilerErrorPanel extends ErrorPanel {
     // to listen on the active compiler.
     final CompilerModel compilerModel = getModel().getCompilerModel();
     Iterable<CompilerInterface> iter = getModel().getCompilerModel().getAvailableCompilers();
-    _compilerChoiceBox = new JComboBox(IterUtil.toArray(iter, CompilerInterface.class));
+    _compilerChoiceBox = new JComboBox<CompilerInterface>(IterUtil.toArray(iter, CompilerInterface.class));
     _compilerChoiceBox.setEditable(false);
     _compilerChoiceBox.setSelectedItem(compilerModel.getActiveCompiler());
     _compilerChoiceBox.addItemListener(new ItemListener() {

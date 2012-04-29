@@ -70,13 +70,13 @@ public class AboutDialog extends JDialog implements ActionListener {
   private final JButton _okButton = new JButton("OK");
 
   /** the button that copies the system properties to the clipboard */
-  private JButton _copyButton;
+  private volatile JButton _copyButton;
   
   /** the table with the System Properties information */
-  private JTable _propertiesTable;
+  private volatile JTable _propertiesTable;
 
   /** index the System Properties tab, one of the tabs in _tabs */
-  private int _propertiesTabIndex;
+  private volatile int _propertiesTabIndex;
   
   /** the pane with tabs to select */
   private final JTabbedPane _tabs = new JTabbedPane();
@@ -358,8 +358,8 @@ public class AboutDialog extends JDialog implements ActionListener {
     "SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\n" + 
     "This software is Open Source Initiative approved Open Source Software.\n" + 
     "Open Source Initative Approved is a trademark of the Open Source Initiative.\n";
-  private static String LICENSE;
-  private static boolean initLicense = false;
+  private static volatile String LICENSE;
+  private static volatile boolean initLicense = false;
   public static final String DYADE_LICENSE =
     "DynamicJava - Copyright \u00a9 1999 Dyade\n\nPermission is hereby granted," + 
     " free of charge, to any person obtaining a copy of this software and associated" + 

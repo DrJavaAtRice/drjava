@@ -84,7 +84,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   private volatile RedoAction _redoAction;
   
   private volatile boolean testVariable;   //For Tests ONLY
-//  private Document _defdoc;
+//  private volatile Document _defdoc;
   
   /** Flag used to determine if the user has already been warned about debugging when the document within 
    *  this defpane has been modified since its last save.
@@ -100,7 +100,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   private volatile boolean _isCtrlShiftBracketDown = false;
   
 //  /** Used by the centering source mechanism to ensure paints */
-//  private boolean _updatePending = false;
+//  private volatile boolean _updatePending = false;
 
   /** Whether to draw text as antialiased. */
   private volatile boolean _antiAliasText = false;
@@ -270,7 +270,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
   /** The OptionListener for FIND_RESULTS_COLOR. */
   private static class FindResultsColorOptionListener implements OptionListener<Color> {
-    private int _index;
+    private volatile int _index;
     public FindResultsColorOptionListener(int i) { _index = i; }
     public void optionChanged(OptionEvent<Color> oce) {
       synchronized(FIND_RESULTS_PAINTERS) {

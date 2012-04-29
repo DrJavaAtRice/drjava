@@ -120,7 +120,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
   /** Ok button. */
   private JButton _okButton;
   /** List of commands. */
-  private JList _list;
+  private JList<String> _list;
   /** Completion monitor to simulate modal behavior. */
   protected CompletionMonitor _editExternalDialogMonitor = new CompletionMonitor();
   
@@ -268,7 +268,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
     bottom.add(Box.createHorizontalGlue());
     mainPanel.add(bottom, BorderLayout.SOUTH);
 
-    _list = new JList();
+    _list = new JList<String>();
     _list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     _list.addListSelectionListener(new ListSelectionListener() {
       public void valueChanged(ListSelectionEvent e) {

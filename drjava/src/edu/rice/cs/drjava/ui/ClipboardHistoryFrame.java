@@ -116,7 +116,7 @@ public class ClipboardHistoryFrame extends SwingFrame {
   private JButton _cancelButton;
 
   /** List with history. */
-  private JList _historyList;
+  private JList<HistoryString> _historyList;
 
   /** Text area for that previews the history content. */
   private JTextArea _previewArea;
@@ -213,7 +213,7 @@ public class ClipboardHistoryFrame extends SwingFrame {
       }
     });
 
-    _historyList = new JList();
+    _historyList = new JList<HistoryString>();
     _historyList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     _historyList.addListSelectionListener(new ListSelectionListener() {
       public void valueChanged(ListSelectionEvent e) {
@@ -223,7 +223,7 @@ public class ClipboardHistoryFrame extends SwingFrame {
     _historyList.setFont(DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN));
     _historyList.setCellRenderer(new DefaultListCellRenderer()  {
       public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-        Component c = super.getListCellRendererComponent(list,value,index,isSelected,cellHasFocus);
+        Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         c.setForeground(DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
         return c;
       }
@@ -340,8 +340,8 @@ public class ClipboardHistoryFrame extends SwingFrame {
   /** Update the displays based on the model. */
   private void updateView() {
     List<String> strs = _chm.getStrings();
-    ListItem[] arr = new ListItem[strs.size()];
-    for(int i = 0; i < strs.size(); ++i) arr[strs.size()-i-1] = new ListItem(strs.get(i));
+    HistoryString[] arr = new HistoryString[strs.size()];
+    for(int i = 0; i < strs.size(); ++i) arr[strs.size()-i-1] = new HistoryString(strs.get(i));
     _historyList.setListData(arr);
     if (_historyList.getModel().getSize() > 0) {
       _historyList.setSelectedIndex(0);
@@ -361,7 +361,7 @@ public class ClipboardHistoryFrame extends SwingFrame {
     if (_historyList.getModel().getSize() > 0) {
       int index = _historyList.getSelectedIndex();
       if (index != -1) {
-        text = ((ListItem)_historyList.getModel().getElementAt(_historyList.getSelectedIndex())).getFull();
+        text = _historyList.getModel().getElementAt(_historyList.getSelectedIndex()).getFull();
       }
     }
 
@@ -375,7 +375,7 @@ public class ClipboardHistoryFrame extends SwingFrame {
     setVisible(false);
     if (_historyList.getModel().getSize() > 0) {
       _buttonPressed = JOptionPane.OK_OPTION;
-      String s = ((ListItem)_historyList.getModel().getElementAt(_historyList.getSelectedIndex())).getFull();
+      String s = _historyList.getModel().getElementAt(_historyList.getSelectedIndex()).getFull();
       _chm.put(s);
       _okAction.value(s);
     }
@@ -395,9 +395,9 @@ public class ClipboardHistoryFrame extends SwingFrame {
   }
   
   /** Keeps a full string, but toString is only the first line. */
-  private static class ListItem {
+  private static class HistoryString {
     private String full, display;
-    public ListItem(String s) {
+    public HistoryString(String s) {
       full = s;
       int index1 = s.indexOf('\n');
       if (index1 == -1) index1 = s.length();

@@ -77,8 +77,6 @@ import edu.rice.cs.drjava.model.javadoc.DefaultJavadocModel;
 import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
 import edu.rice.cs.drjava.model.JDKDescriptor;
 
-import edu.rice.cs.util.swing.Utilities;
-
 /** A JDKToolsLibrary that was loaded from a specific jar file. */
 public class JarJDKToolsLibrary extends JDKToolsLibrary {
   
@@ -116,8 +114,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       "org.relaxng",
     });
   }
-
   
+  /* Fields */
   private final File _location;
   private final List<File> _bootClassPath; // may be null (i.e. compiler's internal behavior)
   
@@ -131,7 +129,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   
   public File location() { return _location; }
   public List<File> bootClassPath() { // may be null
-    if (_bootClassPath!=null) return new ArrayList<File>(_bootClassPath);
+    if (_bootClassPath != null) return new ArrayList<File>(_bootClassPath);
     else return null;
   }
   
@@ -154,8 +152,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     JavadocModel javadoc = new NoJavadocAvailable(model);
     
     FullVersion version = desc.guessVersion(f);
-    JDKToolsLibrary.msg("makeFromFile: "+f+" --> "+version+", vendor: "+version.vendor());
-    JDKToolsLibrary.msg("    desc = "+desc);
+    JDKToolsLibrary.msg("makeFromFile: " + f + " --> " + version + ", vendor: " + version.vendor());
+    JDKToolsLibrary.msg("    desc = " + desc);
     
     boolean isSupported = JavaVersion.CURRENT.supports(version.majorVersion());
     Iterable<File> additionalCompilerFiles = IterUtil.empty();
@@ -217,8 +215,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         try {
           Class<?>[] sig = { FullVersion.class, String.class, List.class };
           Object[] args = { version, f.toString(), bootClassPath };
-          // JDKToolsLibrary.msg("classpath for compiler: "+IterUtil.multilineToString(path));
-          // JDKToolsLibrary.msg("boot classpath for compiler: "+IterUtil.multilineToString(bootClassPath));                
+          // JDKToolsLibrary._log.log("classpath for compiler: "+IterUtil.multilineToString(path));
+          // JDKToolsLibrary._log.log("boot classpath for compiler: "+IterUtil.multilineToString(bootClassPath));                
           CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadLibraryAdapter(loader, path, compilerAdapter, 
                                                                                          sig, args);
           if (attempt.isAvailable()) { compiler = attempt; }
@@ -236,7 +234,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           // can't use loadLibraryAdapter because we need to preempt the whole package
           ClassLoader debugLoader = new PreemptingClassLoader(new PathClassLoader(loader, path), debuggerPackage);
           Debugger attempt = (Debugger) ReflectUtil.loadObject(debugLoader, debuggerAdapter, sig, model);        
-          JDKToolsLibrary.msg("                 debugger=" + attempt.getClass().getName());
+          JDKToolsLibrary.msg("                 debugger="+attempt.getClass().getName());
           if (attempt.isAvailable()) { debugger = attempt; }
         }
         catch (ReflectException e) {
@@ -270,30 +268,40 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     
     // We could start with f.getParentFile(), but this simplifies the logic
     File current = IOUtil.attemptCanonicalFile(f);
+    String name;  // promoted outward for logging purposes
+    String path;  // promoted outward for logging purposes
     String parsedVersion = "";
     String vendor = "";
     do {
-      String name = current.getName();
-      String path = current.getAbsolutePath();
-      if (!forceUnknown) {
-        if (path.startsWith("/System/Library/Frameworks/JavaVM.framework")) vendor = "apple";
+      name = current.getName();
+      path = current.getAbsolutePath();
+      if (! forceUnknown) {
+        if (path.startsWith("/System/Library/Frameworks/JavaVM.framework") || path.startsWith("/Library/Java")) vendor = "apple";
         else if (path.toLowerCase().contains("openjdk")) vendor = "openjdk";
         else if (path.toLowerCase().contains("sun")) vendor = "sun";
+        else if (path.toLowerCase().contains("oracle")) vendor = "oracle";
       }
       if (name.startsWith("jdk-")) {
-        result = JavaVersion.parseFullVersion(parsedVersion = name.substring(4),vendor,vendor,f);
+        parsedVersion = name.substring(4);
+        result = JavaVersion.parseFullVersion(parsedVersion, vendor, vendor, f);
       }
       else if (name.startsWith("jdk")) {
-        result = JavaVersion.parseFullVersion(parsedVersion = name.substring(3),vendor,vendor,f);
+        parsedVersion = name.substring(3); 
+        result = JavaVersion.parseFullVersion(parsedVersion, vendor, vendor, f);
       }
-      else if (name.startsWith("j2sdk")) {
-        result = JavaVersion.parseFullVersion(parsedVersion = name.substring(5),vendor,vendor,f);
+      else if (name.startsWith("j2sdk") || name.startsWith("java-")) {
+        parsedVersion = name.substring(5);
+        result = JavaVersion.parseFullVersion(parsedVersion, vendor, vendor, f);
       }
-      else if (name.matches("\\d+\\.\\d+\\.\\d+")) {
-        result = JavaVersion.parseFullVersion(parsedVersion = name,vendor,vendor,f);
+      else if (name.matches("\\d+\\.\\d+\\.\\d+.*")) {  // The \d+ fields actually match single digits; .* matches an arbitrary suffix
+        msg("Invoking parseFullVersion on " + name + ", " + vendor + ", " + vendor + ", " + f);  //Strip off 1.x where x is 6 or 7
+        parsedVersion = name.substring(0, 5);  // could be generalized to multi-digit matches by using index of first char in .* instead of 5
+        result = JavaVersion.parseFullVersion(parsedVersion, vendor, vendor, f);
+        msg("Result is: " + result.versionString());
       }
       current = current.getParentFile();
     } while (current != null && result == null);
+    
     if (result == null || result.majorVersion().equals(JavaVersion.UNRECOGNIZED) ||
         result.majorVersion().equals(JavaVersion.FUTURE)) {
       JarFile jf = null;
@@ -305,7 +313,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           if (v != null) {
             int space = v.indexOf(' ');
             if (space >= 0) v = v.substring(0,space);
-            result = JavaVersion.parseFullVersion(parsedVersion = v,vendor,vendor,f);
+            result = JavaVersion.parseFullVersion(parsedVersion = v, vendor, vendor, f);
           }
         }
         
@@ -340,9 +348,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       parsedVersion = result.versionString();
     }
     
-    if ((result == null) || (result.vendor()==JavaVersion.VendorType.UNKNOWN)) {
-      if (!forceUnknown) {
-        if (result.majorVersion().compareTo(JavaVersion.JAVA_6)<0) {
+    if ((result == null) || (result.vendor() == JavaVersion.VendorType.UNKNOWN)) {
+      if (! forceUnknown) {
+        if (result.majorVersion().compareTo(JavaVersion.JAVA_6) < 0) {
           // Java 5 or earlier, assume Sun
           vendor = "sun";
         }
@@ -373,6 +381,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       }
       result = JavaVersion.parseFullVersion(parsedVersion,vendor,vendor,f);
     }
+    msg("Guessed version for " + path + " is " + result.versionString());
     return result;
   }
   
@@ -387,6 +396,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     
     String javaHome = System.getProperty("java.home");
     String envJavaHome = null;
+    String envJava7Home = null;
     String programFiles = null;
     String systemDrive = null;
     if (JavaVersion.CURRENT.supports(JavaVersion.JAVA_5)) {
@@ -397,23 +407,31 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       systemDrive = System.getenv("SystemDrive");
     }
    
+    // unwind out of potential JRE subdirectory
     if (javaHome != null) {
       addIfDir(new File(javaHome), roots);
       addIfDir(new File(javaHome, ".."), roots);
       addIfDir(new File(javaHome, "../.."), roots);
+      addIfDir(new File(javaHome, "../../.."), roots);
+      addIfDir(new File(javaHome, "../../../.."), roots);
     }
+    
+    // add JAVA environment bindings to roots
     if (envJavaHome != null) {
       addIfDir(new File(envJavaHome), roots);
       addIfDir(new File(envJavaHome, ".."), roots);
       addIfDir(new File(envJavaHome, "../.."), roots);
     }
     
+    // Add ProgramFiles to roots
     if (programFiles != null) {
       addIfDir(new File(programFiles, "Java"), roots);
       addIfDir(new File(programFiles), roots);
     }
+    
     addIfDir(new File("/C:/Program Files/Java"), roots);
     addIfDir(new File("/C:/Program Files"), roots);
+    
     if (systemDrive != null) {
       addIfDir(new File(systemDrive, "Java"), roots);
       addIfDir(new File(systemDrive), roots);
@@ -421,7 +439,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     addIfDir(new File("/C:/Java"), roots);
     addIfDir(new File("/C:"), roots);
     
-    addIfDir(new File("/System/Library/Frameworks/JavaVM.framework/Versions"), roots);
+    /* Entries for Mac OS X */
+    addIfDir(new File("/System/Library/Java/JavaVirtualMachines"), roots);
+    addIfDir(new File("/Library/Java/JavaVirtualMachines"), roots);
 
     addIfDir(new File("/usr/java"), roots);
     addIfDir(new File("/usr/j2se"), roots);
@@ -432,9 +452,11 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
 
     /* Entries for Linux java packages */
     addIfDir(new File("/usr/lib/jvm"), roots);
+    addIfDir(new File("/usr/lib/jvm/java-7-oracle"), roots);
+    addIfDir(new File("/usr/lib/jvm/java-7-openjdk"), roots);
     addIfDir(new File("/usr/lib/jvm/java-6-sun"), roots);
-    addIfDir(new File("/usr/lib/jvm/java-1.5.0-sun"), roots);
     addIfDir(new File("/usr/lib/jvm/java-6-openjdk"), roots);
+    addIfDir(new File("/usr/lib/jvm/java-1.5.0-sun"), roots);
 
     addIfDir(new File("/home/javaplt/java/Linux-i686"), roots);
     
@@ -444,16 +466,21 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   /* Search for jar files in roots and, if found, transfer them to the jars collection. */
   protected static void searchRootsForJars(LinkedHashMap<File,Set<JDKDescriptor>> roots,
                                            LinkedHashMap<File,Set<JDKDescriptor>> jars) {
+    JDKToolsLibrary.msg("***** roots = " + roots);
     // matches: starts with "j2sdk", starts with "jdk", has form "[number].[number].[number]" (OS X), or
     // starts with "java-" (Linux)
     Predicate<File> subdirFilter = LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("j2sdk.*"),
                                                  IOUtil.regexCanonicalCaseFilePredicate("jdk.*"),
-                                                 LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("\\d+\\.\\d+\\.\\d+"),
-                                                               IOUtil.regexCanonicalCaseFilePredicate("java.*")));
+                                                 LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("\\d+\\.\\d+\\.\\d+.*"),
+                                                               IOUtil.regexCanonicalCaseFilePredicate("java-.*"))); 
     for (Map.Entry<File,Set<JDKDescriptor>> root : roots.entrySet()) {
+      JDKToolsLibrary.msg("Searching root (for jar files): " + root.getKey());
       for (File subdir : IOUtil.attemptListFilesAsIterable(root.getKey(), subdirFilter)) {
+        JDKToolsLibrary.msg("Looking at subdirectory: " + subdir);
         addIfFile(new File(subdir, "lib/tools.jar"), root.getValue(), jars);
         addIfFile(new File(subdir, "Classes/classes.jar"), root.getValue(), jars);
+        addIfFile(new File(subdir, "Contents/Classes/classes.jar"), root.getValue(), jars);
+        addIfFile(new File(subdir, "Contents/Home/lib/tools.jar"), root.getValue(), jars);
       }
     }
   }
@@ -469,10 +496,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         assert desc != null;
 
         boolean containsCompiler = desc.containsCompiler(jar.getKey());
-//        Utilities.show("Checking file " + jar.getKey() + " for " + desc);
         JDKToolsLibrary.msg("Checking file " + jar.getKey() + " for " + desc);
         JDKToolsLibrary.msg("    " + containsCompiler);
-        if (!containsCompiler) continue;
+        if (! containsCompiler) continue;
 
         JarJDKToolsLibrary lib = makeFromFile(jar.getKey(), model, desc);
         if (lib.isValid()) {
@@ -484,8 +510,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           else { mapToAddTo.put(v, IterUtil.singleton(lib)); }
         }
         else {
-          JDKToolsLibrary.msg("    library is not valid: compiler="+lib.compiler().isAvailable()+
-                              " debugger="+lib.debugger().isAvailable()+" javadoc="+lib.javadoc().isAvailable());
+          JDKToolsLibrary.msg("    library is not valid: compiler=" + lib.compiler().isAvailable() +
+                              " debugger=" + lib.debugger().isAvailable() + " javadoc=" + lib.javadoc().isAvailable());
         }
       }
     }
@@ -494,8 +520,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   /** Get completed compound JDKs by going through the list of compound JDKs and finding full JDKs that
     * complete them. */
   protected static Map<FullVersion, Iterable<JarJDKToolsLibrary>>
-    getCompletedCompoundResults(GlobalModel model,
-                                Iterable<JarJDKToolsLibrary> collapsed,
+    getCompletedCompoundResults(GlobalModel model, Iterable<JarJDKToolsLibrary> collapsed,
                                 Iterable<JarJDKToolsLibrary> compoundCollapsed) {
     JDKToolsLibrary.msg("---- Getting Completed Compound Results ----");
     
@@ -504,19 +529,19 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     
     // now we have the JDK libraries in collapsed and the compound libraries in compoundCollapsed
     for(JarJDKToolsLibrary compoundLib: compoundCollapsed) {
-      JDKToolsLibrary.msg("compoundLib: "+compoundLib);
-      JDKToolsLibrary.msg("    "+compoundLib.location());
+      JDKToolsLibrary.msg("compoundLib: " + compoundLib);
+      JDKToolsLibrary.msg("    " + compoundLib.location());
       FullVersion compoundVersion = compoundLib.version();
       JarJDKToolsLibrary found = null;
       // try to find a JDK in results that matches compoundVersion exactly, except for vendor
       for(JarJDKToolsLibrary javaLib: collapsed) {
-        if (!javaLib.jdkDescriptor().isBaseForCompound()) continue; // javaLib not suitable as base
-        JDKToolsLibrary.msg("    exact? "+javaLib);
+        if (! javaLib.jdkDescriptor().isBaseForCompound()) continue; // javaLib not suitable as base
+        JDKToolsLibrary.msg("    exact? " + javaLib);  // Is exact comparison necessary?  It never seems to match.
         FullVersion javaVersion = javaLib.version();
         if ((javaVersion.majorVersion().equals(compoundVersion.majorVersion())) &&
-            (javaVersion.maintenance()==compoundVersion.maintenance()) &&
-            (javaVersion.update()==compoundVersion.update()) &&
-            (javaVersion.release()==compoundVersion.release()) &&
+            (javaVersion.maintenance() == compoundVersion.maintenance()) &&
+            (javaVersion.update() == compoundVersion.update()) &&
+            (javaVersion.release() == compoundVersion.release()) &&
             (javaVersion.supports(compoundLib.jdkDescriptor().getMinimumMajorVersion()))) {
           JDKToolsLibrary.msg("        found");
           found = javaLib;
@@ -524,10 +549,10 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         }
       }
       // if we didn't find one, take the best JDK that matches the major version
-      if (found==null) {
+      if (found == null) {
         for(JarJDKToolsLibrary javaLib: collapsed) {
-          if (!javaLib.jdkDescriptor().isBaseForCompound()) continue; // javaLib not suitable as base
-          JDKToolsLibrary.msg("    major? "+javaLib);
+          if (! javaLib.jdkDescriptor().isBaseForCompound()) continue; // javaLib not suitable as base
+          JDKToolsLibrary.msg("    major? " + javaLib);
           FullVersion javaVersion = javaLib.version();
           if (javaVersion.majorVersion().equals(compoundVersion.majorVersion()) &&
               javaVersion.supports(compoundLib.jdkDescriptor().getMinimumMajorVersion())) {
@@ -538,11 +563,11 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         }
       }
       // if we found a JDK, then create a new compound library
-      if (found!=null) {
+      if (found != null) {
         JarJDKToolsLibrary lib = makeFromFile(compoundLib.location(), model, compoundLib.jdkDescriptor(),
                                               found.bootClassPath());
         if (lib.isValid()) {
-          JDKToolsLibrary.msg("    ==> "+lib.version());
+          JDKToolsLibrary.msg("    based on version " + lib.version());
           FullVersion v = lib.version();
           if (completedResults.containsKey(v)) {
             completedResults.put(v, IterUtil.compose(lib, completedResults.get(v)));
@@ -557,10 +582,10 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   }
   
   /** Produce a list of tools libraries discovered on the file system.  A variety of locations are searched;
-   * only those files that can produce a valid library (see {@link #isValid} are returned.  The result is
-   * sorted by version.  Where one library of the same version might be preferred over another, the preferred 
-   * library appears earlier in the result list.
-   */
+    * only those files that can produce a valid library (see {@link #isValid} are returned.  The result is
+    * sorted by version.  Where one library of the same version might be preferred over another, the preferred 
+    * library appears earlier in the result list.
+    */
   public static Iterable<JarJDKToolsLibrary> search(GlobalModel model) {
     JDKToolsLibrary.msg("---- Searching for Libraries ----");
     
@@ -596,21 +621,27 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     collectValidResults(model, jars, results, compoundResults);
     
     // We store everything in reverse order, since that's the natural order of the versions
-    Iterable<JarJDKToolsLibrary> collapsed = IterUtil.reverse(IterUtil.collapse(results.values()));
-    Iterable<JarJDKToolsLibrary> compoundCollapsed = IterUtil.reverse(IterUtil.collapse(compoundResults.values()));
-    
-    // Get completed compound JDKs by going through the list of compound JDKs and finding full JDKs that
-    // complete them
-    Map<FullVersion, Iterable<JarJDKToolsLibrary>> completedResults =
-      getCompletedCompoundResults(model, collapsed, compoundCollapsed);
-    
-    JDKToolsLibrary.msg("Result:");
-    Iterable<JarJDKToolsLibrary> result = IterUtil.
-      compose(collapsed,IterUtil.reverse(IterUtil.collapse(completedResults.values())));
-    for(JarJDKToolsLibrary lib: result) {
-      JDKToolsLibrary.msg("Found library: "+lib);
+    Iterable<JarJDKToolsLibrary> collapsed = IterUtil.reverse(IterUtil.collapse(results.values()));  // Are versions in results subsequently ignored?
+        
+    JDKToolsLibrary.msg("***** Found the following base libraries *****");
+    for (JarJDKToolsLibrary lib: collapsed) {
+      JDKToolsLibrary.msg("  Base library: " + lib);
     }
     
+    Iterable<JarJDKToolsLibrary> compoundCollapsed = IterUtil.reverse(IterUtil.collapse(compoundResults.values()));
+    
+    // Get completed compound JDKs by going through the list of compound JDKs and finding full JDKs that complete them
+    Map<FullVersion, Iterable<JarJDKToolsLibrary>> completedResults =
+      getCompletedCompoundResults(model, collapsed, compoundCollapsed);
+
+    JDKToolsLibrary.msg("***** Found the following completed compound libraries *****");
+    for (JarJDKToolsLibrary lib: IterUtil.collapse(completedResults.values())) {
+      JDKToolsLibrary.msg("  Compound library: " + lib);
+    }
+    
+    Iterable<JarJDKToolsLibrary> result = 
+      IterUtil.compose(collapsed, IterUtil.reverse(IterUtil.collapse(completedResults.values())));
+
     return result;
   }
   
@@ -624,14 +655,14 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     f = IOUtil.attemptCanonicalFile(f);
     if (IOUtil.attemptIsDirectory(f)) {
       Set<JDKDescriptor> set = map.get(f);
-      if (set==null) {
+      if (set == null) {
         set = new LinkedHashSet<JDKDescriptor>();
         map.put(f, set);
       }
+      if (! set.contains(f)) JDKToolsLibrary.msg("Dir added:     " + f);
       set.add(c);
-      JDKToolsLibrary.msg("Dir added:     "+f);
     }
-    else { JDKToolsLibrary.msg("Dir not added: "+f); }
+    else { JDKToolsLibrary.msg("Dir does not exist: " + f); }
   }
   
   /** Add a canonicalized {@code f} to the given set if it is an existing file */
@@ -645,8 +676,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   }
 
   /** Add a canonicalized {@code f} to the given set if it is an existing file */
-  private static void addIfFile(File f, Set<JDKDescriptor> cs,
-                                Map<? super File,Set<JDKDescriptor>> map) {
+  private static void addIfFile(File f, Set<JDKDescriptor> cs, Map<? super File,Set<JDKDescriptor>> map) {
     f = IOUtil.attemptCanonicalFile(f);
     if (IOUtil.attemptIsFile(f)) {
       Set<JDKDescriptor> set = map.get(f);
@@ -671,17 +701,16 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     Iterable<JDKDescriptor> descriptors = IterUtil.empty();
     try {
       File f = edu.rice.cs.util.FileOps.getDrJavaFile();
-      JDKToolsLibrary.msg("drjava.jar: "+f);
+      JDKToolsLibrary.msg("drjava.jar: " + f);
       if (f.isFile()) {
         JarFile jf = new JarFile(f);
-        JDKToolsLibrary.msg("jar file: "+jf);
+        JDKToolsLibrary.msg("jar file: " + jf);
         Enumeration<JarEntry> entries = jf.entries();
-        while(entries.hasMoreElements()) {
+        while (entries.hasMoreElements()) {
           JarEntry je = entries.nextElement();
           String name = je.getName();
-          if (name.startsWith("edu/rice/cs/drjava/model/compiler/descriptors/") &&
-              name.endsWith(".class") &&
-              (name.indexOf('$')<0)) {
+          if (name.startsWith("edu/rice/cs/drjava/model/compiler/descriptors/") && name.endsWith(".class") &&
+              (name.indexOf('$') < 0)) {
             descriptors = attemptToLoadDescriptor(descriptors, name);
           }
         }
@@ -689,14 +718,14 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       else {
         final String DESC_PATH = "edu/rice/cs/drjava/model/compiler/descriptors";
         File dir = new File(f, DESC_PATH);
-        JDKToolsLibrary.msg("directory, enumerating files in "+dir);
+        JDKToolsLibrary.msg("directory, enumerating files in " + dir);
         Iterable<File> files = IOUtil.listFilesRecursively(dir, new Predicate<File>() {
           public boolean contains(File arg) {
-            return (arg.isFile()) && arg.getName().endsWith(".class") && (arg.getName().indexOf('$')<0);
+            return (arg.isFile()) && arg.getName().endsWith(".class") && (arg.getName().indexOf('$') < 0);
           }
         });
-        for(File je: files) {
-          String name = DESC_PATH+"/"+je.getName();
+        for (File je: files) {
+          String name = DESC_PATH + "/" + je.getName();
           descriptors = attemptToLoadDescriptor(descriptors, name);
         }
       }

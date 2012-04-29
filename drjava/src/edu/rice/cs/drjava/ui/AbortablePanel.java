@@ -48,16 +48,16 @@ import edu.rice.cs.drjava.model.SingleDisplayModel;
   * @version $Id$
   */
 public abstract class AbortablePanel extends TabbedPanel {
-  protected JPanel _leftPane;
-  protected JScrollPane _scrollPane;
+  protected volatile JPanel _leftPane;
+  protected volatile JScrollPane _scrollPane;
   
   protected final SingleDisplayModel _model;
   protected final MainFrame _frame;
   
-  protected String _title;
-  protected JPanel _buttonPanel;
+  protected volatile String _title;
+  protected volatile JPanel _buttonPanel;
   
-  protected JButton _abortButton;
+  protected volatile JButton _abortButton;
 
   /** Constructs a new abortable panel.
     * This is swing view class and hence should only be accessed from the event thread.

@@ -54,14 +54,15 @@ import edu.rice.cs.util.swing.RightClickMouseAdapter;
 
 /** Panel for displaying regions in a list in the order specified by indices passes to addRegion.
   * This class is a swing view class and hence should only be accessed from the event-handling thread.
+  * The volatile declarations are included because the event-thread-only invariant is not enforced. TODO: fix this.
   * Not currently used because BrowserHistoryPanel is not used.
   * @version $Id$
   */
 public abstract class RegionsListPanel<R extends IDocumentRegion> extends TabbedPanel {
-  protected JPanel _leftPane;
+  protected volatile JPanel _leftPane;
   
-  protected JList _list;
-  protected DefaultListModel _listModel;
+  protected volatile JList<RegionListUserObj<R>> _list;
+  protected volatile DefaultListModel<RegionListUserObj<R>> _listModel;
   protected String _title;
   
   protected final SingleDisplayModel _model;
@@ -119,13 +120,13 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
   
   /** Creates the region list. */
   private void _setupRegionList() {
-    _listModel = new DefaultListModel();
-    _list = new JList(_listModel) {
+    _listModel = new DefaultListModel<RegionListUserObj<R>>();
+    _list = new JList<RegionListUserObj<R>>(_listModel) {
       public String getToolTipText(MouseEvent evt) {
         // Get item
         int index = locationToIndex(evt.getPoint());
         
-        @SuppressWarnings("unchecked") RegionListUserObj<R> node = (RegionListUserObj<R>)getModel().getElementAt(index);
+        RegionListUserObj<R> node = getModel().getElementAt(index);
         R r = node.region();
         String tooltip = null;
         
@@ -227,7 +228,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
     int[] indices = _list.getSelectedIndices();
     if (indices != null) {
       for (int index: indices) {
-        @SuppressWarnings("unchecked") RegionListUserObj<R> userObj = ((RegionListUserObj<R>)_listModel.elementAt(index));
+        RegionListUserObj<R> userObj = _listModel.elementAt(index);
         R r = userObj.region();
         regs.add(r);
       }
@@ -249,7 +250,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
   protected RegionListUserObj<R> getUserObjForRegion(R r) {
     for(int i = 0; i < _listModel.size(); ++i) {
       @SuppressWarnings("unchecked") 
-      RegionListUserObj<R> userObj = (RegionListUserObj<R>)_listModel.get(i);
+      RegionListUserObj<R> userObj = _listModel.get(i);
       if ((userObj.region().getStartOffset() == r.getStartOffset()) &&
           (userObj.region().getEndOffset() == r.getEndOffset()) &&
           (userObj.region().getDocument().equals(r.getDocument()))) {
@@ -301,7 +302,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
 //        }
     
     for (int i = 0; i < _listModel.size(); ++i) {
-      @SuppressWarnings("unchecked") RegionListUserObj<R> userObj = (RegionListUserObj<R>)_listModel.get(i);
+      RegionListUserObj<R> userObj = _listModel.get(i);
       if (userObj.region() == r) {
         _listModel.removeElementAt(i);
         break;

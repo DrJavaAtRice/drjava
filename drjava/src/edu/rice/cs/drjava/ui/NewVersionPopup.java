@@ -62,7 +62,7 @@ import edu.rice.cs.util.FileOps;
   */
 public class NewVersionPopup extends JDialog {
   /** whether to keep displaying this dialog, and for which releases */
-  private JComboBox _modeBox;
+  private JComboBox<String> _modeBox;
   /** the button that closes this window */
   private JButton _closeButton;
   /** the button that updates to the new version */
@@ -92,18 +92,18 @@ public class NewVersionPopup extends JDialog {
     _mainFrame.setPopupLoc(this);
     this.setSize(500,150);
     
-    _modeBox = new JComboBox(OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.toArray());
-    for(int i = 0; i < OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.size(); ++i) {
-      if (DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
-            .equals(OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.get(i))) {
+    final ArrayList<String> choices = OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES;
+    final int size = choices.size();
+    _modeBox = new JComboBox<String>(choices.toArray(new String[size]));
+    for(int i = 0; i < size; ++i) {
+      if (DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION).equals(choices.get(i))) {
         _modeBox.setSelectedIndex(i);
         break;
       }
     }
     _modeBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        DrJava.getConfig().setSetting(OptionConstants.NEW_VERSION_NOTIFICATION,
-                                      OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.get(_modeBox.getSelectedIndex()));
+        DrJava.getConfig().setSetting(OptionConstants.NEW_VERSION_NOTIFICATION, choices.get(_modeBox.getSelectedIndex()));
         _msg = null;
         updateText();
       }

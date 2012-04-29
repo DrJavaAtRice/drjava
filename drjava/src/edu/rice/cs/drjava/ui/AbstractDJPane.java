@@ -56,17 +56,15 @@ import java.awt.dnd.*;
 import edu.rice.cs.drjava.DrJavaRoot;
 
 /** This pane class for a SwingDocument. */
-public abstract class AbstractDJPane extends JTextPane
-  implements OptionConstants, DropTargetListener {
+public abstract class AbstractDJPane extends JTextPane implements OptionConstants, DropTargetListener {
   
   // ------------ FIELDS -----------
   
   /* The amount of the visible pane to scroll on a single click (Swing's default is .1) */
   private static final double SCROLL_UNIT = .05;
-
-  
+ 
   /** Paren/brace/bracket matching highlight color. */
-  static ReverseHighlighter.DrJavaHighlightPainter MATCH_PAINTER;
+  static volatile ReverseHighlighter.DrJavaHighlightPainter MATCH_PAINTER;
 
   static {
     Color highColor = DrJava.getConfig().getSetting(DEFINITIONS_MATCH_COLOR);
@@ -74,7 +72,7 @@ public abstract class AbstractDJPane extends JTextPane
   }
   
   /** Highlight painter for selected errors in the defs doc. */
-  static ReverseHighlighter.DrJavaHighlightPainter ERROR_PAINTER =
+  static volatile ReverseHighlighter.DrJavaHighlightPainter ERROR_PAINTER =
     new ReverseHighlighter.DrJavaHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
   
   private static final int ALT_CTRL_META_MASK = Event.ALT_MASK | Event.CTRL_MASK | Event.META_MASK;
@@ -260,7 +258,7 @@ public abstract class AbstractDJPane extends JTextPane
   public abstract DJDocument getDJDocument();
   
   /** Drag and drop target. */
-  DropTarget dropTarget = new DropTarget(this, this);  
+  volatile DropTarget dropTarget = new DropTarget(this, this);  
 
   /** User dragged something into the component. */
   public void dragEnter(DropTargetDragEvent dropTargetDragEvent) {
