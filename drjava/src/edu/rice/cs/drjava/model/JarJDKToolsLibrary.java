@@ -442,6 +442,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     /* Entries for Mac OS X */
     addIfDir(new File("/System/Library/Java/JavaVirtualMachines"), roots);
     addIfDir(new File("/Library/Java/JavaVirtualMachines"), roots);
+    addIfDir(new File("/System/Library/Java/JavaVirtualMachines"), roots);
 
     addIfDir(new File("/usr/java"), roots);
     addIfDir(new File("/usr/j2se"), roots);

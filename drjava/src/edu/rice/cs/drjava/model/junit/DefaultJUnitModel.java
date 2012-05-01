@@ -281,8 +281,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
           final CompilerListener listenerThis = this;
           try {
-            if (_model.hasOutOfSyncDocuments(lod) || _model.getNumCompErrors() > 0) {
-              nonTestCase(allTests, _model.getNumCompErrors() > 0);
+            if (_model.hasOutOfSyncDocuments(lod) || _model.getNumCompilerErrors() > 0) {
+              nonTestCase(allTests, _model.getNumCompilerErrors() > 0);
               return;
             }
             EventQueue.invokeLater(new Runnable() {  // defer running this code; would prefer to waitForInterpreter

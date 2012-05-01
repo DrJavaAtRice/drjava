@@ -520,7 +520,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       StringBuilder numErrMsg;
       
       /** Used for display purposes only */
-      int numCompErrs = getErrorModel().getNumCompErrors();
+      int numCompErrs = getErrorModel().getNumCompilerErrors();
       int numWarnings = getErrorModel().getNumWarnings();     
       
       if (!getErrorModel().hasOnlyWarnings()) {
@@ -541,8 +541,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     /** Gets the message to title the block containing only errors. */
     protected String _getErrorTitle() {
       CompilerErrorModel cem = getErrorModel();
-      if (cem.getNumCompErrors() > 1) return "--------------\n*** Errors ***\n--------------\n";
-      if (cem.getNumCompErrors() > 0) return "-------------\n*** Error ***\n-------------\n";
+      if (cem.getNumCompilerErrors() > 1) return "--------------\n*** Errors ***\n--------------\n";
+      if (cem.getNumCompilerErrors() > 0) return "-------------\n*** Error ***\n-------------\n";
       return "";
     }
       
@@ -624,7 +624,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       }
       
       String warningTitle = _getWarningTitle();
-      if (cem.getNumCompErrors() > 0) doc.append(warningTitle, BOLD_ATTRIBUTES);
+      if (cem.getNumCompilerErrors() > 0) doc.append(warningTitle, BOLD_ATTRIBUTES);
       
       for (int errorNum = 0; errorNum < numErrors; errorNum++) {
         int startPos = doc.getLength();

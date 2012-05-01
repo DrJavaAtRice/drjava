@@ -293,9 +293,10 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   
   public DefaultMutableTreeNode getRootNode() { return _rootNode; }
   public JTree getRegTree() { return _regTree; }
-  public JTree getRegTreeModel() { return _regTreeModel; }
+  public DefaultTreeModel getRegTreeModel() { return _regTreeModel; }
   public String getTitle() { return _title; }
   public RegionManager<R> getRegionManager() { return _regionManager; }
+  public SingleDisplayModel getGlobalModel() { return _model; }
   
   /** Update button state and text. _updateButtons should be overridden if additional buttons are added besides "Go To",
     * "Remove" and "Remove All". 
@@ -982,8 +983,6 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
       super.setBackground(c);
       if (RegionsTreePanel.this != null && dtcr != null) dtcr.setBackgroundNonSelectionColor(c);
     }
-    
-    public DefaultTreeModel getModel() { return (DefaultTreeModel) getModel(); }
   }
   
   /** Class that is embedded in each leaf node. The toString() method determines what's displayed in the tree. */

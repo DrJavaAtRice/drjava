@@ -169,7 +169,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   private volatile boolean _resetAfterCompile = true;
   
   /** Number of errors in last compilation.  compilerModel._numErrors is trashed when the compile model is reset. */
-  private volatile int _numCompErrors = 0;
+  private volatile int _numCompilerErrors = 0;
   
   /* JUnit Fields */
   
@@ -287,10 +287,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     }
     
     public int hashCode() {
-      return 
-        _priority ^
-        (_first == null ? 0 : _first.hashCode()) ^ 
-        (_second == null ? 0 : _second.hashCode() << 1) ^ 
+      return  _priority ^ (_first == null ? 0 : _first.hashCode()) ^ (_second == null ? 0 : _second.hashCode() << 1) ^ 
         getClass().hashCode();
     }
     
@@ -300,8 +297,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         result = _first.compareTo(o._first);
       }
       if (result == 0) {
-        if (_second==JDKDescriptor.NONE) { // identity
-          if (o._second==JDKDescriptor.NONE) { // identity
+        if (_second == JDKDescriptor.NONE) { // identity
+          if (o._second == JDKDescriptor.NONE) { // identity
             result = 0;
           }
           else {
@@ -309,7 +306,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
             result = 1;
           }
         }
-        else if (o._second==JDKDescriptor.NONE) { // identity
+        else if (o._second == JDKDescriptor.NONE) { // identity
           // other is NONE, this is something else; prefer NONE
           result = -1;
         }
@@ -342,7 +339,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         JarJDKToolsLibrary.msg("From config: "+fromConfig);
         results.put(getLibraryKey(LibraryKey.PRIORITY_CONFIG, fromConfig), fromConfig);
       }
-      else { JarJDKToolsLibrary.msg("From config: invalid "+fromConfig); }
+      else { JarJDKToolsLibrary.msg("From config: invalid " + fromConfig); }
     }
     else { JarJDKToolsLibrary.msg("From config: not set"); }
     
@@ -351,23 +348,24 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     for(JDKToolsLibrary fromRuntime: allFromRuntime) {
       if (fromRuntime.isValid()) {
         if (!results.containsKey(getLibraryKey(LibraryKey.PRIORITY_RUNTIME, fromRuntime))) {
-          JarJDKToolsLibrary.msg("From runtime: "+fromRuntime);
+          JarJDKToolsLibrary.msg("From runtime: " + fromRuntime);
           results.put(getLibraryKey(LibraryKey.PRIORITY_RUNTIME, fromRuntime), fromRuntime);
         }
-        else { JarJDKToolsLibrary.msg("From runtime: duplicate "+fromRuntime); }
+        else { JarJDKToolsLibrary.msg("From runtime: duplicate " + fromRuntime); }
       }
-      else { JarJDKToolsLibrary.msg("From runtime: invalid "+fromRuntime); }
+      else { JarJDKToolsLibrary.msg("From runtime: invalid " + fromRuntime); }
     }
     
     Iterable<JarJDKToolsLibrary> fromSearch = JarJDKToolsLibrary.search(this);
     for (JDKToolsLibrary t : fromSearch) {
       JavaVersion.FullVersion tVersion = t.version();
-      JarJDKToolsLibrary.msg("From search: "+t);
+      JarJDKToolsLibrary.msg("From search: " + t);
       JavaVersion.FullVersion coarsenedVersion = coarsenVersion(tVersion);
-      JarJDKToolsLibrary.msg("\ttVersion: "+tVersion+" "+tVersion.vendor());
-      JarJDKToolsLibrary.msg("\tcoarsenedVersion: "+coarsenedVersion+" "+coarsenedVersion.vendor());
+      JarJDKToolsLibrary.msg("\ttVersion: " + tVersion+" " + tVersion.vendor());
+      JarJDKToolsLibrary.msg("\tcoarsenedVersion: " + coarsenedVersion + " " + coarsenedVersion.vendor());
       // give a lower priority to built-in compilers
-      int priority = (edu.rice.cs.util.FileOps.getDrJavaFile().equals(tVersion.location()))?LibraryKey.PRIORITY_BUILTIN:LibraryKey.PRIORITY_SEARCH;
+      int priority = (edu.rice.cs.util.FileOps.getDrJavaFile().equals(tVersion.location())) ?
+        LibraryKey.PRIORITY_BUILTIN : LibraryKey.PRIORITY_SEARCH;
       if (!results.containsKey(getLibraryKey(priority, t))) {
         JarJDKToolsLibrary.msg("\tadded");
         results.put(getLibraryKey(priority, t), t);
@@ -412,8 +410,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Gets the JavadocModel, which provides all methods relating to Javadoc. */
   public JavadocModel getJavadocModel() { return _javadocModel; }
   
-  public int getNumCompErrors() { return _numCompErrors; }
-  public void setNumCompErrors(int num) { _numCompErrors = num; }
+  public int getNumCompilerErrors() { return _numCompilerErrors; }
+  public void setNumCompilerErrors(int num) { _numCompilerErrors = num; }
   
   /** Prepares this model to be thrown away.  Never called in practice outside of quit(), except in tests. */
   public void dispose() {

@@ -142,7 +142,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     listener.waitCompileDone();
     
     assertCompileErrorsPresent(_name(), true);
-//    System.err.println(cm.getCompilerErrorModel());
+//    System.err.println(cm.getErrorModel());
     assertEquals("Should have 2 compiler errors", 2, cm.getNumErrors());
     listener.checkCompileOccurred();
     

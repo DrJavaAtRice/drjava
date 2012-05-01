@@ -133,7 +133,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _findAgainButton.setToolTipText(sb.toString());
 
     // Similar (but NOT identical) code found in BookmarksPanel and BreakpointsPanel
-    _regionManager.addListener(new RegionManagerListener<MovingDocumentRegion>() {      
+    getRegionManager().addListener(new RegionManagerListener<MovingDocumentRegion>() {      
       public void regionAdded(MovingDocumentRegion r) { addRegion(r); }
       public void regionChanged(MovingDocumentRegion r) { 
         regionRemoved(r);
@@ -270,11 +270,11 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   private void _findAgain() {
     _updateButtons();   // force an update buttons operation
     OpenDefinitionsDocument odd = null;
-    if (_searchAll) odd = _model.getActiveDocument();
+    if (_searchAll) odd = getGlobalModel().getActiveDocument();
     else if (_doc != null) { odd = _doc.get(); }
     if (odd != null) {
 
-      _regionManager.clearRegions();
+      getRegionManager().clearRegions();
       assert getRootNode() == getRegTreeModel().getRoot();
       getRootNode().removeAllChildren();
       _docToTreeNode.clear();
@@ -284,7 +284,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
 //      _requestFocusInWindow();
 //      System.err.println("Root has been cleared; child count = " + getRootNode().getChildCount());
       _findReplace.findAll(_searchString, _searchAll, _searchSelectionOnly, _matchCase, _wholeWord, _noComments, _noTestCases, odd, 
-                           _regionManager, _region, this);
+                           getRegionManager(), _region, this);
       getRegTree().scrollRowToVisible(0);  // Scroll to the first line in the new panel
       _requestFocusInWindow();
     }
@@ -293,7 +293,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   /** Turn the selected regions into bookmarks. */
   private void _bookmark() {  // TODO: consolidate with _toggleBookmark in MainFrame/AbstractGlobalModel?
     updateButtons();
-    RegionManager<MovingDocumentRegion> bm = _model.getBookmarkManager();
+    RegionManager<MovingDocumentRegion> bm = getGlobalModel().getBookmarkManager();
     for (MovingDocumentRegion r: getSelectedRegions()) {
       OpenDefinitionsDocument doc = r.getDocument();
       int start = r.getStartOffset();
@@ -349,8 +349,8 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   @Override
   protected void _close() {
 //    System.err.println("FindResultsPanel.close() called on " + this);
-    _regionManager.clearRegions();  // removes and unhighlights each region; regionListener closes the panel at the end
-    _model.removeFindResultsManager(_regionManager);  // removes manager from global model (should be done by listener!)
+    getRegionManager().clearRegions();  // removes and unhighlights each region; regionListener closes the panel at the end
+    getGlobalModel().removeFindResultsManager(getRegionManager());  // removes manager from global model (should be done by listener!)
     _frame.removeCurrentLocationHighlight();
     freeResources();
     super._close();  // Not redundant.  _close may be called from removeRegion.
@@ -360,7 +360,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   public void freeResources() {
     _docToTreeNode.clear();
     _regionToTreeNode.clear();
-    _model.removeFindResultsManager(_regionManager);  // removes manager from global model (should be done by listener!)
+    getGlobalModel().removeFindResultsManager(getRegionManager());  // removes manager from global model (should be done by listener!)
     for (Pair<Option<Color>, OptionListener<Color>> p: _colorOptionListeners) {
       DrJava.getConfig().removeOptionListener(p.first(), p.second());
     }

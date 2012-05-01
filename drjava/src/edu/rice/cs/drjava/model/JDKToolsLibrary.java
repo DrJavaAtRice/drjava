@@ -71,9 +71,8 @@ public class JDKToolsLibrary {
   private final JavadocModel _javadoc;
   private final JDKDescriptor _jdkDescriptor; // JDKDescriptor.NONE if none
   
-  protected JDKToolsLibrary(FullVersion version, JDKDescriptor jdkDescriptor,
-                            CompilerInterface compiler, Debugger debugger,
-                            JavadocModel javadoc) {
+  protected JDKToolsLibrary(FullVersion version, JDKDescriptor jdkDescriptor, CompilerInterface compiler, 
+                            Debugger debugger, JavadocModel javadoc) {
     assert jdkDescriptor != null;
     _version = version;
     _compiler = compiler;
@@ -175,15 +174,15 @@ public class JDKToolsLibrary {
 
     List<JDKToolsLibrary> list = new ArrayList<JDKToolsLibrary>();
     
-    if (compiler!=NoCompilerAvailable.ONLY) {
+    if (compiler != NoCompilerAvailable.ONLY) {
       // if we have found a compiler, add it
       msg("                 compiler found");
       list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, compiler, debugger, javadoc));
     }
       
-    msg("                 compilers found: "+list.size());
+    msg("                 compilers found: " + list.size());
     
-    if (list.size()==0) {
+    if (list.size() == 0) {
       // no compiler found, i.e. compiler == NoCompilerAvailable.ONLY
       msg("                 no compilers found, adding NoCompilerAvailable library");
       list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, NoCompilerAvailable.ONLY, debugger, javadoc));
@@ -193,14 +192,14 @@ public class JDKToolsLibrary {
   }
   
   public static final java.io.StringWriter LOG_STRINGWRITER = new java.io.StringWriter();
-  protected static final java.io.PrintWriter LOG_PW = new java.io.PrintWriter(LOG_STRINGWRITER);
+//  protected static final java.io.PrintWriter LOG_PW = new java.io.PrintWriter(LOG_STRINGWRITER);
   
   public static void msg(String s) {   
 //    try {   
 //      java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(new File(new File(System.getProperty("user.home")),   
-//                                                                                       "mintcompiler.txt").getAbsolutePath(),true));   
+//                                                                                       "FindCompilers.txt").getAbsolutePath(),true));   
 //      pw.println(s);
-      LOG_PW.println(s);
+////      LOG_PW.println(s);
 //      pw.close();   
 //    }   
 //    catch(java.io.IOException ioe) { }   

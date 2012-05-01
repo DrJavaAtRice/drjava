@@ -567,7 +567,7 @@ public class DefaultCompilerModel implements CompilerModel {
 //    resetCompilerErrors();  // Why is this done?
 //    System.err.println("Preparing to construct CompilerErrorModel for errors: " + errors);
     _compilerErrorModel = new CompilerErrorModel(errors.toArray(new DJError[0]), _model);
-    _model.setNumCompErrors(_compilerErrorModel.getNumCompErrors());  // cache number of compiler errors in global model
+    _model.setNumCompilerErrors(_compilerErrorModel.getNumCompilerErrors());  // cache number of compiler errors in global model
   }
   
   //----------------------------- Error Results -----------------------------//
@@ -579,7 +579,7 @@ public class DefaultCompilerModel implements CompilerModel {
   public int getNumErrors() { return getCompilerErrorModel().getNumErrors(); }
   
   /** Gets the total number of current compiler errors. */
-  public int getNumCompErrors() { return getCompilerErrorModel().getNumCompErrors(); }
+  public int getNumCompilerErrors() { return getCompilerErrorModel().getNumCompilerErrors(); }
   
   /** Gets the total number of current warnings. */  
   public int getNumWarnings() { return getCompilerErrorModel().getNumWarnings(); }

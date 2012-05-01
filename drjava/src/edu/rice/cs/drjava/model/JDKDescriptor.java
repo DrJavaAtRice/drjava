@@ -224,15 +224,15 @@ public abstract class JDKDescriptor {
       * @throws FileNotFoundException if none of them exists.*/
     public static File oneOf(File dir, String... fileNames) throws FileNotFoundException {
       if (dir.isDirectory()) {
-        for(String fn: fileNames) {
-          File f = new File(dir,fn);
+        for (String fn: fileNames) {
+          File f = new File(dir, fn);
           if (f.exists()) return f;
         }
-        throw new FileNotFoundException("None of "+IterUtil.toString(IterUtil.make(fileNames), "", ", ", "")+
-                                        " found in "+dir);
+        throw new FileNotFoundException("None of "+IterUtil.toString(IterUtil.make(fileNames), "", ", ", "") +
+                                        " found in " + dir);
 
       }
-      throw new FileNotFoundException(dir+" is not a directory");
+      throw new FileNotFoundException(dir + " is not a directory");
 
     }
   }

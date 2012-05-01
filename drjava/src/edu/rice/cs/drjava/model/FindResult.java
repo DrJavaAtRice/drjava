@@ -43,10 +43,10 @@ package edu.rice.cs.drjava.model;
   * @version $Id$
   */
 public class FindResult {
-  private OpenDefinitionsDocument _document;
-  private int _foundoffset;
-  private boolean _wrapped;
-  private boolean _allWrapped;
+  private final OpenDefinitionsDocument _document;
+  private final int _foundoffset;
+  private final boolean _wrapped;
+  private final boolean _allWrapped;
   
   /** Constructor for a FindResult.
    * @param document the document where the found instance is located

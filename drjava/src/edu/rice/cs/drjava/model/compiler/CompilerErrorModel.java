@@ -202,7 +202,7 @@ public class CompilerErrorModel {
   public int getNumErrors() { return _numErrors; }
   
   /** Returns the number of CompilerErrors that are compiler errors */
-  public int getNumCompErrors() { return _numCompilerErrors; }
+  public int getNumCompilerErrors() { return _numCompilerErrors; }
   
   /** Returns the number of CompilerErrors that are warnings */
   public int getNumWarnings() { return _numWarnings; }
@@ -449,8 +449,8 @@ public class CompilerErrorModel {
     * is inclusive, the ending index is exclusive.
     */
   private static class StartAndEndIndex {
-    private int startPos;
-    private int endPos;
+    private final int startPos;
+    private final int endPos;
     
     public StartAndEndIndex(int startPos, int endPos) {
       this.startPos = startPos;

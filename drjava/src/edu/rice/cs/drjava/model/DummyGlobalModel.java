@@ -392,11 +392,11 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call getDocumentCount on a Dummy");
   }
   
-  public int getNumCompErrors() {
-    throw new UnsupportedOperationException("Tried to call getNumCompErrors on a Dummy");
+  public int getNumCompilerErrors() {
+    throw new UnsupportedOperationException("Tried to call getNumCompilerErrors on a Dummy");
   }
   
-  public void setNumCompErrors(int num) {
+  public void setNumCompilerErrors(int num) {
     throw new UnsupportedOperationException("Tried to call setNumCompErrors on a Dummy");
   }
   

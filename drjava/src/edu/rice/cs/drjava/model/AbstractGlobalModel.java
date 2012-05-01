@@ -167,7 +167,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public static final Log _log = new Log("GlobalModel.txt", false);
   
   /** A document cache that manages how many unmodified documents are open at once. */
-  protected DocumentCache _cache;  
+  protected final DocumentCache _cache;  
   
   static final String DOCUMENT_OUT_OF_SYNC_MSG =
     "Current document is out of sync with the Interactions Pane and should be recompiled!\n";
@@ -256,9 +256,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Remove a manager from the model. */
-  public void removeFindResultsManager(RegionManager<MovingDocumentRegion> rm) {
-    _findResultsManagers.remove(rm);
-  }
+  public void removeFindResultsManager(RegionManager<MovingDocumentRegion> rm) { _findResultsManagers.remove(rm); }
   
   /** Manager for browser history regions. */
   protected final BrowserHistoryManager _browserHistoryManager;
@@ -1134,12 +1132,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** throws UnsupportedOperationException */
-  public int getNumCompErrors() {
+  public int getNumCompilerErrors() {
     throw new UnsupportedOperationException("AbstractGlobalModel does not support compilation");
   }
   
   /** throws UnsupportedOperationException */
-  public void setNumCompErrors(int num) { 
+  public void setNumCompilerErrors(int num) { 
     throw new UnsupportedOperationException("AbstractGlobalModel does not support compilation");
   };
   

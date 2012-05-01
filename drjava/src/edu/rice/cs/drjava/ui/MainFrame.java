@@ -4474,7 +4474,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public JavadocErrorPanel getJavadocErrorPanel() { return _javadocErrorPanel; }
   
   /** Returns the currently shown error panel if there is one. Otherwise returns null. */
-  public CompilerErrorPanel getSelectedCompilerErrorPanel() {
+  public CompilerErrorPanel getSelectedErrorPanel() {
     Component c = _tabbedPane.getSelectedComponent();
     if (c instanceof CompilerErrorPanel) return (CompilerErrorPanel) c;
     return null;
@@ -6421,7 +6421,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     menuBar.add(languageLevelMenu);
     menuBar.add(helpMenu);
     // Plastic-specific style hints
-    if(Utilities.isPlasticLaf()) {
+    if (Utilities.isPlasticLaf()) {
       menuBar.putClientProperty(com.jgoodies.looks.Options.HEADER_STYLE_KEY, com.jgoodies.looks.HeaderStyle.BOTH);
     }
   }
@@ -7943,7 +7943,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                                  final OpenDefinitionsDocument doc,
                                                                  int offset) {
         
-        final RegionManager<R> rm = p._regionManager;
+        final RegionManager<R> rm = p.getRegionManager();
         SortedSet<R> regions = rm.getRegions(doc);
         if (regions == null || regions.size() == 0) return;
         

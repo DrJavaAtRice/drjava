@@ -622,7 +622,7 @@ public class DrJava {
       if (!compiz) return false; // no Compiz
       
       final JavaVersion.FullVersion ver160_20 = JavaVersion.parseFullVersion("1.6.0_20");
-      if (JavaVersion.CURRENT_FULL.compareTo(ver160_20)>=0) return false; // Java >= 1.6.0_20
+      if (JavaVersion.CURRENT_FULL.compareTo(ver160_20) >= 0) return false; // Java >= 1.6.0_20
       
       String[] options = new String[] { "Yes", "Yes, and ignore from now on", "No" };
       int res = javax.swing.JOptionPane.

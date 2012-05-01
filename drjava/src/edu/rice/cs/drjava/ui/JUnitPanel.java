@@ -329,7 +329,7 @@ public class JUnitPanel extends ErrorPanel {
       StringBuilder numErrMsg;
       
       /** Used for display purposes only */
-      int numCompErrs = getErrorModel().getNumCompErrors();
+      int numCompErrs = getErrorModel().getNumCompilerErrors();
       int numWarnings = getErrorModel().getNumWarnings();     
       
       if (! getErrorModel().hasOnlyWarnings()) {
