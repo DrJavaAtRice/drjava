@@ -234,14 +234,14 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           // can't use loadLibraryAdapter because we need to preempt the whole package
           ClassLoader debugLoader = new PreemptingClassLoader(new PathClassLoader(loader, path), debuggerPackage);
           Debugger attempt = (Debugger) ReflectUtil.loadObject(debugLoader, debuggerAdapter, sig, model);        
-          JDKToolsLibrary.msg("                 debugger="+attempt.getClass().getName());
+          JDKToolsLibrary.msg("                 debugger=" + attempt.getClass().getName());
           if (attempt.isAvailable()) { debugger = attempt; }
         }
         catch (ReflectException e) {
-          JDKToolsLibrary.msg("                 no debugger, ReflectException "+e); /* can't load */
+          JDKToolsLibrary.msg("                 no debugger, ReflectException " + e); /* can't load */
         }
         catch (LinkageError e) {
-          JDKToolsLibrary.msg("                 no debugger, LinkageError "+e);  /* can't load */
+          JDKToolsLibrary.msg("                 no debugger, LinkageError " + e);  /* can't load */
         }
       }
       
@@ -294,10 +294,10 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         result = JavaVersion.parseFullVersion(parsedVersion, vendor, vendor, f);
       }
       else if (name.matches("\\d+\\.\\d+\\.\\d+.*")) {  // The \d+ fields actually match single digits; .* matches an arbitrary suffix
-        msg("Invoking parseFullVersion on " + name + ", " + vendor + ", " + vendor + ", " + f);  //Strip off 1.x where x is 6 or 7
+        _log.log("Invoking parseFullVersion on " + name + ", " + vendor + ", " + vendor + ", " + f);  //Strip off 1.x where x is 6 or 7
         parsedVersion = name.substring(0, 5);  // could be generalized to multi-digit matches by using index of first char in .* instead of 5
         result = JavaVersion.parseFullVersion(parsedVersion, vendor, vendor, f);
-        msg("Result is: " + result.versionString());
+        _log.log("Result is: " + result.versionString());
       }
       current = current.getParentFile();
     } while (current != null && result == null);
@@ -379,9 +379,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           }
         }
       }
-      result = JavaVersion.parseFullVersion(parsedVersion,vendor,vendor,f);
+      result = JavaVersion.parseFullVersion(parsedVersion, vendor, vendor,f);
     }
-    msg("Guessed version for " + path + " is " + result.versionString());
+    JDKToolsLibrary.msg("Guessed version for " + path + " is " + result.versionString());
     return result;
   }
   
@@ -466,7 +466,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   /* Search for jar files in roots and, if found, transfer them to the jars collection. */
   protected static void searchRootsForJars(LinkedHashMap<File,Set<JDKDescriptor>> roots,
                                            LinkedHashMap<File,Set<JDKDescriptor>> jars) {
-    JDKToolsLibrary.msg("***** roots = " + roots);
+    _log.log("***** roots = " + roots);
     // matches: starts with "j2sdk", starts with "jdk", has form "[number].[number].[number]" (OS X), or
     // starts with "java-" (Linux)
     Predicate<File> subdirFilter = LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("j2sdk.*"),
@@ -529,8 +529,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     
     // now we have the JDK libraries in collapsed and the compound libraries in compoundCollapsed
     for(JarJDKToolsLibrary compoundLib: compoundCollapsed) {
-      JDKToolsLibrary.msg("compoundLib: " + compoundLib);
-      JDKToolsLibrary.msg("    " + compoundLib.location());
+      JDKToolsLibrary.msg("Checking compoundLib: " + compoundLib + " at location " + compoundLib.location());
       FullVersion compoundVersion = compoundLib.version();
       JarJDKToolsLibrary found = null;
       // try to find a JDK in results that matches compoundVersion exactly, except for vendor
@@ -613,30 +612,29 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     searchRootsForJars(roots, jars);
 
     // check which jars are valid JDKs, and determine if they are compound or full (non-compound) JDKs
-    Map<FullVersion, Iterable<JarJDKToolsLibrary>> results = 
-      new TreeMap<FullVersion, Iterable<JarJDKToolsLibrary>>();
+    Map<FullVersion, Iterable<JarJDKToolsLibrary>> results = new TreeMap<FullVersion, Iterable<JarJDKToolsLibrary>>();
     Map<FullVersion, Iterable<JarJDKToolsLibrary>> compoundResults =
       new TreeMap<FullVersion, Iterable<JarJDKToolsLibrary>>();
     
     collectValidResults(model, jars, results, compoundResults);
     
     // We store everything in reverse order, since that's the natural order of the versions
-    Iterable<JarJDKToolsLibrary> collapsed = IterUtil.reverse(IterUtil.collapse(results.values()));  // Are versions in results subsequently ignored?
+    Iterable<JarJDKToolsLibrary> collapsed = IterUtil.reverse(IterUtil.collapse(results.values()));
         
     JDKToolsLibrary.msg("***** Found the following base libraries *****");
     for (JarJDKToolsLibrary lib: collapsed) {
-      JDKToolsLibrary.msg("  Base library: " + lib);
+      JDKToolsLibrary.msg("*  Base library: " + lib);
     }
     
     Iterable<JarJDKToolsLibrary> compoundCollapsed = IterUtil.reverse(IterUtil.collapse(compoundResults.values()));
     
-    // Get completed compound JDKs by going through the list of compound JDKs and finding full JDKs that complete them
+    // Get completed compound JDKs by going through the list of compound JDKs and finding corresponding full JDKs 
     Map<FullVersion, Iterable<JarJDKToolsLibrary>> completedResults =
       getCompletedCompoundResults(model, collapsed, compoundCollapsed);
 
     JDKToolsLibrary.msg("***** Found the following completed compound libraries *****");
     for (JarJDKToolsLibrary lib: IterUtil.collapse(completedResults.values())) {
-      JDKToolsLibrary.msg("  Compound library: " + lib);
+      JDKToolsLibrary.msg("*  Compound library: " + lib);
     }
     
     Iterable<JarJDKToolsLibrary> result = 
@@ -650,7 +648,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     addIfDir(f, JDKDescriptor.NONE, map);
   }
   
-  /** Add a canonicalized {@code f} to the given set if it is an existing directory or link */
+  /** Add JDKDescriptor c to the JDKDescriptor set of for canonicalized directory {@code f} */
   private static void addIfDir(File f, JDKDescriptor c, Map<? super File, Set<JDKDescriptor>> map) {
     f = IOUtil.attemptCanonicalFile(f);
     if (IOUtil.attemptIsDirectory(f)) {
@@ -659,35 +657,36 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         set = new LinkedHashSet<JDKDescriptor>();
         map.put(f, set);
       }
-      if (! set.contains(f)) JDKToolsLibrary.msg("Dir added:     " + f);
+      if (! set.contains(f)) JDKToolsLibrary.msg("JDKDescriptor" + c + " recorded for dir " + f);
       set.add(c);
     }
     else { JDKToolsLibrary.msg("Dir does not exist: " + f); }
   }
   
-  /** Add a canonicalized {@code f} to the given set if it is an existing file */
+  //** Add {@code JDKDescriptor.NONE} to the JDKDescriptor set for file {@code f} */
   private static void addIfFile(File f, Map<? super File,Set<JDKDescriptor>> map) {
     addIfFile(f, JDKDescriptor.NONE, map);
   }
   
-  /** Add a canonicalized {@code f} to the given set if it is an existing file */
+  
+  //** Add JDKDescriptor {@code c} to the JDKDescriptor set for file {@code f} */
   private static void addIfFile(File f, JDKDescriptor c, Map<? super File,Set<JDKDescriptor>> map) {
     addIfFile(f, Collections.singleton(c), map);
   }
 
-  /** Add a canonicalized {@code f} to the given set if it is an existing file */
+  //** Add JDKDescriptor set cs to the JDKDescriptor set for file {@code f} */
   private static void addIfFile(File f, Set<JDKDescriptor> cs, Map<? super File,Set<JDKDescriptor>> map) {
     f = IOUtil.attemptCanonicalFile(f);
     if (IOUtil.attemptIsFile(f)) {
       Set<JDKDescriptor> set = map.get(f);
-      if (set==null) {
+      if (set == null) {
         set = new LinkedHashSet<JDKDescriptor>();
         map.put(f, set);
       }
       set.addAll(cs);
-      JDKToolsLibrary.msg("File added:     "+f);
+      JDKToolsLibrary.msg("Found JDKDescriptors " + cs + " for File " + f);
     }
-    else { JDKToolsLibrary.msg("File not added: "+f); }
+    else { JDKToolsLibrary.msg("File not found: " + f); }
   }
   
   /** Search for JDK descriptors.
@@ -695,16 +694,16 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     * For example, when doing an "ant run", the classes are spread across classes/base and classes/lib,
     * with the edu.rice.cs.drjava.DrJava class in classes/base but the descriptors in classes/lib. */
   private static Iterable<JDKDescriptor> searchForJDKDescriptors() {
-    JDKToolsLibrary.msg("---- Searching for descriptors ----");
+    JDKToolsLibrary.msg("---- Searching for JDKDescriptors in executable ----");
     long t0 = System.currentTimeMillis();
-    JDKToolsLibrary.msg("ms: "+t0);
+    JDKToolsLibrary.msg("ms: " + t0);
     Iterable<JDKDescriptor> descriptors = IterUtil.empty();
     try {
       File f = edu.rice.cs.util.FileOps.getDrJavaFile();
-      JDKToolsLibrary.msg("drjava.jar: " + f);
+//      JDKToolsLibrary.msg("Searching drjava.jar: " + f);
       if (f.isFile()) {
         JarFile jf = new JarFile(f);
-        JDKToolsLibrary.msg("jar file: " + jf);
+        JDKToolsLibrary.msg("Searching jar file: " + jf);
         Enumeration<JarEntry> entries = jf.entries();
         while (entries.hasMoreElements()) {
           JarEntry je = entries.nextElement();
@@ -712,10 +711,12 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           if (name.startsWith("edu/rice/cs/drjava/model/compiler/descriptors/") && name.endsWith(".class") &&
               (name.indexOf('$') < 0)) {
             descriptors = attemptToLoadDescriptor(descriptors, name);
+            JDKToolsLibrary.msg("Found potential JDKDescriptor: " + name);
           }
         }
       }
       else {
+        JDKToolsLibrary.msg("Searching class file tree corresponding to: " + f);
         final String DESC_PATH = "edu/rice/cs/drjava/model/compiler/descriptors";
         File dir = new File(f, DESC_PATH);
         JDKToolsLibrary.msg("directory, enumerating files in " + dir);
@@ -727,6 +728,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         for (File je: files) {
           String name = DESC_PATH + "/" + je.getName();
           descriptors = attemptToLoadDescriptor(descriptors, name);
+          JDKToolsLibrary.msg("Found potential JDKDescriptor: " + name);
         }
       }
     }
@@ -746,18 +748,18 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     int dotPos = name.indexOf(".class");
     String className = name.substring(0, dotPos).replace('/','.');
     try {
-      JDKToolsLibrary.msg("    class name: "+className);
+      JDKToolsLibrary.msg("    class name: " + className);
       Class<?> clazz = Class.forName(className);
       Class<? extends JDKDescriptor> descClass = clazz.asSubclass(JDKDescriptor.class);
       JDKDescriptor desc = descClass.newInstance();
       JDKToolsLibrary.msg("        loaded!");
       descriptors = IterUtil.compose(descriptors, desc);
     }
-    catch(LinkageError le) { JDKToolsLibrary.msg("LinkageError: "+le); /* ignore */ } 
-    catch(ClassNotFoundException cnfe) { JDKToolsLibrary.msg("ClassNotFoundException: "+cnfe); /* ignore */ }
-    catch(ClassCastException cce) { JDKToolsLibrary.msg("ClassCastException: "+cce); /* ignore */ }
-    catch(IllegalAccessException iae) { JDKToolsLibrary.msg("IllegalAccessException: "+iae); /* ignore */ }
-    catch(InstantiationException ie) { JDKToolsLibrary.msg("InstantiationException: "+ie); /* ignore */ }
+    catch(LinkageError le) { JDKToolsLibrary.msg("LinkageError: " + le); /* ignore */ } 
+    catch(ClassNotFoundException cnfe) { JDKToolsLibrary.msg("ClassNotFoundException: " + cnfe); /* ignore */ }
+    catch(ClassCastException cce) { JDKToolsLibrary.msg("ClassCastException: " + cce); /* ignore */ }
+    catch(IllegalAccessException iae) { JDKToolsLibrary.msg("IllegalAccessException: " + iae); /* ignore */ }
+    catch(InstantiationException ie) { JDKToolsLibrary.msg("InstantiationException: " + ie); /* ignore */ }
     
     return descriptors;
   }

@@ -54,20 +54,21 @@ import edu.rice.cs.util.swing.RightClickMouseAdapter;
 
 /** Panel for displaying regions in a list in the order specified by indices passes to addRegion.
   * This class is a swing view class and hence should only be accessed from the event-handling thread.
+  * The volatile declarations are included because the event-thread-only invariant is not enforced. TODO: fix this.
   * Not currently used because BrowserHistoryPanel is not used.
   * @version $Id$
   */
 public abstract class RegionsListPanel<R extends IDocumentRegion> extends TabbedPanel {
-  protected JPanel _leftPane;
+  protected final JPanel _leftPane;
   
-  protected JList<RegionListUserObj<R>> _list;
-  protected DefaultListModel<RegionListUserObj<R>> _listModel;
-  protected String _title;
+  protected volatile JList<RegionListUserObj<R>> _list;
+  protected volatile DefaultListModel<RegionListUserObj<R>> _listModel;
+  protected volatile String _title;
   
   protected final SingleDisplayModel _model;
   protected final MainFrame _frame;
   
-  protected JPanel _buttonPanel;
+  protected volatile JPanel _buttonPanel;
   
   /** Constructs a new panel to display regions in a list.
     * This is swing view class and hence should only be accessed from the event-handling thread.
@@ -117,7 +118,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
     updateButtons();
   }
   
-  /** Creates the region list. */
+  /** Creates the region list. TODO: fold this into constructor so related fields can be declared final. */
   private void _setupRegionList() {
     _listModel = new DefaultListModel<RegionListUserObj<R>>();
     _list = new JList<RegionListUserObj<R>>(_listModel) {
@@ -186,7 +187,8 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
     return new JComponent[0];    
   }
   
-  /** Creates the buttons for controlling the regions. */
+  /** Creates the buttons for controlling the regions. 
+    * TODO: fold this into constructor so related fields can be declared final. */
   private void _setupButtonPanel() {
     JPanel mainButtons = new JPanel();
     JPanel emptyPanel = new JPanel();
@@ -344,7 +346,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
   
   /** Class that gets put into the list. The toString() method determines what's displayed in the three. */
   protected static class RegionListUserObj<R extends IDocumentRegion> {
-    protected R _region;
+    protected final R _region;
     public int lineNumber() { return _region.getDocument().getLineOfOffset(_region.getStartOffset())+1; }
     public R region() { return _region; }
     public RegionListUserObj(R r) { _region = r; }
@@ -384,5 +386,4 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
       }
     }
   }
-  
 }

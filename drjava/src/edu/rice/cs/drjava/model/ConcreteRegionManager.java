@@ -59,13 +59,13 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
   RegionManager<R> {
   
   /** Hashtable mapping documents to collections of regions.  Primitive operations are thread safe. */
-  private volatile HashMap<OpenDefinitionsDocument, SortedSet<R>> _regions = 
+  private final HashMap<OpenDefinitionsDocument, SortedSet<R>> _regions = 
     new HashMap<OpenDefinitionsDocument, SortedSet<R>>();
   
   /** The domain of the _regions.  This field can be extracted from _regions so it is provided to improve performance
     * Primitive operations are thread-safe. 
     */
-  private volatile Set<OpenDefinitionsDocument> _documents = new HashSet<OpenDefinitionsDocument>();
+  private final Set<OpenDefinitionsDocument> _documents = new HashSet<OpenDefinitionsDocument>();
   
   /* Depending on default constructor */
   
@@ -136,19 +136,20 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     else return null;
   }
   
-  /** Finds the interval of regions in odd such that the line label (excerpt) for the region contains offset. */
+  /** Finds the interval of regions in odd such that their line labels (excerpts) contain offset.
+    * NOTE: not all regions in the interval necessarily have this property.   -- Corky 4/30/12 */
   public Pair<R, R> getRegionInterval(OpenDefinitionsDocument odd, int offset) {
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
 //    System.err.println("getRegionsNear(" + odd + ", " + offset + ") called");
     
-    /* Get the interval of regions whose line label (excerpts) contain offset. The maximium size of the excerpt 
+    /* Get the interval of regions whose line labels (excerpts) contain offset. The maximium size of the excerpt 
      * enclosing a region is 120 characters; it begins at the start of the line containing the start of the region. 
-     * Since empty regions are ignore (and deleted as soon as they are found), the end of a containing region must be 
+     * Since empty regions are ignored (and deleted as soon as they are found), the end of a containing region must be 
      * less than 120 characters from offset.  Find the tail set of all regions [start, end) where offset - 120 < end.
      */
-    @SuppressWarnings("unchecked")
-    SortedSet<R> tail = getTailSet((R) new DocumentRegion(odd, 0, offset - 119));
+    @SuppressWarnings("unchecked") // max operator inserted to ensure that [start,end) interval is non-degenerate.
+    SortedSet<R> tail = getTailSet((R) new DocumentRegion(odd, 0, Math.max(0, offset - 119)));  
     
     /* Search tail, selecting first and last regions r such that r.getLineEnd() >= offset and r.getLineStart <= offset.
      * The tail is totally order on BOTH getLineStart() and getLineEnd() because the functions mapping start to lineStart
@@ -158,7 +159,8 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     
     if (tail.size() == 0) return null;
     
-    // Find the first and last regions whose bounds (using line boundaries) contain offset
+    // Find the first and last regions whose bounds (using line boundaries) contain offset; some in middle may not
+    // contain offset.                               
     Iterator<R> it = tail.iterator();
     R first = null;
     R last = null;
@@ -382,8 +384,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
       for (R r: _regions.get(odd)) regions.add(new DummyDocumentRegion(f, r.getStartOffset(), r.getEndOffset()));
     }
     return regions;
-  }
-      
+  } 
   
   public boolean contains(R region) {
     for (OpenDefinitionsDocument doc: _documents) {

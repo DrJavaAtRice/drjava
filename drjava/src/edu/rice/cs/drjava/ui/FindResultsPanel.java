@@ -67,26 +67,26 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
 
   // The following field has been hoisted into RegionsTreePanel
 //  protected final RegionManager<MovingDocumentRegion> _regionManager;
-  protected final String _searchString;
-  protected final boolean _searchAll;
-  protected final boolean _searchSelectionOnly;
-  protected final boolean _matchCase;
-  protected final boolean _wholeWord;
-  protected final boolean _noComments;
-  protected final boolean _noTestCases;
-  protected final WeakReference<OpenDefinitionsDocument> _doc;
-  protected final FindReplacePanel _findReplace;
-  protected final MovingDocumentRegion _region; //document region used for search limited selection function
+  private final String _searchString;
+  private final boolean _searchAll;
+  private final boolean _searchSelectionOnly;
+  private final boolean _matchCase;
+  private final boolean _wholeWord;
+  private final boolean _noComments;
+  private final boolean _noTestCases;
+  private final WeakReference<OpenDefinitionsDocument> _doc;
+  private final FindReplacePanel _findReplace;
+  private final MovingDocumentRegion _region; //document region used for search limited selection function
     
-  protected JButton _findAgainButton;
-  protected JButton _goToButton;
-  protected JButton _bookmarkButton;
-  protected JButton _removeButton;
-  protected JComboBox<Color> _colorBox;  // hold both Colors and Strings (Why?)
-  protected int _lastIndex;
+  private volatile JButton _findAgainButton;
+  private volatile JButton _goToButton;
+  private volatile JButton _bookmarkButton;
+  private volatile JButton _removeButton;
+  private volatile JComboBox<Color> _colorBox;
+  private volatile int _lastIndex;
   
   /** Saved option listeners kept in this field so they can be removed for garbage collection  */
-  private LinkedList<Pair<Option<Color>, OptionListener<Color>>> _colorOptionListeners = 
+  private final LinkedList<Pair<Option<Color>, OptionListener<Color>>> _colorOptionListeners = 
     new LinkedList<Pair<Option<Color>, OptionListener<Color>>>();
   
   /** Constructs a new find results panel. This is swing class which should only be accessed from the event thread.
@@ -133,7 +133,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _findAgainButton.setToolTipText(sb.toString());
 
     // Similar (but NOT identical) code found in BookmarksPanel and BreakpointsPanel
-    _regionManager.addListener(new RegionManagerListener<MovingDocumentRegion>() {      
+    getRegionManager().addListener(new RegionManagerListener<MovingDocumentRegion>() {      
       public void regionAdded(MovingDocumentRegion r) { addRegion(r); }
       public void regionChanged(MovingDocumentRegion r) { 
         regionRemoved(r);
@@ -152,8 +152,8 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   }
   
   class ColorComboRenderer extends JPanel implements ListCellRenderer<Color> {
-    private Color _color = DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_colorBox.getSelectedIndex()]);
-    private DefaultListCellRenderer _defaultRenderer = new DefaultListCellRenderer();
+    private volatile Color _color = DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_colorBox.getSelectedIndex()]);
+    private final DefaultListCellRenderer _defaultRenderer = new DefaultListCellRenderer();
     private final Dimension _size = new Dimension(0, 20);  
     private final CompoundBorder _compoundBorder = 
       new CompoundBorder(new MatteBorder(2, 10, 2, 10, Color.white), new LineBorder(Color.black));
@@ -164,19 +164,18 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       setBorder(_compoundBorder);
     }
     
-    // Value is either a bonafide Color or null (formerly Color or "None")
     public Component getListCellRendererComponent(JList<? extends Color> list, Color color, int row, boolean sel, boolean hasFocus) {
       JComponent renderer;
       if (color != null) {
         _color = color;
         renderer = this;
       }
-      else { // color is null meaning "none"
+      else {
         JLabel l = (JLabel) _defaultRenderer.getListCellRendererComponent(list, color, row, sel, hasFocus);
         l.setHorizontalAlignment(JLabel.CENTER);
         renderer = l;
       }
-      // Taken out because this is a Java 5 method; not sure if it's necessary
+      // Taken out because this is a 1.5 method; not sure if it's necessary
       renderer.setPreferredSize(_size);
       return renderer;
     }
@@ -215,7 +214,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     final Color normalColor = highlightPanel.getBackground();
     highlightPanel.add(new JLabel("Highlight:"));
     
-    // find the first available color, or choose null (formerly "None")
+    // find the first available color, or choose "None"
     int smallestIndex = 0;
     int smallestUsage = DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[smallestIndex];
     for(_lastIndex = 0; _lastIndex < OptionConstants.FIND_RESULTS_COLORS.length; ++_lastIndex) {
@@ -226,7 +225,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     }
     _lastIndex = smallestIndex;
     ++DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex];
-    _colorBox = new JComboBox<Color>();   // formerly <Object> because it held both Color values and "None" (since changed to null)
+    _colorBox = new JComboBox<Color>();    
     for (int i = 0; i < OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
       _colorBox.addItem(DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[i]));
     }
@@ -271,22 +270,22 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   private void _findAgain() {
     _updateButtons();   // force an update buttons operation
     OpenDefinitionsDocument odd = null;
-    if (_searchAll) odd = _model.getActiveDocument();
+    if (_searchAll) odd = getGlobalModel().getActiveDocument();
     else if (_doc != null) { odd = _doc.get(); }
     if (odd != null) {
 
-      _regionManager.clearRegions();
-      assert _rootNode == _regTreeModel.getRoot();
-      _rootNode.removeAllChildren();
+      getRegionManager().clearRegions();
+      assert getRootNode() == getRegTreeModel().getRoot();
+      getRootNode().removeAllChildren();
       _docToTreeNode.clear();
       _regionToTreeNode.clear();
-      _regTreeModel.nodeStructureChanged(_rootNode);
+      getRegTreeModel().nodeStructureChanged(getRootNode());
       _lastSelectedRegion = null;
 //      _requestFocusInWindow();
-//      System.err.println("Root has been cleared; child count = " + _rootNode.getChildCount());
+//      System.err.println("Root has been cleared; child count = " + getRootNode().getChildCount());
       _findReplace.findAll(_searchString, _searchAll, _searchSelectionOnly, _matchCase, _wholeWord, _noComments, _noTestCases, odd, 
-                           _regionManager, _region, this);
-      _regTree.scrollRowToVisible(0);  // Scroll to the first line in the new panel
+                           getRegionManager(), _region, this);
+      getRegTree().scrollRowToVisible(0);  // Scroll to the first line in the new panel
       _requestFocusInWindow();
     }
   }
@@ -294,7 +293,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   /** Turn the selected regions into bookmarks. */
   private void _bookmark() {  // TODO: consolidate with _toggleBookmark in MainFrame/AbstractGlobalModel?
     updateButtons();
-    RegionManager<MovingDocumentRegion> bm = _model.getBookmarkManager();
+    RegionManager<MovingDocumentRegion> bm = getGlobalModel().getBookmarkManager();
     for (MovingDocumentRegion r: getSelectedRegions()) {
       OpenDefinitionsDocument doc = r.getDocument();
       int start = r.getStartOffset();
@@ -350,8 +349,8 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   @Override
   protected void _close() {
 //    System.err.println("FindResultsPanel.close() called on " + this);
-    _regionManager.clearRegions();  // removes and unhighlights each region; regionListener closes the panel at the end
-    _model.removeFindResultsManager(_regionManager);  // removes manager from global model (should be done by listener!)
+    getRegionManager().clearRegions();  // removes and unhighlights each region; regionListener closes the panel at the end
+    getGlobalModel().removeFindResultsManager(getRegionManager());  // removes manager from global model (should be done by listener!)
     _frame.removeCurrentLocationHighlight();
     freeResources();
     super._close();  // Not redundant.  _close may be called from removeRegion.
@@ -361,7 +360,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   public void freeResources() {
     _docToTreeNode.clear();
     _regionToTreeNode.clear();
-    _model.removeFindResultsManager(_regionManager);  // removes manager from global model (should be done by listener!)
+    getGlobalModel().removeFindResultsManager(getRegionManager());  // removes manager from global model (should be done by listener!)
     for (Pair<Option<Color>, OptionListener<Color>> p: _colorOptionListeners) {
       DrJava.getConfig().removeOptionListener(p.first(), p.second());
     }

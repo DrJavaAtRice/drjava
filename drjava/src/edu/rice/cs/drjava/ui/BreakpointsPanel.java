@@ -67,7 +67,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
   public BreakpointsPanel(MainFrame frame, RegionManager<Breakpoint> breakpointManager) {
     super(frame, "Breakpoints", breakpointManager);
     // TODO: consolidate the following listener with the MainFrame Breakpoint listener
-    _regionManager.addListener(new RegionManagerListener<Breakpoint>() {
+    getRegionManager().addListener(new RegionManagerListener<Breakpoint>() {
       /** Called when a breakpoint is set in a document. Adds the breakpoint to the tree of breakpoints.
         * Must be executed in event thread.
         * @param bp the breakpoint
@@ -85,7 +85,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
         assert EventQueue.isDispatchThread();
 
         DefaultMutableTreeNode regNode = _regionToTreeNode.get(bp);
-        ((DefaultTreeModel)_regTree.getModel()).nodeChanged(regNode);
+        getRegTreeModel().nodeChanged(regNode);
       }
       
       /** Called when a breakpoint is removed from a document.
@@ -94,7 +94,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
         */
       public void regionRemoved(final Breakpoint bp) { removeRegion(bp); }
     });
-    _debugger = _model.getDebugger();
+    _debugger = getGlobalModel().getDebugger();
   }
   
   /** Action performed when the Enter key is pressed. Should be overridden. */
@@ -119,7 +119,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
     Action removeAction = new AbstractAction("Remove") {
       public void actionPerformed(ActionEvent ae) {
 //        startChanging();
-        for (Breakpoint bp: getSelectedRegions()) _regionManager.removeRegion(bp);
+        for (Breakpoint bp: getSelectedRegions()) getRegionManager().removeRegion(bp);
 //        finishChanging();
       }
     };
@@ -128,7 +128,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
     Action removeAllAction = new AbstractAction("Remove All") {
       public void actionPerformed(ActionEvent ae) {
 //        startChanging();
-        _regionManager.clearRegions();
+        getRegionManager().clearRegions();
 //        finishChanging();
       }
     };
@@ -149,13 +149,13 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
     ArrayList<Breakpoint> regs = getSelectedRegions();
     _goToButton.setEnabled(regs.size() == 1);
     _removeButton.setEnabled(regs.size() > 0);
-    _removeAllButton.setEnabled(_rootNode != null && _rootNode.getDepth() > 0);
+    _removeAllButton.setEnabled(getRootNode() != null && getRootNode().getDepth() > 0);
     _enableDisableButton.setEnabled(regs.size() > 0);
     if (regs.size() > 0) {
       if (regs.get(0).isEnabled()) _enableDisableButton.setText("Disable");
       else _enableDisableButton.setText("Enable");
     }
-    _removeAllButton.setEnabled(_rootNode != null && _rootNode.getDepth() > 0);
+    _removeAllButton.setEnabled(getRootNode() != null && getRootNode().getDepth() > 0);
   }
   
   /** Overloaded for BreakpointsPanel, do not close the panel if the tree becomes empty. */
@@ -172,7 +172,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
         
         new AbstractAction("Remove") {
           public void actionPerformed(ActionEvent e) {
-            for (Breakpoint bp: getSelectedRegions()) _regionManager .removeRegion(bp);
+            for (Breakpoint bp: getSelectedRegions()) getRegionManager() .removeRegion(bp);
           }
         }
     };
@@ -191,7 +191,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
     if (bps.size() > 0) {
       final boolean newState = !bps.get(0).isEnabled();
       for (Breakpoint bp: bps) {
-        _regionManager.changeRegion(bp, new Lambda<Breakpoint,Object>() {
+        getRegionManager().changeRegion(bp, new Lambda<Breakpoint,Object>() {
           public Object value(Breakpoint bp) {
             bp.setEnabled(newState);
             return null;

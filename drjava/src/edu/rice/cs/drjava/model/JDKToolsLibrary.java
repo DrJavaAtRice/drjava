@@ -100,7 +100,7 @@ public class JDKToolsLibrary {
     boolean result =
       _compiler instanceof ScalaCompiler ||  /* This is an ugly hack.  TODO: refactor compiler adapters framework */
       _compiler.isAvailable() || _debugger.isAvailable() || _javadoc.isAvailable();
-    msg("Invoking isValid() for " + _compiler.getClass() + " returned " + result);
+    _log.log("Invoking isValid() for " + _compiler.getClass() + " returned " + result);
     return result;
   }
   
@@ -134,8 +134,8 @@ public class JDKToolsLibrary {
 
   /** Only called in making compilers from runtime */
   protected static CompilerInterface getCompilerInterface(String className, FullVersion version) {
-    _log.log("This is a test.  getCompilerInterface called");
-    msg("JDKToolsLibrary.getCompilerInterface(" + className + ", " + version + ") called");
+//    _log.log("This is a test.  getCompilerInterface called");
+    _log.log("JDKToolsLibrary.getCompilerInterface(" + className + ", " + version + ") called");
     if (className != null) {
       List<File> bootClassPath = null;
       String bootProp = System.getProperty("sun.boot.class.path");
@@ -169,9 +169,9 @@ public class JDKToolsLibrary {
     String debuggerAdapter = adapterForDebugger(version);
     if (debuggerAdapter != null) {
       try {
-        msg("                 loading debugger: "+debuggerAdapter);
+        msg("                 loading debugger: " + debuggerAdapter);
         Debugger attempt = (Debugger) ReflectUtil.loadObject(debuggerAdapter, new Class<?>[]{GlobalModel.class}, model);
-        msg("                 debugger="+attempt.getClass().getName());
+        msg("                 debugger=" + attempt.getClass().getName());
         if (attempt.isAvailable()) { debugger = attempt; }
       }
       catch (ReflectException e) { msg("                 no debugger, ReflectException " + e); /* can't load */ }
@@ -208,15 +208,9 @@ public class JDKToolsLibrary {
   public static final java.io.StringWriter LOG_STRINGWRITER = new java.io.StringWriter();
   protected static final java.io.PrintWriter LOG_PW = new java.io.PrintWriter(LOG_STRINGWRITER);
   
+  /** Appends line containing s to _log and to a special log maintained for dumping the state of DrJava. */
   public static void msg(String s) { 
     _log.log(s);
-//    try {   
-//      java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(new File(new File(System.getProperty("user.home")),   
-//                                                                                       "FindCompilers.txt").getAbsolutePath(),true));   
-//      pw.println(s);
-////      LOG_PW.println(s);
-//      pw.close();   
-//    }   
-//    catch(java.io.IOException ioe) { }   
+    LOG_PW.println(s); 
   }
 }

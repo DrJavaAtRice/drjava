@@ -73,7 +73,13 @@ public class DocumentRegion implements OrderedDocumentRegion {
   }
   
   /** Totally orders regions lexicographically based on (_doc, endOffset, startOffset). This method is typically applied
-    * to regions within the same document. 
+    * to regions within the same document.  
+    * NOTE: This ordering does not have all of the properties that might be assumed from some usages in this project.  
+    * Consider all of the regions for a given document. The regions that contain a particular offset are not necessarily
+    * contiguous under this ordering because increasing startOffset shrinks the size of the region, potentially excluding
+    * offset!  However, the smallest region interval including all regions containing an offset is a superset of the
+    * set of regions containing the offset providing an easily computed upper bound on the set of all regions containing
+    * the offset.
     */
   public int compareTo(OrderedDocumentRegion r) {
     int docRel = getDocument().compareTo(r.getDocument());

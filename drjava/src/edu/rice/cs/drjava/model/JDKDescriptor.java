@@ -113,9 +113,7 @@ public abstract class JDKDescriptor {
     * For compound JDKs, this is equal to the version of the full JDK that the compound JDK needs, i.e.
     * if a version of the HJ compiler requires JDK6, it should guess JDK6.
     * @return guessed version */
-  public JavaVersion.FullVersion guessVersion(File f) {
-      return edu.rice.cs.drjava.model.JarJDKToolsLibrary.guessVersion(f, this);
-  }
+  public JavaVersion.FullVersion guessVersion(File f) { return JarJDKToolsLibrary.guessVersion(f, this); }
 
   /** Return the minimum Java version required to use this JDK.
     * @return minimum version */

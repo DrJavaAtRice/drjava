@@ -582,7 +582,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
             _machine.getIgnoreCommentsAndStrings(), _ignoreTestCases.isSelected(), startDoc, rm, region, panel);
 //    _model.refreshActiveDocument();  // Rationale: a giant findAll left the definitions pane is a strange state
     panel.requestFocusInWindow();
-    EventQueue.invokeLater(new Runnable() { public void run() { panel._regTree.scrollRowToVisible(0); } });
+    EventQueue.invokeLater(new Runnable() { public void run() { panel.getRegTree().scrollRowToVisible(0); } });
   }
   
   /** Performs "find all" with the specified options. */

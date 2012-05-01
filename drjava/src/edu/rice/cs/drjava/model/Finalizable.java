@@ -37,12 +37,9 @@
 package edu.rice.cs.drjava.model;
 import java.util.List;
 
-/**
- * A listener that may be added to classes that
- * implement the <code>Finalizable</code> interface.
- * When the object is garbage collected, these 
- * listeners will be notified.
- */
+/** A listener that may be added to classes that implement the <code>Finalizable</code> interface.
+  * When the object is garbage collected, these listeners will be notified.
+  */
 public interface Finalizable<T> {
  
   /** @param fl the finalization listener to be notified when this object is garbage collected */

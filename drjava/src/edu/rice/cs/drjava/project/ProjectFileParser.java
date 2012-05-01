@@ -70,11 +70,11 @@ public class ProjectFileParser extends ProjectFileParserFacade {
   /** Singleton instance of ProjectFileParser */
   public static final ProjectFileParser ONLY = new ProjectFileParser();
   
-  private String _parent;
-  private String _srcFileBase;
+  private volatile String _parent;
+  private volatlie String _srcFileBase;
   
-  BreakpointListVisitor breakpointListVisitor = new BreakpointListVisitor();
-  BookmarkListVisitor bookmarkListVisitor = new BookmarkListVisitor();
+  volatile BreakpointListVisitor breakpointListVisitor = new BreakpointListVisitor();
+  volatile BookmarkListVisitor bookmarkListVisitor = new BookmarkListVisitor();
   
   private ProjectFileParser() { _xmlProjectFile = false; }
   
@@ -133,7 +133,8 @@ public class ProjectFileParser extends ProjectFileParserFacade {
       if (! root.exists()) throw new IOException("Project root " + root + " no longer exists");
       pfir.setProjectRoot(root);
       _srcFileBase = root.getCanonicalPath();
-    }else if (name.compareToIgnoreCase("proj-manifest") == 0) {
+    }
+    else if (name.compareToIgnoreCase("proj-manifest") == 0) {
       List<String> sList = exp.getRest().accept(PathListVisitor.ONLY);
       if(sList.size() > 1) throw new PrivateProjectException("Cannot have multiple manifests");
       if(sList.size() > 0)

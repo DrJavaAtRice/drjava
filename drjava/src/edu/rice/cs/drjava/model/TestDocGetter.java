@@ -51,7 +51,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 public class TestDocGetter extends DummyGlobalModel {
   
   /** Storage for documents and File keys. */
-  HashMap<File, OpenDefinitionsDocument> docs;
+  volatile HashMap<File, OpenDefinitionsDocument> docs;
 
   /** Convenience constructor for no-documents case. */
   public TestDocGetter() { this(new File[0], new String[0]); }

@@ -68,8 +68,8 @@ import edu.rice.cs.util.swing.AsyncTask;
   */
 // QUESTION: why are we still using _lock operations?  All notifiers should run in the event thread.
 
-public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
-  implements GlobalModelListener /*, Serializable */ {
+public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> implements GlobalModelListener 
+  /*, Serializable */ {
   
   public <P,R> void executeAsyncTask(AsyncTask<P,R> task, P param, boolean showProgress, boolean lockUI) {
     _lock.startRead();

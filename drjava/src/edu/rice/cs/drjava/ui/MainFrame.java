@@ -7912,7 +7912,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                                  final OpenDefinitionsDocument doc,
                                                                  int offset) {
         
-        final RegionManager<R> rm = p._regionManager;
+        final RegionManager<R> rm = p.getRegionManager();
         SortedSet<R> regions = rm.getRegions(doc);
         if (regions == null || regions.size() == 0) return;
         
@@ -7930,10 +7930,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           // require values of type R.  Either the interface for RegionManager.updateLines()
           // and RegionManager.reload() needs to be generalized, or a means for creating
           // values that are truly of type R needs to be provided.
-          @SuppressWarnings("unchecked") R start =
-          (R) new DocumentRegion(doc, numLinesChangedAfter, numLinesChangedAfter);
+          @SuppressWarnings("unchecked") 
+          R start = (R) new DocumentRegion(doc, numLinesChangedAfter, numLinesChangedAfter);
           int len = doc.getLength();
-          @SuppressWarnings("unchecked") R end = (R) new DocumentRegion(doc, len, len);
+          @SuppressWarnings("unchecked") 
+          R end = (R) new DocumentRegion(doc, len, len);
           lineNumInterval = Pair.make(start, end); 
         }
         
@@ -8024,6 +8025,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     return scroll;
   }
   
+  /** return the smallest Region interval (a Pair<R,R<) that contains intervals i and j. */ 
   private static <R extends OrderedDocumentRegion> Pair<R, R> maxInterval(Pair<R, R> i, Pair<R, R> j) {
     if (i == null) return j;
     if (j == null) return i;
@@ -8031,7 +8033,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     R i2 = i.second();
     R j1 = j.first();
     R j2 = j.second();
-    
+    // return minimum of lower regions, and maximum of upper regions
     return Pair.make(i1.compareTo(j1) <= 0 ? i1 : j1, i2.compareTo(j2) >= 0 ? i2 : j2);
   }
   
@@ -9815,7 +9817,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       if (c instanceof TabbedPanel) _createTab((TabbedPanel) c);
       if (c instanceof RegionsTreePanel<?>) {
         RegionsTreePanel<?> p = (RegionsTreePanel<?>) c;
-        DefaultTreeModel model = p._regTreeModel;
+        DefaultTreeModel model = p.getRegTreeModel();
         // Update all JTree labels in p (equivalent to performing updateLines on p._regionManager with a [0,0] region)
         model.reload(); 
         p.expandTree();

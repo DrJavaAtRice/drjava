@@ -342,7 +342,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     if (configTools != FileOps.NULL_FILE) {
       JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this, JDKDescriptor.NONE);
       if (fromConfig.isValid()) { 
-        JarJDKToolsLibrary._log.log("From config: " + fromConfig);
+        JarJDKToolsLibrary._log.log("Adding: " + fromConfig  + " from config");
         results.put(getLibraryKey(LibraryKey.PRIORITY_CONFIG, fromConfig), fromConfig);
       }
       else { JarJDKToolsLibrary._log.log("From config: invalid " + fromConfig); }
@@ -354,7 +354,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     for(JDKToolsLibrary fromRuntime: allFromRuntime) {
       if (fromRuntime.isValid()) {
         if (! results.containsKey(getLibraryKey(LibraryKey.PRIORITY_RUNTIME, fromRuntime))) {
-//          JarJDKToolsLibrary._log.log("From runtime: " + fromRuntime);
+          JarJDKToolsLibrary._log.log("Adding: " + fromRuntime + "from runtime");
           results.put(getLibraryKey(LibraryKey.PRIORITY_RUNTIME, fromRuntime), fromRuntime);
         }
 //        else { JarJDKToolsLibrary._log.log("From runtime: duplicate "+fromRuntime); }
@@ -374,7 +374,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         LibraryKey.PRIORITY_BUILTIN : LibraryKey.PRIORITY_SEARCH;
       if (t.compiler().getSuggestedFileExtension().equals(OptionConstants.SCALA_FILE_EXTENSION)) priority = LibraryKey.PRIORITY_SCALA;
       if (! results.containsKey(getLibraryKey(priority, t))) {
-        JarJDKToolsLibrary._log.log("Adding: " + t + "with extension " + t.compiler().getSuggestedFileExtension() + " and priority " + priority);
+        JarJDKToolsLibrary._log.log("Adding: " + t + " with extension " + t.compiler().getSuggestedFileExtension() + " and priority " + priority);
         results.put(getLibraryKey(priority, t), t);
       }
 //      else { JarJDKToolsLibrary._log.log("\tduplicate"); }

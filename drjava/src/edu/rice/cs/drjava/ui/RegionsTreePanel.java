@@ -63,33 +63,33 @@ import edu.rice.cs.util.swing.RightClickMouseAdapter;
 import edu.rice.cs.plt.lambda.Thunk;
 
 /** Panel for displaying regions in a tree sorted by class name and line number.  Only accessed from event thread.
+  * The volatile declarations are included because the event-thread-only invariant is not enforced. TODO: fix this.
   * @version $Id$
   */
 public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends TabbedPanel {
-  protected JPanel _leftPane;
+  protected volatile JPanel _leftPane;
   
-  protected DefaultMutableTreeNode _rootNode;
-  protected DefaultTreeModel _regTreeModel;
-  public JTree _regTree;
-  protected String _title;
-  protected RegionManager<R> _regionManager;
+  private volatile DefaultMutableTreeNode _rootNode;
+  private volatile DefaultTreeModel _regTreeModel;
+  private volatile JTree _regTree;
   
-  protected JPopupMenu _regionPopupMenu;
-  
-  protected final SingleDisplayModel _model;
+  private volatile String _title;
+  private volatile RegionManager<R> _regionManager;
+  private volatile JPopupMenu _regionPopupMenu;
+  private final SingleDisplayModel _model;
   protected final MainFrame _frame;
+  protected volatile JPanel _buttonPanel;
   
-  protected JPanel _buttonPanel;
+  protected volatile DefaultTreeCellRenderer dtcr;
   
-  protected DefaultTreeCellRenderer dtcr;
+  protected volatile boolean _hasNextPrevButtons = true;
   
-  protected boolean _hasNextPrevButtons = true;
   /** button to go to the previous region (or null if _hasNextPrevButtons==false). */
-  protected JButton _prevButton;
+  protected volatile JButton _prevButton;
   /** button to go to the next region (or null if _hasNextPrevButtons==false). */
-  protected JButton _nextButton;
+  protected volatile JButton _nextButton;
   /** the region that was last selected (may be null). */ 
-  protected R _lastSelectedRegion = null;
+  protected volatile R _lastSelectedRegion = null;
   
   /* _ */
   
@@ -103,7 +103,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   /** State pattern to improve performance when rapid changes are made. */
   protected final IChangeState DEFAULT_STATE = new DefaultState();
 //  protected final IChangeState CHANGING_STATE = new ChangingState();
-  protected IChangeState _changeState = DEFAULT_STATE;
+  protected volatile IChangeState _changeState = DEFAULT_STATE;
   
   /** A table mapping each document entered in this panel to its corresponding MutableTreeNode in _regTreeModel. */
   protected volatile HashMap<OpenDefinitionsDocument, DefaultMutableTreeNode> _docToTreeNode = 
@@ -290,6 +290,13 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
     
     ToolTipManager.sharedInstance().registerComponent(_regTree);
   }
+  
+  public DefaultMutableTreeNode getRootNode() { return _rootNode; }
+  public JTree getRegTree() { return _regTree; }
+  public DefaultTreeModel getRegTreeModel() { return _regTreeModel; }
+  public String getTitle() { return _title; }
+  public RegionManager<R> getRegionManager() { return _regionManager; }
+  public SingleDisplayModel getGlobalModel() { return _model; }
   
   /** Update button state and text. _updateButtons should be overridden if additional buttons are added besides "Go To",
     * "Remove" and "Remove All". 
@@ -681,9 +688,9 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   /** Go to next region. */
   public void goToNextRegion() {
     int count = _regionManager.getRegionCount();
-    if (count>0) {
+    if (count > 0) {
       R newRegion = null; // initially not set
-      if (_lastSelectedRegion!=null) {
+      if (_lastSelectedRegion != null) {
         // there are elements and something was selected
         newRegion = getNextRegionInTree(_lastSelectedRegion);
       }
@@ -691,7 +698,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
         // nothing selected, go to first region
         newRegion = _regionManager.getRegions().get(0);
       }
-      if (newRegion!=null) {
+      if (newRegion != null) {
         // a new region was found, select it
         updateNextPreviousRegionButtons(newRegion);
         selectRegion(_lastSelectedRegion);
@@ -980,7 +987,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   
   /** Class that is embedded in each leaf node. The toString() method determines what's displayed in the tree. */
   protected static class RegionTreeUserObj<R extends OrderedDocumentRegion> {
-    protected R _region;
+    protected volatile R _region;
     public int lineNumber() { return _region.getDocument().getLineOfOffset(_region.getStartOffset()) + 1; }
     public R region() { return _region; }
     public RegionTreeUserObj(R r) { _region = r; }

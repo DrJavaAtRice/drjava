@@ -42,7 +42,7 @@ import java.io.*;
  *  @version $Id$
  */
 public class FileMovedException extends IOException {
-  private File _file;
+  private volatile File _file;
   
   /** Creates a FileMovedException for the given file, with the given message. */
   public FileMovedException(File f, String s) {
