@@ -152,12 +152,13 @@ public abstract class IncrementalTaskController<I, R> extends TaskController<R> 
    */
   protected abstract void doResume();
   
+  @SuppressWarnings("unchecked")
   protected void paused() {
     boolean kept = false;
     State current = state.get();
     State next = new PausedState();
     // cast to Object as workaround for Eclipse compiler limitation
-    while (((Object) current) instanceof IncrementalTaskController.PausingState && !kept) {
+    while (current instanceof IncrementalTaskController.PausingState && ! kept) {
       // must loop because a transition between PausingStates could occur concurrently
       // can use weakCompareAndSet since we're already in a while loop
       kept = state.weakCompareAndSet(current, next);

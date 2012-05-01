@@ -39,15 +39,12 @@ import edu.rice.cs.plt.iter.EmptyIterator;
 import edu.rice.cs.plt.iter.ImmutableIterator;
 import edu.rice.cs.plt.iter.IterUtil;
 
-/**
- * Maps from a key to a set of values; a key may be added multiple times 
- * with different values, and those values are collected in a set.
- * Each set is ordered according to some Comparable corresponding to each
- * value.  The methods provided are modeled after the {@link java.util.Map} interface.
- * However, the container being modeled is not exactly a map, and some
- * of the Map methods do not make sense in this context.  For example,
- * {@code put(key, value)} was replaced here by {@code put(key, value, orderBy)}.
- */
+/** Maps from a key to a set of values; a key may be added multiple times with different values, and those values are 
+  * collected in a set.  Each set is ordered according to some Comparable corresponding to each value.  The methods 
+  * provided are modeled after the {@link java.util.Map} interface.  However, the container being modeled is not exactly
+  * a map, and some of the Map methods do not make sense in this context.  For example, {@code put(key, value)} was 
+  * replaced here by {@code put(key, value, orderBy)}.
+  */
 public class ExternallySortedMultiMap<K, V, C extends Comparable<? super C>> {
   
   /** Maps from a key to a <em>non-empty</em> set. */
@@ -149,12 +146,11 @@ public class ExternallySortedMultiMap<K, V, C extends Comparable<? super C>> {
     else { _map.remove(key); _size -= set.size(); return true; }
   }
   
-  /**
-   * Adds all (key, value) pairs represented by {@code map} to this map.  If a mapping is already 
-   * present, adding it makes no modifications; otherwise, the pair is added, sorted according 
-   * to the {@code orderBy} value in {@code map}.
-   * @return  {@code true} iff the operation modified the map.
-   */
+  /** Adds all (key, value) pairs represented by {@code map} to this map.  If a mapping is already 
+    * present, adding it makes no modifications; otherwise, the pair is added, sorted according 
+    * to the {@code orderBy} value in {@code map}.
+    * @return  {@code true} iff the operation modified the map.
+    */
   public boolean putAll(ExternallySortedMultiMap<? extends K, ? extends V, ? extends C> map) {
     boolean result = false;
     for (Map.Entry<? extends K, ? extends ExternallySortedSet<? extends V, ? extends C>> e : 
@@ -163,13 +159,12 @@ public class ExternallySortedMultiMap<K, V, C extends Comparable<? super C>> {
       if (set == null) { set = new ExternallySortedSet<V, C>(); _map.put(e.getKey(), set); }
       _size -= set.size();
       
-      // The following generates an incorrect type error (javac 5, fixed in javac 6):
-      //result = result | set.addAll(e.getValue()); // "|" instead of "||" to avoid short-circuit
-      // The workaround:
-      @SuppressWarnings("unchecked") ExternallySortedSet s = e.getValue();
-      @SuppressWarnings("unchecked") boolean newResult = set.addAll(s);
-      result = result | newResult;
-      
+      // The following generates an incorrect type error in javac 5, fixed in javac 6:
+      result = result | set.addAll(e.getValue()); // "|" instead of "||" to avoid short-circuit
+      // The former workaround:
+//      @SuppressWarnings("unchecked") ExternallySortedSet<V,C> s = e.getValue();
+//      @SuppressWarnings("unchecked") boolean newResult = set.addAll(s);
+//      result = result | newResult;      
       _size += set.size();
     }
     return result;

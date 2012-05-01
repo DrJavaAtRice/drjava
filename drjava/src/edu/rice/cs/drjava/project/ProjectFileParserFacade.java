@@ -94,10 +94,10 @@ public class ProjectFileParserFacade {
     
     String version = pfir.getDrJavaVersion();
     
-    if(version.equals("unknown"))
+    if (version.equals("unknown"))
       doFixup = true;
     
-    if(!doFixup){
+    if (!doFixup){
       int i = version.indexOf("-r");
       
       if(i == -1){

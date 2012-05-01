@@ -430,11 +430,14 @@ public class ConcreteRelationIndex<K, V> implements RelationIndex<K, V>, Seriali
       return new Pair<K, V>(_currentKey, _valuesIter.next());
     }
     
+    @SuppressWarnings("unchecked")
     public void remove() {
-      // javac 5 has a bug which rejects this instanceof type:
-      //if (_valuesIter instanceof ConcreteRelationIndex<?, ?>.ValueSet.ValueSetIterator) {
-      if (_valuesIter instanceof ConcreteRelationIndex.ValueSet.ValueSetIterator) {
-        ((ValueSet.ValueSetIterator) _valuesIter).remove(_entries);
+      // javac 5 has a bug which rejects the following instanceof type:
+      if (_valuesIter instanceof ConcreteRelationIndex<?, ?>.ValueSet.ValueSetIterator) {
+        // The following statement does not type check:
+//        ((ConcreteRelationIndex<?, ?>.ValueSet.ValueSetIterator) _valuesIter).remove(_entries);
+        // workaround: (which lies about types)
+        ((ConcreteRelationIndex<K, V>.ValueSet.ValueSetIterator) _valuesIter).remove(_entries);
       }
       else { throw new UnsupportedOperationException(); }
     }

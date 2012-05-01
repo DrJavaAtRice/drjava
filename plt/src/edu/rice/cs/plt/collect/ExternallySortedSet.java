@@ -37,36 +37,33 @@ package edu.rice.cs.plt.collect;
 import java.util.*;
 import edu.rice.cs.plt.iter.SizedIterable;
 
-/**
- * <p>A container class that <em>almost</em> implements the {@link java.util.SortedSet} interface;
- * the difference is that {@code add()} takes two parameters -- an element, along with a 
- * corresponding {@link Comparable} that will be used to sort the set.  Thus, the set is not 
- * sorted based on any operations defined for the element type; rather, it is sorted according 
- * to an external {@code orderBy} value.  The {@code subSet()}, etc., methods are also adjusted 
- * to take in {@code orderBy} values rather than set elements.</p>
- * 
- * <p>The result is a set that works essentially like a {@link java.util.TreeSet}
- * of {@link edu.rice.cs.plt.tuple.Pair}s in which one of the Pair elements is a Comparable, 
- * and for which a Comparator is correctly defined.  One significant difference is that this
- * implementation does not return {@code true} for the expression {@code add(1, 1) && add(1, 2)},
- * while the explicit Pair implementation would (assuming the Set were initially empty).</p>
- * 
- * <p>Note: the implementation relies heavily on hashing, so good performance is
- * dependent on elements of the set having an efficient {@code hashCode()} implementation.</p>
- */
+/** <p>A container class that <em>almost</em> implements the {@link java.util.SortedSet} interface;
+  * the difference is that {@code add()} takes two parameters -- an element, along with a 
+  * corresponding {@link Comparable} that will be used to sort the set.  Thus, the set is not 
+  * sorted based on any operations defined for the element type; rather, it is sorted according 
+  * to an external {@code orderBy} value.  The {@code subSet()}, etc., methods are also adjusted 
+  * to take in {@code orderBy} values rather than set elements.</p>
+  * 
+  * <p>The result is a set that works essentially like a {@link java.util.TreeSet}
+  * of {@link edu.rice.cs.plt.tuple.Pair}s in which one of the Pair elements is a Comparable, 
+  * and for which a Comparator is correctly defined.  One significant difference is that this
+  * implementation does not return {@code true} for the expression {@code add(1, 1) && add(1, 2)},
+  * while the explicit Pair implementation would (assuming the Set were initially empty).</p>
+  * 
+  * <p>Note: the implementation relies heavily on hashing, so good performance is
+  * dependent on elements of the set having an efficient {@code hashCode()} implementation.</p>
+  */
 public class ExternallySortedSet<T, C extends Comparable<? super C>> implements SizedIterable<T> {
 
-  /**
-   * The sorted set of elements.  Note that operations involving elements
-   * <em>not</em> in {@ink #_orderByMap} should not be allowed, since the comparator
-   * will not be able to handle such elements.
-   */
+  /** The sorted set of elements.  Note that operations involving elements
+    * <em>not</em> in {@ink #_orderByMap} should not be allowed, since the comparator
+    * will not be able to handle such elements.
+    */
   private final SortedSet<T> _set;
   
-  /**
-   * Maps elements to their corresponding {@code orderBy} value. Guaranteed to be defined
-   * for <em>at least</em> every element of {@link #_set}.
-   */
+  /** Maps elements to their corresponding {@code orderBy} value. Guaranteed to be defined
+    * for <em>at least</em> every element of {@link #_set}.
+    */
   private final Map<T, C> _orderByMap;
   
   /** May be {@code null}, indicating no bound. */
@@ -158,13 +155,12 @@ public class ExternallySortedSet<T, C extends Comparable<? super C>> implements 
    */
   public <S> S[] toArray(S[] a) { return _set.toArray(a); }
   
-  /**
-   * Add {@code element} to the set, sorted by {@code orderBy}.
-   * @return  {@code true} iff {@code element} was not already in the set and could be added.
-   * @throws IllegalArgumentException  if {@code this} is a subset of a larger set, and the
-   *                                  element being added is outside the specified bounds.
-   * @throws NullPointerException  if {@code element} is {@code null}
-   */
+  /** Add {@code element} to the set, sorted by {@code orderBy}.
+    * @return  {@code true} iff {@code element} was not already in the set and could be added.
+    * @throws IllegalArgumentException  if {@code this} is a subset of a larger set, and the
+    *                                  element being added is outside the specified bounds.
+    * @throws NullPointerException  if {@code element} is {@code null}
+    */
   public boolean add(T element, C orderBy) {
     if (element == null) { throw new NullPointerException(); }
     else {

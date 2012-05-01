@@ -71,7 +71,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
   public static final ProjectFileParser ONLY = new ProjectFileParser();
   
   private volatile String _parent;
-  private volatlie String _srcFileBase;
+  private volatile String _srcFileBase;
   
   volatile BreakpointListVisitor breakpointListVisitor = new BreakpointListVisitor();
   volatile BookmarkListVisitor bookmarkListVisitor = new BookmarkListVisitor();

@@ -540,7 +540,6 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         if ((javaVersion.majorVersion().equals(compoundVersion.majorVersion())) &&
             (javaVersion.maintenance() == compoundVersion.maintenance()) &&
             (javaVersion.update() == compoundVersion.update()) &&
-            (javaVersion.release() == compoundVersion.release()) &&
             (javaVersion.supports(compoundLib.jdkDescriptor().getMinimumMajorVersion()))) {
           JDKToolsLibrary.msg("        found");
           found = javaLib;

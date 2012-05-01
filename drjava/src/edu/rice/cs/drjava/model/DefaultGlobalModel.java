@@ -286,14 +286,12 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     }
     
     public String toString() {
-      return "priority "+_priority+", version "+_first.versionString()+" "+_first.maintenance()+" "+_first.update()+" "+_first.release()+" "+_first.vendor()+" "+_first.location()+", descriptor "+_second.getName();
+      return "priority " + _priority + ", version " + _first.versionString() + " " + _first.maintenance() + " " + 
+        _first.update() + " " + _first.vendor() + " " + _first.location() + ", descriptor " + _second.getName();
     }
     
     public int hashCode() {
-      return 
-        _priority ^
-        (_first == null ? 0 : _first.hashCode()) ^ 
-        (_second == null ? 0 : _second.hashCode() << 1) ^ 
+      return  _priority ^ (_first == null ? 0 : _first.hashCode()) ^  (_second == null ? 0 : _second.hashCode() << 1) ^ 
         getClass().hashCode();
     }
     
@@ -620,12 +618,12 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       
       _runMain = new DummyInteractionsListener() {
         public void interpreterReady(File wd) {
-          // prevent listener from running twice          
-          // This used to be called using invokeLater, so that the listener would be removed
-          // after the read lock of the notifier had been released, but that was not always
-          // safe; the removal could still happen before the read lock was released
-          // Now removeListener has been rewritten and can be called even when the lock is
-          // held. In that case, the removal will be done as soon as possible.
+          /* Prevent listener from running twice.
+           * This method was formerly called using SwingUtilities.invokeLater, in an attempt to ensure that the listener
+           * would be removed AFTER the read lock of the notifier had been released.  But it did not work.
+           * Now removeListener has been rewritten 
+           * and can be called even when the lock is held. In that case, the removal will be done as soon as possible. */
+          
           _interactionsModel.removeListener(_runMain);  // listener cannot run
           
           // Run debugger restart in an invokeLater so that the InteractionsModel EventNotifier

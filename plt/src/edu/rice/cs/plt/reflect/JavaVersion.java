@@ -2,7 +2,7 @@
 
 PLT Utilities BSD License
 
-Copyright (c) 2007-2010 JavaPLT group at Rice University
+Copyright (c) 2007-201 JavaPLT group at Rice University
 All rights reserved.
 
 Developed by:   Java Programming Languages Team
@@ -79,7 +79,7 @@ public enum JavaVersion {
   
   /** Returns a FullVersion that corresponds to this JavaVersion, e.g. JAVA_6 will return a FullVersion 1.6.0_0. */
   public FullVersion fullVersion() {
-    return new FullVersion(this, 0, 0, ReleaseType.STABLE, null, VendorType.UNKNOWN, "", null);
+    return new FullVersion(this, 0, 0, /* ReleaseType.STABLE, null, */ null, "", null);
   }
   
   /** Produce the {@code JavaVersion} corresponding to the given class version string.  For example,
@@ -172,46 +172,45 @@ public enum JavaVersion {
                                              String java_vm_vendor,
                                              File location) {
     VendorType vendor = VendorType.UNKNOWN;
-    String vendorString = null;
-    
-    if (vendor == VendorType.UNKNOWN) {
-      if (java_runtime_name.toLowerCase().contains("openjdk")) {
-        vendor = VendorType.OPENJDK;
-        vendorString = "OpenJDK";
-      }
-      else if (java_vm_vendor.toLowerCase().contains("apple")) {
-        vendor = VendorType.APPLE;
-        vendorString = "Apple";
-      }
-      else if (java_vm_vendor.toLowerCase().contains("sun") ||
-               java_vm_vendor.toLowerCase().contains("oracle")) {
-        vendor = VendorType.ORACLE;
-        vendorString = "Sun";
-      }
+    String vendorString = "Unknown";
+
+    if (java_runtime_name.toLowerCase().contains("openjdk")) {
+      vendor = VendorType.OPENJDK;
+      vendorString = "OpenJDK";
     }
+    else if (java_vm_vendor.toLowerCase().contains("apple")) {
+      vendor = VendorType.APPLE;
+      vendorString = "Apple";
+    }
+    else if (java_vm_vendor.toLowerCase().contains("sun") ||
+             java_vm_vendor.toLowerCase().contains("oracle")) {
+      vendor = VendorType.ORACLE;
+      vendorString = "Sun";
+    }
+    
+    // Note: vendor may still be null
     
     String number;
     String typeString;
-    // if version doesn't start with "1." and has only one dot, prefix with "1."
-    // example: 6.0 --> 1.6.0
+    // if version doesn't start with "1." and has only one dot, prefix with "1."  Example: 6.0 --> 1.6.0
     if ((! java_version.startsWith("1.")) && (java_version.replaceAll("[^\\.]","").length() == 1)) {
-      java_version = "1."+java_version;
+      java_version = "1." + java_version;
     }
     int dash = java_version.indexOf('-');
-    if (dash == -1) { number = java_version; typeString = null; }
-    else { number = java_version.substring(0, dash); typeString = java_version.substring(dash+1); }
+    if (dash == -1) { number = java_version; /* typeString = null;*/ }
+    else { number = java_version.substring(0, dash); /* typeString = java_version.substring(dash + 1); */}
     
     int dot1 = number.indexOf('.');
     if (dot1 == -1) {
       try {
         int feature = Integer.parseInt(number);
         
-        ReleaseType type;
-        if (typeString == null) { type = ReleaseType.STABLE; }
-        else if (typeString.startsWith("ea")) { type = ReleaseType.EARLY_ACCESS; }
-        else if (typeString.startsWith("beta")) { type = ReleaseType.BETA; }
-        else if (typeString.startsWith("rc")) { type = ReleaseType.RELEASE_CANDIDATE; }
-        else { type = ReleaseType.UNRECOGNIZED; }
+//        ReleaseType type;
+//        if (typeString == null) { type = ReleaseType.STABLE; }
+//        else if (typeString.startsWith("ea")) { type = ReleaseType.EARLY_ACCESS; }
+//        else if (typeString.startsWith("beta")) { type = ReleaseType.BETA; }
+//        else if (typeString.startsWith("rc")) { type = ReleaseType.RELEASE_CANDIDATE; }
+//        else { type = ReleaseType.UNRECOGNIZED; }
         
         JavaVersion version = UNRECOGNIZED;
         switch (feature) {
@@ -224,16 +223,16 @@ public enum JavaVersion {
           case 7: version = JAVA_7; break;
           default: if (feature > 7) { version = FUTURE; } break;
         }
-        return new FullVersion(version, 0, 0, type, typeString, vendor, vendorString, location);
+        return new FullVersion(version, 0, 0, /* type, typeString, */ vendor, vendorString, location);
       }
       catch(NumberFormatException nfe) {
-        return new FullVersion(UNRECOGNIZED, 0, 0, ReleaseType.STABLE, null, vendor, vendorString, location);
+        return new FullVersion(UNRECOGNIZED, 0, 0, /* ReleaseType.STABLE, null,*/ vendor, vendorString, location);
       }
     }
     
     int dot2 = number.indexOf('.', dot1 + 1);
     if (dot2 == -1) { 
-      return new FullVersion(UNRECOGNIZED, 0, 0, ReleaseType.STABLE, null, vendor, vendorString, location); 
+      return new FullVersion(UNRECOGNIZED, 0, 0, /* ReleaseType.STABLE, null, */ vendor, vendorString, location); 
     }
     int underscore = number.indexOf('_', dot2 + 1);
     if (underscore == -1) { underscore = number.indexOf('.', dot2 + 1); }
@@ -244,12 +243,12 @@ public enum JavaVersion {
       int maintenance = Integer.parseInt(number.substring(dot2+1, underscore));
       int update = (underscore >= number.length()) ? 0 : Integer.parseInt(number.substring(underscore + 1));
       
-      ReleaseType type;
-      if (typeString == null) { type = ReleaseType.STABLE; }
-      else if (typeString.startsWith("ea")) { type = ReleaseType.EARLY_ACCESS; }
-      else if (typeString.startsWith("beta")) { type = ReleaseType.BETA; }
-      else if (typeString.startsWith("rc")) { type = ReleaseType.RELEASE_CANDIDATE; }
-      else { type = ReleaseType.UNRECOGNIZED; }
+//      ReleaseType type;
+//      if (typeString == null) { type = ReleaseType.STABLE; }
+//      else if (typeString.startsWith("ea")) { type = ReleaseType.EARLY_ACCESS; }
+//      else if (typeString.startsWith("beta")) { type = ReleaseType.BETA; }
+//      else if (typeString.startsWith("rc")) { type = ReleaseType.RELEASE_CANDIDATE; }
+//      else { type = ReleaseType.UNRECOGNIZED; }
       
       JavaVersion version = UNRECOGNIZED;
       if (major == 1) {
@@ -265,10 +264,10 @@ public enum JavaVersion {
         }
       }
       
-      return new FullVersion(version, maintenance, update, type, typeString, vendor, vendorString, location);
+      return new FullVersion(version, maintenance, update, /* type, typeString, */ vendor, vendorString, location);
     }
     catch (NumberFormatException e) {
-      return new FullVersion(UNRECOGNIZED, 0, 0, ReleaseType.STABLE, null, vendor, vendorString, location);
+      return new FullVersion(UNRECOGNIZED, 0, 0, /* ReleaseType.STABLE, null, */ vendor, vendorString, location);
     }
   }
   
@@ -299,25 +298,27 @@ public enum JavaVersion {
     * @see <a href="http://java.sun.com/j2se/versioning_naming.html">The Sun version specification</a>
     */
   public static class FullVersion implements Comparable<FullVersion>, Serializable {
-    private JavaVersion _majorVersion;
-    private int _maintenance;
-    private int _update;
-    private ReleaseType _type;
-    private String _typeString;
-    private VendorType _vendor;
-    private String _vendorString;
-    private File _location; // may be null
+    private final JavaVersion _majorVersion;
+    private final int _maintenance;
+    private final int _update;
+    /* _type and _typeString are deprecated */
+//    private ReleaseType _type;
+//    private String _typeString;
+    private final VendorType _vendor;
+    private final String _vendorString;
+    private final File _location; // may be null
     
-    /** Assumes {@code typeString} is {@code null} iff {@code type} is {@code STABLE} */
-    private FullVersion(JavaVersion majorVersion, int maintenance, int update, ReleaseType type,
-                        String typeString, VendorType vendor, String vendorString, File location) {
+    /** Assumes {@code typeString} is {@code null} iff {@code type} is {@code STABLE}.  
+      * The Rela*/
+    private FullVersion(JavaVersion majorVersion, int maintenance, int update, /* ReleaseType type,
+                        String typeString, */  VendorType vendor, String vendorString, File location) {
       _majorVersion = majorVersion;
       _maintenance = maintenance;
       _update = update;
-      _type = type;
-      _typeString = typeString;
-      _vendor = vendor;
-      _vendorString = vendorString;
+//      _type = type;
+//      _typeString = typeString;
+      _vendor = (vendor != null) ? vendor : VendorType.UNKNOWN;
+      _vendorString = (vendorString != null) ? vendorString : "Unknown";
       _location = location;
     }
     
@@ -326,7 +327,7 @@ public enum JavaVersion {
     
     /** Get a full version with the maintenance, update and release type zeroed out. */
     public FullVersion onlyMajorVersionAndVendor() {
-      return new FullVersion(_majorVersion, 0, 0, ReleaseType.STABLE, null, _vendor, _vendorString, _location);
+      return new FullVersion(_majorVersion, 0, 0, /* ReleaseType.STABLE, null, */ _vendor, _vendorString, _location);
     }
     
     /** Get the maintenance associated with this full version */
@@ -335,8 +336,8 @@ public enum JavaVersion {
     /** Get the update associated with this full version */
     public int update() { return _update; }    
     
-    /** Get the update associated with this full version */
-    public ReleaseType release() { return _type; }    
+//    /** Get the update associated with this full version */
+//    public ReleaseType release() { return _type; }    
     
     /** Get the vendor associated with this full version */
     public VendorType vendor() { return _vendor; }
@@ -346,12 +347,11 @@ public enum JavaVersion {
     /** Convenience method calling {@code majorVersion().supports(v)} */
     public boolean supports(JavaVersion v) { return _majorVersion.supports(v); }
     
-    /**
-     * Compare two versions.  Major, maintenance, and update numbers are ordered sequentially.  When comparing
-     * two versions that are otherwise equivalent, early access releases precede betas, followed by
-     * release candidates and stable releases. Within the release types, Unrecognized < OpenJDK < Apple < Oracle.
-     * Versions with unknown vendor are only equal if their locations are also equal.
-     */
+    /** Compare two versions.  Major, maintenance, and update numbers are ordered sequentially.  When comparing
+      * two versions that are otherwise equivalent, early access releases precede betas, followed by
+      * release candidates and stable releases. Within the release types, Unrecognized < OpenJDK < Apple < Oracle.
+      * Versions with unknown vendor are only equal if their locations are also equal.
+      */
     public int compareTo(FullVersion v) {
       int result = _majorVersion.compareTo(v._majorVersion);
       if (result == 0) {
@@ -359,32 +359,10 @@ public enum JavaVersion {
         if (result == 0) {
           result = _update - v._update;
           if (result == 0) {
-            result = _type.compareTo(v._type);
+            result = _vendor.compareTo(v._vendor);
             if (result == 0) {
-              result = _vendor.compareTo(v._vendor);
-              if (result == 0 && !_type.equals(ReleaseType.STABLE)) {
-                result = _typeString.compareTo(v._typeString);
-                if (result == 0 && _vendor.equals(VendorType.UNKNOWN)) {
-                  if (_location == null) {
-                    if (v._location == null) return 0;
-                    else return -1;
-                  }
-                  else {
-                    if (v._location == null) return 1;
-                    else return _location.compareTo(v._location);
-                  }
-                }
-              }
-              else if (result == 0 && _vendor.equals(VendorType.UNKNOWN)) {
-                if (_location == null) {
-                  if (v._location == null) return 0;
-                  else return -1;
-                }
-                else {
-                  if (v._location == null) return 1;
-                  else return _location.compareTo(v._location);
-                }
-              }
+              if (_location == null) return (v._location == null) ?  0 : 1;
+              else return _location.compareTo(v._location);
             }
           }
         }
@@ -392,37 +370,26 @@ public enum JavaVersion {
       return result;
     }
     
-    public boolean equals(Object o) {
-      if (this == o) { return true; }
-      else if (!(o instanceof FullVersion)) { return false; }
-      else {
-        FullVersion v = (FullVersion) o;
-        return _majorVersion.equals(v._majorVersion) &&
-          _maintenance == v._maintenance &&
-          _update == v._update &&
-          _type.equals(v._type) &&
-          _vendor.equals(v._vendor) &&
-          (_type.equals(ReleaseType.STABLE) || _typeString.equals(v._typeString)) &&
-          (!_vendor.equals(VendorType.UNKNOWN) ||
-           ((_location==null) && (v._location==null)) || (_location.equals(v._location)));
-      }
-    }
+    /* Define equals in terms of compareTo, based on invariant relating the two methods. */
+    @Override
+    public boolean equals(Object o) { 
+      if (! (o instanceof FullVersion)) return false;
+      FullVersion fv = (FullVersion) o;
+      return compareTo(fv) == 0; }
     
     public int hashCode() {
-      int stringHash = _typeString == null ? 0 : _typeString.hashCode();
       int fileHash = _location == null ? 0 : _location.hashCode();
-      return _majorVersion.hashCode() ^ (_maintenance << 1) ^ (_update << 2) ^ (_type.hashCode() << 3) 
-        ^ (_vendor.hashCode() << 4) ^ (stringHash << 5) ^ fileHash;
+      return _majorVersion.hashCode() ^ (_maintenance << 1) ^ (_update << 2)  ^ (_vendor.hashCode() << 4) ^ fileHash;
     }
     
     private String stringSuffix() {
       StringBuilder result = new StringBuilder();
       result.append("." + _maintenance);
       if (_update != 0) { result.append("_" + _update); }
-      if (!_type.equals(ReleaseType.STABLE)) { result.append('-').append(_typeString); }
       return result.toString();
     }
     
+    // Now identical to stringSuffix() ?
     private String stringSuffixWithVendor() {
       StringBuilder result = new StringBuilder(stringSuffix());
       if ((!_vendor.equals(VendorType.ORACLE)) && 
@@ -436,11 +403,10 @@ public enum JavaVersion {
     /** Produce a string representing version number */
     public String versionString() { return _majorVersion.versionString() + stringSuffixWithVendor(); }
     
-    public String toString() { return _majorVersion + stringSuffix(); }
-    
+    public String toString() { return _majorVersion + stringSuffix(); } 
   }
   
-  private static enum ReleaseType { UNRECOGNIZED, EARLY_ACCESS, BETA, RELEASE_CANDIDATE, STABLE; }
+//  private static enum ReleaseType { UNRECOGNIZED, EARLY_ACCESS, BETA, RELEASE_CANDIDATE, STABLE; }
   
   /** The vendor of this version. */
   public static enum VendorType { UNKNOWN, OPENJDK, APPLE, ORACLE; }
