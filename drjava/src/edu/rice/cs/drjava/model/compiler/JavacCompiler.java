@@ -161,7 +161,7 @@ public abstract class JavacCompiler implements CompilerInterface {
       c = c.getSuperclass();
     }
     c = oldC;
-    if (!isProgram) {
+    if (! isProgram) {
       try {
         // if this doesn't throw, c is a subclass of Applet
         c.asSubclass(java.applet.Applet.class);
@@ -303,7 +303,7 @@ public abstract class JavacCompiler implements CompilerInterface {
       classNameWithQuotes.substring(1, classNameWithQuotes.length() - 1); // removes quotes, becomes MyClass
     
     // we pass MyClass.class just to get a "Static Error: Undefined class 'MyClass'"
-    String ret = JavacCompiler.class.getName()+".runCommand(\""+s.toString()+"\", "+className+".class)";
+    String ret = JavacCompiler.class.getName() + ".runCommand(\"" + s.toString() + "\", " + className + ".class)";
     // System.out.println(ret);
     return ret;
   }

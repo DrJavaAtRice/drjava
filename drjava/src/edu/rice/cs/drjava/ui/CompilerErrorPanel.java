@@ -95,12 +95,14 @@ public class CompilerErrorPanel extends ErrorPanel {
     _compilerChoiceBox = new JComboBox<CompilerInterface>(IterUtil.toArray(iter, CompilerInterface.class));
     _compilerChoiceBox.setEditable(false);
     _compilerChoiceBox.setSelectedItem(compilerModel.getActiveCompiler());
+    _compilerChoiceBox.setToolTipText("From file: " + compilerModel.getActiveCompiler().getDescription());
     _compilerChoiceBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         if (e.getStateChange() == ItemEvent.SELECTED) {
           final CompilerInterface compiler = (CompilerInterface) _compilerChoiceBox.getSelectedItem();
           compilerModel.resetCompilerErrors();
           _compileHasOccurred = false;
+          _compilerChoiceBox.setToolTipText(compiler.getDescription());
           // set the new compiler (and reset the interactions pane) in a separate thread
           // to address [ drjava-Bugs-2985291 ] Delay in GUI when selecting compiler
           new Thread(new Runnable() {
