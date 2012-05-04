@@ -95,7 +95,7 @@ public class JUnitPanel extends ErrorPanel {
   
   private volatile JUnitProgressBar _progressBar;
   
-  private Action _showStackTraceAction = new AbstractAction("Show Stack Trace") {
+  private final Action _showStackTraceAction = new AbstractAction("Show Stack Trace") {
     public void actionPerformed(ActionEvent ae) {
       if (_error != null) {
         _displayStackTrace(_error);

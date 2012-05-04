@@ -48,19 +48,19 @@ import edu.rice.cs.util.UnexpectedException;
 public class JUnitTestRunner extends BaseTestRunner {
   
   /** Receives updates on the test suite's progress. */
-  private JUnitModelCallback _jmc;
+  private volatile JUnitModelCallback _jmc;
 
   /** Class loader that uses DrJava's classpath. */
-  private ClassLoader _loader;
+  private volatile ClassLoader _loader;
 
   /** The JUnit TestResult being accumulated. */
-  private TestResult _result;
+  private volatile TestResult _result;
 
   /** The current number of errors in the result. */
-  private int _errorCount;
+  private volatile int _errorCount;
 
   /** The current number of failures in the result. */
-  private int _failureCount;
+  private volatile int _failureCount;
 
   /** Standard constructor. */
   public JUnitTestRunner(JUnitModelCallback jmc, ClassLoader loader) {
@@ -85,11 +85,11 @@ public class JUnitTestRunner extends BaseTestRunner {
     return _result;
   }
   
-  public Class<?> loadPossibleTest(String className) throws ClassNotFoundException {
+  public synchronized Class<?> loadPossibleTest(String className) throws ClassNotFoundException {
     return _loader.loadClass(className);
   }
   
-  @Override protected Class<? extends TestCase> loadSuiteClass(String className) throws ClassNotFoundException {
+  @Override protected synchronized Class<? extends TestCase> loadSuiteClass(String className) throws ClassNotFoundException {
     return loadPossibleTest(className).asSubclass(TestCase.class);
   }
 
@@ -99,7 +99,7 @@ public class JUnitTestRunner extends BaseTestRunner {
   }
 
   /** Called by JUnit when a test has finished. */
-  @Override public synchronized void testEnded(String testName) {
+  @Override public synchronized void testEnded(final String testName) {
     boolean error = false;
     boolean failure = false;
     if (_result.errorCount() > _errorCount) {
@@ -118,7 +118,7 @@ public class JUnitTestRunner extends BaseTestRunner {
     // ignore
   }
   
-  @Override protected void runFailed(String message) {
+  @Override protected synchronized void runFailed(String message) {
     throw new UnexpectedException(message);
   }  
 }
