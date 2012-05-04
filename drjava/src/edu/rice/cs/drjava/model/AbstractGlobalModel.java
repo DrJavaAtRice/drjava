@@ -1136,12 +1136,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** throws UnsupportedOperationException */
-  public int getNumCompErrors() {
+  public int getNumCompilerErrors() {
     throw new UnsupportedOperationException("AbstractGlobalModel does not support compilation");
   }
   
   /** throws UnsupportedOperationException */
-  public void setNumCompErrors(int num) { 
+  public void setNumCompilerErrors(int num) { 
     throw new UnsupportedOperationException("AbstractGlobalModel does not support compilation");
   };
   

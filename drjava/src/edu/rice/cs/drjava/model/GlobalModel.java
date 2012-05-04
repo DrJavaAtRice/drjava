@@ -408,10 +408,10 @@ public interface GlobalModel extends ILoadDocuments {
   public int getDocumentCount();
   
   /** Returns the number of compiler errors produced by the last compilation. */
-  public int getNumCompErrors();
+  public int getNumCompilerErrors();
   
   /** Sets the number of compiler errors produced by the last compilation. */
-  public void setNumCompErrors(int num); 
+  public void setNumCompilerErrors(int num); 
   
   /** Returnt an OOD given an AbstractDocumentInterface */
   /**CHECK IF NEEDED! */

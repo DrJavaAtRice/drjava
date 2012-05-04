@@ -434,7 +434,7 @@ public class DefaultCompilerModel implements CompilerModel {
     System.err.println("Preparing to construct CompilerErrorModel for errors: " + errors);
     System.err.println("Creating error model with " + errors.size() + " errors");
     _compilerErrorModel = new CompilerErrorModel(errors.toArray(new DJError[0]), _model);
-    _model.setNumCompErrors(_compilerErrorModel.getNumCompErrors());  // cache number of compiler errors in global model
+    _model.setNumCompilerErrors(_compilerErrorModel.getNumCompilerErrors());  // cache number of compiler errors in global model
   }
   
   //----------------------------- Error Results -----------------------------//
@@ -446,7 +446,7 @@ public class DefaultCompilerModel implements CompilerModel {
   public int getNumErrors() { return getCompilerErrorModel().getNumErrors(); }
   
   /** Gets the total number of current compiler errors. */
-  public int getNumCompErrors() { return getCompilerErrorModel().getNumCompErrors(); }
+  public int getNumCompilerErrors() { return getCompilerErrorModel().getNumCompilerErrors(); }
   
   /** Gets the total number of current warnings. */  
   public int getNumWarnings() { return getCompilerErrorModel().getNumWarnings(); }
@@ -562,9 +562,4 @@ public class DefaultCompilerModel implements CompilerModel {
       });
     }
   }
-  
-//  /** returns the LanguageLevelStackTraceMapper
-//    * @return the LanguageLevelStackTraceMapper
-//    * */
-//  public LanguageLevelStackTraceMapper getLLSTM() { return _LLSTM; } 
 }

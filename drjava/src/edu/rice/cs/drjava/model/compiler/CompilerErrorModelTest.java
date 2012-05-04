@@ -66,9 +66,9 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     model = new CompilerErrorModel(new DJError[0], getter);
     Utilities.clearEventQueue();  // constructor for CompilerErrorModel calls invokeLater
     // We successfully built the model, now test the basics.
-    assertEquals("Should have no compiler errors.", 0, model.getNumErrors());
+    assertEquals("Should have no errors.", 0, model.getNumErrors());
     assertEquals("Should have 0 warnings" , 0, model.getNumWarnings());
-    assertEquals("Should have 0 compiler errors" , 0, model.getNumCompErrors());
+    assertEquals("Should have 0 compiler errors" , 0, model.getNumCompilerErrors());
     assertTrue("hasOnlyWarnings should return true.", model.hasOnlyWarnings());
   }
   
@@ -84,7 +84,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     // We successfully built the model, now test the basics.
     assertEquals("Should have 2 errors.", 2, model.getNumErrors());
     assertEquals("Should have 2 warnings" , 2, model.getNumWarnings());
-    assertEquals("Should have 0 compiler errors" , 0, model.getNumCompErrors());
+    assertEquals("Should have 0 compiler errors" , 0, model.getNumCompilerErrors());
     assertTrue("hasOnlyWarnings should return true.", model.hasOnlyWarnings());
   }
   
@@ -104,7 +104,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     // We successfully built the model, now test the basics.
     assertEquals("Should have 3 compiler errors.", 3, model.getNumErrors());
     assertEquals("Should have 1 warning" , 1, model.getNumWarnings());
-    assertEquals("Should have 2 compiler errors" , 2, model.getNumCompErrors());
+    assertEquals("Should have 2 compiler errors" , 2, model.getNumCompilerErrors());
 //    System.out.println(model.getError(0) + "\n" + model.getError(1) + "\n" + model.getError(2));
     assertEquals("Errors should be sorted.", errors[1], model.getError(2));
     assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
@@ -127,7 +127,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     // We successfully built the model, now test the basics.
     assertEquals("Should have 3 compiler errors.", 3, model.getNumErrors());
     assertEquals("Should have 1 warning" , 1, model.getNumWarnings());
-    assertEquals("Should have 2 compiler errors" , 2, model.getNumCompErrors());
+    assertEquals("Should have 2 compiler errors" , 2, model.getNumCompilerErrors());
     assertEquals("Errors should be sorted.", errors[1], model.getError(2));
     assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
@@ -150,7 +150,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     // We successfully built the model, now test the basics.
     assertEquals("Should have 4 compiler errors.", 4, model.getNumErrors());
     assertEquals("Should have 1 warning" , 1, model.getNumWarnings());
-    assertEquals("Should have  compiler errors" , 3, model.getNumCompErrors());
+    assertEquals("Should have  compiler errors" , 3, model.getNumCompilerErrors());
     assertEquals("Errors should be sorted.", errors[3], model.getError(0));
     assertEquals("Errors should be sorted.", errors[1], model.getError(1));
     assertEquals("Errors should be sorted.", errors[0], model.getError(2));
@@ -179,7 +179,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     // We successfully built the model, now test the basics.
     assertEquals("Should have 7 compiler errors.", 7, model.getNumErrors());
     assertEquals("Should have 2 warnings" , 2, model.getNumWarnings());
-    assertEquals("Should have 5 compiler errors" , 5, model.getNumCompErrors());
+    assertEquals("Should have 5 compiler errors" , 5, model.getNumCompilerErrors());
     assertEquals("Errors should be sorted.", errors[3], model.getError(0));
     assertEquals("Errors should be sorted.", errors[5], model.getError(1));
     assertEquals("Errors should be sorted.", errors[1], model.getError(2));
@@ -212,7 +212,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     // We successfully built the model, now test the basics.
     assertEquals("Should have 8 compiler errors.", 8, model.getNumErrors());
     assertEquals("Should have 3 warnings" , 3, model.getNumWarnings());
-    assertEquals("Should have 5 compiler errors" , 5, model.getNumCompErrors());
+    assertEquals("Should have 5 compiler errors" , 5, model.getNumCompilerErrors());
     assertEquals("Errors should be sorted.", errors[0], model.getError(0));
     assertEquals("Errors should be sorted.", errors[7], model.getError(1));
     assertEquals("Errors should be sorted.", errors[3], model.getError(2));
@@ -246,7 +246,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     // We successfully built the model, now test the basics.
     assertEquals("Should have 8 compiler errors.", 8, model.getNumErrors());
     assertEquals("Should have 3 warnings" , 3, model.getNumWarnings());
-    assertEquals("Should have 5 compiler errors" , 5, model.getNumCompErrors());
+    assertEquals("Should have 5 compiler errors" , 5, model.getNumCompilerErrors());
     assertEquals("Errors should be sorted.", errors[7], model.getError(0));
     assertEquals("Errors should be sorted.", errors[0], model.getError(1));
     assertEquals("Errors should be sorted.", errors[3], model.getError(2));
@@ -265,7 +265,7 @@ public final class CompilerErrorModelTest extends DrJavaTestCase {
     // We successfully built the model, now test the basics.
     assertEquals("Should have 15 compiler errors.", 15, model.getNumErrors());
     assertEquals("Should have 6 warnings" , 6, model.getNumWarnings());
-    assertEquals("Should have 9 compiler errors" , 9, model.getNumCompErrors());
+    assertEquals("Should have 9 compiler errors" , 9, model.getNumCompilerErrors());
     assertEquals("Errors should be sorted.", errors[0], model.getError(0));
     assertEquals("Errors should be sorted.", errors[14], model.getError(1));
     assertEquals("Errors should be sorted.", errors[12], model.getError(2));

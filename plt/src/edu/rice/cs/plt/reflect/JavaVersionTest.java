@@ -71,7 +71,7 @@ public class JavaVersionTest extends TestCase {
     
     FullVersion v4 = parseFullVersion("1.5.1-beta");
     assertEquals(JAVA_5, v4.majorVersion());
-    assertEquals("5.1-beta", v4.versionString());
+    assertEquals("5.1", v4.versionString());
     
     FullVersion v5 = parseFullVersion("1.5.1");
     assertEquals(JAVA_5, v5.majorVersion());
@@ -101,7 +101,7 @@ public class JavaVersionTest extends TestCase {
     sorter.add(v4);
     sorter.add(v6);
     
-    assertTrue(IterUtil.isEqual(sorter, IterUtil.make(v1, v2, v3, v4, v5, v6, v7, v8, v9)));
+    assertTrue(IterUtil.isEqual(sorter, IterUtil.make(v1, v2, v3, v5, v6, v7, v8, v9)));
   }
   
   public void testParseFullVersionUnrecognized() {
@@ -119,7 +119,7 @@ public class JavaVersionTest extends TestCase {
     
     FullVersion v4 = parseFullVersion("1.5.1-beta","","");
     assertEquals(JAVA_5, v4.majorVersion());
-    assertEquals("5.1-beta", v4.versionString());
+    assertEquals("5.1", v4.versionString());
     
     FullVersion v5 = parseFullVersion("1.5.1","","");
     assertEquals(JAVA_5, v5.majorVersion());
@@ -149,7 +149,7 @@ public class JavaVersionTest extends TestCase {
     sorter.add(v4);
     sorter.add(v6);
     
-    assertTrue(IterUtil.isEqual(sorter, IterUtil.make(v1, v2, v3, v4, v5, v6, v7, v8, v9)));
+    assertTrue(IterUtil.isEqual(sorter, IterUtil.make(v1, v2, v3, v5, v6, v7, v8, v9)));
   }
   
   public void testParseFullVersionApple() {
@@ -171,7 +171,7 @@ public class JavaVersionTest extends TestCase {
     FullVersion v4 = parseFullVersion("1.5.1-beta","Java(TM) 2 Runtime Environment, Standard Edition",
                                       "\"Apple Computer, Inc.\"");
     assertEquals(JAVA_5, v4.majorVersion());
-    assertEquals("5.1-beta", v4.versionString());
+    assertEquals("5.1", v4.versionString());
     
     FullVersion v5 = parseFullVersion("1.5.1","Java(TM) 2 Runtime Environment, Standard Edition",
                                       "\"Apple Computer, Inc.\"");
@@ -206,7 +206,7 @@ public class JavaVersionTest extends TestCase {
     sorter.add(v9);
     sorter.add(v6);
     
-    assertTrue(IterUtil.isEqual(sorter, IterUtil.make(v1, v2, v3, v4, v5, v6, v7, v8, v9)));
+    assertTrue(IterUtil.isEqual(sorter, IterUtil.make(v1, v2, v3, v5, v6, v7, v8, v9)));
   }
   
   public void testParseFullVersionSun() {
@@ -228,7 +228,7 @@ public class JavaVersionTest extends TestCase {
     FullVersion v4 = parseFullVersion("1.5.1-beta","Java(TM) 2 Runtime Environment, Standard Edition",
                                       "Sun Microsystems Inc.");
     assertEquals(JAVA_5, v4.majorVersion());
-    assertEquals("5.1-beta", v4.versionString());
+    assertEquals("5.1", v4.versionString());
     
     FullVersion v5 = parseFullVersion("1.5.1","Java(TM) 2 Runtime Environment, Standard Edition",
                                       "Sun Microsystems Inc.");
@@ -263,7 +263,7 @@ public class JavaVersionTest extends TestCase {
     sorter.add(v4);
     sorter.add(v6);
     
-    assertTrue(IterUtil.isEqual(sorter, IterUtil.make(v1, v2, v3, v4, v5, v6, v7, v8, v9)));
+    assertTrue(IterUtil.isEqual(sorter, IterUtil.make(v1, v2, v3, v5, v6, v7, v8, v9)));
   }
   
   public void testParseFullVersionOracle() {
@@ -281,7 +281,7 @@ public class JavaVersionTest extends TestCase {
     
     FullVersion v4 = parseFullVersion("1.5.1-beta","Java(TM) 2 Runtime Environment, Standard Edition","Oracle");
     assertEquals(JAVA_5, v4.majorVersion());
-    assertEquals("5.1-beta", v4.versionString());
+    assertEquals("5.1", v4.versionString());
     
     FullVersion v5 = parseFullVersion("1.5.1","Java(TM) 2 Runtime Environment, Standard Edition","Oracle");
     assertEquals(JAVA_5, v5.majorVersion());
@@ -311,7 +311,7 @@ public class JavaVersionTest extends TestCase {
     sorter.add(v4);
     sorter.add(v6);
     
-    assertTrue(IterUtil.isEqual(sorter, IterUtil.make(v1, v2, v3, v4, v5, v6, v7, v8, v9)));
+    assertTrue(IterUtil.isEqual(sorter, IterUtil.make(v1, v2, v3, v5, v6, v7, v8, v9)));
   }
     
   public void testParseFullVersionOpenJDK() {
@@ -329,8 +329,8 @@ public class JavaVersionTest extends TestCase {
     
     FullVersion v4 = parseFullVersion("1.5.1-beta","OpenJDK Runtime Environment","Sun Microsystems Inc.");
     assertEquals(JAVA_5, v4.majorVersion());
-    assertEquals("5.1-beta-OpenJDK", v4.versionString());
-    
+    assertEquals("5.1-OpenJDK", v4.versionString());
+  
     FullVersion v5 = parseFullVersion("1.5.1","OpenJDK Runtime Environment","Sun Microsystems Inc.");
     assertEquals(JAVA_5, v5.majorVersion());
     assertEquals("5.1-OpenJDK", v5.versionString());
@@ -359,7 +359,7 @@ public class JavaVersionTest extends TestCase {
     sorter.add(v9);
     sorter.add(v6);
     
-    assertTrue(IterUtil.isEqual(sorter, IterUtil.make(v1, v2, v3, v4, v5, v6, v7, v8, v9)));
+    assertTrue(IterUtil.isEqual(sorter, IterUtil.make(v1, v2, v3, v5, v6, v7, v8, v9)));
   }
   
   public void testParseFullVersionMint() {
@@ -381,7 +381,7 @@ public class JavaVersionTest extends TestCase {
     FullVersion v4 = parseFullVersion("1.5.1-beta","mint","mint");
     assertEquals(JAVA_5, v4.majorVersion());
     assertEquals(UNKNOWN, v4.vendor());
-    assertEquals("5.1-beta", v4.versionString());
+    assertEquals("5.1", v4.versionString());
     
     FullVersion v5 = parseFullVersion("1.5.1","mint","mint");
     assertEquals(JAVA_5, v5.majorVersion());
@@ -416,7 +416,7 @@ public class JavaVersionTest extends TestCase {
     sorter.add(v4);
     sorter.add(v6);
     
-    assertTrue(IterUtil.isEqual(sorter, IterUtil.make(v1, v2, v3, v4, v5, v6, v7, v8, v9)));
+    assertTrue(IterUtil.isEqual(sorter, IterUtil.make(v1, v2, v3, v5, v6, v7, v8, v9)));
   }
 
   public void testParseFullVersionSort() throws IOException {

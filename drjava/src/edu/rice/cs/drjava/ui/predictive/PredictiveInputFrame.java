@@ -235,7 +235,7 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
    *  @param actions actions to be performed when the user closes the frame, e.g. "OK" and "Cancel"; "Cancel" has to be last
    *  @param items varargs/array of items
    */
-  @SafeVarargs
+  @SuppressWarnings({"unchecked", "varargs"})
   public PredictiveInputFrame(SwingFrame owner, String title, boolean force, boolean ignoreCase, InfoSupplier<? super T> info, 
                               List<PredictiveInputModel.MatchingStrategy<T>> strategies,
                               java.util.List<CloseAction<T>> actions, int cancelIndex, T... items) {

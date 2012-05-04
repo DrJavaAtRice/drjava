@@ -4352,7 +4352,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public void updateStatusField(String text) {
     assert EventQueue.isDispatchThread();
     _statusField.setText(text);
-    _statusField.paint(getGraphics());  // force an immediate repaint
+    _statusBar.repaint();  // force an immediate repaint
   }
   
   /** Updates the status field with the current status of the Definitions Pane. */
@@ -4378,7 +4378,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     if (! _statusField.getText().equals(text)) { 
       _statusField.setText(text); 
-      _statusField.paint(getGraphics());  // force immediate painting of the _statusField
+      _statusBar.repaint();  // force immediate painting of the _statusField
     }
   }
   
@@ -4488,7 +4488,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Changes the message text toward the right of the status bar
     * @param msg The message to place in the status bar
     */
-  public void setStatusMessage(String msg) { _statusReport.setText(msg); }
+  public void setStatusMessage(String msg) { 
+    _statusReport.setText(msg);
+    _statusBar.repaint();  // force an immediate repaint
+  }
   
   /** Sets the message text in the status bar to the null string. */
   public void clearStatusMessage() { _statusReport.setText(""); }

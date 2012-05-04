@@ -38,13 +38,12 @@ import java.io.Serializable;
 import java.io.ObjectInputStream;
 import java.io.IOException;
 
-/**
- * <p>Abstract parent of all tuple classes, providing lazy evaluation of the hash code.  See the 
- * package documentation for general discussion of the tuple classes.</p>
- * 
- * <p>As a wrapper for arbitrary objects, instances of this class will serialize without error
- * only if the wrapped objects are serializable.</p>
- */
+/** <p>Abstract parent of all tuple classes, providing lazy evaluation of the hash code.  See the 
+  * package documentation for general discussion of the tuple classes.</p>
+  * 
+  * <p>As a wrapper for arbitrary objects, instances of this class will serialize without error
+  * only if the wrapped objects are serializable.</p>
+  */
 public abstract class Tuple implements Serializable {
 
   private transient int _hashCode;
@@ -58,7 +57,7 @@ public abstract class Tuple implements Serializable {
   protected abstract int generateHashCode();
   
   public int hashCode() {
-    if (!_validHashCode) { _hashCode = generateHashCode(); _validHashCode = true; }
+    if (! _validHashCode) { _hashCode = generateHashCode(); _validHashCode = true; }
     return _hashCode;
   }
   

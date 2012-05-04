@@ -54,12 +54,12 @@ public class IdentityWrapper<T> extends Wrapper<T> {
     else if (o == null || !getClass().equals(o.getClass())) { return false; }
     else {
       Wrapper<?> cast = (Wrapper<?>) o;
-      return _value == cast._value;
+      return value() == cast.value();
     }
   }
   
   protected int generateHashCode() { 
-    return System.identityHashCode(_value) ^ getClass().hashCode();
+    return System.identityHashCode(value()) ^ getClass().hashCode();
   }
   
   /** Call the constructor (allows {@code T} to be inferred) */

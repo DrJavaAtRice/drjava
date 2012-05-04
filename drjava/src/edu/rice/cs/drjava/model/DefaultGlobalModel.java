@@ -170,7 +170,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   private volatile boolean _resetAfterCompile = true;
   
   /** Number of errors in last compilation.  compilerModel._numErrors is trashed when the compile model is reset. */
-  private volatile int _numCompErrors = 0;
+  private volatile int _numCompilerErrors = 0;
   
   /* JUnit Fields */
   
@@ -416,8 +416,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Gets the JavadocModel, which provides all methods relating to Javadoc. */
   public JavadocModel getJavadocModel() { return _javadocModel; }
   
-  public int getNumCompErrors() { return _numCompErrors; }
-  public void setNumCompErrors(int num) { _numCompErrors = num; }
+  public int getNumCompilerErrors() { return _numCompilerErrors; }
+  public void setNumCompilerErrors(int num) { _numCompilerErrors = num; }
   
   /** Prepares this model to be thrown away.  Never called in practice outside of quit(), except in tests. */
   public void dispose() {

@@ -39,17 +39,16 @@ import java.io.Serializable;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.Lambda;
 
-/**
- * An arbitrary 1-tuple; overrides {@link #toString()}, {@link #equals(Object)}, 
- * and {@link #hashCode()}.
- */
+/** An arbitrary 1-tuple; overrides {@link #toString()}, {@link #equals(Object)}, and {@link #hashCode()}. */
 public class Wrapper<T> extends Option<T> implements Thunk<T> {
   
-  protected final T _value;
+  private final T _value;
   
   public Wrapper(T value) { _value = value; }
   
   public T value() { return _value; }
+  
+//  public void setValue(T newValue) { _value = newValue; }
   
   public T unwrap() { return _value; }
   

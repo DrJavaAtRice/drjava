@@ -596,7 +596,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     int searchLen = searchStr.length();
     if (searchLen == 0) return;
     
-    _frame.updateStatusField("Finding All");
+    _frame.setStatusMessage("Finding All");
     OpenDefinitionsDocument oldDoc = _machine.getDocument();
     OpenDefinitionsDocument oldFirstDoc = _machine.getFirstDoc();
     String oldFindWord = _machine.getFindWord();
@@ -1145,5 +1145,5 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
   
   /***************** METHODS FOR TESTING PURPOSES ONLY  ***********************/
   public DefinitionsPane getDefPane() { return _defPane; }
-  public JButton getFindNextButton() {return _findNextButton; }
+  public JButton getFindNextButton() { return _findNextButton; }
 }

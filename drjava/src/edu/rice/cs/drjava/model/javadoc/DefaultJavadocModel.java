@@ -271,7 +271,7 @@ public class DefaultJavadocModel implements JavadocModel {
             final CompilerListener listenerThis = this;
             try {
               // Utilities.showDebug("compile ended");
-              if (_model.hasOutOfSyncDocuments(llDocs) || _model.getNumCompErrors() > 0) {
+              if (_model.hasOutOfSyncDocuments(llDocs) || _model.getNumCompilerErrors() > 0) {
                 // Utilities.showDebug("still out of date, fail");
                 // fail Javadoc
                 EventQueue.invokeLater(new Runnable() { public void run() { _notifier.javadocEnded(false, destDirFile, true); } });

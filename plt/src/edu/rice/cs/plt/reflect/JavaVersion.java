@@ -190,27 +190,24 @@ public enum JavaVersion {
     
     // Note: vendor may still be null
     
-    String number;
-    String typeString;
+    String number = "";  // compiler requires initialization
+    
     // if version doesn't start with "1." and has only one dot, prefix with "1."  Example: 6.0 --> 1.6.0
     if ((! java_version.startsWith("1.")) && (java_version.replaceAll("[^\\.]","").length() == 1)) {
       java_version = "1." + java_version;
     }
     int dash = java_version.indexOf('-');
-    if (dash == -1) { number = java_version; /* typeString = null;*/ }
-    else { number = java_version.substring(0, dash); /* typeString = java_version.substring(dash + 1); */}
+    if (dash == -1) { number = java_version; }
+    else {  // dash either from Linux directory name like ("java-6-sun") or from trailing qualifier like "-beta"
+      int firstPrefix = java_version.indexOf("1.");
+      if (firstPrefix == -1)  number = java_version.substring(0, dash);  // assumed to have form like "7-oracle"
+      else if (firstPrefix < dash) number = java_version.substring(0, dash).substring(firstPrefix);
+    }
     
     int dot1 = number.indexOf('.');
     if (dot1 == -1) {
       try {
         int feature = Integer.parseInt(number);
-        
-//        ReleaseType type;
-//        if (typeString == null) { type = ReleaseType.STABLE; }
-//        else if (typeString.startsWith("ea")) { type = ReleaseType.EARLY_ACCESS; }
-//        else if (typeString.startsWith("beta")) { type = ReleaseType.BETA; }
-//        else if (typeString.startsWith("rc")) { type = ReleaseType.RELEASE_CANDIDATE; }
-//        else { type = ReleaseType.UNRECOGNIZED; }
         
         JavaVersion version = UNRECOGNIZED;
         switch (feature) {
@@ -223,17 +220,18 @@ public enum JavaVersion {
           case 7: version = JAVA_7; break;
           default: if (feature > 7) { version = FUTURE; } break;
         }
-        return new FullVersion(version, 0, 0, /* type, typeString, */ vendor, vendorString, location);
+        return new FullVersion(version, 0, 0, vendor, vendorString, location);
       }
       catch(NumberFormatException nfe) {
-        return new FullVersion(UNRECOGNIZED, 0, 0, /* ReleaseType.STABLE, null,*/ vendor, vendorString, location);
+        return new FullVersion(UNRECOGNIZED, 0, 0, vendor, vendorString, location);
       }
     }
     
     int dot2 = number.indexOf('.', dot1 + 1);
     if (dot2 == -1) { 
-      return new FullVersion(UNRECOGNIZED, 0, 0, /* ReleaseType.STABLE, null, */ vendor, vendorString, location); 
+      return new FullVersion(UNRECOGNIZED, 0, 0, vendor, vendorString, location); 
     }
+    
     int underscore = number.indexOf('_', dot2 + 1);
     if (underscore == -1) { underscore = number.indexOf('.', dot2 + 1); }
     if (underscore == -1) { underscore = number.length(); }
@@ -242,13 +240,6 @@ public enum JavaVersion {
       int feature = Integer.parseInt(number.substring(dot1 + 1, dot2));
       int maintenance = Integer.parseInt(number.substring(dot2+1, underscore));
       int update = (underscore >= number.length()) ? 0 : Integer.parseInt(number.substring(underscore + 1));
-      
-//      ReleaseType type;
-//      if (typeString == null) { type = ReleaseType.STABLE; }
-//      else if (typeString.startsWith("ea")) { type = ReleaseType.EARLY_ACCESS; }
-//      else if (typeString.startsWith("beta")) { type = ReleaseType.BETA; }
-//      else if (typeString.startsWith("rc")) { type = ReleaseType.RELEASE_CANDIDATE; }
-//      else { type = ReleaseType.UNRECOGNIZED; }
       
       JavaVersion version = UNRECOGNIZED;
       if (major == 1) {
@@ -264,10 +255,10 @@ public enum JavaVersion {
         }
       }
       
-      return new FullVersion(version, maintenance, update, /* type, typeString, */ vendor, vendorString, location);
+      return new FullVersion(version, maintenance, update, vendor, vendorString, location);
     }
     catch (NumberFormatException e) {
-      return new FullVersion(UNRECOGNIZED, 0, 0, /* ReleaseType.STABLE, null, */ vendor, vendorString, location);
+      return new FullVersion(UNRECOGNIZED, 0, 0, vendor, vendorString, location);
     }
   }
   
@@ -361,7 +352,8 @@ public enum JavaVersion {
           if (result == 0) {
             result = _vendor.compareTo(v._vendor);
             if (result == 0) {
-              if (_location == null) return (v._location == null) ?  0 : 1;
+              if (_location == null) return (v._location == null) ?  0 : -1;
+              else if (v._location == null) return 1;  // File.compareTo blows up if the argument is null
               else return _location.compareTo(v._location);
             }
           }
