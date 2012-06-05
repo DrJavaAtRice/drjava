@@ -64,7 +64,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   private static final String FOO_CLASS =
     "package bar\n" +
     "object Foo {\n" +
-    "  def main(args: String[]) {\n" +
+    "  def main(args: Array[String]) {\n" +
     "    println(\"Foo\")\n" +
     "  }\n" +
     "}\n";
@@ -153,15 +153,17 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     IOException, InterruptedException {
     debug.logStart();
     
-    _log.log("Starting testInteractinsCanSeeCompiledClasses");
+    _log.log("Starting testInteractionsCanSeeCompiledClasses");
     
     // Compile Foo
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
     File dir1 = makeCanonical(new File(_tempDir, "dir1"));
     dir1.mkdir();
     File file1 = makeCanonical(new File(dir1, "TestFile1.scala"));
+    System.err.println("Original class Path is: " + _model.getInteractionsClassPath());
     doCompile(doc1, file1);
-    
+    System.err.println("After loading " + file1 + ", class Path is now: " + _model.getInteractionsClassPath());
+    assertTrue("class file for file1 exists", new File(dir1, "DrScalaTestFoo.class").exists());
     assertEquals("interactions result", "\"DrScalaTestFoo\"", interpret("new DrScalaTestFoo().getClass().getName()"));
     
     // Add directory 1 to extra classpath and close doc1
@@ -553,7 +555,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _log.log("Starting testRunMainMethod");
     File dir = makeCanonical(new File(_tempDir, "bar"));
     dir.mkdir();
-    File file = makeCanonical(new File(dir, "Foo.java"));
+    File file = makeCanonical(new File(dir, "Foo.scala"));
     final OpenDefinitionsDocument doc = doCompile(FOO_CLASS, file);
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
@@ -588,10 +590,11 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _log.log("Starting testBookmark");
     File dir = makeCanonical(new File(_tempDir, "bar"));
     dir.mkdir();
-    final File file = makeCanonical(new File(dir, "Foo.java"));
+    final File file = makeCanonical(new File(dir, "Foo.scala"));
     java.io.FileWriter fw = new java.io.FileWriter(file);
     fw.write(FOO_CLASS);
     fw.close();
+    assertTrue("Foo.scala now exists", file.exists());
     _model.openFile(new edu.rice.cs.util.FileOpenSelector() {
       public File[] getFiles() throws edu.rice.cs.util.OperationCanceledException {
         return new File[] { file };

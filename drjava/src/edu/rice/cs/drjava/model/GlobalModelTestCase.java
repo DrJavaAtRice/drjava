@@ -504,7 +504,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     int numErrors = _model.getCompilerModel().getNumErrors();
 
     if (name.length() > 0)  name += ": ";
-    
+    System.err.println("Compiler errors = " + getCompilerErrorString());
     assertEquals(name + " compile errors > 0 ? numErrors = " + numErrors, b, numErrors > 0);
   }
 

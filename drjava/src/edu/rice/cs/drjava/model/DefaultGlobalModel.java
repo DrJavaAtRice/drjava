@@ -195,8 +195,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _debugger = null;
     _javadocModel = null;
     for (JDKToolsLibrary t : tools) {
-      // check for support of JAVA_6; Scala 2.9.* requires Java 7 in some cases but Mac OS X does not yet offer Java 7. */
-      if (t.compiler().isAvailable() && t.version().supports(JavaVersion.JAVA_6)) {
+      // check for support of JAVA_6; Scala 2.9.* requires Java 7. */
+      if (t.compiler().isAvailable() && t.version().supports(JavaVersion.JAVA_7)) {
           compilers.add(t.compiler());
       }
       if (_debugger == null && t.debugger().isAvailable()) { _debugger = t.debugger(); }

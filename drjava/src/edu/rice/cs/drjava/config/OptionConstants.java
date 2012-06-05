@@ -1486,7 +1486,7 @@ public interface OptionConstants {
    */
   public static final class COMPILER_PREFERENCE_CONTROL {
     public static final String NO_PREFERENCE = "No Preference";
-    public static final String SCALA = "Scala version 2.9.1.final";
+    public static final String SCALA = "Scala version 2.9";
     public static ArrayList<String> _list = new ArrayList<String>();
     
     public static void setList(ArrayList<String> list) { _list = list; }

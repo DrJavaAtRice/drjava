@@ -209,7 +209,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           bootClassPath.add(f);
           for(File acf: additionalCompilerFiles) { bootClassPath.add(acf); };
         }
-        if (additionalBootClassPath!=null) { bootClassPath.addAll(additionalBootClassPath); }
+        if (additionalBootClassPath != null) { bootClassPath.addAll(additionalBootClassPath); }
         if (bootClassPath.isEmpty()) { bootClassPath = null; } // null defers to the compiler's default behavior
 
         try {
@@ -458,7 +458,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     addIfDir(new File("/usr/lib/jvm/java-6-openjdk"), roots);
     addIfDir(new File("/usr/lib/jvm/java-1.5.0-sun"), roots);
 
-    addIfDir(new File("/home/javaplt/java/Linux-i686"), roots);
+    /* Entries for Linux scala packages */
+    addIfDir(new File("/usr/share/scala"), roots);
+    addIfDir(new File("/opt/scala"), roots);
     
     return roots;
   }

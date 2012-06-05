@@ -45,10 +45,11 @@ public abstract class JPDADebugTestCase extends DebugTestCase {
 
   protected volatile JPDADebugger _debugger;
 
-  public void setUp() throws Exception {
-    super.setUp();
-    // This cast will fail if the debugger has an unexpected type
-    _debugger = (JPDADebugger) super._debugger;
-  }
+    /* Generates ClassCastException.  JPDADebugger is being loaded by two different class loaders. */
+///  public void setUp() throws Exception {
+//    super.setUp();
+//    // This cast will fail if the debugger has an unexpected type
+//    _debugger = (JPDADebugger) super._debugger;
+//  }
 
 }

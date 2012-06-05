@@ -207,7 +207,7 @@ public abstract class JDKDescriptor {
       }
       else if (jarOrDir.isDirectory()) {
         for(String fn: fileNames) {
-          if (!(new File(jarOrDir,fn).exists())) return false;
+          if (! (new File(jarOrDir,fn).exists())) return false;
         }
         return true;
       }
