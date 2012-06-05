@@ -37,6 +37,8 @@ package edu.rice.cs.plt.reflect;
 import java.io.Serializable;
 import java.io.File;
 
+import java.util.regex.*;
+
 /** A representation of a major Java version, with methods for parsing version number strings. */
 public enum JavaVersion {
   UNRECOGNIZED { public String versionString() { return "?"; } },
@@ -136,9 +138,7 @@ public enum JavaVersion {
     }
   }
   
-  /**
-   * Produce the {@code JavaVersion} corresponding to the given class file.
-   */
+  /** Produce the {@code JavaVersion} corresponding to the given class file. */
   public static JavaVersion parseClassVersion(java.io.InputStream is) {
     java.io.DataInputStream dis = null;
     try {
@@ -158,8 +158,21 @@ public enum JavaVersion {
     }
   }
   
+  public static Pattern VERSION_PATTERN = Pattern.compile("[[0-9]\\._]*");
+  
+  /** Return the longest prefix of version string consisting solely of digits, dots, and underscores. This method
+    * is intended to parse Scala version strings but may have more general applicability.  */
+  public static String parseVersion(String versionString) {
+    
+    Matcher m = VERSION_PATTERN.matcher(versionString);
+    m.lookingAt();  // find longest prefix of versionString that matches VERSION_PATTER
+    
+    try { return m.group(0); }
+    catch(Exception e) { return null; }
+  }
+ 
   /** Produce the {@code JavaVersion.FullVersion} corresponding to the given version string.  Accepts
-    * input of the form "1.6.0", "1.4.2_10", or "1.5.0_05-ea".  The underscore may be replaced by a dot.
+    * input of the form "1.6.0", "1.4.2_10", or "1.5.0_05".  The underscore may be replaced by a dot.
     * If the text cannot be parsed, a trivial version with major version UNRECOGNIZED is returned.
     * The location of the JDK, which may be null, will be stored in the version.
     * 
@@ -189,7 +202,7 @@ public enum JavaVersion {
     }
     
     // Note: vendor may still be null
-    
+
     String number = "";  // compiler requires initialization
     
     // if version doesn't start with "1." and has only one dot, prefix with "1."  Example: 6.0 --> 1.6.0
@@ -238,7 +251,7 @@ public enum JavaVersion {
     try {
       int major = Integer.parseInt(number.substring(0, dot1));
       int feature = Integer.parseInt(number.substring(dot1 + 1, dot2));
-      int maintenance = Integer.parseInt(number.substring(dot2+1, underscore));
+      int maintenance = Integer.parseInt(number.substring(dot2 + 1, underscore));
       int update = (underscore >= number.length()) ? 0 : Integer.parseInt(number.substring(underscore + 1));
       
       JavaVersion version = UNRECOGNIZED;
@@ -276,7 +289,7 @@ public enum JavaVersion {
   }
   
   /** Produce the {@code JavaVersion.FullVersion} corresponding to the given version string.  Accepts
-    * input of the form "1.6.0", "1.4.2_10", or "1.5.0_05-ea".  The underscore may be replaced by a dot.
+    * input of the form "1.6.0", "1.4.2_10", or "1.5.0_05".  The underscore may be replaced by a dot.
     * If the text cannot be parsed, a trivial version with major version UNRECOGNIZED is returned.
     * 
     * @see <a href="http://java.sun.com/j2se/versioning_naming.html#">The Sun version specification</a>
