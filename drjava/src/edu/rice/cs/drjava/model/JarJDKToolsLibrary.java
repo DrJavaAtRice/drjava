@@ -37,17 +37,18 @@
 package edu.rice.cs.drjava.model;
 
 import java.io.File;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
-import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.Collections;
+import java.util.TreeMap;
+
 import java.util.jar.JarFile;
 import java.util.jar.JarEntry;
 import java.util.jar.Manifest;
@@ -76,6 +77,8 @@ import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.model.javadoc.DefaultJavadocModel;
 import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
 import edu.rice.cs.drjava.model.JDKDescriptor;
+
+import edu.rice.cs.util.FileOps;
 
 /** A JDKToolsLibrary that was loaded from a specific jar file. */
 public class JarJDKToolsLibrary extends JDKToolsLibrary {
@@ -389,8 +392,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   protected static LinkedHashMap<File,Set<JDKDescriptor>> getDefaultSearchRoots() {
     JDKToolsLibrary.msg("---- Getting Default Search Roots ----");
     
-    /* roots is a list of possible parent directories of Java installations; we want to eliminate duplicates & 
-     * remember insertion order
+    /* roots is a list of possible parent directories of Java installations and Java-based conpound pinstallations; 
+     * we want to eliminate duplicates & remember insertion order
      */
     LinkedHashMap<File,Set<JDKDescriptor>> roots = new LinkedHashMap<File,Set<JDKDescriptor>>();
     
@@ -439,6 +442,10 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     addIfDir(new File("/C:/Java"), roots);
     addIfDir(new File("/C:"), roots);
     
+    /* Scala entries for Windows */
+    addIfDir(new File("/C:/Scala/scala-2.9.1.final"), roots);
+    addIfDir(new File("/C:/Scala/scala-2.9.1-1"), roots);
+    
     /* Entries for Mac OS X */
     addIfDir(new File("/System/Library/Java/JavaVirtualMachines"), roots);
     addIfDir(new File("/Library/Java/JavaVirtualMachines"), roots);
@@ -458,17 +465,18 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     addIfDir(new File("/usr/lib/jvm/java-6-openjdk"), roots);
     addIfDir(new File("/usr/lib/jvm/java-1.5.0-sun"), roots);
 
-    /* Entries for Linux scala packages */
+    /* Scala entries for Linux */
     addIfDir(new File("/usr/share/scala"), roots);
     addIfDir(new File("/opt/scala"), roots);
     
     return roots;
   }
   
-  /* Search for jar files in roots and, if found, transfer them to the jars collection. */
+  /* Search for tools.jar/classes.jar files in roots and, if found, transfer them to the jars collection. */
   protected static void searchRootsForJars(LinkedHashMap<File,Set<JDKDescriptor>> roots,
                                            LinkedHashMap<File,Set<JDKDescriptor>> jars) {
     _log.log("***** roots = " + roots);
+    _log.log("***** jars = " + jars);
     // matches: starts with "j2sdk", starts with "jdk", has form "[number].[number].[number]" (OS X), or
     // starts with "java-" (Linux)
     Predicate<File> subdirFilter = LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("j2sdk.*"),
@@ -581,7 +589,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     return completedResults;
   }
   
-  /** Produce a list of tools libraries discovered on the file system.  A variety of locations are searched;
+  /** Produce a list of compilers discovered in the file system.  A variety of locations are searched;
     * only those files that can produce a valid library (see {@link #isValid} are returned.  The result is
     * sorted by version.  Where one library of the same version might be preferred over another, the preferred 
     * library appears earlier in the result list.
@@ -594,17 +602,23 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
      */
     LinkedHashMap<File,Set<JDKDescriptor>> roots = getDefaultSearchRoots();
 
-    /* jars is a list of possible tools.jar (or classes.jar) files; we want to eliminate duplicates & 
-     * remember insertion order
+    /* jars is a list of possible jar files containing standard Java or extended compilers; we want to eliminate 
+     * duplicates & remember insertion order
      */
     LinkedHashMap<File,Set<JDKDescriptor>> jars = new LinkedHashMap<File,Set<JDKDescriptor>>();
 
-    // Search for all compound JDK descriptors in the drjava.jar file
-    Iterable<JDKDescriptor> descriptors = searchForJDKDescriptors(); 
-    for(JDKDescriptor desc: descriptors) {
+    // Search for all JDK descriptors in the drjava.jar file or lib/platform.jar in the executable file tree
+    Iterable<JDKDescriptor> descriptors = searchForJDKDescriptorsInExecutable(); 
+    _log.log("***** Finished searching for JDKDescriptor classes *****  descriptors = " + descriptors);
+    for (JDKDescriptor desc: descriptors) {
       // add the specific search directories and files
-      for(File f: desc.getSearchDirectories()) { addIfDir(f, desc, roots); }
-      for(File f: desc.getSearchFiles()) { addIfFile(f, desc, jars); }
+      _log.log("Processing descriptor " + desc);
+      if (desc.toString().contains("Scala")) {
+        _log.log("ScalaDescriptor.getSearchDirectories = " + desc.getSearchDirectories());
+        _log.log("ScalaDescriptor.getSearchFiles = " + desc.getSearchFiles());
+      }
+      for (File f: desc.getSearchDirectories()) { addIfDir(f, desc, roots); }
+      for (File f: desc.getSearchFiles()) { addIfFile(f, desc, jars); }
       // add to the set of packages that need to be shadowed
       TOOLS_PACKAGES.addAll(desc.getToolsPackages());
     }
@@ -644,13 +658,14 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     return result;
   }
   
-  /** Add a canonicalized {@code f} to the given set if it is an existing directory or link */
+  /** Add a canonicalized File {@code f} to the given set if it is an existing directory or link */
   private static void addIfDir(File f, Map<? super File, Set<JDKDescriptor>> map) {
     addIfDir(f, JDKDescriptor.NONE, map);
   }
   
-  /** Add JDKDescriptor c to the JDKDescriptor set of for canonicalized directory {@code f} */
+  /** Add JDKDescriptor c to the JDKDescriptor set for canonicalized directory {@code f} */
   private static void addIfDir(File f, JDKDescriptor c, Map<? super File, Set<JDKDescriptor>> map) {
+    JDKToolsLibrary.msg("Adding JDKDescriptor " + c + " to set for " + f);
     f = IOUtil.attemptCanonicalFile(f);
     if (IOUtil.attemptIsDirectory(f)) {
       Set<JDKDescriptor> set = map.get(f);
@@ -658,7 +673,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         set = new LinkedHashSet<JDKDescriptor>();
         map.put(f, set);
       }
-      if (! set.contains(f)) JDKToolsLibrary.msg("JDKDescriptor" + c + " recorded for dir " + f);
+      if (! set.contains(f)) JDKToolsLibrary.msg("JDKDescriptor " + c + " recorded for dir " + f);
       set.add(c);
     }
     else { JDKToolsLibrary.msg("Dir does not exist: " + f); }
@@ -690,47 +705,29 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     else { JDKToolsLibrary.msg("File not found: " + f); }
   }
   
-  /** Search for JDK descriptors.
-    * Note: This does not work properly if not all classes are in a jar or in the same directory.
-    * For example, when doing an "ant run", the classes are spread across classes/base and classes/lib,
-    * with the edu.rice.cs.drjava.DrJava class in classes/base but the descriptors in classes/lib. */
-  private static Iterable<JDKDescriptor> searchForJDKDescriptors() {
+  /** Search for JDK descriptors in drjava.jar (if that is executable) or ../../lib/plaform.jar (if executable
+    * is file tree rooted at .../classes/base.
+    */
+  private static Iterable<JDKDescriptor> searchForJDKDescriptorsInExecutable() {
     JDKToolsLibrary.msg("---- Searching for JDKDescriptors in executable ----");
     long t0 = System.currentTimeMillis();
     JDKToolsLibrary.msg("ms: " + t0);
-    Iterable<JDKDescriptor> descriptors = IterUtil.empty();
+    Iterable<JDKDescriptor> descriptors = null;  // init required by compiler
     try {
-      File f = edu.rice.cs.util.FileOps.getDrJavaFile();
-//      JDKToolsLibrary.msg("Searching drjava.jar: " + f);
-      if (f.isFile()) {
-        JarFile jf = new JarFile(f);
-        JDKToolsLibrary.msg("Searching jar file: " + jf);
-        Enumeration<JarEntry> entries = jf.entries();
-        while (entries.hasMoreElements()) {
-          JarEntry je = entries.nextElement();
-          String name = je.getName();
-          if (name.startsWith("edu/rice/cs/drjava/model/compiler/descriptors/") && name.endsWith(".class") &&
-              (name.indexOf('$') < 0)) {
-            descriptors = attemptToLoadDescriptor(descriptors, name);
-            JDKToolsLibrary.msg("Found potential JDKDescriptor: " + name);
-          }
-        }
+      File f = FileOps.getDrJavaFile();
+      JDKToolsLibrary.msg("DrJavaFile is: " + f);
+      if (f.isFile()) { /* Not a directory; must be jar file drjava.jar including the scala compiler */
+//         _log.log("Before searching jar file for DrJava, descriptors = " + descriptors);
+        descriptors = searchJarFileForJDKDescriptors(new JarFile(f));
+        _log.log("After searching jar file for DrJava, descriptors = " + descriptors);
       }
-      else {
-        JDKToolsLibrary.msg("Searching class file tree corresponding to: " + f);
-        final String DESC_PATH = "edu/rice/cs/drjava/model/compiler/descriptors";
-        File dir = new File(f, DESC_PATH);
-        JDKToolsLibrary.msg("directory, enumerating files in " + dir);
-        Iterable<File> files = IOUtil.listFilesRecursively(dir, new Predicate<File>() {
-          public boolean contains(File arg) {
-            return (arg.isFile()) && arg.getName().endsWith(".class") && (arg.getName().indexOf('$') < 0);
-          }
-        });
-        for (File je: files) {
-          String name = DESC_PATH + "/" + je.getName();
-          descriptors = attemptToLoadDescriptor(descriptors, name);
-          JDKToolsLibrary.msg("Found potential JDKDescriptor: " + name);
-        }
+      else {  // f is root of class file tree for drjava; JDKDescriptors reside jar file ../../lib/platform.jar
+        File grandParent = f.getParentFile().getParentFile();
+        File platformJarFile = new File(grandParent, "lib/platform.jar");
+        assert platformJarFile.exists();
+        _log.log("Before searching jar file " + platformJarFile + ", descriptors = " + descriptors);
+        descriptors = searchJarFileForJDKDescriptors(new JarFile(platformJarFile));
+        _log.log("After searching jar file " + platformJarFile + ", descriptors = " + descriptors);
       }
     }
     catch(IOException ioe) {
@@ -739,22 +736,41 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     long t1 = System.currentTimeMillis();
     JDKToolsLibrary.msg("ms: "+t1);
     JDKToolsLibrary.msg("duration ms: "+(t1-t0));
-    JDKToolsLibrary.msg("---- Done searching for descriptors ----");
+    JDKToolsLibrary.msg("***** Done searching for descriptors ***** descriptors = " + descriptors);
+    return descriptors;
+  }
+  
+  /** Search JarFile jf for JDKDescriptor classes. */
+  private static Iterable<JDKDescriptor> searchJarFileForJDKDescriptors(JarFile jf) {  
+    JDKToolsLibrary.msg("Entering searchJarFileForJDKDescriptors; searching jar file " + jf.getName());
+    Iterable<JDKDescriptor> descriptors = IterUtil.empty();
+    Enumeration<JarEntry> entries = jf.entries();
+    while (entries.hasMoreElements()) {
+      JarEntry je = entries.nextElement();
+      String name = je.getName();
+      if (name.startsWith("edu/rice/cs/drjava/model/compiler/descriptors/") && name.endsWith(".class") &&
+          (name.indexOf('$') < 0)) {
+        descriptors = attemptToLoadDescriptor(descriptors, name);
+        JDKToolsLibrary.msg("Found potential JDKDescriptor: " + name);
+        JDKToolsLibrary.msg("descriptors = " + descriptors);
+      }
+    }
+    JDKToolsLibrary.msg("Exiting searchJarFileForJDKDescriptors; descriptors = " + descriptors);
     return descriptors;
   }
   
   /** Attempt to load a JDK descriptor, append it to the list if succesful. */
-  protected static Iterable<JDKDescriptor> attemptToLoadDescriptor(Iterable<JDKDescriptor> descriptors,
-                                                                   String name) {
+  protected static Iterable<JDKDescriptor> attemptToLoadDescriptor(Iterable<JDKDescriptor> descriptors, String name) {
     int dotPos = name.indexOf(".class");
     String className = name.substring(0, dotPos).replace('/','.');
+    _log.log("Attempting to load JDKDescriptor class '" + className + "'");
     try {
       JDKToolsLibrary.msg("    class name: " + className);
       Class<?> clazz = Class.forName(className);
       Class<? extends JDKDescriptor> descClass = clazz.asSubclass(JDKDescriptor.class);
       JDKDescriptor desc = descClass.newInstance();
-      JDKToolsLibrary.msg("        loaded!");
       descriptors = IterUtil.compose(descriptors, desc);
+      JDKToolsLibrary.msg("        loaded!");
     }
     catch(LinkageError le) { JDKToolsLibrary.msg("LinkageError: " + le); /* ignore */ } 
     catch(ClassNotFoundException cnfe) { JDKToolsLibrary.msg("ClassNotFoundException: " + cnfe); /* ignore */ }

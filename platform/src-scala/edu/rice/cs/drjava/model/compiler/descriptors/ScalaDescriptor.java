@@ -93,6 +93,12 @@ public class ScalaDescriptor extends JDKDescriptor {
       new File("/C:/Scala/scala-2.9.1.final/lib/scala-compiler.jar")
     });
     files = IterUtil.compose(files, new File("/opt/scala/lib/scala-compiler.jar"));
+    // If executable is class file tree, looks for compiler in associated lib directory
+    File f = FileOps.getDrJavaFile();
+    if (! f.isFile()) { // f is a directory
+      File grandParentFile = f.getParentFile().getParentFile();
+      files = IterUtil.compose(files, new File(grandParentFile, "lib/scala-compiler.jar"));
+    }
     try {
       String scala_home = System.getenv("SCALA_HOME");
       if (scala_home != null) {
