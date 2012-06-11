@@ -3030,6 +3030,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** @return true if this has a legal source file name for the currently active compiler */
     public boolean isSourceFile() {
       if (isUntitled()) return false;  // assert _file != null
+//      System.err.println("In " + this + " the active compiler is " + getCompilerModel().getActiveCompiler());
       return getCompilerModel().getActiveCompiler().isSourceFileForThisCompiler(_file);
     }
     

@@ -1109,6 +1109,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     @Override public void activeCompilerChanged() {
 //      Utilities.showDebug("compileEnded called in CSSListener");
+      System.err.println("Active compiler changed");
       synchronized(this) { activeCompilerChangedCount++; }
       _notifyCompileDone();
     }

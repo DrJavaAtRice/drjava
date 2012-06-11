@@ -65,6 +65,7 @@ import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
 import static edu.rice.cs.drjava.ui.config.ConfigDescriptions.*;
+import static edu.rice.cs.drjava.config.OptionConstants.*;
 
 /** The frame for setting Configuration options on the fly
  *  @version $Id$
@@ -270,24 +271,24 @@ public class ConfigFrame extends SwingFrame {
   }
   
   private void enableChangeListeners() {
-    DrJava.getConfig().addOptionListener(OptionConstants.JUNIT_LOCATION_ENABLED,
+    DrJava.getConfig().addOptionListener(JUNIT_LOCATION_ENABLED,
                                          _junitLocationEnabledListener);
-    DrJava.getConfig().addOptionListener(OptionConstants.JUNIT_LOCATION,
+    DrJava.getConfig().addOptionListener(JUNIT_LOCATION,
                                          _junitLocationListener);
-    DrJava.getConfig().addOptionListener(OptionConstants.CONCJUNIT_CHECKS_ENABLED,
+    DrJava.getConfig().addOptionListener(CONCJUNIT_CHECKS_ENABLED,
                                          _concJUnitChecksEnabledListener);
-    DrJava.getConfig().addOptionListener(OptionConstants.RT_CONCJUNIT_LOCATION,
+    DrJava.getConfig().addOptionListener(RT_CONCJUNIT_LOCATION,
                                          _rtConcJUnitLocationListener);
   }
 
   private void disableChangeListeners() {
-    DrJava.getConfig().removeOptionListener(OptionConstants.JUNIT_LOCATION_ENABLED,
+    DrJava.getConfig().removeOptionListener(JUNIT_LOCATION_ENABLED,
                                             _junitLocationEnabledListener);
-    DrJava.getConfig().removeOptionListener(OptionConstants.JUNIT_LOCATION,
+    DrJava.getConfig().removeOptionListener(JUNIT_LOCATION,
                                             _junitLocationListener);
-    DrJava.getConfig().removeOptionListener(OptionConstants.CONCJUNIT_CHECKS_ENABLED,
+    DrJava.getConfig().removeOptionListener(CONCJUNIT_CHECKS_ENABLED,
                                             _concJUnitChecksEnabledListener);
-    DrJava.getConfig().removeOptionListener(OptionConstants.RT_CONCJUNIT_LOCATION,
+    DrJava.getConfig().removeOptionListener(RT_CONCJUNIT_LOCATION,
                                             _rtConcJUnitLocationListener);
   }
 
@@ -523,23 +524,23 @@ public class ConfigFrame extends SwingFrame {
   /** Add all of the components for the Resource Locations panel of the preferences window. */
   private void _setupResourceLocPanel(ConfigPanel panel) {
     FileOptionComponent browserLoc =
-      newFileOptionComponent(OptionConstants.BROWSER_FILE, _browserChooser);
+      newFileOptionComponent(BROWSER_FILE, _browserChooser);
     addOptionComponent(panel, browserLoc);    
 
     StringOptionComponent browserCommand =
-      newStringOptionComponent(OptionConstants.BROWSER_STRING);
+      newStringOptionComponent(BROWSER_STRING);
     addOptionComponent(panel, browserCommand);
 
     FileOptionComponent javacLoc =
-      newFileOptionComponent(OptionConstants.JAVAC_LOCATION, _fileOptionChooser);
+      newFileOptionComponent(JAVAC_LOCATION, _fileOptionChooser);
     javacLoc.setFileFilter(ClassPathFilter.ONLY);
     addOptionComponent(panel, javacLoc);
 
     BooleanOptionComponent displayAllCompilerVersions =
-      newBooleanOptionComponent(OptionConstants.DISPLAY_ALL_COMPILER_VERSIONS);
+      newBooleanOptionComponent(DISPLAY_ALL_COMPILER_VERSIONS);
     addOptionComponent(panel, displayAllCompilerVersions );
    
-    addOptionComponent(panel, newVectorFileOptionComponent(OptionConstants.EXTRA_CLASSPATH, true));
+    addOptionComponent(panel, newVectorFileOptionComponent(EXTRA_CLASSPATH, true));
     
     panel.displayComponents();
     
@@ -549,11 +550,11 @@ public class ConfigFrame extends SwingFrame {
   private void _setupDisplayPanel(ConfigPanel panel) {
 
     final ForcedChoiceOptionComponent lookAndFeelComponent =
-      newForcedChoiceOptionComponent(OptionConstants.LOOK_AND_FEEL);
+      newForcedChoiceOptionComponent(LOOK_AND_FEEL);
     addOptionComponent(panel, lookAndFeelComponent);
 
     final ForcedChoiceOptionComponent plasticComponent =
-      newForcedChoiceOptionComponent(OptionConstants.PLASTIC_THEMES);
+      newForcedChoiceOptionComponent(PLASTIC_THEMES);
     lookAndFeelComponent.addChangeListener(new OptionComponent.ChangeListener() {
       public Object value(Object oc) {
         plasticComponent.getComponent().setEnabled(lookAndFeelComponent.getCurrentComboBoxValue().
@@ -568,34 +569,34 @@ public class ConfigFrame extends SwingFrame {
     //ToolbarOptionComponent is a degenerate option component
     addOptionComponent(panel, new ToolbarOptionComponent("Toolbar Buttons", this,
                                                   "How to display the toolbar buttons."));
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.LINEENUM_ENABLED));
+    addOptionComponent(panel, newBooleanOptionComponent(LINEENUM_ENABLED));
    
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.SHOW_SOURCE_WHEN_SWITCHING));
+                       newBooleanOptionComponent(SHOW_SOURCE_WHEN_SWITCHING));
     
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.SHOW_CODE_PREVIEW_POPUPS));
+    addOptionComponent(panel, newBooleanOptionComponent(SHOW_CODE_PREVIEW_POPUPS));
     
-    addOptionComponent(panel, newIntegerOptionComponent(OptionConstants.CLIPBOARD_HISTORY_SIZE));
+    addOptionComponent(panel, newIntegerOptionComponent(CLIPBOARD_HISTORY_SIZE));
     
     BooleanOptionComponent checkbox = 
-      newBooleanOptionComponent(OptionConstants.DIALOG_GOTOFILE_FULLY_QUALIFIED);
+      newBooleanOptionComponent(DIALOG_GOTOFILE_FULLY_QUALIFIED);
     addOptionComponent(panel, checkbox);
     
     checkbox =
-      newBooleanOptionComponent(OptionConstants.DIALOG_COMPLETE_SCAN_CLASS_FILES);
+      newBooleanOptionComponent(DIALOG_COMPLETE_SCAN_CLASS_FILES);
     addOptionComponent(panel, checkbox);
     
     checkbox =
-      newBooleanOptionComponent(OptionConstants.DIALOG_COMPLETE_JAVAAPI);
+      newBooleanOptionComponent(DIALOG_COMPLETE_JAVAAPI);
     addOptionComponent(panel, checkbox);
 
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     
     final BooleanOptionComponent drmComponent =
-      newBooleanOptionComponent(OptionConstants.DISPLAY_RIGHT_MARGIN);
+      newBooleanOptionComponent(DISPLAY_RIGHT_MARGIN);
     addOptionComponent(panel, drmComponent);
     final IntegerOptionComponent rmcComponent =
-      newIntegerOptionComponent(OptionConstants.RIGHT_MARGIN_COLUMNS);
+      newIntegerOptionComponent(RIGHT_MARGIN_COLUMNS);
     addOptionComponent(panel, rmcComponent);
 
     OptionComponent.ChangeListener drmListener = new OptionComponent.ChangeListener() {
@@ -612,60 +613,60 @@ public class ConfigFrame extends SwingFrame {
 
   /** Add all of the components for the Font panel of the preferences window. */
   private void _setupFontPanel(ConfigPanel panel) {
-    addOptionComponent(panel, newFontOptionComponent(OptionConstants.FONT_MAIN));
-    addOptionComponent(panel, newFontOptionComponent(OptionConstants.FONT_LINE_NUMBERS));
-    addOptionComponent(panel, newFontOptionComponent(OptionConstants.FONT_DOCLIST));
-    addOptionComponent(panel, newFontOptionComponent(OptionConstants.FONT_TOOLBAR));
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.TEXT_ANTIALIAS));
+    addOptionComponent(panel, newFontOptionComponent(FONT_MAIN));
+    addOptionComponent(panel, newFontOptionComponent(FONT_LINE_NUMBERS));
+    addOptionComponent(panel, newFontOptionComponent(FONT_DOCLIST));
+    addOptionComponent(panel, newFontOptionComponent(FONT_TOOLBAR));
+    addOptionComponent(panel, newBooleanOptionComponent(TEXT_ANTIALIAS));
     panel.displayComponents();
   }
 
   /** Adds all of the components for the Color panel of the preferences window.
    */
   private void _setupColorPanel(ConfigPanel panel) {
-    addOptionComponent(panel, newColorOptionComponent(OptionConstants.DEFINITIONS_NORMAL_COLOR));
-    addOptionComponent(panel, newColorOptionComponent(OptionConstants.DEFINITIONS_KEYWORD_COLOR));
-    addOptionComponent(panel, newColorOptionComponent(OptionConstants.DEFINITIONS_TYPE_COLOR));
-    addOptionComponent(panel, newColorOptionComponent(OptionConstants.DEFINITIONS_COMMENT_COLOR));
-    addOptionComponent(panel, newColorOptionComponent(OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR));
-    addOptionComponent(panel, newColorOptionComponent(OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR));
-    addOptionComponent(panel, newColorOptionComponent(OptionConstants.DEFINITIONS_NUMBER_COLOR));
-    addOptionComponent(panel, newColorOptionComponent(OptionConstants.DEFINITIONS_BACKGROUND_COLOR, true));
-    addOptionComponent(panel, newColorOptionComponent(OptionConstants.DEFINITIONS_LINE_NUMBER_COLOR));
-    addOptionComponent(panel, newColorOptionComponent(OptionConstants.DEFINITIONS_LINE_NUMBER_BACKGROUND_COLOR, true));
-    addOptionComponent(panel, newColorOptionComponent(OptionConstants.DEFINITIONS_MATCH_COLOR,true));
-    addOptionComponent(panel, newColorOptionComponent(OptionConstants.COMPILER_ERROR_COLOR, true));
-    addOptionComponent(panel, newColorOptionComponent(OptionConstants.BOOKMARK_COLOR, true));
-    for (int i = 0; i < OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
-      addOptionComponent(panel, newColorOptionComponent(OptionConstants.FIND_RESULTS_COLORS[i], true));
+    addOptionComponent(panel, newColorOptionComponent(DEFINITIONS_NORMAL_COLOR));
+    addOptionComponent(panel, newColorOptionComponent(DEFINITIONS_KEYWORD_COLOR));
+    addOptionComponent(panel, newColorOptionComponent(DEFINITIONS_TYPE_COLOR));
+    addOptionComponent(panel, newColorOptionComponent(DEFINITIONS_COMMENT_COLOR));
+    addOptionComponent(panel, newColorOptionComponent(DEFINITIONS_DOUBLE_QUOTED_COLOR));
+    addOptionComponent(panel, newColorOptionComponent(DEFINITIONS_SINGLE_QUOTED_COLOR));
+    addOptionComponent(panel, newColorOptionComponent(DEFINITIONS_NUMBER_COLOR));
+    addOptionComponent(panel, newColorOptionComponent(DEFINITIONS_BACKGROUND_COLOR, true));
+    addOptionComponent(panel, newColorOptionComponent(DEFINITIONS_LINE_NUMBER_COLOR));
+    addOptionComponent(panel, newColorOptionComponent(DEFINITIONS_LINE_NUMBER_BACKGROUND_COLOR, true));
+    addOptionComponent(panel, newColorOptionComponent(DEFINITIONS_MATCH_COLOR,true));
+    addOptionComponent(panel, newColorOptionComponent(COMPILER_ERROR_COLOR, true));
+    addOptionComponent(panel, newColorOptionComponent(BOOKMARK_COLOR, true));
+    for (int i = 0; i < FIND_RESULTS_COLORS.length; ++i) {
+      addOptionComponent(panel, newColorOptionComponent(FIND_RESULTS_COLORS[i], true));
     }
     addOptionComponent(panel, 
-                       newColorOptionComponent(OptionConstants.DEBUG_BREAKPOINT_COLOR, true));
+                       newColorOptionComponent(DEBUG_BREAKPOINT_COLOR, true));
     addOptionComponent(panel, 
-                       newColorOptionComponent(OptionConstants.DEBUG_BREAKPOINT_DISABLED_COLOR, true));
+                       newColorOptionComponent(DEBUG_BREAKPOINT_DISABLED_COLOR, true));
     addOptionComponent(panel, 
-                       newColorOptionComponent(OptionConstants.DEBUG_THREAD_COLOR, true));
-    addOptionComponent(panel, newColorOptionComponent(OptionConstants.SYSTEM_OUT_COLOR));
-    addOptionComponent(panel, newColorOptionComponent(OptionConstants.SYSTEM_ERR_COLOR));
-    addOptionComponent(panel, newColorOptionComponent(OptionConstants.SYSTEM_IN_COLOR));
-    addOptionComponent(panel, newColorOptionComponent(OptionConstants.INTERACTIONS_ERROR_COLOR, false, true));
-    addOptionComponent(panel, newColorOptionComponent(OptionConstants.DEBUG_MESSAGE_COLOR, false, true));
+                       newColorOptionComponent(DEBUG_THREAD_COLOR, true));
+    addOptionComponent(panel, newColorOptionComponent(SYSTEM_OUT_COLOR));
+    addOptionComponent(panel, newColorOptionComponent(SYSTEM_ERR_COLOR));
+    addOptionComponent(panel, newColorOptionComponent(SYSTEM_IN_COLOR));
+    addOptionComponent(panel, newColorOptionComponent(INTERACTIONS_ERROR_COLOR, false, true));
+    addOptionComponent(panel, newColorOptionComponent(DEBUG_MESSAGE_COLOR, false, true));
     addOptionComponent(panel, 
-                       newColorOptionComponent(OptionConstants.DRJAVA_ERRORS_BUTTON_COLOR, true));
+                       newColorOptionComponent(DRJAVA_ERRORS_BUTTON_COLOR, true));
     addOptionComponent(panel, 
-                       newColorOptionComponent(OptionConstants.RIGHT_MARGIN_COLOR, true));
+                       newColorOptionComponent(RIGHT_MARGIN_COLOR, true));
     
     panel.displayComponents();
   }
 
   /** Add all of the components for the Positions panel of the preferences window. */
   private void _setupPositionsPanel(ConfigPanel panel) {
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.WINDOW_STORE_POSITION, false)
+    addOptionComponent(panel, newBooleanOptionComponent(WINDOW_STORE_POSITION, false)
                          .setEntireColumn(true));
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.DIALOG_CLIPBOARD_HISTORY_STORE_POSITION,false)
+                       newBooleanOptionComponent(DIALOG_CLIPBOARD_HISTORY_STORE_POSITION,false)
                          .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) { _mainFrame.resetClipboardHistoryDialogPosition(); }
@@ -673,7 +674,7 @@ public class ConfigFrame extends SwingFrame {
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.DIALOG_GOTOFILE_STORE_POSITION, false)
+                       newBooleanOptionComponent(DIALOG_GOTOFILE_STORE_POSITION, false)
                          .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) { _mainFrame.resetGotoFileDialogPosition(); }
@@ -682,7 +683,7 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.DIALOG_COMPLETE_WORD_STORE_POSITION,false)
+                       newBooleanOptionComponent(DIALOG_COMPLETE_WORD_STORE_POSITION,false)
                          .setEntireColumn(true));
     
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
@@ -693,7 +694,7 @@ public class ConfigFrame extends SwingFrame {
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.DIALOG_JAROPTIONS_STORE_POSITION,false)
+                       newBooleanOptionComponent(DIALOG_JAROPTIONS_STORE_POSITION,false)
                          .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -702,14 +703,14 @@ public class ConfigFrame extends SwingFrame {
     }, "Reset \"Create Jar File from Project\" Dialog Position", this, "This resets the dialog position to its default values."));
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.DIALOG_OPENJAVADOC_STORE_POSITION, false)
+    addOptionComponent(panel, newBooleanOptionComponent(DIALOG_OPENJAVADOC_STORE_POSITION, false)
                          .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) { _mainFrame.resetOpenJavadocDialogPosition(); }
     }, "Reset \"Open Javadoc\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.DIALOG_AUTOIMPORT_STORE_POSITION, false)
+    addOptionComponent(panel, newBooleanOptionComponent(DIALOG_AUTOIMPORT_STORE_POSITION, false)
                          .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) { _mainFrame.resetAutoImportDialogPosition(); }
@@ -717,7 +718,7 @@ public class ConfigFrame extends SwingFrame {
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.DIALOG_EXTERNALPROCESS_STORE_POSITION,false)
+                       newBooleanOptionComponent(DIALOG_EXTERNALPROCESS_STORE_POSITION,false)
                          .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -726,7 +727,7 @@ public class ConfigFrame extends SwingFrame {
     }, "Reset \"Execute External Process\" Dialog Position", this, "This resets the dialog position to its default values."));
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.DIALOG_EDITEXTERNALPROCESS_STORE_POSITION, false)
+    addOptionComponent(panel, newBooleanOptionComponent(DIALOG_EDITEXTERNALPROCESS_STORE_POSITION, false)
                          .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -735,7 +736,7 @@ public class ConfigFrame extends SwingFrame {
     }, "Reset \"Execute External Process\" Dialog Position", this, "This resets the dialog position to its default values."));
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.DIALOG_OPENJAVADOC_STORE_POSITION, false)
+    addOptionComponent(panel, newBooleanOptionComponent(DIALOG_OPENJAVADOC_STORE_POSITION, false)
                          .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -744,7 +745,7 @@ public class ConfigFrame extends SwingFrame {
     }, "Reset \"Open Javadoc\" Dialog Position", this, "This resets the dialog position to its default values."));
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.DIALOG_TABBEDPANES_STORE_POSITION, false)
+    addOptionComponent(panel, newBooleanOptionComponent(DIALOG_TABBEDPANES_STORE_POSITION, false)
                          .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -753,12 +754,12 @@ public class ConfigFrame extends SwingFrame {
     }, "Reset \"Tabbed Panes\" Window Position", this, "This resets the window position to its default values."));
 
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.DETACH_TABBEDPANES,false)
+                       newBooleanOptionComponent(DETACH_TABBEDPANES,false)
                          .setEntireColumn(true));
 
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.DIALOG_DEBUGFRAME_STORE_POSITION,false)
+                       newBooleanOptionComponent(DIALOG_DEBUGFRAME_STORE_POSITION,false)
                          .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -766,7 +767,7 @@ public class ConfigFrame extends SwingFrame {
       }
     }, "Reset \"Debugger\" Window Position", this, "This resets the window position to its default values."));
 
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.DETACH_DEBUGGER, false)
+    addOptionComponent(panel, newBooleanOptionComponent(DETACH_DEBUGGER, false)
                          .setEntireColumn(true));
 
     panel.displayComponents();
@@ -828,50 +829,50 @@ public class ConfigFrame extends SwingFrame {
     }
 
     VectorFileOptionComponent sourcePath =
-      newVectorFileOptionComponent(OptionConstants.DEBUG_SOURCEPATH, true);
+      newVectorFileOptionComponent(DEBUG_SOURCEPATH, true);
     // Source path can only include directories
     sourcePath.getFileChooser().setFileFilter(new DirectoryFilter("Source Directories"));
     addOptionComponent(panel, sourcePath);
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.DEBUG_STEP_JAVA));
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.DEBUG_STEP_INTERPRETER));
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.DEBUG_STEP_DRJAVA));
+                       newBooleanOptionComponent(DEBUG_STEP_JAVA));
+    addOptionComponent(panel, newBooleanOptionComponent(DEBUG_STEP_INTERPRETER));
+    addOptionComponent(panel, newBooleanOptionComponent(DEBUG_STEP_DRJAVA));
     addOptionComponent(panel, 
                        new LabelComponent("<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
                                           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
                                           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</html>", 
                                           this, true));
     addOptionComponent(panel, 
-                       newVectorStringOptionComponent(OptionConstants.DEBUG_STEP_EXCLUDE, false));
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.DEBUG_AUTO_IMPORT));
+                       newVectorStringOptionComponent(DEBUG_STEP_EXCLUDE, false));
+    addOptionComponent(panel, newBooleanOptionComponent(DEBUG_AUTO_IMPORT));
     
-    addOptionComponent(panel, newIntegerOptionComponent(OptionConstants.AUTO_STEP_RATE));                                                            
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.DEBUG_EXPRESSIONS_AND_METHODS_IN_WATCHES));
+    addOptionComponent(panel, newIntegerOptionComponent(AUTO_STEP_RATE));                                                            
+    addOptionComponent(panel, newBooleanOptionComponent(DEBUG_EXPRESSIONS_AND_METHODS_IN_WATCHES));
     panel.displayComponents();
   }
 
   /** Add all of the components for the Javadoc panel of the preferences window. */
   private void _setupJavadocPanel(ConfigPanel panel) {
     addOptionComponent(panel, 
-                       newForcedChoiceOptionComponent(OptionConstants.JAVADOC_API_REF_VERSION));
+                       newForcedChoiceOptionComponent(JAVADOC_API_REF_VERSION));
     addOptionComponent(panel, 
-                       newForcedChoiceOptionComponent(OptionConstants.JAVADOC_ACCESS_LEVEL));
+                       newForcedChoiceOptionComponent(JAVADOC_ACCESS_LEVEL));
     addOptionComponent(panel, 
-                       newForcedChoiceOptionComponent(OptionConstants.JAVADOC_LINK_VERSION));
+                       newForcedChoiceOptionComponent(JAVADOC_LINK_VERSION));
     addOptionComponent(panel, 
-                       newStringOptionComponent(OptionConstants.JAVADOC_1_5_LINK));
+                       newStringOptionComponent(JAVADOC_1_5_LINK));
     addOptionComponent(panel, 
-                       newStringOptionComponent(OptionConstants.JAVADOC_1_6_LINK));
+                       newStringOptionComponent(JAVADOC_1_6_LINK));
     addOptionComponent(panel, 
-                       newStringOptionComponent(OptionConstants.JAVADOC_1_7_LINK));
+                       newStringOptionComponent(JAVADOC_1_7_LINK));
     addOptionComponent(panel, 
-                       newStringOptionComponent(OptionConstants.JUNIT_LINK));
+                       newStringOptionComponent(JUNIT_LINK));
 
     VectorStringOptionComponent additionalJavadoc =
-      new VectorStringOptionComponent(OptionConstants.JAVADOC_ADDITIONAL_LINKS, 
-                                      CONFIG_DESCRIPTIONS.get(OptionConstants.JAVADOC_ADDITIONAL_LINKS),
+      new VectorStringOptionComponent(JAVADOC_ADDITIONAL_LINKS, 
+                                      CONFIG_DESCRIPTIONS.get(JAVADOC_ADDITIONAL_LINKS),
                                       this,
-                                      CONFIG_LONG_DESCRIPTIONS.get(OptionConstants.JAVADOC_ADDITIONAL_LINKS)) {
+                                      CONFIG_LONG_DESCRIPTIONS.get(JAVADOC_ADDITIONAL_LINKS)) {
       protected boolean verify(String s) {
         // verify that the allclasses-frame.html file exists at that URL. do not actually parse it now
         boolean result = true;
@@ -906,16 +907,16 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, additionalJavadoc);
     
     addOptionComponent(panel, 
-                       newDirectoryOptionComponent(OptionConstants.JAVADOC_DESTINATION, _dirChooser));
+                       newDirectoryOptionComponent(JAVADOC_DESTINATION, _dirChooser));
     
     addOptionComponent(panel, 
-                       javadocCustomParams = newStringOptionComponent(OptionConstants.JAVADOC_CUSTOM_PARAMS));
+                       javadocCustomParams = newStringOptionComponent(JAVADOC_CUSTOM_PARAMS));
     
     // Note: JAVADOC_FROM_ROOTS is intended to set the -subpackages flag, but I don't think that's something
     // we should support -- in general, we only support performing operations on the files that are open.
     // (dlsmith r4189)
 //    addOptionComponent(panel, 
-//                       newBooleanOptionComponent(OptionConstants.JAVADOC_FROM_ROOTS));
+//                       newBooleanOptionComponent(JAVADOC_FROM_ROOTS));
     
     panel.displayComponents();
   }
@@ -923,82 +924,82 @@ public class ConfigFrame extends SwingFrame {
   /** Adds all of the components for the Prompts panel of the preferences window. */
   private void _setupNotificationsPanel(ConfigPanel panel) {
     // Quit
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.QUIT_PROMPT, false)
+    addOptionComponent(panel, newBooleanOptionComponent(QUIT_PROMPT, false)
                          .setEntireColumn(true));
 
     // Interactions
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.INTERACTIONS_RESET_PROMPT, false)
+    addOptionComponent(panel, newBooleanOptionComponent(INTERACTIONS_RESET_PROMPT, false)
                          .setEntireColumn(true));
     
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.INTERACTIONS_EXIT_PROMPT,false)
+                       newBooleanOptionComponent(INTERACTIONS_EXIT_PROMPT,false)
                          .setEntireColumn(true));
 
     // Javadoc
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.JAVADOC_PROMPT_FOR_DESTINATION,false)
+    addOptionComponent(panel, newBooleanOptionComponent(JAVADOC_PROMPT_FOR_DESTINATION,false)
                          .setEntireColumn(true));
 
 
     // Clean
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.PROMPT_BEFORE_CLEAN, false)
+    addOptionComponent(panel, newBooleanOptionComponent(PROMPT_BEFORE_CLEAN, false)
                          .setEntireColumn(true));
 
     // Prompt to change the language level extensions (.dj0/.dj1->.dj, .dj2->.java)
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.PROMPT_RENAME_LL_FILES, false)
+    addOptionComponent(panel, newBooleanOptionComponent(PROMPT_RENAME_LL_FILES, false)
                          .setEntireColumn(true));
 
     
     // Save before X
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_COMPILE, false)
+    addOptionComponent(panel, newBooleanOptionComponent(ALWAYS_SAVE_BEFORE_COMPILE, false)
                          .setEntireColumn(true));
     
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.ALWAYS_COMPILE_BEFORE_JUNIT,false)
+    addOptionComponent(panel, newBooleanOptionComponent(ALWAYS_COMPILE_BEFORE_JUNIT,false)
                          .setEntireColumn(true)); 
     
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_JAVADOC, false)
+    addOptionComponent(panel, newBooleanOptionComponent(ALWAYS_SAVE_BEFORE_JAVADOC, false)
                          .setEntireColumn(true));
     
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.ALWAYS_COMPILE_BEFORE_JAVADOC, false)
+    addOptionComponent(panel, newBooleanOptionComponent(ALWAYS_COMPILE_BEFORE_JAVADOC, false)
                          .setEntireColumn(true));
 
 
     // These are very problematic features, and so are disabled for the forseeable future.
 //    addOptionComponent(panel, 
-//                       newBooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_RUN));
+//                       newBooleanOptionComponent(ALWAYS_SAVE_BEFORE_RUN));
 //    addOptionComponent(panel, 
-//                       newBooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_DEBUG));
+//                       newBooleanOptionComponent(ALWAYS_SAVE_BEFORE_DEBUG));
     
     // Warnings
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.WARN_BREAKPOINT_OUT_OF_SYNC,false)
+                       newBooleanOptionComponent(WARN_BREAKPOINT_OUT_OF_SYNC,false)
                          .setEntireColumn(true));
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.WARN_DEBUG_MODIFIED_FILE,false)
+                       newBooleanOptionComponent(WARN_DEBUG_MODIFIED_FILE,false)
                          .setEntireColumn(true));
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.WARN_CHANGE_LAF,false)
+                       newBooleanOptionComponent(WARN_CHANGE_LAF,false)
                          .setEntireColumn(true));
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.WARN_CHANGE_THEME,false)
+                       newBooleanOptionComponent(WARN_CHANGE_THEME,false)
                          .setEntireColumn(true));
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.WARN_CHANGE_DCP,false)
+                       newBooleanOptionComponent(WARN_CHANGE_DCP,false)
                          .setEntireColumn(true));
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.WARN_CHANGE_MISC,false)
+                       newBooleanOptionComponent(WARN_CHANGE_MISC,false)
                          .setEntireColumn(true));
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.WARN_CHANGE_INTERACTIONS,false)
+                       newBooleanOptionComponent(WARN_CHANGE_INTERACTIONS,false)
                          .setEntireColumn(true));
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.WARN_PATH_CONTAINS_POUND,false)
+                       newBooleanOptionComponent(WARN_PATH_CONTAINS_POUND,false)
                          .setEntireColumn(true));
 
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.DIALOG_DRJAVA_ERROR_POPUP_ENABLED,false)
+                       newBooleanOptionComponent(DIALOG_DRJAVA_ERROR_POPUP_ENABLED,false)
                          .setEntireColumn(true));
     addOptionComponent(panel,
-                       newBooleanOptionComponent(OptionConstants.WARN_IF_COMPIZ,false)
+                       newBooleanOptionComponent(WARN_IF_COMPIZ,false)
                          .setEntireColumn(true));
     
     
@@ -1008,7 +1009,7 @@ public class ConfigFrame extends SwingFrame {
                                           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</html>", this, true));
 
     addOptionComponent(panel, 
-                       newForcedChoiceOptionComponent(OptionConstants.DELETE_LL_CLASS_FILES));
+                       newForcedChoiceOptionComponent(DELETE_LL_CLASS_FILES));
 
     addOptionComponent(panel, 
                        new LabelComponent("<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
@@ -1016,8 +1017,8 @@ public class ConfigFrame extends SwingFrame {
                                           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</html>", this, true));
 
     addOptionComponent(panel, 
-                       newForcedChoiceOptionComponent(OptionConstants.NEW_VERSION_NOTIFICATION));
-    addOptionComponent(panel, newIntegerOptionComponent(OptionConstants.NEW_VERSION_NOTIFICATION_DAYS));
+                       newForcedChoiceOptionComponent(NEW_VERSION_NOTIFICATION));
+    addOptionComponent(panel, newIntegerOptionComponent(NEW_VERSION_NOTIFICATION_DAYS));
 
     panel.displayComponents();
   }
@@ -1025,32 +1026,32 @@ public class ConfigFrame extends SwingFrame {
   /** Adds all of the components for the Miscellaneous panel of the preferences window. */
   private void _setupMiscPanel(ConfigPanel panel) {
     /* Dialog box options */
-    addOptionComponent(panel, newIntegerOptionComponent(OptionConstants.INDENT_LEVEL));
-    addOptionComponent(panel, newIntegerOptionComponent(OptionConstants.RECENT_FILES_MAX_SIZE));
-    addOptionComponent(panel, newIntegerOptionComponent(OptionConstants.BROWSER_HISTORY_MAX_SIZE));
+    addOptionComponent(panel, newIntegerOptionComponent(INDENT_LEVEL));
+    addOptionComponent(panel, newIntegerOptionComponent(RECENT_FILES_MAX_SIZE));
+    addOptionComponent(panel, newIntegerOptionComponent(BROWSER_HISTORY_MAX_SIZE));
     
     /* Check box options */
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.AUTO_CLOSE_COMMENTS));
+                       newBooleanOptionComponent(AUTO_CLOSE_COMMENTS));
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.RUN_WITH_ASSERT));
+                       newBooleanOptionComponent(RUN_WITH_ASSERT));
     
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.BACKUP_FILES));
+                       newBooleanOptionComponent(BACKUP_FILES));
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.RESET_CLEAR_CONSOLE));
+                       newBooleanOptionComponent(RESET_CLEAR_CONSOLE));
 
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE));
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.DRJAVA_USE_FORCE_QUIT));
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.REMOTE_CONTROL_ENABLED));
-    addOptionComponent(panel, newIntegerOptionComponent(OptionConstants.REMOTE_CONTROL_PORT));
-    addOptionComponent(panel, newIntegerOptionComponent(OptionConstants.FOLLOW_FILE_DELAY));
-    addOptionComponent(panel, newIntegerOptionComponent(OptionConstants.FOLLOW_FILE_LINES));
+                       newBooleanOptionComponent(FIND_REPLACE_FOCUS_IN_DEFPANE));
+    addOptionComponent(panel, newBooleanOptionComponent(DRJAVA_USE_FORCE_QUIT));
+    addOptionComponent(panel, newBooleanOptionComponent(REMOTE_CONTROL_ENABLED));
+    addOptionComponent(panel, newIntegerOptionComponent(REMOTE_CONTROL_PORT));
+    addOptionComponent(panel, newIntegerOptionComponent(FOLLOW_FILE_DELAY));
+    addOptionComponent(panel, newIntegerOptionComponent(FOLLOW_FILE_LINES));
     
 // Any lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
-//    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.LIGHTWEIGHT_PARSING_ENABLED));
-//    addOptionComponent(panel, newIntegerOptionComponent(OptionConstants.DIALOG_LIGHTWEIGHT_PARSING_DELAY));
+//    addOptionComponent(panel, newBooleanOptionComponent(LIGHTWEIGHT_PARSING_ENABLED));
+//    addOptionComponent(panel, newIntegerOptionComponent(DIALOG_LIGHTWEIGHT_PARSING_DELAY));
     
     panel.displayComponents();
   }  
@@ -1058,13 +1059,13 @@ public class ConfigFrame extends SwingFrame {
   /** Adds all of the components for the JVMs panel of the preferences window. */
   private void _setupJVMsPanel(ConfigPanel panel) {
     addOptionComponent(panel, 
-                       newForcedChoiceOptionComponent(OptionConstants.MASTER_JVM_XMX));
+                       newForcedChoiceOptionComponent(MASTER_JVM_XMX));
     addOptionComponent(panel, 
-                       newStringOptionComponent(OptionConstants.MASTER_JVM_ARGS));
+                       newStringOptionComponent(MASTER_JVM_ARGS));
     addOptionComponent(panel, 
-                       newForcedChoiceOptionComponent(OptionConstants.SLAVE_JVM_XMX));
+                       newForcedChoiceOptionComponent(SLAVE_JVM_XMX));
     addOptionComponent(panel, 
-                       newStringOptionComponent(OptionConstants.SLAVE_JVM_ARGS));    
+                       newStringOptionComponent(SLAVE_JVM_ARGS));    
     panel.displayComponents();
   }
 
@@ -1156,7 +1157,7 @@ public class ConfigFrame extends SwingFrame {
       addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
       addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
       
-      addOptionComponent(panel, newForcedChoiceOptionComponent(OptionConstants.FILE_EXT_REGISTRATION));
+      addOptionComponent(panel, newForcedChoiceOptionComponent(FILE_EXT_REGISTRATION));
     }
     else {
       addOptionComponent(panel, 
@@ -1177,75 +1178,65 @@ public class ConfigFrame extends SwingFrame {
     */
   private void _setupCompilerPanel(ConfigPanel panel) {
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.SHOW_UNCHECKED_WARNINGS, false)
+                       newBooleanOptionComponent(SHOW_UNCHECKED_WARNINGS, false)
                          .setEntireColumn(true));
     
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.SHOW_DEPRECATION_WARNINGS, false)
+                       newBooleanOptionComponent(SHOW_DEPRECATION_WARNINGS, false)
                          .setEntireColumn(true));
     
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.SHOW_PATH_WARNINGS, false)
+                       newBooleanOptionComponent(SHOW_PATH_WARNINGS, false)
                          .setEntireColumn(true));
     
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.SHOW_SERIAL_WARNINGS,false)
+                       newBooleanOptionComponent(SHOW_SERIAL_WARNINGS,false)
                          .setEntireColumn(true));
     
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.SHOW_FINALLY_WARNINGS, false)
+                       newBooleanOptionComponent(SHOW_FINALLY_WARNINGS, false)
                          .setEntireColumn(true));
     
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(OptionConstants.SHOW_FALLTHROUGH_WARNINGS, false)
+                       newBooleanOptionComponent(SHOW_FALLTHROUGH_WARNINGS, false)
                          .setEntireColumn(true));
     addOptionComponent(panel, 
                        new LabelComponent("<html><br><br>Note: Some of these options may not be effective, depending on the<br>"+
                                           "compiler you are using.</html>",
                                           this, true));
-    /*
-     * The drop down box containing the compiler names
-     */
+    /* The drop down box containing the compiler names. */
     final ForcedChoiceOptionComponent CPC =
-      newForcedChoiceOptionComponent(OptionConstants.COMPILER_PREFERENCE_CONTROL.evaluate());
+      newForcedChoiceOptionComponent(COMPILER_PREFERENCE_CONTROL.evaluate());
     
-    /*
-     * Action listener that saves the selected compiler name into the DEFAULT_COMPILER_PREFERENCE setting
-     */
+    /* Action listener that loads the selected compiler name into the DEFAULT_COMPILER_PREFERENCE setting. */
     ActionListener CPCActionListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        if(!edu.rice.cs.drjava.DrJava.getConfig().getSetting(OptionConstants.DEFAULT_COMPILER_PREFERENCE).equals(CPC.getCurrentComboBoxValue())) {
-          edu.rice.cs.drjava.DrJava.getConfig().setSetting(OptionConstants.DEFAULT_COMPILER_PREFERENCE,CPC.getCurrentComboBoxValue());
+        if (! edu.rice.cs.drjava.DrJava.getConfig().getSetting(DEFAULT_COMPILER_PREFERENCE).equals(CPC.getCurrentComboBoxValue())) {
+          edu.rice.cs.drjava.DrJava.getConfig().setSetting(DEFAULT_COMPILER_PREFERENCE,CPC.getCurrentComboBoxValue());
         }
       }
     };
    
-    /*
-     * insures that the change is made only when the apply or ok button is hit
-     */
+    /* Insures that the change is made only when the apply or ok button is hit. */
     _applyButton.addActionListener(CPCActionListener);
     _okButton.addActionListener(CPCActionListener);
     
-    /*
-     * adds the drop down box to the panel
-     */
-    addOptionComponent(panel, 
-                       CPC.setEntireColumn(false)
-                      );
+    /* Adds the drop down box to the panel. */
+    addOptionComponent(panel, CPC.setEntireColumn(false));
     
-    addOptionComponent(panel, 
-                       new LabelComponent("<html><br><br>Note: Compiler warnings not shown if compiling any Java language level files.</html>", 
-                                          this, true));
+    String optionLabel = 
+      "<html><br><br>Note: Compiler warnings not shown if compiling any Java language level files.</html>";
+    addOptionComponent(panel, new LabelComponent(optionLabel, this, true));
     panel.displayComponents();
   }
   
   /** Add all of the components for the Interactions panel of the preferences window. */
   private void _setupInteractionsPanel(ConfigPanel panel) {
     final DirectoryOptionComponent wdComponent =
-      newDirectoryOptionComponent(OptionConstants.FIXED_INTERACTIONS_DIRECTORY, _dirChooser);
+      newDirectoryOptionComponent(FIXED_INTERACTIONS_DIRECTORY, _dirChooser);
     addOptionComponent(panel, wdComponent);
     final BooleanOptionComponent stickyComponent = 
-      newBooleanOptionComponent(OptionConstants.STICKY_INTERACTIONS_DIRECTORY);
+      newBooleanOptionComponent(STICKY_INTERACTIONS_DIRECTORY);
     addOptionComponent(panel, stickyComponent);
     
     OptionComponent.ChangeListener wdListener = new OptionComponent.ChangeListener() {
@@ -1260,18 +1251,18 @@ public class ConfigFrame extends SwingFrame {
     wdListener.value(wdComponent);
 
     addOptionComponent(panel, newBooleanOptionComponent
-                         (OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS));
+                         (SMART_RUN_FOR_APPLETS_AND_PROGRAMS));
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
       
-    addOptionComponent(panel, newIntegerOptionComponent(OptionConstants.HISTORY_MAX_SIZE));
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.DIALOG_AUTOIMPORT_ENABLED));
+    addOptionComponent(panel, newIntegerOptionComponent(HISTORY_MAX_SIZE));
+    addOptionComponent(panel, newBooleanOptionComponent(DIALOG_AUTOIMPORT_ENABLED));
     VectorStringOptionComponent autoImportClasses =
-      new VectorStringOptionComponent(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES,
-                                      CONFIG_DESCRIPTIONS.get(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES),
+      new VectorStringOptionComponent(INTERACTIONS_AUTO_IMPORT_CLASSES,
+                                      CONFIG_DESCRIPTIONS.get(INTERACTIONS_AUTO_IMPORT_CLASSES),
                                       this,
-                                      CONFIG_LONG_DESCRIPTIONS.get(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES)) {
+                                      CONFIG_LONG_DESCRIPTIONS.get(INTERACTIONS_AUTO_IMPORT_CLASSES)) {
       protected boolean verify(String s) {
         boolean result = true;
         // verify that the string contains only Java identifier characters, dots and stars
@@ -1298,9 +1289,9 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
       
     addOptionComponent(panel, 
-                       newForcedChoiceOptionComponent(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL));
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.DYNAMICJAVA_REQUIRE_SEMICOLON));
-    addOptionComponent(panel, newBooleanOptionComponent(OptionConstants.DYNAMICJAVA_REQUIRE_VARIABLE_TYPE));
+                       newForcedChoiceOptionComponent(DYNAMICJAVA_ACCESS_CONTROL));
+    addOptionComponent(panel, newBooleanOptionComponent(DYNAMICJAVA_REQUIRE_SEMICOLON));
+    addOptionComponent(panel, newBooleanOptionComponent(DYNAMICJAVA_REQUIRE_VARIABLE_TYPE));
     
     panel.displayComponents();
   }
@@ -1308,11 +1299,11 @@ public class ConfigFrame extends SwingFrame {
   /** Add all of the components for the JUnit panel of the preferences window. */
   private void _setupJUnitPanel(ConfigPanel panel) {
     final BooleanOptionComponent junitLocEnabled =
-      newBooleanOptionComponent(OptionConstants.JUNIT_LOCATION_ENABLED,false)
+      newBooleanOptionComponent(JUNIT_LOCATION_ENABLED,false)
       .setEntireColumn(true);
     addOptionComponent(panel, junitLocEnabled);
     final FileOptionComponent junitLoc =
-      newFileOptionComponent(OptionConstants.JUNIT_LOCATION,
+      newFileOptionComponent(JUNIT_LOCATION,
                               new FileSelectorComponent(this, _jarChooser, 30, 10f) {
       public void setFileField(File file) {
         if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidJUnitFile(file) ||
@@ -1369,13 +1360,13 @@ public class ConfigFrame extends SwingFrame {
     boolean javaVersion7 = JavaVersion.CURRENT.supports(JavaVersion.JAVA_7);
     if (!javaVersion7) {
       final ForcedChoiceOptionComponent concJUnitChecksEnabledComponent =
-        newForcedChoiceOptionComponent(OptionConstants.CONCJUNIT_CHECKS_ENABLED);
+        newForcedChoiceOptionComponent(CONCJUNIT_CHECKS_ENABLED);
       addOptionComponent(panel, concJUnitChecksEnabledComponent);
       
       addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));    
       
       final FileOptionComponent rtConcJUnitLoc =
-        newFileOptionComponent(OptionConstants.RT_CONCJUNIT_LOCATION,
+        newFileOptionComponent(RT_CONCJUNIT_LOCATION,
                                new FileSelectorComponent(this, _jarChooser, 30, 10f) {
         public void setFileField(File file) {
           if (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidRTConcJUnitFile(file)) {
@@ -1499,15 +1490,15 @@ public class ConfigFrame extends SwingFrame {
             s[2] = "No-join checks are disabled.";
             s[3] = "Lucky checks are disabled.";
             if (!concJUnitChecksEnabledComponent.getCurrentComboBoxValue().
-                  equals(OptionConstants.ConcJUnitCheckChoices.NONE)) {
+                  equals(ConcJUnitCheckChoices.NONE)) {
               s[1] = "All-thread checks are enabled.";
               if (concJUnitChecksEnabledComponent.getCurrentComboBoxValue().
-                    equals(OptionConstants.ConcJUnitCheckChoices.ALL) ||
+                    equals(ConcJUnitCheckChoices.ALL) ||
                   concJUnitChecksEnabledComponent.getCurrentComboBoxValue().
-                    equals(OptionConstants.ConcJUnitCheckChoices.NO_LUCKY)) {
+                    equals(ConcJUnitCheckChoices.NO_LUCKY)) {
                 s[2] = "No-join checks are enabled.";
                 if (concJUnitChecksEnabledComponent.getCurrentComboBoxValue().
-                      equals(OptionConstants.ConcJUnitCheckChoices.ALL)) {
+                      equals(ConcJUnitCheckChoices.ALL)) {
                   File rtf = rtConcJUnitLoc.getComponent().getFileFromField();
                   if ((rtf!=null) && !FileOps.NULL_FILE.equals(rtf) && rtf.exists() &&
                       edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidRTConcJUnitFile(rtf)) {
@@ -1544,7 +1535,7 @@ public class ConfigFrame extends SwingFrame {
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     final BooleanOptionComponent forceTestSuffix  =
-      newBooleanOptionComponent(OptionConstants.FORCE_TEST_SUFFIX,false)
+      newBooleanOptionComponent(FORCE_TEST_SUFFIX,false)
       .setEntireColumn(true);
     addOptionComponent(panel, forceTestSuffix);
     

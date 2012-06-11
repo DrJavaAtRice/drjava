@@ -18,7 +18,7 @@
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
  * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+// * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
  * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
  * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
  * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
@@ -78,7 +78,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     "  /**\n" +
     "   * Some shared storage, an instance variable.\n" +
     "   */\n" +
-    "  var shared = 5;\n" +
+    "  var shared = 5\n" +
     "  \n" +
     "  /**\n" +
     "   * a sample method. This method has no parameters\n" +
@@ -124,7 +124,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   public void testCompileAllFailsDifferentSourceRoots() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
     
-    _log.log("Starting testCompileAllFailsDifferentSourceRoots");
+    System.err.println("Starting testCompileAllFailsDifferentSourceRoots");
     
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
@@ -161,7 +161,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     assertEquals(_name() + "Class file exists after failing compile (2)", false, compiled2.exists());
     _model.removeListener(listener);
     
-    _log.log("testCompileAllFailsDifferentSourceRoots completed");
+    System.err.println("testCompileAllFailsDifferentSourceRoots completed");
     
     debug.logEnd();
   }
@@ -172,7 +172,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   public void testCompilePackageAsField() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
     
-    _log.log("Starting testCompilePackageAsField");
+    System.err.println("Starting testCompilePackageAsField");
     
     OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD);
     final File file = tempFile();
@@ -193,7 +193,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     assertEquals(_name() + "Class file exists after failing compile", false, compiled.exists());
     _model.removeListener(listener);
     
-    _log.log("testCompilePackageAsField completed");
+    System.err.println("testCompilePackageAsField completed");
     
     debug.logEnd();
   }
@@ -204,7 +204,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   public void testCompilePackageAsField2() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
     
-    _log.log("Starting testCompilePackageAsField2");
+    System.err.println("Starting testCompilePackageAsField2");
     
     final OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD_2);
     final File file = tempFile();

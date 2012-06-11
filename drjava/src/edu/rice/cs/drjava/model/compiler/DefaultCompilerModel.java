@@ -82,7 +82,7 @@ public class DefaultCompilerModel implements CompilerModel {
   private final List<CompilerInterface> _compilers;
   
   /** Current compiler -- one of _compilers, or a NoCompilerAvailable */
-  private volatile CompilerInterface _active;
+  private volatile CompilerInterface _activeCompiler;
   
   /** Manages listeners to this model. */
   private final CompilerEventNotifier _notifier = new CompilerEventNotifier();
@@ -122,14 +122,15 @@ public class DefaultCompilerModel implements CompilerModel {
     if (_compilers.size() > 0) {
       if (! dCompName.equals(OptionConstants.COMPILER_PREFERENCE_CONTROL.NO_PREFERENCE) &&
            compilerNames.contains(dCompName)) 
-        _active = _compilers.get(compilerNames.indexOf(dCompName));
-      else 
-        _active = _compilers.get(0);
+        _activeCompiler = _compilers.get(compilerNames.indexOf(dCompName));
+      else {
+        _activeCompiler = _compilers.get(0);
+      }
     }
     else
-      _active = NoCompilerAvailable.ONLY;
+      _activeCompiler = NoCompilerAvailable.ONLY;
     
-    _log.log("Setting _active compiler to " + _active);
+//    System.err.println("Setting _activeCompiler to " + _activeCompiler);
     
     _model = m;
     _compilerErrorModel = new CompilerErrorModel(new DJError[0], _model);
@@ -240,7 +241,7 @@ public class DefaultCompilerModel implements CompilerModel {
   /** Compile the given documents. All compile commands invoke this private method! */
   private void _doCompile(List<OpenDefinitionsDocument> docs) throws IOException {
 //    _LLSTM.clearCache();
-    _log.log("_doCompile(" + docs + ") called");
+//    System.err.println("_doCompile(" + docs + ") called");
     final ArrayList<File> filesToCompile = new ArrayList<File>();
     final ArrayList<File> excludedFiles = new ArrayList<File>();
     final ArrayList<DJError> packageErrors = new ArrayList<DJError>();
@@ -431,8 +432,8 @@ public class DefaultCompilerModel implements CompilerModel {
   private void _distributeErrors(List<? extends DJError> errors) throws IOException {
 //    resetCompilerErrors();  // Why is this done?
     _log.log("Preparing to construct CompilerErrorModel for errors: " + errors);
-    System.err.println("Preparing to construct CompilerErrorModel for errors: " + errors);
-    System.err.println("Creating error model with " + errors.size() + " errors");
+//    System.err.println("Preparing to construct CompilerErrorModel for errors: " + errors);
+//    System.err.println("Creating error model with " + errors.size() + " errors");
     _compilerErrorModel = new CompilerErrorModel(errors.toArray(new DJError[0]), _model);
     _model.setNumCompilerErrors(_compilerErrorModel.getNumCompilerErrors());  // cache number of compiler errors in global model
   }
@@ -471,7 +472,7 @@ public class DefaultCompilerModel implements CompilerModel {
     *
     * @see #setActiveCompiler
     */
-  public CompilerInterface getActiveCompiler() { return _active; }
+  public CompilerInterface getActiveCompiler() { return _activeCompiler; }
   
   /** Sets which compiler is the "active" compiler.
     *
@@ -482,10 +483,10 @@ public class DefaultCompilerModel implements CompilerModel {
     */
   public void setActiveCompiler(CompilerInterface compiler) {
     if (_compilers.isEmpty() && compiler.equals(NoCompilerAvailable.ONLY)) {
-      // _active should be set correctly already
+      // _activeCompiler should be set correctly already
     }
     else if (_compilers.contains(compiler)) {
-      _active = compiler;
+      _activeCompiler = compiler;
       _notifier.activeCompilerChanged();
     }
     else {
@@ -499,7 +500,7 @@ public class DefaultCompilerModel implements CompilerModel {
 //  /** Add a compiler to the active list */
 //  public void addCompiler(CompilerInterface compiler) {
 //    if (_compilers.isEmpty()) {
-//      _active = compiler;
+//      _activeCompiler = compiler;
 //    }
 //    _compilers.add(compiler);
 //  }

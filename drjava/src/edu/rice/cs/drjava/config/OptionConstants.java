@@ -1470,20 +1470,17 @@ public interface OptionConstants {
   public static final BooleanOption SHOW_PATH_WARNINGS = 
     new BooleanOption("show.path.warnings", Boolean.FALSE);
   
-  /**
-   * Default compiler to use
-   * Stores the name of the compiler to use, set by changing the selection in
-   * the ForcedChoiceOption created by COMPILER_PREFERENCE_CONTROL.evaluate()
-   */
+  /** Default compiler to use
+    * Stores the name of the compiler to use, set by changing the selection in
+    * the ForcedChoiceOption created by COMPILER_PREFERENCE_CONTROL.evaluate()
+    */
   public static final StringOption DEFAULT_COMPILER_PREFERENCE = 
     new StringOption("default.compiler.preference", COMPILER_PREFERENCE_CONTROL.SCALA);  // NO_PREFERENCE in DrJava
   
-  /**
-   * Class that is used to dynamically populate the ForcedChoiceOption.
-   * setList method is used by DefaultCompilerModel to set the available
-   * compilers that it has
-   * Must store the selected name into DEFAULT_COMPILER_PREFERENCE to save the setting
-   */
+  /** Class that is used to dynamically populate the ForcedChoiceOption.
+    * setList method is used by DefaultCompilerModel to set the available compilers that it has
+    * Must store the selected name into DEFAULT_COMPILER_PREFERENCE to save the setting
+    */
   public static final class COMPILER_PREFERENCE_CONTROL {
     public static final String NO_PREFERENCE = "No Preference";
     public static final String SCALA = "Scala version 2.9";
@@ -1491,9 +1488,7 @@ public interface OptionConstants {
     
     public static void setList(ArrayList<String> list) { _list = list; }
     public static ForcedChoiceOption evaluate() {
-      if (! _list.contains(NO_PREFERENCE)) {
-        _list.add(NO_PREFERENCE);
-      }
+      if (! _list.contains(NO_PREFERENCE)) _list.add(NO_PREFERENCE);
       
       ForcedChoiceOption fco;
       String defaultC = edu.rice.cs.drjava.DrJava.getConfig().getSetting(DEFAULT_COMPILER_PREFERENCE);
