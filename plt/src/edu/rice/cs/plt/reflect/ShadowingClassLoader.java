@@ -39,10 +39,9 @@ import edu.rice.cs.plt.iter.IterUtil;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/**
- * A class loader that hides a set of classes and related resources.  This allows classes 
- * with the same name (but perhaps a different implementation) to be cleanly loaded by a child loader.
- */
+/** A class loader that hides a set of classes and related resources.  This allows classes 
+  * with the same name (but perhaps a different implementation) to be cleanly loaded by a child loader.
+  */
 public class ShadowingClassLoader extends ClassLoader {
   
   private final Iterable<? extends String> _prefixes;
@@ -91,10 +90,9 @@ public class ShadowingClassLoader extends ClassLoader {
     _filterBootClasses = filterBootClasses;
   }
   
-  /**
-   * If the given class is shadowed, a {@code ClassNotFoundException} will
-   * occur; otherwise, the method delegates to the parent class loader.
-   */
+  /** If the given class is shadowed, a {@code ClassNotFoundException} will
+    * occur; otherwise, the method delegates to the parent class loader.
+    */
   @Override protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
     if ((_filterBootClasses || !isBootClass(name)) && matchesPrefixes(name) == _blackList) {
       throw new ClassNotFoundException(name + " is being shadowed");

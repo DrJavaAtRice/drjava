@@ -429,21 +429,20 @@ public final class ReflectUtil {
     return loadLibraryAdapter(baseLoader, libraryPath, adapterName, getClasses(constructorArgs), constructorArgs);
   }
 
-  /**
-   * <p>Create an adapter object which provides an interface to a library that is not available statically on the
-   * class path (or, more generally, to the {@code baseLoader}).  This assumes the relevant code may be organized
-   * into three groups: the base classes, which are available to the {@code baseLoader} and make
-   * no direct references to the library or adapter classes; the library classes, which are located in the path
-   * represented by {@code libraryPath}, and make no direct references to the adapter class; and the adapter
-   * class (including its inner classes), which is available to the {@code baseLoader}, and which can 
-   * directly refer to both the library and base classes.</p>
-   * 
-   * <p>This method constructs an appropriate class loader and then invokes 
-   * {@link #loadObject(ClassLoader, String, Class[], Object[])}.</p>
-   * 
-   * @throws ReflectException  As specified by {@link #loadObject(ClassLoader, String, Class[], Object[])}
-   * 
-   */
+  /** <p>Create an adapter object which provides an interface to a library that is not available statically on the
+    * class path (or, more generally, to the {@code baseLoader}).  This assumes the relevant code may be organized
+    * into three groups: the base classes, which are available to the {@code baseLoader} and make
+    * no direct references to the library or adapter classes; the library classes, which are located in the path
+    * represented by {@code libraryPath}, and make no direct references to the adapter class; and the adapter
+    * class (including its inner classes), which is available to the {@code baseLoader}, and which can 
+    * directly refer to both the library and base classes.</p>
+    * 
+    * <p>This method constructs an appropriate class loader and then invokes 
+    * {@link #loadObject(ClassLoader, String, Class[], Object[])}.</p>
+    * 
+    * @throws ReflectException  As specified by {@link #loadObject(ClassLoader, String, Class[], Object[])}
+    * 
+    */
   public static Object loadLibraryAdapter(ClassLoader baseLoader, Iterable<? extends File> libraryPath, 
                                           String adapterName, Class<?>[] constructorSig, Object... constructorArgs) 
     throws ReflectException {

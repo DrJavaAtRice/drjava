@@ -309,6 +309,7 @@ public final class CollectUtil {
    * Create an immutable {@code PredicateSet} based on the given elements.  May depend on a valid
    * {@code hashCode()} implementation.
    */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public static <T> PredicateSet<T> makeSet(T... elements) {
     return makeSet(IterUtil.asIterable(elements));
   }

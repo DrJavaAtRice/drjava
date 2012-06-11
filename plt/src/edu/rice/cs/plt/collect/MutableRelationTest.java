@@ -211,6 +211,7 @@ public class MutableRelationTest extends TestCase {
     assertEquals(EMPTY, inv.matchSecond("a"));
   }
   
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private Set<Pair<String, String>> makePairSet(String... elts) {
     Set<Pair<String, String>> result = new HashSet<Pair<String, String>>();
     for (int i = 0; i < elts.length; i += 2) {

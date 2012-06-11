@@ -76,6 +76,7 @@ public class EventSequence<T> extends AbstractIterable<T> implements SizedIterab
   public Iterator<T> iterator() { return new ImmutableIterator<T>(_events.iterator()); }
   
   /** Record a sequence of events.  The entire sequence is recorded atomically. */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public void record(T... events) { record(Arrays.asList(events)); }
   
   /** Record a sequence of events.  The entire sequence is recorded atomically. */
@@ -105,11 +106,11 @@ public class EventSequence<T> extends AbstractIterable<T> implements SizedIterab
     }
   }
   
-  /**
-   * Assert that each of the given events have been recorded.  Remove all events that do appear.  If 
-   * any do not, throw an AssertionError describing the first missing event.  All events are removed
-   * atomically.
+  /** Assert that each of the given events have been recorded.  Remove all events that do appear.  If 
+    * any do not, throw an AssertionError describing the first missing event.  All events are removed
+    * atomically.
    */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public void assertOccurance(T... expectedEvents) { assertOccurance(Arrays.asList(expectedEvents)); }
   
   /**
@@ -147,18 +148,17 @@ public class EventSequence<T> extends AbstractIterable<T> implements SizedIterab
     return missing;
   }
   
-  /**
-   * Assert that the given sequence of events was recorded (starting at the beginning).  Remove
-   * the matching subsequence.  If there is a mismatch, throw an AssertionError describing it.
-   * All events are removed atomically.
-   */
+  /** Assert that the given sequence of events was recorded (starting at the beginning).  Remove
+    * the matching subsequence.  If there is a mismatch, throw an AssertionError describing it.
+    * All events are removed atomically.
+    */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public void assertSequence(T... expectedEvents) { assertSequence(Arrays.asList(expectedEvents)); }
   
-  /**
-   * Assert that the given sequence of events was recorded (starting at the beginning).  Remove
-   * the matching subsequence.  If there is a mismatch, throw an AssertionError describing it.
-   * All events are removed atomically.
-   */
+  /** Assert that the given sequence of events was recorded (starting at the beginning).  Remove
+    * the matching subsequence.  If there is a mismatch, throw an AssertionError describing it.
+    * All events are removed atomically.
+    */
   public void assertSequence(Iterable<? extends T> expectedEvents) {
     Option<Pair<T, Option<T>>> mismatched = checkSequence(expectedEvents);
     if (mismatched.isSome()) {
@@ -208,11 +208,11 @@ public class EventSequence<T> extends AbstractIterable<T> implements SizedIterab
     return Option.none();
   }
   
-  /**
-   * Assert that the given sequence of events, and only that sequence, was recorded (starting
-   * at the beginning).  Remove the matching subsequence.  If there is a mismatch, throw an 
-   * AssertionError describing it.  All events are removed atomically.
-   */
+  /** Assert that the given sequence of events, and only that sequence, was recorded (starting
+    * at the beginning).  Remove the matching subsequence.  If there is a mismatch, throw an 
+    * AssertionError describing it.  All events are removed atomically.
+    */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public void assertContents(T... expectedEvents) { assertContents(Arrays.asList(expectedEvents)); }
   
   /**

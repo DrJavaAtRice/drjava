@@ -41,6 +41,7 @@ import static edu.rice.cs.plt.iter.IterUtilTest.assertIteratorUnchecked;
 
 public class NoDuplicatesIteratorTest extends TestCase {
   
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private static <T> NoDuplicatesIterator<T> make(T... elts) {
     return NoDuplicatesIterator.make(IterUtil.asIterable(elts).iterator());
   }

@@ -521,24 +521,24 @@ public final class IterUtil {
   
   /** Create an immutable SizedIterable containing the given values. */
   public static <T> SizedIterable<T> make(T v1, T v2, T v3, T v4, T v5, T v6, T v7, T v8, T v9, T v10) {
-    @SuppressWarnings("unchecked") T[] values = (T[]) new Object[]{ v1, v2, v3, v4, v5, v6 , v7, v8, v9, v10 };
+    @SuppressWarnings("unchecked") 
+    T[] values = (T[]) new Object[]{ v1, v2, v3, v4, v5, v6 , v7, v8, v9, v10 };
     return new ObjectArrayWrapper<T>(values, false);
   }
   
-  /**
-   * Create an immutable SizedIterable containing the given values.  Requires linear time to make a copy
-   * (necessary because {@code vals} can be mutated by the caller).  Note that restrictions on array
-   * creation may lead to errors or warnings at the invocation site where {@code T} is a non-reifiable type.
-   */
+  /** Create an immutable SizedIterable containing the given values.  Requires linear time to make a copy
+    * (necessary because {@code vals} can be mutated by the caller).  Note that restrictions on array
+    * creation may lead to errors or warnings at the invocation site where {@code T} is a non-reifiable type.
+    */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public static <T> SizedIterable<T> make(T... vals) {
     return snapshot(new ObjectArrayWrapper<T>(vals));
   }
 
-  /**
-   * Create an immutable SizedIterable containing the given values, from index {@code start} through the end
-   * of the array. Requires linear time to make a copy (necessary because {@code vals} can be mutated by the
-   * caller).
-   */
+  /** Create an immutable SizedIterable containing the given values, from index {@code start} through the end
+    * of the array. Requires linear time to make a copy (necessary because {@code vals} can be mutated by the
+    * caller).
+    */
   public static <T> SizedIterable<T> make(T[] vals, int start) {
     return snapshot(new ObjectArrayWrapper<T>(vals, start));
   }
@@ -578,21 +578,20 @@ public final class IterUtil {
     return FiniteSequenceIterable.makeCopies(value, copies);
   }
   
-  /**
-   * Create a SizedIterable wrapping the given array.  Subsequent changes to the array will be reflected in the
-   * result.  (If that is not the desired behavior, make a copy instead with {@link #make(Object[])}.)
-   */
+  /** Create a SizedIterable wrapping the given array.  Subsequent changes to the array will be reflected in the
+    * result.  (If that is not the desired behavior, make a copy instead with {@link #make(Object[])}.)
+    */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public static <T> SizedIterable<T> asIterable(T... array) {
     return new ObjectArrayWrapper<T>(array);
   }
   
-  /**
-   * Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through the
-   * end of the array are included.  Subsequent changes to the array will be reflected in the result; also note
-   * that entire array will remain in memory until references to this segment are discarded.  (To prevent mutation
-   * and potential memory leaks, make a copy instead with {@link #make(Object[], int)}.)
-   * @throws IndexOutOfBoundsException  If {@code start} is an invalid index.
-   */
+  /** Create a SizedIterable wrapping a segment of the given array.  Elements from index {@code start} through the
+    * end of the array are included.  Subsequent changes to the array will be reflected in the result; also note
+    * that entire array will remain in memory until references to this segment are discarded.  (To prevent mutation
+    * and potential memory leaks, make a copy instead with {@link #make(Object[], int)}.)
+    * @throws IndexOutOfBoundsException  If {@code start} is an invalid index.
+    */
   public static <T> SizedIterable<T> arraySegment(T[] array, int start) {
     return new ObjectArrayWrapper<T>(array, start);
   }

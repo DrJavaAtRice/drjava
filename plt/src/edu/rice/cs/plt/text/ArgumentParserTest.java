@@ -215,6 +215,7 @@ public class ArgumentParserTest extends TestCase {
     catch (IllegalArgumentException e) { /* expected */ }
   }
   
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private <T> void assertEqualIterable(Iterable<T> actual, T... expected) {
     // convert to AbstractIterable so that we can get a useful error message
     assertEquals(IterUtil.asIterable(expected), IterUtil.snapshot(actual));

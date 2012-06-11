@@ -721,13 +721,23 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         descriptors = searchJarFileForJDKDescriptors(new JarFile(f));
         _log.log("After searching jar file for DrJava, descriptors = " + descriptors);
       }
-      else {  // f is root of class file tree for drjava; JDKDescriptors reside jar file ../../lib/platform.jar
-        File grandParent = f.getParentFile().getParentFile();
-        File platformJarFile = new File(grandParent, "lib/platform.jar");
-        assert platformJarFile.exists();
-        _log.log("Before searching jar file " + platformJarFile + ", descriptors = " + descriptors);
-        descriptors = searchJarFileForJDKDescriptors(new JarFile(platformJarFile));
-        _log.log("After searching jar file " + platformJarFile + ", descriptors = " + descriptors);
+      else {
+        JDKToolsLibrary.msg("Searching class file tree corresponding to: " + f);
+        File parent = f.getParentFile();
+        final String PACKAGE = "edu/rice/cs/drjava/model/compiler/descriptors";
+        final String DESC_PATH = "lib/" + PACKAGE;
+        File dir = new File(parent, DESC_PATH);
+        JDKToolsLibrary.msg("Root directory for descriptors is " + dir);
+        Iterable<File> files = IOUtil.listFilesRecursively(dir, new Predicate<File>() {
+          public boolean contains(File arg) {
+            return (arg.isFile()) && arg.getName().endsWith(".class") && (arg.getName().indexOf('$') < 0);
+          }
+        });
+        for (File je: files) {
+          final String name = PACKAGE + "/" + je.getName();
+          descriptors = attemptToLoadDescriptor(descriptors, name);
+          JDKToolsLibrary.msg("Found potential JDKDescriptor: " + name);
+        }
       }
     }
     catch(IOException ioe) {

@@ -157,7 +157,8 @@ public class ConsListTest extends TestCase {
     checkIterator(twoNumbers.iterator(), 14.0, 11);
     checkIterator(threeNumbers.iterator(), -1, -2.0, -3.0f);
   }
-    
+  
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private <T> void checkIterator(Iterator<T> iter, T... values) {
     for (int i = 0; i < values.length; i++) {
       assertTrue(iter.hasNext());

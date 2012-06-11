@@ -44,7 +44,7 @@ import static edu.rice.cs.plt.collect.CollectUtil.*;
  * Tests for the CollectUtil methods
  */
 public class CollectUtilTest extends TestCase {
-
+  
   public void assertList(List<?> actual, Object... expected) {
     assertEquals(Arrays.asList(expected), actual);
   }

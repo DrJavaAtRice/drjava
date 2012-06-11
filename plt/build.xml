@@ -147,7 +147,7 @@
           description="Compile all source files">
   </target>
   
-  <target name="do-compile" depends="resolve-java5-runtime">
+  <target name="do-compile" depends="resolve-java7-runtime">
   
     <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
     
@@ -160,7 +160,7 @@
     </move>
     
     <javac srcdir="src" destdir="classes/base" source="1.5" target="1.5"
-           bootclasspath="${java5-runtime}" sourcepath="" includeAntRuntime="no"
+           bootclasspath="${java7-runtime}" sourcepath="" includeAntRuntime="no"
            executable="javac" fork="yes" memoryMaximumSize="512M"
            debug="on" optimize="off" deprecation="on"	>
       <classpath>

@@ -61,9 +61,9 @@ public class ScalaDescriptor extends JDKDescriptor {
     * @return name */
   public String getName() { return "Scala"; }
   
-  /** Packages to shadow when loading a new tools.jar.  If we don't shadow these classes, we won't
-    * be able to load distinct versions for each tools.jar library.  These should be verified whenever
-    * a new Java version is released.  (We can't just shadow *everything* because some classes, at 
+  /** Packages to shadow when loading a new scala-compiler.jar.  If we don't shadow these classes, we won't
+    * be able to load distinct versions for each scala-compiler.jar library.  These should be verified whenever
+    * a new Scala version is released.  (We can't just shadow *everything* because some classes, at 
     * least in OS X's classes.jar, can only be loaded by the JVM.)
     * 
     * @return set of packages that need to be shadowed
@@ -75,6 +75,7 @@ public class ScalaDescriptor extends JDKDescriptor {
 //        "com.sun.tools.javac.tree",
 //        "com.sun.tools.javac.comp",
 //        "com.sun.tools.javac.main"
+      // TBA
     });
     return set;
   }
@@ -90,9 +91,10 @@ public class ScalaDescriptor extends JDKDescriptor {
   public Iterable<File> getSearchFiles() {
     /* Code that looks for compiler outside of drjava.jar */
     Iterable<File> files = IterUtil.asIterable(new File[] {
-      new File("/C:/Scala/scala-2.9.1.final/lib/scala-compiler.jar")
+      new File("/C:/Scala/scala-2.9.1.final/lib/scala-compiler.jar")  //TODO make this more robust so it does not depend on the particular version
     });
     files = IterUtil.compose(files, new File("/opt/scala/lib/scala-compiler.jar"));
+    files = IterUtil.compose(files, new File("/usr/share/scala/lib/scala-compiler.jar"));
     // If executable is class file tree, looks for compiler in associated lib directory
     File f = FileOps.getDrJavaFile();
     if (! f.isFile()) { // f is a directory
@@ -129,10 +131,9 @@ public class ScalaDescriptor extends JDKDescriptor {
   }
 
   /** Return the guessed version for the compiler in the specified file (jar file or directory).
-    * Note that this is the Java version that this compiler is compatible to, not the internal compiler version.
-    * For full (non-compound) JDKs, this is equal to the version, i.e. JDK6 should guess Java 6.0.
-    * For compound JDKs, this is equal to the version of the full JDK that the compound JDK needs, i.e.
-    * if a version of the HJ compiler requires JDK6, it should guess JDK6.
+    * Note that this is the Java version on which this Scala compiler is based, not the internal compiler version.
+    * For a Scala enhanced JDK, this is equal to the version of the full JDK that the compound JDK needs, For Scala 2.9.*,
+    * this corresponding version of Java is Java 7.
     * @return guessed version */
   public JavaVersion.FullVersion guessVersion(File f) {
       return JavaVersion.parseFullVersion(JavaVersion.JAVA_7.fullVersion().versionString(), /* TODO: add SCALA to ENUM definition */

@@ -131,6 +131,7 @@ public abstract class SwingWorker<R, I> extends IncrementalTaskController<I, R> 
   /*=== Methods that the subclass may call in doInBackground(). ===*/
   
   /** Called by {@link #doInBackground} when intermediate results are available. */
+  @SuppressWarnings({"unchecked", "rawtypes"})
   protected final void publish(I... chunks) {
     BlockingQueue<I> queue = intermediateQueue();
     try {
