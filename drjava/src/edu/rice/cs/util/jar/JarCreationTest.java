@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -101,13 +101,13 @@ public class JarCreationTest extends DrJavaTestCase {
     dir.mkdir();
     File dir1 = new File(dir, "dir");
     dir1.mkdir();
-    File[] files = new File[]{new File(dir, "test.java"),
+    File[] files = new File[]{new File(dir, "test.scala"),
                               new File(dir, "test.class"),
                               new File(dir, "p1.tmp"),
-                              new File(dir1, "test1.java"),
+                              new File(dir1, "test1.scala"),
                               new File(dir1, "out.class"),
                               new File(dir1, "out.out.out.class"),
-                              new File(dir1, "that.java")};
+                              new File(dir1, "that.scala")};
     dir.deleteOnExit();
     dir1.deleteOnExit();
     for(int i = 0; i < files.length; i++)
@@ -184,7 +184,7 @@ public class JarCreationTest extends DrJavaTestCase {
               "\t}" +
               "}";
 
-      add = File.createTempFile("JarTest",".scaka").getCanonicalFile();
+      add = File.createTempFile("JarTest",".scala").getCanonicalFile();
       add.deleteOnExit();
 
       PrintWriter pw = new PrintWriter(new FileOutputStream(add));
@@ -192,24 +192,24 @@ public class JarCreationTest extends DrJavaTestCase {
       pw.close();
 
       JarBuilder jb = new JarBuilder(f);
-      jb.addFile(add, "", "JarTest.java");
-      jb.addFile(add, "dir", "JarTest.java");
+      jb.addFile(add, "", "JarTest.scala");
+      jb.addFile(add, "dir", "JarTest.scala");
       jb.close();
 
 
       testArchive(f,
-              new TreeSet<String>(Arrays.asList(new String[]{"JarTest.java",
-                                                             "dir/JarTest.java"})));
+              new TreeSet<String>(Arrays.asList(new String[]{"JarTest.scala",
+                                                             "dir/JarTest.scala"})));
 
       JarInputStream jarStream = new JarInputStream(new FileInputStream(f), true);
 
       JarEntry ent = jarStream.getNextJarEntry();
       assertTrue("should have JarTest", ent != null);
-      assertEquals("names should match", "JarTest.java", ent.getName());
+      assertEquals("names should match", "JarTest.scala", ent.getName());
 
       ent = jarStream.getNextJarEntry();
       assertTrue("should have JarTest", ent != null);
-      assertEquals("names should match", "dir/JarTest.java", ent.getName());
+      assertEquals("names should match", "dir/JarTest.scala", ent.getName());
     }
     catch (IOException e) {
       e.printStackTrace();

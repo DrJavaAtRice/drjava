@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -75,7 +75,7 @@ public final class PropertyMaps implements Cloneable {
     * @throws IllegalArgumentException if category is not known. */
   public DrJavaProperty getProperty(String category, String name) {
     Map<String,DrJavaProperty> m = _props.get(category);
-    if (m == null) { throw new IllegalArgumentException("DrJavaProperty category unknown."); }
+    if (m == null) { throw new IllegalArgumentException("DrScalaProperty category unknown."); }
     return m.get(name);
   }
   
@@ -118,7 +118,7 @@ public final class PropertyMaps implements Cloneable {
     * @throws IllegalArgumentException if category is not known. */
   public Map<String, DrJavaProperty> getProperties(String category) {
     Map<String,DrJavaProperty> m = _props.get(category);
-    if (m == null) { throw new IllegalArgumentException("DrJavaProperty category unknown."); }
+    if (m == null) { throw new IllegalArgumentException("DrScalaProperty category unknown."); }
     return m;
   }
   

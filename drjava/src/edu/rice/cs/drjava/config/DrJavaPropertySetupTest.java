@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -758,15 +758,15 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     // tmpfile
     p = pm.getProperty("Misc","tmpfile");
     String s = StringOps.unescapeFileName(p.getCurrent(pm));
-    assertTrue(s.startsWith(TMPDIR + "DrJava-Execute-"));
+    assertTrue(s.startsWith(TMPDIR + "DrScala-Execute-"));
     String s2 = StringOps.unescapeFileName(p.getCurrent(pm));
-    assertTrue(s2.startsWith(TMPDIR + "DrJava-Execute-"));
+    assertTrue(s2.startsWith(TMPDIR + "DrScala-Execute-"));
     assertFalse(s.equals(s2));
     p.setAttribute("name","foo");
     s = StringOps.unescapeFileName(p.getCurrent(pm));
     assertEquals(TMPDIR + "foo", s);
     
-    File dir = FileOps.createTempDirectory("DrJavaPropertySetupTest");
+    File dir = FileOps.createTempDirectory("DrScalaPropertySetupTest");
     p.setAttribute("dir",StringOps.escapeFileName(dir.getAbsolutePath()));
     s = StringOps.unescapeFileName(p.getCurrent(pm));
     assertEquals(dir.getAbsolutePath()+File.separator + "foo", s);
@@ -774,12 +774,12 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     p.resetAttributes();
     p.setAttribute("dir",StringOps.escapeFileName(dir.getAbsolutePath()));
     s = StringOps.unescapeFileName(p.getCurrent(pm));
-    assertTrue(s.startsWith(dir.getAbsolutePath()+File.separator + "DrJava-Execute-"));
+    assertTrue(s.startsWith(dir.getAbsolutePath()+File.separator + "DrScala-Execute-"));
     
     final String TEST_STRING = "This is a test file from DrJavaPropertySetupTest.";
     p.setAttribute("content",TEST_STRING);
     s = StringOps.unescapeFileName(p.getCurrent(pm));
-    assertTrue(s.startsWith(dir.getAbsolutePath()+File.separator + "DrJava-Execute-"));
+    assertTrue(s.startsWith(dir.getAbsolutePath()+File.separator + "DrScala-Execute-"));
     String text = edu.rice.cs.plt.io.IOUtil.toString(new File(s));
     assertEquals(TEST_STRING, text);
     
@@ -788,15 +788,15 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     // file.isdir
     p = pm.getProperty("File","file.isdir");    
     assertTrue(p.getCurrent(pm).startsWith("(file.isdir Error"));    
-    dir = FileOps.createTempDirectory("DrJavaPropertySetupTest");
+    dir = FileOps.createTempDirectory("DrScalaPropertySetupTest");
     p.setAttribute("file",StringOps.escapeFileName(dir.getAbsolutePath()));
     assertEquals("true", p.getCurrent(pm));
 
-    File fil = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("DrJavaPropertySetupTest", ".txt");
+    File fil = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("DrScalaPropertySetupTest", ".txt");
     p.setAttribute("file",StringOps.escapeFileName(fil.getAbsolutePath()));
     assertEquals("false", p.getCurrent(pm));
     
-    File notFound = new File(System.getProperty("java.io.tmpdir"),"DrJavaPropertySetupTest." +
+    File notFound = new File(System.getProperty("java.io.tmpdir"),"DrScalaPropertySetupTest." +
                              System.currentTimeMillis() + "-" + (_r.nextInt() & 0xffff) + ".tmp");
     p.setAttribute("file",StringOps.escapeFileName(notFound.getAbsolutePath()));
     assertEquals("false", p.getCurrent(pm));
@@ -809,15 +809,15 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     // file.isfile
     p = pm.getProperty("File","file.isfile");    
     assertTrue(p.getCurrent(pm).startsWith("(file.isfile Error"));    
-    dir = FileOps.createTempDirectory("DrJavaPropertySetupTest");
+    dir = FileOps.createTempDirectory("DrScalaPropertySetupTest");
     p.setAttribute("file",StringOps.escapeFileName(dir.getAbsolutePath()));
     assertEquals("false", p.getCurrent(pm));
 
-    fil = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("DrJavaPropertySetupTest", ".txt");
+    fil = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("DrScalaPropertySetupTest", ".txt");
     p.setAttribute("file",StringOps.escapeFileName(fil.getAbsolutePath()));
     assertEquals("true", p.getCurrent(pm));
     
-    notFound = new File(System.getProperty("java.io.tmpdir"),"DrJavaPropertySetupTest." + System.currentTimeMillis() +
+    notFound = new File(System.getProperty("java.io.tmpdir"),"DrScalaPropertySetupTest." + System.currentTimeMillis() +
                         "-" + (_r.nextInt() & 0xffff) + ".tmp");
     p.setAttribute("file",StringOps.escapeFileName(notFound.getAbsolutePath()));
     assertEquals("false", p.getCurrent(pm));
@@ -830,15 +830,15 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     // file.isfile
     p = pm.getProperty("File","file.exists");    
     assertTrue(p.getCurrent(pm).startsWith("(file.exists Error"));    
-    dir = FileOps.createTempDirectory("DrJavaPropertySetupTest");
+    dir = FileOps.createTempDirectory("DrScalaPropertySetupTest");
     p.setAttribute("file",StringOps.escapeFileName(dir.getAbsolutePath()));
     assertEquals("true", p.getCurrent(pm));
 
-    fil = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("DrJavaPropertySetupTest", ".txt");
+    fil = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("DrScalaPropertySetupTest", ".txt");
     p.setAttribute("file",StringOps.escapeFileName(fil.getAbsolutePath()));
     assertEquals("true", p.getCurrent(pm));
     
-    notFound = new File(System.getProperty("java.io.tmpdir"),"DrJavaPropertySetupTest." + System.currentTimeMillis() +
+    notFound = new File(System.getProperty("java.io.tmpdir"),"DrScalaPropertySetupTest." + System.currentTimeMillis() +
                         "-" + (_r.nextInt() & 0xffff) + ".tmp");
     p.setAttribute("file",StringOps.escapeFileName(notFound.getAbsolutePath()));
     assertEquals("false", p.getCurrent(pm));
@@ -851,15 +851,15 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     // file.parent
     p = pm.getProperty("File","file.parent");
     assertTrue(p.getCurrent(pm).startsWith("(file.parent Error"));    
-    dir = FileOps.createTempDirectory("DrJavaPropertySetupTest");
+    dir = FileOps.createTempDirectory("DrScalaPropertySetupTest");
     p.setAttribute("file",StringOps.escapeFileName(dir .getAbsolutePath()));
     assertEquals(dir.getParentFile().getAbsolutePath(), StringOps.unescapeFileName(p.getCurrent(pm)));
 
-    fil = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("DrJavaPropertySetupTest", ".txt");
+    fil = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("DrScalaPropertySetupTest", ".txt");
     p.setAttribute("file",StringOps.escapeFileName(fil.getAbsolutePath()));
     assertEquals(fil.getParentFile().getAbsolutePath(), StringOps.unescapeFileName(p.getCurrent(pm)));
     
-    notFound = new File(System.getProperty("java.io.tmpdir"),"DrJavaPropertySetupTest." + System.currentTimeMillis() +
+    notFound = new File(System.getProperty("java.io.tmpdir"),"DrScalaPropertySetupTest." + System.currentTimeMillis() +
                         "-" + (_r.nextInt() & 0xffff) + ".tmp");
     p.setAttribute("file",StringOps.escapeFileName(notFound.getAbsolutePath()));
     assertEquals(new File(System.getProperty("java.io.tmpdir")).getAbsolutePath(),
@@ -876,7 +876,7 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     // file.abs
     p = pm.getProperty("File","file.abs");
     assertTrue(p.getCurrent(pm).startsWith("(file.abs Error"));    
-    dir = FileOps.createTempDirectory("DrJavaPropertySetupTest");
+    dir = FileOps.createTempDirectory("DrScalaPropertySetupTest");
     p.setAttribute("file",StringOps.escapeFileName(dir.getName()));
     assertTrue(p.getCurrent(pm).startsWith("(file.abs Error"));
     p.resetAttributes();
@@ -885,12 +885,12 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     p.setAttribute("file",StringOps.escapeFileName(dir.getName()));
     assertEquals(dir.getAbsolutePath(), StringOps.unescapeFileName(p.getCurrent(pm)));
 
-    fil = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("DrJavaPropertySetupTest", ".txt");
+    fil = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("DrScalaPropertySetupTest", ".txt");
     p.setAttribute("file",StringOps.escapeFileName(fil.getName()));
     p.setAttribute("base",StringOps.escapeFileName(fil.getParentFile().getAbsolutePath()));
     assertEquals(fil.getAbsolutePath(), StringOps.unescapeFileName(p.getCurrent(pm)));
     
-    notFound = new File(System.getProperty("java.io.tmpdir"),"DrJavaPropertySetupTest." + System.currentTimeMillis() +
+    notFound = new File(System.getProperty("java.io.tmpdir"),"DrScalaPropertySetupTest." + System.currentTimeMillis() +
                         "-" + (_r.nextInt() & 0xffff) + ".tmp");
     p.setAttribute("file",StringOps.escapeFileName(notFound.getName()));
     p.setAttribute("base",StringOps.escapeFileName(notFound.getParentFile().getAbsolutePath()));
@@ -906,7 +906,7 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     // file.rel
     p = pm.getProperty("File","file.rel");
     assertTrue(p.getCurrent(pm).startsWith("(file.rel Error"));
-    dir = FileOps.createTempDirectory("DrJavaPropertySetupTest");
+    dir = FileOps.createTempDirectory("DrScalaPropertySetupTest");
     p.setAttribute("file",StringOps.escapeFileName(dir.getAbsolutePath()));
     assertTrue(p.getCurrent(pm).startsWith("(file.rel Error"));
     p.resetAttributes();
@@ -918,10 +918,10 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     p.setAttribute("file",StringOps.escapeFileName(dir.getAbsolutePath()));
     p.setAttribute("base",StringOps.escapeFileName(dir.getParentFile().getAbsolutePath()));
     assertEquals(dir.getName(), StringOps.unescapeFileName(p.getCurrent(pm)));
-    dir = edu.rice.cs.plt.io.IOUtil.createAndMarkTempDirectory("DrJavaPropertySetupTest","");
-    File dir1 = edu.rice.cs.plt.io.IOUtil.createAndMarkTempDirectory("DrJavaPropertySetupTest","",dir);
-    File dir2 = edu.rice.cs.plt.io.IOUtil.createAndMarkTempDirectory("DrJavaPropertySetupTest","",dir);
-    fil = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("DrJavaPropertySetupTest",".txt",dir1);
+    dir = edu.rice.cs.plt.io.IOUtil.createAndMarkTempDirectory("DrScalaPropertySetupTest","");
+    File dir1 = edu.rice.cs.plt.io.IOUtil.createAndMarkTempDirectory("DrScalaPropertySetupTest","",dir);
+    File dir2 = edu.rice.cs.plt.io.IOUtil.createAndMarkTempDirectory("DrScalaPropertySetupTest","",dir);
+    fil = edu.rice.cs.plt.io.IOUtil.createAndMarkTempFile("DrScalaPropertySetupTest",".txt",dir1);
     p.setAttribute("file",StringOps.escapeFileName(fil.getAbsolutePath()));
     p.setAttribute("base",StringOps.escapeFileName(dir2.getAbsolutePath()));
     assertEquals(".." + FS+dir1.getName()+FS+fil.getName(), StringOps.unescapeFileName(p.getCurrent(pm)));
@@ -944,7 +944,7 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     @SuppressWarnings("unused") DrJavaProperty p;
 
     // drjava.current.time.millis
-    p = pm.getProperty("DrJava","drjava.current.time.millis");
+    p = pm.getProperty("DrScala","drjava.current.time.millis");
     
     // ignore
     p = pm.getProperty("Misc","ignore");

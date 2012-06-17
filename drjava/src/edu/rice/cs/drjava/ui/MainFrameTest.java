@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -485,14 +485,14 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   public void testSaveButtonEnabled() throws IOException {
     String user = System.getProperty("user.name");
     _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
-    File forceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.java");
+    File forceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.scala");
     String forceOpenClass1_string =
-      "public class ForceOpenClass1 {\n" +
-      "  ForceOpenClass2 class2;\n" +
-      "  ForceOpenClass3 class3;\n\n" +
-      "  public ForceOpenClass1() {\n" +
-      "    class2 = new ForceOpenClass2();\n" +
-      "    class3 = new ForceOpenClass3();\n" +
+      "class ForceOpenClass1 {\n" +
+      "  var class2: ForceOpenClass2 = null \n" +
+      "  var class3: ForceOpenClass3 = null \n" +
+      "  def ForceOpenClass1() {\n" +
+      "    class2 = new ForceOpenClass2()\n" +
+      "    class3 = new ForceOpenClass3()\n" +
       "  }\n" +
       "}";
     
@@ -506,7 +506,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
         _frame.open(new FileOpenSelector() {
           public File[] getFiles() {
             File[] return_me = new File[1];
-            return_me[0] = new File(_tempDir, "ForceOpenClass1.java");
+            return_me[0] = new File(_tempDir, "ForceOpenClass1.scala");
             return return_me;
           }
         });
@@ -537,27 +537,27 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     String user = System.getProperty("user.name");
     _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
     
-    File forceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.java");
+    File forceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.scala");
     String forceOpenClass1_string =
-      "public class ForceOpenClass1 {\n" +
-      "  ForceOpenClass2 class2;\n" +
-      "  ForceOpenClass3 class3;\n\n" +
-      "  public ForceOpenClass1() {\n" +
-      "    class2 = new ForceOpenClass2();\n" +
-      "    class3 = new ForceOpenClass3();\n" +
+      "class ForceOpenClass1 {\n" +
+      "  var class2: ForceOpenClass2 = null\n" +
+      "  var class3: ForceOpenClass3 = null\n" +
+      "  def ForceOpenClass1() {\n" +
+      "    class2 = new ForceOpenClass2()\n" +
+      "    class3 = new ForceOpenClass3()\n" +
       "  }\n" +
       "}";
     
-    File forceOpenClass2_file = new File(_tempDir, "ForceOpenClass2.java");
+    File forceOpenClass2_file = new File(_tempDir, "ForceOpenClass2.scala");
     String forceOpenClass2_string =
-      "public class ForceOpenClass2 {\n" +
-      "  inx x = 4;\n" +
+      "class ForceOpenClass2 {\n" +
+      "  var x:inx = 4\n" +
       "}";
     
     File forceOpenClass3_file = new File(_tempDir, "ForceOpenClass3.java");
     String forceOpenClass3_string =
-      "public class ForceOpenClass3 {\n" +
-      "  String s = \"asf\";\n" +
+      "class ForceOpenClass3 {\n" +
+      "   var s:String = \"asf\"\n" +
       "}";
     
     IOUtil.writeStringToFile(forceOpenClass1_file, forceOpenClass1_string);
@@ -602,7 +602,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
         _frame.open(new FileOpenSelector() {
           public File[] getFiles() {
             File[] return_me = new File[1];
-            return_me[0] = new File(_tempDir, "ForceOpenClass1.java");
+            return_me[0] = new File(_tempDir, "ForceOpenClass1.scala");
             return return_me;
           }
         });
@@ -657,14 +657,14 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       */
     String user = System.getProperty("user.name");
     _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
-    File forceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.java");
+    File forceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.scala");
     String forceOpenClass1_string =
-      "public class ForceOpenClass1 {\n" +
-      "  ForceOpenClass2 class2;\n" +
-      "  ForceOpenClass3 class3;\n\n" +
-      "  public ForceOpenClass1() {\n" +
-      "    class2 = new ForceOpenClass2();\n" +
-      "    class3 = new ForceOpenClass3();\n" +
+      "class ForceOpenClass1 {\n" +
+      "  var class2: ForceOpenClass2 = null\n" +
+      "  var class3: ForceOpenClass3 = null\n" +
+      "  def ForceOpenClass1() {\n" +
+      "    var class2 = new ForceOpenClass2()\n" +
+      "    var class3 = new ForceOpenClass3()\n" +
       "  }\n" +
       "}";
     
@@ -688,7 +688,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
         _frame.open(new FileOpenSelector() {
           public File[] getFiles() {
             File[] return_me = new File[1];
-            return_me[0] = new File(_tempDir, "ForceOpenClass1.java");
+            return_me[0] = new File(_tempDir, "ForceOpenClass1.scala");
             return return_me;
           }
         });
@@ -776,12 +776,12 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     String user = System.getProperty("user.name");
     _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
     
-    final File goto1_file = new File(_tempDir, "GotoFileUnderCursor1.java");
+    final File goto1_file = new File(_tempDir, "GotoFileUnderCursor1.scala");
     final String goto1_string = "GotoFileUnderCursorTest";
     IOUtil.writeStringToFile(goto1_file, goto1_string);
     goto1_file.deleteOnExit();
     
-    final File goto2_file = new File(_tempDir, "GotoFileUnderCursorTest.java");
+    final File goto2_file = new File(_tempDir, "GotoFileUnderCursorTest.scala");
     String goto2_string = "GotoFileUnderCursor1";
     IOUtil.writeStringToFile(goto2_file, goto2_string);
     goto2_file.deleteOnExit();
@@ -842,7 +842,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     IOUtil.writeStringToFile(goto1_file, goto1_string);
     goto1_file.deleteOnExit();
     
-    final File goto2_file = new File(_tempDir, "GotoFileUnderCursor2.java");
+    final File goto2_file = new File(_tempDir, "GotoFileUnderCursor2.scala");
     String goto2_string = "GotoFileUnderCursor2Test";
     IOUtil.writeStringToFile(goto2_file, goto2_string);
     goto2_file.deleteOnExit();
@@ -904,12 +904,12 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     String user = System.getProperty("user.name");
     _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
     
-    final File goto1_file = new File(_tempDir, "GotoFileUnderCursor3.java");
+    final File goto1_file = new File(_tempDir, "GotoFileUnderCursor3.scala");
     final String goto1_string = "GotoFileUnderCursor";
     IOUtil.writeStringToFile(goto1_file, goto1_string);
     goto1_file.deleteOnExit();
     
-    final File goto2_file = new File(_tempDir, "GotoFileUnderCursor4.java");
+    final File goto2_file = new File(_tempDir, "GotoFileUnderCursor4.scala");
     String goto2_string = "GotoFileUnderCursor3";
     IOUtil.writeStringToFile(goto2_file, goto2_string);
     goto2_file.deleteOnExit();

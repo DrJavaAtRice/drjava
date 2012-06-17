@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -107,9 +107,9 @@ public class DrJavaSurveyPopup extends JDialog {
       rowData[rowNum][1] = System.getProperty(k);
       ++rowNum;
     }
-    rowData[rowNum  ][0] = "DrJava revision";
+    rowData[rowNum  ][0] = "DrScala revision";
     rowData[rowNum++][1] = String.valueOf(Version.getRevisionNumber());
-    rowData[rowNum  ][0] = "DrJava build time";
+    rowData[rowNum  ][0] = "DrScala build time";
     rowData[rowNum++][1] = String.valueOf(Version.getBuildTimeString());
     java.util.Arrays.sort(rowData,new java.util.Comparator<String[]>() {
       public int compare(String[] o1, String[] o2) {

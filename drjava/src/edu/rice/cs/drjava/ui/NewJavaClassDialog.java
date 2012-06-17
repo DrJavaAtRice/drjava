@@ -12,7 +12,7 @@ package edu.rice.cs.drjava.ui;
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -31,8 +31,8 @@ package edu.rice.cs.drjava.ui;
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -104,7 +104,7 @@ public class NewJavaClassDialog extends SwingFrame {
   private final JCheckBox _mainMethod = new JCheckBox("Include main method");
   private final JCheckBox _classConstructor = new JCheckBox("Include class constructor");
   private final JLabel _errorMessage = new JLabel("<html> </html>");
-  private final boolean _isElementaryOrFunctionalJava;
+//  private final boolean _isElementaryOrFunctionalJava;
   
   private final AutoCompletePopup _autoCompletePopup;
   
@@ -120,8 +120,8 @@ public class NewJavaClassDialog extends SwingFrame {
 
     //  Utilities.show("NewJavaClass(" + mf + ")");
     // Java language levels disabled
-    int currentLL = DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL);
-    _isElementaryOrFunctionalJava = false;
+//    int currentLL = DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL);
+//    _isElementaryOrFunctionalJava = false;
 //      (currentLL == OptionConstants.ELEMENTARY_LEVEL) ||
 //      (currentLL == OptionConstants.FUNCTIONAL_JAVA_LEVEL);
 
@@ -238,7 +238,7 @@ public class NewJavaClassDialog extends SwingFrame {
                                              _mainMethod.isSelected(),
                                              _classConstructor.isSelected(),
                                              _superClass.getText(), _interfaces.getText(),
-                                             _isElementaryOrFunctionalJava);
+                                             /* _isElementaryOrFunctionalJava */ false);  // Java LL disabled
 
     _model.newFile(classContent);
     
@@ -324,98 +324,98 @@ public class NewJavaClassDialog extends SwingFrame {
     
     gridbag.setConstraints(_interfaces, c);
     panel.add(_interfaces);
-      
-    if (!_isElementaryOrFunctionalJava) {
-      // Modifiers: public/default
-      c.weightx = 0.0;
-      c.gridwidth = 1;
-      c.insets = labelInsets;
-      
-      prLabel = new JLabel("Access modifier");
-      prLabel.setToolTipText("<html>Class access modifier.</html>");
-      gridbag.setConstraints(prLabel, c);
-      
-      panel.add(prLabel);
-      c.weightx = 1.0;
-      c.gridwidth = GridBagConstraints.REMAINDER;
-      c.insets = compInsets;
-      
-      JPanel accessPanel = new JPanel();
-      accessPanel.setLayout(new BoxLayout(accessPanel, BoxLayout.X_AXIS));
-      accessPanel.add(_publicRadio);
-      accessPanel.add(_defaultRadio);
-      gridbag.setConstraints(accessPanel, c);
-      panel.add(accessPanel);
-      
-      // Modifiers: abstract/final
-      c.weightx = 0.0;
-      c.gridwidth = 1;
-      c.insets = labelInsets;
-      
-      prLabel = new JLabel("Other modifiers");
-      prLabel.setToolTipText("<html>final or abstract class modifiers.</html>");
-      gridbag.setConstraints(prLabel, c);
-      
-      panel.add(prLabel);
-      c.weightx = 1.0;
-      c.gridwidth = GridBagConstraints.REMAINDER;
-      c.insets = compInsets;
-      
-      JPanel faPanel = new JPanel();
-      faPanel.setLayout(new BoxLayout(faPanel, BoxLayout.X_AXIS));
-      faPanel.add(_abstractCheck);
-      faPanel.add(_finalCheck);
-      gridbag.setConstraints(faPanel, c);
-      panel.add(faPanel);
-      _finalCheck.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent actionEvent) {
-          if (_finalCheck.isSelected()) _abstractCheck.setSelected(false);
-        }
-      });
-      _abstractCheck.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent actionEvent) {
-          if (_abstractCheck.isSelected()) _finalCheck.setSelected(false);
-        }
-      });
-      
-      // Include ctor
-      c.weightx = 0.0;
-      c.gridwidth = 1;
-      c.insets = labelInsets;
-      
-      prLabel = new JLabel("");
-      gridbag.setConstraints(prLabel, c);
-      
-      panel.add(prLabel);
-      c.weightx = 1.0;
-      c.gridwidth = GridBagConstraints.REMAINDER;
-      c.insets = compInsets;
-      
-      gridbag.setConstraints(_classConstructor, c);
-      panel.add(_classConstructor);
-      
-      // Include main method
-      c.weightx = 0.0;
-      c.gridwidth = 1;
-      c.insets = labelInsets;
-      
-      prLabel = new JLabel("");
-      gridbag.setConstraints(prLabel, c);
-      
-      panel.add(prLabel);
-      c.weightx = 1.0;
-      c.gridwidth = GridBagConstraints.REMAINDER;
-      c.insets = compInsets;
-      
-      gridbag.setConstraints(_mainMethod, c);
-      panel.add(_mainMethod);
-    }
-
+    
+//    if (!_isElementaryOrFunctionalJava) {  // Java LL disabled
+    // Modifiers: public/default
+    c.weightx = 0.0;
+    c.gridwidth = 1;
+    c.insets = labelInsets;
+    
+    prLabel = new JLabel("Access modifier");
+    prLabel.setToolTipText("<html>Class access modifier.</html>");
+    gridbag.setConstraints(prLabel, c);
+    
+    panel.add(prLabel);
+    c.weightx = 1.0;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.insets = compInsets;
+    
+    JPanel accessPanel = new JPanel();
+    accessPanel.setLayout(new BoxLayout(accessPanel, BoxLayout.X_AXIS));
+    accessPanel.add(_publicRadio);
+    accessPanel.add(_defaultRadio);
+    gridbag.setConstraints(accessPanel, c);
+    panel.add(accessPanel);
+    
+    // Modifiers: abstract/final
+    c.weightx = 0.0;
+    c.gridwidth = 1;
+    c.insets = labelInsets;
+    
+    prLabel = new JLabel("Other modifiers");
+    prLabel.setToolTipText("<html>final or abstract class modifiers.</html>");
+    gridbag.setConstraints(prLabel, c);
+    
+    panel.add(prLabel);
+    c.weightx = 1.0;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.insets = compInsets;
+    
+    JPanel faPanel = new JPanel();
+    faPanel.setLayout(new BoxLayout(faPanel, BoxLayout.X_AXIS));
+    faPanel.add(_abstractCheck);
+    faPanel.add(_finalCheck);
+    gridbag.setConstraints(faPanel, c);
+    panel.add(faPanel);
+    _finalCheck.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent actionEvent) {
+        if (_finalCheck.isSelected()) _abstractCheck.setSelected(false);
+      }
+    });
+    _abstractCheck.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent actionEvent) {
+        if (_abstractCheck.isSelected()) _finalCheck.setSelected(false);
+      }
+    });
+    
+    // Include ctor
+    c.weightx = 0.0;
+    c.gridwidth = 1;
+    c.insets = labelInsets;
+    
+    prLabel = new JLabel("");
+    gridbag.setConstraints(prLabel, c);
+    
+    panel.add(prLabel);
+    c.weightx = 1.0;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.insets = compInsets;
+    
+    gridbag.setConstraints(_classConstructor, c);
+    panel.add(_classConstructor);
+    
+    // Include main method
+    c.weightx = 0.0;
+    c.gridwidth = 1;
+    c.insets = labelInsets;
+    
+    prLabel = new JLabel("");
+    gridbag.setConstraints(prLabel, c);
+    
+    panel.add(prLabel);
+    c.weightx = 1.0;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.insets = compInsets;
+    
+    gridbag.setConstraints(_mainMethod, c);
+    panel.add(_mainMethod);
+//    }
+    
     // Error message
     c.weightx = 1.0;
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
-
+    
     gridbag.setConstraints(_errorMessage, c);
     panel.add(_errorMessage);
     

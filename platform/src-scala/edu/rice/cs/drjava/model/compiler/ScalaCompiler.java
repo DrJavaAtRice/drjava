@@ -66,6 +66,8 @@ import scala.tools.nsc.Settings;
 import scala.tools.nsc.io.PlainFile;
 import scala.tools.nsc.io.Path;
 
+import static edu.rice.cs.drjava.config.OptionConstants.*;
+
 /** An implementation of JavacCompiler that supports compiling with the Scala 2.9.x compiler based on Java 1.7.0.
   * Must be compiled using javac 1.7.0 and with Scala compiler jar on the boot classpath.  The class 
   * Javac160FilteringCompiler filters .exe files out of the class path because the JVM does not recognize such files
@@ -147,11 +149,13 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
     * otherwise false 
     * @return true if the specified file is a source file for this compiler. */
   public boolean isSourceFileForThisCompiler(File f) {
-    // by default, use DrJavaFileUtils.isSourceFile
 //    _log.log("ScalaCompiler.isSourceFile(" + f + ") called");
-    String fileName = f.getName();
-    return fileName.endsWith(SCALA_FILE_EXTENSION) || fileName.endsWith(OptionConstants.JAVA_FILE_EXTENSION);
+    return isScalaSourceFile(f) || isJavaSourceFile(f);
   }
+  
+  public static boolean isScalaSourceFile(File f) { return f.getName().endsWith(SCALA_FILE_EXTENSION); }
+  
+  public static boolean isJavaSourceFile(File f) { return f.getName().endsWith(JAVA_FILE_EXTENSION); }
   
   /** Return the set of source file extensions that this compiler supports.
     * @return the set of source file extensions that this compiler supports. */
@@ -173,12 +177,12 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
       /** Returns true if the file's extension matches ".scala" or ".java". */
       public boolean accept(File f) {
         if (f.isDirectory()) return true;
-        return f.getName().endsWith(SCALA_FILE_EXTENSION) || f.getName().endsWith(OptionConstants.JAVA_FILE_EXTENSION);
+        return f.getName().endsWith(SCALA_FILE_EXTENSION) || f.getName().endsWith(JAVA_FILE_EXTENSION);
       }
       
       /** @return A description of this filter to display. */
       public String getDescription() {
-        return "Scala/Java source files (*" + SCALA_FILE_EXTENSION + ", *" + OptionConstants.JAVA_FILE_EXTENSION + ")";
+        return "Scala/Java source files (*" + SCALA_FILE_EXTENSION + ", *" + JAVA_FILE_EXTENSION + ")";
       }
     };
   }
@@ -197,7 +201,7 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
     * @param f file for which to return the keywords
     * @return the set of keywords that should be highlighted in the specified file. */
   public Set<String> getKeywordsForFile(File f) {
-    return isSourceFileForThisCompiler(f) ? new HashSet<String>(SCALA_KEYWORDS) : new HashSet<String>();
+    return isScalaSourceFile(f) ? new HashSet<String>(SCALA_KEYWORDS) : new HashSet<String>();
   }
   
   /** Set of Scala keywords for special coloring. */
@@ -239,11 +243,10 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
     
 //    Utilities.show("compile command for Scala called");
     
-
     // Create a Settings object that captures the Java class path as the Scala class path!
     Settings settings = new Settings();
     settings.processArgumentString("-usejavacp");
-    _log.log("Passing argument string '" + "-d " + '"' + destination.getPath() + '"' + "to the scala compiler (Global)");
+    System.err.println("Passing argument string '" + "-d " + '"' + destination.getPath() + '"' + " to the scala compiler (Global)");
     settings.processArgumentString("-d " + '"' + destination.getPath() + '"');
     settings.processArgumentString("-cp " + '"' + dJPathToPath(classPath) + '"');
     scala.tools.nsc.reporters.Reporter reporter = new DrJavaReporter(errors);
@@ -255,9 +258,9 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
     
     /* Build a Scala List[PlainFile] corresponding to files.  fileObjects is a Scala List of PlainFile but
      * the Java compiler does not recognize Scala generic covariant types.  */
-    scala.collection.immutable.List fileObjects =   
-      scala.collection.immutable.Nil$.MODULE$;  // the empty list in Scala
+    scala.collection.immutable.List fileObjects = scala.collection.immutable.Nil$.MODULE$;  // the empty list in Scala
     for (File f : files) fileObjects = fileObjects.$colon$colon(new PlainFile(Path.jfile2path(f)));
+    _log.log("Compiling the following files: " + files);
     try { run.compileFiles(fileObjects); }  // fileObjects has raw type List
     catch(Throwable t) {  // compiler threw an exception/error (typically out of memory error)
       errors.addFirst(new DJError("Compile exception: " + t, false));
@@ -265,6 +268,7 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
     }
     
 //    debug.logEnd("compile()");
+    System.err.println("ScalaCompiler.compile returning error list: " + errors);
     return errors;
   }
   

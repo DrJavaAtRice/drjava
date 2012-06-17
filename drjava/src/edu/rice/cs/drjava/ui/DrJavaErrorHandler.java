@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -49,9 +49,9 @@ import edu.rice.cs.util.Log;
 
 /** The handle() method in this class is called every time an uncaught exception propagates to an AWT action.
  *  The static log() method can be used to put log entries into the error log but continue execution.
- *  This does not automatically update the "DrJava Errors" window when new errors occur. In the case of errors,
+ *  This does not automatically update the "DrScala Errors" window when new errors occur. In the case of errors,
  *  we want to minimize the effects on the GUI. If we want to see an updated dialog, we can click on the
- *  "DrJava Errors" button again.
+ *  "DrScalaErrors" button again.
  *  @version $Id$
  */
 public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {

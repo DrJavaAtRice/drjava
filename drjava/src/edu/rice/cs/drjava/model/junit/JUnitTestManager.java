@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -204,9 +204,11 @@ public class JUnitTestManager {
     */
   private boolean _isJUnitTest(Class<?> c) {
 
-    boolean result = (Test.class.isAssignableFrom(c) && !Modifier.isAbstract(c.getModifiers()) && !Modifier.isInterface(c.getModifiers()) ||
-      (new JUnit4TestAdapter(c).getTests().size()>0)) && !new JUnit4TestAdapter(c).getTests().get(0).toString().contains("initializationError")
-      ; //had to add specific check for initializationError. Is there a better way of checking if a class contains a test?
+    boolean result = (Test.class.isAssignableFrom(c) && !Modifier.isAbstract(c.getModifiers()) && 
+                      !Modifier.isInterface(c.getModifiers()) ||
+      (new JUnit4TestAdapter(c).getTests().size()>0)) && 
+      ! new JUnit4TestAdapter(c).getTests().get(0).toString().contains("initializationError")
+      ; //The specific check for initializationError detect when a class contains no tests
     debug.logValues(new String[]{"c", "isJUnitTest(c)"}, c, result);
     return result;
   }

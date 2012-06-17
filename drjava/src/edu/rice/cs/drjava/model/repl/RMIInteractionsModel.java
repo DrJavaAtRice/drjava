@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -82,9 +82,9 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   public Pair<String,String> getVariableToString(String var) {
     System.out.println("getVariableToString: "+var);
     Option<Pair<String,String>> result = _jvm.getVariableToString(var);
-    System.out.println("\tresult.isNone? "+result.isNone());
+    System.out.println("\tresult.isNone? " + result.isNone());
     Pair<String,String> retval = result.unwrap(new Pair<String,String>("",""));
-    System.out.println("\tretval: "+retval);
+    System.out.println("\tretval: " + retval);
     return retval;
   }
   

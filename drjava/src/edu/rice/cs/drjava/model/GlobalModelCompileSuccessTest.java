@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -48,8 +48,9 @@ import javax.swing.text.BadLocationException;
   */
 public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSuccessTestCase {
 
-  /** Tests calling compileAll with different source roots works.
-   */
+  /** Tests calling compileAll with different source roots works.  
+    * NOTE: this "feature" is no longer supported; multiple source roots is flagged as a compilation error.  This test 
+    * has been revised to expect an error.*/
   public void testCompileAllDifferentSourceRoots() throws BadLocationException, IOException, InterruptedException {
     System.err.println("testCompileAllDifferentSourceRoots() compiler =" + _name());
     File aDir = new File(_tempDir, "a");
@@ -60,35 +61,35 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     final File file = new File(aDir, "DrScalaTestFoo.scala");
     saveFile(doc, new FileSelector(file));
     OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
-    final File file2 = new File(bDir, "DrSclaaTestBar.scala");
+    final File file2 = new File(bDir, "DrScalaTestBar.scala");
     saveFile(doc2, new FileSelector(file2));
     
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
+    CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
     _model.getCompilerModel().compileAll();
     
     Utilities.clearEventQueue();
     
-    if (_model.getCompilerModel().getNumErrors() > 0) {
-      fail("compile failed: " + getCompilerErrorString());
+    if (_model.getCompilerModel().getNumErrors() == 0) {
+      fail("compile succeeded despite multiple source roots");
     }
-    assertCompileErrorsPresent(_name(), false);
+    assertCompileErrorsPresent(_name(), true);
     listener.checkCompileOccurred();
 
-    // Make sure .class exists for both files
+    // Make sure .class files do not exist for the two files
     File compiled = classForScala(file, "DrScalaTestFoo");
-    assertTrue(_name() + "Foo Class file doesn't exist after compile", compiled.exists());
+    assertTrue(_name() + "Foo Class file doesn't exist after compile", ! compiled.exists());
     File compiled2 = classForScala(file2, "DrSclaTestBar");
-    assertTrue(_name() + "Bar Class file doesn't exist after compile", compiled2.exists());
+    assertTrue(_name() + "Bar Class file doesn't exist after compile", ! compiled2.exists());
     _model.removeListener(listener);
   }
   
 
   /** Test that one compiled file can depend on the other and that when a keyword
    * is part of a field name, the file will compile.
-   * We compile DrJavaTestFoo and then DrJavaTestFoo2 (which extends
-   * DrJavaTestFoo). This shows that the compiler successfully found
-   * DrJavaTestFoo2 when compiling DrJavaTestFoo.
+   * We compile DrScalaTestFoo and then DrScalaTestFoo2 (which extends
+   * DrScalaTestFoo). This shows that the compiler successfully found
+   * DrScalaTestFoo2 when compiling DrScalaTestFoo.
    * Doesn't reset interactions because no interpretations are performed.
    */
   public void testCompileClassPathOKDefaultPackage()
@@ -132,9 +133,9 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
   }
 
   /** Test that one compiled file can depend on the other.
-   * We compile a.DrJavaTestFoo and then b.DrJavaTestFoo2 (which extends
-   * DrJavaTestFoo). This shows that the compiler successfully found
-   * DrJavaTestFoo2 when compiling DrJavaTestFoo.
+   * We compile a.DrScalaTestFoo and then b.DrScalaTestFoo2 (which extends
+   * DrScalaTestFoo). This shows that the compiler successfully found
+   * DrScalaTestFoo2 when compiling DrScalaTestFoo.
    * Doesn't reset interactions because no interpretations are performed.
    */
   public void testCompileClassPathOKDifferentPackages() throws BadLocationException, IOException, InterruptedException,
@@ -146,7 +147,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     bDir.mkdir();
 
     // Create/compile foo, assuming it works
-    // foo must be public and in DrJavaTestFoo.java!
+    // foo must be public and in DrScalaTestFoo.java!
     OpenDefinitionsDocument doc1 = setupDocument("package a\n" + FOO_TEXT);
     final File fooFile = new File(aDir, "DrScalaTestFoo.scala");
 //    System.err.println("fooFile = " + fooFile.getCanonicalPath());
@@ -168,7 +169,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     _model.removeListener(listener);
     
     OpenDefinitionsDocument doc2 =
-      setupDocument("package b\nimport a.ScalaTestFoo\n" + FOO2_EXTENDS_FOO_TEXT);
+      setupDocument("package b\n" + "import a.ScalaTestFoo\n" + FOO2_EXTENDS_FOO_TEXT);
     final File foo2File = new File(bDir, "DrScalaTestFoo2.scala");
 //    System.err.println("foo2File = " + foo2File.getCanonicalPath());
     saveFile(doc2, new FileSelector(foo2File));

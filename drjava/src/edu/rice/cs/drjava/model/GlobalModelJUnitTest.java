@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -201,7 +201,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //    Utilities.show("Running testNoJUnitErrors");
     
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
-    final File file = new File(_tempDir, "MonkeyTestPass.java");
+    final File file = new File(_tempDir, "MonkeyTestPass.scala");
     saveFile(doc, new FileSelector(file));
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
@@ -230,7 +230,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //    Utilities.show("Running testOneJUnitError");
     
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
-    final File file = new File(_tempDir, "MonkeyTestFail.java");
+    final File file = new File(_tempDir, "MonkeyTestFail.scala");
     saveFile(doc, new FileSelector(file));
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
@@ -253,7 +253,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //    Utilities.show("Running testElspethOneJunitError");
     
     OpenDefinitionsDocument doc = setupDocument(ELSPETH_ERROR_TEXT);
-    final File file = new File(_tempDir, "Elspeth.java");
+    final File file = new File(_tempDir, "Elspeth.scala");
     saveFile(doc, new FileSelector(file));
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
@@ -277,7 +277,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //    Utilities.show("Running testRealError");
     
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_ERROR_TEXT);
-    final File file = new File(_tempDir, "MonkeyTestError.java");
+    final File file = new File(_tempDir, "MonkeyTestError.scala");
     saveFile(doc, new FileSelector(file));
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
@@ -301,7 +301,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //    Utilities.show("Running testNonTestCaseError");
     
     final OpenDefinitionsDocument doc = setupDocument(NON_TESTCASE_TEXT);
-    final File file = new File(_tempDir, "NonTestCase.java");
+    final File file = new File(_tempDir, "NonTestCase.scala");
     saveFile(doc, new FileSelector(file));
     
     JUnitTestListener listener = new JUnitNonTestListener();
@@ -334,7 +334,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //    Utilities.show("Running testResultOfNonPublicTestCase");
     
     final OpenDefinitionsDocument doc = setupDocument(NONPUBLIC_TEXT);
-    final File file = new File(_tempDir, "NonPublic.java");
+    final File file = new File(_tempDir, "NonPublic.scala");
     saveFile(doc, new FileSelector(file));
     
     JUnitTestListener listener = new JUnitTestListener();
@@ -391,7 +391,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //    Utilities.show("Running testNoClassFile");
     
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
-    final File file = new File(_tempDir, "MonkeyTestPass.java");
+    final File file = new File(_tempDir, "MonkeyTestPass.scala");
     saveFile(doc, new FileSelector(file));
     
     JUnitTestListener listener = new JUnitCompileBeforeTestListener();
@@ -423,7 +423,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //    Utilities.show("Running testInfiniteLoop");
     
     final OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_INFINITE_TEXT);
-    final File file = new File(_tempDir, "MonkeyTestInfinite.java");
+    final File file = new File(_tempDir, "MonkeyTestInfinite.scala");
     saveFile(doc, new FileSelector(file));
     
     JUnitTestListener listener = new JUnitTestListener(false) {
@@ -479,7 +479,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     if (printMessages) System.err.println("-----testUnsavedAndUnCompiledChanges-----");
     
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
-    final File file = new File(_tempDir, "MonkeyTestPass.java");
+    final File file = new File(_tempDir, "MonkeyTestPass.scala");
     saveFile(doc, new FileSelector(file));
     
     List<OpenDefinitionsDocument> docs = _model.getSortedOpenDefinitionsDocuments();
@@ -561,7 +561,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     JUnitCompileBeforeTestListener listener2 = new JUnitCompileBeforeTestListener();
     _model.addListener(listener2);
     OpenDefinitionsDocument doc = setupDocument(NON_TESTCASE_TEXT);
-    File file = new File(_tempDir, "NonTestCase.java");
+    File file = new File(_tempDir, "NonTestCase.scala");
     if (printMessages) System.err.println("-----> file = " + file + " -- canWrite() = " + file.canWrite() + " -- exists() = " + file.exists());
     saveFile(doc, new FileSelector(file));
     
@@ -571,7 +571,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener2.resetCompileCounts();
     
     // Opending Test
-    File file2 = new File(_tempDir, "MonkeyTestPass.java");
+    File file2 = new File(_tempDir, "MonkeyTestPass.scala");
     OpenDefinitionsDocument doc2 = setupDocument(MONKEYTEST_PASS_TEXT);
     saveFile(doc2, new FileSelector(file2));
     listener2.runJUnit(_model.getJUnitModel());
@@ -603,7 +603,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //    _log.log("Compiled first doc");
 //    
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
-    File file = new File(_tempDir, "MonkeyTestPass.java");
+    File file = new File(_tempDir, "MonkeyTestPass.scala");
     saveFile(doc, new FileSelector(file));
     JUnitTestListener listener = new JUnitNonTestListener(true);
     _model.addListener(listener);
@@ -619,7 +619,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _model.removeListener(listener);
     
     doc = setupDocument(HAS_MULTIPLE_TESTS_PASS_TEXT);
-    file = new File(_tempDir, "HasMultipleTestsPass.java");
+    file = new File(_tempDir, "HasMultipleTestsPass.scala");
     saveFile(doc, new FileSelector(file));
     
     listener = new JUnitNonTestListener(true);
@@ -646,8 +646,8 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_ERROR_TEXT);
     OpenDefinitionsDocument doc2 = setupDocument(MONKEYTEST_FAIL_TEXT);
-    File file = new File(_tempDir, "MonkeyTestError.java");
-    File file2 = new File(_tempDir, "MonkeyTestFail.java");
+    File file = new File(_tempDir, "MonkeyTestError.scala");
+    File file2 = new File(_tempDir, "MonkeyTestFail.scala");
     saveFile(doc, new FileSelector(file));
     saveFile(doc2, new FileSelector(file2));
     JUnitNonTestListener listener = new JUnitNonTestListener(true);
@@ -681,8 +681,8 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     OpenDefinitionsDocument doc = setupDocument(NON_TESTCASE_TEXT);
     OpenDefinitionsDocument doc2 = setupDocument(STATIC_INNER_TEST_TEXT);
-    File file = new File(_tempDir, "NonTestCase.java");
-    File file2 = new File(_tempDir, "StaticInnerTestCase.java");
+    File file = new File(_tempDir, "NonTestCase.scala");
+    File file2 = new File(_tempDir, "StaticInnerTestCase.scala");
     saveFile(doc, new FileSelector(file));
     saveFile(doc2, new FileSelector(file2));
     
@@ -755,7 +755,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //    // What is the preceding code segment supposed to test; it has already been done!
     
     final OpenDefinitionsDocument doc1 = setupDocument(MULTI_CLASSES_IN_FILE_TEXT);
-    final File file = new File(_tempDir, "DJTest.java");
+    final File file = new File(_tempDir, "DJTest.scala");
     saveFile(doc1, new FileSelector(file));
     if (printMessages) System.err.println("In testCorrectFilesAfterIncorrectChanges_NOJOIN(), DJTest.java = \n" + doc1.getText());
     
@@ -796,10 +796,10 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     if (printMessages) System.err.println("----testJUnit4StyleTestWorks-----");
     
-    File file0 = new File("testFiles/GlobalModelJUnitTestFiles/JUnit4StyleTest.java");
+    File file0 = new File("testFiles/GlobalModelJUnitTestFiles/JUnit4StyleTest.scala");
     final OpenDefinitionsDocument doc = setupDocument((_model._createOpenDefinitionsDocument(file0)).getText());    
     
-    final File file = new File(_tempDir, "JUnit4StyleTest.java");
+    final File file = new File(_tempDir, "JUnit4StyleTest.scala");
     saveFile(doc, new FileSelector(file));
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
@@ -827,10 +827,10 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     if (printMessages) System.err.println("----testJUnit4MultiTest-----");
     
-    File file0 = new File("testFiles/GlobalModelJUnitTestFiles/JUnit4MultiTest.java");
+    File file0 = new File("testFiles/GlobalModelJUnitTestFiles/JUnit4MultiTest.scala");
     final OpenDefinitionsDocument doc = setupDocument((_model._createOpenDefinitionsDocument(file0)).getText());    
     
-    final File file = new File(_tempDir, "JUnit4MultiTest.java");
+    final File file = new File(_tempDir, "JUnit4MultiTest.scala");
     saveFile(doc, new FileSelector(file));
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
@@ -858,9 +858,9 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   public void testJUnit4NoTest_NOJOIN() throws Exception {
     if (printMessages) System.err.println("----testJUnit4NoTest-----");
     
-    File file0 = new File("testFiles/GlobalModelJUnitTestFiles/JUnit4NoTest.java");
+    File file0 = new File("testFiles/GlobalModelJUnitTestFiles/JUnit4NoTest.scala");
     final OpenDefinitionsDocument doc = setupDocument((_model._createOpenDefinitionsDocument(file0)).getText());
-    final File file = new File(_tempDir, "JUnit4NoTest.java");
+    final File file = new File(_tempDir, "JUnit4NoTest.scala");
     saveFile(doc, new FileSelector(file));
     
     JUnitTestListener listener = new JUnitNonTestListener();
@@ -892,10 +892,10 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     
     if (printMessages) System.err.println("----testJUnit4TwoMethod1Test-----");
     
-    File file0 = new File("testFiles/GlobalModelJUnitTestFiles/JUnit4TwoMethod1Test.java");
+    File file0 = new File("testFiles/GlobalModelJUnitTestFiles/JUnit4TwoMethod1Test.scala");
     final OpenDefinitionsDocument doc = setupDocument((_model._createOpenDefinitionsDocument(file0)).getText());    
     
-    final File file = new File(_tempDir, "JUnit4TwoMethod1Test.java");
+    final File file = new File(_tempDir, "JUnit4TwoMethod1Test.scala");
     saveFile(doc, new FileSelector(file));
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);

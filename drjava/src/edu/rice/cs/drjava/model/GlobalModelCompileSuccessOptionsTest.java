@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -54,17 +54,17 @@ import edu.rice.cs.util.swing.Utilities;
  */
 public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompileSuccessTestCase {
 
-  /** Tests a compile on a file that references a non-public class defined in
-   * another class with a name different than the non-public class.
-   * Doesn't reset interactions because no interpretations are performed.
-   */
+  /** Tests a compile on a file that references a "non-public" class defined in another class with a name different 
+    * than the "non-public" class. Doesn't reset interactions because no interpretations are performed.  
+    * NOTE: this is the DrScala conversion of a legacy DrJava test.  All top level classes in Scala are public.
+    */
   public void testCompileReferenceToNonPublicClass() 
     throws BadLocationException, IOException, InterruptedException {
 //    System.out.println("testCompileReferenceToNonPublicClass()");
     OpenDefinitionsDocument doc = setupDocument(FOO_NON_PUBLIC_CLASS_TEXT);
     OpenDefinitionsDocument doc2 = setupDocument(FOO2_REFERENCES_NON_PUBLIC_CLASS_TEXT);
     final File file = tempFile();
-    final File file2 = tempFile(1);
+    final File file2 = tempFile();
     saveFile(doc, new FileSelector(file));
     saveFile(doc2, new FileSelector(file2));
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
@@ -77,6 +77,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     _model.removeListener(listener);
     CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener();
     _model.addListener(listener2);
+    System.exit(0);
     listener2.compile(doc2);
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
@@ -87,8 +88,8 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     assertCompileErrorsPresent(_name(), false);
     
     // Make sure .class exists
-    File compiled = classForScala(file, "DrJavaTestFoo");
-    File compiled2 = classForScala(file, "DrJavaTestFoo2");
+    File compiled = classForScala(file, "DrScalaTestFoo");
+    File compiled2 = classForScala(file, "DrScalaTestFoo2");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());
     assertTrue(_name() + "Class file should exist after compile", compiled2.exists());
   }
@@ -137,7 +138,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
 //        listener2.checkCompileOccurred();
 //        
 //        // Make sure .class exists
-//        compiled = classForJava(file, "DrJavaTestFoo");
+//        compiled = classForJava(file, "DrScalaTestFoo");
 //        assertTrue(_name() + "Class file doesn't exist after compile",
 //                   compiled.exists());
 //      }
@@ -156,7 +157,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     if (_isGenericCompiler()) {
       
       OpenDefinitionsDocument doc = setupDocument(FOO_WITH_GENERICS);
-      final File file = new File(_tempDir, "DrScalaTestFooGenerics.java");
+      final File file = new File(_tempDir, "DrScalaTestFooGenerics.scala");
       saveFile(doc, new FileSelector(file));
       
       CompileShouldSucceedListener listener = new CompileShouldSucceedListener();

@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -48,10 +48,13 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 public abstract class GlobalModelCompileSuccessTestCase extends GlobalModelTestCase {
 
   protected static final String FOO_PACKAGE_AS_PART_OF_FIELD = "class DrScalaTestFoo { val cur_package = 5; }";
-  protected static final String FOO2_EXTENDS_FOO_TEXT = "class DrScalaTestFoo2 extends DrJavaTestFoo {}";
-  protected static final String FOO_NON_PUBLIC_CLASS_TEXT = "class DrScalaTestFoo {} class Foo{}";
+  protected static final String FOO2_EXTENDS_FOO_TEXT = "class DrScalaTestFoo2 extends DrScalaTestFoo {}";
+  protected static final String FOO_NON_PUBLIC_CLASS_TEXT = 
+    "class DrScalaTestFoo {}\n" +
+    "class Foo{}";
   protected static final String FOO2_REFERENCES_NON_PUBLIC_CLASS_TEXT = "class DrScalaTestFoo2 extends Foo{}";
-  protected static final String FOO_WITH_ASSERT = "class DrScalaTestFoo { def foo() { assert(true, \"a vacuous assert failed!\") } }";
+  protected static final String FOO_WITH_ASSERT = 
+    "class DrScalaTestFoo { def foo() { assert(true, \"a vacuous assert failed!\") } }";
   protected static final String FOO_WITH_GENERICS = "class DrScalaTestFooGenerics[T] {}";
 
 //  /** Overrides {@link TestCase#runBare} to interactively run this test case for each compiler, without resetting the 

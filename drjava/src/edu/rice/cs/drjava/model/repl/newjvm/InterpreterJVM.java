@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -46,8 +46,9 @@ import java.rmi.*;
 // NOTE: Do NOT import/use the config framework in this class!
 //  (This class runs in a different JVM, and will not share the config object)
 
-import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.InputStreamRedirector;
+import edu.rice.cs.util.Log;
+import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.newjvm.*;
@@ -64,6 +65,8 @@ import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.repl.InteractionsPaneOptions;
+
+import edu.rice.cs.util.swing.Utilities;
 
 import edu.rice.cs.dynamicjava.Options;
 import edu.rice.cs.dynamicjava.interpreter.*;
@@ -88,6 +91,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   
   /** Singleton instance of this class. */
   public static final InterpreterJVM ONLY = new InterpreterJVM();
+  
+  /** Debugging log. */
+  private static final Log _log  = new Log("GlobalModel.txt", false);
   
   // As RMI can lead to parallel threads, all fields must be thread-safe.  Consequently, we use
   // concurrent Collections
@@ -536,6 +542,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     * @return the class names that are actually test cases
     */
   public List<String> findTestClasses(List<String> classNames, List<File> files) throws RemoteException {
+//    Utilities.show("InterpreterJVM.findTestClaseClasses(" + classNames + ", " + files + ") called");
+    _log.log("InterpreterJVM.findTestClaseClasses(" + classNames + ", " + files + ") called");
     return _junitTestManager.findTestClasses(classNames, files);
   }
   

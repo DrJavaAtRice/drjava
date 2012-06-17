@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -55,64 +55,43 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
   protected static final Log _log = new Log("JUnitError.txt", false);
   
   private static final String MONKEYTEST_FAIL_TEXT =
-    "import junit.framework.*; \n" +
-    "import java.io.*; \n" +
-    "public class MonkeyTestFail extends TestCase { \n" +
-    "  public MonkeyTestFail(String name) { super(name); } \n" +
-    "  public void testShouldFail() { \n" +
-    "    assertEquals(\"monkey\", \"baboon\"); \n" +
+    "import junit.framework._ \n" +
+    "import java.io._ \n" +
+    "class MonkeyTestFail extends TestCase { \n" +
+//    "  def MonkeyTestFail(name: String) { super(name); } \n" +
+    "  def testShouldFail() { \n" +
+    "    assertEquals(\"monkey\", \"baboon\") \n" +
     "  } \n" +
-    "  public void testShouldErr() throws Exception { \n" +
-    "    throw new IOException(\"Error\"); \n" +
+    "  def testShouldErr() throws Exception { \n" +
+    "    throw new IOException(\"Error\") \n" +
     "  } \n" +
     "}";
   
   private static final String TEST_ONE =
-    "import junit.framework.TestCase;\n" +
-    "public class TestOne extends TestCase {\n" +
-    "  public void testMyMethod() {\n" +
-    "    assertTrue(false);\n" +
+    "import junit.framework.TestCase\n" +
+    "class TestOne extends TestCase {\n" +
+    "  def testMyMethod() {\n" +
+    "    assertTrue(false)\n" +
     "  }\n" +
-    "  public TestOne() {\n" +
-    "    super();\n" +
+    "  override def toString() = \"TestOne()\"\n" + 
+    "  override equals(o: Object) = \n" +
+    "    if ((o == null) || getClass() != o.getClass()) false\n" +
+    "    else true\n" +
+    "  override def hashCode() = getClass().hashCode()\n" +
+    "  def testThrowing() throws Exception{\n" +
+    "    throw new Exception(\"here\")\n" +
     "  }\n" +
-    "  public java.lang.String toString() {\n" +
-    "    return \"TestOne(\" + \")\";\n" +
-    "  }\n" +
-    "  public boolean equals(java.lang.Object o) {\n" +
-    "    if ((o == null) || getClass() != o.getClass()) return false;\n" +
-    "    return true;\n" +
-    "  }\n" +
-    "  public int hashCode() {\n" +
-    "    return getClass().hashCode();\n" +
-    "  }\n" +
-    "  public void testThrowing() throws Exception{\n" +
-    "    throw new Exception(\"here\");\n" +
-    "  }\n" +
-    "  public void testFail(){\n" +
-    "    fail(\"i just failed the test\");\n" +
-    "  }\n" +
+    "  def testFail() { fail(\"i just failed the test\") }\n" +
     "}";
   
   private static final String TEST_TWO =
-    "import junit.framework.TestCase;\n" +
-    "public class TestTwo extends TestOne {\n" +
-    "  public void testTwo() {\n" +
-    "    assertTrue(true);\n" +
-    "  }\n" +
-    "  public TestTwo() {\n" +
-    "    super();\n" +
-    "  }\n" +
-    "  public java.lang.String toString() {\n" +
-    "    return \"TestTwo(\" + \")\";\n" +
-    "  }\n" +
-    "  public boolean equals(java.lang.Object o) {\n" +
-    "    if ((o == null) || getClass() != o.getClass()) return false;\n" +
-    "    return true;\n" +
-    "  }\n" +
-    "  public int hashCode() {\n" +
-    "    return getClass().hashCode();\n" +
-    "  }\n" +
+    "import junit.framework.TestCase\n" +
+    "class TestTwo extends TestOne {\n" +
+    "  def testTwo() { assertTrue(true) }\n" +
+    "  override def toString() = \"TestTwo()\"\n" +
+    "  override def equals(o: Object) =\n" +
+    "    (o != null) && (getClass() == o.getClass())\n" +
+    "  override def hashCode() = getClass().hashCode()\n" +
     "}";
   
 //  private static final String NONPUBLIC_TEXT =
@@ -131,10 +110,8 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     "class ABC extends java.util.ArrayList {}\n";
   
   private static final String ABC_TEST =
-    "public class ABCTest extends junit.framework.TestCase {\n" +
-    "  public void testABC() {\n" +
-    "    new ABC().get(0);\n" +
-    "  }\n" +
+    "class ABCTest extends junit.framework.TestCase {\n" +
+    "  new ABC().get(0);\n" +
     "}";
   
   private static final String LANGUAGE_LEVEL_TEST =
@@ -166,7 +143,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
         try {
           _m = new JUnitErrorModel(new JUnitError[0], _model, false);
 
-          final File file = new File(_tempDir, "MonkeyTestFail.java");
+          final File file = new File(_tempDir, "MonkeyTestFail.scala");
           saveFile(doc, new FileSelector(file));
           
           _model.addListener(listener);
@@ -181,7 +158,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
           listener.checkCompileOccurred();
           _log.log("Done with first block");
         }
-        catch(Exception e) { fail("The following exception was thrown in the first block of testErrorsArrayInOrder: /n" + e); }
+        catch(Exception e) { fail("The following exception was thrown in the first block of testErrorsArrayInOrder: \n" + e); }
       }
     });
          
@@ -202,7 +179,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
           _log.log("JUnitDocument is empty");
         }
         catch(BadLocationException e) { fail("BadLocationException in clearing JUnitDocument"); }
-        catch(Exception e) { fail("The following exception was thrown in testErrorsArrayInOrder: /n" + e); }
+        catch(Exception e) { fail("The following exception was thrown in testErrorsArrayInOrder: \n" + e); }
       }
     });
     
@@ -238,9 +215,9 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     _log.log("testVerifyErrorHandledCorrectly_NOJOIN started");
     
     final OpenDefinitionsDocument doc = setupDocument(ABC_CLASS_ONE);
-    final File file = new File(_tempDir, "ABC1.java");
+    final File file = new File(_tempDir, "ABC1.scala");
     final OpenDefinitionsDocument doc2 = setupDocument(ABC_TEST);
-    final File file2 = new File(_tempDir, "ABCTest.java");
+    final File file2 = new File(_tempDir, "ABCTest.scala");
     
     Utilities.invokeAndWait(new Runnable() {
       public void run() { 
@@ -253,14 +230,14 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 //          System.out.println("compiling all");
           _model.getCompilerModel().compileAll();
         }
-        catch(Exception e) { fail("The following exception was thrown in testVerifyErrorHandledCorrectly_NOJOIN location 1: /n" + e); }
+        catch(Exception e) { fail("The following exception was thrown in testVerifyErrorHandledCorrectly_NOJOIN location 1: \n" + e); }
       } 
     });
     
    _log.log("First compile in  testVerifyErrorHandledCorrectly_NOJOIN comlete");
    
     final OpenDefinitionsDocument doc3 = setupDocument(ABC_CLASS_TWO);
-    final File file3 = new File(_tempDir, "ABC2.java");
+    final File file3 = new File(_tempDir, "ABC2.scala");
     
     Utilities.invokeAndWait(new Runnable() {
       public void run() { saveFile(doc3, new FileSelector(file3)); }
@@ -275,7 +252,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     Utilities.invokeAndWait(new Runnable() {
       public void run() { 
         try { listener.compile(doc3); }
-        catch(Exception e) { fail("The following exception was thrown in testVerifyErrorHandledCorrectly_NOJOIN location 2: /n" + e); }
+        catch(Exception e) { fail("The following exception was thrown in testVerifyErrorHandledCorrectly_NOJOIN location 2: \n" + e); }
       }
     });
     
@@ -349,8 +326,8 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     debug.logStart();
     final OpenDefinitionsDocument doc1 = setupDocument(TEST_ONE);
     final OpenDefinitionsDocument doc2 = setupDocument(TEST_TWO);
-    final File file1 = new File(_tempDir, "TestOne.java");
-    final File file2 = new File(_tempDir, "TestTwo.java");
+    final File file1 = new File(_tempDir, "TestOne.scala");
+    final File file2 = new File(_tempDir, "TestTwo.scala");
     
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
@@ -358,7 +335,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
           saveFile(doc1, new FileSelector(file1));
           saveFile(doc2, new FileSelector(file2));
         }
-        catch(Exception e) { fail("The following exception was thrown in testErrorInSuperClass_NOJOIN location 1: /n" + e); }
+        catch(Exception e) { fail("The following exception was thrown in testErrorInSuperClass_NOJOIN location 1: \n" + e); }
       }
     });    
     JUnitTestListener listener = new JUnitTestListener(true);
@@ -367,7 +344,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     Utilities.invokeAndWait(new Runnable() {
       public void run() { 
         try { _model.getCompilerModel().compileAll(); }
-        catch(Exception e) { fail("The following exception was thrown in testErrorInSuperClass_NOJOIN location 12: /n" + e); }
+        catch(Exception e) { fail("The following exception was thrown in testErrorInSuperClass_NOJOIN location 12: \n" + e); }
       }
     });
 //        doc1.startCompile();

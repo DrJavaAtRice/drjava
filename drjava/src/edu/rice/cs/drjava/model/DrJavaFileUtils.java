@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -44,6 +44,8 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.plt.io.IOUtil;
 
+import static edu.rice.cs.drjava.config.OptionConstants.*;
+
 /** Some common methods for determining Java source files, language level files, etc.
   * @version $Id$
   */
@@ -52,20 +54,20 @@ public class DrJavaFileUtils  {
     * @return the set of source file extensions that this compiler supports. */
   public static Set<String> getSourceFileExtensions() {
     HashSet<String> extensions = new HashSet<String>();
-    extensions.add(OptionConstants.JAVA_FILE_EXTENSION);
-    extensions.add(OptionConstants.SCALA_FILE_EXTENSION);
+    extensions.add(JAVA_FILE_EXTENSION);
+    extensions.add(SCALA_FILE_EXTENSION);
     // Java language levels support is disabled
-//    extensions.add(OptionConstants.DJ_FILE_EXTENSION);
-//    extensions.add(OptionConstants.OLD_DJ0_FILE_EXTENSION);
-//    extensions.add(OptionConstants.OLD_DJ1_FILE_EXTENSION);
-//    extensions.add(OptionConstants.OLD_DJ2_FILE_EXTENSION);
+//    extensions.add(DJ_FILE_EXTENSION);
+//    extensions.add(OLD_DJ0_FILE_EXTENSION);
+//    extensions.add(OLD_DJ1_FILE_EXTENSION);
+//    extensions.add(OLD_DJ2_FILE_EXTENSION);
     return extensions;
   }
   
   /** Return the suggested file extension that will be appended to a file without extension.
     * @return the suggested file extension */
   public static String getSuggestedFileExtension() {
-    return OptionConstants.SCALA_FILE_EXTENSION;
+    return SCALA_FILE_EXTENSION;
   }
   
   /** .java --> true
@@ -73,8 +75,8 @@ public class DrJavaFileUtils  {
     * otherwise false
     * @return true if the file is a Java or language level file. */
   public static boolean isSourceFile(String fileName) {
-    return fileName.endsWith(OptionConstants.JAVA_FILE_EXTENSION)
-      || fileName.endsWith(OptionConstants.SCALA_FILE_EXTENSION);
+    return fileName.endsWith(JAVA_FILE_EXTENSION)
+      || fileName.endsWith(SCALA_FILE_EXTENSION);
   }
   
   /** @return true if the file is a Java or language level file. */
@@ -90,7 +92,7 @@ public class DrJavaFileUtils  {
 //    * otherwise false
 //    * @return true if the file is an old project file. */
 //  public static boolean isOldProjectFile(String fileName) {
-//    return fileName.endsWith(OptionConstants.OLD_PROJECT_FILE_EXTENSION);
+//    return fileName.endsWith(OLD_PROJECT_FILE_EXTENSION);
 //  }
 //  
 //  /** @return true if the file is an old project file. */
@@ -106,9 +108,9 @@ public class DrJavaFileUtils  {
     * otherwise false
     * @return true if the file is a project file. */
   public static boolean isProjectFile(String fileName) {
-    return fileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION)
-      || fileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION2)
-      || fileName.endsWith(OptionConstants.OLD_PROJECT_FILE_EXTENSION);
+    return fileName.endsWith(PROJECT_FILE_EXTENSION)
+      || fileName.endsWith(PROJECT_FILE_EXTENSION2)
+      || fileName.endsWith(OLD_PROJECT_FILE_EXTENSION);
   }
   
   /** @return true if the file is a project file. */

@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -228,7 +228,7 @@ public interface OptionConstants {
   /** Color for highlighting thread locations. */
   public static final ColorOption DEBUG_THREAD_COLOR = new ColorOption("debug.thread.color", new Color(100,255,255));
   
-  /** Color for the background of the "DrJava Errors" button. */
+  /** Color for the background of the "DrScala Errors" button. */
   public static final ColorOption DRJAVA_ERRORS_BUTTON_COLOR = new ColorOption("drjava.errors.button.color", Color.red);
 
   /** Color for the line at the right margin. */
@@ -1130,7 +1130,7 @@ public interface OptionConstants {
   public static final VectorOption<KeyStroke> KEY_DRJAVA_SURVEY = 
     new VectorOption<KeyStroke>("key.drjava.survey", new KeyStrokeOption("",null), to.vector());
   
-  /** The key binding for the "DrJava Errors" dialog */
+  /** The key binding for the "DrScala Errors" dialog */
   public static final VectorOption<KeyStroke> KEY_DRJAVA_ERRORS = 
     new VectorOption<KeyStroke>("key.drjava.errors", new KeyStrokeOption("",null), to.vector());
   

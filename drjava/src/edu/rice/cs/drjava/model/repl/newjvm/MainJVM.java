@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -72,6 +72,7 @@ import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.classloader.ClassFileError;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
+import static edu.rice.cs.drjava.config.OptionConstants.*;
 
 /**
  * <p>Manages a remote JVM.  Includes methods for communication in both directions: MainJVMRemoteI
@@ -91,8 +92,9 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  * @version $Id$
  */
 public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
+  
   /** Debugging log. */
-  private static final Log _log  = new Log("MasterSlave.txt", false);
+  private static final Log _log  = new Log("GlobalModel.txt", false);
   
   /** Number of slave startup failures allowed before aborting the startup process. */
   private static final int MAX_STARTUP_FAILURES = 3;
@@ -457,9 +459,16 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     */
   public Option<List<String>> findTestClasses(List<String> classNames, List<File> files) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
+    _log.log("***** In MainJVM.findTestClasses, remote = " + remote);
     if (remote == null) { return Option.none(); }
-    try { return Option.some(remote.findTestClasses(classNames, files)); }
-    catch (RemoteException e) { _handleRemoteException(e); return Option.none(); }
+    try { 
+      _log.log("***** In MainJVM.findTestClasses, forwarding method call to remote");
+      return Option.some(remote.findTestClasses(classNames, files)); 
+    }
+    catch (RemoteException e) {
+       _log.log("***** In MainJVM.findTestClasses, RemoteException thrown: " + e);
+      _handleRemoteException(e); 
+      return Option.none(); }
   }
   
   /**
@@ -592,28 +601,28 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     boolean repeat;
     do {
       repeat = false;
-      File junitLocation = DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION);
+      File junitLocation = DrJava.getConfig().getSetting(JUNIT_LOCATION);
       boolean javaVersion7 = JavaVersion.CURRENT.supports(JavaVersion.JAVA_7);
       // ConcJUnit is available if (a) the built-in framework is used, or (b) the external
       // framework is a valid ConcJUnit jar file, AND the compiler is not Java 7 or newer.
       boolean concJUnitAvailable =
         !javaVersion7 &&
-        (!DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION_ENABLED) ||
+        (!DrJava.getConfig().getSetting(JUNIT_LOCATION_ENABLED) ||
         edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(junitLocation));
       
-      File rtLocation = DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION);
+      File rtLocation = DrJava.getConfig().getSetting(RT_CONCJUNIT_LOCATION);
       boolean rtLocationConfigured =
         edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidRTConcJUnitFile(rtLocation);
       
-      if (DrJava.getConfig().getSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED).
-            equals(OptionConstants.ConcJUnitCheckChoices.ALL) && // "lucky" enabled
+      if (DrJava.getConfig().getSetting(CONCJUNIT_CHECKS_ENABLED).
+            equals(ConcJUnitCheckChoices.ALL) && // "lucky" enabled
           !rtLocationConfigured && // not valid
           (rtLocation != null) && // not null
           (!FileOps.NULL_FILE.equals(rtLocation)) && // not NULL_FILE
           (rtLocation.exists())) { // but exists
         // invalid file, clear setting
-        DrJava.getConfig().setSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED,
-                                      OptionConstants.ConcJUnitCheckChoices.NO_LUCKY);
+        DrJava.getConfig().setSetting(CONCJUNIT_CHECKS_ENABLED,
+                                      ConcJUnitCheckChoices.NO_LUCKY);
         rtLocationConfigured = false;
         javax.swing.JOptionPane.showMessageDialog(null,
                                                   "The selected file is invalid and was disabled:\n"+rtLocation,
@@ -622,8 +631,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       }
       if (concJUnitAvailable && // ConcJUnit available
           rtLocationConfigured && // runtime configured
-          DrJava.getConfig().getSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED).
-            equals(OptionConstants.ConcJUnitCheckChoices.ALL)) { // and "lucky" enabled
+          DrJava.getConfig().getSetting(CONCJUNIT_CHECKS_ENABLED).
+            equals(ConcJUnitCheckChoices.ALL)) { // and "lucky" enabled
         try {
           // NOTE: this is a work-around
           // it seems like it's impossible to pass long file names here on Windows
@@ -651,8 +660,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
         }
         catch(IOException ioe) {
           // we couldn't get the short file name (on Windows), disable "lucky" warnings
-          DrJava.getConfig().setSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED,
-                                        OptionConstants.ConcJUnitCheckChoices.NO_LUCKY);
+          DrJava.getConfig().setSetting(CONCJUNIT_CHECKS_ENABLED,
+                                        ConcJUnitCheckChoices.NO_LUCKY);
           rtLocationConfigured = false;
           javax.swing.JOptionPane.showMessageDialog(null,
                                                     "There was a problem with the selected file, and it was disabled:\n"+rtLocation,
@@ -672,11 +681,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       jvmArgs.add("-Xnoagent");
       jvmArgs.add("-Djava.compiler=NONE");
     }
-    String slaveMemory = DrJava.getConfig().getSetting(OptionConstants.SLAVE_JVM_XMX);
-    if (!"".equals(slaveMemory) && !OptionConstants.heapSizeChoices.get(0).equals(slaveMemory)) {
+    String slaveMemory = DrJava.getConfig().getSetting(SLAVE_JVM_XMX);
+    if (!"".equals(slaveMemory) && !heapSizeChoices.get(0).equals(slaveMemory)) {
       jvmArgs.add("-Xmx" + slaveMemory + "M");
     }
-    String slaveArgs = DrJava.getConfig().getSetting(OptionConstants.SLAVE_JVM_ARGS);
+    String slaveArgs = DrJava.getConfig().getSetting(SLAVE_JVM_ARGS);
     if (PlatformFactory.ONLY.isMacPlatform()) {
       jvmArgs.add("-Xdock:name=Interactions");
     }
@@ -700,21 +709,21 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     JVMBuilder jvmb = new JVMBuilder(_startupClassPath).directory(dir).jvmArguments(jvmArgs);
     
     // extend classpath if JUnit/ConcJUnit location specified
-    File junitLocation = DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION);
+    File junitLocation = DrJava.getConfig().getSetting(JUNIT_LOCATION);
     boolean junitLocationConfigured =
       (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidJUnitFile(junitLocation) ||
        edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(junitLocation));
-    if (DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION_ENABLED) && // enabled
+    if (DrJava.getConfig().getSetting(JUNIT_LOCATION_ENABLED) && // enabled
         !junitLocationConfigured && // not valid 
         (junitLocation != null) && // not null
         (!FileOps.NULL_FILE.equals(junitLocation)) && // not NULL_FILE
         (junitLocation.exists())) { // but exists
       // invalid file, clear setting
-      DrJava.getConfig().setSetting(OptionConstants.JUNIT_LOCATION_ENABLED, false);
+      DrJava.getConfig().setSetting(JUNIT_LOCATION_ENABLED, false);
       junitLocationConfigured = false;
     }
     ArrayList<File> extendedClassPath = new ArrayList<File>();
-    if (DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION_ENABLED) &&
+    if (DrJava.getConfig().getSetting(JUNIT_LOCATION_ENABLED) &&
         junitLocationConfigured) {
       extendedClassPath.add(junitLocation);
     }
@@ -725,14 +734,14 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     Map<String, String> props = jvmb.propertiesCopy();
     
     // settings are mutually exclusive
-    boolean all = DrJava.getConfig().getSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED).
-      equals(OptionConstants.ConcJUnitCheckChoices.ALL);
-    boolean noLucky = DrJava.getConfig().getSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED).
-      equals(OptionConstants.ConcJUnitCheckChoices.NO_LUCKY);
-    boolean onlyThreads = DrJava.getConfig().getSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED).
-      equals(OptionConstants.ConcJUnitCheckChoices.ONLY_THREADS);
-    boolean none = DrJava.getConfig().getSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED).
-      equals(OptionConstants.ConcJUnitCheckChoices.NONE);
+    boolean all = DrJava.getConfig().getSetting(CONCJUNIT_CHECKS_ENABLED).
+      equals(ConcJUnitCheckChoices.ALL);
+    boolean noLucky = DrJava.getConfig().getSetting(CONCJUNIT_CHECKS_ENABLED).
+      equals(ConcJUnitCheckChoices.NO_LUCKY);
+    boolean onlyThreads = DrJava.getConfig().getSetting(CONCJUNIT_CHECKS_ENABLED).
+      equals(ConcJUnitCheckChoices.ONLY_THREADS);
+    boolean none = DrJava.getConfig().getSetting(CONCJUNIT_CHECKS_ENABLED).
+      equals(ConcJUnitCheckChoices.NONE);
     // "threads" is enabled as long as the setting isn't NONE
     props.put("edu.rice.cs.cunit.concJUnit.check.threads.enabled",
               new Boolean(!none).toString());
@@ -843,21 +852,21 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 
     @Override public void started(InterpreterJVMRemoteI i) {
       if (_state.compareAndSet(this, new FreshRunningState(i))) {
-        boolean enforceAllAccess = DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
-          .equals(OptionConstants.DynamicJavaAccessControlChoices.PRIVATE_AND_PACKAGE); // "all"
+        boolean enforceAllAccess = DrJava.getConfig().getSetting(DYNAMICJAVA_ACCESS_CONTROL)
+          .equals(DynamicJavaAccessControlChoices.PRIVATE_AND_PACKAGE); // "all"
         try { i.setEnforceAllAccess(enforceAllAccess); }
         catch (RemoteException re) { _handleRemoteException(re); }
         
-        boolean enforcePrivateAccess = !DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
-          .equals(OptionConstants.DynamicJavaAccessControlChoices.DISABLED); // not "none"
+        boolean enforcePrivateAccess = !DrJava.getConfig().getSetting(DYNAMICJAVA_ACCESS_CONTROL)
+          .equals(DynamicJavaAccessControlChoices.DISABLED); // not "none"
         try { i.setEnforcePrivateAccess(enforcePrivateAccess); }
         catch (RemoteException re) { _handleRemoteException(re); }
         
-        Boolean requireSemicolon = DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_REQUIRE_SEMICOLON);
+        Boolean requireSemicolon = DrJava.getConfig().getSetting(DYNAMICJAVA_REQUIRE_SEMICOLON);
         try { i.setRequireSemicolon(requireSemicolon); }
         catch (RemoteException re) { _handleRemoteException(re); }
         
-        Boolean requireVariableType = DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_REQUIRE_VARIABLE_TYPE);
+        Boolean requireVariableType = DrJava.getConfig().getSetting(DYNAMICJAVA_REQUIRE_VARIABLE_TYPE);
         try { i.setRequireVariableType(requireVariableType); }
         catch (RemoteException re) { _handleRemoteException(re); }
         

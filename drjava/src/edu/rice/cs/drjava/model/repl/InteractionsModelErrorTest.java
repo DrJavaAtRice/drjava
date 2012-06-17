@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -83,8 +83,8 @@ import static edu.rice.cs.drjava.model.repl.InteractionsModelTest.IncompleteInpu
   */
 public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   protected static final String UNARY_FUN_NON_PUBLIC_INTERFACE_TEXT = 
-    "trait UnaryFun {\n"+
-    "  def apply(arg: Object): Object\n"+
+    "trait UnaryFun {\n" +
+    "  def apply(arg: Object): Object\n" +
     "}";
   protected static final String UNARY_FUN_PUBLIC_INTERFACE_TEXT = 
     "trait UnaryFun {\n"+
@@ -92,17 +92,17 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     "}";
 
   protected static final String UNARY_FUN_NON_PUBLIC_CLASS_TEXT = 
-    "abstract class UnaryFun {\n"+
-    "  def apply(arg: Object): Object\n"+
+    "abstract class UnaryFun {\n" +
+    "  def apply(arg: Object): Object\n" +
     "}";
   protected static final String UNARY_FUN_PUBLIC_CLASS_TEXT = 
-    "abstract class UnaryFun {\n"+
-    "  def apply(arg: Object): Object\n"+
+    "abstract class UnaryFun {\n" +
+    "  def apply(arg: Object): Object\n" +
     "}";
   protected static final String CLASS_IN_PACKAGE_CLASS_TEXT = 
-    "package foo\n"+
-    "class Bar {\n"+
-    "  def run() { }\n"+
+    "package foo\n" +
+    "class Bar {\n" +
+    "  def run() { }\n" +
     "}";
 
   private volatile InteractionsPaneOptions _interpreterOptions;
@@ -187,7 +187,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     _log.log("testInterpretExtendPublic started");
     
     OpenDefinitionsDocument doc = setupDocument(UNARY_FUN_PUBLIC_INTERFACE_TEXT);
-    final File file = createFile("UnaryFun.java");
+    final File file = createFile("UnaryFun.scala");
     saveFile(doc, new FileSelector(file));
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
@@ -249,7 +249,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     _log.log("testInterpretExtendPublic started");
     
     OpenDefinitionsDocument doc = setupDocument(UNARY_FUN_PUBLIC_CLASS_TEXT);
-    final File file = createFile("UnaryFun.java");
+    final File file = createFile("UnaryFun.scala");
     saveFile(doc, new FileSelector(file));
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
@@ -281,7 +281,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     final File dir = tempDirectory();
     final File packDir = new File(dir, "foo");
     packDir.mkdir();
-    final File file = new File(packDir, "Bar.java");
+    final File file = new File(packDir, "Bar.scala");
     saveFile(doc, new FileSelector(file));
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);

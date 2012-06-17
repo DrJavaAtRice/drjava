@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -134,7 +134,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     }
     addTab(_tabs,"About",createCopyrightTab());
     LICENSE = getLicense();
-    if (LICENSE != null) addTab(_tabs,"DrJava License",createTextScroller(LICENSE));
+    if (LICENSE != null) addTab(_tabs,"DrScala License",createTextScroller(LICENSE));
     
     addTab(_tabs,"DynamicJava License",createTextScroller(DYADE_LICENSE));
     addTab(_tabs,"Eclipse License",createTextScroller(ECLIPSE_LICENSE));
@@ -183,7 +183,7 @@ public class AboutDialog extends JDialog implements ActionListener {
   public static JComponent createCopyrightTab() {
     final JPanel panel = new JPanel(new BorderLayout());
 
-    final StringBuilder sb = new StringBuilder("DrJava Version : ");
+    final StringBuilder sb = new StringBuilder("DrScala Version : ");
     sb.append(Version.getVersionString());
     FileConfiguration config = DrJava.getConfig();
     if (config!=null) {
@@ -342,7 +342,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     "* Redistributions in binary form must reproduce the above copyright " + 
     "notice, this list of conditions and the following disclaimer in the " + 
     "documentation and/or other materials provided with the distribution.\n" + 
-    "* Neither the names of DrJava, the JavaPLT group, Rice University, nor the " + 
+    "* Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the " + 
     "names of its contributors may be used to endorse or promote products " + 
     "derived from this software without specific prior written permission.\n\n" + 
     "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS " + 
@@ -583,11 +583,11 @@ public class AboutDialog extends JDialog implements ActionListener {
     "in any resulting litigation.";
 
   public static final String INTRODUCTION =
-    "DrJava is a pedagogic programming environment for Java, intended to help students focus more on program" + 
+    "DrScala is a pedagogic programming environment for Scala, intended to help students focus more on program" + 
     " design than on the features of a complicated development environment. It provides an Interactions" + 
     " window based on a \"read-eval-print loop\", which allows programmers to develop, test, and debug" + 
     " Java programs in an interactive, incremental fashion.\n\n" + 
-    "Home Page: http://www.drjava.org\nPaper: http://drjava.sf.net/papers/drjava-paper.shtml";
+    "Home Page: http://www.drscala.org\nPaper: http://drjava.sf.net/papers/drjava-paper.shtml";
 
   public static class ImageInfo {
     private final String name;

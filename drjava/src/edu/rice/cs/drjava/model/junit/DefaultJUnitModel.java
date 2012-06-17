@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -85,6 +85,8 @@ import edu.rice.cs.util.Log;
 import org.objectweb.asm.*;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
+import static edu.rice.cs.drjava.config.OptionConstants.*;
+
 //import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
 
 /** Manages unit testing via JUnit.
@@ -282,6 +284,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
           final CompilerListener listenerThis = this;
           try {
+            _log.log("compileEnded called.  outOfSync = " + _model.hasOutOfSyncDocuments(lod));
             if (_model.hasOutOfSyncDocuments(lod) || _model.getNumCompilerErrors() > 0) {
               nonTestCase(allTests, _model.getNumCompilerErrors() > 0);
               return;
@@ -364,10 +367,10 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     _log.log("openDocFiles = " + openDocFiles);
     
     /* Names of test classes. */
-    final ArrayList<String> classNames = new ArrayList<String>();
+    final ArrayList<String> classNames = new ArrayList<String>();  // TODO: convert classNames/files to HashSet<Pair<String, File>>
     
     /* Source files corresonding to potential test class files */
-    final ArrayList<File> files = new ArrayList<File>();
+    final ArrayList<File> files = new ArrayList<File>();           
     
     /* Flag indicating if project is open */
     boolean isProject = _model.isProjectActive();
@@ -437,7 +440,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               if (indexOfExtDot == -1) continue;  // RMI stub class files return source file names without extensions
               
               // Language level processing is disabled in DrScala
-              /* Determine if this java source file was generated from a language levels file. */
+              /* Determine if this java source file was generated from a .java or a .scala file. */
               String strippedName = javaSourceFileName.substring(0, indexOfExtDot);
               _log.log("Stripped name = " + strippedName);
               
@@ -445,24 +448,17 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               
               if (openDocFiles.contains(javaSourceFileName)) sourceFileName = javaSourceFileName;
               else if (openDocFiles.contains(strippedName + OptionConstants.SCALA_FILE_EXTENSION))
+                sourceFileName = strippedName + OptionConstants.SCALA_FILE_EXTENSION;
+              else if (openDocFiles.contains(strippedName + OptionConstants.JAVA_FILE_EXTENSION))
                 sourceFileName = strippedName + OptionConstants.JAVA_FILE_EXTENSION;
-              else if (openDocFiles.contains(strippedName + OptionConstants.SCALA_FILE_EXTENSION))
-                sourceFileName = strippedName + OptionConstants.JAVA_FILE_EXTENSION;
-//              else if (openDocFiles.contains(strippedName + OptionConstants.DJ_FILE_EXTENSION))
-//                sourceFileName = strippedName + OptionConstants.DJ_FILE_EXTENSION;
-//              else if (openDocFiles.contains(strippedName + OptionConstants.OLD_DJ0_FILE_EXTENSION))
-//                sourceFileName = strippedName + OptionConstants.OLD_DJ0_FILE_EXTENSION;
-//              else if (openDocFiles.contains(strippedName + OptionConstants.OLD_DJ1_FILE_EXTENSION))
-//                sourceFileName = strippedName + OptionConstants.OLD_DJ1_FILE_EXTENSION;
-//              else if (openDocFiles.contains(strippedName + OptionConstants.OLD_DJ2_FILE_EXTENSION))
-//                sourceFileName = strippedName + OptionConstants.OLD_DJ2_FILE_EXTENSION;
+
               else continue; // no matching source file is open
               
               _log.log("File found in openDocFiles = "  + openDocFiles.contains(sourceFileName));
               File sourceFile = new File(sourceFileName);
               classNames.add(className.value());
               files.add(sourceFile);
-              _log.log("Class " + className + "added to classNames.   File " + sourceFileName + " added to files.");
+              _log.log("Class " + className + " added to classNames.   File " + sourceFileName + " added to files.");
             }
             catch(IOException e) { /* ignore it; can't read class file */ }
           }
@@ -474,6 +470,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       throw new UnexpectedException(e); // triggers _junitInterrupted which runs hourglassOff
     }
     
+    _log.log("files = " + files);
     /** Run the junit test suite that has already been set up on the slave JVM */
     _testInProgress = true;
      _log.log("Spawning test thread");

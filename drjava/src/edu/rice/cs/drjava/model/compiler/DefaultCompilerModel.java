@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -243,52 +243,76 @@ public class DefaultCompilerModel implements CompilerModel {
 //    _LLSTM.clearCache();
 //    System.err.println("_doCompile(" + docs + ") called");
     final ArrayList<File> filesToCompile = new ArrayList<File>();
+//    final ArrayList<OpenDefinitionsDocument> validDocs = new ArrayList<OpenDefinitionsDocument>();
     final ArrayList<File> excludedFiles = new ArrayList<File>();
-    final ArrayList<DJError> packageErrors = new ArrayList<DJError>();
+    final ArrayList<DJError> prelimErrors = new ArrayList<DJError>();
+    File sourceRoot = FileOps.NULL_FILE;
+    
+    /* Filter docs to construct filesToCompile */
     for (OpenDefinitionsDocument doc : docs) {
       if (doc.isSourceFile()) {
         File f = doc.getFile();
         // Check for null in case the file is untitled (not sure this is the correct check)
-        if (f != null && f != FileOps.NULL_FILE) { filesToCompile.add(f); }
-        doc.setCachedClassFile(FileOps.NULL_FILE); // clear cached class file
-        
-        try { doc.getSourceRoot(); }
-        catch (InvalidPackageException e) {
-          packageErrors.add(new DJError(f, e.getMessage(), false));
+        if (f != null && f != FileOps.NULL_FILE) {
+          String name = f.getName();
+          assert name.endsWith(".scala") || name.endsWith(".java");
+          filesToCompile.add(f);
+          doc.setCachedClassFile(FileOps.NULL_FILE); // clear cached class file
+          // update sourceRoot if necessary
+          try {
+            if (sourceRoot == FileOps.NULL_FILE) 
+              sourceRoot = doc.getSourceRoot();
+            else {
+              File newRoot = doc.getSourceRoot();
+              if (! newRoot.equals(sourceRoot)) {
+                System.err.println("***** File " + f + " has a different source root.");
+                throw new IllegalArgumentException("File " + f + " has a different source root than the first file: "
+                                                     + filesToCompile.get(0).getName());
+              }
+            } 
+          }
+          catch (Exception e) {
+            prelimErrors.add(new DJError(f, e.getMessage(), false));
+          }
+        }
+        else {
+          excludedFiles.add(f);
+          _log.log("Adding " + f + " to excluded files");
         }
       }
-      else {
-        excludedFiles.add(doc.getFile());
-        _log.log("Adding " + doc.getFile() + " to excluded files");
-      }
     }
+    
+    if (filesToCompile.size() == 0) 
+      prelimErrors.add(new DJError("None of the documents in " + docs + " is a valid source file!", false));
     
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.compileStarted(); } });
     
     try {
-      if (! packageErrors.isEmpty()) { _distributeErrors(packageErrors); }
-      else {
-        try {
-          File buildDir = _model.getBuildDirectory();
-          if (buildDir != null && buildDir != FileOps.NULL_FILE && ! buildDir.exists() && ! buildDir.mkdirs()) {
-            _log.log("Could not create build directory: " + buildDir);
-            throw new IOException("Could not create build directory: " + buildDir);
-          }
-          
-//          File workDir = _model.getWorkingDirectory();
-//          if (workDir == FileOps.NULL_FILE) workDir = null;
-//          if (workDir != null && ! workDir.exists() && ! workDir.mkdirs()) {h
-//            throw new IOException("Could not create working directory: " + workDir);
-//          }
-          _log.log("Calling _compileFiles(" + filesToCompile + ", " + buildDir + ")");
-          _compileFiles(filesToCompile, buildDir);
-        }
-        catch (Throwable t) {
-          DJError err = new DJError(t.toString(), false);
-          _distributeErrors(Arrays.asList(err));
-          throw new UnexpectedException(t);
-        }
+      if (! prelimErrors.isEmpty()) { 
+        System.err.println("Preliminary errors found in compilation");
+        _distributeErrors(prelimErrors); 
       }
+      else {
+        assert filesToCompile.size() > 0;
+        // Determine output directory (buildDir)
+        
+        File buildDir = _model.isProjectActive() ? _model.getBuildDirectory() : sourceRoot;
+        if (buildDir == null || buildDir == FileOps.NULL_FILE)   // build directory may not be set in project 
+          buildDir = sourceRoot;
+        
+        if (! buildDir.exists() && ! buildDir.mkdirs()) {   // project file build directory may not exist yet (?)
+          _log.log("Could not create build directory: " + buildDir);
+          throw new IOException("Could not create build directory: " + buildDir);
+        }
+        
+        System.err.println("Calling _compileFiles(" + filesToCompile + ", " + buildDir + ")");
+        _compileFiles(filesToCompile, buildDir);
+      }
+    }
+    catch (Throwable t) {
+      DJError err = new DJError(t.toString(), false);
+      _distributeErrors(Arrays.asList(err));
+      throw new UnexpectedException(t);
     }
     finally {
       Utilities.invokeLater(new Runnable() {
@@ -296,22 +320,6 @@ public class DefaultCompilerModel implements CompilerModel {
       });
     }
   }
-  
-  
-  //-------------------------------- Helpers --------------------------------//
-  
-  // Disable Java language levels processing
-//  /** Converts JExprParseExceptions thrown by the JExprParser in language levels to CompilerErrors. */
-//  private LinkedList<DJError> _parseExceptions2CompilerErrors(LinkedList<JExprParseException> pes) {
-//    final LinkedList<DJError> errors = new LinkedList<DJError>();
-//    Iterator<JExprParseException> iter = pes.iterator();
-//    while (iter.hasNext()) {
-//      JExprParseException pe = iter.next();
-//      errors.addLast(new DJError(pe.getFile(), pe.currentToken.beginLine-1, pe.currentToken.beginColumn-1, 
-//                                 pe.getMessage(), false));
-//    }
-//    return errors;
-//  }
   
   /** Converts errors thrown by the language level visitors to CompilerErrors. */
   private LinkedList<DJError> _visitorErrors2CompilerErrors(LinkedList<Pair<String, JExpressionIF>> visitorErrors) {
@@ -336,73 +344,35 @@ public class DefaultCompilerModel implements CompilerModel {
     * All public compile methods delegate to this one so this method is the only one that uses synchronization to 
     * prevent compiling and unit testing at the same time.
     * @param files The files to be compiled
-    * @param buildDir The output directory for all the .class files; @code{null} means output to the same 
-    *                 directory as the source file
+    * @param buildDir The output directory for all the .class files; assumed to be a valid directory
     */
   private void _compileFiles(List<File> files, File buildDir) throws IOException {
     _log.log("DefaultCompilerModel._compileFiles called with files = " + files + " and buildDir = " + buildDir);
-    if (! files.isEmpty()) {
-      /* Canonicalize buildDir */
-      if (buildDir == FileOps.NULL_FILE) buildDir = null; // compiler interface wants null pointer if no build directory
-      if (buildDir != null) buildDir = IOUtil.attemptCanonicalFile(buildDir);
-      
-      CompilerInterface compiler = getActiveCompiler();
-      if (compiler.getName().contains("Scala") && buildDir == null) {
-        /* The interface ScalaCompilerInterface contains two extra methods that we need to call from
-         * this method (getOutputDir and setOutputDir).  We cannot simply cast to the class of the
-         * Scala compiler adapater because it is loaded with a DIFFERENT class loader. 
-         */
-        ScalaCompilerInterface scalaCompiler = (ScalaCompilerInterface) compiler;
-        
-        /* Set buildDir to root for first file */
-        try { buildDir =_model.getDocumentForFile(files.get(0)).getSourceRoot(); }  // File must exist 
-        catch (InvalidPackageException e) { /* ignore; next line recovers */ }
-        
-        if (buildDir == null) buildDir = _model.getWorkingDirectory();  // Can working directory be null?
-        if (buildDir == null) buildDir = new File(System.getProperty("user.dir"));
-
-        if (buildDir != null) buildDir = IOUtil.attemptCanonicalFile(buildDir);
-        scalaCompiler.setOutputDir(buildDir);
-        if (_model.isProjectActive()) _model.setBuildDirectory(buildDir);  // Update project file if project exists
-      }
-      
-      _buildDir = buildDir;  // Store build directory in this compiler model
-      
-      List<File> classPath = CollectUtil.makeList(_model.getClassPath());
-      
-      // Temporary hack to allow a boot class path to be specified
-      List<File> bootClassPath = null;
-      String bootProp = System.getProperty("drjava.bootclasspath");
-      if (bootProp != null) { bootClassPath = CollectUtil.makeList(IOUtil.parsePath(bootProp)); }
-      
-      final LinkedList<DJError> errors = new LinkedList<DJError>();
-      
-      // Disable DrJava language levels processing
-      
-//      List<? extends File> preprocessedFiles = _compileLanguageLevelsFiles(files, errors, classPath, bootClassPath);
-      
-//      if (errors.isEmpty()) {
-      // Mutual exclusion with JUnit code that finds all test classes (in DefaultJUnitModel)
-      synchronized(_compilerLock) {
-//          if (preprocessedFiles == null) {
-        _log.log("Calling the compiler adapter on: \n  files = " + files + "\n classPath = " + classPath +
-                 "\n buildDir = " + buildDir + "\n  bootClassPath = " + bootClassPath);
-        errors.addAll(compiler.compile(files, classPath, null, buildDir, bootClassPath, null, true));
-      }
-//          else {
-//            /** If compiling a language level file, do not show warnings, as these are not caught by the language level 
-//              * parser */
-//              _log.log("Calling the compiler adapter with language level files on: \n  files = " + files + 
-//                       "\n classPath = " + classPath + "\n buildDir = " + buildDir + "\n  bootClassPath = " + 
-//                       bootClassPath);
-//            errors.addAll(compiler.compile(preprocessedFiles, classPath, null, buildDir, bootClassPath, null, false));
-//          }
-//    }
+    assert ! files.isEmpty();
+    
+    /* Canonicalize buildDir */
+    buildDir = IOUtil.attemptCanonicalFile(buildDir);
+    
+    _buildDir = buildDir;  // Cache build directory in this compiler model so it can displayed in CompilerErrorPanel
+    
+    CompilerInterface compiler = getActiveCompiler();
+    
+    List<File> classPath = CollectUtil.makeList(_model.getClassPath());
+    System.err.println("Compilation class path is: " + classPath);
+    
+    // Temporary hack to allow a boot class path to be specified
+    List<File> bootClassPath = null;
+    String bootProp = System.getProperty("drjava.bootclasspath");
+    if (bootProp != null) { bootClassPath = CollectUtil.makeList(IOUtil.parsePath(bootProp)); }
+    
+    final LinkedList<DJError> errors = new LinkedList<DJError>();
+    
+    // Mutual exclusion with JUnit code that finds all test classes (in DefaultJUnitModel)
+    synchronized(_compilerLock) {
+      _log.log("Calling the compiler adapter on: \n  files = " + files + "\n classPath = " + classPath +
+               "\n buildDir = " + buildDir + "\n  bootClassPath = " + bootClassPath);
+      errors.addAll(compiler.compile(files, classPath, null, buildDir, bootClassPath, null, true));
       _distributeErrors(errors);
-    }
-    else { 
-      // TODO: Is this necessary?
-      _distributeErrors(Collections.<DJError>emptyList());
     }
   }
   
@@ -412,7 +382,7 @@ public class DefaultCompilerModel implements CompilerModel {
 //    outputDirChooser.showDialog();
 //    return outputDirChooser.getSelectedDirectory();
 //  }
-    
+  
   
   /** Reorders files so that all file names containing "Test" are at the end.  */
   private static List<File> _testFileSort(List<File> files) {

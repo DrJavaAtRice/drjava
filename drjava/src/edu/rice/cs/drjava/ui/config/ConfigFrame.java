@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -1471,7 +1471,7 @@ public class ConfigFrame extends SwingFrame {
           String[] s = new String[] { " ", " ", " ", " " };
           boolean isConcJUnit = true;
           if ((!junitLocEnabled.getComponent().isSelected()) || (f==null) || FileOps.NULL_FILE.equals(f) || !f.exists()) {
-            s[0] = "DrJava uses the built-in ConcJUnit framework.";
+            s[0] = "DrScala uses the built-in ConcJUnit framework.";
           }
           else {
             String type = "ConcJUnit";
@@ -1479,7 +1479,7 @@ public class ConfigFrame extends SwingFrame {
               type = "JUnit";
               isConcJUnit = false;
             }
-            s[0] = "DrJava uses an external "+type+" framework.";
+            s[0] = "DrScala uses an external "+type+" framework.";
           }
           if (!isConcJUnit) {
             s[1] = "JUnit does not support all-thread, no-join";

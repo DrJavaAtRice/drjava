@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -588,6 +588,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                     "New JUnit Test Case",
                                                     JOptionPane.QUESTION_MESSAGE);
       if (testName != null) {
+        /* In DrScala, Java language levels are disabled. But LANGUAGE_LEVEL_EXTENSIONS includes ".scala" and ".java". */
         String ext;
         for(int i = 0; i < OptionConstants.LANGUAGE_LEVEL_EXTENSIONS.length; i++) {
           ext = OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[i];
@@ -1515,6 +1516,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     else {
       // try appending ".scala" and ".java" to see if it's unique
       boolean exact = false;
+      /* In DrScala, Java language levels are disabled. But LANGUAGE_LEVEL_EXTENSIONS includes ".scala" and ".java". */
       for (String attemptedExt: OptionConstants.LANGUAGE_LEVEL_EXTENSIONS) {
         pim.setMask(mask);
         pim.extendMask(attemptedExt);
@@ -1535,7 +1537,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           break;
         }
       }
-      if (!exact) {
+      if (! exact) {
         // not exactly one match
         pim.setMask(mask);
         if (pim.getMatchingItems().size() == 0) {
@@ -1777,7 +1779,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         try {
           Set<JavaAPIListEntry> additionalList = _generateJavaAPISet(url + "/",
                                                                      "", // relative links
-                                                                     new URL(url+"/allclasses-frame.html"));
+                                                                     new URL(url + "/allclasses-frame.html"));
           _javaAPISet.addAll(additionalList);
         }
         catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
@@ -1872,6 +1874,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             else {
               // try appending ".scala" and ".java" to see if it's unique
               boolean exact = false;
+              /* In DrScala, Java language levels are disabled. But LANGUAGE_LEVEL_EXTENSIONS includes ".scala" and ".java". */
               for(String attemptedExt: OptionConstants.LANGUAGE_LEVEL_EXTENSIONS) {
                 pim.setMask(mask);
                 pim.extendMask(attemptedExt);
@@ -1885,7 +1888,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                   break;
                 }
               }
-              if (!exact) {
+              if (! exact) {
                 // not exactly one match
                 pim.setMask(mask);
                 int found = 0;
@@ -9180,10 +9183,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       // update syntax highlighting for all documents
       _model.updateSyntaxHighlighting();
-      // update availability of language levels
-      _guiAvailabilityNotifier.ensureAvailabilityIs
-        (GUIAvailabilityListener.ComponentType.LANGUAGE_LEVELS,
-         _model.getCompilerModel().getActiveCompiler().supportsLanguageLevels());
+      /* In DrScala, Java language levels is disabled. */
+//      // update availability of language levels
+//      _guiAvailabilityNotifier.ensureAvailabilityIs
+//        (GUIAvailabilityListener.ComponentType.LANGUAGE_LEVELS,
+//         _model.getCompilerModel().getActiveCompiler().supportsLanguageLevels());
     }
     
     public void prepareForRun(final OpenDefinitionsDocument doc) {
@@ -9542,9 +9546,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             "- it is a subclass of junit.framework.TestCase.\n";
         }
       }
-      JOptionPane.showMessageDialog(MainFrame.this, message,
-                                    title,
-                                    JOptionPane.ERROR_MESSAGE);
+      JOptionPane.showMessageDialog(MainFrame.this, message, title, JOptionPane.ERROR_MESSAGE);
+      
       // clean up as in JUnitEnded 
       try {
         if (!didCompileFail) showTab(_junitPanel, true);

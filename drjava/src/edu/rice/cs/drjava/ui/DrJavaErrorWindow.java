@@ -10,7 +10,7 @@
  *    * Redistributions in binary form must reproduce the above copyright
  *      notice, this list of conditions and the following disclaimer in the
  *      documentation and/or other materials provided with the distribution.
- *    * Neither the names of DrJava, the JavaPLT group, Rice University, nor the
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
  *      names of its contributors may be used to endorse or promote products
  *      derived from this software without specific prior written permission.
  * 
@@ -29,8 +29,8 @@
  * This software is Open Source Initiative approved Open Source Software.
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * This file is part of DrJava.  Download the current version of this project
- * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
  * END_COPYRIGHT_BLOCK*/
 
@@ -56,7 +56,7 @@ import edu.rice.cs.drjava.config.FileConfiguration;
 
 /** Displays uncaught exceptions and logged conditions.
  *  This window is not automatically updated when new errors occur. In the case of errors, we want to
- *  minimize the effects on the GUI. If we want to see an updated dialog, we can click on the "DrJava Errors"
+ *  minimize the effects on the GUI. If we want to see an updated dialog, we can click on the "DrScala Errors"
  *  button again.
  *  @version $Id$
  */
@@ -124,7 +124,7 @@ public class DrJavaErrorWindow extends JDialog {
   
   /** Creates a window to graphically display the errors that have occurred in the code of DrJava. */
   private DrJavaErrorWindow() {
-    super(_parentFrame, "DrJava Errors");
+    super(_parentFrame, "DrScala Errors");
 
     this.setSize(600,400);
 
@@ -302,7 +302,7 @@ public class DrJavaErrorWindow extends JDialog {
   public static String getSystemAndDrJavaInfo() {
     final StringBuilder b = new StringBuilder();
     b.append("System Properties:\n");
-    b.append("DrJava Version ");
+    b.append("DrScala Version ");
     b.append(edu.rice.cs.drjava.Version.getVersionString());
     FileConfiguration config = DrJava.getConfig();
     if (config!=null) {
@@ -313,7 +313,7 @@ public class DrJavaErrorWindow extends JDialog {
       }
     }
     b.append('\n');
-    b.append("DrJava Build Time ");
+    b.append("DrScala Build Time ");
     b.append(edu.rice.cs.drjava.Version.getBuildTimeString());
     b.append("\n\n");
     java.util.Properties props = System.getProperties();
@@ -338,7 +338,7 @@ public class DrJavaErrorWindow extends JDialog {
       b.append('\n');
     }
     b.append('\n');
-    b.append("DrJava configuration file\n");
+    b.append("DrScala configuration file\n");
     b.append(DrJava.getConfig().toString());
     
     b.append("\n\nUsed memory: about ");
