@@ -254,28 +254,32 @@ public class DefaultCompilerModel implements CompilerModel {
         File f = doc.getFile();
         // Check for null in case the file is untitled (not sure this is the correct check)
         if (f != null && f != FileOps.NULL_FILE) {
+          // process titled source file
           String name = f.getName();
           assert name.endsWith(".scala") || name.endsWith(".java");
           filesToCompile.add(f);
           doc.setCachedClassFile(FileOps.NULL_FILE); // clear cached class file
-          // update sourceRoot if necessary
-          try {
-            if (sourceRoot == FileOps.NULL_FILE) 
-              sourceRoot = doc.getSourceRoot();
-            else {
-              File newRoot = doc.getSourceRoot();
-              if (! newRoot.equals(sourceRoot)) {
-                System.err.println("***** File " + f + " has a different source root.");
-                throw new IllegalArgumentException("File " + f + " has a different source root than the first file: "
-                                                     + filesToCompile.get(0).getName());
-              }
-            } 
-          }
-          catch (Exception e) {
-            prelimErrors.add(new DJError(f, e.getMessage(), false));
+          
+          // in flat file mode, ensure that all files have a common source root
+          if (! _model.isProjectActive()) {
+            try {
+              if (sourceRoot == FileOps.NULL_FILE) 
+                sourceRoot = doc.getSourceRoot();
+              else {
+                File newRoot = doc.getSourceRoot();
+                if (! newRoot.equals(sourceRoot)) {
+                  System.err.println("***** File " + f + " has a different source root.");
+                  throw new IllegalArgumentException("File " + f + " has a different source root than the first file: "
+                                                       + filesToCompile.get(0).getName());
+                }
+              } 
+            }
+            catch (Exception e) {
+              prelimErrors.add(new DJError(f, e.getMessage(), false));
+            }
           }
         }
-        else {
+        else { // add non-source file to excluded files list
           excludedFiles.add(f);
           _log.log("Adding " + f + " to excluded files");
         }

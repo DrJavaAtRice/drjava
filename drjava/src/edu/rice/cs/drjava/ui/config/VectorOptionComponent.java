@@ -299,7 +299,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     DefaultTableCellRenderer _default = new DefaultTableCellRenderer(); 
     public Component getTableCellRendererComponent(JTable table, Object value,
                                                    boolean isSelected, boolean hasFocus, int row, int column) {
-      if (value instanceof Component) return (Component)value;
+      if (value instanceof Component) return (Component) value;
       return _default.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
     }
   }
