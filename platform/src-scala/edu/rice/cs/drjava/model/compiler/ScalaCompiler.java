@@ -1,35 +1,38 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/
- * or http://sourceforge.net/projects/drjava/
+ * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *    * Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *    * Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *    * Neither the names of DrJava, DrScala, the JavaPLT group, Rice University, nor the
+ *      names of its contributors may be used to endorse or promote products
+ *      derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * DrJava Open Source License
+ * This software is Open Source Initiative approved Open Source Software.
+ * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
- * Copyright (C) 2001-2010 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
- *
- * Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
+ * This file is part of DrScala.  Download the current version of this project
+ * from http://www.drscala.org/.
  * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
- * documentation files (the "Software"), to deal with the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and 
- * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
- *     - Redistributions of source code must retain the above copyright notice, this list of conditions and the 
- *       following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
- *       following disclaimers in the documentation and/or other materials provided with the distribution.
- *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the names of its contributors may be used to 
- *       endorse or promote products derived from this Software without specific prior written permission.
- *     - Products derived from this software may not be called "DrJava" nor use the term "DrJava" as part of their 
- *       names without prior written permission from the JavaPLT group.  For permission, write to javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
- * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
- * CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
- * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
- * WITH THE SOFTWARE.
- * 
- *END_COPYRIGHT_BLOCK*/
+ * END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.compiler;
 
@@ -65,8 +68,7 @@ import scala.tools.nsc.Global;
 import scala.tools.nsc.Settings;
 import scala.tools.nsc.io.PlainFile;
 import scala.tools.nsc.io.Path;
-
-import static edu.rice.cs.drjava.config.OptionConstants.*;
+import scala.tools.nsc.reporters.ConsoleReporter;
 
 /** An implementation of JavacCompiler that supports compiling with the Scala 2.9.x compiler based on Java 1.7.0.
   * Must be compiled using javac 1.7.0 and with Scala compiler jar on the boot classpath.  The class 
@@ -149,13 +151,11 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
     * otherwise false 
     * @return true if the specified file is a source file for this compiler. */
   public boolean isSourceFileForThisCompiler(File f) {
+    // by default, use DrJavaFileUtils.isSourceFile
 //    _log.log("ScalaCompiler.isSourceFile(" + f + ") called");
-    return isScalaSourceFile(f) || isJavaSourceFile(f);
+    String fileName = f.getName();
+    return fileName.endsWith(SCALA_FILE_EXTENSION) || fileName.endsWith(OptionConstants.JAVA_FILE_EXTENSION);
   }
-  
-  public static boolean isScalaSourceFile(File f) { return f.getName().endsWith(SCALA_FILE_EXTENSION); }
-  
-  public static boolean isJavaSourceFile(File f) { return f.getName().endsWith(JAVA_FILE_EXTENSION); }
   
   /** Return the set of source file extensions that this compiler supports.
     * @return the set of source file extensions that this compiler supports. */
@@ -177,12 +177,12 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
       /** Returns true if the file's extension matches ".scala" or ".java". */
       public boolean accept(File f) {
         if (f.isDirectory()) return true;
-        return f.getName().endsWith(SCALA_FILE_EXTENSION) || f.getName().endsWith(JAVA_FILE_EXTENSION);
+        return f.getName().endsWith(SCALA_FILE_EXTENSION) || f.getName().endsWith(OptionConstants.JAVA_FILE_EXTENSION);
       }
       
       /** @return A description of this filter to display. */
       public String getDescription() {
-        return "Scala/Java source files (*" + SCALA_FILE_EXTENSION + ", *" + JAVA_FILE_EXTENSION + ")";
+        return "Scala/Java source files (*" + SCALA_FILE_EXTENSION + ", *" + OptionConstants.JAVA_FILE_EXTENSION + ")";
       }
     };
   }
@@ -201,7 +201,7 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
     * @param f file for which to return the keywords
     * @return the set of keywords that should be highlighted in the specified file. */
   public Set<String> getKeywordsForFile(File f) {
-    return isScalaSourceFile(f) ? new HashSet<String>(SCALA_KEYWORDS) : new HashSet<String>();
+    return isSourceFileForThisCompiler(f) ? new HashSet<String>(SCALA_KEYWORDS) : new HashSet<String>();
   }
   
   /** Set of Scala keywords for special coloring. */
@@ -243,13 +243,19 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
     
 //    Utilities.show("compile command for Scala called");
     
+    ConsoleReporter reporter = new DrJavaReporter(errors);
+
     // Create a Settings object that captures the Java class path as the Scala class path!
-    Settings settings = new Settings();
-    settings.processArgumentString("-usejavacp");
-    System.err.println("Passing argument string '" + "-d " + '"' + destination.getPath() + '"' + " to the scala compiler (Global)");
+    Settings settings = reporter.settings();
+    
+//    settings.processArgumentString("-usejavacp");
+    _log.log("Passing argument string '" + "-d " + '"' + destination.getPath() + '"' + "to the scala compiler (Global)");
     settings.processArgumentString("-d " + '"' + destination.getPath() + '"');
-    settings.processArgumentString("-cp " + '"' + dJPathToPath(classPath) + '"');
-    scala.tools.nsc.reporters.Reporter reporter = new DrJavaReporter(errors);
+    // additionalBootClassPathForInteractions consists of the jar files required to run scalac
+    String cp = additionalBootClassPathForInteractions().toString() + dJPathToPath(classPath);
+    settings.processArgumentString("-cp " + '"' + cp + '"');  // cp quoted because unescaped blanks may appear in Windows file names
+    Utilities.show("Location of Scala distribution is: " + _location + "\nScala compiler class path set to '" + cp + "'");
+   
     Global compiler = new Global(settings, reporter);
  
 //    Utilities.show("Scala compiler object constructed");
@@ -258,9 +264,9 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
     
     /* Build a Scala List[PlainFile] corresponding to files.  fileObjects is a Scala List of PlainFile but
      * the Java compiler does not recognize Scala generic covariant types.  */
-    scala.collection.immutable.List fileObjects = scala.collection.immutable.Nil$.MODULE$;  // the empty list in Scala
+    scala.collection.immutable.List fileObjects =   
+      scala.collection.immutable.Nil$.MODULE$;  // the empty list in Scala
     for (File f : files) fileObjects = fileObjects.$colon$colon(new PlainFile(Path.jfile2path(f)));
-    _log.log("Compiling the following files: " + files);
     try { run.compileFiles(fileObjects); }  // fileObjects has raw type List
     catch(Throwable t) {  // compiler threw an exception/error (typically out of memory error)
       errors.addFirst(new DJError("Compile exception: " + t, false));
@@ -268,14 +274,14 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
     }
     
 //    debug.logEnd("compile()");
-    System.err.println("ScalaCompiler.compile returning error list: " + errors);
     return errors;
   }
   
   /** Converts the DJ path (of type Iterable<File>) to the corresponding platform-dependent String. */
   public static String dJPathToPath(Iterable<? extends File> dJPath) {
+    final String pathSep = System.getProperty("path.separator");
     Lambda2<StringBuilder, File, StringBuilder> pathAppend = new Lambda2<StringBuilder, File, StringBuilder>() {
-      public StringBuilder value(StringBuilder sb, File f) { return sb.append(File.separator + f.getPath()); }
+      public StringBuilder value(StringBuilder sb, File f) { return sb.append(pathSep + f.getPath()); }
     }; 
         
     return IterUtil.fold(dJPath, new StringBuilder("."), pathAppend).toString();

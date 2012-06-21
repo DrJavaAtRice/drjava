@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -228,10 +228,8 @@ public abstract class JDKDescriptor {
         }
         throw new FileNotFoundException("None of "+IterUtil.toString(IterUtil.make(fileNames), "", ", ", "")+
                                         " found in "+dir);
-
       }
       throw new FileNotFoundException(dir+" is not a directory");
-
     }
   }
 }
