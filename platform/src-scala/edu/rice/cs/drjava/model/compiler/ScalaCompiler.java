@@ -254,7 +254,7 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
     // additionalBootClassPathForInteractions consists of the jar files required to run scalac
     String cp = additionalBootClassPathForInteractions().toString() + dJPathToPath(classPath);
     settings.processArgumentString("-cp " + '"' + cp + '"');  // cp quoted because unescaped blanks may appear in Windows file names
-    Utilities.show("Location of Scala distribution is: " + _location + "\nScala compiler class path set to '" + cp + "'");
+//    Utilities.show("Location of Scala distribution is: " + _location + "\nScala compiler class path set to '" + cp + "'");
    
     Global compiler = new Global(settings, reporter);
  
