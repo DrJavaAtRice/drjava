@@ -190,7 +190,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         
         String matchText = _matchText(start);
         
-        if (matchText != null) _mainFrame.updateStatusField("Bracket matches: " + matchText);
+        if (matchText != null) _mainFrame.setStatusMessage("Bracket matches: " + matchText);
         else updateStatusField();
       }
     }
@@ -600,16 +600,16 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     _booleanOptionListeners.add(bPair);
     DrJava.getConfig().addOptionListener(OptionConstants.DISPLAY_RIGHT_MARGIN, bListener);
 
-    OptionListener<Integer> iTemp = new OptionListener<Integer>() {
+    OptionListener<Integer> iListener = new OptionListener<Integer>() {
       public void optionChanged(OptionEvent<Integer> oce) {
         _numRightMarginColumns = oce.value;
         DefinitionsPane.this.repaint();
       }
     };
     Pair<Option<Integer>, OptionListener<Integer>> iPair = 
-      new Pair<Option<Integer>, OptionListener<Integer>>(OptionConstants.RIGHT_MARGIN_COLUMNS, iTemp);
+      new Pair<Option<Integer>, OptionListener<Integer>>(OptionConstants.RIGHT_MARGIN_COLUMNS, iListener);
     _integerOptionListeners.add(iPair);
-    DrJava.getConfig().addOptionListener(OptionConstants.RIGHT_MARGIN_COLUMNS, iTemp);
+    DrJava.getConfig().addOptionListener(OptionConstants.RIGHT_MARGIN_COLUMNS, iListener);
     
     cListener = new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oce) {

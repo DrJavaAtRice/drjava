@@ -57,8 +57,8 @@ import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
   */
 
 public class PendingRequestManager {
-  private JPDADebugger _manager;
-  private HashMap<String, Vector<DocumentDebugAction<?>>> _pendingActions;
+  private volatile JPDADebugger _manager;
+  private volatile HashMap<String, Vector<DocumentDebugAction<?>>> _pendingActions;
   
   public PendingRequestManager(JPDADebugger manager) {
     _manager = manager;

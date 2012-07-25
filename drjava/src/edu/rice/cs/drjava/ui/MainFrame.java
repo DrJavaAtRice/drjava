@@ -202,7 +202,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   // Status bar fields
   private final JPanel _statusBar = new JPanel(new BorderLayout()); //( layout );
   private final JLabel _statusField = new JLabel();
-  private final JLabel _statusReport = new JLabel();  //("This is the text for the center message");
+  private final JLabel _statusReport = new JLabel();
   private final JLabel _currLocationField = new JLabel();
   private final PositionListener _posListener = new PositionListener();
   
@@ -4382,7 +4382,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public void updateStatusField(String text) {
     assert EventQueue.isDispatchThread();
     _statusField.setText(text);
-    _statusField.paint(getGraphics());  // force an immediate repaint
+    _statusBar.repaint();  // force an immediate repaint
   }
   
   /** Updates the status field with the current status of the Definitions Pane. */
@@ -4409,7 +4409,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     if (! _statusField.getText().equals(text)) { 
       _statusField.setText(text); 
-      _statusField.paint(getGraphics());  // force immediate painting of the _statusField
+      _statusBar.repaint();  // force immediate painting of the _statusField
     }
   }
   
@@ -5032,7 +5032,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           success = true;
         }
       }
-      // Is _model.refreshActiveDocument() sufficient here? Before this action selected the document in navigator
+      // Is _model.refreshActiveDocument() sufficient here?  Before this action selected the document in navigator
       // it was not in flat-file mode
       _model.refreshActiveDocument();
       return success;
@@ -9995,6 +9995,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /**For test purposes only. Returns the text in the status bar. Is used to test brace matching*/
   public String getFileNameField() { return _statusField.getText(); }
+  
+  /**For test purposes only. Returns the text in the status bar. Is used to test brace matching*/
+  public String getStatusMessage() { return _statusReport.getText(); }
   
   /**For test purposes only. Returns the edit menu*/
   public JMenu getEditMenu() { return _editMenu; }

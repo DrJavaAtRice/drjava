@@ -77,40 +77,40 @@ public class ProjectProfile implements ProjectFileIR {
   
   /* Private fields */
   
-  private List<DocFile> _sourceFiles = new LinkedList<DocFile>();
-  private List<DocFile> _auxiliaryFiles = new LinkedList<DocFile>();
-  private List<DocFile> _excludedFiles = new ArrayList<DocFile>();
-  private List<String> _collapsedPaths = new ArrayList<String>();
+  private volatile List<DocFile> _sourceFiles = new LinkedList<DocFile>();
+  private volatile List<DocFile> _auxiliaryFiles = new LinkedList<DocFile>();
+  private volatile List<DocFile> _excludedFiles = new ArrayList<DocFile>();
+  private volatile List<String> _collapsedPaths = new ArrayList<String>();
   
-  private File _buildDir = FileOps.NULL_FILE;
-  private File _workDir = FileOps.NULL_FILE;
+  private volatile File _buildDir = FileOps.NULL_FILE;
+  private volatile File _workDir = FileOps.NULL_FILE;
   
-  private List<AbsRelFile> _classPathFiles = new ArrayList<AbsRelFile>();
+  private volatile List<AbsRelFile> _classPathFiles = new ArrayList<AbsRelFile>();
   
-  private String _mainClass = null;
+  private volatile String _mainClass = null;
   
   /** root of project source tree.  Invariant: _projectRoot.exists() */
-  private File _projectRoot; /* Invariant after init: _projectRoot.exists() implying _projectRoot != null. */
+  private volatile File _projectRoot; /* Invariant after init: _projectRoot.exists() implying _projectRoot != null. */
   
-  private File _projectFile;  /* Invariant after init: _projectFile.getParentFile().exists() implying _projectFile != null */
+  private volatile File _projectFile;  /* Invariant after init: _projectFile.getParentFile().exists() implying _projectFile != null */
   
-  private File _createJarFile = FileOps.NULL_FILE;
+  private volatile File _createJarFile = FileOps.NULL_FILE;
   
-  private int _createJarFlags = 0;
+  private volatile int _createJarFlags = 0;
   
-  private boolean _autoRefreshStatus = false;
+  private volatile boolean _autoRefreshStatus = false;
   
-  private HashMap<OptionParser<?>,String> _storedPreferences = new HashMap<OptionParser<?>,String>();
+  private volatile HashMap<OptionParser<?>,String> _storedPreferences = new HashMap<OptionParser<?>,String>();
   
-  private List<FileRegion> _bookmarks = new ArrayList<FileRegion>();
-  private List<DebugBreakpointData> _breakpoints = new ArrayList<DebugBreakpointData>();
-  private List<DebugWatchData> _watches = new ArrayList<DebugWatchData>();
+  private volatile List<FileRegion> _bookmarks = new ArrayList<FileRegion>();
+  private volatile List<DebugBreakpointData> _breakpoints = new ArrayList<DebugBreakpointData>();
+  private volatile List<DebugWatchData> _watches = new ArrayList<DebugWatchData>();
   
-  private String _version = "unknown";
+  private volatile String _version = "unknown";
   
-  private String _manifest = null;
+  private volatile String _manifest = null;
   
-  private static Log LOG = new Log("ProjectProfile.txt", false);
+  private volatile static Log LOG = new Log("ProjectProfile.txt", false);
   
   /** Constructs a File for fileName and forwards this call to the main constructor. */
   public ProjectProfile(String fileName) throws IOException { this(new File(fileName)); }

@@ -159,7 +159,7 @@ public class ConcJUnitUtils {
                                          null,
                                          options,
                                          options[1]);
-    if (n==0) {
+    if (n == 0) {
       // yes
       File concJUnitJarFile = FileOps.getDrJavaFile();
       if (DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION_ENABLED)) {

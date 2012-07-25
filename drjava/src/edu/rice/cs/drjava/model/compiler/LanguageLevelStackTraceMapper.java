@@ -60,10 +60,10 @@ public class LanguageLevelStackTraceMapper {
   public static final edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("llstm.txt",false);
   
   /** cache to store the tree maps */
-  private HashMap<String,TreeMap<Integer,Integer>> cache;
+  private volatile HashMap<String,TreeMap<Integer,Integer>> cache;
   
   /** model used to get the OpenDefinitionsDocuments from files */
-  private GlobalModel aGModel;
+  private volatile GlobalModel aGModel;
   
   /* constructor */
   public LanguageLevelStackTraceMapper(GlobalModel aGM){

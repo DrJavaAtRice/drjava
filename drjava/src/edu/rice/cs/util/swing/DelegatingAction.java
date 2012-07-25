@@ -57,7 +57,7 @@ public class DelegatingAction implements Action {
   };
 
   /** Can't use a more specific type parameter because of Action interface. */
-  private HashMap<String, Object> _localProperties = new HashMap<String, Object>();
+  private volatile HashMap<String, Object> _localProperties = new HashMap<String, Object>();
 
   /** The action to delegate to. If it's null, this action is disabled and all method calls will result in 
     * IllegalStateExceptions.

@@ -82,12 +82,12 @@ public class DrJavaRoot {
   
 //  /** This field is only used in the instance of this class in the Interpreter JVM. */
   
-  private static SimpleInteractionsWindow _debugConsole = null;
+  private static volatile SimpleInteractionsWindow _debugConsole = null;
   
-  private static boolean anyLineNumbersSpecified = false;
+  private static volatile boolean anyLineNumbersSpecified = false;
   
   /** Main frame of this DrJava instance. */
-  private static MainFrame _mainFrame = null;
+  private static volatile MainFrame _mainFrame = null;
   
   /* Config objects can't be public static final, since we have to delay construction until we know the 
    * config file's location.  (Might be specified on command line.) Instead, use accessor methods to 
@@ -127,7 +127,7 @@ public class DrJavaRoot {
         "removing the key \"plastic.theme\" and restarting DrJava.\n" +
         "In the meantime, the system default Look and Feel will be used.\n";
       String failureTitle = "Theme not found";
-      if(Utilities.isPlasticLaf(configLAFName)) {
+      if (Utilities.isPlasticLaf(configLAFName)) {
         String themeName = PLASTIC_THEMES_PACKAGE + "." + DrJava.getConfig().getSetting(PLASTIC_THEMES);
         try {
           PlasticTheme theme = (PlasticTheme) Class.forName(themeName).getConstructor(new Class<?>[]{ }).newInstance();
@@ -321,7 +321,7 @@ public class DrJavaRoot {
     _mainFrame.dragEnter(dropTargetDragEvent);
   }
   
-  /** User dropped something on the component. */
+  /** User dropped something on the component. Only runs in the event thread. */
   public static void drop(DropTargetDropEvent dropTargetDropEvent) {
     _mainFrame.drop(dropTargetDropEvent);
   }

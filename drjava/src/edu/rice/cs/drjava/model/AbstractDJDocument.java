@@ -106,7 +106,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //  /** Constant specifying how large pos must be before incremental analysis is applied in posInParenPhrase */
 //  public static final int POS_THRESHOLD = 10000; 
   /** The set of closing braces recognized in most indenting operations. */ 
-  public static final char[] CLOSING_BRACES = new char[] {'}', ')'};
+  public static final char[] CLOSING_BRACES = {'}', ')'};
   
   /*-------- FIELDS ----------*/
   
@@ -243,9 +243,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     for (String w: words) { prims.add(w); }
     return prims;
   }
-  
-//  /** Computes the maximum of x and y. */ 
-//  private int max(int x, int y) { return x <= y? y : x; }
   
   /** Return all highlight status info for text between start and end. This should collapse adjoining blocks with the
     * same status into one.  ONLY runs in the event thread.  Perturbs _currentLocation to improve performance.
@@ -446,8 +443,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Get the current location of the cursor in the document.  Unlike the usual swing document model, which is 
-    * stateless, we maintain a cursor position within our implementation of the reduced model.  Can be modified 
-    * by any thread locking _reduced.  The returned value may be stale if _reduced lock is not held
+    * stateless, we maintain a cursor position within our implementation of the reduced model.  Only accessed
+    * in the event thread.
     * @return where the cursor is as the number of characters into the document
     */
   public int getCurrentLocation() { return _currentLocation; }
@@ -974,7 +971,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //          Utilities.showDebug("Indenting line at offset " + selStart);
         if (_indentLine(reason)) {
           setCurrentLocation(oldPosition.getOffset()); // moves currentLocation back to original offset on line
-          if (onlyWhiteSpaceBeforeCurrent()) move(_getWhiteSpace());  // passes any additional spaces before firstNonWS
+          if (onlySpacesBeforeCurrent()) move(_getWhiteSpace());  // passes any additional spaces before firstNonWS
         }
       }
       else _indentBlock(selStart, selEnd, reason, pm);
@@ -1065,8 +1062,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return firstChar;
   }
   
-  /** Returns the number of blanks in the indent prefix for the start of the statement identified by pos.  Uses a 
-    * default set of delimiters. (';', '{', '}') and a default set of whitespace characters (' ', '\t', n', ',')
+  /** Returns the number of blanks in the indent prefix for the start of the statement identified by pos assuming
+    * statement is already properly indented.  Uses a default set of delimiters. (';', '{', '}') and a default set
+    * of whitespace characters (' ', '\t', n', ',')
     * @param pos Cursor position
     */
   public int _getIndentOfCurrStmt(int pos) {
@@ -1075,8 +1073,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return _getIndentOfCurrStmt(pos, delims, whitespace);
   }
   
-  /** Returns the number of blanks in the indent prefix of the start of the statement identified by pos.  Uses a 
-    * default set of whitespace characters: {' ', '\t', '\n', ','}
+  /** Returns the number of blanks in the indent prefix of the start of the statement identified by pos assuming
+    * statement is already properly indented.  Uses a default set of whitespace characters: {' ', '\t', '\n', ','}
     * @param pos Cursor position
     */
   public int _getIndentOfCurrStmt(int pos, char[] delims) {
@@ -1091,7 +1089,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param whitespace  characters to skip when looking for beginning of next statement
     */
   public int _getIndentOfCurrStmt(final int pos, final char[] delims, final char[] whitespace)  {
-    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     try {
       // Check cache
@@ -1108,7 +1106,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       
       if (prevDelim == -1) reachedStart = true; // no delimiter found
       
-      // From the previous delimiter or start, find the next non-whitespace character (why?)
+      // From the previous delimiter or start, find the next non-whitespace character (skips over blank lines)
       int nextNonWSChar;
       if (reachedStart) nextNonWSChar = getFirstNonWSCharPos(0);
       else nextNonWSChar = getFirstNonWSCharPos(prevDelim + 1, whitespace, false);
@@ -1125,7 +1123,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       // Get the position of the first non-ws character on this line (or end of line if no such char
       int firstNonWS = _getLineFirstCharPos(newLineStart);
       int wSPrefix = firstNonWS - newLineStart;
-      _storeInCache(key, wSPrefix, firstNonWS);  // relying on autoboxing
+      _storeInCache(key, wSPrefix, Math.max(pos - 1, firstNonWS));  // relying on autoboxing
       return wSPrefix;
     }
     catch(BadLocationException e) { throw new UnexpectedException(e); }
@@ -1578,7 +1576,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * non-blank character). Only runs in the event thread.
     * @return true if there are only blank characters before the current location on the current line.
     */
-  private boolean onlyWhiteSpaceBeforeCurrent() throws BadLocationException{
+  private boolean onlySpacesBeforeCurrent() throws BadLocationException{
     
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     

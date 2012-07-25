@@ -436,7 +436,7 @@ public class ConfigOptionListeners implements OptionConstants {
     }
     catch(java.io.IOException e) { exitValue = 1; }
     catch(InterruptedException e) { exitValue = 1; }
-    return (exitValue==0);
+    return (exitValue == 0);
   }
   
   /** Class that gets executed to check if the selected heap size is possible. */

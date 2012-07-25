@@ -73,7 +73,7 @@ public class GUIAvailabilityNotifier extends EventNotifier<GUIAvailabilityListen
     * @param component the component to query
     * @return true if available */
   public boolean isAvailable(ComponentType component) {
-    return (_values.get(component)==0);
+    return (_values.get(component) == 0);
   }
 
   /** Returns the count for the specified component, where 0 means available, and 1 or greater means

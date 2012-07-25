@@ -1181,7 +1181,7 @@ public abstract class FileOps {
             if (found && (shortF != null)) {
               // prepend the short file name to s
 //              LOG.log("\t[8 ] s = '"+s+"'");
-              s = shortF.getName()+((s.length()==0)?"":(File.separator+s));
+              s = shortF.getName()+((s.length() == 0)?"":(File.separator+s));
 //              LOG.log("\t[8a] s = '"+s+"'");
             }
           }

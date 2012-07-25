@@ -447,7 +447,7 @@ public class JPDADebugger implements Debugger {
         indexPart = indexPart.substring(1, indexPart.length()-1).trim();   
         // indexPart now is "1" or "1][2" or "1] [2"   
         String[] indices = indexPart.split("\\]\\s*\\[",-1);   
-        if (indices.length==0) return false;   
+        if (indices.length == 0) return false;   
         for(String indexStr: indices) {   
           indexStr = indexStr.trim();   
           // System.out.println("\t\tindexStr: "+indexStr);   

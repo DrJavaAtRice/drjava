@@ -548,12 +548,10 @@ public class ConfigFrame extends SwingFrame {
   /** Add all of the components for the Display Options panel of the preferences window. */
   private void _setupDisplayPanel(ConfigPanel panel) {
 
-    final ForcedChoiceOptionComponent lookAndFeelComponent =
-      newForcedChoiceOptionComponent(OptionConstants.LOOK_AND_FEEL);
+    final ForcedChoiceOptionComponent lookAndFeelComponent = newForcedChoiceOptionComponent(OptionConstants.LOOK_AND_FEEL);
     addOptionComponent(panel, lookAndFeelComponent);
 
-    final ForcedChoiceOptionComponent plasticComponent =
-      newForcedChoiceOptionComponent(OptionConstants.PLASTIC_THEMES);
+    final ForcedChoiceOptionComponent plasticComponent = newForcedChoiceOptionComponent(OptionConstants.PLASTIC_THEMES);
     lookAndFeelComponent.addChangeListener(new OptionComponent.ChangeListener() {
       public Object value(Object oc) {
         plasticComponent.getComponent().setEnabled(lookAndFeelComponent.getCurrentComboBoxValue().

@@ -69,8 +69,7 @@ public class ConfigDescriptions {
     add(OptionConstants.EXTRA_CLASSPATH, "Extra Classpath",
         "<html>Any directories or jar files to add to the classpath<br>"+
         "of the Compiler and Interactions Pane.</html>");
-    add(OptionConstants.LOOK_AND_FEEL, "Look and Feel", 
-        "Changes the general appearance of DrJava.");
+    add(OptionConstants.LOOK_AND_FEEL, "Look and Feel", "Changes the general appearance of DrJava.");
     add(OptionConstants.PLASTIC_THEMES, "Plastic Theme", 
         "Pick the theme to be used by the Plastic family of Look and Feels");
     

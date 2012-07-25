@@ -179,7 +179,7 @@ public abstract class JavacCompiler implements CompilerInterface {
       catch (java.lang.NoSuchMethodException e) { m = null; }
       if (m==null) {
         java.applet.Applet instance = null;
-        if (args.length==0) {
+        if (args.length == 0) {
           try {
             // try default (nullary) constructor first
             Constructor<?> ctor = c.getConstructor();
@@ -451,7 +451,7 @@ public abstract class JavacCompiler implements CompilerInterface {
 //       "  if (m==null) {\n" +
 //       "    java.applet.Applet instance = null;\n" +
 //       "    boolean fail = false;\n");
-//    if (args.length==0) {
+//    if (args.length == 0) {
 //      command.append(
 //       "    try {\n" +
 //       "      // try default (nullary) constructor first\n" +

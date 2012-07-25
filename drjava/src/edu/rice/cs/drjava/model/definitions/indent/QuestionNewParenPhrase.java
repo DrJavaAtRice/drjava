@@ -48,6 +48,8 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
  */
 public class QuestionNewParenPhrase extends IndentRuleQuestion {
   
+  private static final char[] LOCAL_DELIMS = 
+    {';', ',', '(', '[', '&', '|', '+', '-', '*', '/', '%', '=', '<', '>', '}'};
   /** Constructs a new rule to determine if the current line starts new paren phrase.
     * @param yesRule Rule to use if this rule holds
     * @param noRule Rule to use if this rule does not hold
@@ -70,8 +72,7 @@ public class QuestionNewParenPhrase extends IndentRuleQuestion {
       
       if (startLine > 0) {
         // Find previous delimiter (looking in paren phrases)
-        char[] delims = {';', ',', '(', '[', '&', '|', '+', '-', '*', '/', '%', '=', '<', '>', '}'};
-        int prevDelim = doc.findPrevDelimiter(startLine, delims, false);
+        int prevDelim = doc.findPrevDelimiter(startLine, LOCAL_DELIMS, false);
         if (prevDelim == -1) {
           return false;
         }

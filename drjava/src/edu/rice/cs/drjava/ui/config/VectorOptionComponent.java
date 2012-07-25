@@ -485,6 +485,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   protected java.util.List<JButton> getButtons() {
     List<JButton> buttons = new ArrayList<JButton>();
     buttons.add(_addButton);
+    buttons.add(_removeButton);
     if (_moveButtonEnabled) {
       buttons.add(_moveUpButton);
       buttons.add(_moveDownButton);

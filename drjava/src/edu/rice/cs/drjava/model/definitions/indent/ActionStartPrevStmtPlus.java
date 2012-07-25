@@ -86,7 +86,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     
     try {
       char delim = doc.getText(prevDelimiterPos, 1).charAt(0);    // get delimiter char
-      char[] ws = {' ', '\t', '\n', ';'};  // Why is ';' a delimiter?
+      char[] ws = {' ', '\t', '\n', ';'};  // Note that ';' is whitespace here
       if (delim == ';') {
         int testPos = doc._findPrevCharPos(prevDelimiterPos, ws);  // find char preceding ';' delimiter
         char testDelim = doc.getText(testPos,1).charAt(0);
@@ -116,7 +116,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
           // user may be trying to indent code that is not balanced!
           return supResult;
         }
-        prevDelimiterPos -= delta - 1;  // Position just to right of matching '{' or '('
+        prevDelimiterPos -= (delta - 1);  // Position just to right of matching '{' or '('
         doc.setCurrentLocation(here);
         
         assert doc.getText(prevDelimiterPos, 1).charAt(0) == '{' || 
