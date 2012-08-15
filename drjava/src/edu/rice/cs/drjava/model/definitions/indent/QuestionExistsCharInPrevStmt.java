@@ -40,10 +40,9 @@ import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
-/**
- * This class checks the previous statement for the given character
- * @version $Id$
- */
+/** This class checks the previous statement for the given character.  Not used in DrScala.
+  * @version $Id$
+  */
 public class QuestionExistsCharInPrevStmt extends IndentRuleQuestion {
   
   private char _lookFor;

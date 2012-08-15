@@ -349,7 +349,7 @@ public class ConfigDescriptions {
     add(FIND_REPLACE_FOCUS_IN_DEFPANE, "Focus on the definitions pane after find/replace", 
         "<html>Whether to focus on the definitions pane after executing a find/replace operation.<br>" +
         "If this is not selected, the focus will be in the Find/Replace pane.</html>");
-    add(DRJAVA_USE_FORCE_QUIT, "Forcefully Quit DrJava",
+    add(DRJAVA_USE_FORCE_QUIT, "Forcefully Quit DrScala",
         "<html>On some platforms, DrJava does not shut down properly when files are open<br>"+
         "(namely tablet PCs). Check this option to force DrJava to close.</html>");
     add(REMOTE_CONTROL_ENABLED, "Enable Remote Control",

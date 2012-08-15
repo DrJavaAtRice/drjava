@@ -229,9 +229,9 @@
       <fileset dir="classes/test" includes="**/*" />
     </move>
     
-    <javac srcdir="src" destdir="classes/base" source="1.7" target="1.7"
+    <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
            bootclasspath="${java7-runtime}" sourcepath="" includeAntRuntime="no"
-           executable="javac" fork="yes" memoryMaximumSize="512M"
+           executable="/etc/alternatives/javac-7" fork="yes" memoryMaximumSize="512M"
            debug="on" optimize="off" deprecation="on"	>
       <classpath>
         <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
@@ -1257,7 +1257,7 @@
     <!-- We rely on "location" to generate a platform-specific path; note that properties
          are immutable and so java7-runtime will only be set the *first* time. -->
 
-    <property name="java7-runtime-1" location="${java7-home}/lib/rt.jar" />
+    <property name="java7-runtime-1" location="${java7-home}/lib/dt.jar" />
     <available property="java7-runtime" value="${java7-runtime-1}" file="${java7-runtime-1}" />
 
     <property name="java7-runtime-2" location="${java7-home}/jre/lib/rt.jar" />
@@ -1266,7 +1266,8 @@
     <property name="java7-runtime-3" location="${java7-home}/../Classes/classes.jar" />
     <available property="java7-runtime" value="${java7-runtime-3}" file="${java7-runtime-3}" />
 
-    <fail message="Can't find rt.jar in the Java 7 home: ${java7-home}" unless="java7-runtime" />
+    <fail message="Can't find dt.jar/rt.jar in the Java 7 home: ${java7-home}" unless="java7-runtime" />
+    <echo message="java7-runtime=${java7-runtime}" />
   </target>
   
   <target name="resolve-java7-exec">
@@ -1284,13 +1285,14 @@
     <available property="java7-exec" value="${java7-exec-2}" file="${java7-exec-2}" />
 
     <fail message="Can't find the java executable in the Java 7 home: ${java7-home}" unless="java7-exec" />
+    <echo message="java7-exec=${java7-exec}" />
   </target>
   
   <target name="resolve-java6-runtime">
     <!-- We rely on "location" to generate a platform-specific path; note that properties
          are immutable and so java6-runtime will only be set the *first* time. -->
 
-    <property name="java6-runtime-1" location="${java6-home}/lib/rt.jar" />
+    <property name="java6-runtime-1" location="${java6-home}/lib/dt.jar" />
     <available property="java6-runtime" value="${java6-runtime-1}" file="${java6-runtime-1}" />
 
     <property name="java6-runtime-2" location="${java6-home}/jre/lib/rt.jar" />
@@ -1300,6 +1302,7 @@
     <available property="java6-runtime" value="${java6-runtime-3}" file="${java6-runtime-3}" />
 
     <fail message="Can't find rt.jar in the Java 6 home: ${java6-home}" unless="java6-runtime" />
+    <echo message="java6-runtime=${java6-runtime}" />
   </target>
   
   <target name="resolve-java6-exec">
@@ -1317,6 +1320,7 @@
     <available property="java6-exec" value="${java6-exec-2}" file="${java6-exec-2}" />
 
     <fail message="Can't find the java executable in the Java 6 home: ${java6-home}" unless="java6-exec" />
+    <echo message="java6-exec=${java6-exec}" />
   </target>
   
   <target name="resolve-java5-runtime">
@@ -1363,7 +1367,7 @@
     <available property="java7-tools" value="${java7-tools-3}" file="${java7-tools-3}" />
 
     <fail message="Can't find tools.jar in the Java 7 home: ${java7-home}" unless="java7-tools" />
-    <echo message="java7-tools='${java7-tools}'"/>
+    <echo message="java7-tools='${java7-tools}" />
   </target>
   
   <target name="resolve-java6-tools">
@@ -1377,6 +1381,7 @@
     <available property="java6-tools" value="${java6-tools-3}" file="${java6-tools-3}" />
 
     <fail message="Can't find tools.jar in the Java 6 home: ${java6-home}" unless="java6-tools" />
+    <echo message="java6-tools='${java6-tools}"/>
   </target>
   
   <target name="resolve-java5-tools">
@@ -1403,6 +1408,7 @@
     <available property="current-tools" value="${current-tools-3}" file="${current-tools-3}" />
 
     <fail message="Can't find tools.jar in the Java home: ${java.home}" unless="current-tools" />
+    <echo message="current-tools='${current-tools}" />
   </target>
   
           

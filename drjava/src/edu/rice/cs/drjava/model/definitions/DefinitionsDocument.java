@@ -72,6 +72,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   private static final int NO_COMMENT_OFFSET = 0;
   private static final int WING_COMMENT_OFFSET = 2;
   
+  public static final char[] ALL_DELIMS = 
+    {'{','}','(',')','[',']','+','-','/','*',';',':','=','!','@','#','$','%','^','~','\\','"','`','|'};
+  
   private final List<DocumentClosedListener> _closedListeners = new LinkedList<DocumentClosedListener>();
   
   public void addDocumentClosedListener(DocumentClosedListener l) { 
@@ -632,7 +635,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     final String cached = (String) _checkCache(key);
     if (cached != null) return cached;
     
-    final char[] delims = {'{','}','(',')','[',']','+','-','/','*',';',':','=','!','@','#','$','%','^','~','\\','"','`','|'};
     String name = "";
     
     final String text = getText(0, pos);  
@@ -648,10 +650,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       int objectPos = _findPrevKeyword(text, "object", curPos);
       int interfacePos = _findPrevKeyword(text, "interface", curPos);
       int enumPos = _findPrevKeyword(text, "enum", curPos);
-      int otherPos = findPrevDelimiter(curPos, delims);
+      int otherPos = findPrevDelimiter(curPos, ALL_DELIMS);
       int newPos = -1;
       // see if there's a ) closer by
-      int closeParenPos = _findPrevNonWSCharPos(curPos);
+      int closeParenPos = getPrevNonWSCharPos(curPos);
       if (closeParenPos != -1 && text.charAt(closeParenPos) == ')') {
         // yes, find the matching (
         int openParenPos = findPrevEnclosingBrace(closeParenPos, '(', ')');
@@ -683,10 +685,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           objectPos = _findPrevKeyword(text, "object", curPos);
           interfacePos = _findPrevKeyword(text, "interface", curPos);
           enumPos = _findPrevKeyword(text, "enum", curPos);
-          otherPos = findPrevDelimiter(curPos, delims);
+          otherPos = findPrevDelimiter(curPos, ALL_DELIMS);
           newPos = -1;
           // see if there's a ) closer by
-          closeParenPos = _findPrevNonWSCharPos(curPos);
+          closeParenPos = getPrevNonWSCharPos(curPos);
           if (closeParenPos != -1 && text.charAt(closeParenPos) == ')') {
             // yes, find the matching (
             int openParenPos = findPrevEnclosingBrace(closeParenPos, '(', ')');
@@ -716,7 +718,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         curPos = Math.max(classPos, Math.max(traitPos, Math.max(objectPos, Math.max(interfacePos, enumPos))));
         
         int nameStart = getFirstNonWSCharPos(curPos);
-        if (nameStart==-1) { throw new ClassNameNotFoundException("Cannot determine enclosing class name"); }
+        if (nameStart == -1) { throw new ClassNameNotFoundException("Cannot determine enclosing class name"); }
         int nameEnd = nameStart + 1;
         while (nameEnd < text.length()) {
           if (! Character.isJavaIdentifierPart(text.charAt(nameEnd)) && text.charAt(nameEnd) != '.') break;
@@ -745,90 +747,82 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return name;
   }
   
-  /** Returns true if this position is the instantiation of an anonymous inner class.  Only runs in the event thread.
-    * @param pos position of "new"
-    * @param openCurlyPos position of the next '{'
-    * @return true if anonymous inner class instantiation
-    */
-  
-  public boolean _isAnonymousInnerClass(final int pos, final int openCurlyPos) throws BadLocationException {
-//    String t = getText(0, openCurlyPos+1);
-//    System.err.print("_isAnonymousInnerClass(" + pos + ", " + openCurlyPos + ")");
-//    System.err.println("_isAnonymousInnerClass(" + pos + ", " + openCurlyPos + "): `" + 
-//                       t.substring(pos, openCurlyPos+1) + "`");
-    
-    // Check cache
-    final Query key = new Query.AnonymousInnerClass(pos, openCurlyPos);
-    Boolean cached = (Boolean) _checkCache(key);
-    if (cached != null) {
-//      System.err.println(" ==> " + cached);
-      return cached;
-    }
-    int newPos = pos;
-//    synchronized(_reduced) {
-    cached = false;
-    
-    String text = getText(0, openCurlyPos + 1);  // includes open Curly brace
-    newPos += "new".length();
-    int classStart = getFirstNonWSCharPos(newPos);
-    if (classStart != -1) { 
-      int classEnd = classStart + 1;
-      while (classEnd < text.length()) {
-        if (! Character.isJavaIdentifierPart(text.charAt(classEnd)) && text.charAt(classEnd) != '.') {
-          // delimiter found
-          break;
-        }
-        ++classEnd;
-      }
-      
-      /* Determine parenStart, the postion immediately before the open parenthesis following the superclass name. */
-//         System.err.println("\tclass = `" + text.substring(classStart,classEnd) + "`");
-      int parenStart = getFirstNonWSCharPos(classEnd);
-      if (parenStart != -1) {
-        int origParenStart = parenStart;
-        
-//           System.err.println("\tfirst non-whitespace after class = " + parenStart + " `" + text.charAt(parenStart) + "`");
-        if (text.charAt(origParenStart) == '<') {
-          parenStart = -1;
-          // might be a generic Java class
-          int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>'); 
-          if (closePointyBracket != -1) {
-            if (text.charAt(closePointyBracket) == '>') {
-              parenStart = getFirstNonWSCharPos(closePointyBracket+1);
-            }
-          }
-        }
-        else if (text.charAt(origParenStart) == '[') {
-          parenStart = -1;
-          // might be a generic Scala class
-          int closeBracket = findNextEnclosingBrace(origParenStart, '[', ']'); 
-          if (closeBracket != -1) {
-            if (text.charAt(closeBracket) == ']') {
-              parenStart = getFirstNonWSCharPos(closeBracket+1);
-            }
-          }
-        }
-      }
-      
-      if (parenStart != -1) {
-        if (text.charAt(parenStart) == '(') {
-          setCurrentLocation(parenStart + 1);   // reduced model points to pos == parenStart + 1
-          int parenEnd = balanceForward();
-          if (parenEnd > -1) {
-            parenEnd = parenEnd + parenStart + 1;
-//               System.err.println("\tafter closing paren = " + parenEnd);
-            int afterParen = getFirstNonWSCharPos(parenEnd);
-//               System.err.println("\tfirst non-whitespace after paren = " + parenStart + " `" + text.charAt(afterParen) + "`");
-            cached = (afterParen == openCurlyPos); 
-          }
-        }
-      }
-    }
-    _storeInCache(key, cached, openCurlyPos);
-//      System.err.println(" ==> " + cached);
-    return cached;
-//    }
+  /** Returns false.  In mature DrScala, this method should not be called for Scala text. */
+  public boolean _isAnonymousInnerClass(final int pos, final int openCurlyPos) throws BadLocationException { 
+    return false;
   }
+//    // Check cache
+//    final Query key = new Query.AnonymousInnerClass(pos, openCurlyPos);
+//    Boolean cached = (Boolean) _checkCache(key);
+//    if (cached != null) {
+////      System.err.println(" ==> " + cached);
+//      return cached;
+//    }
+//    int newPos = pos;
+////    synchronized(_reduced) {
+//    cached = false;
+//    
+//    String text = getText(0, openCurlyPos + 1);  // includes open Curly brace
+//    newPos += "new".length();
+//    int classStart = getFirstNonWSCharPos(newPos);
+//    if (classStart != -1) { 
+//      int classEnd = classStart + 1;
+//      while (classEnd < text.length()) {
+//        if (! Character.isJavaIdentifierPart(text.charAt(classEnd)) && text.charAt(classEnd) != '.') {
+//          // delimiter found
+//          break;
+//        }
+//        ++classEnd;
+//      }
+//      
+//      /* Determine parenStart, the postion immediately before the open parenthesis following the superclass name. */
+////         System.err.println("\tclass = `" + text.substring(classStart,classEnd) + "`");
+//      int parenStart = getFirstNonWSCharPos(classEnd);
+//      if (parenStart != -1) {
+//        int origParenStart = parenStart;
+//        
+////           System.err.println("\tfirst non-whitespace after class = " + parenStart + " `" + text.charAt(parenStart) + "`");
+//        if (text.charAt(origParenStart) == '<') {
+//          parenStart = -1;
+//          // might be a generic Java class
+//          int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>'); 
+//          if (closePointyBracket != -1) {
+//            if (text.charAt(closePointyBracket) == '>') {
+//              parenStart = getFirstNonWSCharPos(closePointyBracket+1);
+//            }
+//          }
+//        }
+//        else if (text.charAt(origParenStart) == '[') {
+//          parenStart = -1;
+//          // might be a generic Scala class
+//          int closeBracket = findNextEnclosingBrace(origParenStart, '[', ']'); 
+//          if (closeBracket != -1) {
+//            if (text.charAt(closeBracket) == ']') {
+//              parenStart = getFirstNonWSCharPos(closeBracket+1);
+//            }
+//          }
+//        }
+//      }
+//      
+//      if (parenStart != -1) {
+//        if (text.charAt(parenStart) == '(') {
+//          setCurrentLocation(parenStart + 1);   // reduced model points to pos == parenStart + 1
+//          int parenEnd = balanceForward();
+//          if (parenEnd > -1) {
+//            parenEnd = parenEnd + parenStart + 1;
+////               System.err.println("\tafter closing paren = " + parenEnd);
+//            int afterParen = getFirstNonWSCharPos(parenEnd);
+////               System.err.println("\tfirst non-whitespace after paren = " + parenStart + " `" + text.charAt(afterParen) + "`");
+//            cached = (afterParen == openCurlyPos); 
+//          }
+//        }
+//      }
+//    }
+//    _storeInCache(key, cached, openCurlyPos);
+////      System.err.println(" ==> " + cached);
+//    return cached;
+////    }
+//  }
   
   /** Gets the package name embedded in the text of this document by minimally parsing the document to find the
     * package statement.  If package statement is not found or is ill-formed, returns "" as the package name.
@@ -847,97 +841,94 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     catch(Exception e) { throw new UnexpectedException(e); }
   }
   
-  /** Returns the index of the anonymous inner class being instantiated at the specified position (where openining brace
-    * for anonymous inner class is pos).  Only runs in event thread.
-    * @param pos is position of the opening curly brace of the anonymous inner class
-    * @return anonymous class index
-    */
+  /** Returns -1.  In mature DrScala, this method should never be called for Scala source. */
   int _getAnonymousInnerClassIndex(final int pos) throws BadLocationException, ClassNameNotFoundException {   
-//    boolean oldLog = true; // log; log = false;
-    
-    /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
-    
-    // Check cache
-    final Query key = new Query.AnonymousInnerClassIndex(pos);
-    final Integer cached = (Integer) _checkCache(key);
-    if (cached != null) {
-//      log = oldLog;
-      return cached.intValue();
-    }
-    
-    int newPos = pos; // formerly pos -1 // move outside the curly brace?  Corrected to do nothing since already outside
-    
-//    final char[] delims = {'{','}','(',')','[',']','+','-','/','*',';',':','=','!','@','#','$','%','^','~','\\','"','`','|'};
-    
-    final String className = _getEnclosingClassName(newPos - 2 , true);  // class name must be followed by at least "()"
-    final String text = getText(0, newPos - 2);  // excludes miminal (empty) argument list after class name
-    int index = 1;
-    
-//    if (oldLog) System.err.println("anon before " + pos + " enclosed by " + className);
-    while ((newPos = _findPrevKeyword(text, "new", newPos - 4)) != -1) { // excludes space + minimal class name + args
-//      if (oldLog) System.err.println("new found at " + newPos);
-      int afterNewPos = newPos + "new".length();
-      int classStart = getFirstNonWSCharPos(afterNewPos);
-      if (classStart == -1) { continue; }
-      int classEnd = classStart + 1;
-      while (classEnd < text.length()) {
-        if (! Character.isJavaIdentifierPart(text.charAt(classEnd)) && text.charAt(classEnd) != '.') {
-          // delimiter found
-          break;
-        }
-        ++classEnd;
-      }
-//      if (oldLog) System.err.println("\tclass = `" + text.substring(classStart,classEnd) + "`");
-      int parenStart = getFirstNonWSCharPos(classEnd);
-      if (parenStart == -1) { continue; }
-      int origParenStart = parenStart;
-      
-//      if (oldLog) System.err.println("\tfirst non-whitespace after class = " + parenStart + " `" + text.charAt(parenStart) + "`");
-      if (text.charAt(origParenStart) == '<') {
-        parenStart = -1;
-        // might be a generic Java class
-        int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>');
-        if (closePointyBracket != -1) {
-          if (text.charAt(closePointyBracket) == '>') {
-            parenStart = getFirstNonWSCharPos(closePointyBracket + 1);
-          }
-        }
-      }
-      if (text.charAt(origParenStart) == '[') {
-        parenStart = -1;
-        // might be a generic Scala class
-        int closeBracket = findNextEnclosingBrace(origParenStart, '[', ']');
-        if (closeBracket != -1) {
-          if (text.charAt(closeBracket) == ']') {
-            parenStart = getFirstNonWSCharPos(closeBracket + 1);
-          }
-        }
-      }
-      if (parenStart == -1) { continue; }      
-      if (text.charAt(parenStart) != '(') { continue; }
-      int parenEnd = findNextEnclosingBrace(parenStart, '(', ')');
-      
-      int nextOpenCurly = _findNextOpenCurly(text, parenEnd);
-      if (nextOpenCurly == -1) { continue; }
-//      if (oldLog) System.err.println("{ found at " + nextOpenCurly + ": `" + 
-//                                     text.substring(newPos, nextOpenCurly + 1) + "`");
-//      if (oldLog) System.err.println("_isAnonymousInnerClass(" + newPos + ", " + nextOpenCurly + ")");
-      if (_isAnonymousInnerClass(newPos, nextOpenCurly)) {
-//        if (oldLog) System.err.println("is anonymous inner class");
-        String cn = _getEnclosingClassName(newPos, true);
-//        if (oldLog) System.err.println("enclosing class = " + cn);
-        if (! cn.startsWith(className)) { break; }
-        else if (! cn.equals(className)) {
-          newPos = findPrevEnclosingBrace(newPos, '{', '}');
-          continue;
-        }
-        else ++index;
-      }
-    }
-    _storeInCache(key, index, pos);
-//    oldLog = log;
-    return index;
+    return -1;
   }
+    
+//    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+//    
+//    // Check cache
+//    final Query key = new Query.AnonymousInnerClassIndex(pos);
+//    final Integer cached = (Integer) _checkCache(key);
+//    if (cached != null) {
+////      log = oldLog;
+//      return cached.intValue();
+//    }
+//    
+//    int newPos = pos; // formerly pos -1 // move outside the curly brace?  Corrected to do nothing since already outside
+//    
+////    final char[] delims = {'{','}','(',')','[',']','+','-','/','*',';',':','=','!','@','#','$','%','^','~','\\','"','`','|'};
+//    
+//    final String className = _getEnclosingClassName(newPos - 2 , true);  // class name must be followed by at least "()"
+//    final String text = getText(0, newPos - 2);  // excludes miminal (empty) argument list after class name
+//    int index = 1;
+//    
+////    if (oldLog) System.err.println("anon before " + pos + " enclosed by " + className);
+//    while ((newPos = _findPrevKeyword(text, "new", newPos - 4)) != -1) { // excludes space + minimal class name + args
+////      if (oldLog) System.err.println("new found at " + newPos);
+//      int afterNewPos = newPos + "new".length();
+//      int classStart = getFirstNonWSCharPos(afterNewPos);
+//      if (classStart == -1) { continue; }
+//      int classEnd = classStart + 1;
+//      while (classEnd < text.length()) {
+//        if (! Character.isJavaIdentifierPart(text.charAt(classEnd)) && text.charAt(classEnd) != '.') {
+//          // delimiter found
+//          break;
+//        }
+//        ++classEnd;
+//      }
+////      if (oldLog) System.err.println("\tclass = `" + text.substring(classStart,classEnd) + "`");
+//      int parenStart = getFirstNonWSCharPos(classEnd);
+//      if (parenStart == -1) { continue; }
+//      int origParenStart = parenStart;
+//      
+////      if (oldLog) System.err.println("\tfirst non-whitespace after class = " + parenStart + " `" + text.charAt(parenStart) + "`");
+//      if (text.charAt(origParenStart) == '<') {
+//        parenStart = -1;
+//        // might be a generic Java class
+//        int closePointyBracket = findNextEnclosingBrace(origParenStart, '<', '>');
+//        if (closePointyBracket != -1) {
+//          if (text.charAt(closePointyBracket) == '>') {
+//            parenStart = getFirstNonWSCharPos(closePointyBracket + 1);
+//          }
+//        }
+//      }
+//      if (text.charAt(origParenStart) == '[') {
+//        parenStart = -1;
+//        // might be a generic Scala class
+//        int closeBracket = findNextEnclosingBrace(origParenStart, '[', ']');
+//        if (closeBracket != -1) {
+//          if (text.charAt(closeBracket) == ']') {
+//            parenStart = getFirstNonWSCharPos(closeBracket + 1);
+//          }
+//        }
+//      }
+//      if (parenStart == -1) { continue; }      
+//      if (text.charAt(parenStart) != '(') { continue; }
+//      int parenEnd = findNextEnclosingBrace(parenStart, '(', ')');
+//      
+//      int nextOpenCurly = _findNextOpenCurly(text, parenEnd);
+//      if (nextOpenCurly == -1) { continue; }
+////      if (oldLog) System.err.println("{ found at " + nextOpenCurly + ": `" + 
+////                                     text.substring(newPos, nextOpenCurly + 1) + "`");
+////      if (oldLog) System.err.println("_isAnonymousInnerClass(" + newPos + ", " + nextOpenCurly + ")");
+//      if (_isAnonymousInnerClass(newPos, nextOpenCurly)) {
+////        if (oldLog) System.err.println("is anonymous inner class");
+//        String cn = _getEnclosingClassName(newPos, true);
+////        if (oldLog) System.err.println("enclosing class = " + cn);
+//        if (! cn.startsWith(className)) { break; }
+//        else if (! cn.equals(className)) {
+//          newPos = findPrevEnclosingBrace(newPos, '{', '}');
+//          continue;
+//        }
+//        else ++index;
+//      }
+//    }
+//    _storeInCache(key, index, pos);
+////    oldLog = log;
+//    return index;
+//  }
   
   /** Returns the name of the class or interface enclosing the caret position at the top level.
     * @return Name of enclosing class or interface
@@ -966,8 +957,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         throw new ClassNameNotFoundException("no top level brace found");
       }
       
-      char[] delims = {'{', '}', ';'};
-      int prevDelimPos = findPrevDelimiter(topLevelBracePos, delims);
+      int prevDelimPos = findPrevDelimiter(topLevelBracePos, AbstractDJDocument.DEFAULT_DELIMS);
       if (prevDelimPos == -1) {
         // Search from start of doc
         prevDelimPos = 0;

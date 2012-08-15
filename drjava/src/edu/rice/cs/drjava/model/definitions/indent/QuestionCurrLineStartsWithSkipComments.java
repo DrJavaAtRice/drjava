@@ -36,81 +36,64 @@
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
+import java.util.Arrays;
+
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
-import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
+import javax.swing.text.BadLocationException;
 
-/** Determines whether the current line in the document starts with a specific character sequence, skipping over any 
-  * comments and leading whitespace on that line. The character sequence is passed to the constructor of the class as
-  * a String argument.
+import edu.rice.cs.util.UnexpectedException;
+
+import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
+import static edu.rice.cs.drjava.model.AbstractDJDocument.*;
+
+/** Determines whether the current line in the document starts with starts with a delimiter char specified by the 
+  * sorted char[] _delimiters field, skipping over any comments and leading whitespace on that line. The character 
+  * sequence is passed to the constructor of the class as a String argument.
   * @version $Id$
   */
 public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
   /** The String to be matched. This String may not contain whitespace characters or comment-delimiting characters. */
-  private String _prefix;
+  private final char[] _delimiters;  // must be in sorted order
   
   /** @param yesRule The decision subtree for the case that this rule applies in the current context.
     * @param noRule The decision subtree for the case that this rule does not apply in the current context.
     */
-  public QuestionCurrLineStartsWithSkipComments(String prefix, IndentRule yesRule, IndentRule noRule) {
+  public QuestionCurrLineStartsWithSkipComments(char[] delimiters, IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
-    _prefix = prefix;
+    _delimiters = delimiters;
   }
   
-  /** Determines whether or not the current line in the document starts with the character sequence specified by the
-    * String field _prefix, skipping over any comments and leading whitespace on that line.  Will not match prefixes
-    * that begin with "//" or "/*" or whitespace.  Will not match empty string unless line has some uncommented nonWS
-    * text.  Assumes that write lock and reduced lock are already held.
+  /** Determines whether or not the current line in the document starts with a delimiter char specified by the char[]
+    * field _delimiters, skipping over any comments and leading whitespace on that line.  Will not match '/' or
+    * default whitespace chars.  Only runs in event thread.
     * @param doc The AbstractDJDocument containing the current line.
     * @return True iff the current line in the document starts with the
     * character sequence specified by the String field _prefix.
     */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     // Find the first non-whitespace character on the current line.
-    
-    int origPos = doc.getCurrentLocation();
-    int startPos   = doc._getLineFirstCharPos(origPos);
-    int endPos     = doc._getLineEndPos(origPos);
-    int lineLength = endPos - startPos;
-    
-    char prevChar = '\0';
-    String text = doc._getText(startPos, lineLength);
-//      System.err.println("line is: '" + text + "'");
-    
-    doc.setCurrentLocation(startPos);
-    try { 
-      for (int i = 0; i < lineLength; i++, doc.move(1)) {
-        
-        ReducedModelState state = doc.getStateAtCurrent();
-        
-        if (state.equals(INSIDE_BLOCK_COMMENT)) {  // Handle case: ...*/*
-          assert prevChar == '\0'; 
-          continue;
-        }
-        char currentChar = text.charAt(i);
-//          System.err.println("Iteration " + i + ": ch = " + currentChar + " prevCh = " + prevChar);
-        
-        if (currentChar == '/') {
-          if (prevChar == '/') return false;  // opened a LINE_COMMENT
-          if (prevChar == '\0') {
-            prevChar = currentChar;
-            continue;     // leading char in line is '/'
-          }
-        }
-        else if (currentChar == '*' && prevChar == '/') { // opened a BLOCK_COMMENT, subsequent chars will be inside
-          prevChar = '\0';
-          continue;      
-        }
-        else if (currentChar == ' ' || currentChar == '\t') {  
-          if (prevChar == '\0') {
-            continue;  // consume opening whitespace
-          }
-        }
-        return text.startsWith(_prefix, i);   // special cases have already been eliminated
-      }
+    int orig = doc.getCurrentLocation();
+    if (orig == ERROR_INDEX) return false;
+//    System.err.println("applyRule called ");
+    int endPos = doc._getLineEndPos(orig);
+//    System.err.print(" endPos = " + endPos);
+    if (endPos == ERROR_INDEX) {
+//      System.err.println("Returning false because location is invalid");
+      return false;
     }
-    finally { doc.setCurrentLocation(origPos); }
-    return false;
+    
+//    char prevChar = '\0';
+    try {
+      int firstNonWSCharPos = doc.getFirstNonWSCharPos(orig, false);  // skip over comments
+//      System.err.print(" firstCharPos = " + firstNonWSCharPos);
+      if (firstNonWSCharPos == ERROR_INDEX || firstNonWSCharPos >= endPos) return false;
+      char firstNonWSChar = doc.getText(firstNonWSCharPos, 1).charAt(0);
+//      System.err.print(" firstChar = '" + firstNonWSChar + "'");
+//      System.err.println("");
+      return Arrays.binarySearch(_delimiters, firstNonWSChar) >= 0; // non-negative only for _delimiters
+    }
+    catch(BadLocationException ble) { /* throw new UnexpectedException("Should never happen"); */ return false; }
   }
 }

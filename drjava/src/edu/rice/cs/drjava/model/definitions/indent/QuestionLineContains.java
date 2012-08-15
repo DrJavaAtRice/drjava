@@ -71,7 +71,6 @@ public class QuestionLineContains extends IndentRuleQuestion {
    * @return true if this node's rule holds.
    */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
-
     int charPos = doc.findCharOnLine(doc.getCurrentLocation(), _findChar);
     if (charPos == -1) {
       return false;

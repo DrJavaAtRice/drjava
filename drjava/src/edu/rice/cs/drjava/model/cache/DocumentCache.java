@@ -177,7 +177,7 @@ public class DocumentCache {
         assert _doc != null;
         // update documents if necessary
         if (_keywords != null) {  // copy cached keywords to new copy of doc
-          _doc.setKeywords(_keywords); _keywords.clear(); _keywords = null;
+          _doc.setKeywords(_keywords); /* _keywords.clear(); */ _keywords = null;  //_keywords is  bound to shared immutable table
         }
       }
       catch(IOException e) { throw new UnexpectedException(e); }

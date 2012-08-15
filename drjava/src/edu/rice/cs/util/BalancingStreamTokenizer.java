@@ -49,10 +49,9 @@ import java.util.ArrayList;
 
 import edu.rice.cs.plt.lambda.Lambda;
 
-/**
- * A tokenizer that splits a stream into string tokens while balancing quoting characters.
- * @author Mathias Ricken
- * @version $Id$
+/** A tokenizer that splits a stream into string tokens while balancing quoting characters.
+  * @author Mathias Ricken
+  * @version $Id$
  */
 
 public class BalancingStreamTokenizer {
@@ -462,7 +461,7 @@ public class BalancingStreamTokenizer {
   public String getNextToken() throws IOException {
     StringBuilder buf = new StringBuilder();
     int c = nextToken();
-    while (c!=-1) {
+    while (c != -1) {
       _isEscape = ((_escape != null) && (((char)c) == _escape));
       
       // see if this is whitespace

@@ -60,11 +60,11 @@ public class IndentInfo {
   //the distance to the start of the current line
   private int _distToStart; /* formerly distToStart */
 
-  static public final String NONE = "";           /* formely noBrace */
-  static public final String OPEN_CURLY = "{"; /* formerly openCurly */ 
-  static public final String OPEN_PAREN = "(";    /* formerly openParen */
-  static public final String OPEN_BRACKET = "[";  /* formerly openBracket */
-
+  static public final String NONE = "";
+  static public final String OPEN_CURLY = "{";
+  static public final String OPEN_PAREN = "(";    /* identical constant defeind in BraceInfo class */
+  static public final String OPEN_BRACKET = "[";
+  
   /** Creates an IndentInfo with default values. */
   public IndentInfo() {
     _lineEnclosingBraceType = NONE;

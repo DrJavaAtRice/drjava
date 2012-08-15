@@ -85,5 +85,4 @@ public class QuestionPrevLineStartsWith extends IndentRuleQuestion {
     // On first line
     return false;
   }
-
 }

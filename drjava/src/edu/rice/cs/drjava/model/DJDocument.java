@@ -134,17 +134,15 @@ public interface DJDocument extends SwingDocumentInterface {
     */
   public int findPrevDelimiter(int pos, char[] delims) throws BadLocationException;
   
-  /** Searching backwards, finds the position of the first character that is one
-   * of the given delimiters.  Will not look for delimiters inside a paren
-   * phrase if skipParenPhrases is true.
-   * NB: ignores comments.
-   * @param pos Position to start from
-   * @param delims array of characters to search for
-   * @param skipParenPhrases whether to look for delimiters inside paren phrases
-   * (eg. semicolons in a for statement)
-   * @return position of first matching delimiter, or ERROR_INDEX (-1) if beginning
-   * of document is reached.
-   */
+  /** Searching backwards, finds the position of the first character that is one of the given delimiters.  Will not 
+    * look for delimiters inside a paren phrase if skipParenPhrases is true.
+    * @param pos Position to start from
+    * @param delims array of characters to search for
+    * @param skipParenPhrases whether to look for delimiters inside paren phrases
+    * (eg. semicolons in a for statement)
+    * @return position of first matching delimiter, or ERROR_INDEX (-1) if beginning
+    * of document is reached.
+    */
   public int findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases) throws BadLocationException;
   
 //  /** This function finds the given character in the same statement as the given
@@ -160,7 +158,7 @@ public interface DJDocument extends SwingDocumentInterface {
 //   * @return position of first non-whitespace character before pos,
 //   * or ERROR_INDEX (-1) if begining of document is reached
 //   */
-//  public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException;
+//  public int getPrevNonWSCharPos(int pos, char[] whitespace) throws BadLocationException;
   
   /** Default indentation - uses OTHER flag and no progress indicator.
     * @param selStart the offset of the initial character of the region to indent
@@ -268,7 +266,7 @@ public interface DJDocument extends SwingDocumentInterface {
   public int getFirstNonWSCharPos (int pos, char[] whitespace, boolean acceptComments)
     throws BadLocationException;
   
-//  public int findPrevNonWSCharPos(int pos) throws BadLocationException;
+//  public int getPrevNonWSCharPos(int pos) throws BadLocationException;
   
 //  /** Returns true if the given position is inside a paren phrase.
 //   * @param pos the position we're looking at

@@ -38,8 +38,8 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
-/** Indents the current line in the document to the indent level of the start of the statement that the cursor is
-  * currently on, plus the given suffix string.
+/** Assumes that the current line is NOT the start of the current statement and preceding lines are indented correctly. 
+  * Indents the current line to the indent level of the start of the containing statement plus the given suffix string.
   * @version $Id$
   */
 public class ActionStartCurrStmtPlus extends IndentRuleAction {
@@ -53,8 +53,8 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
     _suffix = suffix;
   }
 
-  /** Properly indents the line that the caret is currently on. Replaces all whitespace characters at the beginning
-    * of the line with the appropriate spacing or characters.
+  /** Properly indents the line containing the caret assuming cureent statement starts on a preceding (!) line.
+    * Replaces all whitespace characters at the beginning of the line with the appropriate spacing or characters.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentition is taking place
     * @return true if the caller should update the current location itself,
@@ -63,15 +63,17 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
   public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     boolean supResult = super.indentLine(doc, reason);
 
-    /** This method is simply a call to getIndentOfCurrStmt, which is fully tested in IndentHelperTest, so no additional
-      * tests are provided for this class.
+    /** This method is simply a call to getIndentOfCurrStmt for the preceding line.  This method is fully tested in 
+      * IndentHelperTest, so no additional tests are provided for this class.
       */
 
     int indent = 0;
+    
+    int prevLineEnd = doc._getLineStartPos() - 1;
+    
+    if (prevLineEnd < 0) return supResult;  // start of prev line was 0 or ERROR_INDEX
 
-
-    indent = doc._getIndentOfCurrStmt(doc.getCurrentLocation(), new char[] {';','{','}'}, new char[] {' ', '\t','\n'});
-
+    indent = doc._getIndentOfCurrStmt(prevLineEnd, new char[] {';','{','}'}, new char[] {' ', '\t','\n'});
 
     indent = indent + _suffix;
     doc.setTab(indent, doc.getCurrentLocation());

@@ -216,7 +216,7 @@ public final class NewJVMTest extends DrJavaTestCase {
     assertTrue(_jvm.interpret("class A { override def toString() = { throw new RuntimeException(); } };" +
                               "new A()"));
     String result = _jvm.returnBuffer();
-    System.err.println("returnBuffer() returns " + result);
+//    System.err.println("returnBuffer() returns " + result);
     assertTrue("exception should have been thrown by toString",
                result.contains("java.lang.RuntimeException"));
     

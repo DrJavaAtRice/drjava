@@ -152,7 +152,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
     SortedSet<R> tail = getTailSet((R) new DocumentRegion(odd, 0, Math.max(0, offset - 119)));  
     
     /* Search tail, selecting first and last regions r such that r.getLineEnd() >= offset and r.getLineStart <= offset.
-     * The tail is totally order on BOTH getLineStart() and getLineEnd() because the functions mapping start to lineStart
+     * The tail is totally ordered on BOTH getLineStart() and getLineEnd() because the functions mapping start to lineStart
      * and end to lineEnd are monotonic and the tail is totally ordered on BOTH start and end (since regions do not 
      * overlap).  Hence, we can abandon the search as soon as we reach a region r such that r.getLineStart() > offset.  
      * tail may be empty. */

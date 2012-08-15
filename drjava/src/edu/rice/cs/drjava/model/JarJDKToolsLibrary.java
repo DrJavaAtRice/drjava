@@ -151,15 +151,14 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     JavadocModel javadoc = new NoJavadocAvailable(model);
     
     FullVersion version = desc.guessVersion(f);
-    JDKToolsLibrary.msg("makeFromFile: " + f + " --> " + version + ", vendor: " + version.vendor());
-    JDKToolsLibrary.msg("    desc = " + desc);
+    JDKToolsLibrary.msg("makeFromFile: " + f + "; version: " + version + "," + version.majorVersion() + "; desc: " + desc);
     
     boolean isSupported = JavaVersion.CURRENT.supports(version.majorVersion());
     Iterable<File> additionalCompilerFiles = IterUtil.empty();
 
     // JDKDescriptor.NONE will require JavaVersion.CURRENT to be at least JavaVersion.JAVA_1_1,
     // i.e. it will always be supported
-    isSupported |= JavaVersion.CURRENT.supports(desc.getMinimumMajorVersion());
+//    isSupported |= JavaVersion.CURRENT.supports(desc.getMinimumMajorVersion());
     try {
       additionalCompilerFiles = desc.getAdditionalCompilerFiles(f);
     }
@@ -167,6 +166,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       // not all additional compiler files were found
       isSupported = false;
     }
+    JDKToolsLibrary.msg("isSupported = " + isSupported + "; Additional files are: " + additionalCompilerFiles);
     
     // We can't execute code that was possibly compiled for a later Java API version.
     List<File> bootClassPath = null;
@@ -395,11 +395,12 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     
     String javaHome = System.getProperty("java.home");
     String envJavaHome = null;
-    String envJava7Home = null;
+    String envScalaHome = null;
     String programFiles = null;
     String systemDrive = null;
     if (JavaVersion.CURRENT.supports(JavaVersion.JAVA_7)) {
       envJavaHome = System.getenv("JAVA_HOME");
+      envScalaHome = System.getenv("SCALA_HOME");
       programFiles = System.getenv("ProgramFiles");
       systemDrive = System.getenv("SystemDrive");
     }
@@ -420,6 +421,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       addIfDir(new File(envJavaHome, "../.."), roots);
     }
     
+    
     // Windows entries for Java
     if (programFiles != null) {
       addIfDir(new File(programFiles, "Java"), roots);
@@ -435,6 +437,13 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     }
     addIfDir(new File("/C:/Java"), roots);
     addIfDir(new File("/C:"), roots);
+    
+    // add Scala environment bindings to roots
+    if (envScalaHome != null) {
+      addIfDir(new File(envScalaHome), roots);
+      addIfDir(new File(envScalaHome, ".."), roots);
+      addIfDir(new File(envScalaHome, "../.."), roots);
+    }
     
     /* Scala entries for Windows */
     addIfDir(new File("/C:/Scala/scala-2.9.1.final"), roots);
@@ -504,6 +513,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         if (! containsCompiler) continue;
 
         JarJDKToolsLibrary lib = makeFromFile(jar.getKey(), model, desc);
+        _log.log("makeFromFile(...) returned library " + lib);
         if (lib.isValid()) {
           FullVersion v = lib.version();
           Map<FullVersion, Iterable<JarJDKToolsLibrary>> mapToAddTo = results;
@@ -513,10 +523,11 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
           else { mapToAddTo.put(v, IterUtil.singleton(lib)); }
         }
         else {
-          JDKToolsLibrary.msg("    library is not valid: compiler=" + lib.compiler().isAvailable() +
+          JDKToolsLibrary.msg("This library is not valid: compiler=" + lib.compiler().isAvailable() +
                               " debugger=" + lib.debugger().isAvailable() + " javadoc=" + lib.javadoc().isAvailable());
         }
       }
+      _log.log("Valid Results: \n***** results = " + results + "\n***** compound results = " + compoundResults);
     }
   }
   

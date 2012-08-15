@@ -76,11 +76,11 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
     
     // Get position of previous non-WS char (not in comments)
     try {
-      int loc = doc._findPrevNonWSCharPos(bracePos);
+      int loc = doc.getPrevNonWSCharPos(bracePos);
       char ch = doc.getText(loc,1).charAt(0);
       for (char pch: _prefix) if (ch == pch) return true;
     }
-    catch (BadLocationException e) { }    
+    catch (BadLocationException e) { /* fall through */ }    
     return false;
   }
 }

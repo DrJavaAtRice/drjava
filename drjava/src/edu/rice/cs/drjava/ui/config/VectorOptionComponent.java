@@ -184,6 +184,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
       public boolean isCellEditable(int row, int col) { return true; }
       public void setValueAt(Object value, int row, int col) { fireTableCellUpdated(row, col); }
     };
+    
     // button table
     _buttonTable = new JTable(_buttonTableModel);
     _buttonTable.setColumnSelectionAllowed(false);
@@ -485,6 +486,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   protected java.util.List<JButton> getButtons() {
     List<JButton> buttons = new ArrayList<JButton>();
     buttons.add(_addButton);
+    buttons.add(_removeButton);
     if (_moveButtonEnabled) {
       buttons.add(_moveUpButton);
       buttons.add(_moveDownButton);

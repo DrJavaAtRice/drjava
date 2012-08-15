@@ -58,7 +58,6 @@ public class QuestionPrevLineStartsJavaDocWithText extends IndentRuleQuestion {
     * @return true if this node's rule holds.
     */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
-
     try {
       // Find start of line
       int here = doc.getCurrentLocation();

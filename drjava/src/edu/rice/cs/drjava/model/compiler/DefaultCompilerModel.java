@@ -268,7 +268,7 @@ public class DefaultCompilerModel implements CompilerModel {
               else {
                 File newRoot = doc.getSourceRoot();
                 if (! newRoot.equals(sourceRoot)) {
-                  System.err.println("***** File " + f + " has a different source root.");
+//                  System.err.println("***** File " + f + " has a different source root.");
                   throw new IllegalArgumentException("File " + f + " has a different source root than the first file: "
                                                        + filesToCompile.get(0).getName());
                 }
@@ -293,7 +293,7 @@ public class DefaultCompilerModel implements CompilerModel {
     
     try {
       if (! prelimErrors.isEmpty()) { 
-        System.err.println("Preliminary errors found in compilation");
+//        System.err.println("Preliminary errors found in compilation");
         _distributeErrors(prelimErrors); 
       }
       else {
@@ -309,7 +309,7 @@ public class DefaultCompilerModel implements CompilerModel {
           throw new IOException("Could not create build directory: " + buildDir);
         }
         
-        System.err.println("Calling _compileFiles(" + filesToCompile + ", " + buildDir + ")");
+//        System.err.println("Calling _compileFiles(" + filesToCompile + ", " + buildDir + ")");
         _compileFiles(filesToCompile, buildDir);
       }
     }
@@ -362,7 +362,7 @@ public class DefaultCompilerModel implements CompilerModel {
     CompilerInterface compiler = getActiveCompiler();
     
     List<File> classPath = CollectUtil.makeList(_model.getClassPath());
-    System.err.println("Compilation class path is: " + classPath);
+//    System.err.println("Compilation class path is: " + classPath);
     
     // Temporary hack to allow a boot class path to be specified
     List<File> bootClassPath = null;

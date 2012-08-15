@@ -58,7 +58,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     final File file = tempFile();
 //    System.err.println("Temp source file is " + file.getAbsolutePath());
     
-    System.err.println("testClassFileSynchronization started");
+//    System.err.println("testClassFileSynchronization started");
     
     saveFile(doc, new FileSelector(file));
     
@@ -71,7 +71,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     File buildDir = null;
     try { buildDir = doc.getSourceRoot(); }
     catch(Exception e) { fail("Internal testing error. Test file " + file + " not set up correctly"); }
-    System.err.println("Build directory for test is: " + buildDir);
+//    System.err.println("Build directory for test is: " + buildDir);
     assertTrue("should not be in sync before compile", ! doc.checkIfClassFileInSync());
     assertTrue("The state of all open documents should be out of sync", _model.hasOutOfSyncDocuments());
     testStartCompile(doc);
@@ -87,7 +87,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     
     // Make sure .class exists
     File compiled = new File(buildDir, "DrScalaTestBar.class");
-    System.err.println("compiled class file = " + compiled);
+//    System.err.println("compiled class file = " + compiled);
 
     assertTrue("Build directory '" + buildDir + "' exists", buildDir.exists());
     assertTrue("Class file '" + compiled + "' should exist after compile", compiled.isFile());
@@ -102,7 +102,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     saveFile(doc, new FileSelector(file));
     assertTrue("should not be in sync after save", ! doc.checkIfClassFileInSync());
     
-    System.err.println("testClassFileSynchronization completed");
+//    System.err.println("testClassFileSynchronization completed");
   }
   
   /** Ensure that renaming a file makes it out of sync with its class file.
@@ -115,7 +115,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     final File file = tempFile();
     final File file2 = tempFile();
     
-    System.err.println("testClassFileSynchronizationAfterRename started");
+//    System.err.println("testClassFileSynchronizationAfterRename started");
     
     saveFile(doc, new FileSelector(file));
     

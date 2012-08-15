@@ -4364,9 +4364,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     String fileName = doc.getCompletePath();
     if (! fileName.equals(_fileTitle)) {
       _fileTitle = fileName;
-      setTitle(fileName);
-      _tabbedPanesFrame.setTitle("Tabbed Panes - "+fileName);
-      if (_debugFrame!=null) _debugFrame.setTitle("Debugger - "+fileName);
+      setTitle("DrScala: " + fileName);
+      _tabbedPanesFrame.setTitle("Tabbed Panes - " + fileName);
+      if (_debugFrame!=null) _debugFrame.setTitle("Debugger - " + fileName);
       _model.getDocCollectionWidget().repaint();
     }
     String path = doc.getCompletePath();
@@ -5302,8 +5302,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   void quit() {
 //    AbstractGlobalModel._log.log("MainFrame.quit() called");
     if (_promptBeforeQuit) {
-      String title = "Quit DrJava?";
-      String message = "Are you sure you want to quit DrJava?";
+      String title = "Quit DrScala?";
+      String message = "Are you sure you want to quit DrScala?";
       ConfirmCheckBoxDialog dialog = new ConfirmCheckBoxDialog(MainFrame.this, title, message);
       int rc = dialog.show();
       if (rc != JOptionPane.YES_OPTION) return;
@@ -6199,7 +6199,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_printInteractionsPreviewAction, "Print Preview", "PrintPreview", 
                  "Preview how the interactions document will be printed");    
     
-    _setUpAction(_quitAction, "Quit", "Quit", "Quit DrJava");
+    _setUpAction(_quitAction, "Quit", "Quit", "Quit DrScala");
     
     _setUpAction(_undoAction, "Undo", "Undo previous command");
     _setUpAction(_redoAction, "Redo", "Redo last undo");
@@ -9237,7 +9237,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void junitTestEnded(final String name, final boolean succeeded, final boolean causedError) {
       assert EventQueue.isDispatchThread();
-      System.err.println("junitTestEnded(" + name + ", " + succeeded + ", " + causedError + ")");
+//      System.err.println("junitTestEnded(" + name + ", " + succeeded + ", " + causedError + ")");
       _junitPanel.getErrorListPane().testEnded(name, succeeded, causedError);  // What does this do?
       _junitPanel.progressStep(succeeded);
       _model.refreshActiveDocument();

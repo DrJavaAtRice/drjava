@@ -77,6 +77,7 @@ class ActionStartPrevLinePlusMultilinePreserve extends IndentRuleAction {
     * @return this is always false, since we are updating the cursor location
     */
   public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+    super.indentLine(doc, reason); // This call does nothing other than record some indent tracing
     try {
       // copy it so any changes are not remembered
       String[] suffices = new String[_suffices.length];

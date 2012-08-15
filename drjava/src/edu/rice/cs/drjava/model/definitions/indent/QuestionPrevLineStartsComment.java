@@ -68,8 +68,7 @@ class QuestionPrevLineStartsComment extends IndentRuleQuestion {
     * @return true if this node's rule holds.
     */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
-
-      int cursor;
+    int cursor;
 
     // Move back to start of current line
     cursor = doc._getLineStartPos(doc.getCurrentLocation());

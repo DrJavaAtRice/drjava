@@ -78,7 +78,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
    */
   public static Test suite() { return  new TestSuite(DefinitionsDocumentTest.class); }
   
-  /** Convenience method that wraps _doc.indentLines calls in a write lock. */
+  /** Convenience method that wraps _doc.indentLines calls in a write lock. [Archaic] */
   private void indentLines(int selStart, int selEnd) {
     _doc.indentLines(selStart, selEnd); 
   }

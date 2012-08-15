@@ -87,7 +87,7 @@ public final class IndentTest extends DrJavaTestCase {
     Utilities.invokeAndWait(new Runnable() { public void run() { _doc._indentLine(reason); } });
   }
  
-  /** Convenience method that performs _doc._indentLines in the event thread. */
+  /** Convenience method that performs _doc.indentLines in the event thread. */
   private void safeIndentLines(final int startSel, final int endSel) {
     Utilities.invokeAndWait(new Runnable() { 
       public void run() {

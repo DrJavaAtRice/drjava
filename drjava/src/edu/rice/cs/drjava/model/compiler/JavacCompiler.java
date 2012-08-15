@@ -376,7 +376,7 @@ public abstract class JavacCompiler implements CompilerInterface {
   /** Return the set of keywords that should be highlighted in the specified file.
     * @param f file for which to return the keywords
     * @return the set of keywords that should be highlighted in the specified file. */
-  public Set<String> getKeywordsForFile(File f) { return new HashSet<String>(JAVA_KEYWORDS); }
+  public Set<String> getKeywordsForFile(File f) { return JAVA_KEYWORDS; }
   
   /** Set of Java/GJ keywords for special coloring. */
   public static final HashSet<String> JAVA_KEYWORDS = new HashSet<String>();

@@ -42,7 +42,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.UnexpectedException;
 
 /** Determines whether or not the closest non-whitespace character preceding the start of the current line (excluding 
-  * any characters inside comments or strings) is on the same line as the enclosing CURLY brace (class is misnamed!).
+  * any characters inside comments or strings) is on the same line as the enclosing brace (curly or paren).
   *
   * @version $Id$
   */
@@ -52,38 +52,42 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion {
     */
   public QuestionStartAfterOpenBrace(IndentRule yesRule, IndentRule noRule) { super(yesRule, noRule); }
   
-  /** Assumes read lock is already held.
+  /** Only runs in the event thread.
     * @param doc The AbstractDJDocument containing the current line.
     * @return True the closest non-whitespace character before the start of the current line (excluding any 
     * characters inside comments or strings) is an open brace.
     */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason)  {
-    
     int origin = doc.getCurrentLocation();
     int lineStart = doc._getLineStartPos(origin);
     
     if (lineStart <= 1) return false;  // linestart follows a newLine, which must be preceded by a brace to return true
-    // Get brace for start of line
-    doc.setCurrentLocation(lineStart);
-    BraceInfo info = doc._getLineEnclosingBrace();
-    doc.setCurrentLocation(origin);    
-    
-    if (! info.braceType().equals(BraceInfo.OPEN_CURLY) || info.distance() <= 0)
-      // Precondition not met: we should have a brace
-      return false;
-    int bracePos = lineStart - info.distance();    
-    
+    try {  // must restore current location
+      
+      // Get brace for start of line
+      doc.setCurrentLocation(lineStart);
+      BraceInfo info = doc._getLineEnclosingBrace();
+      doc.setCurrentLocation(origin);    
+      
+      String braceType = info.braceType();
+      if (! (braceType.equals(BraceInfo.OPEN_CURLY) || braceType.equals(BraceInfo.OPEN_PAREN)) || info.distance() <= 0) 
+        // Either enclosing brace is not '{' or '(' or there is no enclosing brace
+        return false;
+      int bracePos = lineStart - info.distance();    
+      
 //    // Get brace's end of line
-    int braceEndLinePos = doc._getLineEndPos(bracePos);
-    
-    // Get position of next non-WS char (not in comments)
-    int nextNonWS = -1;
+      int braceEndLinePos = doc._getLineEndPos(bracePos);
+      
+      // Get position of next non-WS char (not in comments)
+      int nextNonWS = -1;
 //    System.err.println("bracePos = " + bracePos + " docLength = " + doc.getLength());
-    try { nextNonWS = doc.getFirstNonWSCharPos(braceEndLinePos /* bracePos + 1*/); }
-    catch (BadLocationException e) { throw new UnexpectedException(e); } // Shouldn't happen
-    
-    if (nextNonWS == -1) return true;
-    
-    return (nextNonWS >= lineStart);
+      try { nextNonWS = doc.getFirstNonWSCharPos(braceEndLinePos /* bracePos + 1*/); }
+      catch (BadLocationException e) { throw new UnexpectedException(e); } // Shouldn't happen
+      
+      if (nextNonWS == -1) return true;
+      
+      return (nextNonWS >= lineStart);
+    }
+    finally{ doc.setCurrentLocation(origin); }
   }
 }

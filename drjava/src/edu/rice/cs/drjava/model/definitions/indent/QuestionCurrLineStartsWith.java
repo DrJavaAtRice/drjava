@@ -45,38 +45,56 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
   * @version $Id$
   */
 public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
-  private String _prefix;
+  private volatile String _prefix;
+  private volatile boolean _acceptComments;
   
   /** Constructs a new rule for the given prefix string. Does not look inside comments.
     * @param prefix String to search for
     * @param yesRule Rule to use if this rule holds
     * @param noRule Rule to use if this rule does not hold
     */
-  public QuestionCurrLineStartsWith(String prefix, IndentRule yesRule, IndentRule noRule) {
+  public QuestionCurrLineStartsWith(String prefix, boolean acceptComments, IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
     _prefix = prefix;
+    _acceptComments = acceptComments;
   }
   
+  /** Convenience constructor for case wlineStart acceptComments is true */
+  public QuestionCurrLineStartsWith(String prefix, IndentRule yesRule, IndentRule noRule) {
+    this(prefix, true, yesRule, noRule);
+  }
   /** Determines if the current line in the document starts with the specified prefix, ignoring whitespace.
+    * If the prefix is null or empty, returns true.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is being done
     * @return true if this node's rule holds.
     */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
+    if (_prefix == null) return true;
+    int len = _prefix.length();
+    if (len == 0) return true;
     
     try {
       // Find start of line
-      int here = doc.getCurrentLocation();
-      int firstCharPos = doc._getLineFirstCharPos(here);
-      int lineEndPos = doc._getLineEndPos(here);
+      int lineStart = doc._getLineStartPos();
+      int firstCharPos, lineEndPos;
+      
+      if (_acceptComments) {
+        firstCharPos = doc._getLineFirstCharPos(lineStart);
+        lineEndPos = doc._getLineEndPos(lineStart);
+      }
+      else {
+        firstCharPos = doc.getFirstNonWSCharPos(lineStart);
+        lineEndPos = doc._getLineEndPos(firstCharPos);
+      }
       
       // If prefix would run off the end of the line, the answer is obvious.
-      if (firstCharPos + _prefix.length() > lineEndPos) {
+      if (firstCharPos + len > lineEndPos) {
         return false;
       }
       
       // Compare prefix
-      String actualPrefix = doc.getText(firstCharPos, _prefix.length());
+      String actualPrefix = doc.getText(firstCharPos, len);
       return _prefix.equals(actualPrefix);
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }  // Shouldn't happen

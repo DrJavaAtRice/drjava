@@ -53,7 +53,7 @@ public class JavaSourceFilter extends FileFilter {
     if (f.isDirectory()) return true;
     
     String ext = getExtension(f);
-    return ext.equals(OptionConstants.JAVA_FILE_EXTENSION) || ext.equals(OptionConstants.SCALA_FILE_EXTENSION);
+    return ext != null && ext.equals(OptionConstants.JAVA_FILE_EXTENSION) || ext.equals(OptionConstants.SCALA_FILE_EXTENSION);
   }
 
   /** @return A description of this filter to display. */
@@ -64,7 +64,7 @@ public class JavaSourceFilter extends FileFilter {
 
   /* Get the extension of a file. */
   public static String getExtension(File f) {
-    String ext = null;
+    String ext = "";
     String s = f.getName();
     int i = s.lastIndexOf('.');
     if (i > 0 && i < s.length() - 1) {

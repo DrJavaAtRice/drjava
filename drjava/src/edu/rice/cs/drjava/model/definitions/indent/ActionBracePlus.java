@@ -65,7 +65,7 @@ public class ActionBracePlus extends IndentRuleAction {
     int dist = info.distance();
 
     // Check preconditions
-    if (info.braceType().equals("") || dist < 0) {  // Should use interned Strings here
+    if (info.braceType().equals(BraceInfo.NONE) || dist < 0) {
       // Can't find brace, so do nothing.
       return supResult;
     }

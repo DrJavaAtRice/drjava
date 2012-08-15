@@ -82,7 +82,7 @@ public class LogTest extends MultiThreadedTestCase {
   /** Returns the string after the date; returns null if there is no date. */
   private static String getStringAfterDate(String s) {
     int pos = s.indexOf("GMT: ");
-    if (pos==-1) { return null; }
+    if (pos == -1) { return null; }
     return s.substring(pos + 5);
   }
   

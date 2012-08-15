@@ -313,22 +313,18 @@ public interface OptionConstants {
     
     private static boolean _registered = false;
     
-    /** Return the look-and-feel to use by default */
+    /** Return the look-and-feel class name to use by default */
     public static String getDefaultLookAndFeel() {
       if (PlatformFactory.ONLY.isMacPlatform())
         return UIManager.getSystemLookAndFeelClassName(); // Mac: Let the system decide.
-      else if (PlatformFactory.ONLY.isWindowsPlatform())
-        return UIManager.getCrossPlatformLookAndFeelClassName(); // Windows: Metal, because the Windows LAF is ugly
-      else {
-        if (JavaVersion.CURRENT.supports(JavaVersion.JAVA_6)) {
-          // Linux with Java 6: Let the system decide. Probably GTK, which is ok.
-          return UIManager.getSystemLookAndFeelClassName();
-        }
-        else {
-          // Linux with Java older than Java 6: Metal
-          return UIManager.getCrossPlatformLookAndFeelClassName();
-        }
+      else // Set CrossPlatform "Nimbus" LookAndFeel
+        try {
+          for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels())
+            if ("Nimbus".equals(info.getName())) return info.getClassName();
+      } catch (Exception e) {
+        // If Nimbus is not available, fall through and use CrossPlatformLookAndFeel
       }
+      return UIManager.getCrossPlatformLookAndFeelClassName();
     }
     
     /** Need to ensure that a look-and-feel can be instantiated and is valid.
@@ -354,7 +350,8 @@ public interface OptionConstants {
           try {
             String currName = lafis[i].getClassName();
             LookAndFeel currLAF = (LookAndFeel) Class.forName(currName).newInstance();
-            if (currLAF.isSupportedLookAndFeel()) lookAndFeels.add(currName);
+            // Filter out "gtk" LookAndFeel; it is broken on Linux in several ways
+            if (currLAF.isSupportedLookAndFeel() && ! currName.contains("gtk")) lookAndFeels.add(currName);
           }
           // failed to load/instantiate class, or it is not supported; it is not a valid choice.
           catch (ClassNotFoundException e) { /* do nothing */ }
@@ -1769,7 +1766,7 @@ public interface OptionConstants {
   public static final BooleanOption SHOW_CODE_PREVIEW_POPUPS =
     new BooleanOption("show.code.preview.popups", Boolean.TRUE);
   
-  /** Whether to use Runtime.halt to quit DrJava (see bugs 1550220 and 1478796). */
+  /** Whether to use Runtime.halt to quit DrScala (see bugs 1550220 and 1478796). */
   public static final BooleanOption DRJAVA_USE_FORCE_QUIT =
     new BooleanOption("drjava.use.force.quit", Boolean.FALSE);
   

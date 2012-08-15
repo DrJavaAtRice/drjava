@@ -151,7 +151,7 @@ public class Utilities {
       java.io.Reader r = DataFlavor.stringFlavor.getReaderForText(t);
       int ch;
       final StringBuilder sb = new StringBuilder();
-      while ((ch=r.read()) !=-1 ) { sb.append((char)ch); }
+      while ((ch=r.read()) != -1 ) { sb.append((char)ch); }
       s = sb.toString();
     }
     catch(UnsupportedFlavorException ufe) { /* ignore, return null */ }

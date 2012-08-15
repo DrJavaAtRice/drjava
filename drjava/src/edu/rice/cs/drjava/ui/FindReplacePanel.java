@@ -580,7 +580,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
                                     this);
     findAll(searchStr, searchAll, searchSelectionOnly, _machine.getMatchCase(), _machine.getMatchWholeWord(),
             _machine.getIgnoreCommentsAndStrings(), _ignoreTestCases.isSelected(), startDoc, rm, region, panel);
-//    _model.refreshActiveDocument();  // Rationale: a giant findAll left the definitions pane is a strange state
+    _model.refreshActiveDocument();  // Rationale: a giant findAll left the definitions pane is a strange state
     panel.requestFocusInWindow();
     EventQueue.invokeLater(new Runnable() { public void run() { panel.getRegTree().scrollRowToVisible(0); } });
   }

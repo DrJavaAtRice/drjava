@@ -362,7 +362,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-//  public int findPrevNonWSCharPos(int pos) throws BadLocationException {
+//  public int getPrevNonWSCharPos(int pos) throws BadLocationException {
 //    throw new UnsupportedOperationException("Dummy method");
 //  }
   
@@ -400,7 +400,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-//  public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException {
+//  public int getPrevNonWSCharPos(int pos, char[] whitespace) throws BadLocationException {
 //    throw new UnsupportedOperationException("Dummy method");
 //  }
   

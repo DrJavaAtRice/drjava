@@ -449,11 +449,12 @@ public class ReducedModelBrace extends AbstractReducedModel {
     * matching brace obviously must appear on the preceding line or before.  To find the enclosing brace one must first 
     * move past this newline. If there is not a line enclosing brace, returns BraceInfo.NULL.  Usually called when 
     * distToStart() = 0.
+    * Why not move the cursor to the beginning of the line and use getEnclosingBrace?
     */
   public BraceInfo _getLineEnclosingBrace() {
     Stack<Brace> braceStack = new Stack<Brace>();
     TokenList.Iterator iter = _cursor.copy();
-    resetWalkerLocationToCursor();  // Why not use _parent._rmc._cursor instead of _parent._rmc._walker?
+    resetWalkerLocationToCursor();
     // this is the distance to front edge of the preceding newline.
     final int distToStart = _parent.getDistToStart();
 //    System.err.println("_getLineEnclosingBrace.distToStart = " + distToStart);

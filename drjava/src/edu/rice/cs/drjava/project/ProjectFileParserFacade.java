@@ -55,7 +55,7 @@ public class ProjectFileParserFacade {
   public ProjectFileIR parse(File projFile) throws IOException, FileNotFoundException, MalformedProjectFileException {
     FileReader fr = new FileReader(projFile);
     int read = fr.read();
-    if (read==-1) {
+    if (read == -1) {
       // empty project file, throw exception
       throw new MalformedProjectFileException("Empty project file.");
     }
@@ -66,7 +66,7 @@ public class ProjectFileParserFacade {
       return fixup(XMLProjectFileParser.ONLY.parse(projFile));
     }
     read = fr.read();
-    if (read==-1) {
+    if (read == -1) {
       // project file just contained ";", throw exception
       throw new MalformedProjectFileException("Incomplete project file.");
     }

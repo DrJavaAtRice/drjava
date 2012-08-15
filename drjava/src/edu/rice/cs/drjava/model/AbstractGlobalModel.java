@@ -164,7 +164,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   */
 public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants, DocumentIterator {
   
-  public static final Log _log = new Log("GlobalModel.txt", true);
+  public static final Log _log = new Log("GlobalModel.txt", false);
   
   /** A document cache that manages how many unmodified documents are open at once. */
   protected DocumentCache _cache;  
@@ -2819,7 +2819,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       CompilerModel cm = getCompilerModel();
       if (cm == null) {
         // use the cache adapter so setting the keywords doesn't load the document
-        _cacheAdapter.setKeywords(edu.rice.cs.drjava.model.compiler.JavacCompiler.JAVA_KEYWORDS);
+        _cacheAdapter.setKeywords(edu.rice.cs.drjava.model.compiler.ScalaCompiler.SCALA_KEYWORDS);
       }
       else {
         // use the cache adapter so setting the keywords doesn't load the document
@@ -3864,8 +3864,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return getDocument().findNextEnclosingBrace(pos, opening, closing);
     }
     
-//    public int findPrevNonWSCharPos(int pos) throws BadLocationException {
-//      return getDocument().findPrevNonWSCharPos(pos);
+//    public int getPrevNonWSCharPos(int pos) throws BadLocationException {
+//      return getDocument().getPrevNonWSCharPos(pos);
 //    }
     
     /**Only runs in the event thread. */
@@ -3889,28 +3889,28 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return getDocument()._getLineFirstCharPos(pos);
     }
     
-    /** Assumes read lock is already held. */
+    /** Only runs in event thread. */
     public int findCharOnLine(int pos, char findChar) {
       return getDocument().findCharOnLine(pos, findChar);
     }
     
-    /** Assumes read lock is already held. */
+    /** Only runs in event thread. */
     public int _getIndentOfCurrStmt(int pos) throws BadLocationException {
       return getDocument()._getIndentOfCurrStmt(pos);
     }
     
-    /** Assumes read lock is already held. */
+    /** Only runs in event thread. */
     public int _getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException {
       return getDocument()._getIndentOfCurrStmt(pos, delims);
     }
     
-    /** Assumes read lock is already held. */
+    /** Only runs in event thread. */
     public int _getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
       return getDocument()._getIndentOfCurrStmt(pos, delims, whitespace);
     }
     
-//    public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException {
-//      return getDocument().findPrevCharPos(pos, whitespace);
+//    public int getPrevNonWSCharPos(int pos, char[] whitespace) throws BadLocationException {
+//      return getDocument().getPrevNonWSCharPos(pos, whitespace);
 //    }
     
 //    public boolean findCharInStmtBeforePos(char findChar, int position) {
