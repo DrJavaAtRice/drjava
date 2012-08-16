@@ -44,13 +44,13 @@ import java.io.PrintStream;
 
 /** This class does almost all the work for keeping an indent tree trace.  IndentRuleQuestion
   * also does some of the work, and any subclass may substitute its own version of getRuleName()
-  * Note: tracing (determined by ruleTraceEnabled) is disabled by default
+  * Note: tracing (determined solely by ruleTraceEnabled) is disabled by default
   * @version $Id$
   */
 public abstract class IndentRuleWithTrace implements IndentRule {
 
   private static volatile ArrayList<String> trace = null;
-  private static volatile boolean startOver = false;
+  private static volatile boolean startOver = true;
   private static volatile boolean ruleTraceEnabled = false;
 
   public static final String YES = "Yes";
@@ -70,6 +70,7 @@ public abstract class IndentRuleWithTrace implements IndentRule {
     }
   }
 
+  /* Potentially used in test code. */
   public static void setRuleTraceEnabled(boolean ruleTraceEnabled) {
     IndentRuleWithTrace.ruleTraceEnabled = ruleTraceEnabled;
   }

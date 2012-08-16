@@ -62,12 +62,28 @@ public interface Query {
     public IndentInformation(int pos) { super(pos); }
   }
   
-  abstract static class AbstractEnclosingBrace implements Query {
+  public static class PrevEnclosingBrace implements Query {
+    private final int _pos;
+    private final char _opening;
+    
+    public PrevEnclosingBrace(int pos, char opening) { 
+      _pos = pos;
+      _opening = opening;
+    }
+    
+    public boolean equals(Object other) {
+      if (other == null || other.getClass() != getClass()) return false;
+      PrevEnclosingBrace o = (PrevEnclosingBrace) other;
+      return o._pos == _pos && o._opening == _opening;
+    }
+  }
+  
+  public static class NextEnclosingBrace implements Query {
     private final int _pos;
     private final char _opening;
     private final char _closing;
     
-    public AbstractEnclosingBrace(final int pos, final char opening, final char closing) { 
+    public NextEnclosingBrace(final int pos, final char opening, final char closing) { 
       _pos = pos; 
       _opening = opening;
       _closing = closing;
@@ -75,19 +91,11 @@ public interface Query {
     
     public boolean equals(Object other) {
       if (other == null || other.getClass() != getClass()) return false;
-      AbstractEnclosingBrace o = (AbstractEnclosingBrace) other;
+      NextEnclosingBrace o = (NextEnclosingBrace) other;
       return o._pos == _pos && o._opening == _opening && o._closing == _closing;
     }
     
     public int hashCode() { return hash(getClass().hashCode(), _pos, _opening, _closing); }
-  }
-  
-  public static class PrevEnclosingBrace extends AbstractEnclosingBrace {
-    public PrevEnclosingBrace(int pos, char opening, char closing) { super(pos, opening, closing); }
-  }
-  
-  public static class NextEnclosingBrace extends AbstractEnclosingBrace {
-    public NextEnclosingBrace(int pos, char opening, char closing) { super(pos, opening, closing); }
   }
   
   abstract static class CharArrayAndFlag implements Query {
@@ -240,6 +248,7 @@ public interface Query {
   public static class EnclosingClassName implements Query {
     private int _pos;
     private boolean _qual;
+    
     public EnclosingClassName(int pos, boolean qual) {
       _pos = pos;
       _qual = qual;

@@ -180,7 +180,7 @@ public class DJError implements Comparable<DJError>, Serializable {
     return compareErrorWarning(other);
   }
   
-  /** Compares this error's postion with other error's, based first on line number, then by column. */
+  /** Compares this error's position with other error's, based first on line number, then by column. */
   private int compareByPosition(DJError other) {
     // Compare by line unless lines are equal
     int byLine = _lineNumber - other.lineNumber();

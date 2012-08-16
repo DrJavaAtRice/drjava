@@ -4204,7 +4204,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     try {
       Utilities.invokeAndWait(new Runnable() {  
         public void run() {
-//          doc.makePositions();  // reconstruct embedded postions in document (reconstructing document if necesarry)
+//          doc.makePositions();  // reconstruct embedded positions in document (reconstructing document if necesarry)
           _documentNavigator.setNextChangeModelInitiated(true);
           _documentNavigator.selectDocument(doc);
         }

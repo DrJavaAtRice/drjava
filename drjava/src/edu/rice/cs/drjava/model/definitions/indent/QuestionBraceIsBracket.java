@@ -64,7 +64,7 @@ public class QuestionBraceIsBracket extends IndentRuleQuestion {
 //    return info.lineEnclosingBraceType().equals(IndentInfo.OPEN_PAREN) || 
 //      info.lineEnclosingBraceType().equals(IndentInfo.OPEN_BRACKET); 
     
-    BraceInfo info = doc._getLineEnclosingBrace();
+    BraceInfo info = doc._getLineEnclosingBrace();  // ignores "=>" which should not occur inside square brackets
     String braceType = info.braceType();
     return braceType.equals(BraceInfo.OPEN_BRACKET); 
   }

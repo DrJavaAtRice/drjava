@@ -96,13 +96,16 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   /* All of the following char[] arrays appears in ascending order so that they support Arrays.binarySearch. */
   public static final char[] DEFAULT_DELIMS                = {';', '{', '}'};
-  public static final char[] DEFAULT_WHITESPACE            = {'\t', '\n', ' '};
-  public static final char[] DEFAULT_WHITESPACE_WITH_COMMA = {'\t', '\n', ' ', ','};
+  public static final char[] SCALA_DELIMS                  = {'(', ')', ';', '=', '>', '{', '}'};
+  public static final char[] DEFAULT_WHITESPACE            = {'\t', '\n', '\r', ' '};
+  public static final char[] DEFAULT_WHITESPACE_WITH_COMMA = {'\t', '\n', '\r', ' ', ','};
   public static final char[] NEWLINE                       = {'\n'};
   public static final char[] EQUALS                        = {'='};
   public static final char[] OPENING_BRACES                = {'(', '>', '{'};  // includes pseudo-brace "=>"
+  public static final char[] OPENING_BRACES_WITH_EQUALS    = {'(', '=', '>', '{'};  // includes pseudo-braces "=" & "=>"
   public static final char[] CLOSING_BRACES                = {')', '}'};  
-  public static final char[] SEMICOLON_MARKERS             = {'\n', '(', ')', '>', '{', '}'}; 
+  public static final char[] SEMICOLON_MARKERS             = {'\n', '(', ')', '>', '{', '}'};
+  
   public static final char[] NOT_TERMINATING_CHARS         =   
     {'!', '%', '&', '(', '*', '+', '-', '.', '/', '<', '=', '>', '^', '{', '|'};
   public static final char[] ALPHANUMERIC                  = 
@@ -234,7 +237,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //    System.err.println("Installing Indent Option Listener for " + this);
     _listener1 = new OptionListener<Integer>() {
       public void optionChanged(OptionEvent<Integer> oce) {
-        System.err.println("Changing INDENT_LEVEL for " + this + " to " + oce.value);
+//        System.err.println("Changing INDENT_LEVEL for " + this + " to " + oce.value);
         indenter.buildTree(oce.value);
       }
     };
@@ -577,7 +580,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public void resetReducedModelLocation() { _reduced.resetLocation(); }
   
   /** Searching backwards, finds the position of the enclosing brace of specified type.  Ignores comments.  Only runs in
-    * event thread.  TODO: implement this method by iterating getEnclosingBrace until brace of specified form is found
+    * event thread.
     * @param pos Position to start from
     * @param opening opening brace character
     * @param closing closing brace character
@@ -588,7 +591,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     // assert EventQueue.isDispatchThread();
     // Check cache
-    final Query key = new Query.PrevEnclosingBrace(pos, opening, closing);
+    final Query key = new Query.PrevEnclosingBrace(pos, opening);
     final Integer cached = (Integer) _checkCache(key);
     if (cached != null) return cached.intValue();
     
@@ -721,7 +724,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   /** Searching backwards, finds the position of the first character that is one of the given delimiters, ignoring
     * phrases bracketed by parens, curly braces, or comments.  The array of delimiters MUST APPEAR IN ASCENDING ORDER 
-    * to support using Array.binarySearch.
+    * to support using Array.binarySearch.  See below for description of special case treatment of ">" and "=" as
+    * delimters.
     * @param pos Position to start from
     * @param delims array of characters to search IN ASCENDING ORDER
     * @return position of first matching delimiter, or ERROR_INDEX (-1) if beginning of document is reached.
@@ -734,9 +738,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * and over phrases bracketed in parens or curly braces, if so instructed.  Should only be called from pos inside 
     * explict/implicit enclosing brace.  If '>' appears in the delims array, this method looks for "=>" instead of ">" 
     * so that the implicit brace opening a case body can be found.  If '=' appears in the delims array, this method 
-    * looks for '=' preceded by a character other than '!', '=', or a binary operator.  The individual char '>' is not 
-    * supported as a possible delimiter. In addition, if skipOverBraces is enabled, the delims must exclude ')' and '}'.
-    * Otherwise no skipping will happen! 
+    * looks for '=' preceded by a character other than '!', '=', or a binary operator and an empty rest of line.  
+    * The individual char '>' is not supported as a possible delimiter. In addition, if skipOverBraces is enabled, 
+    * the delims must exclude ')' and '}'.  Otherwise no skipping will happen! 
     * The array of delimiters MUST APPEAR IN ASCENDING ORDER to support using Array.binarySearch.
     * Only runs in event thread.
     * @param pos Position to start from
@@ -749,7 +753,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
-//    Utilities.show("findPrevDelimiter(" + pos + ", " + Arrays.toString(delims) + ", " + skipBracePhrases);
+//    System.err.println("***** findPrevDelimiter(" + pos + ", " + Arrays.toString(delims) + ", " + 
+//                       skipBracePhrases + ")");
     
     // Check cache
     final Query key = new Query.PrevDelimiter(pos, delims, skipBracePhrases);
@@ -769,7 +774,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     // Walk backwards from specificed position, scanning current line for a delimiter
     while (i >= 0) {
-//      Utilities.show("findPrevDelimiter loop iteration: " + i);
+//      System.err.println("findPrevDelimiter loop iteration: " + i);
       /* Invariant: 0 <= i < pos; text[i+1:pos] contains no valid delims */
 
       setCurrentLocation(i);  // reduced model points to i
@@ -780,9 +785,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       char ch = text.charAt(i);
       
       if (match(ch, delims)) {
+//        System.err.println("Matching char '" + ch + "' found at pos " + i);
         /* The following is an UGLY hack to enable treating "=>" as a delimiter.  If '>' is a delimiter char, then
-         * it signifies the two character delimiter "=>". */
-        
+         * it signifies the two character delimiter "=>". */ 
         if (ch != '>' && ch != '=') break;  // matched delim other than '>', '='; i points to the delim;
 
         // must examine preceding character
@@ -791,20 +796,28 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           break;
         }
         char prev = text.charAt(i - 1);
-        if (ch == '<') {
-          if (prev == '=') break;  // matched "=>";  i points to '>' within "=>"
+        int lineEnd = _getLineEndPos(i);
+        int firstNonWS = _getFirstNonWSCharPos(i + 1);  // Start at right edge of ch
+//          System.err.println("Found '" + ch + "' at pos " + i);         
+//          System.err.println("    lineEnd = " + lineEnd + " firstNonWSPos = " + firstNonWS + " firstNonWSChar = '" + 
+//                             text.charAt(firstNonWS) + "'  prev = '" + prev + "'");
+        if (ch == '>') {
+          if (prev == '=' && firstNonWS != ERROR_INDEX && lineEnd < firstNonWS)
+              break;  // matched line-ending "=>";  i points to '>' within "=>"
           i--;  // decrement i and continue;
         }
         else { /* ch == '=' */
-          if ((prev == ' ') || Arrays.binarySearch(ILLEGAL_PREFIX_CHARS, prev) == ERROR_INDEX) 
-            break;  // matched '=' 
+          // Confirm that '=' appears as symbol at end of line
+
+          if ((prev == ' ' || Arrays.binarySearch(ILLEGAL_PREFIX_CHARS, prev) == ERROR_INDEX) && (lineEnd < firstNonWS)) 
+            break;  // matched line-ending '=' 
           i--;  // decrement i and continue;
         }
       }
         
       // ch is not a matching delim; examine ch as possible end of brace phrase to skip
       else if (skipBracePhrases && match(ch, CLOSING_BRACES)) {  // note that delims have already been matched
-//            Utilities.show("closing bracket is '" + ch + "' at pos " + i);
+//        System.err.println("In findPrevDelimiter, found skipPhrase ending in'" + ch + "' at pos " + i);
         setCurrentLocation(i + 1); // move cursor immediately to right of ch (a brace); i = _currentLocation - 1
 //            Utilities.show("_currentLocation = " + _currentLocation);
         int dist = balanceBackward();
@@ -815,7 +828,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         assert dist > 1;  // minimum length for dist is 2 corresponding to "()"
 //        Utilities.show("text = '" + text.substring(i + 1 - dist, dist) + "' dist = " + dist + " matching bracket is '" 
 //                         + text.charAt(i) + "' at pos " + i);
-        i = i + 1 - dist;  // decrement i to skip over balanced brace text and continue (i moved immediately left of brace)
+        i = i - dist;  // decrement i to skip over balanced brace text and continue with PRECEDING char
+//        System.err.println("Skipped phrase = '" + _getText(i+1,dist) + "'");
       }
       else i--;  // decrement i and continue
     }  // end of while loop
@@ -830,8 +844,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
     _storeInCache(key, i, pos - 1);  // update cache; entry veracity depends on text[0:pos-1] remaining invariant
 //    Utilities.show("findPrevDelimiter returning offset " + i + "; ch = " + ((i >= 0) ? getText(i,1) : "ERROR_INDEX"));
-    
-    // Return position of matching delim or ERROR_INDEX (-1) 
+//    System.err.println("From findPrevDelimeter, returning " + i);
+    // Return position of matching delim or ERROR_INDEX (-1)
     return i;  
   }
   
@@ -893,7 +907,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
-    System.err.println("getPrevNonWSCharPos(" + pos + ") called");
+//    System.err.println("getPrevNonWSCharPos(" + pos + ") called");
     // Check cache
     final Query key = new Query.PrevCharPos(pos, whitespace);
     final Integer cached = (Integer) _checkCache(key);
@@ -1140,14 +1154,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** Returns the length of the whitespace prefix of the line containing pos.  Hence, it assumes that it is already
     * properly indented.  If no nonWS char appears on the specified line, returns 0. */
   public int _getIndentOfLine(int pos) {
-    System.err.println("_getIndentOfLine(" + pos + ") called");
-    System.err.println("char at pos == newline? " + (_getText(pos, 1).equals("\n")));
-    System.err.println("line for _getIndentOfLine = '" + _getCurrentLine(pos) + "'");
+//    System.err.println("_getIndentOfLine(" + pos + ") called");
+//    System.err.println("char at pos == newline? " + (_getText(pos, 1).equals("\n")));
+//    System.err.println("line for _getIndentOfLine = '" + _getCurrentLine(pos) + "'");
     int lineStart = _getLineStartPos(pos);
-    System.err.println("lineStart = " + lineStart);
+//    System.err.println("lineStart = " + lineStart);
     if (lineStart == ERROR_INDEX) return 0;
     int lineEnd = _getLineEndPos(pos);
-    System.err.println("lineEnd = " + lineEnd);
+//    System.err.println("lineEnd = " + lineEnd);
     try {
       int firstNonWSCharPos = getFirstNonWSCharPos(lineStart);
       if (firstNonWSCharPos > lineEnd || firstNonWSCharPos == ERROR_INDEX) return 0;
@@ -1188,7 +1202,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
     try {
-       System.err.println("_getIndentOfCurrStmt(" + pos + ") called. Char at this pos = " + _getText(pos, 1).charAt(0));
+//       System.err.println("_getIndentOfCurrStmt(" + pos + ") called. Char at this pos = " + _getText(pos, 1).charAt(0));
       // Check cache
       int lineStart = _getLineStartPos(pos);  // returns 0 for initial line
       if (lineStart == 0) return 0;    // The beginning of the document has an indent of zero.
@@ -1196,62 +1210,83 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       final Query key = new Query.IndentOfCurrStmt(lineStart, delims, whitespace);
       final Integer cached = (Integer) _checkCache(key);
       if (cached != null) {
-        System.err.println("Returning cached value " + cached);
+//        System.err.println("Returning cached value " + cached);
         return cached;
       }
       
-      System.err.println("line start for current line is " + lineStart);
+//      System.err.println("line start for current line is " + lineStart);
            
       // We want to find the indent prefix for the current statement
       
-      /* Perform some analysis.  There are two cases:
-       * (i)  The current line ends (!) with '}' or ')' implying that it has the same indent prefix as the enclosing 
-       *      statement  unless the enclosing statment has the form "def ... = { ... }" or 
-       *      def ... = ... match ... { ... }
-       * (ii) The current line is either a new statement (which may be nested within a block opened by {, (, or =>? }
-       *      or the continuation of a statement
+      /* Perform some analysis.  There are four cases:
+       * (i)   The current line begins with '}' or ')' implying that it has the same indent prefix as the enclosing 
+       *       statement  unless the enclosing statment has the form "def ... = { ... }" or 
+       *       def ... = ... match ... { ... }  
+       *       NOTE: this closing brace usually appears on a line by itself or with another closing brace 
+       * (ii)  The current line is a new statement following a line ending in "="
+       * (iii) The current line is a new statement nested within a block opened by '{', '(', or "=>") or 
+       * (iv)  The current line is the continuation of a statement
+ 
+       * Addendum: in (iii), the line containing the enclosing brace may have the form "} else if (...) {" in which case
+       *           searching for the beginning of the statement is wrong.  Added as special case.
        */
     
       // Check for closing '}' or ')' ignoring comment text
       
-      int lineEnd = _getLineEndPos(pos);
-      int lastNonWSCharPos = getPrevNonWSCharPos(lineEnd, whitespace);  
-      if (lastNonWSCharPos == ERROR_INDEX)  // no nonWS char preceding lineEnd (!), so return indent of first line
+      int firstNonWSCharPos = getFirstNonWSCharPos(lineStart, whitespace, /* accept comments */ false);  
+      if (firstNonWSCharPos == ERROR_INDEX)  // no nonWS char preceding lineEnd (!), so return indent of first line
         return _getIndentOfLine(0);
-
-      char lastNonWSChar = _getText(lastNonWSCharPos, 1).charAt(0);
-      System.err.println("Last unshadowed char on line containing given pos = " + lastNonWSChar);
       
-      if (lastNonWSChar == '}' || lastNonWSChar == ')') {
-        // check for "=" or "= ... match ... " prefix preceding phrase ending in firstNonWSChar
+      char firstNonWSChar = _getText(firstNonWSCharPos, 1).charAt(0);
+      int charOffset = firstNonWSCharPos - _getLineStartPos(firstNonWSCharPos);
+        
+//      System.err.println("First unshadowed char on line containing given pos = '" + firstNonWSChar + "'");
+//      System.err.println("Character code is: " + (int) firstNonWSChar);
+      // Look for "} else if (...) {" pattern on given line
+      if (firstNonWSChar == '}') {
+        int lineEnd = _getLineEndPos(firstNonWSCharPos);
+        int len = lineEnd - firstNonWSCharPos - 1;
+        String restOfLine = _getText(firstNonWSCharPos + 1, len).trim();
+        if (restOfLine.startsWith("else ")) return charOffset;
+      }
+      // Look for "=" or "= ... match ... " prefix preceding balanced phrase ending in firstNonWSChar
+      if (firstNonWSChar == '}' || firstNonWSChar == ')') { 
         int orig = getCurrentLocation(); // Save _currentLocation
         try { // Look for enclosing '='
-          setCurrentLocation(lastNonWSCharPos + 1);  // immediately to right of '}' or ')'
+          setCurrentLocation(firstNonWSCharPos + 1);  // immediately to right of '}' or ')'
           int dist = balanceBackward();
-          int newPos = lastNonWSCharPos + 1 - dist;
+          int newPos = firstNonWSCharPos + 1 - dist;
           int enclosingBracePos = _getEnclosingBracePos();  // may be ERROR_INDEX
           int equalsPos = findPrevDelimiter(newPos, EQUALS);
           // The following assumes 'def' appears on same line as '='  TO DO: findPrev 'def'
           if (equalsPos > 0 && equalsPos > enclosingBracePos) return _getIndentOfLine(equalsPos);
           // '=' not found; look for first preceding nonWS character ignoring balanced phrases
           int newerPos = findPrevDelimiter(newPos, ALPHANUMERIC);
-          System.err.println("No opening '=' found; returning indent of '" + _getCurrentLine(newerPos) + "'");
+//          System.err.println("No opening '=' found; returning indent of '" + _getCurrentLine(newerPos) + "'");
           if (newerPos >= 0) return _getIndentOfLine(newerPos);  // assumes statement begins on same line as newerPos
-          System.err.println("Program text is garbled");
-          return _getIndentOfLine(lastNonWSCharPos); // program text is garbled
-            
+//          System.err.println("Program text is garbled");
+          return charOffset; // program text is garbled
         }
-        catch(BadLocationException ble) { return _getIndentOfLine(lastNonWSChar); }
+        catch(BadLocationException ble) { return _getIndentOfLine(firstNonWSCharPos); }
         finally { setCurrentLocation(orig); }
       }
-      
-      
-      // Find the beginning of the current statement assuming it is already prop
+      else if (firstNonWSChar == 'c') {
+//        System.err.println("first chars ='" + _getText(firstNonWSCharPos, 5) + "'");
+        if (_getText(firstNonWSCharPos, 5).equals("case ")) { // beginning of "case ..."
+//          System.err.println("Found case statement starting at pos " + firstNonWSCharPos);
+          return charOffset;
+        }
+      }
+//      System.err.println("Repeat: firstNonWSChar = '" + firstNonWSChar + "'");
+                                                    
+      // Find the beginning of the current statement assuming it is already properly indented
 
-      /* Find the postion of the enclosing brace or implied brace ("=>") beginning the block. May throw 
+      /* Find the position of the enclosing brace or implied brace ("=>") beginning the block. May throw 
        * BadLocationException. Must treat '=' as special case; it is NOT a enclosing brace! */
       
       int prevBracePos = findEnclosingScalaBracePos(lineStart);
+      
+//      System.err.println("Searching back from " + lineStart + ", found enclosing scala brace at pos " + prevBracePos);
       
       /* Find the position of the end of the previous statement in a block.  If none is found, 
        * search returns ERROR_INDEX. */
@@ -1260,7 +1295,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       /* The larger of prevSemicolonPos and prevBracePos marks the line (ignoring comments and balanced phrases)
        * preceding the beginning of the statement.  */
       
-      System.err.println("Prev Brace Pos " + prevBracePos + "; Prev Semicolon Pos = " + prevSemicolonPos);
+//      System.err.println("Prev Brace Pos " + prevBracePos + "; Prev Semicolon Pos = " + prevSemicolonPos);
       
       int endPrevLine = Math.max(_getLineEndPos(prevBracePos), prevSemicolonPos);
       
@@ -1271,7 +1306,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       
       beginStmtPos = _getLineStartPos(getFirstNonWSCharPos(beginStmtPos, whitespace, /* accept comments */ false));
       
-      System.err.println("Beginning of current statement = " + beginStmtPos);
+//      System.err.println("Beginning of current statement = " + beginStmtPos);
       return _getIndentOfLine(beginStmtPos);  // Assumes current statement is properly indented
     }
     catch(BadLocationException e) { /* fall through */ }
@@ -1291,11 +1326,11 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     /* Searching backward, look at each line end that is not enclosed in a balanced phrase, and find the  
      * first line that does NOT satisfy one of the following:
-     * (i)   ends in a opening paren and is not the test clause for an if/for/while; or
+     * (i)   ends in a closing paren that is not the end of a test clause for an if/for/while; or
      * (ii)  ends in '.' that is a separate token (not the end of a Double token), or
      * (iii) ends in a character other than a designated terminating char (like '+', '*', ...), or
      * (iv)  is empty, or
-     * (v) starts with "if" and the next 
+     * (v)   starts with "if" and the next ??
      * Then classify this boundary as ending in a semicolon and return the index of
      * the newline character marking this boundary.  If no such boundary is found,
      * return ERROR_INDEX. */
@@ -1320,7 +1355,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       
       // pos is end of previous non-empty line; lastNonWSCharPos is pos of nearest preceding unshadowed Non WS char 
       char lastNonWSChar = getText().charAt(lastNonWSCharPos);
-      System.err.println("In _findPrevImplicitSemicolon, last NonWS char is '" + lastNonWSChar + "'");
+//      System.err.println("In _findPrevImplicitSemicolon, last NonWS char is '" + lastNonWSChar + "'");
       
       // Is lastNonWSChar a ')'
       
@@ -1330,7 +1365,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           setCurrentLocation(lastNonWSCharPos + 1);  // immediately to right of paren
           int dist = balanceBackward();
           int newPos = _getLineStartPos(lastNonWSCharPos + 1 - dist);  // resume search from left of matching paren
-          System.err.println("Skipping back past ForIfWhile prefix in searching for implicit semicolon");
+//          System.err.println("Skipping back past ForIfWhile prefix in searching for implicit semicolon");
           return _findPrevImplicitSemicolonPos(newPos);
         }
       } else {
@@ -1357,76 +1392,98 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return ERROR_INDEX;
   }
   
-  /** Find the enclosing line Scala brace, '{', '(', or "=>" with no intervening "case". */
-  public int findEnclosingScalaBracePos(int pos) throws BadLocationException {
-    
-    System.err.println("findEnclosingScalaBracePos(" + pos + ") called");
-    
-    int origPos = _currentLocation;
-    int lineStart = _getLineStartPos(pos);
-    setCurrentLocation(lineStart);
-    try {
-      BraceInfo info = _getLineEnclosingBrace(); // Uses reduced model; more efficient that using findPrevDelim
-      int dist1 = info.distance();
-      
-      // Check preconditions
-      if (info.braceType().equals("") || dist1 < 0) {  // Should use interned Strings here
-        // Can't find brace, return ERROR_INDEX
-        System.err.println("Finding line enclosing brace failed");
-        return ERROR_INDEX;
-      }
-      
-      // Enclosing brace exists
-      int bracePos = lineStart - dist1;
-      
-      System.err.println("Tentative scala enclosing brace position is " + bracePos + "; brace is " + 
-                         _getText(bracePos, 1).charAt(0));
-      
-      /* Must look back for Scala pseudo-brace skipping over any intervening brace phrases! */
-      
-      int chPos = getPrevNonWSCharPos(lineStart - 1);
-      char ch = getText(chPos, 1).charAt(0);
-      
-      System.err.println("Looking back for brace phrase to skip. chPos = " + chPos + " ch = " + ch);
-      
-      // Skip intervening brace phrases 
-      
-     while (match(ch, CLOSING_BRACES)) {  // note that delims have already been matched
-//            Utilities.show("closing bracket is '" + ch + "' at pos " + i);
-       System.err.println("Setting current loc to " + (chPos + 1));
-       setCurrentLocation(chPos + 1); // move cursor immediately to right of ch (a brace); chPos = _currentLocation - 1
-//            Utilities.show("_currentLocation = " + _currentLocation);
-        int dist2 = balanceBackward();
-        System.err.println("Balance back dist = " + dist2);
-        if (dist2 < 0) { 
-          bracePos = ERROR_INDEX;
-          break;            // braces do not balance; return error
-        }
-        assert dist2 > 1;  // minimum length for dist is 2 corresponding to "()"
-//        Utilities.show("text = '" + text.substring(i + 1 - dist, dist) + "' dist = " + dist + " matching bracket is '" 
-//                         + text.charAt(i) + "' at pos " + i);
-        chPos -= (dist2 - 1);  // decrement chPos to skip over balanced brace text and continue
-        System.err.println("chPos moved to " + chPos + " ch = " + getText(chPos, 1).charAt(0));
-        chPos = getPrevNonWSCharPos(chPos + 1);  // include current char as possible result
-        ch = getText(chPos, 1).charAt(0);
-        System.err.println("For next loop iteration, chPos = " + chPos + " and ch = " + ch);
-      }
-      
-     System.err.println("After brace phrase skipping, chPos = " + chPos + " and ch = " + ch);
-     
-      /* In Scala, a pseudo-brace "=>" may shadow the enclosing brace, check for this case but a
-       * "case" keyword at line opening closes such a preceding pseudo-brace. */
-      if (! _getCurrentLine(lineStart).trim().startsWith("case")) {
-        try {
-          int pseudoBracePos = findPrevDelimiter(chPos, OPENING_BRACES);
-          if (pseudoBracePos > bracePos) bracePos = pseudoBracePos;
-        }
-        catch(BadLocationException ble) { throw new UnexpectedException(ble); } // should never happen
-      }
-      System.err.println("Scala brace is '" + _getText(bracePos, 1).charAt(0) + "' pos is " + bracePos);
-      return bracePos;
-    }
-    finally { setCurrentLocation(origPos); }
+  /* Old version */
+//  /** Find the enclosing line Scala brace, '{', '(', or "=>" with no intervening "case". */
+//  public int findEnclosingScalaBracePos(int pos) throws BadLocationException {
+//    
+////    System.err.println("findEnclosingScalaBracePos(" + pos + ") called");
+//    
+//    int origPos = _currentLocation;
+//    int lineStart = _getLineStartPos(pos);
+//    setCurrentLocation(lineStart);
+//    try {
+//      BraceInfo info = _getLineEnclosingBrace(); // Uses reduced model; more efficient that using findPrevDelim
+//      int dist1 = info.distance();
+//      
+//      // Check preconditions
+//      if (info.braceType().equals("") || dist1 < 0) {  // Should use interned Strings here
+//        // Can't find brace, return ERROR_INDEX
+////        System.err.println("Finding line enclosing brace failed");
+//        return ERROR_INDEX;
+//      }
+//      
+//      // Enclosing brace exists
+//      int bracePos = lineStart - dist1;
+//      
+////      System.err.println("Tentative scala enclosing brace position is " + bracePos + "; brace is " + 
+////                         _getText(bracePos, 1).charAt(0));
+//      
+//      /* Must look back for Scala pseudo-brace skipping over any intervening brace phrases! */
+//      
+//      int chPos = getPrevNonWSCharPos(lineStart - 1);
+//      char ch = getText(chPos, 1).charAt(0);
+//      
+////      System.err.println("Looking back for brace phrase to skip. chPos = " + chPos + " ch = " + ch);
+//      
+//      // Skip intervening brace phrases 
+//      
+//     while (match(ch, CLOSING_BRACES)) {  // note that delims have already been matched
+////            Utilities.show("closing bracket is '" + ch + "' at pos " + i);
+////       System.err.println("Setting current loc to " + (chPos + 1));
+//       setCurrentLocation(chPos + 1); // move cursor immediately to right of ch (a brace); chPos = _currentLocation - 1
+////            Utilities.show("_currentLocation = " + _currentLocation);
+//        int dist2 = balanceBackward();
+////        System.err.println("Balance back dist = " + dist2);
+//        if (dist2 < 0) { 
+//          bracePos = ERROR_INDEX;
+//          break;            // braces do not balance; return error
+//        }
+//        assert dist2 > 1;  // minimum length for dist is 2 corresponding to "()"
+////        Utilities.show("text = '" + text.substring(i + 1 - dist, dist) + "' dist = " + dist + " matching bracket is '" 
+////                         + text.charAt(i) + "' at pos " + i);
+//        chPos -= (dist2 - 1);  // decrement chPos to skip over balanced brace text and continue
+////        System.err.println("chPos moved to " + chPos + " ch = " + getText(chPos, 1).charAt(0));
+//        chPos = getPrevNonWSCharPos(chPos + 1);  // include current char as possible result
+//        ch = getText(chPos, 1).charAt(0);
+////        System.err.println("For next loop iteration, chPos = " + chPos + " and ch = " + ch);
+//      }
+//      
+////     System.err.println("After brace phrase skipping, chPos = " + chPos + " and ch = " + ch);
+//     
+//      /* In Scala, a pseudo-brace "=>" may shadow the enclosing brace, check for this case but a
+//       * "case" keyword at line opening closes such a preceding pseudo-brace. */
+//      if (! _getCurrentLine(lineStart).trim().startsWith("case")) {
+//        try {
+//          int pseudoBracePos = findPrevDelimiter(chPos, OPENING_BRACES);
+//          if (pseudoBracePos > bracePos) bracePos = pseudoBracePos;
+//        }
+//        catch(BadLocationException ble) { throw new UnexpectedException(ble); } // should never happen
+//      }
+////      System.err.println("Scala brace is '" + _getText(bracePos, 1).charAt(0) + "' pos is " + bracePos);
+//      return bracePos;
+//    }
+//    finally { setCurrentLocation(origPos); }
+//  }
+  
+  /** Find the position of the enclosing Scala brace { '{', '(', or "=>" } enclosing pos. */
+  public int findEnclosingScalaBracePos(int pos) throws BadLocationException {  
+    return findPrevDelimiter(pos, OPENING_BRACES);
+  }
+  
+  /** Find the position of the Scala brace { '{', '(', or "=>" } enclosing the start of the line containing pos  */
+  public int findLineEnclosingScalaBracePos(int pos) throws BadLocationException {  
+    return findPrevDelimiter(_getLineStartPos(pos), OPENING_BRACES);
+  }
+  
+  /** Find the position of the enclosing Scala brace { '{', '(', "=", or "=>" } enclosing pos. */
+  public int findEnclosingScalaBracePosWithEquals(int pos) throws BadLocationException {  
+    return findPrevDelimiter(pos, OPENING_BRACES_WITH_EQUALS);
+  }
+  
+  
+  /** Find the position of the Scala brace { '{', '(', "=", or "=>" } enclosing the start of the line containing pos  */
+  public int findLineEnclosingScalaBracePosWithEquals(int pos) throws BadLocationException {  
+    return findPrevDelimiter(_getLineStartPos(pos), OPENING_BRACES_WITH_EQUALS);
   }
   
   /** Assumes that getText().charAt(pos) == ')'.  Returns true iff the balanced paren text ending at pos is the test
@@ -1435,13 +1492,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public boolean isTestIfForWhile(int pos) {
     final int origPos = _currentLocation;
     
-    System.err.println("isTestIfForWhile(" + pos + ") called");
-    System.err.println("Current line is '" + _getCurrentLine(pos) + "'");
+//    System.err.println("isTestIfForWhile(" + pos + ") called");
+//    System.err.println("Current line is '" + _getCurrentLine(pos) + "'");
     
     boolean result = false;
     int rightEdge = pos + 1;
     setCurrentLocation(rightEdge);
-    System.err.println("rightEdge + " + rightEdge + " preceding char is '" + _getText(rightEdge - 1, 1).charAt(0) + "'");
+//    System.err.println("rightEdge + " + rightEdge + " preceding char is '" + _getText(rightEdge - 1, 1).charAt(0) + "'");
     int dist = balanceBackward();
     
     if (dist != ERROR_INDEX) {
@@ -1456,8 +1513,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         if (lastKeywordCharPos >= 0) 
           result = getText(lastKeywordCharPos - 1, 2).equals("if") || getText(lastKeywordCharPos - 2, 3).equals("for")
             || getText(lastKeywordCharPos - 4, 5).equals("while");
-        System.err.println("lastKeywordCharPos = " + lastKeywordCharPos + " keywordText = '" + 
-                           getText(lastKeywordCharPos - 5, 6) + "'"  + " result = " + result);
+//        System.err.println("lastKeywordCharPos = " + lastKeywordCharPos + " keywordText = '" + 
+//                           getText(lastKeywordCharPos - 5, 6) + "'"  + " result = " + result);
       }
       catch(BadLocationException ble) { /* fall through */ }
     }
@@ -1531,7 +1588,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return matchIndex;
   }
   
-  /** Returns the absolut postion of the beginning of the current line using _currentLocation as pos. */
+  /** Returns the absolut position of the beginning of the current line using _currentLocation as pos. */
   public int _getLineStartPos() { return _getLineStartPos(_currentLocation); }
   
   /** Returns the absolute position of the beginning of the current line.  If pos  input is bad, returns ERROR_INDEX
@@ -1563,7 +1620,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return newPos;  // may equal 0
   }
   
-  /** Returns the absolute postion of the current line using _currentLocation as pos. */
+  /** Returns the absolute position of the current line using _currentLocation as pos. */
   public int _getLineEndPos() { return _getLineEndPos(_currentLocation); }
     
   /** Returns the absolute position of the end of the current line.  (At beginning of next newline, or the end of the 
@@ -1629,6 +1686,15 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     }
     _storeInCache(key, nonWSPos, Math.max(pos - 1, nonWSPos));
     return nonWSPos;  // may equal lineEnd
+  }
+  
+  /** Finds the position of the first non-whitespace character after pos, skipping comments and whil
+    * @param pos Position to start from
+    * @return position of first non-whitespace character after pos, or ERROR_INDEX (-1) if end of document is reached
+    */
+  public int _getFirstNonWSCharPos(int pos) {
+    try { return getFirstNonWSCharPos(pos); }
+    catch(BadLocationException ble) { return ERROR_INDEX; }
   }
   
   /** Finds the position of the first non-whitespace character after pos. NB: Skips comments and all whitespace, 
@@ -1900,6 +1966,19 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return pos - dist;
   }
   
+  /** returns position of enclosing brace for the given pos.  If no such brace exists, returns ERROR_INDEX. */
+  public int _getEnclosingBracePos(int pos) {
+    int orig = _currentLocation;
+    try {
+      setCurrentLocation(pos);
+      BraceInfo b = _getEnclosingBrace();
+      int dist = b.distance();
+      if (dist < 0) return ERROR_INDEX;
+      return pos - dist;
+    }
+    finally { setCurrentLocation(orig); }
+  }
+    
   /** Returns true if the reduced model's current position is inside a paren phrase.  Only runs in the event thread.
     * @return true if pos is immediately inside parentheses
     */
@@ -2067,7 +2146,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public void setTab(int tab, int pos) {
     
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
-    System.err.println("Inserting prefix consisting of " + tab + " spaces in line '" + _getCurrentLine() + ";");
+//    System.err.println("Inserting prefix consisting of " + tab + " spaces in line '" + _getCurrentLine() + ";");
     
     try {
       int startPos = _getLineStartPos(pos);
@@ -2096,7 +2175,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public void setTab(String tab, int pos) {
     
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
-    System.err.println("Inserting prefix '" + tab + "' in line '" + _getCurrentLine() + ";");
+//    System.err.println("Inserting prefix '" + tab + "' in line '" + _getCurrentLine() + ";");
     try {
       int startPos = _getLineStartPos(pos);
       int firstNonWSPos = _getLineFirstCharPos(pos);

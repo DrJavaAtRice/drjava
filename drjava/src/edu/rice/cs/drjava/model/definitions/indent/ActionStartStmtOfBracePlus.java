@@ -36,22 +36,27 @@
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
+import javax.swing.text.BadLocationException;
+
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
-/** Indents the current line in the document to the indent level of the start of the brace (paren or curly) enclosing 
+/** Indents the current line in the document to the indent level of the start of the brace ('{', '('} and optinally
+  * "=>"enclosing 
   * the start of the current line, plus the given suffix.
   * @version $Id$
   */
 public class ActionStartStmtOfBracePlus extends IndentRuleAction {
-  private int _suffix;
+  private final int _suffix;
+  private final boolean _includeScalaBraces;  // includes local Scala brace forms "=>" and "="
   
   /** Constructs a new rule with the given suffix string.
     * @param suffix String to append to indent level of brace
     */
-  public ActionStartStmtOfBracePlus(int suffix) {
+  public ActionStartStmtOfBracePlus(int suffix, boolean includeScalaBraces) {
     super();
     _suffix = suffix;
+    _includeScalaBraces = includeScalaBraces;
   }
 
   /** Properly indents the line that the caret is currently on. Replaces all whitespace characters at the beginning of the
@@ -64,33 +69,20 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
 
     boolean supResult = super.indentLine(doc, reason); // This call does nothing other than record some indent tracing
     int pos = doc.getCurrentLocation();
-//    System.err.println("indentLine in ActionStartStmtOfBracePlus called at location " + pos + "  line = '" + 
-//                       doc._getCurrentLine() + "'");
-    
-    // Get distance to brace
-    int lineStart = doc._getLineStartPos(pos);
-    if (lineStart < 0) lineStart = 0;
-    BraceInfo info = doc._getLineEnclosingBrace();
-    int distToLineEnclosingBrace = info.distance();
-//    System.err.println("dist to brace = " + distToLineEnclosingBrace);
-    
-    // Is there a "=>" pseudobrace between
-
-    // If there is no brace, align to left margin; can't happen when called from rule 19
-    if (distToLineEnclosingBrace == -1) {
-      doc.setTab(_suffix, pos);
-      return supResult;
+//    System.err.println("***** ActionStartStmtOfBracePlus.indentLine called at location " + pos + "  line = '" + 
+//                       doc._getCurrentLine() + "'" + "=> is " + _includeScalaBraces);
+    try {
+      // Get bracePos
+      int bracePos = (_includeScalaBraces) ? doc.findEnclosingScalaBracePosWithEquals(pos) : 
+        doc._getEnclosingBracePos(pos);
+      
+//      System.err.println("bracePos = " + bracePos);
+      final int indent = doc._getIndentOfCurrStmt(bracePos) + _suffix;
+//      System.err.println("indent = " + doc._getIndentOfCurrStmt(bracePos) + " _suffix = " + _suffix);
+      
+      doc.setTab(indent, pos);
     }
-
-    // Get the absolute position of (the left edge of) the line enclosing brace
-    final int bracePos = lineStart - distToLineEnclosingBrace;
-//    System.err.println("bracePos = " + bracePos);
-    final int indent = doc._getIndentOfCurrStmt(bracePos) + _suffix;
-//    System.err.println("In ActionStartStmtOfBracePlus, indent = " + doc._getIndentOfCurrStmt(bracePos) + 
-//                       " _suffix = " + _suffix);
-
-    doc.setTab(indent, pos);
-    
+    catch(BadLocationException ble) { /* do nothing */ }
     return supResult;
   }
 }

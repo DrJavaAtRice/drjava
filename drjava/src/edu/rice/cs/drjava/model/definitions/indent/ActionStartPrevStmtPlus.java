@@ -45,25 +45,29 @@ import static edu.rice.cs.drjava.model.AbstractDJDocument.ERROR_INDEX;
 
 /** Indents the current line in the document to the indent level of the start of the statement preceding the one the
   * cursor is currently on, plus the given suffix padding (a number of spaces).  The preceding statement may be the
-  * prefix (like 'if (...) {') of the current line
+  * prefix (like 'if (...) {') of the current line in which case an indentLevel prefix must be added.
+  * 
+  * TO DO: eliminate _suffix argument; no longer used.
   *
   * @version $Id$
   */
 public class ActionStartPrevStmtPlus extends IndentRuleAction {
-  private int _suffix;  // number of spaces in suffix
-  private boolean _useColon;
+  private final int _suffix;  // number of spaces in suffix
+  private final boolean _useColon;
+  private final int _indentLevel;
 
   /** Constructs a new rule with the given suffix string.
     * @param suffix String to append to indent level of brace
     * @param colonIsDelim whether to include colons as statement delimiters   NOTE: always false in Scala
     */
-  public ActionStartPrevStmtPlus(int suffix, boolean colonIsDelim) {
+  public ActionStartPrevStmtPlus(int suffix, boolean colonIsDelim, int indentLevel) {
     super();
     _suffix = suffix;
     _useColon = colonIsDelim;
+    _indentLevel = indentLevel;
   }
   
-  public ActionStartPrevStmtPlus(int suffix) { this(suffix, false); }
+  public ActionStartPrevStmtPlus(int suffix, int indentLevel) { this(suffix, false, indentLevel); }
 
   /** Properly indents the line that the caret is currently on, assuming previous/enclosing statement is properly indented. 
     * Replaces all whitespace characters at the beginning of the line with the approprate spaces.  
@@ -74,33 +78,36 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     */
   public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     boolean supResult = super.indentLine(doc, reason);
-    int indent = 0;  // default if lineStart == ERROR_INDEX
     int orig = doc.getCurrentLocation();
 //    System.err.println("Indenting line: '" + doc._getCurrentLine() + "'" + " origPos = " + orig);
     
     // Find start of current line
     int lineStart = doc._getLineStartPos(orig);  
-    if (lineStart > 0) {
+    if (lineStart <= 0) return supResult;
+    
+    try {
+      int indent;
+      // Find enclosing brace for current line (excluding Scala pseudo-braces?)
+      int enclosingBracePos = doc.findLineEnclosingScalaBracePos(lineStart);
       
-      // Find enclosing brace for current line (excluding Scala pseudo-braces)
-      BraceInfo info = doc._getLineEnclosingBrace();
-      int distToLineEnclosingBrace = info.distance();
-      if (distToLineEnclosingBrace < 0) indent = _suffix;  // No enclosing brace or preceding semicolon
-      else {
-        int enclosingBracePos = orig - distToLineEnclosingBrace;
-        int prevSemicolonPos = doc._findPrevImplicitSemicolonPos(orig);
-//        System.err.println("Enclosing Brace Pos = " + enclosingBracePos + " Prev Semicolon Pos = " + prevSemicolonPos);
-        int boundaryPos = Math.max(enclosingBracePos, prevSemicolonPos);
-//        System.err.println("Boundary Pos = " + boundaryPos);
-//        System.err.println("Line with boundary is '" + doc._getCurrentLine(boundaryPos) + "'");
-
-        indent = doc._getIndentOfCurrStmt(boundaryPos) + _suffix;  // using indent of statement preceding boundary
-//        System.err.println("Indent of stmt '" + doc._getCurrentLine(boundaryPos) + "' = " + indent + " suffix = " + _suffix);
+      int prevSemicolonPos = doc._findPrevImplicitSemicolonPos(orig);
+//      System.err.println("Enclosing Brace Pos = " + enclosingBracePos + " Prev Semicolon Pos = " + prevSemicolonPos);
+      int boundaryPos = Math.max(enclosingBracePos, prevSemicolonPos);
+//      System.err.println("Boundary Pos = " + boundaryPos);
+//      System.err.println("Line with boundary is '" + doc._getCurrentLine(boundaryPos) + "'");
+      
+      indent = doc._getIndentOfCurrStmt(boundaryPos) + _suffix;  // using indent of statement preceding boundary
+//      System.err.println("In ActionStartPrevStmtPlus, indent = " + indent + " _suffix = " + _suffix);
+      if (boundaryPos == enclosingBracePos) {
+        indent = indent +  _indentLevel;
+//        System.err.println("Incrementing indent to " + indent);
       }
+//      System.err.println("Indent of stmt '" + doc._getCurrentLine(boundaryPos) + "' = " + indent + " suffix = " + _suffix);
       assert doc.getCurrentLocation() == orig;
+//      System.err.println("In ActionStartPrevStmtPlus, setting indent at pos " + indent);
+      doc.setTab(indent, orig);
     }
-//    System.err.println("In ActionStartPrevStmtPlus, setting indent at pos " + indent);
-    doc.setTab(indent, orig);
+    catch(BadLocationException ble) { /* do nothing */ }
     return supResult;
   }
 }

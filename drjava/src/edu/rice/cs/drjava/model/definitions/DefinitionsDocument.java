@@ -775,7 +775,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //        ++classEnd;
 //      }
 //      
-//      /* Determine parenStart, the postion immediately before the open parenthesis following the superclass name. */
+//      /* Determine parenStart, the position immediately before the open parenthesis following the superclass name. */
 ////         System.err.println("\tclass = `" + text.substring(classStart,classEnd) + "`");
 //      int parenStart = getFirstNonWSCharPos(classEnd);
 //      if (parenStart != -1) {

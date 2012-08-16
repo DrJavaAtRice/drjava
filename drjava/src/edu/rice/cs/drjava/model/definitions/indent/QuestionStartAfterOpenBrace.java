@@ -41,6 +41,8 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.UnexpectedException;
 
+import static edu.rice.cs.drjava.model.AbstractDJDocument.ERROR_INDEX;
+
 /** Determines whether or not the closest non-whitespace character preceding the start of the current line (excluding 
   * any characters inside comments or strings) is on the same line as the enclosing brace (curly or paren).
   *
@@ -61,33 +63,31 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion {
     int origin = doc.getCurrentLocation();
     int lineStart = doc._getLineStartPos(origin);
     
-    if (lineStart <= 1) return false;  // linestart follows a newLine, which must be preceded by a brace to return true
+//    System.err.println("QuestionStartAfterOpenBrace.indentline called with origin = " + origin + " and lineStart = " +
+//                       lineStart);
+//    System.err.println("Current line = '" + doc._getCurrentLine() + "'");
+    
+    if (lineStart <= 1) return false;  // lineStart < 1 => No preceding line exists!
+    
     try {  // must restore current location
       
-      // Get brace for start of line
-      doc.setCurrentLocation(lineStart);
-      BraceInfo info = doc._getLineEnclosingBrace();
-      doc.setCurrentLocation(origin);    
+      // Get brace for start of line;
+      int bracePos = doc.findEnclosingScalaBracePosWithEquals(lineStart);
+//      System.err.println("Enclosing brace pos = " + bracePos);
       
-      String braceType = info.braceType();
-      if (! (braceType.equals(BraceInfo.OPEN_CURLY) || braceType.equals(BraceInfo.OPEN_PAREN)) || info.distance() <= 0) 
-        // Either enclosing brace is not '{' or '(' or there is no enclosing brace
-        return false;
-      int bracePos = lineStart - info.distance();    
-      
-//    // Get brace's end of line
+    // Get brace's end of line
       int braceEndLinePos = doc._getLineEndPos(bracePos);
       
       // Get position of next non-WS char (not in comments)
-      int nextNonWS = -1;
-//    System.err.println("bracePos = " + bracePos + " docLength = " + doc.getLength());
-      try { nextNonWS = doc.getFirstNonWSCharPos(braceEndLinePos /* bracePos + 1*/); }
-      catch (BadLocationException e) { throw new UnexpectedException(e); } // Shouldn't happen
+      int nextNonWS = doc.getFirstNonWSCharPos(braceEndLinePos /* bracePos + 1*/);
+//      System.err.println("Next NonWS pos after brace = " + nextNonWS);
       
-      if (nextNonWS == -1) return true;
-      
-      return (nextNonWS >= lineStart);
+      // return true if no NonWS character appears between brace and beginning of curr line
+      boolean result = nextNonWS == ERROR_INDEX || nextNonWS >= lineStart;
+//      System.err.println("QuestionStartAfterOpenBrace.indentline returning " + result);
+
+      return result;  
     }
-    finally{ doc.setCurrentLocation(origin); }
+    catch (BadLocationException e) { return false; } 
   }
 }

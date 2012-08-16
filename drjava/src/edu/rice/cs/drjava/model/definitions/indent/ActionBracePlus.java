@@ -36,6 +36,8 @@
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
+import javax.swing.text.BadLocationException;
+
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceInfo;
 
@@ -59,30 +61,30 @@ public class ActionBracePlus extends IndentRuleAction {
   public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     boolean supResult = super.indentLine(doc, reason);
     int here = doc.getCurrentLocation();
-    int startLine = doc._getLineStartPos(here);
-    doc.setCurrentLocation(startLine);  // Is this necessary?  _getLineEnclosingBrace only depends on current LINE
-    BraceInfo info = doc._getLineEnclosingBrace();
-    int dist = info.distance();
+//    int startLine = doc._getLineStartPos(here);
 
-    // Check preconditions
-    if (info.braceType().equals(BraceInfo.NONE) || dist < 0) {
-      // Can't find brace, so do nothing.
-      return supResult;
+//    BraceInfo info = doc._getLineEnclosingBrace();
+//    int dist = info.distance();
+//
+//    // Check preconditions
+//    if (info.braceType().equals(BraceInfo.NONE) || dist < 0) {
+//      // Can't find brace, so do nothing.
+//      return supResult;
+//    }
+//
+//    // Find length to brace
+//    int bracePos = startLine - dist;
+    try {
+      int bracePos = doc.findLineEnclosingScalaBracePos(here);
+        // Get distance to start of line from enclosing brace
+      int braceNewline = doc._getLineStartPos(bracePos);
+      int braceIndent = bracePos - braceNewline;
+      
+      // Create tab string
+      final int tab = _suffixCt + braceIndent;
+      doc.setTab(tab, here);
     }
-
-    // Find length to brace
-    int bracePos = startLine - dist;
-    // Get distance to start of line from enclosing brace
-    int braceNewline = doc._getLineStartPos(bracePos);
-    int braceIndent = bracePos - braceNewline;
-
-    // Create tab string
-    final int tab = _suffixCt + braceIndent;
-
-    if (here > doc.getLength()) here = doc.getLength() - 1;
-    doc.setCurrentLocation(here);
-
-    doc.setTab(tab, here);
+    catch(BadLocationException ble) { /* do nothing */ }
     
     return supResult;
   }

@@ -41,6 +41,8 @@ import javax.swing.text.BadLocationException;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
+import static edu.rice.cs.drjava.model.AbstractDJDocument.*;
+
 /**
  * Determines if the current line is starting a new statement by
  * searching backwards to see if the previous line was the end
@@ -63,36 +65,36 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
   }
  
   /** Determines if the previous non-whitespace character not on this line was one of the following: '(', ')', ';', '=',
-    * '{', '}',  or the previous line ended with an implicit semicolon.  Ignores characters in quotes and comments.
+    * '>', '{', '}',  or the previous line ended with an implicit semicolon.  Ignores characters in quotes and comments.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @return true if this node's rule holds.
     */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
     
-    char[] delims = {'(', ')', ';', '=', '{', '}'};
     int orig = doc.getCurrentLocation();
     int lineStart = doc._getLineStartPos(orig);
-//    System.err.println("In QuestionStartingNewStmt, orig = " + orig + " lineStart = " + lineStart);
+//    System.err.println("In QuestionStartingNewStmt.applyRule, orig = " + orig + " lineStart = " + lineStart);
     
     int prevDelimiterPos;
     char prevDelimiter;
     
     try {
-      prevDelimiterPos = doc.findPrevDelimiter(lineStart, delims);
+      prevDelimiterPos = doc.findPrevDelimiter(lineStart, SCALA_DELIMS);
       prevDelimiter = doc.getText(prevDelimiterPos, 1).charAt(0);
     } catch (BadLocationException e) { /* given line is not preceded by any delimiter; must appear in doc heading */
       return true;
     }
     
-//    System.err.println("In QuestionStartingNewStmt, prevDelimiterPos = " + prevDelimiterPos + " prevDelimiter = '" + 
+//    System.err.println("   prevDelimiterPos = " + prevDelimiterPos + " prevDelimiter = '" + 
 //                       prevDelimiter + "'");
     
-    int prevImplicitSemicolonPos = doc._findPrevImplicitSemicolonPos(lineStart);
+    int prevSemicolonPos = doc._findPrevImplicitSemicolonPos(lineStart);
     
-    if (prevImplicitSemicolonPos > prevDelimiterPos) prevDelimiterPos = prevImplicitSemicolonPos;
-    else if (prevDelimiter == '=') return false;  // line is right hand side of some form of definition
+//    System.err.println("   prevSemicolonPos = " + prevSemicolonPos);
+    
+    if (prevSemicolonPos > prevDelimiterPos) prevDelimiterPos = prevSemicolonPos;
+
     else if (prevDelimiter == ')' && doc.isTestIfForWhile(prevDelimiterPos)) return false;
-    
     
     // If no previous delimiter exists, imaginary delimiter at position -1
     
@@ -104,18 +106,16 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
     } 
     catch (BadLocationException e) { throw new UnexpectedException(e); }
     
-//    System.err.println("In QuestionStartingNewStmt, firstNonWSCharAfterDelimPos = " + firstNonWSCharAfterDelimiterPos);
+//    System.err.println("    firstNonWSCharAfterDelimPos = " + firstNonWSCharAfterDelimiterPos);
     // If the first non-WS character is after the beginning of the orig line
     // or we reached the end of the document, then we are starting a new statement.
     if (firstNonWSCharAfterDelimiterPos >= lineStart || firstNonWSCharAfterDelimiterPos == -1) return true;
     
     // Check for an implicit semicolon at end of nearest non-empty preceding line
-    int prevSemicolonPos = doc._findPrevImplicitSemicolonPos(lineStart);
     int prevNonWSCharPos;
     try { prevNonWSCharPos = doc.getPrevNonWSCharPos(lineStart); }
     catch(BadLocationException ble) { return true; } // should only happen when lineStart == 0
-//    System.err.println("In QuestionStartingNewStmt, orig = " + orig + " prevSemiPos = " + prevSemicolonPos + 
-//                       " prevNonWSPos = " + prevNonWSCharPos + " prevNonWSChar = '" + 
+//    System.err.println("    prevNonWSPos = " + prevNonWSCharPos + " prevNonWSChar = '" + 
 //                       doc._getText(prevNonWSCharPos, 1).charAt(0) + "'");
     return prevSemicolonPos > prevNonWSCharPos;  // true if no significant chars between lineStart and prevSemicolonPos
   }

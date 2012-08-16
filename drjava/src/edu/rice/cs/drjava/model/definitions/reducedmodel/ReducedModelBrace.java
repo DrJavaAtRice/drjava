@@ -379,7 +379,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     }
     
     int relDistance = 0; // distance from iter position to walker position
-    int distance = 0;    // distance from iter position to _cursor postion
+    int distance = 0;    // distance from iter position to _cursor position
     
     // move one token left, changing iter but not walker
     iter.prev();   
