@@ -67,26 +67,26 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
 
   // The following field has been hoisted into RegionsTreePanel
 //  protected final RegionManager<MovingDocumentRegion> _regionManager;
-  protected final String _searchString;
-  protected final boolean _searchAll;
-  protected final boolean _searchSelectionOnly;
-  protected final boolean _matchCase;
-  protected final boolean _wholeWord;
-  protected final boolean _noComments;
-  protected final boolean _noTestCases;
-  protected final WeakReference<OpenDefinitionsDocument> _doc;
-  protected final FindReplacePanel _findReplace;
-  protected final MovingDocumentRegion _region; //document region used for search limited selection function
+  private final String _searchString;
+  private final boolean _searchAll;
+  private final boolean _searchSelectionOnly;
+  private final boolean _matchCase;
+  private final boolean _wholeWord;
+  private final boolean _noComments;
+  private final boolean _noTestCases;
+  private final WeakReference<OpenDefinitionsDocument> _doc;
+  private final FindReplacePanel _findReplace;
+  private final MovingDocumentRegion _region; //document region used for search limited selection function
     
-  protected JButton _findAgainButton;
-  protected JButton _goToButton;
-  protected JButton _bookmarkButton;
-  protected JButton _removeButton;
-  protected JComboBox<Color> _colorBox;
-  protected int _lastIndex;
+  private volatile JButton _findAgainButton;
+  private volatile JButton _goToButton;
+  private volatile JButton _bookmarkButton;
+  private volatile JButton _removeButton;
+  private volatile JComboBox<Color> _colorBox;
+  private volatile int _lastIndex;
   
   /** Saved option listeners kept in this field so they can be removed for garbage collection  */
-  private LinkedList<Pair<Option<Color>, OptionListener<Color>>> _colorOptionListeners = 
+  private final LinkedList<Pair<Option<Color>, OptionListener<Color>>> _colorOptionListeners = 
     new LinkedList<Pair<Option<Color>, OptionListener<Color>>>();
   
   /** Constructs a new find results panel. This is swing class which should only be accessed from the event thread.
@@ -152,8 +152,8 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
   }
   
   class ColorComboRenderer extends JPanel implements ListCellRenderer<Color> {
-    private Color _color = DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_colorBox.getSelectedIndex()]);
-    private DefaultListCellRenderer _defaultRenderer = new DefaultListCellRenderer();
+    private volatile Color _color = DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_colorBox.getSelectedIndex()]);
+    private final DefaultListCellRenderer _defaultRenderer = new DefaultListCellRenderer();
     private final Dimension _size = new Dimension(0, 20);  
     private final CompoundBorder _compoundBorder = 
       new CompoundBorder(new MatteBorder(2, 10, 2, 10, Color.white), new LineBorder(Color.black));

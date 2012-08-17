@@ -75,8 +75,8 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
   
   private volatile String _title;
   private volatile RegionManager<R> _regionManager;
-  protected volatile JPopupMenu _regionPopupMenu;
-  protected final SingleDisplayModel _model;
+  private volatile JPopupMenu _regionPopupMenu;
+  private final SingleDisplayModel _model;
   protected final MainFrame _frame;
   protected volatile JPanel _buttonPanel;
   

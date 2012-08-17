@@ -59,11 +59,11 @@ import edu.rice.cs.util.swing.RightClickMouseAdapter;
   * @version $Id$
   */
 public abstract class RegionsListPanel<R extends IDocumentRegion> extends TabbedPanel {
-  protected volatile JPanel _leftPane;
+  private volatile JPanel _leftPane;
   
-  protected volatile JList<RegionListUserObj<R>> _list;
-  protected volatile DefaultListModel<RegionListUserObj<R>> _listModel;
-  protected String _title;
+  private volatile JList<RegionListUserObj<R>> _list;
+  private volatile DefaultListModel<RegionListUserObj<R>> _listModel;
+  protected volatile String _title;
   
   protected final SingleDisplayModel _model;
   protected final MainFrame _frame;

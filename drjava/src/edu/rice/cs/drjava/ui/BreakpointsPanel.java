@@ -94,7 +94,7 @@ public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
         */
       public void regionRemoved(final Breakpoint bp) { removeRegion(bp); }
     });
-    _debugger = _model.getDebugger();
+    _debugger = getGlobalModel().getDebugger();
   }
   
   /** Action performed when the Enter key is pressed. Should be overridden. */

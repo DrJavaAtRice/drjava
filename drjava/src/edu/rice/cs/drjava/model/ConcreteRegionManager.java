@@ -138,7 +138,7 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
   
   /** Finds the interval of regions in odd such that the line label (excerpt) for the region contains offset. */
   public Pair<R, R> getRegionInterval(OpenDefinitionsDocument odd, int offset) {
-/* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
 //    System.err.println("getRegionsNear(" + odd + ", " + offset + ") called");
     
@@ -147,8 +147,9 @@ public class ConcreteRegionManager<R extends OrderedDocumentRegion> extends Even
      * Since empty regions are ignore (and deleted as soon as they are found), the end of a containing region must be 
      * less than 120 characters from offset.  Find the tail set of all regions [start, end) where offset - 120 < end.
      */
-    @SuppressWarnings("unchecked")
-    SortedSet<R> tail = getTailSet((R) new DocumentRegion(odd, 0, offset - 119));
+    @SuppressWarnings("unchecked") // max operator inserted to ensure that [start,end) interval is non-degenerate.
+    SortedSet<R> tail = getTailSet((R) new DocumentRegion(odd, 0, Math.max(0, offset - 119)));  
+    
     
     /* Search tail, selecting first and last regions r such that r.getLineEnd() >= offset and r.getLineStart <= offset.
      * The tail is totally order on BOTH getLineStart() and getLineEnd() because the functions mapping start to lineStart

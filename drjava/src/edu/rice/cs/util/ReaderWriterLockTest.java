@@ -76,7 +76,7 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
   /** Tests that multiple readers can run without causing deadlock. We can't really impose any ordering on their output.
     */
   public void testMultipleReaders() throws InterruptedException {
-    final StringBuilder buf = new StringBuilder();
+    final StringBuffer buf = new StringBuffer();  // StringBuffer is designed for concurrent access
 
     // Create three threads
     ReaderThread r1 = new PrinterReaderThread("r1 ", buf);
@@ -102,7 +102,7 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
 
   /** Tests that multiple writers run in mutually exclusive intervals without causing deadlock. */
   public void testMultipleWriters() throws InterruptedException {
-    final StringBuilder buf = new StringBuilder();
+    final StringBuffer buf = new StringBuffer();  // StringBuffer is designed for concurrent access
 
     // Create three threads
     WriterThread w1 = new PrinterWriterThread("w1 ", buf);
@@ -226,7 +226,7 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
    * enforce that no one interferes with output from a writer.
    */
   public void testMultipleReadersAndWriters() throws InterruptedException {
-    final StringBuilder buf = new StringBuilder();
+    final StringBuffer buf = new StringBuffer();  // StringBuffer is designed for concurrent access
 
     // Create threads
     WriterThread w1 = new PrinterWriterThread("w1 ", buf);
@@ -298,14 +298,14 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
   /** A ReaderThread which repeatedly prints to a buffer. */
   public class PrinterReaderThread extends ReaderThread {
     PrintCommand _command;
-    public PrinterReaderThread(String msg, final StringBuilder buf) { _command = new PrintCommand(msg, buf); }
+    public PrinterReaderThread(String msg, final StringBuffer buf) { _command = new PrintCommand(msg, buf); }
     public void read() { _command.print(); }
   }
 
   /** A WriterThread which repeatedly prints to a buffer. */
   public class PrinterWriterThread extends WriterThread {
     PrintCommand _command;
-    public PrinterWriterThread(String msg, final StringBuilder buf) { _command = new PrintCommand(msg, buf); }
+    public PrinterWriterThread(String msg, final StringBuffer buf) { _command = new PrintCommand(msg, buf); }
     public void write() { _command.print(); }
   }
 
@@ -316,11 +316,11 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
     /** Number of milliseconds to wait between iterations */
     volatile int _waitMillis = 5;
     /** Buffer to print to */
-    final StringBuilder _buf;
+    final StringBuffer _buf;  // StringBuffer is designed for concurrent access
     /** Message to print */
     final String _msg;
     /** Creates a new command to print to a buffer during a read or write. */
-    public PrintCommand(String msg, StringBuilder buf) {
+    public PrintCommand(String msg, StringBuffer buf) {
       _msg = msg;
       _buf = buf;
     }
