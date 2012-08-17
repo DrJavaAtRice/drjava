@@ -42,9 +42,9 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 import java.util.ArrayList;
 import java.io.PrintStream;
 
-/** This class does almost all the work for keeping an indent tree trace.  IndentRuleQuestion
-  * also does some of the work, and any subclass may substitute its own version of getRuleName()
-  * Note: tracing (determined solely by ruleTraceEnabled) is disabled by default
+/** This class does almost all the work for keeping an indent tree trace.  IndentRuleQuestion also does some of the 
+  * work, and any subclass may substitute its own version of getRuleName()
+  * Note: tracing (turned "on" by setting ruleTraceEnabled to true and uncommenting line 110) is disabled by default.
   * @version $Id$
   */
 public abstract class IndentRuleWithTrace implements IndentRule {
@@ -107,7 +107,7 @@ public abstract class IndentRuleWithTrace implements IndentRule {
     _addToIndentTrace(getRuleName(), TERMINUS_RULE, true);
 
     //Add the next line, and every time something is indented, the indent trace will be printed
-    printLastIndentTrace(System.out);
+//    printLastIndentTrace(System.out);
     return true;
   }
   

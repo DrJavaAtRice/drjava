@@ -1237,7 +1237,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       if (firstNonWSCharPos == ERROR_INDEX)  // no nonWS char preceding lineEnd (!), so return indent of first line
         return _getIndentOfLine(0);
       
-      char firstNonWSChar = _getText(firstNonWSCharPos, 1).charAt(0);
+      char firstNonWSChar = _getText(firstNonWSCharPos, 1).charAt(0);  // first unshadowed char on line containing pos
       int charOffset = firstNonWSCharPos - _getLineStartPos(firstNonWSCharPos);
         
 //      System.err.println("First unshadowed char on line containing given pos = '" + firstNonWSChar + "'");
@@ -1246,8 +1246,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       if (firstNonWSChar == '}') {
         int lineEnd = _getLineEndPos(firstNonWSCharPos);
         int len = lineEnd - firstNonWSCharPos - 1;
-        String restOfLine = _getText(firstNonWSCharPos + 1, len).trim();
-        if (restOfLine.startsWith("else ")) return charOffset;
+        // Extract line text following '}' and trim leading whitespace
+        String nonEmptyLine = _getText(firstNonWSCharPos + 1, len).trim();  
+        if (nonEmptyLine.startsWith("else ")) return charOffset;
       }
       // Look for "=" or "= ... match ... " prefix preceding balanced phrase ending in firstNonWSChar
       if (firstNonWSChar == '}' || firstNonWSChar == ')') { 
@@ -1258,9 +1259,15 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           int newPos = firstNonWSCharPos + 1 - dist;
           int enclosingBracePos = _getEnclosingBracePos();  // may be ERROR_INDEX
           int equalsPos = findPrevDelimiter(newPos, EQUALS);
-          // The following assumes 'def' appears on same line as '='  TO DO: findPrev 'def'
+          /* The following assumes 'def' appears on same line as '='.  If an enclosing '=' appears
+           * after the brace enclosing the balanced phrase ending in firstNonWSChar, the we have
+           * a "def ... = <balanced phrase>" or "def ... = ... match ... <balanced phrase>" form to indent.
+           * TO DO: findPrev 'def' instead of assuming it is on the same line with '='. 
+           */
           if (equalsPos > 0 && equalsPos > enclosingBracePos) return _getIndentOfLine(equalsPos);
-          // '=' not found; look for first preceding nonWS character ignoring balanced phrases
+          /* '=' not found; look for first preceding nonWS character ignoring balanced phrases.  The next two
+           * statements (ignoring debugging) also assume that the current statment begins on the same line as
+           * the first NonWS char preceding the balanced phrase ending in firstNonWSChar. */
           int newerPos = findPrevDelimiter(newPos, ALPHANUMERIC);
 //          System.err.println("No opening '=' found; returning indent of '" + _getCurrentLine(newerPos) + "'");
           if (newerPos >= 0) return _getIndentOfLine(newerPos);  // assumes statement begins on same line as newerPos

@@ -1,10 +1,10 @@
-<!-- DrJava Build Script -->
+<!-- DrScala Build Script -->
 
 <!-- This build script is based on the template located at "trunk/misc/build-template.xml"
      in the DrJava Subversion repository.  In general, changes made to the script should be
      reflected in the template as well. -->
      
-<project name="drjava" default="help">
+<project name="drscala" default="help">
 
   <property name="readable-project-name" value="DrJava" />
   <property name="src-working-dir" value="src/edu/rice/cs/drjava" />
@@ -730,7 +730,7 @@
       <arg value="--quiet" />
       <arg value="--revision" />
       <arg value="HEAD" />
-      <arg value="${svn-repository}/trunk/${ant.project.name}" />
+      <arg value="${svn-repository}/trunk/drjava" /> <!-- Must be changed when package name element "drjava" => "drscala" -->
       <arg value="benchmarkSources" />
     </exec>
     <antcall target="benchmark-single-previous">
