@@ -103,7 +103,9 @@ public class MovingDocumentRegion extends DocumentRegion {
           
           // Construct the matching string and compressed selection prefix and suffix strings within text
           String prefix, match, suffix;
-          if (excerptLength < startRed) { // selection not included in excerpt
+          // Added the predicate "startRed < 0" because "text.substring(startRed, endRed)" threw an 
+          // IndexOutOfBoundsException with startRed == -18. Perhaps editing text in question created this situation.
+          if (excerptLength < startRed || startRed < 0) { // selection not included in excerpt
             prefix = StringOps.compress(text.substring(0, excerptLength));
             match = " ...";
             suffix = "";

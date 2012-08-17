@@ -116,6 +116,7 @@ public class Indenter {
       rule14 = new QuestionNewParenPhrase(rule15, rule16),  // is current non ) line a new phrase after open paren?
       rule23 = new QuestionNewParenPhrase(rule30, rule38),  // is current ) line a new phrase after open paren?
       rule21 = new QuestionCurrLineStartsWith(")", rule23, rule14), // does current line start with ')'?
+      
       // root of non-comment indent tree: is brace enclosing start of this line in { '(', '['}?  
       rule13 = new QuestionBraceIsParenOrBracket(rule21, rule17),   
       
