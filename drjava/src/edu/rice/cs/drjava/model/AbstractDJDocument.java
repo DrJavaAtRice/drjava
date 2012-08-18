@@ -1212,11 +1212,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     final Integer cached = (Integer) _checkCache(key);
     if (cached != null) return cached.intValue();
     
-    int dist;
-    
     final int oldPos = _currentLocation;
     setCurrentLocation(pos);
-    dist = _reduced.getDistToStart(0);
+    int dist = _reduced.getDistToStart(0);
     setCurrentLocation(oldPos);
     
     int newPos = 0;
