@@ -1292,6 +1292,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     buf.append("*/\n");
 //    if (! elementary) buf.append("public ");
     buf.append("def testX() {\n}\n\n");
+    buf.append("/** Sample test method which tests no program code. */\n");
+    buf.append("def testNothing() {\n");
+    buf.append("assertTrue(\"Dummy Test\", true)\n");
+    buf.append("println(\"TESTING Nothing\")\n");
+    buf.append("}\n");
     buf.append("}\n");
     String test = buf.toString();
     
