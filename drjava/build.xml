@@ -228,10 +228,15 @@
     <move todir="classes/base">
       <fileset dir="classes/test" includes="**/*" />
     </move>
-    
+    <!--
     <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
            bootclasspath="${java7-runtime}" sourcepath="" includeAntRuntime="no"
            executable="/etc/alternatives/javac-7" fork="yes" memoryMaximumSize="512M"
+           debug="on" optimize="off" deprecation="on"	>
+    -->
+    <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
+           bootclasspath="${java7-runtime}" sourcepath="" includeAntRuntime="no"
+           executable="${java7-home}/bin/javac" fork="yes" memoryMaximumSize="512M"
            debug="on" optimize="off" deprecation="on"	>
       <classpath>
         <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
