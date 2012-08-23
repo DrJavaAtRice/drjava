@@ -1306,6 +1306,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    * some unit tests because the slave JVM keeps its working directory open until it shuts down. 
    */
    public static class TestGlobalModel extends DefaultGlobalModel {
-    public File getWorkingDirectory() { return getMasterWorkingDirectory(); }
+     // public File getWorkingDirectory() { return getMasterWorkingDirectory(); }
   } 
 }
