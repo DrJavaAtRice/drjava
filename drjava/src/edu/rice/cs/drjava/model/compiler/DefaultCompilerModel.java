@@ -251,9 +251,6 @@ public class DefaultCompilerModel implements CompilerModel {
     /* Filter docs to construct filesToCompile */
     for (OpenDefinitionsDocument doc : docs) {
       if (doc.isSourceFile()) {
-
-        _log.log(doc.getFile() + " IS SourceFile...");
-
         File f = doc.getFile();
         // Check for null in case the file is untitled (not sure this is the correct check)
         if (f != null && f != FileOps.NULL_FILE) {
