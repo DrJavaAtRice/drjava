@@ -8,7 +8,7 @@
 
   <property name="readable-project-name" value="DrJava" />
   <property name="src-working-dir" value="src/edu/rice/cs/drjava" />
-  <property name="junit-jar-to-include" value="lib/concutest-junit-4.7-withrt-nodep.jar" />
+  <property name="junit-jar-to-include" value="lib/buildlib/junit.jar" />
   <property name="md5-temp-name" value="classes/md5.properties" />
   <property name="md5-properties-path" value="edu/rice/cs/drjava/md5.properties" />
   <property name="main-class" value="edu.rice.cs.drjava.DrJava" />
@@ -231,7 +231,7 @@
     <!--
     <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
            bootclasspath="${java7-runtime}" sourcepath="" includeAntRuntime="no"
-           executable="/etc/alternatives/javac-7" fork="yes" memoryMaximumSize="512M"
+           executable="${java7-home}/bin/javac" fork="yes" memoryMaximumSize="512M"
            debug="on" optimize="off" deprecation="on"	>
     -->
     <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"

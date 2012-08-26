@@ -305,6 +305,7 @@ public interface OptionConstants {
   /** Class that allows the look and feels to be initialized properly. */
   static class LookAndFeels {
     private static String[][] _registerLAFs = {
+      {"Sea Glass", "com.seaglasslookandfeel.SeaGlassLookAndFeel"},
       {"Plastic 3D", "com.jgoodies.looks.plastic.Plastic3DLookAndFeel"},
       {"Plastic XP", "com.jgoodies.looks.plastic.PlasticXPLookAndFeel"},
       {"Plastic Windows", "com.jgoodies.looks.windows.Plastic3DLookAndFeel"},

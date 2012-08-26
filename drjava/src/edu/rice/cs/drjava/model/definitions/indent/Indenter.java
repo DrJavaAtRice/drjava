@@ -36,6 +36,8 @@
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
+import java.util.Arrays;
+
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -44,6 +46,8 @@ import edu.rice.cs.drjava.config.OptionConstants;
   * @version $Id$
   */
 public class Indenter {
+  
+  private static final String[] FALSE_CASE_SUFFIXES = new String[] { "class", "object" };
   
   public Indenter(int indentLevel) { 
     _indentLevel = indentLevel;
@@ -74,7 +78,7 @@ public class Indenter {
     */
   public void buildTree(int indentLevel) {
     char[] indent = new char[indentLevel];
-    java.util.Arrays.fill(indent,' ');
+    Arrays.fill(indent,' ');
     
     boolean autoCloseComments = false;
     try { autoCloseComments = DrJava.getConfig().getSetting(OptionConstants.AUTO_CLOSE_COMMENTS).booleanValue(); }
@@ -89,12 +93,12 @@ public class Indenter {
       rule35 = new ActionStartLineOf("if"),
 
       rule32 = new ActionStartCurrStmtPlus(0),
-      rule31 = new QuestionCurrLineStartsWithSkipComments(new char[] {'{'}, rule32, rule37),
+      rule31 = new QuestionCurrLineStartsWithChar(new char[] {'{'}, rule32, rule37),
       // Does thi snew statement begin with "case"?  If so, must be indented with enclosing brace (excluding "=>")
-      rule30 = new QuestionCurrLineStartsWith("case", /* accept comments */ false, rule36, rule39),
+      rule30 = new QuestionCurrLineStartsWith("case", FALSE_CASE_SUFFIXES, rule36, rule39),
       
       // Does this new statement begin with "else"?  If so, must match corresponding "if" (the prev stmt)
-      rule29 = new QuestionCurrLineStartsWith("else", /* accept comments */ false, rule35, rule30),
+      rule29 = new QuestionCurrLineStartsWith("else", rule35, rule30),
       // Is this line the start of a new statement?
       rule25 = new QuestionStartingNewStmt(rule29, rule31),  
       // Does this line follow an annotation?  ??
@@ -109,7 +113,7 @@ public class Indenter {
       
       // root of non-comment indent tree for Scala: is brace enclosing start of this line a square bracket?  
       // Does current line begin with '}' or ')' ignoring comment text, WS  TODO: check for balanced braces
-      rule18 = new QuestionCurrLineStartsWithSkipComments(new char[] {')', '}'}, rule19, rule20),
+      rule18 = new QuestionCurrLineStartsWithChar(new char[] {')', '}'}, rule19, rule20),
      
       // rule 8, 11, 13, 14, 15, 16, 17, 22, 23, 26, 27, 28, 29, 30, 33, 34, 38, 40, 42 avail
       
