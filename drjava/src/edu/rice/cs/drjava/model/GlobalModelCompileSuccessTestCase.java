@@ -48,11 +48,11 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 public abstract class GlobalModelCompileSuccessTestCase extends GlobalModelTestCase {
 
   protected static final String FOO_PACKAGE_AS_PART_OF_FIELD = "class DrScalaTestFoo { val cur_package = 5; }";
-  protected static final String FOO2_EXTENDS_FOO_TEXT = "class DrScalaTestFoo2 extends DrScalaTestFoo {}";
+  protected static final String FOO2_EXTENDS_FOO_TEXT = "import DrScalaTestFoo \n class DrScalaTestFoo2 extends DrScalaTestFoo {}";
   protected static final String FOO_NON_PUBLIC_CLASS_TEXT = 
     "class DrScalaTestFoo {}\n" +
     "class Foo{}";
-  protected static final String FOO2_REFERENCES_NON_PUBLIC_CLASS_TEXT = "class DrScalaTestFoo2 extends Foo{}";
+  protected static final String FOO2_REFERENCES_NON_PUBLIC_CLASS_TEXT = "import Foo \n class DrScalaTestFoo2 extends Foo{}";
   protected static final String FOO_WITH_ASSERT = 
     "class DrScalaTestFoo { def foo() { assert(true, \"a vacuous assert failed!\") } }";
   protected static final String FOO_WITH_GENERICS = "class DrScalaTestFooGenerics[T] {}";

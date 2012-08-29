@@ -410,8 +410,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       addIfDir(new File(javaHome), roots);
       addIfDir(new File(javaHome, ".."), roots);
       addIfDir(new File(javaHome, "../.."), roots);
-      addIfDir(new File(javaHome, "../../.."), roots);
-      addIfDir(new File(javaHome, "../../../.."), roots);
+//      addIfDir(new File(javaHome, "../../.."), roots);
+//      addIfDir(new File(javaHome, "../../../.."), roots);
     }
     
     // add JAVA environment bindings to roots
@@ -421,22 +421,22 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       addIfDir(new File(envJavaHome, "../.."), roots);
     }
     
-    
-    // Windows entries for Java
+    // Windows entries for Java and Scala
     if (programFiles != null) {
       addIfDir(new File(programFiles, "Java"), roots);
+      addIfDir(new File(programFiles, "Scala"), roots);
       addIfDir(new File(programFiles), roots);
     }
     
-    addIfDir(new File("/C:/Program Files/Java"), roots);
-    addIfDir(new File("/C:/Program Files"), roots);
+    addIfDir(new File(systemDrive + "/Program Files/Java"), roots);
+    addIfDir(new File(systemDrive + "/Program Files/Scala"), roots);
+    addIfDir(new File(systemDrive + "/Program Files"), roots);
     
     if (systemDrive != null) {
       addIfDir(new File(systemDrive, "Java"), roots);
+      addIfDir(new File(systemDrive, "Scala"), roots);
       addIfDir(new File(systemDrive), roots);
     }
-    addIfDir(new File("/C:/Java"), roots);
-    addIfDir(new File("/C:"), roots);
     
     // add Scala environment bindings to roots
     if (envScalaHome != null) {
@@ -445,9 +445,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       addIfDir(new File(envScalaHome, "../.."), roots);
     }
     
-    /* Scala entries for Windows */
-    addIfDir(new File("/C:/Scala/scala-2.9.1.final"), roots);
-    addIfDir(new File("/C:/Scala/scala-2.9.1-1"), roots);
+//    /* Scala entries for Windows */
+//    addIfDir(new File("/C:/Scala/scala-2.9.1.final"), roots);
+//    addIfDir(new File("/C:/Scala/scala-2.9.1-1"), roots);
     
     /* Java entries for Mac OS X */
     addIfDir(new File("/System/Library/Java/JavaVirtualMachines"), roots);
@@ -484,7 +484,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     Predicate<File> subdirFilter = LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("j2sdk.*"),
                                                  IOUtil.regexCanonicalCaseFilePredicate("jdk.*"),
                                                  LambdaUtil.or(IOUtil.regexCanonicalCaseFilePredicate("\\d+\\.\\d+\\.\\d+.*"),
-                                                               IOUtil.regexCanonicalCaseFilePredicate("java-.*"))); 
+                                                               IOUtil.regexCanonicalCaseFilePredicate("java-.*"),
+                                                               IOUtil.regexCanonicalCaseFilePredicate("scala-.*"))); 
     for (Map.Entry<File,Set<JDKDescriptor>> root : roots.entrySet()) {
       JDKToolsLibrary.msg("Searching root (for jar files): " + root.getKey());
       for (File subdir : IOUtil.attemptListFilesAsIterable(root.getKey(), subdirFilter)) {
@@ -493,6 +494,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         addIfFile(new File(subdir, "Classes/classes.jar"), root.getValue(), jars);
         addIfFile(new File(subdir, "Contents/Classes/classes.jar"), root.getValue(), jars);
         addIfFile(new File(subdir, "Contents/Home/lib/tools.jar"), root.getValue(), jars);
+        addIfFile(new File(subdir, "lib/scala-compiler.jar"), root.getValue(), jars);
       }
     }
   }

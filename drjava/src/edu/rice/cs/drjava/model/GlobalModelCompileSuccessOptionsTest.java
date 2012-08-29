@@ -77,7 +77,6 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     _model.removeListener(listener);
     CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener();
     _model.addListener(listener2);
-    System.exit(0);
     listener2.compile(doc2);
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());

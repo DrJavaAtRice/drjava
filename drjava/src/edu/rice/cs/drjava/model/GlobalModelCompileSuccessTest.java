@@ -86,15 +86,13 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
   
 
   /** Test that one compiled file can depend on the other and that when a keyword
-   * is part of a field name, the file will compile.
-   * We compile DrScalaTestFoo and then DrScalaTestFoo2 (which extends
-   * DrScalaTestFoo). This shows that the compiler successfully found
-   * DrScalaTestFoo2 when compiling DrScalaTestFoo.
-   * Doesn't reset interactions because no interpretations are performed.
-   */
-  public void testCompileClassPathOKDefaultPackage()
-    throws BadLocationException, IOException, InterruptedException
-  {
+    * is part of a field name, the file will compile.
+    * We compile DrScalaTestFoo and then DrScalaTestFoo2 (which extends
+    * DrScalaTestFoo). This shows that the compiler successfully found
+    * DrScalaTestFoo2 when compiling DrScalaTestFoo.
+    * Doesn't reset interactions because no interpretations are performed.
+    */
+  public void testCompileClassPathOKDefaultPackage() throws BadLocationException, IOException, InterruptedException {
 //    System.out.println("testCompileClasspathOKDefaultPackage()");
     // Create/compile foo, assuming it works
     OpenDefinitionsDocument doc1 = setupDocument(FOO_PACKAGE_AS_PART_OF_FIELD);

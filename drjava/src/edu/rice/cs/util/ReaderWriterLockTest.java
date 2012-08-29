@@ -310,14 +310,14 @@ public class ReaderWriterLockTest extends DrJavaTestCase {
 
   /** A ReaderThread which repeatedly prints to a buffer. */
   public class PrinterReaderThread extends ReaderThread {
-    PrintCommand _command;
+    volatile PrintCommand _command;
     public PrinterReaderThread(String msg, final StringBuffer buf) { _command = new PrintCommand(msg, buf); }
     public void read() { _command.print(); }
   }
 
   /** A WriterThread which repeatedly prints to a buffer. */
   public class PrinterWriterThread extends WriterThread {
-    PrintCommand _command;
+    volatile PrintCommand _command;
     public PrinterWriterThread(String msg, final StringBuffer buf) { _command = new PrintCommand(msg, buf); }
     public void write() { _command.print(); }
   }
