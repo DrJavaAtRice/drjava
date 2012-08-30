@@ -73,7 +73,8 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
     
     int orig = doc.getCurrentLocation();
     int lineStart = doc._getLineStartPos(orig);
-//    System.err.println("In QuestionStartingNewStmt.applyRule, orig = " + orig + " lineStart = " + lineStart);
+//    System.err.println("***** QuestionStartingNewStmt.applyRule called, orig = " + orig + " lineStart = " + lineStart +
+//    " line = '" + doc._getCurrentLine(orig) + "'");
     
     int prevDelimiterPos;
     char prevDelimiter;
@@ -85,12 +86,13 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
       return true;
     }
     
-//    System.err.println("   prevDelimiterPos = " + prevDelimiterPos + " prevDelimiter = '" + 
+//    System.err.println("  In QSNS.applyrule, prevDelimiterPos = " + prevDelimiterPos + " prevDelimiter = '" + 
 //                       prevDelimiter + "'");
     
     int prevSemicolonPos = doc._findPrevImplicitSemicolonPos(lineStart);
     
-//    System.err.println("   prevSemicolonPos = " + prevSemicolonPos);
+//    System.err.println("   prevSemicolonPos = " + prevSemicolonPos + " line is '" + 
+//                       doc._getCurrentLine(prevSemicolonPos) + "'");
     
     if (prevSemicolonPos > prevDelimiterPos) prevDelimiterPos = prevSemicolonPos;
 

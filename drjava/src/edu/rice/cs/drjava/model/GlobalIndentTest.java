@@ -49,8 +49,8 @@ import edu.rice.cs.util.OperationCanceledException;
  * @version $Id$
  */
 public final class GlobalIndentTest extends GlobalModelTestCase {
-  private static final String FOO_EX_1 = "public class Foo {\n";
-  private static final String FOO_EX_2 = "int foo;\n";
+  private static final String FOO_EX_1 = "class Foo {\n";
+  private static final String FOO_EX_2 = "val foo: Int\n";
   private static final String BAR_CALL_1 = "bar(monkey,\n";
   private static final String BAR_CALL_2 = "banana)\n";
 //  private static final String BEAT_1 = "void beat(Horse dead,\n";

@@ -50,6 +50,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
   */
 public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
   private final String _prefix;
+  private final int _prefLen; // length of _prefix
   private final String[] _excludedSuffixes;  // SORTED array of excluded suffix strings
   private static final String SUFFIX_DELIMITERS = " \t\n\r{}()[]="; // not in sorted order
   private static final String[] EMPTY_STRING_ARRAY = new String[0];
@@ -63,6 +64,7 @@ public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
   public QuestionCurrLineStartsWith(String prefix, String[] excludedSuffixes, IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
     _prefix = prefix;
+    _prefLen = (prefix == null) ? 0 : _prefix.length();
     _excludedSuffixes = excludedSuffixes;
   }
   
@@ -78,9 +80,9 @@ public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
     * @return true if this node's rule holds.
     */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    if (_prefix == null) return true;
-    int len = _prefix.length();
-    if (len == 0) return true;
+//    System.err.println("***** QCLSW.applyRule called; _prefix = '" + _prefix + "' exclude = " + 
+//                       Arrays.toString(_excludedSuffixes));
+    if (_prefLen == 0) return true;
     
     try {
       // Find start of line
@@ -88,31 +90,41 @@ public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
       
       int firstCharPos = doc.getFirstNonWSCharPos(lineStart);
       int lineEndPos = doc._getLineEndPos(firstCharPos);
+      
+//      System.err.println("  lineStart = " + lineStart + "  firstCharPos = " + firstCharPos + " lineEndPos = " + 
+//                         lineEndPos);
 
-      // If prefix would run off the end of the line, the answer is obvious.
-      if (firstCharPos + len > lineEndPos) {
+      // If prefix would run off the end of the line, return false
+      if (firstCharPos + _prefLen > lineEndPos) {
         return false;
       }
       
       // Compare prefix
-      String actualPrefix = doc.getText(firstCharPos, len);
-      if (_prefix.equals(actualPrefix)) return (_excludedSuffixes.length == 0) || confirmExcludedSuffixes(doc, len);
+      int textLen = doc.getLength() - firstCharPos;
+      
+      assert textLen >= _prefLen;  // lineEndPos <= textLen => textLen > lineEndPos - firstCharPos
+      
+      if (textLen < _prefLen) return false;    // current line cannot possibly start with _prefix
+      String text = doc.getText(firstCharPos, textLen);
+      String actualPrefix = text.substring(0, _prefLen);
+//      System.err.println("  actualPrefix = " + actualPrefix + " equalsTest = " + _prefix.equals(actualPrefix));
+      if (_prefix.equals(actualPrefix)) return (_excludedSuffixes.length == 0) || confirmExcludedSuffixes(text, textLen);
       return false;
     }
-    catch (BadLocationException e) { throw new UnexpectedException(e); }  // Shouldn't happen
+    catch (BadLocationException e) { return false; }  // no first NonWS char exists; hence non-empty _prefix cannot match
   }
-  /** Assuming doc contains at least offset chars, confirms that the first word in the sequel (after doclen) is not in 
+  
+  /** Given text starts with _prefix, confirms that the first word in the sequel (after _prefix) is not in 
     * _excludedSuffixes */
-  private boolean confirmExcludedSuffixes(AbstractDJDocument doc, int offset) {
-    int docLen = doc.getLength();
-    if (docLen == offset) return true;  // no chars follow the prefix
-    char nextChar = doc._getText(offset, 1).charAt(0);
+  private boolean confirmExcludedSuffixes(String text, int len) {
+    if (len == _prefLen) return true;  // no chars follow the prefix
+    char nextChar = text.substring(_prefLen, _prefLen + 1).charAt(0);
     if (! Character.isWhitespace(nextChar)) return false;  // if char following prefix is not whitespace, the prefix is bad
 
-    String sequel = doc._getText(offset + 1, docLen - offset - 1); // sequel is text following the whitespace char
+    String sequel = text.substring(_prefLen + 1, len - _prefLen - 1); // sequel is text following the whitespace char
     StringTokenizer tokenizer = new StringTokenizer(sequel, SUFFIX_DELIMITERS, true);
     
-    if (! tokenizer.hasMoreTokens()) return true;                  // if text following whitespace char is empty, condition is confirmed
+    if (! tokenizer.hasMoreTokens()) return true;          // if text following whitespace char is empty, condition is confirmed
     String suffix = tokenizer.nextToken();
 //    System.err.println("Case suffix token = '" + suffix + "'");
     return Arrays.binarySearch(_excludedSuffixes, suffix) < 0;  // true when excluded suffix is NOT found

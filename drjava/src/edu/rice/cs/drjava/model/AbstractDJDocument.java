@@ -101,6 +101,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public static final char[] DEFAULT_WHITESPACE_WITH_COMMA = {'\t', '\n', '\r', ' ', ','};
   public static final char[] NEWLINE                       = {'\n'};
   public static final char[] EQUALS                        = {'='};
+  public static final char[] STRICT_OPENING_BRACES         = {'(', '{'};
   public static final char[] OPENING_BRACES                = {'(', '>', '{'};  // includes pseudo-brace "=>"
   public static final char[] OPENING_BRACES_WITH_EQUALS    = {'(', '=', '>', '{'};  // includes pseudo-braces "=" & "=>"
   public static final char[] CLOSING_BRACES                = {')', '}'};  
@@ -659,8 +660,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return result;
   }
   
-  /** Searching forward, finds the position of the enclosing brace, which may be a pointy bracket. NB: ignores comments.
-    * Only runs in event thread.
+  /** Searching forward, finds the position of the next enclosing brace, which may be a pointy bracket, ignoring 
+    * comments.  Only runs in event thread.
     * @param pos Position to start from
     * @param opening opening brace character
     * @param closing closing brace character
@@ -743,6 +744,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * the delims must exclude ')' and '}'.  Otherwise no skipping will happen! 
     * The array of delimiters MUST APPEAR IN ASCENDING ORDER to support using Array.binarySearch.
     * Only runs in event thread.
+    * TODO: make this method significantly faster; may require re-factoring the reduced model
     * @param pos Position to start from
     * @param delims array of characters to search for; must exclude '}' and ')' if skipBracePhrases is true
     * @param skipBracePhrases whether to look for delimiters inside brace phrases
@@ -766,7 +768,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     if (pos == 0) return ERROR_INDEX;
     
-//    Utilities.show("Executing delim search loop");
+//    System.err.println("Executing delim search loop");
     
     int i = pos - 1;  // index for for loop below
     String text = getText();
@@ -842,9 +844,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     setCurrentLocation(origPos);    // Restore the state of the reduced model; 
   
-    _storeInCache(key, i, pos - 1);  // update cache; entry veracity depends on text[0:pos-1] remaining invariant
-//    Utilities.show("findPrevDelimiter returning offset " + i + "; ch = " + ((i >= 0) ? getText(i,1) : "ERROR_INDEX"));
-//    System.err.println("From findPrevDelimeter, returning " + i);
+    _storeInCache(key, i, pos - 1);  // update cache; only changes in text[0:pos-1] affect the result
+//    System.err.println("***** findPrevDelimiter returning offset " + i + "; ch = " + ((i >= 0) ? getText(i,1) : "ERROR_INDEX"));
     // Return position of matching delim or ERROR_INDEX (-1)
     return i;  
   }
@@ -913,21 +914,17 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     final Integer cached = (Integer) _checkCache(key);
     if (cached != null)  return cached.intValue();
     
-    int reducedPos = pos;
     int i = pos - 1;
     String text;
     text = getText(0, pos); 
     
     final int origPos = _currentLocation;
     try {
-      // Move reduced model to location reducedPpos
-      setCurrentLocation(reducedPos);
       
       // Walk backward from specified position
       
       while (i >= 0) { 
-        /* Invariant: reduced model points to reducedPos, 0 <= i < reducedPos <= pos, 
-         * text[i+1:pos-1] contains invalid chars */
+        /* Invariant: 0 <= i <  pos, text[i+1:pos-1] contains invalid chars */
         
         if (match(text.charAt(i), whitespace)) {
           // ith char is whitespace
@@ -935,17 +932,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           continue;
         }
         
-        // Found a non-whitespace char;  move reduced model to location i
+        // Found a non-whitespace char;  move reduced model to location i and check for shadowing
         setCurrentLocation(i);
-        reducedPos = i;                  // reduced model points to i == reducedPos
-        
-        // Check if matching char is within a comment (not including opening two characters)
         if ((_reduced.getStateAtCurrent().equals(INSIDE_LINE_COMMENT)) ||
             (_reduced.getStateAtCurrent().equals(INSIDE_BLOCK_COMMENT))) {
           i--;
           continue;
         }
-        
         if (i > 0 && _isStartOfComment(text, i - 1)) { /* char i is second character in opening comment marker */  
           // Move i past the first comment character and continue searching
           i = i - 2;
@@ -955,14 +948,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         // Found valid previous character
         break;
       }
-      /* Exit invariant same as for loop except that i <= reducedPos because at break i = reducedPos */
+      /* Exit invariant same as for loop except that i == ERROR_INDEX | i == pos of last valid char */
     }  
     finally { setCurrentLocation(origPos); }
-    
-    int result = reducedPos;
-    if (i < 0) result = ERROR_INDEX;
-    _storeInCache(key, result, pos - 1);
-    return result;
+
+    if (i < 0) i = ERROR_INDEX;
+    _storeInCache(key, i, pos - 1);
+    return i;
   }
     
   /** Checks the query cache for a stored value.  Returns the value if it has been cached, or null 
@@ -1327,9 +1319,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     */
   public int _findPrevImplicitSemicolonPos(int pos) {
     
-    // TODO: cache the results of these queries!!
-    
-//    Utilities.show("_findPrevImplicitSemicolon called at position " + pos);
+//    System.err.println("***** _findPrevImplicitSemicolon(" + pos + ")");
     
     /* Searching backward, look at each line end that is not enclosed in a balanced phrase, and find the  
      * first line that does NOT satisfy one of the following:
@@ -1341,61 +1331,95 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
      * Then classify this boundary as ending in a semicolon and return the index of
      * the newline character marking this boundary.  If no such boundary is found,
      * return ERROR_INDEX. */
+    
     assert pos >= 0;
     
+    // Check cache
+    final Query key = new Query.PrevImplicitSemicolon(pos);
+    final Integer cached = (Integer) _checkCache(key);
+    if (cached != null) return cached.intValue();
+    
     int origPos = _currentLocation;
-    int lineStart /* = ERROR_INDEX */ ;         // javac requires initialization
-    int lastNonWSCharPos /*  = ERROR_INDEX */;  // javac requires initialization
-    try {
-      // find closest preceding newline that is not inside a brace phrase and does not terminate an empty line
+    
+    int lineStart;
+    int lastNonWSCharPos;
+    int result = ERROR_INDEX;  // cache cell for method result; copied to Query cache on exit
+    
+    try {  // finally clause copies result cache cell to Query cache
+      
+      // Find closest preceding newline that is not inside a brace phrase and does not terminate an empty line
       do {
         pos = findPrevDelimiter(pos, NEWLINE);
-        if (pos < 0) return ERROR_INDEX;
+//        System.err.println("In loop, candidate line for prev semicolon = '" + _getCurrentLine(pos) + "'");
+        if (pos < 0) return result;  // return ERROR_INDEX
+        
         assert getText(pos, 1).charAt(0) == newline;
         
         lineStart = _getLineStartPos(pos);
         
         // Find last unshadowed (by a comment) nonWS char in text preceding endPrevLinePos
         lastNonWSCharPos = getPrevNonWSCharPos(pos);
-        if (lastNonWSCharPos == ERROR_INDEX) return ERROR_INDEX;
+//        System.err.println("For this line, lineStart = " + lineStart + " lastNonWSCharPos = " + lastNonWSCharPos);
+        if (lastNonWSCharPos == ERROR_INDEX) {
+          return result;  //  return ERROR_INDEX
+        }
       } while (lastNonWSCharPos < lineStart);
+      
+//      System.err.println("  lineStart = " + lineStart + " line = '" + _getCurrentLine(pos) + "'");
       
       // pos is end of previous non-empty line; lastNonWSCharPos is pos of nearest preceding unshadowed Non WS char 
       char lastNonWSChar = getText().charAt(lastNonWSCharPos);
-//      System.err.println("In _findPrevImplicitSemicolon, last NonWS char is '" + lastNonWSChar + "'");
+//      System.err.println("In _findPrevImplicitSemicolon, last NonWS char is '" + lastNonWSChar + "' on line '" + 
+//                         _getCurrentLine(lastNonWSCharPos) + "'");
       
-      // Is lastNonWSChar a ')'
+      // Is lastNonWSChar a ')'?
       
       if (lastNonWSChar == ')') {
-        if (! isTestIfForWhile(lastNonWSCharPos)) return pos;
+        if (! isTestIfForWhile(lastNonWSCharPos)) {
+          result = pos;
+          return result;
+        }
         else {
           setCurrentLocation(lastNonWSCharPos + 1);  // immediately to right of paren
           int dist = balanceBackward();
           int newPos = _getLineStartPos(lastNonWSCharPos + 1 - dist);  // resume search from left of matching paren
 //          System.err.println("Skipping back past ForIfWhile prefix in searching for implicit semicolon");
-          return _findPrevImplicitSemicolonPos(newPos);
+          result = _findPrevImplicitSemicolonPos(newPos);
+          return result;
         }
       } else {
         // Is lastNonWSChar a possible terminating char (preceding an implicit semicolon) or a semicolon
         int chIndex = Arrays.binarySearch(NOT_TERMINATING_CHARS, lastNonWSChar);
-        if (chIndex < 0) // ch can end a statement/expression (may even be an explicit semicolon)
-          return pos;
+        if (chIndex < 0) { // ch can end a statement/expression (may even be an explicit semicolon)
+          result = pos;
+          return result;
+        }
+          
         if (chIndex == DOT_INDEX) { // prevNonWSChar is '.'; must exclude numeric constants
           // The ordered char array DOUBLE_DELIMS was defined heuristically; it may need perturbing
           int numericDelimPos = findPrevDelimiter(lastNonWSCharPos, DOUBLE_DELIMS);
           try {
             double numVal = Double.parseDouble(getText(numericDelimPos + 1, lastNonWSCharPos + 1));
           }
-          catch(NumberFormatException nfe) { return _findPrevImplicitSemicolonPos(numericDelimPos); }
-          return pos;  // lastNonWSChar is plausible terminating char because it is final char in a Double
+          catch(NumberFormatException nfe) { 
+            result = _findPrevImplicitSemicolonPos(numericDelimPos);
+            return result;
+          }
+//          System.err.println("***** _findPrevImplicitSemicolonPos returning " + pos);
+          result = pos;  // lastNonWSChar is plausible terminating char because it is final char in a Double
+          return result;  
         }
-        // TODO: convert this recursive pattern to a while loop
-        // look at the preceding line boundary
-        return _findPrevImplicitSemicolonPos(lastNonWSCharPos);
+        
+        // find semicolon pos starting at the preceding line boundary
+        result = _findPrevImplicitSemicolonPos(lastNonWSCharPos);
+        return result;
       }
     }
     catch(BadLocationException bpe) { }  // should never happen?
-    finally { setCurrentLocation(origPos); }
+    finally {
+      _storeInCache(key, result, Math.max(0, pos - 1));  // Only changes to text[0: pos-1] affect the result
+      setCurrentLocation(origPos); 
+    }
     return ERROR_INDEX;
   }
   
@@ -1767,7 +1791,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         setCurrentLocation(i);  // reduced model points to location i
         result = i;
         
-        // TODO: is this version is may e faster than actual code?
+        // TODO: is this version faster than actual code?
 //        // Check if non-ws char is within comment and if we want to ignore them.
 //        if (! acceptComments &&
 //            ((_reduced.getStateAtCurrent().equals(INSIDE_LINE_COMMENT)) ||

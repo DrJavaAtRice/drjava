@@ -41,6 +41,8 @@ import javax.swing.text.BadLocationException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
+import static edu.rice.cs.drjava.model.AbstractDJDocument.*;
+
 /** Indents the current line in the document to the indent level of the start of the brace ('{', '('} and optinally
   * "=>"enclosing 
   * the start of the current line, plus the given suffix.
@@ -74,7 +76,7 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
     try {
       // Get bracePos
       int bracePos = (_includeScalaBraces) ? doc.findEnclosingScalaBracePosWithEquals(pos) : 
-        doc._getEnclosingBracePos(pos);
+        doc.findPrevDelimiter(pos, STRICT_OPENING_BRACES);
       
 //      System.err.println("bracePos = " + bracePos);
       final int indent = doc._getIndentOfCurrStmt(bracePos) + _suffix;

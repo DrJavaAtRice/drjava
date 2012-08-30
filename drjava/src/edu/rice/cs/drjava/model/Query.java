@@ -223,6 +223,10 @@ public interface Query {
     public PosInBlockComment(int pos) { super(pos); }
   }
   
+  public static class PrevImplicitSemicolon extends Pos {
+    public PrevImplicitSemicolon(int pos) { super(pos); }
+  }
+  
   public static class AnonymousInnerClass implements Query {
     private final int _pos;
     private final int _openCurlyPos;

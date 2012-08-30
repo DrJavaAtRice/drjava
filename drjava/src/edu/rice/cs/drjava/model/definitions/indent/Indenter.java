@@ -102,12 +102,13 @@ public class Indenter {
       // Is this line the start of a new statement?
       rule25 = new QuestionStartingNewStmt(rule29, rule31),  
       // Does this line follow an annotation?  ??
-      rule24 = new QuestionPrevLineStartsWith("@", rule40, rule25),  
-
+      rule24 = new QuestionPrevLineStartsWith("@", rule40, rule25),
+      rule23 = new ActionBracePlus(1),              // align with first char after enclosing '{' or '(' brace
+      rule22 = new QuestionStartAfterOpenBrace(rule23, rule24),
       // Indent line starting after open brace (including "=>")
       rule21 = new ActionStartStmtOfBracePlus(indentLevel,  /* include Scala braces */ true),
       // Does the preceding line contain the enclosing brace (including "=>" and "=") as last token?
-      rule20 = new QuestionStartAfterOpenBrace(rule21, /* rule22 */ rule24),  // test includes Scala braces
+      rule20 = new QuestionStartImmedAfterOpenBrace(rule21, rule22),  // test includes Scala braces
       // Indent the line to match whitespace preceding the line enclosing brace
       rule19 = new ActionStartStmtOfBracePlus(0, /* include Scala braces" */ false),  
       

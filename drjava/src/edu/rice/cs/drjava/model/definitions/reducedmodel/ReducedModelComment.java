@@ -432,7 +432,11 @@ public class ReducedModelComment extends AbstractReducedModel {
     return getStateAtCurrent() != FREE /* || curToken.isLineComment() || curToken.isBlockCommentStart() */; 
   }
   
-  public boolean isWeaklyShadowed() { return isShadowed() || isOpenComment(); }
+  /** @return true if the _cursor is within a block or line comment including opening / char but excluding the newline
+    * at the end of a wing comment. */
+  public boolean isWeaklyShadowed() { 
+    return isShadowed() && (getStateAtCurrent() == INSIDE_BLOCK_COMMENT || ! _cursor.current().isNewline())
+      || isOpenComment(); }
   
   public boolean isOpenComment() {
     if (_cursor.atStart() || ! _cursor.atEnd()) return false;
