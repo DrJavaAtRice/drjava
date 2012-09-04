@@ -187,13 +187,13 @@ public interface DJDocument extends SwingDocumentInterface {
     * (';', '{', '}') and a default set of whitespace characters (' ', '\t', n', ',').
     * @param pos Cursor position
     */
-  public int _getIndentOfCurrStmt(int pos) throws BadLocationException;
+  public int _getIndentOfStmt(int pos) throws BadLocationException;
   
   /** Returns the indent level of the start of the statement that the cursor is on.  Uses a default set of whitespace
     * characters (' ', '\t', '\n', ',').
     * @param pos Cursor position
     */
-  public int _getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException;
+  public int _getIndentOfStmt(int pos, char[] delims) throws BadLocationException;
   
   /** Returns the indent level of the start of the statement
    * that the cursor is on.
@@ -201,7 +201,7 @@ public interface DJDocument extends SwingDocumentInterface {
    * @param delims Delimiter characters denoting end of statement
    * @param whitespace characters to skip when looking for beginning of next statement
    */
-  public int _getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace)
+  public int _getIndentOfStmt(int pos, char[] delims, char[] whitespace)
     throws BadLocationException;
   
   /** Determines if the given character exists on the line where

@@ -3903,18 +3903,18 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** Only runs in event thread. */
-    public int _getIndentOfCurrStmt(int pos) throws BadLocationException {
-      return getDocument()._getIndentOfCurrStmt(pos);
+    public int _getIndentOfStmt(int pos) throws BadLocationException {
+      return getDocument()._getIndentOfStmt(pos);
     }
     
     /** Only runs in event thread. */
-    public int _getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException {
-      return getDocument()._getIndentOfCurrStmt(pos, delims);
+    public int _getIndentOfStmt(int pos, char[] delims) throws BadLocationException {
+      return getDocument()._getIndentOfStmt(pos, delims);
     }
     
     /** Only runs in event thread. */
-    public int _getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
-      return getDocument()._getIndentOfCurrStmt(pos, delims, whitespace);
+    public int _getIndentOfStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
+      return getDocument()._getIndentOfStmt(pos, delims, whitespace);
     }
     
 //    public int getPrevNonWSCharPos(int pos, char[] whitespace) throws BadLocationException {

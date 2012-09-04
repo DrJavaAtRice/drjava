@@ -92,9 +92,10 @@ public class Indenter {
       rule36 = new ActionStartStmtOfBracePlus(indentLevel,  /* include Scala braces */ false),
       rule35 = new ActionStartLineOf("if"),
 
-      rule32 = new ActionStartCurrStmtPlus(0),
+      rule32 = new ActionStartCurrStmtPlus(0),   // Since stmt opens with '{', suppress indenting
       rule31 = new QuestionCurrLineStartsWithChar(new char[] {'{'}, rule32, rule37),
-      // Does thi snew statement begin with "case"?  If so, must be indented with enclosing brace (excluding "=>")
+      
+      // Does thi snew statement begin with pattern matching "case"?  If so, must be indented with enclosing brace (excluding "=>")
       rule30 = new QuestionCurrLineStartsWith("case", FALSE_CASE_SUFFIXES, rule36, rule39),
       
       // Does this new statement begin with "else"?  If so, must match corresponding "if" (the prev stmt)

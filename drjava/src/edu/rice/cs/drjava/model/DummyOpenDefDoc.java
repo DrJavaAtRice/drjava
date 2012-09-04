@@ -384,15 +384,15 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
   public int findCharOnLine(int pos, char findChar) { throw new UnsupportedOperationException("Dummy method"); }
   
-  public int _getIndentOfCurrStmt(int pos) throws BadLocationException {
+  public int _getIndentOfStmt(int pos) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public int _getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException {
+  public int _getIndentOfStmt(int pos, char[] delims) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public int _getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
+  public int _getIndentOfStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
   }
   

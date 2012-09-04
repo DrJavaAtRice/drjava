@@ -58,10 +58,6 @@ public interface Query {
     public int hashCode() { return hash(getClass().hashCode(), _pos); }
   }
   
-  public static class IndentInformation extends Pos {
-    public IndentInformation(int pos) { super(pos); }
-  }
-  
   public static class PrevEnclosingBrace implements Query {
     private final int _pos;
     private final char _opening;
@@ -145,12 +141,12 @@ public interface Query {
     }
   }
   
-  public static class IndentOfCurrStmt implements Query {
+  public static class IndentOfStmt implements Query {
     private final int _pos;
     private final char[] _delims;
     private final char[] _whitespace;
     
-    public IndentOfCurrStmt(int pos, char[] delims, char[] whitespace) { 
+    public IndentOfStmt(int pos, char[] delims, char[] whitespace) { 
       _pos = pos;
       _delims = delims;
       _whitespace = whitespace;
@@ -158,7 +154,7 @@ public interface Query {
     
     public boolean equals(Object other) {
       if (other == null || other.getClass() != getClass()) return false;
-      IndentOfCurrStmt o = (IndentOfCurrStmt) other;
+      IndentOfStmt o = (IndentOfStmt) other;
       return o._pos == _pos && Arrays.equals(o._delims, _delims) && Arrays.equals(o._whitespace, _whitespace);
     }
     
@@ -226,6 +222,15 @@ public interface Query {
   public static class PrevImplicitSemicolon extends Pos {
     public PrevImplicitSemicolon(int pos) { super(pos); }
   }
+  
+  public static class IndentInformation extends Pos {
+    public IndentInformation(int pos) { super(pos); }
+  }
+  
+  public static class EnclosingBraceOrPrevSemicolon extends Pos {
+    public EnclosingBraceOrPrevSemicolon(int pos) { super(pos); }
+  }
+  
   
   public static class AnonymousInnerClass implements Query {
     private final int _pos;

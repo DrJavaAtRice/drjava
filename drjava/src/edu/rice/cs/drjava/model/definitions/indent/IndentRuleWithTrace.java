@@ -106,7 +106,7 @@ public abstract class IndentRuleWithTrace implements IndentRule {
   public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     _addToIndentTrace(getRuleName(), TERMINUS_RULE, true);
 
-    //Uncomment the next line, and every time something is indented, the indent trace will be printed
+    // Uncomment the next line, and every time something is indented, the indent trace will be printed
 //    printLastIndentTrace(System.out);
     return true;
   }

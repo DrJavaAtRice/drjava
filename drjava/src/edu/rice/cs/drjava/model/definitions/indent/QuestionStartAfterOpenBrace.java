@@ -79,7 +79,7 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion {
       int braceEndLinePos = doc._getLineEndPos(bracePos);
       
       // Get position of next non-WS char (not in comments)
-      int nextNonWS = doc.getFirstNonWSCharPos(braceEndLinePos /* bracePos + 1*/);
+      int nextNonWS = doc.getFirstNonWSCharPos(braceEndLinePos + 1);  // 
 //      System.err.println("Next NonWS pos after brace = " + nextNonWS);
       
       // return true if no NonWS character appears between brace and beginning of curr line

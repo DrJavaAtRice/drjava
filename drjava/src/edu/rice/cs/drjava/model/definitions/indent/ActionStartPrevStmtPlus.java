@@ -44,8 +44,9 @@ import javax.swing.text.BadLocationException;
 import static edu.rice.cs.drjava.model.AbstractDJDocument.ERROR_INDEX;
 
 /** Indents the current line in the document to the indent level of the start of the statement preceding the one the
-  * cursor is currently on, plus the given suffix padding (a number of spaces).  The preceding statement may be the
-  * prefix (like 'if (...) {') of the current line in which case an indentLevel prefix must be added.
+  * cursor is currently on, plus the given suffix padding (a number of spaces).  The preceding statement may be a 
+  * statement prelude (like "if (...) {") of the current line in which case an indentLevel prefix must be added.
+  * NOTE: this method assumes that the previous line is part of the preceding statement.
   * 
   * TO DO: eliminate _suffix argument; no longer used.
   *
@@ -55,7 +56,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
   private final int _suffix;  // number of spaces in suffix
   private final boolean _useColon;
   private final int _indentLevel;
-
+  
   /** Constructs a new rule with the given suffix string.
     * @param suffix String to append to indent level of brace
     * @param colonIsDelim whether to include colons as statement delimiters   NOTE: always false in Scala
@@ -68,10 +69,10 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
   }
   
   public ActionStartPrevStmtPlus(int suffix, int indentLevel) { this(suffix, false, indentLevel); }
-
+  
   /** Properly indents the line that the caret is currently on, assuming previous/enclosing statement is properly indented. 
     * Replaces all whitespace characters at the beginning of the line with the approprate spaces.  
-    * Assumes reduced lock is already held [Archaic].  Only runs in the event thread.
+    * Only runs in the event thread.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is taking place
     * @return true if the caller should update the current location itself, false if the indenter has already handled it
@@ -79,35 +80,17 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
   public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     boolean supResult = super.indentLine(doc, reason);
     int orig = doc.getCurrentLocation();
-//    System.err.println("Indenting line: '" + doc._getCurrentLine() + "'" + " origPos = " + orig);
+//    System.err.println("**** [ASPSP]indentline called on line: '" + doc._getCurrentLine() + "'" + " origPos = " + orig);
     
     // Find start of current line
     int lineStart = doc._getLineStartPos(orig);  
-    if (lineStart <= 0) return supResult;
+    if (lineStart <= 0) return supResult;   
+    int indent = doc._getIndentOfStmt(lineStart - 1);  // ASSUMES PREV LINE IS PART OF PREV STMT
     
-    try {
-      int indent;
-      // Find enclosing brace for current line (excluding Scala pseudo-braces?)
-      int enclosingBracePos = doc.findLineEnclosingScalaBracePos(lineStart);
-      
-      int prevSemicolonPos = doc._findPrevImplicitSemicolonPos(orig);
-//      System.err.println("Enclosing Brace Pos = " + enclosingBracePos + " Prev Semicolon Pos = " + prevSemicolonPos);
-      int boundaryPos = Math.max(enclosingBracePos, prevSemicolonPos);
-//      System.err.println("Boundary Pos = " + boundaryPos);
-//      System.err.println("Line with boundary is '" + doc._getCurrentLine(boundaryPos) + "'");
-      
-      indent = doc._getIndentOfCurrStmt(boundaryPos) + _suffix;  // using indent of statement preceding boundary
-//      System.err.println("In ActionStartPrevStmtPlus, indent = " + indent + " _suffix = " + _suffix);
-      if (boundaryPos == enclosingBracePos) {
-        indent = indent +  _indentLevel;
-//        System.err.println("Incrementing indent to " + indent);
-      }
-//      System.err.println("Indent of stmt '" + doc._getCurrentLine(boundaryPos) + "' = " + indent + " suffix = " + _suffix);
-      assert doc.getCurrentLocation() == orig;
-//      System.err.println("In ActionStartPrevStmtPlus, setting indent at pos " + indent);
-      doc.setTab(indent, orig);
-    }
-    catch(BadLocationException ble) { /* do nothing */ }
+//    System.err.println("[ASPSP]Indent of prev stmt '" + doc._getCurrentLine(lineStart - 1) + "' = " + indent + 
+//                       "\n       suffix = " + _suffix);
+//    System.err.println("In ActionStartPrevStmtPlus, setting indent at pos " + indent);
+    doc.setTab(indent, orig);
     return supResult;
   }
 }

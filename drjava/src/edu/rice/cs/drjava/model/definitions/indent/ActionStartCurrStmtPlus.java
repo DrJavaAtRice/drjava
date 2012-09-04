@@ -53,7 +53,7 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
     _suffix = suffix;
   }
 
-  /** Properly indents the line containing the caret assuming cureent statement starts on a preceding (!) line.
+  /** Properly indents the line containing the caret assuming current statement starts on a preceding (!) line.
     * Replaces all whitespace characters at the beginning of the line with the appropriate spacing or characters.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentition is taking place
@@ -73,7 +73,7 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
     
     if (prevLineEnd < 0) return supResult;  // start of prev line was 0 or ERROR_INDEX
 
-    indent = doc._getIndentOfCurrStmt(prevLineEnd, new char[] {';','{','}'}, new char[] {' ', '\t','\n'});
+    indent = doc._getIndentOfStmt(prevLineEnd, new char[] {';','{','}'}, new char[] {' ', '\t','\n'});
 
     indent = indent + _suffix;
     doc.setTab(indent, doc.getCurrentLocation());

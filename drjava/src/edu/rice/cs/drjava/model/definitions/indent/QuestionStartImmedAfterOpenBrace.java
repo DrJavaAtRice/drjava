@@ -63,36 +63,40 @@ public class QuestionStartImmedAfterOpenBrace extends IndentRuleQuestion {
     int origin = doc.getCurrentLocation();
     int lineStart = doc._getLineStartPos(origin);
     
-    System.err.println("QuestionStartImmedAfterOpenBrace.indentline called with origin = " + origin + " and lineStart = " +
-                       lineStart);
-    System.err.println("Current line = '" + doc._getCurrentLine() + "'");
+//    System.err.println("***** QSIAOB.indentline called with origin = " + origin + " and lineStart = " +
+//                       lineStart);
+//    System.err.println("[QSIAOB] Current line = '" + doc._getCurrentLine() + "'");
     
     if (lineStart <= 1) return false;  // lineStart < 1 => No preceding line exists!
     
-    try {  // must restore current location
+    try {  // getFirstNonWSCharPos declares BadLocationException
       
       // Get brace for start of line;
-      int bracePos = doc.findEnclosingScalaBracePosWithEquals(lineStart);
-//      System.err.println("Enclosing brace pos = " + bracePos);
+      int bracePos = doc.findEnclosingScalaBracePosWithEquals(lineStart);  // may be ERROR_INDEX
+//      System.err.println("[QSIAOB] Enclosing Scala brace pos = " + bracePos);
+      
+      if (bracePos == ERROR_INDEX) return false;
       
       // Get brace's end of line
       int braceEndLinePos = doc._getLineEndPos(bracePos);
       
       // Get first unshadowed nonWS char after the brace
       int firstNonWSCharPos = doc.getFirstNonWSCharPos(bracePos + 1);  // does not throw BadLocationException
-      if (firstNonWSCharPos == ERROR_INDEX) return true;
-      else if (firstNonWSCharPos < braceEndLinePos) return false; 
+//      System.err.println("[QSIAOB] First NonWS char pos after brace = " + firstNonWSCharPos);
+      return firstNonWSCharPos == ERROR_INDEX || firstNonWSCharPos >= lineStart ; 
       
-      // Get position of next non-WS char (not in comments)        // may throw BadLocationException
-      int nextNonWS = doc.getFirstNonWSCharPos(braceEndLinePos);
-//      System.err.println("Next NonWS pos after brace = " + nextNonWS);
-      
-      // return true if no NonWS character appears between brace and beginning of curr line
-      boolean result = nextNonWS == ERROR_INDEX || nextNonWS >= lineStart;
-//      System.err.println("QuestionStartAfterOpenBrace.indentline returning " + result);
-
-      return result;  
+//      // Get position of next non-WS char (not in comments)        // may throw BadLocationException
+//      int nextNonWS = doc.getFirstNonWSCharPos(braceEndLinePos + 1);
+////      System.err.println(");
+//     
+//      if (0 <= nextNonWS && nextNonWS < doc.getLength()) 
+//        System.err.println("   Containing line = '" + _getCurrentLine(nextNonWS) + "'");
+//      // return true if no NonWS character appears between brace and beginning of curr line
+//      boolean result = nextNonWS == ERROR_INDEX || nextNonWS >= lineStart;
+////      System.err.println("QuestionStartAfterOpenBrace.indentline returning " + result);
+//
+//      return result;  
     }
-    catch (BadLocationException e) { return false; } 
+    catch (BadLocationException e) { return false; /* impossible? */ } 
   }
 }

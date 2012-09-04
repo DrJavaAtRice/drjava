@@ -43,9 +43,8 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 import static edu.rice.cs.drjava.model.AbstractDJDocument.*;
 
-/** Indents the current line in the document to the indent level of the start of the brace ('{', '('} and optinally
-  * "=>"enclosing 
-  * the start of the current line, plus the given suffix.
+/** Indents the current line in the document to the indent level of the start of the brace ('{', '('} (and optionally
+  * {'=', "=>"} at line end) enclosing the start of the current line, plus the given suffix.
   * @version $Id$
   */
 public class ActionStartStmtOfBracePlus extends IndentRuleAction {
@@ -72,15 +71,17 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
     boolean supResult = super.indentLine(doc, reason); // This call does nothing other than record some indent tracing
     int pos = doc.getCurrentLocation();
 //    System.err.println("***** ActionStartStmtOfBracePlus.indentLine called at location " + pos + "  line = '" + 
-//                       doc._getCurrentLine() + "'" + "=> is " + _includeScalaBraces);
+//                       doc._getCurrentLine() + "'" + " includeScalaBraces = " + _includeScalaBraces);
     try {
       // Get bracePos
       int bracePos = (_includeScalaBraces) ? doc.findEnclosingScalaBracePosWithEquals(pos) : 
         doc.findPrevDelimiter(pos, STRICT_OPENING_BRACES);
       
+      if (bracePos == ERROR_INDEX) return supResult;  // will never happen if pos has an enclosing (Scala) brace 
+      
 //      System.err.println("bracePos = " + bracePos);
-      final int indent = doc._getIndentOfCurrStmt(bracePos) + _suffix;
-//      System.err.println("indent = " + doc._getIndentOfCurrStmt(bracePos) + " _suffix = " + _suffix);
+      final int indent = doc._getIndentOfStmt(bracePos) + _suffix;
+//      System.err.println("indent = " + doc._getIndentOfStmt(bracePos) + " _suffix = " + _suffix);
       
       doc.setTab(indent, pos);
     }
