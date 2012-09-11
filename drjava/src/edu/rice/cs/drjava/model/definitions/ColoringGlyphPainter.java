@@ -292,8 +292,9 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
       case HighlightStatus.COMMENTED:
         g.setColor(COMMENTED_COLOR);
         break;
+        /* SINGLE_QUOTE has different termination criteria in Scala */
       case HighlightStatus.SINGLE_QUOTED:
-        g.setColor(SINGLE_QUOTED_COLOR);
+        g.setColor(/* SINGLE_QUOTED_COLOR */ NORMAL_COLOR);
         break;
       case HighlightStatus.DOUBLE_QUOTED:
         g.setColor(DOUBLE_QUOTED_COLOR);

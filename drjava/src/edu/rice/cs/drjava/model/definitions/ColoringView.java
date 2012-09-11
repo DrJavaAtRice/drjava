@@ -205,7 +205,8 @@ public class ColoringView extends PlainView implements OptionConstants {
         g.setColor(COMMENTED_COLOR);
         break;
       case HighlightStatus.SINGLE_QUOTED:
-        g.setColor(SINGLE_QUOTED_COLOR);
+        /* In Scala, SINGLE_QUOTE escapes have different termination criteria */
+        g.setColor(/* SINGLE_QUOTED_COLOR */ NORMAL_COLOR);
         break;
       case HighlightStatus.DOUBLE_QUOTED:
         g.setColor(DOUBLE_QUOTED_COLOR);

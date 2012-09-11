@@ -652,7 +652,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public boolean isShadowed() { return _reduced.isShadowed(); }
   
   /** @return true iff _currentLocation is inside comment or string */
-  public boolean isWeaklyShadowed() { return _reduced.isWeaklyShadowed(); }
+  public boolean isWeaklyShadowed(boolean shadowStrings) { return _reduced.isWeaklyShadowed(shadowStrings); }
   
   /** @return true iff specified pos is inside comment or string. */
   public boolean isShadowed(int pos) {
@@ -730,7 +730,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Searching backwards, finds the position of the first character that is one of the given delimiters, ignoring
-    * phrases bracketed by parens, curly braces, or comments.  The array of delimiters MUST APPEAR IN ASCENDING ORDER 
+    * phrases bracketed by parens, curly braces, or comments.  The search also ignores the contents of strings and
+    * hence cannot find '"" as a delimiter.  The array of delimiters MUST APPEAR IN ASCENDING ORDER 
     * to support using Array.binarySearch.  See below for description of special case treatment of ">" and "=" as
     * delimters.
     * @param pos Position to start from
@@ -742,7 +743,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Searching backwards, finds position of first character preceding pos that is a given delimiter, skipping over 
-    * comments and phrases bracketed in parens or curly braces, if so instructed.  Should only be called from pos inside 
+    * comments and phrases bracketed in parens or curly braces, if so instructed.  The search also ignores the contents 
+    * of strings and hence cannot find '"" as a delimiter.  This method should only be called from pos inside 
     * explict/implicit enclosing brace (??)  If '>' appears in the delims array, this method looks for "=>" instead of 
     * ">" so that the implicit brace opening a case body can be found.  If '=' appears in the delims array, this method 
     * looks for '=' preceded by a character other than '!', '=', or a binary operator and an empty rest of line.  
@@ -787,7 +789,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       /* Invariant: 0 <= i < pos; text[i+1:pos] contains no valid delims */
 
       setCurrentLocation(i);  // reduced model points to i
-      if (isWeaklyShadowed()) {  
+      if (isWeaklyShadowed(true)) {  // includes chars in string literals!
 //            System.err.println(text.charAt(i) + " at pos " + i + " is shadowed");
         i--; continue;  // ignore current char (text[i]) because it is shadowed
       }
@@ -1182,16 +1184,27 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     assert pos >= 0;
     
     int org = getCurrentLocation();
-    int revPos = pos;                          // revised pos created by skipping over paren phrases that span stmt lines
-    int revLineEnd = _getLineEndPos(pos);      // end of the line containing revPos
-    int revLineStart = _getLineStartPos(pos);  // start of the line containing revPos
+    int lineEnd = _getLineEndPos(pos);
     
-    assert revLineEnd >=0 && revLineStart >= 0;
+//    System.err.println("***** _findBeginningOfStmt(" + pos + ") called; Line end is + " + lineEnd + "; Current line is '" + 
+//                       _getCurrentLine(pos) + "'");
     try {
+      // Find last valid char preceding lineEnd
+      int revPos = getPrevNonWSCharPos(lineEnd);     // revised pos created by skipping over paren phrases that span stmt lines
+      if (revPos == ERROR_INDEX) return 0;
+      
+      int revLineEnd = _getLineEndPos(revPos);       // end of the line containing revPos
+      int revLineStart = _getLineStartPos(revPos);      // start of the line containing revPos
+//      System.err.println("[FBOS] revPos = " + revPos + "; revLineEnd = " + revLineEnd + "; revLineStart = " + revLineStart);
+      
+      assert revLineEnd >=0 && revLineStart >= 0;
+      
       /* Find pos of last unmatched brace on this line; all paren phrases must be examined. */
       int lastBracePos = findPrevDelimiter(revLineEnd, CLOSING_BRACES, /* skip paren phrases */ false);
       // lastBracePos may be ERROR_INDEX
+//      System.err.println("[FBOS] lastBracePos = " + lastBracePos);
       
+      // Skip all line spanning paren phrases chained from this line
       while (lastBracePos >= revLineStart) {   // closing brace found on line; lastBracePos >= 0
         // find matching open brace
         setCurrentLocation(lastBracePos + 1);  // always well-defined since there is brace at pos lastBracePos
@@ -1205,11 +1218,16 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           revLineEnd = _getLineEndPos(revLineStart);
         }
         lastBracePos = findPrevDelimiter(revPos, CLOSING_BRACES, /* skip paren phrases */ false);
+//        System.err.println("[FBOS] new lastBracePos = " + lastBracePos);
       }
+      int result = _getFirstNonWSCharPos(revLineStart);
+//      System.err.println("***** FBOS returning " + result);
+      return result;
     } 
-    catch(BadLocationException e) { return _getFirstNonWSCharPos(revLineStart); }
+    catch(BadLocationException e) { /* either getPrevNonWSCharPos(pos) or findPrevDelimter(...) failed; fall through */ }
     finally { setCurrentLocation(org); }
-    return _getFirstNonWSCharPos(revLineStart);
+    // punt by returning the indent of line containing pos
+    return _getFirstNonWSCharPos(lineEnd);
   }
   
   /** Returns the number of blanks in the indent prefix for the start of the statement identified by pos.  Uses a 
@@ -1232,10 +1250,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
  
   /** Returns the number of spaces in the indent prefix of the start of the statement identified by pos) assuming
-    * that this statement is already properly indented.  Assumes pos >= 0.  In Scala, the hard problem is finding
-    * the beginning of a statement since semicolons are generally omitted.  The current statement includes
-    * all statement prefixes connected by '=' (like 'def foo = ').  If current line is empty, use end of preceding 
-    * line as pos.  Assumes beginning of statement is already propertly indented!
+    * that the leading line of this statement is already properly indented.  Assumes pos >= 0.  In Scala, the hard 
+    * problem is finding the beginning of a statement since semicolons are generally omitted.  The current statement 
+    * includes all statement prefixes connected by '=' (like 'def foo = ').  If current line is empty, use end of 
+    * preceding line as pos.
     * @param pos  the current reference position which must identify a non WS char.
     * @param delims  delimiter characters denoting possible ends of preceding statement.
     * @param whitespace  characters to skip when looking for beginning of next statement; must include ' ' and '\n'
@@ -1246,20 +1264,22 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
 //    System.err.println("***** _getIndentOfStmt(" + pos + ") called. Char at this pos = " + _getText(pos, 1).charAt(0));
 //    System.err.println("  Corresponding line = '" + _getCurrentLine(pos) + "'");
+    
     // Check cache
     int lineEnd = _getLineEndPos(pos);  // returns 0 for empty document
-    if (lineEnd == 0) return 0;       // The beginning of the document has an indent of zero.
+    if (lineEnd <= 1) return 0;         // lineEnd = 1 iff first line is empty followed newline; otherwise lineEnd > 1
     
     final Query key = new Query.IndentOfStmt(lineEnd, delims, whitespace);
     final Integer cached = (Integer) _checkCache(key);
     if (cached != null) {
-//        System.err.println("Returning cached value " + cached);
+//        System.err.println("  Returning cached value " + cached);
       return cached;
     }
     
-    /* Searcing backwards from lineEnd, skip over any brace phrase ending on this line that spans multiple lines, errs if
+    /* Searching backwards from lineEnd, skip over any brace phrase ending on this line that spans multiple lines, errs if
      * this line is a continuation and no braces span this line! */
     int stmtStart = _findBeginningOfStmt(lineEnd);
+//    System.err.println("In _getIndentOfStmt, lineEnd = " + lineEnd + " stmtStart = " + stmtStart);
     int indentOfStmt = stmtStart - _getLineStartPos(stmtStart);  // indent of this stmt (excluding possible prelude!)
     
     if (stmtStart == ERROR_INDEX) {  // No beginning found; perhaps line containing pos is blank
@@ -1271,7 +1291,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       catch(BadLocationException e) { return 0; } // document preceding pos is empty
     }
     
-//    System.err.println("Plausible first char pos in stmt at pos " + pos + " is " + stmtStart);
+//    System.err.println("  In _getIndentOfStmt, plausible first char pos in stmt at pos " + pos + " is " + stmtStart);
     
     /* Find the EnclosingBraceOrPrevSemicolon of this stmt.  The braces setincludes '=' and "=>". */
     try {
@@ -1662,9 +1682,18 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         int lastKeywordCharPos = getPrevNonWSCharPos(newPos);
         // TODO: ensure character preceding keyword text is a delimiter
         if (lastKeywordCharPos >= 0) 
-          result = getText(lastKeywordCharPos - 1, 2).equals("if") || getText(lastKeywordCharPos - 2, 3).equals("for")
-            || getText(lastKeywordCharPos - 4, 5).equals("while");
-//        System.err.println("lastKeywordCharPos = " + lastKeywordCharPos + " keywordText = '" + 
+          if (getText(lastKeywordCharPos - 4, 5).equals("while")) { 
+          // found "while", but it may be part of "do { ... } while (...)" loop; check for preceding "do { ... }"
+          int prevKeywordCharPos = findPrevDelimiter(lastKeywordCharPos - 4, ALPHANUMERIC);
+//          System.err.println("[ITIFW] preceding keyword = '" + getText(prevKeywordCharPos - 2, 3) + "'");
+          result = ! getText(prevKeywordCharPos - 2, 3).equals(" do");
+          // Note: "do" must be preceded by a space if embedded in properly indented program text
+          // TODO?  fix the corner case when "do" appears unembedded in some interpreted statement sequence
+        }                                                        
+        else
+          result = getText(lastKeywordCharPos - 1, 2).equals("if") || getText(lastKeywordCharPos - 2, 3).equals("for");
+        
+//        System.err.println("[ITIFW] lastKeywordCharPos = " + lastKeywordCharPos + " keywordText = '" + 
 //                           getText(lastKeywordCharPos - 5, 6) + "'"  + " result = " + result);
       }
       catch(BadLocationException ble) { /* fall through */ }
@@ -1867,7 +1896,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return getFirstNonWSCharPos(pos, DEFAULT_WHITESPACE, acceptComments);
   }
   
-  /** Finds the position of the first non-whitespace character after pos ON THE CURRENT LINE. If acceptComments 
+  /** Finds the position of the first non-whitespace character after pos ON THE CURRENT LINE.  If acceptComments 
     * is false, skips chars in comments.  Cannot actually throw a BadLocationException.  Returns ERROR_INDEX if 
     * no such char exists.
     * TODO: change to _getFirstNonWSCharPos by swallowing impossible BadLocationException
@@ -1881,6 +1910,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     
+//    System.err.println("***** getFirstNonWSChaPos called at pos " + pos + "; acceptComments = " + acceptComments);
+    
     // Check cache
     final Query key = new Query.FirstNonWSCharPos(pos, whitespace, acceptComments);
     final Integer cached = (Integer) _checkCache(key);
@@ -1893,7 +1924,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //    if (origPos != pos) setCurrentLocation(pos);  // Move reduced model to location pos
     try {
       int i = pos;
-      int result = 0;  // javac requires initialization
+      int result = ERROR_INDEX; // default value if no valid char is found
       // Walk forward from specificed position until Non WS char is found or end of document is reached
       // Invariant: i <= endPos && i >= pos &&  no char in document(pos:i) 
       while (i < docLen) {
@@ -1906,7 +1937,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         // Found a non whitespace character
         // Move reduced model to walker's location for subsequent processing
         setCurrentLocation(i);  // reduced model points to location i
-        result = i;
+//        System.err.println("In [GFNWSCP], found Non WS char at pos " + i + "; char is '" + _getText(i, 1).charAt(0) + "'");
         
         // TODO: is this version faster than actual code?
 //        // Check if non-ws char is within comment and if we want to ignore them.
@@ -1924,18 +1955,24 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //          continue;
 //        }
         
-        // Check if non-ws char is within comment, ignore it
-        if (! acceptComments && isWeaklyShadowed()) {
-          i++;  // TODO: increment i to skip over entire comment
-          continue;
+        if (acceptComments || ! isWeaklyShadowed(false)) { // found a valid char, cache this result and return it
+          result = i;
+          break;
         }
-        
-        // Return position of matching char
-        _storeInCache(key, result, result + 1);  // Cached answer depends only on text(0:result]
-//          _setCurrentLocation(origPos);
-        return result;
+     
+        // Since char is invalid, update i and continue
+//        System.err.println("In [GFNWSCP], char at pos " + i + " is shadowed.");
+        i++;  // TODO: increment i to skip over entire comment
       }
       
+      assert i < docLen || result == ERROR_INDEX;
+      
+      // cache and return result
+      _storeInCache(key, result, result + 1);  // Cached answer depends only on text(0:result]
+//      println("***** getFirstNonWSCharPos returning " + result + "; char is '" + _getText(result, 1).charAt(0) + "'");
+      return result;
+    }
+    catch(Exception e) {  // Must restore origPos if any form of exception occurs
       // No matching char found in document
       _storeInCache(key, ERROR_INDEX, Integer.MAX_VALUE);  // Any change to the document invalidates this result!
 //          _setCurrentLocation(origPos);
@@ -1979,7 +2016,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //        reducedPos = i;
 //        
 //        // Check if non-ws char is within comment, ignore it
-//        if (! acceptComments && isWeaklyShadowed()) {
+//        if (! acceptComments && isWeaklyShadowed(false)) {
 //          i++;  // TODO: increment i to skip over entire comment
 //          continue;
 //        }

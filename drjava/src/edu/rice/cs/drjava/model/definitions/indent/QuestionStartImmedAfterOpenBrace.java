@@ -63,17 +63,15 @@ public class QuestionStartImmedAfterOpenBrace extends IndentRuleQuestion {
     int origin = doc.getCurrentLocation();
     int lineStart = doc._getLineStartPos(origin);
     
-//    System.err.println("***** QSIAOB.indentline called with origin = " + origin + " and lineStart = " +
-//                       lineStart);
-//    System.err.println("[QSIAOB] Current line = '" + doc._getCurrentLine() + "'");
-    
+//    System.err.println("[QSIAOB] called at location " + origin + "; Current line = '" + doc._getCurrentLine() + "'");
+   
     if (lineStart <= 1) return false;  // lineStart < 1 => No preceding line exists!
     
     try {  // getFirstNonWSCharPos declares BadLocationException
       
       // Get brace for start of line;
       int bracePos = doc.findEnclosingScalaBracePosWithEquals(lineStart);  // may be ERROR_INDEX
-//      System.err.println("[QSIAOB] Enclosing Scala brace pos = " + bracePos);
+//      System.err.println("[QSIAOB] Enclosing Scala brace pos = " + bracePos + "; lineStart = " + lineStart);
       
       if (bracePos == ERROR_INDEX) return false;
       

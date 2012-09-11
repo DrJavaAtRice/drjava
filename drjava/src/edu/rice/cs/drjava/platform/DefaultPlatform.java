@@ -80,7 +80,7 @@ class DefaultPlatform implements PlatformSupport {
     *
     * @param about the Action associated with openning the About dialog
     * @param prefs the Action associated with openning the Preferences dialog
-    * @param quit  the Action associated with quitting the DrJava application
+    * @param quit  the Action associated with quitting the DrScala application
     */
   public void afterUISetup(Action about, Action prefs, Action quit) { }
 
@@ -217,15 +217,15 @@ class DefaultPlatform implements PlatformSupport {
   /** @return true if file extensions can be registered and unregistered. */
   public boolean canRegisterFileExtensions() { return false; }
   
-  /** Register .drjava and .djapp file extensions.
+  /** Register .drscala and .dsapp file extensions.
     * @return true if registering succeeded */
   public boolean registerDrJavaFileExtensions() { return false; }
 
-  /** Unregister .drjava and .djapp file extensions.
+  /** Unregister .drscala and .dsapp file extensions.
     * @return true if unregistering succeeded */
   public boolean unregisterDrJavaFileExtensions() { return false; }
   
-  /** @return true if .drjava and .djapp file extensions are registered. */
+  /** @return true if .drscala and .dsapp file extensions are registered. */
   public boolean areDrJavaFileExtensionsRegistered() { return false; }
   
   /** Register .java file extension.

@@ -82,7 +82,7 @@ public class AboutDialog extends JDialog implements ActionListener {
   private final JTabbedPane _tabs = new JTabbedPane();
   
   public AboutDialog(JFrame owner) {
-    super(owner, "About DrJava", true); // (changed to non-modal for now)
+    super(owner, "About DrScala", true); // (changed to non-modal for now)
 
     buildGUI(getContentPane());
     getRootPane().setDefaultButton(_okButton);
@@ -109,7 +109,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 
   public void buildGUI(Container cp) {
     cp.setLayout(new BorderLayout());
-    JLabel drjava = createImageLabel(DRJAVA,JLabel.LEFT);
+    JLabel drjava = /* createImageLabel(DRJAVA,JLabel.LEFT) */ new JLabel("DrScala");
     if (drjava != null) {
       drjava.setBorder(new CompoundBorder(new EmptyBorder(5,5,5,5), drjava.getBorder()));
       drjava.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -136,6 +136,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     LICENSE = getLicense();
     if (LICENSE != null) addTab(_tabs,"DrScala License",createTextScroller(LICENSE));
     
+    addTab(_tabs,"Scala License",createTextScroller(SCALA_LICENSE));
     addTab(_tabs,"DynamicJava License",createTextScroller(DYADE_LICENSE));
     addTab(_tabs,"Eclipse License",createTextScroller(ECLIPSE_LICENSE));
     addTab(_tabs,"System Properties",createSysPropTab());
@@ -358,8 +359,40 @@ public class AboutDialog extends JDialog implements ActionListener {
     "SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\n" + 
     "This software is Open Source Initiative approved Open Source Software.\n" + 
     "Open Source Initative Approved is a trademark of the Open Source Initiative.\n";
+  
   private static String LICENSE;
   private static boolean initLicense = false;
+  
+  public static final String SCALA_LICENSE =
+    "SCALA LICENSE\n\n" +
+    "Copyright (c) 2002-2011 EPFL, Lausanne, unless otherwise specified.\n" +
+    "All rights reserved.\n\n" +
+    "This software was developed by the Programming Methods Laboratory of the\n" +
+    "Swiss Federal Institute of Technology (EPFL), Lausanne, Switzerland.\n\n" +
+    "Permission to use, copy, modify, and distribute this software in source\n" +
+    "or binary form for any purpose with or without fee is hereby granted,\n" +
+    "provided that the following conditions are met:\n\n" +
+    "   1. Redistributions of source code must retain the above copyright\n" +
+    "      notice, this list of conditions and the following disclaimer.\n\n" +
+    "   2. Redistributions in binary form must reproduce the above copyright\n" +
+    "      notice, this list of conditions and the following disclaimer in the\n" +
+    "      documentation and/or other materials provided with the distribution.\n" +
+    
+    "   3. Neither the name of the EPFL nor the names of its contributors\n" +
+    "      may be used to endorse or promote products derived from this\n" +
+    "      software without specific prior written permission.\n\n\n" +
+    "THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND\n" +
+    "ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE\n" +
+    "IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE\n" +
+    "ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE\n" +
+    "FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL\n" +
+    "DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR\n" +
+    "SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER\n" +
+    "CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT\n" +
+    "LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY\n" +
+    "OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF\n" +
+    "SUCH DAMAGE.";
+
   public static final String DYADE_LICENSE =
     "DynamicJava - Copyright \u00a9 1999 Dyade\n\nPermission is hereby granted," + 
     " free of charge, to any person obtaining a copy of this software and associated" + 
@@ -375,6 +408,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     " OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n" + 
     "Except as contained in this notice, the name of Dyade shall not be used in advertising or otherwise" + 
     " to promote the sale, use or other dealings in this Software without prior written authorization from Dyade.";
+  
   public static final String ECLIPSE_LICENSE =
     "Eclipse Public License - v 1.0\n"+
     "\n" +

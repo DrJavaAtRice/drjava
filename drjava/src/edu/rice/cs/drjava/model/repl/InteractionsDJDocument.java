@@ -276,7 +276,8 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
             g.setFont(MAIN_FONT);
           }
           else if (p.second().equals(InteractionsDocument.CHARACTER_RETURN_STYLE)) {
-            g.setColor(SINGLE_QUOTED_COLOR);
+            /* SINGLE_QUOTE escape has different termination criteria in Scala */
+            g.setColor(/* SINGLE_QUOTED_COLOR*/ NORMAL_COLOR);
             g.setFont(MAIN_FONT);
           }
           else return false; /* Normal text color */ 

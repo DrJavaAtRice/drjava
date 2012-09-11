@@ -63,9 +63,9 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion {
     int origin = doc.getCurrentLocation();
     int lineStart = doc._getLineStartPos(origin);
     
-//    System.err.println("QuestionStartAfterOpenBrace.indentline called with origin = " + origin + " and lineStart = " +
+//    System.err.println("***** QuestionStartAfterOpenBrace.applyRule called with origin = " + origin + " and lineStart = " +
 //                       lineStart);
-//    System.err.println("Current line = '" + doc._getCurrentLine() + "'");
+//    System.err.println("   Current line = '" + doc._getCurrentLine() + "'");
     
     if (lineStart <= 1) return false;  // lineStart < 1 => No preceding line exists!
     
@@ -73,14 +73,17 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion {
       
       // Get brace for start of line;
       int bracePos = doc.findEnclosingScalaBracePosWithEquals(lineStart);
-//      System.err.println("Enclosing brace pos = " + bracePos);
+      
+//      System.err.println("[QSAOB] Enclosing brace pos = " + bracePos);
+      
+      if (bracePos == ERROR_INDEX) return false;
       
     // Get brace's end of line
       int braceEndLinePos = doc._getLineEndPos(bracePos);
       
       // Get position of next non-WS char (not in comments)
       int nextNonWS = doc.getFirstNonWSCharPos(braceEndLinePos + 1);  // 
-//      System.err.println("Next NonWS pos after brace = " + nextNonWS);
+//      System.err.println("[QSAOB] Next NonWS pos after brace = " + nextNonWS);
       
       // return true if no NonWS character appears between brace and beginning of curr line
       boolean result = nextNonWS == ERROR_INDEX || nextNonWS >= lineStart;

@@ -432,16 +432,31 @@ public class ReducedModelComment extends AbstractReducedModel {
     return getStateAtCurrent() != FREE /* || curToken.isLineComment() || curToken.isBlockCommentStart() */; 
   }
   
-  /** @return true if the _cursor is within a block or line comment including opening / char but excluding the newline
-    * at the end of a wing comment. */
-  public boolean isWeaklyShadowed() { 
-    return isShadowed() && (getStateAtCurrent() == INSIDE_BLOCK_COMMENT || ! _cursor.current().isNewline())
-      || isOpenComment(); }
+  /** @return true if the _cursor is within a block comment, line comment,  i(ncluding opening '/' char in comments) and
+    * optionally a string (including the opening and closing '"' chars).  Note: the newline at the end of a wing comment
+    * is NOT weakly shadowed. 
+    * @param shadowStrings flag that tells this method to respect double-quote shadowing when true*/
+  public boolean isWeaklyShadowed(boolean shadowStrings) { 
+    return (isShadowed() && /* exclude newline at end of wing comment */
+            (getStateAtCurrent() == INSIDE_BLOCK_COMMENT || ! _cursor.current().isNewline())  && 
+            /* conditionally esclude chars in strings */ (getStateAtCurrent() != INSIDE_DOUBLE_QUOTE || shadowStrings)
+              || isOpenComment() || (isDoubleQuote() && shadowStrings));  // open braces for comments and strings
+  }
   
+  /** @return true if the cursor is pointing to an open comment bracee (either block or wing). */
   public boolean isOpenComment() {
-    if (_cursor.atStart() || ! _cursor.atEnd()) return false;
+    if (_cursor.atStart() || _cursor.atEnd()) return false;  // currentLocation is outside document!
     ReducedToken curToken = _cursor.current();
     return curToken.isCommentStart();
+  }
+  
+  /** @return true if the cursor is pointing to an DoubleQuote brace.  Patterned after isOpenComment.  The isWeaklyShadowedMethod
+    * depends on this one.*/
+  public boolean isDoubleQuote() {
+//    System.err.println("isDoubleQuote() called.  Current token is '" + _cursor.current() + "'");
+    if (_cursor.atStart() || _cursor.atEnd()) return false;
+    ReducedToken curToken = _cursor.current();
+    return curToken.isDoubleQuote();
   }
   
   /* The walker design is an ugly kludge.  The reduced model consists of two separate TokenLists, a reduced "comment"

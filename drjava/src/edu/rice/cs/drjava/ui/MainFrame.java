@@ -6308,16 +6308,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _setUpAction(_breakpointsPanelAction, "Breakpoints", "Display the breakpoints panel");
     }
     
-    _setUpAction(_helpAction, "Help", "Show documentation on how to use DrJava");
-    _setUpAction(_quickStartAction, "Help", "View Quick Start Guide for DrJava");
-    _setUpAction(_aboutAction, "About", "About DrJava");
+    _setUpAction(_helpAction, "Help", "Show documentation on how to use DrScala");
+    _setUpAction(_quickStartAction, "Help", "View Quick Start Guide for DrScala");
+    _setUpAction(_aboutAction, "About", "About DrScala");
     _setUpAction(_checkNewVersionAction, "Check for New Version", "Find", "Check for New Version");
     _checkNewVersionAction.setEnabled(DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_ALLOWED));
 //    _setUpAction(_drjavaSurveyAction, "Send System Information", "About", 
 //                 "Send anonymous system information to DrJava developers");
-    _setUpAction(_errorsAction, "DrJava Errors", "drjavaerror", "Show a window with internal DrJava errors");
+    _setUpAction(_errorsAction, "DrScala Errors", "drjavaerror", "Show a window with internal DrScala errors");
     _setUpAction(_forceQuitAction, "Force Quit", "Stop", "Force DrJava to quit without cleaning up");
-    _setUpAction(_generateCustomDrJavaJarAction, "Generate Custom drjava.jar...",
+    _setUpAction(_generateCustomDrJavaJarAction, "Generate Custom drscala.jar...",
                  "<html>Generate a custom drjava.jar file that includes additional files,<br>"+
                  "e.g. libraries or resources.</html>");
   }

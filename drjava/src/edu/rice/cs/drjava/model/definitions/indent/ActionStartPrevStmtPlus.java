@@ -84,7 +84,10 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     
     // Find start of current line
     int lineStart = doc._getLineStartPos(orig);  
-    if (lineStart <= 0) return supResult;   
+    if (lineStart <= 0) {  // No preceding line (with valid program text) exists; indent is 0
+      doc.setTab(0, orig);
+      return supResult;
+    }
     int indent = doc._getIndentOfStmt(lineStart - 1);  // ASSUMES PREV LINE IS PART OF PREV STMT
     
 //    System.err.println("[ASPSP]Indent of prev stmt '" + doc._getCurrentLine(lineStart - 1) + "' = " + indent + 

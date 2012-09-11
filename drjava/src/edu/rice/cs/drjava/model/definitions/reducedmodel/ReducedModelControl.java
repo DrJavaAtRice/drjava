@@ -119,7 +119,7 @@ public class ReducedModelControl implements BraceReduction {
   public boolean isShadowed() { return _rmc.isShadowed(); }
   
   /** Determines if current token is either shadowed or an opening comment brace ("//" or "/*"). */
-  public boolean isWeaklyShadowed() { return _rmc.isWeaklyShadowed(); }
+  public boolean isWeaklyShadowed(boolean shadowStrings) { return _rmc.isWeaklyShadowed(shadowStrings); }
   
   /** Finds the closing brace that matches the next significant brace iff that brace is an open brace. Fails when 
     * brace is shadowed. </P>
