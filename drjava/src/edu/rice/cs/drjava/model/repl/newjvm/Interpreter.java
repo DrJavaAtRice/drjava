@@ -4,6 +4,7 @@ import java.io.*;
 import scala.tools.nsc.interpreter.ILoop;
 import scala.tools.nsc.Settings;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.HashSet;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -157,19 +158,35 @@ public class Interpreter {
       iLoop.process(s);
     }
   });
-  
-  /*
-   * NOTE: currently, all of the construction takes place prior to the constructor call.
-   *       however, we may need to use the other constructors for unit testing, etc (?)
-   *       so we're just leaving all of the constructor calls in InterpreterJVM as they
-   *       are for now.  BUT it may be possible to eliminate these alternate constructors
-   *       altogether -- and if this is the case, then it may also be possible to pare down 
-   *       InterpreterJVM a good deal
-   */
+
+  // as far as I know, the first three constructors are unused in DrScala
   public Interpreter(Options opt) { this(); }
   public Interpreter(Options o,TypeContext typeC,RuntimeBindings b) { this(); }
   public Interpreter(Options opt, ClassLoader loader) { this(); }
-  public Interpreter() {  }
+
+  public Interpreter() {}
+
+  private final HashSet<String> addedPaths = new HashSet<String>();
+  public void addCP(String pathType, String path) {
+//    System.out.print(pathType + ": " + path);
+    // because a new Interpreter is instantiated upon EVERY compilation, we 
+    // only need to add a given path once
+    if (addedPaths.add(path)) {
+//      System.out.println("...(NEW ENTRY)");
+//      System.out.println("sending command, ':cp " + path + "', to the REPL...");
+      String res = this._interpret(":cp " + path, true);
+      if (res.contains("doesn't seem to exist"))
+         System.err.println("ERROR: unable to add cp, '" + path + "' to the Interpreter classpath.");
+//      System.out.println("result: " + res);
+    }
+//    else
+//      System.out.println("...(ALREADY ADDED)");
+  }
+  public void addExtraCP(String path) { addCP("addExtraCP", path); }
+  public void addProjectCP(String path) { addCP("addProjectCP", path); }
+  public void addBuildDirectoryCP(String path) { addCP("addBuildDirectoryCP", path); }
+  public void addProjectFilesCP(String path) { addCP("addProjectFilesCP", path); }
+  public void addExternalFilesCP(String path) { addCP("addExternalFilesCP", path); }
   
   /** Initialize the interpreter for use in the interactions pane. */
   private void _init() {
@@ -187,7 +204,7 @@ public class Interpreter {
       /* should never happen. */
       throw new UnexpectedException(ie);
     }
-     
+
     // Perform a trivial computation, forcing it to load most of its classes.
     inputStrings.add("val _$$$$$__$$$$$$_ = 2+2\n");
     /* this call blocks until the first line of the return has been received */
@@ -210,6 +227,18 @@ public class Interpreter {
     if (! Utilities.TEST_MODE) _init();
   }
 
+  /**
+   * Public interface for the interpreter; this is separated from the internal 
+   * implementation ('_interpret') because 'colon commands' are passed to that
+   * method in order to augment the REPL classpath.
+   */
+  public String interpret(String input) throws InterpreterException {
+    Matcher match = scalaColonCmd.matcher(input);
+    if (match.matches()) 
+      return "Error:  Scala interpreter colon commands not accepted.\n";
+    return this._interpret(input, false);
+  }
+
   /** The primary method of the Scala Interpreter class: returns whatever String is returned 
     * by ILoop in response to input code, or "" if there is no return.
     * 
@@ -224,12 +253,7 @@ public class Interpreter {
     * there is a potential race condition on internal actions of this method if it is called from 
     * multiple threads.
     */
-  public synchronized String interpret(String input) throws InterpreterException {
-
-    Matcher match = scalaColonCmd.matcher(input);
-
-    if (match.matches()) return "Error:  Scala interpreter colon commands not accepted.\n";
-    
+  public synchronized String _interpret(String input, boolean addingCP) {
     // Perform deferred initialization if necessary
     if (! _isInitialized) _init(); 
 
@@ -237,7 +261,7 @@ public class Interpreter {
       /* clear out any leftovers -- there should never be any, however */
       outputStrings.clear();
       /* write the current line of code into the inputStrings queue */
-      inputStrings.add(input + '\n');
+      inputStrings.add(addingCP? input : (input + '\n'));
       /* this call blocks until the first line of the return has been received */
       String s = outputStrings.take();
       

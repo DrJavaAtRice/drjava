@@ -133,6 +133,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _interpreterOptions = new InteractionsPaneOptions();
 
     //_defaultInterpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
+    //_defaultInterpreter = new Interpreter();
+    //_defaultInterpreter = new Interpreter(_classPathManager);
     _defaultInterpreter = new Interpreter();
 
     _interpreters = new ConcurrentHashMap<String,Interpreter>();
@@ -622,11 +624,26 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   public void junitJVMReady() { }
   
   // --------- Class path methods ----------
-  public void addExtraClassPath(File f) { _classPathManager.addExtraCP(f); }
-  public void addProjectClassPath(File f) { _classPathManager.addProjectCP(f); }
-  public void addBuildDirectoryClassPath(File f) { _classPathManager.addBuildDirectoryCP(f); }
-  public void addProjectFilesClassPath(File f) { _classPathManager.addProjectFilesCP(f); }
-  public void addExternalFilesClassPath(File f) { _classPathManager.addExternalFilesCP(f); }
+  public void addExtraClassPath(File f) { 
+      _classPathManager.addExtraCP(f); 
+      _defaultInterpreter.addExtraCP(f.getPath());
+  }
+  public void addProjectClassPath(File f) { 
+      _classPathManager.addProjectCP(f); 
+      _defaultInterpreter.addProjectCP(f.getPath());
+  }
+  public void addBuildDirectoryClassPath(File f) { 
+      _classPathManager.addBuildDirectoryCP(f); 
+      _defaultInterpreter.addBuildDirectoryCP(f.getPath()); 
+  }
+  public void addProjectFilesClassPath(File f) { 
+      _classPathManager.addProjectFilesCP(f); 
+      _defaultInterpreter.addProjectFilesCP(f.getPath()); 
+  }
+  public void addExternalFilesClassPath(File f) { 
+      _classPathManager.addExternalFilesCP(f); 
+      _defaultInterpreter.addExternalFilesCP(f.getPath()); 
+  }
   public Iterable<File> getClassPath() {
     // need to make a serializable snapshot
     return IterUtil.snapshot(_classPathManager.getClassPath());
