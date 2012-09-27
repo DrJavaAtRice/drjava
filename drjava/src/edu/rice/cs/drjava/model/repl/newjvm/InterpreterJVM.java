@@ -133,9 +133,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _interpreterOptions = new InteractionsPaneOptions();
 
     //_defaultInterpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
-    //_defaultInterpreter = new Interpreter();
-    //_defaultInterpreter = new Interpreter(_classPathManager);
     _defaultInterpreter = new Interpreter();
+    //_defaultInterpreter = new Interpreter(_classPathManager);
+    //_defaultInterpreter = new Interpreter(_interpreterLoader);
 
     _interpreters = new ConcurrentHashMap<String,Interpreter>();
     _busyInterpreters = Collections.synchronizedSet(new HashSet<Interpreter>());
@@ -409,7 +409,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       if (isInterpreterName(name)) {
         throw new IllegalArgumentException("'" + name + "' is not a unique interpreter name");
       }
-      Interpreter i = new Interpreter(_interpreterOptions, _interpreterLoader);
+//      Interpreter i = new Interpreter(_interpreterOptions, _interpreterLoader);
+      Interpreter i = new Interpreter();
       putInterpreter(name, i);
     }
   }
@@ -466,7 +467,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       if (thisVal != null) { bindings = new RuntimeBindings(bindings, c, thisVal); }
       bindings = new RuntimeBindings(bindings, vars, IterUtil.asIterable(localVars));
       
-      Interpreter i = new Interpreter(_interpreterOptions, ctx, bindings);
+//      Interpreter i = new Interpreter(_interpreterOptions, ctx, bindings);
+      Interpreter i = new Interpreter();
 //      _environments.put(name, Pair.make(ctx, bindings));
       putInterpreter(name, i);
     }
@@ -626,23 +628,23 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   // --------- Class path methods ----------
   public void addExtraClassPath(File f) { 
       _classPathManager.addExtraCP(f); 
-      _defaultInterpreter.addExtraCP(f.getPath());
+      _defaultInterpreter.addCP("addExtraCP", f.getPath());
   }
   public void addProjectClassPath(File f) { 
       _classPathManager.addProjectCP(f); 
-      _defaultInterpreter.addProjectCP(f.getPath());
+      _defaultInterpreter.addCP("addProjectCP", f.getPath());
   }
   public void addBuildDirectoryClassPath(File f) { 
       _classPathManager.addBuildDirectoryCP(f); 
-      _defaultInterpreter.addBuildDirectoryCP(f.getPath()); 
+      _defaultInterpreter.addCP("addBuildDirectoryCP", f.getPath()); 
   }
   public void addProjectFilesClassPath(File f) { 
       _classPathManager.addProjectFilesCP(f); 
-      _defaultInterpreter.addProjectFilesCP(f.getPath()); 
+      _defaultInterpreter.addCP("addProjectFilesCP", f.getPath()); 
   }
   public void addExternalFilesClassPath(File f) { 
       _classPathManager.addExternalFilesCP(f); 
-      _defaultInterpreter.addExternalFilesCP(f.getPath()); 
+      _defaultInterpreter.addCP("addExternalFilesCP", f.getPath()); 
   }
   public Iterable<File> getClassPath() {
     // need to make a serializable snapshot

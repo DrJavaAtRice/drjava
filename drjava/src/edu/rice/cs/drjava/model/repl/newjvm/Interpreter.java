@@ -19,7 +19,7 @@ import edu.rice.cs.util.swing.Utilities;
 /**
  * Class for providing interpretation services in the Interactions pane. Code
  * submitted for interpretation (from the Interactions pane) is submitted to
- * an "ILoop" instance, which interprets the code and returns a String result.
+ * a "DrScalaILoop" instance, which interprets the code and returns a String result.
  * 
  * Since stderr and stdout are redirected to point to the Interactions pane and
  * the DrJava console, "print" statements called from within ILoop, in the course
@@ -33,26 +33,10 @@ import edu.rice.cs.util.swing.Utilities;
  * queue, after which the output queue is immediately polled for ILoop's return 
  * content.
  *
- * yes, the dummy Reader/OutputStream instances are very ugly in terms of readability
- * ...but there is nothing to read, since the behavior of each of these methods is 
- * identical: just to print out a message alerting us that it has been called. so all
- * of the dummy methods are defined in single lines.
- * 
  * TODO: 
  *       1)  error handling (I'm basically just printing the stack traces of any 
  *       exceptions caught, but we should probably be trying to restart calls in 
  *       some places -- particularly any interrupted blocking calls on blocking queues)
- * 
- *       2)  a) should we use LinkedBlockingQueue's instead of an ArrayBlockingQueue's,
- *           to avoid fixing the capacity of the input/outputStrings queues?
- *           
- *           b) if NOT, how do we determine a "good" capacity for an ArrayBlockingQueue?
- *           (personally, I am fine with just plucking the number 100 out of thin air, since
- *           the capacity of "inputStrings" should never exceed 1 and that of "outputStrings"
- *           would never exceed 3 or 4, as far as I can tell, and is emptied at the beginning
- *           of each call to "interpret" in any case -- and 100 pointers is not exactly going 
- *           to tax the heap)
- *
  */
 public class Interpreter {
 
@@ -152,41 +136,23 @@ public class Interpreter {
   /* thread in which ILoop runs */
   private final Thread _iLoopThread = new Thread(new Runnable(){
     public void run() {
-      ILoop iLoop = new ILoop(_iLoopReader, _iLoopWriter);
+      DrScalaILoop iLoop = new DrScalaILoop(_iLoopReader, _iLoopWriter);
       Settings s = new Settings();
       s.processArgumentString("-usejavacp");
       iLoop.process(s);
     }
   });
 
-  // as far as I know, the first three constructors are unused in DrScala
-  public Interpreter(Options opt) { this(); }
-  public Interpreter(Options o,TypeContext typeC,RuntimeBindings b) { this(); }
-  public Interpreter(Options opt, ClassLoader loader) { this(); }
-
   public Interpreter() {}
 
-  private final HashSet<String> addedPaths = new HashSet<String>();
-  public void addCP(String pathType, String path) {
+  /** method for adding a classpath element to the REPL classpath. */
+  public synchronized void addCP(String pathType, String path) {
 //    System.out.print(pathType + ": " + path);
-    // because a new Interpreter is instantiated upon EVERY compilation, we 
-    // only need to add a given path once
-    if (addedPaths.add(path)) {
-//      System.out.println("...(NEW ENTRY)");
-//      System.out.println("sending command, ':cp " + path + "', to the REPL...");
-      String res = this._interpret(":cp " + path, true);
-      if (res.contains("doesn't seem to exist"))
-         System.err.println("ERROR: unable to add cp, '" + path + "' to the Interpreter classpath.");
-//      System.out.println("result: " + res);
-    }
-//    else
-//      System.out.println("...(ALREADY ADDED)");
+    String res = this._interpret(":cp " + path, true);
+    if (res.contains("doesn't seem to exist"))
+      System.err.println("ERROR: unable to add cp, '" + path +
+        "' to the Interpreter classpath.");
   }
-  public void addExtraCP(String path) { addCP("addExtraCP", path); }
-  public void addProjectCP(String path) { addCP("addProjectCP", path); }
-  public void addBuildDirectoryCP(String path) { addCP("addBuildDirectoryCP", path); }
-  public void addProjectFilesCP(String path) { addCP("addProjectFilesCP", path); }
-  public void addExternalFilesCP(String path) { addCP("addExternalFilesCP", path); }
   
   /** Initialize the interpreter for use in the interactions pane. */
   private void _init() {
@@ -228,7 +194,7 @@ public class Interpreter {
   }
 
   /**
-   * Public interface for the interpreter; this is separated from the internal 
+   * Public interface for the interpretation; this is separated from the internal 
    * implementation ('_interpret') because 'colon commands' are passed to that
    * method in order to augment the REPL classpath.
    */
