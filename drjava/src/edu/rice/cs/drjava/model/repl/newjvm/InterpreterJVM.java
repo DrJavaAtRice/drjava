@@ -648,7 +648,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   }
   public Iterable<File> getClassPath() {
     // need to make a serializable snapshot
-//    return IterUtil.snapshot(_classPathManager.getClassPath());
-    return null;
+    return IterUtil.snapshot(_classPathManager.getClassPath());
+//    return null;
   }
 }

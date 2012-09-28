@@ -164,7 +164,11 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     doCompile(doc1, file1);
     System.err.println("After loading " + file1 + ", class Path is now: " + _model.getInteractionsClassPath());
     assertTrue("class file for file1 exists", new File(dir1, "DrScalaTestFoo.class").exists());
-    assertEquals("interactions result", "\"DrScalaTestFoo\"", interpret("new DrScalaTestFoo().getClass().getName()"));
+
+    // example format of REPL result: res0: java.lang.String = DrScalaTestFoo
+    String pattern = "\\s*res[0-9]+: java\\.lang\\.String = DrScalaTestFoo\\s*";
+    String result = interpret("new DrScalaTestFoo().getClass().getName()");
+    assertTrue("interactions result matches pattern", result.matches(pattern));
     
     // Add directory 1 to extra classpath and close doc1
     Vector<File> cp = new Vector<File>();
@@ -178,11 +182,11 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     OpenDefinitionsDocument doc2 = setupDocument(BAZ_TEXT);
     File dir2 = makeCanonical(new File(_tempDir, "dir2"));
     dir2.mkdir();
-    File file2 = makeCanonical(new File(dir2, "TestFile1.scala"));
+    File file2 = makeCanonical(new File(dir2, "TestFile2.scala"));
     doCompile(doc2, file2);
     
     // Ensure that Baz can use the Foo class from extra classpath
-    assertEquals("interactions result", "z: java.lang.Class[_ <: object DrScalaTestBaz] = class DrScalaTestBaz$", 
+    assertEquals("interactions result", "z: java.lang.String = DrScalaTestBaz$", 
                  interpret("val z = DrScalaTestBaz.getClass().getName()"));
     
     // Ensure that static fields can be seen
@@ -224,7 +228,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _log.log("Starting testInteractionsCanSeeChangedClass");
     
     final String text_before = "class DrScalaTestFoo { def m():Int = { ";
-    final String text_after = " }";
+    final String text_after = " }}";
     final int num_iterations = 3;
     File file;
     OpenDefinitionsDocument doc;
@@ -504,11 +508,13 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     Utilities.clearEventQueue();
     _model.resetInteractionsClassPath();
     
+    // example format of REPL result: res0: java.lang.String = DrScalaTestFoo
+    String pattern = "\\s*res[0-9]+: java\\.lang\\.String = DrScalaTestFoo\\s*";
     result = interpret("new DrScalaTestFoo().getClass().getName()");
-    
+
     // Now it should be on the classpath
-    assertEquals("interactions result", "\"DrScalaTestFoo\"", result);
-    
+    assertTrue("interactions result matches pattern", result.matches(pattern));
+
     // Rename directory back to clean up
     tempDir = makeCanonical(new File(tempPath + "a"));
     tempDir.renameTo(makeCanonical(new File(tempPath)));
@@ -536,7 +542,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
-        dim.addInterpreter("Starting testInterpreter");
+//        dim.addInterpreter("Starting testInterpreter");
+        dim.addInterpreter("testInterpreter");
         dim.setActiveInterpreter("testInterpreter", "myPrompt>"); 
       }
     });
