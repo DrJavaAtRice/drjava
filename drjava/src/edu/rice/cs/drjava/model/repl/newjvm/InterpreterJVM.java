@@ -133,7 +133,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _interpreterOptions = new InteractionsPaneOptions();
 
     //_defaultInterpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
-    _defaultInterpreter = new Interpreter();
+    _defaultInterpreter = new DrScalaInterpreter();
     //_defaultInterpreter = new Interpreter(_classPathManager);
     //_defaultInterpreter = new Interpreter(_interpreterLoader);
 
@@ -410,7 +410,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
         throw new IllegalArgumentException("'" + name + "' is not a unique interpreter name");
       }
 //      Interpreter i = new Interpreter(_interpreterOptions, _interpreterLoader);
-      Interpreter i = new Interpreter();
+      Interpreter i = new DrScalaInterpreter();
       putInterpreter(name, i);
     }
   }
@@ -468,7 +468,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       bindings = new RuntimeBindings(bindings, vars, IterUtil.asIterable(localVars));
       
 //      Interpreter i = new Interpreter(_interpreterOptions, ctx, bindings);
-      Interpreter i = new Interpreter();
+      Interpreter i = new DrScalaInterpreter();
 //      _environments.put(name, Pair.make(ctx, bindings));
       putInterpreter(name, i);
     }

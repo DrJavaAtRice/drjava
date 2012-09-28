@@ -7,7 +7,8 @@ import scala.tools.nsc.io.File
 import scala.tools.nsc.io.File.pathSeparator
 import scala.collection.mutable.ListBuffer
 
-class DrScalaILoop(r: BufferedReader, w: PrintWriter) extends ILoop(r, w) { 
+class DrScalaILoop(r: BufferedReader, w: PrintWriter) 
+extends ILoop(r, w) with ScalaInterpreterAdapter { 
   lazy val addedClasspaths = (ListBuffer[String]() ++
     settings.classpath.value.split(pathSeparator).filterNot(_ == ""))
   override def addClasspath(arg: String): Unit = {
