@@ -24,13 +24,13 @@ class DrScalaILoop(r: BufferedReader, w: PrintWriter) extends ILoop(r, w) {
         //command("1 + 1")
       }
     }
-    else System.err.println("Ignoring duplicate path, " + fPath)
+    // else System.err.println("Ignoring duplicate path, " + fPath)
   }
   override def createInterpreter() {
     val pathsToAdd = (addedClasspaths.filterNot(
       settings.classpath.value.split(pathSeparator).toSet.contains(_)))
     settings.classpath append pathsToAdd.mkString(pathSeparator)
-    System.err.println("Creating new interpreter with classpath: " + settings.classpath.value)
+    // System.err.println("Creating new interpreter with classpath: " + settings.classpath.value)
     this.intp = new ILoopInterpreter
   }
 }

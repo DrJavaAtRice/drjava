@@ -167,7 +167,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     _model.removeListener(listener);
     
     OpenDefinitionsDocument doc2 =
-      setupDocument("package b\n" + "import a.ScalaTestFoo\n" + FOO2_EXTENDS_FOO_TEXT);
+      setupDocument("package b\n" + "import a.DrScalaTestFoo\n" + FOO2_EXTENDS_FOO_TEXT);
     final File foo2File = new File(bDir, "DrScalaTestFoo2.scala");
 //    System.err.println("foo2File = " + foo2File.getCanonicalPath());
     saveFile(doc2, new FileSelector(foo2File));
