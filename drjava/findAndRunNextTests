@@ -1,0 +1,51 @@
+#! /usr/bin/python
+
+from subprocess import call
+import os
+
+baseCmd = '-Dtest-spec='
+
+def backup_found_list():
+  with open('testsRunSoFar', 'r') as f, open('testsRunSoFar_backup', 'w') as g:
+    g.write(f.read())
+
+def add_skipped_test(tst):
+  with open('skippedTests', 'a') as f:
+    f.write(tst + '\n')
+
+def find_next_test():
+  with open('testsRunSoFar', 'r') as f:
+    alreadyRun = [t for t in f.read().split('\n') if t]
+  if not alreadyRun:
+    print 'error fetching list of tests which have already been run...'
+  else:
+    for (path, dirs, files) in os.walk('.'):
+      for f in files:
+          if f.endswith('Test.java') and f.replace('.java','') not in alreadyRun:
+            if f.lower().find('indent') == -1 and path.lower().find('indent') == -1:
+              return f.replace('.java', '')
+            # temporary hack to avoid all indentation-related tests
+            else:
+              add_skipped_test(f)
+    print "couldn't find any more tests to run..."
+  return 0
+
+def run_next_test():
+  tst = find_next_test()
+  if tst:
+    print 'testing:', baseCmd + tst
+    res = call(['ant', baseCmd + tst, 'test'])
+    if res:
+      print tst, 'FAILED.'
+    else:
+      with open('testsRunSoFar', 'a') as f:
+        f.write(tst + '\n')
+      print tst, 'PASSED. adding it to list of tests already run'
+      return 1
+  return 0
+
+open('skippedTests', 'w').close()
+backup_found_list()
+keep_going = 1
+while keep_going:
+  keep_going = run_next_test()
