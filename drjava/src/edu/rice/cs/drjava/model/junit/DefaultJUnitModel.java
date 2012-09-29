@@ -458,7 +458,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               File sourceFile = new File(sourceFileName);
               classNames.add(className.value());
               files.add(sourceFile);
-              _log.log("Class " + className + " added to classNames.   File " + sourceFileName + " added to files.");
+              _log.log("Class " + className.value() + " added to classNames.   File " + sourceFileName + " added to files.");
             }
             catch(IOException e) { /* ignore it; can't read class file */ }
           }
