@@ -223,7 +223,7 @@ public class FileOpsTest extends DrJavaTestCase {
   /** This tests that packageExplore correctly runs through and returns
     * non-empty packages.  This function is no longer used in DrJava/DrScala.
     */
-  public void testPackageExplore() throws IOException {
+/*  public void testPackageExplore() throws IOException {
     File rootDir = FileOps.createTempDirectory("fileOpsTest");
     File subDir0 = new File(rootDir, "sub0");
     subDir0.mkdir();
@@ -254,7 +254,8 @@ public class FileOpsTest extends DrJavaTestCase {
     
     assertTrue("deleting temp directory", FileOps.deleteDirectory(rootDir));
   }
-  
+*/
+
   /** Tests that non-empty directories can be deleted on exit. */
   public void testDeleteDirectoryOnExit() throws IOException, InterruptedException {
     
@@ -376,7 +377,7 @@ public class FileOpsTest extends DrJavaTestCase {
   public void testGetFiles() throws IOException {
     File dir1 = FileOps.createTempDirectory("DrJavaTestTempDir");
     assertTrue("dir1 exists", dir1.exists());
-    File file1a = File.createTempFile("DrScalaTemp-", ".temp", dir1).getCanonicalFile();
+    File file1a = File.createTempFile("DrScalaTest-", ".temp", dir1).getCanonicalFile();
     assertTrue("file1a exists", file1a.exists());
     File file1b = File.createTempFile("DrScala-", ".temp", dir1).getCanonicalFile();
     assertTrue("file1b exists", file1b.exists());
@@ -397,11 +398,13 @@ public class FileOpsTest extends DrJavaTestCase {
     Set<File> res2 = new TreeSet<File>(Arrays.asList(new File[] {file1a, file2}));
     
     Set<File> nrfiles = new TreeSet<File>();
+    // non-recursive search
     for(File f : FileOps.getFilesInDir(dir1, false, ff)) {
       nrfiles.add(f.getCanonicalFile());
     }
     
     Set<File> rfiles = new TreeSet<File>();
+    // recursive search
     for(File f : FileOps.getFilesInDir(dir1, true, ff)) {
       rfiles.add(f.getCanonicalFile());
     }
