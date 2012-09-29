@@ -110,8 +110,8 @@ public final class ProjectMenuTest extends DrJavaTestCase {
           _projFileText =
             ";; DrJava project file.  Written with build: 20040623-1933\n" +
             "(source ;; comment\n" +
-            "   (file (name \"src/test1.java\")(select 32 32))" +
-            "   (file (name \"src/test2.java\")(select 32 32)))";
+            "   (file (name \"src/test1.scala\")(select 32 32))" +
+            "   (file (name \"src/test2.scala\")(select 32 32)))";
           
           IOUtil.writeStringToFile(_projFile, _projFileText);
           
