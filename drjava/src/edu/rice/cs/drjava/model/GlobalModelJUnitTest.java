@@ -60,7 +60,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /** Whether or not to print debugging output. */
   static final boolean printMessages = false;
   
-  private static final String ELSPETH_ERROR_TEXT = 
+  private static final String ELSPETH_ERROR_TEXT_JAVA = 
     "import junit.framework.TestCase;" +
     "public class Elspeth extends TestCase {" +
     "    public void testMe() {" +
@@ -81,8 +81,19 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "    return getClass().hashCode();" +
     "  }" +
     "}";
+
+  private static final String ELSPETH_ERROR_TEXT =
+    "import java.io._ \n" +
+    "import junit.framework._ \n" +
+    "import junit.framework.Assert._ \n" +
+    "class Elspeth extends TestCase { \n" +
+    "  def testMe() { \n" +
+    "    val s = \"elspeth\" \n" +
+    "    assertEquals(\"they match\", s, \"elspeth4\") \n" +
+    "  } \n" +
+    "}\n";
   
-  private static final String MONKEYTEST_PASS_TEXT =
+  private static final String MONKEYTEST_PASS_TEXT_JAVA =
     "import junit.framework.*; \n" +
     "import java.io.*; \n" +
     "public class MonkeyTestPass extends TestCase { \n" +
@@ -91,8 +102,18 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "    assertEquals(\"monkey\", \"monkey\"); \n" +
     "  } \n" +
     "}\n";
+
+  private static final String MONKEYTEST_PASS_TEXT =
+    "import java.io._ \n" +
+    "import junit.framework._ \n" +
+    "import junit.framework.Assert._ \n" +
+    "class MonkeyTestPass extends TestCase { \n" +
+    "  def testShouldPass() { \n" +
+    "    assertEquals(\"monkey\", \"monkey\") \n" +
+    "  } \n" +
+    "}\n";
   
-  private static final String MONKEYTEST_PASS_ALT_TEXT =
+  private static final String MONKEYTEST_PASS_ALT_TEXT_JAVA =
     "import junit.framework.*; \n" +
     "import java.io.*; \n" +
     "public class MonkeyTestPass extends TestCase { \n" +
@@ -101,8 +122,18 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "    assertEquals(\"monkeys\", \"monkeys\"); \n" +
     "  } \n" +
     "}\n";
+
+  private static final String MONKEYTEST_PASS_ALT_TEXT =
+    "import java.io._ \n" +
+    "import junit.framework._ \n" +
+    "import junit.framework.Assert._ \n" +
+    "class MonkeyTestPass extends TestCase { \n" +
+    "  def testShouldPass() { \n" +
+    "    assertEquals(\"monkeys\", \"monkeys\") \n" +
+    "  } \n" +
+    "}\n";
   
-  private static final String MONKEYTEST_FAIL_TEXT =
+  private static final String MONKEYTEST_FAIL_TEXT_JAVA =
     "import junit.framework.*; " +
     "public class MonkeyTestFail extends TestCase { " +
     "  public MonkeyTestFail(String name) { super(name); } " +
@@ -111,7 +142,16 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "  } " +
     "}";
   
-  private static final String MONKEYTEST_ERROR_TEXT =
+  private static final String MONKEYTEST_FAIL_TEXT =
+    "import junit.framework._ \n" +
+    "import junit.framework.Assert._ \n" +
+    "class MonkeyTestFail extends TestCase { \n" +
+    "  def testShouldFail() { \n" +
+    "    assertEquals(\"monkey\", \"baboon\") " +
+    "  } \n" +
+    "}\n";
+
+  private static final String MONKEYTEST_ERROR_TEXT_JAVA =
     "import junit.framework.*; " +
     "public class MonkeyTestError extends TestCase { " +
     "  public MonkeyTestError(String name) { super(name); } " +
@@ -119,6 +159,14 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "    throw new Error(\"This is an error.\"); " +
     "  } " +
     "}";
+
+  private static final String MONKEYTEST_ERROR_TEXT =
+    "import junit.framework._; \n" +
+    "class MonkeyTestError extends TestCase { \n" +
+    "  def testThrowsError() { \n" +
+    "    throw new Error(\"This is an error.\") \n" +
+    "  } \n" +
+    "}\n";
   
 //  private static final String MONKEYTEST_COMPILEERROR_TEXT =
 //    "import junit.framework.*; " +
@@ -138,10 +186,13 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "  } " +
     "}";
   
-  private static final String NON_TESTCASE_TEXT =
+  private static final String NON_TESTCASE_TEXT_JAVA =
     "public class NonTestCase {}";
+
+  private static final String NON_TESTCASE_TEXT =
+    "class NonTestCase {}";
   
-  private static final String MONKEYTEST_INFINITE_TEXT =
+  private static final String MONKEYTEST_INFINITE_TEXT_JAVA =
     "import junit.framework.*; " +
     "public class MonkeyTestInfinite extends TestCase { " +
     "  public MonkeyTestInfinite(String name) { super(name); } " +
@@ -149,8 +200,16 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "    while(true) {}" +
     "  } " +
     "}";
+
+  private static final String MONKEYTEST_INFINITE_TEXT =
+    "import junit.framework._ \n" +
+    "class MonkeyTestInfinite extends TestCase { \n" +
+    "  def testInfinite() { \n" +
+    "    while(true) {}\n" +
+    "  } \n" +
+    "}\n";
   
-  private static final String HAS_MULTIPLE_TESTS_PASS_TEXT =
+  private static final String HAS_MULTIPLE_TESTS_PASS_TEXT_JAVA =
     "import junit.framework.*; " +
     "public class HasMultipleTestsPass extends TestCase { " +
     "  public HasMultipleTestsPass(String name) { super(name); } " +
@@ -161,8 +220,20 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "    assertTrue(true); " +
     "  } " +
     "}";
+
+  private static final String HAS_MULTIPLE_TESTS_PASS_TEXT =
+    "import junit.framework._ \n" +
+    "import junit.framework.Assert._ \n" +
+    "class HasMultipleTestsPass extends TestCase { \n" +
+    "  def testShouldPass() { \n" +
+    "    assertEquals(\"monkey\", \"monkey\") \n" +
+    "  } \n" +
+    "  def testShouldAlsoPass() { \n" +
+    "    assertTrue(true) \n" +
+    "  } \n" +
+    "}\n";
   
-  private static final String STATIC_INNER_TEST_TEXT = 
+  private static final String STATIC_INNER_TEST_TEXT_JAVA = 
     "import junit.framework.TestCase;" +
     " public class StaticInnerTestCase{" +
     "   public static class Sadf extends TestCase {" +
@@ -180,14 +251,36 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "     }" +
     "   }" +
     "}";
+
+  private static final String STATIC_INNER_TEST_TEXT = 
+    "import junit.framework._ \n" +
+    " class StaticInnerTestCase{ \n" +
+    "   object Sadf extends TestCase { \n" +
+    "     def testX() { \n" +
+    "       assertTrue(\"this is true\", true) \n" +
+    "     } \n" +
+    "     def testY() { \n" +
+    "       assertFalse(\"this is false\", false) \n" +
+    "     } \n" +
+    "   } \n" +
+    "} \n";
   
-  private static final String MULTI_CLASSES_IN_FILE_TEXT = 
+  private static final String MULTI_CLASSES_IN_FILE_TEXT_JAVA = 
     "import junit.framework.TestCase;" +
     " class A { } " +
     " class B /* with syntax error */ { public void foo(int x) { } } " +
     " public class DJTest extends TestCase { " + 
     "   public void testAB() { assertTrue(\"this is true\", true); } " +
     " }";
+  
+  private static final String MULTI_CLASSES_IN_FILE_TEXT = 
+    "import junit.framework._ \n" + /* last char index: 25 */
+    "import junit.framework.Assert._ \n" + /* last char index: 58 */
+    " class A { } \n" + /* last char index: 72 */
+    " class B /* with syntax error */ { def foo(x: Int) { } } \n" + /* 'def' starts at 108 */
+    " class DJTest extends TestCase { \n" + 
+    "   def testAB() { assertTrue(\"this is true\", true) } \n" +
+    " }\n";
   
   
 //  /** Creates a test suite for JUnit to run.
@@ -328,8 +421,8 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _log.log("testNonTestCaseError completed");
   }
   
-  /** Tests that the ui is notified to put up an error dialog if JUnit is run on a non-public TestCase. */
-  public void testResultOfNonPublicTestCase_NOJOIN() throws Exception {
+  /** Tests that the ui is notified to put up an error dialog if JUnit is run on a non-public TestCase. N/A for Scala. */
+  public void _testResultOfNonPublicTestCase_NOJOIN() throws Exception {
     if (printMessages) System.err.println("----testResultOfNonPublicTestCase-----");
 //    Utilities.show("Running testResultOfNonPublicTestCase");
     
@@ -771,7 +864,8 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener1.assertJUnitTestEndedCount(1);
     listener1.assertNonTestCaseCount(0);
     _model.removeListener(listener1);
-    doc1.remove(87,4);
+    // doc1.remove(87,4);
+    doc1.remove(109,6);
     
     JUnitTestListener listener2 = new JUnitCompileBeforeTestListener();
     _model.addListener(listener2);
