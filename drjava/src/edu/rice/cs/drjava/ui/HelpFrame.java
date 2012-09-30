@@ -55,7 +55,7 @@ public class HelpFrame extends HTMLFrame {
   protected static final String ICON = "DrJavaHelp.png";
 
   public HelpFrame() {
-    super("Help on using DrJava", INTRO_URL, HelpFrame.class.getResource(HELP_PATH + CONTENTS_PAGE), ICON);
+    super("Help on using DrScala", INTRO_URL, HelpFrame.class.getResource(HELP_PATH + CONTENTS_PAGE), ICON);
     addHyperlinkListener(_linkListener);
   }
   

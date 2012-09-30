@@ -86,7 +86,7 @@ public class DocumentRegion implements OrderedDocumentRegion {
     if (docRel != 0) return docRel;
     // At this point, we know that this and r have identical file paths, but they do not have to be the same allocation
     
-    assert getDocument() == r.getDocument();  // DrJava never creates two ODD objects with the same path
+    assert getDocument() == r.getDocument();  // DrScala never creates two ODD objects with the same path
     int end1 = getEndOffset();
     int end2 = r.getEndOffset();
     int endDiff = end1 - end2;

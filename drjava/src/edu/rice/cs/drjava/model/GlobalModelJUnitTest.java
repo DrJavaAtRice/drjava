@@ -452,8 +452,8 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _log.log("testResultOfNonPublicTestCase completed");
   }
   
-  /* This test has become inconsistent with DrJava behavior.  If a document's file no longer exists and no class file
-   * exists, DrJava will detect that there is no valid class file for the document and ask the user to compile the
+  /* This test has become inconsistent with DrScala behavior.  If a document's file no longer exists and no class file
+   * exists, DrScala will detect that there is no valid class file for the document and ask the user to compile the
    * file
    */
 //  public void testDoNotRunJUnitIfFileHasBeenMoved() throws Exception {
@@ -818,7 +818,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     public void saveBeforeCompile() {
       if (printMessages) System.err.println("saveBeforeCompile called in " + this);
       synchronized(this) { saveBeforeCompileCount++; }
-      /** Assumes that DrJava is in flat file mode! */
+      /** Assumes that DrScala is in flat file mode! */
       saveAllFiles(_model, new FileSaveSelector() {
         public File getFile() { throw new UnexpectedException ("Test should not ask for save file name"); }
         public boolean warnFileOpen(File f) { return false; }

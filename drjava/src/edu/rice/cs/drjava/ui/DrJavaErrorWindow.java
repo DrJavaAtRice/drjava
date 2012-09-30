@@ -122,7 +122,7 @@ public class DrJavaErrorWindow extends JDialog {
     return _singletonInstance;
   }
   
-  /** Creates a window to graphically display the errors that have occurred in the code of DrJava. */
+  /** Creates a window to graphically display the errors that have occurred in the code of DrScala. */
   private DrJavaErrorWindow() {
     super(_parentFrame, "DrScala Errors");
 
@@ -296,7 +296,7 @@ public class DrJavaErrorWindow extends JDialog {
     validate();
   }
   
-  /** Return a string with the system properties, the DrJava configuration file contents, and
+  /** Return a string with the system properties, the DrScala configuration file contents, and
     * information about memory. The data is anonymized.
     * @return information string */
   public static String getSystemAndDrJavaInfo() {
@@ -453,9 +453,9 @@ public class DrJavaErrorWindow extends JDialog {
     "Please submit a bug report containing the information below " +
     "and an account of the actions that caused the bug (if known) to " +
     "<a href=\"" + SF_ADD_BUG_URL + "\"><b>" + SF_LINK_NAME + "</b></a>.<br>" +
-    "You may wish to save all your work and restart DrJava.<br>" +
-    "Thanks for your help in making DrJava better!</b></font></p></html>";
+    "You may wish to save all your work and restart DrScala.<br>" +
+    "Thanks for your help in making DrScala better!</b></font></p></html>";
   private static final String NO_ERRORS_HTML =
     "No errors occurred!<br>" +
-    "Thanks for using DrJava!</b></font></p></html>";
+    "Thanks for using DrScala!</b></font></p></html>";
 }

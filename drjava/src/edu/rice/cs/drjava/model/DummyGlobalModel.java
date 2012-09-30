@@ -472,7 +472,7 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call getMainClass on a Dummy");
   }
   
-  public Iterable<AbsRelFile> getExtraClassPath() {
+  public Iterable<AbsRelFile> getExtraProjectClassPath() {
     throw new UnsupportedOperationException("Tried to call getExtraClasspath on a Dummy");
   }
   

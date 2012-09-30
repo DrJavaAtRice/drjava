@@ -64,10 +64,10 @@ import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.drjava.config.OptionParser;
 
-/** Handles the bulk of DrJava's program logic.  The UI components interface with the GlobalModel through its 
+/** Handles the bulk of DrScala's program logic.  The UI components interface with the GlobalModel through its 
   * public methods, and GlobalModel responds via the GlobalModelListener interface.  This removes the dependency 
   * on the UI for the logical flow of the program's features.  With the current implementation, we can finally test 
-  * the compile an unit testing functionality of DrJava, along with many other things.  An ongoing refactoring effort 
+  * the compile an unit testing functionality of DrScala, along with many other things.  An ongoing refactoring effort 
   * will be moving many GlobalModel functions into more specific sub-interfaces for particular behaviors:
   * 
   * @see DefaultGlobalModel
@@ -136,10 +136,10 @@ public interface GlobalModel extends ILoadDocuments {
   public void addToBrowserHistory();
   
 //  //---------------------------- Interpreter --------------------------------//
-//  /** Updates the security manager in DrJava. */
+//  /** Updates the security manager in DrScala. */
 //  public void enableSecurityManager();
 //  
-//  /** Updates the security manager in DrJava. */
+//  /** Updates the security manager in DrScala. */
 //  public void disableSecurityManager();
 //  
   //---------------------------- File Management ----------------------------//
@@ -305,13 +305,13 @@ public interface GlobalModel extends ILoadDocuments {
   /** Resets the console. Fires consoleReset() event. */
   public void resetConsole();
   
-  /** Prints System.out to the DrJava console.  This method may be safely called from outside the event thread. */
+  /** Prints System.out to the DrScala console.  This method may be safely called from outside the event thread. */
   public void systemOutPrint(String s);
   
-  /** Prints System.err to the DrJava console.  This method may be safely called from outside the event thread. */
+  /** Prints System.err to the DrScala console.  This method may be safely called from outside the event thread. */
   public void systemErrPrint(String s);
   
-  /** Prints the given string to the DrJava console as an echo of System.in.  This method may be safely called from
+  /** Prints the given string to the DrScala console as an echo of System.in.  This method may be safely called from
     * outside the event thread.  
     */
   public void systemInEcho(String s);
@@ -490,7 +490,7 @@ public interface GlobalModel extends ILoadDocuments {
   /** Returns only the project's extra classpaths.
     * @return The classpath entries loaded along with the project
     */
-  public Iterable<AbsRelFile> getExtraClassPath();
+  public Iterable<AbsRelFile> getExtraProjectClassPath();
   
   /** Sets the set of classpath entries to use as the projects set of classpath entries.  This is normally used by the
     * project preferences.

@@ -38,8 +38,7 @@ package edu.rice.cs.drjava.model;
 
 import java.io.*;
 
-/** Class with getClassName method for finding the name of the first class or 
-  * interface defined in a file */
+/** Class with getClassName method for finding the name of the first class, object, or trait defined in a file */
 
 public class ClassAndInterfaceFinder {
   
@@ -61,9 +60,7 @@ public class ClassAndInterfaceFinder {
       initialize(r);
     }
     finally {
-      try {
-        if (r != null) r.close();
-      }
+      try { if (r != null) r.close(); }
       catch(IOException ioe) { /* ignore exception on close */ }
     }
   }
@@ -74,36 +71,39 @@ public class ClassAndInterfaceFinder {
     tokenizer.slashSlashComments(true);
     tokenizer.slashStarComments(true);
     tokenizer.lowerCaseMode(false);
+    
     tokenizer.wordChars('_','_');
     tokenizer.wordChars('.','.');
+    tokenizer.wordChars('$','$');
+    
+    // In Scala, treat ';' as whitespace
+    tokenizer.whitespaceChars(';', ';');
   }
   
-  /** Finds the the name of the first class or interface defined in this file.
-    * @return the String containing this name or "" if no such class or interface
-    *         is found.
+  /** Finds the the name of the first class, object, or trait defined in this file.
+    * @return the String containing this name or "" if no such class, object, or interface is found.
     */
-  public String getClassOrInterfaceName() { return getName(true); }
+  public String getClassObjectOrTraitName() { return getName(true); }
   
-  /** Finds the the name of the first class (excluding interfaces) defined in this file.
-    * @return the String containing this name or "" if no such class or interface
-    *         is found.
+  /** Finds the the name of the first class or object (excluding traits) defined in this file.
+    * @return the String containing this name or "" if no such class or object is found.
     */
   public String getClassName() { return getName(false); }
   
-  /** Finds the the name of the first class or interface in this file, respecting the
-    * value of the interfaceOK flag.
+  /** Finds the the name of the first class, object, or trait in this file, respecting the
+    * value of the traitOK flag.
     * I hate flags but did not see a simpler way to avoid duplicated code.
     * This method has package (rather than private) visibility for testing purposes.
     */
-  String getName(boolean interfaceOK) {
+  String getName(boolean traitOK) {
     try {
       String package_name = "";
       int tokenType;
       
-      // find the "class"/"interface" or "package" keyword (may encounter EOF)
+      // find the "class"/"object"/"trait" or "package" keyword (may encounter EOF)
       do {
         tokenType = tokenizer.nextToken();
-      } while(! isClassOrInterfaceWord(tokenType,interfaceOK) && ! isPackageWord(tokenType));
+      } while(! isClassObjectOrTraitWord(tokenType, traitOK) && ! isPackageWord(tokenType));
       
       if (isEOF(tokenType)) return "";
       
@@ -117,16 +117,16 @@ public class ClassAndInterfaceFinder {
       
       if (isEOF(tokenType)) return "";
       
-      if (keyword.equals("class")) return tokenizer.sval;  // a class defined without a package
+      if (keyword.equals("class") || keyword.equals("object")) return tokenizer.sval;  // a class or object defined without a package
       
-      if (interfaceOK && keyword.equals("interface")) return tokenizer.sval; // an interface without a package
+      if (traitOK && keyword.equals("trait")) return tokenizer.sval; // a trait without a package
       
       if (keyword.equals("package")) package_name = tokenizer.sval;
       
-      // find the "class" keyword
-      do { tokenType = tokenizer.nextToken(); } while (! isClassOrInterfaceWord(tokenType, interfaceOK));
+      // find the "class", "object", or "trait" keyword
+      do { tokenType = tokenizer.nextToken(); } while (! isClassObjectOrTraitWord(tokenType, traitOK));
       
-      // find the name of the class or interface
+      // find the name of the class or object
       do { tokenType = tokenizer.nextToken(); } while (! isWord(tokenType));
       
       if (tokenType == StreamTokenizer.TT_EOF) return "";
@@ -135,9 +135,7 @@ public class ClassAndInterfaceFinder {
       
       return tokenizer.sval;
       
-    } catch(IOException e) {
-      return "";
-    }
+    } catch(IOException e) { return ""; }
   }
   
   /** returns true iff the token is a word (as defined by StreamTokenizer)
@@ -149,10 +147,10 @@ public class ClassAndInterfaceFinder {
   
   /** returns true iff the token is "class" or we're at the end of the file
    */
-  private boolean isClassOrInterfaceWord(int tt, boolean interfaceOK) {
+  private boolean isClassObjectOrTraitWord(int tt, boolean traitOK) {
     return  isEOF(tt) || 
-      (tt == StreamTokenizer.TT_WORD && tokenizer.sval.equals("class")) ||
-      (tt == StreamTokenizer.TT_WORD && interfaceOK && tokenizer.sval.equals("interface"));
+      (tt == StreamTokenizer.TT_WORD && (tokenizer.sval.equals("class") || tokenizer.sval.equals("object") || 
+                                         (traitOK && tokenizer.sval.equals("trait"))));
   }
   
   /** returns true iff the token is "package" or we're at the end of the file

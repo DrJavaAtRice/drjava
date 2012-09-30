@@ -527,7 +527,7 @@ public class ProjectProfile implements ProjectFileIR {
     }
     
     // write source files
-    /* This property has been renamed "source-files" (instead of "source") so that old versions of DrJava will not 
+    /* This property has been renamed "source-files" (instead of "source") so that old versions of DrJava/DrScala will not 
      * recognize it.  In the new project file format, source files are relative to the project root, not the parent
      * of the project file. */
     if (!_sourceFiles.isEmpty()) {

@@ -165,7 +165,7 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
   public void nonTestCase(boolean isTestAll, boolean didCompileFail) { }
   
   /** Called when trying to test an illegal class file.
-    * @param e the ClassFileError thrown when DrJava attempted to load the offending class.
+    * @param e the ClassFileError thrown when DrScala attempted to load the offending class.
     */
   public void classFileError(ClassFileError e) { }
   

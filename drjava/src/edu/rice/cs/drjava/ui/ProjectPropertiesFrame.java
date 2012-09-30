@@ -225,7 +225,7 @@ public class ProjectPropertiesFrame extends SwingFrame {
     
     _autoRefreshComponent.setSelected(_getAutoRefreshStatus());
 
-    ArrayList<AbsRelFile> cp = new ArrayList<AbsRelFile>(CollectUtil.makeList(_model.getExtraClassPath()));
+    ArrayList<AbsRelFile> cp = new ArrayList<AbsRelFile>(CollectUtil.makeList(_model.getExtraProjectClassPath()));
     _extraClassPathList.setValue(cp);
 
     ArrayList<File> ef = new ArrayList<File>();

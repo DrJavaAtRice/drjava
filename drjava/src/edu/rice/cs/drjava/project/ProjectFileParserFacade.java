@@ -83,12 +83,10 @@ public class ProjectFileParserFacade {
   
   private static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("ParserFacadeFixup.txt", false);
   
-  /**
-   * Here we check versions, and see if we need to apply a fixup to account for specify main-class as a classname instead of as a file.   
-   * All DrJava revisions before 4782 need to be fixed up.  We also fixup all projects that have "unknown" versions.
-   * 
-   * @param pfir - the ProjectProfile to fixup, if needed.
-   */
+  /** Here we check versions, and see if we need to apply a fixup to account for specify main-class as a classname instead of as a file.   
+    * All DrJava revisions before 4782 need to be fixed up.  We also fixup all projects that have "unknown" versions.
+    * @param pfir - the ProjectProfile to fixup, if needed.
+    */
   protected ProjectFileIR fixup(ProjectFileIR pfir){
     boolean doFixup = false;
     

@@ -68,7 +68,7 @@ public class ConfigDescriptions {
         "Display all compiler versions, even if they have the same major version.");
     add(EXTRA_CLASSPATH, "Extra Classpath", "<html>Any directories or jar files to add to the classpath<br>" +
         "of the Compiler and Interactions Pane.</html>");
-    add(LOOK_AND_FEEL, "Look and Feel", "Changes the general appearance of DrJava.");
+    add(LOOK_AND_FEEL, "Look and Feel", "Changes the general appearance of DrScala.");
     add(PLASTIC_THEMES, "Plastic Theme", "Pick the theme to be used by the Plastic family of Look and Feels");
     
     //ToolbarOptionComponent is a degenerate option component
@@ -112,7 +112,7 @@ public class ConfigDescriptions {
     
     add(RIGHT_MARGIN_COLUMNS, "Right Margin Position", "The number of columns after which the right margin is displayed.");
     
-    add(FONT_MAIN, "Main Font", "The font used for most text in DrJava.");
+    add(FONT_MAIN, "Main Font", "The font used for most text in DrScala.");
     add(FONT_LINE_NUMBERS, "Line Numbers Font",
         "<html>The font for displaying line numbers on the left side of<br>" +
         "the Definitions Pane if Show All Line Numbers is enabled.<br>" +
@@ -196,7 +196,7 @@ public class ConfigDescriptions {
     add(DEBUG_STEP_INTERPRETER, "Step Into Interpreter Classes",
         "<html>Whether the Debugger should step into the classes<br>" +
         "used by the Interactions Pane (DynamicJava).</html>");
-    add(DEBUG_STEP_DRJAVA, "Step Into DrJava Classes", "Whether the Debugger should step into DrJava's own class files.");
+    add(DEBUG_STEP_DRJAVA, "Step Into DrScala Classes", "Whether the Debugger should step into DrJava's own class files.");
     add(DEBUG_STEP_EXCLUDE, "Classes/Packages To Exclude",
         "<html>Any classes that the debuggger should not step into.<br>" +
         "Should be a list of fully-qualified class names.<br>" +
@@ -235,15 +235,15 @@ public class ConfigDescriptions {
 //        "in an open document's source tree, rather than just the document's<br>" +
 //        "own package and sub-packages.</html>");
     
-    add(QUIT_PROMPT, "Prompt Before Quit", "Whether DrJava should prompt the user before quitting.");
+    add(QUIT_PROMPT, "Prompt Before Quit", "Whether DrScala should prompt the user before quitting.");
     
     // Interactions
     add(INTERACTIONS_RESET_PROMPT, "Prompt Before Resetting Interactions Pane",
-        "<html>Whether DrJava should prompt the user before<br>" + "manually resetting the interactions pane.</html>");
+        "<html>Whether DrScala should prompt the user before<br>" + "manually resetting the interactions pane.</html>");
     
     
     add(INTERACTIONS_EXIT_PROMPT, "Prompt if Interactions Pane Exits Unexpectedly",
-        "<html>Whether DrJava should show a dialog box if a program<br>" +
+        "<html>Whether DrScala should show a dialog box if a program<br>" +
         "in the Interactions Pane exits without the user clicking Reset.</html>");
     
     // Javadoc
@@ -252,24 +252,24 @@ public class ConfigDescriptions {
     
     // Clean
     add(PROMPT_BEFORE_CLEAN, "Prompt before Cleaning Build Directory",
-        "<html>Whether DrJava should prompt before cleaning the<br>" + "build directory of a project</html>");
+        "<html>Whether DrScala should prompt before cleaning the<br>" + "build directory of a project</html>");
     
     // Prompt to change the language level extensions (.dj0/.dj1->.dj, .dj2->.java)
     add(PROMPT_RENAME_LL_FILES, "Prompt to Rename Old Language Level Files When Saving",
-        "<html>Whether DrJava should prompt the user to rename old language level files.<br>" +
-        "DrJava suggests to rename .dj0 and .dj1 files to .dj, and .dj2 files to .java.</html>");
+        "<html>Whether DrScala should prompt the user to rename old language level files.<br>" +
+        "DrJava/DrScala suggests to rename .dj0 and .dj1 files to .dj, and .dj2 files to .java.</html>");
     
     // Save before X
     add(ALWAYS_SAVE_BEFORE_COMPILE, "Automatically Save Before Compiling",
-        "<html>Whether DrJava should automatically save before<br>" + "recompiling or ask the user each time.</html>");
+        "<html>Whether DrScala should automatically save before<br>" + "recompiling or ask the user each time.</html>");
     add(ALWAYS_COMPILE_BEFORE_JUNIT, "Automatically Compile Before Testing",
-        "<html>Whether DrJava should automatically compile before<br>" +
+        "<html>Whether DrScala should automatically compile before<br>" +
         "testing with JUnit or ask the user each time.</html>");
     add(ALWAYS_SAVE_BEFORE_JAVADOC, "Automatically Save Before Generating Javadoc",
-        "<html>Whether DrJava should automatically save before<br>" +
+        "<html>Whether DrScala should automatically save before<br>" +
         "generating Javadoc or ask the user each time.</html>");
     add(ALWAYS_COMPILE_BEFORE_JAVADOC, "Automatically Compile Before Generating Javadoc",
-        "<html>Whether DrJava should automatically compile before<br>" +
+        "<html>Whether DrScala should automatically compile before<br>" +
         "generating Javadoc or ask the user each time.</html>");
         
     // These are very problematic features, and so are disabled for the forseeable future.
@@ -277,51 +277,51 @@ public class ConfigDescriptions {
 //                       new BooleanOptionComponent(ALWAYS_SAVE_BEFORE_RUN, 
 //                                                  "Automatically Save and Compile Before Running Main Method", 
 //                                                  this,
-//                                                  "<html>Whether DrJava automatically saves and compiles before running<br>" +
+//                                                  "<html>Whether DrScala automatically saves and compiles before running<br>" +
 //                                                  "a document's main method or explicitly asks the user each time.</html>");
 //    addOptionComponent(panel, 
 //                       new BooleanOptionComponent(ALWAYS_SAVE_BEFORE_DEBUG, 
 //                                                  "Automatically Save and Compile Before Debugging", 
 //                                                  this,
-//                                                  "<html>Whether DrJava automatically saves and compiles before<br>" +
+//                                                  "<html>Whether DrScala automatically saves and compiles before<br>" +
 //                                                  "debugging or explicitly asks the user each time.</html>");
     
     // Warnings
     add(WARN_BREAKPOINT_OUT_OF_SYNC, "Warn on Breakpoint if Out of Sync", 
-        "<html>Whether DrJava should warn the user if the class file<br>" +
+        "<html>Whether DrScala should warn the user if the class file<br>" +
         "is out of sync before setting a breakpoint in that file.</html>");
     add(WARN_DEBUG_MODIFIED_FILE, "Warn if Debugging Modified File", 
-        "<html>Whether DrJava should warn the user if the file being<br>" +
+        "<html>Whether DrScala should warn the user if the file being<br>" +
         "debugged has been modified since its last save.</html>");
     add(WARN_CHANGE_LAF, "Warn to Restart to Change Look and Feel",
-        "<html>Whether DrJava should warn the user that look and feel<br>" +
-        "changes will not be applied until DrJava is restarted.</html>.");
+        "<html>Whether DrScala should warn the user that look and feel<br>" +
+        "changes will not be applied until DrScala is restarted.</html>.");
     add(WARN_CHANGE_THEME, "Warn to Restart to Change Theme",
-        "<html>Whether DrJava should warn the user that theme<br>" +
-        "changes will not be applied until DrJava is restarted.</html>.");
+        "<html>Whether DrScala should warn the user that theme<br>" +
+        "changes will not be applied until DrScala is restarted.</html>.");
     add(WARN_CHANGE_DCP, "Warn to Restart to Change Default Compiler Preference",
-        "<html>Whether DrJava should warn the user that default compiler preference<br>" +
-        "changes will not be applied until DrJava is restarted.</html>.");
+        "<html>Whether DrScala should warn the user that default compiler preference<br>" +
+        "changes will not be applied until DrScala is restarted.</html>.");
     add(WARN_CHANGE_MISC, "Warn to Restart to Change Preferences (other)",
-        "<html>Whether DrJava should warn the user that preference<br>" +
-        "changes will not be applied until DrJava is restarted.</html>.");
+        "<html>Whether DrScala should warn the user that preference<br>" +
+        "changes will not be applied until DrScala is restarted.</html>.");
     add(WARN_CHANGE_INTERACTIONS, "Warn to Reset to Change Interactions",
-        "<html>Whether DrJava should warn the user that preference<br>" +
+        "<html>Whether DrScala should warn the user that preference<br>" +
         "changes will not be applied until the Interactions Pane<br>" + "is reset.</html>.");
     add(WARN_PATH_CONTAINS_POUND, "Warn if File's Path Contains a '#' Symbol",
-        "<html>Whether DrJava should warn the user if the file being<br>" +
+        "<html>Whether DrScala should warn the user if the file being<br>" +
         "saved has a path that contains a '#' symbol.<br>" +
         "Users cannot use such files in the Interactions Pane<br>" + "because of a bug in Java.</html>");
-    add(DIALOG_DRJAVA_ERROR_POPUP_ENABLED, "Show a notification window when the first DrJava error occurs",
-        "<html>Whether to show a notification window when the first DrJava error occurs.<br>" +
+    add(DIALOG_DRJAVA_ERROR_POPUP_ENABLED, "Show a notification window when the first DrScala error occurs",
+        "<html>Whether to show a notification window when the first DrScala error occurs.<br>" +
         "If this is disabled, only the \"DrJava Error\" button will appear.</html>");
     add(WARN_IF_COMPIZ, "Warn If Compiz Detected",
-        "<html>Whether DrJava should warn the user if Compiz is running.<br>"+
+        "<html>Whether DrScala should warn the user if Compiz is running.<br>"+
         "Compiz and Java Swing are incompatible and can lead to crashes.</html>");
     add(DELETE_LL_CLASS_FILES, "Delete language level class files?",
-        "Whether DrJava should delete class files in directories with language level files.");
+        "Whether DrScala should delete class files in directories with language level files.");
     add(NEW_VERSION_NOTIFICATION, "Check for new versions?",
-        "Whether DrJava should check for new versions on drjava.org.");
+        "Whether DrScala should check for new versions on drjava.org.");
     add(NEW_VERSION_NOTIFICATION_DAYS, "Days between new version check",
         "The number of days between automatic new version checks.");
     
@@ -341,7 +341,7 @@ public class ConfigDescriptions {
     add(RUN_WITH_ASSERT, "Enable Assert Statement Execution", runWithAssertMsg);
     
     add(BACKUP_FILES, "Keep Emacs-style Backup Files", 
-        "<html>Whether DrJava should keep a backup copy of each file that<br>" +
+        "<html>Whether DrScala should keep a backup copy of each file that<br>" +
         "the user modifies, saved with a '~' at the end of the filename.</html>");
     add(RESET_CLEAR_CONSOLE, "Clear Console After Interactions Reset", 
         "Whether to clear the Console output after resetting the Interactions Pane.");
@@ -350,18 +350,18 @@ public class ConfigDescriptions {
         "<html>Whether to focus on the definitions pane after executing a find/replace operation.<br>" +
         "If this is not selected, the focus will be in the Find/Replace pane.</html>");
     add(DRJAVA_USE_FORCE_QUIT, "Forcefully Quit DrScala",
-        "<html>On some platforms, DrJava does not shut down properly when files are open<br>"+
-        "(namely tablet PCs). Check this option to force DrJava to close.</html>");
+        "<html>On some platforms, DrScala does not shut down properly when files are open<br>"+
+        "(namely tablet PCs). Check this option to force DrScala to close.</html>");
     add(REMOTE_CONTROL_ENABLED, "Enable Remote Control",
-        "<html>Whether DrJava should listen to a socket (see below) so it<br>" +
+        "<html>Whether DrScala should listen to a socket (see below) so it<br>" +
         "can be remote controlled and told to open files.<br>"+
-        "(Changes will not be applied until DrJava is restarted.)</html>");
+        "(Changes will not be applied until DrScala is restarted.)</html>");
     add(REMOTE_CONTROL_PORT, "Remote Control Port",
-        "<html>A running instance of DrJava can be remote controlled and<br>"+
+        "<html>A running instance of DrScala can be remote controlled and<br>"+
         "told to open files. This specifies the port used for remote control.<br>" + 
-        "(Changes will not be applied until DrJava is restarted.)</html>");
+        "(Changes will not be applied until DrScala is restarted.)</html>");
     add(FOLLOW_FILE_DELAY, "Follow File Delay",
-        "<html>The delay in milliseconds that has to elapse before DrJava will check<br>"+
+        "<html>The delay in milliseconds that has to elapse before DrScala will check<br>"+
         "if a file that is being followed or the output of an external process has changed.</html>");
     add(FOLLOW_FILE_LINES, "Maximum Lines in \"Follow File\" Window",
         "<html>The maximum number of lines to keep in a \"Follow File\"<br>" +
@@ -373,7 +373,7 @@ public class ConfigDescriptions {
 //                                                  "<html>Whether to continuously parse the source file for useful information.<br>" +
 //                                                  "Enabling this option might introduce delays when editing files.<html>"));
 //    add(DIALOG_LIGHTWEIGHT_PARSING_DELAY, "Light-weight parsing delay in milliseconds"
-//                                                  "The amount of time DrJava will wait after the last keypress before beginning to parse."));
+//                                                  "The amount of time DrScala will wait after the last keypress before beginning to parse."));
     
     add(MASTER_JVM_XMX, "Maximum Heap Size for Main JVM in MB", 
         "The maximum heap the Main JVM can use. Select blank for default.");
@@ -414,23 +414,23 @@ public class ConfigDescriptions {
         "applets and ACM Java Task Force programs (subclasses of acm.program.Program).</html>");
     add(HISTORY_MAX_SIZE, "Size of Interactions History", "The number of interactions to remember in the history.");
     add(DIALOG_AUTOIMPORT_ENABLED, "Enable the \"Auto Import\" Dialog",
-        "<html>Whether DrJava should open the \"Auto Import\" dialog when<br>" +
+        "<html>Whether DrScala should open the \"Auto Import\" dialog when<br>" +
         "an undefined class is encountered in the Interactions Pane.</html>");
     add(INTERACTIONS_AUTO_IMPORT_CLASSES, "Classes to Auto-Import",
         "<html>List of classes to auto-import every time the<br>" +
         "Interaction Pane is reset or started. Examples:<br><br>" + "java.io.File<br>" + "java.util.*</html>");
     add(DYNAMICJAVA_ACCESS_CONTROL, "Enforce access control", 
-        "What kind of access control should DrJava enforce in the Interactions Pane?");
+        "What kind of access control should DrScala enforce in the Interactions Pane?");
     add(DYNAMICJAVA_REQUIRE_SEMICOLON, "Require Semicolon",
-        "<html>Whether DrJava should require a semicolon at the<br>" +
+        "<html>Whether DrScala should require a semicolon at the<br>" +
         "end of a statement in the Interactions Pane.</html>");
     add(DYNAMICJAVA_REQUIRE_VARIABLE_TYPE, "Require Variable Type",
-        "<html>Whether DrJava should require a variable type for<br>" +
+        "<html>Whether DrScala should require a variable type for<br>" +
         "variable declarations in the Interactions Pane.</html>");
     
     /** Add all of the components for the JUnit panel of the preferences window. */
     add(JUNIT_LOCATION_ENABLED, "Use external JUnit",
-        "<html>If this is enabled, DrJava will use the JUnit configured<br>" +
+        "<html>If this is enabled, DrScala will use the JUnit configured<br>" +
         "below under 'JUnit/ConcJUnit Location'. If it is disabled,<br>" +
         "DrJava will use the JUnit that is built-in.</html>");
     add(JUNIT_LOCATION, "JUnit/ConcJUnit Location", "<html>Optional location of the JUnit or ConcJUnit jar file.<br>" +
@@ -451,6 +451,6 @@ public class ConfigDescriptions {
     add(FORCE_TEST_SUFFIX, "Require test classes in projects to end in \"Test\"",
         "Whether to force test classes in projects to end in \"Test\".");
     /* Java language levels are disabled in DrScala, but LANGUAGE_LEVEL refers to Option indicating Scala. */
-    add(LANGUAGE_LEVEL, "Language Level", "The language level DrJava currently uses.");
+    add(LANGUAGE_LEVEL, "Language Level", "The Java language level DrScala currently uses.");
   } 
 }

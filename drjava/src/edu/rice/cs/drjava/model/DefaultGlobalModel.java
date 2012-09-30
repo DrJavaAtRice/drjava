@@ -829,7 +829,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       File projRoot = getProjectRoot();
       if (projRoot != null) { result = IterUtil.compose(result, projRoot); }
       
-      Iterable<AbsRelFile> projectExtras = getExtraClassPath();
+      Iterable<AbsRelFile> projectExtras = getExtraProjectClassPath();
       if (projectExtras != null) { result = IterUtil.compose(result, projectExtras); }
     }
     else { result = IterUtil.compose(result, getSourceRootSet()); }
@@ -854,7 +854,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     */
   public void resetInteractionsClassPath() {
 //    System.err.println("Resetting interactions class path");
-    Iterable<AbsRelFile> projectExtras = getExtraClassPath();
+    Iterable<AbsRelFile> projectExtras = getExtraProjectClassPath();
     //System.out.println("Adding project classpath vector to interactions classpath: " + projectExtras);
     if (projectExtras != null)  for (File cpE : projectExtras) { _interactionsModel.addProjectClassPath(cpE); }
     
@@ -881,6 +881,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     // add project source root to projectFilesClassPath.  All files in project tree have this root.
     
     _interactionsModel.addProjectFilesClassPath(getProjectRoot());  // is sync advisable here?
-    setClassPathChanged(false);  // reset classPathChanged state
+    setClassPathChanged(false);  // reset classPathChanged state  // Why is this flag set to false here?
   } 
 }

@@ -465,7 +465,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
   }
   
   /** Called when trying to test an illegal class file.
-    * @param e the ClassFileError thrown when DrJava attempted to load the offending file
+    * @param e the ClassFileError thrown when DrScala attempted to load the offending file
     */
   public void classFileError(ClassFileError e) {
     _lock.startRead();

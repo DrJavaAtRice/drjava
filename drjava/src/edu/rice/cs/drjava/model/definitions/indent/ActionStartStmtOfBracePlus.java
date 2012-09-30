@@ -78,10 +78,9 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
         doc.findPrevDelimiter(pos, STRICT_OPENING_BRACES);
       
       if (bracePos == ERROR_INDEX) return supResult;  // will never happen if pos has an enclosing (Scala) brace 
-//      boolean prevDelimiterIsStrict = Arrays.binarySearch(STRICT_OPENING_BRACES, doc.getText(bracePos, 1).charAt(0)) >= 0);
-//      System.err.println("bracePos = " + bracePos /* + "; prevDelimiterIsStrict = " + prevDelimiterIsStrict */);
-      final int indent = doc._getIndentOfStmt(bracePos) + _suffix;
-//      System.err.println("indent = " + indent + " _suffix = " + _suffix);
+//      System.err.println("[ASSOBP] bracePos = " + bracePos + "; brace = '" + doc.getText(bracePos,1).charAt(0) + "'");
+      final int indent = doc._getIndentOfRestrictedStmt(bracePos) + _suffix;  // ignore any '=' prelude
+//      System.err.println("[ASSOBP] indent = " + indent + " _suffix = " + _suffix);
       
       doc.setTab(indent, pos);
     }

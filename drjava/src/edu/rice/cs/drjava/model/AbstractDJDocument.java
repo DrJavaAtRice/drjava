@@ -1188,6 +1188,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
 //    System.err.println("***** _findBeginningOfStmt(" + pos + ") called; Line end is + " + lineEnd + "; Current line is '" + 
 //                       _getCurrentLine(pos) + "'");
+    /* Find the beginning of the stmt (without prelude) on this line.  Must skip over paren phrases and comments that
+     * end on this line, including both embedded and spanning phrases.  The innermost char beginning a line and 
+     * preceding all paren phrases ending on this line (or all paren phrases forming a line spanning chain that ends
+     * on this line) is the beginning of our stmt. */
     try {
       // Find last valid char preceding lineEnd
       int revPos = getPrevNonWSCharPos(lineEnd);     // revised pos created by skipping over paren phrases that span stmt lines
@@ -1199,7 +1203,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       
       assert revLineEnd >=0 && revLineStart >= 0;
       
-      /* Find pos of last unmatched brace on this line; all paren phrases must be examined. */
+      /* Find pos of last closing brace on this line; all paren phrases must be examined. */
       int lastBracePos = findPrevDelimiter(revLineEnd, CLOSING_BRACES, /* skip paren phrases */ false);
       // lastBracePos may be ERROR_INDEX
 //      System.err.println("[FBOS] lastBracePos = " + lastBracePos);
@@ -1236,9 +1240,17 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param pos Cursor position
     */
   public int _getIndentOfStmt(int pos) {
-    return _getIndentOfStmt(pos, DEFAULT_DELIMS, DEFAULT_WHITESPACE_WITH_COMMA);
+    return _getIndentOfStmt(pos, DEFAULT_DELIMS, DEFAULT_WHITESPACE_WITH_COMMA, true);
   }
   
+  /** Returns the number of blanks in the indent prefix for the start of the RESTRICTED statement ('=' preludes are excluded)
+    * identified by pos.  Uses a default set of delimiters, {';', '{', '}'} and a default set of whitespace characters 
+    * {' ', '\t', n', ','}.  Assumes beginning of statement is already propertly indented!
+    * @param pos Cursor position
+    */
+  public int _getIndentOfRestrictedStmt(int pos) {
+    return _getIndentOfStmt(pos, DEFAULT_DELIMS, DEFAULT_WHITESPACE_WITH_COMMA, false);
+  }
   /** Returns the number of blanks in the indent prefix of the start of the statement identified by pos.  Uses a 
     * default set of whitespace characters: {' ', '\t', '\n', ','}.  Assumes beginning of statement is already propertly
     * indented!  '{' is a statement break but '='is not.
@@ -1246,7 +1258,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * TODO: why is whitespace passed as an argument.  Isn't the default OK?
     */
   public int _getIndentOfStmt(int pos, char[] delims) {
-    return _getIndentOfStmt(pos, delims, DEFAULT_WHITESPACE_WITH_COMMA);
+    return _getIndentOfStmt(pos, delims, DEFAULT_WHITESPACE_WITH_COMMA, true);
   }
  
   /** Returns the number of spaces in the indent prefix of the start of the statement identified by pos) assuming
@@ -1259,6 +1271,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param whitespace  characters to skip when looking for beginning of next statement; must include ' ' and '\n'
     */
   public int _getIndentOfStmt(final int pos, final char[] delims, final char[] whitespace)  {
+    return _getIndentOfStmt(pos, delims, whitespace, true);
+  }
+  
+  /** Same method as above except inlcudeEqualsPrelude flag has been added so searching back for such preludes can be
+    * suppressed.  The default is for this flag to be true. */
+  public int _getIndentOfStmt(final int pos, final char[] delims, final char[] whitespace, boolean includeEqualsPrelude)  {
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
     assert pos >= 0;
     
@@ -1272,26 +1290,29 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     final Query key = new Query.IndentOfStmt(lineEnd, delims, whitespace);
     final Integer cached = (Integer) _checkCache(key);
     if (cached != null) {
-//        System.err.println("  Returning cached value " + cached);
+//        System.err.println("  [GIOS] Returning cached value " + cached);
       return cached;
     }
     
     /* Searching backwards from lineEnd, skip over any brace phrase ending on this line that spans multiple lines, errs if
      * this line is a continuation and no braces span this line! */
     int stmtStart = _findBeginningOfStmt(lineEnd);
-//    System.err.println("In _getIndentOfStmt, lineEnd = " + lineEnd + " stmtStart = " + stmtStart);
+//    System.err.println("[GIOS] lineEnd = " + lineEnd + " stmtStart = " + stmtStart + " from calling FBOS again");
     int indentOfStmt = stmtStart - _getLineStartPos(stmtStart);  // indent of this stmt (excluding possible prelude!)
     
     if (stmtStart == ERROR_INDEX) {  // No beginning found; perhaps line containing pos is blank
       try {
         int newPos = getPrevNonWSCharPos(lineEnd);
         stmtStart = _findBeginningOfStmt(newPos);
+//        System.err.println("[GIOS] called FBOS yet again because stmtStart == ERROR_INDEX; newPos = " + newPos +
+//                           "; final stmtStart = " + stmtStart);
         indentOfStmt = stmtStart - _getLineStartPos(stmtStart);
+        
       }
       catch(BadLocationException e) { return 0; } // document preceding pos is empty
     }
     
-//    System.err.println("  In _getIndentOfStmt, plausible first char pos in stmt at pos " + pos + " is " + stmtStart);
+//    System.err.println("[GIOS] plausible first char pos in stmt at pos " + pos + " is " + stmtStart);
     
     /* Find the EnclosingBraceOrPrevSemicolon of this stmt.  The braces setincludes '=' and "=>". */
     try {
@@ -1301,20 +1322,23 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       
       /* Perform some analysis depending on the boundary char preceding the previous line:
        * (i)   if char == newline (semicolon or implicit semicolon immediately precedes it), return indent of next Non WS Char
-       * (ii)  if char == '=', find the prev semicolon (returning pos of a NEWLINE) and then the pps the firstNonWS char
-       *       following the newline   (The find prev semicolon can be done with the findEBOPS method because the prelude
-       *       of '=' cannot contain an enclosing brace of any form in a legal program.)
+       * (ii)  if char == '=' then
+       *       (a) if includeEqualsPrelude == true, find the prev semicolon (returning pos of a NEWLINE) and then the pos
+       *           the firstNonWS char following the newline   (The find prev semicolon can be done with the findEBOPS 
+       *           method because the prelude of '=' cannot contain an enclosing brace of any form in a legal program.)
+       *        (b) otherwise return indent of next Non WS char
        * (iii) if char = '{' or '(' or '>', find the indent of the firstNonWS char following the brace.
        *     
        */
-//      System.err.println("    boundaryPos = " + boundaryPos + ", boundaryChar = '" + boundaryChar + "'");
-      if (boundaryChar == '=') return _getIndentOfStmt(boundaryPos - 1);  // find indent of stmt prelude
+//      System.err.println("[GIOS] boundaryPos = " + boundaryPos + ", boundaryChar = '" + boundaryChar + "'");
+      if (boundaryChar == '=' && includeEqualsPrelude) return _getIndentOfStmt(boundaryPos - 1);  // find indent of stmt prelude
       else { 
-        assert boundaryChar == newline || boundaryChar == '(' || boundaryChar == '{' || boundaryChar == '>';
+        assert boundaryChar == newline || boundaryChar == '(' || boundaryChar == '{' || boundaryChar == '>' || 
+          (boundaryChar == '=' && ! includeEqualsPrelude);                                                                                                        ;
         int endBoundaryLine = _getLineEndPos(boundaryPos);
         int nextNonWSCharPos = _getFirstNonWSCharPos(endBoundaryLine + 1);
         int diff = nextNonWSCharPos - _getLineStartPos(nextNonWSCharPos);
-//        System.err.println("first Non WS char pos of this stmt is " + nextNonWSCharPos + " indent = " + diff);
+//        System.err.println("[GIOS] first Non WS char pos of this stmt is " + nextNonWSCharPos + " indent = " + diff);
 //        System.err.println("***** _getIndentOfStmt returning " + diff);
         return nextNonWSCharPos - _getLineStartPos(nextNonWSCharPos);
       }

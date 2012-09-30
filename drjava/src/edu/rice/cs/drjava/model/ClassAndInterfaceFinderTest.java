@@ -50,13 +50,13 @@ import java.io.StringReader;
 public class ClassAndInterfaceFinderTest extends DrJavaTestCase {
   
   
-  /** Tests to see if string input is properly parsed to obtain interface name.
+  /** Tests to see if string input is properly parsed to obtain trait name.
    */
-  public void testStringInterfaceRecognition() {
+  public void testStringTraitRecognition() {
     try {
-      Reader r = new StringReader("//\n /**/public Class Interface interface Aa.12_34 {}");
+      Reader r = new StringReader("//\n /**/Class Trait trait Aa.12_34 {}");
       ClassAndInterfaceFinder finder = new ClassAndInterfaceFinder(r);
-      String s = finder.getClassOrInterfaceName();
+      String s = finder.getClassObjectOrTraitName();
       assertEquals("stringInterfaceRecognition","Aa.12_34", s);
     }
     catch (Exception e) {
@@ -65,11 +65,11 @@ public class ClassAndInterfaceFinderTest extends DrJavaTestCase {
   }
   
   
-  /** Tests to see if string input is properly parsed to reject interface name.
+  /** Tests to see if string input is properly parsed to reject trait name.
    */
   public void testStringInterfaceRejection() {
     try {
-      Reader r = new StringReader("//\n /**/public Class Interface interface Aa.12_34 {}");
+      Reader r = new StringReader("//\n /**/Class Trait trait Aa.12_34 {}");
       ClassAndInterfaceFinder finder = new ClassAndInterfaceFinder(r);
       String s = finder.getClassName();
       assertEquals("stringInterfaceRejection","", s);
@@ -84,9 +84,9 @@ public class ClassAndInterfaceFinderTest extends DrJavaTestCase {
    */
   public void testStringClassRecognition() {
     try {
-      Reader r = new StringReader("//\n /**/public Class Interface class Aa.12_34 {}");
+      Reader r = new StringReader("//\n /**/Class Trait class Aa.12_34 {}");
       ClassAndInterfaceFinder finder = new ClassAndInterfaceFinder(r);
-      String s = finder.getClassOrInterfaceName();
+      String s = finder.getClassObjectOrTraitName();
       assertEquals("stringNameRecognition","Aa.12_34", s);
     }
     catch (Exception e) {
@@ -98,15 +98,13 @@ public class ClassAndInterfaceFinderTest extends DrJavaTestCase {
    */
   public void testStringPackageRecognition() {
     try {
-      Reader r = new StringReader("//\n /**/package x public interface Aa.12_34 {}");
+      Reader r = new StringReader("//\n /**/package x trait Aa.12_34 {}");
       ClassAndInterfaceFinder finder = new ClassAndInterfaceFinder(r);
-      String s = finder.getClassOrInterfaceName();
+      String s = finder.getClassObjectOrTraitName();
       assertEquals("stringNameRecognition","x.Aa.12_34", s);
     }
     catch (Exception e) {
       fail("stringPackageRecognition threw " + e);
     }
-  }
-  
-  
+  } 
 }

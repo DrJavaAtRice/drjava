@@ -149,7 +149,7 @@ public interface FileGroupingState {
   /** Returns a collection of classpath entries specific to the current project.
     * @return the project's extra classpath
     */
-  public Iterable<AbsRelFile> getExtraClassPath();
+  public Iterable<AbsRelFile> getExtraProjectClassPath();
   
   /** Sets the list of project-specific classpath entries. */
   public void setExtraClassPath(Iterable<AbsRelFile> cp);

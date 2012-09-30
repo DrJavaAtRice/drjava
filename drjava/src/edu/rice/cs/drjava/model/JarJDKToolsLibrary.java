@@ -613,7 +613,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
      */
     LinkedHashMap<File,Set<JDKDescriptor>> jars = new LinkedHashMap<File,Set<JDKDescriptor>>();
 
-    // Search for all compiler descriptors in the drjava.jar file or lib/platform.jar in the executable file tree
+    // Search for all compiler descriptors in the drscala.jar file or lib/platform.jar in the executable file tree
     Iterable<JDKDescriptor> descriptors = searchForJDKDescriptors(); 
     for(JDKDescriptor desc: descriptors) {
       // add the specific search directories and files

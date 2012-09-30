@@ -101,7 +101,7 @@ public class FindReplaceMachineTest extends DrJavaTestCase {
   public void setUp() throws Exception {
     super.setUp();
     String user = System.getProperty("user.name");
-    _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
+    _tempDir = IOUtil.createAndMarkTempDirectory("DrScala-test-" + user, "");
     _docPrev = _model.newFile(_tempDir);;
     _doc = _model.newFile(_tempDir);
     _docNext = _model.newFile(_tempDir);

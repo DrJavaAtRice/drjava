@@ -939,7 +939,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     // ----- FIND ALL DEFINED CLASSES IN FOLDER ---
     
-    public Iterable<AbsRelFile> getExtraClassPath() { return _projExtraClassPath; }
+    public Iterable<AbsRelFile> getExtraProjectClassPath() { return _projExtraClassPath; }
     public void setExtraClassPath(Iterable<AbsRelFile> cp) { 
       _projExtraClassPath = cp; 
       setClassPathChanged(true);
@@ -1053,7 +1053,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File getCreateJarFile() { return FileOps.NULL_FILE; }
     public void setCreateJarFlags(int f) { }
     public int getCreateJarFlags() { return 0; }
-    public Iterable<AbsRelFile> getExtraClassPath() { return IterUtil.empty(); }
+    public Iterable<AbsRelFile> getExtraProjectClassPath() { return IterUtil.empty(); }
     public void setExtraClassPath(Iterable<AbsRelFile> cp) { }
     public boolean isProjectChanged() { return false; }
     public void setProjectChanged(boolean changed) { /* Do nothing  */  }
@@ -1687,7 +1687,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       for (String s : paths) { builder.addCollapsedPath(s); }
     }
     
-    Iterable<AbsRelFile> exCp = getExtraClassPath();
+    Iterable<AbsRelFile> exCp = getExtraProjectClassPath();
     if (exCp != null) {
       for (AbsRelFile f : exCp) { builder.addClassPathFile(f); }
     }
@@ -2519,13 +2519,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     });
   }
   
-  /** Prints System.out to the DrJava console.  This method can safely be run outside the event thread. */
+  /** Prints System.out to the DrScala console.  This method can safely be run outside the event thread. */
   public void systemOutPrint(final String s) { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_OUT_STYLE); }
   
-  /** Prints System.err to the DrJava console.  This method can safely be run outside the event thread. */
+  /** Prints System.err to the DrScala console.  This method can safely be run outside the event thread. */
   public void systemErrPrint(final String s) { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_ERR_STYLE); }
   
-  /** Prints to the DrJava console as an echo of System.in.  This method can safely be run outside the event thread. */
+  /** Prints to the DrScala console as an echo of System.in.  This method can safely be run outside the event thread. */
   public void systemInEcho(final String s) { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_IN_STYLE); }
   
   /** throws UnsupportedOperationException */
@@ -2541,7 +2541,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Returns a project's extra classpaths; empty for FlatFileGroupingState
     * @return The classpath entries loaded along with the project
     */
-  public Iterable<AbsRelFile> getExtraClassPath() { return _state.getExtraClassPath(); }
+  public Iterable<AbsRelFile> getExtraProjectClassPath() { return _state.getExtraProjectClassPath(); }
   
   /** Sets the set of classpath entries to use as the projects set of classpath entries.  This is normally used by the
     * project preferences..
@@ -3914,7 +3914,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     /** Only runs in event thread. */
     public int _getIndentOfStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
-      return getDocument()._getIndentOfStmt(pos, delims, whitespace);
+      return getDocument()._getIndentOfStmt(pos, delims, whitespace, true);
     }
     
 //    public int getPrevNonWSCharPos(int pos, char[] whitespace) throws BadLocationException {

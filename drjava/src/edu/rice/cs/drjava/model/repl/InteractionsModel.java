@@ -314,7 +314,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _resetInterpreter(wd, force);
   }
   
-  /** Resets the Java interpreter.  This should only be called from resetInterpreter, never directly. */
+  /** Resets the interpreter.  This should only be called from resetInterpreter, never directly. */
   protected abstract void _resetInterpreter(File wd, boolean force);
   
   /** Returns the working directory for the current interpreter. */

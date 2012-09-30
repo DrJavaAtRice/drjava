@@ -208,7 +208,7 @@ public class JDKToolsLibrary {
   public static final java.io.StringWriter LOG_STRINGWRITER = new java.io.StringWriter();
   protected static final java.io.PrintWriter LOG_PW = new java.io.PrintWriter(LOG_STRINGWRITER);
   
-  /** Appends line containing s to _log and to a special log maintained for dumping the state of DrJava.  All messages
+  /** Appends line containing s to _log and to a special log maintained for dumping the state of DrScala.  All messages
     * intended for the special log must be pass through this method. */
   public static void msg(String s) { 
     _log.log(s);

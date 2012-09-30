@@ -95,7 +95,7 @@ public class Indenter {
       rule32 = new ActionStartCurrStmtPlus(0),   // Since stmt opens with '{', suppress indenting
       rule31 = new QuestionCurrLineStartsWithChar(new char[] {'{'}, rule32, rule37),
       
-      // Does thi snew statement begin with pattern matching "case"?  If so, must be indented with enclosing brace (excluding "=>")
+      // Does this snew statement begin with pattern matching "case"?  If so, must be indented with enclosing brace (excluding "=>")
       rule30 = new QuestionCurrLineStartsWith("case", FALSE_CASE_SUFFIXES, rule36, rule39),
       
       // Does this new statement begin with "else"?  If so, must match corresponding "if" (the prev stmt)
@@ -108,8 +108,10 @@ public class Indenter {
       rule22 = new QuestionStartAfterOpenBrace(rule23, rule24),
       // Indent line starting after open brace (including "=>")
       rule21 = new ActionStartStmtOfBracePlus(indentLevel,  /* include Scala braces */ true),
+      // Rule interpolated to handle "def ... = /n ... match { /n case ... =>"
+      rule205 = new QuestionCurrLineStartsWith("case", FALSE_CASE_SUFFIXES, rule36, rule21),
       // Does the preceding line contain the enclosing brace (including "=>" and "=") as last token?
-      rule20 = new QuestionStartImmedAfterOpenBrace(rule21, rule22),  // test includes Scala braces
+      rule20 = new QuestionStartImmedAfterOpenBrace(rule205, rule22),  // test includes Scala braces
       // Indent the line to match whitespace preceding the line enclosing brace
       rule19 = new ActionStartStmtOfBracePlus(0, /* include Scala braces" */ false),  
       

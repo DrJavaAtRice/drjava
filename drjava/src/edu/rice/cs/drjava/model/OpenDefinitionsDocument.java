@@ -50,7 +50,7 @@ import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.Finalizable;
 import edu.rice.cs.drjava.model.definitions.*;
 
-/** Interface for an open document in DrJava. It may not be resident (in DocumentCache).
+/** Interface for an open document in DrScala. It may not be resident (in DocumentCache).
   * @version $Id$
   */
 public interface OpenDefinitionsDocument extends DJDocument, Finalizable<DefinitionsDocument>,

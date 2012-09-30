@@ -58,7 +58,7 @@ public class PackageLexer extends java.io.StreamTokenizer {
     slashSlashComments(true);
     slashStarComments(true);
     
-    // add '_' and '.' to set of wordChars (package name is read as single word)
+    // add '_', '.', and '$' to set of wordChars (package name is read as single word)
     wordChars('_', '_');
     wordChars('.', '.');
     wordChars('$', '$');
@@ -83,13 +83,11 @@ public class PackageLexer extends java.io.StreamTokenizer {
         token = nextToken();
         if (token != TT_WORD || sval.startsWith(".") || sval.endsWith(".") || sval.contains("..")) break;
         name.append(prefix).append(sval);
-        prefix = ".";  // This is horrible imperative hack; in tail recursive form it is extra argument
+        prefix = ".";  // This is horrible imperative hack; in tail recursive form it is an extra argument
         token = nextToken();
       }
       return name.toString();
     }
-    catch(IOException e) {
-      return "";
-    }
+    catch(IOException e) { return ""; }
   }
 }

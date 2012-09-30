@@ -67,7 +67,7 @@ public interface PlatformSupport {
   /** Hook for performing general UI setup.  Called after all other UI setup is done.
    *  @param about the Action associated with openning the About dialog
    *  @param prefs the Action associated with openning the Preferences dialog
-   *  @param quit the Action associated with quitting the DrJava application
+   *  @param quit the Action associated with quitting the DrScala application
    */
   public void afterUISetup(Action about, Action prefs, Action quit);
   

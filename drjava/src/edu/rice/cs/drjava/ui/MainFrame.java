@@ -128,7 +128,7 @@ import static edu.rice.cs.util.XMLConfig.XMLConfigException;
 import static edu.rice.cs.plt.object.ObjectUtil.hash;
 import static edu.rice.cs.drjava.ui.MainFrameStatics.*;
 
-/** DrJava's main window. */
+/** DrScala's main window. */
 public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetListener {
   private static final Log _log = new Log("MainFrame.txt", false);
   
@@ -315,7 +315,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         f.getPath().endsWith(PROJECT_FILE_EXTENSION2) || f.getPath().endsWith(OLD_PROJECT_FILE_EXTENSION);
     }
     public String getDescription() { 
-      return "DrJava Project Files (*" + PROJECT_FILE_EXTENSION + ", *" + PROJECT_FILE_EXTENSION2 + ", *" + 
+      return "DrScala Project Files (*" + PROJECT_FILE_EXTENSION + ", *" + PROJECT_FILE_EXTENSION2 + ", *" + 
         OLD_PROJECT_FILE_EXTENSION + ")";
     }
   };
@@ -480,7 +480,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   private final Action _newProjectAction = new AbstractAction("New") {
-    { putValue(Action.SHORT_DESCRIPTION, "New DrJava project"); }  // init
+    { putValue(Action.SHORT_DESCRIPTION, "New DrScala project"); }  // init
     public void actionPerformed(ActionEvent ae) { _newProject(); }
   };
   
@@ -630,13 +630,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * source file in the editor pane)
     */
   private final Action _openProjectAction = new AbstractAction("Open...") {
-    { putValue(Action.SHORT_DESCRIPTION, "Open DrJava project"); }
+    { putValue(Action.SHORT_DESCRIPTION, "Open DrScala project"); }
     public void actionPerformed(ActionEvent ae) { _openProject(); }
   };
   
   private final Action _closeProjectAction = new AbstractAction("Close") {
     { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT);
-      putValue(Action.SHORT_DESCRIPTION, "Close DrJava project"); }
+      putValue(Action.SHORT_DESCRIPTION, "Close DrScala project"); }
     public void actionPerformed(ActionEvent ae) { 
       closeProject();
       _findReplace.updateFirstDocInSearch();
@@ -742,7 +742,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };
   
   /** Asks the user for a file name and saves a copy of the active document (in the definitions pane) to
-    * that file. DrJava's state is not modified (i.e. it does not set the document to 'unchanged'). */
+    * that file. DrScala's state is not modified (i.e. it does not set the document to 'unchanged'). */
   private final Action _saveCopyAction = new AbstractAction("Save Copy...") {
     public void actionPerformed(ActionEvent ae) { _saveCopy(); }
   };
@@ -754,7 +754,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   private final Action _saveProjectAction = new AbstractAction("Save") {
     { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT);  // init
-      putValue(Action.SHORT_DESCRIPTION, "Save DrJava project"); }
+      putValue(Action.SHORT_DESCRIPTION, "Save DrScala project"); }
     public void actionPerformed(ActionEvent ae) {
       _saveAll();  // saves project file and all modified project source files; does not save external files
     }
@@ -762,8 +762,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   private final Action _saveProjectAsAction = new AbstractAction("Save As...") {
     { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT);  // init
-      putValue(Action.SHORT_DESCRIPTION, "Save DrJava project As");
-      putValue(Action.LONG_DESCRIPTION, "Save DrJava project under different name"); }
+      putValue(Action.SHORT_DESCRIPTION, "Save DrScala project As");
+      putValue(Action.LONG_DESCRIPTION, "Save DrScala project under different name"); }
     public void actionPerformed(ActionEvent ae) {
       if (_saveProjectAs()) {  // asks user for new project file name; sets _projectFile in global model to this value
         _saveAll();  // performs saveAll operation using new project file name, assuming "Save as" was not cancelled
@@ -1214,12 +1214,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
   
-  /** Quits DrJava.  Optionally displays a prompt before quitting. */
+  /** Quits DrScala.  Optionally displays a prompt before quitting. */
   private final Action _quitAction = new AbstractAction("Quit") {
     public void actionPerformed(ActionEvent ae) { quit(); }
   };
   
-  /** Quits DrJava.  Optionally displays a prompt before quitting. */
+  /** Quits DrScala.  Optionally displays a prompt before quitting. */
   private final Action _forceQuitAction = new AbstractAction("Force Quit") {
     public void actionPerformed(ActionEvent ae) { _forceQuit(); }
   };
@@ -2212,7 +2212,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Defines actions that displays the interactions classpath. */
-  private final Action _viewInteractionsClassPathAction = new AbstractAction("View Interactions Classpath...") {
+  private final Action _viewInteractionsClassPathAction = new AbstractAction("View Interactions Class Path ...") {
     public void actionPerformed(ActionEvent e) { viewInteractionsClassPath(); }
   };
   
@@ -2283,8 +2283,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
 
-  /** Action that starts a new, blank, unconnected DrJava instance. */
-  private final Action _newDrJavaInstanceAction = new AbstractAction("New DrJava Instance...") {
+  /** Action that starts a new, blank, unconnected DrScala instance. */
+  private final Action _newDrJavaInstanceAction = new AbstractAction("New DrScala Instance...") {
     public void actionPerformed(ActionEvent ae) {
       try {
         Process p = JVMBuilder.DEFAULT.classPath(FileOps.getDrJavaFile()).
@@ -2894,7 +2894,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
   
-  /** How DrJava responds to window events. */
+  /** How DrScala responds to window events. */
   private final WindowListener _windowCloseListener = new WindowAdapter() {
     public void windowActivated(WindowEvent ev) { }
     public void windowClosed(WindowEvent ev) { }
@@ -3634,7 +3634,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           catch(IOException ignored) { /* ignore */ }
           if (!Utilities.TEST_MODE && !System.getProperty("user.name").equals(RemoteControlClient.getServerUser())) {
             Object[] options = {"Disable","Ignore"};
-            String msg = "<html>Could not start DrJava's remote control server";
+            String msg = "<html>Could not start DrScala's remote control server";
             if (RemoteControlClient.getServerUser() != null) {
               msg += "<br>because user "+RemoteControlClient.getServerUser()+" is already using the same port";
             }
@@ -3679,9 +3679,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             public void run() {
               int rc;
               Object[] options = {"Yes", "No", "Always", "Never"};
-              String text = "Do you want to associate .java, .drjava and .djapp files with DrJava?\n" + 
-                "Double-clicking on those files will open them in DrJava.\n\n" +
-                "Select 'Always' to let DrJava do this automatically.\n"+
+              String text = "Do you want to associate .java, .drjava and .djapp files with DrScala?\n" + 
+                "Double-clicking on those files will open them in DrScala.\n\n" +
+                "Select 'Always' to let DrScala do this automatically.\n"+
                 "Select 'Never' if you don't want to be asked again.\n\n"+
                 "You can change this setting in the Preferences dialog under\n"+
                 "Miscellaneous/File Types.";
@@ -3769,18 +3769,17 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     DrJavaPropertySetup.setup(); 
     
     // Files
-    PropertyMaps.TEMPLATE.
-      setProperty("DrJava", 
-                  new FileProperty("drjava.current.file", new Thunk<File>() {
-      public File value() { return _model.getActiveDocument().getRawFile(); }
-    }, 
-                                   "Returns the current document in DrJava.\n"+
-                                   "Optional attributes:\n"+
-                                   "\trel=\"<dir to which the output should be relative\"\n"+
-                                   "\tsquote=\"<true to enclose file in single quotes>\"\n"+
-                                   "\tdquote=\"<true to enclose file in double quotes>\"") {
-                                     public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
-                                   });
+    PropertyMaps.TEMPLATE.setProperty("DrJava", 
+                                      new FileProperty("drjava.current.file", 
+                                                       new Thunk<File>() {
+                                                         public File value() { return _model.getActiveDocument().getRawFile(); } }, 
+                                                       "Returns the current document in DrJava.\n"+
+                                                       "Optional attributes:\n"+
+                                                       "\trel=\"<dir to which the output should be relative\"\n"+
+                                                       "\tsquote=\"<true to enclose file in single quotes>\"\n"+
+                                                       "\tdquote=\"<true to enclose file in double quotes>\"") {
+                                                         public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
+                                                       });
     PropertyMaps.TEMPLATE.setProperty("DrJava", 
                                       new DrJavaProperty("drjava.current.line", 
                                                          "Returns the current line in the Definitions Pane.") {
@@ -4099,7 +4098,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                        "\tdquote=\"<true to enclose file in double quotes>\"") {
       protected List<File> getList(PropertyMaps pm) {
         ArrayList<File> l = new ArrayList<File>();
-        for(File f: _model.getExtraClassPath()) { l.add(f); }
+        for(File f: _model.getExtraProjectClassPath()) { l.add(f); }
         return l;
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
@@ -4627,7 +4626,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       try {
         hourglassOn();
         // make sure there are no open projects
-        if (! _model.isProjectActive() || (_model.isProjectActive() && _closeProject())) _openProjectHelper(file);
+        if (! _model.isProjectActive() || _closeProject()) _openProjectHelper(file);
       }
       catch(Exception e) { e.printStackTrace(System.out); }
       finally { hourglassOff(); } 
@@ -4693,8 +4692,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   boolean _closeProject() { return _closeProject(false); }
   
-  /** Saves the project file; closes all open project files; and calls _model.closeProject(quitting) the 
-    * clean up the state of the global model.  It also restores the list view navigator
+  /** Saves the project file; closes all open project files; and calls _model.closeProject(quitting) to 
+    * clean up the state of the global model.  It also restores the list view navigator.
     * @param quitting whether the project is being closed as part of quitting DrJava
     * @return true if the project is closed, false if cancelled
     */

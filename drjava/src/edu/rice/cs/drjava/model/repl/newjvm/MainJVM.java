@@ -74,23 +74,24 @@ import edu.rice.cs.util.classloader.ClassFileError;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 
-/**
- * <p>Manages a remote JVM.  Includes methods for communication in both directions: MainJVMRemoteI
- * provides callbacks allowing the remote JVM to access the model, and a variety of delegating
- * methods wrap calls to the InterpreterJVMRemoteI methods, taking care of any RMI-related errors.
- * In the case of errors, these interpreter-delegating methods communicate the failure via the
- * return value.  (Note that it is impossible to guarantee success of these methods -- the remote
- * process may exit arbitrarily at any time -- and clients should behave gracefully when failures
- * occur.)</p>
- * 
- * <p>The current design is flawed: strictly speaking, two sequential interpreter-delegating calls to
- * this object may communicate with <em>different</em> JVMs if the remote JVM happens to reset in
- * the interim.  A better design would return a separate object for interfacing with each unique remote
- * JVM.  In this way, clients would know that all calls to a certain object would be forwarded to
- * the same remote JVM.</p>
- * 
- * @version $Id$
- */
+/** <p>Manages a remote JVM.  Includes methods for communication in both directions: MainJVMRemoteI
+  * provides callbacks allowing the remote JVM to access the model, and a variety of delegating
+  * methods wrap calls to the InterpreterJVMRemoteI methods, taking care of any RMI-related errors.
+  * In the case of errors, these interpreter-delegating methods communicate the failure via the
+  * return value.  (Note that it is impossible to guarantee success of these methods -- the remote
+  * process may exit arbitrarily at any time -- and clients should behave gracefully when failures
+  * occur.)</p>
+  * 
+  * <p>The current design is flawed: strictly speaking, two sequential interpreter-delegating calls to
+  * this object may communicate with <em>different</em> JVMs if the remote JVM happens to reset in
+  * the interim.  A better design would return a separate object for interfacing with each unique remote
+  * JVM.  In this way, clients would know that all calls to a certain object would be forwarded to
+  * the same remote JVM.</p>
+  * 
+  * <p> Note that the Option type used in this class is edu.rice.cs.plt.tuple.Option, not edu.rice.cs.drjava.config. 
+  * 
+  * @version $Id$
+  */
 public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /** Debugging log. */
@@ -151,17 +152,15 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Starts the interpreter if it's not running already. */
   public void startInterpreterJVM() { _state.value().start(); /* waitUntilReady(); */ }
   
-  /**
-   * Stop the interpreter if it's current running.  (Note that, until {@link #startInterpreterJVM} is called
-   * again, all methods that delegate to the interpreter JVM will fail, returning "false" or "none".)
-   */
+  /** Stop the interpreter if it's current running.  (Note that, until {@link #startInterpreterJVM} is called
+    * again, all methods that delegate to the interpreter JVM will fail, returning "false" or "none".)
+    */
   public void stopInterpreterJVM() { _state.value().stop(); }
   
-  /**
-   * Get a "fresh" interpreter JVM.  Has the same effect as {@link #startInterpreterJVM} if no interpreter
-   * is running.  If a currently-running JVM is already "fresh", it is still stopped and restarted when
-   * {@code force} is true.
-   */
+  /** Get a "fresh" interpreter JVM.  Has the same effect as {@link #startInterpreterJVM} if no interpreter
+    * is running.  If a currently-running JVM is already "fresh", it is still stopped and restarted when
+    * {@code force} is true.
+    */
   public void restartInterpreterJVM(boolean force) { _state.value().restart(force); /* waitUntilReady(); */ }
     
   /**
@@ -396,10 +395,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException e) { _handleRemoteException(e); return false; }
   }
   
-  /**
-   * Blocks until the interpreter is connected.  Returns {@code true} if the change was successfully passed to
-   * the remote JVM.
-   */
+  /** Blocks until the interpreter is connected.  Returns {@code true} if the change was successfully passed to
+    * the remote JVM.
+    */
   public boolean addProjectFilesClassPath(File f) {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
     if (remote == null) { return false; }
@@ -430,7 +428,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   /** Returns the current class path of the interpreter as a list of unique entries.  The result is "none"
-   * if the remote JVM is unavailable or if an exception occurs.  Blocks until the interpreter is connected.
+    * if the remote JVM is unavailable or if an exception occurs.  Blocks until the interpreter is connected.
     */
   public Option<Iterable<File>> getClassPath() {
     InterpreterJVMRemoteI remote = _state.value().interpreter(false);
@@ -786,19 +784,17 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 
   /** State-based implementation of the starting/stopping functionality. */
   private abstract class State {
-    /**
-     * Get the current interpreter -- null if unavailable.  Block if necessary.
-     * @param used  Whether this access will lead to a used JVM -- one that should be reset even when not forced 
-     */
+    /** Get the current interpreter -- null if unavailable.  Block if necessary.
+      * @param used  Whether this access will lead to a used JVM -- one that should be reset even when not forced 
+      */
     public abstract InterpreterJVMRemoteI interpreter(boolean used); 
     /** Ensure that the interpreter is starting or running.  Block if necessary. */
     public abstract void start();
     /** Ensure that the interpreter is stopping or not running. Block if necessary. */
     public abstract void stop();
-    /**
-     * Ensure that the interpreter is stopping or not running, to be started again.  Block if necessary.
-     * @param force  Whether an unused, running JVM should be restarted
-     */
+    /** Ensure that the interpreter is stopping or not running, to be started again.  Block if necessary.
+      * @param force  Whether an unused, running JVM should be restarted
+      */
     public abstract void restart(boolean force);
     public abstract void dispose();
     /** React to a completed startup. */

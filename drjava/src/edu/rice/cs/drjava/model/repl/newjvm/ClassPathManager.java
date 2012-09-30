@@ -47,10 +47,11 @@ import edu.rice.cs.plt.reflect.PathClassLoader;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/**
- * Maintains a dynamic class path, allowing entries to be incrementally added in the appropriate
- * place in the list.  This class is used in the interpreter JVM, and may be accessed concurrently.
- */
+/** Maintains a dynamic class path, allowing entries to be incrementally added in the appropriate
+  * place in the list.  In normal DrScala sessions, this class is used in the interpreter JVM, and 
+  * may be accessed concurrently.  In some tests and debugging runs,  a single JVM is used 
+  * (SimpleInteractionsModel). In this case, the ClassPathManager runs in the main JVM.
+  */
 public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   
   // For thread safety, all accesses to these lists are synchronized on this, and when they are made available
@@ -88,7 +89,7 @@ public class ClassPathManager implements Lambda<ClassLoader, ClassLoader> {
   public static final String INTERACTIONS_CLASS_PATH_PROPERTY = "edu.rice.cs.drjava.interactions.class.path";
   
   protected void updateProperty() {
-    System.setProperty(INTERACTIONS_CLASS_PATH_PROPERTY,IOUtil.pathToString(_fullPath));
+    System.setProperty(INTERACTIONS_CLASS_PATH_PROPERTY, IOUtil.pathToString(_fullPath));
   }
   
   private final Lambda<Iterable<File>, Iterable<File>> _makeSafeSnapshot =
