@@ -52,44 +52,47 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 public final class JUnitErrorModelTest extends GlobalModelTestCase {
   
   private volatile JUnitErrorModel _m;
-  protected static final Log _log = new Log("JUnitError.txt", false);
+  protected static final Log _log = new Log("JUnitError.txt", true);
   
   private static final String MONKEYTEST_FAIL_TEXT =
     "import junit.framework._ \n" +
+    "import junit.framework.Assert._ \n" +
     "import java.io._ \n" +
     "class MonkeyTestFail extends TestCase { \n" +
 //    "  def MonkeyTestFail(name: String) { super(name); } \n" +
     "  def testShouldFail() { \n" +
     "    assertEquals(\"monkey\", \"baboon\") \n" +
     "  } \n" +
-    "  def testShouldErr() throws Exception { \n" +
+    "  def testShouldErr() { \n" +
     "    throw new IOException(\"Error\") \n" +
     "  } \n" +
     "}";
   
   private static final String TEST_ONE =
-    "import junit.framework.TestCase\n" +
+    "import junit.framework._ \n" +
+    "import junit.framework.Assert._ \n" +
     "class TestOne extends TestCase {\n" +
     "  def testMyMethod() {\n" +
     "    assertTrue(false)\n" +
     "  }\n" +
     "  override def toString() = \"TestOne()\"\n" + 
-    "  override equals(o: Object) = \n" +
+    "  override def equals(o: Any) = \n" +
     "    if ((o == null) || getClass() != o.getClass()) false\n" +
     "    else true\n" +
     "  override def hashCode() = getClass().hashCode()\n" +
-    "  def testThrowing() throws Exception{\n" +
+    "  def testThrowing() {\n" +
     "    throw new Exception(\"here\")\n" +
     "  }\n" +
     "  def testFail() { fail(\"i just failed the test\") }\n" +
     "}";
   
   private static final String TEST_TWO =
-    "import junit.framework.TestCase\n" +
+    "import junit.framework._ \n" +
+    "import junit.framework.Assert._ \n" +
     "class TestTwo extends TestOne {\n" +
     "  def testTwo() { assertTrue(true) }\n" +
     "  override def toString() = \"TestTwo()\"\n" +
-    "  override def equals(o: Object) =\n" +
+    "  override def equals(o: Any) =\n" +
     "    (o != null) && (getClass() == o.getClass())\n" +
     "  override def hashCode() = getClass().hashCode()\n" +
     "}";
@@ -104,10 +107,10 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
 //    "}";
   
   private static final String ABC_CLASS_ONE =
-    "class ABC extends java.util.Vector {}\n";
+    "class ABC extends java.util.Vector \n";
   
   private static final String ABC_CLASS_TWO =
-    "class ABC extends java.util.ArrayList {}\n";
+    "class ABC extends java.util.ArrayList \n";
   
   private static final String ABC_TEST =
     "class ABCTest extends junit.framework.TestCase {\n" +
@@ -115,8 +118,9 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     "}";
   
   private static final String LANGUAGE_LEVEL_TEST =
+    "import junit.framework.Assert._ \n" +
     "class MyTest extends junit.framework.TestCase {\n" + 
-    "  void testMyMethod() {\n" + 
+    "  def testMyMethod() {\n" + 
     "    assertEquals(\"OneString\", \"TwoStrings\");\n" + 
     "  }\n" + 
     "}\n";
@@ -365,14 +369,14 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     
     _m = _model.getJUnitModel().getJUnitErrorModel();
     
-    assertEquals("test case has one error reported", 3, _m.getNumErrors());
+    assertEquals("test case has three errors reported", 3, _m.getNumErrors());
     assertTrue("first error should be an error not a warning", !_m.getError(0).isWarning());
     
     assertTrue("it's a junit error", _m.getError(0) instanceof JUnitError);
     
-    assertEquals("The first error is on line 5", 3, _m.getError(0).lineNumber());
-    assertEquals("The first error is on line 5", 19, _m.getError(1).lineNumber());
-    assertEquals("The first error is on line 5", 22, _m.getError(2).lineNumber());
+    assertEquals("The first error is on line 4", 4, _m.getError(0).lineNumber());
+    assertEquals("The second error is on line 12", 12, _m.getError(1).lineNumber());
+    assertEquals("The third error is on line 14", 14, _m.getError(2).lineNumber());
     
 //    Utilities.clearEventQueue();
 //    Utilities.clearEventQueue();
@@ -388,11 +392,11 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     
     listener.assertJUnitStartCount(1);
     
-    assertEquals("test case has one error reported", 3, _m.getNumErrors());
-    assertTrue("first error should be an error not a warning", !_m.getError(0).isWarning());
-    assertEquals("The first error is on line 5", 3, _m.getError(0).lineNumber());
-    assertEquals("The first error is on line 5", 19, _m.getError(1).lineNumber());
-    assertEquals("The first error is on line 5", 22, _m.getError(2).lineNumber());
+    assertEquals("test case has no *new* errors reported", 3, _m.getNumErrors());
+
+    assertEquals("The first error is on line 4", 4, _m.getError(0).lineNumber());
+    assertEquals("The second error is on line 12", 12, _m.getError(1).lineNumber());
+    assertEquals("The third error is on line 14", 14, _m.getError(2).lineNumber());
     
     _model.removeListener(listener);
     debug.logEnd();
