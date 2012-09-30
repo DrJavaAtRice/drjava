@@ -1,6 +1,5 @@
 BraceTest
 JUnitErrorModelTest
-InteractionsModelErrorTest
 ignore tests above this line for now (deep issues, exceptions, sneaky indentation tests, etc)
 
 CommandLineTest
@@ -107,3 +106,4 @@ IntegerOptionComponentTest
 ColorOptionComponentTest
 PredictiveInputModelTest
 GlobalModelJUnitTest
+InteractionsModelErrorTest
