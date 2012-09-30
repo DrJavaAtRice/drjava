@@ -57,17 +57,13 @@ import edu.rice.cs.plt.tuple.OptionVisitor;
 import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.text.TextUtil;
 
-import edu.rice.cs.dynamicjava.Options;
-import edu.rice.cs.dynamicjava.interpreter.*;
-import edu.rice.cs.dynamicjava.interpreter.Interpreter;
-import edu.rice.cs.dynamicjava.symbol.*;
-import edu.rice.cs.dynamicjava.symbol.type.Type;
+import edu.rice.cs.drjava.model.repl.newjvm.DrScalaInterpreter;
+import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.PrintWriter;
-import java.lang.ClassLoader;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -83,7 +79,7 @@ import static edu.rice.cs.drjava.model.repl.InteractionsModelTest.IncompleteInpu
   */
 public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   protected static final String UNARY_FUN_NON_PUBLIC_INTERFACE_TEXT = 
-    "trait UnaryFun {\n" +
+    "private trait UnaryFun {\n" +
     "  def apply(arg: Object): Object\n" +
     "}";
   protected static final String UNARY_FUN_PUBLIC_INTERFACE_TEXT = 
@@ -92,7 +88,7 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     "}";
 
   protected static final String UNARY_FUN_NON_PUBLIC_CLASS_TEXT = 
-    "abstract class UnaryFun {\n" +
+    "private abstract class UnaryFun {\n" +
     "  def apply(arg: Object): Object\n" +
     "}";
   protected static final String UNARY_FUN_PUBLIC_CLASS_TEXT = 
@@ -105,81 +101,20 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     "  def run() { }\n" +
     "}";
 
-  private volatile InteractionsPaneOptions _interpreterOptions;
   private volatile Interpreter _interpreter;  
-  private volatile ClassPathManager _classPathManager;
-  private volatile ClassLoader _interpreterLoader;
   
   private static Log _log = new Log("InteractionsModelErrorTest.txt", false);
   
   public InteractionsModelErrorTest() {
     super();
-
-    _classPathManager = new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
-    _interpreterLoader = _classPathManager.makeClassLoader(null);
-    
-    // _interpreterOptions = Options.DEFAULT;
-    _interpreterOptions = new InteractionsPaneOptions();
-    _interpreter = new Interpreter(_interpreterOptions, _interpreterLoader);
-  }
-  
-  /** Asserts that the results of interpreting the first of each
-    * Pair is equal to the second.
-    * @param cases an array of Pairs
-    */
-  private void tester(Pair<String,Object>[] cases) throws InterpreterException {
-    for (int i = 0; i < cases.length; i++) {
-      Object out = interpretDirectly(cases[i].first());
-      assertEquals(cases[i].first() + " interpretation wrong!", cases[i].second(), out);
-    }
-  }
-  
-  private Object interpretDirectly(String s) throws InterpreterException {
-    return _interpreter.interpret(s).apply(new OptionVisitor<Object, Object>() {
-      public Object forNone() { return null; }
-      public Object forSome(Object obj) { return obj; }
-    });
+    _interpreter = new DrScalaInterpreter();
+    _interpreter.start();
   }
   
   protected String _name() {
     return "compiler=" + _model.getCompilerModel().getActiveCompiler().getName() + ": ";
   }
 
-    // Not applicable in Scala
-//  /** Tests that we get the correct 'cannot access its superinterface' error for non-public classes. */
-//  @SuppressWarnings("unchecked")
-//  public void testInterpretExtendNonPublic()
-//    throws BadLocationException, IOException, InterruptedException, InterpreterException {
-//    _log.log("testInterpretExtendNonPublic started");
-//    
-//    OpenDefinitionsDocument doc = setupDocument(UNARY_FUN_NON_PUBLIC_INTERFACE_TEXT);
-//    final File file = tempFile();
-//    saveFile(doc, new FileSelector(file));
-//    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
-//    _model.addListener(listener);
-//    listener.compile(doc);
-//    if (_model.getCompilerModel().getNumErrors() > 0) {
-//      fail("compile failed: " + getCompilerErrorString());
-//    }
-//    listener.checkCompileOccurred();
-//    _model.removeListener(listener);
-//    assertCompileErrorsPresent(_name(), false);
-//    
-//    // Make sure .class exists
-//    File compiled = classForScala(file, "UnaryFun");
-//    assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
-//    
-//    _classPathManager.addBuildDirectoryCP(compiled.getParentFile());
-//    
-//    try {
-//      _interpreter.interpret("UnaryFun f = new UnaryFun() { Object apply(Object arg) { return (Integer)arg * (Integer)arg; }}");
-//      fail("Should fail with 'cannot access its superinterface' exception.");
-//    }
-//    catch(edu.rice.cs.dynamicjava.interpreter.CheckerException ce) {
-//      assertTrue(ce.getMessage().indexOf("cannot access its superinterface")>=0);
-//    }
-//  }
-  
   /** Tests that we don't get an error for public classes. */
   @SuppressWarnings("unchecked")
   public void testInterpretExtendPublic()
@@ -195,17 +130,31 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     if (_model.getCompilerModel().getNumErrors() > 0) {
       fail("compile failed: " + getCompilerErrorString());
     }
+    _log.log("checking compile");
     listener.checkCompileOccurred();
+    _log.log("compile completed");
     _model.removeListener(listener);
     assertCompileErrorsPresent(_name(), false);
     
     // Make sure .class exists
     File compiled = classForScala(file, "UnaryFun");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
+    _log.log("found class file");
+
+    _log.log("path to add: " + compiled.getParentFile().getPath());
+    _interpreter.addCP("BuildDirectoryCP", compiled.getParentFile().getPath());
+    _log.log("added CP");
     
-    _classPathManager.addBuildDirectoryCP(compiled.getParentFile());
-    
-    _interpreter.interpret("UnaryFun f = new UnaryFun() { def apply(arg: Object) = arg.as(Int) * arg.as(Int)}"); // FIX!!
+    try {
+      String res = _interpreter.interpret("val f = new UnaryFun() { " + 
+              "def apply(arg: Object): Object = { (arg.asInstanceOf[Int] * " +
+              "arg.asInstanceOf[Int]).asInstanceOf[java.lang.Integer] } }");
+      assertTrue("extending a public class should NOT cause an error. res: " + res, 
+              !res.contains("error"));
+    }
+    catch(Throwable t) {
+      fail("testInterpretExtendPublic threw: " + t);
+    }
   }
   
   /** Tests that we get the correct 'cannot access its superinterface' error for non-public classes. */
@@ -231,14 +180,20 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     File compiled = classForScala(file, "UnaryFun");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
     
-    _classPathManager.addBuildDirectoryCP(compiled.getParentFile());
+    _interpreter.addCP("BuildDirectoryCP", compiled.getParentFile().getPath());
     
     try {
-      _interpreter.interpret("UnaryFun f = new UnaryFun() { public Object apply(Object arg) { return (Integer)arg * (Integer)arg; }}");
-      fail("Should fail with 'cannot access its superclass' exception.");
+      String res = _interpreter.interpret("val f = new UnaryFun() " + 
+          "{ def apply(arg: Object) = { (arg.asInstanceOf[Int] * " +
+          "arg.asInstanceOf[Int]).asInstanceOf[Object] }}");
+      if (!res.contains("error: private class UnaryFun escapes its " +
+                  "defining scope as part of type UnaryFun"))
+        fail("Should fail with 'private class UnaryFun escapes its " +
+                  "defining scope as part of type UnaryFun'");
     }
-    catch(edu.rice.cs.dynamicjava.interpreter.CheckerException ce) {
-      assertTrue(ce.getMessage().indexOf("cannot access its superclass")>=0);
+    catch (Throwable t) {
+      fail("Scala interpreter should return an exception, but " +
+              "it should not *throw* one itself. Threw: " + t);
     }
   }
   
@@ -265,9 +220,18 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     File compiled = classForScala(file, "UnaryFun");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
     
-    _classPathManager.addBuildDirectoryCP(compiled.getParentFile());
+    _interpreter.addCP("BuildDirectoryCP", compiled.getParentFile().getPath());
     
-    _interpreter.interpret("UnaryFun f = new UnaryFun() { public Object apply(Object arg) { return (Integer)arg * (Integer)arg; }}");
+   try {
+     String res = _interpreter.interpret("val f = new UnaryFun() { " + 
+             "def apply(arg: Object) = { (arg.asInstanceOf[Int] * " +
+             "arg.asInstanceOf[Int]).asInstanceOf[Object] }}");
+     assertTrue("extending a public class should NOT cause an error", 
+             !res.contains("error"));
+   }
+   catch (Throwable t) {
+     fail("testInterpretExtendPublic threw: " + t);
+   }
   }
   
   /** Test that we get the right package using getPackage(). */
@@ -297,22 +261,32 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     File compiled = classForScala(file, "Bar");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
     
-    _classPathManager.addBuildDirectoryCP(compiled.getParentFile().getParentFile());
+    String classFilePath = compiled.getParentFile().getPath();
+    String fooPath = classFilePath.substring(0, classFilePath.lastIndexOf("foo"));
+    _interpreter.addCP("BuildDirectoryCP", fooPath);
     
-    Object out = interpretDirectly("new foo.Bar().getClass().getPackage().getName()");
-    assertEquals("Package of foo.Bar should be foo", "foo", out);
+    try {
+      String res = _interpreter.interpret(
+        "val f = new foo.Bar().getClass().getPackage().getName()");
+      assertEquals("Package of foo.Bar should be foo", "f: java.lang.String = foo", res.trim());
+    }
+    catch (Throwable t) {
+      fail("testInterpretGetPackageClass threw: " + t);
+    }
   }
   
   /** Test that we get the right package using getPackage() with anonymous inner classes defined in the Interactions Pane. */
-  @SuppressWarnings("unchecked")
-  public void testInterpretGetPackageAnonymous()
-    throws BadLocationException, IOException, InterruptedException, InterpreterException {
+  public void testInterpretGetPackageAnonymous() {
+    //throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretGetPackageAnonymous started");
 
-    Object out = interpretDirectly("new Runnable() { public void run() { } }.getClass().getPackage()");
-    assertEquals("Package of $1 should be null", null, out);
-    
-    out = interpretDirectly("package foo; new Runnable() { public void run() { } }.getClass().getPackage().getName()");
-    assertEquals("Package of foo.$1 should be foo", "foo", out);
+    try {
+      String res = _interpreter.interpret(
+        "val n = new Runnable() { def run() { } }.getClass().getPackage()");
+      assertEquals("package should be null", "n: java.lang.Package = null", res.trim());
+    }
+    catch (Throwable t) {
+      fail("testInterpretGetPackageClass threw: " + t);
+    }
   }
 }
