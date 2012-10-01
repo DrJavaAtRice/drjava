@@ -3,7 +3,11 @@
 from subprocess import call
 import os
 
-baseCmd = '-Dtest-spec='
+# searchRoot = './plt'
+
+searchRoot = '.'
+def getCmd(tst):
+  return ['ant', '-Dtest-spec={}'.format(tst), 'test']
 
 def backup_found_list():
   with open('testsRunSoFar', 'r') as f, open('testsRunSoFar_backup', 'w') as g:
@@ -19,7 +23,7 @@ def find_next_test():
   if not alreadyRun:
     print 'error fetching list of tests which have already been run...'
   else:
-    for (path, dirs, files) in os.walk('.'):
+    for (path, dirs, files) in os.walk(searchRoot):
       for f in files:
           if f.endswith('Test.java') and f.replace('.java','') not in alreadyRun:
             if f.lower().find('indent') == -1 and path.lower().find('indent') == -1:
@@ -33,8 +37,8 @@ def find_next_test():
 def run_next_test():
   tst = find_next_test()
   if tst:
-    print 'testing:', baseCmd + tst
-    res = call(['ant', baseCmd + tst, 'test'])
+    print 'testing:', tst
+    res = call(getCmd(tst))
     if res:
       print tst, 'FAILED.'
     else:
