@@ -7,6 +7,6 @@ package edu.rice.cs.drjava.model.repl.newjvm;
  */
 public interface ScalaInterpreterAdapter {
   void addClasspath(String path);
-  // (void | boolean) reset
+  void reset();
   // (String?) interpret(String toInterpret) ... optional major refactoring
 }

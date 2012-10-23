@@ -153,6 +153,11 @@ public class DrScalaInterpreter implements Interpreter {
       System.err.println("ERROR: unable to add cp, '" + path +
         "' to the Interpreter classpath.");
   }
+
+  public synchronized void reset() {
+    String res = this._interpret(":reset", true);
+    System.err.println("result of reset cmd: " + res);
+  }
   
   /** Initialize the interpreter for use in the interactions pane. */
   private void _init() {
@@ -199,8 +204,12 @@ public class DrScalaInterpreter implements Interpreter {
    * method in order to augment the REPL classpath.
    */
   public String interpret(String input) throws InterpreterException {
+    if (input.equals(":test-reset")){
+      this.reset();
+      return "";
+    }
     Matcher match = scalaColonCmd.matcher(input);
-    if (match.matches()) 
+    if (match.matches())
       return "Error:  Scala interpreter colon commands not accepted.\n";
     return this._interpret(input, false);
   }
@@ -219,7 +228,7 @@ public class DrScalaInterpreter implements Interpreter {
     * there is a potential race condition on internal actions of this method if it is called from 
     * multiple threads.
     */
-  private synchronized String _interpret(String input, boolean addingCP) {
+  private synchronized String _interpret(String input, boolean isCmd) {
     // Perform deferred initialization if necessary
     if (! _isInitialized) _init(); 
 
@@ -227,7 +236,7 @@ public class DrScalaInterpreter implements Interpreter {
       /* clear out any leftovers -- there should never be any, however */
       outputStrings.clear();
       /* write the current line of code into the inputStrings queue */
-      inputStrings.add(addingCP? input : (input + '\n'));
+      inputStrings.add(isCmd? input : (input + '\n'));
       /* this call blocks until the first line of the return has been received */
       String s = outputStrings.take();
       

@@ -6,6 +6,7 @@ import scala.tools.nsc.util.ClassPath
 import scala.tools.nsc.io.File
 import scala.tools.nsc.io.File.pathSeparator
 import scala.collection.mutable.ListBuffer
+// import scala.tools.nsc.interpreter.LoopCommands.LoopCommand
 
 class DrScalaILoop(r: BufferedReader, w: PrintWriter) 
 extends ILoop(r, w) with ScalaInterpreterAdapter { 
@@ -34,4 +35,12 @@ extends ILoop(r, w) with ScalaInterpreterAdapter {
     // System.err.println("Creating new interpreter with classpath: " + settings.classpath.value)
     this.intp = new ILoopInterpreter
   }
+  def reset() {
+    closeInterpreter()
+    createInterpreter()
+  }
+  override def commands: List[LoopCommand] = 
+  (LoopCommand.nullary("reset","reset Interpreter",() => reset()) :: 
+    this.standardCommands)
+// ++ { if (isReplPower) powerCommands else Nil }
 }

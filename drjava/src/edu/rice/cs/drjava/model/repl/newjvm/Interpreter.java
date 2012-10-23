@@ -7,6 +7,6 @@ public interface Interpreter {
   String interpret(String input) throws InterpreterException;
   void start();
   void addCP(String pathType, String path);
-  // (void | boolean) reset();  (future extension)
+  void reset();
   // (void | boolean) cd();  (future extension)
 }
