@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>DrScala</string>
+<!--	<string>DrJava</string> -->
+	<key>CFBundleIconFile</key>
+	<string>DrScala.icns</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>DrScala</string>
+	<key>CFBundleIdentifier</key>
+	<string>edu.rice.cs.drjava.DrJava</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>@VERSION@</string>
+	<key>CFBundleSignature</key>
+    <string>DrSc</string>
+<!--    <string>DrJa</string> -->
+	<key>Java</key>
+	<dict>
+		<key>ClassPath</key>
+		<string>$JAVAROOT/drscala.jar</string>
+		<key>JVMVersion</key>
+		<string>1.5+</string>
+		<key>MainClass</key>
+		<string>edu.rice.cs.drjava.DrJava</string>
+		<key>Properties</key>
+		<dict>
+			<key>apple.laf.useScreenMenuBar</key>
+			<string>true</string>
+                        <key>edu.rice.cs.drjava.icon</key>
+                        <string>$APP_PACKAGE/Contents/Resources/DrScala.icns</string>
+		</dict>
+	</dict>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+    	<dict>
+        	<key>CFBundleTypeExtensions</key>
+        	<array>
+			<string>drjava</string>
+        	</array>
+        	<key>CFBundleTypeName</key>
+        	<string>DrJava Project File</string>
+        	<key>CFBundleTypeRole</key>
+        	<string>Editor</string>
+    </dict>
+    	<dict>
+        	<key>CFBundleTypeExtensions</key>
+        	<array>
+			<string>java</string>
+        	</array>
+        	<key>CFBundleTypeName</key>
+        	<string>Java Source File</string>
+        	<key>CFBundleTypeRole</key>
+        	<string>Editor</string>
+    </dict>
+    	<dict>
+        	<key>CFBundleTypeExtensions</key>
+        	<array>
+			<string>djapp</string>
+        	</array>
+        	<key>CFBundleTypeName</key>
+        	<string>DrJava Add-On File</string>
+        	<key>CFBundleTypeRole</key>
+        	<string>Editor</string>
+    </dict>
+</array>
+</dict>
+</plist>
