@@ -6,7 +6,8 @@
      
 <project name="drscala" default="help">
 
-  <property name="readable-project-name" value="DrJava" />
+<!--  <property name="readable-project-name" value="DrJava" /> -->
+  <property name="readable-project-name" value="DrScala" />
   <property name="src-working-dir" value="src/edu/rice/cs/drjava" />
   <property name="junit-jar-to-include" value="lib/buildlib/junit.jar" />
   <property name="md5-temp-name" value="classes/md5.properties" />
