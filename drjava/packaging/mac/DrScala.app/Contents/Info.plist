@@ -5,7 +5,8 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>DrJava</string>
+	<string>DrScala</string>
+<!--	<string>DrJava</string> -->
 	<key>CFBundleIconFile</key>
 	<string>DrScala.icns</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -19,7 +20,8 @@
 	<key>CFBundleShortVersionString</key>
 	<string>@VERSION@</string>
 	<key>CFBundleSignature</key>
-	<string>DrJa</string>
+    <string>DrSc</string>
+<!--    <string>DrJa</string> -->
 	<key>Java</key>
 	<dict>
 		<key>ClassPath</key>
