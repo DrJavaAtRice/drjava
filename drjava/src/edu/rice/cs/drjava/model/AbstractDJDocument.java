@@ -911,11 +911,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * whitespace, including newlines.  This search does NOT skip over balanced parenthetical expressions!
     * @param pos Position to start from
     * @param whitespace chars considered as white space
-    * @return position of first non-whitespace character before pos OR ERROR_INDEX (-1) if no such char
+    * @return position of first non-whitespace character before pos OR ERROR_INDEX (-1) if no such char, e.g., when
+    *   pos < 0
     */
   public int getPrevNonWSCharPos(final int pos, final char[] whitespace) throws BadLocationException {
     
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
+    
+    if (pos < 0) return ERROR_INDEX;  // 
     
 //    System.err.println("getPrevNonWSCharPos(" + pos + ") called");
     // Check cache
@@ -1215,8 +1218,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         int dist = balanceBackward();
         if (dist < 0) // Unmatched closing brace on this line; text is mangled
           break;
-        revPos = lastBracePos - dist + 1; // pos of matching open brace
-//        System.err.println("Skipping over paren phrase ending at pos " + lastBracePos + " to pos " + revPos);
+        revPos = lastBracePos - dist; // pos of matching open brace
+//        System.err.println("{FBOS} Skipping over paren phrase ending at pos " + lastBracePos + " to pos " + revPos);
         if (revPos < revLineStart) {
           revLineStart = _getLineStartPos(revPos);
           revLineEnd = _getLineEndPos(revLineStart);
@@ -1231,7 +1234,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     catch(BadLocationException e) { /* either getPrevNonWSCharPos(pos) or findPrevDelimter(...) failed; fall through */ }
     finally { setCurrentLocation(org); }
     // punt by returning the indent of line containing pos
-    return _getFirstNonWSCharPos(lineEnd);
+    int result = _getFirstNonWSCharPos(lineEnd);
+//    System.err.println("***** FBOS returning " + result);
+    return result;
   }
   
   /** Returns the number of blanks in the indent prefix for the start of the statement identified by pos.  Uses a 
@@ -1253,7 +1258,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   /** Returns the number of blanks in the indent prefix of the start of the statement identified by pos.  Uses a 
     * default set of whitespace characters: {' ', '\t', '\n', ','}.  Assumes beginning of statement is already propertly
-    * indented!  '{' is a statement break but '='is not.
+    * indented!  '{' is a statement break but '=' is not.
     * @param pos Cursor position
     * TODO: why is whitespace passed as an argument.  Isn't the default OK?
     */
@@ -1283,14 +1288,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //    System.err.println("***** _getIndentOfStmt(" + pos + ") called. Char at this pos = " + _getText(pos, 1).charAt(0));
 //    System.err.println("  Corresponding line = '" + _getCurrentLine(pos) + "'");
     
-    // Check cache
+    //  Check cache
     int lineEnd = _getLineEndPos(pos);  // returns 0 for empty document
     if (lineEnd <= 1) return 0;         // lineEnd = 1 iff first line is empty followed newline; otherwise lineEnd > 1
     
     final Query key = new Query.IndentOfStmt(lineEnd, delims, whitespace);
     final Integer cached = (Integer) _checkCache(key);
     if (cached != null) {
-//        System.err.println("  [GIOS] Returning cached value " + cached);
+//      System.err.println("  [GIOS] Returning cached value " + cached);
       return cached;
     }
     
@@ -1298,11 +1303,16 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
      * this line is a continuation and no braces span this line! */
     int stmtStart = _findBeginningOfStmt(lineEnd);
 //    System.err.println("[GIOS] lineEnd = " + lineEnd + " stmtStart = " + stmtStart + " from calling FBOS again");
-    int indentOfStmt = stmtStart - _getLineStartPos(stmtStart);  // indent of this stmt (excluding possible prelude!)
     
-    if (stmtStart == ERROR_INDEX) {  // No beginning found; perhaps line containing pos is blank
+    int indentOfStmt; // indent of plausible statement start (excluding possible prelude)
+    
+    if (stmtStart == ERROR_INDEX) {  // No beginning found; perhaps no valid text precedes pos
       try {
         int newPos = getPrevNonWSCharPos(lineEnd);
+        if (newPos == ERROR_INDEX) { // Document preceding lineEnd contains no NonWS chars
+//          System.err.println("***** [GIOS] returning 0 because no NonWS chars precede end of specified line");
+          return 0;
+        }
         stmtStart = _findBeginningOfStmt(newPos);
 //        System.err.println("[GIOS] called FBOS yet again because stmtStart == ERROR_INDEX; newPos = " + newPos +
 //                           "; final stmtStart = " + stmtStart);
@@ -1311,13 +1321,20 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       }
       catch(BadLocationException e) { return 0; } // document preceding pos is empty
     }
+    else indentOfStmt = stmtStart - _getLineStartPos(stmtStart); 
     
 //    System.err.println("[GIOS] plausible first char pos in stmt at pos " + pos + " is " + stmtStart);
     
     /* Find the EnclosingBraceOrPrevSemicolon of this stmt.  The braces setincludes '=' and "=>". */
     try {
       int boundaryPos = findEnclosingBraceOrPrevSemicolon(stmtStart);
-      if (boundaryPos == ERROR_INDEX) return indentOfStmt;
+      if (boundaryPos == ERROR_INDEX) { // find indent of firstNonWS char in doc
+//        System.err.println("***** GIOS returning " + indentOfStmt);
+        return indentOfStmt;
+      }
+      
+      assert boundaryPos >= 0;
+        
       char boundaryChar = _getText(boundaryPos, 1). charAt(0);   // Note: if brace is "=>", returned pos points to '>'.
       
       /* Perform some analysis depending on the boundary char preceding the previous line:
@@ -1354,7 +1371,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public int _findPrevImplicitSemicolonPos(int pos) {
     
 //    System.err.println("***** _findPrevImplicitSemicolon(" + pos + ")");
-//    System.err.println("  Corresponding line = '" + _getCurrentLine(pos) + "'");
+//    System.err.println("      Corresponding line = '" + _getCurrentLine(pos) + "'");
     
     /* Searching backward, look at each line end that is not enclosed in a balanced phrase, and find the  
      * first line that does NOT satisfy one of the following:
@@ -1384,7 +1401,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       // Find closest preceding newline that is not inside a brace phrase and does not terminate an empty line
       do {
         pos = findPrevDelimiter(pos, NEWLINE);
-//        System.err.println("In loop, candidate line for prev semicolon = '" + _getCurrentLine(pos) + "'");
+//        System.err.println("[FPIS] In loop, candidate line for prev semicolon = '" + _getCurrentLine(pos) + "'");
         if (pos < 0) return result;  // return ERROR_INDEX
         
         assert getText(pos, 1).charAt(0) == newline;
@@ -1393,17 +1410,17 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         
         // Find last unshadowed (by a comment) nonWS char in text preceding endPrevLinePos
         lastNonWSCharPos = getPrevNonWSCharPos(pos);
-//        System.err.println("For this line, lineStart = " + lineStart + " lastNonWSCharPos = " + lastNonWSCharPos);
+//        System.err.println("[FPIS] candidate lineStart = " + lineStart + " lastNonWSCharPos = " + lastNonWSCharPos);
         if (lastNonWSCharPos == ERROR_INDEX) {
           return result;  //  return ERROR_INDEX
         }
       } while (lastNonWSCharPos < lineStart);
       
-//      System.err.println("  lineStart = " + lineStart + " line = '" + _getCurrentLine(pos) + "'");
+//      System.err.println("[FPIS]  lineStart = " + lineStart + " line = '" + _getCurrentLine(pos) + "'");
       
       // pos is end of previous non-empty line; lastNonWSCharPos is pos of nearest preceding unshadowed Non WS char 
       char lastNonWSChar = getText().charAt(lastNonWSCharPos);
-//      System.err.println("In _findPrevImplicitSemicolon, last NonWS char is '" + lastNonWSChar + "' on line '" + 
+//      System.err.println("[FPIS] last NonWS char is '" + lastNonWSChar + "' on line '" + 
 //                         _getCurrentLine(lastNonWSCharPos) + "'");
       
       // Is lastNonWSChar a ')'?
@@ -1417,7 +1434,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           setCurrentLocation(lastNonWSCharPos + 1);  // immediately to right of paren
           int dist = balanceBackward();
           int newPos = _getLineStartPos(lastNonWSCharPos + 1 - dist);  // resume search from left of matching paren
-//          System.err.println("Skipping back past ForIfWhile prefix in searching for implicit semicolon");
+//          System.err.println("[FPIS] Skipping back past ForIfWhile prefix in searching for implicit semicolon");
           result = _findPrevImplicitSemicolonPos(newPos);
           return result;
         }
@@ -1428,18 +1445,23 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           result = pos;
           return result;
         }
-          
-        if (chIndex == DOT_INDEX) { // prevNonWSChar is '.'; must exclude numeric constants
+//        System.err.println("[FPIS] lastNonWSChar is a potential non-terminating char"); 
+        if (chIndex == DOT_INDEX) { // lastNonWSChar is '.'; must exclude numeric constants
           // The ordered char array DOUBLE_DELIMS was defined heuristically; it may need perturbing
+//          System.err.println("[FPIS] lastNonWSChar at pos " + lastNonWSCharPos + " is '.'");
           int numericDelimPos = findPrevDelimiter(lastNonWSCharPos, DOUBLE_DELIMS);
+          // numericDelimPos may be -1
           try {
-            double numVal = Double.parseDouble(getText(numericDelimPos + 1, lastNonWSCharPos + 1));
+            String numText = getText(numericDelimPos + 1, lastNonWSCharPos + 1 - numericDelimPos);
+//            System.err.println("[FPIS] numerical text = '" + numText + "'");
+            double numVal = Double.parseDouble(numText);
           }
           catch(NumberFormatException nfe) { 
-            result = _findPrevImplicitSemicolonPos(numericDelimPos);
+            result = _findPrevImplicitSemicolonPos(lastNonWSCharPos);
+//            System.err.println("[FPIS] '.' was not part of a number");
             return result;
           }
-//          System.err.println("***** _findPrevImplicitSemicolonPos returning " + pos);
+//          System.err.println("[FPIS] '.' was part of a number");
           result = pos;  // lastNonWSChar is plausible terminating char because it is final char in a Double
           return result;  
         }
@@ -1449,12 +1471,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
         return result;
       }
     }
-    catch(BadLocationException bpe) { }  // should never happen?
-    finally {
+    catch(BadLocationException bpe) { /* fall through */ }  // should never happen?
+    finally { // On all returns except for a cache hit, clean up by executing
       _storeInCache(key, result, Math.max(0, pos - 1));  // Only changes to text[0: pos-1] affect the result
-      setCurrentLocation(origPos); 
-    }
-    return ERROR_INDEX;
+      setCurrentLocation(origPos);
+//      System.err.println("[FPIS] returning " + result);
+    }   
+    return ERROR_INDEX;  // compiler flow analysis is weak; unreachable!
   }
   
   /* Old version */
@@ -1571,12 +1594,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     /* Searching backward, look at each line end that is not enclosed in a balanced phrase or block comment, and find 
      * the first line satisfying one of the following property:
-     * (i)  contains an enclosing brace '{', '(', '=', or "=>" where the latter two are required to at line end (ignoring
+     * (i)  contains an enclosing brace '{', '(', '=', or "=>" where the latter two are required to appear at line end (ignoring
      *      comments and whitespace), or 
-     * (ii) does not qualify under (i) above and does not have any of the following properties
-     *      (a) ends in a closing paren that is not the end of a test clause for an if/for/while;
+     * (ii) does not qualify under (i) above and does not have any of the following properties (implying no semicolon)
+     *      (a) ends in a closing paren that is the end of a test clause for an if/for/while;
      *      (b) ends in '.' that is a separate token (not the end of a Double token), or
      *      (c) ends in a character that cannot terminate a line (see NON_TERMINATING_CHARS)
+     *      (d) ends with "extends" or precedes a line beginning with "extends"
      *      (d) is empty
      * Then classify this boundary as the brace found in (i) or the newline at the end of the line qualifying under (ii) [an
      * implicit semeicolon].
@@ -1603,29 +1627,32 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       // Find closest unmatched open brace or newline preceding newPos that does not terminate an empty line
       do {
         newPos = findPrevDelimiter(newPos, OPENING_DELIMS_AND_NEWLINE);
-//        System.err.println("In loop, candidate line for prev brace/semicolon = '" + _getCurrentLine(pos) + "'");
-        if (newPos < 0) return result;  // return ERROR_INDEX
-        
+//        System.err.println("[FEBOPS] In loop, candidate line for prev brace/semicolon = '" + _getCurrentLine(pos) + "'");
+        if (newPos < 0) {
+//          System.err.println("[FEBOPS] returning " + result);
+          return result;  // return ERROR_INDEX
+        }
         lineStart = _getLineStartPos(newPos);
         
         // Find last unshadowed (by comments) nonWS char in text up to (and including) newPos
         lastNonWSCharPos = getPrevNonWSCharPos(newPos + 1);
-//        System.err.println("For this line, lineStart = " + lineStart + " lastNonWSCharPos = " + lastNonWSCharPos);
+//        System.err.println("{FEBOPS] For this line, lineStart = " + lineStart + " lastNonWSCharPos = " + lastNonWSCharPos);
         
         if (lastNonWSCharPos == ERROR_INDEX) {
           return result;  //  return ERROR_INDEX
         }
       } while (lastNonWSCharPos < lineStart);
       
-//      System.err.println("  lineStart = " + lineStart + " line = '" + _getCurrentLine(pos) + "'");
+//      System.err.println("[FEBOPS] final lineStart = " + lineStart + " line = '" + _getCurrentLine(pos) + "'");
       
       // newPos points to matching delim; lastNonWSCharPos points to nearest preceding (including ==) unshadowed NonWS char 
       char lastNonWSChar = getText(lastNonWSCharPos, 1).charAt(0);
-//      System.err.println("In findEnclosingBraceOrPrevSemicolon, last NonWS char is '" + lastNonWSChar + "' on line '" + 
+//      System.err.println("[FEBOPS] last NonWS char is '" + lastNonWSChar + "' on line '" + 
 //                         _getCurrentLine(lastNonWSCharPos) + "'");
       
       if (Arrays.binarySearch(OPENING_BRACES_WITH_EQUALS, lastNonWSChar) >= 0)  { // found a match among delims
         result = lastNonWSCharPos;
+//        System.err.println("[FEBOPS] returning " + result);
         return result;
       }
       
@@ -1633,23 +1660,36 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       result = newPos;
       
       if (lastNonWSChar == ')') {
-        if (! isTestIfForWhile(lastNonWSCharPos)) return result;
+        if (! isTestIfForWhile(lastNonWSCharPos)) {
+//          System.err.println("[FEBOPS] returning pos 0f return = " + result);
+          return result;
+        }
         else {
           setCurrentLocation(lastNonWSCharPos + 1);  // immediately to right of paren
           int dist = balanceBackward();
           int revPos = lastNonWSCharPos + 1 - dist;  // resume search from left of matching paren
-//          System.err.println("Skipping back past ForIfWhile prefix in searching for implicit semicolon");
+//          System.err.println("[FEBOPS] Skipping back past ForIfWhile prefix in searching for implicit semicolon");
           result = findEnclosingBraceOrPrevSemicolon(revPos);
+//          System.err.println("[FEBOPS] returning " + result);
           return result;
         }
       } else if (lastNonWSChar == '}' || lastNonWSChar == ';') {  // found an implicit/explicit semicolon at pos newPos
+//        System.err.println("[FEBOPS] returning " + result);
         return result;
       } else { // lastNonWSChar is not a closing brace or a semicloon
         
         // Is lastNonWSChar a possible terminating char (preceding an implicit semicolon) or a semicolon
         int chIndex = Arrays.binarySearch(NOT_TERMINATING_CHARS, lastNonWSChar);
-        if (chIndex < 0)  { // ch can end a statement/expression
+        if (chIndex < 0) {
           result = newPos;
+          if (lastNonWSChar == 's') {
+            int offset = lastNonWSCharPos - 7;
+            if (offset >= 0 && getText(offset, 8).equals(" extends"))  { // not a line end
+              Utilities.show("Found ' extends' at position " + offset);
+              result = findEnclosingBraceOrPrevSemicolon(offset); 
+            }
+          }
+          //            System.err.println("[FEBOPS] returning " + result);
           return result;
         }
           
@@ -1660,16 +1700,19 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
             double numVal = Double.parseDouble(getText(numericDelimPos + 1, lastNonWSCharPos + 1));
           }
           catch(NumberFormatException nfe) { 
-            result =  findEnclosingBraceOrPrevSemicolon(numericDelimPos);
+            result = findEnclosingBraceOrPrevSemicolon(lastNonWSCharPos);
+//            System.err.println("[FEBOPS] returning " + result);
             return result;
           }
 //          System.err.println("***** _findPrevImplicitSemicolonPos returning " + newPos);
           // lastNonWSChar is plausible terminating char because it is final char in a Double
+//          System.err.println("[FEBOPS] returning " + result);
           return result;  
         }
         
         // reject lastNonWSChar as enclosing brace or implicit semicolon. Recur starting at the preceding line boundary
         result = _findPrevImplicitSemicolonPos(lastNonWSCharPos);
+//        System.err.println("[FEBOPS] returning " + result);
         return result;
       }
     }
@@ -1678,6 +1721,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       _storeInCache(key, result, Math.max(0, pos - 1));  // Only changes to text[0: pos-1] affect the result
       setCurrentLocation(origPos); 
     }
+//    System.err.println("[FEBOPS] returning " + ERROR_INDEX);
     return ERROR_INDEX;
   }
   

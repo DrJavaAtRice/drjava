@@ -88,12 +88,12 @@ public class Indenter {
       // Main tree
       rule40 = new ActionStartPrevLinePlus(""),
       rule39 = new ActionStartPrevStmtPlus(0, true, _indentLevel),  // Indent line that starts new statement
-      rule37 = new ActionStartCurrStmtPlus(2),                // continuation of current statement
+      rule37 = new ActionStartCurrStmtPlus(2),   // predecessor of rule33           
       rule36 = new ActionStartStmtOfBracePlus(indentLevel,  /* include Scala braces */ false),
       rule35 = new ActionStartLineOf("if"),
-
+      rule33 = new ActionStartPrevLinePlus("  "),   // Continuation of current statement
       rule32 = new ActionStartCurrStmtPlus(0),   // Since stmt opens with '{', suppress indenting
-      rule31 = new QuestionCurrLineStartsWithChar(new char[] {'{'}, rule32, rule37),
+      rule31 = new QuestionCurrLineStartsWithChar(new char[] {'{'}, rule32, rule33),
       
       // Does this snew statement begin with pattern matching "case"?  If so, must be indented with enclosing brace (excluding "=>")
       rule30 = new QuestionCurrLineStartsWith("case", FALSE_CASE_SUFFIXES, rule36, rule39),
@@ -122,17 +122,18 @@ public class Indenter {
       // rule 8, 11, 13, 14, 15, 16, 17, 22, 23, 26, 27, 28, 29, 30, 33, 34, 38, 40, 42 avail
       
       // Comment tree
+      rule43 = new ActionDoNothing(),
       rule12 = new ActionStartPrevLinePlus(""),
       rule10 = new ActionStartPrevLinePlus("* "),
       rule09 = new QuestionCurrLineEmptyOrEnterPress(rule10, rule12),
       rule07 = new QuestionCurrLineStartsWith("*", rule12, rule09),
-      rule06 = new QuestionPrevLineStartsWith("*", rule07, rule12),
+      rule06 = new QuestionPrevLineStartsWith("*", rule07, rule43),  // formerly ..., rule12)
       rule05 = new ActionStartPrevLinePlus(" "),    // padding prefix for interior of ordinary block comment
       rule04 = new ActionStartPrevLinePlus(" * "),  // padding prefix for new line within ordinary block comment
       rule46 = new ActionStartPrevLinePlus("  * "), // padding prefix for new line within special javadoc block comment
       rule47 = new ActionStartPrevLinePlus("  "),   // padding prefix for interior of special javadoc block comment
       rule45 = new QuestionPrevLineStartsJavaDocWithText(rule46, rule04),  // Prev line begins special javadoc comment?
-      rule48 = new QuestionPrevLineStartsJavaDocWithText(rule47, rule05),  // Prev line begins special javadoc comment? 
+      rule48 = new QuestionPrevLineStartsJavaDocWithText(rule47, rule43),  // Prev line begins special javadoc comment? 
       rule41 = new ActionStartPrevLinePlusMultilinePreserve(new String[] { " * \n", " */" }, 0, 3, 0, 3),
       rule49 = new ActionStartPrevLinePlusMultilinePreserve(new String[] { "  * \n", "  */"}, 0, 4, 0, 4),
       rule50 = new QuestionPrevLineStartsJavaDocWithText(rule49, rule41),
@@ -140,7 +141,6 @@ public class Indenter {
       rule03 = new QuestionCurrLineEmptyOrEnterPress(rule45, rule48),
       rule51 = new QuestionCurrLineEmpty(rule50, rule03), // autoClose: rule03 unnecessarily retests CurrentLineEmpty
       rule02 = new QuestionPrevLineStartsComment(autoCloseComments ? rule51 : rule03, rule06),
-      rule43 = new ActionDoNothing(),
       rule44 = new QuestionCurrLineIsWingComment(rule43, rule18),
       rule01 = new QuestionInsideComment(rule02, rule44);
     

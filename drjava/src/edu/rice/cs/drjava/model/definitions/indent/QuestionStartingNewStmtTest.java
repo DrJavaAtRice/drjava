@@ -38,45 +38,45 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Tests the question rule which determines if the current line
- * is starting a new statement.
- *
- * @version $Id$
- */
+/** Tests the question rule which determines if the current line is starting a new statement.
+  * @version $Id$
+  */
 public final class QuestionStartingNewStmtTest extends IndentRulesTestCase {
 
-  /** Ensures that the current line is the first line of a statement.
-   * This is done by testing if the previous character is one of
-   * the following: docstart, ';', '{', '}'
-   * These characters are here-on refered to as 'end-characters'.
-   */
+  /** Ensures that the current line is the first line of a statement. This is done by testing if the previous 
+    * character is one of several possibilities.
+    * TODO: run all of these tests in the event-handling thread.
+    */
   public void testStartOfStmtCheckForEndCharacters() throws BadLocationException {
     IndentRuleQuestion rule = new QuestionStartingNewStmt(null, null);
 
     // Starting new stmt, prev char docstart
-    _setDocText("import java.util.Vector;\n");
+    _setDocText("import java.util.Vector\n");
     _doc.setCurrentLocation(4);
     assertTrue("starting new stmt, prev char docstart",
-        rule.testApplyRule(_doc, Indenter.IndentReason.OTHER));
+        rule.applyRule(_doc, Indenter.IndentReason.OTHER));
 
-    // Starting new stmt, prev char ';'
-    _setDocText("foo();\nbar();\n");
-    _doc.setCurrentLocation(7);
-    assertTrue("starting new stmt, prev char ';'",
-        rule.testApplyRule(_doc, Indenter.IndentReason.OTHER));
+    // Starting new stmt, prev char '.' number
+    _setDocText("val x = 4.\nbar()\nfoo\n");
+    _doc.setCurrentLocation(11);
+    assertTrue("starting new stmt, prev char '.' in number",
+        rule.applyRule(_doc, Indenter.IndentReason.OTHER));
+    // Adjust cursor so prev char is ')'
+    _doc.setCurrentLocation(17);
+    assertTrue("starting new stmt, prev char ')'",
+        rule.applyRule(_doc, Indenter.IndentReason.OTHER));
     
     // Starting new stmt, prev char '{'
-    _setDocText("public void foo() {\nfoo()\n");
-    _doc.setCurrentLocation(20);
+    _setDocText("def foo() {\nfoo()\n");
+    _doc.setCurrentLocation(12);
     assertTrue("starting new stmt, prev char '{'",
-        rule.testApplyRule(_doc, Indenter.IndentReason.OTHER));
+        rule.applyRule(_doc, Indenter.IndentReason.OTHER));
 
     // Starting new stmt, prev char '}'
-    _setDocText("x();\n}\nfoo()\n");
-    _doc.setCurrentLocation(7);
+    _setDocText("x()\n}\nfoo()\n");
+    _doc.setCurrentLocation(6);
     assertTrue("starting new stmt, prev char '}'",
-        rule.testApplyRule(_doc, Indenter.IndentReason.OTHER));
+        rule.applyRule(_doc, Indenter.IndentReason.OTHER));
   }  
 
   /** Ensures that the current line is the first line of a statement.
@@ -87,35 +87,35 @@ public final class QuestionStartingNewStmtTest extends IndentRulesTestCase {
     IndentRuleQuestion rule = new QuestionStartingNewStmt(null, null);
   
     // Starting new stmt, ignore whitespace in between
-    _setDocText("bar();\n\t   \n  foo();");
-    _doc.setCurrentLocation(12);
+    _setDocText("bar()\n\t   \n  foo()");
+    _doc.setCurrentLocation(11);
     assertTrue("starting new stmt, ignore whitespace in between",
-        rule.testApplyRule(_doc, Indenter.IndentReason.OTHER));
+        rule.applyRule(_doc, Indenter.IndentReason.OTHER));
 
     // Starting new stmt, ignore single line comments
-    _setDocText("} // note:\n//please ignore me\nfoo();\n");
+    _setDocText("} // note:\n//please ignore me\nfoo()\n");
     _doc.setCurrentLocation(30);
     assertTrue("starting new stmt, ignore single line comments",
-        rule.testApplyRule(_doc, Indenter.IndentReason.OTHER));
+        rule.applyRule(_doc, Indenter.IndentReason.OTHER));
 
     // Starting new stmt, ignore multi-line comments
-    _setDocText("{ /* in a comment\nstill in a comment\ndone */\nfoo();");
+    _setDocText("{ /* in a comment\nstill in a comment\ndone */\nfoo()");
     _doc.setCurrentLocation(45);
     assertTrue("starting new stmt, ignore multi-line comments",
-        rule.testApplyRule(_doc, Indenter.IndentReason.OTHER));
+        rule.applyRule(_doc, Indenter.IndentReason.OTHER));
 
-    _setDocText("bar();\n/* blah */ foo();\n");
-    _doc.setCurrentLocation(18);
+    _setDocText("bar()\n/* blah + */ foo()\n");
+    _doc.setCurrentLocation(17);
     assertTrue("starting new stmt, ignore multi-line comment on same " +
         "line as new stmt",
-        rule.testApplyRule(_doc, Indenter.IndentReason.OTHER));
+        rule.applyRule(_doc, Indenter.IndentReason.OTHER));
 
     _setDocText("method foo() {\n" +
   "}\n" +
   "     ");
     _doc.setCurrentLocation(17);
     assertTrue("Blank line with no non-WS after",
-        rule.testApplyRule(_doc, Indenter.IndentReason.OTHER));
+        rule.applyRule(_doc, Indenter.IndentReason.OTHER));
 
     _setDocText("method foo() {\n" +
   "}\n" +
@@ -123,7 +123,7 @@ public final class QuestionStartingNewStmtTest extends IndentRulesTestCase {
   "// comment");
     _doc.setCurrentLocation(17);
     assertTrue("Blank line with comments after, but no non-WS",
-        rule.testApplyRule(_doc, Indenter.IndentReason.OTHER));
+        rule.applyRule(_doc, Indenter.IndentReason.OTHER));
   }
 
   /** Ensures that the current line is the first line of a statement.
@@ -134,21 +134,21 @@ public final class QuestionStartingNewStmtTest extends IndentRulesTestCase {
     IndentRuleQuestion rule = new QuestionStartingNewStmt(null, null);
 
     // Not starting new stmt, ignore end chars in quotes
-    _setDocText("x = bar + \";\" + \"}\" + \"{\"\n+ foo;\n");
-    _doc.setCurrentLocation(26);
+    _setDocText("x = bar + \";\" + \"}\" + \"{\" + \n\"{\" foo\n");
+    _doc.setCurrentLocation(32);  // point at space before terminating 'foo'
     assertTrue("not starting new stmt, ignore end chars in quotes",
-        !rule.testApplyRule(_doc, Indenter.IndentReason.OTHER));
+        ! rule.applyRule(_doc, Indenter.IndentReason.OTHER));
 
     // Not starting new stmt, ignore end chars in single-line comments
     _setDocText("x = bar.//;{}\nfoo();\n");
     _doc.setCurrentLocation(14);
     assertTrue("not starting new stmt, ignore end chars in single-line comments",
-        !rule.testApplyRule(_doc, Indenter.IndentReason.OTHER));
+        ! rule.applyRule(_doc, Indenter.IndentReason.OTHER));
 
     // Not starting new stmt, ignore end chars in multi-line comments
     _setDocText("x = bar./*;\n{\n}\n*/\nfoo();\n");
     _doc.setCurrentLocation(19);
     assertTrue("not starting new stmt, ignore end chars in multi-line comments",
-        !rule.testApplyRule(_doc, Indenter.IndentReason.OTHER));
+        ! rule.applyRule(_doc, Indenter.IndentReason.OTHER));
   }
 }

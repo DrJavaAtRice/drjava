@@ -41,7 +41,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /** Determines whether or not the last block or expression list opened previous to the start of the current line was 
   * opened by '['.  This questions corresponds to rule 11 in our decision tree.
-  * @version $Id: QuestionBraceIsParenOrBracket.java 5594 2012-06-21 11:23:40Z rcartwright $
+  * @version $Id: $
   */
 public class QuestionBraceIsBracket extends IndentRuleQuestion {
   /** @param yesRule The decision subtree for the case that this rule applies in the current context.

@@ -57,11 +57,11 @@ public final class IndentRuleWithTraceTest extends IndentRulesTestCase {
     IndentRuleQuestion
       rule1 = new QuestionInsideComment(rule2, rule2);
     String text =
-      "public class foo {\n" +
+      "class foo {\n" +
       "/**\n" +
       " * This method does nothing\n" + 
       " */\n" +
-      "public void method1(){\n" +
+      "def method1(){\n" +
       "}\n" +
       "}\n";
 

@@ -44,44 +44,50 @@ import edu.rice.cs.drjava.model.definitions.indent.IndentRulesTestCase;
   */
 public final class IndentHelperTest extends IndentRulesTestCase {
   
-  /** Convenience method that wraps _doc.findPrevDelimiter calls in a read lock. */
+  /** Convenience method that calls _doc.findPrevDelimiter. */
   private int findPrevDelimiter(int pos, char[] delimiters) throws BadLocationException {
     return _doc.findPrevDelimiter(pos, delimiters); 
   }
   
-  /** Convenience method that wraps _doc.inParenPhrase calls in a read lock. */
+  /** Convenience method that calls _doc.inParenPhrase. */
   private boolean _inParenPhrase(int pos) throws BadLocationException {
     return _doc._inParenPhrase(pos); 
   }
   
-  /** Convenience method that wraps _doc.getIndentOfCurrStmt calls in a read lock. */
+  /** Convenience method that calls _doc.getIndentOfCurrStmt. */
   private int _getIndentOfStmt(int pos) throws BadLocationException {
     return _doc._getIndentOfStmt(pos); 
   }
-
-  /** Convenience method that wraps _doc.getLineStartPos calls in a read lock. */
+  
+  
+  /** Convenience method that calls _doc.getIndentOfCurrStmt. */
+  private int _getIndentOfLine(int pos) throws BadLocationException {
+    return _doc._getIndentOfLine(pos); 
+  }
+  
+  /** Convenience method that calls _doc.getLineStartPos. */
   private int _getLineStartPos(int pos) throws BadLocationException {
     return _doc._getLineStartPos(pos); 
   }
   
-  /** Convenience method that wraps _doc.getLineEndPos calls in a read lock. */
+  /** Convenience method that calls _doc.getLineEndPos. */
   private int _getLineEndPos(int pos) throws BadLocationException {
     return _doc._getLineEndPos(pos); 
   }
   
-  /** Convenience method that wraps _doc.getLineFirstCharPos calls in a read lock. */
+  /** Convenience method that calls _doc.getLineFirstCharPos. */
   private int _getLineFirstCharPos(int pos) throws BadLocationException {
     return _doc._getLineFirstCharPos(pos); 
   }
   
-    /** Convenience method that wraps _doc.getFirstNonWSCharPos calls in a read lock. */
+    /** Convenience method that calls _doc.getFirstNonWSCharPos. */
   private int getFirstNonWSCharPos(int pos) throws BadLocationException {
     return _doc.getFirstNonWSCharPos(pos); 
   }
   
   /** Tests findPrevDelimiter() */
   public void testFindPrevDelimiter() throws BadLocationException {
-    char[] delimiters1 = {';', ':', '?'};
+    char[] delimiters1 = {':', ';', '?'};
 
     // Used to test for delimiters not in test string
     char[] delimiters2 = {'%'};
@@ -90,15 +96,15 @@ public final class IndentHelperTest extends IndentRulesTestCase {
     char[] delimiters3 = {'f'};
 
     // Used to test finding delimiters that can be confused with comments
-    char[] delimiters4 = {'/', '*'};
+    char[] delimiters4 = {'*','/'};
     
-    _setDocText("/*bar;\nfoo();\nx;*/\nreturn foo;\n");
-    assertEquals("Check that delimiters in multi-line comments are ignored",
+    _setDocText("/*bar;\nfoo();\nx;*/\nfoo;\n");
+    assertEquals("Check that delimiters in block comments are ignored",
                  -1,
-                 findPrevDelimiter(23, delimiters1));
+                 findPrevDelimiter(22, delimiters1));
     
     _setDocText("foo();\n//bar();\nbiz();\n");
-    assertEquals("Check that delimiters in single-line comments are ignored",
+    assertEquals("Check that delimiters in wing comments are ignored",
                  5,
                  findPrevDelimiter(16, delimiters1));
     
@@ -124,11 +130,11 @@ public final class IndentHelperTest extends IndentRulesTestCase {
 //                 12,
 //                 _doc.findPrevDelimiter(14, delimiters1, false));
     
-    _setDocText("foo();\n test ? x : y;\n\t    return blah();\n");
+    _setDocText("foo();\n test ? x : y;\n\t    blah();\n");
     assertEquals("Check that ERROR_INDEX (-1) is returned if no matching character is found", 
                  -1, 
                  findPrevDelimiter(20, delimiters2)); 
-    assertEquals("Check that delimiter is found if it is right after 0",
+    assertEquals("Check that delimiter is found if it is located at position 0",
                  0,
                  findPrevDelimiter(20, delimiters3));
     assertEquals("Check that delimiter is not found if it is at cursor's position",
@@ -212,26 +218,29 @@ public final class IndentHelperTest extends IndentRulesTestCase {
       assertEquals("prev delimiter on same line, indent two spaces", 2, _getIndentOfStmt(8));
   }
 
+  /** Test indenting of multiple line statement.  DrScala indents two more spaces at the beginning of each continuation
+    * line.  Comment text is indents like program text but it is ignored when determined the indentation of the next 
+    * line.  Is this the right convention? */
   public void testGetIndentOfCurrStmtMultipleLines()
     throws BadLocationException {
 
     String text = 
-      "  oogabooga();\n" +
-      "  bar().\n" +  
-      "    bump().\n" +  
-      "    //comment\n" +  
+      "oogabooga()\n" +
+      "bar().\n" +      // indent of this = 0
+      "    bump().\n" +   // indent of this line = 2
+      "    //comment\n" +  // indent of this line should be 6
       "    /*commment\n" +
       "     *again;{}\n" +
       "     */\n" +
       "     foo();\n";
 
     _setDocText(text);
-    assertEquals("start stmt on previous line, indent two spaces", 2, _getIndentOfStmt(24));
-    assertEquals("start stmt before previous line, cursor inside single-line comment indent two spaces", 2,
-                 _getIndentOfStmt(42));
-    assertEquals("start stmt before single-line comment, cursor inside multi-line comment indent two spaces", 2,
-                 _getIndentOfStmt(56));
-    assertEquals("start stmt before multi-line comment, indent two spaces", 2, _getIndentOfStmt(88));
+    assertEquals("start stmt on previous line, indent two more spaces", 0, _getIndentOfStmt(20));  // pos on bump() line
+    assertEquals("start stmt before previous line, cursor inside single-line comment indent two more spaces", 0,
+                 _getIndentOfStmt(38));
+    assertEquals("start stmt before single-line comment, cursor inside multi-line comment indent two spaces", 0,
+                 _getIndentOfLine(52));
+    assertEquals("start stmt before multi-line comment, indent two more spaces", 8, _getIndentOfLine(84));
   }
 
   public void testGetIndentOfCurrStmtIgnoreDelimsInParenPhrase() throws BadLocationException {

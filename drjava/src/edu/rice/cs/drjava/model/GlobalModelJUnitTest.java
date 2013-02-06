@@ -61,24 +61,20 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   static final boolean printMessages = false;
   
   private static final String ELSPETH_ERROR_TEXT_JAVA = 
-    "import junit.framework.TestCase;" +
-    "public class Elspeth extends TestCase {" +
-    "    public void testMe() {" +
-    "        String s = \"elspeth\";" +
+    "import junit.framework.TestCase" +
+    "class Elspeth extends TestCase {" +
+    "    def testMe() {" +
+    "        val s = \"elspeth\"" +
     "        assertEquals(\"they match\", s, \"elspeth4\");" +
     "    }" +
-    "  public Elspeth() {" +
-    "    super();" +
+    "  override def toString = \"Elspeth()\"" +
     "  }" +
-    "  public java.lang.String toString() {" +
-    "    return \"Elspeth(\" + \")\";" +
+    "  override def equals(o: Any) = {" +
+    "    if ((o == null) || getClass != o.getClass) false" +
+    "    else true" +
     "  }" +
-    "  public boolean equals(java.lang.Object o) {" +
-    "    if ((o == null) || getClass() != o.getClass()) return false;" +
-    "    return true;" +
-    "  }" +
-    "  public int hashCode() {" +
-    "    return getClass().hashCode();" +
+    "  override def hashCode = {" +
+    "    getClass.hashCode;" +
     "  }" +
     "}";
 
@@ -94,12 +90,11 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "}\n";
   
   private static final String MONKEYTEST_PASS_TEXT_JAVA =
-    "import junit.framework.*; \n" +
-    "import java.io.*; \n" +
-    "public class MonkeyTestPass extends TestCase { \n" +
-    "  public MonkeyTestPass(String name) { super(name); } \n" +
-    "  public void testShouldPass() { \n" +
-    "    assertEquals(\"monkey\", \"monkey\"); \n" +
+    "import junit.framework._ \n" +
+    "import java.io._ \n" +
+    "class MonkeyTestPass(name: String) extends TestCase(name) { \n" +
+    "  def testShouldPass() { \n" +
+    "    assertEquals(\"monkey\", \"monkey\") \n" +
     "  } \n" +
     "}\n";
 
@@ -134,11 +129,10 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "}\n";
   
   private static final String MONKEYTEST_FAIL_TEXT_JAVA =
-    "import junit.framework.*; " +
-    "public class MonkeyTestFail extends TestCase { " +
-    "  public MonkeyTestFail(String name) { super(name); } " +
-    "  public void testShouldFail() { " +
-    "    assertEquals(\"monkey\", \"baboon\"); " +
+    "import junit.framework._ " +
+    "class MonkeyTestFail(name: String) extends TestCase(name) { " +
+    "  def testShouldFail() { " +
+    "    assertEquals(\"monkey\", \"baboon\") " +
     "  } " +
     "}";
   
@@ -152,11 +146,10 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "}\n";
 
   private static final String MONKEYTEST_ERROR_TEXT_JAVA =
-    "import junit.framework.*; " +
-    "public class MonkeyTestError extends TestCase { " +
-    "  public MonkeyTestError(String name) { super(name); } " +
-    "  public void testThrowsError() { " +
-    "    throw new Error(\"This is an error.\"); " +
+    "import junit.framework._ " +
+    "class MonkeyTestError(name: String) extends TestCase(name) { " +
+    "  def testThrowsError() { " +
+    "    throw new Error(\"This is an error.\") " +
     "  } " +
     "}";
 

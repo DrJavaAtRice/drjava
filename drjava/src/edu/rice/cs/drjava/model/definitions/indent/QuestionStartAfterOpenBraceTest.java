@@ -38,8 +38,8 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
 
-/** Tests whether the closest non-whitespace character preceding the start of the current line (excluding any characters
-  * inside comments or strings) is an open brace.
+/** Tests whether the closest non-whitespace character preceding the start of the current line (excluding any 
+  * characters inside comments or strings) is an open brace (paren or curly).
   * @version $Id$
   */
 public final class QuestionStartAfterOpenBraceTest extends IndentRulesTestCase {
@@ -48,11 +48,15 @@ public final class QuestionStartAfterOpenBraceTest extends IndentRulesTestCase {
   private IndentRuleQuestion _rule = new QuestionStartAfterOpenBrace(null, null);
   
   public void testNoBrace() throws BadLocationException {
-    _text = "method(\nint[] a, String b) {}";
+    _text = "def method(\na: Int, b: String) {\n}\n";
     _setDocText(_text);
-    assertTrue("START has no preceding brace.", !_rule.testApplyRule(_doc, 0, Indenter.IndentReason.OTHER));
-    assertTrue("START immediately follows an open paren, not a brace.", !_rule.testApplyRule(_doc, 8, Indenter.IndentReason.OTHER));
-    assertTrue("START immediately follows an open paren, not a brace.", !_rule.testApplyRule(_doc, _text.length()-1, Indenter.IndentReason.OTHER));
+    assertTrue("START has no preceding brace.", ! _rule.applyRule(_doc, 0, Indenter.IndentReason.OTHER));
+    assertTrue("START immediately follows an open paren", 
+               _rule.applyRule(_doc, 12, Indenter.IndentReason.OTHER));
+    assertTrue("START immediately follows an open brace.", 
+               _rule.applyRule(_doc, 33, Indenter.IndentReason.OTHER));
+    assertTrue("START immediately follows a closed curly brace.", 
+               ! _rule.applyRule(_doc, _text.length(), Indenter.IndentReason.OTHER));
   }
   
   public void testRightAfterBrace() throws BadLocationException {
@@ -62,7 +66,7 @@ public final class QuestionStartAfterOpenBraceTest extends IndentRulesTestCase {
       "}";
     
     _setDocText(_text);
-    assertTrue("START immediately follows an open brace.", _rule.testApplyRule(_doc, 19, Indenter.IndentReason.OTHER));
+    assertTrue("START immediately follows an open brace.", _rule.applyRule(_doc, 19, Indenter.IndentReason.OTHER));
     
     _text = 
       "boolean method(\n" +
@@ -71,8 +75,8 @@ public final class QuestionStartAfterOpenBraceTest extends IndentRulesTestCase {
       "}";
     
     _setDocText(_text); 
-    assertTrue("START immediately follows an open paren.", !_rule.testApplyRule(_doc, 40, Indenter.IndentReason.OTHER));
-    assertTrue("START immediately follows an open brace.", _rule.testApplyRule(_doc, 41, Indenter.IndentReason.OTHER));
+    assertTrue("START immediately follows an open paren.", !_rule.applyRule(_doc, 40, Indenter.IndentReason.OTHER));
+    assertTrue("START immediately follows an open brace.", _rule.applyRule(_doc, 41, Indenter.IndentReason.OTHER));
   }
   
   public void testWSAfterBrace() throws BadLocationException {
@@ -85,10 +89,11 @@ public final class QuestionStartAfterOpenBraceTest extends IndentRulesTestCase {
     
     _setDocText(_text);
     
-    assertTrue("START immediatly follows an open brace.", _rule.testApplyRule(_doc, 14, Indenter.IndentReason.OTHER));
-    assertTrue("Only WS between open brace and START.", _rule.testApplyRule(_doc, 15, Indenter.IndentReason.OTHER));
-    assertTrue("Only WS between open brace and START.", _rule.testApplyRule(_doc, 23, Indenter.IndentReason.OTHER));
-    assertTrue("START immediatly follows an open paren.", !_rule.testApplyRule(_doc, 25, Indenter.IndentReason.OTHER)); 
+    assertTrue("START immediatly follows an open brace.", _rule.applyRule(_doc, 14, Indenter.IndentReason.OTHER));
+    assertTrue("Only WS between open brace and START.", _rule.applyRule(_doc, 15, Indenter.IndentReason.OTHER));
+    assertTrue("START immediately follows an open paren", _rule.applyRule(_doc, 23, Indenter.IndentReason.OTHER));
+    assertTrue("START still in shadow of first open brace", 
+               _rule.applyRule(_doc, _text.length() - 1, Indenter.IndentReason.OTHER)); 
   }
   
   public void testCommentsAfterBrace() throws BadLocationException {
@@ -104,27 +109,27 @@ public final class QuestionStartAfterOpenBraceTest extends IndentRulesTestCase {
     
     _setDocText(_text);
     
-    assertTrue("START = 0.", !_rule.testApplyRule(_doc, 0, Indenter.IndentReason.OTHER));
-    assertTrue("START = 0.", !_rule.testApplyRule(_doc, 14, Indenter.IndentReason.OTHER));
-    assertTrue("Only WS between START and open brace.", _rule.testApplyRule(_doc, 15, Indenter.IndentReason.OTHER));
-    assertTrue("Only WS between START and open brace.", _rule.testApplyRule(_doc, 30, Indenter.IndentReason.OTHER));
-    assertTrue("Only WS between START and open brace.", _rule.testApplyRule(_doc, 44, Indenter.IndentReason.OTHER));
-    assertTrue("Only comment and WS between START and open brace.", _rule.testApplyRule(_doc, 45, Indenter.IndentReason.OTHER));
-    assertTrue("Only comment and WS between START and open brace.", _rule.testApplyRule(_doc, 60, Indenter.IndentReason.OTHER));
-    assertTrue("Only comment and WS between START and open brace.", _rule.testApplyRule(_doc, 77, Indenter.IndentReason.OTHER));
+    assertTrue("START = 0.", !_rule.applyRule(_doc, 0, Indenter.IndentReason.OTHER));
+    assertTrue("START = 0.", !_rule.applyRule(_doc, 14, Indenter.IndentReason.OTHER));
+    assertTrue("Only WS between START and open brace.", _rule.applyRule(_doc, 15, Indenter.IndentReason.OTHER));
+    assertTrue("Only WS between START and open brace.", _rule.applyRule(_doc, 30, Indenter.IndentReason.OTHER));
+    assertTrue("Only WS between START and open brace.", _rule.applyRule(_doc, 44, Indenter.IndentReason.OTHER));
+    assertTrue("Only comment and WS between START and open brace.", _rule.applyRule(_doc, 45, Indenter.IndentReason.OTHER));
+    assertTrue("Only comment and WS between START and open brace.", _rule.applyRule(_doc, 60, Indenter.IndentReason.OTHER));
+    assertTrue("Only comment and WS between START and open brace.", _rule.applyRule(_doc, 77, Indenter.IndentReason.OTHER));
   }
   
   public void testBraceLastCharOnLine() throws BadLocationException {
     _setDocText("{\n");
-    assertTrue("Brace only char on line.", _rule.testApplyRule(_doc, 2, Indenter.IndentReason.OTHER));
+    assertTrue("Brace only char on line.", _rule.applyRule(_doc, 2, Indenter.IndentReason.OTHER));
     
     _setDocText("void foo() {\n");
-    assertTrue("Brace last char on line.", _rule.testApplyRule(_doc, 13, Indenter.IndentReason.OTHER));
+    assertTrue("Brace last char on line.", _rule.applyRule(_doc, 13, Indenter.IndentReason.OTHER));
   }
   
   public void testTextAfterBrace() throws BadLocationException {
     _setDocText("{ hello\n  foo();");
-    assertTrue("Text on line after brace.", _rule.testApplyRule(_doc, 8, Indenter.IndentReason.OTHER));
+    assertTrue("Text on line after brace.", _rule.applyRule(_doc, 8, Indenter.IndentReason.OTHER));
   }
 }
 

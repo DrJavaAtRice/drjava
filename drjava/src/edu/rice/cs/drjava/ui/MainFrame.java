@@ -5909,7 +5909,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       OpenDefinitionsDocument doc = _model.getDocumentForFile(f);
       if (doc != null && _saveSelector.shouldSaveAfterFileMoved(doc, f)) _saveAs();
     }
-    catch (IOException ioe) { /* Couldn't find the document, so ignore the FME */ }
+    catch (IOException ioe) { throw new UnexpectedException(ioe); }
   }
   
   void _showProjectFileParseError(MalformedProjectFileException mpfe) {

@@ -405,7 +405,7 @@ public class DefaultJavadocModel implements JavadocModel {
     
     List<DJError> errors = new ArrayList<DJError>();
     try {
-      Process p = _jvmBuilder.start("com.sun.tools.javadoc.Main", args);
+      Process p = _jvmBuilder.start("scala.tools.nsc.ScalaDoc", args);
       Thunk<String> outputString = ConcurrentUtil.processOutAsString(p);
       Thunk<String> errorString = ConcurrentUtil.processErrAsString(p);
       p.waitFor();

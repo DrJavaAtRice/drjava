@@ -40,12 +40,11 @@ import javax.swing.text.*;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
-/**
- * Indents the current line in the document to the indent level of the
- * start of the previous line, adds several lines of text at that indent level,
- * and moves the cursor to a particular line and position.
- * @version $Id$
- */
+/** Indents the current line in the document to the indent level of the
+  * start of the previous line, adds several lines of text at that indent level,
+  * and moves the cursor to a particular line and position.
+  * @version $Id$
+  */
 class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
   private String[] _suffices;
   private int _line = 0;

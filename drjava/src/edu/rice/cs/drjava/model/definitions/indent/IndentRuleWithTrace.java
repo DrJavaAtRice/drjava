@@ -51,7 +51,7 @@ public abstract class IndentRuleWithTrace implements IndentRule {
 
   private static volatile ArrayList<String> trace = null;
   private static volatile boolean startOver = true;
-  private static volatile boolean ruleTraceEnabled = false;
+  private static volatile boolean ruleTraceEnabled = false;  // true ENABLES TRACING (along with uncommenting 110)
 
   public static final String YES = "Yes";
   public static final String NO = "No";

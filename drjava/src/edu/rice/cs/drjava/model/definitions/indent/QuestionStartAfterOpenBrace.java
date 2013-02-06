@@ -63,9 +63,8 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion {
     int origin = doc.getCurrentLocation();
     int lineStart = doc._getLineStartPos(origin);
     
-//    System.err.println("***** QuestionStartAfterOpenBrace.applyRule called with origin = " + origin + " and lineStart = " +
-//                       lineStart);
-//    System.err.println("   Current line = '" + doc._getCurrentLine() + "'");
+//    System.err.println("***** QSAOB.applyRule called with origin = " + origin + " and lineStart = " + lineStart);
+//    System.err.println("      Current line = '" + doc._getCurrentLine() + "'");
     
     if (lineStart <= 1) return false;  // lineStart < 1 => No preceding line exists!
     
@@ -78,6 +77,8 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion {
       
       if (bracePos == ERROR_INDEX) return false;
       
+//      System.err.println("[QSAOB] Enclosing brace is '" + doc._getText(bracePos, 1).charAt(0) + "'");
+      
     // Get brace's end of line
       int braceEndLinePos = doc._getLineEndPos(bracePos);
       
@@ -87,7 +88,7 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion {
       
       // return true if no NonWS character appears between brace and beginning of curr line
       boolean result = nextNonWS == ERROR_INDEX || nextNonWS >= lineStart;
-//      System.err.println("QuestionStartAfterOpenBrace.indentline returning " + result);
+//      System.err.println("QSAOB.applyRule returning " + result);
 
       return result;  
     }

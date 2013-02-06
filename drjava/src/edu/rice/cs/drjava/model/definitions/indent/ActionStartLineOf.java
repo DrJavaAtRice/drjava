@@ -69,7 +69,7 @@ public class ActionStartLineOf extends IndentRuleAction {
     _lastCharDelimArray = new char[] { _lastChar };
   }
 
-  /** Properly indents the line that the caret is currently on. Replaces all whitespace characters at the beginning of 
+  /** Properly indents the line that the caret is currently on.  Replaces all whitespace characters at the beginning of 
     * the line with the appropriate spacing or characters.   Only runs in event thread.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is taking place
@@ -102,7 +102,7 @@ public class ActionStartLineOf extends IndentRuleAction {
 //    else minPos = doc._getLineEndPos(orig - distToLineEnclosingBrace) + 1;
     
     try {
-      int minPos = doc.findEnclosingScalaBracePos(startPos);  // may throw a BadLocationException
+      int minPos = doc.findEnclosingScalaBracePos(startPos);  // may throw a BadLocationException or return ERROR_INDEX
       
 //      System.err.println("In search within ActionStartLineOf, start position is " + startPos + 
 //                         " position of enclosing Scala brace is " + minPos);

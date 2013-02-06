@@ -83,15 +83,15 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
       prevDelimiterPos = doc.findPrevDelimiter(lineStart, SCALA_DELIMS);
       prevDelimiter = doc.getText(prevDelimiterPos, 1).charAt(0);
     } catch (BadLocationException e) { /* given line is not preceded by any delimiter; must appear in doc heading */
-      return true;
+      prevDelimiterPos = -1;
+      prevDelimiter = '~'; // Scala does not use '~' for anything
     }
     
-//    System.err.println("  In QSNS.applyrule, prevDelimiterPos = " + prevDelimiterPos + " prevDelimiter = '" + 
-//                       prevDelimiter + "'");
+//    System.err.println("[QSNS] prevDelimiterPos = " + prevDelimiterPos + " prevDelimiter = '" + prevDelimiter + "'");
     
     int prevSemicolonPos = doc._findPrevImplicitSemicolonPos(lineStart);
     
-//    System.err.println("   prevSemicolonPos = " + prevSemicolonPos + " line is '" + 
+//    System.err.println("[QSNS] prevSemicolonPos = " + prevSemicolonPos + " line is '" + 
 //                       doc._getCurrentLine(prevSemicolonPos) + "'");
     
     if (prevSemicolonPos > prevDelimiterPos) prevDelimiterPos = prevSemicolonPos;
@@ -108,7 +108,7 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
     } 
     catch (BadLocationException e) { throw new UnexpectedException(e); }
     
-//    System.err.println("    firstNonWSCharAfterDelimPos = " + firstNonWSCharAfterDelimiterPos);
+//    System.err.println("[QSNS] firstNonWSCharAfterDelimPos = " + firstNonWSCharAfterDelimiterPos);
     // If the first non-WS character is after the beginning of the orig line
     // or we reached the end of the document, then we are starting a new statement.
     if (firstNonWSCharAfterDelimiterPos >= lineStart || firstNonWSCharAfterDelimiterPos == -1) return true;
@@ -117,7 +117,7 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
     int prevNonWSCharPos;
     try { prevNonWSCharPos = doc.getPrevNonWSCharPos(lineStart); }
     catch(BadLocationException ble) { return true; } // should only happen when lineStart == 0
-//    System.err.println("    prevNonWSPos = " + prevNonWSCharPos + " prevNonWSChar = '" + 
+//    System.err.println("[QSNS] prevNonWSPos = " + prevNonWSCharPos + " prevNonWSChar = '" + 
 //                       doc._getText(prevNonWSCharPos, 1).charAt(0) + "'");
     return prevSemicolonPos > prevNonWSCharPos;  // true if no significant chars between lineStart and prevSemicolonPos
   }
