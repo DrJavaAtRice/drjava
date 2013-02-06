@@ -248,10 +248,11 @@
           description="Compile the 'scala-specific' sources">
     <antcall target="do-compile">
       <param name="platform-tag" value="scala" />
-      <param name="source-version" value="1.7" />
+      <param name="source-version" value="1.6" />
       <param name="runtime-jar" value="${java7-runtime}" />
-<!--      <param name="extra-classpath" value="${scala-home}/scala-compiler.jar:${scala-home}/scala-library.jar:${basedir}/../drjava/drjava.jar" />  Note that the foolowing depends on scala.jar in lib directory of this branch's drjava tree -->
-      <param name="extra-classpath" value="" />
+      <param name="extra-classpath" value="${scala-home}/lib/scala-compiler.jar:${scala-home}/lib/scala-library.jar:${basedir}/../drjava/drscala.jar" />  
+   <!-- Note that the following depends on scala.jar in lib directory of this branch's drjava tree -->
+   <!-- Replaced  <param name="extra-classpath" value="" /> -->
     </antcall>
 
   </target>
@@ -1192,7 +1193,7 @@
   <target name="resolve-scala-tools">
     <!-- scala-tools is the path to our monolithic scala jar. -->
     <echo message="scala-home = ${scala-home}" />
-    <property name="scala-tools" value="${scala-home}/lib/scala.jar" />
+    <property name="scala-tools" value="${scala-home}/lib/scala-compiler.jar:${scala-home}/lib/scala-library.jar" />
     <echo message="scala-tools = ${scala-tools}" />
   </target>
 

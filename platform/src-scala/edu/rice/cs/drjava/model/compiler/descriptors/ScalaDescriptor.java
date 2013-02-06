@@ -37,9 +37,11 @@
 package edu.rice.cs.drjava.model.compiler.descriptors;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -136,7 +138,7 @@ public class ScalaDescriptor extends JDKDescriptor {
     * this corresponding version of Java is Java 7.
     * @return guessed version */
   public JavaVersion.FullVersion guessVersion(File f) {
-      return JavaVersion.parseFullVersion(JavaVersion.JAVA_7.fullVersion().versionString(), /* TODO: add SCALA to ENUM definition */
+      return JavaVersion.parseFullVersion(JavaVersion.JAVA_6.fullVersion().versionString(), /* TODO: add SCALA to ENUM definition */
                                           "Java PLT Research Group",
                                           "Java PLT Research Group",
                                           f);
@@ -152,7 +154,7 @@ public class ScalaDescriptor extends JDKDescriptor {
   
   /** Return the minimum Java version required to use this JDK.
     * @return minimum version */
-  public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_7; }
+  public JavaVersion getMinimumMajorVersion() { return JavaVersion.JAVA_5; }
   
   /** Return the list of additional files required to use the compiler.
     * The compiler was found in the specified file. This method may have to search the user's hard drive, e.g.
@@ -167,11 +169,16 @@ public class ScalaDescriptor extends JDKDescriptor {
     }
     else {
       File parentDir = compiler.getParentFile();
-      return IterUtil.make(Util.oneOf(parentDir, "scala-library.jar"),
-                           Util.oneOf(parentDir, "scala-dbc.jar"),
-                           Util.oneOf(parentDir, "scala-swing.jar"),
-                           Util.oneOf(parentDir, "scalap.jar"),
-                           Util.oneOf(parentDir, "jline.jar"));
+      File[] jars = parentDir.listFiles(new FilenameFilter() {
+        public boolean accept(File parent, String name) { return name.endsWith(".jar"); }
+      });
+      return Arrays.asList(jars);                                      
+                                        
+//      return IterUtil.make(Util.oneOf(parentDir, "scala-library.jar"),
+//                           Util.oneOf(parentDir, "scala-dbc.jar"),
+//                           Util.oneOf(parentDir, "scala-swing.jar"),
+//                           Util.oneOf(parentDir, "scalap.jar"),
+//                           Util.oneOf(parentDir, "jline.jar"));
     }
   }
   

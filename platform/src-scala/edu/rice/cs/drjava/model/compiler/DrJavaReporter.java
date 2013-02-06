@@ -63,7 +63,7 @@ import edu.rice.cs.util.Log;
   */
 public class DrJavaReporter extends ConsoleReporter {
   
-  public static final Log _log = new Log("GlobalModel.txt", true);
+  public static final Log _log = new Log("GlobalModel.txt", false);
   
   /** Error table passed in from client. */
   final LinkedList<DJError> djErrors;
@@ -91,8 +91,8 @@ public class DrJavaReporter extends ConsoleReporter {
     if (pos != null && pos.isDefined()) {
       /* msg has a corresponding source file */
       SourceFile source = pos.source();
-      /* TODO: drop reporting of messages with severity = NOTE. */
-      DJError error = new DJError(source.file().file(), pos.line(), pos.column(), msg, ! severity.equals(ERROR()));
+      /* NOTE: line adjusted by one based on observation. Does Scala follow a different line numbering scheme? */
+      DJError error = new DJError(source.file().file(), pos.line() - 1, pos.column(), msg, /* ! severity.equals(ERROR()) */ false);
       _log.log("Recording error " + error);
       djErrors.add(error);
       /* pos.file() is a scala AbstractFile; pos.file().file() is the Java File backing it. */

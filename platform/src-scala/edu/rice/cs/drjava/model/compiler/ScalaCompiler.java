@@ -77,9 +77,9 @@ import scala.tools.nsc.reporters.ConsoleReporter;
   *
   *  @version $Id$
   */
-public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCompilerInterface {
+public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala */ CompilerInterface {
   
-  public static final Log _log = new Log("GlobalModel.txt", true);
+  public static final Log _log = new Log("GlobalModel.txt", false);
   
   private File _outputDir = null;
     
@@ -89,10 +89,10 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
   
   public String getName() { return "Scala " + scala.tools.nsc.Properties.versionString(); }  // Properties$.MODULE$.versionString()
   
-  /** returns the output directory for the Scala compiler.  This method is not an override! */
-  public File getOutputDir() { return _outputDir; }
-  /** sets the output directory for the Scala compiler. */
-  public void setOutputDir(File f) { _outputDir = f; }
+//  /** returns the output directory for the Scala compiler.  This method is not an override! */
+//  public File getOutputDir() { return _outputDir; }
+//  /** sets the output directory for the Scala compiler. */
+//  public void setOutputDir(File f) { _outputDir = f; }
    
   /** A compiler can instruct DrJava to include additional elements for the boot class path of the Interactions JVM. 
     * This feature is necessary for the Scala compiler, since the Scala interpreter needs to be invoked at runtime. */
@@ -200,16 +200,15 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
   /** Return the set of keywords that should be highlighted in the specified file.
     * @param f file for which to return the keywords
     * @return the set of keywords that should be highlighted in the specified file. */
-  public Set<String> getKeywordsForFile(File f) {
-    return isSourceFileForThisCompiler(f) ? new HashSet<String>(SCALA_KEYWORDS) : new HashSet<String>();
-  }
+  public Set<String> getKeywordsForFile(File f) { return SCALA_KEYWORDS; }
   
   /** Set of Scala keywords for special coloring. */
   public static final HashSet<String> SCALA_KEYWORDS = new HashSet<String>();
   static {
     SCALA_KEYWORDS.addAll(JAVA_KEYWORDS);
     final String[] words =  {
-      "val", "var", "def", "implicit", "override"
+      "val", "var", "def", "implicit", "override", "yield", "trait", "type", "sealed", "lazy", "object", "forSome", 
+      "match", "=>", "<-", "->"
     };
     for(String s: words) { SCALA_KEYWORDS.add(s); }
   }
@@ -249,6 +248,7 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements ScalaCom
     Settings settings = reporter.settings();
     
 //    settings.processArgumentString("-usejavacp");
+    settings.processArgumentString("-deprecation");
     _log.log("Passing argument string '" + "-d " + '"' + destination.getPath() + '"' + "to the scala compiler (Global)");
     settings.processArgumentString("-d " + '"' + destination.getPath() + '"');
     // additionalBootClassPathForInteractions consists of the jar files required to run scalac
