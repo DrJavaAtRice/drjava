@@ -1,4 +1,4 @@
-/*BEGIN_COPYRIGHT_BLOCK
+/* BEGIN_COPYRIGHT_BLOCK
  *
  * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.

@@ -1,4 +1,4 @@
-/*BEGIN_COPYRIGHT_BLOCK
+/* BEGIN_COPYRIGHT_BLOCK
  *
  * Copyright (c) 2001-2010, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
@@ -215,8 +215,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         try {
           Class<?>[] sig = { FullVersion.class, String.class, List.class };
           Object[] args = { version, f.toString(), bootClassPath };
-          // JDKToolsLibrary._log.log("classpath for compiler: "+IterUtil.multilineToString(path));
-          // JDKToolsLibrary._log.log("boot classpath for compiler: "+IterUtil.multilineToString(bootClassPath));                
+          // JDKToolsLibrary._log.log("classpath for compiler: " + IterUtil.multilineToString(path));
+          // JDKToolsLibrary._log.log("boot classpath for compiler: " + IterUtil.multilineToString(bootClassPath));                
           CompilerInterface attempt = (CompilerInterface) ReflectUtil.loadLibraryAdapter(loader, path, compilerAdapter, 
                                                                                          sig, args);
           if (attempt.isAvailable()) { compiler = attempt; }
@@ -288,6 +288,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       else if (name.startsWith("jdk")) {
         parsedVersion = name.substring(3); 
         result = JavaVersion.parseFullVersion(parsedVersion, vendor, vendor, f);
+        JDKToolsLibrary.msg("For name starting with 'jdk', parsedVersion = '" + parsedVersion + "' result = '" + result + "'");
       }
       else if (name.startsWith("j2sdk") || name.startsWith("java-")) {
         parsedVersion = name.substring(5);
@@ -442,7 +443,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     /* Entries for Mac OS X */
     addIfDir(new File("/System/Library/Java/JavaVirtualMachines"), roots);
     addIfDir(new File("/Library/Java/JavaVirtualMachines"), roots);
-    addIfDir(new File("/System/Library/Java/JavaVirtualMachines"), roots);
+//    addIfDir(new File("/System/Library/Java/JavaVirtualMachines"), roots);
 
     addIfDir(new File("/usr/java"), roots);
     addIfDir(new File("/usr/j2se"), roots);

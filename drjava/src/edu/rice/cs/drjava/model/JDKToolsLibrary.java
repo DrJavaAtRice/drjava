@@ -71,6 +71,8 @@ public class JDKToolsLibrary {
   private final JavadocModel _javadoc;
   private final JDKDescriptor _jdkDescriptor; // JDKDescriptor.NONE if none
   
+  /* package private */ static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("JDKToolsLibrary.txt", true);
+  
   protected JDKToolsLibrary(FullVersion version, JDKDescriptor jdkDescriptor, CompilerInterface compiler, 
                             Debugger debugger, JavadocModel javadoc) {
     assert jdkDescriptor != null;
@@ -194,7 +196,7 @@ public class JDKToolsLibrary {
   public static final java.io.StringWriter LOG_STRINGWRITER = new java.io.StringWriter();
 //  protected static final java.io.PrintWriter LOG_PW = new java.io.PrintWriter(LOG_STRINGWRITER);
   
-  public static void msg(String s) {   
+  public static void msg(String s) {  _log.log(s);   
 //    try {   
 //      java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(new File(new File(System.getProperty("user.home")),   
 //                                                                                       "FindCompilers.txt").getAbsolutePath(),true));   
