@@ -158,20 +158,23 @@ public enum JavaVersion {
     }
   }
   
-  /**
-   * Produce the {@code JavaVersion.FullVersion} corresponding to the given version string.  Accepts
-   * input of the form "1.6.0", "1.4.2_10", or "1.5.0_05-ea".  The underscore may be replaced by a dot.
-   * If the text cannot be parsed, a trivial version with major version UNRECOGNIZED is returned.
-   * The location of the JDK, which may be null, will be stored in the version.
-   * 
-   * @see <a href="http://java.sun.com/j2se/versioning_naming.html#">The Sun version specification</a>
-   */
+  /** Produce the {@code JavaVersion.FullVersion} corresponding to the given version string.  Accepts
+    * input of the form "1.6.0", "1.4.2_10", or "1.5.0_05-ea".  The underscore may be replaced by a dot.
+    * If the text cannot be parsed, a trivial version with major version UNRECOGNIZED is returned.
+    * The location of the JDK, which may be null, will be stored in the version.
+    * 
+    * @see <a href="http://java.sun.com/j2se/versioning_naming.html#">The Sun version specification</a>
+    */
+  // Why are underscores used as word separators in identifiers below?
   public static FullVersion parseFullVersion(String java_version,
                                              String java_runtime_name,
                                              String java_vm_vendor,
                                              File location) {
     VendorType vendor = VendorType.UNKNOWN;
     String vendorString = null;
+    
+    /** Strip trailing ".jdk" off of java_version strings from post Java 6 Oracle JVMs for Mac OS X. */
+    if (java_version.endsWith(".jdk")) java_version = java_version.substring(0, java_version.length() - 4);
     
     if (vendor == VendorType.UNKNOWN) {
       if (java_runtime_name.toLowerCase().contains("openjdk")) {
@@ -194,7 +197,7 @@ public enum JavaVersion {
     // if version doesn't start with "1." and has only one dot, prefix with "1."
     // example: 6.0 --> 1.6.0
     if ((!java_version.startsWith("1.")) && (java_version.replaceAll("[^\\.]","").length()==1)) {
-      java_version = "1."+java_version;
+      java_version = "1." + java_version;
     }
     int dash = java_version.indexOf('-');
     if (dash == -1) { number = java_version; typeString = null; }

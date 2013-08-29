@@ -147,7 +147,7 @@
           description="Compile all source files">
   </target>
   
-  <target name="do-compile" depends="resolve-java5-runtime">
+  <target name="do-compile" depends="resolve-java7-runtime">
   
     <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
     
