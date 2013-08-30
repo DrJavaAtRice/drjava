@@ -64,6 +64,9 @@ public interface CompilerInterface {
     *                       If <code>null</code>, the default is used.
     * @param sourceVersion  The language version of the sources.  Should be consistent with <code>bootClassPath</code>.  
     * If <code>null</code>, the default is used.
+    * 
+    * NOTE: currently, sourceVersion is ALWAYS null.  This method is only called from two places in DefaultCompilerModel.
+    * 
     * @param showWarnings  Whether compiler warnings should be shown or ignored.
     * @return Errors that occurred. If no errors, should be zero length (not null).
     */

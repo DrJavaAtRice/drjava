@@ -71,7 +71,7 @@ public class JDKToolsLibrary {
   private final JavadocModel _javadoc;
   private final JDKDescriptor _jdkDescriptor; // JDKDescriptor.NONE if none
   
-  /* package private */ static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("JDKToolsLibrary.txt", true);
+  /* package private */ static edu.rice.cs.util.Log _log = new edu.rice.cs.util.Log("JDKToolsLibrary.txt", false);
   
   protected JDKToolsLibrary(FullVersion version, JDKDescriptor jdkDescriptor, CompilerInterface compiler, 
                             Debugger debugger, JavadocModel javadoc) {
@@ -101,6 +101,8 @@ public class JDKToolsLibrary {
   
   public static String adapterForCompiler(JavaVersion.FullVersion version) {
     switch (version.majorVersion()) {
+      case FUTURE: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
+      case JAVA_8: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
       case JAVA_7: return "edu.rice.cs.drjava.model.compiler.Javac170Compiler";
       case JAVA_6: {
         switch (version.vendor()) {

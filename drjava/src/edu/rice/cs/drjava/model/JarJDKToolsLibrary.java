@@ -229,7 +229,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       String debuggerPackage = "edu.rice.cs.drjava.model.debug.jpda";
       if (debuggerAdapter != null) {
         try {
-          JDKToolsLibrary.msg("                 loading debugger: "+debuggerAdapter);
+          JDKToolsLibrary.msg("                 loading debugger: " + debuggerAdapter);
           Class<?>[] sig = { GlobalModel.class };
           // can't use loadLibraryAdapter because we need to preempt the whole package
           ClassLoader debugLoader = new PreemptingClassLoader(new PathClassLoader(loader, path), debuggerPackage);
@@ -276,7 +276,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       name = current.getName();
       path = current.getAbsolutePath();
       if (! forceUnknown) {
-        if (path.startsWith("/System/Library/Frameworks/JavaVM.framework") || path.startsWith("/Library/Java")) vendor = "apple";
+        if (path.startsWith("/System/Library/Frameworks/JavaVM.framework")) vendor = "apple";
+        else if (path.startsWith("/Library/Java")) vendor = "oracle";
         else if (path.toLowerCase().contains("openjdk")) vendor = "openjdk";
         else if (path.toLowerCase().contains("sun")) vendor = "sun";
         else if (path.toLowerCase().contains("oracle")) vendor = "oracle";
@@ -445,6 +446,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     addIfDir(new File("/Library/Java/JavaVirtualMachines"), roots);
 //    addIfDir(new File("/System/Library/Java/JavaVirtualMachines"), roots);
 
+    /* Entries for Linux */
     addIfDir(new File("/usr/java"), roots);
     addIfDir(new File("/usr/j2se"), roots);
     addIfDir(new File("/usr"), roots);

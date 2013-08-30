@@ -74,11 +74,12 @@ public class DrJavaFileUtils  {
     * otherwise false
     * @return true if the file is a Java or language level file. */
   public static boolean isSourceFile(String fileName) {
-    return fileName.endsWith(OptionConstants.JAVA_FILE_EXTENSION)
+    return fileName != null && 
+      (  fileName.endsWith(OptionConstants.JAVA_FILE_EXTENSION)
       || fileName.endsWith(OptionConstants.DJ_FILE_EXTENSION)
       || fileName.endsWith(OptionConstants.OLD_DJ0_FILE_EXTENSION)
       || fileName.endsWith(OptionConstants.OLD_DJ1_FILE_EXTENSION)
-      || fileName.endsWith(OptionConstants.OLD_DJ2_FILE_EXTENSION);
+      || fileName.endsWith(OptionConstants.OLD_DJ2_FILE_EXTENSION) );
   }
   
   /** @return true if the file is a Java or language level file. */

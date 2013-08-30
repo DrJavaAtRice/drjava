@@ -336,7 +336,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     if (configTools != FileOps.NULL_FILE) {
       JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this, JDKDescriptor.NONE);
       if (fromConfig.isValid()) { 
-        JarJDKToolsLibrary.msg("From config: "+fromConfig);
+        JarJDKToolsLibrary.msg("From config: " + fromConfig);
         results.put(getLibraryKey(LibraryKey.PRIORITY_CONFIG, fromConfig), fromConfig);
       }
       else { JarJDKToolsLibrary.msg("From config: invalid " + fromConfig); }

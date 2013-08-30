@@ -54,6 +54,9 @@
   <!-- Don't use or inherit the CLASSPATH environment variable for anything -->
   <property name="build.sysclasspath" value="ignore" />
   
+  <!-- This property was added based on a tip found on the internet in response to many failing unit tests using Java 7 -->
+  <property name="run.jvmargs.ide" value=""/>
+
   <!-- Extension that defines the "extendclasspath" task.  This should be a standard feature of Ant, but
        as long as it's not, we can use this extension from the Clover developers. -->
   <taskdef resource="com/cenqua/ant/antlib.xml" classpath="lib/buildlib/cenquatasks.jar" />
@@ -430,7 +433,7 @@
     <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}' and '${test-tools}'" />
     <extendclasspath path="${junit-jar}" />
     <junit haltonfailure="${test-halt}" failureproperty="test-failed"
-           fork="yes" forkmode="perTest" maxmemory="800M" jvm="${test-jvm}" dir="${basedir}">
+           fork="yes" forkmode="perTest" maxmemory="1G" jvm="${test-jvm}" dir="${basedir}">
       <classpath>
         <pathelement location="${test-tools}" />
         <pathelement location="${junit-jar}" />
