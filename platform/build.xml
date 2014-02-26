@@ -14,7 +14,7 @@
 <project name="platform" default="help">
 
   <property name="readable-project-name" value="DrJava Platform-Specific Classes" />
-  <property name="svn-repository" value="https://svn.sourceforge.net/svnroot/drjava" />
+  <property name="svn-repository" value="https://drjava.svn.sourceforge.net/svnroot/drjava" />
 
   <!-- Properties loaded from a file -->
   <property name="props" value="../ant.properties" />

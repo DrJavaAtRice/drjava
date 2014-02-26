@@ -78,7 +78,7 @@ public class Javac170Compiler extends JavacCompiler { // Javac170FilteringCompil
       diagnostic.getMethod("getKind");
       // javax.lang.model.SourceVersion.RELEASE_7 field introduced in Java 7
       Class<?> sourceVersion = Class.forName("javax.lang.model.SourceVersion");
-      sourceVersion.getField("RELEASE_7");
+      sourceVersion.getField("RELEASE_7");  // only exists in Java 7 and later releases
       // javax.tools.Diagnostic and javax.lang.model.SourceVersion are also found in rt.jar;
       // to test if tools.jar is available, we need to test for a class only found in tools.jar
       Class.forName("com.sun.tools.javac.main.JavaCompiler");
@@ -207,7 +207,8 @@ public class Javac170Compiler extends JavacCompiler { // Javac170FilteringCompil
     
     // Bug fix: if "-target" is not present, Iterables in for-each loops cause compiler errors
     if (sourceVersion != null) { options.add("-target"); options.add(sourceVersion); }
-    else { options.add("-target"); options.add("1.7"); }
+    /* The following line is commented out because it does not work for Java 8. */
+//    else { options.add("-target"); options.add("1.7"); }
 
     return options;
   }
