@@ -12,7 +12,7 @@
   <property name="md5-temp-name" value="classes/md5.properties" />
   <property name="md5-properties-path" value="edu/rice/cs/drjava/md5.properties" />
   <property name="main-class" value="edu.rice.cs.drjava.DrJava" />
-  <property name="svn-repository" value="https://svn.code.sf.net/p/drjava/code/tags" />
+  <property name="svn-repository" value="https://svn.code.sf.net/p/drjava/code" />
 
   <!-- Properties loaded from a file -->
   <property name="props" value="../ant.properties" />
