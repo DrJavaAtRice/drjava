@@ -101,20 +101,19 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   }
 
   /** Make sure interpreting simple constants works.
-    * Note that strings and characters are quoted.
-    */
+    * Note that strings and characters are quoted. */
   @SuppressWarnings({"unchecked", "rawtypes"})
   public void testConstants() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
-      Pair.make("5", new Integer(5)),
-        Pair.make("1356", new Integer(1356)),
-        Pair.make("true", Boolean.TRUE),
-        Pair.make("false", Boolean.FALSE),
-        Pair.make("\'c\'", new Character('c')),
-        Pair.make("1.345", new Double(1.345)),
-        Pair.make("\"buwahahahaha!\"", "buwahahahaha!"),
-        Pair.make("\"yah\\\"eh\\\"\"", "yah\"eh\""),
-        Pair.make("'\\''", new Character('\''))
+      Pair.make("5", (Object) new Integer(5)),
+        Pair.make("1356", (Object) new Integer(1356)),
+        Pair.make("true", (Object) Boolean.TRUE),
+        Pair.make("false", (Object) Boolean.FALSE),
+        Pair.make("\'c\'", (Object) new Character('c')),
+        Pair.make("1.345", (Object) new Double(1.345)),
+        Pair.make("\"buwahahahaha!\"", (Object) "buwahahahaha!"),
+        Pair.make("\"yah\\\"eh\\\"\"", (Object) "yah\"eh\""),
+        Pair.make("'\\''", (Object) new Character('\''))
     };
     tester(cases);
   }
@@ -124,19 +123,19 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   public void testBooleanOps() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
       //and
-      Pair.make("true && false", Boolean.FALSE), Pair.make("true && true",
-          Boolean.TRUE),
+      Pair.make("true && false", (Object) Boolean.FALSE), Pair.make("true && true",
+          (Object) Boolean.TRUE),
       //or
-      Pair.make("true || true", Boolean.TRUE), Pair.make("false || true", Boolean.TRUE),
-          Pair.make("false || false", Boolean.FALSE),
+      Pair.make("true || true", (Object) Boolean.TRUE), Pair.make("false || true", (Object) Boolean.TRUE),
+          Pair.make("false || false", (Object) Boolean.FALSE),
       // not
-      Pair.make("!true", Boolean.FALSE), Pair.make("!false", Boolean.TRUE),
+      Pair.make("!true", (Object) Boolean.FALSE), Pair.make("!false", (Object) Boolean.TRUE),
           //equals
-      Pair.make("true == true", Boolean.TRUE), Pair.make("false == true", Boolean.FALSE),
-          Pair.make("false == false", Boolean.TRUE),
+      Pair.make("true == true", (Object) Boolean.TRUE), Pair.make("false == true", (Object) Boolean.FALSE),
+          Pair.make("false == false", (Object) Boolean.TRUE),
       // xor
-      Pair.make("false ^ false", Boolean.valueOf(false ^ false)), Pair.make("false ^ true ",
-          Boolean.valueOf(false ^ true))
+      Pair.make("false ^ false", (Object) Boolean.valueOf(false ^ false)), Pair.make("false ^ true ",
+          (Object) Boolean.valueOf(false ^ true))
     };
     tester(cases);
   }
@@ -145,8 +144,8 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   @SuppressWarnings({"unchecked", "rawtypes"})
   public void testShortCircuit() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
-      Pair.make("false && (3 == 1/0)", Boolean.FALSE),
-      Pair.make("true || (1/0 != 43)", Boolean.TRUE)
+      Pair.make("false && (3 == 1/0)", (Object) Boolean.FALSE),
+      Pair.make("true || (1/0 != 43)", (Object) Boolean.TRUE)
     };
     tester(cases);
   }
@@ -156,46 +155,45 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   public void testIntegerOps() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
       // plus
-      Pair.make("5+6", new Integer(5 + 6)),
+      Pair.make("5+6", (Object) new Integer(5 + 6)),
       // minus
-      Pair.make("6-5", new Integer(6 - 5)),
+      Pair.make("6-5", (Object) new Integer(6 - 5)),
       // times
-      Pair.make("6*5", new Integer(6*5)),
+      Pair.make("6*5", (Object) new Integer(6*5)),
       // divide
-      Pair.make("6/5", new Integer(6/5)),
+      Pair.make("6/5", (Object) new Integer(6/5)),
       // modulo
-      Pair.make("6%5", new Integer(6%5)),
+      Pair.make("6%5", (Object) new Integer(6%5)),
       // bit and
-      Pair.make("6&5", new Integer(6 & 5)),
+      Pair.make("6&5", (Object) new Integer(6 & 5)),
       // bit or
-      Pair.make("6 | 5", new Integer(6 | 5)),
+      Pair.make("6 | 5", (Object) new Integer(6 | 5)),
       // bit xor
-      Pair.make("6^5", new Integer(6 ^ 5)),
+      Pair.make("6^5", (Object) new Integer(6 ^ 5)),
       // bit complement
-      Pair.make("~6", new Integer(~6)),
+      Pair.make("~6", (Object) new Integer(~6)),
       // unary plus
-      Pair.make(" + 5", new Integer(+5)),
+      Pair.make(" + 5", (Object) new Integer(+5)),
       // unary minus
-      Pair.make("-5", new Integer(-5)),
+      Pair.make("-5", (Object) new Integer(-5)),
       // left shift
-      Pair.make("400 << 5", new Integer(400 << 5)),
+      Pair.make("400 << 5", (Object) new Integer(400 << 5)),
       // right shift
-      Pair.make("400 >> 5", new Integer(400 >> 5)),
+      Pair.make("400 >> 5", (Object) new Integer(400 >> 5)),
       // unsigned right shift
-      Pair.make("400 >>> 5", new Integer(400 >>> 5)),
+      Pair.make("400 >>> 5", (Object) new Integer(400 >>> 5)),
       // less than
-      Pair.make("5 < 4", Boolean.valueOf(5 < 4)),
+      Pair.make("5 < 4", (Object) Boolean.valueOf(5 < 4)),
       // less than or equal to
-      Pair.make("4 <= 4", Boolean.valueOf(4 <= 4)), Pair.make("4 <= 5", Boolean.valueOf(4 <= 5)),
+      Pair.make("4 <= 4", (Object) Boolean.valueOf(4 <= 4)), Pair.make("4 <= 5", (Object) Boolean.valueOf(4 <= 5)),
           // greater than
-      Pair.make("5 > 4", Boolean.valueOf(5 > 4)), Pair.make("5 > 5", Boolean.valueOf(5 > 5)),
+      Pair.make("5 > 4", (Object) Boolean.valueOf(5 > 4)), Pair.make("5 > 5", (Object) Boolean.valueOf(5 > 5)),
           // greater than or equal to
-      Pair.make("5 >= 4", Boolean.valueOf(5 >= 4)), Pair.make("5 >= 5", Boolean.valueOf(5 >= 5)),
+      Pair.make("5 >= 4", (Object) Boolean.valueOf(5 >= 4)), Pair.make("5 >= 5", (Object) Boolean.valueOf(5 >= 5)),
           // equal to
-      Pair.make("5 == 5", Boolean.valueOf(5 == 5)), Pair.make("5 == 6", Boolean.valueOf(
-          5 == 6)),
+      Pair.make("5 == 5", (Object) Boolean.valueOf(5 == 5)), Pair.make("5 == 6", (Object) Boolean.valueOf(5 == 6)),
       // not equal to
-      Pair.make("5 != 6", Boolean.valueOf(5 != 6)), Pair.make("5 != 5", Boolean.valueOf(5 != 5))
+      Pair.make("5 != 6", (Object) Boolean.valueOf(5 != 6)), Pair.make("5 != 5", (Object) Boolean.valueOf(5 != 5))
     };
     tester(cases);
   }
@@ -205,33 +203,33 @@ public class JavaInterpreterTest extends DrJavaTestCase {
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
   public void testDoubleOps() throws InterpreterException {
-    Pair<String,Object>[] cases = new Pair[] {
+    Pair<String,Object>[] cases = new Pair[]{
       // less than
-      Pair.make("5.6 < 6.7", Boolean.valueOf(5.6 < 6.7)),
+      Pair.make("5.6 < 6.7", (Object) Boolean.valueOf(5.6 < 6.7)),
       // less than or equal to
-      Pair.make("5.6 <= 5.6", Boolean.valueOf(5.6 <= 5.6)),
+      Pair.make("5.6 <= 5.6", (Object) Boolean.valueOf(5.6 <= 5.6)),
       // greater than
-      Pair.make("5.6 > 4.5", Boolean.valueOf(5.6 > 4.5)),
+      Pair.make("5.6 > 4.5", (Object) Boolean.valueOf(5.6 > 4.5)),
       // greater than or equal to
-      Pair.make("5.6 >= 56.4", Boolean.valueOf(5.6 >= 56.4)),
+      Pair.make("5.6 >= 56.4", (Object) Boolean.valueOf(5.6 >= 56.4)),
       // equal to
-      Pair.make("5.4 == 5.4", Boolean.valueOf(5 == 5)),
+      Pair.make("5.4 == 5.4", (Object) Boolean.valueOf(5 == 5)),
       // not equal to
-      Pair.make("5.5 != 5.5", Boolean.valueOf(5 != 5)),
+      Pair.make("5.5 != 5.5", (Object) Boolean.valueOf(5 != 5)),
       // unary plus
-      Pair.make(" + 5.6", new Double(+5.6)),
+      Pair.make(" + 5.6", (Object) new Double(+5.6)),
       // unary minus
-      Pair.make("-5.6", new Double(-5.6)),
+      Pair.make("-5.6", (Object) new Double(-5.6)),
       // times
-      Pair.make("5.6 * 4.5", new Double(5.6*4.5)),
+      Pair.make("5.6 * 4.5", (Object) new Double(5.6*4.5)),
       // divide
-      Pair.make("5.6 / 3.4", new Double(5.6/3.4)),
+      Pair.make("5.6 / 3.4", (Object) new Double(5.6/3.4)),
       // modulo
-      Pair.make("5.6 % 3.4", new Double(5.6%3.4)),
+      Pair.make("5.6 % 3.4", (Object) new Double(5.6%3.4)),
       // plus
-      Pair.make("5.6 + 6.7", new Double(5.6 + 6.7)),
+      Pair.make("5.6 + 6.7", (Object) new Double(5.6 + 6.7)),
       // minus
-      Pair.make("4.5 - 3.4", new Double(4.5 - 3.4)),
+      Pair.make("4.5 - 3.4", (Object) new Double(4.5 - 3.4)),
     };
     tester(cases);
   }
@@ -243,9 +241,9 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   public void testStringOps() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
       // concatenation
-      Pair.make("\"yeah\" + \"and\"", "yeah" + "and"),
+      Pair.make("\"yeah\" + \"and\"", (Object) "yeah" + "and"),
       // equals
-      Pair.make("\"yeah\".equals(\"yeah\")", Boolean.valueOf("yeah".equals("yeah"))),
+      Pair.make("\"yeah\".equals(\"yeah\")", (Object) Boolean.valueOf("yeah".equals("yeah"))),
 
     };
     tester(cases);
@@ -258,7 +256,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   public void testCharacterOps()  throws InterpreterException{
     Pair<String,Object>[] cases = new Pair[] {
       // equals
-      Pair.make("'c' == 'c'", Boolean.valueOf('c' == 'c'))
+      Pair.make("'c' == 'c'", (Object) Boolean.valueOf('c' == 'c'))
     };
     tester(cases);
   }
@@ -270,15 +268,15 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   @SuppressWarnings({"unchecked", "rawtypes"})
   public void testSemicolon() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
-      Pair.make("'c' == 'c'", Boolean.valueOf('c' == 'c')),
-      Pair.make("'c' == 'c';", null),
-      Pair.make("String s = \"hello\"", null),
-      Pair.make("String x = \"hello\";", null),
-      Pair.make("char c = 'c'", null),
-      Pair.make("Character d = new Character('d')", null),
-      Pair.make("s", "hello"), Pair.make("s;", null),
-      Pair.make("x", "hello"), Pair.make("x;", null),
-      Pair.make("c", 'c'), Pair.make("d", 'd')
+      Pair.make("'c' == 'c'", (Object) Boolean.valueOf('c' == 'c')),
+      Pair.make("'c' == 'c';", (Object) null),
+      Pair.make("String s = \"hello\"", (Object) null),
+      Pair.make("String x = \"hello\";", (Object) null),
+      Pair.make("char c = 'c'", (Object) null),
+      Pair.make("Character d = new Character('d')", (Object) null),
+      Pair.make("s", "hello"), Pair.make("s;", (Object) null),
+      Pair.make("x", "hello"), Pair.make("x;", (Object) null),
+      Pair.make("c", (Object) 'c'), Pair.make("d", (Object) 'd')
     };
     tester(cases);
   }
@@ -289,8 +287,8 @@ public class JavaInterpreterTest extends DrJavaTestCase {
   @SuppressWarnings({"unchecked", "rawtypes"})
   public void testNullInstanceOf() throws InterpreterException {
     Pair<String,Object>[] cases = new Pair[] {
-      Pair.make("null instanceof Object", Boolean.valueOf(null instanceof Object)),
-      Pair.make("null instanceof String", Boolean.valueOf(null instanceof String))
+      Pair.make("null instanceof Object", (Object) Boolean.valueOf(null instanceof Object)),
+      Pair.make("null instanceof String", (Object) Boolean.valueOf(null instanceof String))
     };
     tester(cases);
   }
@@ -322,15 +320,15 @@ public class JavaInterpreterTest extends DrJavaTestCase {
     _interpreter.interpret("boolean bool");
     _interpreter.interpret("String str");
     Pair<String,Object>[] cases = new Pair[] {
-      Pair.make("b", new Byte((byte)0)),
-      Pair.make("s", new Short((short)0)),
-      Pair.make("i", new Integer(0)),
-      Pair.make("l", new Long(0L)),
-      Pair.make("f", new Float(0.0f)),
-      Pair.make("d", new Double(0.0d)),
-      Pair.make("c", new Character('\u0000')),
-      Pair.make("bool", Boolean.valueOf(false)),
-      Pair.make("str", null)
+      Pair.make("b", (Object) new Byte((byte)0)),
+      Pair.make("s", (Object) new Short((short)0)),
+      Pair.make("i", (Object) new Integer(0)),
+      Pair.make("l", (Object) new Long(0L)),
+      Pair.make("f", (Object) new Float(0.0f)),
+      Pair.make("d", (Object) new Double(0.0d)),
+      Pair.make("c", (Object) new Character('\u0000')),
+      Pair.make("bool", (Object) Boolean.valueOf(false)),
+      Pair.make("str", (Object) null)
     };
     tester(cases);
   }

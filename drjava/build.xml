@@ -40,6 +40,7 @@
   <property name="drjava.test.config" value="testFiles/drjava.basic.config" />
   
   <property environment="env" />
+  <property name="java8-home" value="${env.JAVA8_HOME}" />
   <property name="java7-home" value="${env.JAVA7_HOME}" />
   <property name="java6-home" value="${env.JAVA6_HOME}" />
   <property name="java5-home" value="${env.JAVA5_HOME}" />
@@ -107,6 +108,8 @@
     <echo message="            '-6' targets)" />
     <echo message="JAVA7_HOME: Home folder of the Java 7 JRE or JDK (required for" />
     <echo message="            '-7' targets)" />
+    <echo message="JAVA8_HOME: Home folder of the Java 8 JRE or JDK (required for" />
+    <echo message="            '-8' targets)" />
     <echo message="LAUNCH4J_HOME: Location of the Launch4j installation (used to " />
     <echo message="               release a Windows application)" />
     <echo message="CLOVER_JAR: Location of the Clover jar file" />
@@ -215,11 +218,12 @@
        Compilation Targets
        ******************* -->
        
+  <!-- The following target assumes that javac resolves a Java 8 compiler -->
   <target name="compile" depends="generate-source, do-compile, copy-resources, unjar-libs"
           description="Compile all source files (after generating the source)">
   </target>
   
-  <target name="do-compile" depends="resolve-java7-runtime, resolve-java7-tools">
+  <target name="do-compile" depends="resolve-java8-runtime, resolve-java8-tools">
   
     <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
     
@@ -231,9 +235,113 @@
       <fileset dir="classes/test" includes="**/*" />
     </move>
     
-    <javac srcdir="src" destdir="classes/base" source="1.5" target="1.5"
+    <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
+           bootclasspath="${java8-runtime}" sourcepath="" includeAntRuntime="no"
+           executable="javac" fork="yes" memoryMaximumSize="1024M"
+           debug="on" optimize="off" deprecation="on"	>
+      <classpath>
+        <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
+             debugger code into the "platform" module -->
+        <pathelement location="${java8-tools}" />
+        <fileset refid="libs" />
+        <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
+        <pathelement location="classes/base" />
+      </classpath>
+      <compilerarg value="-Xlint" />
+      <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
+      <compilerarg value="-Xlint:-serial" /> 
+      <!-- Use the next line to compile against other sources, ignoring any unneeded classes.
+           This can be useful in creating a pruned version of a jar file for the lib directory.
+           (You must also clear the sourcepath="" option.)
+      <include name="${src-working-dir}/**/*.java" /> -->
+    </javac>
+    
+    <mkdir dir="classes/test" /> <!-- May be deleted by the previous move -->
+    <move todir="classes/test">
+      <fileset dir="classes/base">
+        <include name="**/*Test.class" />
+        <include name="**/*Test$*.class" />
+        <include name="**/*TestCase.class" />
+        <include name="**/*TestCase$*.class" />
+        <!-- Additional test classes should be listed here -->
+      </fileset>
+    </move>
+    
+  </target>
+
+  <!-- The following target assumes that javac resolves to a Java 6 javac compiler -->
+  <target name="compile-6" depends="generate-source, do-compile-6, copy-resources, unjar-libs"
+          description="Compile all source files (after generating the source)">
+  </target>
+  
+  <target name="do-compile-6" depends="resolve-java6-runtime, resolve-java6-tools">
+  
+    <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
+    
+    <mkdir dir="classes/base" />
+    <mkdir dir="classes/test" />
+    
+    <!-- Move any test classes back to base to prevent recompilation -->
+    <move todir="classes/base">
+      <fileset dir="classes/test" includes="**/*" />
+    </move>
+    
+    <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
+           bootclasspath="${java6-runtime}" sourcepath="" includeAntRuntime="no"
+           executable="javac" fork="yes" memoryMaximumSize="1024M"
+           debug="on" optimize="off" deprecation="on"	>
+      <classpath>
+        <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
+             debugger code into the "platform" module -->
+        <pathelement location="${java6-tools}" />
+        <fileset refid="libs" />
+        <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
+        <pathelement location="classes/base" />
+      </classpath>
+      <compilerarg value="-Xlint" />
+      <!-- Ignore serial warnings, because they occur for every Throwable definition (among others) -->
+      <compilerarg value="-Xlint:-serial" /> 
+      <!-- Use the next line to compile against other sources, ignoring any unneeded classes.
+           This can be useful in creating a pruned version of a jar file for the lib directory.
+           (You must also clear the sourcepath="" option.)
+      <include name="${src-working-dir}/**/*.java" /> -->
+    </javac>
+    
+    <mkdir dir="classes/test" /> <!-- May be deleted by the previous move -->
+    <move todir="classes/test">
+      <fileset dir="classes/base">
+        <include name="**/*Test.class" />
+        <include name="**/*Test$*.class" />
+        <include name="**/*TestCase.class" />
+        <include name="**/*TestCase$*.class" />
+        <!-- Additional test classes should be listed here -->
+      </fileset>
+    </move>
+    
+  </target>
+  
+  <!-- The following target assumes that javac resolves to a Java 7 javac compiler -->
+  <target name="compile-7" depends="generate-source, do-compile-7, copy-resources, unjar-libs"
+          description="Compile all source files (after generating the source)">
+  </target>
+  
+  <target name="do-compile-7" depends="resolve-java7-runtime, resolve-java7-tools">
+  
+    <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
+    
+    <mkdir dir="classes/base" />
+    <mkdir dir="classes/test" />
+    
+    <!-- Move any test classes back to base to prevent recompilation -->
+    <move todir="classes/base">
+      <fileset dir="classes/test" includes="**/*" />
+    </move>
+    
+    <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
            bootclasspath="${java7-runtime}" sourcepath="" includeAntRuntime="no"
-           executable="javac" fork="yes" memoryMaximumSize="512M"
+           executable="javac" fork="yes" memoryMaximumSize="1024M"
            debug="on" optimize="off" deprecation="on"	>
       <classpath>
         <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
@@ -265,8 +373,7 @@
     </move>
     
   </target>
-  
-  
+
   <target name="copy-resources">
     <copy todir="classes/base">
       <fileset dir="src">
@@ -301,7 +408,6 @@
     </unjar>
   </target>
   
-  
 
   <!-- ***************
        Testing Targets
@@ -313,6 +419,16 @@
       <param name="test-jvm" value="java" />
       <param name="test-tools" value="${current-tools}" />
       <param name="test-force-disable-concjunit" value="false" />
+    </antcall>
+  </target>
+
+  <target name="test-8" depends="compile, resolve-java8-exec, resolve-java8-tools" unless="skip-test"
+          description="Run all tests under Java 8 (after compiling); use -Dtest-spec=... to filter">
+    <echo message="ConcJUnit is currently incompatible with Java 7."/>
+    <antcall target="iterate-tests">
+      <param name="test-jvm" value="${java8-exec}" />
+      <param name="test-tools" value="${java8-tools}" />
+      <param name="test-force-disable-concjunit" value="true" />
     </antcall>
   </target>
 
@@ -433,7 +549,7 @@
     <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}' and '${test-tools}'" />
     <extendclasspath path="${junit-jar}" />
     <junit haltonfailure="${test-halt}" failureproperty="test-failed"
-           fork="yes" forkmode="perTest" maxmemory="1G" jvm="${test-jvm}" dir="${basedir}">
+           fork="yes" forkmode="perTest" maxmemory="2G" jvm="${test-jvm}" dir="${basedir}">
       <classpath>
         <pathelement location="${test-tools}" />
         <pathelement location="${junit-jar}" />
@@ -471,6 +587,13 @@
     </antcall>
   </target>
   
+  <target name="run-8" depends="compile, resolve-java8-exec"
+          description="Run the main class under Java 8 (after compiling)">
+    <antcall target="do-run">
+      <param name="run-jvm" value="${java8-exec}" />
+    </antcall>
+  </target>
+
   <target name="run-7" depends="compile, resolve-java7-exec"
           description="Run the main class under Java 7 (after compiling)">
     <antcall target="do-run">
@@ -517,6 +640,13 @@
     </antcall>
   </target>
   
+  <target name="run-jar-8" depends="jar, resolve-java8-exec"
+          description="Run the jar file under Java 7 (after building it)">
+    <antcall target="do-run-jar">
+      <param name="run-jvm" value="${java8-exec}" />
+    </antcall>
+  </target>
+
   <target name="run-jar-7" depends="jar, resolve-java7-exec"
           description="Run the jar file under Java 7 (after building it)">
     <antcall target="do-run-jar">
@@ -1255,6 +1385,24 @@
        Property-resolution Targets 
        *************************** -->
   
+  <target name="resolve-java8-runtime">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java8-runtime will only be set the *first* time. -->
+
+    <property name="java8-runtime-1" location="${java8-home}/lib/rt.jar" />
+    <available property="java8-runtime" value="${java8-runtime-1}" file="${java8-runtime-1}" />
+
+    <property name="java8-runtime-2" location="${java8-home}/jre/lib/rt.jar" />
+    <available property="java8-runtime" value="${java8-runtime-2}" file="${java8-runtime-2}" />
+
+    <property name="java8-runtime-3" location="${java8-home}/../Classes/classes.jar" />
+    <available property="java8-runtime" value="${java8-runtime-3}" file="${java8-runtime-3}" />
+
+    <echo message="java8-runtime = ${java8-runtime}" />
+
+    <fail message="Can't find rt.jar in the Java 8 home: ${java8-home}" unless="java8-runtime" />
+  </target>
+
   <target name="resolve-java7-runtime">
     <!-- We rely on "location" to generate a platform-specific path; note that properties
          are immutable and so java7-runtime will only be set the *first* time. -->
@@ -1273,6 +1421,23 @@
     <fail message="Can't find rt.jar in the Java 7 home: ${java7-home}" unless="java7-runtime" />
   </target>
   
+  <target name="resolve-java8-exec">
+    <!-- We rely on "location" to generate a platform-specific path -->
+
+    <property name="java8-exec-1" location="${java8-home}/bin/java.exe" />
+    <condition property="java8-exec" value="${java8-exec-1}">
+      <and>
+        <available file="${java8-exec-1}" />
+        <os family="windows" />
+      </and>
+    </condition>
+    
+    <property name="java8-exec-2" location="${java8-home}/bin/java" />
+    <available property="java8-exec" value="${java8-exec-2}" file="${java8-exec-2}" />
+
+    <fail message="Can't find the java executable in the Java 8 home: ${java8-home}" unless="java8-exec" />
+  </target>
+
   <target name="resolve-java7-exec">
     <!-- We rely on "location" to generate a platform-specific path -->
 
@@ -1360,6 +1525,19 @@
     <fail message="Can't find the java executable in the Java 5 home: ${java5-home}" unless="java5-exec" />
   </target>
     
+  <target name="resolve-java8-tools">
+    <property name="java8-tools-1" location="${java8-home}/lib/tools.jar" />
+    <available property="java8-tools" value="${java8-tools-1}" file="${java8-tools-1}" />
+
+    <property name="java8-tools-2" location="${java8-home}/../lib/tools.jar" />
+    <available property="java8-tools" value="${java8-tools-2}" file="${java8-tools-2}" />
+
+    <property name="java8-tools-3" location="${java8-home}/../Classes/classes.jar" />
+    <available property="java8-tools" value="${java8-tools-3}" file="${java8-tools-3}" />
+
+    <fail message="Can't find tools.jar in the Java 8 home: ${java8-home}" unless="java8-tools" />
+  </target>
+
   <target name="resolve-java7-tools">
     <property name="java7-tools-1" location="${java7-home}/lib/tools.jar" />
     <available property="java7-tools" value="${java7-tools-1}" file="${java7-tools-1}" />
