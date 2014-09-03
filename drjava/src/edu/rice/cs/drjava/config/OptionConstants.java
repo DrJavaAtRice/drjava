@@ -344,7 +344,7 @@ public interface OptionConstants {
             String currName = lafis[i].getClassName();
             LookAndFeel currLAF = (LookAndFeel) Class.forName(currName).newInstance();
             // Filter out "gtk" LookAndFeel; it is broken on Linux in several ways
-            if (currLAF.isSupportedLookAndFeel() && ! currName.contains("gtk")) lookAndFeels.add(currName);
+            if (! currName.contains("gtk") && currLAF.isSupportedLookAndFeel()) lookAndFeels.add(currName);
           }
           // failed to load/instantiate class, or it is not supported; it is not a valid choice.
           catch (ClassNotFoundException e) { /* do nothing */ }

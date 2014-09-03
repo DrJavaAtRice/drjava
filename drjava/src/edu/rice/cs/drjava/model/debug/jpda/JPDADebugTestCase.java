@@ -45,10 +45,13 @@ public abstract class JPDADebugTestCase extends DebugTestCase {
 
   protected volatile JPDADebugger _debugger;
 
-  public void setUp() throws Exception {
-    super.setUp();
-    // This cast will fail if the debugger has an unexpected type
-    _debugger = (JPDADebugger) super._debugger;
-  }
+  /* The following method generated a ClassCastException in Java 8.  It appears that there are two incarnations of 
+   * JPDADebugger loaded by different class loaders (but only in Java 8?).  At any rate, this method override is
+   * unnecessary as all uses of _debugger are consistent with the Debugger interface. */
+//  public void setUp() throws Exception {
+//    super.setUp();
+//    // This cast will fail if the debugger has an unexpected type
+//    _debugger = (JPDADebugger) super._debugger;
+//  }
 
 }

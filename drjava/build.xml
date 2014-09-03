@@ -218,12 +218,12 @@
        Compilation Targets
        ******************* -->
        
-  <!-- The following target assumes that javac resolves a Java 7 compiler -->
+  <!-- The following target assumes that javac resolves a Java 8 compiler -->
   <target name="compile" depends="generate-source, do-compile, copy-resources, unjar-libs"
           description="Compile all source files (after generating the source)">
   </target>
   
-  <target name="do-compile" depends="resolve-java7-runtime, resolve-java7-tools">
+  <target name="do-compile" depends="resolve-java8-runtime, resolve-java8-tools">
   
     <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
     
@@ -236,13 +236,13 @@
     </move>
     
     <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
-           bootclasspath="${java7-runtime}" sourcepath="" includeAntRuntime="no"
+           bootclasspath="${java8-runtime}" sourcepath="" includeAntRuntime="no"
            executable="javac" fork="yes" memoryMaximumSize="1024M"
            debug="on" optimize="off" deprecation="on"	>
       <classpath>
         <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
              debugger code into the "platform" module -->
-        <pathelement location="${java7-tools}" />
+        <pathelement location="${java8-tools}" />
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
