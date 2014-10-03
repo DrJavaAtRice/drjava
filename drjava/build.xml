@@ -1679,7 +1679,7 @@
   
   <!-- Sets svn-revision to the current "Last Changed Rev" of "svn info". -->
   <target name="resolve-svn-revision">
-    <exec executable="svn" dir="${svn-working-dir}" failonerror="yes" output="svn-info.txt">
+    <exec executable="svn" dir="${svn-working-dir}" failonerror="no" output="svn-info.txt">
       <arg value="info" />
     </exec>
     <loadfile property="svn-revision" srcfile="svn-info.txt">
