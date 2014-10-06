@@ -69,7 +69,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Main class for DrJava.
-  * @version $Id$
+  * @version $Id: DrJavaRoot.java 5611 2012-07-25 15:03:33Z rcartwright $
   */
 public class DrJavaRoot {  
   /** Class to probe to see if the debugger is available */
@@ -153,7 +153,7 @@ public class DrJavaRoot {
       }
       
       // The MainFrame *must* be constructed after the compiler setup process has
-      // occurred; otherwise, the list of compilers in the UI will be wrong.
+      // executed; otherwise, the list of compilers in the UI will be wrong.
       
 //      Utilities.showDebug("Creating MainFrame");
       _mainFrame = new MainFrame();

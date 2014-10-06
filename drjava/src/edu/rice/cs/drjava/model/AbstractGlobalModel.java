@@ -155,12 +155,13 @@ import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
+import edu.rice.cs.util.text.EditDocumentInterface;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** In simple terms, a DefaultGlobalModel without an interpreter, compiler, junit testing, debugger or javadoc.
   * Hence, it only has only document handling functionality
-  * @version $Id$
+  * @version $Id: AbstractGlobalModel.java 5553 2012-05-01 17:28:45Z rcartwright $
   */
 public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants, DocumentIterator {
   
@@ -2489,11 +2490,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     });
   }
   
-  /** Appends a string to the given document using a particular attribute set.
-    * Also waits for a small amount of time (InteractionsModel.WRITE_DELAY) to prevent any one
-    * writer from flooding the model with print calls to the point that the
-    * user interface could become unresponsive. 
-    * Only runs in event thread.
+  /** Appends a string to the given document using a particular attribute set (identified by a String key). Also waits
+    * for a small amount of time (InteractionsModel.WRITE_DELAY) to prevent any one writer from flooding the model with
+    * print calls to the point where the user interface could become unresponsive.  Only runs in event thread.
     * @param doc Document to append to
     * @param s String to append to the end of the document
     * @param style the style to print with
@@ -2505,13 +2504,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** Prints System.out to the DrJava console.  This method can safely be run outside the event thread. */
-  public void systemOutPrint(final String s) { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_OUT_STYLE); }
+  public void systemOutPrint(final String s) { _docAppend(_consoleDoc, s, EditDocumentInterface.SYSTEM_OUT_STYLE); }
   
   /** Prints System.err to the DrJava console.  This method can safely be run outside the event thread. */
-  public void systemErrPrint(final String s) { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_ERR_STYLE); }
+  public void systemErrPrint(final String s) { _docAppend(_consoleDoc, s, EditDocumentInterface.SYSTEM_ERR_STYLE); }
   
   /** Prints to the DrJava console as an echo of System.in.  This method can safely be run outside the event thread. */
-  public void systemInEcho(final String s) { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_IN_STYLE); }
+  public void systemInEcho(final String s) { _docAppend(_consoleDoc, s, EditDocumentInterface.SYSTEM_IN_STYLE); }
   
   /** throws UnsupportedOperationException */
   public void printDebugMessage(String s) {
@@ -3605,7 +3604,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return offset;
     }
     
-    protected int _caretPosition = 0;
+    protected volatile int _caretPosition = 0;
     
     /** Forwarding method to sync the definitions with whatever view component is representing them. */
     public void setCurrentLocation(int location) { 

@@ -98,7 +98,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * methods, and the GlobalModel responds via the GlobalModelListener interface. This removes the dependency on the 
   * UI for the logical flow of the program's features.  With the current implementation, we can finally test the compile
   * functionality of DrJava, along with many other things. <p>
-  * @version $Id$
+  * @version $Id: DefaultGlobalModel.java 5755 2013-08-30 12:00:36Z rcartwright $
   */
 public class DefaultGlobalModel extends AbstractGlobalModel {
   /* FIELDS */
@@ -570,7 +570,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     private volatile InteractionsListener _runMain;
     
     /** Runs the main method in this document in the interactions pane after resetting interactions with the source
-      * root for this document as the working directory.  Warns the use if the class files for the doucment are not 
+      * root for this document as the working directory.  Warns the use if the class files for the document are not 
       * up to date.  Fires an event to signal when execution is about to begin.
       * NOTE: this code normally runs in the event thread; it cannot block waiting for an event that is triggered by
       * event thread execution!

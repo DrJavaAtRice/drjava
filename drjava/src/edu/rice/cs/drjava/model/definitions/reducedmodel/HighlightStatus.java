@@ -37,8 +37,8 @@
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /** A block that represents information about the highlighting status of a particular section in the document.
- *  @version $Id$
- */
+  * @version $Id: HighlightStatus.java 5175 2010-01-20 08:46:32Z mgricken $
+  */
 public class HighlightStatus {
   public static final int NORMAL = 0;
   public static final int COMMENTED = 1;
@@ -47,39 +47,39 @@ public class HighlightStatus {
   public static final int KEYWORD = 4;
   public static final int NUMBER = 5;
   public static final int TYPE = 6;
-  private int _state;
-  private int _location;
-  private int _length;
-
+  private volatile int _state;
+  private volatile int _location;
+  private volatile int _length;
+  
   /** Constructor.
-   * @param location the starting character offset of the block
-   * @param length length of block
-   * @param state coloring state of the block
-   */
+    * @param location the starting character offset of the block
+    * @param length length of block
+    * @param state coloring state of the block
+    */
   public HighlightStatus(int location, int length, int state) {
     _location = location;
     _length = length;
     _state = state;
   }
-
+  
   /** Get the coloring state of this block.
-   * @return an integer representing the color to paint the text
-   * in the bounds of this block
-   */
+    * @return an integer representing the color to paint the text
+    * in the bounds of this block
+    */
   public int getState() {
     return  _state;
   }
-
+  
   /** Get the starting location of this coloring block.
-   * @return an integer offset
-   */
+    * @return an integer offset
+    */
   public int getLocation() {
     return  _location;
   }
-
+  
   /** Get the size of this coloring block.
-   * @return the number of characters spanned by this block.
-   */
+    * @return the number of characters spanned by this block.
+    */
   public int getLength() {
     return  _length;
   }

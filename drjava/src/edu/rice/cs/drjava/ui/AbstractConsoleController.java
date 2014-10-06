@@ -46,8 +46,6 @@ import javax.swing.text.*;
 
 import java.util.Vector;
 
-import edu.rice.cs.util.text.ConsoleDocument;
-
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
@@ -55,10 +53,13 @@ import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
+import edu.rice.cs.util.text.ConsoleDocument;
+import edu.rice.cs.util.text.EditDocumentInterface;
+
 
 /** Abstract class that hooks a Swing console/interactions document with its Swing pane.
   * TODO: move interactions specific functionality to InteractionsController by creating ConsoleDJDocument class
-  * @version $Id$
+  * @version $Id: AbstractConsoleController.java 5360 2010-08-13 22:36:42Z mgricken $
   */
 public abstract class AbstractConsoleController /* implements Serializable */ {
   
@@ -107,13 +108,13 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   /** Adds AttributeSets as named styles to the Swing console document. */
   protected void _addDocumentStyles() {
     // Default
-    _interactionsDJDocument.setDocStyle(ConsoleDocument.DEFAULT_STYLE, _defaultStyle);
+    _interactionsDJDocument.setDocStyle(InteractionsDocument.DEFAULT_STYLE, _defaultStyle);
     
     // System.out
     _systemOutStyle.addAttributes(_defaultStyle);
     _systemOutStyle.addAttribute(StyleConstants.Foreground,
                                  DrJava.getConfig().getSetting(OptionConstants.SYSTEM_OUT_COLOR));
-    _interactionsDJDocument.setDocStyle(ConsoleDocument.SYSTEM_OUT_STYLE, _systemOutStyle);
+    _interactionsDJDocument.setDocStyle(EditDocumentInterface.SYSTEM_OUT_STYLE, _systemOutStyle);
     DrJava.getConfig().addOptionListener(OptionConstants.SYSTEM_OUT_COLOR,
                                          new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oe) {
@@ -125,7 +126,7 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
     _systemErrStyle.addAttributes(_defaultStyle);
     _systemErrStyle.addAttribute(StyleConstants.Foreground,
                                  DrJava.getConfig().getSetting(OptionConstants.SYSTEM_ERR_COLOR));
-    _interactionsDJDocument.setDocStyle(ConsoleDocument.SYSTEM_ERR_STYLE, _systemErrStyle);
+    _interactionsDJDocument.setDocStyle(EditDocumentInterface.SYSTEM_ERR_STYLE, _systemErrStyle);
     DrJava.getConfig().addOptionListener(OptionConstants.SYSTEM_ERR_COLOR,
                                          new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oe) {

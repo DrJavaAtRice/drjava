@@ -58,12 +58,11 @@ public class TextAtom implements Atom {
   public String toString() { return _text; }  
 }
 
-/**
- * this type of text atom is mostly like its super class
- * except its string representation includes the sourrounding 
- * quotes and the instances of the characters: \ " etc are turned
- * into their corresponding escape character sequences.
- */
+/** This type of text atom is mostly like its super class
+  * except its string representation includes the sourrounding 
+  * quotes and the instances of the characters: \ " etc are turned
+  * into their corresponding escape character sequences.
+  */
 class QuotedTextAtom extends TextAtom {
   
   public QuotedTextAtom(String text) { super(text); }

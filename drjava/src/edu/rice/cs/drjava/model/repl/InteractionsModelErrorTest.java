@@ -43,7 +43,7 @@ import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.text.ConsoleDocument;
+//import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 import javax.swing.text.BadLocationException;
 import edu.rice.cs.plt.tuple.Pair;
@@ -76,7 +76,7 @@ import static edu.rice.cs.drjava.model.repl.InteractionsModelTest.TestInteractio
 import static edu.rice.cs.drjava.model.repl.InteractionsModelTest.IncompleteInputInteractionsModel;
 
 /** Tests errors in an InteractionsModel.
-  * @version $Id$
+  * @version $Id: InteractionsModelErrorTest.java 5236 2010-04-27 01:43:36Z mgricken $
   */
 public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   protected static final String UNARY_FUN_NON_PUBLIC_INTERFACE_TEXT = 

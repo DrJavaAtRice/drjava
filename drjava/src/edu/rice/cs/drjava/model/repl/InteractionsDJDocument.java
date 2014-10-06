@@ -45,7 +45,7 @@ import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.text.ConsoleDocumentInterface;
-import edu.rice.cs.util.text.ConsoleDocument;
+//import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.awt.*;
@@ -249,17 +249,18 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
             g.setColor(DEBUGGER_COLOR);
             g.setFont(g.getFont().deriveFont(Font.BOLD));
           }
-          else if (p.second().equals(ConsoleDocument.SYSTEM_OUT_STYLE)) {
+          /* Note: SYSTEM_OUT_STYLE, SYSTEM_IN_STYLE, SYSTEM_ERR_STYLE are defined in EditDocumentInterface */
+          else if (p.second().equals(SYSTEM_OUT_STYLE)) {
             //DrJava.consoleErr().println("System.out Style");
             g.setColor(INTERACTIONS_SYSTEM_OUT_COLOR);
             g.setFont(MAIN_FONT);
           }
-          else if (p.second().equals(ConsoleDocument.SYSTEM_IN_STYLE)) {
+          else if (p.second().equals(SYSTEM_IN_STYLE)) {
             //DrJava.consoleErr().println("System.in Style");
             g.setColor(INTERACTIONS_SYSTEM_IN_COLOR);
             g.setFont(MAIN_FONT);
           }
-          else if (p.second().equals(ConsoleDocument.SYSTEM_ERR_STYLE)) {
+          else if (p.second().equals(SYSTEM_ERR_STYLE)) {
             //DrJava.consoleErr().println("System.err Style");
             g.setColor(INTERACTIONS_SYSTEM_ERR_COLOR);
             g.setFont(MAIN_FONT);

@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.*;
+import java.util.Arrays;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
@@ -44,10 +45,11 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
   * parenthesized expression.  Specifically, this rule determines if the previous line ends in a comma, semicolon, 
   * open paren, or open bracket.  Note that whitespace, blank lines, and comments are disregarded.
   * 
- * @version $Id$
+ * @version $Id: QuestionNewParenPhrase.java 5611 2012-07-25 15:03:33Z rcartwright $
  */
 public class QuestionNewParenPhrase extends IndentRuleQuestion {
   
+  /* Array of delimited characters.  MUST BE SORTED.  Sort is performed in constructor. */
   private static final char[] LOCAL_DELIMS = 
     {';', ',', '(', '[', '&', '|', '+', '-', '*', '/', '%', '=', '<', '>', '}'};
   /** Constructs a new rule to determine if the current line starts new paren phrase.
@@ -56,6 +58,7 @@ public class QuestionNewParenPhrase extends IndentRuleQuestion {
     */
   public QuestionNewParenPhrase(IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
+    Arrays.sort(LOCAL_DELIMS);
   }
  
   /** Determines if the previous line ends in a comma, semicolon,

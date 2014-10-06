@@ -58,7 +58,7 @@ import java.lang.reflect.Constructor;
 /** An abstract parent for all javac-based compiler interfaces.  Manages the auxiliary naming methods.
   * To support loading via reflection, all subclasses are assumed to have a public constructor with
   * a matching signature.
-  *  @version $Id$
+  *  @version $Id: JavacCompiler.java 5611 2012-07-25 15:03:33Z rcartwright $
   */
 public abstract class JavacCompiler implements CompilerInterface {
   
@@ -288,15 +288,18 @@ public abstract class JavacCompiler implements CompilerInterface {
     }
   }
   
-  // This is a command that automatically detects if
-  // a) the class is an ACM Java Task Force program (subclass of acm.program.Program)
-  // b) an applet
-  // c) a class with a static main method
-  //
-  // If a), then DrJava inserts "code=MyClass" as argument 0.
-  // If b), then DrJava performs the same as "applet MyClass" (see above).
-  // If c), then DrJava executes MyClass.main (traditional java behavior).
-  public static String transformRunCommand(String s) {    
+  /** This is a method that automatically detects if
+    * a) the class is an ACM Java Task Force program (subclass of acm.program.Program)
+    * b) an applet
+    * c) a class with a static main method
+    
+    If a), then DrJava inserts "code=MyClass" as argument 0.
+    If b), then DrJava performs the same as "applet MyClass" (see above).
+    If c), then DrJava executes MyClass.main (traditional java behavior).
+    
+    It formerly was static, but it is overriden in ScalacCompiler.
+    */
+  public String transformRunCommand(String s) {    
     if (s.endsWith(";"))  s = _deleteSemiColon(s);
     List<String> args = ArgumentTokenizer.tokenize(s, true);
     final String classNameWithQuotes = args.get(1); // this is "MyClass"

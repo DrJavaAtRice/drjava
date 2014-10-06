@@ -149,7 +149,7 @@ public abstract class JDKDescriptor {
   }
   
   public String toString() {
-    return this.getClass().getName()+": "+getName();
+    return this.getClass().getName() + ": " + getName();
   }
   
   /** Singleton representing a JDK that doesn't have a descriptor. */

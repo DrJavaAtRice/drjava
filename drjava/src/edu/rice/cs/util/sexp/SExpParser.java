@@ -163,14 +163,14 @@ public class SExpParser {
       return cons;
     }
     
-    /**
-     * Parses an atom.  The token was already read and
-     * found not to start a list, this method interprets
-     * what is given.  This method chooses which type of
-     * atom the token represents and creates the atom.
-     * @param t the token to interpret
-     * @return the correct corresponding atom
-     */
+    /** Parses an atom.  The token was already read and
+      * found not to start a list, this method interprets
+      * what is given.  This method chooses which type of
+      * atom the token represents and creates the atom.
+      * @param t the token to interpret
+      * @return the correct corresponding atom */
+    
+    @SuppressWarnings("all")  /* package private class QuotedTextAtom is defined in file TextAtom rather than its own file. */
     private Atom parseAtom(Tokens.SExpToken t) {
       if (t instanceof Tokens.BooleanToken) {
         if (((Tokens.BooleanToken)t).getValue())

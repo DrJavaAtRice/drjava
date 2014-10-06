@@ -55,7 +55,7 @@ import edu.rice.cs.plt.iter.IterUtil;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** A test on the GlobalModel that does deals with everything outside of simple file operations, e.g., compile, quit.
-  * @version $Id$
+  * @version $Id: GlobalModelOtherTest.java 5444 2011-08-17 07:54:58Z rcartwright $
   */
 public final class GlobalModelOtherTest extends GlobalModelTestCase implements OptionConstants {
   
@@ -83,7 +83,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     final TestListener listener = new TestListener() { 
       public void undoableEditHappened() { 
         undoableEditCount++; 
-//        System.err.println("undoableEditHappened call propagated to listener");
+        System.err.println("undoableEditHappened call propagated to listener");
       } 
     };
     
@@ -95,7 +95,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
         // Have to add an undoable edit listener for Undo to work
     doc.addUndoableEditListener(new UndoableEditListener() {
       public void undoableEditHappened(UndoableEditEvent e) { 
-//            System.err.println("undoableEditHappened(" + e + ") called");
+            System.err.println("undoableEditHappened(" + e + ") called");
         doc.getUndoManager().addEdit(e.getEdit()); 
       }
     });

@@ -271,7 +271,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     String name;  // promoted outward for logging purposes
     String path;  // promoted outward for logging purposes
     String parsedVersion = "";
-    String vendor = "";
+    String vendor = "oracle";
     do {
       name = current.getName();
       path = current.getAbsolutePath();
@@ -290,6 +290,11 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         parsedVersion = name.substring(3); 
         result = JavaVersion.parseFullVersion(parsedVersion, vendor, vendor, f);
         JDKToolsLibrary.msg("For name starting with 'jdk', parsedVersion = '" + parsedVersion + "' result = '" + result + "'");
+      }
+      else if (name.startsWith("openjdk")) {
+        parsedVersion = name.substring(7); 
+        result = JavaVersion.parseFullVersion(parsedVersion, vendor, vendor, f);
+        JDKToolsLibrary.msg("For name starting with 'openjdk', parsedVersion = '" + parsedVersion + "' result = '" + result + "'");
       }
       else if (name.startsWith("j2sdk") || name.startsWith("java-")) {
         parsedVersion = name.substring(5);
@@ -408,14 +413,15 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       programFiles = System.getenv("ProgramFiles");
       systemDrive = System.getenv("SystemDrive");
     }
-   
+    // To do: add OS query and filter additions depending on OS
+    
     // unwind out of potential JRE subdirectory
     if (javaHome != null) {
       addIfDir(new File(javaHome), roots);
       addIfDir(new File(javaHome, ".."), roots);
       addIfDir(new File(javaHome, "../.."), roots);
       addIfDir(new File(javaHome, "../../.."), roots);
-      addIfDir(new File(javaHome, "../../../.."), roots);
+//      addIfDir(new File(javaHome, "../../../.."), roots);
     }
     
     // add JAVA environment bindings to roots
@@ -432,7 +438,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     }
     
     addIfDir(new File("/C:/Program Files/Java"), roots);
+    addIfDir(new File("/C:/Program Files (x86)/Java"), roots);
     addIfDir(new File("/C:/Program Files"), roots);
+    addIfDir(new File("/C:/Program Files (x86)"), roots);
     
     if (systemDrive != null) {
       addIfDir(new File(systemDrive, "Java"), roots);
