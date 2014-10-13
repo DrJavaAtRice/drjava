@@ -45,7 +45,7 @@ import java.io.*;
 
 /** This class contains the basic fields and methods that are necessary for any test file that needs to use the
   * JPDADebugger.
-  * @version $Id$
+  * @version $Id: DebugTestCase.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class DebugTestCase extends GlobalModelTestCase {
   

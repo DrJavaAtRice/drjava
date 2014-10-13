@@ -45,54 +45,85 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
 /** Question rule in the indentation decision tree.  Determines if the current line starts with the specified string.
-  * Comments (and string literals?) are ignored.
-  * @version $Id$
+  * Some prefixes may be ignored.  Comments may or may be ignored.
+  * @version $Id: QuestionCurrLineStartsWith.java 5709M 2014-10-10 19:21:26Z (local) $
   */
 public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
   private final String _prefix;
   private final int _prefLen; // length of _prefix
   private final String[] _excludedSuffixes;  // SORTED array of excluded suffix strings
+  private final boolean _acceptComments;
   private static final String SUFFIX_DELIMITERS = " \t\n\r{}()[]="; // not in sorted order
   private static final String[] EMPTY_STRING_ARRAY = new String[0];
+
   
-  /** Constructs a new rule for the given prefix string. Does not look inside comments.
+  /** Constructs a new rule for the given prefix string and excludedSuffixes.
     * @param prefix String to search for
     * @param excludedSuffixes is a SORTED array of excluded suffix strings
     * @param yesRule Rule to use if this rule holds
     * @param noRule Rule to use if this rule does not hold
+    * @param acceptComments whether to include comment text in search
     */
-  public QuestionCurrLineStartsWith(String prefix, String[] excludedSuffixes, IndentRule yesRule, IndentRule noRule) {
+  public QuestionCurrLineStartsWith(String prefix, String[] excludedSuffixes, IndentRule yesRule, IndentRule noRule, 
+                                    boolean acceptComments) {
     super(yesRule, noRule);
     _prefix = prefix;
     _prefLen = (prefix == null) ? 0 : _prefix.length();
     _excludedSuffixes = excludedSuffixes;
+    _acceptComments = acceptComments;
   }
   
-  /** Convenience constructor for case where excludedSuffixes is empty. */
-  public QuestionCurrLineStartsWith(String prefix, IndentRule yesRule, IndentRule noRule) {
-    this(prefix, EMPTY_STRING_ARRAY, yesRule, noRule);
+  /** Constructs a new rule for the given prefix string and excludedSuffixes that ignores comments
+    * @param prefix String to search for
+    * @param excludedSuffixes is a SORTED array of excluded suffix strings
+    * @param yesRule Rule to use if this rule holds
+    * @param noRule Rule to use if this rule does not hold
+    * @param acceptComments whether to include comment text in search
+    */
+  public static QuestionCurrLineStartsWith newQuestionWithSuffixesSkipComments(String prefix, String[] excludedSuffixes, 
+                                                                               IndentRule yesRule, IndentRule noRule) {
+   return new QuestionCurrLineStartsWith(prefix, excludedSuffixes, yesRule, noRule, false);
   }
-  /** Determines if the current line in the document starts with the specified prefix, ignoring whitespace and comments.
-    * (What about string literals?)
+  
+  /** Constructs a new rule for the given prefix string that ignores comments
+    * @param prefix String to search for
+    * @param excludedSuffixes is a SORTED array of excluded suffix strings
+    * @param yesRule Rule to use if this rule holds
+    * @param noRule Rule to use if this rule does not hold
+    * @param acceptComments whether to include comment text in search
+    */
+  public static QuestionCurrLineStartsWith newQuestionSkipComments(String prefix, IndentRule yesRule, IndentRule noRule) {
+   return new QuestionCurrLineStartsWith(prefix,  EMPTY_STRING_ARRAY, yesRule, noRule, false);
+  }
+  
+  /** Constructs a new rule for the given prefix string that processes comments. */
+  public static QuestionCurrLineStartsWith newQuestion(String prefix, IndentRule yesRule, IndentRule noRule) {
+    return new QuestionCurrLineStartsWith(prefix, EMPTY_STRING_ARRAY, yesRule, noRule, true);
+  }
+  
+  /** Determines if the current line in the document starts with the specified prefix, ignoring whitespace and,
+    * optionally, comments.
     * If the prefix is null or empty, returns true.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is being done
     * @return true if this node's rule holds.
     */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
-//    System.err.println("***** QCLSW.applyRule called; _prefix = '" + _prefix + "' exclude = " + 
-//                       Arrays.toString(_excludedSuffixes));
+    System.err.println("***** QCLSW.applyRule called; _prefix = '" + _prefix + "' exclude = " + 
+                       Arrays.toString(_excludedSuffixes) + " currentLocation = " + doc.getCurrentLocation());
     if (_prefLen == 0) return true;
     
     try {
       // Find start of line
       int lineStart = doc._getLineStartPos();
       
-      int firstCharPos = doc.getFirstNonWSCharPos(lineStart);
+//      System.err.println("*** doc text from lineStart is: '" + doc.getText().substring(lineStart) + "'");
+      
+      int firstCharPos = doc.getFirstNonWSCharPos(lineStart, _acceptComments);
       int lineEndPos = doc._getLineEndPos(firstCharPos);
       
-//      System.err.println("  lineStart = " + lineStart + "  firstCharPos = " + firstCharPos + " lineEndPos = " + 
-//                         lineEndPos);
+      System.err.println("  lineStart = " + lineStart + "  firstCharPos = " + firstCharPos + " lineEndPos = " + 
+                         lineEndPos);
 
       // If prefix would run off the end of the line, return false
       if (firstCharPos + _prefLen > lineEndPos) {
@@ -107,7 +138,7 @@ public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
       if (textLen < _prefLen) return false;    // current line cannot possibly start with _prefix
       String text = doc.getText(firstCharPos, textLen);
       String actualPrefix = text.substring(0, _prefLen);
-//      System.err.println("  actualPrefix = " + actualPrefix + " equalsTest = " + _prefix.equals(actualPrefix));
+      System.err.println("  actualPrefix = " + actualPrefix + " equalsTest = " + _prefix.equals(actualPrefix));
       if (_prefix.equals(actualPrefix)) return (_excludedSuffixes.length == 0) || confirmExcludedSuffixes(text, textLen);
       return false;
     }

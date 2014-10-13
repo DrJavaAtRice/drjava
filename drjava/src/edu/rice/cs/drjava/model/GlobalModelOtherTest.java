@@ -55,7 +55,7 @@ import edu.rice.cs.plt.iter.IterUtil;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** A test on the GlobalModel that does deals with everything outside of simple file operations, e.g., compile, quit.
-  * @version $Id$
+  * @version $Id: GlobalModelOtherTest.java 5719M 2014-10-05 21:59:44Z (local) $
   */
 public final class GlobalModelOtherTest extends GlobalModelTestCase implements OptionConstants {
   
@@ -160,9 +160,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File dir1 = makeCanonical(new File(_tempDir, "dir1"));
     dir1.mkdir();
     File file1 = makeCanonical(new File(dir1, "TestFile1.scala"));
-    System.err.println("Original class Path is: " + _model.getInteractionsClassPath());
+//    System.err.println("Original class Path is: " + _model.getInteractionsClassPath());
     doCompile(doc1, file1);
-    System.err.println("After loading " + file1 + ", class Path is now: " + _model.getInteractionsClassPath());
+//    System.err.println("After loading " + file1 + ", class Path is now: " + _model.getInteractionsClassPath());
     assertTrue("class file for file1 exists", new File(dir1, "DrScalaTestFoo.class").exists());
 
     // example format of REPL result: res0: java.lang.String = DrScalaTestFoo

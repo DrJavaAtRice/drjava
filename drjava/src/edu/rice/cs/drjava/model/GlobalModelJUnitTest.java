@@ -51,7 +51,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 
 /** A test of Junit testing support in the GlobalModel.
-  * @version $Id$
+  * @version $Id: GlobalModelJUnitTest.java 5751 2013-02-06 10:32:04Z rcartwright $
   */
 public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   

@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.config;
 
 /** Class representing user-defined variables that can be inserted as variables in external processes.
-  * @version $Id$
+  * @version $Id: VariableProperty.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class VariableProperty extends ConstantProperty {
   /** Create a variable property. */

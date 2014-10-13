@@ -41,7 +41,7 @@ import java.io.*;
 
 /** Property that evaluates to a file, can be mutated, and that can be inserted
   * as variables in external processes.
-  * @version $Id$
+  * @version $Id: MutableFileProperty.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class MutableFileProperty extends FileProperty {
   protected File _fileValue = null;

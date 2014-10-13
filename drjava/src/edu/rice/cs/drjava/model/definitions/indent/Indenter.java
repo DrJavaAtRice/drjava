@@ -43,7 +43,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 /** Singleton class to construct and use the indentation decision tree.
-  * @version $Id$
+  * @version $Id: Indenter.java 5751M 2014-10-11 01:13:15Z (local) $
   */
 public class Indenter {
   
@@ -86,20 +86,21 @@ public class Indenter {
     
     IndentRule
       // Main tree
-      rule40 = new ActionStartPrevLinePlus(""),
+      rule40 = new ActionStartPrevLineSkipCommentsPlus(""),
       rule39 = new ActionStartPrevStmtPlus(0, true, _indentLevel),  // Indent line that starts new statement
       rule37 = new ActionStartCurrStmtPlus(2),   // predecessor of rule33           
       rule36 = new ActionStartStmtOfBracePlus(indentLevel,  /* include Scala braces */ false),
       rule35 = new ActionStartLineOf("if"),
-      rule33 = new ActionStartPrevLinePlus("  "),   // Continuation of current statement
+      
+      rule33 = new ActionStartPrevLineSkipCommentsPlus("  "),   // Continuation of current statement but ignore intervening comments!
       rule32 = new ActionStartCurrStmtPlus(0),   // Since stmt opens with '{', suppress indenting
-      rule31 = new QuestionCurrLineStartsWithChar(new char[] {'{'}, rule32, rule33),
+      rule31 = QuestionCurrLineStartsWithChar.newQuestion(new char[] {'{'}, rule32, rule33),
       
       // Does this snew statement begin with pattern matching "case"?  If so, must be indented with enclosing brace (excluding "=>")
-      rule30 = new QuestionCurrLineStartsWith("case", FALSE_CASE_SUFFIXES, rule36, rule39),
+      rule30 = QuestionCurrLineStartsWith.newQuestionWithSuffixesSkipComments("case", FALSE_CASE_SUFFIXES, rule36, rule39),
       
       // Does this new statement begin with "else"?  If so, must match corresponding "if" (the prev stmt)
-      rule29 = new QuestionCurrLineStartsWith("else", rule35, rule30),
+      rule29 = QuestionCurrLineStartsWith.newQuestionSkipComments("else", rule35, rule30),
       // Is this line the start of a new statement?
       rule25 = new QuestionStartingNewStmt(rule29, rule31),  
       // Does this line follow an annotation?  ??
@@ -109,25 +110,37 @@ public class Indenter {
       // Indent line starting after open brace (including "=>")
       rule21 = new ActionStartStmtOfBracePlus(indentLevel,  /* include Scala braces */ true),
       // Rule interpolated to handle "def ... = /n ... match { /n case ... =>"
-      rule205 = new QuestionCurrLineStartsWith("case", FALSE_CASE_SUFFIXES, rule36, rule21),
+      rule26 = QuestionCurrLineStartsWith.newQuestionWithSuffixesSkipComments("case", FALSE_CASE_SUFFIXES, rule36, rule21),
       // Does the preceding line contain the enclosing brace (including "=>" and "=") as last token?
-      rule20 = new QuestionStartImmedAfterOpenBrace(rule205, rule22),  // test includes Scala braces
+      rule20 = new QuestionStartImmedAfterOpenBrace(rule26, rule22),  // test includes Scala braces
       // Indent the line to match whitespace preceding the line enclosing brace
       rule19 = new ActionStartStmtOfBracePlus(0, /* include Scala braces" */ false),  
       
-      // root of non-comment indent tree for Scala: is brace enclosing start of this line a square bracket?  
       // Does current line begin with '}' or ')' ignoring comment text, WS  TODO: check for balanced braces
-      rule18 = new QuestionCurrLineStartsWithChar(new char[] {')', '}'}, rule19, rule20),
-     
-      // rule 8, 11, 13, 14, 15, 16, 17, 22, 23, 26, 27, 28, 29, 30, 33, 34, 38, 40, 42 avail
+      rule18 = QuestionCurrLineStartsWithChar.newQuestion(new char[] {')', '}'}, rule19, rule20),
       
-      // Comment tree
+      rule17 = new QuestionBraceIsCurly(rule18, rule24),  
+      rule16 = new ActionBracePlus(1 + indentLevel),
+      rule08 = new ActionBracePlus(1),
+      
+      rule27 = new ActionBracePlus(0),
+      rule14 = new QuestionNewParenPhrase(rule08, rule16),  // is current non ) line a new phrase after open paren?
+      rule15 = new QuestionNewParenPhrase(rule30, rule27),  // is current ) line a new phrase after open paren?
+      rule13 = QuestionCurrLineStartsWith.newQuestionSkipComments(")", rule15, rule14), // does current line start with ')'?
+      
+      // root of non-comment indent tree for Scala: is brace enclosing start of this line either '(' or '['?  
+      rule11 = new QuestionBraceIsParenOrBracket(rule13, rule17),   
+     
+      // rule 27, 28, 29, 30, 33, 34, 38, 40, 42 avail
+      
+      // Comment indenting tree
       rule43 = new ActionDoNothing(),
       rule12 = new ActionStartPrevLinePlus(""),
       rule10 = new ActionStartPrevLinePlus("* "),
       rule09 = new QuestionCurrLineEmptyOrEnterPress(rule10, rule12),
-      rule07 = new QuestionCurrLineStartsWith("*", rule12, rule09),
-      rule06 = new QuestionPrevLineStartsWith("*", rule07, rule43),  // formerly ..., rule12)
+      rule07 = QuestionCurrLineStartsWith.newQuestion("*", rule12, rule09), //  Starts with "*"? (searches comments)
+      rule06 = new QuestionPrevLineStartsWith("*", rule07, rule43),         // Interior line of block comment?
+      
       rule05 = new ActionStartPrevLinePlus(" "),    // padding prefix for interior of ordinary block comment
       rule04 = new ActionStartPrevLinePlus(" * "),  // padding prefix for new line within ordinary block comment
       rule46 = new ActionStartPrevLinePlus("  * "), // padding prefix for new line within special javadoc block comment
@@ -138,11 +151,11 @@ public class Indenter {
       rule49 = new ActionStartPrevLinePlusMultilinePreserve(new String[] { "  * \n", "  */"}, 0, 4, 0, 4),
       rule50 = new QuestionPrevLineStartsJavaDocWithText(rule49, rule41),
       
-      rule03 = new QuestionCurrLineEmptyOrEnterPress(rule45, rule48),
+      rule03 = new QuestionCurrLineEmptyOrEnterPress(rule45, rule48),  // Is the line empty or created by EnterPress? or
       rule51 = new QuestionCurrLineEmpty(rule50, rule03), // autoClose: rule03 unnecessarily retests CurrentLineEmpty
       rule02 = new QuestionPrevLineStartsComment(autoCloseComments ? rule51 : rule03, rule06),
-      rule44 = new QuestionCurrLineIsWingComment(rule43, rule18),
-      rule01 = new QuestionInsideComment(rule02, rule44);
+      rule44 = new QuestionCurrLineIsWingComment(rule43, rule11), // Is the line a left-justified wing comment
+      rule01 = new QuestionInsideComment(rule02, rule44); // Is the line start inside a block comment?
     
     _topRule = rule01;
   }

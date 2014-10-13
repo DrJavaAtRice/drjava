@@ -160,7 +160,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** In simple terms, a DefaultGlobalModel without an interpreter, compiler, junit testing, debugger or javadoc.
   * Hence, it only has only document handling functionality
-  * @version $Id$
+  * @version $Id: AbstractGlobalModel.java 5727M 2014-10-06 05:11:31Z (local) $
   */
 public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants, DocumentIterator {
   
@@ -1164,7 +1164,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @param pos2 second selection position */
   public void toggleBookmark(int pos1, int pos2) { _toggleBookmark(pos1, pos2); }
   
-  /** Raw version of toggleBookmark.  ASSUMES that read lock is already held
+  /** Raw version of toggleBookmark.  Only runs in event thread.
     * @param pos1 first selection position
     * @param pos2 second selection position */
   public void _toggleBookmark(int pos1, int pos2) {
@@ -3273,7 +3273,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           _log.log("Calling FileOps.saveFile to save " + file);
           _log.log("shouldUpdateDocumentState() = " + com.shouldUpdateDocumentState());
           FileOps.saveFile(new FileOps.DefaultFileSaver(file) {
-            /** Only runs in event thread so no read lock is necessary. */
+            /** Only runs in event thread. */
             public void saveTo(OutputStream os) throws IOException {
               DefinitionsDocument dd = getDocument();
               try {
@@ -3886,13 +3886,13 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return getDocument().getFirstNonWSCharPos(pos, acceptComments);
     }
     
-    /** Assumes read lock is already held. */
+    /** Only runs in event thead. */
     public int getFirstNonWSCharPos (int pos, char[] whitespace, boolean acceptComments)
       throws BadLocationException {
       return getDocument().getFirstNonWSCharPos(pos, whitespace, acceptComments);
     }
     
-    /** Assumes read lock is already held. */
+    /** Only runs in event thread. */
     public int _getLineFirstCharPos(int pos) throws BadLocationException {
       return getDocument()._getLineFirstCharPos(pos);
     }

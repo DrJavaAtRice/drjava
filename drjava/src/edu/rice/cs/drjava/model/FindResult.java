@@ -40,7 +40,7 @@ package edu.rice.cs.drjava.model;
   * (or -1 if the string was not found) as well as a flag indicating
   * whether the machine wrapped around the end of the document.
   *
-  * @version $Id$
+  * @version $Id: FindResult.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class FindResult {
   private OpenDefinitionsDocument _document;

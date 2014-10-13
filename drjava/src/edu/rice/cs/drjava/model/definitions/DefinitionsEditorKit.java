@@ -48,7 +48,7 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
   * implements a factory for new documents and a factory for Views (the things that render the document).  May only be
   * used as the EditorKit for panes extending AbstractDJPane.  In fact, only used as the EditorKit for DefintionsPanes.
   * Stored as a field of DefinitionsPane.
-  * @version $Id$
+  * @version $Id: DefinitionsEditorKit.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class DefinitionsEditorKit extends StyledEditorKit {
   

@@ -1,4 +1,4 @@
-@version $Id$
+@version $Id: readme.txt 2905 2005-03-04 22:49:13Z evlich $
 
 About the compilers interface:
 

@@ -50,7 +50,7 @@ import static edu.rice.cs.drjava.model.AbstractDJDocument.ERROR_INDEX;
   * 
   * TO DO: eliminate _suffix argument; no longer used.
   *
-  * @version $Id$
+  * @version $Id: ActionStartPrevStmtPlus.java 5711 2012-09-11 19:42:33Z rcartwright $
   */
 public class ActionStartPrevStmtPlus extends IndentRuleAction {
   private final int _suffix;  // number of spaces in suffix

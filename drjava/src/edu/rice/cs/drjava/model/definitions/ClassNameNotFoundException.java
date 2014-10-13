@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model.definitions;
 /**
  * Exception indicating that a class name could not be found in
  * the DefinitionsDocument from which it was thrown.
- * @version $Id$
+ * @version $Id: ClassNameNotFoundException.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class ClassNameNotFoundException extends Exception {
   

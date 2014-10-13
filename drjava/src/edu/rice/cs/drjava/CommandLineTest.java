@@ -52,7 +52,7 @@ import edu.rice.cs.util.swing.Utilities;
 
 /**
  * Tests opening/creating files specified as command line arguments.
- * @version $Id$
+ * @version $Id: CommandLineTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class CommandLineTest extends DrJavaTestCase {
   /** File separator, i.e. '/' or '\\'. */

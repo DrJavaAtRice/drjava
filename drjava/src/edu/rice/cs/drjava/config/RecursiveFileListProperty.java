@@ -44,7 +44,7 @@ import edu.rice.cs.util.StringOps;
 import edu.rice.cs.plt.text.TextUtil;
 
 /** Class representing a lazy lists of files that are found recursively inside a start directory.
-  * @version $Id$
+  * @version $Id: RecursiveFileListProperty.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class RecursiveFileListProperty extends FileListProperty {
   /** Start directory. */

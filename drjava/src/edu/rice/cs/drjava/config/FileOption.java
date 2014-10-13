@@ -40,7 +40,7 @@ import java.io.*;
 import edu.rice.cs.util.FileOps;
 
 /** Class representing all configuration options with values of type File.
-  * @version $Id$
+  * @version $Id: FileOption.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class FileOption extends Option<File> {
   

@@ -57,7 +57,7 @@ import java.util.Vector;
   * The precedinjg example is simple because Integers (like most data-type classes defined in the Java
   * libraries) have handy toString() / parsing methods/constructors.
   *
-  * @version $Id$
+  * @version $Id: Option.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class Option<T> extends OptionParser<T> implements FormatStrategy<T> {
   /** A hashtable that maps Configuration objects to a list of listeners for this particular option.  Part of the magic

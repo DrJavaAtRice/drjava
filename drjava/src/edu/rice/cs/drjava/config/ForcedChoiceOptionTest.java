@@ -43,7 +43,7 @@ import java.util.ArrayList;
 /**
  * Class according to the JUnit protocol. Tests
  * the proper functionality of the class ForcedChoiceOption.
- * @version $Id$
+ * @version $Id: ForcedChoiceOptionTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class ForcedChoiceOptionTest extends DrJavaTestCase {
   /** @param name The name of this test case.

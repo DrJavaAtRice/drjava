@@ -52,7 +52,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   *
   * Every test in this class is run for *each* of the compilers that is available.
   *
-  * @version $Id$
+  * @version $Id: GlobalModelCompileErrorsTest.java 5594M 2014-10-05 21:59:44Z (local) $
   */
 public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   
@@ -124,7 +124,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   public void testCompileAllFailsDifferentSourceRoots() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
     
-    System.err.println("Starting testCompileAllFailsDifferentSourceRoots");
+//    System.err.println("Starting testCompileAllFailsDifferentSourceRoots");
     
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
@@ -147,7 +147,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     cm.compileAll();
     listener.waitCompileDone();
     
-    System.err.println("Number of errors = " + cm.getNumErrors());
+//    System.err.println("Number of errors = " + cm.getNumErrors());
     
     assertCompileErrorsPresent(_name(), true);
 //    System.err.println(cm.getCompilerErrorModel());
@@ -161,7 +161,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     assertEquals(_name() + "Class file exists after failing compile (2)", false, compiled2.exists());
     _model.removeListener(listener);
     
-    System.err.println("testCompileAllFailsDifferentSourceRoots completed");
+//    System.err.println("testCompileAllFailsDifferentSourceRoots completed");
     
     debug.logEnd();
   }
@@ -172,7 +172,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   public void testCompilePackageAsField() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
     
-    System.err.println("Starting testCompilePackageAsField");
+//    System.err.println("Starting testCompilePackageAsField");
     
     OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD);
     final File file = tempFile();
@@ -193,7 +193,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     assertEquals(_name() + "Class file exists after failing compile", false, compiled.exists());
     _model.removeListener(listener);
     
-    System.err.println("testCompilePackageAsField completed");
+//    System.err.println("testCompilePackageAsField completed");
     
     debug.logEnd();
   }
@@ -204,7 +204,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   public void testCompilePackageAsField2() throws BadLocationException, IOException, InterruptedException {
     debug.logStart();
     
-    System.err.println("Starting testCompilePackageAsField2");
+//    System.err.println("Starting testCompilePackageAsField2");
     
     final OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD_2);
     final File file = tempFile();
@@ -309,7 +309,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     debug.logStart();
     
     _log.log("Starting testCompileFailsCorrectLineNumbers");
-    System.err.println("Starting testCompileFailsCorrectLineNumbers");
+//    System.err.println("Starting testCompileFailsCorrectLineNumbers");
     
     File aDir = new File(_tempDir, "a");
     // bDir has been eleted; it is a second source root
@@ -355,7 +355,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
 //    assertTrue("location of error should be after 34 (line 3 or 4)", p2.getOffset() >= 34);
     
     _log.log("testCompileFailsCorrectLineNumbers completed");
-    System.err.println("testCompileFailsCorrectLineNumbers completed");
+//    System.err.println("testCompileFailsCorrectLineNumbers completed");
     
     debug.logEnd();
   }

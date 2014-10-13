@@ -45,7 +45,7 @@ import java.io.IOException;
 /** JUnit test class for testing TestDocGetter.
  *
  *  @author <a href="mailto:ericc@rice.edu">Eric Shao-yu Cheng</a>
- *  @version $Id$
+ *  @version $Id: TestDocGetterTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class TestDocGetterTest extends DrJavaTestCase {
   

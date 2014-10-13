@@ -43,7 +43,7 @@ import java.io.File;
 /** Class for document regions that totally ordered by allocation chronology.  They do not conform to the invariants
   * required for OrderedDocumentRegions.
   * Warning: this class defines compareTo which implicitly defines a coarser equality relation than equals
-  * @version $Id$
+  * @version $Id: BrowserDocumentRegion.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class BrowserDocumentRegion implements IDocumentRegion, Comparable<BrowserDocumentRegion> {
   private static volatile int _indexCounter = 0;   // sequence number counter for browser regions

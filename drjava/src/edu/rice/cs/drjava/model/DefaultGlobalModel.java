@@ -99,7 +99,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * methods, and the GlobalModel responds via the GlobalModelListener interface. This removes the dependency on the 
   * UI for the logical flow of the program's features.  With the current implementation, we can finally test the compile
   * functionality of DrJava, along with many other things. <p>
-  * @version $Id$
+  * @version $Id: DefaultGlobalModel.java 5727M 2014-10-06 05:11:31Z (local) $
   */
 public class DefaultGlobalModel extends AbstractGlobalModel {
   /* FIELDS */
@@ -620,9 +620,9 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
         public void interpreterReady(File wd) {
           /* Prevent listener from running twice.
            * This method was formerly called using SwingUtilities.invokeLater, in an attempt to ensure that the listener
-           * would be removed AFTER the read lock of the notifier had been released.  But it did not work.
-           * Now removeListener has been rewritten 
-           * and can be called even when the lock is held. In that case, the removal will be done as soon as possible. */
+           * would be removed AFTER the read lock of the notifier had been released [archaic].  But it did not work.
+           * Now removeListener has been rewritten but it only runs in the even thread. Removal is done
+           * as soon as possible. */
           
           _interactionsModel.removeListener(_runMain);  // listener cannot run
           

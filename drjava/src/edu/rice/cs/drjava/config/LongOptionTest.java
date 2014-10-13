@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.config;
 import edu.rice.cs.drjava.DrJavaTestCase;
 
 /** Class according to the JUnit protocol. Tests the proper functionality of the class LongOption.
- *  @version $Id$
+ *  @version $Id: LongOptionTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class LongOptionTest extends DrJavaTestCase {
   

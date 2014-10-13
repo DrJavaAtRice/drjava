@@ -44,7 +44,7 @@ import javax.swing.text.BadLocationException;
  * that opened the most recent block or expression list that contains
  * the beginning of the current line. Optional additional whitespaces 
  * can be passed through the constructor.
- * @version $Id$
+ * @version $Id: ActionBracePlusTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class ActionBracePlusTest extends IndentRulesTestCase {
   private String _text, _aligned;

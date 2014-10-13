@@ -40,7 +40,7 @@ import java.io.File;
 
 /** The concrete class for "dummy document" regions produced by ProjectFileParser.  These degenerate regions, which do
   * not include a document, are only used transiently during project file input processing.
-  * @version $Id$
+  * @version $Id: DummyDocumentRegion.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class DummyDocumentRegion implements FileRegion {
 

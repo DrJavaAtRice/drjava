@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.config;
 
-/** @version $Id$ */
+/** @version $Id: OptionListener.java 5594 2012-06-21 11:23:40Z rcartwright $ */
 public interface OptionListener<T> {
     public void optionChanged(OptionEvent<T> oce);
 }

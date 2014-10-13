@@ -44,7 +44,7 @@ import javax.swing.text.BadLocationException;
 
 /** Tests to ensure that compilation succeeds when expected.  Every test in this class is run for *each* of the
   * available compilers.
-  * @version $Id$
+  * @version $Id: GlobalModelCompileSuccessTest.java 5716M 2014-10-05 21:59:44Z (local) $
   */
 public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSuccessTestCase {
 
@@ -52,7 +52,7 @@ public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSucce
     * NOTE: this "feature" is no longer supported; multiple source roots is flagged as a compilation error.  This test 
     * has been revised to expect an error.*/
   public void testCompileAllDifferentSourceRoots() throws BadLocationException, IOException, InterruptedException {
-    System.err.println("testCompileAllDifferentSourceRoots() compiler =" + _name());
+//    System.err.println("testCompileAllDifferentSourceRoots() compiler =" + _name());
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
     aDir.mkdir();

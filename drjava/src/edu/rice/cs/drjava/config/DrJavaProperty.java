@@ -44,7 +44,7 @@ import java.util.Iterator;
 import edu.rice.cs.plt.lambda.Lambda;
 
 /** Class representing values that can be inserted as variables in external processes.
- *  @version $Id$
+ *  @version $Id: DrJavaProperty.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public abstract class DrJavaProperty implements Cloneable {
   /** Whether the invalidation listening mechanism has been deactivated due to an error. */

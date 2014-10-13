@@ -48,7 +48,7 @@ import edu.rice.cs.util.swing.Utilities;
 
 /** Tests the JPDA-based debugger.
   * TODO: Why are these tests commented out?!
-  * @version $Id$
+  * @version $Id: DebugTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public final class DebugTest extends JPDADebugTestCase implements OptionConstants {
   

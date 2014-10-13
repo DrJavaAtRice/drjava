@@ -50,7 +50,7 @@ import edu.rice.cs.drjava.model.debug.LineNotExecutableException;
 import javax.swing.text.BadLocationException;
 
 /** Superclasses all DebugActions that are associated with specific OpenDefinitionsDocuments.
-  * @version $Id$
+  * @version $Id: DocumentDebugAction.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class DocumentDebugAction<T extends EventRequest> extends DebugAction<T> {
   

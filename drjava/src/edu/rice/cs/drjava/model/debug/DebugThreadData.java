@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.model.debug;
 
 /**
  * Class for keeping track of the currently running threads.
- * @version $Id$
+ * @version $Id: DebugThreadData.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public abstract class DebugThreadData {
   private final String _name;

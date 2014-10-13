@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.model.debug;
 
 /**
  * Class for keeping track of a stack frame in the debugger.
- * @version $Id$
+ * @version $Id: DebugStackData.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class DebugStackData {
   private final String _method;

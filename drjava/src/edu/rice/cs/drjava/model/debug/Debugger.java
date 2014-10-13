@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
 /** Interface for any debugger implementation to be used by DrJava.
-  * @version $Id$
+  * @version $Id: Debugger.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public interface Debugger {
   

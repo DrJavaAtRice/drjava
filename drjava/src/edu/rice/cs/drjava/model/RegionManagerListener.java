@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.model;
 
 /** Any class which wants to listen to DocumentRegion events fired by a RegionManager should implement this interface
  *  and use RegionManager's addListener() method.
- *  @version $Id$
+ *  @version $Id: RegionManagerListener.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public interface RegionManagerListener<R extends IDocumentRegion> {
   /** Called when a region is added in a document.  Must be executed in event thread.

@@ -47,7 +47,7 @@ import java.io.IOException;
  * Vector<T>.
  * VectorOption<String> now allows empty strings, i.e. "[,]" is a vector of two empty strings.
  * "[]" will be interpreted as a vector of one empty string, and "" is an empty vector.
- * @version $Id$
+ * @version $Id: VectorOption.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class VectorOption<T> extends Option<Vector<T>> {
 

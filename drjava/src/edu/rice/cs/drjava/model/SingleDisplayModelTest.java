@@ -48,7 +48,7 @@ import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Test functions of the single display model.
- *  @version $Id$
+ *  @version $Id: SingleDisplayModelTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class SingleDisplayModelTest extends GlobalModelTestCase {
 

@@ -71,7 +71,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 /** Default implementation of the CompilerModel interface. This implementation is used for normal DrJava execution
   * (as opposed to testing DrJava).  TO DO: convert edu.rice.cs.util.Pair to edu.rice.cs.plt.tuple.Pair; requires 
   * making the same conversion in javalanglevels.
-  * @version $Id$
+  * @version $Id: DefaultCompilerModel.java 5703 2012-08-23 23:16:15Z wdforson $
   */
 public class DefaultCompilerModel implements CompilerModel {
   

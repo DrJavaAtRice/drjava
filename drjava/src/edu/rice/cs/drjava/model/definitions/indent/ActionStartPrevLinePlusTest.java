@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.model.definitions.indent;
 
 /** Tests ActionStartPrevLinePlus(String)
-  * @version $Id$
+  * @version $Id: ActionStartPrevLinePlusTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class ActionStartPrevLinePlusTest extends IndentRulesTestCase {
   

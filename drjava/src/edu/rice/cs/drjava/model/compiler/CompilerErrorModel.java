@@ -61,7 +61,7 @@ import edu.rice.cs.util.swing.Utilities;
   * TODO: refactor most of the code in this class into an abstract ErrorModel class.  JUnitErrorModel should inherit
   * from this abstract class not from CompilerErrorModel!  JavadocErrorModel should also inherit from
   * this abstract class instead of decorating a CompilerErrorModel!
-  * @version $Id$
+  * @version $Id: CompilerErrorModel.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class CompilerErrorModel {
   private static final String newLine = StringOps.EOL;

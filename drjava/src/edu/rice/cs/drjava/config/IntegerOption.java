@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.config;
 
 /** Class defining all configuration options with values of type Integer.
-  * @version $Id$
+  * @version $Id: IntegerOption.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class IntegerOption extends Option<Integer> {
   

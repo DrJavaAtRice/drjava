@@ -41,7 +41,7 @@ import java.io.File;
 import edu.rice.cs.util.OperationCanceledException;
 
 /** An interface to give GlobalModel a file to save a document to.
-  * @version $Id$
+  * @version $Id: FileSaveSelector.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public interface FileSaveSelector {
   

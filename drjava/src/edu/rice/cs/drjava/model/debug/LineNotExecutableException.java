@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model.debug;
 /**
  * Thrown when a breakpoint is set on a line that's not executable.
  * 
- * @version $Id$
+ * @version $Id: LineNotExecutableException.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class LineNotExecutableException extends DebugException {
   public LineNotExecutableException(String desc) {

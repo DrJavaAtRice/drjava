@@ -39,7 +39,7 @@ import java.io.*;
 import edu.rice.cs.util.FileOps;
 
 /** A Configuration object that is backed by a file.
-  * @version $Id$
+  * @version $Id: FileConfiguration.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class FileConfiguration extends SavableConfiguration {  
   

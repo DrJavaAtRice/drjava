@@ -64,7 +64,7 @@ import edu.rice.cs.util.swing.AsyncTask;
   * <p>
   * <i>No</i> methods on this class should be synchronized using traditional Java synchronization!
   * <p>
-  * @version $Id$
+  * @version $Id: GlobalEventNotifier.java 5727 2012-09-30 03:58:32Z rcartwright $
   */
 // QUESTION: why are we still using _lock operations?  All notifiers should run in the event thread.
 

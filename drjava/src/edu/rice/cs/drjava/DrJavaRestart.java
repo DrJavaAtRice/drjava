@@ -44,7 +44,7 @@ import javax.swing.JOptionPane;
 
 /** Helper class for DrJava that copies a file and then starts it. Part of the automatic update
   * in NewVersionPopup.
-  * @version $Id$
+  * @version $Id: DrJavaRestart.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class DrJavaRestart {
   /**

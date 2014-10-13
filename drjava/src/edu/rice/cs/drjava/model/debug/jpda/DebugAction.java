@@ -41,7 +41,7 @@ import java.util.Vector;
 import edu.rice.cs.drjava.model.debug.DebugException;
 
 /** Keeps track of information about any request to the debugger, such as Breakpoints.
-  * @version $Id$
+  * @version $Id: DebugAction.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class DebugAction<T extends EventRequest> {
   public static final int ANY_LINE = -1;

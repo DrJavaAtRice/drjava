@@ -44,7 +44,7 @@ import javax.swing.text.BadLocationException;
 //import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
 /** Superclass for all test classes for the indentation decision tree.
-  * @version $Id$
+  * @version $Id: IndentRulesTestCase.java 5594M 2014-10-06 13:35:07Z (local) $
   */
 public abstract class IndentRulesTestCase extends DrJavaTestCase {
   
@@ -81,6 +81,10 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
   protected final void _setDocText(String text) throws BadLocationException {
     setDocText(_doc, text);
   }
+  
+  /** Returns text of _doc. */
+  protected final String _getDocText() { return _doc.getText(); }
+  
 //    _doc.clear();
 //    _doc._insertString(0, text, null);
 //    Utilities.clearEventQueue();  // make sure that all listener actions triggered by this document update have completed

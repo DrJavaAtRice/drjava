@@ -40,7 +40,7 @@ import javax.swing.text.BadLocationException;
 
 /**
  * Tests the action rule which does nothing to the given text.
- * @version $Id$
+ * @version $Id: ActionDoNothingTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class ActionDoNothingTest extends IndentRulesTestCase {
 

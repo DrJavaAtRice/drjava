@@ -40,7 +40,7 @@ import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.plt.lambda.Lambda2;
 
 /** Class representing binary operations that can be inserted as variables in external processes.
-  * @version $Id$
+  * @version $Id: BinaryOpProperty.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class BinaryOpProperty<P,Q,R> extends EagerProperty {
   /** Operation to perform. */

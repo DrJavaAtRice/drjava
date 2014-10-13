@@ -44,7 +44,7 @@ import java.io.IOException;
 import edu.rice.cs.util.StringOps;
 
 /** Class representing file lists that are not evaluated until necessary.
-  * @version $Id$
+  * @version $Id: FileListProperty.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class FileListProperty extends DrJavaProperty {
   /** Separating string. */

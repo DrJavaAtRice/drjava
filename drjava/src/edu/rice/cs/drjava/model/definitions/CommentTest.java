@@ -45,7 +45,7 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
 import javax.swing.text.BadLocationException;
 
 /** Test the comment lines / uncomment lines functionality.
-  * @version $Id$
+  * @version $Id: CommentTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public final class CommentTest extends DrJavaTestCase {
   protected DefinitionsDocument doc;

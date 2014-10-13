@@ -45,7 +45,7 @@ import static edu.rice.cs.drjava.model.AbstractDJDocument.*;
 
 /** Indents the current line in the document to the indent level of the start of the brace ('{', '('} (and optionally
   * {'=', "=>"} at line end) enclosing the start of the current line, plus the given suffix.
-  * @version $Id$
+  * @version $Id: ActionStartStmtOfBracePlus.java 5727 2012-09-30 03:58:32Z rcartwright $
   */
 public class ActionStartStmtOfBracePlus extends IndentRuleAction {
   private final int _suffix;

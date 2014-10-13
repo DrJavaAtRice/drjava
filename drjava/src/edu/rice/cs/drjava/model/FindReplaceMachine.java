@@ -51,7 +51,7 @@ import javax.swing.JOptionPane;
 import java.awt.Component;
 
 /** Implementation of logic of find/replace over a document.
-  * @version $Id$
+  * @version $Id: FindReplaceMachine.java 5594M 2014-10-06 05:11:31Z (local) $
   */
 public class FindReplaceMachine {
   
@@ -671,8 +671,8 @@ public class FindReplaceMachine {
     return _findWrapped(startDoc, start, len, true);  // last arg is true because searching all docs has wrapped
   } 
   
-  /** Determines whether the whole find word is found at the input position.  Assumes read lock or hourglass is
-    * already held.
+  /** Determines whether the whole find word is found at the input position.  Only called in event thread or when 
+    * hourglass is held.
     * @param doc - the document where an instance of the find word was found
     * @param foundOffset - the position where that instance was found
     * @return true if the whole word is found at foundOffset, false otherwise

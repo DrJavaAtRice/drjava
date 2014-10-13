@@ -57,7 +57,7 @@ import edu.rice.cs.util.swing.Utilities;
 import static edu.rice.cs.drjava.model.definitions.reducedmodel.BraceInfo.*;
 
 /** Class that tests the tab/enter/curly indenting functionality.
-  * @version $Id$
+  * @version $Id: IndentTest.java 5668 2012-08-15 04:58:30Z rcartwright $
   */
 public final class IndentTest extends DrJavaTestCase {
   protected DefinitionsDocument _doc;

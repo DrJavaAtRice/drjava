@@ -43,7 +43,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 
 
 /** Determines whether or not the current line in the document starts with "//" 
-  * @version $Id$
+  * @version $Id: QuestionCurrLineIsWingComment.java 5594M 2014-10-07 05:23:24Z (local) $
   */
 public class QuestionCurrLineIsWingComment extends IndentRuleQuestion {
   
@@ -53,26 +53,11 @@ public class QuestionCurrLineIsWingComment extends IndentRuleQuestion {
   public QuestionCurrLineIsWingComment(IndentRule yesRule, IndentRule noRule) { super(yesRule, noRule); }
   
   /** Determines whether or not the current line in the document starts with the wing comment prefix "//". Does NOT
-    * check if this line is embedded in a block comment.  Only runs in event thread.
+    * check if this line is embedded in a block comment or than "//" appears in position other
+    * than beginning of line.  Only runs in event thread.
     * @param doc The AbstractDJDocument containing the current line.
     * @param reason The reason that the indentation is being done
     * @return true iff the current line is a wing comment.
     */
-  boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    try {
-      // Find the first non-whitespace character on the current line.
-      
-      int currentPos = doc.getCurrentLocation();
-      int startPos   = doc._getLineStartPos(currentPos);
-      int maxPos     = doc.getLength();
-      int diff       = maxPos - startPos;
-      
-      if (diff < 2) return false;
-      
-      String text = doc.getText(startPos, 2);
-      
-      return text.equals("//");
-    }
-    catch (BadLocationException e) { throw new UnexpectedException(); }
-  }
+  boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) { return doc.isCurrLineWingComment(); } 
 }

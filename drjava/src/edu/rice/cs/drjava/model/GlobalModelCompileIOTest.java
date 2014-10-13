@@ -45,7 +45,7 @@ import javax.swing.text.BadLocationException;
 
 /** Tests to ensure that compilation interacts with files correctly.
   *
-  * @version $Id$
+  * @version $Id: GlobalModelCompileIOTest.java 5668M 2014-10-05 21:59:44Z (local) $
   */
 public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
   
@@ -141,7 +141,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     saveFileAs(doc, new FileSelector(file2));
     assertTrue("should not be in sync after renaming", ! doc.checkIfClassFileInSync());
     
-    System.err.println("testClassFileSynchronizationAfterRename completed");
+//    System.err.println("testClassFileSynchronizationAfterRename completed");
   }
   
   /** Tests a compile after a file has unexpectedly been moved or delete. */
@@ -149,7 +149,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
     
-    System.err.println("testCompileAfterFileMoved started");
+//    System.err.println("testCompileAfterFileMoved started");
     saveFile(doc, new FileSelector(file));
     TestListener listener = new TestListener();
     _model.addListener(listener);
@@ -171,6 +171,6 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
     File compiled = classForScala(file, "DrScalaTestFoo");
     assertTrue("Class file shouldn't exist after compile", !compiled.exists());
     _model.removeListener(listener);
-    System.err.println("testCompileAfterFileMoved completed");
+//    System.err.println("testCompileAfterFileMoved completed");
   }
 }

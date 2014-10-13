@@ -59,7 +59,7 @@ import java.awt.EventQueue;
  *  <i>No</i> methods on this class should be synchronized using traditional Java synchronization!
  *  <p>
  *
- * @version $Id$
+ * @version $Id: DebugEventNotifier.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class DebugEventNotifier extends EventNotifier<DebugListener> implements DebugListener {
   

@@ -66,7 +66,7 @@ import java.util.List;
  * </LI>
  * </OL>
  *
- * @version $Id$
+ * @version $Id: SingleDisplayModel.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public interface SingleDisplayModel extends GlobalModel {
   /** @return the currently active document. */

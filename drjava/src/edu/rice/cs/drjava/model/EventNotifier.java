@@ -41,7 +41,7 @@ import edu.rice.cs.util.ReaderWriterLock;
 
 /** Base class for all component-specific EventNotifiers.  This class provides common methods to 
   * manage listeners of a specific type.  T the type of the listener class to be managed.
-  * @version $Id$
+  * @version $Id: EventNotifier.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class EventNotifier<T> {
   /** All T Listeners that are listening to the model.  Accesses to this collection are protected by the 

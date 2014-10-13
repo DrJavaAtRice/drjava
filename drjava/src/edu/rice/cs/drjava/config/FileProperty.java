@@ -43,7 +43,7 @@ import java.util.HashSet;
 import java.io.*;
 
 /** Property that evaluates to a file and that can be inserted as variables in external processes.
-  * @version $Id$
+  * @version $Id: FileProperty.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class FileProperty extends DrJavaProperty {
   protected Thunk<File> _getFile;

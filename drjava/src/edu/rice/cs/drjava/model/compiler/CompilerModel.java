@@ -45,7 +45,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
   * the CompilerListener interface.  The four primary uses of this interface will be to manage listeners, to trigger
   * compilation of (a) document(s), to handle the results, and to manage available compilers.
   * 
-  * @version $Id$
+  * @version $Id: CompilerModel.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public interface CompilerModel {
   //----------------------------Locking--------------------------------------//

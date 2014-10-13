@@ -71,7 +71,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  *  (reset in {@link #setUp} and a temporary directory that's created per test invocation (and subsequently cleaned in
  *  {@link #tearDown}. This reduces the burden for such file management stuff in the test cases themselves.
  *
- *  @version $Id$
+ *  @version $Id: GlobalModelTestCase.java 5702M 2014-10-11 18:21:39Z (local) $
  */
 public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
@@ -504,7 +504,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     int numErrors = _model.getCompilerModel().getNumErrors();
 
     if (name.length() > 0)  name += ": ";
-    System.err.println("Compiler errors = " + getCompilerErrorString());
+//    System.err.println("Compiler errors = " + getCompilerErrorString());
     assertEquals(name + " compile errors > 0 ? numErrors = " + numErrors, b, numErrors > 0);
   }
 
@@ -1109,7 +1109,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     @Override public void activeCompilerChanged() {
 //      Utilities.showDebug("compileEnded called in CSSListener");
-      System.err.println("Active compiler changed");
+//      System.err.println("Active compiler changed");
       synchronized(this) { activeCompilerChangedCount++; }
       _notifyCompileDone();
     }
@@ -1193,7 +1193,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected volatile boolean printMessages = GlobalModelJUnitTest.printMessages;
     
     /** Construct JUnitTestListener without resetting interactions */
-    public JUnitTestListener() { this(false);  }
+    public JUnitTestListener() { this(false);  }  // Changing false to true turns on message printing.
+    
     public JUnitTestListener(boolean printListenerMessages) {
       this.printMessages = printListenerMessages;
     }

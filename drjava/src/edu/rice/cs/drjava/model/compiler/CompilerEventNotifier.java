@@ -73,7 +73,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  * Java synchronization!
  * <p>
  *
- * @version $Id$
+ * @version $Id: CompilerEventNotifier.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 class CompilerEventNotifier extends EventNotifier<CompilerListener> implements CompilerListener {
   

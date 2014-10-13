@@ -47,7 +47,7 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
   * in UndoManager.  The public methods that involve composite state are synchronized, so this manager can be accessed
   * outside of the event thread.  The internal data structures _compoundEdits and _keys are not thread safe but they
   * only accessed only by synchronized methods.  The synchronization scheme (locking on this) follows UndoManager.
-  * @version $Id$
+  * @version $Id: CompoundUndoManager.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class CompoundUndoManager extends UndoManager {
   

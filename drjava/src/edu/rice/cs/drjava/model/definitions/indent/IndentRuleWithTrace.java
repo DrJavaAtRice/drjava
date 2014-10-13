@@ -45,7 +45,7 @@ import java.io.PrintStream;
 /** This class does almost all the work for keeping an indent tree trace.  IndentRuleQuestion also does some of the 
   * work, and any subclass may substitute its own version of getRuleName()
   * Note: tracing (turned "on" by setting ruleTraceEnabled to true and uncommenting line 110) is disabled by default.
-  * @version $Id$
+  * @version $Id: IndentRuleWithTrace.java 5751M 2014-10-06 11:20:47Z (local) $
   */
 public abstract class IndentRuleWithTrace implements IndentRule {
 
@@ -102,7 +102,9 @@ public abstract class IndentRuleWithTrace implements IndentRule {
     return false;
   }
 
-  /** This method does not indent the current line! */
+  /** This method does not indent the current line directly. But it is overridden in specific action classes 
+    * which call this code using super and then perform an indenting action. It also provides a hook for 
+    * tracing the indenting process. */
   public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     _addToIndentTrace(getRuleName(), TERMINUS_RULE, true);
 

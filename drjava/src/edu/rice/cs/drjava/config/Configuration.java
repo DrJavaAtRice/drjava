@@ -41,7 +41,7 @@ import java.io.PrintWriter;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Class to store and retrieve all configurable options.
-  * @version $Id$
+  * @version $Id: Configuration.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class Configuration {  
   

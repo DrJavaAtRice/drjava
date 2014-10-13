@@ -42,7 +42,7 @@ import java.awt.Font;
 /**
  * Class according to the JUnit protocol. Tests
  * the proper functionality of the class FontOption.
- * @version $Id$
+ * @version $Id: FontOptionTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class FontOptionTest extends DrJavaTestCase {
 

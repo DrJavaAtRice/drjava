@@ -69,7 +69,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Main class for DrJava.
-  * @version $Id$
+  * @version $Id: DrJavaRoot.java 5668 2012-08-15 04:58:30Z rcartwright $
   */
 public class DrJavaRoot {  
   /** Class to probe to see if the debugger is available */

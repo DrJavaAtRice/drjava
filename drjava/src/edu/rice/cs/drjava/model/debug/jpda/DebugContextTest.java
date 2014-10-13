@@ -50,7 +50,7 @@ import edu.rice.cs.util.swing.Utilities;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** More tests over the JPDA debugger.
- *  @version $Id$
+ *  @version $Id: DebugContextTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class DebugContextTest extends JPDADebugTestCase {
   

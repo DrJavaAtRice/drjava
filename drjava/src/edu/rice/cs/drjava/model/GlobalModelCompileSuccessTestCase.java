@@ -43,7 +43,7 @@ import edu.rice.cs.plt.reflect.JavaVersion;
  * 
  * Every test in this class is run for *each* of the compilers that is available.
  *
- * @version $Id$
+ * @version $Id: GlobalModelCompileSuccessTestCase.java 5716 2012-09-28 02:40:33Z wdforson $
  */
 public abstract class GlobalModelCompileSuccessTestCase extends GlobalModelTestCase {
 

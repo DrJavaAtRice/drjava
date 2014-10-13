@@ -42,7 +42,7 @@ import edu.rice.cs.drjava.model.GlobalModelTestCase.TestListener;
 /**
  * Tests the functionality of the class that notifies listeners
  * of a global model.
- * @version $Id$
+ * @version $Id: EventNotifierTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class EventNotifierTest extends DrJavaTestCase {
   

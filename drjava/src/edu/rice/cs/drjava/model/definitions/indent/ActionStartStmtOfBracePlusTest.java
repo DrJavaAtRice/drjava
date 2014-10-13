@@ -41,7 +41,7 @@ import javax.swing.text.BadLocationException;
 /**
  * Test the action rules for code in the indentation decision tree.
  * Assumes cursor is within a brace.
- * @version $Id$
+ * @version $Id: ActionStartStmtOfBracePlusTest.java 5675 2012-08-16 21:25:57Z rcartwright $
  */
 public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
 

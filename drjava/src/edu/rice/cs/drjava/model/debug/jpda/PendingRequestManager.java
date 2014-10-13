@@ -53,7 +53,7 @@ import edu.rice.cs.drjava.model.debug.DebugException;
 
 /** Keeps track of DocumentDebugActions that are waiting to be resolved when the classes they corresponed to are 
   * prepared.  (Only DocumentDebugActions have reference types which can be prepared.)
-  * @version $Id$
+  * @version $Id: PendingRequestManager.java 5594M 2014-09-20 05:13:27Z (local) $
   */
 
 public class PendingRequestManager {
@@ -153,8 +153,8 @@ public class PendingRequestManager {
     */
   public void classPrepared (ClassPrepareEvent event) throws DebugException {
     ReferenceType rt = event.referenceType();
-    //DrJava.consoleOut().println("In classPrepared. rt: " + rt);
-    //DrJava.consoleOut().println("equals getReferenceType: " +
+    //System.out.println("In classPrepared. rt: " + rt);
+    //System.out.println("equals getReferenceType: " +
     //                   rt.equals(_manager.getReferenceType(rt.name())));
     String className = rt.name();
     
@@ -168,7 +168,7 @@ public class PendingRequestManager {
     Vector<DocumentDebugAction<?>> actions = _pendingActions.get(className);
     Vector<DocumentDebugAction<?>> failedActions =
       new Vector<DocumentDebugAction<?>>();
-    //DrJava.consoleOut().println("pending actions: " + actions);
+    //System.out.println("pending actions: " + actions);
     if (actions == null) {
       // Must have been a different class with a matching prefix, ignore it
       // since we're not interested in this class.
@@ -211,7 +211,7 @@ public class PendingRequestManager {
       }
       catch (DebugException e) {
         failedActions.add(a);
-        // DrJava.consoleOut().println("Exception preparing request!! " + e);
+        // System.out.println("Exception preparing request!! " + e);
       }
     }
     

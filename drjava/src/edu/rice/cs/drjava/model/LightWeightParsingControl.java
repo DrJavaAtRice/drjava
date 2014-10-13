@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model;
 import java.util.List;
 
 /** Light-weight parsing control.
- *  @version $Id$
+ *  @version $Id: LightWeightParsingControl.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public interface LightWeightParsingControl {
   /** Perform light-weight parsing on the document if the delay has been exceeded.

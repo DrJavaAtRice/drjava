@@ -41,7 +41,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 /** A question node in the decision tree for the indentation system. Calls to <code>indentLine</code> on an 
   * IndentRuleQuestion will make a decision based on context and call the same method on one of its children.  
   * The leaves of the tree are represented by IndentRuleAction objects.
-  * @version $Id$
+  * @version $Id: IndentRuleQuestion.java 5594M 2014-10-06 05:28:45Z (local) $
   */
 public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
   /** Node in decision tree to use if the rule holds in this context. */
@@ -97,15 +97,15 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
     }
   }
   
-  /** Convenience method that wraps calls on applyRule in a read lock. Only used in testing. */
+  /** Convenience method that formerly wrapped calls on applyRule in read locks. Only used in testing. */
   boolean testApplyRule(AbstractDJDocument doc, Indenter.IndentReason reason) { return applyRule(doc, reason); }
   
-  /** Convenience method that wraps calls on applyRule in a read lock. Only used in testing. */
+  /** Convenience method that formerly wrapped calls on applyRule in read locks. Only used in testing. */
   boolean testApplyRule(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
     return applyRule(doc, pos, reason); 
   }
   
-  /** Convenience method that wraps calls on indentLine in a write lock. Only used in testing. */
+  /** Convenience method that formelry wrapped calls on indentLine in write locks. Only used in testing. */
   public boolean testIndentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     return indentLine(doc, reason); 
   }

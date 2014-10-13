@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model;
 import java.io.*;
 
 /** Special FileMovedException to signify when a document's file no longer exists on disk where it once was.
- *  @version $Id$
+ *  @version $Id: FileMovedException.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class FileMovedException extends IOException {
   private volatile File _file;

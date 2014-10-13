@@ -47,7 +47,7 @@ import java.io.IOException;
 
 /**
  * Tests that a custom config file can be specified.
- * @version $Id$
+ * @version $Id: ConfigFileTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class ConfigFileTest extends DrJavaTestCase {
   private static final String CUSTOM_PROPS =

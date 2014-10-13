@@ -44,7 +44,7 @@ import java.io.StringReader;
  * junit for testing.
  *
  * @author <a href="mailto:jasonbs@rice.edu">Jason Schiller</a>
- * @version $Id$
+ * @version $Id: ClassAndInterfaceFinderTest.java 5727 2012-09-30 03:58:32Z rcartwright $
  */
 
 public class ClassAndInterfaceFinderTest extends DrJavaTestCase {

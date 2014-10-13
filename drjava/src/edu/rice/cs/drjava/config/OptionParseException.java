@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.config;
 
 /** Exception indicating that an OptionParser could not parse the specified value for a given configurable option.
-  * @version $Id$
+  * @version $Id: OptionParseException.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class OptionParseException extends IllegalArgumentException {
   

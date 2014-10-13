@@ -41,7 +41,7 @@ import javax.swing.text.BadLocationException;
 /** Test the action rules for code in the indentation decision tree.
   * The implementation relies heavily on functions which are fully
   * tested in IndentHelpersTest.
-  * @version $Id$
+  * @version $Id: ActionStartPrevStmtPlusTest.java 5675 2012-08-16 21:25:57Z rcartwright $
   */
 public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
   

@@ -46,7 +46,7 @@ import java.text.SimpleDateFormat;
  *
  * This javadoc corresponds to build drjava-@DATE@-r@REVISION@;
  *
- * @version $Id$
+ * @version $Id: Version.orig 4571 2008-07-10 22:45:33Z dlsmith $
  */
 public abstract class Version {
 

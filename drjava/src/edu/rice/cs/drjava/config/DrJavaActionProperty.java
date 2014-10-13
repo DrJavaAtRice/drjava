@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.config;
 /** Class representing actions that are executed as side effect of command line
   * evaluation for variables in external processes.
  *
- *  @version $Id$
+ *  @version $Id: DrJavaActionProperty.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public abstract class DrJavaActionProperty extends DrJavaProperty {  
   /** Create a property. */

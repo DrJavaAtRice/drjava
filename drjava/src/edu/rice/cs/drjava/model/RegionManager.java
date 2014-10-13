@@ -46,7 +46,7 @@ import java.util.SortedSet;
 
 /** Interface for a region manager.  Region ordering (as in DocumentRegion) is not required, but it facilitates 
   * efficient implementation.
-  * @version $Id$
+  * @version $Id: RegionManager.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public interface RegionManager<R extends IDocumentRegion> {
   

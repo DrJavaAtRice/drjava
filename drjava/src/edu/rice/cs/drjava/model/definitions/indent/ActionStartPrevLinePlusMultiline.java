@@ -43,7 +43,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 /** Indents the current line in the document to the indent level of the
   * start of the previous line, adds several lines of text at that indent level,
   * and moves the cursor to a particular line and position.
-  * @version $Id$
+  * @version $Id: ActionStartPrevLinePlusMultiline.java 5751 2013-02-06 10:32:04Z rcartwright $
   */
 class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
   private String[] _suffices;

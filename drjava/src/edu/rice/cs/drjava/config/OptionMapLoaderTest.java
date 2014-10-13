@@ -40,7 +40,7 @@ import java.io.*;
 import edu.rice.cs.drjava.DrJavaTestCase;
 
 /**Tests the OptionMapLoader.
- * @version $Id$
+ * @version $Id: OptionMapLoaderTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class OptionMapLoaderTest extends DrJavaTestCase implements OptionConstants {
   

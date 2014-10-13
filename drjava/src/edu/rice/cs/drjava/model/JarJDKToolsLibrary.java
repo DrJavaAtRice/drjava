@@ -470,6 +470,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
 
     /* Scala entries for Linux */
     addIfDir(new File("/usr/share/scala"), roots);
+    addIfDir(new File("/usr/share/java"), roots);
+    addIfDir(new File("/usr/share/java/scala"), roots);
     addIfDir(new File("/opt/scala"), roots);
     
     return roots;

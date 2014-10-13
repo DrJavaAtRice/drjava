@@ -40,7 +40,7 @@ import java.io.*;
 import java.util.Date;
 
 /** A Configuration object that can be read and saved from a Stream.
- *  @version $Id$
+ *  @version $Id: SavableConfiguration.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class SavableConfiguration extends Configuration {
   /** Creates a new Configuration based on the given OptionMap.

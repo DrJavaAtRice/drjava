@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.config;
 
 /** Class representing values that are eagerly computed, so they are never stale.
- *  @version $Id$
+ *  @version $Id: EagerProperty.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public abstract class EagerProperty extends DrJavaProperty {
   /** Create a property. */

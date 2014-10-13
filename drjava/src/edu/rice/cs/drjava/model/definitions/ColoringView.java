@@ -56,7 +56,7 @@ import edu.rice.cs.util.text.EditDocumentInterface;
   * drawSelectedText at some point. As of 2002/06/17, we now extend PlainView because WrappedPlainView was causing 
   * bugs related to resizing the viewport of the definitions scroll pane.
   *
-  * @version $Id$
+  * @version $Id: ColoringView.java 5711 2012-09-11 19:42:33Z rcartwright $
   */
 public class ColoringView extends PlainView implements OptionConstants {
   

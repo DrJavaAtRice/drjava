@@ -16,7 +16,7 @@
   Each chapter is separated into its own file.  This should only be edited to change
   the date, title, etc., or add/reorganize chapters.
   
-  @version $Id$
+  @version $Id: devdoc.docbook 4971 2009-08-03 21:26:37Z mgricken $
 -->
 
 <book id="index">

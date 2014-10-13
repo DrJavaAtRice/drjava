@@ -76,7 +76,7 @@ import edu.rice.cs.drjava.config.OptionParser;
   * @see JUnitModel
   * @see JavadocModel
   *
-  * @version $Id$
+  * @version $Id: GlobalModel.java 5727 2012-09-30 03:58:32Z rcartwright $
   */
 public interface GlobalModel extends ILoadDocuments {
   

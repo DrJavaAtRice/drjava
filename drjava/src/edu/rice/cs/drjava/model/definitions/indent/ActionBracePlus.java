@@ -43,7 +43,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceInfo;
 
 /** Aligns indentation of the current line to the character that opened the enclosing block or expression list.  
   * Optional additional whitespaces can be passed through the constructor.
-  * @version $Id$
+  * @version $Id: ActionBracePlus.java 5675 2012-08-16 21:25:57Z rcartwright $
   */
 public class ActionBracePlus extends IndentRuleAction {
   /** int holding the number of additional blanks to be inserted. */

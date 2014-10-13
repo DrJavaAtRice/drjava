@@ -37,7 +37,7 @@
 /** This class tests the internal functionality of CompilerErrorModel using a dummy implementation of the 
  *  IGetDocuments interface.
  *
- * @version $Id$
+ * @version $Id: CompilerErrorModelTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 package edu.rice.cs.drjava.model.compiler;
 
@@ -51,7 +51,7 @@ import edu.rice.cs.util.OperationCanceledException;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Tests the CompilerErrorModel.
- *  @version $Id$
+ *  @version $Id: CompilerErrorModelTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class CompilerErrorModelTest extends DrJavaTestCase {
   private File[] files;

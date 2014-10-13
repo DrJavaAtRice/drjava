@@ -75,7 +75,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 /**
  * Tests whether the current line is empty.
  * 
- * @version $Id$
+ * @version $Id: QuestionCurrLineEmptyOrEnterPressTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class QuestionCurrLineEmptyOrEnterPressTest extends IndentRulesTestCase {
 

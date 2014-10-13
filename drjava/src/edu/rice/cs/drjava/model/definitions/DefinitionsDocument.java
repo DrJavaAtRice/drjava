@@ -489,7 +489,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //    Utilities.show("Line = \n" + getText(_currentLocation, getLineEndPos(_currentLocation) - _currentLocation + 1));
     int pos1 = getText().indexOf("//", _currentLocation);  // TODO: get text of current line instead of whole document
     if (pos1 < 0) return NO_COMMENT_OFFSET;
-    int pos2 = getFirstNonWSCharPos(_currentLocation, true);
+    int pos2 = getFirstNonWSCharPos(_currentLocation, true);   // Comment text is recognized
 //    Utilities.show("Pos1 = " + pos1 + " Pos2 = " + pos2);
     if (pos1 != pos2) return NO_COMMENT_OFFSET;
     
@@ -514,7 +514,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
   }  
   
-  /** Assumes that read lock is already held. */
+  /** Only executed in event thread. */
   private int _findNextOpenCurly(String text, int pos) throws BadLocationException {
     
     /* */ assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
@@ -1090,7 +1090,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   /** Finds the next identifier (starting with next non-whitespace character) in the document starting at start. Assumes that
-    * read lock and _reduced lock are already held. */
+    * _reduced lock is already held. */
   private String getNextIdentifier(final int startPos) throws ClassNameNotFoundException {
     
     try {

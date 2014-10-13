@@ -42,7 +42,7 @@ import java.util.*;
 
 /** Class representing all the variables that
   * can be inserted as variables in external processes.
-  * @version $Id$
+  * @version $Id: PropertyMaps.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public final class PropertyMaps implements Cloneable {
   /** Map of property sets. */

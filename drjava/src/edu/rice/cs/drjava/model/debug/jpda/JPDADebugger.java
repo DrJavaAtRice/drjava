@@ -82,7 +82,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * isReady, and startUp.  Public methods also throw a DebugException if
   * the EventHandlerThread has caught an exception.
   *
-  * @version $Id$
+  * @version $Id: JPDADebugger.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class JPDADebugger implements Debugger {
   

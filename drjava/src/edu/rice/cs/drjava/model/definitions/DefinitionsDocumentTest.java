@@ -54,7 +54,7 @@ import javax.swing.text.BadLocationException;
 import java.util.List;
 
 /** Tests the functionality of the definitions document.
-  * @version $Id$
+  * @version $Id: DefinitionsDocumentTest.java 5707 2012-08-26 05:57:03Z rcartwright $
   */
 public final class DefinitionsDocumentTest extends DrJavaTestCase implements ReducedModelStates {
   private DefinitionsDocument _doc;

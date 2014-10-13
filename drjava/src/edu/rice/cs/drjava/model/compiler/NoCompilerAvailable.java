@@ -50,7 +50,7 @@ import javax.swing.filechooser.FileFilter;
 import edu.rice.cs.drjava.ui.SmartSourceFilter;
 
 /** A CompilerInterface implementation for signifying that no compiler is available.
-  * @version $Id$
+  * @version $Id: NoCompilerAvailable.java 5668 2012-08-15 04:58:30Z rcartwright $
   */
 public class NoCompilerAvailable implements CompilerInterface {
   public static final CompilerInterface ONLY = new NoCompilerAvailable();

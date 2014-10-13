@@ -41,7 +41,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
  * JUnit for testing.
  *
  * @author <a href="mailto:jasonbs@rice.edu">Jason Schiller</a>
- * @version $Id$
+ * @version $Id: DummyOpenDefDocTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 
 public class DummyOpenDefDocTest extends DrJavaTestCase {

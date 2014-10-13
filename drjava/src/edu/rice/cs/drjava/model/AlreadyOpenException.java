@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.model;
 import edu.rice.cs.util.UnexpectedException;
 
 /** Indicates that the file attempting to be opened is already open.
- *  @version $Id$
+ *  @version $Id: AlreadyOpenException.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class AlreadyOpenException extends Exception {
   

@@ -41,7 +41,7 @@ package edu.rice.cs.drjava.model;
   * called.  WARNING: this class overrides the equals method but does not override the hashCode method to maintain 
   * consistency.  Hence, instances can only be used as keys in identity based hash tables.  NOTE: since class instances
   * are mutable, a hashCode method consistent with equals WOULD NOT WORK anyway.
-  * @version $Id$
+  * @version $Id: DocumentRegion.java 5727 2012-09-30 03:58:32Z rcartwright $
   */
 public class DocumentRegion implements OrderedDocumentRegion {
   protected final OpenDefinitionsDocument _doc;

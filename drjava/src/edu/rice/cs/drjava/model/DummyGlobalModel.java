@@ -68,7 +68,7 @@ import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.drjava.config.OptionParser;
 
 /** Concrete implementation of GlobalModel that always throws UnsupportedOperationExceptions.
-  * @version $Id$
+  * @version $Id: DummyGlobalModel.java 5727 2012-09-30 03:58:32Z rcartwright $
   */
 public class DummyGlobalModel implements GlobalModel {
   /** Since this is not supposed to be used, we need to throw an exception OTHER than the ones it officially supports.

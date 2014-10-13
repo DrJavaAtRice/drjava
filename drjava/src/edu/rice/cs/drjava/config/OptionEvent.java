@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.config;
 
-/** @version $Id$ */
+/** @version $Id: OptionEvent.java 5594 2012-06-21 11:23:40Z rcartwright $ */
 public class OptionEvent<T> {
   public final Option<T> option;
   public final T value;

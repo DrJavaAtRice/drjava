@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.config;
 import edu.rice.cs.drjava.DrJavaTestCase;
 
 /** Class according to the JUnit protocol. Tests the proper functionality of the class NonNegativeIntegerOption.
- *  @version $Id$
+ *  @version $Id: NonNegativeIntegerOptionTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class NonNegativeIntegerOptionTest extends DrJavaTestCase {
   /** @param name The name of this test case. */

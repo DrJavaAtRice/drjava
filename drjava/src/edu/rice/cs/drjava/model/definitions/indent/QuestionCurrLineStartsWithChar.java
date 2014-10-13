@@ -56,13 +56,23 @@ import static edu.rice.cs.drjava.model.AbstractDJDocument.*;
 public class QuestionCurrLineStartsWithChar extends IndentRuleQuestion {
   /** The String to be matched. This String may not contain whitespace characters or comment-delimiting characters. */
   private final char[] _delimiters;  // must be in sorted order
+  private final boolean _acceptComments;
   
   /** @param yesRule The decision subtree for the case that this rule applies in the current context.
     * @param noRule The decision subtree for the case that this rule does not apply in the current context.
     */
-  public QuestionCurrLineStartsWithChar(char[] delimiters, IndentRule yesRule, IndentRule noRule) {
+  public QuestionCurrLineStartsWithChar(char[] delimiters, boolean acceptComments, IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
     _delimiters = delimiters;
+    _acceptComments = acceptComments;
+  }
+  
+  public static QuestionCurrLineStartsWithChar newQuestionSkipComments(char[] delimiters, IndentRule yesRule, IndentRule noRule) {
+    return new QuestionCurrLineStartsWithChar(delimiters, false, yesRule, noRule);
+  }
+  
+  public static QuestionCurrLineStartsWithChar newQuestion(char[] delimiters, IndentRule yesRule, IndentRule noRule) {
+    return new QuestionCurrLineStartsWithChar(delimiters, true, yesRule, noRule);
   }
   
   /** Determines whether or not the current line in the document starts with a delimiter char specified by the char[]
@@ -79,10 +89,9 @@ public class QuestionCurrLineStartsWithChar extends IndentRuleQuestion {
 //    System.err.println("applyRule called ");
     int endPos = doc._getLineEndPos(orig);
 //    System.err.print(" endPos = " + endPos);
-    if (endPos == ERROR_INDEX) {
+    if (endPos == ERROR_INDEX)
 //      System.err.println("Returning false because location is invalid");
       return false;
-    }
     
 //    char prevChar = '\0';
     try {

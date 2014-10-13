@@ -47,7 +47,7 @@ import edu.rice.cs.plt.io.IOUtil;
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 
 /** Some common methods for determining Java source files, language level files, etc.
-  * @version $Id$
+  * @version $Id: DrJavaFileUtils.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class DrJavaFileUtils  {
   /** Return the set of source file extensions that this compiler supports.

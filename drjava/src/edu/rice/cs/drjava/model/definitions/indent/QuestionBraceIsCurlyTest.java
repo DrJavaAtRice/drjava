@@ -44,7 +44,7 @@ import javax.swing.text.BadLocationException;
  * opened previous to the start of the current line was opened 
  * by the character '{'. 
  * This questions corresponds to rule 15 in our decision tree.
- * @version $Id$
+ * @version $Id: QuestionBraceIsCurlyTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class QuestionBraceIsCurlyTest extends IndentRulesTestCase {
   // PRE: we are not inside a multiline comment

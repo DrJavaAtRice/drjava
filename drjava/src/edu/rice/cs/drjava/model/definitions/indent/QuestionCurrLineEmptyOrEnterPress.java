@@ -37,8 +37,9 @@
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
+import edu.rice.cs.util.swing.Utilities;
 
-/** @version $Id$
+/** @version $Id: QuestionCurrLineEmptyOrEnterPress.java 5594M 2014-10-11 01:13:13Z (local) $
   * Asks whether the current line is empty (contains only whitespace), or indentation was
   * spawned by pressing enter.
   * 
@@ -54,7 +55,10 @@ class QuestionCurrLineEmptyOrEnterPress extends IndentRuleQuestion {
     * @return true if this node's rule holds.
     */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    if (reason == Indenter.IndentReason.ENTER_KEY_PRESS) return true;
+    if (reason == Indenter.IndentReason.ENTER_KEY_PRESS) {
+//      Utilities.show("[QCLEOEP] Returning true");
+      return true;
+    }
     // Determine if there are only whitespace chars by seeing if the first non-WS char is the endOfLine
     int here = doc.getCurrentLocation();
     int endOfLine = doc._getLineEndPos(here);

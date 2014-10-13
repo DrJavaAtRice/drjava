@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model;
 import javax.swing.text.Highlighter;
 
 /** Interface for highlighted regions.
-  * @version $Id$ */
+  * @version $Id: IHighlighted.java 5594 2012-06-21 11:23:40Z rcartwright $ */
 public interface IHighlighted {
   /** Storage structure for a painter and its associated tag. */
   public static class PainterTag {

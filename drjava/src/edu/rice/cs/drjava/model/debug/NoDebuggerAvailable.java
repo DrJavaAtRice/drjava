@@ -42,7 +42,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 /**
  * Placeholder class indicating that no debugger is available to DrJava.
  * This class follows the Singleton pattern.
- * @version $Id$
+ * @version $Id: NoDebuggerAvailable.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class NoDebuggerAvailable implements Debugger {
   

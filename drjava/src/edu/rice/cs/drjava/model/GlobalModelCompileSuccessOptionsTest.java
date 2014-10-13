@@ -50,7 +50,7 @@ import edu.rice.cs.util.swing.Utilities;
  * 
  * Every test in this class is run for *each* of the compilers that is available.
  *
- * @version $Id$
+ * @version $Id: GlobalModelCompileSuccessOptionsTest.java 5708 2012-08-29 23:52:35Z rcartwright $
  */
 public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompileSuccessTestCase {
 

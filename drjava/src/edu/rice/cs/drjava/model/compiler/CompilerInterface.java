@@ -44,7 +44,7 @@ import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.plt.reflect.JavaVersion;
 
 /** The minimum interface that a compiler must meet to be used by DrJava.
-  * @version $Id$
+  * @version $Id: CompilerInterface.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public interface CompilerInterface {
   

@@ -46,7 +46,7 @@ import edu.rice.cs.util.OperationCanceledException;
  * Tests the indenting functionality on the level of the GlobalModel.
  * Not only are we testing that the document turns out right, but also
  * that the cursor position in the document is consistent with a standard.
- * @version $Id$
+ * @version $Id: GlobalIndentTest.java 5709 2012-08-30 05:11:09Z rcartwright $
  */
 public final class GlobalIndentTest extends GlobalModelTestCase {
   private static final String FOO_EX_1 = "class Foo {\n";

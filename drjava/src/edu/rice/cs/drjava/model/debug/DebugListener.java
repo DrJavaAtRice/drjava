@@ -41,7 +41,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
 /** Any class which wants to listen to events fired by the Debugger should implement this interface and use Debugger's
   * addDebugListener() method.
-  * @version $Id$
+  * @version $Id: DebugListener.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public interface DebugListener extends RegionManagerListener<Breakpoint> {
   

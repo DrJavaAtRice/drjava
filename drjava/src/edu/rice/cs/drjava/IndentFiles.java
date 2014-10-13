@@ -48,7 +48,7 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
 /** Allows users to pass filenames to a command-line indenter.  Unfortunately, this uses the Swing API (high 
   * overhead), but we attempt to run the indentation in "headless AWT" mode to prevent a Java icon from showing 
   * up on the OS X dock.
-  * @version $Id$
+  * @version $Id: IndentFiles.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class IndentFiles {
   

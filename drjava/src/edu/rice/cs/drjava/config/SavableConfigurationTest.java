@@ -46,7 +46,7 @@ import java.util.Date;
 
 /** JUnit test class for testing SavableConfiguration.
   * @author <a href="mailto:chrisw@rice.edu">Chris Warrington</a>
-  * @version $Id$
+  * @version $Id: SavableConfigurationTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class SavableConfigurationTest extends DrJavaTestCase {
   /** This is the date format the Date.toString() uses.

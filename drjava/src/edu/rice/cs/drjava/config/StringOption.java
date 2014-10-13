@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.config;
 
 /** Class representing all configuration options with values of type String.
-  * @version $Id$
+  * @version $Id: StringOption.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class StringOption extends Option<String> {
   /** @param key The name of this Option. */

@@ -102,7 +102,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * 5.2. If additional files arrive via the handleOpenFile event, DrJava will
   *      MainFrame.handleRemoteOpenFile.
   * 
-  * @version $Id$
+  * @version $Id: DrJava.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class DrJava {
   public static volatile Log _log = new Log("DrJava.txt", false);

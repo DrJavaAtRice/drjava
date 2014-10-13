@@ -47,7 +47,7 @@ import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.EditDocumentException;
 
 /** Tests to ensure that compilation behaves correctly in border cases.
-  * @version $Id$
+  * @version $Id: GlobalModelCompileTest.java 5715 2012-09-28 02:08:43Z wdforson $
   */
 public final class GlobalModelCompileTest extends GlobalModelTestCase {
   protected static final Log _log  = new Log("GlobalModelCompileTest.txt", false);

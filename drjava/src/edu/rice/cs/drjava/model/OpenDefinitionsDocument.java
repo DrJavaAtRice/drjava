@@ -51,7 +51,7 @@ import edu.rice.cs.drjava.model.Finalizable;
 import edu.rice.cs.drjava.model.definitions.*;
 
 /** Interface for an open document in DrScala. It may not be resident (in DocumentCache).
-  * @version $Id$
+  * @version $Id: OpenDefinitionsDocument.java 5727 2012-09-30 03:58:32Z rcartwright $
   */
 public interface OpenDefinitionsDocument extends DJDocument, Finalizable<DefinitionsDocument>,
   Comparable<OpenDefinitionsDocument>, INavigatorItem {

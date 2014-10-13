@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
 /** A node in the decision tree used for the indentation system.
-  * @version $Id$
+  * @version $Id: IndentRule.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public interface IndentRule {
   /** Properly indents the line that the given position is on. Replaces all whitespace characters at the beginning of 

@@ -36,11 +36,13 @@
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import javax.swing.text.BadLocationException;
+import edu.rice.cs.drjava.model.definitions.indent.IndentRulesTestCase;
 
 /** This class contains tests for AbstractDJDocument.
   */
-public class AbstractDJDocumentTest extends DrJavaTestCase {
+public class AbstractDJDocumentTest extends IndentRulesTestCase {
+  
   public void testIsNum() {
     assertTrue(AbstractDJDocument._isNum("0"));
     assertTrue(AbstractDJDocument._isNum("1"));
@@ -158,5 +160,88 @@ public class AbstractDJDocumentTest extends DrJavaTestCase {
     assertTrue(AbstractDJDocument._isNum("12.0e2D"));
     assertTrue(AbstractDJDocument._isNum("12.3e2D"));
     assertTrue(AbstractDJDocument._isNum("12.34e2D"));
+  }
+  
+  public void testInBlockComment() throws BadLocationException {
+    String text = 
+      "/* This is a block comment */\n" +
+      "    //comment\n" +  
+      "    /*commment\n" +
+      "     *again;{}\n" +
+      "     */\n" +
+      "     foo();\n";
+    _setDocText(text);
+    
+//    System.err.println("text = \n" + _doc.getText());
+    
+    // Looking at "/* This is a block comment ...
+    assertFalse("position of opening of block is not 'in'",  _doc._insideBlockComment(0));
+    assertFalse("position following '/' at opening is not 'in'", _doc._insideBlockComment(1));
+    assertTrue("position following '/*' at opening is 'in'", _doc._insideBlockComment(2));
+    assertTrue("position just after 'comment' is 'in'",  _doc._insideBlockComment(26));
+    assertTrue("position just before closing '*/' is 'in'",  _doc._insideBlockComment(27));
+    assertTrue("position just before closing '/' is 'in'",  _doc._insideBlockComment(28));
+    assertFalse("position just after closing '/' is not 'in'", _doc._insideBlockComment(29));
+
+    // Looking at "    //comment ...
+    assertFalse("position following block comment is not 'in'",   _doc._insideBlockComment(30));
+    assertFalse("position at beginning of next line is not 'in'",  _doc._insideBlockComment(31));
+    
+    // Looking at "    /*comment ...
+    assertTrue("position preceding block is not 'in'",  ! _doc._insideBlockComment(44));
+    assertTrue("position immediately before '/*' not 'in'",  ! _doc._insideBlockComment(48));
+    assertTrue("position following '/' is not 'in'",  ! _doc._insideBlockComment(49));
+    assertTrue("position following '/*' is 'in'",  _doc._insideBlockComment(50));
+  }   
+  
+  public void testIsPrevLineComment() throws BadLocationException {
+    String text = 
+      "    bump().\n" +  
+      "    //comment\n" +  
+      "    /*commment\n" +
+      "     *again;{}\n" +
+      "     */\n" +
+      "     foo();\n";
+    _setDocText(text);
+    
+//    System.err.println("text = \n" + text);
+    
+//    _doc.setCurrentLocation(13);  // Looking at "    // comment ..."
+    assertTrue("line preceding //comment line is NOT a pure line comment",  ! _doc.isPrevLineNewComment(13));
+    assertTrue("line preceding //comment line is NOT ignorable", ! _doc.isPrevLineIgnorable(13));
+    
+//    _doc.setCurrentLocation(27);  // Looking at "    /*comment ..."
+    assertTrue("line preceding /*comment line is a pure line comment", _doc.isPrevLineNewComment(27));
+    assertTrue("line preceding /*comment line is ignorable", _doc.isPrevLineIgnorable(27));
+    
+//    _doc.setCurrentLocation(42);  // Looking at "     *again ..."
+    assertTrue("line preceding *again line is a new comment line", _doc.isPrevLineNewComment(42));
+    assertTrue("line preceding *again line is a not within a block comment", ! _doc.isPrevLineInBlockComment(42));
+    assertTrue("line preceding *again line is ignorable", _doc.isPrevLineIgnorable(42));
+    
+    _doc.setCurrentLocation(57);  // Looking at "     *again ..."
+    assertTrue("/* line preceding '*/' line is a NOT pure line comment", ! _doc.isPrevLineNewComment(57));
+    assertTrue("line preceding *again line is a within a block comment", _doc.isPrevLineInBlockComment(57));
+    assertTrue("/* line preceding '*/' line is ignorable", _doc.isPrevLineIgnorable(57));
+  }
+  
+  public void testShadowingOfComments() throws BadLocationException {
+    String text = 
+      " //comment\n" +  
+      " /*commment\n" +
+      "  *again;{}\n" +
+      "  */\n";
+    _setDocText(text);
+    
+    assertFalse("before beginning of line comment", _doc.isWeaklyShadowed(0));
+    assertTrue("weak shadowing of beginning of line comment", _doc.isWeaklyShadowed(1));
+    assertFalse("shadowing of beginning of line comment", _doc.isShadowed(1));
+    
+    assertTrue("end of line comment", _doc.isWeaklyShadowed(9));
+    assertTrue("end of block comment", _doc.isWeaklyShadowed(38));
+    
+    assertFalse("before beginning of block comment", _doc.isWeaklyShadowed(11));
+    assertTrue("weak shadowing of beginning of block comment", _doc.isWeaklyShadowed(12));
+    assertFalse("shadowing of beginning of block comment", _doc.isShadowed(12));
   }
 }

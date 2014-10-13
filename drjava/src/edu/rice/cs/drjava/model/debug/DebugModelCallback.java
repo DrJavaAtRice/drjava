@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.model.debug;
 
 /** Callback interface which allows a Debugger to respond to events fired 
   * in a remote jvm.
-  * @version $Id$
+  * @version $Id: DebugModelCallback.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public interface DebugModelCallback {
 //  /** Notifies the debugger that an assignment has been made in the given debug interpreter.

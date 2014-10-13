@@ -44,7 +44,7 @@ import edu.rice.cs.util.swing.ConfirmCheckBoxDialog;
 import java.awt.EventQueue;
 import javax.swing.*;
 
-/** @version $Id$ */
+/** @version $Id: ConfigOptionListeners.java 5594 2012-06-21 11:23:40Z rcartwright $ */
 public class ConfigOptionListeners implements OptionConstants {
   public static class DisplayAllCompilerVersionsListener implements OptionListener<Boolean>, OptionConstants {
     protected JFrame _parent;

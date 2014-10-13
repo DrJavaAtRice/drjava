@@ -44,7 +44,7 @@ import java.util.Iterator;
  * Class defining a configuration option that requires a choice between
  * mutually-exclusive possible values.  Values are stored as Strings, though
  * this could be extended to any type with a fairly simple refactoring.
- * @version $Id$
+ * @version $Id: ForcedChoiceOption.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class ForcedChoiceOption extends Option<String>
 {

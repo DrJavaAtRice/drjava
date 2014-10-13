@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.config;
 import edu.rice.cs.plt.lambda.Lambda;
 
 /** Class representing unary operations that can be inserted as variables in external processes.
-  * @version $Id$
+  * @version $Id: UnaryOpProperty.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class UnaryOpProperty<P,R> extends EagerProperty {
   /** Operation to perform. */

@@ -56,7 +56,7 @@ import java.util.List;
 import static edu.rice.cs.util.XMLConfig.XMLConfigException;
 
 /** Class setting up the variables for external processes.
-  *  @version $Id$
+  *  @version $Id: DrJavaPropertySetup.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class DrJavaPropertySetup implements OptionConstants {
   public static void setup() {

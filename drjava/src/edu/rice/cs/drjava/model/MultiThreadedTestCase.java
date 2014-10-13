@@ -42,7 +42,7 @@ import edu.rice.cs.drjava.ui.DefinitionsPaneTest;
 import junit.framework.AssertionFailedError;
 
 /** TestCase which can fail if another thread causes an error or failure.
-  * @version $Id$
+  * @version $Id: MultiThreadedTestCase.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class MultiThreadedTestCase extends DrJavaTestCase {
   public MultiThreadedTestCase() { super(); }

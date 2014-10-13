@@ -41,7 +41,7 @@ package edu.rice.cs.drjava;
   * This class ensures that each component is registered with all other components that need to call its methods.  In 
   * essence, this class manages component associations.  Any details more low-level than who talks to who should be
   * handled by components through their interfaces.
-  * @version $Id$
+  * @version $Id: MainController.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class MainController {
   /* Things that MainController needs to manage:

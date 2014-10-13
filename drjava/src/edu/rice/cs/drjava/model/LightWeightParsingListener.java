@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.model;
 
 /** Light-weight parsing visitor.
- *  @version $Id$
+ *  @version $Id: LightWeightParsingListener.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public interface LightWeightParsingListener {
   /** Gets called when the enclosing class name of a document was updated. Always gets called in the event thread.

@@ -42,7 +42,7 @@ package edu.rice.cs.drjava.model.definitions;
  * This can happen if there is nothing between "package" and ";", or if there
  * is no terminating semicolon ever.
  *
- * @version $Id$
+ * @version $Id: InvalidPackageException.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class InvalidPackageException extends Exception {
   private final int _location;

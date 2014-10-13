@@ -40,7 +40,7 @@ import edu.rice.cs.plt.lambda.Lambda3;
 import edu.rice.cs.plt.lambda.Lambda;
 
 /** Class representing ternary operations that can be inserted as variables in external processes.
-  * @version $Id$
+  * @version $Id: TernaryOpProperty.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class TernaryOpProperty<O,P,Q,R> extends EagerProperty {
   /** Operation to perform. */

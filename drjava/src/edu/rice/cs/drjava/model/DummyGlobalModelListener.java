@@ -46,7 +46,7 @@ import edu.rice.cs.util.FileOpenSelector;
 
 /** A dummy GlobalModelListener that does nothing. Useful for listening to only a small number of events.
   * Not currently used.
-  * @version $Id$
+  * @version $Id: DummyGlobalModelListener.java 5727 2012-09-30 03:58:32Z rcartwright $
   */
 public class DummyGlobalModelListener extends DummyInteractionsListener implements GlobalModelListener {
   

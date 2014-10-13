@@ -41,7 +41,7 @@ import edu.rice.cs.drjava.DrJava;
 import java.util.Vector;
 
 /** Class representing values from the DrJava configuration file that can be inserted as variables in external processes.
-  * @version $Id$
+  * @version $Id: ConfigProperty.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class ConfigProperty extends EagerProperty {
   /** True if this is a list of values. This allows the sep="..." attribute. */

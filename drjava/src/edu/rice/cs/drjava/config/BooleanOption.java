@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.config;
 
 /** Class defining all configuration options with values of type Boolean.
- *  @version $Id$
+ *  @version $Id: BooleanOption.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class BooleanOption extends Option<Boolean> {
   

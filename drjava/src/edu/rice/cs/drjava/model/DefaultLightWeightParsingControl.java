@@ -50,7 +50,7 @@ import edu.rice.cs.util.swing.Utilities;
 
 /** Default light-weight parsing control.  This class is declared final because it cannot be robustly subclassed because
   * the constructor starts a thread.
-  * @version $Id$
+  * @version $Id: DefaultLightWeightParsingControl.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public final class DefaultLightWeightParsingControl implements LightWeightParsingControl {
   /** The model. */

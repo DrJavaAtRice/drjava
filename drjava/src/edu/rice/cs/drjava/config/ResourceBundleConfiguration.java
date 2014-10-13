@@ -44,7 +44,7 @@ import java.io.*;
 import java.util.Enumeration;
 
 /** A configuration in a resource bundle.
-  * @version $Id$
+  * @version $Id: ResourceBundleConfiguration.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class ResourceBundleConfiguration extends FileConfiguration {
   /** Name of the resource bundle. */

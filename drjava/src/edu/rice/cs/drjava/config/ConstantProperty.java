@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.config;
 import java.util.HashSet;
 
 /** Class representing values that are constant and that can be inserted as variables in external processes.
-  * @version $Id$
+  * @version $Id: ConstantProperty.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class ConstantProperty extends EagerProperty {
   /** Create a constant property. */

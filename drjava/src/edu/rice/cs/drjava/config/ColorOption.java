@@ -39,7 +39,7 @@ import java.awt.*;
 
 /**
  * Class defining all configuration options with values of type Color.
- * @version $Id$
+ * @version $Id: ColorOption.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class ColorOption extends Option<Color>{
   

@@ -45,7 +45,7 @@ import edu.rice.cs.plt.lambda.Thunk;
 
 /** Class for a document region that moves with changes in the document; it also includes a lazy tool-tip and line
   * boundaries.  TODO: convert _startPos and _endPos to _cachedStart and _cachedEnd which are updated by updateLines
-  * @version $Id$Regiong
+  * @version $Id: MovingDocumentRegion.java 5594 2012-06-21 11:23:40Z rcartwright $Regiong
   */
 public class MovingDocumentRegion extends DocumentRegion {
   

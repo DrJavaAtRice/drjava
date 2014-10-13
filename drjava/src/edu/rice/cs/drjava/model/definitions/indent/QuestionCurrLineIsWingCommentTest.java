@@ -74,7 +74,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 /** Tests visitor class that determines whether the current line is a wing comment.
  * 
- * @version $Id$
+ * @version $Id: QuestionCurrLineIsWingCommentTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class QuestionCurrLineIsWingCommentTest extends IndentRulesTestCase {
 

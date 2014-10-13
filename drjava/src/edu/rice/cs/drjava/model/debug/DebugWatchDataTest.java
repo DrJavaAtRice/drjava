@@ -76,7 +76,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 
 /**
  * Tests that the DebugWatchData class can display state correctly.
- * @version $Id$
+ * @version $Id: DebugWatchDataTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class DebugWatchDataTest extends DrJavaTestCase {
  

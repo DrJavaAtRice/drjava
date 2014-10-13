@@ -42,7 +42,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 
 /** DummyGetDocumentsTest for unit testing DummyGetDocuments.  Uses JUnit for testing.
   * @author <a href="mailto:ericc@rice.edu">Eric Shao-yu Cheng</a>
-  * @version $Id$
+  * @version $Id: DummyGlobalModelTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class DummyGlobalModelTest extends DrJavaTestCase {
   

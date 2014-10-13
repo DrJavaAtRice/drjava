@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.model.debug;
 
 /**
  * Class for keeping track of watched fields and variables.
- * @version $Id$
+ * @version $Id: DebugWatchData.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class DebugWatchData {
   /** String to display if the value is not in scope.

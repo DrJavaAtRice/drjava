@@ -57,7 +57,7 @@ import java.lang.reflect.Constructor;
 /** An abstract parent for all javac-based compiler interfaces.  Manages the auxiliary naming methods.
   * To support loading via reflection, all subclasses are assumed to have a public constructor with
   * a matching signature.
-  *  @version $Id$
+  *  @version $Id: JavacCompiler.java 5668M 2014-10-05 21:59:44Z (local) $
   */
 public abstract class JavacCompiler implements CompilerInterface {
   
@@ -192,7 +192,7 @@ public abstract class JavacCompiler implements CompilerInterface {
               throw ite.getCause();
             }
             else {
-              System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
+//              System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
             }
           }
           if (instance == null) {
@@ -209,14 +209,14 @@ public abstract class JavacCompiler implements CompilerInterface {
                 throw ite.getCause();
               }
               else {
-                System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
+//                System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
                 return;
               }
             }
           }
           if (instance==null) {
-            System.err.println("Static Error: This applet does not have a default constructor or a constructor "+
-                               "accepting String[].");
+//            System.err.println("Static Error: This applet does not have a default constructor or a constructor "+
+//                               "accepting String[].");
             return;
           }
         }
@@ -234,12 +234,12 @@ public abstract class JavacCompiler implements CompilerInterface {
               throw ite.getCause();
             }
             else {
-              System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
+//              System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
               return;
             }
           }
           if (instance==null) {
-            System.err.println("Static Error: This applet does not have a constructor accepting String[].");
+//            System.err.println("Static Error: This applet does not have a constructor accepting String[].");
             return;
           }
         }
@@ -250,12 +250,12 @@ public abstract class JavacCompiler implements CompilerInterface {
       try {
         m = c.getMethod("main", java.lang.String[].class);
         if (!m.getReturnType().equals(void.class)) {
-          System.err.println("Static Error: This class does not have a static void main method accepting String[].");
+//          System.err.println("Static Error: This class does not have a static void main method accepting String[].");
           m = null;
         }
       }
       catch (java.lang.NoSuchMethodException e) {
-        System.err.println("Static Error: This class does not have a static void main method accepting String[].");
+//        System.err.println("Static Error: This class does not have a static void main method accepting String[].");
         m = null;
       }
     }
@@ -271,17 +271,17 @@ public abstract class JavacCompiler implements CompilerInterface {
         m.invoke(null, new Object[] { args });
       }
       catch(SecurityException se) {
-        System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
+//        System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
       }
       catch(IllegalAccessException iae) {
-        System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
+//        System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
       }
       catch(java.lang.reflect.InvocationTargetException ite) {
         if (ite.getCause()!=null) {
           throw ite.getCause();
         }
         else {
-          System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
+//          System.err.println("Error: Please turn off 'Smart Run' or use 'java' command instead of 'run'.");
         }
       }
     }
@@ -295,7 +295,7 @@ public abstract class JavacCompiler implements CompilerInterface {
   // If a), then DrJava inserts "code=MyClass" as argument 0.
   // If b), then DrJava performs the same as "applet MyClass" (see above).
   // If c), then DrJava executes MyClass.main (traditional java behavior).
-  public static String transformRunCommand(String s) {    
+  public String transformRunCommand(String s) {    
     if (s.endsWith(";"))  s = _deleteSemiColon(s);
     List<String> args = ArgumentTokenizer.tokenize(s, true);
     final String classNameWithQuotes = args.get(1); // this is "MyClass"
@@ -371,7 +371,7 @@ public abstract class JavacCompiler implements CompilerInterface {
 
   /** Return true if this compiler can be used in conjunction with the language level facility.
     * @return true if language levels can be used. */
-  public boolean supportsLanguageLevels() { return false; }  // Not in DrScala
+  public boolean supportsLanguageLevels() { return true; }  // Allowed in Java code in DrScala
   
   /** Return the set of keywords that should be highlighted in the specified file.
     * @param f file for which to return the keywords

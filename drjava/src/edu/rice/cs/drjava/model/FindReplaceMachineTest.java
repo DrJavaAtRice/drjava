@@ -46,7 +46,7 @@ import javax.swing.text.BadLocationException;
 import java.io.File;
 
 /** Tests the FindReplaceMachine.
-  * @version $Id$
+  * @version $Id: FindReplaceMachineTest.java 5727 2012-09-30 03:58:32Z rcartwright $
   */
 public class FindReplaceMachineTest extends DrJavaTestCase {
   private volatile OpenDefinitionsDocument _doc;  // working document accessible across threads

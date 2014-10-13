@@ -41,7 +41,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 /** Indents the current line in the document to the indent level of the
   * start of the contract or statement of the brace enclosing the current
   * position, plus the given suffix.
-  * @version $Id$
+  * @version $Id: ActionDoNothing.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class ActionDoNothing extends IndentRuleAction {
   

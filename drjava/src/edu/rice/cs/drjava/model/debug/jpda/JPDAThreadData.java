@@ -41,7 +41,7 @@ import edu.rice.cs.drjava.model.debug.DebugThreadData;
 
 /**
  * Class for keeping track of the currently running threads.
- * @version $Id$
+ * @version $Id: JPDAThreadData.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class JPDAThreadData extends DebugThreadData {
   private final ThreadReference _thread;

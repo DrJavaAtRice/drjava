@@ -44,7 +44,7 @@ import javax.swing.text.BadLocationException;
  * This means it tests cases where the user has just hit ENTER somewhere
  * on the opening line of a block comment.
  *
- * @version $Id$
+ * @version $Id: ActionStartPrevLinePlusMultilinePreserveTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class ActionStartPrevLinePlusMultilinePreserveTest extends IndentRulesTestCase {
   

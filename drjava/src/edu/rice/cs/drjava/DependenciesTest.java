@@ -39,7 +39,7 @@ package edu.rice.cs.drjava;
 import junit.framework.*;
 
 /** Test that ensures all external dependencies are met!
- *  @version $Id$
+ *  @version $Id: DependenciesTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class DependenciesTest extends DrJavaTestCase {
   public static final String REQUIRED_UTIL_VERSION = "20040521-1616";

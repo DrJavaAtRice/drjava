@@ -51,7 +51,7 @@ import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.UnexpectedException;
 
 /** A thread that listens and responds to events from JPDA when the debugger has attached to another JVM.
-  * @version $Id$
+  * @version $Id: EventHandlerThread.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class EventHandlerThread extends Thread {
   

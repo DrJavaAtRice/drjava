@@ -48,7 +48,7 @@ import edu.rice.cs.util.OperationCanceledException;
  *  TODO: Simplify signatures to avoid command pattern overhead.
  *  @see GlobalModel
  *  @see DefaultGlobalModel
- *  @version $Id$
+ *  @version $Id: ILoadDocuments.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public interface ILoadDocuments {
   /** Open a file and read it into the definitions.  The provided file selector chooses a file, and on a successful

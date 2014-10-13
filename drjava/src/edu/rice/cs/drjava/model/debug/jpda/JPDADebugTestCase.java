@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model.debug.jpda;
 import edu.rice.cs.drjava.model.debug.DebugTestCase;
 
 /** A DebugTestCase whose debugger is a {@code JPDADebugger}.
- *  @version $Id$
+ *  @version $Id: JPDADebugTestCase.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public abstract class JPDADebugTestCase extends DebugTestCase {
 

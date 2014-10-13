@@ -40,7 +40,7 @@ import java.awt.Font;
 
 /**
  * Class defining all configuration entries of type Font
- * @version $Id$
+ * @version $Id: FontOption.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class FontOption extends Option<Font> {
 

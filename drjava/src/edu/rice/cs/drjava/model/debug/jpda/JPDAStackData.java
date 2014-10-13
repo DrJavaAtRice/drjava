@@ -40,7 +40,7 @@ import com.sun.jdi.StackFrame;
 import edu.rice.cs.drjava.model.debug.DebugStackData;
 
 /** Class for keeping track of a stack frame in the debugger.
-  * @version $Id$
+  * @version $Id: JPDAStackData.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class JPDAStackData extends DebugStackData {
   /** Object for keeping track of a stack frame.

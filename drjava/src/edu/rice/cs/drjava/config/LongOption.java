@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.config;
 
 /** Class defining all configuration options with values of type Long.
-  * @version $Id$
+  * @version $Id: LongOption.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class LongOption extends Option<Long> {
   
