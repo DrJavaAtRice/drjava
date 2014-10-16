@@ -994,6 +994,12 @@
   
   <!-- Sets svn-revision to the current "Last Changed Rev" of "svn info". -->
   <target name="resolve-svn-revision">
+  <!-- do nothing -->
+  </target>
+  
+<!-- superseded old code
+  <!- Sets svn-revision to the current "Last Changed Rev" of "svn info". ->
+  <target name="resolve-svn-revision">
     <exec executable="svn" failonerror="yes" output="svn-info.txt">
       <arg value="info" />
     </exec>
@@ -1008,7 +1014,7 @@
     </loadfile>
     <delete file="svn-info.txt" />
   </target>
-  
+-->
 
   <!-- Sets "already-generated" if "generate-file" is more recent than "generate-sourcefile";
        otherwise, the out-of-date target file is deleted (if it exists).  Note that, since
