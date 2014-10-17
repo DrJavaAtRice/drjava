@@ -223,7 +223,7 @@ public abstract class AbstractDJPane extends JTextPane
     // Is this action still necessary?  Answer: yes!  Without this line, the caret often moves when the user hits "tab"
     getDJDocument().setCurrentLocation(getCaretPosition());
     
-    // The _reduced lock within DefinitionsDocument should be probably be set as well
+    // The _reduced lock within DefinitionsDocument should be probably be set as well [archaic]
     
     final int selStart = getSelectionStart();
     final int selEnd = getSelectionEnd();

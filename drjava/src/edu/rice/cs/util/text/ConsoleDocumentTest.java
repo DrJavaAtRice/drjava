@@ -43,7 +43,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Tests ConsoleDocument.
-  * @version $Id$
+  * @version $Id: ConsoleDocumentTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class ConsoleDocumentTest extends DrJavaTestCase {
   protected ConsoleDocument _doc;

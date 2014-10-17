@@ -40,7 +40,7 @@ package edu.rice.cs.drjava.model.repl;
  * Exception to signify that the interpreter was interrupted
  * before it could complete.
  *
- * @version $Id$
+ * @version $Id: InterpreterInterruptedException.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class InterpreterInterruptedException extends RuntimeException {
   public final int startLine;

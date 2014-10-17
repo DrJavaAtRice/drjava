@@ -52,7 +52,7 @@ import java.io.File;
   * be called to show the dialog, using the suggested location for the Javadoc as the "start" file.  If the user 
   * modifies the selection once, the user's choice will be remembered and no further suggestions will be used.
   *
-  * @version $Id$
+  * @version $Id: JavadocDialog.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class JavadocDialog implements DirectorySelector {
   /** Parent frame of the dialog. */

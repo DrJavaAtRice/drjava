@@ -54,7 +54,7 @@ import java.io.BufferedWriter;
 
 /** History class that records what has been typed in the interactions pane.  This class is not thread safe;
   * it is only accessed from InteractionsDocument which takes responsibility for synchronization.
-  * @version $Id$
+  * @version $Id: History.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class History implements OptionConstants, Serializable {
 

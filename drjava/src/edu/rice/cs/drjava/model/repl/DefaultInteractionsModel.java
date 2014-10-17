@@ -55,7 +55,7 @@ import edu.rice.cs.util.swing.Utilities;
 
 /** Interactions model which can notify GlobalModelListeners on events.
   * TODO: remove invokeLater wrappers here and enforce the policy that all of the listener methods must use them
-  * @version $Id$
+  * @version $Id: DefaultInteractionsModel.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class DefaultInteractionsModel extends RMIInteractionsModel {
   /** Message to signal that input is required from the console. */

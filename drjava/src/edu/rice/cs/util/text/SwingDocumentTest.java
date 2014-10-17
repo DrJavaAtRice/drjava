@@ -41,7 +41,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import javax.swing.text.BadLocationException;
 
 /** Tests the SwingDocument.
-  * @version $Id$
+  * @version $Id: SwingDocumentTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class SwingDocumentTest extends DrJavaTestCase {
   protected SwingDocument _doc;

@@ -44,7 +44,7 @@ import javax.swing.text.BadLocationException;
  * <p>
  * All tests check for the ':' character on the current line.
  *
- * @version $Id$
+ * @version $Id: QuestionLineContainsTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class QuestionLineContainsTest extends IndentRulesTestCase {
 

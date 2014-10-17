@@ -51,7 +51,7 @@ import edu.rice.cs.util.swing.SwingFrame;
  * and TOOLBAR_ICONS_ENABLED) bypassing the the normal graphical representation
  * with JRadioButtons, in order to comply with the special circumstances regarding
  * their setting.
- * @version $Id$
+ * @version $Id: ToolbarOptionComponent.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class ToolbarOptionComponent extends OptionComponent<Boolean,JComponent> {
 

@@ -48,7 +48,7 @@ import javax.swing.event.CaretListener;
 import javax.swing.text.Position;
 
 /** Listens to the caret in the associated DefinitionsPane and highlights the text containing CompilerErrors.
- * @version $Id$
+ * @version $Id: ErrorCaretListener.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class ErrorCaretListener implements CaretListener {
   private final OpenDefinitionsDocument _openDoc;

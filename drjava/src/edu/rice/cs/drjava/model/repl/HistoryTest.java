@@ -50,7 +50,7 @@ import java.io.File;
 import java.io.IOException;
 
 /** Tests the functionality of the repl History.
- *  @version $Id$
+ *  @version $Id: HistoryTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class HistoryTest extends DrJavaTestCase implements OptionConstants{
   private History _history;

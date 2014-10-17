@@ -43,7 +43,7 @@ import javax.swing.*;
 import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
 
 /** Controller for an interactions script.
-  * @version $Id$
+  * @version $Id: InteractionsScriptController.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class InteractionsScriptController /* implements Serializable */ {
   /** Associated model. */

@@ -53,7 +53,7 @@ import java.io.File;
  * Tests the functionality provided by an implementation of JavadocModel.
  * For now, this class is hard-coded to test DefaultJavadocModel, but it can be
  * extended to test any implementation of the interface.
- * @version $Id$
+ * @version $Id: JavadocModelTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class JavadocModelTest extends DrJavaTestCase {
   

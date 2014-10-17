@@ -44,7 +44,7 @@ import edu.rice.cs.drjava.*;
 import edu.rice.cs.util.swing.SwingFrame;
 
 /** Graphical form of an IntegerOption.
-  * @version $Id$
+  * @version $Id: IntegerOptionComponent.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class IntegerOptionComponent extends OptionComponent<Integer,JTextField> {
   private volatile JTextField _jtf;

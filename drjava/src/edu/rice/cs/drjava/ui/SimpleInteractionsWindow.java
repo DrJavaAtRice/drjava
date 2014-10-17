@@ -48,7 +48,7 @@ import edu.rice.cs.util.swing.SwingFrame;
 
 /** A standalone Interactions Window that provides the functionality of DrJava's Interactions Pane in a single JVM.
   * Useful for quickly testing small pieces of code if DrJava is not running.
-  * @version $Id$
+  * @version $Id: SimpleInteractionsWindow.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class SimpleInteractionsWindow extends SwingFrame {
   //private final SimpleRMIInteractionsModel _rmiModel;

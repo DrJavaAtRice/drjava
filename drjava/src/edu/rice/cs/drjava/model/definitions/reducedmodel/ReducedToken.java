@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /** The representation of document text in the reduced model. ReducedToken :: = Brace | Gap
-  * @version $Id$
+  * @version $Id: ReducedToken.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class ReducedToken implements ReducedModelStates {
   private volatile ReducedModelState _state;
@@ -125,12 +125,12 @@ public abstract class ReducedToken implements ReducedModelStates {
   /** Indicates whether this brace is commented out.  Package visible for testing purposes.
     * @return true if the brace is hidden by comments.
     */
-  boolean isCommented() { return  inBlockComment() || inLineComment(); }
+  boolean isCommented() { return  insideBlockComment() || inLineComment(); }
   
   /** Determines whether the current location is inside a block comment.  (Excludes opening "brace"!)
     * @return true or false
     */
-  private boolean inBlockComment() { return  _state == INSIDE_BLOCK_COMMENT; }
+  private boolean insideBlockComment() { return  _state == INSIDE_BLOCK_COMMENT; }
   
   /** Determines whether the current location is inside a line comment.  (Excludes opening "brace"!)
     * @return true or false

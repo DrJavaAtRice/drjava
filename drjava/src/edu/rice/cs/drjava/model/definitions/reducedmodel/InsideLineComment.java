@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
 
 /** The shadowing state that corresponds to being inside a line comment.
-  * @version $Id$
+  * @version $Id: InsideLineComment.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class InsideLineComment extends ReducedModelState {
   /** Singleton instance */

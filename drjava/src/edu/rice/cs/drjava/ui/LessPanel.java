@@ -47,7 +47,7 @@ import edu.rice.cs.util.swing.Utilities;
 /** Panel for displaying some component with buttons, one of which is an "Abort" button.
   * This should be used to display the output of an external process.
   * This class is a swing class that should only be accessed from the event thread.
-  * @version $Id$
+  * @version $Id: LessPanel.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class LessPanel extends AbortablePanel {
   /** Size of the buffer read at once. */

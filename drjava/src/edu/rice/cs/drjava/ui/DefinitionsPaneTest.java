@@ -55,7 +55,7 @@ import java.util.Vector;
 import java.util.Date;
 
 /** Tests the Definitions Pane
-  * @version $Id$
+  * @version $Id: DefinitionsPaneTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public final class DefinitionsPaneTest extends MultiThreadedTestCase {
 

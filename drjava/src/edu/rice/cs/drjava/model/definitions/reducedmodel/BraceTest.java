@@ -42,7 +42,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceException;
 
 /**
  * Tests the Brace class.
- * @version $Id$
+ * @version $Id: BraceTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class BraceTest extends DrJavaTestCase implements ReducedModelStates {
   protected Brace rparen;

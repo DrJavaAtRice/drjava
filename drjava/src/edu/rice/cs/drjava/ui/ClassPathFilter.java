@@ -41,7 +41,7 @@ import javax.swing.filechooser.FileFilter;
 
 
 /** A file filter for files with extensions ".jar"/".zip". Used in file choosers for extra classpath option.
- *  @version $Id$
+ *  @version $Id: ClassPathFilter.java 5668 2012-08-15 04:58:30Z rcartwright $
  */
 public class ClassPathFilter extends FileFilter {
   public static final ClassPathFilter ONLY = new ClassPathFilter();

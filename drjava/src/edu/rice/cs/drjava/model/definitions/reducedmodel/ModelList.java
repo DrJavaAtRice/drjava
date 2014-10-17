@@ -41,7 +41,7 @@ import java.util.Set;
 
 /** A doubly-linked list class with header and trailer nodes. Allows multiple iterators to make modifications to the 
   * same list without failing unlike the iterators for java.util.*List.
-  * @version $Id$
+  * @version $Id: ModelList.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 class ModelList<T> {
   private Node<T> _head;

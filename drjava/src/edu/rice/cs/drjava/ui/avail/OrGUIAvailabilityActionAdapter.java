@@ -44,7 +44,7 @@ import javax.swing.Action;
 /**
  * Adapter from Action to OrGUIAvailabilityListener.
  *
- * @version $Id$
+ * @version $Id: OrGUIAvailabilityActionAdapter.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class OrGUIAvailabilityActionAdapter extends OrGUIAvailabilityListener {
   protected final Action _adaptee;

@@ -61,7 +61,7 @@ import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 /** Panel for displaying find results. This class is a swing class which should only be accessed from the event thread.
-  * @version $Id$
+  * @version $Id: FindResultsPanel.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
 

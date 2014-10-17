@@ -38,16 +38,15 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.BadLocationException;
 
-/**
- * Tests the indention rule which detects whether the current line
- * starts with a particular string.
- * @version $Id$
- */
+/** Tests the rule QuestionCurrLineStartsWith which determines whether the current line
+  * starts with a particular string.
+  * @version $Id: QuestionCurrLineStartsWithTest.java 5594 2012-06-21 11:23:40Z rcartwright $
+  */
 public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
 
   /** Tests not having the prefix in the text. */
   public void testNoPrefix() throws BadLocationException {
-    IndentRuleQuestion rule = new QuestionCurrLineStartsWith("{", null, null);
+    IndentRuleQuestion rule = QuestionCurrLineStartsWith.newQuestion("{", null, null);
     
     // Open brace
     _setDocText("foo();\n}\n");
@@ -56,36 +55,35 @@ public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("line after close brace (no open brace)", !rule.testApplyRule(_doc, 8, Indenter.IndentReason.OTHER));
     
     // Close brace
-    rule = new QuestionCurrLineStartsWith("}", null, null);
+    rule = QuestionCurrLineStartsWith.newQuestion("}", null, null);
     _setDocText("{\nfoo();");
     assertTrue("no close brace", !rule.testApplyRule(_doc, 0, Indenter.IndentReason.OTHER));
   }
   
-  /** Tests having a line start with prefix, with text following
-   */
+  /** Tests having a line start with prefix, with text following */
   public void testStartsWithPrefixWithText() throws BadLocationException {
-    IndentRuleQuestion rule = new QuestionCurrLineStartsWith("}", null, null);
+    IndentRuleQuestion rule = QuestionCurrLineStartsWith.newQuestion("}", null, null);
         
     // Prefix plus text (no space)
     _setDocText("foo();\n}bar();\n");
-    assertTrue("line before brace (no space)", !rule.testApplyRule(_doc, 0, Indenter.IndentReason.OTHER));
+    assertFalse("beginning of text", rule.testApplyRule(_doc, 0, Indenter.IndentReason.OTHER));
     assertTrue("just before brace (no space)", rule.testApplyRule(_doc, 7, Indenter.IndentReason.OTHER));
-    assertTrue("just after brace (no space)", rule.testApplyRule(_doc, 9, Indenter.IndentReason.OTHER));
-    assertTrue("line after brace (no space)", !rule.testApplyRule(_doc, 15, Indenter.IndentReason.OTHER));
+    assertTrue("end-of-line after brace (no space)", rule.testApplyRule(_doc, 11, Indenter.IndentReason.OTHER));
+    assertFalse("line after brace (no space)", rule.testApplyRule(_doc, 15, Indenter.IndentReason.OTHER));
     
     // Prefix plus text (with space)
-    rule = new QuestionCurrLineStartsWith("*", null, null);
+    rule = QuestionCurrLineStartsWith.newQuestion("*", null, null);
     _setDocText("foo\n * comment\nbar");
-    assertTrue("line before star (with space)", !rule.testApplyRule(_doc, 0, Indenter.IndentReason.OTHER));
-    assertTrue("just before star (with space)", rule.testApplyRule(_doc, 4, Indenter.IndentReason.OTHER));
-    assertTrue("just after star (with space)", rule.testApplyRule(_doc, 6, Indenter.IndentReason.OTHER));
-    assertTrue("line after star (with space)", !rule.testApplyRule(_doc, 15, Indenter.IndentReason.OTHER));
+    assertFalse("beginning of text", rule.testApplyRule(_doc, 0, Indenter.IndentReason.OTHER));
+    assertTrue("before star (with space)", rule.testApplyRule(_doc, 4, Indenter.IndentReason.OTHER));
+    assertTrue("just before star", rule.testApplyRule(_doc, 5, Indenter.IndentReason.OTHER));
+    assertTrue("just after star", rule.testApplyRule(_doc, 6, Indenter.IndentReason.OTHER));
+    assertFalse("line after star (with space)", rule.testApplyRule(_doc, 15, Indenter.IndentReason.OTHER));
   }
   
-  /** Tests having a line start with prefix, with no text following
-   */
+  /** Tests having a line start with prefix, with no text following */
   public void testStartsWithPrefixNoText() throws BadLocationException {
-    IndentRuleQuestion rule = new QuestionCurrLineStartsWith("{", null, null);
+    IndentRuleQuestion rule = QuestionCurrLineStartsWith.newQuestion("{", null, null);
     
     // Prefix plus no text (no space)
     _setDocText("foo();\n{\nbar();\n");
@@ -102,10 +100,9 @@ public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("line after brace (with space)", !rule.testApplyRule(_doc, 14, Indenter.IndentReason.OTHER));
   }
   
-  /** Tests having a multiple character prefix.
-   */
+  /** Tests having a multiple character prefix. */
   public void testMultipleCharPrefix() throws BadLocationException {
-    IndentRuleQuestion rule = new QuestionCurrLineStartsWith(".*.", null, null);
+    IndentRuleQuestion rule = QuestionCurrLineStartsWith.newQuestion(".*.", null, null);
     
     // Multi-char prefix
     _setDocText("*\n.*\n.*.\n.*.foo");
@@ -115,67 +112,72 @@ public final class QuestionCurrLineStartsWithTest extends IndentRulesTestCase {
     assertTrue("dot star dot text", rule.testApplyRule(_doc, 9, Indenter.IndentReason.OTHER));
   }
     
-  /** Tests having a commented prefix without searching in comments.
-   */
+  /** Tests having a commented prefix without searching in comments. */
   public void testCommentedPrefixDontSearchComment() throws BadLocationException {
-    IndentRuleQuestion rule = new QuestionCurrLineStartsWith("{", null, null);
+    IndentRuleQuestion rule = QuestionCurrLineStartsWith.newQuestionSkipComments("{", null, null);
     
     // Open brace in comment
-    _setDocText("foo();\n// {\nbar();\n");
-    assertTrue("just before brace", !rule.testApplyRule(_doc, 7, Indenter.IndentReason.OTHER));
-    assertTrue("just after brace", !rule.testApplyRule(_doc, 11, Indenter.IndentReason.OTHER));
-    assertTrue("line after brace", !rule.testApplyRule(_doc, 12, Indenter.IndentReason.OTHER));
+    _setDocText("foo();\n// {\nbar();\n{");
+    assertFalse("just before brace", rule.testApplyRule(_doc, 7, Indenter.IndentReason.OTHER));
+    assertFalse("just after brace", rule.testApplyRule(_doc, 11, Indenter.IndentReason.OTHER));
+    assertFalse("line after brace", rule.testApplyRule(_doc, 12, Indenter.IndentReason.OTHER));
+    assertTrue("second line after brace", rule.testApplyRule(_doc, 19, Indenter.IndentReason.OTHER));
   }
 
-  /** Tests having a commented prefix with searching in comments.
-   */
+  /** Tests having a commented prefix with searching in comments. */
   public void testCommentedPrefixSearchComment() throws BadLocationException {
-    IndentRuleQuestion rule = new QuestionCurrLineStartsWith("*", null, null);
+    IndentRuleQuestion rule = QuestionCurrLineStartsWith.newQuestion("*", null, null);
     
     // Star in comment
     _setDocText("/**\n* \ncomment\n");
-    assertTrue("line before star", !rule.testApplyRule(_doc, 0, Indenter.IndentReason.OTHER));
-    assertTrue("just before star", rule.testApplyRule(_doc, 4, Indenter.IndentReason.OTHER));
-    assertTrue("just after star", rule.testApplyRule(_doc, 6, Indenter.IndentReason.OTHER));
-    assertTrue("line after star", !rule.testApplyRule(_doc, 7, Indenter.IndentReason.OTHER));
+//    System.err.println("*** Text is: '" + _doc.getText() + "'");
+    assertFalse("line before star", rule.testApplyRule(_doc, 0, Indenter.IndentReason.OTHER));
+    assertFalse("just before first star", rule.testApplyRule(_doc, 1, Indenter.IndentReason.OTHER));
+    assertTrue("just before star at beginning of line 2", rule.testApplyRule(_doc, 4, Indenter.IndentReason.OTHER));
+    
+    assertTrue("just after star", rule.testApplyRule(_doc, 5, Indenter.IndentReason.OTHER));
+    assertFalse("line after star", rule.testApplyRule(_doc, 7, Indenter.IndentReason.OTHER));
   }
   
-  /** Tests having text on a line before the prefix.
-   */
+  /** Tests having text on a line before the prefix. */
   public void testDoesNotStartWithPrefix() throws BadLocationException {
-    IndentRuleQuestion rule = new QuestionCurrLineStartsWith("}", null, null);
+    IndentRuleQuestion rule = QuestionCurrLineStartsWith.newQuestion("}", null, null);
     
     // Close brace in text, not starting line
-    _setDocText("foo(); }\nbar();\n");
-    assertTrue("before brace", !rule.testApplyRule(_doc, 0, Indenter.IndentReason.OTHER));
-    assertTrue("just before brace", !rule.testApplyRule(_doc, 7, Indenter.IndentReason.OTHER));
-    assertTrue("just after brace", !rule.testApplyRule(_doc, 8, Indenter.IndentReason.OTHER));
-    assertTrue("line after brace", !rule.testApplyRule(_doc, 10, Indenter.IndentReason.OTHER));
+    _setDocText("foo(); }\nbar();\n  }");
+    assertFalse("before brace", rule.testApplyRule(_doc, 0, Indenter.IndentReason.OTHER));
+    assertFalse("one space before brace", rule.testApplyRule(_doc, 7, Indenter.IndentReason.OTHER));
+    assertFalse("just before brace", rule.testApplyRule(_doc, 7, Indenter.IndentReason.OTHER));
+    assertFalse("just after brace", rule.testApplyRule(_doc, 8, Indenter.IndentReason.OTHER));
+    assertFalse("line after brace", rule.testApplyRule(_doc, 9, Indenter.IndentReason.OTHER));
+    assertFalse("line after brace", rule.testApplyRule(_doc, 9, Indenter.IndentReason.OTHER));
+    assertFalse("end of line before 2nd brace", rule.testApplyRule(_doc, 15, Indenter.IndentReason.OTHER));
+    assertTrue("end of line before 2nd brace", rule.testApplyRule(_doc, 16, Indenter.IndentReason.OTHER));
   }
 
-  /** Prefix appears at the end of a document.
-   */
+  /** Prefix appears at the end of a document. */
   public void testPrefixAtEnd() throws BadLocationException {
-    IndentRuleQuestion rule = new QuestionCurrLineStartsWith("}", null, null);
+    IndentRuleQuestion rule = QuestionCurrLineStartsWith.newQuestion("}", null, null);
     
-    _setDocText("void foo() {\n}");
-    assertTrue("first line", !rule.testApplyRule(_doc, 3, Indenter.IndentReason.OTHER));
-    assertTrue("end of first line", !rule.testApplyRule(_doc, 12, Indenter.IndentReason.OTHER));
+    _setDocText("void foo() {\n}\n");
+//    System.err.println("text = \n" + _doc.getText());
+    assertFalse("first line", rule.testApplyRule(_doc, 3, Indenter.IndentReason.OTHER));
+    assertFalse("end of first line", rule.testApplyRule(_doc, 12, Indenter.IndentReason.OTHER));
     assertTrue("beginning of second line", rule.testApplyRule(_doc, 13, Indenter.IndentReason.OTHER));
     assertTrue("end of second line", rule.testApplyRule(_doc, 14, Indenter.IndentReason.OTHER));
+    assertFalse("after second line", rule.testApplyRule(_doc, 15, Indenter.IndentReason.OTHER));
   }
   
-  /** Tests multiple-character prefix.
-   */
+  /** Tests multiple-character prefix. */
   public void testMultCharPrefix() throws BadLocationException {
-    IndentRuleQuestion rule = new QuestionCurrLineStartsWith("abcdefg", null, null);
+    IndentRuleQuestion rule = QuestionCurrLineStartsWith.newQuestion("abcdefg", null, null);
     
     _setDocText("   abcdefghij\n  abcde");
     assertTrue("first line, beginning", rule.testApplyRule(_doc, 0, Indenter.IndentReason.OTHER));
-    assertTrue("first line, mid", rule.testApplyRule(_doc, 6, Indenter.IndentReason.OTHER));
+    assertTrue("first line after 'c'", rule.testApplyRule(_doc, 6, Indenter.IndentReason.OTHER));
     assertTrue("first line, end", rule.testApplyRule(_doc, 13, Indenter.IndentReason.OTHER));
-    assertTrue("second line, beginning", !rule.testApplyRule(_doc, 14, Indenter.IndentReason.OTHER));
-    assertTrue("second line, mid", !rule.testApplyRule(_doc, 18, Indenter.IndentReason.OTHER));
-    assertTrue("second line, end", !rule.testApplyRule(_doc, 21, Indenter.IndentReason.OTHER));
+    assertFalse("second line, beginning", rule.testApplyRule(_doc, 14, Indenter.IndentReason.OTHER));
+    assertFalse("second line after 'b'", rule.testApplyRule(_doc, 18, Indenter.IndentReason.OTHER));
+    assertFalse("second line, end", rule.testApplyRule(_doc, 21, Indenter.IndentReason.OTHER));
   }
 }

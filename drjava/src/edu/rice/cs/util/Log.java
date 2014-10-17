@@ -45,7 +45,7 @@ import java.util.TimeZone;
 
 /** Logging class to record errors or unexpected behavior to a file.  The file is created in the current directory,
   * and is only used if the log is enabled.  All logs can be enabled at once with the ENABLE_ALL field.
-  * @version $Id$
+  * @version $Id: Log.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class Log {
   public static final boolean ENABLE_ALL = false;

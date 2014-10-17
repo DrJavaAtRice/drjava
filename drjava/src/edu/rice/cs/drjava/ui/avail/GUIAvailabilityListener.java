@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.ui.avail;
 /** An interface for responding to events that change GUI availability,
   * i.e. that require enabling/disabling menu items, etc.
   *
-  * @version $Id$
+  * @version $Id: GUIAvailabilityListener.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public interface GUIAvailabilityListener {
   public static enum ComponentType {

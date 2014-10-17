@@ -47,7 +47,7 @@ import edu.rice.cs.util.DirectorySelector;
 /**
  * Model interface for Javadoc integration features.
  * Note: Implementors should have a constructor taking an IGetDocuments.
- * @version $Id$
+ * @version $Id: JavadocModel.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public interface JavadocModel {
   /** Name for the suggested destination directory to be placed in the

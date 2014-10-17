@@ -44,7 +44,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 
 
 /** A file filter for files with extensions ".java" and ".scala". Used in the file choosers for open and save. 
- *  @version $Id$
+ *  @version $Id: JavaSourceFilter.java 5668 2012-08-15 04:58:30Z rcartwright $
  */
 public class JavaSourceFilter extends FileFilter {
   

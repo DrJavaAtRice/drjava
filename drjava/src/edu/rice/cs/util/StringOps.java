@@ -56,7 +56,7 @@ import javax.swing.text.html.parser.*;
  * A class to provide some convenient String operations as static methods.
  * It's abstract to prevent (useless) instantiation, though it can be subclassed
  * to provide convenient namespace importation of its methods.
- * @version $Id$
+ * @version $Id: StringOps.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 
 public abstract class StringOps {

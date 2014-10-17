@@ -42,7 +42,7 @@ import java.io.File;
 import java.io.Serializable;
 
 /** A class to represent JUnit errors.  This class enables DrJava to highlight the exact error text.
-  * @version $Id$
+  * @version $Id: JUnitError.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class JUnitError extends DJError implements Serializable {
   private volatile String _test;

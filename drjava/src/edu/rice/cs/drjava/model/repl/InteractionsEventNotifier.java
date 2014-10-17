@@ -52,7 +52,7 @@ import edu.rice.cs.drjava.model.EventNotifier;
   * that multiple notifications (reads) can occur simultaneously, but only one thread can be adding or removing 
   * listeners (writing) at a time, and no reads can occur during a write. <p>
   * <i>No</i> methods on this class should be synchronized using traditional Java synchronization! <p>
-  * @version $Id$
+  * @version $Id: InteractionsEventNotifier.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 
 public class InteractionsEventNotifier extends EventNotifier<InteractionsListener> implements InteractionsListener {

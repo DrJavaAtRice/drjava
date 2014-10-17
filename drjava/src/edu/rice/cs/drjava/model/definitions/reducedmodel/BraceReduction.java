@@ -40,7 +40,7 @@ import java.util.ArrayList;
 
 /** The interface BraceReduction serves as the template for our reduced view of a java document, which stores only the
  * information necessary for parenthesis matching.
- * @version $Id$
+ * @version $Id: BraceReduction.java 5594 2012-06-21 11:23:40Z rcartwright $
  * @author JavaPLT
  */
 

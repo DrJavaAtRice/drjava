@@ -43,7 +43,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 /** Singleton class to construct and use the indentation decision tree.
-  * @version $Id: Indenter.java 5751M 2014-10-11 01:13:15Z (local) $
+  * @version $Id: Indenter.java 5751 2013-02-06 10:32:04Z rcartwright $
   */
 public class Indenter {
   
@@ -117,17 +117,17 @@ public class Indenter {
       rule19 = new ActionStartStmtOfBracePlus(0, /* include Scala braces" */ false),  
       
       // Does current line begin with '}' or ')' ignoring comment text, WS  TODO: check for balanced braces
-      rule18 = QuestionCurrLineStartsWithChar.newQuestion(new char[] {')', '}'}, rule19, rule20),
+      rule18 = QuestionCurrLineStartsWithChar.newQuestion(new char[] {')',']', '}'}, rule19, rule20),
       
       rule17 = new QuestionBraceIsCurly(rule18, rule24),  
       rule16 = new ActionBracePlus(1 + indentLevel),
       rule08 = new ActionBracePlus(1),
       
       rule27 = new ActionBracePlus(0),
-      rule14 = new QuestionNewParenPhrase(rule08, rule16),  // is current non ) line a new phrase after open paren?
-      rule15 = new QuestionNewParenPhrase(rule30, rule27),  // is current ) line a new phrase after open paren?
-      rule13 = QuestionCurrLineStartsWith.newQuestionSkipComments(")", rule15, rule14), // does current line start with ')'?
-      
+      rule14 = new QuestionNewParenPhrase(rule08, rule16),  // is current non "),]" line a new phrase after open paren?
+      rule15 = new QuestionNewParenPhrase(rule30, rule27),  // is current "),]" line a new phrase after open paren?
+      // Does current line start with ')' or ']'?
+      rule13 = QuestionCurrLineStartsWithChar.newQuestionSkipComments(new char[] {')', ']'}, rule15, rule14), 
       // root of non-comment indent tree for Scala: is brace enclosing start of this line either '(' or '['?  
       rule11 = new QuestionBraceIsParenOrBracket(rule13, rule17),   
      

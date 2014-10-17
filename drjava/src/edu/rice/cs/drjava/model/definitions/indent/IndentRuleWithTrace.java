@@ -45,7 +45,7 @@ import java.io.PrintStream;
 /** This class does almost all the work for keeping an indent tree trace.  IndentRuleQuestion also does some of the 
   * work, and any subclass may substitute its own version of getRuleName()
   * Note: tracing (turned "on" by setting ruleTraceEnabled to true and uncommenting line 110) is disabled by default.
-  * @version $Id: IndentRuleWithTrace.java 5751M 2014-10-06 11:20:47Z (local) $
+  * @version $Id: IndentRuleWithTrace.java 5751 2013-02-06 10:32:04Z rcartwright $
   */
 public abstract class IndentRuleWithTrace implements IndentRule {
 

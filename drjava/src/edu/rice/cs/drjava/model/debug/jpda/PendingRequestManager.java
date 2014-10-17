@@ -53,7 +53,7 @@ import edu.rice.cs.drjava.model.debug.DebugException;
 
 /** Keeps track of DocumentDebugActions that are waiting to be resolved when the classes they corresponed to are 
   * prepared.  (Only DocumentDebugActions have reference types which can be prepared.)
-  * @version $Id: PendingRequestManager.java 5594M 2014-09-20 05:13:27Z (local) $
+  * @version $Id: PendingRequestManager.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 
 public class PendingRequestManager {

@@ -46,7 +46,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 
 /** Question rule in the indentation decision tree.  Determines if the current line starts with the specified string.
   * Some prefixes may be ignored.  Comments may or may be ignored.
-  * @version $Id: QuestionCurrLineStartsWith.java 5709M 2014-10-10 19:21:26Z (local) $
+  * @version $Id: QuestionCurrLineStartsWith.java 5709 2012-08-30 05:11:09Z rcartwright $
   */
 public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
   private final String _prefix;

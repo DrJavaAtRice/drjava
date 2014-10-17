@@ -45,7 +45,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
  * <p>
  * <b>Does not work if character being searched for is a '/' or a '*'</b>
  *
- * @version $Id$
+ * @version $Id: QuestionLineContains.java 5668 2012-08-15 04:58:30Z rcartwright $
  */
 public class QuestionLineContains extends IndentRuleQuestion {
   /** Character to search for

@@ -41,7 +41,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
 /** Indents current line to the indent level of the previous line augmented by a suffix.
- * @version $Id: ActionStartPrevLinePlus.java 5594M 2014-10-11 00:09:22Z (local) $
+ * @version $Id: ActionStartPrevLinePlus.java 5175 2010-01-20 08:46:32Z mgricken $
  */
 class ActionStartPrevLinePlus extends IndentRuleAction {
   private String _suffix;

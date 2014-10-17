@@ -52,7 +52,7 @@ import static edu.rice.cs.drjava.model.AbstractDJDocument.*;
  * <p>
  * Note that characters in comments and quotes are disregarded. 
  *
- * @version $Id$
+ * @version $Id: QuestionStartingNewStmt.java 5751 2013-02-06 10:32:04Z rcartwright $
  */
 public class QuestionStartingNewStmt extends IndentRuleQuestion {
   
@@ -119,6 +119,7 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
     catch(BadLocationException ble) { return true; } // should only happen when lineStart == 0
 //    System.err.println("[QSNS] prevNonWSPos = " + prevNonWSCharPos + " prevNonWSChar = '" + 
 //                       doc._getText(prevNonWSCharPos, 1).charAt(0) + "'");
+//    System.err.println("[QSNS in indent tree] prevSemicolonPos = " + prevSemicolonPos + " prevNonWSCharPos = " + prevNonWSCharPos);
     return prevSemicolonPos > prevNonWSCharPos;  // true if no significant chars between lineStart and prevSemicolonPos
   }
 }

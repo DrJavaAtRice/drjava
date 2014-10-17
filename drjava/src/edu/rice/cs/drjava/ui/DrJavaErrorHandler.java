@@ -52,7 +52,7 @@ import edu.rice.cs.util.Log;
  *  This does not automatically update the "DrScala Errors" window when new errors occur. In the case of errors,
  *  we want to minimize the effects on the GUI. If we want to see an updated dialog, we can click on the
  *  "DrScalaErrors" button again.
- *  @version $Id$
+ *  @version $Id: DrJavaErrorHandler.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
   

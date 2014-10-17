@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model.repl;
 import java.io.File;
 
 /** Interface for any listener to an InteractionsModel.
-  * @version $Id$
+  * @version $Id: InteractionsListener.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public interface InteractionsListener {
   

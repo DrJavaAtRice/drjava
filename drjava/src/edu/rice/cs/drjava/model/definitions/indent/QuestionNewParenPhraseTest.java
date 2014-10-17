@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2014, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@ import javax.swing.text.BadLocationException;
  * Tests the indention rule which detects whether the current line starts
  * a new parenthesized phrase.  (ie. Previous line ends in comma, semicolon,
  * open paren, or open bracket.)
- * @version $Id$
+ * @version $Id: QuestionNewParenPhraseTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class QuestionNewParenPhraseTest extends IndentRulesTestCase {
 

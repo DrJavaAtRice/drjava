@@ -54,7 +54,7 @@ import edu.rice.cs.util.swing.CheckBoxJList;
 
 /** Graphical form of a VectorOption for the Extra Classpath/Sourcepath options.
   * Uses a file chooser for each AbsRelFile element.
- *  @version $Id$
+ *  @version $Id: VectorAbsRelFileOptionComponent.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class VectorAbsRelFileOptionComponent extends VectorOptionComponent<AbsRelFile> implements OptionConstants {
   private FileFilter _fileFilter;

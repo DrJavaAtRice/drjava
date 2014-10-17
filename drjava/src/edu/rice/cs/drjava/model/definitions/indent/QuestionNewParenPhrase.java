@@ -1,6 +1,6 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * Copyright (c) 2001-2012, JavaPLT group at Rice University (drjava@rice.edu)
+ * Copyright (c) 2001-2014, JavaPLT group at Rice University (drjava@rice.edu)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -30,46 +30,53 @@
  * Open Source Initative Approved is a trademark of the Open Source Initiative.
  * 
  * This file is part of DrScala.  Download the current version of this project
- * from http://www.drscala.org/.
+ * from http://www.drjava.org/ or http://sourceforge.net/projects/drjava/
  * 
  * END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.*;
+import java.util.Arrays;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
+import edu.rice.cs.util.swing.Utilities;
 
 /** Question rule in the indentation decision tree.  Determines if the current line starts a new "phrase" within a 
   * parenthesized expression.  Specifically, this rule determines if the previous line ends in a comma, semicolon, 
   * open paren, or open bracket.  Note that whitespace, blank lines, and comments are disregarded.
   * 
- * @version $Id$
+ * @version $Id: QuestionNewParenPhrase.java 5611 2012-07-25 15:03:33Z rcartwright $
  */
 public class QuestionNewParenPhrase extends IndentRuleQuestion {
   
+  /* Array of delimiters; must be sorted!  This sort is performed in the constructor. */
+  
+  public static final char[] LOCAL_DELIMS =
+    {'%', '&', '(', '*', '+', ',', '-', '/', ';', '<', '=', '>', '[', '|', '}'};  /* Sorted! */
+
   /** Constructs a new rule to determine if the current line starts new paren phrase.
     * @param yesRule Rule to use if this rule holds
     * @param noRule Rule to use if this rule does not hold
     */
-  public QuestionNewParenPhrase(IndentRule yesRule, IndentRule noRule) {
-    super(yesRule, noRule);
-  }
+  public QuestionNewParenPhrase(IndentRule yesRule, IndentRule noRule) { super(yesRule, noRule); }
  
-  /** Determines if the previous line ends in a comma, semicolon,open paren, open bracket, operator, or comparator.
+  /** Determines if the previous line ends in a comma, semicolon,
+    * open paren, open bracket, operator, or comparator.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @return true if this node's rule holds.
     */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
+
     try {
       // Find start of line
       int here = doc.getCurrentLocation();
       int startLine = doc._getLineStartPos(here);
+//      System.err.println("QuestionNewParenPhrase.applyRule called. here = " + here + " startLine = " + startLine);
       
       if (startLine > 0) {
         // Find previous delimiter (looking in paren phrases)
-        char[] delims = {';', ',', '(', '[', '&', '|', '+', '-', '*', '/', '%', '=', '<', '>', '}'};
-        int prevDelim = doc.findPrevDelimiter(startLine, delims, false);
+        int prevDelim = doc.findPrevDelimiter(startLine, LOCAL_DELIMS, false);
         if (prevDelim == -1) {
           return false;
         }

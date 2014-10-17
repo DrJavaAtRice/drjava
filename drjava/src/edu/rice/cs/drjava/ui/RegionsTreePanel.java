@@ -64,7 +64,7 @@ import edu.rice.cs.plt.lambda.Thunk;
 
 /** Panel for displaying regions in a tree sorted by class name and line number.  Only accessed from event thread.
   * The volatile declarations are included because the event-thread-only invariant is not enforced. TODO: fix this.
-  * @version $Id$
+  * @version $Id: RegionsTreePanel.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends TabbedPanel {
   protected volatile JPanel _leftPane;

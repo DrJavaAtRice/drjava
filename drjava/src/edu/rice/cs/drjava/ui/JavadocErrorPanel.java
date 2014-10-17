@@ -44,7 +44,7 @@ import javax.swing.text.*;
 /**
  * The panel which displays all the Javadoc parsing errors.
  *
- * @version $Id$
+ * @version $Id: JavadocErrorPanel.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class JavadocErrorPanel extends ErrorPanel {
 

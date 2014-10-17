@@ -58,7 +58,7 @@ import static java.awt.Event.*;
 
 
 /** Defines the commonly used Option constants in DrJava config and project profiles.
-  * @version $Id: OptionConstants.java 5707M 2014-09-19 14:36:26Z (local) $
+  * @version $Id: OptionConstants.java 5707 2012-08-26 05:57:03Z rcartwright $
   */
 public interface OptionConstants {
   

@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /** This interface contains the various constants used by the reduced model to represent the states of various blocks
   * in the document.
-  * @version $Id$
+  * @version $Id: ReducedModelStates.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public interface ReducedModelStates {
   

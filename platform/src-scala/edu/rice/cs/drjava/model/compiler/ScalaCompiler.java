@@ -97,12 +97,14 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
   /** A compiler can instruct DrJava to include additional elements for the boot class path of the Interactions JVM. 
     * This feature is necessary for the Scala compiler, since the Scala interpreter needs to be invoked at runtime. */
   public java.util.List<File> additionalBootClassPathForInteractions() {
+//    Utilities.show("additionalBootClassPath ... called in Scala compiler adapter; _location = " + _location);
     if (_location.equals(FileOps.getDrJavaFile())) {
       // all in one, don't need anything else
       return Arrays.asList(new File(_location));
     }
     else {
       File parentDir = new File(_location).getParentFile();
+      if (parentDir == null) return Collections.emptyList();
       try {
         File[] jarFiles = new File[] {
           Util.oneOf(parentDir, "jline.jar"),
@@ -131,6 +133,19 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
    return super.transformCommands(interactionsString);
   }
   
+  public String transformRunCommand(String s) {    
+    if (s.endsWith(";"))  s = _deleteSemiColon(s);
+    List<String> args = ArgumentTokenizer.tokenize(s, true);
+    final String classNameWithQuotes = args.get(1); // this is "MyClass"
+    final String className =
+      classNameWithQuotes.substring(1, classNameWithQuotes.length() - 1); // removes quotes, becomes MyClass
+    
+    // In this override, we use Scala notation for the class object for "MyClass"
+    String ret = JavacCompiler.class.getName() + ".runCommand(\"" + s.toString() + "\", classOf[" + className + "])";
+    // System.out.println(ret);
+    return ret;
+  }
+
   public boolean isAvailable() {
     JDKToolsLibrary.msg("Testing scala-compiler.jar to determine if it contains scala.tools.nsc.Main");
     try {
@@ -192,17 +207,19 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
   public String getOpenAllFilesInFolderExtension() {
     return SCALA_FILE_EXTENSION;
   }
+  
+  /* Java language levels is supported for Java code in .dj files */
 
-  /** Return true if this compiler can be used in conjunction with the language level facility.
-    * @return true if language levels can be used. */
-  public boolean supportsLanguageLevels() { return false; }
+//  /** Return true if this compiler can be used in conjunction with the language level facility.
+//    * @return true if language levels can be used. */
+//  public boolean supportsLanguageLevels() { return false; }
   
   /** Return the set of keywords that should be highlighted in the specified file.
     * @param f file for which to return the keywords
     * @return the set of keywords that should be highlighted in the specified file. */
   public Set<String> getKeywordsForFile(File f) { return SCALA_KEYWORDS; }
   
-  /** Set of Scala keywords for special coloring. */
+  /** Add Scala keywords to set of keywords for special coloring. What syntax do we expect in interactions pane? */
   public static final HashSet<String> SCALA_KEYWORDS = new HashSet<String>();
   static {
     SCALA_KEYWORDS.addAll(JAVA_KEYWORDS);

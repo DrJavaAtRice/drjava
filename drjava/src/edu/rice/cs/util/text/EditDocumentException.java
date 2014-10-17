@@ -37,7 +37,7 @@
 package edu.rice.cs.util.text;
 
 /** Exception thrown indicating an illegal state or operation on an EditDocument.
- *  @version $Id$
+ *  @version $Id: EditDocumentException.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class EditDocumentException extends RuntimeException {
   private Throwable _value;

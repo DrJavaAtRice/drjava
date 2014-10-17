@@ -44,7 +44,7 @@ import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.util.newjvm.*;
 
 /** This interface specifies the methods that the interpreter JVM exposes for the MainJVM to call.
-  * @version $Id$
+  * @version $Id: InterpreterJVMRemoteI.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public interface InterpreterJVMRemoteI extends SlaveRemote {
   

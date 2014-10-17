@@ -41,7 +41,7 @@ import javax.swing.text.BadLocationException;
 /**
  * Test class according to the JUnit protocol. Tests the proper functionality
  * of the class QuestionHasCharPrecedingOpenBrace.
- * @version $Id$
+ * @version $Id: QuestionHasCharPrecedingOpenBraceTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class QuestionHasCharPrecedingOpenBraceTest extends IndentRulesTestCase
 {

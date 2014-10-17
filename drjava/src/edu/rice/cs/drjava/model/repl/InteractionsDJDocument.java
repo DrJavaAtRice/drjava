@@ -311,11 +311,10 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   /** Called when the Interactions pane is reset.  Only runs in event thread. */
   public void clearColoring() { synchronized(_stylesList) { _toClear = true; } }
   
-  /** @return true iff the end of the current interaction is an open comment block
-    */
-  public boolean _inBlockComment() {
-        boolean toReturn = _inBlockComment(getLength());
-        return toReturn;
+  /** @return true iff the end of the current interaction is an open comment block. */
+  public boolean _insideBlockComment() {
+    boolean toReturn = _insideBlockComment(getLength());
+    return toReturn;
   }
   
   /** Inserts the given exception data into the document with the given style.

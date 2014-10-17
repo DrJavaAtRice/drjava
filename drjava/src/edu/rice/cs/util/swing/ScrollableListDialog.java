@@ -58,7 +58,7 @@ import java.util.Vector;
   * JOptionPane.</p>
   * 
   * @author Chris Warrington
-  * @version $Id$
+  * @version $Id: ScrollableListDialog.java 5594 2012-06-21 11:23:40Z rcartwright $
   * @since 2007-03-06
   */
 public class ScrollableListDialog<T> extends JDialog {

@@ -85,7 +85,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
   * (Do not use DrJava's config framework here.)
   * <p>
   * Note that this class is specific to DynamicJava. It must be refactored to accommodate other interpreters.
-  * @version $Id$
+  * @version $Id: InterpreterJVM.java 5723 2012-09-29 19:38:35Z wdforson $
   */
 public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRemoteI, JUnitModelCallback {
   

@@ -44,7 +44,7 @@ import javax.swing.text.BadLocationException;
 
 /** Tests to ensure that compilation succeeds when expected.  Every test in this class is run for *each* of the
   * available compilers.
-  * @version $Id: GlobalModelCompileSuccessTest.java 5716M 2014-10-05 21:59:44Z (local) $
+  * @version $Id: GlobalModelCompileSuccessTest.java 5716 2012-09-28 02:40:33Z wdforson $
   */
 public final class GlobalModelCompileSuccessTest extends GlobalModelCompileSuccessTestCase {
 

@@ -44,7 +44,7 @@ import edu.rice.cs.drjava.*;
 import edu.rice.cs.util.swing.SwingFrame;
 
 /** Graphical form of a ColorOption.
- *  @version $Id$
+ *  @version $Id: ColorOptionComponent.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class ColorOptionComponent extends OptionComponent<Color,JPanel> {
   private JButton _button;

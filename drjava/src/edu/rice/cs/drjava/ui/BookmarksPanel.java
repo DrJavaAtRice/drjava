@@ -46,7 +46,7 @@ import edu.rice.cs.drjava.model.RegionManagerListener;
 import edu.rice.cs.drjava.model.MovingDocumentRegion;
 
 /** Panel for displaying bookmarks. Only runs in the event thread.
-  * @version $Id$
+  * @version $Id: BookmarksPanel.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class BookmarksPanel extends RegionsTreePanel<MovingDocumentRegion> {
   protected JButton _goToButton;

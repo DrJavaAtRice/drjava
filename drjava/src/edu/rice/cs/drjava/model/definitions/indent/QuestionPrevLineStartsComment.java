@@ -39,10 +39,10 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
-/** Given the start of the current line is inside a block comment, asks
-  * whether the comment begins on the "previous line," ignoring white space.
+/** Given the start of the current line is inside a block comment, asks whether the comment begins on the previous 
+  * line.  Note tha the beginning of the block comment does not necessarily open the previous line.
   * 
-  * @version $Id$
+  * @version $Id: QuestionPrevLineStartsComment.java 5668 2012-08-15 04:58:30Z rcartwright $
   */
 class QuestionPrevLineStartsComment extends IndentRuleQuestion {
   
@@ -50,13 +50,12 @@ class QuestionPrevLineStartsComment extends IndentRuleQuestion {
     super(yesRule, noRule);
   }
   
-  /** Determines if the previous line in the document starts a block comment.  Assumes that read lock and reduced lock
-    * are already held.
-    * We know that the current line is in a block comment. Therefore, if the
-    * start of the previous line is not inside of a block comment, then the
-    * previous line must have started the comment. 
+  /** Determines if the previous line in the document starts a block comment.  Assumes that the current line is
+    * in the same block comment. Only runs in event thread. We know that the current line is in a block comment. 
+    * Therefore, if the start of the previous line is not inside of a block comment, then the  previous line must
+    * have started the comment. 
     * <p>
-    * There is an exception to this; however, it is handled adequately. Consider
+    * There is an exception to this reasoning, which is addressed. Consider
     * the case when the previous line contains the following code:
     * <code>*&#47; bar(); &#47;*</code>
     * <p>
@@ -68,26 +67,26 @@ class QuestionPrevLineStartsComment extends IndentRuleQuestion {
     * @return true if this node's rule holds.
     */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    int cursor;
+
+    int orgPos = doc.getCurrentLocation();
 
     // Move back to start of current line
-    cursor = doc._getLineStartPos(doc.getCurrentLocation());
+    int pos = doc._getLineStartPos(orgPos);
     
     /* If the start of the current line is the start of the document, there was no previous line and so this line must 
      * have started the comment. */
-    if (cursor == 0) return false;
+    if (pos == 0) return false;
     
-    // Move the cursor to the previous line
-    cursor = cursor - 1;
-    
-    // Move it to the start of the previous line
-    cursor = doc._getLineStartPos(cursor);
-    
-    // Return if the start of the previous line is in a comment.
-//    BraceReduction reduced = doc.getReduced();
-    doc.resetReducedModelLocation();
-    ReducedModelState state = doc.stateAtRelLocation(cursor - doc.getCurrentLocation());
-    return ! state.equals(ReducedModelStates.INSIDE_BLOCK_COMMENT);
+    /* Get the start of the previous line */
+    pos = doc._getLineStartPos(pos-1);
+    /* Return true iff the start of the prev line is not inside a block comment. */
+    return ! doc.isShadowed(pos);
+   
+//    doc.setCurrentLocation(pos);
+//    try {
+//      return doc.getStateAtCurrent().equals(ReducedModelStates.INSIDE_BLOCK_COMMENT);
+//    }
+//    finally { doc.setCurrentLocation(orgPos); }
   }
 }
-
+ 

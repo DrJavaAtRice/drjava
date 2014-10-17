@@ -59,7 +59,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /** About dialog.
-  * @version $Id$
+  * @version $Id: AboutDialog.java 5711 2012-09-11 19:42:33Z rcartwright $
   */
 public class AboutDialog extends JDialog implements ActionListener {
 

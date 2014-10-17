@@ -94,7 +94,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   /*-------- CONSTANTS ----------*/
   
-  /* All of the following char[] arrays appears in ascending order so that they support Arrays.binarySearch. */
+  /* All of the following char[] arrays appear in ascending order so that they support Arrays.binarySearch. */
   public static final char[] DEFAULT_DELIMS                = {';', '{', '}'};
   public static final char[] SCALA_DELIMS                  = {'(', ')', ';', '=', '>', '{', '}'};
   public static final char[] OPENING_DELIMS_AND_NEWLINE    = {'\n', '(', '=', '>', '{'};
@@ -102,14 +102,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public static final char[] DEFAULT_WHITESPACE_WITH_COMMA = {'\t', '\n', '\r', ' ', ','};
   public static final char[] NEWLINE                       = {'\n'};
   public static final char[] EQUALS                        = {'='};
-  public static final char[] STRICT_OPENING_BRACES         = {'(', '{'};
-  public static final char[] OPENING_BRACES                = {'(', '>', '{'};  // includes pseudo-brace "=>"
-  public static final char[] OPENING_BRACES_WITH_EQUALS    = {'(', '=', '>', '{'};  // includes pseudo-braces "=" & "=>"
-  public static final char[] CLOSING_BRACES                = {')', '}'};  
-  public static final char[] SEMICOLON_MARKERS             = {'\n', '(', ')', '>', '{', '}'};
+  public static final char[] STRICT_OPENING_BRACES         = {'(', '[', '{'};
+  public static final char[] OPENING_BRACES                = {'(', '>', '[', '{'};  // includes pseudo-brace "=>"
+  public static final char[] OPENING_BRACES_WITH_EQUALS    = {'(', '=', '>', '[', '{'};  // includes pseudo-braces "=" & "=>"
+  public static final char[] CLOSING_BRACES                = {')', ']', '}'};  
+  public static final char[] SEMICOLON_MARKERS             = {'\n', '(', ')', '>', '[', ']', '{', '}'};
   
   public static final char[] NOT_TERMINATING_CHARS         =   
-    {'!', '%', '&', '(', '*', '+', '-', '.', '/', '<', '=', '>', '^', '{', '|'};
+    {'!', '%', '&', '(', '*', '+', '-', '.', '/', '<', '=', '>', '[', '^', '{', '|'};
   public static final char[] ALPHANUMERIC                  = 
     {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R',
      'S','T','U','V','W','X','Y','Z','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t',
@@ -201,6 +201,23 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     _initNewIndenter();
 //     System.err.println("AbstractDJDocument constructor with indent level " + indenter.getIndentLevel() 
 //    + " invoked on " + this);
+    // ensure that char arrays are sorted
+    Arrays.sort(DEFAULT_DELIMS);
+    Arrays.sort(SCALA_DELIMS);
+    Arrays.sort(OPENING_DELIMS_AND_NEWLINE);
+    Arrays.sort(DEFAULT_WHITESPACE);
+    Arrays.sort(DEFAULT_WHITESPACE_WITH_COMMA);
+    Arrays.sort(NEWLINE);
+    Arrays.sort(EQUALS);
+    Arrays.sort(STRICT_OPENING_BRACES);
+    Arrays.sort(OPENING_BRACES);
+    Arrays.sort(OPENING_BRACES_WITH_EQUALS);
+    Arrays.sort(CLOSING_BRACES);
+    Arrays.sort(SEMICOLON_MARKERS);
+    Arrays.sort(NOT_TERMINATING_CHARS); 
+    Arrays.sort(ALPHANUMERIC);
+    Arrays.sort(DOUBLE_DELIMS);
+    Arrays.sort(ILLEGAL_PREFIX_CHARS);             
   }
   
   //-------- METHODS ---------//
@@ -1188,6 +1205,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     try {
       int firstNonWSCharPos = getFirstNonWSCharPos(lineStart, true);  // Comment text is recognized
       if (firstNonWSCharPos > lineEnd || firstNonWSCharPos == ERROR_INDEX) return 0;
+//      System.err.println("first Non WS char is '" + _getText(firstNonWSCharPos, 1));
       return firstNonWSCharPos - lineStart;
     }
     catch(BadLocationException ble) { return ERROR_INDEX; }
@@ -1587,7 +1605,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return findEnclosingScalaBracePos(_getLineStartPos(pos));
   }
   
-  /** Find the position of the enclosing Scala brace { '{', '(', "=", or "=>" } enclosing pos. */
+  /** Find the position of the enclosing Scala brace { '{', '(', '[', "=", or "=>" } enclosing pos. */
   public int findEnclosingScalaBracePosWithEquals(int pos) throws BadLocationException {  
     int res = findPrevDelimiter(pos, OPENING_BRACES_WITH_EQUALS);
     if (res == ERROR_INDEX) return ERROR_INDEX;

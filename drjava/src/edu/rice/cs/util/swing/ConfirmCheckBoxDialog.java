@@ -41,7 +41,7 @@ import javax.swing.*;
 
 /**
  * Simple class wrapping JOptionPane to have a checkbox underneath the message.
- * @version $Id$
+ * @version $Id: ConfirmCheckBoxDialog.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class ConfirmCheckBoxDialog {
   private JDialog _dialog;

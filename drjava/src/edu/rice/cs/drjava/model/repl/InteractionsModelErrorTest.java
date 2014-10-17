@@ -75,7 +75,7 @@ import static edu.rice.cs.drjava.model.repl.InteractionsModelTest.TestInteractio
 import static edu.rice.cs.drjava.model.repl.InteractionsModelTest.IncompleteInputInteractionsModel;
 
 /** Tests errors in an InteractionsModel.
-  * @version $Id$
+  * @version $Id: InteractionsModelErrorTest.java 5728 2012-09-30 19:03:27Z wdforson $
   */
 public final class InteractionsModelErrorTest extends GlobalModelTestCase {
   protected static final String UNARY_FUN_NON_PUBLIC_INTERFACE_TEXT = 

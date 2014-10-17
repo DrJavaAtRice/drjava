@@ -40,7 +40,7 @@ import java.awt.*;
 import javax.swing.*;
 
 /** Pane for an interactions script.
-  * @version $Id$
+  * @version $Id: InteractionsScriptPane.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class InteractionsScriptPane extends JPanel {
   

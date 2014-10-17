@@ -99,7 +99,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * methods, and the GlobalModel responds via the GlobalModelListener interface. This removes the dependency on the 
   * UI for the logical flow of the program's features.  With the current implementation, we can finally test the compile
   * functionality of DrJava, along with many other things. <p>
-  * @version $Id: DefaultGlobalModel.java 5727M 2014-10-06 05:11:31Z (local) $
+  * @version $Id: DefaultGlobalModel.java 5727 2012-09-30 03:58:32Z rcartwright $
   */
 public class DefaultGlobalModel extends AbstractGlobalModel {
   /* FIELDS */

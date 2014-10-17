@@ -37,7 +37,7 @@
 package edu.rice.cs.util.text;
 
 /** A GUI-toolkit agnostic extension of EditDocumentInterface that adds a console input state property.
-  * @version $Id$
+  * @version $Id: ConsoleDocumentInterface.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public interface ConsoleDocumentInterface extends EditDocumentInterface {
   

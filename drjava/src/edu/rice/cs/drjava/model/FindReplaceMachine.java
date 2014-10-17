@@ -51,7 +51,7 @@ import javax.swing.JOptionPane;
 import java.awt.Component;
 
 /** Implementation of logic of find/replace over a document.
-  * @version $Id: FindReplaceMachine.java 5594M 2014-10-06 05:11:31Z (local) $
+  * @version $Id: FindReplaceMachine.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class FindReplaceMachine {
   

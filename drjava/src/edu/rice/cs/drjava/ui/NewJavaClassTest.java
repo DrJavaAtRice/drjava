@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /** Tests for NewNewJavaClassDialog.
-  * @version $Id$
+  * @version $Id: NewJavaClassTest.java 5242 2010-04-29 14:46:13Z mgricken $
   */
 public class NewJavaClassTest extends TestCase {
   public void testcheckClassNameGoodNames(){

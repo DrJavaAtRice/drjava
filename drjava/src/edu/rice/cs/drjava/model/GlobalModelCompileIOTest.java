@@ -45,7 +45,7 @@ import javax.swing.text.BadLocationException;
 
 /** Tests to ensure that compilation interacts with files correctly.
   *
-  * @version $Id: GlobalModelCompileIOTest.java 5668M 2014-10-05 21:59:44Z (local) $
+  * @version $Id: GlobalModelCompileIOTest.java 5668 2012-08-15 04:58:30Z rcartwright $
   */
 public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
   

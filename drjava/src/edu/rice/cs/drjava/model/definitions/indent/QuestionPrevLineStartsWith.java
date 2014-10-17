@@ -42,7 +42,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
 /** Question rule in indentation decision tree.  Determines if the preceding line starts with the specified character.
-  * @version $Id$
+  * @version $Id: QuestionPrevLineStartsWith.java 5668 2012-08-15 04:58:30Z rcartwright $
   */
 public class QuestionPrevLineStartsWith extends IndentRuleQuestion {
   private String _prefix;

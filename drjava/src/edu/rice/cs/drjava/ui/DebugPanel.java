@@ -55,7 +55,7 @@ import edu.rice.cs.util.swing.RightClickMouseAdapter;
  * Panel for displaying the debugger input and output in MainFrame.  This
  * class is a swing view class and hence should only be accessed from the 
  * event-handling thread.
- * @version $Id$
+ * @version $Id: DebugPanel.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class DebugPanel extends JPanel implements OptionConstants {
 

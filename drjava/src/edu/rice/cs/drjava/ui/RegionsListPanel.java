@@ -56,7 +56,7 @@ import edu.rice.cs.util.swing.RightClickMouseAdapter;
   * This class is a swing view class and hence should only be accessed from the event-handling thread.
   * The volatile declarations are included because the event-thread-only invariant is not enforced. TODO: fix this.
   * Not currently used because BrowserHistoryPanel is not used.
-  * @version $Id$
+  * @version $Id: RegionsListPanel.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class RegionsListPanel<R extends IDocumentRegion> extends TabbedPanel {
   protected final JPanel _leftPane;

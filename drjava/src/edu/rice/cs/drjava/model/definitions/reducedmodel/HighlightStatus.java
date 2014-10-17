@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /** A block that represents information about the highlighting status of a particular section in the document.
- *  @version $Id$
+ *  @version $Id: HighlightStatus.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class HighlightStatus {
   public static final int NORMAL = 0;

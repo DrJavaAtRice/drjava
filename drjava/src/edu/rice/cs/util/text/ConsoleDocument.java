@@ -55,7 +55,7 @@ import edu.rice.cs.util.FileOps;
 /** A GUI-toolkit agnostic interface to a console document.  This class assumes that the embedded document supports 
   * readers/writers locking and uses that locking protocol to ensure the integrity of the data added in this class
   * WHY is prompt considered part of a console document rather than an interactions document?
-  * @version $Id$ */
+  * @version $Id: ConsoleDocument.java 5594 2012-06-21 11:23:40Z rcartwright $ */
 public class ConsoleDocument implements ConsoleDocumentInterface {
   
   /** The default prompt to use in the console. */

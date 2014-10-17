@@ -41,7 +41,7 @@ import edu.rice.cs.drjava.model.definitions.indent.IndentRulesTestCase;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Tests for the helper methods in DefinitionsDocument
-  * @version $Id: IndentHelperTest.java 5751M 2014-10-11 03:37:21Z (local) $
+  * @version $Id: IndentHelperTest.java 5751 2013-02-06 10:32:04Z rcartwright $
   */
 public final class IndentHelperTest extends IndentRulesTestCase {
   
@@ -258,13 +258,13 @@ public final class IndentHelperTest extends IndentRulesTestCase {
     assertEquals("single line comment on third line should be indented 4 spaces", 4, getIndentOfLine(29));
 //    System.err.println("text less 43 chars = \n" + text.substring(43));
     assertEquals("block comment on fourth line should be indented 4 spaces", 4, getIndentOfLine(43));
-//    System.err.println("text less 56 chars = \n" + text.substring(56));
     
-    assertEquals("second line in block comment on fifth line should be indented 5 spaces ", 5, getIndentOfLine(56));
-//    System.err.println("text less 71 chars = \n" + text.substring(71));
-    assertEquals("last line in block comment should be indented 5 spaces", 5, getIndentOfLine(71));
-//    System.err.println("text less 79 chars = \n" + text.substring(79));
-    assertEquals("method call on foo should be indented 4 spaces", 4, getIndentOfLine(79));
+//    System.err.println("text less 58 chars = \n" + text.substring(58));  
+    assertEquals("second line in block comment on fifth line should be indented 5 spaces ", 5, getIndentOfLine(58));
+//    System.err.println("text less 73 chars = \n" + text.substring(73));
+    assertEquals("last line in block comment should be indented 5 spaces", 5, getIndentOfLine(73));
+//    System.err.println("text less 81 chars = \n" + text.substring(81));
+    assertEquals("method call on foo should be indented 4 spaces", 4, getIndentOfLine(81));
   }
 
 //  public void testGetIndentOfCurrStmtIgnoreDelimsInParenPhrase() throws BadLocationException {

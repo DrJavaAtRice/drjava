@@ -65,7 +65,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 /** A Swing specific model for the DrJava InteractionsPane.  It glues together an InteractionsDocument, an 
   * InteractionsPane and a JavaInterpreter.  This abstract class provides common functionality for all such models.
   * The methods in this class generally can be executed only in the event thread once the model has been constructed.
-  * @version $Id$
+  * @version $Id: InteractionsModel.java 5727 2012-09-30 03:58:32Z rcartwright $
   */
 public abstract class InteractionsModel implements InteractionsModelCallback {
   

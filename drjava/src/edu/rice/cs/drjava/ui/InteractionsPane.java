@@ -61,7 +61,7 @@ import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.repl.*;
 
 /** The view component for repl interaction.
-  * @version $Id$
+  * @version $Id: InteractionsPane.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class InteractionsPane extends AbstractDJPane implements OptionConstants, ClipboardOwner {
   

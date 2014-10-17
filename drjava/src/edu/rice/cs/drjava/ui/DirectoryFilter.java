@@ -42,7 +42,7 @@ import javax.swing.filechooser.FileFilter;
 
 /**
  * A file filter for selecting directories.
- * @version $Id$
+ * @version $Id: DirectoryFilter.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class DirectoryFilter extends FileFilter {
   /** Name of the filter. */

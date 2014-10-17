@@ -39,7 +39,7 @@ package edu.rice.cs.util;
 import java.io.*;
 
 /** Allows an output stream, such as System.out and System.err, to be redirected to another stream.
- * @version $Id$
+ * @version $Id: OutputStreamRedirector.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public abstract class OutputStreamRedirector extends OutputStream {
   

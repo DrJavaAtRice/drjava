@@ -46,7 +46,7 @@ import javax.swing.JOptionPane;
  * A JUnit test case class that tests {@link ScrollableListDialog}.
  * 
  * @author Chris Warrington
- * @version $Id$
+ * @version $Id: ScrollableListDialogTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  * @since 2007-03-06
  */
 public class ScrollableListDialogTest extends TestCase {

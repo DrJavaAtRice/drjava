@@ -1,4 +1,4 @@
-<!-- DrJava Platform-Specific Classes Build Script -->
+<!-- DrScala Platform-Specific Classes Build Script -->
 
 <!-- This build script is based on the template located at "trunk/misc/build-template.xml"
      in the DrJava Subversion repository.  In general, changes made to the script should be
@@ -15,8 +15,8 @@
 
   <taskdef name="if" classname="net.sf.antcontrib.logic.IfTask"  classpath="lib/buildlib/ant-contrib.jar"/>
 
-  <property name="readable-project-name" value="DrJava Platform-Specific Classes" />
-  <property name="svn-repository" value="https://svn.sourceforge.net/svnroot/drjava" />
+  <property name="readable-project-name" value="DrScala Platform-Specific Classes" />
+  <property name="svn-repository" value="http://sourceforge.net/p/drjava/code/HEAD/tree/branches/drscala" />
 
   <!-- Properties loaded from a file -->
   <property name="props" value="../ant.properties" />
@@ -38,24 +38,12 @@
   <!-- *** Environment properties that are not needed may be removed *** -->
   <property environment="env" />
   <property name="drjava-jar" value="${env.DRJAVA_JAR}" />
-  <property name="java5-home" value="${env.JAVA5_HOME}" />
   <property name="java6-home" value="${env.JAVA6_HOME}" />
   <property name="java7-home" value="${env.JAVA7_HOME}" />
+  <property name="java8-home" value="${env.JAVA8_HOME}" />
   <property name="openjdk6-home" value="${env.OPENJDK6_HOME}" />
-  <property name="mint-home" value="${env.MINT_HOME}" />
-  <property name="nextgen-home" value="${env.NGC_HOME}" />
+  <property name="openjdk7-home" value="${env.OPENJDK7_HOME}" />
 
-<!--  HJ stuff is irrelevant in scala branch 
-  <if>
-        <equals arg1="${env.HJ_HOME}" arg2=""/>
-        <then>
-        	  <property name="hj-home" value="${env.HJ_HOME}" />
-        </then>
-        <else>
-            <property name="hj-home" value="${basedir}/../misc/drjava-hj/input"/>
-        </else>
-  </if>
--->
   <if>
         <equals arg1="${env.SCALA_HOME}" arg2=""/>
         <then>
@@ -105,13 +93,9 @@
     <echo message="      in Subversion targets" />
     <echo message="DRJAVA_JAR: Location of the drjava.jar file (most classes here " />
     <echo message="            implement interfaces defined there)." />
-    <echo message="JAVA5_HOME: Home folder of the Java 5 JDK" />
     <echo message="JAVA6_HOME: Home folder of the Java 6 JDK" />
     <echo message="JAVA7_HOME: Home folder of the Java 7 JDK" />
     <echo message="OPENJDK6_HOME: Home folder of the OpenJDK 6" />
-    <echo message="MINT_HOME: Home folder of the Mint distribution" />
-    <echo message="NEXTGEN_HOME: Home folder of the NextGen distribution" />
-    <echo message="HJ_HOME: Home folder of the Habanero Java distribution" />
     <echo message="" />
     <echo message="For control over the version of Java used to run Ant, set JAVA_HOME." />
     <echo message="Ant may also require ANT_HOME to be set.  Note that the value of " />
@@ -174,16 +158,6 @@
        later APIs, the DrJava application is responsible for ensuring that those classes are 
        only loaded when the necessary APIs are available. -->
        
-  <target name="compile-jdk5" depends="resolve-java5-runtime, resolve-java5-tools" 
-          description="Compile the 'jdk5' sources">
-    <antcall target="do-compile">
-      <param name="platform-tag" value="jdk5" />
-      <param name="source-version" value="1.5" />
-      <param name="runtime-jar" value="${java5-runtime}" />
-      <param name="extra-classpath" value="${java5-tools}" />
-    </antcall>
-  </target>
-  
   <target name="compile-jdk6" depends="resolve-java6-runtime, resolve-java6-tools" 
           description="Compile the 'jdk6' sources">
     <antcall target="do-compile">
@@ -214,36 +188,6 @@
     </antcall>
   </target>
 
-  <target name="compile-mint" depends="resolve-java6-runtime, resolve-mint-tools" 
-          description="Compile the 'mint' sources">
-    <antcall target="do-compile">
-      <param name="platform-tag" value="mint" />
-      <param name="source-version" value="1.6" />
-      <param name="runtime-jar" value="${java6-runtime}" />
-      <param name="extra-classpath" value="${mint-tools}" />
-    </antcall>
-  </target>
-
-  <target name="compile-nextgen" depends="resolve-java5-runtime, resolve-nextgen-tools" 
-          description="Compile the 'nextgen' sources">
-    <antcall target="do-compile">
-      <param name="platform-tag" value="nextgen" />
-      <param name="source-version" value="1.5" />
-      <param name="runtime-jar" value="${java5-runtime}" />
-      <param name="extra-classpath" value="${nextgen-tools}" />
-    </antcall>
-  </target>
-
-  <target name="compile-hj" depends="resolve-java5-runtime, resolve-hj-tools" 
-          description="Compile the 'hj' sources">
-    <antcall target="do-compile">
-      <param name="platform-tag" value="hj" />
-      <param name="source-version" value="1.5" />
-      <param name="runtime-jar" value="${java5-runtime}" />
-      <param name="extra-classpath" value="${hj-tools}:${hj-home}/lib/sootclasses-2.3.0.jar:${hj-home}/lib/polyglot.jar:${hj-home}/lib/hjc.jar" />
-    </antcall>
-  </target>
-
   <target name="compile-scala" depends="resolve-java7-runtime, resolve-scala-tools" 
           description="Compile the 'scala-specific' sources">
     <antcall target="do-compile">
@@ -257,32 +201,22 @@
 
   </target>
 
-  <target name="compile-eclipse" depends="resolve-java6-runtime, resolve-java6-tools, unjar-libs" 
-          description="Compile the 'eclipse' sources">
-    <antcall target="do-compile">
-      <param name="platform-tag" value="eclipse" />
-      <param name="source-version" value="1.6" />
-      <param name="runtime-jar" value="${java6-runtime}" />
-      <param name="extra-classpath" value="${java6-tools}" />
-    </antcall>
-  </target>
-  
-  <target name="compile-mac" depends="resolve-java5-runtime" 
+  <target name="compile-mac" depends="resolve-java6-runtime" 
           description="Compile the 'mac' sources">
     <antcall target="do-compile">
       <param name="platform-tag" value="mac" />
-      <param name="source-version" value="1.5" />
-      <param name="runtime-jar" value="${java5-runtime}" />
-      <param name="extra-classpath" value="${java5-runtime}/../ui.jar" />
+      <param name="source-version" value="1.6" />
+      <param name="runtime-jar" value="${java6-runtime}" />
+      <param name="extra-classpath" value="${java6-runtime}/../ui.jar" />
     </antcall>
   </target>
   
-  <target name="compile-windows" depends="resolve-java5-runtime" 
+  <target name="compile-windows" depends="resolve-java6-runtime" 
           description="Compile the 'windows' sources">
     <antcall target="do-compile">
       <param name="platform-tag" value="windows" />
-      <param name="source-version" value="1.5" />
-      <param name="runtime-jar" value="${java5-runtime}" />
+      <param name="source-version" value="1.6" />
+      <param name="runtime-jar" value="${java6-runtime}" />
       <param name="extra-classpath" value="" />
     </antcall>
   </target>
@@ -383,15 +317,6 @@
        Testing Targets
        *************** -->
   
-  <target name="test-jdk5" depends="compile-jdk5, resolve-java5-exec, resolve-java5-tools" 
-          description="Run all 'jdk5' tests (after compiling); use -Dtest-spec=... to filter">
-    <antcall target="iterate-tests">
-      <param name="platform-tag" value="jdk5" />
-      <param name="extra-classpath" value="${java5-tools}" />
-      <param name="test-jvm" value="${java5-exec}" />
-    </antcall>
-  </target>
-
   <target name="test-jdk6" depends="compile-jdk6, resolve-java6-exec, resolve-java6-tools" 
           description="Run all 'jdk6' tests (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
@@ -419,48 +344,12 @@
     </antcall>
   </target>
 
-  <target name="test-mint" depends="compile-mint, resolve-mint-exec, resolve-mint-tools" 
-          description="Run all 'mint' tests (after compiling); use -Dtest-spec=... to filter">
-    <antcall target="iterate-tests">
-      <param name="platform-tag" value="mint" />
-      <param name="extra-classpath" value="${mint-tools}" />
-      <param name="test-jvm" value="${mint-exec}" />
-    </antcall>
-  </target>
-
-  <target name="test-nextgen" depends="compile-nextgen, resolve-java6-exec, resolve-nextgen-exec, resolve-nextgen-tools" 
-          description="Run all 'nextgen' tests (after compiling); use -Dtest-spec=... to filter">
-    <antcall target="iterate-tests">
-      <param name="platform-tag" value="nextgen" />
-      <param name="extra-classpath" value="${nextgen-tools}" />
-      <param name="test-jvm" value="${nextgen-exec}" />
-    </antcall>
-  </target>
-
-  <target name="test-hj" depends="compile-hj,  resolve-hj-tools" 
-          description="Run all 'hj' tests (after compiling); use -Dtest-spec=... to filter">
-    <antcall target="iterate-tests">
-      <param name="platform-tag" value="hj" />
-      <param name="extra-classpath" value="${hj-tools}" />
-      <param name="test-jvm" value="" />
-    </antcall>
-  </target>
-
   <target name="test-scala" depends="compile-scala,  resolve-scala-tools" 
           description="Run all 'scala' tests (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
       <param name="platform-tag" value="scala" />
       <param name="extra-classpath" value="${scala-tools}" />
       <param name="test-jvm" value="" />
-    </antcall>
-  </target>
-
-  <target name="test-eclipse" depends="compile-eclipse, resolve-java6-exec, resolve-java6-tools" 
-          description="Run all 'eclipse' tests (after compiling); use -Dtest-spec=... to filter">
-    <antcall target="iterate-tests">
-      <param name="platform-tag" value="eclipse" />
-      <param name="extra-classpath" value="${java6-tools}" />
-      <param name="test-jvm" value="${java6-exec}" />
     </antcall>
   </target>
 
@@ -481,7 +370,6 @@
       <param name="test-jvm" value="java" />
     </antcall>
   </target>
-
   
   <target name="iterate-tests" depends="resolve-test-formatter-class">
     <!-- Calls do-test, unless that is overridden by the caller -->
@@ -613,15 +501,10 @@
         <attribute name="Build-Version" value="${version-tag}" />
       </manifest>
       <fileset dir="classes/lib" />
-      <fileset dir="classes/base-jdk5" />
       <fileset dir="classes/base-jdk6" />
       <fileset dir="classes/base-jdk7" />
       <fileset dir="classes/base-openjdk6" />
-      <fileset dir="classes/base-mint" />
-      <fileset dir="classes/base-nextgen" />
-      <fileset dir="classes/base-hj" />
       <fileset dir="classes/base-scala" />
-      <fileset dir="classes/base-eclipse" />
       <fileset dir="classes/base-mac" />
       <fileset dir="classes/base-windows" />
       <!-- Additional platform types should be listed here -->
@@ -635,15 +518,10 @@
         <attribute name="Built-By" value="${user.name}" />
         <attribute name="Build-Version" value="${version-tag}" />
       </manifest>
-      <fileset dir="classes/base-jdk5" />
       <fileset dir="classes/base-jdk6" />
       <fileset dir="classes/base-jdk7" />
       <fileset dir="classes/base-openjdk6" />
-      <fileset dir="classes/base-mint" />
-      <fileset dir="classes/base-nextgen" />
-      <fileset dir="classes/base-hj" />
       <fileset dir="classes/base-scala" />
-      <fileset dir="classes/base-eclipse" />
       <fileset dir="classes/base-mac" />
       <fileset dir="classes/base-windows" />
       <!-- Additional platform types should be listed here -->
@@ -663,14 +541,10 @@
     <echo message="Deleting all intermediate build products" />
     
     <delete dir="classes/lib" failonerror="${clean-can-fail}" />
-    <delete dir="classes/test-jdk5" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-jdk6" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-jdk7" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-openjdk6" failonerror="${clean-can-fail}" />
-    <delete dir="classes/test-mint" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-nextgen" failonerror="${clean-can-fail}" />
-    <delete dir="classes/test-hj" failonerror="${clean-can-fail}" />
-    <delete dir="classes/test-eclipse" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-mac" failonerror="${clean-can-fail}" />
     <delete dir="classes/test-windows" failonerror="${clean-can-fail}" />
     
@@ -1103,93 +977,6 @@
     <fail message="Can't find tools.jar in the Java 6 home: ${openjdk6-home}" unless="openjdk6-tools" />
   </target>
 
-  <!-- No resolve-mint-runtime, use resolve-java6-runtime -->
-
-  <target name="resolve-mint-exec">
-    <!-- We rely on "location" to generate a platform-specific path -->
-
-    <property name="mint-exec-1" location="${mint-home}/langtools/bin/mint.bat" />
-    <condition property="mint-exec" value="${mint-exec-1}">
-      <and>
-        <available file="${mint-exec-1}" />
-        <os family="windows" />
-      </and>
-    </condition>
-    
-    <if>
-      <not><isset property="mint-exec" /></not>
-      <then>
-        <property name="mint-exec-2" location="${mint-home}/langtools/bin/mint" />
-        <available property="mint-exec" value="${mint-exec-2}" file="${mint-exec-2}" />
-      </then>
-    </if>
-
-    <fail message="Can't find the java executable in the Mint home: ${mint-home}" unless="mint-exec" />
-    <echo message="${mint-exec}"/>
-  </target>
-  
-  <target name="resolve-mint-tools">
-    <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so mint-tools will only be set the *first* time. -->
-
-    <property name="mint-tools-1" location="${mint-home}/langtools/dist/lib/classes.jar" />
-    <available property="mint-tools" value="${mint-tools-1}" file="${mint-tools-1}" />
-
-    <fail message="Can't find classes.jar in the Mint home: ${mint-home}" unless="mint-tools" />
-  </target>
-  
-  <!-- No resolve-nextgen-runtime, use resolve-java6-runtime -->
-
-  <target name="resolve-nextgen-exec">
-    <!-- We rely on "location" to generate a platform-specific path -->
-
-    <property name="nextgen-exec-1" location="${nextgen-home}/bin/nextgen.bat" />
-    <condition property="nextgen-exec" value="${nextgen-exec-1}">
-      <and>
-        <available file="${nextgen-exec-1}" />
-        <os family="windows" />
-      </and>
-    </condition>
-    
-    <if>
-      <not><isset property="nextgen-exec" /></not>
-      <then>
-        <property name="nextgen-exec-2" location="${nextgen-home}/bin/nextgen" />
-        <available property="nextgen-exec" value="${nextgen-exec-2}" file="${nextgen-exec-2}" />
-      </then>
-    </if>
-
-    <fail message="Can't find the java executable in the Nextgen home: ${nextgen-home}" unless="nextgen-exec" />
-    <echo message="${nextgen-exec}"/>
-  </target>
-  
-  <target name="resolve-nextgen-tools">
-    <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so nextgen-tools will only be set the *first* time. -->
-
-    <property name="nextgen-tools-1" location="${nextgen-home}/nextgen2.jar" />
-    <available property="nextgen-tools" value="${nextgen-tools-1}" file="${nextgen-tools-1}" />
-
-    <property name="nextgen-tools-2" location="${nextgen-home}/jars/nextgen2.jar" />
-    <available property="nextgen-tools" value="${nextgen-tools-2}" file="${nextgen-tools-2}" />
-
-    <property name="nextgen-tools-3" location="${nextgen-home}/built" />
-    <available property="nextgen-tools" value="${nextgen-tools-3}" file="${nextgen-tools-3}/edu/rice/cs/nextgen2/compiler/Main.class" />
-
-    <fail message="Can't find nextgen.jar, nextgen2.jar in the Nextgen home: ${nextgen-home}" unless="nextgen-tools" />
-  </target>
-
-  <target name="resolve-hj-tools">
-    <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so hj-tools will only be set the *first* time. -->
-
-    <echo message="putative location of hj.jar is ${hj-home}/lib/hj.jar" />
-    <property name="hj-tools-1" location="${hj-home}/lib/hj.jar" />
-    <available property="hj-tools" value="${hj-tools-1}" file="${hj-tools-1}" />
-
-    <fail message="Can't find hj.jar in the hj home: ${hj-home}" unless="hj-tools" />
-  </target>
-
   <target name="resolve-scala-tools">
     <!-- scala-tools is the path to our monolithic scala jar. -->
     <echo message="scala-home = ${scala-home}" />
@@ -1274,6 +1061,7 @@
   
   <!-- Sets svn-revision to the current "Last Changed Rev" of "svn info". -->
   <target name="resolve-svn-revision">
+    <!--
     <exec executable="svn" failonerror="yes" output="svn-info.txt">
       <arg value="info" />
     </exec>
@@ -1287,6 +1075,7 @@
       </filterchain>
     </loadfile>
     <delete file="svn-info.txt" />
+    -->
   </target>
   
 

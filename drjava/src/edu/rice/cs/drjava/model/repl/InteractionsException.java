@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model.repl;
 /**
  * Exception to signify that something went wrong during an interaction.
  *
- * @version $Id$
+ * @version $Id: InteractionsException.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class InteractionsException extends RuntimeException {
   public InteractionsException(String s) { super(s); }

@@ -730,76 +730,11 @@
   <target name="benchmark-previous">
     <mkdir dir="benchmarkSources" />
     
-    <echo message="Checking out the Subversion head revision" />
-    <exec executable="svn" failonerror="yes">
-      <arg value="checkout" />
-      <arg value="--quiet" />
-      <arg value="--revision" />
-      <arg value="HEAD" />
-      <arg value="${svn-repository}/trunk/drjava" /> <!-- Must be changed when package name element "drjava" => "drscala" -->
-      <arg value="benchmarkSources" />
-    </exec>
-    <antcall target="benchmark-single-previous">
-      <param name="svn-working-dir" location="benchmarkSources" />
-    </antcall>
-    
-    <math result="remaining-benchmark-count" datatype="int"
-          operand1="${benchmark-count}" operation="-" operand2="1" />
-    <fornum count="${remaining-benchmark-count}" param="iteration">
-      <sequential>
-        <antcall target="benchmark-revert" />
-        <antcall target="benchmark-single-previous">
-          <param name="svn-working-dir" location="benchmarkSources" />
-        </antcall>
-      </sequential>
-    </fornum>
-    
-    <delete dir="benchmarkSources" />
+    <echo message="benchmark-previous currently does nothing" />
   </target>
   
   <target name="benchmark-single-previous" depends="resolve-svn-revision">
-    <echo message="*****************************************" />
-    <echo message="Running benchmark tests on revision ${svn-revision}" />
-    <echo message="*****************************************" />
-
-    <!-- Change the build script text for builds that don't support test-output-to-file -->
-    <replaceregexp file="benchmarkSources/build.xml" flags="g"
-                   match="&lt;formatter[^&gt;]*/&gt;"
-                   replace="&lt;formatter type=&quot;xml&quot; usefile=&quot;true&quot;/&gt;" />
-    <!-- Eliminate taskdefs, which are apparently inherited (Ant complains otherwise) -->
-    <replaceregexp file="benchmarkSources/build.xml" flags="gs"
-                   match="&lt;taskdef[^&gt;]*/&gt;" replace="" />
-    <mkdir dir="benchmarkResults/${svn-revision}" />
-
-    <trycatch property="benchmark-error">
-      <try>
-        <!-- Must iterate tests *here* to support scripts that don't do test-repeat -->
-        <antcall target="iterate-tests">
-          <param name="do-test-target" value="do-test-previous" />
-          <param name="test-formatter" value="xml" />
-          <!-- test-output-to-file is not inferred in some build scripts -->
-          <param name="test-output-to-file" value="yes" />
-        </antcall>
-      </try>
-      <catch>
-        <echo message="Error occured during benchmark testing:${line.separator}${benchmark-error}" />
-      </catch>
-    </trycatch>
-
-    <!-- Restore sources to their original state -->
-    <trycatch>
-      <try>
-        <ant dir="benchmarkSources" target="clean" />
-      </try>
-      <catch />
-    </trycatch>
-    <exec executable="svn" dir="benchmarkSources" failonerror="yes">
-      <arg value="revert" />
-      <arg value="--quiet" />
-      <arg value="build.xml" />
-    </exec>
-    
-    <move todir="benchmarkResults/${svn-revision}" file="testResults" failonerror="no" />
+    <echo message="benchmark-single-previous currently does nothing" />
   </target>
   
   <target name="do-test-previous">
@@ -826,30 +761,18 @@
   </target>
   
   <target name="benchmark-revert">
-    <echo message="Updating benchmarkSources to a previous revision" />
-    <fornum count="${benchmark-skip}" param="iteration">
-      <sequential>
-        <exec executable="svn" dir="benchmarkSources" failonerror="yes">
-          <arg value="update" />
-          <arg value="--revision" />
-          <arg value="PREV" />
-        </exec>
-      </sequential>
-    </fornum>
+    <echo message="benchmark-revert currently does nothing" />
   </target>
   
   <target name="benchmark-report">
-    <mkdir dir="docs/benchmark" />
-    <!-- TODO - implement this.  Report should be generated in docs/benchmark. -->
-    <echo message="Report generation not yet implemented" />
-    <!-- <delete dir="benchmarkResults" /> -->
+    <echo message="benchmark-report currently does nothing" />
   </target>
 
   
   <!-- *************
        Clean Targets
        ************* -->
-       
+      
   <target name="clean" depends="clean-intermediate, clean-products, clean-concjunit"
           description="Remove all build products; the result should match the intended Subversion contents">
   </target>
@@ -873,7 +796,7 @@
       <fileset dir="${basedir}" defaultexcludes="no">
         <include name="TEST*" />
         <include name="src/**/*.class" />
-        <include name="svn-info.txt" />
+<!--    <include name="svn-info.txt" /> -->
         <include name="findbugs-excludes.xml" />
         <!-- We could get rid of backups, but "update" ignores them, so they're okay.
              (doesn't work if defaultexcludes is "yes") -->
@@ -915,22 +838,28 @@
   <!-- ******************
        Subversion Targets 
        ****************** -->
-  
+
   <target name="update" depends="clean" description="Reconcile source with the Subversion archive">
     <echo message="Running Subversion update" />
+<!--  
     <exec executable="svn" dir="${svn-working-dir}" failonerror="yes">
       <arg value="update" />
     </exec>
     <exec executable="svn" dir="${svn-working-dir}" failonerror="yes">
       <arg value="status" />
     </exec>
+-->   
   </target>
-  
+
+
+
   <target name="commit" depends="update, build" 
           description="Commit source to the Subversion archive (after building)">
-    <antcall target="clean-intermediate"> <!-- Clean up after the latest build -->
+<!--
+    <antcall target="clean-intermediate"> 
       <param name="clean-can-fail" value="no" />
     </antcall>
+
     <exec executable="svn" dir="${svn-working-dir}" failonerror="yes">
       <arg value="status" />
     </exec>
@@ -942,10 +871,13 @@
       <arg value="-m" />
       <arg value="${svn-commit-message}" />
     </exec>
+-->
   </target>
+
 
   <target name="tag" depends="update, resolve-version-tag" unless="skip-tag"
           description="Copy the working copy to a new Subversion tag (after updating)">
+<!--  
     <echo message="Creating a new Subversion tag with name ${version-tag}"/>
     <exec executable="svn" failonerror="yes">
       <arg value="copy" />
@@ -954,10 +886,12 @@
       <arg value="-m" />
       <arg value="Created tag ${version-tag}" />
     </exec>
+-->
   </target>
-  
+
   <target name="branch" depends="update" 
           description="Copy the working copy to a new Subversion branch (after updating)">
+<!--
     <echo message="This will create a new branch from your working copy.  If there are changes " />
     <echo message="in your copy that have not been committed, you may want to do so first, " />
     <echo message="so that there's a clear branch point for merging later." />
@@ -971,7 +905,9 @@
       <arg value="-m" />
       <arg value="Created branch ${svn-branch-name}" />
     </exec>
+-->
   </target>
+
 
 
   <!-- ***************
@@ -1019,8 +955,10 @@
           description="Make a development release">
     <delete dir="${version-tag}" />
   </target>
-  
+
+
   <target name="src-zip" depends="resolve-version-tag" unless="skip-tag">
+<!--  
     <echo message="Creating ${version-tag}-src.zip" />
     <exec executable="svn" failonerror="yes">
       <arg value="export" />
@@ -1030,8 +968,10 @@
     <zip destfile="${version-tag}-src.zip">
       <zipfileset dir="${version-tag}/src" prefix="${version-tag}/src" />
     </zip>
+ -->
   </target>
-  
+
+
   <target name="jar-app" depends="jar, assert-jar-exists, resolve-version-tag">
     <echo message="Creating ${version-tag}.jar" />
     <copy file="${ant.project.name}.jar" tofile="${version-tag}.jar" />
@@ -1494,6 +1434,7 @@
   
   <!-- Sets is-modified if "svn status" has non-empty output. -->
   <target name="resolve-is-modified" depends="clean">
+<!--
     <exec executable="svn" dir="${svn-working-dir}" failonerror="yes" outputproperty="svn-status">
       <arg value="status" />
     </exec>
@@ -1502,10 +1443,12 @@
         <equals arg1="${svn-status}" arg2="" />
       </not>
     </condition>
+-->
   </target>
   
   <!-- Sets svn-revision to the current "Last Changed Rev" of "svn info". -->
   <target name="resolve-svn-revision">
+<!--
     <exec executable="svn" dir="${svn-working-dir}" failonerror="yes" output="svn-info.txt">
       <arg value="info" />
     </exec>
@@ -1519,6 +1462,7 @@
       </filterchain>
     </loadfile>
     <delete file="svn-info.txt" />
+-->
   </target>
   
 

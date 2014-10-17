@@ -71,7 +71,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
  *  (reset in {@link #setUp} and a temporary directory that's created per test invocation (and subsequently cleaned in
  *  {@link #tearDown}. This reduces the burden for such file management stuff in the test cases themselves.
  *
- *  @version $Id: GlobalModelTestCase.java 5702M 2014-10-11 18:21:39Z (local) $
+ *  @version $Id: GlobalModelTestCase.java 5702 2012-08-23 23:12:41Z wdforson $
  */
 public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   

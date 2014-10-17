@@ -49,7 +49,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** A Swing specific InteractionsModel which can serve as the glue between a local InteractionsDocument and a remote 
   * JavaInterpreter in another JVM.
-  * @version $Id$
+  * @version $Id: RMIInteractionsModel.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class RMIInteractionsModel extends InteractionsModel {
   

@@ -43,7 +43,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 
 
 /** Determines whether or not the current line in the document starts with "//" 
-  * @version $Id: QuestionCurrLineIsWingComment.java 5594M 2014-10-07 05:23:24Z (local) $
+  * @version $Id: QuestionCurrLineIsWingComment.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class QuestionCurrLineIsWingComment extends IndentRuleQuestion {
   

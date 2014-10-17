@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import javax.swing.text.BadLocationException;
 
 /** Tests the question rule which determines if the current line is starting a new statement.
-  * @version $Id$
+  * @version $Id: QuestionStartingNewStmtTest.java 5751 2013-02-06 10:32:04Z rcartwright $
   */
 public final class QuestionStartingNewStmtTest extends IndentRulesTestCase {
 

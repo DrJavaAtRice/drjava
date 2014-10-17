@@ -90,7 +90,7 @@ import static edu.rice.cs.drjava.config.OptionConstants.*;
 //import edu.rice.cs.drjava.model.compiler.LanguageLevelStackTraceMapper;
 
 /** Manages unit testing via JUnit.
-  * @version $Id$
+  * @version $Id: DefaultJUnitModel.java 5722 2012-09-29 19:37:22Z wdforson $
   */
 public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
@@ -412,7 +412,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
             try {
               final Box<String> className = new SimpleBox<String>();
               final Box<String> sourceName = new SimpleBox<String>();
-              new ClassReader(IOUtil.toByteArray(entry)).accept(new ClassVisitor() {
+              new ClassReader(IOUtil.toByteArray(entry)).accept(new ClassVisitor(Opcodes.ASM4) {
                 public void visit(int version, int access, String name, String sig, String sup, String[] inters) {
                   className.set(name.replace('/', '.'));
                 }

@@ -42,7 +42,7 @@ import java.rmi.RemoteException;
 
 /**
  * The remote interface for a slave JVM.
- * @version $Id$
+ * @version $Id: SlaveRemote.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public interface SlaveRemote extends Remote {
   /**

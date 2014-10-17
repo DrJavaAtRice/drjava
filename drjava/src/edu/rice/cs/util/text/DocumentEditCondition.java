@@ -38,7 +38,7 @@ package edu.rice.cs.util.text;
 
 /** Class to decide whether a given edit can be applied to the document. Subclasses can impose conditions on 
   * which edits will be applied.
-  * @version $Id$
+  * @version $Id: DocumentEditCondition.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class DocumentEditCondition {
   

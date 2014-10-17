@@ -58,7 +58,7 @@ import java.util.LinkedList;
   * We have imposed an ordering on the pending waiting readers and writers using an ordered queue.
   * </p>
   * TODO: revise this formulation of readers/writers to allow writers to recursively readLock and writeLock!
-  * @version $Id$
+  * @version $Id: ReaderWriterLock.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class ReaderWriterLock {
   /** The number of readers currently reading. */

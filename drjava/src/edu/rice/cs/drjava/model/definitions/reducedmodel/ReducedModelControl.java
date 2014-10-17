@@ -53,9 +53,10 @@ import edu.rice.cs.util.UnexpectedException;
   * <li> There is no nesting of comment open characters. If // is encountered in the middle of a comment, it is 
   * treated as two separate slashes.  Similarly for /*.
   * </ol>
-  * All of the code in the class assumes that the document read lock and the lock on this are held.
+  * All of the code in the class assumes that the lock on this is held.  (Is this necessary if all document
+  * inspection and modification is done in the event thread?)
   * @author JavaPLT
-  * @version $Id$
+  * @version $Id: ReducedModelControl.java 5711 2012-09-11 19:42:33Z rcartwright $
   */
 public class ReducedModelControl implements BraceReduction {
   /* private fields; default visibility for testing purposes only. */

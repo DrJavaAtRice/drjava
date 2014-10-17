@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /**
  * Tests the interaction between quotes and backslashes.
- * @version $Id$
+ * @version $Id: SingleQuoteTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class SingleQuoteTest extends BraceReductionTestCase
   implements ReducedModelStates

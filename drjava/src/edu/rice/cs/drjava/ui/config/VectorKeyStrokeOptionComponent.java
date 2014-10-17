@@ -53,7 +53,7 @@ import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Graphical form of a VectorOption for the KeyStroke options.
- *  @version $Id$
+ *  @version $Id: VectorKeyStrokeOptionComponent.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class VectorKeyStrokeOptionComponent extends VectorOptionComponent<KeyStroke> implements OptionConstants, Comparable<VectorKeyStrokeOptionComponent> {
   private static final int DIALOG_HEIGHT = 185;

@@ -50,7 +50,7 @@ import edu.rice.cs.util.swing.Utilities;
 
 /** The graphical form of an Option. Provides a way to see the values of Option while running DrJava and perform live 
   * updating of Options.
-  * @version $Id$
+  * @version $Id: OptionComponent.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class OptionComponent<T,C extends JComponent> implements Serializable {
   protected final Option<T> _option;

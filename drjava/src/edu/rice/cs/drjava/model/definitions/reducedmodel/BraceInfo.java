@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /** Indent information block.
- *  @version $Id$
+ *  @version $Id: BraceInfo.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class BraceInfo {
   

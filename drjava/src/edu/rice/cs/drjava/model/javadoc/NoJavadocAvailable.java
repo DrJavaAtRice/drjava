@@ -46,7 +46,7 @@ import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.util.DirectorySelector;
 
 /** Javadoc model to use when javadoc is unavailable.
-  * @version $Id$
+  * @version $Id: NoJavadocAvailable.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class NoJavadocAvailable implements JavadocModel {
   

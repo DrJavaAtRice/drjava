@@ -39,7 +39,7 @@ package edu.rice.cs.util;
 /**
  * Indicates that a GUI operation has been canceled, e.g., choosing
  * a file to save to from a file selection dialog.
- * @version $Id$
+ * @version $Id: OperationCanceledException.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class OperationCanceledException extends Exception {
   

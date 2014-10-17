@@ -43,7 +43,7 @@ package edu.rice.cs.util;
   * and in other similar cases where we know that an exception should not
   * occur, we throw this on the off chance that something does go wrong.
   * This aids us in debugging the code.
-  * @version $Id$
+  * @version $Id: UnexpectedException.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class UnexpectedException extends RuntimeException {
 

@@ -42,7 +42,7 @@ import java.util.HashSet;
 /**
  * Listener responding to the availability of several GUI components.
  *
- * @version $Id$
+ * @version $Id: OrGUIAvailabilityListener.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public abstract class OrGUIAvailabilityListener implements GUIAvailabilityListener {
   protected final HashSet<ComponentType> _components = new HashSet<ComponentType>();

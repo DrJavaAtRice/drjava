@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
 
 /** The shadowing state that corresponds to being inside a double-quoted string.
-  * @version $Id$
+  * @version $Id: InsideDoubleQuote.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class InsideDoubleQuote extends ReducedModelState {
   /** Singleton instance */

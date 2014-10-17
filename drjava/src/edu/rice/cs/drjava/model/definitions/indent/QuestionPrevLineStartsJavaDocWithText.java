@@ -43,7 +43,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 
 /** Question rule in the indentation decision tree.  Determines if the 
   * line previous to the current position starts with the specified character.
-  * @version $Id$
+  * @version $Id: QuestionPrevLineStartsJavaDocWithText.java 5668 2012-08-15 04:58:30Z rcartwright $
   */
 public class QuestionPrevLineStartsJavaDocWithText extends IndentRuleQuestion {
   

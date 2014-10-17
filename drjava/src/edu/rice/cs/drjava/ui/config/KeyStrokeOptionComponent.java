@@ -48,7 +48,7 @@ import javax.swing.*;
 
 /**
  * Graphical form of a KeyStrokeOption.
- * @version $Id$
+ * @version $Id: KeyStrokeOptionComponent.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke,JPanel>
                                       implements Comparable<KeyStrokeOptionComponent> {

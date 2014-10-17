@@ -42,7 +42,7 @@ import java.awt.event.*;
 
 /**
  * A splash screen window to be displayed as DrJava is first starting up.
- * @version $Id$
+ * @version $Id: SplashScreen.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class SplashScreen extends JWindow {
   private static final String SPLASH_ICON = "splash.png";

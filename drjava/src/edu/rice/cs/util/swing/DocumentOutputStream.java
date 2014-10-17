@@ -43,7 +43,7 @@ import  javax.swing.text.AttributeSet;
 
 /** An extension of {@link OutputStream} that writes its output to
   * an implementation of {@link Document}.
-  * @version $Id$
+  * @version $Id: DocumentOutputStream.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class DocumentOutputStream extends OutputStream {
   private Document _doc;

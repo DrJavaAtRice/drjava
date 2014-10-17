@@ -61,7 +61,7 @@ import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
 
 /** A simple implementation of InteractionsModel, which uses a DynamicJavaAdapter directly (in the same JVM) to 
   * interpret code.  It can be used in a standalone interface, such as edu.rice.cs.drjava.ui.SimpleInteractionsWindow.
-  * @version $Id$
+  * @version $Id: SimpleInteractionsModel.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class SimpleInteractionsModel extends InteractionsModel {  
   protected ClassPathManager _classPathManager;

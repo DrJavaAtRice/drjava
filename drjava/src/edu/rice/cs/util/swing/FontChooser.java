@@ -48,7 +48,7 @@ import java.awt.event.*;
  * FontChooser, adapted from NwFontChooserS by Noah Wairauch.
  * (see http:///forum.java.sun.com/thread.jsp?forum=57&thread=195067)
  *
- * @version $Id$
+ * @version $Id: FontChooser.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 
 public class FontChooser extends JDialog {

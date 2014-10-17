@@ -46,7 +46,7 @@ import edu.rice.cs.util.classloader.ClassFileError;
  * This interface specifies the methods that the Main JVM exposes
  * for the InterpreterJVM to call.
  *
- * @version $Id$
+ * @version $Id: MainJVMRemoteI.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public interface MainJVMRemoteI extends MasterRemote {
   

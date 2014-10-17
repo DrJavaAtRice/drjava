@@ -41,7 +41,7 @@ import edu.rice.cs.util.classloader.ClassFileError;
 
 /** Callback interface which allows an JUnitModel to respond to tests running in a remote JVM.
   * 
-  * @version $Id$
+  * @version $Id: JUnitModelCallback.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public interface JUnitModelCallback {
   

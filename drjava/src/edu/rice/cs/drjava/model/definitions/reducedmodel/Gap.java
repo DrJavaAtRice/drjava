@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /** A subclass of ReducedToken that represents sequences of non-special characters.
-  * @version $Id$
+  * @version $Id: Gap.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 class Gap extends ReducedToken {
   private volatile int _size;

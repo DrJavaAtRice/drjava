@@ -57,7 +57,7 @@ import edu.rice.cs.util.swing.Utilities;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Test I/O functions of the global model.  TODO: move document observations to event thread.
-  * @version $Id: GlobalModelIOTest.java 5594M 2014-10-11 03:40:27Z (local) $
+  * @version $Id: GlobalModelIOTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public final class GlobalModelIOTest extends GlobalModelTestCase implements OptionConstants {
   
@@ -1129,16 +1129,18 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     
     listener.assertInteractionStartCount(0);
     safeLoadHistory(fs1);
-//    System.out.println("fs1[" + fs1 + "]");
+//    System.err.println("fs1[" + fs1 + "]");
     listener.waitInteractionDone();
     
     listener.logInteractionStart();
     safeLoadHistory(fs2);
-//    System.out.println("fs2[" + fs2 + "]");
+//    System.err.println("fs2[" + fs2 + "]");
     listener.waitInteractionDone();
     
     // check that output of loaded history is correct
     ConsoleDocument con = _model.getConsoleDocument();
+    System.err.println("con = \n" + con + "\n***End of Console***");
+                       
     assertEquals("Output of loaded history is not correct: " + con.getDocText(0, con.getLength()).trim(),
                  "x = 5" + StringOps.EOL + "x = 5",
                  con.getDocText(0, con.getLength()).trim());

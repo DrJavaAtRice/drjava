@@ -52,7 +52,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   *
   * Every test in this class is run for *each* of the compilers that is available.
   *
-  * @version $Id: GlobalModelCompileErrorsTest.java 5594M 2014-10-05 21:59:44Z (local) $
+  * @version $Id: GlobalModelCompileErrorsTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   

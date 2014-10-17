@@ -51,7 +51,7 @@ import edu.rice.cs.plt.lambda.Lambda;
 
 /** A tokenizer that splits a stream into string tokens while balancing quoting characters.
   * @author Mathias Ricken
-  * @version $Id$
+  * @version $Id: BalancingStreamTokenizer.java 5668 2012-08-15 04:58:30Z rcartwright $
  */
 
 public class BalancingStreamTokenizer {

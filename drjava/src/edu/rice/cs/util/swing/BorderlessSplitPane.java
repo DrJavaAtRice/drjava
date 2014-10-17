@@ -43,7 +43,7 @@ import java.awt.*;
  * A JSplitPane without a traditional Swing border.  Uses a null
  * border instead, which improves the appearance of nested panes
  * on Mac OS X.
- * @version $Id$
+ * @version $Id: BorderlessSplitPane.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class BorderlessSplitPane extends JSplitPane {
   // note, I can't think of a way to guarantee superclass behavior without

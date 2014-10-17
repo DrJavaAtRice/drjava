@@ -39,7 +39,7 @@ package edu.rice.cs.util;
 import java.io.File;
 /** An interface to give GlobalModel a directory for various operations.
   *
-  * @version $Id$
+  * @version $Id: DirectorySelector.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public interface DirectorySelector {
   

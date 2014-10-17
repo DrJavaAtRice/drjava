@@ -48,7 +48,7 @@ import java.text.*;
  * preparing the print job of previewing or printing given the String
  * representation of the document.
  *
- * @version $Id$
+ * @version $Id: DrJavaBook.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class DrJavaBook implements Pageable {
   

@@ -44,7 +44,7 @@ import java.io.IOException;
 /**
  * Tests for a class to tokenize a stream while balancing quoting characters.
  * @author Mathias Ricken
- * @version $Id$
+ * @version $Id: BalancingStreamTokenizerTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 
 public class BalancingStreamTokenizerTest extends TestCase {

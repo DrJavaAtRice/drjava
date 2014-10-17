@@ -61,7 +61,7 @@ import edu.rice.cs.util.FileOps;
 
 
 /** Displays whether a new version of DrJava is available.
-  *  @version $Id$
+  *  @version $Id: NewVersionPopup.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class NewVersionPopup extends JDialog {
   /** whether to keep displaying this dialog, and for which releases */

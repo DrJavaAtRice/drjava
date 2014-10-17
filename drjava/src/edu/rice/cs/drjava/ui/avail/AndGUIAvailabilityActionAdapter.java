@@ -44,7 +44,7 @@ import javax.swing.Action;
 /**
  * Adapter from Action to ComplexGUIAvailabilityListener.
  *
- * @version $Id$
+ * @version $Id: AndGUIAvailabilityActionAdapter.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class AndGUIAvailabilityActionAdapter extends AndGUIAvailabilityListener {
   protected final Action _adaptee;

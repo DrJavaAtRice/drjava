@@ -53,7 +53,7 @@ import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import java.util.Date;
 
 /** Test functions of InteractionsPane.
-  * @version $Id$
+  * @version $Id: InteractionsPaneTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public final class InteractionsPaneTest extends DrJavaTestCase {
   

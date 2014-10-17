@@ -54,7 +54,7 @@ import java.util.HashMap;
  * Java synchronization!
  * <p>
  *
- * @version $Id$
+ * @version $Id: GUIAvailabilityNotifier.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class GUIAvailabilityNotifier extends EventNotifier<GUIAvailabilityListener> implements GUIAvailabilityListener {
   /** The current availabilities of the individual components. */

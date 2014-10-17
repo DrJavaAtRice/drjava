@@ -46,7 +46,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 /** The Graphical form of a FontOption.
-  * @version $Id$
+  * @version $Id: FontOptionComponent.java 5594 2012-06-21 11:23:40Z rcartwright $
   */ 
 public class FontOptionComponent extends OptionComponent<Font,JPanel> {
   

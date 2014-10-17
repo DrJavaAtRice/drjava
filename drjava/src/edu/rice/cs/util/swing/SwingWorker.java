@@ -44,7 +44,7 @@ import java.awt.EventQueue;
   *
   * Note that the API changed slightly in the 3rd version: you must now invoke start() on the SwingWorker after
   * creating it.
-  * @version $Id$
+  * @version $Id: SwingWorker.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class SwingWorker {
   private volatile Object _value;  // see getValue(), setValue()

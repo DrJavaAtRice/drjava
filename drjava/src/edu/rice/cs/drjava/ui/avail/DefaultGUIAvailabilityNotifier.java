@@ -46,7 +46,7 @@ import edu.rice.cs.drjava.model.EventNotifier;
  * Java synchronization!
  * <p>
  *
- * @version $Id$
+ * @version $Id: DefaultGUIAvailabilityNotifier.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class DefaultGUIAvailabilityNotifier extends GUIAvailabilityNotifier {
   /** Set the availability of tasks needed for JUnit, i.e. JUNIT and COMPILER.

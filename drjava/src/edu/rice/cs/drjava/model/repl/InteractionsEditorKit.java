@@ -43,7 +43,7 @@ import javax.swing.text.*;
 /**
  * This is an editor kit for editing Java source files. It functions as the controller in the MVC arrangement.
  * It implements a factory for new documents, and it also has a factory for Views (the things that render the document).
- * @version $Id$
+ * @version $Id: InteractionsEditorKit.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class InteractionsEditorKit extends StyledEditorKit {
   

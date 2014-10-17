@@ -44,7 +44,7 @@ import javax.swing.border.*;
 //import java.io.Serializable;
 
 /** Manages a JDialog with a scrollable text area and a button panel.
-  * @version $Id$
+  * @version $Id: ScrollableDialog.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class ScrollableDialog /* implements Serializable */ {
   /** Default width for all ScrollableDialogs. */

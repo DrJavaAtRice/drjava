@@ -44,7 +44,7 @@ import java.awt.Component;
 /**
  * Adapter from Component to ComplexGUIAvailabilityListener.
  *
- * @version $Id$
+ * @version $Id: OrGUIAvailabilityComponentAdapter.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class OrGUIAvailabilityComponentAdapter extends OrGUIAvailabilityListener {
   protected final Component _adaptee;

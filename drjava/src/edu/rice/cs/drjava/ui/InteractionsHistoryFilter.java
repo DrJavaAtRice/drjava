@@ -43,7 +43,7 @@ import  javax.swing.filechooser.FileFilter;
 /**
  * A file filter for files with extensions ".hist".
  * Used in the file choosers for the Interactions History.
- * @version $Id$
+ * @version $Id: InteractionsHistoryFilter.java 5668 2012-08-15 04:58:30Z rcartwright $
  */
 public class InteractionsHistoryFilter extends FileFilter {
 

@@ -62,7 +62,7 @@ import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 
 /** Test functions of MainFrame.
-  * @version $Id$
+  * @version $Id: MainFrameTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public final class MainFrameTest extends MultiThreadedTestCase {
   

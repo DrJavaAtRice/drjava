@@ -44,7 +44,7 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.SwingFrame;
 
 /** Graphical form of a StringOption.
- *  @version $Id$
+ *  @version $Id: StringOptionComponent.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class StringOptionComponent extends OptionComponent<String,JTextField> {
   private JTextField _jtf;

@@ -45,7 +45,7 @@ import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
 /**
  * Super class for any type of result that can occur from a call to interpret.
  * 
- * @version $Id$
+ * @version $Id: InterpretResult.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public abstract class InterpretResult implements Serializable {  
   public abstract <T> T apply(Visitor<T> v);

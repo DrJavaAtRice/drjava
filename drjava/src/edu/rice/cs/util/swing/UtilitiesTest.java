@@ -63,7 +63,7 @@ public class UtilitiesTest extends TestCase {
         catch(InterruptedException ie) { }
         SwingUtilities.invokeLater(new Runnable() {
           public void run() {
-            System.out.println("Runnable 2");
+//            System.out.println("Runnable 2");
             ++count[0];
           }
         });          
@@ -76,7 +76,7 @@ public class UtilitiesTest extends TestCase {
           ++count[0];
           SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-              System.out.println("Runnable 2");
+//              System.out.println("Runnable 2");
               ++count[0];
             }
           });          

@@ -68,7 +68,7 @@ import static edu.rice.cs.drjava.ui.config.ConfigDescriptions.*;
 import static edu.rice.cs.drjava.config.OptionConstants.*;
 
 /** The frame for setting Configuration options on the fly
- *  @version $Id$
+ *  @version $Id: ConfigFrame.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class ConfigFrame extends SwingFrame {
 

@@ -50,7 +50,7 @@ import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.swing.ProcessingDialog;
 
 /** Helpers for ConcJUnit.
-  * @version $Id$
+  * @version $Id: ConcJUnitUtils.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class ConcJUnitUtils {  
   //-------------------------- ConcJUnit Utilities --------------------------//

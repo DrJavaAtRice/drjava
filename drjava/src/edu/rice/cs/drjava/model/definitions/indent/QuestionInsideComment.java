@@ -38,8 +38,10 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
-/** Asks whether the beginning of the current line is inside a C-style comment.
-  * @version $Id$
+/** Determines whether the beginning of the current line is inside a block comment.  Positions within the
+  * delimiters can never arise in this rule, but the coding of _insideBlockComment must treat the positions of the chars in
+  * the opening comment bracket specially to yield a positive answer in these cases.
+  * @version $Id: QuestionInsideComment.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 class QuestionInsideComment extends IndentRuleQuestion {
   
@@ -49,7 +51,8 @@ class QuestionInsideComment extends IndentRuleQuestion {
     * @param doc AbstractDJDocument containing the line to be indented.
     * @return true if this node's rule holds.
     */
-  boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) { 
-    return doc._inBlockComment(doc.getCurrentLocation()); 
+  boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
+    int orgPos = doc.getCurrentLocation();
+    return doc._insideBlockComment(orgPos); 
   }
 }

@@ -57,7 +57,7 @@ import java.lang.reflect.Constructor;
 /** An abstract parent for all javac-based compiler interfaces.  Manages the auxiliary naming methods.
   * To support loading via reflection, all subclasses are assumed to have a public constructor with
   * a matching signature.
-  *  @version $Id: JavacCompiler.java 5668M 2014-10-05 21:59:44Z (local) $
+  *  @version $Id: JavacCompiler.java 5668 2012-08-15 04:58:30Z rcartwright $
   */
 public abstract class JavacCompiler implements CompilerInterface {
   

@@ -36,27 +36,27 @@
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-/** Tests whether the previous line starts the comment containing the cursor.
-  * @version $Id$
+/** Tests whether the previous line starts the block comment containing the cursor.
+  * @version $Id: QuestionPrevLineStartsCommentTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public final class QuestionPrevLineStartsCommentTest extends IndentRulesTestCase {
 
   static IndentRuleQuestion rule2 = new QuestionPrevLineStartsComment(null,
               null);
   private static String example1 = "/*\nfoo\nbar\n*/";
-  //                                    .    .
+  
   // /* 
   // foo
   // bar
   // */
   private static String example2 = "foo /* bar\nblah\nmoo\n*/";
-  //                                            .     .
+  
   // foo /* bar
   // blah
   // moo
   // */
   private static String example3 = "/*\nfoo\n// /*\nbar\n*/";
-  //                                    .    .      .
+  
   // /*
   // foo
   // // /*
@@ -65,12 +65,12 @@ public final class QuestionPrevLineStartsCommentTest extends IndentRulesTestCase
 
   public void testSimpleFirstLine() throws javax.swing.text.BadLocationException {
     _setDocText(example1);
-    assertEquals(true, rule2.testApplyRule(_doc, 3, Indenter.IndentReason.OTHER));
+    assertTrue("prev line starts block comment", rule2.testApplyRule(_doc, 3, Indenter.IndentReason.OTHER));
   }
   
   public void testSimpleSecondLine() throws javax.swing.text.BadLocationException {
     _setDocText(example1);
-    assertEquals(false, rule2.testApplyRule(_doc, 7, Indenter.IndentReason.OTHER));
+    assertFalse("prev line is inside block comment", rule2.testApplyRule(_doc, 7, Indenter.IndentReason.OTHER));
   }
   
   public void testSlashStarMidLineFirstLine() throws javax.swing.text.BadLocationException {

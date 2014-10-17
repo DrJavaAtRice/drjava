@@ -44,7 +44,7 @@ import javax.swing.text.BadLocationException;
  * This class does almost all the work for keeping an indent tree trace.  IndentRuleQuestion
  * also does some of the work, and any subclass may substitute its own version of getRuleName()
  * This test is broken in DrScala.  TODO: fix it.
- * @version $Id: IndentRuleWithTraceTest.java 5751M 2014-10-09 19:44:20Z (local) $
+ * @version $Id: IndentRuleWithTraceTest.java 5751 2013-02-06 10:32:04Z rcartwright $
  */
 public final class IndentRuleWithTraceTest extends IndentRulesTestCase {
 

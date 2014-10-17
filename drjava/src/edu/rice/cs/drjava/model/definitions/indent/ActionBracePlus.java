@@ -41,7 +41,8 @@ import javax.swing.text.BadLocationException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceInfo;
 
-/** Aligns indentation of the current line to the character that opened the enclosing block or expression list.  
+/** Aligns indentation of the current line to the character that opened the enclosing block or expression list. 
+  * Recognizes square brackets as form of brace.
   * Optional additional whitespaces can be passed through the constructor.
   * @version $Id: ActionBracePlus.java 5675 2012-08-16 21:25:57Z rcartwright $
   */

@@ -51,7 +51,7 @@ import edu.rice.cs.dynamicjava.symbol.*;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
 
 /** Tests the functionality of the repl interpreter.
-  * @version $Id$
+  * @version $Id: JavaInterpreterTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class JavaInterpreterTest extends DrJavaTestCase {
   

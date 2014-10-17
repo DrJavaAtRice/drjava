@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.model.repl;
 
 /** Listens for input requests from System.in.
- *  @version $Id$
+ *  @version $Id: InputListener.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public interface InputListener {
   public String getConsoleInput();

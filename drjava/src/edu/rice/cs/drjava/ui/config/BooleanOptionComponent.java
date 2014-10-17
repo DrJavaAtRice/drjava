@@ -43,7 +43,7 @@ import edu.rice.cs.drjava.*;
 import edu.rice.cs.util.swing.SwingFrame;
 
 /** Graphical form of a BooleanOption.
-  * @version $Id$
+  * @version $Id: BooleanOptionComponent.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class BooleanOptionComponent extends OptionComponent<Boolean,JCheckBox> {
   protected JCheckBox _jcb;

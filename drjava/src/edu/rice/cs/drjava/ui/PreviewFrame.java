@@ -52,7 +52,7 @@ import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.util.swing.SwingFrame;
 
 /** DrJava's print preview window
-  * @version $Id$
+  * @version $Id: PreviewFrame.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class PreviewFrame extends SwingFrame {
   

@@ -43,7 +43,7 @@ import java.awt.event.*;
 
 /** Displayed when the user chooses to save the interactions history. It will show the current history and allow the
   * user to edit or save it to a file.
-  * $Id$
+  * $Id: HistorySaveDialog.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class HistorySaveDialog extends DrJavaScrollableDialog /* implements Serializable */ {
   

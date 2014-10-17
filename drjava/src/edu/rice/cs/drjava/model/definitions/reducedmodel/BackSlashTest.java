@@ -40,7 +40,7 @@ import  junit.framework.*;
 
 /**
  * Test the interactions between double quotes and backslashes.
- * @version $Id$
+ * @version $Id: BackSlashTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class BackSlashTest extends BraceReductionTestCase
   implements ReducedModelStates

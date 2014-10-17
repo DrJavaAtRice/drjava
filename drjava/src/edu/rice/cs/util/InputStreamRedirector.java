@@ -40,7 +40,7 @@ import java.io.*;
 import java.util.ArrayList;
 
 /** Redirects requests for input through the abstract method _getInput().
-  * @version $Id$
+  * @version $Id: InputStreamRedirector.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class InputStreamRedirector extends InputStream {
   /** Buffer that stores the current set of bytes.

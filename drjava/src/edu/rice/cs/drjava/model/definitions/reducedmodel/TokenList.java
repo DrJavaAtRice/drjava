@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /** A list of reduced model tokens.  Uses ModelList as its base.
-  * @version $Id$
+  * @version $Id: TokenList.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class TokenList extends ModelList<ReducedToken> implements /*imports*/ ReducedModelStates {
   
@@ -93,7 +93,7 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
     
     
     /** Handles the details of the case where a brace is inserted into a gap. Assumes the current token is a gap!  
-      * Assumes that read lock and reduced locks are already held. 
+      * Assumes that the reduced lock is already held. 
       */
     void insertBraceToGap(String text) {
       current().shrink(getBlockOffset());
@@ -109,7 +109,7 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
     }
     
     /** Helper function to _insertBrace. Handles the details of the case where brace is inserted between two
-      * reduced tokens.  No destructive action is taken.  Assume that read lock and reduced lock are already held.
+      * reduced tokens.  No destructive action is taken.  Assume that the reduced lock is already held.
       */
     void insertNewBrace(String text) {
       insert(Brace.MakeBrace(text, getStateAtCurrent()));
@@ -145,8 +145,8 @@ public class TokenList extends ModelList<ReducedToken> implements /*imports*/ Re
     }
     
     /** Walks along the list on which ReducedModel is based from the current cursor position.  Which path it takes
-      * depends on the return value of getStateAtCurrent() at the start of the walk.  Assumes read lock and reduced
-      * lock are already held.
+      * depends on the return value of getStateAtCurrent() at the start of the walk.  Assumes reduced
+      * lock is already held.
       */
     void updateBasedOnCurrentState() {
       if (atStart()) next();

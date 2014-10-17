@@ -41,7 +41,7 @@ import javax.swing.text.BadLocationException;
 /**
  * Tests the indention rule which detects whether the immediately previous line
  * starts with a particular string.
- * @version $Id$
+ * @version $Id: QuestionPrevLineStartsWithTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class QuestionPrevLineStartsWithTest extends IndentRulesTestCase {
 

@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.util.swing.Utilities;
 
-/** @version $Id: QuestionCurrLineEmptyOrEnterPress.java 5594M 2014-10-11 01:13:13Z (local) $
+/** @version $Id: QuestionCurrLineEmptyOrEnterPress.java 5594 2012-06-21 11:23:40Z rcartwright $
   * Asks whether the current line is empty (contains only whitespace), or indentation was
   * spawned by pressing enter.
   * 

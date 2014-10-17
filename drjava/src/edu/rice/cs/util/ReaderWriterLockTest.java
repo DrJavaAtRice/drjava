@@ -42,7 +42,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
   * safely access a shared resource.  (Multiple readers can be active at a time, but only one writer can be active, 
   * during which time no readers can be active.)  This can be difficult to test because there is little control over 
   * how the threads are actually scheduled.
-  * @version $Id$
+  * @version $Id: ReaderWriterLockTest.java 5708 2012-08-29 23:52:35Z rcartwright $
   */
 public class ReaderWriterLockTest extends DrJavaTestCase {
 

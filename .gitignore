@@ -1,0 +1,10 @@
+*.org
+*.org2
+*.drjava
+*~
+*.sav
+*.class
+*.old
+*.svn
+*.new
+drjava/svn-info.txt

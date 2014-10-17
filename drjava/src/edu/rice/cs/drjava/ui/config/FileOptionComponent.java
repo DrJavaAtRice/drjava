@@ -47,7 +47,7 @@ import java.io.File;
 import javax.swing.filechooser.FileFilter;
 
 /** Graphical form of a FileOption.
- *  @version $Id$
+ *  @version $Id: FileOptionComponent.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class FileOptionComponent extends OptionComponent<File,FileSelectorComponent> implements OptionConstants {
 

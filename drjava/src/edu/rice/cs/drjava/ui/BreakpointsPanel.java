@@ -51,7 +51,7 @@ import edu.rice.cs.drjava.model.debug.*;
 
 /** Panel for displaying the breakpoints.  This class is a swing view class and hence should only be accessed from the 
   * event-handling thread.
-  * @version $Id$
+  * @version $Id: BreakpointsPanel.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class BreakpointsPanel extends RegionsTreePanel<Breakpoint> {
   protected JButton _goToButton;

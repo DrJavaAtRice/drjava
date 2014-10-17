@@ -67,7 +67,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
  * {@code quitSlave()}, for example, when it is known to have been matched by a successful
  * {@code invokeSlave} invocation).
  *  
- * @version $Id$
+ * @version $Id: AbstractMasterJVM.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public abstract class AbstractMasterJVM implements MasterRemote {
   

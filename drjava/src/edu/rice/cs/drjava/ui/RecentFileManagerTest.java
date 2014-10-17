@@ -48,7 +48,7 @@ import java.io.IOException;
 import java.util.Vector;
 
 /** Test functions of RecentFileManager.
-  * @version $Id$
+  * @version $Id: RecentFileManagerTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public final class RecentFileManagerTest extends DrJavaTestCase {
   

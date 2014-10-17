@@ -42,7 +42,7 @@ import java.awt.*;
 
 /** Common button that can be instantiated to create close buttons with  any ActionListener to notify, or not, if you
   * so choose.
-  * @version $Id$
+  * @version $Id: CommonCloseButton.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class CommonCloseButton extends JButton {
 

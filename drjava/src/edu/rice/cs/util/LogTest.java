@@ -48,7 +48,7 @@ import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.plt.io.IOUtil;
 
 /** Test cases for {@link Log}.
- *  @version $Id$
+ *  @version $Id: LogTest.java 5668 2012-08-15 04:58:30Z rcartwright $
  */
 public class LogTest extends MultiThreadedTestCase {
   

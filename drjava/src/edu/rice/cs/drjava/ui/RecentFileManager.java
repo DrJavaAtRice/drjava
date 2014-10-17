@@ -52,7 +52,7 @@ import edu.rice.cs.util.FileOpenSelector;
 /**
  * Manages a list of the most recently used files to be displayed
  * in the File menu.
- * @version $Id$
+ * @version $Id: RecentFileManager.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class RecentFileManager implements OptionConstants {
   /** Position in the file menu where the entries start. */

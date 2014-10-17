@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 /**
  * Tests whether start of line is within a multiline comment.
  *
- * @version $Id$
+ * @version $Id: QuestionInsideCommentTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class QuestionInsideCommentTest extends IndentRulesTestCase {
 
@@ -68,10 +68,11 @@ public final class QuestionInsideCommentTest extends IndentRulesTestCase {
       
   
   public void testDocStart() throws javax.swing.text.BadLocationException {      
-    assertEquals(false, _rule.testApplyRule(_doc, 0, Indenter.IndentReason.OTHER));
+    assertFalse("Start of document", _rule.testApplyRule(_doc, 0, Indenter.IndentReason.OTHER));
   }
   public void testLineBeginsComment() throws javax.swing.text.BadLocationException {
-    assertEquals(false, _rule.testApplyRule(_doc, 3, Indenter.IndentReason.OTHER));
+    assertFalse("Immediately after opening '/'", _rule.testApplyRule(_doc, 2, Indenter.IndentReason.OTHER));
+    assertTrue("Immediately after opening '/*'", _rule.testApplyRule(_doc, 3, Indenter.IndentReason.OTHER));
   }
   public void testFooLine() throws javax.swing.text.BadLocationException {
     assertEquals(true, _rule.testApplyRule(_doc, 6, Indenter.IndentReason.OTHER));
@@ -86,19 +87,26 @@ public final class QuestionInsideCommentTest extends IndentRulesTestCase {
     assertEquals(false, _rule.testApplyRule(_doc, 16, Indenter.IndentReason.OTHER));
   }
   public void testSlashStarMidLineAfter() throws javax.swing.text.BadLocationException {
-    assertEquals(false, _rule.testApplyRule(_doc, 24, Indenter.IndentReason.OTHER));
+    assertTrue("Immediately after second opening '/*/'", 
+               _rule.testApplyRule(_doc, 21, Indenter.IndentReason.OTHER));
+    assertTrue("In the middle of '//' shadowed by second block comment", 
+               _rule.testApplyRule(_doc, 21, Indenter.IndentReason.OTHER));
   }
   public void testCommentedOutSlashStar() throws javax.swing.text.BadLocationException {
     assertEquals(true, _rule.testApplyRule(_doc, 30, Indenter.IndentReason.OTHER));
-  }
-  public void testStarSlashMidLineBefore() throws javax.swing.text.BadLocationException {
     assertEquals(true, _rule.testApplyRule(_doc, 33, Indenter.IndentReason.OTHER));
   }
-  public void testStarSlashMidLineAfter() throws javax.swing.text.BadLocationException {
-    assertEquals(true, _rule.testApplyRule(_doc, 41, Indenter.IndentReason.OTHER));
+  public void testSecondClosingStarSlashStar() throws javax.swing.text.BadLocationException {
+    assertTrue("Still barely inside second block comment", 
+               _rule.testApplyRule(_doc, 36, Indenter.IndentReason.OTHER));
+    assertTrue("Just past '*' in closing '*/' which is still inside", 
+               _rule.testApplyRule(_doc, 37, Indenter.IndentReason.OTHER));
+  }
+  public void testAfterSecondClosingStarSlash() throws javax.swing.text.BadLocationException {
+    assertFalse("Well outside closing '*/'", _rule.testApplyRule(_doc, 41, Indenter.IndentReason.OTHER));
   }
   public void testAfterCommentedOutSlashStar() throws javax.swing.text.BadLocationException {
-    assertEquals(false, _rule.testApplyRule(_doc, 49, Indenter.IndentReason.OTHER));
+    assertFalse("After shadowed '/*'", _rule.testApplyRule(_doc, 49, Indenter.IndentReason.OTHER));
   }
   
 }

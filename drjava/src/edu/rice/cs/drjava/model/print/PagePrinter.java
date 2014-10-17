@@ -45,7 +45,7 @@ import java.awt.font.*;
  * Class which represents a Printable object for a given
  * page of the print job.
  *
- * @version $Id$
+ * @version $Id: PagePrinter.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class PagePrinter implements Printable {
 

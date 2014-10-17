@@ -40,7 +40,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 import edu.rice.cs.util.text.EditDocumentException;
 
 /** Tests the functionality of the InteractionsDocument.  Most history functionality is tested in HistoryTest.
- *  @version $Id$
+ *  @version $Id: InteractionsDocumentTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class InteractionsDocumentTest extends DrJavaTestCase {
   protected InteractionsDocument _doc;

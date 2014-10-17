@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 /** This class acts as the representation of a brace in the reduced view.  It also includes information about the gap
   * of plaintext preceding the actual brace before the previous brace or the start of the file.
   * WARNING: the code in this class critically depends on the fact that literal strings are interned.
-  * @version $Id$
+  * @version $Id: Brace.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 class Brace extends ReducedToken implements ReducedModelStates {
   

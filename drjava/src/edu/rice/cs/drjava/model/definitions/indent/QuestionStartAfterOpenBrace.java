@@ -46,7 +46,7 @@ import static edu.rice.cs.drjava.model.AbstractDJDocument.ERROR_INDEX;
 /** Determines whether or not the closest non-whitespace character preceding the start of the current line (excluding 
   * any characters inside comments or strings) is on the same line as the enclosing brace (curly or paren).
   *
-  * @version $Id$
+  * @version $Id: QuestionStartAfterOpenBrace.java 5751 2013-02-06 10:32:04Z rcartwright $
   */
 public class QuestionStartAfterOpenBrace extends IndentRuleQuestion {
   /** @param yesRule The decision subtree for the case that this rule applies in the current context.

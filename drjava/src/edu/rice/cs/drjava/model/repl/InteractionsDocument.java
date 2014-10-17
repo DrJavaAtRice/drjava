@@ -52,7 +52,7 @@ import edu.rice.cs.drjava.config.OptionListener;
 /** A GUI toolkit-agnostic document that supports console-like interaction with a Java interpreter.
   * This class assumes that the embedded document supports readers/writers locking and uses that locking
   * protocol to ensure the integrity of the data added in this class 
-  * @version $Id$
+  * @version $Id: InteractionsDocument.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class InteractionsDocument extends ConsoleDocument {
   

@@ -49,7 +49,7 @@ import edu.rice.cs.util.UnexpectedException;
 
 /**
  * DrJava's Javadoc viewing frame
- * @version $Id$
+ * @version $Id: JavadocFrame.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class JavadocFrame extends HTMLFrame {
 

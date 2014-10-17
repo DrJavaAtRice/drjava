@@ -51,7 +51,7 @@ import edu.rice.cs.util.UnexpectedException;
 /** A JPanel with a text box and a "..." button used to select a file or directory.  The file name is editable in the
   * text box, and a JFileChooser is displayed if the user clicks the "..." button.
   * TODO: make this inherit from FileSelectorStringComponent or factor the common code into an abstract class!  Duplicated code!
-  * @version $Id$
+  * @version $Id: FileSelectorComponent.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class FileSelectorComponent extends JPanel {
   

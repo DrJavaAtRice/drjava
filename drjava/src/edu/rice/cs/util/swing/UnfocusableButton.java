@@ -39,7 +39,7 @@ package edu.rice.cs.util.swing;
 import javax.swing.*;
 
 /** A JButton that cannot be given focus.
-  * @version $Id$
+  * @version $Id: UnfocusableButton.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class UnfocusableButton extends JButton {
   /** Creates a new UnfocusableButton. */

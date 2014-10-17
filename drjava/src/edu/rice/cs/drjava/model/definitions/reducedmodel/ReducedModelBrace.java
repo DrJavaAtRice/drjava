@@ -41,7 +41,7 @@ import java.util.Stack;
 /** Keeps track of the true braces (i.e., "() {}[]"). This reduced sub-model is used to balance braces for both 
   * indenting and highlighting purposes.  For example, when the user's caret is immediately after a closing brace, 
   * this allows the DefinitionsPane to produced a highlight extending from the closing brace to its match.
-  * @version $Id$
+  * @version $Id: ReducedModelBrace.java 5675 2012-08-16 21:25:57Z rcartwright $
   * @author JavaPLT
   */
 public class ReducedModelBrace extends AbstractReducedModel {

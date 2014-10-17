@@ -40,7 +40,7 @@ import javax.swing.text.BadLocationException;
 
 /** Tests whether the closest non-whitespace character preceding the start of the current line (excluding any 
   * characters inside comments or strings) is an open brace (paren or curly).
-  * @version $Id$
+  * @version $Id: QuestionStartAfterOpenBraceTest.java 5751 2013-02-06 10:32:04Z rcartwright $
   */
 public final class QuestionStartAfterOpenBraceTest extends IndentRulesTestCase {
   private String _text;

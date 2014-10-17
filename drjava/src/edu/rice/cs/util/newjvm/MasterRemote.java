@@ -40,7 +40,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 /** The remote interface for a master JVM.
-  * @version $Id$
+  * @version $Id: MasterRemote.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public interface MasterRemote extends Remote {
   /** No-op to prove that the master is still alive. */

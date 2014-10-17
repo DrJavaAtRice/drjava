@@ -41,7 +41,7 @@ import java.net.URL;
 
 /** The central interface for all platform-specific code in DrJava.  A default platform-neutral implementation is
   * provided in DefaultPlatform.
-  * @version $Id$
+  * @version $Id: PlatformSupport.java 5727 2012-09-30 03:58:32Z rcartwright $
   * @see edu.rice.cs.drjava.platform.DefaultPlatform
   */
 public interface PlatformSupport {

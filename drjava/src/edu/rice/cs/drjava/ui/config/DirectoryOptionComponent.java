@@ -49,7 +49,7 @@ import edu.rice.cs.util.swing.SwingFrame;
 
 /** Graphical form of a FileOption.
  *
- *  @version $Id$
+ *  @version $Id: DirectoryOptionComponent.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class DirectoryOptionComponent extends OptionComponent<File,DirectorySelectorComponent> implements OptionConstants {
 

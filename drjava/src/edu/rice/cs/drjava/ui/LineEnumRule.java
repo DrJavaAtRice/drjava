@@ -44,7 +44,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 
 /**
  * The row header of the DefinitionsPane which displays the line numbers
- * @version $Id$
+ * @version $Id: LineEnumRule.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class LineEnumRule extends JComponent {
   /** The magic number for Swing's JTextPane border padding. */

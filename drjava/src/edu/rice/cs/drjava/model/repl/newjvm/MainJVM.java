@@ -90,7 +90,7 @@ import static edu.rice.cs.drjava.config.OptionConstants.*;
   * 
   * <p> Note that the Option type used in this class is edu.rice.cs.plt.tuple.Option, not edu.rice.cs.drjava.config. 
   * 
-  * @version $Id$
+  * @version $Id: MainJVM.java 5727 2012-09-30 03:58:32Z rcartwright $
   */
 public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   

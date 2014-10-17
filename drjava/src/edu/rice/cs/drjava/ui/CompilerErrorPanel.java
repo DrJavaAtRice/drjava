@@ -59,7 +59,7 @@ import java.util.Vector;
 /** The panel which houses the list of errors after an unsuccessful compilation.  If the user clicks on the combobox,
   * it moves the definitions cursor to the error in the source.  If the cursor is moved onto a line with an error, it 
   * selects the appropriate error in the list but do not move the cursor.
-  * @version $Id$
+  * @version $Id: CompilerErrorPanel.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class CompilerErrorPanel extends ErrorPanel {
   

@@ -76,7 +76,7 @@ import static edu.rice.cs.drjava.ui.predictive.PredictiveInputModel.*;
 import static edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame.FrameState;
 
 /** Autocomplete support.
-  * @version $Id$
+  * @version $Id: AutoCompletePopup.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class AutoCompletePopup {
   /** Main frame. */

@@ -40,7 +40,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 
 /**
  * Tests the functionality of the ModelList list class.
- * @version $Id$
+ * @version $Id: ModelListTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class ModelListTest extends DrJavaTestCase {
   protected ModelList<Integer> fEmpty;

@@ -2143,7 +2143,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         // by getting the canonical file, we make sure that we get an IOException if the filename is illegal
         if (! file.getCanonicalFile().exists() || selector.verifyOverwrite(file)) {  // confirm that existing file can be overwritten        
           FileOps.saveFile(new FileOps.DefaultFileSaver(file) {
-            /** Only runs in event thread so no read lock is necessary. */
+            /** Only runs in event thread. */
             public void saveTo(OutputStream os) throws IOException {
               final String text = doc.getText();
               OutputStreamWriter osw = new OutputStreamWriter(os);
@@ -5317,11 +5317,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     // tried passing false here. seemed to help with bug
     // [ 1478796 ] DrJava Does Not Shut Down With Project Open
     // on HP tc1100 and Toshiba Portege tablet PCs, but did not help in all cases
-    if (! _closeProject(true)) { return; /* if user pressed cancel, do not quit */ }
+    if (! _closeProject(true)) return; /* if user pressed cancel, do not quit */
     
     _updateSavedConfiguration();
-    
-    //DrJava.consoleOut().println("Quitting DrJava...");
+    System.out.println("Quitting DrScala ...");
     dispose();    // Free GUI elements of this frame
     _model.quit();
   }

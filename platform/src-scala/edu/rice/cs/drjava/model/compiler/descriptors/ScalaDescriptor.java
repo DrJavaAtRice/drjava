@@ -97,6 +97,7 @@ public class ScalaDescriptor extends JDKDescriptor {
     });
     files = IterUtil.compose(files, new File("/opt/scala/lib/scala-compiler.jar"));
     files = IterUtil.compose(files, new File("/usr/share/scala/lib/scala-compiler.jar"));
+    files = IterUtil.compose(files, new File("/usr/share/java/scala-compiler-2.9.2.jar"));
     // If executable is class file tree, looks for compiler in associated lib directory
     File f = FileOps.getDrJavaFile();
     if (! f.isFile()) { // f is a directory
@@ -160,7 +161,7 @@ public class ScalaDescriptor extends JDKDescriptor {
     * The compiler was found in the specified file. This method may have to search the user's hard drive, e.g.
     * by looking relative to compiler.getParentFile(), by checking environment variables, or by looking in
     * certain OS-specific directories.
-    * @param compiler location where the compiler was fund
+    * @param compiler location where the compiler was foUund
     * @return list of additional files that need to be available */
   public Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException {
     if (compiler.equals(FileOps.getDrJavaFile())) {

@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /** Indent information block.
- *  @version $Id$
+ *  @version $Id: IndentInfo.java 5668 2012-08-15 04:58:30Z rcartwright $
  */
 public class IndentInfo {
   private String _lineEnclosingBraceType;      //the type of brace at the beginning of our line

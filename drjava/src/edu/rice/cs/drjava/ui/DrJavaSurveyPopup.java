@@ -55,7 +55,7 @@ import edu.rice.cs.plt.lambda.LambdaUtil;
 
 /** Asks whether DrJava may contact the DrJava developers and send information about
   * the operating system and the Java version used.
-  * @version $Id$
+  * @version $Id: DrJavaSurveyPopup.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class DrJavaSurveyPopup extends JDialog {
   /** the keys of the system properties that we want to send */

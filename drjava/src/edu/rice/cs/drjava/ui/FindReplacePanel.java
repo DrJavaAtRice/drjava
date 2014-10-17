@@ -64,7 +64,7 @@ import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.SwingDocument;
 
 /** The tabbed panel that handles requests for finding and replacing text.
-  * @version $Id$
+  * @version $Id: FindReplacePanel.java 5668 2012-08-15 04:58:30Z rcartwright $
   */
 class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
 

@@ -46,7 +46,7 @@ import java.util.LinkedList;
  * are translated so that the tokenized arguments have the same meaning.
  * Since all methods are static, the class is declared abstract to prevent
  * instantiation.
- * @version $Id$
+ * @version $Id: ArgumentTokenizer.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public abstract class ArgumentTokenizer {
   private static final int NO_TOKEN_STATE = 0;

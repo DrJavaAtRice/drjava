@@ -47,7 +47,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
   * <p>
   * <b>Does not work if character being searched for is a '/' or a '*'</b>
   *
-  * @version $Id$
+  * @version $Id: QuestionFollowedByStar.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class QuestionFollowedByStar extends IndentRuleQuestion {
   

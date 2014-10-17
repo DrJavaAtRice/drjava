@@ -42,7 +42,7 @@ import javax.swing.text.BadLocationException;
 
 /** Determines whether or not the line enclosing brace is '{' and is immediately preceded by the given _prefix.  
   * If _prefix is '=', we are looking for "= {".  This questions corresponds to rule 22 in our decision tree.
-  * @version $Id$
+  * @version $Id: QuestionHasCharPrecedingOpenBrace.java 5668 2012-08-15 04:58:30Z rcartwright $
   */
 public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
   private char[] _prefix;

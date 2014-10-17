@@ -44,7 +44,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 /** A JDialog with a scrollable text area and a button panel. Uses DrJava's configurable Main Font in the text area.
- *  @version $Id$
+ *  @version $Id: DrJavaScrollableDialog.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class DrJavaScrollableDialog extends ScrollableDialog {
 

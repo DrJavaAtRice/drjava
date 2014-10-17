@@ -46,7 +46,7 @@ import edu.rice.cs.drjava.DrJavaRoot;
   * boolean indicating if the panel is being displayed, and a close button. Attaches an action to the close button
   * which calls the _close method. This method can be overwritten in a subclass if needed.  Methods in this
   * class should only be executed in the event thread, but it not enforced.  (FIX THIS?)
-  * @version $Id$
+  * @version $Id: TabbedPanel.java 5668 2012-08-15 04:58:30Z rcartwright $
   */
 public abstract class TabbedPanel extends JPanel implements DropTargetListener {
   

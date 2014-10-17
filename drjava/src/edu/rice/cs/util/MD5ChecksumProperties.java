@@ -42,7 +42,7 @@ import java.util.jar.*;
 import java.security.*;
 
 /** Create a property file with MD5 checksums
-  *  @version $Id$
+  *  @version $Id: MD5ChecksumProperties.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class MD5ChecksumProperties extends Properties {
   public static final int BUFFER_SIZE = 10*1024;

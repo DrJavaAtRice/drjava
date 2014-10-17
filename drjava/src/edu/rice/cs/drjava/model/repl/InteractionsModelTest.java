@@ -61,7 +61,7 @@ import java.rmi.RemoteException;
   * document locking and "event queue only" invariants are violated.  The ubiquitous workaround is to call 
   * Utilities.clearEventQueue().
   * TODO: completely revise this class.
-  * @version $Id$
+  * @version $Id: InteractionsModelTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public final class InteractionsModelTest extends DrJavaTestCase {
   

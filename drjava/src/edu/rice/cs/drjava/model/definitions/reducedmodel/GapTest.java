@@ -40,7 +40,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
 
 /**
  * Tests the functionality of the Gap class.
- * @version $Id$
+ * @version $Id: GapTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class GapTest extends DrJavaTestCase {
   /** Tests the ability to grow a Gap.

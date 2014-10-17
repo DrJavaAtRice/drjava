@@ -40,6 +40,6 @@ package edu.rice.cs.drjava.model.definitions.indent;
   * Performs the update to the document, based on the context provided
   * by its position in the decision tree.  TODO: eliminate this class; it does
   * NOTHING.  IndentRuleWithTrace can be used everywhere instead.
-  * @version $Id: IndentRuleAction.java 5668M 2014-10-06 11:18:17Z (local) $
+  * @version $Id: IndentRuleAction.java 5668 2012-08-15 04:58:30Z rcartwright $
   */
 public abstract class IndentRuleAction extends IndentRuleWithTrace { }

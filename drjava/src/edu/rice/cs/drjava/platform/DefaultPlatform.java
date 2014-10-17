@@ -51,7 +51,7 @@ import java.util.List;
 
 /** Default platform-neutral implementation of PlatformSupport.  Most implementations
   * will extend this class to inherit default behaviors.
-  * @version $Id$
+  * @version $Id: DefaultPlatform.java 5711 2012-09-11 19:42:33Z rcartwright $
   */
 class DefaultPlatform implements PlatformSupport {
   /** Singleton instance. */

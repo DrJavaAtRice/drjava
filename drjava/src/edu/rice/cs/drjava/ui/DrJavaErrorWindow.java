@@ -58,7 +58,7 @@ import edu.rice.cs.drjava.config.FileConfiguration;
  *  This window is not automatically updated when new errors occur. In the case of errors, we want to
  *  minimize the effects on the GUI. If we want to see an updated dialog, we can click on the "DrScala Errors"
  *  button again.
- *  @version $Id$
+ *  @version $Id: DrJavaErrorWindow.java 5727 2012-09-30 03:58:32Z rcartwright $
  */
 public class DrJavaErrorWindow extends JDialog {
   /** Sourceforge add bug URL */

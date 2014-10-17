@@ -40,7 +40,7 @@ import java.io.File;
 import java.io.Serializable;
 
 /** An interface for a GUI frame that opens files.
- *  @version $Id$
+ *  @version $Id: FileOpenSelector.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public interface FileOpenSelector extends Serializable {
   public File[] getFiles() throws OperationCanceledException;

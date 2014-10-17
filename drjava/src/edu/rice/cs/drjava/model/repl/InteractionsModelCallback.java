@@ -42,7 +42,7 @@ import java.util.List;
 
 /** Callback interface which allows an InteractionsModel to respond to events in a remote Java interpreter.  These
   * methods may run outside the event thread!
-  * @version $Id$
+  * @version $Id: InteractionsModelCallback.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public interface InteractionsModelCallback {
   

@@ -44,7 +44,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
 
 /** A file filter for all source files. Java language levels support has been disabled.
- *  @version $Id$
+ *  @version $Id: SmartSourceFilter.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class SmartSourceFilter extends JavaSourceFilter {
   

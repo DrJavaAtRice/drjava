@@ -102,7 +102,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
   * (the view).  We may want to refactor this class into a different package. <p>
   * (The PopupConsole was introduced in version 1.29 of this file and subsequently removed.)
   *
-  * @version $Id$
+  * @version $Id: InteractionsController.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class InteractionsController extends AbstractConsoleController {
   
@@ -489,7 +489,7 @@ public class InteractionsController extends AbstractConsoleController {
 //  /** Evaluates the current text following the prompt in the interactions document.*/
 //  private void _evalCurrentInteraction() {
 //    
-//    if (! _interactionsDJDocument._inBlockComment()) {
+//    if (! _interactionsDJDocument._insideBlockComment()) {
 //       
 //    String toEval;
 //    if (_doc.inProgress()) return;  // Don't start a new interaction while one is in progress

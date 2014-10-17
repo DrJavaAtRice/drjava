@@ -40,7 +40,7 @@ import javax.swing.table.*;
 import java.util.Vector;
 
 /** Common TableModel for Uneditable tables
- *  @version $Id$
+ *  @version $Id: UneditableTableModel.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class UneditableTableModel extends DefaultTableModel {
   public UneditableTableModel() { super(); }

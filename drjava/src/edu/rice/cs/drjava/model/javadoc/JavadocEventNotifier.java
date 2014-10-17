@@ -70,7 +70,7 @@ import edu.rice.cs.drjava.model.compiler.CompilerListener;
  * Java synchronization!
  * <p>
  *
- * @version $Id$
+ * @version $Id: JavadocEventNotifier.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 class JavadocEventNotifier extends EventNotifier<JavadocListener>
   implements JavadocListener {

@@ -75,7 +75,7 @@ import static edu.rice.cs.drjava.ui.MainFrameStatics.*;
 import static edu.rice.cs.drjava.ui.predictive.PredictiveInputModel.*;
 
 /** Generates Java source from information entered in the "New Class" dialog.
-  * @version $Id$
+  * @version $Id: NewJavaClassDialog.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class NewJavaClassDialog extends SwingFrame {
 

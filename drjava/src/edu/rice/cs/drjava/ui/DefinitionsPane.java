@@ -65,7 +65,7 @@ import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStat
 
 /** The pane in which work on a given OpenDefinitionsDocument occurs. A DefinitionsPane is tied to a single document,
  *  which cannot be changed.
- *  @version $Id$
+ *  @version $Id: DefinitionsPane.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class DefinitionsPane extends AbstractDJPane implements Finalizable<DefinitionsPane> {
 

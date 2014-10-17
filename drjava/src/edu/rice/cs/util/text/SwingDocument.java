@@ -57,7 +57,7 @@ import java.util.HashMap;
   * are performed in the event thread.
   * 
   * TODO: create a separate DummySwingDocument class for testing and make SwingDocument abstract.
-  * @version $Id$
+  * @version $Id: SwingDocument.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class SwingDocument extends DefaultStyledDocument implements EditDocumentInterface, AbstractDocumentInterface {
   
@@ -183,12 +183,12 @@ public class SwingDocument extends DefaultStyledDocument implements EditDocument
     catch (BadLocationException e) { throw new EditDocumentException(e); }
   }
   
-  /** Gets the document text; this method is threadsafe. */
+  /** Gets the document text; this method should only be executed in event thread. */
   public String getText() { 
     try { return getText(0, getLength()); }  // calls method defined in DefaultStyledDocument
-    catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible if read lock is already held
+    catch (BadLocationException e) { throw new UnexpectedException(e); }  // should never happen in event thread
   }
- 
+  
   /** Sanitized version of getText(int, int) that converts BadLocationException to UnexpectedException. */
   public String _getText(int pos, int len) { 
     try { return getText(pos, len); }  // calls method defined in DefaultStyledDocument

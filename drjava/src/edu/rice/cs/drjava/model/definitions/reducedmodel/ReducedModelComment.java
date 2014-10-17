@@ -40,7 +40,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
   * coloring purposes.  Given the information contained here, the DefinitionsEditorKit can paint strings, comments, and
   * regular code in different colors.  DefinitionsEditorKit colors keywords by directly reading DefinitionsDocument, 
   * the "full-scale" model.
-  * @version $Id$
+  * @version $Id: ReducedModelComment.java 5711 2012-09-11 19:42:33Z rcartwright $
   */
 
 public class ReducedModelComment extends AbstractReducedModel {
@@ -59,7 +59,7 @@ public class ReducedModelComment extends AbstractReducedModel {
       case '*': insertSpecial("*"); break;
       case '/': insertSpecial("/"); break;
       case '\n': insertNewline(); break;
-      case '\\': insertSpecial("\\"); break;
+      case '\\': insertSpecial("\\"); break;  // Note: "\\".length() = 1
       case '\'': insertQuote("'"); break;
       case '\"': insertQuote("\""); break;
       default:
@@ -426,23 +426,23 @@ public class ReducedModelComment extends AbstractReducedModel {
   }
   
   /** @return true if the current token is shadowed by a comment or quotation.  Note: returns false for the "brace" 
-    * opening a line, block comment, or quotation. */
+    * opening a line, block comment, or quotation.  What about the interior of two character brace? */
   public boolean isShadowed() {
 //     ReducedToken curToken = _cursor.current();
     return getStateAtCurrent() != FREE /* || curToken.isLineComment() || curToken.isBlockCommentStart() */; 
   }
   
-  /** @return true if the _cursor is within a block comment, line comment,  i(ncluding opening '/' char in comments) and
-    * optionally a string (including the opening and closing '"' chars).  Note: the newline at the end of a wing comment
-    * is NOT weakly shadowed. 
+  /** @return true if the _cursor is within a block comment, line comment,  (including the opening and closing '/' chars 
+    * in comments) and optionally a string (including the opening and closing '"' chars).  Note: the newline at the end 
+    * of a wing comment is NOT weakly shadowed. 
     * @param shadowStrings flag that tells this method to respect double-quote shadowing when true*/
   public boolean isWeaklyShadowed(boolean shadowStrings) { 
     return (isShadowed() && /* exclude newline at end of wing comment */
             (getStateAtCurrent() == INSIDE_BLOCK_COMMENT || ! _cursor.current().isNewline())  && 
-            /* conditionally esclude chars in strings */ (getStateAtCurrent() != INSIDE_DOUBLE_QUOTE || shadowStrings)
+            /* conditionally exclude chars in strings */ (getStateAtCurrent() != INSIDE_DOUBLE_QUOTE || shadowStrings)
               || isOpenComment() || (isDoubleQuote() && shadowStrings));  // open braces for comments and strings
   }
-  
+    
   /** @return true if the cursor is pointing to an open comment bracee (either block or wing). */
   public boolean isOpenComment() {
     if (_cursor.atStart() || _cursor.atEnd()) return false;  // currentLocation is outside document!

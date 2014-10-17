@@ -57,7 +57,7 @@ import java.lang.StringBuffer;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Tests the functionality of the new JVM manager.
- *  @version $Id$
+ *  @version $Id: NewJVMTest.java 5668 2012-08-15 04:58:30Z rcartwright $
  */
 public final class NewJVMTest extends DrJavaTestCase {
   private static final Log _log  = new Log("NewJVMTest.txt", false);

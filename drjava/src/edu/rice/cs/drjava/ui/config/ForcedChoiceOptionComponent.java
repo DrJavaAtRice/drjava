@@ -47,7 +47,7 @@ import java.util.Iterator;
 /** This component displays all legal choices for a ForcedChoiceOption as a list
   * of radio buttons.  The radio buttons are placed within a framed panel titled
   * with the OptionComponent's label.
-  * @version $Id$
+  * @version $Id: ForcedChoiceOptionComponent.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class ForcedChoiceOptionComponent extends OptionComponent<String,JComboBox<String>> {
   private volatile JComboBox<String> _comboBox;

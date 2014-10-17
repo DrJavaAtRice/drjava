@@ -45,7 +45,7 @@ import java.util.List;
  * Tests that an ArgumentTokenizer can correctly divide up a string
  * into command line-style arguments.  Tries to follow the precedent
  * set by a Unix bash shell in most cases.
- * @version $Id$
+ * @version $Id: ArgumentTokenizerTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class ArgumentTokenizerTest extends DrJavaTestCase {
 

@@ -44,7 +44,7 @@ import java.awt.Component;
 /**
  * Adapter from Component to ComplexGUIAvailabilityListener.
  *
- * @version $Id$
+ * @version $Id: AndGUIAvailabilityComponentAdapter.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class AndGUIAvailabilityComponentAdapter extends AndGUIAvailabilityListener {
   protected final Component _adaptee;

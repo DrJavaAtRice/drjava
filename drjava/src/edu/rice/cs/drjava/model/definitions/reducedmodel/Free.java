@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
 
 /** Shadowing state that indicates normal, unshadowed text.
-  * @version $Id$
+  * @version $Id: Free.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class Free extends ReducedModelState {
   public static final Free ONLY = new Free();

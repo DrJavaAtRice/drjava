@@ -41,7 +41,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 /** A question node in the decision tree for the indentation system. Calls to <code>indentLine</code> on an 
   * IndentRuleQuestion will make a decision based on context and call the same method on one of its children.  
   * The leaves of the tree are represented by IndentRuleAction objects.
-  * @version $Id: IndentRuleQuestion.java 5594M 2014-10-06 05:28:45Z (local) $
+  * @version $Id: IndentRuleQuestion.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
   /** Node in decision tree to use if the rule holds in this context. */

@@ -46,7 +46,7 @@ import java.util.Vector;
 
 /** The panel that set of configuration options (e.g. Fonts, Colors) uses to display its configurable items as read
  *  from OptionConstants.
- *  @version $Id$
+ *  @version $Id: ConfigPanel.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class ConfigPanel extends JPanel {
 

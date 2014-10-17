@@ -47,7 +47,7 @@ import javax.swing.text.BadLocationException;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** A test on the GlobalModel for JUnit testing.
-  * @version $Id$
+  * @version $Id: JUnitErrorModelTest.java 5732 2012-09-30 21:11:39Z wdforson $
   */
 public final class JUnitErrorModelTest extends GlobalModelTestCase {
   

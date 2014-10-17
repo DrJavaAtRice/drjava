@@ -37,13 +37,13 @@
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /** Tests insertion and move and other non-delete functionality of the reduced model.
-  * @version $Id$
+  * @version $Id: ReducedModelTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public final class ReducedModelTest extends BraceReductionTestCase implements ReducedModelStates {
   /** tests backwards balancer, e.g., ')' balances with '(' */
   public void testBalanceBackward() {
     assertEquals("#0.0", -1, model0.balanceBackward());
-    model0 = setUpExample();
+    model0 = setUpExample(); // which is the following document
     // {
     // ___
     // (__)
@@ -267,10 +267,13 @@ public final class ReducedModelTest extends BraceReductionTestCase implements Re
     model1.insertChar('/');
     model1.insertChar('*');
     model1.insertChar('{');
+    assertEquals("#-0.0", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
     model1.move(-1);
     // /*#{
     assertEquals("#0.0", INSIDE_BLOCK_COMMENT, model1.getStateAtCurrent());
-    model1.move(-2);
+    model1.move(-1);
+    assertEquals("#0.05", FREE, model1.getStateAtCurrent());  
+    model1.move(-1);
     assertEquals("#0.1", FREE, model1.currentToken().getState());
     model1.move(3);
     model1.insertChar('*');

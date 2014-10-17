@@ -56,7 +56,7 @@ import java.io.File;
 import java.util.HashMap;
 
 /** The panel that displays all the testing errors.
-  * @version $Id$
+  * @version $Id: JUnitPanel.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class JUnitPanel extends ErrorPanel {
   private static final String START_JUNIT_MSG = "Testing in progress.  Please wait ...\n";

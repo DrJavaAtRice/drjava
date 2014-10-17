@@ -58,7 +58,7 @@ import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 
 /** Abstract class that hooks a Swing console/interactions document with its Swing pane.
   * TODO: move interactions specific functionality to InteractionsController by creating ConsoleDJDocument class
-  * @version $Id$
+  * @version $Id: AbstractConsoleController.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class AbstractConsoleController /* implements Serializable */ {
   

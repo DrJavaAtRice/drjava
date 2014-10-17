@@ -41,7 +41,7 @@ import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStat
 /** Represents the abstract notion of a shadowing state.  The shadowing state of text is simply its interpretation during
   * compilation.  Commented text is ignored; quoted text is accumulated into string constants.  This classification
   * supports accurate highlighting, indenting, and other analyses of program text.
-  * @version $Id$
+  * @version $Id: ReducedModelState.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class ReducedModelState {
   

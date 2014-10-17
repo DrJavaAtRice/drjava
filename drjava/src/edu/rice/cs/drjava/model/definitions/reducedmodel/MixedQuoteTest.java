@@ -40,7 +40,7 @@ import  junit.framework.*;
 
 /**
  * Tests the interaction between double and single quotes and comments
- * @version $Id$
+ * @version $Id: MixedQuoteTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public final class MixedQuoteTest extends BraceReductionTestCase
   implements ReducedModelStates

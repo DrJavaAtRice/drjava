@@ -54,7 +54,7 @@ import static edu.rice.cs.drjava.config.OptionConstants.*;
   * It's abstract to prevent (useless) instantiation, though it can be subclassed
   * to provide convenient namespace importation of its methods.
   *
-  * @version $Id$
+  * @version $Id: FileOps.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public abstract class FileOps {
   

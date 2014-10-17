@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /** A refactoring of the common code between ReducedModelComment and ReducedModelBrace.  Both of the refactored classes
   * extend this class.
-  * @version $Id$
+  * @version $Id: AbstractReducedModel.java 5594 2012-06-21 11:23:40Z rcartwright $
   * @author JavaPLT
   */
 public abstract class AbstractReducedModel implements ReducedModelStates {

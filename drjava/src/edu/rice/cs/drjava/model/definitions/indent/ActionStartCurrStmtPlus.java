@@ -40,7 +40,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 
 /** Assumes that the current line is NOT the start of the current statement and preceding lines are indented correctly. 
   * Indents the current line to the indent level of the start of the containing statement plus the given suffix string.
-  * @version $Id: ActionStartCurrStmtPlus.java 5710M 2014-10-06 12:28:37Z (local) $
+  * @version $Id: ActionStartCurrStmtPlus.java 5710 2012-09-04 04:45:09Z rcartwright $
   */
 public class ActionStartCurrStmtPlus extends IndentRuleAction {
   private int _suffix;

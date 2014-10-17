@@ -47,7 +47,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Displays a popup window for the first uncaught exception or logged conditions.
- *  @version $Id$
+ *  @version $Id: DrJavaErrorPopup.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 public class DrJavaErrorPopup extends JDialog {
   /** information about the error */

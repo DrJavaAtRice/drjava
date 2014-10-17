@@ -57,7 +57,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 /** Graphical form of a VectorOption for the Extra Classpath option. Uses a file chooser for each String element.
- *  @version $Id$
+ *  @version $Id: VectorOptionComponent.java 5668 2012-08-15 04:58:30Z rcartwright $
  */
 public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>,JComponent> implements OptionConstants {
   protected JScrollPane _tableScrollPane;

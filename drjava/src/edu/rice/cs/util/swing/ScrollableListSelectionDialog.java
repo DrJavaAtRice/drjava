@@ -60,7 +60,7 @@ import javax.swing.table.AbstractTableModel;
  * from JOptionPane.</p>
  * 
  * @author Chris Warrington
- * @version $Id$
+ * @version $Id: ScrollableListSelectionDialog.java 5594 2012-06-21 11:23:40Z rcartwright $
  * @since 2007-04-08
  */
 public class ScrollableListSelectionDialog extends JDialog {

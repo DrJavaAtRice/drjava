@@ -55,7 +55,7 @@ import edu.rice.cs.plt.iter.IterUtil;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** A test on the GlobalModel that does deals with everything outside of simple file operations, e.g., compile, quit.
-  * @version $Id: GlobalModelOtherTest.java 5719M 2014-10-05 21:59:44Z (local) $
+  * @version $Id: GlobalModelOtherTest.java 5719 2012-09-28 22:58:24Z wdforson $
   */
 public final class GlobalModelOtherTest extends GlobalModelTestCase implements OptionConstants {
   

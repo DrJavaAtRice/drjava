@@ -72,7 +72,7 @@ import java.util.List;
  * Java synchronization!
  * <p>
  *
- * @version $Id$
+ * @version $Id: JUnitEventNotifier.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitListener {
   
