@@ -1,2 +1,6 @@
 *.org
+*.sav
+*.new
 *.drjava
+*~
+drjava/classes
