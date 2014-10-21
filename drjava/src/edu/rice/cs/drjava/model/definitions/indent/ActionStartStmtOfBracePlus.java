@@ -66,9 +66,9 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
     * @param reason The reason that the indentation is taking place
     * @return true if the caller should update the current location itself, false if the indenter has already handled it
     */
-  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+  public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
 
-    boolean supResult = super.indentLine(doc, reason); // This call does nothing other than record some indent tracing
+    traceIndenting(doc, _suffix + ", " + _includeScalaBraces, reason);
     int pos = doc.getCurrentLocation();
 //    System.err.println("***** ActionStartStmtOfBracePlus.indentLine called at location " + pos + "  line = '" + 
 //                       doc._getCurrentLine() + "'" + " includeScalaBraces = " + _includeScalaBraces);
@@ -77,7 +77,7 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
       int bracePos = (_includeScalaBraces) ? doc.findEnclosingScalaBracePosWithEquals(pos) : 
         doc.findPrevDelimiter(pos, STRICT_OPENING_BRACES);
       
-      if (bracePos == ERROR_INDEX) return supResult;  // will never happen if pos has an enclosing (Scala) brace 
+      if (bracePos == ERROR_INDEX) return;  // will never happen if pos has an enclosing (Scala) brace 
 //      System.err.println("[ASSOBP] bracePos = " + bracePos + "; brace = '" + doc.getText(bracePos,1).charAt(0) + "'");
       final int indent = doc._getIndentOfRestrictedStmt(bracePos) + _suffix;  // ignore any '=' prelude
 //      System.err.println("[ASSOBP] indent = " + indent + " _suffix = " + _suffix);
@@ -85,6 +85,5 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
       doc.setTab(indent, pos);
     }
     catch(BadLocationException ble) { /* do nothing */ }
-    return supResult;
   }
 }

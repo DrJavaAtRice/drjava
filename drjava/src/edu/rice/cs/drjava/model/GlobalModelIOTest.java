@@ -1139,7 +1139,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     
     // check that output of loaded history is correct
     ConsoleDocument con = _model.getConsoleDocument();
-    System.err.println("con = \n" + con + "\n***End of Console***");
+//    System.err.println("con = \n" + con + "\n***End of Console***");
                        
     assertEquals("Output of loaded history is not correct: " + con.getDocText(0, con.getLength()).trim(),
                  "x = 5" + StringOps.EOL + "x = 5",

@@ -150,13 +150,12 @@ public class DrScalaInterpreter implements Interpreter {
 //    System.out.print(pathType + ": " + path);
     String res = this._interpret(":cp " + path, true);
     if (res.contains("doesn't seem to exist"))
-      System.err.println("ERROR: unable to add cp, '" + path +
-        "' to the Interpreter classpath.");
+      System.err.println("ERROR: unable to add cp, '" + path + "' to the Interpreter classpath.");
   }
 
   public synchronized void reset() {
     String res = this._interpret(":reset", true);
-    System.err.println("result of reset cmd: " + res);
+//    System.err.println("result of reset cmd: " + res);
   }
   
   /** Initialize the interpreter for use in the interactions pane. */

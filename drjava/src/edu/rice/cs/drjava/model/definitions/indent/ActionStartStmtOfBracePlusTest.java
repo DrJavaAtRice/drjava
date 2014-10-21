@@ -45,7 +45,6 @@ import javax.swing.text.BadLocationException;
  */
 public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
 
-
 //  /** Tests indenting with a single line contract. */
 //  public void testSingleLineContract() throws BadLocationException {
 //    IndentRuleAction rule1 = new ActionStartStmtOfBracePlus(0);

@@ -59,8 +59,8 @@ public class ActionBracePlus extends IndentRuleAction {
     * @param doc AbstractDJDocument containing the line to be indented.
     * @return true if the caller should update the current location, false if the indenter has already done this.
     */
-  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    boolean supResult = super.indentLine(doc, reason);
+  public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+    traceIndenting(doc, "" + _suffixCt, reason);
     int here = doc.getCurrentLocation();
 //    int startLine = doc._getLineStartPos(here);
 
@@ -86,7 +86,5 @@ public class ActionBracePlus extends IndentRuleAction {
       doc.setTab(tab, here);
     }
     catch(BadLocationException ble) { /* do nothing */ }
-    
-    return supResult;
   }
 }

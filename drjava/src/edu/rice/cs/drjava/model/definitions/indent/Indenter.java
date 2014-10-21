@@ -49,9 +49,17 @@ public class Indenter {
   
   private static final String[] FALSE_CASE_SUFFIXES = new String[] { "class", "object" };
   
+  /** Static tracing flag. */
+  public static volatile boolean traceOn = false;
+  
+  /** Turn indent tracing on.  Potentially used in test code. */
+  public static void setTraceOn(boolean t) { traceOn = t; }
+  
+  /** Only constructor */
   public Indenter(int indentLevel) { 
     _indentLevel = indentLevel;
-    buildTree(indentLevel); 
+    buildTree(indentLevel);
+    setTraceOn(false);
   }
   
   private final int _indentLevel;
@@ -164,9 +172,12 @@ public class Indenter {
     * @param doc document containing line to be indented  Assumes that reduced lock is already held.
     * @return true if the condition tested by the top rule holds, false otherwise
     */
-  public boolean indent(AbstractDJDocument doc, Indenter.IndentReason reason) {
+  public void indent(AbstractDJDocument doc, Indenter.IndentReason reason) {
 //    Utilities.showDebug("Indenter.indent called on doc "  + doc);
-    return _topRule.indentLine(doc, reason);
+     IndentRuleWithTrace.initTrace();
+     String line = doc._getCurrentLine();
+     _topRule.indentLine(doc, reason);
+     IndentRuleWithTrace.printLastIndentTrace(line, System.err);
   }
 }
 

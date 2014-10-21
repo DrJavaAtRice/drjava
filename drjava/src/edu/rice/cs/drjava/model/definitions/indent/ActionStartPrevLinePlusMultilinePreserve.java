@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.*;
+import java.util.Arrays;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
@@ -76,8 +77,10 @@ class ActionStartPrevLinePlusMultilinePreserve extends IndentRuleAction {
     * @param reason The reason that the indentation is taking place
     * @return this is always false, since we are updating the cursor location
     */
-  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    super.indentLine(doc, reason); // This call does nothing other than record some indent tracing
+  public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+    traceIndenting(doc, 
+                   Arrays.toString(_suffices) + ", " + _cursorLine + ", " + _cursorPos + ", " + _psrvLine + ", " + _psrvPos,
+                   reason);
     try {
       // copy it so any changes are not remembered
       String[] suffices = new String[_suffices.length];
@@ -104,7 +107,7 @@ class ActionStartPrevLinePlusMultilinePreserve extends IndentRuleAction {
       //  javax.swing.JOptionPane.showMessageDialog(null, "\"" + suffices[i] + "\"", "suffices[" + i + "]", 
       //    javax.swing.JOptionPane.PLAIN_MESSAGE);
       a = new ActionStartPrevLinePlusMultiline(suffices, _cursorLine, _cursorPos);
-      return a.indentLine(doc, reason);
+      a.indentLine(doc, reason);
     }
     catch (BadLocationException e) {
       // Shouldn't happen

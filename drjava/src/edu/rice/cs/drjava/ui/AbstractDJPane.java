@@ -214,7 +214,7 @@ public abstract class AbstractDJPane extends JTextPane
    */
   public void indent(final Indenter.IndentReason reason) {
 
-    /** Because indent() is a function called directly by the Keymap, it does not go through the regular insertString
+    /** Because indent() is a method called directly by the Keymap, it does not go through the regular insertString
       * channels.  Thus it may not be in sync with the document's internal position.  For that reason, we grab the
       * caretPosition and set the current location to that value before calling the insertLine operation.  The logic
       * for a single line insert is very dependent on the current location.

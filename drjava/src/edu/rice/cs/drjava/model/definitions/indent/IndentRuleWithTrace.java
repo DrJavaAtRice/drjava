@@ -50,41 +50,40 @@ import java.io.PrintStream;
 public abstract class IndentRuleWithTrace implements IndentRule {
 
   private static volatile ArrayList<String> trace = null;
-  private static volatile boolean startOver = true;
-  private static volatile boolean ruleTraceEnabled = false;  // true ENABLES TRACING (along with uncommenting 110)
+//  private static volatile boolean startOver = true;
+  private static volatile boolean ruleTraceEnabled = true;  // true ENABLES TRACING (along with uncommenting 110)
 
-  public static final String YES = "Yes";
-  public static final String NO = "No";
-  public static final String TERMINUS_RULE = "";
+  public static final String YES = " Yes";
+  public static final String NO = " No";
+//  public static final String TERMINUS_RULE = "";
 
+  /** Initialize trace list. */
+  public static void initTrace() {
+    trace = new ArrayList<String>();
+  }
+  
   /* This method prints the most recent trace through the indent tree */
-  public static void printLastIndentTrace(PrintStream ps) {
+  public static void printLastIndentTrace(String line, PrintStream ps) {
     if (trace == null) {
       ps.println("No trace to print");
     } 
     else {
+      ps.println("********Tracing indenting of line '" + line + "'**********");
       for (int x = 0; x < trace.size(); x++) {
         ps.println(trace.get(x));
       }
-      ps.println("******************************");
+      ps.println("**********************************************************");
     }
   }
 
-  /* Potentially used in test code. */
-  public static void setRuleTraceEnabled(boolean ruleTraceEnabled) {
-    IndentRuleWithTrace.ruleTraceEnabled = ruleTraceEnabled;
-  }
 
   static ArrayList<String> getTrace() { return trace; }
 
-  /** This rule just adds to the trace kept in trace */
-  protected static void _addToIndentTrace(String ruleName, String direction, boolean terminus) {
-    if (ruleTraceEnabled) {
-      if (startOver) trace = new ArrayList<String>();
-      startOver = terminus;
-      trace.add(ruleName + " " + direction);
-    }
+  /** This rule just adds to the information kept in trace */
+  protected static void _addToIndentTrace(String s) {
+      trace.add(s);
   }
+ 
 
   /** Properly indents the line identified by pos. Replaces all whitespace characters at the beginning of the line with
     * the appropriate spacing or characters.
@@ -93,34 +92,28 @@ public abstract class IndentRuleWithTrace implements IndentRule {
     * @param reason  the reason that the indentation is taking place
     * @return true if the caller should update the current location itself, false if the indenter has already handled it
     */
-  public boolean indentLine(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
+  public void indentLine(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
     int oldPos = doc.getCurrentLocation();
     doc.setCurrentLocation(pos);
     indentLine(doc, reason);
     if (oldPos > doc.getLength()) oldPos = doc.getLength();
     doc.setCurrentLocation(oldPos);
-    return false;
   }
 
-  /** This method does not indent the current line directly. But it is overridden in specific action classes 
-    * which call this code using super and then perform an indenting action. It also provides a hook for 
-    * tracing the indenting process. */
-  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    _addToIndentTrace(getRuleName(), TERMINUS_RULE, true);
-
+  /** Traces the indenting process. */
+  public void traceIndenting(AbstractDJDocument doc, String args, Indenter.IndentReason reason) {
+    if (Indenter.traceOn) _addToIndentTrace(getRuleName() + "(" + args + ")");
     // Uncomment the next line, and every time something is indented, the indent trace will be printed
-//    printLastIndentTrace(System.out);
-    return true;
+  }
+  
+  /** Convenience method that formerly wrapped calls on indentLine in write locks. Only used in testing. */
+  public void testIndentLine(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
+    indentLine(doc, pos, reason); 
   }
   
   /** Convenience method that wraps calls on indentLine in a write lock. Only used in testing. */
-  public boolean testIndentLine(AbstractDJDocument doc, int pos, Indenter.IndentReason reason) {
-    return indentLine(doc, pos, reason); 
-  }
-  
-  /** Convenience method that wraps calls on indentLine in a write lock. Only used in testing. */
-   public boolean testIndentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-     return indentLine(doc, reason); 
+   public void testIndentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+     indentLine(doc, reason); 
    }
 
   /** The rule name to report to _addToIndentTrace */

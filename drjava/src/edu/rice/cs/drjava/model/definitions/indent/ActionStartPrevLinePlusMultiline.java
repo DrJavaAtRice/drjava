@@ -37,6 +37,7 @@
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import javax.swing.text.*;
+import java.util.Arrays;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
@@ -48,7 +49,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
   private String[] _suffices;
   private int _line = 0;
-  // private int _position = 0;
+  private int _position = 0;
   private int _offset = 0;
 
   /** Creates a multiline insert rule.  It should be noted that although the suffices
@@ -81,6 +82,8 @@ class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
         ("The specified position was not within the bounds of the specified line.");
     }
     
+    _position = position; 
+    
     // pre-compute the relative offset (without indents) of the new position
     for (int i = 0; i < line; i++) {
       _offset += _suffices[i].length();
@@ -88,14 +91,15 @@ class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
     _offset += position;
   }
   
+
   /** Indents the line according to the previous line, with the suffix lines added and the cursor moved to a specific 
     * location.  If on the first line, indent is set to 0.  Only runs in event thread.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is taking place
     * @return this is always false, since we are updating the cursor location
     */
-  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    super.indentLine(doc, reason);
+  public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+    traceIndenting(doc, Arrays.toString(_suffices) + ", " + _line + ", " + _position, reason);
     try {
       // Find start of line
       int here = doc.getCurrentLocation();
@@ -124,7 +128,6 @@ class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
           here += _suffices[i].length();
         }
       }
-      return false;
     }
     catch (BadLocationException e) {
       // Shouldn't happen

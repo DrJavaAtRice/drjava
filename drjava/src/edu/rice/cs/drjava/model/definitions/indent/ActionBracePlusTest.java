@@ -75,8 +75,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
   }
   
 
-  public void testSpaceSuffix() throws BadLocationException
-  {
+  public void testSpaceSuffix() throws BadLocationException {
     _action = new ActionBracePlus(1);
     
     // (2) 
@@ -214,8 +213,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
     _action.testIndentLine(_doc, 14, Indenter.IndentReason.OTHER); // line 3
     _action.testIndentLine(_doc, 27, Indenter.IndentReason.OTHER); // line 4
     _action.testIndentLine(_doc, 43, Indenter.IndentReason.OTHER); // line 5
-    assertEquals("Lines aligned plus one level.",
-                 _aligned, _doc.getText());
+    assertEquals("Lines aligned plus one level.", _aligned, _doc.getText());
     
     _action.testIndentLine(_doc, 54, Indenter.IndentReason.OTHER); // after baz()
     assertEquals("Cursor after baz().", _aligned, _doc.getText());

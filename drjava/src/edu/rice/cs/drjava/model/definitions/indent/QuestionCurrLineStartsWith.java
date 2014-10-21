@@ -109,8 +109,8 @@ public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
     * @return true if this node's rule holds.
     */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    System.err.println("***** QCLSW.applyRule called; _prefix = '" + _prefix + "' exclude = " + 
-                       Arrays.toString(_excludedSuffixes) + " currentLocation = " + doc.getCurrentLocation());
+//    System.err.println("***** QCLSW.applyRule called; _prefix = '" + _prefix + "' exclude = " + 
+//                       Arrays.toString(_excludedSuffixes) + " currentLocation = " + doc.getCurrentLocation());
     if (_prefLen == 0) return true;
     
     try {
@@ -122,8 +122,8 @@ public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
       int firstCharPos = doc.getFirstNonWSCharPos(lineStart, _acceptComments);
       int lineEndPos = doc._getLineEndPos(firstCharPos);
       
-      System.err.println("  lineStart = " + lineStart + "  firstCharPos = " + firstCharPos + " lineEndPos = " + 
-                         lineEndPos);
+//      System.err.println("  lineStart = " + lineStart + "  firstCharPos = " + firstCharPos + " lineEndPos = " + 
+//                         lineEndPos);
 
       // If prefix would run off the end of the line, return false
       if (firstCharPos + _prefLen > lineEndPos) {
@@ -138,7 +138,7 @@ public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
       if (textLen < _prefLen) return false;    // current line cannot possibly start with _prefix
       String text = doc.getText(firstCharPos, textLen);
       String actualPrefix = text.substring(0, _prefLen);
-      System.err.println("  actualPrefix = " + actualPrefix + " equalsTest = " + _prefix.equals(actualPrefix));
+//      System.err.println("  actualPrefix = " + actualPrefix + " equalsTest = " + _prefix.equals(actualPrefix));
       if (_prefix.equals(actualPrefix)) return (_excludedSuffixes.length == 0) || confirmExcludedSuffixes(text, textLen);
       return false;
     }

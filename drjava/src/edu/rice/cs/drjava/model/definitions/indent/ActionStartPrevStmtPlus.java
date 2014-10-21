@@ -61,10 +61,10 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     * @param suffix String to append to indent level of brace
     * @param colonIsDelim whether to include colons as statement delimiters   NOTE: always false in Scala
     */
-  public ActionStartPrevStmtPlus(int suffix, boolean colonIsDelim, int indentLevel) {
+  public ActionStartPrevStmtPlus(int suffix, boolean useColon, int indentLevel) {
     super();
     _suffix = suffix;
-    _useColon = colonIsDelim;
+    _useColon = useColon;
     _indentLevel = indentLevel;
   }
   
@@ -75,18 +75,18 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     * Only runs in the event thread.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is taking place
-    * @return true if the caller should update the current location itself, false if the indenter has already handled it
     */
-  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    boolean supResult = super.indentLine(doc, reason);
+  public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+    traceIndenting(doc, _suffix + ", " + _useColon + ", " + _indentLevel, reason);
     int orig = doc.getCurrentLocation();
-//    System.err.println("**** [ASPSP]indentline called on line: '" + doc._getCurrentLine() + "'" + " origPos = " + orig);
+//    System.err.println("**** [ASPSP]indentline called on line: '" + doc._getCurrentLine() + "'" + 
+//                       " origPos = " + orig);
     
     // Find start of current line
     int lineStart = doc._getLineStartPos(orig);  
     if (lineStart <= 0) {  // No preceding line (with valid program text) exists; indent is 0
       doc.setTab(0, orig);
-      return supResult;
+      return;
     }
     int indent = doc._getIndentOfStmt(lineStart - 1);  // ASSUMES PREV LINE IS PART OF PREV STMT
     
@@ -94,7 +94,6 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
 //                       "\n       suffix = " + _suffix);
 //    System.err.println("In ActionStartPrevStmtPlus, setting indent at pos " + indent);
     doc.setTab(indent, orig);
-    return supResult;
   }
 }
 

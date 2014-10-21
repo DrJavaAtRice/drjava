@@ -75,9 +75,9 @@ public class ActionStartLineOf extends IndentRuleAction {
     * @param reason The reason that the indentation is taking place
     * @return true if the caller should update the current location itself, false if the indenter has already handled it
     */
-  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+  public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
 
-    boolean supResult = super.indentLine(doc, reason); // This call does nothing other than record some indent tracing
+    traceIndenting(doc, _prefix, reason); // This call does nothing other than record some indent tracing
     int orig = doc.getCurrentLocation();
     
 //    System.err.println("In ActionStartLineOf, indenting line: '" + doc._getCurrentLine() + "'\n" + 
@@ -90,7 +90,7 @@ public class ActionStartLineOf extends IndentRuleAction {
 //    BraceInfo info = doc._getLineEnclosingBrace();
 //    
     int startPos = doc._getLineStartPos(orig) - 1;  // starting position for searching backwards
-    if (startPos <= 0) return supResult;
+    if (startPos <= 0) return;
 //    
 //    int distToLineEnclosingBrace = info.distance();
 ////    System.err.println("dist to brace = " + distToLineEnclosingBrace);
@@ -124,7 +124,7 @@ public class ActionStartLineOf extends IndentRuleAction {
         }
         char matchChar = doc._getText(matchPos, 1).charAt(0);
         prefixStartPos = matchPos - _length + 1;
-        if (prefixStartPos < minPos) /* do nothing */ return supResult;
+        if (prefixStartPos < minPos) /* do nothing */ return;
         if (doc._getText(prefixStartPos, _length).equals(_prefix)) break;  
         pos = matchPos - 1;  // could be optimized prefixStartPos if lastChar does not occur elsewhere in prefix
       }
@@ -142,6 +142,5 @@ public class ActionStartLineOf extends IndentRuleAction {
     catch(BadLocationException ble) { /* do nothing */ }
     
     // do nothing if prefixStartPos < minPos
-    return supResult;
   }
 }
