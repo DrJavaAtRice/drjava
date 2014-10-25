@@ -48,7 +48,7 @@ import java.util.Vector;
   * necessary -- but may be convenient in order to re-use code.  For example, to make an anonymous class that handles
   * options of static type Integer, with the name "indent.level", you could use the following code:
   * <pre>
-  * Option&lt;Integer&gt; INDENT_LEVEL = new Option&lt;Integer&gt;("indent.level") {
+  * Option&lt;Integer&gt; INDENT_INC = new Option&lt;Integer&gt;("indent.level") {
   *         public Integer parse(String s) {
   *             return new Integer(s);
   *         }

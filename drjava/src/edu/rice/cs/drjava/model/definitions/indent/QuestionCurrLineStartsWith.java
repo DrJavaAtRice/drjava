@@ -66,7 +66,7 @@ public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
     */
   public QuestionCurrLineStartsWith(String prefix, String[] excludedSuffixes, IndentRule yesRule, IndentRule noRule, 
                                     boolean acceptComments) {
-    super(yesRule, noRule);
+    super(yesRule, noRule, "'" + prefix + "', " + Arrays.toString(excludedSuffixes) + "," + acceptComments);
     _prefix = prefix;
     _prefLen = (prefix == null) ? 0 : _prefix.length();
     _excludedSuffixes = excludedSuffixes;
@@ -120,7 +120,7 @@ public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
 //      System.err.println("*** doc text from lineStart is: '" + doc.getText().substring(lineStart) + "'");
       
       int firstCharPos = doc.getFirstNonWSCharPos(lineStart, _acceptComments);
-      int lineEndPos = doc._getLineEndPos(firstCharPos);
+      int lineEndPos = doc._getLineEndPos(lineStart);
       
 //      System.err.println("  lineStart = " + lineStart + "  firstCharPos = " + firstCharPos + " lineEndPos = " + 
 //                         lineEndPos);
@@ -131,7 +131,7 @@ public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
       }
       
       // Compare prefix
-      int textLen = doc.getLength() - firstCharPos;
+      int textLen = doc.getLength() - firstCharPos;  // Why not lineEndPos - firstCharPos
       
       assert textLen >= _prefLen;  // lineEndPos <= textLen => textLen > lineEndPos - firstCharPos
       

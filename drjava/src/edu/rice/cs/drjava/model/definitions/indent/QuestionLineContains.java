@@ -59,7 +59,7 @@ public class QuestionLineContains extends IndentRuleQuestion {
    * @param noRule Rule to use if this rule does not hold
    */
   public QuestionLineContains(char findChar, IndentRule yesRule, IndentRule noRule) {
-    super(yesRule, noRule);
+    super(yesRule, noRule, Character.toString(findChar));
     _findChar = findChar;
   }
   

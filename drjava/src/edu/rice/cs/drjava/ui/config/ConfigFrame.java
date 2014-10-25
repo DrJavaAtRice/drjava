@@ -1026,7 +1026,7 @@ public class ConfigFrame extends SwingFrame {
   /** Adds all of the components for the Miscellaneous panel of the preferences window. */
   private void _setupMiscPanel(ConfigPanel panel) {
     /* Dialog box options */
-    addOptionComponent(panel, newIntegerOptionComponent(INDENT_LEVEL));
+    addOptionComponent(panel, newIntegerOptionComponent(INDENT_INC));
     addOptionComponent(panel, newIntegerOptionComponent(RECENT_FILES_MAX_SIZE));
     addOptionComponent(panel, newIntegerOptionComponent(BROWSER_HISTORY_MAX_SIZE));
     

@@ -39,6 +39,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import javax.swing.text.BadLocationException;
+import java.util.Arrays;
 
 /** Determines whether or not the line enclosing brace is '{' and is immediately preceded by the given _prefix.  
   * If _prefix is '=', we are looking for "= {".  This questions corresponds to rule 22 in our decision tree.
@@ -51,7 +52,7 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
     * @param noRule  The decision subtree for the case that this rule does not apply in the current context.
     */
   public QuestionHasCharPrecedingOpenBrace(char[] prefix, IndentRule yesRule, IndentRule noRule) {
-    super(yesRule, noRule);
+    super(yesRule, noRule, Arrays.toString(prefix));
     _prefix = prefix;
   }
   

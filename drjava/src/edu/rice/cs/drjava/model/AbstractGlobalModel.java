@@ -616,8 +616,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       this(project.getParentFile(), null, null, null, project, new File[0], new File[0], new File[0], 
            IterUtil.<AbsRelFile>empty(), null, 0, false, null, new HashMap<OptionParser<?>,String>());
       HashMap<OptionParser<?>,String> defaultStoredPreferences = new HashMap<OptionParser<?>,String>();
-      // by default, put INDENT_LEVEL AND LANGUAGE_LEVEL into the project file
-      defaultStoredPreferences.put(INDENT_LEVEL, DrJava.getConfig().getOptionMap().getString(INDENT_LEVEL));      
+      // by default, put INDENT_INC AND LANGUAGE_LEVEL into the project file
+      defaultStoredPreferences.put(INDENT_INC, DrJava.getConfig().getOptionMap().getString(INDENT_INC));      
       defaultStoredPreferences.put(LANGUAGE_LEVEL, DrJava.getConfig().getOptionMap().getString(LANGUAGE_LEVEL));
       setPreferencesStoredInProject(defaultStoredPreferences);
     }

@@ -126,13 +126,14 @@ public final class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRule
     assertTrue("Line starts a javadoc comment.",                            !_rule.testApplyRule(_doc, 110, Indenter.IndentReason.OTHER));
     assertTrue("Line inside javadoc comment.",                              !_rule.testApplyRule(_doc, 130, Indenter.IndentReason.OTHER));
     assertTrue("Line starts with alphanumeric character.",                  !_rule.testApplyRule(_doc, 180, Indenter.IndentReason.OTHER));
-    assertTrue("Line closes comment. It follows an open brace.",            !_rule.testApplyRule(_doc, 201, Indenter.IndentReason.OTHER));
-    assertTrue("Line closes comment. It follows an open brace.",            !_rule.testApplyRule(_doc, 221, Indenter.IndentReason.OTHER));
+    assertTrue("Line closes comment followed by an open brace.",             _rule.testApplyRule(_doc, 201, Indenter.IndentReason.OTHER));
+    assertTrue("Line closes comment. It follows an open brace.",             _rule.testApplyRule(_doc, 221, Indenter.IndentReason.OTHER));
     assertTrue("At end of block - line starts with a close brace.",         !_rule.testApplyRule(_doc, 225, Indenter.IndentReason.OTHER));
     assertTrue("Line starts a multi-line comment.",                         !_rule.testApplyRule(_doc, 260, Indenter.IndentReason.OTHER));
     assertTrue("Line inside multi-line comment.",                           !_rule.testApplyRule(_doc, 275, Indenter.IndentReason.OTHER));
     assertTrue("Line inside multi-line comment.",                           !_rule.testApplyRule(_doc, 300, Indenter.IndentReason.OTHER));
-    assertTrue("Line closes comment. It follows an open brace.",            !_rule.testApplyRule(_doc, 325, Indenter.IndentReason.OTHER));
+    assertTrue("Line closes comment followed by a open brace",               _rule.testApplyRule(_doc, 325, Indenter.IndentReason.OTHER));
+    assertTrue("Late in line that closes comment followed by a open brace",  _rule.testApplyRule(_doc, 345, Indenter.IndentReason.OTHER));
     assertTrue("Line starts with a close brace.",                           !_rule.testApplyRule(_doc, 355, Indenter.IndentReason.OTHER));
     assertTrue("Empty line.",                                               !_rule.testApplyRule(_doc, 390, Indenter.IndentReason.OTHER));
     assertTrue("At last character - line starts with a close brace.",       !_rule.testApplyRule(_doc, 400, Indenter.IndentReason.OTHER));
@@ -168,15 +169,15 @@ public final class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRule
     assertTrue("At start of block - line starts with an open brace.",       !_rule.testApplyRule(_doc,  25, Indenter.IndentReason.OTHER));
     assertTrue("Inside block - line starts with an open brace.",            !_rule.testApplyRule(_doc,  30, Indenter.IndentReason.OTHER));
     assertTrue("Line starts a one-line comment.",                           !_rule.testApplyRule(_doc,  54, Indenter.IndentReason.OTHER));
-    System.err.println("Should return false: " + _rule.testApplyRule(_doc,  60, Indenter.IndentReason.OTHER));
     assertTrue("Line starts a one-line comment.",                           !_rule.testApplyRule(_doc,  60, Indenter.IndentReason.OTHER));
     assertTrue("Line starts with alphanumeric character.",                  !_rule.testApplyRule(_doc,  80, Indenter.IndentReason.OTHER));
     assertTrue("Line starts a javadoc comment.",                            !_rule.testApplyRule(_doc, 104, Indenter.IndentReason.OTHER));
     assertTrue("Line starts a javadoc comment.",                            !_rule.testApplyRule(_doc, 110, Indenter.IndentReason.OTHER));
     assertTrue("Line inside javadoc comment.",                              !_rule.testApplyRule(_doc, 130, Indenter.IndentReason.OTHER));
-    assertTrue("Line closes multi-line comment, it follows a close brace.", !_rule.testApplyRule(_doc, 150, Indenter.IndentReason.OTHER));
+    assertTrue("Line closes multi-line comment followed by closed brace.",   _rule.testApplyRule(_doc, 150, Indenter.IndentReason.OTHER));
     assertTrue("Line starts with alphanumeric character.",                  !_rule.testApplyRule(_doc, 180, Indenter.IndentReason.OTHER));
-    assertTrue("Line starts with a comment, it follows a close brace.",     !_rule.testApplyRule(_doc, 221, Indenter.IndentReason.OTHER));
+    assertTrue("Line opens with block comment followed by open brace.",      _rule.testApplyRule(_doc, 200, Indenter.IndentReason.OTHER));
+    assertTrue("Near end of line with block comment followed by open brace", _rule.testApplyRule(_doc, 221, Indenter.IndentReason.OTHER));
     assertTrue("At end of block - line starts with a slash.",               !_rule.testApplyRule(_doc, 225, Indenter.IndentReason.OTHER));
     assertTrue("Line starts a multi-line comment.",                         !_rule.testApplyRule(_doc, 260, Indenter.IndentReason.OTHER));
     assertTrue("Line inside multi-line comment.",                           !_rule.testApplyRule(_doc, 275, Indenter.IndentReason.OTHER));
@@ -184,7 +185,7 @@ public final class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRule
     assertTrue("Line inside multi-line comment.",                           !_rule.testApplyRule(_doc, 325, Indenter.IndentReason.OTHER));
     assertTrue("Line closes multi-line comment, it follows a slash.",       !_rule.testApplyRule(_doc, 355, Indenter.IndentReason.OTHER));
     assertTrue("Line starts with a star.",                                  !_rule.testApplyRule(_doc, 376, Indenter.IndentReason.OTHER));
-    assertTrue("At last character - line starts with a close brace.",       !_rule.testApplyRule(_doc, 400, Indenter.IndentReason.OTHER));
-    assertTrue("At end of document - line starts with a close brace.",      !_rule.testApplyRule(_doc, 401, Indenter.IndentReason.OTHER));
+    assertTrue("At last character - line starts with a close brace.",        _rule.testApplyRule(_doc, 400, Indenter.IndentReason.OTHER));
+    assertTrue("At end of document - line starts with a close brace.",       _rule.testApplyRule(_doc, 401, Indenter.IndentReason.OTHER));
   }
 }

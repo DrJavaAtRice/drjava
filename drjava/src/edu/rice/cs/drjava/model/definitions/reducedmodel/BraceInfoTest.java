@@ -52,7 +52,7 @@ public final class BraceInfoTest extends DrJavaTestCase {
   
   public void setUp() throws Exception {
     super.setUp();
-    _document = new AbstractDJDocument(IndentRulesTestCase.TEST_INDENT_LEVEL) {
+    _document = new AbstractDJDocument(IndentRulesTestCase.TEST_INDENT_INC) {
       protected int startCompoundEdit() {
         //Do nothing
         return 0;

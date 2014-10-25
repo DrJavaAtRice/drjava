@@ -45,27 +45,27 @@ import javax.swing.text.BadLocationException;
  */
 public final class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
 
-//  /** Tests indenting with a single line contract. */
-//  public void testSingleLineContract() throws BadLocationException {
-//    IndentRuleAction rule1 = new ActionStartStmtOfBracePlus(0);
-//    IndentRuleAction rule2 = new ActionStartStmtOfBracePlus(3); // 3 spaces
-//    
-//    String text = "public void foo() {\nbar();";
-//    String aligned1 = text;
-//    String aligned2 = "public void foo() {\n   bar();";
-//    
-//    _setDocText(text);
-////    System.err.println("Raw Document text is: " + _doc.getText());
-//    rule1.testIndentLine(_doc, 20, Indenter.IndentReason.OTHER);
-////    System.err.println("Indented Document text is: " + _doc.getText());
-//    assertEquals("single line contract, no indent, no suffix", aligned1, _doc.getText());
-//    
-//    _setDocText(text);
-////    System.err.println("Raw Document text is: " + _doc.getText());
-//    rule2.testIndentLine(_doc, 20, Indenter.IndentReason.OTHER);
-////    System.err.println("Indented Document text is: " + _doc.getText());
-//    assertEquals("single line contract, no indent, with suffix", aligned2, _doc.getText());
-//  }
+  /** Tests indenting with a single line contract. */
+  public void testSingleLineContract() throws BadLocationException {
+    IndentRuleAction rule1 = new ActionStartStmtOfBracePlus(0, false);
+    IndentRuleAction rule2 = new ActionStartStmtOfBracePlus(3, false); // 3 spaces
+    
+    String text = "public void foo() {\nbar();";
+    String aligned1 = text;
+    String aligned2 = "public void foo() {\n   bar();";
+    
+    _setDocText(text);
+//    System.err.println("Raw Document text is: " + _doc.getText());
+    rule1.testIndentLine(_doc, 20, Indenter.IndentReason.OTHER);
+//    System.err.println("Indented Document text is: " + _doc.getText());
+    assertEquals("single line contract, no indent, no suffix", aligned1, _doc.getText());
+    
+    _setDocText(text);
+//    System.err.println("Raw Document text is: " + _doc.getText());
+    rule2.testIndentLine(_doc, 20, Indenter.IndentReason.OTHER);
+//    System.err.println("Indented Document text is: " + _doc.getText());
+    assertEquals("single line contract, no indent, with suffix", aligned2, _doc.getText());
+  }
 //  
 //  /** Tests indenting with an indented single line contract. */
 //  public void testIndentedSingleLineContract() throws BadLocationException {

@@ -85,8 +85,9 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
     }
     
 //    char prevChar = '\0';
+    int lineStart = doc._getLineStartPos(orig);
     try {
-      int firstNonWSCharPos = doc.getFirstNonWSCharPos(orig, false);  // skip over comments
+      int firstNonWSCharPos = doc.getFirstNonWSCharPos(lineStart, false);  // skip over comments
 //      System.err.print(" firstCharPos = " + firstNonWSCharPos);
       if (firstNonWSCharPos == ERROR_INDEX || firstNonWSCharPos >= endPos) return false;
       char firstNonWSChar = doc.getText(firstNonWSCharPos, 1).charAt(0);

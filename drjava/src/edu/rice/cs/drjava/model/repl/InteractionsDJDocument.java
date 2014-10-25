@@ -193,7 +193,7 @@ public class InteractionsDJDocument extends AbstractDJDocument implements Consol
   
   
   /** Returns a new indenter. Eventually to be used to return an interactions indenter */
-  protected Indenter makeNewIndenter(int indentLevel) { return new Indenter(indentLevel); }
+  protected Indenter makeNewIndenter(int indentInc) { return new Indenter(indentInc); }
   
   /** A list of styles and their locations augmenting this document.  This augmentation is NOT part of the reduced
     * model; it a separate extension that uses itself as a mutual exclusion lock.  This list holds pairs of location

@@ -42,4 +42,9 @@ package edu.rice.cs.drjava.model.definitions.indent;
   * NOTHING.  IndentRuleWithTrace can be used everywhere instead.
   * @version $Id: IndentRuleAction.java 5668 2012-08-15 04:58:30Z rcartwright $
   */
-public abstract class IndentRuleAction extends IndentRuleWithTrace { }
+public abstract class IndentRuleAction extends IndentRuleWithTrace { 
+  
+  /* Only constructor; propagates args passed to concrete subclass constructor. */
+  public IndentRuleAction(String args) { super(args); }
+
+}

@@ -45,8 +45,8 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
   */
 public class ActionDoNothing extends IndentRuleAction {
   
-  /** Relying on default constructor. */
-  // public ActionDoNothing() { super(); }
+  /** Only constructor. Passes empty args string to IndentWithTrace superclass. */
+  public ActionDoNothing() { super(""); }
   
   /** Properly indents the line that the caret is currently on. Replaces all whitespace characters at the 
     * beginning of the line with the appropriate spacing or characters.
@@ -56,6 +56,6 @@ public class ActionDoNothing extends IndentRuleAction {
     *         false if the indenter has already handled this
     */
   public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    traceIndenting(doc, "", reason);
+    traceIndenting(doc, reason);
   }
 }

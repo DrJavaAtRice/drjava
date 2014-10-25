@@ -146,8 +146,7 @@ public interface DJDocument extends SwingDocumentInterface {
   public int findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases) throws BadLocationException;
   
 //  /** This function finds the given character in the same statement as the given
-//   * position, and before the given position.  It is used by QuestionExistsCharInStmt and
-//   * QuestionExistsCharInPrevStmt
+//   * position, and before the given position.
 //   */
 //  public boolean findCharInStmtBeforePos(char findChar, int position);
   

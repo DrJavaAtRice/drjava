@@ -60,7 +60,7 @@ public class ActionStartLineOf extends IndentRuleAction {
     * @param prefix String that starts line to match
     */
   public ActionStartLineOf(String prefix) {
-    super();
+    super(prefix);
     if (prefix == null || prefix.equals("")) 
       throw new UnexpectedException("Attempted to construct ActionStartLineOf indenting rule with a degenerate prefix");
     _prefix = prefix;
@@ -77,7 +77,7 @@ public class ActionStartLineOf extends IndentRuleAction {
     */
   public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
 
-    traceIndenting(doc, _prefix, reason); // This call does nothing other than record some indent tracing
+    traceIndenting(doc, reason); // This call does nothing other than record some indent tracing
     int orig = doc.getCurrentLocation();
     
 //    System.err.println("In ActionStartLineOf, indenting line: '" + doc._getCurrentLine() + "'\n" + 

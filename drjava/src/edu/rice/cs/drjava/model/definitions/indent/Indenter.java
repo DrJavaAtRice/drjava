@@ -55,14 +55,14 @@ public class Indenter {
   /** Turn indent tracing on.  Potentially used in test code. */
   public static void setTraceOn(boolean t) { traceOn = t; }
   
-  /** Only constructor */
-  public Indenter(int indentLevel) { 
-    _indentLevel = indentLevel;
-    buildTree(indentLevel);
-    setTraceOn(false);
+  /** Only constructor; indentInc is number of spaces in each new indenting level */
+  public Indenter(int indentInc) { 
+    _indentInc = indentInc;
+    setTraceOn(false);   // turns indenting on or off
+    buildTree(indentInc);
   }
   
-  private final int _indentLevel;
+  private final int _indentInc;
   
   /** Enumeration of reasons why indentation may be preformed. */
   public enum IndentReason {
@@ -79,13 +79,13 @@ public class Indenter {
   /** Root of decision tree. */
   protected IndentRule _topRule;
   
-  public int getIndentLevel() { return _indentLevel; }
+  public int getIndentInc() { return _indentInc; }
   
   /** Builds the decision tree for indentation.
     * For now, this method needs to be called every time the size of one indent level is being changed!
     */
-  public void buildTree(int indentLevel) {
-    char[] indent = new char[indentLevel];
+  public void buildTree(int indentInc) {
+    char[] indent = new char[indentInc];
     Arrays.fill(indent,' ');
     
     boolean autoCloseComments = false;
@@ -95,9 +95,9 @@ public class Indenter {
     IndentRule
       // Main tree
       rule40 = new ActionStartPrevLineSkipCommentsPlus(""),
-      rule39 = new ActionStartPrevStmtPlus(0, true, _indentLevel),  // Indent line that starts new statement
-      rule37 = new ActionStartCurrStmtPlus(2),   // predecessor of rule33           
-      rule36 = new ActionStartStmtOfBracePlus(indentLevel,  /* include Scala braces */ false),
+      rule39 = new ActionStartPrevStmtPlus(),   // Indent line that starts new statement
+      rule37 = new ActionStartCurrStmtPlus(2),  // predecessor of rule33           
+      rule36 = new ActionStartStmtOfBracePlus(indentInc,  /* include Scala braces */ false),
       rule35 = new ActionStartLineOf("if"),
       
       rule33 = new ActionStartPrevLineSkipCommentsPlus("  "),   // Continuation of current statement but ignore intervening comments!
@@ -113,10 +113,10 @@ public class Indenter {
       rule25 = new QuestionStartingNewStmt(rule29, rule31),  
       // Does this line follow an annotation?  ??
       rule24 = new QuestionPrevLineStartsWith("@", rule40, rule25),
-      rule23 = new ActionBracePlus(1),              // align with first char after enclosing '{' or '(' brace
+      rule23 = new ActionBracePlus(1),              // align with first char after enclosing '{', '(', or '[' brace
       rule22 = new QuestionStartAfterOpenBrace(rule23, rule24),
       // Indent line starting after open brace (including "=>")
-      rule21 = new ActionStartStmtOfBracePlus(indentLevel,  /* include Scala braces */ true),
+      rule21 = new ActionStartStmtOfBracePlus(indentInc,  /* include Scala braces */ true),
       // Rule interpolated to handle "def ... = /n ... match { /n case ... =>"
       rule26 = QuestionCurrLineStartsWith.newQuestionWithSuffixesSkipComments("case", FALSE_CASE_SUFFIXES, rule36, rule21),
       // Does the preceding line contain the enclosing brace (including "=>" and "=") as last token?
@@ -124,14 +124,14 @@ public class Indenter {
       // Indent the line to match whitespace preceding the line enclosing brace
       rule19 = new ActionStartStmtOfBracePlus(0, /* include Scala braces" */ false),  
       
-      // Does current line begin with '}' or ')' ignoring comment text, WS  TODO: check for balanced braces
+      // Does current line begin with '}', ']', or ')' ignoring comment text, WS  TODO: check for balanced braces
       rule18 = QuestionCurrLineStartsWithChar.newQuestion(new char[] {')',']', '}'}, rule19, rule20),
       
       rule17 = new QuestionBraceIsCurly(rule18, rule24),  
-      rule16 = new ActionBracePlus(1 + indentLevel),
+      rule16 = new ActionBracePlus(1 + indentInc),  
       rule08 = new ActionBracePlus(1),
       
-      rule27 = new ActionBracePlus(0),
+      rule27 = new ActionBracePlus(0),  // align ')' or ']' with matching open brace
       rule14 = new QuestionNewParenPhrase(rule08, rule16),  // is current non "),]" line a new phrase after open paren?
       rule15 = new QuestionNewParenPhrase(rule30, rule27),  // is current "),]" line a new phrase after open paren?
       // Does current line start with ')' or ']'?
@@ -147,14 +147,14 @@ public class Indenter {
       rule10 = new ActionStartPrevLinePlus("* "),
       rule09 = new QuestionCurrLineEmptyOrEnterPress(rule10, rule12),
       rule07 = QuestionCurrLineStartsWith.newQuestion("*", rule12, rule09), //  Starts with "*"? (searches comments)
-      rule06 = new QuestionPrevLineStartsWith("*", rule07, rule43),         // Interior line of block comment?
+      rule06 = new QuestionPrevLineStartsWith("*", rule07, rule12),         // Line in block comment follows * line?
       
       rule05 = new ActionStartPrevLinePlus(" "),    // padding prefix for interior of ordinary block comment
       rule04 = new ActionStartPrevLinePlus(" * "),  // padding prefix for new line within ordinary block comment
       rule46 = new ActionStartPrevLinePlus("  * "), // padding prefix for new line within special javadoc block comment
       rule47 = new ActionStartPrevLinePlus("  "),   // padding prefix for interior of special javadoc block comment
       rule45 = new QuestionPrevLineStartsJavaDocWithText(rule46, rule04),  // Prev line begins special javadoc comment?
-      rule48 = new QuestionPrevLineStartsJavaDocWithText(rule47, rule43),  // Prev line begins special javadoc comment? 
+      rule48 = new QuestionPrevLineStartsJavaDocWithText(rule47, rule05),  // Prev line begins special javadoc comment? 
       rule41 = new ActionStartPrevLinePlusMultilinePreserve(new String[] { " * \n", " */" }, 0, 3, 0, 3),
       rule49 = new ActionStartPrevLinePlusMultilinePreserve(new String[] { "  * \n", "  */"}, 0, 4, 0, 4),
       rule50 = new QuestionPrevLineStartsJavaDocWithText(rule49, rule41),
@@ -174,10 +174,9 @@ public class Indenter {
     */
   public void indent(AbstractDJDocument doc, Indenter.IndentReason reason) {
 //    Utilities.showDebug("Indenter.indent called on doc "  + doc);
-     IndentRuleWithTrace.initTrace();
      String line = doc._getCurrentLine();
      _topRule.indentLine(doc, reason);
-     IndentRuleWithTrace.printLastIndentTrace(line, System.err);
+     if (traceOn) IndentRuleWithTrace.printLastIndentTrace(line, System.err);
   }
 }
 

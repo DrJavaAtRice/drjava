@@ -53,7 +53,7 @@ public class QuestionPrevLineStartsWith extends IndentRuleQuestion {
     * @param noRule Rule to use if this rule does not hold
     */
   public QuestionPrevLineStartsWith(String prefix, IndentRule yesRule, IndentRule noRule) {
-    super(yesRule, noRule);
+    super(yesRule, noRule, prefix);
     _prefix = prefix;
   }
   
@@ -63,6 +63,7 @@ public class QuestionPrevLineStartsWith extends IndentRuleQuestion {
     */
   boolean applyRule(AbstractDJDocument doc, Indenter.IndentReason reason) {
 
+//    System.err.println("QPLSW called with prefix '" + _prefix + "'");
     try {
       // Find start of line
       int here = doc.getCurrentLocation();
@@ -73,8 +74,11 @@ public class QuestionPrevLineStartsWith extends IndentRuleQuestion {
         int startPrevLine = doc._getLineStartPos(startLine - 1);
         int firstChar = doc._getLineFirstCharPos(startPrevLine);
         
+//        System.err.println("  startLine = " + startLine + "; firstChar = '" + firstChar + "'");
+        
         // Compare prefix
         String actualPrefix = doc.getText(firstChar, _prefix.length());
+//        System.err.println("  actual prefix = '" + actualPrefix + "'");
         return _prefix.equals(actualPrefix);
       }
     }

@@ -45,107 +45,74 @@ import javax.swing.text.BadLocationException;
   */
 public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
   
-//  public void testNoPrevStmt() throws BadLocationException {
-//    IndentRuleAction rule1 = new ActionStartPrevStmtPlus(0, true);
-//    IndentRuleAction rule2 = new ActionStartPrevStmtPlus(2, true);
-//
-//    _setDocText("foo();\n");
-//    rule1.testIndentLine(_doc, 2, Indenter.IndentReason.OTHER);
-//    assertEquals("no prev stmt, no suffix", "foo();\n", _doc.getText());
-//    
-//    _setDocText("foo();\n");
-//    rule2.testIndentLine(_doc, 2, Indenter.IndentReason.OTHER);
-//    assertEquals("no prev stmt, suffix two spaces", "  foo();\n", _doc.getText());
-//  }
-//  
-//  public void testPrevStmtPrevLine() throws BadLocationException {
-//    IndentRuleAction rule1 = new ActionStartPrevStmtPlus(0, true);
-//    IndentRuleAction rule2 = new ActionStartPrevStmtPlus(2, true);
-//
-//    _setDocText("  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\nbiz();\n");
-////    System.err.println("Raw Document text is: " + _doc.getText());
-//    rule1.testIndentLine(_doc, 44, Indenter.IndentReason.OTHER);
-////    System.err.println("Indented Document text is: " + _doc.getText());
-//    assertEquals("prev stmt on prev line, no suffix",
-//                 "  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\n  biz();\n",
-//                 _doc.getText());
-//    
-//    _setDocText("  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\nbiz();\n");
-////    System.err.println("Raw Document text is: " + _doc.getText());
-//    rule2.testIndentLine(_doc, 44, Indenter.IndentReason.OTHER);
-////    System.err.println("Indented Document text is: " + _doc.getText());
-//    assertEquals("prev stmt on prev line, suffix two spaces",
-//                 "  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\n    biz();\n",
-//                 _doc.getText());
-//  }
-//
-//  public void testPrevStmtSeveralLinesBeforeCurrLocation() throws BadLocationException {
-//    IndentRuleAction rule1 = new ActionStartPrevStmtPlus(0, true);
-//    IndentRuleAction rule2 = new ActionStartPrevStmtPlus(2, true);
-//    
-//    _setDocText("  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\nx;\n");
-//    rule1.testIndentLine(_doc, 56, Indenter.IndentReason.OTHER);
-//    assertEquals("prev stmt serveral lines before, no suffix",
-//                 "  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\n  x;\n",
-//                 _doc.getText());
-//    
-//    _setDocText("  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\nx;\n");
-//    rule2.testIndentLine(_doc, 56, Indenter.IndentReason.OTHER);
-//    assertEquals("prev stmt serveral lines before, suffix two spaces", 
-//                 "  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\n    x;\n",
-//                 _doc.getText());
-//  }
-//  
-//  public void testColonNotDelim() throws BadLocationException {
-//    IndentRuleAction rule = new ActionStartPrevStmtPlus(0, false);
-//    
-//    _setDocText("test2 = x ? y :\n" +     // ? and : on one line
-//                "  z;\n" +     // unfinished ternary
-//                "foo();\n");     // new stmt
-//    rule.testIndentLine(_doc, 21, Indenter.IndentReason.OTHER);
-//    assertEquals("Colon is not a delimiter",
-//                 "test2 = x ? y :\n" +     // ? and : on one line
-//                 "  z;\n" +     // unfinished ternary
-//                 "foo();\n",
-//                 _doc.getText());
-//  }
-//
-//
-//  public void testAfterArrayAssign() throws BadLocationException {
-//    IndentRuleAction rule = new ActionStartPrevStmtPlus(0, false);
-//    
-//    _setDocText("a = {\n" +
-//                "  b,c,d\n" + 
-//                "};\n" +
-//                "   a;");     // new stmt
-//    //rule.indentLine(_doc, 8);
-//    rule.testIndentLine(_doc, 17, Indenter.IndentReason.OTHER);
-//    assertEquals("After array assignment",
-//                 "a = {\n" + 
-//                 "  b,c,d\n" +
-//                 "};\n" +
-//                 "a;",
-//                 _doc.getText());
-//  }
-//  public void testAfterArrayAssignMultiSemi() throws BadLocationException {
-//    IndentRuleAction rule = new ActionStartPrevStmtPlus(0, false);
-//    
-//    _setDocText("a = {\n" +
-//                "  b,c,d\n" + 
-//                "};;;\n" +
-//                "   a;");     // new stmt
-//    //rule.indentLine(_doc, 8);
-//    rule.testIndentLine(_doc, 19, Indenter.IndentReason.OTHER);
-//    assertEquals("After array assignment multi semi colons",
-//                 "a = {\n" + 
-//                 "  b,c,d\n" +
-//                 "};;;\n" +
-//                 "a;",
-//                 _doc.getText());
-//  }
+  public void testNoPrevStmt() throws BadLocationException {
+    IndentRuleAction rule = new ActionStartPrevStmtPlus();
+
+    _setDocText("foo();\n");
+    rule.testIndentLine(_doc, Indenter.IndentReason.OTHER);
+    assertEquals("no prev stmt", "foo();\n", _doc.getText());
+  }
+ 
+  /* This test current fails because _findBeginningOfStmt fails to skip over some embedded comments. */
+  public void xtestPrevStmtPrevLine() throws BadLocationException {
+    IndentRuleAction rule = new ActionStartPrevStmtPlus();
+
+    _setDocText("  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\nbiz();\n");
+//    System.err.println("Raw Document text is: " + _doc.getText());
+    rule.testIndentLine(_doc, 44, Indenter.IndentReason.OTHER);
+//    System.err.println("Indented Document text is: " + _doc.getText());
+    assertEquals("prev stmt on prev line, no suffix",
+                 "  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\n  biz();\n",
+                 _doc.getText());
+  }
+
+  public void testPrevStmtSeveralLinesBeforeCurrLocation() throws BadLocationException {
+    IndentRuleAction rule = new ActionStartPrevStmtPlus();
+    
+    _setDocText("  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\nx;\n");
+    rule.testIndentLine(_doc, 56, Indenter.IndentReason.OTHER);
+    assertEquals("prev stmt serveral lines before, no suffix",
+                 "  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\n  x;\n",
+                 _doc.getText());
+    
+  }
+  
+  public void testAfterArrayAssign() throws BadLocationException {
+    IndentRuleAction rule = new ActionStartPrevStmtPlus();
+    
+    _setDocText("a = {\n" +
+                "  b,c,d\n" + 
+                "};\n" +
+                "   a;");     // new stmt
+    //rule.indentLine(_doc, 8);
+    rule.testIndentLine(_doc, 17, Indenter.IndentReason.OTHER);
+    assertEquals("After array assignment",
+                 "a = {\n" + 
+                 "  b,c,d\n" +
+                 "};\n" +
+                 "a;",
+                 _doc.getText());
+  }
+  
+  public void testAfterArrayAssignMultiSemi() throws BadLocationException {
+    IndentRuleAction rule = new ActionStartPrevStmtPlus();
+    
+    _setDocText("a = {\n" +
+                "  b,c,d\n" + 
+                "};;;\n" +
+                "   a;");     // new stmt
+    //rule.indentLine(_doc, 8);
+    rule.testIndentLine(_doc, 19, Indenter.IndentReason.OTHER);
+    assertEquals("After array assignment multi semi colons",
+                 "a = {\n" + 
+                 "  b,c,d\n" +
+                 "};;;\n" +
+                 "a;",
+                 _doc.getText());
+  }
 //  
 //  public void testAnonymousInnerClassAssign() throws BadLocationException {
-//    IndentRuleAction rule = new ActionStartPrevStmtPlus(0, false);
+//    IndentRuleAction rule = new ActionStartPrevStmtPlus();
 //    
 //    _setDocText("Runnable command = new Runnable() {\n" + 
 //                "  public void run() { ... }\n" +
@@ -161,7 +128,7 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
 //  }
 //  
 //  public void testAnonymousInnerClassArg() throws BadLocationException {
-//    IndentRuleAction rule = new ActionStartPrevStmtPlus(0, false);
+//    IndentRuleAction rule = new ActionStartPrevStmtPlus();
 //    
 //    _setDocText("setCommand(new Runnable() {\n" + 
 //                "  public void run() { ... }\n" +
@@ -176,20 +143,19 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
 //                 _doc.getText());
 //  } 
 
-  /** 
-   * not currently supported 
+  /** Not currently supported 
    * currently assuming single stmt per line
    */
-  /*
-  public void testAfterArrayAssignMultiSemiAndStmt() throws BadLocationException {
-    IndentRuleAction rule = new ActionStartPrevStmtPlus("", false);
+  public void xtestAfterArrayAssignMultiSemiAndStmt() throws BadLocationException {
+    IndentRuleAction rule = new ActionStartPrevStmtPlus();
     
     _setDocText("a = {\n" +
                 "  b,c,d\n" + 
                 "};b;;\n" +
                 "   a;");     // new stmt
     //rule.indentLine(_doc, 8);
-    rule.indentLine(_doc, 20);
+    
+    rule.indentLine(_doc, 20, Indenter.IndentReason.OTHER );
     assertEquals("After array assignment multi semi colons and embedded stmt",
                  "a = {\n" + 
                  "  b,c,d\n" +
@@ -197,7 +163,6 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
                  "a;",
                  _doc.getText());
   }
-  */
 }
 
 

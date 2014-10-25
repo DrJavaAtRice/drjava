@@ -36,54 +36,62 @@
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import javax.swing.text.BadLocationException;
-
+import javax.swing.text.*;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
-import static edu.rice.cs.drjava.model.AbstractDJDocument.*;
-
-/** Indents the current line in the document to the indent level of the start of the brace ('{', '('} (and optionally
-  * {'=', "=>"} at line end) enclosing the start of the current line, plus the given suffix.
-  * @version $Id: ActionStartStmtOfBracePlus.java 5727 2012-09-30 03:58:32Z rcartwright $
+/** Indents current line to the indent level of the previous line (ignoring all comments!) augmented by a suffix.
+  * @version $Id: ActionStartPrevLinePlus.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public class ActionStartStmtOfBracePlus extends IndentRuleAction {
-  private final int _suffix;
-  private final boolean _includeScalaBraces;  // includes local Scala brace forms "=>" and "="
-  
-  /** Constructs a new rule with the given suffix string.
-    * @param suffix String to append to indent level of brace
+class ActionStartPrevLineSkipCommentsPlus extends IndentRuleAction {
+  private String _suffix;
+
+  /** Repeats the indentation from the previous line augmented by a suffix
+    * @param suffix  The string to be added
     */
-  public ActionStartStmtOfBracePlus(int suffix, boolean includeScalaBraces) {
-    super(Integer.toString(suffix) + ", " + includeScalaBraces);
-    _suffix = suffix;
-    _includeScalaBraces = includeScalaBraces;
+  public ActionStartPrevLineSkipCommentsPlus(String suffix) { 
+    super(suffix); // propagate arg information to superclass IndentWithTrace
+    _suffix = suffix; 
   }
 
-  /** Properly indents the line that the caret is currently on. Replaces all whitespace characters at the beginning of the
-    * line with the appropriate spacing or characters.   Only runs in event thread.
+  /** Indents the line according to the previous line (ignoring all comments), with the suffix string added. On the
+    * first line, indent is set to 0.  Only runs in event thread.
     * @param doc AbstractDJDocument containing the line to be indented.
     * @param reason The reason that the indentation is taking place
-    * @return true if the caller should update the current location itself, false if the indenter has already handled it
+    * @return true if the caller should update the current location, false if the indenter has already done it
     */
   public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-
-    traceIndenting(doc, reason);
-    int pos = doc.getCurrentLocation();
-//    System.err.println("***** ActionStartStmtOfBracePlus.indentLine called at location " + pos + "  line = '" + 
-//                       doc._getCurrentLine() + "'" + " includeScalaBraces = " + _includeScalaBraces);
+    traceIndenting(doc, reason);  // sets supResult to true, determines _suffix and propagates trace info
     try {
-      // Get bracePos
-      int bracePos = (_includeScalaBraces) ? doc.findEnclosingScalaBracePosWithEquals(pos) : 
-        doc.findPrevDelimiter(pos, STRICT_OPENING_BRACES);
+      // Find start of line
+      int here = doc.getCurrentLocation();
+      int startLine = doc._getLineStartPos(here);
+     
+      // Find prefix of previous line ignoring comment lines 
+      String prefix;
       
-      if (bracePos == ERROR_INDEX) return;  // will never happen if pos has an enclosing (Scala) brace 
-//      System.err.println("[ASSOBP] bracePos = " + bracePos + "; brace = '" + doc.getText(bracePos,1).charAt(0) + "'");
-      final int indent = doc._getIndentOfRestrictedStmt(bracePos) + _suffix;  // ignore any '=' prelude
-//      System.err.println("[ASSOBP] indent = " + indent + " _suffix = " + _suffix);
+      // If startLine is not beginning of document, find first 
+      if (startLine > 0) {
       
-      doc.setTab(indent, pos);
+        // Find start of previous line (ignoring comments and empty lines)
+        int startPrevLine = doc._getLineStartPos(startLine - 1);
+        while (startPrevLine > 0 && doc.isPrevLineIgnorable(startLine)) {
+          startLine = startPrevLine;
+          startPrevLine = doc._getLineStartPos(startPrevLine - 1);
+        }
+        
+        // if startPrevLine is 0, the following code binds prefix to _suffix
+//        System.err.println("*** startPrevLine = " + startPrevLine);
+         
+        int firstChar = doc._getLineFirstCharPos(startPrevLine);
+        prefix = doc.getText(startPrevLine, firstChar - startPrevLine) + _suffix;
+      }
+      else prefix = _suffix; 
+//      System.err.println("Question [ASPLP] prefix.length() = " + prefix.length());
+      
+      if (AbstractDJDocument.hasOnlySpaces(prefix)) doc.setTab(prefix.length(), here);
+      else doc.setTab(prefix, here);
     }
-    catch(BadLocationException ble) { /* do nothing */ }
+    catch (BadLocationException e) { throw new UnexpectedException(e); } // Shouldn't happen
   }
 }

@@ -64,8 +64,8 @@ class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
    * @throws IllegalArgumentException if the integer params are negative or
    * outside the appropriate bounds
    */
-  public ActionStartPrevLinePlusMultiline(String suffices[],
-                                          int line, int position) {
+  public ActionStartPrevLinePlusMultiline(String suffices[], int line, int position) {
+    super(Arrays.toString(suffices) + ", " + line + ", " + position);  // propagate args string to IndentWithTrace
     _suffices = suffices;
     
     // do bounds checking up-front
@@ -99,7 +99,7 @@ class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
     * @return this is always false, since we are updating the cursor location
     */
   public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    traceIndenting(doc, Arrays.toString(_suffices) + ", " + _line + ", " + _position, reason);
+    traceIndenting(doc, reason);
     try {
       // Find start of line
       int here = doc.getCurrentLocation();

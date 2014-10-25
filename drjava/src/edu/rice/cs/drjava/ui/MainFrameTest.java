@@ -341,7 +341,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     final DefinitionsPane pane = _frame.getCurrentDefPane();
     final OpenDefinitionsDocument doc = pane.getOpenDefDocument();
     
-    setConfigSetting(OptionConstants.INDENT_LEVEL, Integer.valueOf(2));
+    setConfigSetting(OptionConstants.INDENT_INC, Integer.valueOf(2));
 
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 

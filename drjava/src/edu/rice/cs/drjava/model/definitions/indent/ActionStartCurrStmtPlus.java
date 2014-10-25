@@ -49,7 +49,7 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
     * @param suffix String to append to indent level of brace
     */
   public ActionStartCurrStmtPlus(int suffix) {
-    super();
+    super(Integer.toString(suffix));
     _suffix = suffix;
   }
 
@@ -61,7 +61,7 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
     * false if the indenter has already handled this
     */
   public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    traceIndenting(doc, "" + _suffix, reason);
+    traceIndenting(doc, reason);
 
     /** This method is simply a call to _getIndentOfStmt for the preceding line.  This method is fully tested in 
       * IndentHelperTest, so no additional tests are provided for this class.

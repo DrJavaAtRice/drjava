@@ -67,13 +67,13 @@ public final class OptionMapLoaderTest extends DrJavaTestCase implements OptionC
     OptionMapLoader loader = new OptionMapLoader(is);
     DefaultOptionMap map = new DefaultOptionMap();
     loader.loadInto(map);
-    assertEquals("indent (integer) option",  map.getOption(INDENT_LEVEL),indent);
+    assertEquals("indent (integer) option",  map.getOption(INDENT_INC),indent);
     assertEquals("JAVAC", map.getOption(JAVAC_LOCATION),javac.getAbsoluteFile());
     assertEquals("size of extra-classpath vector", Integer.valueOf(size), 
                  Integer.valueOf(map.getOption(EXTRA_CLASSPATH).size()));
   }
   
   public void testEmptyConfigSet() throws IOException {
-    checkSet("",INDENT_LEVEL.getDefault(), JAVAC_LOCATION.getDefault(),  EXTRA_CLASSPATH.getDefault().size());
+    checkSet("",INDENT_INC.getDefault(), JAVAC_LOCATION.getDefault(),  EXTRA_CLASSPATH.getDefault().size());
   }
 }

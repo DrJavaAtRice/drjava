@@ -73,7 +73,7 @@ public final class ConfigFileTest extends DrJavaTestCase {
 //    Utilities.clearEventQueue();
     
     FileConfiguration config = DrJava.getConfig();
-    assertEquals("custom indent level", 5, config.getSetting(OptionConstants.INDENT_LEVEL).intValue());
+    assertEquals("custom indent level", 5, config.getSetting(OptionConstants.INDENT_INC).intValue());
     assertEquals("custom history size", 1, config.getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue());
     //Tests if a user can put a default value in the .drjava file
     assertEquals("definitions.keyword.color", Color.blue, config.getSetting(OptionConstants.DEFINITIONS_KEYWORD_COLOR));

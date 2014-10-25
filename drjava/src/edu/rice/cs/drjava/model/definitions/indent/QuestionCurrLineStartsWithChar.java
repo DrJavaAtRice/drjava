@@ -62,7 +62,7 @@ public class QuestionCurrLineStartsWithChar extends IndentRuleQuestion {
     * @param noRule The decision subtree for the case that this rule does not apply in the current context.
     */
   public QuestionCurrLineStartsWithChar(char[] delimiters, boolean acceptComments, IndentRule yesRule, IndentRule noRule) {
-    super(yesRule, noRule);
+    super(yesRule, noRule, Arrays.toString(delimiters) + ", " + acceptComments);
     _delimiters = delimiters;
     _acceptComments = acceptComments;
   }
@@ -94,8 +94,9 @@ public class QuestionCurrLineStartsWithChar extends IndentRuleQuestion {
       return false;
     
 //    char prevChar = '\0';
+    int lineStart = doc._getLineStartPos(orig);
     try {
-      int firstNonWSCharPos = doc.getFirstNonWSCharPos(orig, false);  // skip over comments
+      int firstNonWSCharPos = doc.getFirstNonWSCharPos(lineStart, false);  // skip over comments
 //      System.err.print(" firstCharPos = " + firstNonWSCharPos);
       if (firstNonWSCharPos == ERROR_INDEX || firstNonWSCharPos >= endPos) return false;
       char firstNonWSChar = doc.getText(firstNonWSCharPos, 1).charAt(0);

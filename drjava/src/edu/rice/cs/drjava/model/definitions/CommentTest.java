@@ -49,7 +49,7 @@ import javax.swing.text.BadLocationException;
   */
 public final class CommentTest extends DrJavaTestCase {
   protected DefinitionsDocument doc;
-  private Integer _indentLevel = Integer.valueOf(2);
+  private Integer _indentInc = Integer.valueOf(2);
   private GlobalEventNotifier _notifier;
 
   /** Resents configuration settings and sets up the indent level so that we
@@ -60,7 +60,7 @@ public final class CommentTest extends DrJavaTestCase {
     DrJava.getConfig().resetToDefaults();
     _notifier = new GlobalEventNotifier();
     doc = new DefinitionsDocument(_notifier);
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,_indentLevel);
+    DrJava.getConfig().setSetting(OptionConstants.INDENT_INC,_indentInc);
   }
 
   /** Tests the Comment Out Line(s) command with a single line. */

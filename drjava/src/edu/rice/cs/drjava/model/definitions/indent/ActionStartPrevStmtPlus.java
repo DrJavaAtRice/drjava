@@ -44,31 +44,17 @@ import javax.swing.text.BadLocationException;
 import static edu.rice.cs.drjava.model.AbstractDJDocument.ERROR_INDEX;
 
 /** Indents the current line in the document to the indent level of the start of the statement preceding the one the
-  * cursor is currently on, plus the given suffix padding (a number of spaces).  The preceding statement may be a 
-  * statement prelude (like "if (...) {") of the current line in which case an indentLevel prefix must be added.
-  * NOTE: this method assumes that the previous line is part of the preceding statement.
-  * 
-  * TO DO: eliminate _suffix argument; no longer used.
+  * cursor is currently on.  The preceding statement may be a statement prelude (like "if (...) {") of the current 
+  * line in which case an indentInc prefix must be added.  NOTE: this method assumes that the previous line is part
+  * of the preceding statement.
   *
   * @version $Id: ActionStartPrevStmtPlus.java 5711 2012-09-11 19:42:33Z rcartwright $
   */
 public class ActionStartPrevStmtPlus extends IndentRuleAction {
-  private final int _suffix;  // number of spaces in suffix
-  private final boolean _useColon;
-  private final int _indentLevel;
+
+  /** Only constructor, super call passes empty args string to superclass. */
   
-  /** Constructs a new rule with the given suffix string.
-    * @param suffix String to append to indent level of brace
-    * @param colonIsDelim whether to include colons as statement delimiters   NOTE: always false in Scala
-    */
-  public ActionStartPrevStmtPlus(int suffix, boolean useColon, int indentLevel) {
-    super();
-    _suffix = suffix;
-    _useColon = useColon;
-    _indentLevel = indentLevel;
-  }
-  
-  public ActionStartPrevStmtPlus(int suffix, int indentLevel) { this(suffix, false, indentLevel); }
+  public ActionStartPrevStmtPlus() { super(""); }
   
   /** Properly indents the line that the caret is currently on, assuming previous/enclosing statement is properly indented. 
     * Replaces all whitespace characters at the beginning of the line with the approprate spaces.  
@@ -77,7 +63,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     * @param reason The reason that the indentation is taking place
     */
   public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    traceIndenting(doc, _suffix + ", " + _useColon + ", " + _indentLevel, reason);
+    traceIndenting(doc, reason);
     int orig = doc.getCurrentLocation();
 //    System.err.println("**** [ASPSP]indentline called on line: '" + doc._getCurrentLine() + "'" + 
 //                       " origPos = " + orig);
@@ -90,8 +76,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     }
     int indent = doc._getIndentOfStmt(lineStart - 1);  // ASSUMES PREV LINE IS PART OF PREV STMT
     
-//    System.err.println("[ASPSP]Indent of prev stmt '" + doc._getCurrentLine(lineStart - 1) + "' = " + indent + 
-//                       "\n       suffix = " + _suffix);
+//    System.err.println("[ASPSP]Indent of prev stmt '" + doc._getCurrentLine(lineStart - 1) + "' = " + indent);
 //    System.err.println("In ActionStartPrevStmtPlus, setting indent at pos " + indent);
     doc.setTab(indent, orig);
   }

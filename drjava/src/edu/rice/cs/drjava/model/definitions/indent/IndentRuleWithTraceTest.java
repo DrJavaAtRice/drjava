@@ -50,7 +50,7 @@ import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 public final class IndentRuleWithTraceTest extends IndentRulesTestCase {
 
   public void testTrace() throws BadLocationException{
-    Indenter.setTraceOn(true);
+    boolean traceOnSaved = Indenter.traceOn;
     try {
       IndentRule
         rule4 = new ActionBracePlus(2),
@@ -67,23 +67,29 @@ public final class IndentRuleWithTraceTest extends IndentRulesTestCase {
         "}\n" +
         "}\n";
       
-      
+      Indenter.setTraceOn(true);
       _setDocText(text);
       rule1.indentLine(_doc, 23, Indenter.IndentReason.OTHER);
       rule1.indentLine(_doc, 75, Indenter.IndentReason.OTHER);
       
-      String[] expected = {"edu.rice.cs.drjava.model.definitions.indent.QuestionInsideComment No",
-        "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsParenOrBracket No",
-        "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsCurly Yes",
-        "edu.rice.cs.drjava.model.definitions.indent.ActionBracePlus "};
+      String[] expected = {
+        "edu.rice.cs.drjava.model.definitions.indent.QuestionInsideComment() Yes", 
+        "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsBracket() No", 
+        "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsCurly() Yes", 
+        "edu.rice.cs.drjava.model.definitions.indent.ActionBracePlus(2)", 
+        "edu.rice.cs.drjava.model.definitions.indent.QuestionInsideComment() No",
+        "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsBracket() No", 
+        "edu.rice.cs.drjava.model.definitions.indent.QuestionBraceIsCurly() Yes",
+        "edu.rice.cs.drjava.model.definitions.indent.ActionBracePlus(2)"
+      };
       
       ArrayList<String> actual = IndentRuleWithTrace.getTrace();
-//    System.err.println("Trace is: " + actual);
-      assertEquals("steps in trace", 4, actual.size());
+      System.err.println("Trace is: " + actual);
+      assertEquals("steps in trace", 8, actual.size());
       for(int x = 0; x < actual.size(); x++) {
         assertEquals("check trace step " + x, expected[x], actual.get(x));
       }
     }
-    finally { Indenter.setTraceOn(false); }
+    finally { Indenter.setTraceOn(traceOnSaved); }
   }
 }

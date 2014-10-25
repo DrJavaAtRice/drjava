@@ -49,42 +49,29 @@ import java.io.PrintStream;
   */
 public abstract class IndentRuleWithTrace implements IndentRule {
 
-  private static volatile ArrayList<String> trace = null;
-//  private static volatile boolean startOver = true;
-  private static volatile boolean ruleTraceEnabled = true;  // true ENABLES TRACING (along with uncommenting 110)
+  public static final ArrayList<String> trace = new ArrayList<String>();
 
   public static final String YES = " Yes";
   public static final String NO = " No";
 //  public static final String TERMINUS_RULE = "";
-
-  /** Initialize trace list. */
-  public static void initTrace() {
-    trace = new ArrayList<String>();
-  }
+  
+  public final String _args;
+  
+  /* Only constructor */
+  IndentRuleWithTrace(String args) { _args = args; }
   
   /* This method prints the most recent trace through the indent tree */
   public static void printLastIndentTrace(String line, PrintStream ps) {
-    if (trace == null) {
-      ps.println("No trace to print");
-    } 
-    else {
-      ps.println("********Tracing indenting of line '" + line + "'**********");
-      for (int x = 0; x < trace.size(); x++) {
-        ps.println(trace.get(x));
-      }
-      ps.println("**********************************************************");
+    ps.println("********Tracing indenting of line '" + line + "'**********");
+    for (int x = 0; x < trace.size(); x++) {
+      ps.println(trace.get(x));
     }
+    ps.println("**********************************************************");
   }
 
-
+  /* Returns the ArrayList<String> bound to traceOn */
   static ArrayList<String> getTrace() { return trace; }
-
-  /** This rule just adds to the information kept in trace */
-  protected static void _addToIndentTrace(String s) {
-      trace.add(s);
-  }
  
-
   /** Properly indents the line identified by pos. Replaces all whitespace characters at the beginning of the line with
     * the appropriate spacing or characters.
     * @param doc  the AbstractDJDocument containing the line to be indented.
@@ -101,8 +88,8 @@ public abstract class IndentRuleWithTrace implements IndentRule {
   }
 
   /** Traces the indenting process. */
-  public void traceIndenting(AbstractDJDocument doc, String args, Indenter.IndentReason reason) {
-    if (Indenter.traceOn) _addToIndentTrace(getRuleName() + "(" + args + ")");
+  public void traceIndenting(AbstractDJDocument doc, Indenter.IndentReason reason) {
+    if (Indenter.traceOn) trace.add(getRuleName() + "(" + _args + ")");
     // Uncomment the next line, and every time something is indented, the indent trace will be printed
   }
   

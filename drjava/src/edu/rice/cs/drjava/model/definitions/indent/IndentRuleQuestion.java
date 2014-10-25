@@ -55,6 +55,13 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
     * @param noRule Rule to use if this rule does not hold
     */
   public IndentRuleQuestion(final IndentRule yesRule, final IndentRule noRule) {
+    super("");  // uses empty string as default args string for tracing
+    _yesRule = yesRule;
+    _noRule = noRule;
+  }
+  
+  public IndentRuleQuestion(final IndentRule yesRule, final IndentRule noRule, String args) {
+    super(args);  // executes _args = args in constructor for superclass
     _yesRule = yesRule;
     _noRule = noRule;
   }
@@ -88,11 +95,11 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
     */
   public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     if (applyRule(doc, reason)) {
-      _addToIndentTrace(getRuleName() + YES);
+      if (Indenter.traceOn) trace.add(getRuleName() + "(" + _args + ")" + YES);
       _yesRule.indentLine(doc, reason);
     }
     else {
-      _addToIndentTrace(getRuleName() + NO);
+      if (Indenter.traceOn) trace.add(getRuleName() + "(" + _args + ")" + NO);
       _noRule.indentLine(doc, reason);
     }
   }

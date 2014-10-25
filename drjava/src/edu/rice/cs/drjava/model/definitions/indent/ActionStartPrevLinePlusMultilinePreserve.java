@@ -62,9 +62,9 @@ class ActionStartPrevLinePlusMultilinePreserve extends IndentRuleAction {
     * @throws IllegalArgumentException if the integer params are negative or
     * outside the appropriate bounds
     */
-  public ActionStartPrevLinePlusMultilinePreserve(String suffices[],
-                                                  int cursorLine, int cursorPos,
-                                                  int psrvLine, int psrvPos) {
+  public ActionStartPrevLinePlusMultilinePreserve(String suffices[], int cursorLine, int cursorPos, int psrvLine, 
+                                                  int psrvPos) {
+    super(Arrays.toString(suffices) + ", " + cursorLine + ", " + cursorPos + ", " + psrvLine + ", " + psrvPos);
     _suffices = suffices;
     _cursorLine = cursorLine;
     _cursorPos = cursorPos;
@@ -78,9 +78,7 @@ class ActionStartPrevLinePlusMultilinePreserve extends IndentRuleAction {
     * @return this is always false, since we are updating the cursor location
     */
   public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    traceIndenting(doc, 
-                   Arrays.toString(_suffices) + ", " + _cursorLine + ", " + _cursorPos + ", " + _psrvLine + ", " + _psrvPos,
-                   reason);
+    traceIndenting(doc, reason);
     try {
       // copy it so any changes are not remembered
       String[] suffices = new String[_suffices.length];

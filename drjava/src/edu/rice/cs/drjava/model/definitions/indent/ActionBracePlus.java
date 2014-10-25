@@ -42,7 +42,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceInfo;
 
 /** Aligns indentation of the current line to the character that opened the enclosing block or expression list. 
-  * Recognizes square brackets as form of brace.
+  * Recognizes square brackets, parens, and => as braces.
   * Optional additional whitespaces can be passed through the constructor.
   * @version $Id: ActionBracePlus.java 5675 2012-08-16 21:25:57Z rcartwright $
   */
@@ -51,7 +51,10 @@ public class ActionBracePlus extends IndentRuleAction {
   private int _suffixCt;
 
   /** @param ct The additional whitespaces to be inserted. */
-  public ActionBracePlus(int ct) { _suffixCt = ct; }
+  public ActionBracePlus(int ct) { 
+    super(Integer.toString(ct));
+    _suffixCt = ct; 
+  }
 
   /** Properly indents the line that the caret is currently on.  Replaces all whitespace characters at the beginning of
     * the line with the appropriate spacing or characters.<p>
@@ -60,7 +63,7 @@ public class ActionBracePlus extends IndentRuleAction {
     * @return true if the caller should update the current location, false if the indenter has already done this.
     */
   public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    traceIndenting(doc, "" + _suffixCt, reason);
+    traceIndenting(doc, reason);
     int here = doc.getCurrentLocation();
 //    int startLine = doc._getLineStartPos(here);
 
@@ -77,7 +80,7 @@ public class ActionBracePlus extends IndentRuleAction {
 //    int bracePos = startLine - dist;
     try {
       int bracePos = doc.findLineEnclosingScalaBracePos(here);
-        // Get distance to start of line from enclosing brace
+        // Get distance from enclosing brace to start of line on which it appears
       int braceNewline = doc._getLineStartPos(bracePos);
       int braceIndent = bracePos - braceNewline;
       

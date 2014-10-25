@@ -36,6 +36,8 @@
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
+import edu.rice.cs.util.swing.Utilities;
+
 import javax.swing.text.BadLocationException;
 
 /**
@@ -76,8 +78,8 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
   
 
   public void testSpaceSuffix() throws BadLocationException {
-    _action = new ActionBracePlus(1);
-    
+    IndentRuleAction action1 = new ActionBracePlus(0);
+    IndentRuleAction action2 = new ActionBracePlus(1);
     // (2) 
     
     _text = 
@@ -89,11 +91,12 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
      "             arg2, arg3) + 4;";
  
     _setDocText(_text);
-    _action.testIndentLine(_doc, 0, Indenter.IndentReason.OTHER); // Does nothing.
+    action1.testIndentLine(_doc, 0, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.testIndentLine(_doc, 18, Indenter.IndentReason.OTHER); // Does nothing.
+    action1.testIndentLine(_doc, 18, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.testIndentLine(_doc, 20, Indenter.IndentReason.OTHER); // Aligns second line.
+    
+    action2.testIndentLine(_doc, 20, Indenter.IndentReason.OTHER); // Aligns second line.
     assertEquals("Line aligned to open paren.", _aligned.length(), _doc.getLength());
     assertEquals("Line aligned to open paren.", _aligned, _doc.getText());
     
@@ -109,11 +112,11 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
      "{}";
 
     _setDocText(_text);
-    _action.testIndentLine(_doc, 0, Indenter.IndentReason.OTHER); // Does nothing.
+    action1.testIndentLine(_doc, 0, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.testIndentLine(_doc, 15, Indenter.IndentReason.OTHER); // Does nothing.
+    action1.testIndentLine(_doc, 15, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.testIndentLine(_doc, 16, Indenter.IndentReason.OTHER); // Aligns second line.
+    action2.testIndentLine(_doc, 16, Indenter.IndentReason.OTHER); // Aligns second line.
     assertEquals("Line aligned to open paren.", _aligned.length(), _doc.getLength());
     assertEquals("Line aligned to open paren.", _aligned, _doc.getText());
  
@@ -131,11 +134,11 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
      "{}";
 
     _setDocText(_text);
-    _action.testIndentLine(_doc, 0, Indenter.IndentReason.OTHER); // Does nothing.
+    action1.testIndentLine(_doc, 0, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.testIndentLine(_doc, 15, Indenter.IndentReason.OTHER); // Does nothing.
+    action1.testIndentLine(_doc, 15, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.testIndentLine(_doc, 20, Indenter.IndentReason.OTHER); // Aligns second line.
+    action2.testIndentLine(_doc, 20, Indenter.IndentReason.OTHER); // Aligns second line.
     assertEquals("Line aligned to open paren.", _aligned, _doc.getText());
  
     // (5) 
@@ -154,41 +157,46 @@ public final class ActionBracePlusTest extends IndentRulesTestCase {
      "      }]";
 
     _setDocText(_text);
-    _action.testIndentLine(_doc, 0, Indenter.IndentReason.OTHER); // Does nothing.
+    action1.testIndentLine(_doc, 0, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.testIndentLine(_doc, 6, Indenter.IndentReason.OTHER); // Does nothing.
+    action1.testIndentLine(_doc, 6, Indenter.IndentReason.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.testIndentLine(_doc, 10, Indenter.IndentReason.OTHER); // Aligns second line.
+    action2.testIndentLine(_doc, 10, Indenter.IndentReason.OTHER); // Aligns second line.
     assertEquals("Line aligned to open bracket.", _aligned, _doc.getText()); 
 
   }
   
-  public void testLargeSuffix() throws BadLocationException
-  {
-    _action = new ActionBracePlus(3);
-    
-    // (6) 
-    
-    _text = 
-     "var = method(foo.\n" + 
-     "  bar(), arg3) + 4;";
-
-    _aligned = 
-     "var = method(foo.\n" + 
-     "               bar(), arg3) + 4;";
- 
-    _setDocText(_text);
-    _action.testIndentLine(_doc, 0, Indenter.IndentReason.OTHER); // Does nothing.
-    assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.testIndentLine(_doc, 17, Indenter.IndentReason.OTHER); // Does nothing.
-    assertEquals("START has no brace.", _text.length(), _doc.getLength());
-    _action.testIndentLine(_doc, 25, Indenter.IndentReason.OTHER); // Aligns second line.
-    assertEquals("Line aligned to open paren.", _aligned.length(), _doc.getLength());
-    assertEquals("Line aligned to open paren.", _aligned, _doc.getText());
+  public void testLargeSuffix() throws BadLocationException {
+    boolean traceOnSaved = Indenter.traceOn;
+    try {
+      Indenter.setTraceOn(true);
+      IndentRuleAction action1 = new ActionBracePlus(0);
+      IndentRuleAction action2 = new ActionBracePlus(3);
+      // (6) 
+      
+      _text = 
+        "var = method(foo.\n" + 
+        "  bar(), arg3) + 4;";
+      
+      _aligned = 
+        "var = method(foo.\n" + 
+        "               bar(), arg3) + 4;";
+      
+      _setDocText(_text);
+      action1.testIndentLine(_doc, 0, Indenter.IndentReason.OTHER); // Does nothing.
+      assertEquals("START has no brace.", _text.length(), _doc.getLength());
+      action1.testIndentLine(_doc, 17, Indenter.IndentReason.OTHER); // Does nothing.
+      assertEquals("START has no brace.", _text.length(), _doc.getLength());
+      action2.testIndentLine(_doc, 25, Indenter.IndentReason.OTHER); // Aligns second line.
+//      System.err.println("_doc text is: \n'" + _doc.getText() + "'");
+//      System.err.println("_aligned.length() = " + _aligned.length() + "; _doc.getLength() = " + _doc.getLength());
+//    assertEquals("Line aligned to open paren.", _aligned.length(), _doc.getLength());
+      assertEquals("Line aligned to open paren.", _aligned, _doc.getText());
+    }
+    finally { Indenter.setTraceOn(traceOnSaved); }
   }
   
-  public void testComment() throws BadLocationException
-  {
+  public void testComment() throws BadLocationException {
     _action = new ActionBracePlus(3);
     
     // (7) 

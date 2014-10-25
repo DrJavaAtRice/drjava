@@ -154,21 +154,21 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * @param notifier used by CompoundUndoManager to announce undoable edits
     */
   public DefinitionsDocument(GlobalEventNotifier notifier) {
-    this(new Indenter(DrJava.getConfig().getSetting(INDENT_LEVEL).intValue()), notifier);
+    this(new Indenter(DrJava.getConfig().getSetting(INDENT_INC).intValue()), notifier);
   }
   
   /** Main constructor.
     * @param notifier used by CompoundUndoManager to announce undoable edits
     */
   public DefinitionsDocument(GlobalEventNotifier notifier, CompoundUndoManager undoManager) {
-    this(new Indenter(DrJava.getConfig().getSetting(INDENT_LEVEL).intValue()), notifier, undoManager);
+    this(new Indenter(DrJava.getConfig().getSetting(INDENT_INC).intValue()), notifier, undoManager);
   }
   
   /** Returns the document's editor */
   public DefinitionsEditorKit getEditor() { return _editor; }
   
   /** Returns a new indenter. */
-  protected Indenter makeNewIndenter(int indentLevel) { return new Indenter(indentLevel); }
+  protected Indenter makeNewIndenter(int indentInc) { return new Indenter(indentInc); }
   
   /** Sets the OpenDefinitionsDocument that holds this DefinitionsDocument (the odd can only be set once).
     * @param odd the OpenDefinitionsDocument to set as this DD's holder

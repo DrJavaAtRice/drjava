@@ -60,7 +60,7 @@ public class IndentFiles {
     */
   public static void main(String[] args) {
     Vector<String> fileNames = new Vector<String>();
-    int indentLevel = 2;
+    int indentInc = 2;
     boolean silent = false;
     if (args.length < 1) _displayUsage();
     else {
@@ -68,7 +68,7 @@ public class IndentFiles {
         String arg = args[i];
         if (arg.equals("-indent")) {
           i++;
-          try { indentLevel = Integer.parseInt(args[i]); }
+          try { indentInc = Integer.parseInt(args[i]); }
           catch (Exception e) {
             _displayUsage();
             System.exit(-1);
@@ -77,7 +77,7 @@ public class IndentFiles {
         else if (arg.equals("-silent")) silent = true;
         else fileNames.add(arg);
       }
-      indentFiles(fileNames, indentLevel, silent);
+      indentFiles(fileNames, indentInc, silent);
     }
   }
 
@@ -91,13 +91,13 @@ public class IndentFiles {
   
   /** Applies the indent logic to each file in the list of file names, saving the new copy of each one.
     * @param fileNames Vector of filenames of files to be indented
-    * @param indentLevel The number of spaces to use for a level of indentation
+    * @param indentInc The number of spaces to use for a level of indentation
     * @param silent Whether to print any output to System.out
     */
-  public static void indentFiles(Vector<String> fileNames, int indentLevel, boolean silent) {
+  public static void indentFiles(Vector<String> fileNames, int indentInc, boolean silent) {
     //System.setProperty("java.awt.headless", "true"); // attempt headless AWT
     //System.out.println("Using Headless AWT: " + isHeadless());
-    Indenter indenter = new Indenter(indentLevel);
+    Indenter indenter = new Indenter(indentInc);
     
     if (! silent) System.out.println("DrJava - Indenting files:");
     for (int i = 0; i < fileNames.size(); i++) {

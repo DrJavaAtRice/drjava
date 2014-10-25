@@ -326,7 +326,7 @@ public class ConfigDescriptions {
         "The number of days between automatic new version checks.");
     
     /* Dialog box options */
-    add(INDENT_LEVEL, "Indent Level", "The number of spaces to use for each level of indentation.");
+    add(INDENT_INC, "Indent Level", "The number of spaces to use for each level of indentation.");
     add(RECENT_FILES_MAX_SIZE, "Recent Files List Size",
         "<html>The number of files to remember in<br>" + "the recently used files list in the File menu.</html>");
     add(BROWSER_HISTORY_MAX_SIZE, "Maximum Size of Browser History", 

@@ -49,7 +49,10 @@ class ActionStartPrevLinePlus extends IndentRuleAction {
   /** Repeats the indentation from the previous line augmented by a suffix
     * @param suffix  The string to be added
     */
-  public ActionStartPrevLinePlus(String suffix) { _suffix = suffix; }
+  public ActionStartPrevLinePlus(String suffix) { 
+    super(suffix);
+    _suffix = suffix; 
+  }
 
   /** Indents the line according to the previous line, with the suffix string added. On the first line, indent is set
     * to 0.  Only runs in event thread.
@@ -58,7 +61,7 @@ class ActionStartPrevLinePlus extends IndentRuleAction {
     * @return true if the caller should update the current location, false if the indenter has already done it
     */
   public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
-    traceIndenting(doc, _suffix, reason);
+    traceIndenting(doc, reason);
     try {
       // Find start of line
       int here = doc.getCurrentLocation();
@@ -74,6 +77,7 @@ class ActionStartPrevLinePlus extends IndentRuleAction {
       }
       else prefix = _suffix;  // On first line
       
+      /* Use space count if prefix only contains spaces. Why? It looks equivalent.*/
       if (AbstractDJDocument.hasOnlySpaces(prefix)) doc.setTab(prefix.length(), here);
       else doc.setTab(prefix, here);
     }

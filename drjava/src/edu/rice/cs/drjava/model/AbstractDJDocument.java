@@ -184,12 +184,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   /** Constructor used in super calls from DefinitionsDocument and InteractionsDJDocument. */
   protected AbstractDJDocument() { 
-    this(new Indenter(DrJava.getConfig().getSetting(INDENT_LEVEL).intValue()));
+    this(new Indenter(DrJava.getConfig().getSetting(INDENT_INC).intValue()));
   }
   
   /** Constructor used from anonymous test classes. */
-  protected AbstractDJDocument(int indentLevel) { 
-    this(new Indenter(indentLevel));
+  protected AbstractDJDocument(int indentInc) { 
+    this(new Indenter(indentInc));
   }
   
   /** Constructor used to build a new document with an existing indenter.  Used in tests and super calls from 
@@ -199,7 +199,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     _queryCache = null;
     _offsetToQueries = null;
     _initNewIndenter();
-//     System.err.println("AbstractDJDocument constructor with indent level " + indenter.getIndentLevel() 
+//     System.err.println("AbstractDJDocument constructor with indent level " + indenter.getIndentInc() 
 //    + " invoked on " + this);
     // ensure that char arrays are sorted
     Arrays.sort(DEFAULT_DELIMS);
@@ -239,13 +239,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param indent the size of indent that you want for the document
     */
   public void setIndent(final int indent) {
-    DrJava.getConfig().setSetting(INDENT_LEVEL, indent);
+    DrJava.getConfig().setSetting(INDENT_INC, indent);
     this._indent = indent;
   }
   
   protected void _removeIndenter() {
 //    System.err.println("REMOVE INDENTER called");
-    DrJava.getConfig().removeOptionListener(INDENT_LEVEL, _listener1);
+    DrJava.getConfig().removeOptionListener(INDENT_INC, _listener1);
     DrJava.getConfig().removeOptionListener(AUTO_CLOSE_COMMENTS, _listener2);
   }
   
@@ -257,7 +257,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //    System.err.println("Installing Indent Option Listener for " + this);
     _listener1 = new OptionListener<Integer>() {
       public void optionChanged(OptionEvent<Integer> oce) {
-//        System.err.println("Changing INDENT_LEVEL for " + this + " to " + oce.value);
+//        System.err.println("Changing INDENT_INC for " + this + " to " + oce.value);
         indenter.buildTree(oce.value);
       }
     };
@@ -265,11 +265,11 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     _listener2 = new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oce) {
 //        System.err.println("Reconfiguring indenter to use AUTO_CLOSE_COMMENTS = " + oce.value);
-        indenter.buildTree(DrJava.getConfig().getSetting(INDENT_LEVEL));
+        indenter.buildTree(DrJava.getConfig().getSetting(INDENT_INC));
       }
     };
     
-    DrJava.getConfig().addOptionListener(INDENT_LEVEL, _listener1);
+    DrJava.getConfig().addOptionListener(INDENT_INC, _listener1);
     DrJava.getConfig().addOptionListener(AUTO_CLOSE_COMMENTS, _listener2);
   }
 
@@ -774,13 +774,13 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
   
   /** Searching backwards, finds position of first character preceding pos that is a given delimiter, skipping over 
-    * comments and phrases bracketed in parens or curly braces, if so instructed.  The search also ignores the contents 
-    * of strings and hence cannot find '"" as a delimiter.  This method should only be called from pos inside 
-    * explict/implicit enclosing brace (??)  If '>' appears in the delims array, this method looks for "=>" instead of 
-    * ">" so that the implicit brace opening a case body can be found.  If '=' appears in the delims array, this method 
-    * looks for '=' preceded by a character other than '!', '=', or a binary operator and an empty rest of line.  
-    * The individual char '>' is not supported as a possible delimiter. In addition, if skipOverBraces is enabled, 
-    * the delims must exclude ')' and '}'.  Otherwise no skipping will happen! 
+    * comments and phrases bracketed in parens, square brackets or curly braces, if so instructed.  The search also 
+    * ignores the contents of strings and hence cannot find '"" as a delimiter.  This method should only be called 
+    * from pos inside explict/implicit enclosing brace.  If '>' appears in the delims array, this method looks for 
+    * "=>" instead of ">" so that the implicit brace opening a case body can be found.  If '=' appears in the delims 
+    * array, this method looks for '=' preceded by a character other than '!', '=', or a binary operator and an empty
+    * rest of line. The individual char '>' is not supported as a possible delimiter. In addition, if skipOverBraces 
+    * is enabled, the delims must exclude ')' , ']', and '}'.  Otherwise no skipping will happen! 
     * The array of delimiters MUST APPEAR IN ASCENDING ORDER to support using Array.binarySearch.
     * Only runs in event thread.
     * Question (??): does this method work when there is no enclosing brace; it superficially appears that it does.
@@ -1211,13 +1211,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
    
   /* Searching backward from the end of the line containg pos, find the beginning of the statement containing pos. 
-   * This seach skips over any line-spanning brace phrase that ends on the line of pos.  It assumes that:
+   * This seach skips over any line-spanning brace or comments phrase that ends on the line of pos.  It assumes that:
    * (i)   pos >= 0
    * (ii)  the document text up through the end of this line is non-empty, and 
    * (iii) this stmt begins on the first unspanned line.
-   * It does not include any prelude text beyond what appears on the first unspanned line.
+   * (iv)  the end of this line is not inside a comment
+   * (v)   this statement does not include any prelude text beyond what appears on the first unspanned line.
    */
-  
+  // BUG: does not skip over non-trailing embedded comments
   public int _findBeginningOfStmt(final int pos) {
     
     assert pos >= 0;
@@ -1230,15 +1231,15 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
     /* Find the beginning of the stmt (without prelude) on this line.  Must skip over paren phrases and comments that
      * end on this line, including both embedded and spanning phrases.  The innermost char beginning a line and 
-     * preceding all paren phrases ending on this line (or all paren phrases forming a line spanning chain that ends
-     * on this line) is the beginning of our stmt. */
+     * preceding all paren phrases and comments ending on this line (or all paren phrases forming a line spanning 
+     * chain that ends on this line) is the beginning of our stmt. */
     try {
       // Find last valid char preceding lineEnd
-      int revPos = getPrevNonWSCharPos(lineEnd);     // revised pos created by skipping over paren phrases that span stmt lines
+      int revPos = getPrevNonWSCharPos(lineEnd);     // last char in stmt not in a comment
       if (revPos == ERROR_INDEX) return 0;
       
       int revLineEnd = _getLineEndPos(revPos);       // end of the line containing revPos
-      int revLineStart = _getLineStartPos(revPos);      // start of the line containing revPos
+      int revLineStart = _getLineStartPos(revPos);   // start of the line containing revPos
 //      System.err.println("[FBOS] revPos = " + revPos + "; revLineEnd = " + revLineEnd + "; revLineStart = " + revLineStart);
       
       assert revLineEnd >=0 && revLineStart >= 0;
@@ -1252,7 +1253,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       while (lastBracePos >= revLineStart) {   // closing brace found on line; lastBracePos >= 0
         // find matching open brace
         setCurrentLocation(lastBracePos + 1);  // always well-defined since there is brace at pos lastBracePos
-        int dist = balanceBackward();
+        int dist = balanceBackward();  // DOES NOT WORK FOR SQUARE BRACKETS!  TODO: fix this.
         if (dist < 0) // Unmatched closing brace on this line; text is mangled
           break;
         revPos = lastBracePos - dist; // pos of matching open brace
@@ -1362,7 +1363,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     
 //    System.err.println("[GIOS] plausible first char pos in stmt at pos " + pos + " is " + stmtStart);
     
-    /* Find the EnclosingBraceOrPrevSemicolon of this stmt.  The braces setincludes '=' and "=>". */
+    /* Find the EnclosingBraceOrPrevSemicolon of this stmt.  The braces setincludes '=', "=>", and ";". */
     try {
       int boundaryPos = findEnclosingBraceOrPrevSemicolon(stmtStart);
       if (boundaryPos == ERROR_INDEX) { // find indent of firstNonWS char in doc
@@ -1600,7 +1601,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return res;
   }
   
-  /** Find the position of the Scala brace { '{', '(', or "=>" } enclosing the start of the line containing pos  */
+  /** Find the position of the Scala brace { '{', '(', '[', or "=>" } enclosing the start of the line containing pos  */
   public int findLineEnclosingScalaBracePos(int pos) throws BadLocationException {  
     return findEnclosingScalaBracePos(_getLineStartPos(pos));
   }
@@ -2562,7 +2563,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   public void setTab(int tab, int pos) {
     
     assert Utilities.TEST_MODE || EventQueue.isDispatchThread();
-//    System.err.println("Inserting prefix consisting of " + tab + " spaces in line '" + _getCurrentLine() + ";");
+//    System.err.println("Inserting prefix consisting of " + tab + " spaces in line '" + _getCurrentLine() + "'");
     
     try {
       int startPos = _getLineStartPos(pos);
