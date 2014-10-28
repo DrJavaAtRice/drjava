@@ -437,7 +437,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     * of a wing comment is NOT weakly shadowed. 
     * @param shadowStrings flag that tells this method to respect double-quote shadowing when true*/
   public boolean isWeaklyShadowed(boolean shadowStrings) { 
-    return (isShadowed() && /* exclude newline at end of wing comment */
+    return (isShadowed() && /* tests that exclude newline at end of wing comment */
             (getStateAtCurrent() == INSIDE_BLOCK_COMMENT || ! _cursor.current().isNewline())  && 
             /* conditionally exclude chars in strings */ (getStateAtCurrent() != INSIDE_DOUBLE_QUOTE || shadowStrings)
               || isOpenComment() || (isDoubleQuote() && shadowStrings));  // open braces for comments and strings

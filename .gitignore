@@ -8,3 +8,4 @@
 *.svn
 *.new
 drjava/svn-info.txt
+drjava/classes

@@ -41,23 +41,24 @@ import java.util.ArrayList;
 import edu.rice.cs.util.UnexpectedException;
 
 /** This class provides an implementation of the BraceReduction interface for brace matching.  In order to correctly
-  * match, this class keeps track of what is commented (line and block) and what is inside double quotes (strings).
+  * match, this class keeps track of what text is commented (line and block) and what text is inside double quotes.
   * To avoid unnecessary complication, this class maintains a few invariants for its  consistent states, i.e., between
   * top-level function calls.
   * <ol>
-  * <li> The cursor offset is never at the end of a brace.  If movement or insertion puts it there, the cursor is 
-  * updated to point to the 0 offset of the next brace. (token?)
+  * <li> The cursor offset is never at the end of a brace (token).  If movement or insertion puts it there, the cursor is 
+  * updated to point to the 0 offset of the next brace (token).
   * <li> Quoting information is invalid inside valid comments.  When part of the document becomes uncommented, the
   * reduced model must update the quoting information linearly in the newly revealed code.
   * <li> Quote shadowing and comment shadowing are mutually exclusive.
   * <li> There is no nesting of comment open characters. If // is encountered in the middle of a comment, it is 
   * treated as two separate slashes.  Similarly for /*.
   * </ol>
-  * All of the code in the class assumes that the lock on this is held.  (Is this necessary if all document
-  * inspection and modification is done in the event thread?)
+  * All of the code in the class assumes that the lock on this is held.  (Archaic. The reduced model is only accessed
+  * in the event thread (except in tests which are not all properly synchronized).
   * @author JavaPLT
   * @version $Id: ReducedModelControl.java 5711 2012-09-11 19:42:33Z rcartwright $
   */
+// TODO: add support for Scala triple quoting.
 public class ReducedModelControl implements BraceReduction {
   /* private fields; default visibility for testing purposes only. */
   final ReducedModelBrace _rmb;   // the reduced brace model
