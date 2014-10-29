@@ -144,7 +144,7 @@ public class CompilerErrorModel {
     // .dj2 file anymore. When we get a compiler error in a .java file, and we have a corresponding
     // .dj2 file open, but not the .java file, then we change the error to refer to the .dj2 file
     // instead.
-    if (model!=null) {
+    if (model != null) {
       HashSet<File> odds = new HashSet<File>();
       for(OpenDefinitionsDocument odd: model.getOpenDefinitionsDocuments()) {
         odds.add(odd.getRawFile());
