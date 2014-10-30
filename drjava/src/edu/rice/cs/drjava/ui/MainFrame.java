@@ -90,6 +90,7 @@ import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.ui.config.ConfigFrame;
+import edu.rice.cs.drjava.ui.coverage.CoverageFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputModel;
 import edu.rice.cs.drjava.ui.avail.*;
@@ -219,6 +220,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private volatile JButton _runButton;
   private volatile JButton _junitButton;
   private volatile JButton _errorsButton;
+  private volatile JButton _coverageButton;
   
   private final JToolBar _toolBar = new JToolBar();
   private final JFileChooser _interactionsHistoryChooser = new JFileChooser();
@@ -245,6 +247,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final QuickStartFrame _quickStartFrame = new QuickStartFrame();
   private volatile AboutDialog _aboutDialog;
   private volatile RecentDocFrame _recentDocFrame;    /** Holds/shows the history of documents for ctrl-tab. */
+  private volatile CoverageFrame _coverageFrame;
   
 //  private ProjectPropertiesFrame _projectPropertiesFrame;
   
@@ -1034,6 +1037,56 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       catch (IOException ioe) { MainFrameStatics.showIOError(MainFrame.this, ioe); }
     }
   };
+
+  /** Useless action. Will show a warning window. */
+  private volatile AbstractAction _coverageAction = new AbstractAction("Useless action. Show a warning window.") {
+    {}// _addGUIAvailabilityListener(this,                                             // init
+                                 //GUIAvailabilityListener.ComponentType.INTERACTIONS);}
+    public void actionPerformed(ActionEvent ae) {
+    showCoverageFrame();    
+/*
+    JFileChooser chooser = new JFileChooser();
+    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+    int returnVal = chooser.showOpenDialog(MainFrame.this);
+    if(returnVal == JFileChooser.APPROVE_OPTION) {
+        
+         String s = "";
+         try{
+             for(OpenDefinitionsDocument doc : _model.getOpenDefinitionsDocuments()){
+                 s = s + doc.getFileName() + "," ;  //getFile()
+                 //s = doc.getFile().getCanonicalPath().replace(".java",".class");
+             }
+             final ReportGenerator generator = new ReportGenerator(_model.getOpenDefinitionsDocuments(), chooser.getSelectedFile());
+             generator.create();
+             
+         } catch (Exception e){
+             StringWriter sw = new StringWriter();
+             PrintWriter pw = new PrintWriter(sw);
+             e.printStackTrace(pw);
+             s = sw.toString(); // stack trace as a string
+         }
+         JOptionPane.showMessageDialog(MainFrame.this, s,
+                                       "open files are", JOptionPane.ERROR_MESSAGE);
+    }     
+*/  
+      
+ 
+    }
+  };
+
+  public void showCoverageFrame() {   
+    //ProjectPropertiesFrame ppf = new ProjectPropertiesFrame(this);
+    _coverageFrame.setVisible(true);
+    _coverageFrame.reset();
+    _coverageFrame.toFront(); 
+/*
+    _coverageFrame.setUp();
+    setPopupLoc(_coverageFrame);
+    _coverageFrame.resetToCurrent();
+    _coverageFrame.setVisible(true);
+    _coverageFrame.toFront();
+*/
+  }
   
   /** Default cut action.  Returns focus to the correct pane. */
   final Action cutAction = new DefaultEditorKit.CutAction() {
@@ -3586,6 +3639,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       // Initialize cached frames and dialogs 
       _configFrame = new ConfigFrame(MainFrame.this);
+      _coverageFrame = new CoverageFrame(MainFrame.this);
       _aboutDialog = new AboutDialog(MainFrame.this);
       _interactionsScriptController = null;
       _executeExternalDialog = new ExecuteExternalDialog(MainFrame.this);
@@ -6282,6 +6336,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     _setUpAction(_junitAction, "Test Current", "Run JUnit over the current document");
     _setUpAction(_junitAllAction, "Test", "Run JUnit over all open JUnit tests");
+
+    _setUpAction(_coverageAction, "Coverage", "Generate code coverage reports");
+
     if (_model.getJavadocModel().isAvailable()) {
       _setUpAction(_javadocAllAction, "Javadoc", "Create and save Javadoc for the packages of all open documents");
       _setUpAction(_javadocCurrentAction, "Preview Javadoc Current", "Preview the Javadoc for the current document");
@@ -7137,7 +7194,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _toolBar.add(_runButton = _createToolbarButton(_runAction));
     _toolBar.add(_junitButton = _createToolbarButton(_junitAllAction));
     _toolBar.add(_createToolbarButton(_javadocAllAction));
-    
+    _toolBar.add(_coverageButton = _createToolbarButton(_coverageAction));    
+
+
     // DrJava Errors
     _toolBar.addSeparator();
     _errorsButton = _createToolbarButton(_errorsAction);
