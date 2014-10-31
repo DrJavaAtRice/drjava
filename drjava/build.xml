@@ -176,7 +176,7 @@
        Build Target
        ************ -->
   
-  <target name="build" depends="test, jar" description="Shortcut for 'test' and 'jar'">
+  <target name="build" depends="clean, test, jar" description="Shortcut for 'clean', 'test', and 'jar'">
   </target>
   
 
