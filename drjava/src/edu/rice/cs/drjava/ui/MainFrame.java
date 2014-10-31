@@ -1039,7 +1039,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };
 
   /** Useless action. Will show a warning window. */
-  private volatile AbstractAction _coverageAction = new AbstractAction("Useless action. Show a warning window.") {
+  private volatile AbstractAction _coverageAction = new AbstractAction("Code Coverage") {
     {}// _addGUIAvailabilityListener(this,                                             // init
                                  //GUIAvailabilityListener.ComponentType.INTERACTIONS);}
     public void actionPerformed(ActionEvent ae) {
@@ -6337,7 +6337,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_junitAction, "Test Current", "Run JUnit over the current document");
     _setUpAction(_junitAllAction, "Test", "Run JUnit over all open JUnit tests");
 
-    _setUpAction(_coverageAction, "Coverage", "Generate code coverage reports");
+    _setUpAction(_coverageAction, "Code Coverage", "Generate code coverage reports");
 
     if (_model.getJavadocModel().isAvailable()) {
       _setUpAction(_javadocAllAction, "Javadoc", "Create and save Javadoc for the packages of all open documents");
@@ -6714,6 +6714,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(toolsMenu, _runAppletAction, KEY_RUN_APPLET, updateKeyboardManager);
     _addMenuItem(toolsMenu, _resetInteractionsAction, KEY_RESET_INTERACTIONS, updateKeyboardManager);
     toolsMenu.addSeparator();
+
+	// Code Coverage
+	_addMenuItem(toolsMenu, _coverageAction, KEY_CODE_COVERAGE, updateKeyboardManager);
+	toolsMenu.addSeparator();
     
     // Javadoc
     final JMenu javadocMenu = new JMenu("Javadoc");

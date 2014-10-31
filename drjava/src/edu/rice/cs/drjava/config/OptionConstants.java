@@ -1164,6 +1164,10 @@ public interface OptionConstants {
   public static final VectorOption<KeyStroke> KEY_NEW_DRJAVA_INSTANCE= 
     new VectorOption<KeyStroke>("key.new.drjava.instance", new KeyStrokeOption("",null),
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F1, CTRL_MASK|SHIFT_MASK)));
+
+  /** The key binding for starting a new code coverage frame. */
+  public static final VectorOption<KeyStroke> KEY_CODE_COVERAGE = 
+    new VectorOption<KeyStroke>("key.code.coverage", new KeyStrokeOption("",null), to.vector());
   
   /* ---------- Find Replace Options ---------- */
   
