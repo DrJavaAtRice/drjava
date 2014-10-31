@@ -613,8 +613,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       this(project.getParentFile(), null, null, null, project, new File[0], new File[0], new File[0], 
            IterUtil.<AbsRelFile>empty(), null, 0, false, null, new HashMap<OptionParser<?>,String>());
       HashMap<OptionParser<?>,String> defaultStoredPreferences = new HashMap<OptionParser<?>,String>();
-      // by default, put INDENT_LEVEL AND LANGUAGE_LEVEL into the project file
-      defaultStoredPreferences.put(INDENT_LEVEL, DrJava.getConfig().getOptionMap().getString(INDENT_LEVEL));      
+      // by default, put INDENT_INC AND LANGUAGE_LEVEL into the project file
+      defaultStoredPreferences.put(INDENT_INC, DrJava.getConfig().getOptionMap().getString(INDENT_INC));      
       defaultStoredPreferences.put(LANGUAGE_LEVEL, DrJava.getConfig().getOptionMap().getString(LANGUAGE_LEVEL));
       setPreferencesStoredInProject(defaultStoredPreferences);
     }
@@ -2457,7 +2457,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** Registers OptionListeners.  Factored out code from the two constructor. */
   private void _registerOptionListeners() {
-//    // Listen to any relevant config options
+//// Listen to any relevant config options
 //    DrJava.getConfig().addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
     
     // The following is unnecessary because the DefaultFileSaver constructor directly uses BACKUP_FILES
@@ -2874,7 +2874,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
     }
     
-//    /** Reconstructs the embedded positions for this document. */
+///** Reconstructs the embedded positions for this document. */
 //    public void makePositions() { _cacheAdapter.makePositions(); }
     
     /** Returns the name of the top level class, if any.
@@ -3987,11 +3987,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return getDefaultRootElement().getElement(line).getStartOffset();
     }
     
-//    /** Add a region manager for find results to this document.
+///** Add a region manager for find results to this document.
 //      * @param rm the global model's region manager */
 //    public void addFindResultsManager(RegionManager<MovingDocumentRegion> rm) { _findResultsManagers.add(rm); }
     
-//    /** Remove a manager for find results from this document.
+///** Remove a manager for find results from this document.
 //      * @param rm the global model's region manager. */
 //    public void removeFindResultsManager(RegionManager<MovingDocumentRegion> rm) { _findResultsManagers.remove(rm); }
     

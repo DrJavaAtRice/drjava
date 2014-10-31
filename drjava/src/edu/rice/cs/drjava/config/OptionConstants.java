@@ -1392,7 +1392,7 @@ public interface OptionConstants {
   public static final BooleanOption OPEN_FOLDER_RECURSIVE =  new BooleanOption("open.folder.recursive", Boolean.FALSE);
   
   /** How many spaces to use for indenting. */
-  public static final NonNegativeIntegerOption INDENT_LEVEL = 
+  public static final NonNegativeIntegerOption INDENT_INC = 
     new NonNegativeIntegerOption("indent.level", Integer.valueOf(2));
   
   /** Number of lines to remember in the Interactions History */

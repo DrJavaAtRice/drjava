@@ -95,7 +95,7 @@ class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
     * @param reason The reason that the indentation is taking place
     * @return this is always false, since we are updating the cursor location
     */
-  public boolean indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
+  public void indentLine(AbstractDJDocument doc, Indenter.IndentReason reason) {
     super.indentLine(doc, reason);
     try {
       // Find start of line
@@ -125,7 +125,6 @@ class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
           here += _suffices[i].length();
         }
       }
-      return false;
     }
     catch (BadLocationException e) {
       // Shouldn't happen

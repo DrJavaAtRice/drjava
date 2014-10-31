@@ -765,7 +765,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertEquals("number of times interpreterChanged fired", i, interpreterChangedCount);
     }
 
-//    /** Not used */
+///** Not used */
 //    public void assertInteractionCaretPositionChangedCount(int i) {
 //      assertEquals("number of times interactionCaretPositionChanged fired", i, interactionCaretPositionChangedCount);
 //    }
@@ -814,7 +814,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertEquals("number of times saveBeforeCompile fired", i, saveBeforeCompileCount);
     }
 
-//    /** Not used.*/
+///** Not used.*/
 //    public void assertSaveBeforeRunCount(int i) {
 //      assertEquals("number of times saveBeforeRun fired", i, saveBeforeRunCount);
 //    }
@@ -831,7 +831,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertEquals("number of times compileBeforeJavadoc fired", i, compileBeforeJavadocCount);
     }
 
-//    /** Not used. */
+///** Not used. */
 //    public void assertSaveBeforeDebugCount(int i) {
 //      assertEquals("number of times saveBeforeDebug fired",
 //                   i,
@@ -899,7 +899,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     public void interpreterChanged(boolean inProgress) { listenerFail("interpreterChanged fired unexpectedly"); }
 
-//    /**Not used */
+///**Not used */
 //    public void interactionCaretPositionChanged(int pos) {
 //      listenerFail("interactionCaretPosition fired unexpectedly");
 //    }

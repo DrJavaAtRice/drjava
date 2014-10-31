@@ -156,8 +156,8 @@ public class Indenter {
     * @param doc document containing line to be indented  Assumes that reduced lock is already held.
     * @return true if the condition tested by the top rule holds, false otherwise
     */
-  public boolean indent(AbstractDJDocument doc, Indenter.IndentReason reason) {
+  public void indent(AbstractDJDocument doc, Indenter.IndentReason reason) {
 //    Utilities.showDebug("Indenter.indent called on doc "  + doc);
-    return _topRule.indentLine(doc, reason);
+    _topRule.indentLine(doc, reason);
   }
 }

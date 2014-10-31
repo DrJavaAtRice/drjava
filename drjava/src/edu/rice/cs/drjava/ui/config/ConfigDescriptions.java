@@ -464,7 +464,7 @@ public class ConfigDescriptions {
         "The number of days between automatic new version checks.");
     
     /* Dialog box options */
-    add(OptionConstants.INDENT_LEVEL,
+    add(OptionConstants.INDENT_INC,
         "Indent Level",
         "The number of spaces to use for each level of indentation.");
     add(OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size",

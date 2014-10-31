@@ -463,11 +463,11 @@ public class JavaInterpreterTest extends DrJavaTestCase {
 //  /** Test that the value of a variable can be queried externally. */
 //  public void testQueryVariableExternally() {
 //    _interpreter.defineVariable("x", 7);
-//    // Get value of variable externally
+//// Get value of variable externally
 //    assertEquals("external query for x",
 //                 new Integer(7), _interpreter.getVariable("x"));
 //
-//    // Undefined variable
+//// Undefined variable
 //    try {
 //      _interpreter.getVariable("undefined");
 //      fail("Should have thrown IllegalStateException");
@@ -511,7 +511,7 @@ public class JavaInterpreterTest extends DrJavaTestCase {
 //    * given the value of the ALLOW_PRIVATE_ACCESS configuration option.
 //    */
 //  public void testAllowPrivateAccess() throws InterpreterException {
-//    // The real option listener is in DefaultGlobalModel, so add one here.
+//// The real option listener is in DefaultGlobalModel, so add one here.
 //    DrJava.getConfig().addOptionListener(OptionConstants.ALLOW_PRIVATE_ACCESS, new OptionListener<Boolean>() {
 //      public void optionChanged(OptionEvent<Boolean> oce) {
 //        _interpreter.setPrivateAccessible(oce.value.booleanValue());

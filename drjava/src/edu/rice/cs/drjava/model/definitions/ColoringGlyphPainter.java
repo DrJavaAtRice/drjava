@@ -321,7 +321,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
 //    */
 //  public void changedUpdate(DocumentEvent changes, Shape a, ViewFactory f) {
 //    super.changedUpdate(changes, a, f);
-//    // Make sure we redraw since something changed in the formatting
+//// Make sure we redraw since something changed in the formatting
 //    Container c = getContainer();
 //    if (c != null) c.repaint();
 //  }

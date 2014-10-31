@@ -511,7 +511,7 @@ public class InteractionsController extends AbstractConsoleController {
 //    _notifyInteractionStarted();
 //    _doc.setInProgress(true);
 //    _model.setAddToHistory(text); // _document.addToHistory(text);
-//    //Do not add to history immediately in case the user is not finished typing when they press return
+////Do not add to history immediately in case the user is not finished typing when they press return
 //  }
 //  
 //  /** Appends a newLine to _document assuming that the Write Lock is already held. Must run in the event thread. */

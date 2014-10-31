@@ -951,7 +951,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
       "}\n";
     
     _doc.addUndoableEditListener(_doc.getUndoManager());
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,Integer.valueOf(2));
+    DrJava.getConfig().setSetting(OptionConstants.INDENT_INC,Integer.valueOf(2));
 //    Utilities.clearEventQueue();
     _doc.insertString(0, text, null);
     assertEquals("insertion",text, _doc.getText()); 
@@ -993,7 +993,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
       "//}\n";
     
     _doc.addUndoableEditListener(_doc.getUndoManager());
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,Integer.valueOf(2));
+    DrJava.getConfig().setSetting(OptionConstants.INDENT_INC,Integer.valueOf(2));
 //    Utilities.clearEventQueue();
     _doc.insertString(0,text,null);
     assertEquals("insertion",text, _doc.getText());
@@ -1042,7 +1042,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     CompoundUndoManager undoManager = _doc.getUndoManager();
     
     _doc.addUndoableEditListener(undoManager);
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,Integer.valueOf(2));
+    DrJava.getConfig().setSetting(OptionConstants.INDENT_INC,Integer.valueOf(2));
 //    Utilities.clearEventQueue();
     // 1
     
@@ -1115,7 +1115,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     assertEquals("Should have indented correctly.", indented,
                  _doc.getText());
     
-//    // Try to undo the nested edit
+//// Try to undo the nested edit
 //    try {
 //      _doc.getUndoManager().undo();
 //      fail("Should not have allowed undoing a nested edit.");

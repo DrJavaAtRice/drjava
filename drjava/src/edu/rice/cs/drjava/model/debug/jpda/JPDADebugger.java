@@ -1273,7 +1273,7 @@ public class JPDADebugger implements Debugger {
 //  private void scrollToSource(LocatableEvent e) {
 //    Location location = e.location();
 //    
-//    // First see if doc is stored
+//// First see if doc is stored
 //    EventRequest request = e.request();
 //    Object docProp = request.getProperty("document");
 //    if ((docProp != null) && (docProp instanceof OpenDefinitionsDocument)) {

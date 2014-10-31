@@ -637,9 +637,9 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
 
     pack();
 //    Dimension parentDim = (_owner != null) ? _owner.getSize() : getToolkit().getScreenSize();
-//    //int xs = (int) parentDim.getWidth()/3;
+////int xs = (int) parentDim.getWidth()/3;
 //    int ys = (int) parentDim.getHeight()/4;
-//    // in line below, parentDim was _owner.getSize(); changed because former could generate NullPointerException
+//// in line below, parentDim was _owner.getSize(); changed because former could generate NullPointerException
 //    setSize(new Dimension((int) getSize().getWidth(), (int)Math.min(parentDim.getHeight(), Math.max(ys, 300)))); 
     if (_owner!=null) { setLocationRelativeTo(_owner); }
 

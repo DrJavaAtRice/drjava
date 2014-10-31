@@ -799,7 +799,7 @@ public abstract class FileOps {
     /** This field keeps track of whether or not outputFile has been resolved to its canonical name. */
     private boolean isCanonical = false;
     
-//    /** Globally enables backups for any DefaultFileSaver that does not override the shouldBackup method. */
+///** Globally enables backups for any DefaultFileSaver that does not override the shouldBackup method. */
 //    public static void setBackupsEnabled(boolean isEnabled) { backupsEnabled = isEnabled; }
     
     public DefaultFileSaver(File file){ outputFile = file.getAbsoluteFile(); }

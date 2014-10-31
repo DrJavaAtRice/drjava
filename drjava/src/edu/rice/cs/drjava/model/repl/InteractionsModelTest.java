@@ -876,7 +876,7 @@ public final class InteractionsModelTest extends DrJavaTestCase {
 //    private volatile boolean _interactionDone = false;       // records when the interaction is done
 //    private final Object _interactionLock = new Object();    // lock for _interactionDone
 //    
-//    /** Relying on the default constructor. */
+///** Relying on the default constructor. */
 //    
 //    public void interactionEnded() {
 //      synchronized(_interactionLock) { 

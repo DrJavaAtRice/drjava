@@ -752,7 +752,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
 //    listener0.compile(doc0);
 //    listener0.checkCompileOccurred();
 //    _model.removeListener(listener0);
-//    // What is the preceding code segment supposed to test; it has already been done!
+//// What is the preceding code segment supposed to test; it has already been done!
         
     final OpenDefinitionsDocument doc1 = setupDocument(MULTI_CLASSES_IN_FILE_TEXT);
     final File file = new File(_tempDir, "DJTest.java");

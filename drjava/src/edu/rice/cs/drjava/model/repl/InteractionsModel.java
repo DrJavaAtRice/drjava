@@ -793,7 +793,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 //    * and assumes read lock or write lock is already held. 
 //    */
 //  protected void advanceCaret(final int n) {
-//    /* In legacy unit tests, _pane can apparently be null in some cases.  It can also be mutated in the middle of run() 
+///* In legacy unit tests, _pane can apparently be null in some cases.  It can also be mutated in the middle of run() 
 //     in InteractionsDJDocumentTest.testStylesListContentAndReset. */
 //    final InteractionsPane pane = _pane;  
 ////    if (Utilities.TEST_MODE && pane == null) return;  // Some legacy unit tests do not set up an interactions pane

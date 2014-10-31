@@ -506,7 +506,7 @@ public class DrJava {
     * @throws IllegalStateException if config has already been assigned
     */
   static FileConfiguration _initConfig() throws IllegalStateException {
-//    // Make sure someone doesn't try to change the config object.
+//// Make sure someone doesn't try to change the config object.
 //    if (_config != null) throw new IllegalStateException("Can only call initConfig once!");
     
     FileConfiguration config;

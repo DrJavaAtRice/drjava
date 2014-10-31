@@ -74,7 +74,7 @@ public final class IndentTest extends DrJavaTestCase {
     DrJava.getConfig().resetToDefaults();
     _notifier = new GlobalEventNotifier();
     _doc = new DefinitionsDocument(_notifier);
-    setConfigSetting(OptionConstants.INDENT_LEVEL, indentLevel);
+    setConfigSetting(OptionConstants.INDENT_INC, indentLevel);
   }
   
   /** Builds the suite of tests for Indent.class.
@@ -539,7 +539,7 @@ public final class IndentTest extends DrJavaTestCase {
 //  public void testIndentInfoBlockComments () throws BadLocationException {
 //    BraceReduction _reduced = _doc.getReduced();
 //    _doc.insertString(0, "(\n /*\n*\n", null);
-//    // (\n/*\n*#\n
+//// (\n/*\n*#\n
 //    _reduced.move(-1);
 //    IndentInfo info = _reduced.getIndentInformation();
 //    _assertIndentInfo(info, OPEN_PAREN, -1, 7, 1);
@@ -551,7 +551,7 @@ public final class IndentTest extends DrJavaTestCase {
 //  public void testIndentInfoBlockComments2 () throws BadLocationException {
 //    BraceReduction _reduced = _doc.getReduced();
 //    _doc.insertString(0, "\n(\n /*\n*\n", null);
-//    // \n(\n/*\n*#\n
+//// \n(\n/*\n*#\n
 //    _reduced.move(-1);
 //    IndentInfo info = _reduced.getIndentInformation();
 //    _assertIndentInfo(info, OPEN_PAREN, 7, 7, 1);
@@ -563,7 +563,7 @@ public final class IndentTest extends DrJavaTestCase {
 //  public void testIndentInfoBlockComments3 () throws BadLocationException {
 //    BraceReduction _reduced = _doc.getReduced();
 //    _doc.insertString(0, "{\n  /*\n*\n", null);
-//    // (\n/*\n*#\n
+//// (\n/*\n*#\n
 //    _reduced.move(-1);
 //    IndentInfo info = _reduced.getIndentInformation();
 //    _assertIndentInfo(info, OPEN_CURLY, -1, 8, 1);
@@ -575,7 +575,7 @@ public final class IndentTest extends DrJavaTestCase {
 //  public void testIndentInfoBlockComments4 () throws BadLocationException {
 //    BraceReduction _reduced = _doc.getReduced();
 //    _doc.insertString(0, "\n{\n  /*\n*\n", null);
-//    // \n(\n/*\n*#\n
+//// \n(\n/*\n*#\n
 //    _reduced.move(-1);
 //    IndentInfo info = _reduced.getIndentInformation();
 //    _assertIndentInfo(info, OPEN_CURLY, 8, 8, 1);
@@ -595,7 +595,7 @@ public final class IndentTest extends DrJavaTestCase {
 //    * @exception BadLocationException
 //    */
 //  public void testSkippingComments () throws BadLocationException {
-//    // just paren
+//// just paren
 //    BraceReduction _reduced = _doc.getReduced();
 //    _doc.insertString(0, "\n{\n   //{ ()\n}", null);
 //    IndentInfo info = _reduced.getIndentInformation();
@@ -606,7 +606,7 @@ public final class IndentTest extends DrJavaTestCase {
 //    * @exception BadLocationException
 //    */
 //  public void testSkippingCommentsBraceAtBeginning () throws BadLocationException {
-//    // just paren
+//// just paren
 //    BraceReduction _reduced = _doc.getReduced();
 //    _doc.insertString(0, "{\n   //{ ()}{", null);
 //    IndentInfo info = _reduced.getIndentInformation();
@@ -617,7 +617,7 @@ public final class IndentTest extends DrJavaTestCase {
 //    * @exception BadLocationException
 //    */
 //  public void testNothingToIndentOn () throws BadLocationException {
-//    // just paren
+//// just paren
 //    BraceReduction _reduced = _doc.getReduced();
 //    _doc.insertString(0, "   //{ ()}{", null);
 //    IndentInfo info = _reduced.getIndentInformation();
@@ -696,7 +696,7 @@ public final class IndentTest extends DrJavaTestCase {
   
 //  /** Not supported any more. */
 //  public void testLargerIndent () throws BadLocationException {
-//    // just paren
+//// just paren
 //    BraceReduction rm = doc.getReduced();
 //    doc.insertString(0, "public class temp \n  {  ()\n { text here", null);
 //    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
@@ -1129,12 +1129,12 @@ public final class IndentTest extends DrJavaTestCase {
 //    Utilities.clearEventQueue();
 //    Utilities.clearEventQueue();
     _assertContents(indentedBefore, _doc);
-//    System.err.println("Changing INDENT_LEVEL option constant to 8");
-    setConfigSetting(OptionConstants.INDENT_LEVEL, 8);
+//    System.err.println("Changing INDENT_INC option constant to 8");
+    setConfigSetting(OptionConstants.INDENT_INC, 8);
     
 //    Utilities.clearEventQueue();
 //    Utilities.clearEventQueue();
-//    System.err.println("level is " + DrJava.getConfig().getSetting(OptionConstants.INDENT_LEVEL));
+//    System.err.println("level is " + DrJava.getConfig().getSetting(OptionConstants.INDENT_INC));
 //    System.err.println("doc = " + _doc);
     safeIndentLines(0, _doc.getLength());
         
@@ -1190,8 +1190,8 @@ public final class IndentTest extends DrJavaTestCase {
 //      _indentAndCompare(unindentedFiles[x], correctFiles[x]);
 //    }
 //
-//    //We know the following test file should (currently) fail, so we assert that it will fail to check
-//    //our _indentAndCompare(...) function
+////We know the following test file should (currently) fail, so we assert that it will fail to check
+////our _indentAndCompare(...) function
 //    boolean threwAFE = false;
 //    try {
 //      _indentAndCompare(new File(directory, "IndentProblems.indent"),

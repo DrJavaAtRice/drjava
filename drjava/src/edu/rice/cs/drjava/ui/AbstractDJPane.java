@@ -200,7 +200,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     return (int) (visibleRectangle.getHeight() * SCROLL_UNIT);
   }
   
-  /** Runs indent(int) with a default value of Indenter.IndentReason.OTHER */
+  /** Runs indent(Indenter.IndentReason) with a default value of Indenter.IndentReason.OTHER */
   public void indent() { indent(Indenter.IndentReason.OTHER); }
 
   /** Perform an indent either on the current line or on the given selected box of text.  Calls are sent to GlobalModel

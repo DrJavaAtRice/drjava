@@ -50,7 +50,7 @@ public abstract class JPDADebugTestCase extends DebugTestCase {
    * unnecessary as all uses of _debugger are consistent with the Debugger interface. */
 //  public void setUp() throws Exception {
 //    super.setUp();
-//    // This cast will fail if the debugger has an unexpected type
+//// This cast will fail if the debugger has an unexpected type
 //    _debugger = (JPDADebugger) super._debugger;
 //  }
 

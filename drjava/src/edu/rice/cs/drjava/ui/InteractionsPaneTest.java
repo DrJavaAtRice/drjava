@@ -403,7 +403,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
 //  private volatile boolean _resetDone;
 //  
 //  public void testPromptListClearedOnReset() throws Exception {
-//    // Can't use the fields declared in setUp; we need a real InteractionsModel
+//// Can't use the fields declared in setUp; we need a real InteractionsModel
 //    final MainFrame _mf = new MainFrame();
 //    final Object _resetLock = new Object();
 //    
@@ -422,7 +422,7 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
 ////    System.err.println(_pane.getPromptList());
 //    assertEquals("PromptList before insert should contain 0 elements", 0, _pane.getPromptList().size());
 //        
-//    // Insert some text 
+//// Insert some text 
 //    _doc.append("5", InteractionsDocument.NUMBER_RETURN_STYLE);
 //
 //    Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(_doc.getLength()); } });
@@ -469,11 +469,11 @@ public final class InteractionsPaneTest extends DrJavaTestCase {
 //    _model.resetInterpreter(FileOption.NULL_FILE);
 //    Utilities.clearEventQueue();
 // 
-//    /* Wait until reset has finished. Reset is started just before interpreterReady notification. */
+///* Wait until reset has finished. Reset is started just before interpreterReady notification. */
 //    synchronized(_resetLock) { while (! _resetDone) _resetLock.wait(); }
 //    Utilities.clearEventQueue();
 // 
-//    // wait until the reset operation (which is queued ahead of us) has grabbed the WriteLock
+//// wait until the reset operation (which is queued ahead of us) has grabbed the WriteLock
 //    Utilities.invokeAndWait(new Runnable() { public void run() {  _size = _pane.getPromptList().size(); } });
 //      
 //    Utilities.clearEventQueue();

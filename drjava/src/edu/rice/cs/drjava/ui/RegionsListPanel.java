@@ -317,7 +317,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
   
 //  /** Remove all regions for this document from the tree. Must be executed in event thread. */
 //  public void removeRegions(final OpenDefinitionsDocument odd) {
-//    // Only change GUI from event-dispatching thread
+//// Only change GUI from event-dispatching thread
 //    Runnable doCommand = new Runnable() {
 //      public void run() {
 ////        String name = "";

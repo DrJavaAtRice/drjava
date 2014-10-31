@@ -3192,7 +3192,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _debugSplitPane = new BorderlessSplitPane(JSplitPane.VERTICAL_SPLIT, true);
       _mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, _docSplitPane, _tabbedPane);
 // Lightweight parsing has been disabled until we have something that is beneficial and works better in the background.
-//    // The OptionListener for LIGHTWEIGHT_PARSING_ENABLED.
+//// The OptionListener for LIGHTWEIGHT_PARSING_ENABLED.
 //    OptionListener<Boolean> parsingEnabledListener = new OptionListener<Boolean>() {
 //      public void optionChanged(OptionEvent<Boolean> oce) {
 //        if (oce.value) {
@@ -7831,7 +7831,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
     });
     
-//    // This listener updates the _cachedCaretPosition in the _interactionsController when the cursor is manually set.
+//// This listener updates the _cachedCaretPosition in the _interactionsController when the cursor is manually set.
 //    _interactionsPane.addMouseListener(new MouseInputAdapter() {
 //      public void mouseClicked(MouseEvent e) { 
 //        _interactionsController.setCachedCaretPos(_interactionsPane.viewToModel(e.getPoint()));
@@ -8180,9 +8180,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _docSplitPane.setRightComponent(scroll); //crazy line
     _docSplitPane.setDividerLocation(oldLocation);
     
-//    // if the current def pane is uneditable, that means we arrived here from a compile with errors.  We're
-//    // guaranteed to make it editable again when we return from the compilation, so we take the state
-//    // with us.  We guarantee only one definitions pane is un-editable at any time.
+//// if the current def pane is uneditable, that means we arrived here from a compile with errors.  We're
+//// guaranteed to make it editable again when we return from the compilation, so we take the state
+//// with us.  We guarantee only one definitions pane is un-editable at any time.
 //    if (_currentDefPane.isEditable()) {
 //      _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();
     _currentDefPane.notifyActive();
@@ -8195,7 +8195,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //      _currentDefPane.notifyActive();
 //      _currentDefPane.setEditable(false);
 //    }
-//    // reset the undo/redo menu items
+//// reset the undo/redo menu items
     resetUndo();
     _updateDebugStatus();
   }

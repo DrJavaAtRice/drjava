@@ -153,14 +153,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * @param notifier used by CompoundUndoManager to announce undoable edits
     */
   public DefinitionsDocument(GlobalEventNotifier notifier) {
-    this(new Indenter(DrJava.getConfig().getSetting(INDENT_LEVEL).intValue()), notifier);
+    this(new Indenter(DrJava.getConfig().getSetting(INDENT_INC).intValue()), notifier);
   }
   
   /** Main constructor.
     * @param notifier used by CompoundUndoManager to announce undoable edits
     */
   public DefinitionsDocument(GlobalEventNotifier notifier, CompoundUndoManager undoManager) {
-    this(new Indenter(DrJava.getConfig().getSetting(INDENT_LEVEL).intValue()), notifier, undoManager);
+    this(new Indenter(DrJava.getConfig().getSetting(INDENT_INC).intValue()), notifier, undoManager);
   }
   
   /** Returns the document's editor */
@@ -207,7 +207,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //    if (_file == null) {
 //      throw new IllegalStateException("This document does not yet have a file.");
 //    }
-//    //does the file actually exist?
+////does the file actually exist?
 //    if (_file.exists()) return _file;
 //    else throw new FileMovedException(_file, "This document's file has been moved or deleted.");
 //  }
@@ -234,7 +234,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //  public void setFile(File file) {
 //    _file = file;
 //
-//    //jim: maybe need lock
+////jim: maybe need lock
 //    if (_file != null) {
 //      _timestamp = _file.lastModified();
 //    }

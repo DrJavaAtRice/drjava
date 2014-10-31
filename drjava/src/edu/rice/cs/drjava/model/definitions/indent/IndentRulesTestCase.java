@@ -48,7 +48,7 @@ import javax.swing.text.BadLocationException;
   */
 public abstract class IndentRulesTestCase extends DrJavaTestCase {
   
-  public static final int TEST_INDENT_LEVEL = 2;
+  public static final int TEST_INDENT_INC = 2;
 
   protected volatile AbstractDJDocument _doc;
 //  private String _indent;
@@ -59,7 +59,7 @@ public abstract class IndentRulesTestCase extends DrJavaTestCase {
     super.setUp();
     //_notifier = new GlobalEventNotifier();
     //_doc = new DefinitionsDocument(_notifier);
-    _doc = new AbstractDJDocument(TEST_INDENT_LEVEL) {
+    _doc = new AbstractDJDocument(TEST_INDENT_INC) {
       protected int startCompoundEdit() { return 0; /* Do nothing. */ }
       protected void endCompoundEdit(int key) { /* Do nothing. */ }
       protected void endLastCompoundEdit() { /* Do nothing. */ }
