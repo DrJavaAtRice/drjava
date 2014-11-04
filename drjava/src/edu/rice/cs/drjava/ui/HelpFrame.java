@@ -42,20 +42,36 @@ import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent;
 import java.net.URL;
 import java.net.MalformedURLException;
+import java.io.*;
 
 /**
  * The frame for displaying the HTML help files.
  * @version $Id$
  */
-public class HelpFrame extends HTMLFrame {
-  private static final String HELP_PATH =  "/edu/rice/cs/drjava/docs/user/";
+public class HelpFrame extends HTMLFrame{
+  
+    private static final String HELP_PATH = "/home/ytc/comp402/CodeCoverage/drjava/coveragereport/";
+	private static File myFile=new File("/home/ytc/comp402/CodeCoverage/drjava/coveragereport/default/andy.java.html");
+	private static final URL INTRO_URL = initURL(myFile);
+	private static URL initURL(File f){
+	URL l = null;
+    try {
+  		l = f.toURI().toURL();
+	} catch( Exception e ){
+
+	};
+	return l;
+	}
+
+  //private static final String HELP_PATH =  "/edu/rice/cs/drjava/docs/user/";
   protected static final String CONTENTS_PAGE = "index.html";
   protected static final String HOME_PAGE = "ch01.html";
-  private static final URL INTRO_URL = HTMLFrame.class.getResource(HELP_PATH + HOME_PAGE);
+  //private static final URL INTRO_URL = HTMLFrame.class.getResource(HELP_PATH + HOME_PAGE);
   protected static final String ICON = "DrJavaHelp.png";
 
   public HelpFrame() {
-    super("Help on using DrJava", INTRO_URL, HelpFrame.class.getResource(HELP_PATH + CONTENTS_PAGE), ICON);
+    //super("Help on using DrJava", INTRO_URL, HelpFrame.class.getResource(HELP_PATH + CONTENTS_PAGE), ICON);
+    super("Help on using DrJava", INTRO_URL, INTRO_URL, ICON);
     addHyperlinkListener(_linkListener);
   }
   

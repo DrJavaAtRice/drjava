@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.*;
+
 //import java.util.HashMap;
 //import java.util.Map;
 //import java.util.LinkedList;
@@ -58,26 +59,11 @@ public class ReportGenerator {
  //private final File classesDirectory;
  private final File sourceDirectory;
  private final File reportDirectory;
- private final List<OpenDefinitionsDocument> docs;
+ private final ArrayList<File> targets;
+ private final ArrayList<String> targetNames;
+ private final String mainClassFileName;
 
  //private ExecFileLoader execFileLoader;
- 
- public static class TestTarget implements Runnable {
-
-  public void run() {
-   isPrime(7);
-  }
-
-  private boolean isPrime(final int n) {
-   for (int i = 2; i * i <= n; i++) {
-    if ((n ^ i) == 0) {
-     return false;
-    }
-   }
-   return true;
-  }
-
- }
  
  /**
   * A class loader that loads classes from in-memory data.
@@ -121,21 +107,19 @@ public class ReportGenerator {
 
  private String getTargetClassName(final OpenDefinitionsDocument doc) throws Exception {
   File file = doc.getFile();
-  String path = file.getPath();
+  //String path = file.getPath();
   String name = file.getName().replace(".java", "");
-/*
-  Properties properties = new Properties();
-  try {
-   properties.load(new FileInputStream(path));
-  } catch (IOException e) {
-    
-  }
-  return properties.getProperty("package").replace(";", "") + "." + name;
-*/
+
   if(doc.getPackageName()!="")
    return doc.getPackageName() + "." + name;
 
   return name;
+ }
+
+ private String getTargetClassName(final File file) throws Exception {
+  String ClassName = file.getPath().replace(sourceDirectory.getPath(),"").replace(".java", "").replace("/",".").substring(1);
+
+  return ClassName;
  }
 
  private void printCounter(final String unit, final ICounter counter) {
@@ -166,12 +150,72 @@ public class ReportGenerator {
   //this.executionDataFile = new File(projectDirectory, "jacoco.exec");
   //this.classesDirectory = new File(projectDirectory, "bin");
   //this.sourceDirectory =new File(projectDirectory, "src");
-  this.docs = docs;
+  ArrayList<File> targets = new ArrayList<File>();
+  ArrayList<String> targetNames = new ArrayList<String>();
+
+  for(OpenDefinitionsDocument doc : docs){
+    targets.add(doc.getFile());
+    targetNames.add(getTargetClassName(doc));
+  }
+
+  this.targets = targets;
+  this.targetNames = targetNames;
+
   File projectDirectory = docs.get(0).getFile().getParentFile(); 
   this.title = projectDirectory.getName(); 
-  this.sourceDirectory = projectDirectory;
-  this.reportDirectory = new File(destDirectory, "coveragereport");
+
+  File src = projectDirectory;
+  String packageName = docs.get(0).getPackageName();
+  if(!packageName.equals("")){
+	//If there's package, go up until the root dir  
+	int numUp = packageName.split("\\.").length;
+	for(int i = 0; i< numUp ; i++){
+		src = src.getParentFile();
+	}
+  }
+  
+  this.sourceDirectory = src;
+  this.reportDirectory = destDirectory; //new File(destDirectory, "coveragereport");
+
+  this.mainClassFileName = getTargetClassName(docs.get(0).getFile());
  }
+
+ public ReportGenerator(File sourceDirectory, File classesDirectory, String mainClassPath , File destDirectory) throws Exception  {
+  this.sourceDirectory = sourceDirectory;
+  //this.classesDirectory = classesDirectory;
+  this.reportDirectory = destDirectory; 
+  this.title = sourceDirectory.getName();
+  
+  this.mainClassFileName = mainClassPath;
+
+  this.targets = rec_init(sourceDirectory);
+  ArrayList<String> targetNames = new ArrayList<String>();
+  for(File f: targets){
+	targetNames.add(getTargetClassName(f));
+  }
+  this.targetNames = targetNames;
+
+ }
+
+ public ArrayList<File> rec_init(File sourceDirectory){
+    ArrayList<File> files = new ArrayList<File>();
+    for(File f: sourceDirectory.listFiles()){
+		if(f.isFile()){
+			int i = f.getPath().lastIndexOf('.');
+			if (i > 0) {
+				String extension = f.getPath().substring(i+1);
+				if(extension.equals("java")){
+					files.add(f);
+				}
+			}
+		}else if(f.isDirectory()){
+			files.addAll(rec_init(f));
+		}
+    }
+
+    return files;
+ }
+
 
  /**
   * Create the report.
@@ -184,11 +228,14 @@ public class ReportGenerator {
   //loadExecutionData();
   //final String targetName = TestTarget.class.getName();
 
-  File target = docs.get(0).getFile();
+  //File target = docs.get(0).getFile();
+  //String targetName = getTargetClassName(docs.get(0));
+
+
   //File target = sourceDirectory.listFiles()[0].listFiles()[1];
-  //File target2 = sourceDirectory.listFiles()[0].listFiles()[2];
-  String targetName = getTargetClassName(docs.get(0));
+  //File target2 = sourceDirectory.listFiles()[0].listFiles()[2];  
   //String targetName2 = getTargetClassName(target2);
+
   
   // For instrumentation and runtime we need a IRuntime instance
   // to collect execution data:
@@ -196,11 +243,18 @@ public class ReportGenerator {
 
   // The Instrumenter creates a modified version of our test target class
   // that contains additional probes for execution data recording:
-  final Instrumenter instr = new Instrumenter(runtime);
-  final byte[] instrumented = instr.instrument(getTargetClass(target), targetName);
+  //final Instrumenter instr = new Instrumenter(runtime);
+  //final byte[] instrumented = instr.instrument(getTargetClass(target), targetName);
   //final Instrumenter instr2 = new Instrumenter(runtime);
   //final byte[] instrumented2 = instr2.instrument(getTargetClass(targetName2), targetName2);
   
+  ArrayList<byte[]> instrumenteds = new ArrayList<byte[]>();
+  for(int i = 0 ; i< targets.size() ; i++){
+	final Instrumenter instr = new Instrumenter(runtime);
+    final byte[] instrumented = instr.instrument(getTargetClass(targets.get(i)), targetNames.get(i));
+    instrumenteds.add(instrumented);
+  }
+
   // Now we're ready to run our instrumented class and need to startup the
   // runtime first:
   final RuntimeData data = new RuntimeData();
@@ -209,19 +263,22 @@ public class ReportGenerator {
   // In this tutorial we use a special class loader to directly load the
   // instrumented class definition from a byte[] instances.
   final MemoryClassLoader memoryClassLoader = new MemoryClassLoader();
-  memoryClassLoader.addDefinition(targetName, instrumented);
+  //memoryClassLoader.addDefinition(targetName, instrumented);
   //memoryClassLoader.addDefinition(targetName2, instrumented2);
-  
-  final Class<?> targetClass = memoryClassLoader.loadClass(targetName);
+  for(int i = 0; i< targetNames.size(); i++){
+	memoryClassLoader.addDefinition(targetNames.get(i), instrumenteds.get(i));
+  }
+
+  final Class<?> mainClass = memoryClassLoader.loadClass(mainClassFileName);
 
   // Here we execute our test target class through its Runnable interface:
   //final Runnable targetInstance = (Runnable) targetClass.newInstance();
   //targetInstance.run();
   
   //Execute the test target class 
-     Method meth = targetClass.getMethod("main", String[].class);
-     String[] params = new String[]{}; // init params accordingly
-     meth.invoke(null, (Object) params); // static method doesn't have an instance
+  Method meth = mainClass.getMethod("main", String[].class);
+  String[] params = new String[]{}; // init params accordingly
+  meth.invoke(null, (Object) params); // static method doesn't have an instance
 
   // At the end of test execution we collect execution data and shutdown
   // the runtime:
@@ -234,9 +291,13 @@ public class ReportGenerator {
   // information:
   final CoverageBuilder coverageBuilder = new CoverageBuilder();
   final Analyzer analyzer = new Analyzer(executionData, coverageBuilder);
-  analyzer.analyzeClass(getTargetClass(target), targetName);
+  //analyzer.analyzeClass(getTargetClass(target), targetName);
   //analyzer.analyzeClass(getTargetClass(targetName2), targetName2);
-  //analyzer.analyzeAll(classesDirectory);
+  //TODO? analyzer.analyzeAll(classesDirectory);
+
+  for(int i = 0; i< targetNames.size(); i++){
+	analyzer.analyzeClass(getTargetClass(targets.get(i)), targetNames.get(i));
+  }
   
   printCoverage(coverageBuilder);
   

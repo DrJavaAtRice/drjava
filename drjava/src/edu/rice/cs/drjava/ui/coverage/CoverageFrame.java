@@ -89,6 +89,7 @@ public class CoverageFrame extends SwingFrame {
   private final JButton _applyButton;
   private final JButton _cancelButton;
   private final JCheckBox _useCurrentFile;
+  private final JCheckBox _openHTMLBrowser;
 
   //  private JButton _saveSettingsButton;
   private final JPanel _mainPanel;
@@ -126,6 +127,8 @@ public class CoverageFrame extends SwingFrame {
 			selectFile.setEnabled(!_useCurrentFile.isSelected()); 
         }
     });
+
+    _openHTMLBrowser = new JCheckBox("Open web browser to display the report", false);
  
     Action okAction = new AbstractAction("Ok") {
       public void actionPerformed(ActionEvent e) {
@@ -180,7 +183,7 @@ public class CoverageFrame extends SwingFrame {
     bottom.setBorder(new EmptyBorder(5,5,5,5));
     bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
     bottom.add(Box.createHorizontalGlue());
-    bottom.add(_applyButton);
+    //bottom.add(_applyButton);
     bottom.add(_okButton);
     bottom.add(_cancelButton);
     bottom.add(Box.createHorizontalGlue());
@@ -246,11 +249,12 @@ public class CoverageFrame extends SwingFrame {
   public boolean generateReport(){
 	try{
 		if(_useCurrentFile.isSelected()){
-             //final ReportGenerator generator = new ReportGenerator(_model.getOpenDefinitionsDocuments(), chooser.getSelectedFile());
+            //final ReportGenerator generator = new ReportGenerator(_model.getOpenDefinitionsDocuments(), _outputDirSelector.getFileFromField());
 			final ReportGenerator generator = new ReportGenerator(_model.getDocumentNavigator().getSelectedDocuments(), _outputDirSelector.getFileFromField());
              generator.create();
 		}else{
-
+			final ReportGenerator generator = new ReportGenerator(_srcRootSelector.getFileFromField(), _classDirSelector.getFileFromField() , _mainDocumentSelector.getText(), _outputDirSelector.getFileFromField());
+			generator.create();
 		}
 /*
              for(OpenDefinitionsDocument doc : _model.getOpenDefinitionsDocuments()){
@@ -347,12 +351,19 @@ public class CoverageFrame extends SwingFrame {
     Insets labelInsets = new Insets(5, 10, 0, 0);
     Insets compInsets  = new Insets(5, 5, 0, 10);
 
-	// CheckBox
+	// CheckBox for using current selected files
 	c.weightx = 0.0;
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
     gridbag.setConstraints(_useCurrentFile, c);
 	panel.add(_useCurrentFile);
+
+	// CheckBox for opening HTML report in web browser
+	c.weightx = 0.0;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.insets = compInsets;
+    gridbag.setConstraints(_openHTMLBrowser, c);
+	panel.add(_openHTMLBrowser);
 
     // Project Root
     c.weightx = 0.0;
