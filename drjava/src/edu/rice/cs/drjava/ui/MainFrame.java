@@ -84,6 +84,8 @@ import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DocumentUIListener;
+
+import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.definitions.NoSuchDocumentException;
 import edu.rice.cs.drjava.model.debug.*;
@@ -1038,40 +1040,89 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
 
-  /** Useless action. Will show a warning window. */
+  public void compileBeforeCodeCoverage(final CompilerListener coverageAfterCompile) {
+
+   //right now using the compile before junit setting
+   if (DrJava.getConfig().getSetting(ALWAYS_COMPILE_BEFORE_JUNIT).booleanValue() || Utilities.TEST_MODE) {
+     // Compile all open source files
+     _model.getCompilerModel().addListener(coverageAfterCompile);  // listener removes itself
+     _compileAll();
+   }
+   else { // pop up a window to ask if all open files should be compiled before testing        
+     final JButton yesButton = new JButton(new AbstractAction("Yes") {
+       public void actionPerformed(ActionEvent e) {
+         // compile all open source files and test
+         _model.getCompilerModel().addListener(coverageAfterCompile);  // listener removes itself
+         _compileAll();
+       }
+     });
+     final JButton noButton = new JButton(new AbstractAction("No") {
+       public void actionPerformed(ActionEvent e) {
+         //abort
+       }
+     });
+     ScrollableListDialog<OpenDefinitionsDocument> dialog = 
+       new ScrollableListDialog.Builder<OpenDefinitionsDocument>()
+       .setOwner(MainFrame.this)
+       .setTitle("Must Compile All Source Files to Run Code Coverage")
+       .setText("<html>Before you can run code coverage, you must first compile all out of sync source files.<br>"+
+                "Would you like to compile all files and run the code coverage tool?")
+       .setItems(_model.getOpenDefinitionsDocuments())
+       .setMessageType(JOptionPane.QUESTION_MESSAGE)
+       .setFitToScreen(true)
+       .clearButtons()
+       .addButton(yesButton)
+       .addButton(noButton)
+       .build();
+     
+     dialog.showDialog();
+   }
+ }
+  
+  
+  /** Show the coverage report dialogue */
   private volatile AbstractAction _coverageAction = new AbstractAction("Code Coverage") {
     {}// _addGUIAvailabilityListener(this,                                             // init
                                  //GUIAvailabilityListener.ComponentType.INTERACTIONS);}
     public void actionPerformed(ActionEvent ae) {
-    showCoverageFrame();    
-/*
-    JFileChooser chooser = new JFileChooser();
-    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-    int returnVal = chooser.showOpenDialog(MainFrame.this);
-    if(returnVal == JFileChooser.APPROVE_OPTION) {
-        
-         String s = "";
-         try{
-             for(OpenDefinitionsDocument doc : _model.getOpenDefinitionsDocuments()){
-                 s = s + doc.getFileName() + "," ;  //getFile()
-                 //s = doc.getFile().getCanonicalPath().replace(".java",".class");
-             }
-             final ReportGenerator generator = new ReportGenerator(_model.getOpenDefinitionsDocuments(), chooser.getSelectedFile());
-             generator.create();
-             
-         } catch (Exception e){
-             StringWriter sw = new StringWriter();
-             PrintWriter pw = new PrintWriter(sw);
-             e.printStackTrace(pw);
-             s = sw.toString(); // stack trace as a string
-         }
-         JOptionPane.showMessageDialog(MainFrame.this, s,
-                                       "open files are", JOptionPane.ERROR_MESSAGE);
-    }     
-*/  
       
- 
+    if (!_model.hasOutOfSyncDocuments()) {  
+      showCoverageFrame();    
     }
+    else {
+      
+      CompilerListener coverage = new DummyCompilerListener() {
+              @Override public void compileAborted(Exception e) {
+            // gets called if there are modified files and the user chooses NOT to save the files
+            // see bug report 2582488: Hangs If Testing Modified File, But Choose "No" for Saving
+            final CompilerListener listenerThis = this;
+             _model.getCompilerModel().removeListener(listenerThis); 
+            }
+          
+          @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
+            final CompilerListener listenerThis = this;
+            try {
+              if (_model.hasOutOfSyncDocuments() || _model.getNumCompilerErrors() > 0) {
+                return;
+              }
+              EventQueue.invokeLater(new Runnable() {  // defer running this code; would prefer to waitForInterpreter
+                public void run() { showCoverageFrame();}
+              });
+            }
+            finally {  // always remove this listener after its first execution
+              EventQueue.invokeLater(new Runnable() { 
+                public void run() { _model.getCompilerModel().removeListener(listenerThis); }
+              });
+            }
+          }
+        
+    
+    }; //end coverage listener
+    
+    compileBeforeCodeCoverage(coverage);
+    
+    } //end else
+  }
   };
 
   public void showCoverageFrame() {   
