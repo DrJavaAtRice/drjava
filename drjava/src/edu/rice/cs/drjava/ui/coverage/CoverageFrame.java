@@ -250,10 +250,10 @@ public class CoverageFrame extends SwingFrame {
 	try{
 		if(_useCurrentFile.isSelected()){
             //final ReportGenerator generator = new ReportGenerator(_model.getOpenDefinitionsDocuments(), _outputDirSelector.getFileFromField());
-			final ReportGenerator generator = new ReportGenerator(_model.getDocumentNavigator().getSelectedDocuments(), _outputDirSelector.getFileFromField());
+			final ReportGenerator generator = new ReportGenerator(_model, _model.getDocumentNavigator().getSelectedDocuments(), _outputDirSelector.getFileFromField());
              generator.create();
 		}else{
-			final ReportGenerator generator = new ReportGenerator(_srcRootSelector.getFileFromField(), _classDirSelector.getFileFromField() , _mainDocumentSelector.getText(), _outputDirSelector.getFileFromField());
+			final ReportGenerator generator = new ReportGenerator(_model, _srcRootSelector.getFileFromField(), _mainDocumentSelector.getText(), _outputDirSelector.getFileFromField());
 			generator.create();
 		}
 /*

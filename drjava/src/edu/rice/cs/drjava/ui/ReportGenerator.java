@@ -23,6 +23,7 @@ import java.util.*;
 //import java.util.Map;
 //import java.util.LinkedList;
 //import java.util.Properties;
+import edu.rice.cs.plt.collect.CollectUtil;
 
 import org.jacoco.core.analysis.Analyzer;
 import org.jacoco.core.analysis.CoverageBuilder;
@@ -59,7 +60,7 @@ public class ReportGenerator {
  //private final File classesDirectory;
  private final File sourceDirectory;
  private final File reportDirectory;
- private final ArrayList<File> targets;
+ private final List<File> targets;
  private final ArrayList<String> targetNames;
  private final String mainClassFileName;
 
@@ -117,7 +118,7 @@ public class ReportGenerator {
  }
 
  private String getTargetClassName(final File file) throws Exception {
-  String ClassName = file.getPath().replace(sourceDirectory.getPath(),"").replace(".java", "").replace("/",".").substring(1);
+  String ClassName = file.getPath().replace(sourceDirectory.getPath()+"/","").replace(".java", "").replace(".class", "").replace("/",".");//.substring(1);
 
   return ClassName;
  }
@@ -145,21 +146,11 @@ public class ReportGenerator {
   * 
   * @param projectDirectory
   */
- public ReportGenerator(final List<OpenDefinitionsDocument> docs, File destDirectory) throws Exception  {
+ public ReportGenerator(final SingleDisplayModel _model, final List<OpenDefinitionsDocument> docs, File destDirectory) throws Exception  {
   //this.title = projectDirectory.getName();
   //this.executionDataFile = new File(projectDirectory, "jacoco.exec");
   //this.classesDirectory = new File(projectDirectory, "bin");
   //this.sourceDirectory =new File(projectDirectory, "src");
-  ArrayList<File> targets = new ArrayList<File>();
-  ArrayList<String> targetNames = new ArrayList<String>();
-
-  for(OpenDefinitionsDocument doc : docs){
-    targets.add(doc.getFile());
-    targetNames.add(getTargetClassName(doc));
-  }
-
-  this.targets = targets;
-  this.targetNames = targetNames;
 
   File projectDirectory = docs.get(0).getFile().getParentFile(); 
   this.title = projectDirectory.getName(); 
@@ -175,12 +166,40 @@ public class ReportGenerator {
   }
   
   this.sourceDirectory = src;
+
+  
+  List<File> targets = new ArrayList<File>();
+  for(File dir:CollectUtil.makeList(_model.getClassPath())){
+    if( dir.getName().equals("lib") || dir.getName().equals("base") || dir.getName().equals("test"))
+		continue;
+    //System.out.println(dir.getName());
+  	targets.addAll(rec_init_target(dir));
+  }
+  this.targets = targets;
+
+  ArrayList<String> targetNames = new ArrayList<String>();
+/*
+  for(OpenDefinitionsDocument doc : docs){
+    targets.add(doc.getFile());
+    targetNames.add(getTargetClassName(doc));
+  }
+*/
+  
+  System.out.println(targets.size());
+
+  for(File f: targets){
+    //System.out.println(getTargetClassName(f));
+  	targetNames.add(getTargetClassName(f));
+  }
+  this.targetNames = targetNames;
+
+  
   this.reportDirectory = destDirectory; //new File(destDirectory, "coveragereport");
 
-  this.mainClassFileName = getTargetClassName(docs.get(0).getFile());
+  this.mainClassFileName = getTargetClassName(docs.get(0).getFile());//docs.get(0).getFile().getName().replace(".java",".class");//
  }
 
- public ReportGenerator(File sourceDirectory, File classesDirectory, String mainClassPath , File destDirectory) throws Exception  {
+ public ReportGenerator(final SingleDisplayModel _model, File sourceDirectory, String mainClassPath , File destDirectory) throws Exception  {
   this.sourceDirectory = sourceDirectory;
   //this.classesDirectory = classesDirectory;
   this.reportDirectory = destDirectory; 
@@ -197,7 +216,7 @@ public class ReportGenerator {
 
  }
 
- public ArrayList<File> rec_init(File sourceDirectory){
+ public List<File> rec_init(File sourceDirectory){
     ArrayList<File> files = new ArrayList<File>();
     for(File f: sourceDirectory.listFiles()){
 		if(f.isFile()){
@@ -210,6 +229,25 @@ public class ReportGenerator {
 			}
 		}else if(f.isDirectory()){
 			files.addAll(rec_init(f));
+		}
+    }
+
+    return files;
+ }
+
+ public List<File> rec_init_target(File sourceDirectory){
+    ArrayList<File> files = new ArrayList<File>();
+    for(File f: sourceDirectory.listFiles()){		
+		if(f.isFile()){
+			int i = f.getPath().lastIndexOf('.');
+			if (i > 0) {
+				String extension = f.getPath().substring(i+1);
+				if(extension.equals("class")){
+					files.add(f);
+				}
+			}
+		}else if(f.isDirectory()){
+			files.addAll(rec_init_target(f));
 		}
     }
 
