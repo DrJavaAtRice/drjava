@@ -1067,7 +1067,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
        .setTitle("Must Compile All Source Files to Run Code Coverage")
        .setText("<html>Before you can run code coverage, you must first compile all out of sync source files.<br>"+
                 "Would you like to compile all files and run the code coverage tool?")
-       .setItems(_model.getOpenDefinitionsDocuments())
+       .setItems(_model.getOutOfSyncDocuments())
        .setMessageType(JOptionPane.QUESTION_MESSAGE)
        .setFitToScreen(true)
        .clearButtons()
@@ -1127,6 +1127,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 
   public void showCoverageFrame() {   
     //ProjectPropertiesFrame ppf = new ProjectPropertiesFrame(this);
+	 _coverageFrame.setOutputDir(_model.getWorkingDirectory());
     _coverageFrame.setVisible(true);
     _coverageFrame.reset();
     _coverageFrame.toFront(); 

@@ -111,7 +111,6 @@ public class CoverageFrame extends SwingFrame {
     _mainFrame = mf;
     _model = _mainFrame.getModel();
     _mainPanel= new JPanel();
-
     _useCurrentFile = new JCheckBox("Generete report for current selected file", false);
     _useCurrentFile.addActionListener(new ActionListener(){
         @Override
@@ -212,6 +211,10 @@ public class CoverageFrame extends SwingFrame {
     reset();
     _applyButton.setEnabled(false);
     CoverageFrame.this.setVisible(false);
+  }
+  
+  public void setOutputDir(File file) {
+	  _outputDirSelector.setFileField(file);
   }
 
   public void reset(){
