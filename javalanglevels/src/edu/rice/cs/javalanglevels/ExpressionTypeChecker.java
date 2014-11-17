@@ -435,15 +435,14 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     }
   }
   
-  /**
-   * Check if this NumericBinaryExpression was okay.  It is not okay if either the left or the right result are not number types
-   * or if they are not instance datas.  Throw an appropriate error if any of these is the case.  Always return the least
-   * restrictive subtype of the left and the right.
-   * @param that  The NumericBinaryExpression being checked
-   * @param left_result  The result from visiting the left side of the NumericBinaryExpression
-   * @param right_result  The result from visiting the right side of the NumericBinaryExpression
-   * @return  An InstanceData of the least restrictive type of the left and right sides.
-   */
+  /** Check if this NumericBinaryExpression was okay.  It is not okay if either the left or the right result are not number types
+    * or if they are not instance datas.  Throw an appropriate error if any of these is the case.  Always return the least
+    * restrictive subtype of the left and the right.
+    * @param that  The NumericBinaryExpression being checked
+    * @param left_result  The result from visiting the left side of the NumericBinaryExpression
+    * @param right_result  The result from visiting the right side of the NumericBinaryExpression
+    * @return  An InstanceData of the least restrictive type of the left and right sides.
+    */
   public TypeData forNumericBinaryExpressionOnly(NumericBinaryExpression that, TypeData left_result, TypeData right_result) {
     if (left_result == null || right_result == null) {return null;}
     
@@ -568,8 +567,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     throw new RuntimeException("Internal Program Error: BitwiseNot is not supported.  " + 
                                "It should have been caught before getting to the TypeChecker.  Please report this bug.");
   }
-  
-  
+
   /** A NotExpression is illformed if its argument is not an instance type or its argument is not of type boolean.  Give
     * an error if this is the case.  Always return SymbolData.BOOLEAN_TYPE.getInstanceData() since this is the correct 
     * type for this expression.
@@ -578,18 +576,15 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     * @return  SymbolData.BOOLEAN_TYPE.getInstanceData()
     */
   public TypeData forNotExpressionOnly(NotExpression that, TypeData valueRes) {
-    if (valueRes == null) {return null;}
+    if (valueRes == null) return null;
     
     //make sure that lhs could be resolved (not PackageData)
-    if (!assertFound(valueRes, that)) {
-      return null;
-    }
+    if (!assertFound(valueRes, that)) return null;
     
     if (assertInstanceType(valueRes, 
                            "You cannot use the not (!) operator with " + valueRes.getName() + 
                            ", because it is a class name, not an instance", that) &&
-        ! valueRes.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, 
-                                                      JAVA_VERSION)) {
+        ! valueRes.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, JAVA_VERSION)) {
       
       _addError("You cannot use the not (!) operator with something of type " + valueRes.getName() + 
                 ". Instead, it should be used with an expression of boolean type", that);
@@ -597,13 +592,6 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     
     return SymbolData.BOOLEAN_TYPE.getInstanceData(); //it should always be a boolean type.
     
-  }
-  
-  /** Not currently supported */
-  public TypeData forConditionalExpressionOnly(ConditionalExpression that, TypeData condition_result, 
-                                               TypeData forTrue_result, TypeData forFalse_result) {
-    throw new RuntimeException ("Internal Program Error: Conditional expressions are not supported.  " + 
-                                "This should have been caught before the TypeChecker.  Please report this bug.");
   }
   
   /** Checks to see if this InstanceofExpression is okay.  It is not okay if typeRes is not a SymbolData, 
@@ -1431,18 +1419,45 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
              sd2.isBooleanType(JAVA_VERSION)) {
       return SymbolData.BOOLEAN_TYPE;
     }
-    else return SymbolData.INT_TYPE; // NOTE: It seems like any binary operation on number types with only ints, shorts, chars, or bytes will return an int
+    // NOTE: It seems like any binary operation on number types with only ints, shorts, chars, or bytes will return an int
+    else return SymbolData.INT_TYPE; 
   }
   
+//  /** Throw runtime exception, since conditional expressions are not allowed, and this should have been caught
+//   * before the TypeChecker.
+//   */
+//  public TypeData forConditionalExpression(ConditionalExpression that) {
+//    throw new RuntimeException("Internal Program Error: Conditional expressions are not supported. " + 
+//                               " This should have been caught before the Type Checker.  Please report this bug.");
+//  }
   
-  
-  
-  /**
-   * Throw runtime exception, since conditional expressions are not allowed, and this should have been caught
-   * before the TypeChecker.
-   */
-  public TypeData forConditionalExpression(ConditionalExpression that) {
-    throw new RuntimeException("Internal Program Error: Conditional expressions are not supported.  This should have been caught before the Type Checker.  Please report this bug.");
+    /** A ConditionalExpression is illformed if its argument is not of Boolean type or its argument types are incompatible.
+      * Give an error if this is the case.  Always return the more general type of the consequent and alternative. 
+      * @param that  The NotExpression being type-checked
+      * @param valueRes  The type of the argument to the NotExpression
+      * @return the type of the conditional expression
+      */
+  public TypeData forConditionalExpressionOnly(ConditionalExpression that) { 
+    Expression condition = that.getCondition();
+    Expression conseq = that.getForTrue();
+    Expression alt = that.getForFalse();
+    
+    TypeData conditionType = visit(condition);
+    TypeData conseqType = visit(conseq);
+    TypeData altType = visit(alt);
+    TypeData returnType = getCommonSuperTypeBase(conseqType.getSymbolData(), altType.getSymbolData());
+    
+    if (! conditionType.getSymbolData().isAssignable(SymbolData.BOOLEAN_TYPE, JAVA_VERSION)) {
+      _addError("The test in this conditional has type " + conditionType.getName() + " instead of boolean.", that);
+      return returnType;
+    }
+    
+    if (returnType == null) {
+      _addError("The type " + conseqType.getName() + " of the consequent and the type " + altType.getName() +
+                "of this conditional are not compatible");
+      return returnType;
+    } 
+    return returnType; 
   }
   
   /** Try to look up the type of the instanceof, and visit the expression that is being tested.
@@ -1453,7 +1468,8 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     * @return  The TypeData for boolean, or null
     */
   public TypeData forInstanceofExpression(InstanceofExpression that) {
-    //this call to getSymbolData will not throw any errors, but may return null.  If null is returned, an error needs to be added.
+    // This call to getSymbolData will not throw any errors, but may return null.  If null is returned, 
+    // an error needs to be added.
     final SymbolData typeRes = getSymbolData(that.getType().getName(), _data.getSymbolData(), that.getType(), false);
     final TypeData valueRes = that.getValue().visit(this);
     
@@ -1473,9 +1489,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     // Neither typeRes nor valueRes are null.
     return forInstanceofExpressionOnly(that, typeRes, valueRes);
   }
-  
-  
-  
+    
   /** Try to look up the type of the cast, and visit the expression that is being cast.
     * If the type being cast to is null, add an error, and return null.
     * If what is being cast cannot be resolved, just return the expected result of the cast, to allow type checking.
@@ -1503,15 +1517,13 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     return forCastExpressionOnly(that, typeRes, valueRes);
   }
   
-  
-  /**
-   * Make sure the dimensions of the array instantiation are all instances and subtypes of int, and then return
-   * an instance of the array.
-   * @param that  The UninitializedArrayInstantiation being type checked
-   * @param typeRes  The type of the array
-   * @param dimensions_result  The array of the result of type-checking all the dimensions of this array.
-   * @return an instance of the array.
-   */
+  /** Make sure the dimensions of the array instantiation are all instances and subtypes of int, and then return
+    * an instance of the array.
+    * @param that  The UninitializedArrayInstantiation being type checked
+    * @param typeRes  The type of the array
+    * @param dimensions_result  The array of the result of type-checking all the dimensions of this array.
+    * @return an instance of the array.
+    */
   public TypeData forUninitializedArrayInstantiationOnly(UninitializedArrayInstantiation that, TypeData typeRes, 
                                                          TypeData[] dimensions_result) {
     //make sure all of the dimensions_result dimensions are instance datas
@@ -1545,11 +1557,10 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     return typeRes.getInstanceData();
   }
   
-  /**
-   * Resolve the type of the array and visit its dimensions.  Call Only method to check instances in dimensions.
-   * @param that  The SimpleUninitializedArrayInstantiation being type-checked.
-   * @return  The type of the array, or null if there was an error.
-   */
+  /** Resolve the type of the array and visit its dimensions.  Call Only method to check instances in dimensions.
+    * @param that  The SimpleUninitializedArrayInstantiation being type-checked.
+    * @return  The type of the array, or null if there was an error.
+    */
   public TypeData forSimpleUninitializedArrayInstantiation(SimpleUninitializedArrayInstantiation that) {
     final SymbolData typeRes = getSymbolData(that.getType().getName(), _data.getSymbolData(), that.getType());
     final TypeData[] dimensions_result = makeArrayOfRetType(that.getDimensionSizes().getExpressions().length);
@@ -1592,14 +1603,11 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     return typeRes.getInstanceData();
   }
   
-  /**
-   * This is not legal java--should have been caught before the TypeChecker.  Give a runtime exception
-   */
+  /** This is not legal java--should have been caught before the TypeChecker.  Give a runtime exception */
   public TypeData forComplexInitializedArrayInstantiation(ComplexInitializedArrayInstantiation that) {
     throw new RuntimeException("Internal Program Error: Complex Initialized Array Instantiations are not legal Java." + 
                                "  This should have been caught before the Type Checker.  Please report this bug.");
   }
-  
   
   // Moved from TypeChecker
   public TypeData forInnerClassDef(InnerClassDef that) {
@@ -1637,8 +1645,8 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     }
   }
   
-  /** Compare a list of variable datas and a list of list of variable datas.  If a variable data is in the list and in each list of the lists of lists, mark it as having been
-    * assigned.
+  /** Compare a list of variable datas and a list of list of variable datas.  If a variable data is in the list 
+    * and in each list of the lists of lists, mark it as having been assigned.
     * @param tryBlock  The list of variable datas.
     * @param catchBlocks  The list of list of variable datas.
     */
@@ -1662,37 +1670,39 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
    */
   public void handleUncheckedException(SymbolData sd, JExpression j) {
     if (j instanceof MethodInvocation) {
-      _addError("The method " + ((MethodInvocation)j).getName().getText() + " is declared to throw the exception " + sd.getName() + " which needs to be caught or declared to be thrown", j);
+      _addError("The method " + ((MethodInvocation)j).getName().getText() + " is declared to throw the exception " + sd.getName() + 
+                " which needs to be caught or declared to be thrown", j);
     }
     else if (j instanceof ThrowStatement) {
       _addError("This statement throws the exception " + sd.getName() + " which needs to be caught or declared to be thrown", j);
     }
     else if (j instanceof ClassInstantiation) {
-      _addError("The constructor for the class " + ((ClassInstantiation)j).getType().getName() + " is declared to throw the exception " + sd.getName() + " which needs to be caught or declared to be thrown.", j);
+      _addError("The constructor for the class " + ((ClassInstantiation)j).getType().getName() + 
+                " is declared to throw the exception " + sd.getName() + " which needs to be caught or declared to be thrown.", j);
     }
     else {
-      throw new RuntimeException("Internal Program Error: Something besides a method invocation or throw statement threw an exception.  Please report this bug.");
+      throw new RuntimeException("Internal Program Error: " + 
+                                 "Something besides a method invocation or throw statement threw an exception. " + 
+                                 " Please report this bug.");
     }
   }
   
   
-  /**
-   * Returns whether the sd is a checked exception, i.e. one that needs to be caught or declared to be thrown.
-   * This is defined as all subclasses of java.lang.Throwable except for subclasses of java.lang.RuntimeException
-   */
+  /** Returns whether the sd is a checked exception, i.e. one that needs to be caught or declared to be thrown.
+    * This is defined as all subclasses of java.lang.Throwable except for subclasses of java.lang.RuntimeException
+    */
   public boolean isCheckedException(SymbolData sd, JExpression that) {
     return sd.isSubClassOf(getSymbolData("java.lang.Throwable", _data, that, false)) &&
       ! sd.isSubClassOf(getSymbolData("java.lang.RuntimeException", _data, that, false)) &&
       ! sd.isSubClassOf(getSymbolData("java.lang.Error", _data, that, false));
   }
   
-  /**
-   * Return true if the Exception is a checked exception yet is not caught or declared to be thrown, and false otherwise.
-   * An exception is a checked if it does not extend either java.lang.RuntimeException or java.lang.Error,
-   * and is not declared to be thrown by the enclosing method.
-   * @param sd  The SymbolData of the Exception we are checking.
-   * @param that  The JExpression passed to getSymbolData for error purposes.
-   */
+  /** Return true if the Exception is a checked exception yet is not caught or declared to be thrown, and false otherwise.
+    * An exception is a checked if it does not extend either java.lang.RuntimeException or java.lang.Error,
+    * and is not declared to be thrown by the enclosing method.
+    * @param sd  The SymbolData of the Exception we are checking.
+    * @param that  The JExpression passed to getSymbolData for error purposes.
+    */
   public boolean isUncaughtCheckedException(SymbolData sd, JExpression that) {
     return isCheckedException(sd, that);
   }
@@ -1703,7 +1713,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     for (int i = 0; i < that.getStatements().length; i++) {
       items_result[i] = that.getStatements()[i].visit(this);
       //walk over what has been thrown and throw an error if it contains an unchecked exception
-      for (int j = 0; j<this._thrown.size(); j++) {
+      for (int j = 0; j < this._thrown.size(); j++) {
         if (isUncaughtCheckedException(this._thrown.get(j).getFirst(), that)) {
           handleUncheckedException(this._thrown.get(j).getFirst(), this._thrown.get(j).getSecond());
         }
@@ -1743,7 +1753,6 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     private ModifiersAndVisibility _publicStaticMav = 
       new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public", "static"});
     
-    
     public ExpressionTypeCheckerTest() { this(""); }
     public ExpressionTypeCheckerTest(String name) { super(name); }
     
@@ -1755,7 +1764,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       _etc = 
         new ExpressionTypeChecker(null, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
                                   new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData, JExpression>>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
       _etc._importedPackages.addFirst("java.lang");
       _sd1 = new SymbolData("i.like.monkey");
       _sd2 = new SymbolData("i.like.giraffe");
@@ -1917,7 +1926,8 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       SimpleUninitializedArrayInstantiation sa1 = 
         new SimpleUninitializedArrayInstantiation(si, new ArrayType(si, "int[][][]", 
                                                                     new ArrayType(si, "int[][]", 
-                                                                                  new ArrayType(si, "int[]", new PrimitiveType(si, "int")))), 
+                                                                                  new ArrayType(si, "int[]", 
+                                                                                                new PrimitiveType(si, "int")))), 
                                                   new DimensionExpressionList(si, new Expression[] {i1, i2, i3}));
       assertEquals("Should return instance of int[][][]", intArray3.getInstanceData(), sa1.visit(_etc));
       assertEquals("There should be no errors", 0, errors.size());
@@ -1925,7 +1935,9 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       // Test one with a bad index
       SimpleUninitializedArrayInstantiation sa2 = 
         new SimpleUninitializedArrayInstantiation(si, new ArrayType(si, "int[][][]", 
-                                                                    new ArrayType(si, "int[][]", new ArrayType(si, "int[]", new PrimitiveType(si, "int")))), 
+                                                                    new ArrayType(si, "int[][]", 
+                                                                                  new ArrayType(si, "int[]", 
+                                                                                                new PrimitiveType(si, "int")))), 
                                                   new DimensionExpressionList(si, new Expression[] {i1, i2, badIndexD}));
       assertEquals("Should return instance of int[][][]", intArray3.getInstanceData(), sa2.visit(_etc));
       /* The preceding test only confirms structural equality not identity  of the result.  The TypeData equals method
@@ -1961,8 +1973,9 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       // Test one with wrong dimensions--too few--should be no additional errors
       SimpleUninitializedArrayInstantiation sa5 = 
         new SimpleUninitializedArrayInstantiation(si, new ArrayType(si, "int[][][]", 
-                                                                    new ArrayType(si, "int[][]", new ArrayType(si, "int[]", 
-                                                                                                               new PrimitiveType(si, "int")))), 
+                                                                    new ArrayType(si, "int[][]", 
+                                                                                  new ArrayType(si, "int[]", 
+                                                                                                new PrimitiveType(si, "int")))), 
                                                   new DimensionExpressionList(si, new Expression[] {i1, i2}));
       assertEquals("Should return instance of int[][][]", intArray3.getInstanceData(), sa5.visit(_etc));
       assertEquals("There should still be 3 errors", 3, errors.size());
@@ -1978,16 +1991,26 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     }
 
     public void testForComplexUninitializedArrayInstantiation() {
-      ComplexUninitializedArrayInstantiation ca1 = new ComplexUninitializedArrayInstantiation(SourceInfo.NONE, new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "my")),
-                                                                                              new ArrayType(SourceInfo.NONE, "type[][][]", new ArrayType(SourceInfo.NONE, "type[][]", new ArrayType(SourceInfo.NONE, "type[]", new ClassOrInterfaceType(SourceInfo.NONE, "type", new Type[0])))), 
-                                                                                              new DimensionExpressionList(SourceInfo.NONE, new Expression[0]));
+      ComplexUninitializedArrayInstantiation ca1 = 
+        new ComplexUninitializedArrayInstantiation(SourceInfo.NONE, 
+                                                   new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "my")),
+                                                   new ArrayType(SourceInfo.NONE, "type[][][]", 
+                                                                 new ArrayType(SourceInfo.NONE, "type[][]", 
+                                                                               new ArrayType(SourceInfo.NONE, "type[]", 
+                                                                                             new ClassOrInterfaceType(SourceInfo.NONE, 
+                                                                                                                      "type", 
+                                                                                                                      new Type[0])))), 
+                                                   new DimensionExpressionList(SourceInfo.NONE, new Expression[0]));
       //This should always give a runtime exception
       try {
         ca1.visit(_etc);
         fail("Should have throw runtime exception");
       }
       catch (RuntimeException e) {
-        assertEquals("Correct exception should have been thrown","Internal Program Error: Complex Uninitialized Array Instantiations are not legal Java.  This should have been caught before the Type Checker.  Please report this bug." , e.getMessage());
+        assertEquals("Correct exception should have been thrown",
+                     "Internal Program Error: Complex Uninitialized Array Instantiations are not legal Java. " + 
+                     " This should have been caught before the Type Checker.  Please report this bug." , 
+                     e.getMessage());
       }
     }    
     
@@ -2021,10 +2044,15 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       symbolTable.put("int[][][]", intArray3);
       
       // One that works--int instance index
+      Expression[] exps = new Expression[] { new NullLiteral(si), new NullLiteral(si), new NullLiteral(si)};
       SimpleUninitializedArrayInstantiation sa1 = 
-        new SimpleUninitializedArrayInstantiation(si, new ArrayType(si, "int[][][]", 
-                                                                    new ArrayType(si, "int[][]", new ArrayType(si, "int[]", new PrimitiveType(si, "int")))), 
-                                                  new DimensionExpressionList(si, new Expression[] {new NullLiteral(si), new NullLiteral(si), new NullLiteral(si)}));
+        new SimpleUninitializedArrayInstantiation(si, 
+                                                  new ArrayType(si, "int[][][]", 
+                                                                new ArrayType(si, "int[][]", 
+                                                                              new ArrayType(si, "int[]", 
+                                                                                            new PrimitiveType(si, "int")))), 
+                                                  new DimensionExpressionList(si, 
+                                                                              exps));
       
       TypeData[] arrayInitTypes1 =
         new TypeData[] { SymbolData.INT_TYPE.getInstanceData(), 
@@ -2051,26 +2079,36 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       assertEquals("Should return int[][][] instance", intArray3.getInstanceData(), 
                    _etc.forUninitializedArrayInstantiationOnly(sa1, intArray3, arrayInitTypes3));
       assertEquals("Should be one error", 1, errors.size());
-      assertEquals("Error message should be correct", "All dimensions of an array instantiation must be instances.  You have specified the type int.  Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
+      assertEquals("Error message should be correct", 
+                   "All dimensions of an array instantiation must be instances. " + 
+                   " You have specified the type int.  Perhaps you meant to create a new instance of int", 
+                   errors.getLast().getFirst());
       
       // one with bad index: not int type
-      assertEquals("Should return int[][][] instance", intArray3.getInstanceData(), _etc.forUninitializedArrayInstantiationOnly(sa1, intArray3, new TypeData[] {SymbolData.INT_TYPE.getInstanceData(), SymbolData.BOOLEAN_TYPE, SymbolData.CHAR_TYPE.getInstanceData()}));
+      assertEquals("Should return int[][][] instance", intArray3.getInstanceData(), 
+                   _etc.forUninitializedArrayInstantiationOnly(sa1, intArray3, 
+                                                               new TypeData[] {SymbolData.INT_TYPE.getInstanceData(), 
+        SymbolData.BOOLEAN_TYPE, SymbolData.CHAR_TYPE.getInstanceData()}));
       assertEquals("Should be 2 errors", 2, errors.size());
-      assertEquals("Error message should be correct", "The dimensions of an array instantiation must all be ints.  You have specified something of type boolean" , errors.getLast().getFirst());
+      assertEquals("Error message should be correct", 
+                   "The dimensions of an array instantiation must all be ints.  You have specified something of type boolean", 
+                   errors.getLast().getFirst());
       
       
     }
     
     public void testForArrayInitializer() {
-      ArrayInitializer ai = new ArrayInitializer(SourceInfo.NONE, new VariableInitializerI[] {new IntegerLiteral(SourceInfo.NONE, 2)});
+      ArrayInitializer ai = 
+        new ArrayInitializer(SourceInfo.NONE, new VariableInitializerI[] {new IntegerLiteral(SourceInfo.NONE, 2)});
       try {
         ai.visit(_etc);
         fail("Should have throw runtime exception");
       }
       catch(RuntimeException e) {
-        assertEquals("Exception message should be correct", "Internal Program Error: forArrayInitializer should never be called, but it was.  Please report this bug.", e.getMessage());
-      }
-      
+        assertEquals("Exception message should be correct", 
+                     "Internal Program Error: forArrayInitializer should never be called, but it was.  Please report this bug.", 
+                     e.getMessage());
+      }  
     }
     
     public void testForSimpleInitializedArrayInstantiation() {
@@ -2100,57 +2138,85 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       symbolTable.put("int[]", intArray);
       
       //try one that should work:
-      InitializedArrayInstantiation good = new SimpleInitializedArrayInstantiation(SourceInfo.NONE, intArrayType, new ArrayInitializer(SourceInfo.NONE, new VariableInitializerI[] {e1, e2}));
+      InitializedArrayInstantiation good = 
+        new SimpleInitializedArrayInstantiation(SourceInfo.NONE, intArrayType, 
+                                                new ArrayInitializer(SourceInfo.NONE, new VariableInitializerI[] {e1, e2}));
       assertEquals("Should return int array instance", intArray.getInstanceData(), good.visit(_etc));
       assertEquals("Should be no errors", 0, errors.size());
       
       //char is a subtype of int, so it can be used here
-      good = new SimpleInitializedArrayInstantiation(SourceInfo.NONE, intArrayType, new ArrayInitializer(SourceInfo.NONE, new VariableInitializerI[] {e1, e2, e6}));
+      good = 
+        new SimpleInitializedArrayInstantiation(SourceInfo.NONE, intArrayType, 
+                                                new ArrayInitializer(SourceInfo.NONE, 
+                                                                     new VariableInitializerI[] {e1, e2, e6}));
       assertEquals("Should return int array instance", intArray.getInstanceData(), good.visit(_etc));
       assertEquals("Should be no errors", 0, errors.size());
       
       //lhs is not an array type
-      InitializedArrayInstantiation bad = new SimpleInitializedArrayInstantiation(SourceInfo.NONE, new PrimitiveType(SourceInfo.NONE, "int"), new ArrayInitializer(SourceInfo.NONE, new VariableInitializerI[] {e1, e2}));
+      InitializedArrayInstantiation bad = 
+        new SimpleInitializedArrayInstantiation(SourceInfo.NONE, new PrimitiveType(SourceInfo.NONE, "int"), 
+                                                new ArrayInitializer(SourceInfo.NONE, new VariableInitializerI[] {e1, e2}));
       assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), bad.visit(_etc));
       assertEquals("Should be 1 error", 1, errors.size());
-      assertEquals("Error message should be correct", "You cannot initialize the non-array type int with an array initializer", errors.getLast().getFirst());
+      assertEquals("Error message should be correct", 
+                   "You cannot initialize the non-array type int with an array initializer", 
+                   errors.getLast().getFirst());
       
       //one of the elements is the wrong type
       //boolean
-      bad = new SimpleInitializedArrayInstantiation(SourceInfo.NONE, intArrayType, new ArrayInitializer(SourceInfo.NONE, new VariableInitializerI[] {e1, e4, e2, e6}));
+      bad = 
+        new SimpleInitializedArrayInstantiation(SourceInfo.NONE, 
+                                                intArrayType, 
+                                                new ArrayInitializer(SourceInfo.NONE, 
+                                                                     new VariableInitializerI[] {e1, e4, e2, e6}));
       assertEquals("Should return int array instance", intArray.getInstanceData(), bad.visit(_etc));
       assertEquals("Should be 2 errors", 2, errors.size());
-      assertEquals("Error message should be correct", "The elements of this initializer should have type int but element 1 has type boolean", errors.getLast().getFirst());
+      assertEquals("Error message should be correct", 
+                   "The elements of this initializer should have type int but element 1 has type boolean", 
+                   errors.getLast().getFirst());
       
       //double
-      bad = new SimpleInitializedArrayInstantiation(SourceInfo.NONE, intArrayType, new ArrayInitializer(SourceInfo.NONE, new VariableInitializerI[] {e1, e5, e2, e6}));
+      bad = 
+        new SimpleInitializedArrayInstantiation(SourceInfo.NONE, 
+                                                intArrayType, 
+                                                new ArrayInitializer(SourceInfo.NONE, 
+                                                                     new VariableInitializerI[] {e1, e5, e2, e6}));
       assertEquals("Should return int array instance", intArray.getInstanceData(), bad.visit(_etc));
       assertEquals("Should be 3 errors", 3, errors.size());
-      assertEquals("Error message should be correct", "The elements of this initializer should have type int but element 1 has type double", errors.getLast().getFirst());
+      assertEquals("Error message should be correct", 
+                   "The elements of this initializer should have type int but element 1 has type double", 
+                   errors.getLast().getFirst());
       
       //cannot resolve lhs
-      bad = new SimpleInitializedArrayInstantiation(SourceInfo.NONE, new PrimitiveType(SourceInfo.NONE, "ej"), new ArrayInitializer(SourceInfo.NONE, new VariableInitializerI[] {e1, e2}));
+      bad = 
+        new SimpleInitializedArrayInstantiation(SourceInfo.NONE, new PrimitiveType(SourceInfo.NONE, "ej"), 
+                                                new ArrayInitializer(SourceInfo.NONE, 
+                                                                     new VariableInitializerI[] {e1, e2}));
       assertEquals("Should return null", null, bad.visit(_etc));
       assertEquals("Should be 4 error", 4, errors.size());
       assertEquals("Error message should be correct", "Class or variable ej not found.", errors.getLast().getFirst());
       
       //one of the things in the initializer is a type name!
-      bad = new SimpleInitializedArrayInstantiation(SourceInfo.NONE, intArrayType, new ArrayInitializer(SourceInfo.NONE, new VariableInitializerI[] {e1, e7}));
+      bad = 
+        new SimpleInitializedArrayInstantiation(SourceInfo.NONE, intArrayType, 
+                                                new ArrayInitializer(SourceInfo.NONE, 
+                                                                     new VariableInitializerI[] {e1, e7}));
       assertEquals("Should return instance of int[]", intArray.getInstanceData(), bad.visit(_etc));
       assertEquals("Should now be 5 error messages", 5, errors.size());
-      assertEquals("Error message should be correct", "The elements of this initializer should all be instances, but you have specified the type name int.  Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
-      
-      
+      assertEquals("Error message should be correct", 
+                   "The elements of this initializer should all be instances, but you have specified the type name int. " + 
+                   " Perhaps you meant to create a new instance of int", errors.getLast().getFirst());
     }
     
-    
-    
-    
     public void testForSimpleAssignmentExpressionOnly() {
-      SimpleAssignmentExpression sae = new SimpleAssignmentExpression(SourceInfo.NONE, new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "i")), new IntegerLiteral(SourceInfo.NONE, 5));
+      SimpleAssignmentExpression sae = 
+        new SimpleAssignmentExpression(SourceInfo.NONE, new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "i")), 
+                                       new IntegerLiteral(SourceInfo.NONE, 5));
       
       //if lhs is assignable to rhs, and both instances, do not give any errors
-      assertEquals("Should return double instance", SymbolData.DOUBLE_TYPE.getInstanceData(), _etc.forSimpleAssignmentExpressionOnly(sae, SymbolData.DOUBLE_TYPE.getInstanceData(), SymbolData.INT_TYPE.getInstanceData()));
+      assertEquals("Should return double instance", SymbolData.DOUBLE_TYPE.getInstanceData(), 
+                   _etc.forSimpleAssignmentExpressionOnly(sae, SymbolData.DOUBLE_TYPE.getInstanceData(), 
+                                                          SymbolData.INT_TYPE.getInstanceData()));
       assertEquals("Should be no errors", 0, errors.size());
       
       //if either input is null, return null
@@ -2204,7 +2270,6 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
                    errors.get(3).getFirst());
       
     }
-    
     
     public void testForPlusAssignmentExpressionOnly() {
       PlusAssignmentExpression pae = 
@@ -2321,8 +2386,12 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
                                       new IntegerLiteral(SourceInfo.NONE, 5));
       
       //if both lhs and rhs are instances of numbers, and lhs is assignable to rhs, should be no errors
-      assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), _etc.forNumericAssignmentExpressionOnly(nae, SymbolData.INT_TYPE.getInstanceData(), SymbolData.CHAR_TYPE.getInstanceData()));
-      assertEquals("Should return double instance", SymbolData.DOUBLE_TYPE.getInstanceData(), _etc.forNumericAssignmentExpressionOnly(nae, SymbolData.DOUBLE_TYPE.getInstanceData(), SymbolData.INT_TYPE.getInstanceData()));
+      assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), 
+                   _etc.forNumericAssignmentExpressionOnly(nae, SymbolData.INT_TYPE.getInstanceData(), 
+                                                           SymbolData.CHAR_TYPE.getInstanceData()));
+      assertEquals("Should return double instance", SymbolData.DOUBLE_TYPE.getInstanceData(), 
+                   _etc.forNumericAssignmentExpressionOnly(nae, SymbolData.DOUBLE_TYPE.getInstanceData(), 
+                                                           SymbolData.INT_TYPE.getInstanceData()));
       assertEquals("Should be no errors", 0, errors.size());
       
       
@@ -2343,14 +2412,16 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       assertEquals("Error message should be correct", "Could not resolve symbol bad_reference", errors.get(0).getFirst());
       
       //if lhs not an instance data, give error
-      assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), _etc.forNumericAssignmentExpressionOnly(nae, SymbolData.INT_TYPE, SymbolData.CHAR_TYPE.getInstanceData()));
+      assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), 
+                   _etc.forNumericAssignmentExpressionOnly(nae, SymbolData.INT_TYPE, SymbolData.CHAR_TYPE.getInstanceData()));
       assertEquals("Should be 2 errors", 2, errors.size());  // Generated a duplicate error message
       assertEquals("Error message should be correct", 
                    "You cannot use a numeric assignment (-=, %=, *=, /=) on the type int.  Perhaps you meant to create " +
                    "a new instance of int", 
                    errors.get(1).getFirst());
       // if rhs not instance data, give error
-      assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), _etc.forNumericAssignmentExpressionOnly(nae, SymbolData.INT_TYPE.getInstanceData(), SymbolData.CHAR_TYPE));
+      assertEquals("Should return int instance", SymbolData.INT_TYPE.getInstanceData(), 
+                   _etc.forNumericAssignmentExpressionOnly(nae, SymbolData.INT_TYPE.getInstanceData(), SymbolData.CHAR_TYPE));
       assertEquals("Should now be 3 errors", 3, errors.size());
       assertEquals("Error message should be correct", 
                    "You cannot use the type name char on the left hand side of a numeric assignment (-=, %=, *=, /=)." +
@@ -2394,56 +2465,88 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     
     
     public void testForShiftAssignmentExpressionOnly() {
-      ShiftAssignmentExpression sae = new LeftShiftAssignmentExpression(SourceInfo.NONE, new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "j")), new IntegerLiteral(SourceInfo.NONE, 2));
+      ShiftAssignmentExpression sae = 
+        new LeftShiftAssignmentExpression(SourceInfo.NONE, 
+                                          new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "j")), 
+                                          new IntegerLiteral(SourceInfo.NONE, 2));
       try {
         _etc.forShiftAssignmentExpressionOnly(sae, _sd1, _sd2);
         fail("forShiftAssignmentExpressionOnly should have thrown a runtime exception");
       }
       catch (RuntimeException e) {
-        assertEquals("Exception message should be correct", "Internal Program Error: Shift assignment operators are not supported.  This should have been caught before the TypeChecker.  Please report this bug.", e.getMessage());
+        assertEquals("Exception message should be correct", 
+                     "Internal Program Error: Shift assignment operators are not supported. " + 
+                     " This should have been caught before the TypeChecker.  Please report this bug.", 
+                     e.getMessage());
       }
     }
     
     public void testForBitwiseAssignmentExpressionOnly() {
-      BitwiseAssignmentExpression bae = new BitwiseXorAssignmentExpression(SourceInfo.NONE, new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "j")), new IntegerLiteral(SourceInfo.NONE, 2));
+      BitwiseAssignmentExpression bae = 
+        new BitwiseXorAssignmentExpression(SourceInfo.NONE, 
+                                           new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "j")), 
+                                           new IntegerLiteral(SourceInfo.NONE, 2));
       try {
         _etc.forBitwiseAssignmentExpressionOnly(bae, _sd1, _sd2);
         fail("forBitwiseAssignmentExpressionOnly should have thrown a runtime exception");
       }
       catch (RuntimeException e) {
-        assertEquals("Exception message should be correct", "Internal Program Error: Bitwise assignment operators are not supported.  This should have been caught before the TypeChecker.  Please report this bug.", e.getMessage());
+        assertEquals("Exception message should be correct", 
+                     "Internal Program Error: Bitwise assignment operators are not supported. " + 
+                     " This should have been caught before the TypeChecker.  Please report this bug.", 
+                     e.getMessage());
       }
     }
     
-    
     public void testForBooleanExpressionOnly() {
-      BooleanExpression be = new OrExpression(SourceInfo.NONE, new BooleanLiteral(SourceInfo.NONE, true), new BooleanLiteral(SourceInfo.NONE, false));
+      BooleanExpression be = 
+        new OrExpression(SourceInfo.NONE, 
+                         new BooleanLiteral(SourceInfo.NONE, true), 
+                         new BooleanLiteral(SourceInfo.NONE, false));
       
       //if both left and right are boolean instance types, everything is good
       
-      assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), _etc.forBooleanExpressionOnly(be, SymbolData.BOOLEAN_TYPE.getInstanceData(), SymbolData.BOOLEAN_TYPE.getInstanceData()));
+      assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), 
+                   _etc.forBooleanExpressionOnly(be, SymbolData.BOOLEAN_TYPE.getInstanceData(), 
+                                                 SymbolData.BOOLEAN_TYPE.getInstanceData()));
       assertEquals("There should be no errors", 0, errors.size());
       
       //if the left type is not an instance type, give an error
-      assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), _etc.forBooleanExpressionOnly(be, SymbolData.BOOLEAN_TYPE, SymbolData.BOOLEAN_TYPE.getInstanceData()));
+      assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), 
+                   _etc.forBooleanExpressionOnly(be, SymbolData.BOOLEAN_TYPE, SymbolData.BOOLEAN_TYPE.getInstanceData()));
       assertEquals("There should now be 1 error", 1, errors.size());
-      assertEquals("The error message should be correct", "The left side of this expression is a type, not an instance.  Perhaps you meant to create a new instance of boolean", errors.getLast().getFirst());
+      assertEquals("The error message should be correct", 
+                   "The left side of this expression is a type, not an instance. " + 
+                   " Perhaps you meant to create a new instance of boolean", 
+                   errors.getLast().getFirst());
       
       //if the left type is an instance type but not a boolean type, give an error
-      assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), _etc.forBooleanExpressionOnly(be, SymbolData.INT_TYPE.getInstanceData(), SymbolData.BOOLEAN_TYPE.getInstanceData()));
+      assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), 
+                   _etc.forBooleanExpressionOnly(be, SymbolData.INT_TYPE.getInstanceData(), 
+                                                 SymbolData.BOOLEAN_TYPE.getInstanceData()));
       assertEquals("There should now be 2 errors", 2, errors.size());
-      assertEquals("The error message should be correct", "The left side of this expression is not a boolean value.  Therefore, you cannot apply a Boolean Operator (&&, ||) to it", errors.getLast().getFirst());
+      assertEquals("The error message should be correct", 
+                   "The left side of this expression is not a boolean value. " + 
+                   " Therefore, you cannot apply a Boolean Operator (&&, ||) to it", 
+                   errors.getLast().getFirst());
       
       //if the right type is not an instance type, give an error
-      assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), _etc.forBooleanExpressionOnly(be, SymbolData.BOOLEAN_TYPE.getInstanceData(), SymbolData.BOOLEAN_TYPE));
+      assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), 
+                   _etc.forBooleanExpressionOnly(be, SymbolData.BOOLEAN_TYPE.getInstanceData(), SymbolData.BOOLEAN_TYPE));
       assertEquals("There should now be 3 errors", 3, errors.size());
-      assertEquals("The error message should be correct", "The right side of this expression is a type, not an instance.  Perhaps you meant to create a new instance of boolean", errors.getLast().getFirst());
+      assertEquals("The error message should be correct", "The right side of this expression is a type, not an instance. " + 
+                   " Perhaps you meant to create a new instance of boolean", 
+                   errors.getLast().getFirst());
       
       //if the right type is an instance type but not a boolean give an error
-      assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), _etc.forBooleanExpressionOnly(be, SymbolData.BOOLEAN_TYPE.getInstanceData(), SymbolData.DOUBLE_TYPE.getInstanceData()));
+      assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), 
+                   _etc.forBooleanExpressionOnly(be, SymbolData.BOOLEAN_TYPE.getInstanceData(), 
+                                                 SymbolData.DOUBLE_TYPE.getInstanceData()));
       assertEquals("There should now be 4 errors", 4, errors.size());
       assertEquals("The error message should be correct", 
-                   "The right side of this expression is not a boolean value.  Therefore, you cannot apply a Boolean Operator (&&, ||) to it", errors.getLast().getFirst());
+                   "The right side of this expression is not a boolean value. " + 
+                   " Therefore, you cannot apply a Boolean Operator (&&, ||) to it", 
+                   errors.getLast().getFirst());
       
     }
     
@@ -2526,7 +2629,8 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
                    errors.getLast().getFirst());
       
       //left is primitive, right is not, not both number types--does not work
-      assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), _etc.forEqualityExpressionOnly(ee, SymbolData.INT_TYPE.getInstanceData(), _sd1.getInstanceData()));
+      assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), 
+                   _etc.forEqualityExpressionOnly(ee, SymbolData.INT_TYPE.getInstanceData(), _sd1.getInstanceData()));
       assertEquals("There should now be 2 errors", 2, errors.size());
       assertEquals("Error message should be correct", 
                    "At least one of the arguments to this Equality Operator (==, !=) is primitive.  Therefore, "
@@ -2626,7 +2730,6 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       }
     }
     
-    
     public void testForPlusExpressionOnly() {
       PlusExpression pe = new PlusExpression(SourceInfo.NONE, NULL_LITERAL, NULL_LITERAL);
       SymbolData string = new SymbolData("java.lang.String");
@@ -2700,10 +2803,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
                    "The arguments to the Plus Operator (+) must both be instances, but you have specified a type "
                      + "name.  Perhaps you meant to create a new instance of char", 
                    errors.getLast().getFirst());
-      
-      
-    }
-    
+    } 
     
     public void testForNumericBinaryExpressionOnly() {
       NumericBinaryExpression nbe = new ModExpression(SourceInfo.NONE, NULL_LITERAL, NULL_LITERAL);
@@ -2766,10 +2866,12 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
         fail("Should have thrown runtime exception");
       }
       catch (RuntimeException e) {
-        assertEquals("Error message should be correct", "Internal Program Error: The student is missing an operator.  This should have been caught before the TypeChecker.  Please report this bug.", e.getMessage());
+        assertEquals("Error message should be correct", "Internal Program Error: The student is missing an operator. " + 
+                     " This should have been caught before the TypeChecker.  Please report this bug.", 
+                     e.getMessage());
       }
     }
-    
+   
     public void testForIncrementExpressionOnly() {
       IncrementExpression ie = 
         new PositivePrefixIncrementExpression(SourceInfo.NONE, 
@@ -2808,9 +2910,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
                      + "something of type " + _sd2.getName(), 
                    errors.getLast().getFirst());
     }
-    
-    
-    
+  
     public void testForNumericUnaryExpressionOnly() {
       NumericUnaryExpression nue = new PositiveExpression(SourceInfo.NONE, new IntegerLiteral(SourceInfo.NONE, 5));
       //number types like char and byte should be widened to int
@@ -2851,7 +2951,8 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
         fail("forBitwiseNotExpressionOnly should have thrown a runtime exception");
       }
       catch (RuntimeException e) {
-        assertEquals("Exception message should be correct", "Internal Program Error: BitwiseNot is not supported.  It should have been caught before getting to the TypeChecker.  Please report this bug.", e.getMessage());
+        assertEquals("Exception message should be correct", "Internal Program Error: BitwiseNot is not supported. " + 
+                     " It should have been caught before getting to the TypeChecker.  Please report this bug.", e.getMessage());
       }
     }
     
@@ -2881,7 +2982,6 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
                      + "with an expression of boolean type", errors.getLast().getFirst());
     }
     
-    
     public void testForConditionalExpressionOnly() {
       SymbolData sd1 = SymbolData.DOUBLE_TYPE;
       SymbolData sd2 = SymbolData.BOOLEAN_TYPE;
@@ -2890,19 +2990,10 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
                                                            new BooleanLiteral(SourceInfo.NONE, true),
                                                            new IntegerLiteral(SourceInfo.NONE, 5),
                                                            new IntegerLiteral(SourceInfo.NONE, 79));
-      
-      try {
-        _etc.forConditionalExpressionOnly(cd, _sd3, _sd2, _sd1);
-        fail("Should have thrown an exception.");
-      }
-      catch (Exception e) {
-        assertEquals("Exception message should be correct", 
-                     "Internal Program Error: Conditional expressions are not supported.  This should have been "
-                       + "caught before the TypeChecker.  Please report this bug.", e.getMessage());
-        
-      }
-    }  
-    
+      assertEquals("simple well-formed conditional expression", sd2.getSymbolData(), 
+                   _etc.forConditionalExpressionOnly(cd, _sd2, _sd3, _sd3));
+    }
+  
     public void testForInstanceOfExpressionOnly() {
       SymbolData sd1 = SymbolData.DOUBLE_TYPE;
       SymbolData sd2 = SymbolData.BOOLEAN_TYPE;
@@ -2998,7 +3089,6 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       assertEquals("Should still be just three errors", 3, errors.size());
     }
     
-    
     public void testForSimpleNamedClassInstantiation() { 
       ParenthesizedExpressionList pel1 = 
         new ParenthesizedExpressionList(SourceInfo.NONE, new Expression[] {new IntegerLiteral(SourceInfo.NONE, 5)});
@@ -3064,26 +3154,21 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       assertEquals("Should be 4 errors", 4, errors.size());
       assertEquals("Error message should be correct", "simpleClass is abstract and thus cannot be instantiated", 
                    errors.getLast().getFirst());
-      
-      
+
       //now, what if we are dealing with an inner class?
       SimpleNamedClassInstantiation ci2 = 
         new SimpleNamedClassInstantiation(SourceInfo.NONE, 
                                           new ClassOrInterfaceType(SourceInfo.NONE, "A.B", new Type[0]), 
                                           new ParenthesizedExpressionList(SourceInfo.NONE, new Expression[0]));
-      
-      
+
       SymbolData a = new SymbolData("A");
       a.setIsContinuation(false);
       SymbolData b = new SymbolData("A$B");
       b.setIsContinuation(false);
       b.setOuterData(a);
       a.addInnerClass(b);
-      MethodData consb = new MethodData("B", _publicMav, new TypeParameter[0], b, 
-                                        new VariableData[0], 
-                                        new String[0], 
-                                        b,
-                                        null);
+      MethodData consb = 
+        new MethodData("B", _publicMav, new TypeParameter[0], b, new VariableData[0], new String[0], b, null);
       b.addMethod(consb);
       symbolTable.put("A", a);
       a.setMav(new ModifiersAndVisibility(SourceInfo.NONE, new String[] {"public"}));
@@ -3101,7 +3186,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       assertEquals("Should return A.B", b.getInstanceData(), ci2.visit(_etc));
       assertEquals("Should still be just 5 errors", 5, errors.size()); 
     }
-    
+  
     public void testForComplexNamedClassInstantiation() {
       ParenthesizedExpressionList pel1 = 
         new ParenthesizedExpressionList(SourceInfo.NONE, new Expression[] { new IntegerLiteral(SourceInfo.NONE, 5)});
@@ -3110,11 +3195,9 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
                                            new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "o")), 
                                            new ClassOrInterfaceType(SourceInfo.NONE, "innerClass", new Type[0]),                                  
                                            pel1);
-      
       ComplexNamedClassInstantiation ci2 = 
         new ComplexNamedClassInstantiation(SourceInfo.NONE, 
-                                           new SimpleNameReference(SourceInfo.NONE, 
-                                                                   new Word(SourceInfo.NONE, "o")), 
+                                           new SimpleNameReference(SourceInfo.NONE, new Word(SourceInfo.NONE, "o")), 
                                            new ClassOrInterfaceType(SourceInfo.NONE, "innerClass", new Type[0]), 
                                            new ParenthesizedExpressionList(SourceInfo.NONE, new Expression[0]));
       
@@ -3131,11 +3214,9 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       innerClass.setIsContinuation(false);
       outerClass.addInnerClass(innerClass);
       innerClass.setOuterData(outerClass);
-      MethodData cons1 = new MethodData("innerClass", _publicMav, new TypeParameter[0], innerClass, 
-                                        new VariableData[0], 
-                                        new String[0], 
-                                        innerClass,
-                                        null);
+      MethodData cons1 = 
+        new MethodData("innerClass", _publicMav, new TypeParameter[0], innerClass, new VariableData[0], new String[0], 
+                       innerClass, null);
       innerClass.addMethod(cons1);
       symbolTable.put("outer", outerClass);
       _etc._vars.addLast(new VariableData("o", _publicMav, outerClass, true, _etc._data));
@@ -3194,7 +3275,6 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
                      + "try new outer.innerClass()",
                    errors.getLast().getFirst());
       
-      
       //if inner class of that name does not exist, give an error
       innerClass.setMav(_publicMav);
       ParenthesizedExpressionList pel2 = 
@@ -3208,7 +3288,6 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       assertEquals("Should be 6 errors", 6, errors.size());
       assertEquals("Error message should be correct", "Class or variable notInnerClass not found.", 
                    errors.getLast().getFirst());
-      
       
       //if inner class is private, give error
       innerClass.setMav(_privateMav);
@@ -3366,8 +3445,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
                    "Ambiguous reference to class or interface ambigThing", 
                    errors.getLast().getFirst());    
     }
-    
-    
+
     public void testForComplexNameReference() {
       //if lhs is a package data, we want to keep building it:
       
@@ -3762,7 +3840,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
                      + "classes is static.  Thus, an enclosing instance of context does not exist", 
                    errors.getLast().getFirst());
     }
-    
+  
     public void testForArrayAccessOnly() {
       ArrayAccess aa = 
         new ArrayAccess(SourceInfo.NONE, NULL_LITERAL, NULL_LITERAL);
@@ -3799,8 +3877,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       assertEquals("Error message should be correct", 
                    "Could not resolve symbol bad_reference", 
                    errors.getLast().getFirst());
-      
-      
+
       //if rhs is a PackageData, give an error and return null
       assertEquals("Should return null", null, _etc.forArrayAccessOnly(aa, SymbolData.INT_TYPE, pd));
       assertEquals("Should still be 1 error", 1, errors.size());  // Generated a duplicate error
@@ -3844,8 +3921,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
                    "You cannot reference an array element with an index of type double.  Instead, you must use an int",
                    errors.get(4).getFirst());   
     }
-    
-    
+
     public void testLiterals() {
       StringLiteral sl = new StringLiteral(SourceInfo.NONE, "string literal!");
       IntegerLiteral il = new IntegerLiteral(SourceInfo.NONE, 4);
@@ -3906,10 +3982,8 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
                    "This class or interface name cannot appear in parentheses.  Perhaps you meant to create a new "
                      + "instance of int" , 
                    errors.getLast().getFirst());
-      
-      
     }
-    
+   
     public void testMethodInvocationHelper() {
       ParenthesizedExpressionList exp1 = new ParenthesizedExpressionList(SourceInfo.NONE, new Expression[0]);
       MethodInvocation noArgs = new SimpleMethodInvocation(SourceInfo.NONE, new Word(SourceInfo.NONE, "myName"), exp1);
@@ -3949,10 +4023,12 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
         new MethodData("myName", _publicMav, new TypeParameter[0], SymbolData.LONG_TYPE, 
                        new VariableData[] {new VariableData(SymbolData.INT_TYPE)}, new String[0], _sd2, NULL_LITERAL);
       _sd2.addMethod(intArg);
-      assertEquals("Should return long instance", SymbolData.LONG_TYPE.getInstanceData(), _etc.methodInvocationHelper(typeArg, _sd2.getInstanceData()));
+      assertEquals("Should return long instance", SymbolData.LONG_TYPE.getInstanceData(), 
+                   _etc.methodInvocationHelper(typeArg, _sd2.getInstanceData()));
       assertEquals("Should be 2 errors", 2, errors.size());
-      assertEquals("Error message should be correct", "Cannot pass a class or interface name as an argument to a method.  Perhaps you meant to create an instance or use int.class", errors.getLast().getFirst());
-      
+      assertEquals("Error message should be correct", "Cannot pass a class or interface name as an argument to a method. " + 
+                   " Perhaps you meant to create an instance or use int.class", 
+                   errors.getLast().getFirst());
       // if matching method, no error
       assertEquals("Should return long instance", SymbolData.LONG_TYPE.getInstanceData(), 
                    _etc.methodInvocationHelper(oneIntArg, _sd2.getInstanceData()));
@@ -3965,8 +4041,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       assertEquals("Error message should be correct", 
                    "Cannot access the non-static method myName from a static context", 
                    errors.getLast().getFirst());
-      
-      
+
       //static method from static context is okay
       MethodData doubleArg = 
         new MethodData("myName", _publicStaticMav, new TypeParameter[0], SymbolData.CHAR_TYPE, 
@@ -4029,8 +4104,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
                    errors.getLast().getFirst());
       
     }
-    
-    
+
     public void testForComplexMethodInvocation() {
       MethodInvocation staticNoArgs = 
         new ComplexMethodInvocation(SourceInfo.NONE, 
@@ -4133,9 +4207,8 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       assertEquals("Error message should be correct", 
                    "The class or interface giraffe in giraffe is private and cannot be accessed from i.like.monkey", 
                    errors.getLast().getFirst());
-      
     }
-    
+ 
     
     public void testCanBeAssigned() {
       VariableData finalWithValue = new VariableData("i", _finalMav, SymbolData.INT_TYPE, true, _sd1);
@@ -4147,11 +4220,8 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       assertTrue("Should be assignable", _etc.canBeAssigned(finalWithOutValue));
       assertTrue("Should be assignable", _etc.canBeAssigned(notFinalWithValue));
       assertTrue("Should be assignable", _etc.canBeAssigned(notFinalWithOutValue));
-      
-      
     }
-    
-    
+   
     public void testForSimpleAssignment() {
       VariableData vd4 = new VariableData("Flanders", _publicMav, SymbolData.INT_TYPE, true, _sd4);
       VariableData vd5 = new VariableData("Ned", _publicMav, _sd4, true, _sd5);
@@ -4241,11 +4311,8 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
                                        new BooleanLiteral(SourceInfo.NONE, true));
       assertEquals("Should return boolean instance", SymbolData.BOOLEAN_TYPE.getInstanceData(), sa5.visit(_etc));
       assertEquals("Should still be 4 errors", 4, errors.size());
-      
-      
-      
     }
-    
+   
     public void testForPlusAssignmentExpression() {
       VariableData vd4 = new VariableData("Flanders", _publicMav, SymbolData.INT_TYPE, true, _sd4);
       VariableData vd5 = new VariableData("Ned", _publicMav, _sd4, true, _sd5);
@@ -4337,7 +4404,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
                    "or both be numbers.  You have specified arguments of type int and java.lang.String", 
                    errors.get(2).getFirst());
     }
-    
+  
     public void testForNumericAssignmentExpression() {
       VariableData vd4 = new VariableData("Flanders", _publicMav, SymbolData.INT_TYPE, true, _sd4);
       VariableData vd5 = new VariableData("Ned", _publicMav, _sd4, true, _sd5);
@@ -4923,3 +4990,4 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     }
   }
 }
+

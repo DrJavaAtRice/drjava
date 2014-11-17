@@ -128,6 +128,9 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     });
   }   
   
+  /** Any extra action to perform (beyond notifying listeners) when the interpreter won't start.
+    * @param e The Exception indicating the interpreter won't start
+    */
   protected void _interpreterWontStart(final Exception e) {
     Utilities.invokeLater(new Runnable() { 
       public void run() {

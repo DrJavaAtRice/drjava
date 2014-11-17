@@ -31,8 +31,8 @@
   <property name="link-source" value="no" />
   
   <property environment="env" />
+  <property name="java7-home" value="${env.JAVA7_HOME}" />
   <property name="java6-home" value="${env.JAVA6_HOME}" />
-  <property name="java5-home" value="${env.JAVA5_HOME}" />
   <property name="javacc-home"  value="${env.JAVACC_HOME}" />
   <property name="clover-jar" value="${env.CLOVER_JAR}" />
   <property name="findbugs-home" value="${env.FINDBUGS_HOME}" />
@@ -76,10 +76,10 @@
     <echo message="      the 'java' command is used by default in testing/running; " />
     <echo message="      the 'svn' command is used to generate version numbers and " />
     <echo message="      in Subversion targets" />
-    <echo message="JAVA5_HOME: Home folder of the Java 5 JRE or JDK (required for" />
-    <echo message="            compiling and '-5' targets)" />
     <echo message="JAVA6_HOME: Home folder of the Java 6 JRE or JDK (required for" />
     <echo message="            '-6' targets)" />
+    <echo message="JAVA7_HOME: Home folder of the Java 7 JRE or JDK (required for" />
+    <echo message="            compiling and '-7' targets)" />
     <echo message="JAVACC_HOME: Top-level directory of JavaCC (version 4.1+ is preferred)" />
     <echo message="CLOVER_JAR: Location of the Clover jar file" />
     <echo message="FINDBUGS_HOME: Location of the FindBugs installation" />
@@ -223,7 +223,7 @@
           description="Compile all source files (after generating the source)">
   </target>
   
-  <target name="do-compile" depends="resolve-java5-runtime">
+  <target name="do-compile" depends="resolve-java7-runtime">
   
     <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
     
@@ -235,8 +235,8 @@
       <fileset dir="classes/test" includes="**/*" />
     </move>
     
-    <javac srcdir="src" destdir="classes/base" source="1.5" target="1.5"
-           bootclasspath="${java5-runtime}" sourcepath="" includeAntRuntime="no"
+    <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
+           bootclasspath="${java7-runtime}" sourcepath="" includeAntRuntime="no"
            executable="javac" fork="yes" memoryMaximumSize="512M"
            debug="on" optimize="off" deprecation="on"	>
       <classpath>
@@ -322,10 +322,10 @@
     </antcall>
   </target>
   
-  <target name="test-5" depends="compile, resolve-java5-exec" unless="skip-test"
-          description="Run all tests under Java 5 (after compiling); use -Dtest-spec=... to filter">
+  <target name="test-7" depends="compile, resolve-java7-exec" unless="skip-test"
+          description="Run all tests under Java 7 (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
-      <param name="test-jvm" value="${java5-exec}" />
+      <param name="test-jvm" value="${java7-exec}" />
     </antcall>
   </target>
   
@@ -837,8 +837,6 @@
       </fileset>
     </replaceregexp>
   </target>
-
-  
   
   <!-- ***************************
        Property-resolution Targets 
@@ -849,10 +847,10 @@
          are immutable and so java6-runtime will only be set the *first* time. -->
 
     <property name="java6-runtime-1" location="${java6-home}/lib/rt.jar" />
-    <available property="java5-runtime" value="${java6-runtime-1}" file="${java6-runtime-1}" />
+    <available property="java6-runtime" value="${java6-runtime-1}" file="${java6-runtime-1}" />
 
     <property name="java6-runtime-2" location="${java6-home}/jre/lib/rt.jar" />
-    <available property="java5-runtime" value="${java6-runtime-2}" file="${java6-runtime-2}" />
+    <available property="java6-runtime" value="${java6-runtime-2}" file="${java6-runtime-2}" />
 
     <property name="java6-runtime-3" location="${java6-home}/../Classes/classes.jar" />
     <available property="java6-runtime" value="${java6-runtime-3}" file="${java6-runtime-3}" />
@@ -877,37 +875,37 @@
     <fail message="Can't find the java executable in the Java 6 home: ${java6-home}" unless="java6-exec" />
   </target>
   
-  <target name="resolve-java5-runtime">
+  <target name="resolve-java7-runtime">
     <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so java5-runtime will only be set the *first* time. -->
+         are immutable and so java7-runtime will only be set the *first* time. -->
 
-    <property name="java5-runtime-1" location="${java5-home}/lib/rt.jar" />
-    <available property="java5-runtime" value="${java5-runtime-1}" file="${java5-runtime-1}" />
+    <property name="java7-runtime-1" location="${java7-home}/lib/rt.jar" />
+    <available property="java7-runtime" value="${java7-runtime-1}" file="${java7-runtime-1}" />
 
-    <property name="java5-runtime-2" location="${java5-home}/jre/lib/rt.jar" />
-    <available property="java5-runtime" value="${java5-runtime-2}" file="${java5-runtime-2}" />
+    <property name="java7-runtime-2" location="${java7-home}/jre/lib/rt.jar" />
+    <available property="java7-runtime" value="${java7-runtime-2}" file="${java7-runtime-2}" />
 
-    <property name="java5-runtime-3" location="${java5-home}/../Classes/classes.jar" />
-    <available property="java5-runtime" value="${java5-runtime-3}" file="${java5-runtime-3}" />
+    <property name="java7-runtime-3" location="${java7-home}/../Classes/classes.jar" />
+    <available property="java7-runtime" value="${java7-runtime-3}" file="${java7-runtime-3}" />
 
-    <fail message="Can't find rt.jar in the Java 5 home: ${java5-home}" unless="java5-runtime" />
+    <fail message="Can't find rt.jar in the Java 7 home: ${java7-home}" unless="java7-runtime" />
   </target>
   
-  <target name="resolve-java5-exec">
+  <target name="resolve-java7-exec">
     <!-- We rely on "location" to generate a platform-specific path -->
 
-    <property name="java5-exec-1" location="${java5-home}/bin/java.exe" />
-    <condition property="java5-exec" value="${java5-exec-1}">
+    <property name="java7-exec-1" location="${java7-home}/bin/java.exe" />
+    <condition property="java7-exec" value="${java7-exec-1}">
       <and>
-        <available file="${java5-exec-1}" />
+        <available file="${java7-exec-1}" />
         <os family="windows" />
       </and>
     </condition>
     
-    <property name="java5-exec-2" location="${java5-home}/bin/java" />
-    <available property="java5-exec" value="${java5-exec-2}" file="${java5-exec-2}" />
+    <property name="java7-exec-2" location="${java7-home}/bin/java" />
+    <available property="java7-exec" value="${java7-exec-2}" file="${java7-exec-2}" />
 
-    <fail message="Can't find the java executable in the Java 5 home: ${java5-home}" unless="java5-exec" />
+    <fail message="Can't find the java executable in the Java 7 home: ${java7-home}" unless="java7-exec" />
   </target>
   
   

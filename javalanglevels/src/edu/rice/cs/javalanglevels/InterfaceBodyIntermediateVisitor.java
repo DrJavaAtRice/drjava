@@ -204,7 +204,7 @@ public class InterfaceBodyIntermediateVisitor extends IntermediateVisitor {
       errors = new LinkedList<Pair<String, JExpressionIF>>();
       LanguageLevelConverter.symbolTable.clear();
       LanguageLevelConverter._newSDs.clear();
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, IterUtil.make(new File("lib/buildlib/junit.jar")));
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, IterUtil.make(new File("lib/buildlib/junit.jar")));
       visitedFiles = new LinkedList<Pair<LanguageLevelVisitor, edu.rice.cs.javalanglevels.tree.SourceFile>>();      
 //      _hierarchy = new Hashtable<String, TypeDefBase>();
       _ibiv = 

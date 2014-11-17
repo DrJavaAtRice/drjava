@@ -586,11 +586,11 @@ public class BodyTypeChecker extends SpecialTypeChecker {
      if (cases_result[cases_result.length-1] == null) return null;
      
      return _bodyData.getMethodData().getReturnType().getInstanceData();
-  }
+   }
+   
   
-  
-  /** Make sure that the label for this LabeledCase is correct.  The label must be a constant expression of type int or 
-    * char.  Then delegate to the super class to handle the braced body of the switch case. */
+   /** Make sure that the label for this LabeledCase is correct.  The label must be a constant expression of type int or 
+     * char.  Then delegate to the super class to handle the braced body of the switch case. */
    public TypeData forLabeledCase(LabeledCase that) {
      ExpressionTypeChecker etc = new ExpressionTypeChecker(_data, _file, _package, _importedFiles, _importedPackages, 
                                                            _vars, _thrown);
@@ -681,51 +681,6 @@ public class BodyTypeChecker extends SpecialTypeChecker {
       }
     }
   }
-  
-  /** Check if the two given SymbolDatas have a common super type.  If so, return it, else return null. */
-  protected SymbolData getCommonSuperType(SymbolData s1, SymbolData s2) {
-    if ((s1 == null) && (s2 == null)) {
-      return null;
-    }
-    
-    if (s1 == SymbolData.NOT_FOUND && s2 != null) {return SymbolData.NOT_FOUND;}
-    if (s2 == SymbolData.NOT_FOUND && s1 != null) {return SymbolData.NOT_FOUND;}
-    
-    if (s1 == null && s1 != SymbolData.NOT_FOUND) { return s2; }
-    if (s2 == null && s1 != SymbolData.NOT_FOUND) {return s1;}
-    if (s1==null || s2==null) {return null;}
-    if (s1 == SymbolData.EXCEPTION) { return s2; }
-    if (s2 == SymbolData.EXCEPTION) { return s1; }
-    
-    // See if s1 and s2 have a common super class.
-    SymbolData sd = getCommonSuperTypeBaseCase(s1, s2);
-    if (sd != null ) { return sd; }
-    sd = getCommonSuperTypeBaseCase(s2, s1);
-    if (sd != null) { return sd; }
-    
-    //If s1's superClass is null, then we have gone all the way through the superclass hierarchy without finding a matching class.
-    if (s1.getSuperClass() == null) {
-      //return null;
-      //since we know that Object should be the super class of everything, return Object.
-      return getSymbolData("java.lang.Object", _data, new NullLiteral(SourceInfo.NONE));
-    }
-    
-    // Recur on the super class chain.   
-    sd = getCommonSuperType(s1.getSuperClass(), s2);
-    if (sd != null) {
-      return sd;
-    }
-    
-    // Recur on each interface.
-    for (SymbolData currSd : s1.getInterfaces()) {
-      sd = getCommonSuperType(currSd, s2);
-      if (sd != null) {
-        return sd;
-      }
-    }
-    return null;
-  }
-
 
   /** @return true if the symbol data is the generic SymbolData.EXCEPTIOn class or if it extends java.lang.Throwable*/
   protected boolean isException(SymbolData sd) {
@@ -1074,7 +1029,7 @@ public class BodyTypeChecker extends SpecialTypeChecker {
       _bd2.addVars(((MethodData)_bd2).getParams());
       _bbtc = new BodyTypeChecker(_bd1, new File(""), "", new LinkedList<String>(), new LinkedList<String>(), 
                                   new LinkedList<VariableData>(), new LinkedList<Pair<SymbolData,JExpression>>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
       _bbtc._importedPackages.addFirst("java.lang");
     }
     

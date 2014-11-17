@@ -1222,6 +1222,7 @@
   
   <!-- Sets svn-revision to the current "Last Changed Rev" of "svn info". -->
   <target name="resolve-svn-revision">
+    <!-- Do nothing
     <exec executable="svn" failonerror="yes" output="svn-info.txt">
       <arg value="info" />
     </exec>
@@ -1235,6 +1236,7 @@
       </filterchain>
     </loadfile>
     <delete file="svn-info.txt" />
+   -->
   </target>
   
 

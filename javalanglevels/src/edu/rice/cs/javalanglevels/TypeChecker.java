@@ -783,9 +783,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   /** Return a TypeData array of the specified size. */
   protected TypeData[] makeArrayOfRetType(int len) { return new TypeData[len]; }
 
-  /** This method is called by default from cases that do not 
-    * override forCASEOnly.
-    **/
+  /** This method is called by default from cases that do not override forCASEOnly. **/
   protected TypeData defaultCase(JExpressionIF that) { return null; }
 
   public TypeData forClassDefOnly(ClassDef that, TypeData mavRes, TypeData nameRes, TypeData[] typeParametersRes,
@@ -808,7 +806,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
   public TypeData forInnerInterfaceDefOnly(InnerInterfaceDef that, TypeData mavRes, TypeData nameRes, 
                                            TypeData[] typeParamRes, TypeData[] superinterfacesRes, TypeData bodyRes) {
     return forJExpressionOnly(that);
-    // replaces forInterfaceDefOnly(that, mavRes, nameRes, typeParamRes, superinterfacesRes, bodyRes);
+    // replaces forInterfaceDefOnly(that, mavRes, nameRes, typeParamRes, superinterfacesRes, bodyRes); // Whjfor
   }
 
   public TypeData forInstanceInitializerOnly(InstanceInitializer that, TypeData codeRes) {
@@ -875,6 +873,48 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     return null;
   }
   
+    /** Check if the two given SymbolDatas have a common super type.  If so, return it, else return null. */
+  protected SymbolData getCommonSuperType(SymbolData s1, SymbolData s2) {
+    if ((s1 == null) && (s2 == null)) {
+      return null;
+    }
+    
+    if (s1 == SymbolData.NOT_FOUND && s2 != null) return SymbolData.NOT_FOUND;
+    if (s2 == SymbolData.NOT_FOUND && s1 != null) return SymbolData.NOT_FOUND;
+    
+    if (s1 == null && s1 != SymbolData.NOT_FOUND) return s2;
+    if (s2 == null && s1 != SymbolData.NOT_FOUND) return s1;
+    if (s1==null || s2 == null) return null;
+    if (s1 == SymbolData.EXCEPTION) return s2; 
+    if (s2 == SymbolData.EXCEPTION) return s1; 
+    
+    // See if s1 and s2 have a common super class.
+    SymbolData sd = getCommonSuperTypeBaseCase(s1, s2);
+    if (sd != null )  return sd; 
+    sd = getCommonSuperTypeBaseCase(s2, s1);
+    if (sd != null)  return sd; 
+    
+    //If s1's superClass is null, then we have gone all the way through the superclass hierarchy without finding a matching class.
+    if (s1.getSuperClass() == null) {
+      //return null;
+      //since we know that Object should be the super class of everything, return Object.
+      return getSymbolData("java.lang.Object", _data, new NullLiteral(SourceInfo.NONE));
+    }
+    
+    // Recur on the super class chain.   
+    sd = getCommonSuperType(s1.getSuperClass(), s2);
+    if (sd != null) return sd;
+    
+    // Recur on each interface.
+    for (SymbolData currSd : s1.getInterfaces()) {
+      sd = getCommonSuperType(currSd, s2);
+      if (sd != null) {
+        return sd;
+      }
+    }
+    return null;
+  }
+  
   /** Return whether the value on the right can be assigned to the value on the left. 
     * Uses autoboxing if the user has java 1.5.
     */
@@ -892,12 +932,11 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     return sdRight.isAssignableTo(sdLeft, JavaVersion.JAVA_1_4);  // Version 1.4 used to turn off autoboxing
   }
 
-  /**
-   * The method will add an error for each abstract method in the current SymbolData's inheritance hierarchy
-   * that does not have a concrete implementation.
-   * @param sd  The SymbolData for the current class definition
-   * @param classDef  The current ClassDef
-   */
+  /** The method will add an error for each abstract method in the current SymbolData's inheritance hierarchy
+    * that does not have a concrete implementation.
+    * @param sd  The SymbolData for the current class definition
+    * @param classDef  The current ClassDef
+    */
   protected void _checkAbstractMethods(SymbolData sd, JExpression classDef) {
     if (sd.hasModifier("abstract") || sd.isInterface()) {
       // Our work here is done because an abstract class has no constraints to implement.
@@ -1364,7 +1403,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       LanguageLevelConverter.loadSymbolTable();
 
       _btc = new TypeChecker(new File(""), "", new LinkedList<String>(), new LinkedList<String>());
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
       _btc._importedPackages.addFirst("java.lang");
       _errorAdded = false;
       _sd1 = new SymbolData("i.like.monkey");
@@ -1941,7 +1980,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
       assertTrue("Should be able to assign an array to an interface of java.io.Serializable", 
                  _btc._isAssignableFrom(symbolTable.get("java.io.Serializable"), integerArray));
 
-      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_5, EmptyIterable.<File>make());
+      LanguageLevelConverter.OPT = new Options(JavaVersion.JAVA_6, EmptyIterable.<File>make());
       assertFalse("Should not be assignable.", 
                   _btc._isAssignableFrom(symbolTable.get("java.lang.Double"), SymbolData.INT_TYPE));
       assertFalse("Should not be assignable.", 

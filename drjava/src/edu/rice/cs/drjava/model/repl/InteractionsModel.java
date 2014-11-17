@@ -766,14 +766,16 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     * @param t The Throwable thrown by System.exit
     */
   protected abstract void _interpreterResetFailed(Throwable t);
+   
+  /** Any extra action to perform (beyond notifying listeners) when the interpreter won't start.
+    * @param e The Exception indicating the interpreter won't start
+    */
+  protected abstract void _interpreterWontStart(final Exception e);
   
   /** Notifies listeners that the interpreter reset failed. (Subclasses must maintain listeners.)
     * @param t Throwable explaining why the reset failed.
     */
   protected abstract void _notifyInterpreterResetFailed(Throwable t);
-  
-  /** Action to perform when the interpreter won't start. */
-  protected abstract void _interpreterWontStart(Exception e);
   
   public String getBanner() { return _banner; }
   

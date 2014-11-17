@@ -539,14 +539,16 @@ public class DefaultCompilerModel implements CompilerModel {
       if (bootClassPath == null) { llOpts = new Options(getActiveCompiler().version(), classPath); }
       else { llOpts = new Options(getActiveCompiler().version(), classPath, bootClassPath); }
       
-      // NOTE: the following workaround ("_testFileSort(files)" instead of simply "files") may no longer be necessary.
-      /* Perform the conversion incorporating the following Bug Workaround:  Forward references can generate spurious 
+      // NOTE: the workaround "_testFileSort(files)" instead of simply "files") may no longer be necessary.
+      
+      /* Perform the LL conversion incorporating the following workaround:  Forward references can generate spurious 
        * conversion errors in some cases.  This problem can be mitigated by compiling JUnit test files (with names
        * containing the substring "Test") last.  
        */
       Map<File,Set<String>> sourceToTopLevelClassMap = new HashMap<File,Set<String>>();
       Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> llErrors = 
         llc.convert(_testFileSort(files).toArray(new File[0]), llOpts, sourceToTopLevelClassMap);
+      
       /* Add any errors encountered in conversion to the compilation error log. */
       errors.addAll(_parseExceptions2CompilerErrors(llErrors.getFirst()));
       errors.addAll(_visitorErrors2CompilerErrors(llErrors.getSecond()));
@@ -635,64 +637,64 @@ public class DefaultCompilerModel implements CompilerModel {
 //    _compilers.add(compiler);
 //  }
   
-  /** Delete the .class files that match the following pattern:
-    * XXX.dj? --> XXX.class
-    *             XXX$*.class
-    * @param sourceToTopLevelClassMap a map from directories to classes in them
-    */
-  public void smartDeleteClassFiles(Map<File,Set<String>> sourceToTopLevelClassMap) {
-    final File buildDir = _model.getBuildDirectory();
-    final File sourceDir = _model.getProjectRoot();
-    // Accessing the disk is the most costly part; therefore, we want to scan each directory only once.
-    // We create a map from parent directory to class names in that directory.
-    // Then we scan the files in each directory and delete files that match the class names listed for it.
-    // dirToClassNameMap: key=parent directory, value=set of classes in this directory
-    Map<File,Set<String>> dirToClassNameMap = new HashMap<File,Set<String>>();
-    for(Map.Entry<File,Set<String>> e: sourceToTopLevelClassMap.entrySet()) {
-      try {
-        File dir = e.getKey().getParentFile();
-        if (buildDir != null && buildDir != FileOps.NULL_FILE &&
-            sourceDir != null && sourceDir != FileOps.NULL_FILE) {
-          // build directory set
-          String rel = edu.rice.cs.util.FileOps.stringMakeRelativeTo(dir,sourceDir);
-          dir = new File(buildDir,rel);
-        }
-        Set<String> classNames = dirToClassNameMap.get(dir);
-        if (classNames == null) classNames = new HashSet<String>();
-        classNames.addAll(e.getValue());
-        dirToClassNameMap.put(dir,classNames);
-//          System.out.println(e.getKey() + " --> " + dir);
-//          for(String name: e.getValue()) {
-//            System.out.println("\t" + name);
+//  /** Delete the .class files that match the following pattern:
+//    * XXX.dj? --> XXX.class
+//    *             XXX$*.class
+//    * @param sourceToTopLevelClassMap a map from directories to classes in them
+//    */
+//  public void smartDeleteClassFiles(Map<File,Set<String>> sourceToTopLevelClassMap) {
+//    final File buildDir = _model.getBuildDirectory();
+//    final File sourceDir = _model.getProjectRoot();
+//    // Accessing the disk is the most costly part; therefore, we want to scan each directory only once.
+//    // We create a map from parent directory to class names in that directory.
+//    // Then we scan the files in each directory and delete files that match the class names listed for it.
+//    // dirToClassNameMap: key=parent directory, value=set of classes in this directory
+//    Map<File,Set<String>> dirToClassNameMap = new HashMap<File,Set<String>>();
+//    for(Map.Entry<File,Set<String>> e: sourceToTopLevelClassMap.entrySet()) {
+//      try {
+//        File dir = e.getKey().getParentFile();
+//        if (buildDir != null && buildDir != FileOps.NULL_FILE &&
+//            sourceDir != null && sourceDir != FileOps.NULL_FILE) {
+//          // build directory set
+//          String rel = edu.rice.cs.util.FileOps.stringMakeRelativeTo(dir,sourceDir);
+//          dir = new File(buildDir,rel);
+//        }
+//        Set<String> classNames = dirToClassNameMap.get(dir);
+//        if (classNames == null) classNames = new HashSet<String>();
+//        classNames.addAll(e.getValue());
+//        dirToClassNameMap.put(dir,classNames);
+////          System.out.println(e.getKey() + " --> " + dir);
+////          for(String name: e.getValue()) {
+////            System.out.println("\t" + name);
+////          }
+//      }
+//      catch(IOException ioe) { /* we'll fail to delete this, but that's better than deleting something we shouldn't */ }
+//    }
+//    // Now that we have a map from parent directories to the class names that should be deleted
+//    // in them, we scan the files in each directory, then check if the names match the class names.      
+//    for(final Map.Entry<File,Set<String>> e: dirToClassNameMap.entrySet()) {
+////        System.out.println("Processing dir: " + e.getKey());
+////        System.out.println("\t" + java.util.Arrays.toString(e.getValue().toArray(new String[0])));
+//      e.getKey().listFiles(new java.io.FilenameFilter() {
+//        public boolean accept(File dir, String name) {
+////            System.out.println("\t" + name);
+//          int endPos = name.lastIndexOf(".class");
+//          if (endPos < 0) return false; // can't be a class file
+//          int dollarPos = name.indexOf('$');
+//          if ((dollarPos >= 0) && (dollarPos < endPos)) endPos = dollarPos;
+//          // class name goes to the .class or the first $, whichever comes first
+//          Set<String> classNames = e.getValue();
+//          if (classNames.contains(name.substring(0,endPos))) { 
+//            // this is a class file that is generated from a .dj? file
+//            new File(dir, name).delete();
+//            // don't need to return true, we're deleting the file here already
+////              System.out.println("\t\tDeleted");
 //          }
-      }
-      catch(IOException ioe) { /* we'll fail to delete this, but that's better than deleting something we shouldn't */ }
-    }
-    // Now that we have a map from parent directories to the class names that should be deleted
-    // in them, we scan the files in each directory, then check if the names match the class names.      
-    for(final Map.Entry<File,Set<String>> e: dirToClassNameMap.entrySet()) {
-//        System.out.println("Processing dir: " + e.getKey());
-//        System.out.println("\t" + java.util.Arrays.toString(e.getValue().toArray(new String[0])));
-      e.getKey().listFiles(new java.io.FilenameFilter() {
-        public boolean accept(File dir, String name) {
-//            System.out.println("\t" + name);
-          int endPos = name.lastIndexOf(".class");
-          if (endPos < 0) return false; // can't be a class file
-          int dollarPos = name.indexOf('$');
-          if ((dollarPos >= 0) && (dollarPos < endPos)) endPos = dollarPos;
-          // class name goes to the .class or the first $, whichever comes first
-          Set<String> classNames = e.getValue();
-          if (classNames.contains(name.substring(0,endPos))) { 
-            // this is a class file that is generated from a .dj? file
-            new File(dir, name).delete();
-            // don't need to return true, we're deleting the file here already
-//              System.out.println("\t\tDeleted");
-          }
-          return false;
-        }
-      });
-    }
-  }
+//          return false;
+//        }
+//      });
+//    }
+//  }
   
   /** returns the LanguageLevelStackTraceMapper
     * @return the LanguageLevelStackTraceMapper

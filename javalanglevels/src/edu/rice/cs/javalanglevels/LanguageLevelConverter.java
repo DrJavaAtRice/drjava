@@ -63,6 +63,9 @@ public class LanguageLevelConverter {
   
   public static final Log _log = new Log("LLConverter.txt", false);
   
+  /* TODO: get rid of all the static dreck (except constants) used in this class and its affiliated
+   * classes.  Ugly, ugly, ugly ...  Corky 11-11-14 */
+  
   /** Hashtable for a shared symbolTable.  Since this field is static, only one instance of
     * LanguageLevelConverter should exist at a time.  If we create a
     * LanguageLevelConverter instance for each translation, we must drop the static attribute. */
@@ -90,7 +93,8 @@ public class LanguageLevelConverter {
   
   /* Relying on default constructor. */
   
-  /** Ensures that the symbol table contains essential symbols.  Should be done in the symbol table class. */
+  /** Ensures that the symbol table contains essential symbols.  Executed as part of LanguageLevelVisitor init
+    * and typechecker inits (TryCatchBodyTypeChecker, TypeChecker, ExpressionTypeChecker). */
   public static void loadSymbolTable() {
 
     if (symbolTable.get("java.lang.Object") == null)    _classFile2SymbolData("java.lang.Object");
@@ -108,8 +112,8 @@ public class LanguageLevelConverter {
     SymbolData objectSD = symbolTable.get("java.lang.Object");   
     SymbolData integerSD = symbolTable.get("java.lang.Integer");
     assert objectSD != null && integerSD != null;
-    assert integerSD.isAssignableTo(objectSD, JavaVersion.JAVA_5);
-    assert SymbolData.INT_TYPE.isAssignableTo(objectSD, JavaVersion.JAVA_5);
+    assert integerSD.isAssignableTo(objectSD, JavaVersion.JAVA_6);
+    assert SymbolData.INT_TYPE.isAssignableTo(objectSD, JavaVersion.JAVA_6);
   }
   
     /** We'll use this class loader to look up resources (*not* to load classes) */
@@ -193,7 +197,7 @@ public class LanguageLevelConverter {
     
     // TODO !!! Use classFile2SymbolData directly.  Should class files have their supertypes defined anywhere but in 
     // class files?
-    ClassVisitor extractData = new ClassVisitor() {
+    ClassVisitor extractData = new ClassVisitor(Opcodes.ASM4) {
       
       public void visit(int version, int access, String name, String sig, String sup, String[] interfaces) {
         sd.setMav(_createMav(access));
@@ -400,7 +404,7 @@ public class LanguageLevelConverter {
 //    /* The number of files to compile may change if one file references another one.
 //     We don't want to visit these newly referenced files because they've already
 //     been visited. */
-//    // WHAT DOES VISIT MEAN?
+//    // WHAT DOES VISIT MEAN?  Apply this to them?
 //    int originalNumOfFiles = files.length;
     
     /* Find the files in the File[] array files that are LL, advanced or Full Java files. Do the parsing and conformance 
@@ -435,14 +439,14 @@ public class LanguageLevelConverter {
         if (isAdvancedFile(f))  advanced.addLast(f);
         else if (isFullJavaFile(f)) javaFiles.addLast(f);
         
-        if (isJavaFile(f)) {  /* a .dj0, .dj1, .dj2,, .dj, or .java file */
+        if (isJavaFile(f)) {  /* a .dj0, .dj1, .dj2,, .dj, or .java file; all but .dj and .java are legacy */
           System.out.flush();
           SourceFile sf;
           JExprParser jep = new JExprParser(f);
           try { 
 //            System.err.println("Parsing " + f);
             _log.log("Parsing " + f);
-            sf = jep.SourceFile();
+            sf = jep.SourceFile();  // Does the SourceFile method parse the file f embedded in jep?
 //            System.err.println("Completed parsing " + f);
             final Set<String> topLevelClasses = new HashSet<String>();
             for (TypeDefBase t: sf.getTypes()) {
@@ -465,7 +469,7 @@ public class LanguageLevelConverter {
             
           // Now create a LanguageLevelVisitor to do the first pass over the file.
           LanguageLevelVisitor llv;
-          if (isLanguageLevelFile(f)) {
+          if (isLanguageLevelFile(f)) { // Intermediate is the only language level other than full Java.
             llv = new IntermediateVisitor(f,
                                           importedPackageBase,
                                           new LinkedList<Pair<String, JExpressionIF>>(),
@@ -474,7 +478,7 @@ public class LanguageLevelConverter {
                                           languageLevelVisitedFiles);
           }
           else {
-            assert isAdvancedFile(f) || isFullJavaFile(f);
+            assert isAdvancedFile(f) || isFullJavaFile(f);  // Advanced files are treated exactly like full Java.
             llv = new FullJavaVisitor(f,
                                       importedPackageBase,
                                       new LinkedList<Pair<String, JExpressionIF>>(),
@@ -735,23 +739,23 @@ public class LanguageLevelConverter {
   
   /**Only certain versions of the java compiler support autoboxing*/
   public static boolean versionSupportsAutoboxing(JavaVersion version) {
-    return version.supports(JavaVersion.JAVA_5);
+    return version.supports(JavaVersion.JAVA_6);
     // If we care to support it, also allows JSR-14
   }
   
   /**Only certain versions of the java compiler support generics*/
   public static boolean versionSupportsGenerics(JavaVersion version) {
-    return version.supports(JavaVersion.JAVA_5);
+    return version.supports(JavaVersion.JAVA_6);
     // If we care to support it, also allows JSR-14
   }
   
   /**Only 1.5 supports for each*/
   public static boolean versionSupportsForEach(JavaVersion version) {
-    return version.supports(JavaVersion.JAVA_5);
+    return version.supports(JavaVersion.JAVA_6);
   }
   
   /* @return true if the compiler version is 1.5 */
-  public static boolean versionIs15(JavaVersion version) { return version.supports(JavaVersion.JAVA_5); }
+  public static boolean versionIs15(JavaVersion version) { return version.supports(JavaVersion.JAVA_6); }
   
   /**Do a conversion from the command line, to allow quick testing*/
   public static void main(String[] args) {
@@ -771,7 +775,7 @@ public class LanguageLevelConverter {
     }
     
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result = 
-      llc.convert(files, new Options(JavaVersion.JAVA_5,
+      llc.convert(files, new Options(JavaVersion.JAVA_6,
                                      IOUtil.parsePath(System.getProperty("java.class.path", ""))));
     System.out.println(result.getFirst().size() + result.getSecond().size() + " errors.");
     for(JExprParseException p : result.getFirst()) {

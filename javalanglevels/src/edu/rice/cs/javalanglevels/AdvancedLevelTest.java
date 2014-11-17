@@ -117,7 +117,7 @@ public class AdvancedLevelTest extends TestCase {
     for (int i = 0; i < len3; i++) { testFiles[len1 + len2 + i] = files3[i]; }
         
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-    result = llc.convert(testFiles, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
+    result = llc.convert(testFiles, new Options(JavaVersion.JAVA_6, IterUtil.<File>empty()));
     
 //    System.err.println("testFiles = " + Arrays.toString(testFiles));
     
@@ -228,7 +228,7 @@ public class AdvancedLevelTest extends TestCase {
     LanguageLevelConverter llc = new LanguageLevelConverter();
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
     for (int i = 0; i<testFiles.length; i++) {
-      result = llc.convert(new File[]{testFiles[i]}, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
+      result = llc.convert(new File[]{testFiles[i]}, new Options(JavaVersion.JAVA_6, IterUtil.<File>empty()));
       assertTrue("should be parse exceptions or visitor exceptions", !result.getFirst().isEmpty() || !result.getSecond().isEmpty());
       }
   }  
@@ -247,7 +247,7 @@ public class AdvancedLevelTest extends TestCase {
 
     LanguageLevelConverter llc = new LanguageLevelConverter();
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> result;
-    result = llc.convert(testFiles, new Options(JavaVersion.JAVA_5, IterUtil.<File>empty()));
+    result = llc.convert(testFiles, new Options(JavaVersion.JAVA_6, IterUtil.<File>empty()));
 //    System.err.println("ParseExceptions: " + result.getFirst());
 //    System.err.println("VisitorExceptions: " + result.getSecond());
     

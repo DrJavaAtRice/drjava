@@ -1501,7 +1501,7 @@ public class SymbolData extends TypeData {
                                       new String[0],
                                       _sd,
                                       null);
-      assertFalse("There should not be a conflict.", checkDifferentReturnTypes(md2, _sd, JavaVersion.JAVA_5));
+      assertFalse("There should not be a conflict.", checkDifferentReturnTypes(md2, _sd, JavaVersion.JAVA_6));
       assertEquals("There should not be an error.", 0, TypeChecker.errors.size());
       // Test with an exact copy of the method except for differing return types.
       MethodData md3 = new MethodData("methodName",
@@ -1512,7 +1512,7 @@ public class SymbolData extends TypeData {
                                       new String[0],
                                       _sd,
                                       null);
-      assertTrue("There should be a conflict.", checkDifferentReturnTypes(md3, _sd, JavaVersion.JAVA_5));
+      assertTrue("There should be a conflict.", checkDifferentReturnTypes(md3, _sd, JavaVersion.JAVA_6));
       assertEquals("There should be one error.", 1, TypeChecker.errors.size());
       assertEquals("The error message should be correct.", 
                    "methodName() in i.like.monkey cannot override methodName() in superClass;" + 
@@ -1540,7 +1540,7 @@ public class SymbolData extends TypeData {
                                       new String[0],
                                       null,
                                       null);
-      assertFalse("There should not be a conflict.", checkDifferentReturnTypes(md5, _sd, JavaVersion.JAVA_5));
+      assertFalse("There should not be a conflict.", checkDifferentReturnTypes(md5, _sd, JavaVersion.JAVA_6));
       assertEquals("There should still be one error.", 1, TypeChecker.errors.size());
       // Test with an exact copy except for diffeing return types.
       MethodData md6 = new MethodData("superSuperMethodName",
@@ -1552,7 +1552,7 @@ public class SymbolData extends TypeData {
                                       null,
                                       null);
       md6.getParams()[0].setEnclosingData(md6);
-      assertTrue("There should be a conflict.", checkDifferentReturnTypes(md6, _sd, JavaVersion.JAVA_5));
+      assertTrue("There should be a conflict.", checkDifferentReturnTypes(md6, _sd, JavaVersion.JAVA_6));
       assertEquals("There should be two errors.", 2, TypeChecker.errors.size());
       
       //Test a method that restricts the mav of the super class's method
@@ -1566,7 +1566,7 @@ public class SymbolData extends TypeData {
                                       null);
 
       md7.getParams()[0].setEnclosingData(md7);
-      assertTrue("There should be a conflict", checkDifferentReturnTypes(md7, _sd, JavaVersion.JAVA_5));
+      assertTrue("There should be a conflict", checkDifferentReturnTypes(md7, _sd, JavaVersion.JAVA_6));
       assertEquals("There should be three errors", 3, TypeChecker.errors.size());
       assertEquals("The error message should be correct", 
                    "superSuperMethodName in myData cannot override superSuperMethodName in " + superSuperSd.getName() + 
@@ -1588,7 +1588,7 @@ public class SymbolData extends TypeData {
                                       new SymbolData("myData"),
                                       null);
                                       
-      assertFalse("There should be no conflict", checkDifferentReturnTypes(md8, _sd, JavaVersion.JAVA_5));
+      assertFalse("There should be no conflict", checkDifferentReturnTypes(md8, _sd, JavaVersion.JAVA_6));
       assertEquals("There should still be 3 errors", 3, TypeChecker.errors.size());
       /* Java 1.4 is not supported. */
 //      assertTrue("There should be a conflict in 1.4", checkDifferentReturnTypes(md8, _sd, JavaVersion.JAVA_1_4));
@@ -1708,22 +1708,22 @@ public class SymbolData extends TypeData {
     }
     
     public void testIsNumberType() {
-      assertTrue(SymbolData.INT_TYPE.isNumberType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Integer").isNumberType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.DOUBLE_TYPE.isNumberType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Double").isNumberType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.LONG_TYPE.isNumberType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Long").isNumberType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.CHAR_TYPE.isNumberType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Character").isNumberType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.FLOAT_TYPE.isNumberType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Float").isNumberType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.SHORT_TYPE.isNumberType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Short").isNumberType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.BYTE_TYPE.isNumberType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Byte").isNumberType(JavaVersion.JAVA_5));     
-      assertFalse(SymbolData.BOOLEAN_TYPE.isNumberType(JavaVersion.JAVA_5));
-      assertFalse(new SymbolData("java.lang.Boolean").isNumberType(JavaVersion.JAVA_5));
+      assertTrue(SymbolData.INT_TYPE.isNumberType(JavaVersion.JAVA_6));
+      assertTrue(new SymbolData("java.lang.Integer").isNumberType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.DOUBLE_TYPE.isNumberType(JavaVersion.JAVA_6));
+      assertTrue(new SymbolData("java.lang.Double").isNumberType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.LONG_TYPE.isNumberType(JavaVersion.JAVA_6));
+      assertTrue(new SymbolData("java.lang.Long").isNumberType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.CHAR_TYPE.isNumberType(JavaVersion.JAVA_6));
+      assertTrue(new SymbolData("java.lang.Character").isNumberType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.FLOAT_TYPE.isNumberType(JavaVersion.JAVA_6));
+      assertTrue(new SymbolData("java.lang.Float").isNumberType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.SHORT_TYPE.isNumberType(JavaVersion.JAVA_6));
+      assertTrue(new SymbolData("java.lang.Short").isNumberType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.BYTE_TYPE.isNumberType(JavaVersion.JAVA_6));
+      assertTrue(new SymbolData("java.lang.Byte").isNumberType(JavaVersion.JAVA_6));     
+      assertFalse(SymbolData.BOOLEAN_TYPE.isNumberType(JavaVersion.JAVA_6));
+      assertFalse(new SymbolData("java.lang.Boolean").isNumberType(JavaVersion.JAVA_6));
     }
 
     public void testIsNumberTypeWithoutAutoboxing() {
@@ -1747,140 +1747,140 @@ public class SymbolData extends TypeData {
 
     
     public void testIsIntType() {
-      assertTrue(SymbolData.INT_TYPE.isIntType(JavaVersion.JAVA_5));
-      assertTrue((new SymbolData("java.lang.Integer")).isIntType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.DOUBLE_TYPE.isIntType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Double")).isIntType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.LONG_TYPE.isIntType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Long")).isIntType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.CHAR_TYPE.isIntType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Character")).isIntType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.FLOAT_TYPE.isIntType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Float")).isIntType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.SHORT_TYPE.isIntType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Short")).isIntType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BYTE_TYPE.isIntType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Byte")).isIntType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BOOLEAN_TYPE.isIntType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Boolean")).isIntType(JavaVersion.JAVA_5));
+      assertTrue(SymbolData.INT_TYPE.isIntType(JavaVersion.JAVA_6));
+      assertTrue((new SymbolData("java.lang.Integer")).isIntType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.DOUBLE_TYPE.isIntType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Double")).isIntType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.LONG_TYPE.isIntType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Long")).isIntType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.CHAR_TYPE.isIntType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Character")).isIntType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.FLOAT_TYPE.isIntType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Float")).isIntType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.SHORT_TYPE.isIntType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Short")).isIntType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.BYTE_TYPE.isIntType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Byte")).isIntType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.BOOLEAN_TYPE.isIntType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Boolean")).isIntType(JavaVersion.JAVA_6));
     }
     
 
     public void testIsDoubleType() {
-      assertFalse(SymbolData.INT_TYPE.isDoubleType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Integer")).isDoubleType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.DOUBLE_TYPE.isDoubleType(JavaVersion.JAVA_5));
-      assertTrue((new SymbolData("java.lang.Double")).isDoubleType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.CHAR_TYPE.isDoubleType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Character")).isDoubleType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.FLOAT_TYPE.isDoubleType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Float")).isDoubleType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.SHORT_TYPE.isDoubleType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Short")).isDoubleType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BYTE_TYPE.isDoubleType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Byte")).isDoubleType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BOOLEAN_TYPE.isDoubleType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Boolean")).isDoubleType(JavaVersion.JAVA_5));
+      assertFalse(SymbolData.INT_TYPE.isDoubleType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Integer")).isDoubleType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.DOUBLE_TYPE.isDoubleType(JavaVersion.JAVA_6));
+      assertTrue((new SymbolData("java.lang.Double")).isDoubleType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.CHAR_TYPE.isDoubleType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Character")).isDoubleType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.FLOAT_TYPE.isDoubleType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Float")).isDoubleType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.SHORT_TYPE.isDoubleType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Short")).isDoubleType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.BYTE_TYPE.isDoubleType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Byte")).isDoubleType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.BOOLEAN_TYPE.isDoubleType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Boolean")).isDoubleType(JavaVersion.JAVA_6));
     }
     
     public void testIsCharType() {
-      assertFalse(SymbolData.INT_TYPE.isCharType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Integer")).isCharType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.DOUBLE_TYPE.isCharType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Double")).isCharType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.CHAR_TYPE.isCharType(JavaVersion.JAVA_5));
-      assertTrue((new SymbolData("java.lang.Character")).isCharType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.FLOAT_TYPE.isCharType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Float")).isCharType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.SHORT_TYPE.isCharType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Short")).isCharType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BYTE_TYPE.isCharType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Byte")).isCharType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BOOLEAN_TYPE.isCharType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Boolean")).isCharType(JavaVersion.JAVA_5));
+      assertFalse(SymbolData.INT_TYPE.isCharType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Integer")).isCharType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.DOUBLE_TYPE.isCharType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Double")).isCharType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.CHAR_TYPE.isCharType(JavaVersion.JAVA_6));
+      assertTrue((new SymbolData("java.lang.Character")).isCharType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.FLOAT_TYPE.isCharType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Float")).isCharType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.SHORT_TYPE.isCharType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Short")).isCharType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.BYTE_TYPE.isCharType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Byte")).isCharType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.BOOLEAN_TYPE.isCharType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Boolean")).isCharType(JavaVersion.JAVA_6));
     }
     
     public void testIsFloatType() {
-      assertFalse(SymbolData.INT_TYPE.isFloatType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Integer")).isFloatType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.DOUBLE_TYPE.isFloatType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Double")).isFloatType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.CHAR_TYPE.isFloatType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Character")).isFloatType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.FLOAT_TYPE.isFloatType(JavaVersion.JAVA_5));
-      assertTrue((new SymbolData("java.lang.Float")).isFloatType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.SHORT_TYPE.isFloatType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Short")).isFloatType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BYTE_TYPE.isFloatType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Byte")).isFloatType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BOOLEAN_TYPE.isFloatType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Boolean")).isFloatType(JavaVersion.JAVA_5));
+      assertFalse(SymbolData.INT_TYPE.isFloatType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Integer")).isFloatType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.DOUBLE_TYPE.isFloatType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Double")).isFloatType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.CHAR_TYPE.isFloatType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Character")).isFloatType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.FLOAT_TYPE.isFloatType(JavaVersion.JAVA_6));
+      assertTrue((new SymbolData("java.lang.Float")).isFloatType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.SHORT_TYPE.isFloatType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Short")).isFloatType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.BYTE_TYPE.isFloatType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Byte")).isFloatType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.BOOLEAN_TYPE.isFloatType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Boolean")).isFloatType(JavaVersion.JAVA_6));
     }
     
     
     public void testIsByteType() {
-      assertFalse(SymbolData.INT_TYPE.isByteType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Integer")).isByteType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.DOUBLE_TYPE.isByteType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Double")).isByteType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.CHAR_TYPE.isByteType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Character")).isByteType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.FLOAT_TYPE.isByteType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Float")).isByteType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.SHORT_TYPE.isByteType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Short")).isByteType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.BYTE_TYPE.isByteType(JavaVersion.JAVA_5));
-      assertTrue((new SymbolData("java.lang.Byte")).isByteType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BOOLEAN_TYPE.isByteType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Boolean")).isByteType(JavaVersion.JAVA_5));
+      assertFalse(SymbolData.INT_TYPE.isByteType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Integer")).isByteType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.DOUBLE_TYPE.isByteType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Double")).isByteType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.CHAR_TYPE.isByteType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Character")).isByteType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.FLOAT_TYPE.isByteType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Float")).isByteType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.SHORT_TYPE.isByteType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Short")).isByteType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.BYTE_TYPE.isByteType(JavaVersion.JAVA_6));
+      assertTrue((new SymbolData("java.lang.Byte")).isByteType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.BOOLEAN_TYPE.isByteType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Boolean")).isByteType(JavaVersion.JAVA_6));
     }
     
     public void testIsBooleanType() {
-      assertFalse(SymbolData.INT_TYPE.isBooleanType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Integer")).isBooleanType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.DOUBLE_TYPE.isBooleanType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Double")).isBooleanType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.CHAR_TYPE.isBooleanType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Character")).isBooleanType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.FLOAT_TYPE.isBooleanType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Float")).isBooleanType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.SHORT_TYPE.isBooleanType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Short")).isBooleanType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.BYTE_TYPE.isBooleanType(JavaVersion.JAVA_5));
-      assertFalse((new SymbolData("java.lang.Byte")).isBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.BOOLEAN_TYPE.isBooleanType(JavaVersion.JAVA_5));
-      assertTrue((new SymbolData("java.lang.Boolean")).isBooleanType(JavaVersion.JAVA_5));
+      assertFalse(SymbolData.INT_TYPE.isBooleanType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Integer")).isBooleanType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.DOUBLE_TYPE.isBooleanType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Double")).isBooleanType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.CHAR_TYPE.isBooleanType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Character")).isBooleanType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.FLOAT_TYPE.isBooleanType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Float")).isBooleanType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.SHORT_TYPE.isBooleanType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Short")).isBooleanType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.BYTE_TYPE.isBooleanType(JavaVersion.JAVA_6));
+      assertFalse((new SymbolData("java.lang.Byte")).isBooleanType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.BOOLEAN_TYPE.isBooleanType(JavaVersion.JAVA_6));
+      assertTrue((new SymbolData("java.lang.Boolean")).isBooleanType(JavaVersion.JAVA_6));
     }
     
     public void testIsNonFloatOrBooleanType() {
-      assertTrue(SymbolData.INT_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Integer").isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.DOUBLE_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertFalse(new SymbolData("java.lang.Double").isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.CHAR_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Character").isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.FLOAT_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertFalse(new SymbolData("java.lang.Float").isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.SHORT_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Short").isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.BYTE_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Byte").isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.LONG_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Long").isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.BOOLEAN_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(new SymbolData("java.lang.Boolean").isNonFloatOrBooleanType(JavaVersion.JAVA_5));
+      assertTrue(SymbolData.INT_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertTrue(new SymbolData("java.lang.Integer").isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.DOUBLE_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertFalse(new SymbolData("java.lang.Double").isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.CHAR_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertTrue(new SymbolData("java.lang.Character").isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.FLOAT_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertFalse(new SymbolData("java.lang.Float").isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.SHORT_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertTrue(new SymbolData("java.lang.Short").isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.BYTE_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertTrue(new SymbolData("java.lang.Byte").isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.LONG_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertTrue(new SymbolData("java.lang.Long").isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.BOOLEAN_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertTrue(new SymbolData("java.lang.Boolean").isNonFloatOrBooleanType(JavaVersion.JAVA_6));
       
     }
     
     public void testIsNonFloatOrBooleanTypeWithoutAutoboxing() {
-      assertTrue(SymbolData.INT_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.DOUBLE_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.CHAR_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertFalse(SymbolData.FLOAT_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.SHORT_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.BYTE_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.LONG_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
-      assertTrue(SymbolData.BOOLEAN_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_5));
+      assertTrue(SymbolData.INT_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.DOUBLE_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.CHAR_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertFalse(SymbolData.FLOAT_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.SHORT_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.BYTE_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.LONG_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_6));
+      assertTrue(SymbolData.BOOLEAN_TYPE.isNonFloatOrBooleanType(JavaVersion.JAVA_6));
     }
     
     
