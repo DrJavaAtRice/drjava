@@ -34,7 +34,7 @@
   <property name="java7-home" value="${env.JAVA7_HOME}" />
   <property name="java6-home" value="${env.JAVA6_HOME}" />
   <property name="javacc-home"  value="${env.JAVACC_HOME}" />
-  <property name="clover-jar" value="${env.CLOVER_JAR}" />
+<!--  <property name="clover-jar" value="${env.CLOVER_JAR}" /> -->
   <property name="findbugs-home" value="${env.FINDBUGS_HOME}" />
   
   <property name="is-development" value="yes" /> <!-- Development or stable release -->
@@ -43,8 +43,7 @@
   <!-- Don't use or inherit the CLASSPATH environment variable for anything -->
   <property name="build.sysclasspath" value="ignore" />
   
-  <!-- Extension that defines the "extendclasspath" task.  This should be a standard feature of Ant, but
-       as long as it's not, we can use this extension from the Clover developers. -->
+  <!-- Extension that defines the "extendclasspath" task.  -->
   <taskdef resource="com/cenqua/ant/antlib.xml" classpath="lib/buildlib/cenquatasks.jar" />
 
   <!-- Extension containing various tools, including "for" and "if" -->
@@ -81,7 +80,7 @@
     <echo message="JAVA7_HOME: Home folder of the Java 7 JRE or JDK (required for" />
     <echo message="            compiling and '-7' targets)" />
     <echo message="JAVACC_HOME: Top-level directory of JavaCC (version 4.1+ is preferred)" />
-    <echo message="CLOVER_JAR: Location of the Clover jar file" />
+<!--    <echo message="CLOVER_JAR: Location of the Clover jar file" /> -->
     <echo message="FINDBUGS_HOME: Location of the FindBugs installation" />
     <echo message="" />
     <echo message="For control over the version of Java used to run Ant, set JAVA_HOME." />
@@ -422,7 +421,7 @@
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/plt-ant.jar" /> <!-- required for custom formatter -->
         <pathelement location="lib/buildlib/jlbench-base.jar" />
-        <pathelement location="${clover-jar}" />
+<!--        <pathelement location="${clover-jar}" /> -->
         <pathelement location="classes/test" />
         <pathelement location="classes/base" />
         <pathelement location="classes/lib" />
@@ -509,7 +508,7 @@
     </javadoc>
   </target>
   
-  
+<!--  
   <target name="clover" depends="clean, setup-clover, test, report-clover" 
           description="Generate a Clover test coverage report" />
   
@@ -518,7 +517,8 @@
   
   <target name="clover-5" depends="clean, setup-clover, test-5, report-clover" 
           description="Generate a Clover test coverage report under Java 5" />
-  
+-->  
+<!--
   <target name="report-clover" depends="resolve-version-tag">
     <echo message="Generating Clover report" />
     <clover-report>
@@ -526,11 +526,13 @@
         <format type="html" />
       </current>
     </clover-report>
-    <antcall target="clean-intermediate"> <!-- Remove instrumented class files -->
+
+    <antcall target="clean-intermediate"> 
       <param name="clean-can-fail" value="no" />
     </antcall>
   </target>
-
+-->
+<!--
   <target name="setup-clover" depends="assert-clover-jar-exists">
     <extendclasspath path="${clover-jar}" />
     <taskdef resource="clovertasks" classpath="${clover-jar}" />
@@ -539,11 +541,10 @@
       <files>
         <exclude name="**/*Test.java" />
         <exclude name="**/*TestCase.java" />
-        <!-- Additional test sources should be listed here -->
       </files>
     </clover-setup>
   </target>
-
+-->
 
   <target name="findbugs" depends="assert-findbugs-exists, compile"
 	      description="Generate a findbugs report (after compiling)">
@@ -588,7 +589,7 @@
     <echo message="Deleting all intermediate build products" />
     
     <delete dir="classes" failonerror="${clean-can-fail}" />
-    <delete dir="cloverdb" failonerror="${clean-can-fail}" />
+<!--    <delete dir="cloverdb" failonerror="${clean-can-fail}" /> -->
 
     <delete includeemptydirs="true" failonerror="${clean-can-fail}">
       <fileset dir="testFiles">
@@ -767,16 +768,14 @@
     </zip>
   </target>
   
-  <!-- We don't include this in the standard release process, because we don't want to
-       include instrumented files in the release, and because Clover must be run on a
-       licensed machine -->
+<!--
   <target name="clover-zip" depends="clover, resolve-version-tag">
     <echo message="Creating ${version-tag}-clover.zip" />
     <zip destfile="${version-tag}-clover.zip">
       <zipfileset dir="docs/clover" prefix="${version-tag}/clover" />
     </zip>
   </target>
-
+-->
 
 
   <!-- ********************************
@@ -914,10 +913,11 @@
     <fail message="Can't find ${ant.project.name}.jar" unless="jar-exists" />
   </target>
   
-  <target name="assert-clover-jar-exists">
+<!--  <target name="assert-clover-jar-exists">
     <available property="clover-jar-exists" file="${clover-jar}" />
     <fail message="${clover-jar} does not exist" unless="clover-jar-exists" />
   </target>
+-->
   
   <target name="assert-findbugs-exists">
     <available property="findbugs-exists" file="${findbugs-home}/lib/findbugs.jar" />
