@@ -75,6 +75,9 @@ import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 import javax.swing.filechooser.FileFilter;
+import java.awt.Desktop;
+import java.net.URI;
+import java.net.URISyntaxException;;
 
 /** A frame for code coverage report */
 public class CoverageFrame extends SwingFrame {
@@ -86,11 +89,10 @@ public class CoverageFrame extends SwingFrame {
   private final SingleDisplayModel _model; 
 
   private final JButton _okButton;
-  private final JButton _applyButton;
   private final JButton _cancelButton;
   private final JCheckBox _useCurrentFile;
   private final JCheckBox _openHTMLBrowser;
-;
+
   private final JPanel _mainPanel;
 
   private volatile DirectorySelectorComponent _srcRootSelector;
@@ -123,20 +125,18 @@ public class CoverageFrame extends SwingFrame {
  
     Action okAction = new AbstractAction("Ok") {
       public void actionPerformed(ActionEvent e) {
-        // Always apply and save settings
         boolean successful = generateReport();
-        if (successful) CoverageFrame.this.setVisible(false);
+        if (successful){ 
+			CoverageFrame.this.setVisible(false);
+			if(_openHTMLBrowser.isSelected()){
+				String indexURL = _outputDirSelector.getFileFromField().getPath() + "/index.html";
+				displayReportUsingDefaultBrowser(indexURL);
+			}
+		}
       }
+
     };
     _okButton = new JButton(okAction);
-
-    Action applyAction = new AbstractAction("Apply") {
-      public void actionPerformed(ActionEvent e) {
-        // Always save settings
-        saveSettings();
-      }
-    };
-    _applyButton = new JButton(applyAction);
 
     Action cancelAction = new AbstractAction("Cancel") {
       public void actionPerformed(ActionEvent e) { cancel(); }
@@ -172,7 +172,6 @@ public class CoverageFrame extends SwingFrame {
     bottom.setBorder(new EmptyBorder(5,5,5,5));
     bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
     bottom.add(Box.createHorizontalGlue());
-    //bottom.add(_applyButton);
     bottom.add(_okButton);
     bottom.add(_cancelButton);
     bottom.add(Box.createHorizontalGlue());
@@ -196,7 +195,6 @@ public class CoverageFrame extends SwingFrame {
 
   /** Resets the frame and hides it. */
   public void cancel() {
-    _applyButton.setEnabled(false);
     CoverageFrame.this.setVisible(false);
   }
   
@@ -215,13 +213,8 @@ public class CoverageFrame extends SwingFrame {
 		}
              
     } catch (Exception e){
-             StringWriter sw = new StringWriter();
-             PrintWriter pw = new PrintWriter(sw);
-             e.printStackTrace(pw);
-             String s = sw.toString(); // stack trace as a string
-			 JOptionPane.showMessageDialog(_mainFrame, s,
-                                       "error: ", JOptionPane.ERROR_MESSAGE);
-			return false;
+        displayErrorMessage(e);
+		return false;
     }
 
 	return true;
@@ -331,20 +324,6 @@ public class CoverageFrame extends SwingFrame {
     gridbag.setConstraints(wdPanel, c);
     panel.add(wdPanel);
   }
-  
-   private DocumentListener _applyListener = new DocumentListener() {
-      public void insertUpdate(DocumentEvent e) { setEnabled(); }
-      public void removeUpdate(DocumentEvent e) { setEnabled(); }
-      public void changedUpdate(DocumentEvent e) { setEnabled(); }
-      private void setEnabled() { 
-        assert EventQueue.isDispatchThread();
-//        Utilities.invokeLater(new Runnable() { 
-//          public void run() { 
-            _applyButton.setEnabled(true); 
-//          } 
-//        }); 
-      }
-   };
 
   public JPanel _srcRootPanel() {
     DirectoryChooser dirChooser = new DirectoryChooser(this);
@@ -359,8 +338,6 @@ public class CoverageFrame extends SwingFrame {
         _mainFrame.installModalWindowAdapter(CoverageFrame.this, LambdaUtil.NO_OP, CANCEL);
       }
     };
-    
-    _srcRootSelector.getFileField().getDocument().addDocumentListener(_applyListener);
 
     return _srcRootSelector;
   }
@@ -379,7 +356,6 @@ public class CoverageFrame extends SwingFrame {
       }
     };
 
-    _outputDirSelector.getFileField().getDocument().addDocumentListener(_applyListener);
     return _outputDirSelector;
   }
 
@@ -409,7 +385,6 @@ public class CoverageFrame extends SwingFrame {
     _mainDocumentSelector.setFont(_mainDocumentSelector.getFont().deriveFont(12f));
     _mainDocumentSelector.setPreferredSize(new Dimension(22, 22));
     
-    _mainDocumentSelector.getDocument().addDocumentListener(_applyListener);
     
     selectFile = new JButton("...");
     selectFile.addActionListener(new ActionListener(){
@@ -469,6 +444,33 @@ public class CoverageFrame extends SwingFrame {
   protected final Runnable1<WindowEvent> CANCEL = new Runnable1<WindowEvent>() {
     public void run(WindowEvent e) { cancel(); }
   };
+
+  private void displayReportUsingDefaultBrowser(String url){
+    if(Desktop.isDesktopSupported()){
+        Desktop desktop = Desktop.getDesktop();
+        try {
+			URI uri = new File(url).toURI();
+            desktop.browse(uri);
+        } catch (IOException e0){ 
+			displayErrorMessage(e0);
+		}
+    }else{
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            runtime.exec("xdg-open " + url);
+        } catch (IOException e2) {
+            displayErrorMessage(e2);
+        }
+    }
+  }
+
+  private void displayErrorMessage(Exception e){
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    e.printStackTrace(pw);
+    String s = sw.toString(); // stack trace as a string
+	JOptionPane.showMessageDialog(_mainFrame, s, "error: ", JOptionPane.ERROR_MESSAGE);
+  }
 
 
   /** Validates before changing visibility.  Only runs in the event thread.
