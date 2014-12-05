@@ -34,7 +34,7 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.ui;
+package edu.rice.cs.drjava.ui.coverage;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -52,10 +52,22 @@ import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
+import edu.rice.cs.drjava.ui.MainFrame;
+import edu.rice.cs.drjava.platform.PlatformFactory;
+
+import javax.swing.*;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
+import javax.swing.text.*;
+import java.util.*;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 /** The frame for displaying the HTML help files.
-  * @version $Id: HTMLFrame.java 5175 2010-01-20 08:46:32Z mgricken $
+  * @version $Id$
   */
-public class HTMLFrame extends SwingFrame {
+public class CoverageHTMLFrame extends SwingFrame {
   
   private static final int FRAME_WIDTH = 750;
   private static final int FRAME_HEIGHT = 600;
@@ -76,11 +88,17 @@ public class HTMLFrame extends SwingFrame {
   
   private JPanel _navPane;
   
+  private static final String HELP_PATH = "/home/ytc/andy2/output";
+  protected static final String CONTENTS_PAGE = "index.html";
+  protected static final String HOME_PAGE = "ch01.html";
+
   protected HistoryList _history;
   
   private HyperlinkListener _resetListener = new HyperlinkListener() {
     public void hyperlinkUpdate(HyperlinkEvent e) {
+	  
       if (_linkError && e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+        System.out.println("_resetListener hyperlinkUpdate");
         _resetMainPane();
       }
     }
@@ -145,7 +163,7 @@ public class HTMLFrame extends SwingFrame {
   
   private Action _closeAction = new AbstractAction("Close") {
     public void actionPerformed(ActionEvent e) {
-      HTMLFrame.this.setVisible(false);
+      CoverageHTMLFrame.this.setVisible(false);
     }
   };
   
@@ -164,14 +182,169 @@ public class HTMLFrame extends SwingFrame {
     _contentsDocPane.addHyperlinkListener(linkListener);
     _mainDocPane.addHyperlinkListener(linkListener);
   }
+
+  /** Shows the page selected by the hyperlink event.  Changed to anonymous inner class for 
+   * encapsulation purposes */
+  private HyperlinkListener _linkListener = new HyperlinkListener() {
+    public void hyperlinkUpdate(HyperlinkEvent event) {
+      if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+        System.out.println("_linkListener hyperlinkUpdate");
   
+        // Only follow links within the documentation
+        URL url = event.getURL();
+        String protocol = url.getProtocol();
+
+        if (!"file".equals(protocol) && !"jar".equals(protocol)) {
+          // try to open in the platform's web browser, since we can't
+          //  view it effectively here if it isn't in the jar
+          // (we only handle file/jar protocols)
+          PlatformFactory.ONLY.openURL(url);
+
+ System.out.println("here");
+          return; 
+        }
+
+        // perform path testing
+        String path = url.getPath();
+
+        if (path.indexOf(HELP_PATH+CONTENTS_PAGE) >= 0) {
+          System.out.println(path.indexOf(HELP_PATH+CONTENTS_PAGE));
+          try { url = new URL(url,HOME_PAGE); } // redirect to home, not content
+          catch(MalformedURLException murle) {
+            /* do nothing */
+          }
+        }
+        else if (path.indexOf(HELP_PATH) < 0){ 
+System.out.println("path.indexOf(HELP_PATH) < 0");
+return; // not anywhere in the help section
+}          
+        if (url.sameFile(_history.contents)){ 
+	System.out.println("sameFile");
+return; // we're already here!
+}
+
+System.out.println("jumpTo" + url.getPath());
+        jumpTo(url);
+      }
+    }
+  };
+      
+  private static URL initURL(File f){
+	URL l = null;
+    try {
+  		l = f.toURI().toURL();
+	} catch( Exception e ){
+
+	};
+	return l;
+  }
+
+  private void init(JEditorPane jep) throws IOException {
+         
+		 jep.setEditable(false);  
+         HTMLEditorKit kit = new HTMLEditorKit();
+         jep.setEditorKit(kit);
+         
+         StyleSheet styleSheet = kit.getStyleSheet();
+         styleSheet.importStyleSheet(new File(HELP_PATH + "/.resources/report.css").toURI().toURL());
+         styleSheet.importStyleSheet(new File(HELP_PATH +"/.resources/prettify.css").toURI().toURL());
+		 //styleSheet.addRule(".nc {background-color : red; }");
+		 styleSheet.addRule("span.pc {background-color : yellow; }");
+		 styleSheet.addRule(".fc {background-color : green; }");
+		 //styleSheet.addRule("pre.source lang-java linenums {background-color : red; }");
+         kit.setStyleSheet(styleSheet);
+         jep.setContentType("text/html");
+		 //jep.setText("<html><body><span class=\"nc\">c = 1;</span></body></html>");
+
+         loadcode(jep, new File(HELP_PATH + "/index.html").toURI().toURL());
+//jumpTo(new File(HELP_PATH + "/testandy/andy.java.html").toURI().toURL());
+//jumpTo(new File(HELP_PATH + "/testandy/andy.java.html").toURI().toURL());
+  }
+
+  public int t = 0;
+  public void loadcode(JEditorPane jep, URL url) throws IOException { 
+		//System.out.println("loadcode: " + url.getPath());
+
+         //File file = new File(url.getFile());
+File file;
+if(t<2 || t > 4){
+         file = new File(HELP_PATH + "/testandy/andy.java.html"); t++;
+}else{
+	file = new File(HELP_PATH + "/testandy2/andy2.java.html"); t++;
+}
+         URL url2 = file.toURI().toURL();
+         try {        	 
+			 //System.out.println(url2.equals(file2.toURI().toURL()));
+             //file = new File(url2.getPath());
+             System.out.println("loadcode: " + url2.getFile());
+        	 jep.setPage(url2);
+         }
+         catch (IOException e) {
+           jep.setContentType("text/html");
+           jep.setText("<html><body>Could not load the report</body></html>");
+         } 
+/**/
+		//File file = new File(url.getPath());
+        //jep.setPage(url);
+         
+         String content = null;
+         try {
+             FileReader reader = new FileReader(file);
+             char[] chars = new char[(int) file.length()];
+             reader.read(chars);
+             content = new String(chars);
+             reader.close();
+         } catch (IOException e) {
+             e.printStackTrace();
+         }
+         org.jsoup.nodes.Document doc = Jsoup.parse(content);
+         Elements elements = doc.select("span");
+         for(Element e: elements){
+        	 String classAttr = e.attr("class");
+		     if(classAttr==null || classAttr.length() < 2)
+			   continue;
+			 String classStartWith = classAttr.substring(0,2);
+        	 if(classStartWith.equals("nc")|| classStartWith.equals("fc") || classStartWith.equals("pc")){
+        		 e.removeAttr("id");
+        		 e.removeAttr("title");
+        		 if(classAttr.length()!=2){
+        			 String newClassName = classAttr.substring(0,2);
+        			 e.attr("class", newClassName);
+        		 }
+        	 }
+         }
+         
+         //System.out.println(doc.html());
+         jep.setText(doc.html());
+         jep.setPage(url2);
+		 jep.setText(doc.html());
+         jep.setPage(url2);
+		 jep.setText(doc.html());
+  }
+
+
+  /** Only for testing. Delete this after testing is done. */
+  public CoverageHTMLFrame() {
+	//File file = new File("/home/ytc/andy2/output/index.html");
+    //final URL introUrl = initURL(file);
+    this("Code Coverage Report", initURL(new File("/home/ytc/andy2/output/index.html")), initURL(new File("/home/ytc/andy2/output/index.html")), "DrJavaHelp.png");
+  }  
+
+
   /** Sets up the frame and displays it. */
-  public HTMLFrame(String frameName, URL introUrl, URL indexUrl, String iconString) {
+  public CoverageHTMLFrame(String frameName, URL introUrl, URL indexUrl, String iconString) {
     this(frameName, introUrl, indexUrl, iconString, null);
+    addHyperlinkListener(_linkListener);
+	_hideNavigationPane();
+	try{
+	    init(_mainDocPane);
+	} catch (IOException e){
+
+	}
   }
   
   /** Sets up the frame and displays it. */
-  public HTMLFrame(String frameName, URL introUrl, URL indexUrl, String iconString, File baseDir) {
+  public CoverageHTMLFrame(String frameName, URL introUrl, URL indexUrl, String iconString, File baseDir) {
     super(frameName);
     
     _contentsDocPane = new JEditorPane();
@@ -245,8 +418,8 @@ public class HTMLFrame extends SwingFrame {
     if (introUrl == null) _displayMainError(null);
     else {
       _history = new HistoryList(introUrl);
-      _displayPage(introUrl);
-      _displayPage(introUrl);
+      //_displayPage(introUrl);
+      //_displayPage(introUrl);
     }
     
     // Set all dimensions ----
@@ -263,6 +436,7 @@ public class HTMLFrame extends SwingFrame {
   }
   
   private void _resetMainPane() {
+System.out.println("_resetMainPane");
     _linkError = false;
     
     _mainDocPane = new JEditorPane();
@@ -282,7 +456,9 @@ public class HTMLFrame extends SwingFrame {
   private void _displayPage(URL url) {
     if (url == null) return;
     try {
-      _mainDocPane.setPage(url);
+//      _mainDocPane.setPage(url);
+System.out.println("in 1");
+      loadcode(_mainDocPane, url);
       if (_baseURL != null) {
         ((HTMLDocument)_contentsDocPane.getDocument()).setBase(_baseURL);
       }
@@ -292,7 +468,10 @@ public class HTMLFrame extends SwingFrame {
       String path = url.getPath();
       try {
         URL newURL = new URL(_baseURL + path);
-        _mainDocPane.setPage(newURL);
+        //_mainDocPane.setPage(newURL);
+System.out.println("in 2");
+		loadcode(_mainDocPane, newURL);
+
         if (_baseURL != null) {
           ((HTMLDocument)_contentsDocPane.getDocument()).setBase(_baseURL);
         }

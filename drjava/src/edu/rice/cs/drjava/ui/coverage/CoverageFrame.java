@@ -90,12 +90,10 @@ public class CoverageFrame extends SwingFrame {
   private final JButton _cancelButton;
   private final JCheckBox _useCurrentFile;
   private final JCheckBox _openHTMLBrowser;
-
-  //  private JButton _saveSettingsButton;
+;
   private final JPanel _mainPanel;
 
   private volatile DirectorySelectorComponent _srcRootSelector;
-  private volatile DirectorySelectorComponent _classDirSelector;
   private volatile DirectorySelectorComponent _outputDirSelector;
   private volatile JTextField                 _mainDocumentSelector;
   private volatile JButton 					  selectFile;
@@ -115,13 +113,7 @@ public class CoverageFrame extends SwingFrame {
     _useCurrentFile.addActionListener(new ActionListener(){
         @Override
         public void actionPerformed(ActionEvent e) {
-			//enableComponents(_disableContainer, _useCurrentFile.isSelected());
-
-            //enableComponents(_srcRootSelector, !_useCurrentFile.isSelected());
-			//enableComponents(_classDirSelector, !_useCurrentFile.isSelected());
-			//enableComponents(_mainDocumentSelector, !_useCurrentFile.isSelected());
 			_srcRootSelector.setEnabled(!_useCurrentFile.isSelected()); 
-			_classDirSelector.setEnabled(!_useCurrentFile.isSelected()); 
 			_mainDocumentSelector.setEnabled(!_useCurrentFile.isSelected()); 
 			selectFile.setEnabled(!_useCurrentFile.isSelected()); 
         }
@@ -134,7 +126,6 @@ public class CoverageFrame extends SwingFrame {
         // Always apply and save settings
         boolean successful = generateReport();
         if (successful) CoverageFrame.this.setVisible(false);
-        reset();
       }
     };
     _okButton = new JButton(okAction);
@@ -143,7 +134,6 @@ public class CoverageFrame extends SwingFrame {
       public void actionPerformed(ActionEvent e) {
         // Always save settings
         saveSettings();
-        reset();
       }
     };
     _applyButton = new JButton(applyAction);
@@ -202,13 +192,10 @@ public class CoverageFrame extends SwingFrame {
     else { dim.height -= 80; }
     setSize(dim);
     Utilities.setPopupLoc(this, _mainFrame);
-
-    reset();
   }
 
   /** Resets the frame and hides it. */
   public void cancel() {
-    reset();
     _applyButton.setEnabled(false);
     CoverageFrame.this.setVisible(false);
   }
@@ -217,54 +204,15 @@ public class CoverageFrame extends SwingFrame {
 	  _outputDirSelector.setFileField(file);
   }
 
-  public void reset(){
-//  Utilities.show("reset(" + projRoot + ")");
-/*
-	final File pr = _model.getsrcRoot();
-    final JTextField prTextField = _srcRootSelector.getFileField();
-    if (pr == FileOps.NULL_FILE) prTextField.setText("");
-    else _srcRootSelector.setFileField(pr);
-    
-    final File bd = _model.getClassDirectory();
-    final JTextField bdTextField = _classDirSelector.getFileField();
-    if (bd == FileOps.NULL_FILE) bdTextField.setText("");
-    else _classDirSelector.setFileField(bd);
-
-    final File wd = _model.getOutputDirectory();
-    final JTextField wdTextField = _outputDirSelector.getFileField();
-    if (wd == FileOps.NULL_FILE) wdTextField.setText("");
-    else _outputDirSelector.setFileField(wd);
-
-    final String mc = _model.getMainClass();
-    final JTextField mcTextField = _mainDocumentSelector;
-    if (mc == null) mcTextField.setText("");
-    else mcTextField.setText(mc);
-    
-    //_autoRefreshComponent.setSelected(_getAutoRefreshStatus());
-    
-    //_storedPreferences.clear();
-    //_storedPreferences.putAll(_model.getPreferencesStoredInProject());
-    
-    _applyButton.setEnabled(false);
-*/
-  }
-
   public boolean generateReport(){
 	try{
 		if(_useCurrentFile.isSelected()){
-            //final ReportGenerator generator = new ReportGenerator(_model.getOpenDefinitionsDocuments(), _outputDirSelector.getFileFromField());
 			final ReportGenerator generator = new ReportGenerator(_model, _model.getDocumentNavigator().getSelectedDocuments(), _outputDirSelector.getFileFromField());
              generator.create();
 		}else{
 			final ReportGenerator generator = new ReportGenerator(_model, _srcRootSelector.getFileFromField(), _mainDocumentSelector.getText(), _outputDirSelector.getFileFromField());
 			generator.create();
 		}
-/*
-             for(OpenDefinitionsDocument doc : _model.getOpenDefinitionsDocuments()){
-                 s = s + doc.getFileName() + "," ;  //getFile()
-                 //s = doc.getFile().getCanonicalPath().replace(".java",".class");
-             }
-*/
              
     } catch (Exception e){
              StringWriter sw = new StringWriter();
@@ -284,67 +232,20 @@ public class CoverageFrame extends SwingFrame {
   public boolean saveSettings() {//throws IOException {
     File pr = _srcRootSelector.getFileFromField();
     if (_srcRootSelector.getFileField().getText().equals("")) pr = FileOps.NULL_FILE;
-    //_model.setsrcRoot(pr);
-
-    File bd = _classDirSelector.getFileFromField();
-    if (_classDirSelector.getFileField().getText().equals("")) bd = FileOps.NULL_FILE;
-    //_model.setClassDirectory(bd);
 
     File wd = _outputDirSelector.getFileFromField();
     if (_outputDirSelector.getFileField().getText().equals("")) wd = FileOps.NULL_FILE;
-    //_model.setOutputDirectory(wd);
 
     String mc = _mainDocumentSelector.getText();
     if(mc == null) mc = "";
-    //_model.setMainClass(mc);
-
-    
-    //    _mainFrame.saveProject();   
-    //_model.setPreferencesStoredInProject(_storedPreferences);
     
     return true;
   }
 
-  /** Returns the current project root in the project profile. */
-  private File _getsrcRoot() {
-    File srcRoot = null;//_model.getsrcRoot();
-    if (srcRoot != null) return srcRoot;
+  /** Returns the default null dir. */
+  private File _getDefaultNullDir() {
     return FileOps.NULL_FILE;
   }
-
-  /** Returns the current class directory in the project profile. */
-  private File _getClassDir() {
-    File classDir = null;//_model.getClassDirectory();
-    if (classDir != null) return classDir;
-    return FileOps.NULL_FILE;
-  }
-
-  /** Returns the current output directory in the project profile (FileOption.NULL_FILE if none is set) */
-  private File _getOutputDir() {
-    File outputDir = null;//_model.getOutputDirectory();
-    if (outputDir != null) return outputDir;
-    return FileOps.NULL_FILE;
-  }
-
-  /** Returns the file contianing the main class in the project profile (FileOption.NULL_FILE if none is set) */
-  private File _getMainFile() {
-    File mainFile = null;//_model.getMainClassContainingFile();
-    if (mainFile != null) return mainFile;
-    return FileOps.NULL_FILE;
-  }
-  
-  /** Returns the fully-qualified name of the main class in the project profile ("" if none is set) */
-  private String _getMainClass(){
-    String mainClass = null;//_model.getMainClass();
-    if(mainClass == null) return "";
-    
-    return mainClass;
-  }
-  
-  /** Returns whether the project is set to automatically open new source files */
-  //private boolean _getAutoRefreshStatus() {
-  //  return _model.getAutoRefreshStatus();
-  //}
 
   private void _setupPanel(JPanel panel) {
     GridBagLayout gridbag = new GridBagLayout();
@@ -374,8 +275,7 @@ public class CoverageFrame extends SwingFrame {
     c.insets = labelInsets;
 
     JLabel prLabel = new JLabel("Src Root");
-    prLabel.setToolTipText("<html>The root directory for the project source files .<br>" + 
-    "If not specified, the parent directory of the project file.</html>");
+    prLabel.setToolTipText("<html>The root directory for the project source files.</html>");
     gridbag.setConstraints(prLabel, c);
 
     panel.add(prLabel);
@@ -387,29 +287,9 @@ public class CoverageFrame extends SwingFrame {
     gridbag.setConstraints(prPanel, c);
     panel.add(prPanel);
 
-    // Class Directory
 
-    c.weightx = 0.0;
-    c.gridwidth = 1;
-    c.insets = labelInsets;
-
-    JLabel bdLabel = new JLabel("Class Directory");
-    bdLabel.setToolTipText("<html>The directory the class files will be compiled into.<br>" + 
-        "If not specified, the class files will be compiled into<br>" + 
-    "the same directory as their corresponding source files</html>");
-    gridbag.setConstraints(bdLabel, c);
-
-    panel.add(bdLabel);
-    c.weightx = 1.0;
-    c.gridwidth = GridBagConstraints.REMAINDER;
-    c.insets = compInsets;
-
-    JPanel bdPanel = _classDirectoryPanel();
-    gridbag.setConstraints(bdPanel, c);
-    panel.add(bdPanel);
 
     // Main Document file
-
     c.weightx = 0.0;
     c.gridwidth = 1;
     c.insets = labelInsets;
@@ -439,7 +319,7 @@ public class CoverageFrame extends SwingFrame {
     c.insets = labelInsets;
 
     JLabel wdLabel = new JLabel("Output Directory");
-    wdLabel.setToolTipText("<html>The root directory for relative path names.</html>");
+    wdLabel.setToolTipText("<html>The output directory for reports.</html>");
     gridbag.setConstraints(wdLabel, c);
 
     panel.add(wdLabel);
@@ -468,7 +348,7 @@ public class CoverageFrame extends SwingFrame {
 
   public JPanel _srcRootPanel() {
     DirectoryChooser dirChooser = new DirectoryChooser(this);
-    dirChooser.setSelectedFile(_getsrcRoot());
+    dirChooser.setSelectedFile(_getDefaultNullDir());
     dirChooser.setDialogTitle("Select Src Root Folder");
     dirChooser.setApproveButtonText("Select");
 //  dirChooser.setEditable(true);
@@ -479,40 +359,15 @@ public class CoverageFrame extends SwingFrame {
         _mainFrame.installModalWindowAdapter(CoverageFrame.this, LambdaUtil.NO_OP, CANCEL);
       }
     };
-    //toReturn.add(_classDirSelector, BorderLayout.EAST);
     
     _srcRootSelector.getFileField().getDocument().addDocumentListener(_applyListener);
 
     return _srcRootSelector;
   }
 
-  public JPanel _classDirectoryPanel() {
-    DirectoryChooser dirChooser = new DirectoryChooser(this);
-    File bd = _getClassDir();
-    if (bd == null || bd == FileOps.NULL_FILE) bd = _getsrcRoot();
-    dirChooser.setSelectedFile(bd);
-    dirChooser.setDialogTitle("Select Class Directory");
-    dirChooser.setApproveButtonText("Select");
-//  dirChooser.setEditable(true);
-    // (..., false); since class directory does not have to exist
-    _classDirSelector = new DirectorySelectorComponent(this, dirChooser, 20, 12f, false) {
-      protected void _chooseFile() {
-        _mainFrame.removeModalWindowAdapter(CoverageFrame.this);
-        super._chooseFile();
-        _mainFrame.installModalWindowAdapter(CoverageFrame.this, LambdaUtil.NO_OP, CANCEL);
-      }
-    };
-    _classDirSelector.setFileField(bd);  // the file field is used as the initial file selection
-    //toReturn.add(_classDirSelector, BorderLayout.EAST);
-
-    _classDirSelector.getFileField().getDocument().addDocumentListener(_applyListener);
-
-    return _classDirSelector;
-  }
-
   public JPanel _outputDirectoryPanel() {
     DirectoryChooser dirChooser = new DirectoryChooser(this);
-    dirChooser.setSelectedFile(_getOutputDir());
+    dirChooser.setSelectedFile(_getDefaultNullDir());
     dirChooser.setDialogTitle("Select Output Directory");
     dirChooser.setApproveButtonText("Select");
 //  dirChooser.setEditable(true);
@@ -523,7 +378,6 @@ public class CoverageFrame extends SwingFrame {
         _mainFrame.installModalWindowAdapter(CoverageFrame.this, LambdaUtil.NO_OP, CANCEL);
       }
     };
-    //toReturn.add(_classDirSelector, BorderLayout.EAST);
 
     _outputDirSelector.getFileField().getDocument().addDocumentListener(_applyListener);
     return _outputDirSelector;
@@ -531,7 +385,7 @@ public class CoverageFrame extends SwingFrame {
 
 
   public JPanel _mainDocumentSelector() {
-    final File srcRoot = _getsrcRoot();
+    final File srcRoot = _getDefaultNullDir();
 
     final FileChooser chooser = new FileChooser(srcRoot);
     chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -539,10 +393,7 @@ public class CoverageFrame extends SwingFrame {
 
     chooser.setDialogTitle("Select Main Class");
     chooser.setCurrentDirectory(srcRoot);
-    File   mainFile  = _getMainFile();
-    if (mainFile != FileOps.NULL_FILE){
-      chooser.setSelectedFile(mainFile);
-    }
+    File mainFile = _getDefaultNullDir();
 
     chooser.setApproveButtonText("Select");
 
@@ -618,18 +469,6 @@ public class CoverageFrame extends SwingFrame {
   protected final Runnable1<WindowEvent> CANCEL = new Runnable1<WindowEvent>() {
     public void run(WindowEvent e) { cancel(); }
   };
-  
-/*
-  public void enableComponents(Container container, boolean enable) {
-    Component[] components = container.getComponents();
-    for (Component component : components) {
-      component.setEnabled(enable);
-        if (component instanceof Container) {
-          enableComponents((Container)component, enable);
-        }
-    }
-  }
-*/
 
 
   /** Validates before changing visibility.  Only runs in the event thread.

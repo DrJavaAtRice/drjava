@@ -92,7 +92,7 @@ import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.javadoc.JavadocModel;
 import edu.rice.cs.drjava.ui.config.ConfigFrame;
-import edu.rice.cs.drjava.ui.coverage.CoverageFrame;
+import edu.rice.cs.drjava.ui.coverage.*;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputModel;
 import edu.rice.cs.drjava.ui.avail.*;
@@ -1126,18 +1126,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   };
 
   public void showCoverageFrame() {   
-    //ProjectPropertiesFrame ppf = new ProjectPropertiesFrame(this);
 	 _coverageFrame.setOutputDir(_model.getWorkingDirectory());
     _coverageFrame.setVisible(true);
-    _coverageFrame.reset();
     _coverageFrame.toFront(); 
-/*
-    _coverageFrame.setUp();
-    setPopupLoc(_coverageFrame);
-    _coverageFrame.resetToCurrent();
-    _coverageFrame.setVisible(true);
-    _coverageFrame.toFront();
-*/
   }
   
   /** Default cut action.  Returns focus to the correct pane. */

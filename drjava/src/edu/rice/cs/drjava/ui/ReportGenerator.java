@@ -19,10 +19,6 @@ import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.*;
 
-//import java.util.HashMap;
-//import java.util.Map;
-//import java.util.LinkedList;
-//import java.util.Properties;
 import edu.rice.cs.plt.collect.CollectUtil;
 
 import org.jacoco.core.analysis.Analyzer;
@@ -56,15 +52,11 @@ public class ReportGenerator {
 
  private final String title;
 
- //private final File executionDataFile;
- //private final File classesDirectory;
  private final File sourceDirectory;
  private final File reportDirectory;
  private final List<File> targets;
  private final ArrayList<String> targetNames;
  private final String mainClassFileName;
-
- //private ExecFileLoader execFileLoader;
  
  /**
   * A class loader that loads classes from in-memory data.
@@ -108,7 +100,6 @@ public class ReportGenerator {
 
  private String getTargetClassName(final OpenDefinitionsDocument doc) throws Exception {
   File file = doc.getFile();
-  //String path = file.getPath();
   String name = file.getName().replace(".java", "");
 
   if(doc.getPackageName()!="")
@@ -118,7 +109,7 @@ public class ReportGenerator {
  }
 
  private String getTargetClassName(final File file) throws Exception {
-  String ClassName = file.getPath().replace(sourceDirectory.getPath()+"/","").replace(".java", "").replace(".class", "").replace("/",".");//.substring(1);
+  String ClassName = file.getPath().replace(sourceDirectory.getPath()+"/","").replace(".java", "").replace(".class", "").replace("/",".");
 
   return ClassName;
  }
@@ -142,20 +133,11 @@ public class ReportGenerator {
  }
 
  /**
-  * Create a new generator based for the given project.
+  * Create a new generator based for the given file.
   * 
-  * @param projectDirectory
   */
  public ReportGenerator(final SingleDisplayModel _model, final List<OpenDefinitionsDocument> docs, File destDirectory) throws Exception  {
-  //this.title = projectDirectory.getName();
-  //this.executionDataFile = new File(projectDirectory, "jacoco.exec");
-  //this.classesDirectory = new File(projectDirectory, "bin");
-  //this.sourceDirectory =new File(projectDirectory, "src");
-
-  File projectDirectory = docs.get(0).getFile().getParentFile(); 
-  this.title = projectDirectory.getName(); 
-
-  File src = projectDirectory;
+  File src = docs.get(0).getFile().getParentFile(); 
   String packageName = docs.get(0).getPackageName();
   if(!packageName.equals("")){
 	//If there's package, go up until the root dir  
@@ -164,50 +146,39 @@ public class ReportGenerator {
 		src = src.getParentFile();
 	}
   }
-  
   this.sourceDirectory = src;
+  this.title = src.getName();
 
-  
   List<File> targets = new ArrayList<File>();
   for(File dir:CollectUtil.makeList(_model.getClassPath())){
     if( dir.getName().equals("lib") || dir.getName().equals("base") || dir.getName().equals("test"))
 		continue;
-    //System.out.println(dir.getName());
   	targets.addAll(rec_init_target(dir));
   }
   this.targets = targets;
 
   ArrayList<String> targetNames = new ArrayList<String>();
-/*
-  for(OpenDefinitionsDocument doc : docs){
-    targets.add(doc.getFile());
-    targetNames.add(getTargetClassName(doc));
-  }
-*/
-  
-  System.out.println(targets.size());
-
   for(File f: targets){
-    //System.out.println(getTargetClassName(f));
   	targetNames.add(getTargetClassName(f));
   }
   this.targetNames = targetNames;
 
-  
-  this.reportDirectory = destDirectory; //new File(destDirectory, "coveragereport");
-
-  this.mainClassFileName = getTargetClassName(docs.get(0).getFile());//docs.get(0).getFile().getName().replace(".java",".class");//
+  this.reportDirectory = destDirectory;
+  this.mainClassFileName = getTargetClassName(docs.get(0).getFile());
  }
 
+
+ /**
+  * Create a new generator based for the given project.
+  * 
+  */
  public ReportGenerator(final SingleDisplayModel _model, File sourceDirectory, String mainClassPath , File destDirectory) throws Exception  {
   this.sourceDirectory = sourceDirectory;
-  //this.classesDirectory = classesDirectory;
   this.reportDirectory = destDirectory; 
-  this.title = sourceDirectory.getName();
-  
+  this.title = sourceDirectory.getName();  
   this.mainClassFileName = mainClassPath;
 
-  this.targets = rec_init(sourceDirectory);
+  this.targets = rec_init_src(sourceDirectory);
   ArrayList<String> targetNames = new ArrayList<String>();
   for(File f: targets){
 	targetNames.add(getTargetClassName(f));
@@ -216,7 +187,7 @@ public class ReportGenerator {
 
  }
 
- public List<File> rec_init(File sourceDirectory){
+ public List<File> rec_init_src(File sourceDirectory){
     ArrayList<File> files = new ArrayList<File>();
     for(File f: sourceDirectory.listFiles()){
 		if(f.isFile()){
@@ -228,7 +199,7 @@ public class ReportGenerator {
 				}
 			}
 		}else if(f.isDirectory()){
-			files.addAll(rec_init(f));
+			files.addAll(rec_init_src(f));
 		}
     }
 
@@ -260,32 +231,13 @@ public class ReportGenerator {
   * @throws Exception 
   */
  public void create() throws Exception {
-
-  // Read the jacoco.exec file. Multiple data files could be merged
-  // at this point
-  //loadExecutionData();
-  //final String targetName = TestTarget.class.getName();
-
-  //File target = docs.get(0).getFile();
-  //String targetName = getTargetClassName(docs.get(0));
-
-
-  //File target = sourceDirectory.listFiles()[0].listFiles()[1];
-  //File target2 = sourceDirectory.listFiles()[0].listFiles()[2];  
-  //String targetName2 = getTargetClassName(target2);
-
-  
+ 
   // For instrumentation and runtime we need a IRuntime instance
   // to collect execution data:
   final IRuntime runtime = new LoggerRuntime();
 
   // The Instrumenter creates a modified version of our test target class
   // that contains additional probes for execution data recording:
-  //final Instrumenter instr = new Instrumenter(runtime);
-  //final byte[] instrumented = instr.instrument(getTargetClass(target), targetName);
-  //final Instrumenter instr2 = new Instrumenter(runtime);
-  //final byte[] instrumented2 = instr2.instrument(getTargetClass(targetName2), targetName2);
-  
   ArrayList<byte[]> instrumenteds = new ArrayList<byte[]>();
   for(int i = 0 ; i< targets.size() ; i++){
 	final Instrumenter instr = new Instrumenter(runtime);
@@ -301,18 +253,12 @@ public class ReportGenerator {
   // In this tutorial we use a special class loader to directly load the
   // instrumented class definition from a byte[] instances.
   final MemoryClassLoader memoryClassLoader = new MemoryClassLoader();
-  //memoryClassLoader.addDefinition(targetName, instrumented);
-  //memoryClassLoader.addDefinition(targetName2, instrumented2);
   for(int i = 0; i< targetNames.size(); i++){
 	memoryClassLoader.addDefinition(targetNames.get(i), instrumenteds.get(i));
   }
 
   final Class<?> mainClass = memoryClassLoader.loadClass(mainClassFileName);
 
-  // Here we execute our test target class through its Runnable interface:
-  //final Runnable targetInstance = (Runnable) targetClass.newInstance();
-  //targetInstance.run();
-  
   //Execute the test target class 
   Method meth = mainClass.getMethod("main", String[].class);
   String[] params = new String[]{}; // init params accordingly
@@ -329,9 +275,6 @@ public class ReportGenerator {
   // information:
   final CoverageBuilder coverageBuilder = new CoverageBuilder();
   final Analyzer analyzer = new Analyzer(executionData, coverageBuilder);
-  //analyzer.analyzeClass(getTargetClass(target), targetName);
-  //analyzer.analyzeClass(getTargetClass(targetName2), targetName2);
-  //TODO? analyzer.analyzeAll(classesDirectory);
 
   for(int i = 0; i< targetNames.size(); i++){
 	analyzer.analyzeClass(getTargetClass(targets.get(i)), targetNames.get(i));
@@ -345,7 +288,6 @@ public class ReportGenerator {
   // class folder and each jar you want in your report. If you have
   // more than one bundle you will need to add a grouping node to your
   // report
-  //final IBundleCoverage bundleCoverage = analyzeStructure(executionData);
   final IBundleCoverage bundleCoverage = coverageBuilder.getBundle(title);
   createReport(bundleCoverage, executionData, sessionInfos);
  }
@@ -363,8 +305,6 @@ public class ReportGenerator {
   // information. At this point the report doesn't know about the
   // structure of the report being created
   visitor.visitInfo(sessionInfos.getInfos(), executionData.getContents());
-  //visitor.visitInfo(execFileLoader.getSessionInfoStore().getInfos(),
-  //  execFileLoader.getExecutionDataStore().getContents());
 
   // Populate the report structure with the bundle coverage information.
   // Call visitGroup if you need groups in your report.
@@ -391,47 +331,6 @@ public class ReportGenerator {
       .getLine(i).getStatus()));
    }
   }
- }
-/*
- private void loadExecutionData() throws IOException {
-  execFileLoader = new ExecFileLoader();
-  execFileLoader.load(executionDataFile);
- }
-
- private IBundleCoverage analyzeStructure(ExecutionDataStore executionData) throws IOException {
-  final CoverageBuilder coverageBuilder = new CoverageBuilder();
-  final Analyzer analyzer = new Analyzer(
-    executionData, coverageBuilder);
-    //execFileLoader.getExecutionDataStore(), coverageBuilder);
-
-  //analyzer.analyzeAll(classesDirectory);
-
-  return coverageBuilder.getBundle(title);
- }
-*/
- /**
-  * Starts the report generation process
-  * 
-  * @param args
-  *            Arguments to the application. This will be the location of the
-  *            eclipse projects that will be used to generate reports for
-  * @throws Exception 
-  */
- public static void main(final String[] args) throws Exception {
-  /*
-  // Run ant build 
-  File buildFile = new File("build.xml");
-  Project p = new Project();
-  p.setUserProperty("ant.file", buildFile.getAbsolutePath());
-  p.init();
-  ProjectHelper helper = ProjectHelper.getProjectHelper();
-  p.addReference("ant.projectHelper", helper);
-  helper.parse(p, buildFile);
-  p.executeTarget(p.getDefaultTarget());
-  */
-  
-  //final ReportGenerator generator = new ReportGenerator(new File("C:\\Users\\YTC\\workspace\\comp440\\JacocoTest2"));
-  //generator.create();
  }
 
 }
