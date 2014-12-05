@@ -837,7 +837,7 @@ public class TypeChecker extends JExpressionIFDepthFirstVisitor<TypeData> implem
     * Returns the common super type of the two types provided the requisite analysis is trivial. 
     * Returns null otherwise. */
   protected static SymbolData getCommonSuperTypeBaseCase(SymbolData sdLeft, SymbolData sdRight) {
-    System.err.println("***** Computing CommonSuperTypeBaseCase of " + sdLeft + ", " + sdRight);
+//    System.err.println("***** Computing CommonSuperTypeBaseCase of " + sdLeft + ", " + sdRight);
     if (sdLeft == SymbolData.EXCEPTION) return sdRight;
     if (sdRight == SymbolData.EXCEPTION) return sdLeft;
     if (sdLeft == sdRight) return sdLeft;
