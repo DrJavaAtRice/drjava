@@ -86,14 +86,14 @@ public abstract class Javac160FilteringCompiler extends JavacCompiler {
         }
         else {
           // LOG.log("\tjunit.jar not found");
-          if (tempJUnit!=null) {
+          if (tempJUnit != null) {
             tempJUnit.delete();
             tempJUnit = null;
           }
         }
       }
       catch(IOException ioe) {
-        if (tempJUnit!=null) {
+        if (tempJUnit != null) {
           tempJUnit.delete();
           tempJUnit = null;
         }

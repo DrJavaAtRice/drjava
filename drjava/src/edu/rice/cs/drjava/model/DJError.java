@@ -71,7 +71,7 @@ public class DJError implements Comparable<DJError>, Serializable {
 //    System.err.println("instance of DJError (or subclass) constructed; file = " + file + "; message = " + message);
     // need to precisely match the CompilerError message, otherwise a file name containing
     // "CompilerError" may trigger an UnexpectedException (see bug 2872797)
-    if (message != null && message.startsWith("Compile exception: sun.tools.java.CompilerError"))
+    if (message != null && message.startsWith("Compile exception: "))
       throw new UnexpectedException(message);
     _file = file;
     _lineNumber = lineNumber;

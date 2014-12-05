@@ -101,7 +101,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
                            " on the right hand side of an assignment", that)) {
       
       // make sure the rhs can be assigned to the lhs
-      if (! valueRes.getSymbolData().isAssignableTo(nameRes.getSymbolData(), JAVA_VERSION)) {
+      if (! valueRes.getSymbolData().isAssignableTo(nameRes.getSymbolData(), true)) {
         _addError("You cannot assign something of type " + valueRes.getName() + " to something of type " + 
                   nameRes.getName(), that);
       }
@@ -141,7 +141,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     // need to see if rhs is a String.
     SymbolData string = getSymbolData("java.lang.String", that, false, false);
     
-    if (nameRes.getSymbolData().isAssignableTo(string, JAVA_VERSION)) {
+    if (nameRes.getSymbolData().isAssignableTo(string, true)) {
       //the rhs is a String, so just make sure they are both instance types.
       assertInstanceType(nameRes, "The arguments to a Plus Assignment Operator (+=) must both be instances, " + 
                          "but you have specified a type name", that);
@@ -151,16 +151,15 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     }
     
     else { // neither is a string, so they must both be numbers
-      if (!nameRes.getSymbolData().isNumberType(JAVA_VERSION) ||
-          !valueRes.getSymbolData().isNumberType(JAVA_VERSION)) {
+      if (! nameRes.getSymbolData().isNumberType() ||
+          ! valueRes.getSymbolData().isNumberType()) {
         _addError("The arguments to the Plus Assignment Operator (+=) must either include an instance of a String " + 
                   "or both be numbers.  You have specified arguments of type " + nameRes.getName() + " and " + 
                   valueRes.getName(), that);
         return string.getInstanceData(); // return String by default
       }
       
-      else if (! valueRes.getSymbolData().isAssignableTo(nameRes.getSymbolData(), 
-                                                             JAVA_VERSION)) {
+      else if (! valueRes.getSymbolData().isAssignableTo(nameRes.getSymbolData(), true)) {
         _addError("You cannot increment something of type " + nameRes.getName() + " with something of type " + 
                   valueRes.getName(), that);
       }
@@ -233,12 +232,12 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       
       boolean error = false;
       //make sure that both lhs and rhs are number types:
-      if (!nameRes.getSymbolData().isNumberType(JAVA_VERSION)) {
+      if (! nameRes.getSymbolData().isNumberType()) {
         _addError("The left side of this expression is not a number.  " + 
                   "Therefore, you cannot apply a numeric assignment (-=, %=, *=, /=) to it", that);
         error=true;
       }
-      if (!valueRes.getSymbolData().isNumberType(JAVA_VERSION)) {
+      if (! valueRes.getSymbolData().isNumberType()) {
         _addError("The right side of this expression is not a number.  " + 
                   "Therefore, you cannot apply a numeric assignment (-=, %=, *=, /=) to it", that);
         error = true;
@@ -246,8 +245,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       
       // Make sure the lhs is parent type of rhs  NOTE: technically this is allowable in full java but inconsistent
       // with the fact that you cannot say int i = 0; i = i + 4.2;  To avoid student confusion, we will not allow it.
-      if (!error && !valueRes.getSymbolData().isAssignableTo(nameRes.getSymbolData(), 
-                                                                 JAVA_VERSION)) {
+      if (!error && !valueRes.getSymbolData().isAssignableTo(nameRes.getSymbolData(), true)) {
         _addError("You cannot use a numeric assignment (-=, %=, *=, /=) on something of type " + nameRes.getName() + 
                   " with something of type " + valueRes.getName(), that);
       }
@@ -282,14 +280,14 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     if (! assertFound(left_result, that) || ! assertFound(right_result, that)) return null;
     
     if (assertInstanceType(left_result, "The left side of this expression is a type, not an instance", that) &&
-        !left_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, JAVA_VERSION)) {
+        !left_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, true)) {
       
       _addError("The left side of this expression is not a boolean value.  " + 
                 "Therefore, you cannot apply a Boolean Operator (&&, ||) to it", that);
     }
     
     if (assertInstanceType(right_result, "The right side of this expression is a type, not an instance", that) &&
-        ! right_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, JAVA_VERSION)) {
+        ! right_result.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, true)) {
       
       _addError("The right side of this expression is not a boolean value.  " + 
                 "Therefore, you cannot apply a Boolean Operator (&&, ||) to it", that);
@@ -324,10 +322,8 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     SymbolData left = left_result.getSymbolData();
     SymbolData right = right_result.getSymbolData();
     if (left.isPrimitiveType() || right.isPrimitiveType()) {
-      if (!((left.isNumberType(JAVA_VERSION) &&
-             right.isNumberType(JAVA_VERSION)) ||
-            (left.isAssignableTo(SymbolData.BOOLEAN_TYPE, JAVA_VERSION)
-               && right.isAssignableTo(SymbolData.BOOLEAN_TYPE, JAVA_VERSION)))) {
+      if (! ((left.isNumberType() && right.isNumberType()) || (left.isAssignableTo(SymbolData.BOOLEAN_TYPE, true)
+               && right.isAssignableTo(SymbolData.BOOLEAN_TYPE, true)))) {
         _addError("At least one of the arguments to this Equality Operator (==, !=) is primitive.  Therefore, they " + 
                   "must either both be number types or both be boolean types.  You have specified expressions with type " +
                   left_result.getName() + " and " + right_result.getName(), that);
@@ -356,9 +352,9 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     if (left_result == null || right_result == null) {return null;}
     
     //make sure that both lhs and rhs could be resolved (not PackageDatas)
-    if (!assertFound(left_result, that) || !assertFound(right_result, that)) return null;
+    if (! assertFound(left_result, that) || !assertFound(right_result, that)) return null;
     
-    if (!left_result.getSymbolData().isNumberType(JAVA_VERSION)) {
+    if (! left_result.getSymbolData().isNumberType()) {
       _addError("The left side of this expression is not a number.  Therefore, you cannot apply a Comparison Operator" +
                 " (<, >; <=, >=) to it", that);
     }
@@ -366,7 +362,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
       assertInstanceType(left_result, "The left side of this expression is a type, not an instance", that);
     }
     
-    if (!right_result.getSymbolData().isNumberType(JAVA_VERSION)) {
+    if (! right_result.getSymbolData().isNumberType()) {
       _addError("The right side of this expression is not a number.  Therefore, you cannot apply a Comparison Operator" +
                 " (<, >; <=, >=) to it", that);
     }
@@ -405,8 +401,8 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     
     SymbolData string = getSymbolData("java.lang.String", that, false, false);
     
-    if (left_result.getSymbolData().isAssignableTo(string, JAVA_VERSION) ||
-        right_result.getSymbolData().isAssignableTo(string, JAVA_VERSION)) {
+    if (left_result.getSymbolData().isAssignableTo(string, true) ||
+        right_result.getSymbolData().isAssignableTo(string, true)) {
       //one of these is a String, so just make sure they are both instance types.
       assertInstanceType(left_result, "The arguments to the Plus Operator (+) must both be instances, " + 
                          "but you have specified a type name", that);
@@ -416,8 +412,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     }
     
     else { //neither is a string, so they must both be numbers
-      if (!left_result.getSymbolData().isNumberType(JAVA_VERSION) ||
-          !right_result.getSymbolData().isNumberType(JAVA_VERSION)) {
+      if (! left_result.getSymbolData().isNumberType() || ! right_result.getSymbolData().isNumberType()) {
         _addError("The arguments to the Plus Operator (+) must either include an instance of a String or both be" + 
                   " numbers.  You have specified arguments of type " + left_result.getName() + " and " + 
                   right_result.getName(), that);
@@ -452,7 +447,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     }
     
     if (assertInstanceType(left_result, "The left side of this expression is a type, not an instance", that) &&
-        !left_result.getSymbolData().isNumberType(JAVA_VERSION)) {
+        ! left_result.getSymbolData().isNumberType()) {
       
       _addError("The left side of this expression is not a number.  Therefore, you cannot apply a Numeric Binary" + 
                 " Operator (*, /, -, %) to it", that);
@@ -460,7 +455,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     }
     
     if (assertInstanceType(right_result, "The right side of this expression is a type, not an instance", that) &&
-        !right_result.getSymbolData().isNumberType(JAVA_VERSION)) {
+        ! right_result.getSymbolData().isNumberType()) {
       
       _addError("The right side of this expression is not a number.  Therefore, you cannot apply a Numeric Binary " + 
                 "Operator (*, /, -, %) to it", that);
@@ -526,7 +521,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     
     if (assertInstanceType(valueRes, "You cannot increment or decrement " + valueRes.getName() + 
                            ", because it is a class name not an instance", that)) {
-      if (!valueRes.getSymbolData().isNumberType(JAVA_VERSION)) {
+      if (! valueRes.getSymbolData().isNumberType()) {
         _addError("You cannot increment or decrement something that is not a number type." + 
                   "  You have specified something of type " + valueRes.getName(), that);
       }
@@ -551,7 +546,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     
     if (assertInstanceType(valueRes, "You cannot use a numeric unary operator (+, -) with " + valueRes.getName() + 
                            ", because it is a class name, not an instance", that) &&
-        !valueRes.getSymbolData().isNumberType(JAVA_VERSION)) {
+        ! valueRes.getSymbolData().isNumberType()) {
       
       _addError("You cannot apply this unary operator to something of type " + valueRes.getName() + 
                 ".  You can only apply it to a numeric type such as double, int, or char", that);
@@ -584,7 +579,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     if (assertInstanceType(valueRes, 
                            "You cannot use the not (!) operator with " + valueRes.getName() + 
                            ", because it is a class name, not an instance", that) &&
-        ! valueRes.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, JAVA_VERSION)) {
+        ! valueRes.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, true)) {
       
       _addError("You cannot use the not (!) operator with something of type " + valueRes.getName() + 
                 ". Instead, it should be used with an expression of boolean type", that);
@@ -616,7 +611,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     
     else if (assertInstanceType(valueRes, "You are trying to test if " + valueRes.getName() + 
                                 " belongs to type, but it is a class or interface type, not an instance", that) 
-               && ! valueRes.getSymbolData().isCastableTo(typeRes.getSymbolData(), JAVA_VERSION)) {
+               && ! valueRes.getSymbolData().isCastableTo(typeRes.getSymbolData())) {
       
       _addError("You cannot test whether an expression of type " + valueRes.getName() + " belongs to type "
                   + typeRes.getName() + " because they are not related", 
@@ -645,10 +640,10 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
                 "Perhaps you meant to cast to the type itself, " + typeRes.getName(), that);
     }
     
-    else if (assertInstanceType(valueRes, "You are trying to cast " + valueRes.getName() + 
-                                ", which is a class or interface type, not an instance", that) &&
-             !valueRes.getSymbolData().isCastableTo(typeRes.getSymbolData(), 
-                                                        JAVA_VERSION)) {
+    else if (assertInstanceType(valueRes, 
+                                "You are trying to cast " + valueRes.getName() + 
+                                ", which is a class or interface type, not an instance", that) 
+               && ! valueRes.getSymbolData().isCastableTo(typeRes.getSymbolData())) {
       
       _addError("You cannot cast an expression of type " + valueRes.getName() + " to type " + 
                 typeRes.getName() + " because they are not related", that);
@@ -830,10 +825,10 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     
     SymbolData enclosing = _data.getSymbolData();  // grabs the enclosing class if _data not already a SymbolData
     
-    if (enclosing.isDoublyAnonymous()) {
-      _addError(enclosing + "is a nested anonymous class, which is not supported at any language level", that);
-      return null;
-    }
+//    if (enclosing.isDoublyAnonymous()) {
+//      _addError(enclosing + "is a nested anonymous class, which is not supported at any language level", that);
+//      return null;
+//    }
 //    System.err.println("***** forSACInst called for anon class in " + enclosing);
     final SymbolData superClass = getSymbolData(that.getType().getName(), enclosing, that); // resolve super class
 //    System.err.println("**** SuperClass symbol is " + superClass);
@@ -896,10 +891,10 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
 //    assert _data instanceof SymbolData;
     
    
-    if (_data.isDoublyAnonymous()) {
-      _addError(_data + "is a nested anonymous class, which is not supported at any language level", that);
-      return null;
-    }
+//    if (_data.isDoublyAnonymous()) {
+//      _addError(_data + "is a nested anonymous class, which is not supported at any language level", that);
+//      return null;
+//    }
     
     SymbolData lexEnclosing = _data.getSymbolData();  // grabs the enclosing class if _data not already a SymbolData
     
@@ -1229,7 +1224,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     }
     
     if (assertInstanceType(index, "You have used a type name in place of an array index", that) &&
-        ! index.getSymbolData().isAssignableTo(SymbolData.INT_TYPE, JAVA_VERSION)) {
+        ! index.getSymbolData().isAssignableTo(SymbolData.INT_TYPE, true)) {
       _addError("You cannot reference an array element with an index of type " + index.getSymbolData().getName() + 
                 ".  Instead, you must use an int", that);
     }
@@ -1397,28 +1392,17 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     * otherwise return INT_TYPE.
     */
   protected SymbolData _getLeastRestrictiveType(SymbolData sd1, SymbolData sd2) {
-    if ((sd1.isDoubleType(JAVA_VERSION) &&
-         sd2.isNumberType(JAVA_VERSION)) ||
-        (sd2.isDoubleType(JAVA_VERSION) &&
-         sd1.isNumberType(JAVA_VERSION))) {
+    if ((sd1.isDoubleType() && sd2.isNumberType()) || (sd2.isDoubleType() && sd1.isNumberType())) {
       return SymbolData.DOUBLE_TYPE;
     }
-    else if ((sd1.isFloatType(JAVA_VERSION) &&
-              sd2.isNumberType(JAVA_VERSION)) ||
-             (sd2.isFloatType(JAVA_VERSION) &&
-              sd1.isNumberType(JAVA_VERSION))) {
+    else if ((sd1.isFloatType() && sd2.isNumberType()) || (sd2.isFloatType() && sd1.isNumberType())) {
       return SymbolData.FLOAT_TYPE;
     }
-    else if ((sd1.isLongType(JAVA_VERSION) &&
-              sd2.isNumberType(JAVA_VERSION)) ||
-             (sd2.isLongType(JAVA_VERSION) &&
-              sd1.isNumberType(JAVA_VERSION))) {
+    else if ((sd1.isLongType() && sd2.isNumberType()) || (sd2.isLongType() && sd1.isNumberType())) {
       return SymbolData.LONG_TYPE;
     }
-    else if (sd1.isBooleanType(JAVA_VERSION) &&
-             sd2.isBooleanType(JAVA_VERSION)) {
-      return SymbolData.BOOLEAN_TYPE;
-    }
+    else if (sd1.isBooleanType() && sd2.isBooleanType()) return SymbolData.BOOLEAN_TYPE;
+
     // NOTE: It seems like any binary operation on number types with only ints, shorts, chars, or bytes will return an int
     else return SymbolData.INT_TYPE; 
   }
@@ -1431,7 +1415,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
 //                               " This should have been caught before the Type Checker.  Please report this bug.");
 //  }
   
-    /** A ConditionalExpression is illformed if its argument is not of Boolean type or its argument types are incompatible.
+    /** A ConditionalExpression is ill-formed if its argument is not of Boolean type or its argument types are incompatible.
       * Give an error if this is the case.  Always return the more general type of the consequent and alternative. 
       * @param that  The NotExpression being type-checked
       * @param valueRes  The type of the argument to the NotExpression
@@ -1442,19 +1426,22 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     Expression conseq = that.getForTrue();
     Expression alt = that.getForFalse();
     
-    TypeData conditionType = visit(condition);
-    TypeData conseqType = visit(conseq);
-    TypeData altType = visit(alt);
-    TypeData returnType = getCommonSuperTypeBase(conseqType.getSymbolData(), altType.getSymbolData());
+    TypeData conditionType = condition.visit(this);
+    TypeData conseqType = conseq.visit(this);
+    TypeData altType = alt.visit(this);
+    TypeData returnType = getCommonSuperType(conseqType.getSymbolData(), altType.getSymbolData());
     
-    if (! conditionType.getSymbolData().isAssignable(SymbolData.BOOLEAN_TYPE, JAVA_VERSION)) {
+//    System.err.println("[ETC.forCondExprOnly] conditionType = " + conditionType + ", conseqType = " + conseqType + 
+//                       ", alttype = " + altType);
+    
+    if (! conditionType.getSymbolData().isAssignableTo(SymbolData.BOOLEAN_TYPE, true)) {
       _addError("The test in this conditional has type " + conditionType.getName() + " instead of boolean.", that);
       return returnType;
     }
     
     if (returnType == null) {
       _addError("The type " + conseqType.getName() + " of the consequent and the type " + altType.getName() +
-                "of this conditional are not compatible");
+                "of this conditional are not compatible", that);
       return returnType;
     } 
     return returnType; 
@@ -1503,7 +1490,8 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     final TypeData valueRes = that.getValue().visit(this);
     
     if (typeRes == null) {
-      _addError(that.getType().getName() + " cannot appear as the type of a cast expression because it is not a valid type", that.getType());
+      _addError(that.getType().getName() + " cannot appear as the type of a cast expression because it is not a valid type", 
+                that.getType());
       return null;
     }
     
@@ -1530,8 +1518,7 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     Expression[] dims = that.getDimensionSizes().getExpressions();
     for (int i = 0; i<dimensions_result.length; i++) {
       if (dimensions_result[i] != null && assertFound(dimensions_result[i], dims[i])) {
-        if (!dimensions_result[i].getSymbolData().isAssignableTo(SymbolData.INT_TYPE, 
-                                                                 JAVA_VERSION)) {
+        if (!dimensions_result[i].getSymbolData().isAssignableTo(SymbolData.INT_TYPE, true)) {
           _addError("The dimensions of an array instantiation must all be ints.  You have specified something of type " +
                     dimensions_result[i].getName(), dims[i]);
         }
@@ -1671,14 +1658,16 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
   public void handleUncheckedException(SymbolData sd, JExpression j) {
     if (j instanceof MethodInvocation) {
       _addError("The method " + ((MethodInvocation)j).getName().getText() + " is declared to throw the exception " + sd.getName() + 
-                " which needs to be caught or declared to be thrown", j);
+                " which needs to be caught or declared to be thrown",
+                j);
     }
     else if (j instanceof ThrowStatement) {
       _addError("This statement throws the exception " + sd.getName() + " which needs to be caught or declared to be thrown", j);
     }
     else if (j instanceof ClassInstantiation) {
       _addError("The constructor for the class " + ((ClassInstantiation)j).getType().getName() + 
-                " is declared to throw the exception " + sd.getName() + " which needs to be caught or declared to be thrown.", j);
+                " is declared to throw the exception " + sd.getName() + " which needs to be caught or declared to be thrown.", 
+                j);
     }
     else {
       throw new RuntimeException("Internal Program Error: " + 
@@ -2983,15 +2972,15 @@ public class ExpressionTypeChecker extends SpecialTypeChecker {
     }
     
     public void testForConditionalExpressionOnly() {
-      SymbolData sd1 = SymbolData.DOUBLE_TYPE;
-      SymbolData sd2 = SymbolData.BOOLEAN_TYPE;
+//      SymbolData sd1 = SymbolData.DOUBLE_TYPE;
+//      SymbolData sd2 = SymbolData.BOOLEAN_TYPE;
       SymbolData sd3 = SymbolData.INT_TYPE;
       ConditionalExpression cd = new ConditionalExpression(SourceInfo.NONE, 
                                                            new BooleanLiteral(SourceInfo.NONE, true),
                                                            new IntegerLiteral(SourceInfo.NONE, 5),
                                                            new IntegerLiteral(SourceInfo.NONE, 79));
-      assertEquals("simple well-formed conditional expression", sd2.getSymbolData(), 
-                   _etc.forConditionalExpressionOnly(cd, _sd2, _sd3, _sd3));
+      assertEquals("simple well-formed conditional expression", sd3.getSymbolData(), 
+                   _etc.forConditionalExpressionOnly(cd));
     }
   
     public void testForInstanceOfExpressionOnly() {

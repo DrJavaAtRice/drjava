@@ -27,5 +27,4 @@ class CrazyTryCatchAllCaught {
     }
     return 5;
   }
-      
 }

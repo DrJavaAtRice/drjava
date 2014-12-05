@@ -1094,6 +1094,7 @@ public class PredictiveInputModelTest extends DrJavaTestCase {
     assertTrue(pim.getMatchingItems().contains("JFrame"));
   }
 
+  // What about Java 6, 7, 8?
   public void testJavaAPIFragmentLineNumStrategy() {
     final String base = edu.rice.cs.drjava.DrJava.
       getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.JAVADOC_1_5_LINK) + "/";

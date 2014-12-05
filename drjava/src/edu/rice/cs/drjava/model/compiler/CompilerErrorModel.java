@@ -141,12 +141,12 @@ public class CompilerErrorModel {
     // .dj2 file anymore. When we get a compiler error in a .java file, and we have a corresponding
     // .dj2 file open, but not the .java file, then we change the error to refer to the .dj2 file
     // instead.
-    if (model!=null) {
+    if (model != null) {
       HashSet<File> odds = new HashSet<File>();
       for(OpenDefinitionsDocument odd: model.getOpenDefinitionsDocuments()) {
         odds.add(odd.getRawFile());
       }
-      for(int i=0; i<errors.length; ++i) {
+      for(int i = 0; i < errors.length; ++i) {
         DJError e = errors[i];
         if (e.fileName().endsWith(edu.rice.cs.drjava.config.OptionConstants.JAVA_FILE_EXTENSION)) {
           // only needs to be done for .java files
@@ -172,7 +172,7 @@ public class CompilerErrorModel {
     
     _numWarnings = 0;
     _numCompilerErrors = 0;
-    for (int i =0; i < errors.length; i++) {
+    for (int i = 0; i < errors.length; i++) {
       if (errors[i].isWarning()) _numWarnings++;
       else _numCompilerErrors++;
     }

@@ -343,6 +343,7 @@ public class DefaultCompilerModel implements CompilerModel {
       
       List<? extends File> preprocessedFiles = _compileLanguageLevelsFiles(files, errors, classPath, bootClassPath);
       
+      System.err.println("Performed Language Level Translation of " + preprocessedFiles);
       if (errors.isEmpty()) {
         CompilerInterface compiler = getActiveCompiler();
         
@@ -382,8 +383,8 @@ public class DefaultCompilerModel implements CompilerModel {
     * @return  An updated list for compilation containing no Language Levels files, or @code{null}
     *          if there were no Language Levels files to process.
     */
-  private List<File> _compileLanguageLevelsFiles(List<File> files, List<DJError> errors,
-                                                 Iterable<File> classPath, Iterable<File> bootClassPath) {
+  private List<File> _compileLanguageLevelsFiles(List<File> files, List<DJError> errors, Iterable<File> classPath, 
+                                                 Iterable<File> bootClassPath) {
     /* Construct the collection of files to be compild by javac, renaming any language levels (.dj*) files to the 
      * corresponding java (.java) files.  By using a HashSet, we avoid creating duplicates in this collection.
      */
@@ -535,7 +536,7 @@ public class DefaultCompilerModel implements CompilerModel {
       
       /* Perform language levels conversion, creating corresponding .java files. */
       LanguageLevelConverter llc = new LanguageLevelConverter();
-      Options llOpts;
+      Options llOpts;  /* Options passed as arguments to LLConverter */
       if (bootClassPath == null) { llOpts = new Options(getActiveCompiler().version(), classPath); }
       else { llOpts = new Options(getActiveCompiler().version(), classPath, bootClassPath); }
       

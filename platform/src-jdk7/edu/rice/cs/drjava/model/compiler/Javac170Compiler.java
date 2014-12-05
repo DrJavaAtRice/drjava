@@ -148,6 +148,7 @@ public class Javac170Compiler extends JavacCompiler { // Javac170FilteringCompil
     Iterable<? extends JavaFileObject> fileObjects = fileManager.getJavaFileObjectsFromFiles(files);
     
     try {
+      System.err.println("Calling '" + compiler + "' with options " + options);
       compiler.getTask(null, fileManager, diagnostics, options, null, fileObjects).call();
       for (Diagnostic<? extends JavaFileObject> d: diagnostics.getDiagnostics()) {
         Diagnostic.Kind dt = d.getKind();
@@ -165,7 +166,7 @@ public class Javac170Compiler extends JavacCompiler { // Javac170FilteringCompil
          * non-existent path--the name of the test file (allocated as a TEMP file) appended to the source root for 
          * DrJava--in GlobalModelCompileErrorsTest.testCompileFailsCorrectLineNumbers().  The expression 
          * d.getSource().toUri().getPath() returns the correct result as does ((JCDiagnostic) d).getSourceName(). */
-        if (d.getSource()!=null) {
+        if (d.getSource() != null) {
           errors.add(new DJError(new File(d.getSource().toUri().getPath()), // d.getSource().getName() fails! 
                                  ((int) d.getLineNumber()) - 1,  // javac starts counting at 1
                                  ((int) d.getColumnNumber()) - 1, 

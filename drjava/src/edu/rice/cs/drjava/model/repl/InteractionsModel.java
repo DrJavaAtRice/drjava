@@ -817,7 +817,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     });
   }
   
-  /** Called when a new Java interpreter has registered and is ready for use. */
+  /** Called when a new Java interpreter has registered and is ready for use. 
+    * @param wd working directory for interpreter.
+    */
   public void interpreterReady(final File wd) {
     debug.logStart();
 //    System.err.println("interpreterReady(" + wd + ") called in InteractionsModel");  // DEBUG

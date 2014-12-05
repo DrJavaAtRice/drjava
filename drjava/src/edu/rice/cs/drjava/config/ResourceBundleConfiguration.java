@@ -79,7 +79,7 @@ public class ResourceBundleConfiguration extends FileConfiguration {
       }
       
       public <T> T setOption(Option<T> o, T val) {
-        if (o==null) return _shadowed.getOptionMap().setOption(o, val);
+        if (o == null) return _shadowed.getOptionMap().setOption(o, val);
         try {
           String str = _bundle.getString(o.getName());
           return null; // defined in resource bundle, can't be set

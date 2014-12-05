@@ -105,7 +105,7 @@ public class InterfaceBodyTypeChecker extends SpecialTypeChecker {
     if (md == null) {
       throw new RuntimeException("Internal Program Error: Could not find the method " + that.getName().getText() + " in interface " + _symbolData.getName() + ".  Please report this bug.");
     }
-    SymbolData.checkDifferentReturnTypes(md, _symbolData, LanguageLevelConverter.OPT.javaVersion());
+    SymbolData.checkDifferentReturnTypes(md, _symbolData, true);
     return resRes;
   }
   

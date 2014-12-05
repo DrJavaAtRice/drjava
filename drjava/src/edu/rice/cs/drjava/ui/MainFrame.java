@@ -1739,7 +1739,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         else if (ver == JavaVersion.JAVA_5) linkVersion = JAVADOC_1_5_TEXT;
         else if (ver == JavaVersion.JAVA_6) linkVersion = JAVADOC_1_6_TEXT;
         else if (ver == JavaVersion.JAVA_7) linkVersion = JAVADOC_1_7_TEXT;
-        else linkVersion = JAVADOC_1_3_TEXT;   // ???? This looks like the wrong default; I would version 7.
+        else if (ver == JavaVersion.JAVA_8) linkVersion = JAVADOC_1_8_TEXT;
+        else linkVersion = JAVADOC_1_7_TEXT;   // default
       }
       if (linkVersion.equals(JAVADOC_1_3_TEXT)) {
         base = DrJava.getConfig().getSetting(JAVADOC_1_3_LINK) + "/";
@@ -1772,7 +1773,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         stripPrefix = ""; // nothing needs to be stripped, links in 1.7 Javadoc are relative
         suffix = "/allclasses-1.7.html";
       }
-      
+      else if (linkVersion.equals(JAVADOC_1_8_TEXT)) {
+        base = DrJava.getConfig().getSetting(JAVADOC_1_8_LINK) + "/";
+        stripPrefix = ""; // nothing needs to be stripped, links in 1.8 Javadoc are relative
+        suffix = "/allclasses-1.8.html";
+      }
       if (!suffix.equals("")) {
         _javaAPISet.addAll(_generateJavaAPISet(base, stripPrefix, suffix));
       }
@@ -3555,6 +3560,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       };
       DrJava.getConfig().addOptionListener(JAVADOC_1_5_LINK, link15OptionListener);
+      
       OptionListener<String> link16OptionListener = new OptionListener<String>() {
         public void optionChanged(OptionEvent<String> oce) {
           String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
@@ -3564,12 +3570,37 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           }
         }
       };
+      
+      OptionListener<String> link17OptionListener = new OptionListener<String>() {
+        public void optionChanged(OptionEvent<String> oce) {
+          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
+          if (linkVersion.equals(JAVADOC_1_7_TEXT) ||
+              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
+            clearJavaAPISet();
+          }
+        }
+      };
+      
+      OptionListener<String> link18OptionListener = new OptionListener<String>() {
+        public void optionChanged(OptionEvent<String> oce) {
+          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
+          if (linkVersion.equals(JAVADOC_1_8_TEXT) ||
+              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
+            clearJavaAPISet();
+          }
+        }
+      };
+      
       DrJava.getConfig().addOptionListener(JAVADOC_1_6_LINK, link16OptionListener);
+      DrJava.getConfig().addOptionListener(JAVADOC_1_7_LINK, link17OptionListener);
+      DrJava.getConfig().addOptionListener(JAVADOC_1_8_LINK, link18OptionListener);
+      
       OptionListener<String> linkJUnitOptionListener = new OptionListener<String>() {
         public void optionChanged(OptionEvent<String> oce) {
           clearJavaAPISet();
         }
       };
+       
       DrJava.getConfig().addOptionListener(JUNIT_LINK, linkJUnitOptionListener);
       OptionListener<Vector<String>> additionalLinkOptionListener = new OptionListener<Vector<String>>() {
         public void optionChanged(OptionEvent<Vector<String>> oce) {

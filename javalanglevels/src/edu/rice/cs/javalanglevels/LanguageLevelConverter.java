@@ -80,6 +80,8 @@ public class LanguageLevelConverter {
   /**Number of line number mappings (from dj* to java) per line. */
   public static final int LINE_NUM_MAPPINGS_PER_LINE = 8;
   
+  public static final SymbolData OBJECT;  // initialized in static initialization block
+  
   /** Stores all the SymbolDatas (and corresponding visitors) created as in course of conversion.  If we create a
     * LanguageLevelConverter instance for each translation, we must drop the static attribute. */
   public static final Hashtable<SymbolData, LanguageLevelVisitor> _newSDs = 
@@ -112,8 +114,8 @@ public class LanguageLevelConverter {
     SymbolData objectSD = symbolTable.get("java.lang.Object");   
     SymbolData integerSD = symbolTable.get("java.lang.Integer");
     assert objectSD != null && integerSD != null;
-    assert integerSD.isAssignableTo(objectSD, JavaVersion.JAVA_6);
-    assert SymbolData.INT_TYPE.isAssignableTo(objectSD, JavaVersion.JAVA_6);
+    assert integerSD.isAssignableTo(objectSD, true);
+    assert SymbolData.INT_TYPE.isAssignableTo(objectSD, true);
   }
   
     /** We'll use this class loader to look up resources (*not* to load classes) */
@@ -177,9 +179,11 @@ public class LanguageLevelConverter {
     
     // Class file found; create the symbol table entry
     final SymbolData sd;
-//    if (qualifiedClassName.equals("java.lang.Object")) 
+//    if (qualifiedClassName.equals("java.lang.Object")) { 
 //      System.err.println("***SHOUT*** java.lang.Object is being added to symbolTable from class file");
+//    }
     SymbolData sdLookup = LanguageLevelConverter.symbolTable.get(qualifiedClassName); 
+    
     if (sdLookup == null)  { // create a continuation for sd
       sd = new SymbolData(qualifiedClassName); 
       LanguageLevelConverter.symbolTable.put(qualifiedClassName, sd);
@@ -337,6 +341,12 @@ public class LanguageLevelConverter {
     else if (className.equals("null"))   return SymbolData.NULL_TYPE;
 //    System.err.println("***** className " + className + " did not match primitive names");
     return null;
+  }
+  
+  /**** Static initialization block ***/
+  static {
+    loadSymbolTable();
+    OBJECT = symbolTable.get("java.lang.Object");
   }
   
   /***Add the parse exception to the list of parse exceptions*/
@@ -675,20 +685,20 @@ public class LanguageLevelConverter {
               // write out the line number map and the augmented java file
               PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(augmentedFile)));
               SortedMap<Integer,Integer> lineNumberMap = a.getLineNumberMap();
-              pw.println("// Language Level Converter line number map: dj*->java. Entries: "+lineNumberMap.size());
+              pw.println("// Language Level Converter line number map: dj*->java. Entries: " +lineNumberMap.size());
               // We print out LINE_NUM_MAPPINGS_PER_LINE mappings per line, so we need numLines
               // at the top of the file, and one more for a descriptive comment.
               // That means we need to increase the line numbers in the generated java file by numLines+1
-              int numLines = (int)Math.ceil(((double)lineNumberMap.size())/LINE_NUM_MAPPINGS_PER_LINE);
+              int numLines = (int)Math.ceil(((double)lineNumberMap.size()) / LINE_NUM_MAPPINGS_PER_LINE);
               int mapCount = 0;
               for(Map.Entry<Integer,Integer> e: lineNumberMap.entrySet()) {
                 // e.getKey(): dj* line number; e.getValue(): java line number (must be increased by numLines)
-                if (mapCount%LINE_NUM_MAPPINGS_PER_LINE==0) pw.print("//");
+                if (mapCount % LINE_NUM_MAPPINGS_PER_LINE == 0) pw.print("//");
                 pw.printf(" %5d->%-5d", e.getKey(), (e.getValue()+numLines+1));
-                if (mapCount%LINE_NUM_MAPPINGS_PER_LINE==LINE_NUM_MAPPINGS_PER_LINE-1) pw.println();
+                if (mapCount % LINE_NUM_MAPPINGS_PER_LINE ==  LINE_NUM_MAPPINGS_PER_LINE - 1) pw.println();
                 ++mapCount;
               }
-              if (mapCount%LINE_NUM_MAPPINGS_PER_LINE!=0) pw.println(); // print a newline unless we just printed one
+              if (mapCount % LINE_NUM_MAPPINGS_PER_LINE != 0) pw.println(); // print a newline unless we just printed one
               
               String augmented = sw.toString();
               pw.write(augmented, 0, augmented.length());
@@ -737,25 +747,18 @@ public class LanguageLevelConverter {
     return new File(augmentedFilePath + ".java"); //replace it with .java
   }
   
-  /**Only certain versions of the java compiler support autoboxing*/
-  public static boolean versionSupportsAutoboxing(JavaVersion version) {
-    return version.supports(JavaVersion.JAVA_6);
-    // If we care to support it, also allows JSR-14
-  }
+  /**All versions of the java compiler since Java 5 support autoboxing. */
+  public static boolean versionSupportsAutoboxing(JavaVersion version) { return true; }
   
-  /**Only certain versions of the java compiler support generics*/
-  public static boolean versionSupportsGenerics(JavaVersion version) {
-    return version.supports(JavaVersion.JAVA_6);
-    // If we care to support it, also allows JSR-14
-  }
+  /**All versions of the java compiler since Java 5 support generics. */
+  public static boolean versionSupportsGenerics(JavaVersion version) { return true; }
   
-  /**Only 1.5 supports for each*/
-  public static boolean versionSupportsForEach(JavaVersion version) {
-    return version.supports(JavaVersion.JAVA_6);
-  }
+  /**All version of the java compiler since Java 5 support foreach. */
+  public static boolean versionSupportsForEach(JavaVersion version) { return true; }
   
-  /* @return true if the compiler version is 1.5 */
-  public static boolean versionIs15(JavaVersion version) { return version.supports(JavaVersion.JAVA_6); }
+  /* The following method is archaic and no longer usedd. */
+//  /* @return true if the compiler corresponds to Java 5 or later.  */
+//  public static boolean versionIs15(JavaVersion version) { return true; }
   
   /**Do a conversion from the command line, to allow quick testing*/
   public static void main(String[] args) {

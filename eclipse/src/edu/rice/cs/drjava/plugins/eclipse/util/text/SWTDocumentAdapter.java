@@ -48,23 +48,14 @@ import org.eclipse.swt.graphics.Color;
 
 import edu.rice.cs.util.text.*;
 
-/**
- * Provides a toolkit-independent way to interact with an
- * SWT StyledText widget (from Eclipse).
- *
- * A StyledText serves as both model and view, so this class
- * must interface to the model parts of the widget.
- *
- * @version $Id$
- */
+/** Provides a toolkit-independent way to interact with an SWT StyledText widget (from Eclipse).
+  * A StyledText serves as both model and view, so this class must interface to the model parts of the widget.
+  * @version $Id$
+  */
 public class SWTDocumentAdapter implements EditDocumentInterface, ConsoleDocumentInterface {
 
-  // TO DO:
-  //  - Test multithreaded support
+  // TO DO:  Test multithreaded support
 
-  /**
-  * 
-  */
  private static final long serialVersionUID = 5467877329916880674L;
 
 /** StyledText widget containing the view. */
@@ -88,9 +79,7 @@ public class SWTDocumentAdapter implements EditDocumentInterface, ConsoleDocumen
   /** Any exception that occurred in the most recent (asynchronous) edit. */
   protected EditDocumentException _editException;
 
-  /**
-   * Creates a new document adapter for an SWT StyledText.
-   */
+  /** Creates a new document adapter for an SWT StyledText. */
   public SWTDocumentAdapter(StyledText pane) {
     _pane = pane;
     _text = pane.getContent();
@@ -104,79 +93,67 @@ public class SWTDocumentAdapter implements EditDocumentInterface, ConsoleDocumen
     addVerifyListener(new ConditionListener());
   }
 
-  /**
-   * Adds a VerifyListener to the internal SWTStyledText.
-   * @param l VerifyListener to add to the pane
-   */
+  /** Adds a VerifyListener to the internal SWTStyledText.
+    * @param l VerifyListener to add to the pane
+    */
   public void addVerifyListener(VerifyListener l) {
     _pane.addVerifyListener(l);
   }
 
-  /**
-   * Removes a VerifyListener from the internal SWTStyledText.
-   * @param l VerifyListener to remove from the pane
-   */
+  /** Removes a VerifyListener from the internal SWTStyledText.
+    * @param l VerifyListener to remove from the pane
+    */
   public void removeVerifyListener(VerifyListener l) {
     _pane.removeVerifyListener(l);
   }
 
-  /**
-   * Adds a ModifyListener to the internal SWTStyledText.
-   * @param l ModifyListener to add to the pane
-   */
+  /** Adds a ModifyListener to the internal SWTStyledText.
+    * @param l ModifyListener to add to the pane
+    */
   public void addModifyListener(ModifyListener l) {
     _pane.addModifyListener(l);
   }
 
-  /**
-   * Removes a ModifyListener from the internal SWTStyledText.
-   * @param l ModifyListener to remove from the pane
-   */
+  /** Removes a ModifyListener from the internal SWTStyledText.
+    * @param l ModifyListener to remove from the pane
+    */
   public void removeModifyListener(ModifyListener l) {
     _pane.removeModifyListener(l);
   }
 
-  /**
-   * Adds the given SWTStyle as a style with the given name.
-   * It can then be used in insertText.
-   * @param name Name of the style, to be passed to insertText
-   * @param s SWTStyle to use for the style
-   */
+  /** Adds the given SWTStyle as a style with the given name. It can then be used in insertText.
+    * @param name Name of the style, to be passed to insertText
+    * @param s SWTStyle to use for the style
+    */
   public void addDocStyle(String name, SWTStyle s) {
     _styles.put(name, s);
   }
 
-  /**
-   * Gets the object which can determine whether an insert
+  /** Gets the object which can determine whether an insert
    * or remove edit should be applied, based on the inputs.
    * @return an Object to determine legality of inputs
    */
   public DocumentEditCondition getEditCondition() {
     return _condition;
   }
-
-  /**
-   * Provides an object which can determine whether an insert
-   * or remove edit should be applied, based on the inputs.
-   * @param condition Object to determine legality of inputs
-   */
+  
+  /** Provides an object which can determine whether an insert
+    * or remove edit should be applied, based on the inputs.
+    * @param condition Object to determine legality of inputs
+    */
   public void setEditCondition(DocumentEditCondition condition) {
     _condition = condition;
   }
 
-  /**
-   * Inserts a string into the document at the given offset
-   * and the given named style, if the edit condition allows it.
-   * @param offs Offset into the document
-   * @param str String to be inserted
-   * @param style Name of the style to use.  Must have been
-   * added using addStyle.
-   * @throws EditDocumentException if the offset is illegal
-   */
+  /** Inserts a string into the document at the given offset
+    * and the given named style, if the edit condition allows it.
+    * @param offs Offset into the document
+    * @param str String to be inserted
+    * @param style Name of the style to use.  Must have been
+    * added using addStyle.
+    * @throws EditDocumentException if the offset is illegal
+    */
   public void insertText(int offs, String str, String style) throws EditDocumentException {
-    _insertText(offs, str, style);
-  }
-  public void _insertText(int offs, String str, String style) throws EditDocumentException {
     if (_condition.canInsertText(offs)) forceInsertText(offs, str, style);
   }
 
@@ -190,10 +167,7 @@ public class SWTDocumentAdapter implements EditDocumentInterface, ConsoleDocumen
   // WHY IS THIS METHOD SYNCHRONIZED? IT MAKES NO SENSE!
   public synchronized void forceInsertText(final int offs, final String str, final String style)
     throws EditDocumentException {
-    _forceInsertText(offs, str, style);
-  }
-  
-  public void _forceInsertText(final int offs, final String str, final String style) {
+
     SWTStyle s = null;
     if (style != null) s = _styles.get(style);
     
@@ -235,15 +209,7 @@ public class SWTDocumentAdapter implements EditDocumentInterface, ConsoleDocumen
     * @throws EditDocumentException if the offset or length are illegal
     */
   public void removeText(int offs, int len) throws EditDocumentException {
-    _removeText(offs, len);
-  }
-  /** Same as above except it assumes that the document readLock is already held, which is 
-    * irrelevant in SWT.
-    */
-  public void _removeText(int offs, int len) throws EditDocumentException {
-    if (_condition.canRemoveText(offs)) { //, len)) {
-      forceRemoveText(offs, len);
-    }
+    if (_condition.canRemoveText(offs)) forceRemoveText(offs, len);
   }
 
   /** Removes a portion of the document, regardless of the edit condition.
@@ -251,6 +217,7 @@ public class SWTDocumentAdapter implements EditDocumentInterface, ConsoleDocumen
     * @param len Number of characters to remove
     * @throws EditDocumentException if the offset or length are illegal
     */
+  // WHY IS THIS METHOD SYNCHRONIZED?
   public synchronized void forceRemoveText(final int offs, final int len) throws EditDocumentException {
     _editException = null;
     _forceRemove = true;

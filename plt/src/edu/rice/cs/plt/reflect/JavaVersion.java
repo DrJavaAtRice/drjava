@@ -65,10 +65,9 @@ public enum JavaVersion {
                      System.getProperty("java.vm.vendor", ""),
                      null);
   
-  /**
-   * {@code true} iff this version is at least as recent as {@code v}, and thus can be expected to 
-   * support {@code v}'s APIs (as long as the required features are backwards-compatible)
-   */
+  /** {@code true} iff this version is at least as recent as {@code v}, and thus can be expected to 
+    * support {@code v}'s APIs (as long as the required features are backwards-compatible)
+    */
   public boolean supports(JavaVersion v) { return compareTo(v) >= 0; }
 
   /** Produce the version number as a string */

@@ -296,8 +296,6 @@ public abstract class JavacCompiler implements CompilerInterface {
     If a), then DrJava inserts "code=MyClass" as argument 0.
     If b), then DrJava performs the same as "applet MyClass" (see above).
     If c), then DrJava executes MyClass.main (traditional java behavior).
-    
-    It formerly was static, but it is overriden in ScalacCompiler.
     */
   public String transformRunCommand(String s) {    
     if (s.endsWith(";"))  s = _deleteSemiColon(s);
