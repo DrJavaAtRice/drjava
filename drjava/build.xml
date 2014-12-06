@@ -68,6 +68,13 @@
   <!-- fornum task, used for test-repeat -->
   <taskdef name="fornum" classname="edu.rice.cs.plt.ant.ForNumTask" classpath="lib/buildlib/plt-ant.jar" onerror="report" />
   
+  <!-- For code coverage report -->
+  <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+      <classpath path="lib/jacocoant.jar"/>
+  </taskdef>
+  <property name="coverage-report-dir" value="coverage report"/>
+  <property name="coverage-exec" value="jacoco.exec"/>
+
 <!--  <extendclasspath path="lib/buildlib/junit.jar" /> -->
 
   <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
@@ -548,6 +555,7 @@
   <target name="do-test" depends="resolve-jvm-args, resolve-junit-jar">
     <echo message="Running all tests matching '${test-filter-string}' with command '${test-jvm}', using '${junit-jar}' and '${test-tools}'" />
     <extendclasspath path="${junit-jar}" />
+    <jacoco:coverage xmlns:jacoco="antlib:org.jacoco.ant">
     <junit haltonfailure="${test-halt}" failureproperty="test-failed"
            fork="yes" forkmode="perTest" maxmemory="2G" jvm="${test-jvm}" dir="${basedir}">
       <classpath>
@@ -570,14 +578,38 @@
       </syspropertyset>
       <jvmarg line="${jvm-args} ${concjunit-bootclasspath}" />
       <formatter classname="${test-formatter-class}" usefile="${test-output-to-file}" />
-      <batchtest>
+      <batchtest fork="true">
         <fileset dir="classes/test">
-          <filename name="**/*${test-filter-string}*/**" />
+          <filename name="**/*${test-filter-string}*/**" />  
           <filename name="**/*Test.class" />
         </fileset>
       </batchtest>
     </junit>
+    </jacoco:coverage>
     <fail if="test-failed" message="One or more unit tests failed."/>
+    <antcall target="generate-coverage-report" />
+    <delete file="${coverage-exec}"/>
+  </target>
+
+  <target name = "generate-coverage-report" xmlns:jacoco="antlib:org.jacoco.ant">
+  <jacoco:report>
+                        
+    <executiondata>
+        <file file="${coverage-exec}"/>
+    </executiondata>
+                        
+    <structure name="drjava">
+        <classfiles>
+            <fileset dir="classes"/>
+        </classfiles>
+        <sourcefiles encoding="UTF-8">
+            <fileset dir="src"/>
+        </sourcefiles>
+    </structure>
+                        
+    <html destdir="${coverage-report-dir}"/>
+                        
+  </jacoco:report>
   </target>
 
 
@@ -976,8 +1008,7 @@
        Clean Targets
        ************* -->
        
-  <target name="clean" depends="clean-intermediate, clean-products, clean-concjunit"
-          description="Remove all build products; the result should match the intended Subversion contents">
+  <target name="clean" depends="clean-intermediate, clean-coverage-report, clean-products, clean-concjunit" description="Remove all build products; the result should match the intended Subversion contents">
   </target>
 
   <target name="clean-intermediate" unless="skip-clean">
@@ -986,8 +1017,8 @@
     <delete dir="classes" failonerror="${clean-can-fail}" />
     <delete dir="cloverdb" failonerror="${clean-can-fail}" />
     <delete dir="benchmarkSources" failonerror="${clean-can-fail}" />
-    <delete dir="benchmarkResults" failonerror="${clean-can-fail}" />
-    
+    <delete dir="benchmarkResults" failonerror="${clean-can-fail}" />  
+
     <delete includeemptydirs="true" failonerror="${clean-can-fail}">
       <fileset dir="testFiles">
         <exclude name="**" />
@@ -1012,7 +1043,12 @@
     </delete>
     
   </target>
-  
+
+  <target name="clean-coverage-report" unless="skip-clean">
+	<delete dir="${coverage-report-dir}" failonerror="${clean-can-fail}" />
+    <delete file="${coverage-exec}"/>
+  </target>
+
   <target name="clean-products" unless="skip-clean">
     <echo message="Deleting all final build products" />
     
