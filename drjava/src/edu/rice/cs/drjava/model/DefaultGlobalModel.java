@@ -671,7 +671,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       * @exception IOException propagated from GlobalModel.compileAll()
       */
     public void runMain(String qualifiedClassName) throws ClassNameNotFoundException, IOException {
-      _runInInteractions("java {0}", qualifiedClassName);
+      _runInInteractions("{0}.main(null)", qualifiedClassName);
     }
     
     /** Runs this document as applet in the interactions pane after resetting interactions with the source
