@@ -587,11 +587,10 @@
     </junit>
     </jacoco:coverage>
     <fail if="test-failed" message="One or more unit tests failed."/>
-    <antcall target="generate-coverage-report" />
-    <delete file="${coverage-exec}"/>
+    <antcall target="generate-cover" />
   </target>
 
-  <target name = "generate-coverage-report" xmlns:jacoco="antlib:org.jacoco.ant">
+  <target name = "generate-cover" xmlns:jacoco="antlib:org.jacoco.ant">
   <jacoco:report>
                         
     <executiondata>
@@ -600,7 +599,7 @@
                         
     <structure name="drjava">
         <classfiles>
-            <fileset dir="classes"/>
+            <fileset dir="classes/base"/>
         </classfiles>
         <sourcefiles encoding="UTF-8">
             <fileset dir="src"/>
@@ -1045,6 +1044,8 @@
   </target>
 
   <target name="clean-coverage-report" unless="skip-clean">
+    <echo message="Deleting all coverage report products" />
+
 	<delete dir="${coverage-report-dir}" failonerror="${clean-can-fail}" />
     <delete file="${coverage-exec}"/>
   </target>
