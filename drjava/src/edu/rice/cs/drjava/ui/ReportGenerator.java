@@ -58,6 +58,9 @@ public class ReportGenerator {
  private final ArrayList<String> targetNames;
  private final String mainClassFileName;
  
+ private  CoverageBuilder cb;
+ 
+ 
  /**
   * A class loader that loads classes from in-memory data.
   */
@@ -151,7 +154,7 @@ public class ReportGenerator {
 
   List<File> targets = new ArrayList<File>();
   for(File dir:CollectUtil.makeList(_model.getClassPath())){
-    if( dir.getName().equals("lib") || dir.getName().equals("base") || dir.getName().equals("test"))
+    if(!dir.isDirectory() || dir.getName().equals("lib") || dir.getName().equals("base") || dir.getName().equals("test"))
 		continue;
   	targets.addAll(rec_init_target(dir));
   }
@@ -280,6 +283,7 @@ public class ReportGenerator {
 	analyzer.analyzeClass(getTargetClass(targets.get(i)), targetNames.get(i));
   }
   
+  this.cb = coverageBuilder;
   printCoverage(coverageBuilder);
   
   // Run the structure analyzer on a single class folder to build up
@@ -315,6 +319,30 @@ public class ReportGenerator {
   visitor.visitEnd();
 
  }
+ 
+ 
+ public ArrayList<String> getLineColorsForClass(String className) {
+	 
+	 ArrayList<String> lineColors = new ArrayList<String>();
+	 
+	 for (final IClassCoverage cc : cb.getClasses()) {
+		   if (!cc.getName().equals(className)) {
+			   continue;
+		   }
+		   
+		   for (int i = 0; i < cc.getFirstLine(); i++) {
+			   lineColors.add("");
+			   
+		   }
+
+		   for (int i = cc.getFirstLine(); i <= cc.getLastLine(); i++) {
+			   lineColors.add(getColor(cc.getLine(i).getStatus()));
+		   }
+		  }
+	 
+	 return lineColors;
+ }
+ 
  
  private void printCoverage(CoverageBuilder coverageBuilder){
   for (final IClassCoverage cc : coverageBuilder.getClasses()) {

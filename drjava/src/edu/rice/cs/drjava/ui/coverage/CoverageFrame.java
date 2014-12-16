@@ -43,14 +43,18 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Vector;
 import java.util.Map;
 import java.util.HashMap;
+
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.border.EmptyBorder;
 
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
+import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.config.OptionParser;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -59,12 +63,10 @@ import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.ui.config.*;
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.DrJava;
-
 import edu.rice.cs.plt.iter.IterUtil;
 import edu.rice.cs.plt.collect.CollectUtil;
 import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
-
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.AbsRelFile;
 import edu.rice.cs.util.swing.FileSelectorComponent;
@@ -75,6 +77,7 @@ import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 import javax.swing.filechooser.FileFilter;
+
 import java.awt.Desktop;
 import java.net.URI;
 import java.net.URISyntaxException;;
@@ -207,9 +210,12 @@ public class CoverageFrame extends SwingFrame {
 		if(_useCurrentFile.isSelected()){
 			final ReportGenerator generator = new ReportGenerator(_model, _model.getDocumentNavigator().getSelectedDocuments(), _outputDirSelector.getFileFromField());
              generator.create();
+             highlight(generator);
+             
 		}else{
 			final ReportGenerator generator = new ReportGenerator(_model, _srcRootSelector.getFileFromField(), _mainDocumentSelector.getText(), _outputDirSelector.getFileFromField());
 			generator.create();
+			highlight(generator);
 		}
              
     } catch (Exception e){
@@ -220,6 +226,44 @@ public class CoverageFrame extends SwingFrame {
 	return true;
   }
 
+  
+  private void highlight(ReportGenerator generator) {
+    
+	  Iterator<OpenDefinitionsDocument> iter = _model.getDocumentNavigator().getDocuments().iterator();
+	  while (iter.hasNext()) {
+		  OpenDefinitionsDocument o = iter.next(); 
+		  DefinitionsPane pane = _mainFrame.getDefPaneGivenODD(o);
+		  try {
+		  ArrayList<String> colors = generator.getLineColorsForClass(o.getQualifiedClassName());
+		  
+		  for (int i = 0; i < colors.size(); i ++) {
+			  String color = colors.get(i);
+			  
+			  Color c = Color.black;
+			  if (color.equals("")) {
+				  continue;
+			  }
+			  if (color.equals("green")) {
+				  c = Color.green;
+			  }
+			  if (color.equals("red")) {
+				  c = Color.red;
+			  }
+			  if (color.equals("yellow")) {
+				  c = Color.yellow;
+			  }
+			  
+			  
+			  pane.getHighlightManager().
+	                     addHighlight(o._getOffset(i), o._getOffset(i+1),  new ReverseHighlighter.DrJavaHighlightPainter(c));
+		  }
+		  }
+		  catch (ClassNameNotFoundException e) {
+			  continue;
+		  }
+		 
+	  }
+  }
 
   /** Caches the settings in the global model */
   public boolean saveSettings() {//throws IOException {
