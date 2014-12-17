@@ -44,6 +44,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 import java.util.Map;
 import java.util.HashMap;
@@ -54,6 +55,8 @@ import javax.swing.border.EmptyBorder;
 
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
+import edu.rice.cs.drjava.model.compiler.CompilerListener;
+import edu.rice.cs.drjava.model.compiler.DummyCompilerListener;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.config.OptionParser;
@@ -73,6 +76,7 @@ import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.DirectorySelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.util.swing.FileChooser;
+import edu.rice.cs.util.swing.HighlightManager.HighlightInfo;
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -210,12 +214,12 @@ public class CoverageFrame extends SwingFrame {
 		if(_useCurrentFile.isSelected()){
 			final ReportGenerator generator = new ReportGenerator(_model, _model.getDocumentNavigator().getSelectedDocuments(), _outputDirSelector.getFileFromField());
              generator.create();
-             highlight(generator);
+             highlight(generator, true);
              
 		}else{
 			final ReportGenerator generator = new ReportGenerator(_model, _srcRootSelector.getFileFromField(), _mainDocumentSelector.getText(), _outputDirSelector.getFileFromField());
 			generator.create();
-			highlight(generator);
+			highlight(generator, false);
 		}
              
     } catch (Exception e){
@@ -227,12 +231,18 @@ public class CoverageFrame extends SwingFrame {
   }
 
   
-  private void highlight(ReportGenerator generator) {
+  private void highlight(ReportGenerator generator, boolean selOnly) {
     
-	  Iterator<OpenDefinitionsDocument> iter = _model.getDocumentNavigator().getDocuments().iterator();
+	  Iterator<OpenDefinitionsDocument> iter;
+	  if (!selOnly) {
+		  iter = _model.getDocumentNavigator().getDocuments().iterator();
+	  }
+	  else {
+		  iter = _model.getDocumentNavigator().getSelectedDocuments().iterator();
+	  }
 	  while (iter.hasNext()) {
 		  OpenDefinitionsDocument o = iter.next(); 
-		  DefinitionsPane pane = _mainFrame.getDefPaneGivenODD(o);
+		  final DefinitionsPane pane = _mainFrame.getDefPaneGivenODD(o);
 		  try {
 		  ArrayList<String> colors = generator.getLineColorsForClass(o.getQualifiedClassName());
 		  
@@ -253,9 +263,42 @@ public class CoverageFrame extends SwingFrame {
 				  c = Color.yellow;
 			  }
 			  
-			  
-			  pane.getHighlightManager().
+			  final HighlightInfo info = pane.getHighlightManager().
 	                     addHighlight(o._getOffset(i), o._getOffset(i+1),  new ReverseHighlighter.DrJavaHighlightPainter(c));
+		  
+
+
+			  
+			  CompilerListener removeHighlight = new DummyCompilerListener() {
+	              @Override public void compileAborted(Exception e) {
+	            // gets called if there are modified files and the user chooses NOT to save the files
+	            // see bug report 2582488: Hangs If Testing Modified File, But Choose "No" for Saving
+	            final CompilerListener listenerThis = this;
+	             _model.getCompilerModel().removeListener(listenerThis); 
+	            }
+	          
+	          @Override public void compileEnded(File workDir, List<? extends File> excludedFiles) {
+	            final CompilerListener listenerThis = this;
+	            try {
+	              if (_model.hasOutOfSyncDocuments() || _model.getNumCompilerErrors() > 0) {
+	                return;
+	              }
+	              EventQueue.invokeLater(new Runnable() {  // defer running this code; would prefer to waitForInterpreter
+	                public void run() {pane.getHighlightManager().removeHighlight(info);}
+	              });
+	            }
+	            finally {  // always remove this listener after its first execution
+	              EventQueue.invokeLater(new Runnable() { 
+	                public void run() { _model.getCompilerModel().removeListener(listenerThis); }
+	              });
+	            }
+	          }
+	        
+	    
+	    }; //end coverage listener
+	    
+	    
+	    _model.getCompilerModel().addListener(removeHighlight);
 		  }
 		  }
 		  catch (ClassNameNotFoundException e) {
