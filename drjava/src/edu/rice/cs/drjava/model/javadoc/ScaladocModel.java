@@ -45,49 +45,49 @@ import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.util.DirectorySelector;
 
 /**
- * Model interface for Javadoc integration features.
+ * Model interface for Scaladoc integration features.
  * Note: Implementors should have a constructor taking an IGetDocuments.
- * @version $Id: JavadocModel.java 5594 2012-06-21 11:23:40Z rcartwright $
+ * @version $Id: ScaladocModel.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public interface JavadocModel {
+public interface ScaladocModel {
   /** Name for the suggested destination directory to be placed in the
    * source root of one of the open documents.  (Value is "doc".)
    */
   public static final String SUGGESTED_DIR_NAME = "doc";
   
-  /** {@code true} iff the classes to run javadoc are available */
+  /** {@code true} iff the classes to run scaladoc are available */
   public boolean isAvailable();
   
-  /** Add a JavadocListener to the model.
-   * @param listener a listener that reacts to Javadoc events
+  /** Add a ScaladocListener to the model.
+   * @param listener a listener that reacts to Scaladoc events
    */
-  public void addListener(JavadocListener listener);
+  public void addListener(ScaladocListener listener);
   
-  /** Remove a JavadocListener from the model.  If the listener is not currently
+  /** Remove a ScaladocListener from the model.  If the listener is not currently
    * listening to this model, this method has no effect.
-   * @param listener a listener that reacts to Javadoc events
+   * @param listener a listener that reacts to Scaladoc events
    */
-  public void removeListener(JavadocListener listener);
+  public void removeListener(ScaladocListener listener);
   
-  /** Removes all JavadocListeners from this model. */
+  /** Removes all ScaladocListeners from this model. */
   public void removeAllListeners();
   
-  /** Accessor for the Javadoc error model. */
-  public CompilerErrorModel getJavadocErrorModel();
+  /** Accessor for the Scaladoc error model. */
+  public CompilerErrorModel getScaladocErrorModel();
   
-  /** Clears all current Javadoc errors. */
-  public void resetJavadocErrors();
+  /** Clears all current Scaladoc errors. */
+  public void resetScaladocErrors();
   
-  /** Suggests a default location for generating Javadoc, based on the given
-   * document's source root.  (Appends JavadocModel.SUGGESTED_DIR_NAME to
+  /** Suggests a default location for generating Scaladoc, based on the given
+   * document's source root.  (Appends ScaladocModel.SUGGESTED_DIR_NAME to
    * the sourceroot.)
    * @param doc Document with the source root to use as the default.
    * @return Suggested destination directory, or null if none could be
    * determined.
    */
-  public File suggestJavadocDestination(OpenDefinitionsDocument doc);
+  public File suggestScaladocDestination(OpenDefinitionsDocument doc);
   
-  /** Javadocs all open documents, after ensuring that all are saved.
+  /** Scaladocs all open documents, after ensuring that all are saved.
     * The user provides a destination, and the gm provides the package info.
     * 
     * @param select a command object for selecting a directory and warning a user
@@ -96,16 +96,16 @@ public interface JavadocModel {
     * 
     * @throws IOException if there is a problem manipulating files
     */
-  public void javadocAll(DirectorySelector select, FileSaveSelector saver) throws IOException;
+  public void scaladocAll(DirectorySelector select, FileSaveSelector saver) throws IOException;
   
-  /** Generates Javadoc for the given document only, after ensuring it is saved.
+  /** Generates Scaladoc for the given document only, after ensuring it is saved.
     * Saves the output to a temporary directory, which is provided in the
-    * javadocEnded event on the provided listener.
+    * scaladocEnded event on the provided listener.
     * 
-    * @param doc Document to generate Javadoc for
+    * @param doc Document to generate Scaladoc for
     * @param saver a command object for saving the document (if it moved/changed)
     * 
     * @throws IOException if there is a problem manipulating files
     */
-  public void javadocDocument(OpenDefinitionsDocument doc, FileSaveSelector saver) throws IOException;
+  public void scaladocDocument(OpenDefinitionsDocument doc, FileSaveSelector saver) throws IOException;
 }

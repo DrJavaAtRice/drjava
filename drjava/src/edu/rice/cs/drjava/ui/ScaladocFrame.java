@@ -48,10 +48,10 @@ import java.io.IOException;
 import edu.rice.cs.util.UnexpectedException;
 
 /**
- * DrJava's Javadoc viewing frame
- * @version $Id: JavadocFrame.java 5594 2012-06-21 11:23:40Z rcartwright $
+ * DrJava's Scaladoc viewing frame
+ * @version $Id: ScaladocFrame.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public class JavadocFrame extends HTMLFrame {
+public class ScaladocFrame extends HTMLFrame {
 
   private static final int MAX_READ_PACKAGES_LINES = 100;
   private static final int MAX_READ_FOR_LINK_LINES = 100;
@@ -75,7 +75,7 @@ public class JavadocFrame extends HTMLFrame {
       }
     }
     else {
-      throw new IllegalStateException("No Javadoc HTML output files found!");
+      throw new IllegalStateException("No Scaladoc HTML output files found!");
     }
     return test.getAbsolutePath();
   }
@@ -135,18 +135,18 @@ public class JavadocFrame extends HTMLFrame {
   }
 
   /** Constructor.
-   * @param destDir Directory holding the Javadoc
+   * @param destDir Directory holding the Scaladoc
    * @param curClass Name of the class to try to show by default
-   * @param allDocs Whether Javadoc was run for all open documents
+   * @param allDocs Whether Scaladoc was run for all open documents
    */
-  public JavadocFrame(File destDir, String curClass, boolean allDocs)
+  public ScaladocFrame(File destDir, String curClass, boolean allDocs)
     throws MalformedURLException
   {
     // This call has to happen first!
-    super("Javadoc Viewer",
+    super("Scaladoc Viewer",
           new URL("file", "", introPagePath(destDir, curClass)),
           new URL("file", "", (new File(destDir, INDEX_PAGE)).getAbsolutePath()),
-           "DrJavadoc.png", destDir);
+           "drscaladoc.png", destDir);
 
     addHyperlinkListener(new HyperlinkListener() {
       public void hyperlinkUpdate(HyperlinkEvent event) {

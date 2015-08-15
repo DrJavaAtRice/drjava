@@ -48,13 +48,13 @@ import edu.rice.cs.util.swing.Utilities;
 import javax.swing.*;
 import java.io.File;
 
-/** Manages a dialog box that can select a destination directory for generating Javadoc.  The getDirectory method should
-  * be called to show the dialog, using the suggested location for the Javadoc as the "start" file.  If the user 
+/** Manages a dialog box that can select a destination directory for generating Scaladoc.  The getDirectory method should
+  * be called to show the dialog, using the suggested location for the Scaladoc as the "start" file.  If the user 
   * modifies the selection once, the user's choice will be remembered and no further suggestions will be used.
   *
-  * @version $Id: JavadocDialog.java 5594 2012-06-21 11:23:40Z rcartwright $
+  * @version $Id: ScaladocDialog.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public class JavadocDialog implements DirectorySelector {
+public class ScaladocDialog implements DirectorySelector {
   /** Parent frame of the dialog. */
   private final JFrame _frame;
   
@@ -76,11 +76,11 @@ public class JavadocDialog implements DirectorySelector {
   /** Current suggestion for the destination directory, or null. */
   private File _suggestedDir;
   
-  /** Creates a new JavadocDialog to show from the given frame.
+  /** Creates a new ScaladocDialog to show from the given frame.
     * 
     * @param frame Parent frame of this dialog
     */
-  public JavadocDialog(JFrame frame) {
+  public ScaladocDialog(JFrame frame) {
     _frame = frame;
     _useSuggestion = true;
     _suggestedDir = null;
@@ -92,7 +92,7 @@ public class JavadocDialog implements DirectorySelector {
 //    chooser.setEditable(true);
     
     // Create components for dialog
-    String msg = "Select a destination directory for the Javadoc files:";
+    String msg = "Select a destination directory for the Scaladoc files:";
     _selector = new DirectorySelectorComponent(_frame, chooser, DirectorySelectorComponent.DEFAULT_NUM_COLS, DirectorySelectorComponent.DEFAULT_FONT_SIZE, false);
     _checkBox = new JCheckBox("Always Prompt For Destination");
     Object[] components = new Object[] { msg, _selector, _checkBox };
@@ -100,21 +100,21 @@ public class JavadocDialog implements DirectorySelector {
     _optionPane = new JOptionPane(components,
                                   JOptionPane.QUESTION_MESSAGE,
                                   JOptionPane.OK_CANCEL_OPTION);
-    _dialog = _optionPane.createDialog(_frame, "Select Javadoc Destination");
+    _dialog = _optionPane.createDialog(_frame, "Select Scaladoc Destination");
     chooser.setOwner(_dialog);
   }
   
   
   public boolean isRecursive() { return false; }
   
-  /** Shows the dialog prompting the user for a destination directory in which to generate Javadoc.
+  /** Shows the dialog prompting the user for a destination directory in which to generate Scaladoc.
     * 
     * This operation must be executed from the event-handling thread!
     *
     * @param start The directory to display in the text box.  If null,
     * the most recent suggested directory (passed in via setSuggestedDir)
     * is displayed, unless the user has modified a previous suggestion.
-    * @return A directory to use for the Javadoc (which might not exist)
+    * @return A directory to use for the Scaladoc (which might not exist)
     * @throws OperationCanceledException if the selection request is canceled
     */
   public File getDirectory(File start) throws OperationCanceledException {
@@ -128,7 +128,7 @@ public class JavadocDialog implements DirectorySelector {
     }
     
     Configuration config = DrJava.getConfig();
-    boolean ask = config.getSetting(OptionConstants.JAVADOC_PROMPT_FOR_DESTINATION).booleanValue();
+    boolean ask = config.getSetting(OptionConstants.SCALADOC_PROMPT_FOR_DESTINATION).booleanValue();
     
     if (ask) {
       // The "always prompt" checkbox should be checked
@@ -145,7 +145,7 @@ public class JavadocDialog implements DirectorySelector {
       
       // See if the user wants to suppress this dialog in the future.
       if (!_checkBox.isSelected()) {
-        config.setSetting(OptionConstants.JAVADOC_PROMPT_FOR_DESTINATION,
+        config.setSetting(OptionConstants.SCALADOC_PROMPT_FOR_DESTINATION,
                           Boolean.FALSE);
       }
       
@@ -172,7 +172,7 @@ public class JavadocDialog implements DirectorySelector {
     JOptionPane.showMessageDialog(_frame, message, title, JOptionPane.ERROR_MESSAGE);
   }
   
-  /** Sets the suggested destination directory for Javadoc generation. This directory will be displayed
+  /** Sets the suggested destination directory for Scaladoc generation. This directory will be displayed
     * in the file field if the user has not modified the suggestion in the past.
     * @param dir Suggested destination directory
     */

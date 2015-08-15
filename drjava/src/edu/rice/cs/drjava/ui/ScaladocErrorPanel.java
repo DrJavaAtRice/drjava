@@ -42,61 +42,61 @@ import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import javax.swing.text.*;
 
 /**
- * The panel which displays all the Javadoc parsing errors.
+ * The panel which displays all the Scaladoc parsing errors.
  *
- * @version $Id: JavadocErrorPanel.java 5594 2012-06-21 11:23:40Z rcartwright $
+ * @version $Id: ScaladocErrorPanel.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public class JavadocErrorPanel extends ErrorPanel {
+public class ScaladocErrorPanel extends ErrorPanel {
 
-  protected JavadocErrorListPane _errorListPane;
+  protected ScaladocErrorListPane _errorListPane;
 
   /** Constructor.
    * @param model SingleDisplayModel in which we are running
    * @param frame MainFrame in which we are displayed
    */
-  public JavadocErrorPanel(SingleDisplayModel model, MainFrame frame) {
+  public ScaladocErrorPanel(SingleDisplayModel model, MainFrame frame) {
     super(model, frame, "Scaladoc Output", "Scaladoc");
 //    _successful = true;
-    _errorListPane = new JavadocErrorListPane();
+    _errorListPane = new ScaladocErrorListPane();
     setErrorListPane(_errorListPane);
   }
 
-  /** Returns the JavadocErrorListPane that this panel manages.
+  /** Returns the ScaladocErrorListPane that this panel manages.
    */
-  public JavadocErrorListPane getErrorListPane() {
+  public ScaladocErrorListPane getErrorListPane() {
     return _errorListPane;
   }
 
   protected CompilerErrorModel getErrorModel() {
-    return getModel().getJavadocModel().getJavadocErrorModel();
+    return getModel().getScaladocModel().getScaladocErrorModel();
   }
 
   /** Called when work begins. */
-  public void setJavadocInProgress() {
-    _errorListPane.setJavadocInProgress();
+  public void setScaladocInProgress() {
+    _errorListPane.setScaladocInProgress();
   }
 
   /** Closes this panel and resets the corresponding model. */
   @Override
   protected void _close() {
     super._close();
-    getModel().getJavadocModel().resetJavadocErrors();
+    getModel().getScaladocModel().resetScaladocErrors();
     reset();
   }
 
   /** Reset the errors to the current error information. */
   public void reset() {
-    CompilerErrorModel model = getModel().getJavadocModel().getJavadocErrorModel();
+    CompilerErrorModel model = getModel().getScaladocModel().getScaladocErrorModel();
     if (model != null) _numErrors = model.getNumErrors();
     else _numErrors = 0;
 
     _errorListPane.updateListPane(true);
   }
 
-  /** A pane to show Javadoc errors. It acts a bit like a listbox (clicking
+  /** A pane to show Scaladoc errors. It acts a bit like a listbox (clicking
    * selects an item) but items can each wrap, etc.
    */
-  public class JavadocErrorListPane extends ErrorPanel.ErrorListPane {
+  public class ScaladocErrorListPane extends ErrorPanel.ErrorListPane {
     protected boolean _wasSuccessful = false;
     
 //    private final JLabel _errorLabel = new JLabel();
@@ -104,7 +104,7 @@ public class JavadocErrorPanel extends ErrorPanel {
 //    private final JLabel _fileLabel = new JLabel();
 
     /** Puts the error pane into "compilation in progress" state. */
-    public void setJavadocInProgress() {
+    public void setScaladocInProgress() {
       _errorListPositions = new Position[0];
 
       ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
@@ -114,9 +114,9 @@ public class JavadocErrorPanel extends ErrorPanel {
       _wasSuccessful = false;
     }
     
-    public void setJavadocEnded(boolean success) { _wasSuccessful = success; }
+    public void setScaladocEnded(boolean success) { _wasSuccessful = success; }
 
-    /** Used to show that the last javadoc command was unsuccessful. */
+    /** Used to show that the last scaladoc command was unsuccessful. */
     protected void _updateWithErrors() throws BadLocationException {
       ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
       String failureName = "error";
@@ -137,9 +137,9 @@ public class JavadocErrorPanel extends ErrorPanel {
       selectNothing();
     }
 
-//     public JavadocError getError() {
+//     public ScaladocError getError() {
 //       return _error;
 //     }
-    public String getErrorDocumentTitle() { return "Javadoc Errors"; }
+    public String getErrorDocumentTitle() { return "Scaladoc Errors"; }
   }
 }

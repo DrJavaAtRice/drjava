@@ -45,51 +45,51 @@ import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.util.DirectorySelector;
 
-/** Javadoc model to use when javadoc is unavailable.
-  * @version $Id: NoJavadocAvailable.java 5594 2012-06-21 11:23:40Z rcartwright $
+/** Scaladoc model to use when scaladoc is unavailable.
+  * @version $Id: NoScaladocAvailable.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public class NoJavadocAvailable implements JavadocModel {
+public class NoScaladocAvailable implements ScaladocModel {
   
-  private final JavadocEventNotifier _notifier = new JavadocEventNotifier();
-  private final CompilerErrorModel _javadocErrorModel;
+  private final ScaladocEventNotifier _notifier = new ScaladocEventNotifier();
+  private final CompilerErrorModel _scaladocErrorModel;
   
-  public NoJavadocAvailable(GlobalModel model) {
-    DJError e = new DJError("The javadoc feature is not available.", false);
-    _javadocErrorModel = new CompilerErrorModel(new DJError[]{e}, model);
+  public NoScaladocAvailable(GlobalModel model) {
+    DJError e = new DJError("The scaladoc feature is not available.", false);
+    _scaladocErrorModel = new CompilerErrorModel(new DJError[]{e}, model);
   }
   
   public boolean isAvailable() { return false; }
   
   
-  /** Add a JavadocListener to the model.
-    * @param listener a listener that reacts to Javadoc events
+  /** Add a ScaladocListener to the model.
+    * @param listener a listener that reacts to Scaladoc events
     */
-  public void addListener(JavadocListener listener) { _notifier.addListener(listener); }
+  public void addListener(ScaladocListener listener) { _notifier.addListener(listener); }
   
-  /** Remove a JavadocListener from the model.  If the listener is not instaled, this method has no effect.
-    * @param listener a listener that reacts to Javadoc events
+  /** Remove a ScaladocListener from the model.  If the listener is not instaled, this method has no effect.
+    * @param listener a listener that reacts to Scaladoc events
     */
-  public void removeListener(JavadocListener listener) { _notifier.removeListener(listener); }
+  public void removeListener(ScaladocListener listener) { _notifier.removeListener(listener); }
   
-  /** Removes all JavadocListeners from this model. */
+  /** Removes all ScaladocListeners from this model. */
   public void removeAllListeners() { _notifier.removeAllListeners(); }
   
   
-  /** Accessor for the Javadoc error model. */
-  public CompilerErrorModel getJavadocErrorModel() { return _javadocErrorModel; }
+  /** Accessor for the Scaladoc error model. */
+  public CompilerErrorModel getScaladocErrorModel() { return _scaladocErrorModel; }
   
-  /** Clears all current Javadoc errors. */
-  public void resetJavadocErrors() { /* ignore */ }
+  /** Clears all current Scaladoc errors. */
+  public void resetScaladocErrors() { /* ignore */ }
   
-  /** Suggests a default location for generating Javadoc, based on the given document's source root.  (Appends 
-    * JavadocModel.SUGGESTED_DIR_NAME to the sourceroot.)
+  /** Suggests a default location for generating Scaladoc, based on the given document's source root.  (Appends 
+    * ScaladocModel.SUGGESTED_DIR_NAME to the sourceroot.)
     * @param doc Document with the source root to use as the default.
     * @return Suggested destination directory, or null if none could be
     * determined.
     */
-  public File suggestJavadocDestination(OpenDefinitionsDocument doc) { return null; }
+  public File suggestScaladocDestination(OpenDefinitionsDocument doc) { return null; }
   
-  /** Javadocs all open documents, after ensuring that all are saved.
+  /** Scaladocs all open documents, after ensuring that all are saved.
     * The user provides a destination, and the gm provides the package info.
     * 
     * @param select a command object for selecting a directory and warning a user
@@ -98,20 +98,20 @@ public class NoJavadocAvailable implements JavadocModel {
     * 
     * @throws IOException if there is a problem manipulating files
     */
-  public void javadocAll(DirectorySelector select, FileSaveSelector saver) throws IOException {
-    _notifier.javadocStarted();
-    _notifier.javadocEnded(false, null, true);
+  public void scaladocAll(DirectorySelector select, FileSaveSelector saver) throws IOException {
+    _notifier.scaladocStarted();
+    _notifier.scaladocEnded(false, null, true);
   }
   
-  /** Generates Javadoc for the given document only, after ensuring it is saved. Saves the output to a temporary 
-    * directory, which is provided in the javadocEnded event on the provided listener.
-    * @param doc Document to generate Javadoc for
+  /** Generates Scaladoc for the given document only, after ensuring it is saved. Saves the output to a temporary 
+    * directory, which is provided in the scaladocEnded event on the provided listener.
+    * @param doc Document to generate Scaladoc for
     * @param saver a command object for saving the document (if it moved/changed)
     * @throws IOException if there is a problem manipulating files
     */
-  public void javadocDocument(OpenDefinitionsDocument doc, FileSaveSelector saver) throws IOException {
-    _notifier.javadocStarted();
-    _notifier.javadocEnded(false, null, true);
+  public void scaladocDocument(OpenDefinitionsDocument doc, FileSaveSelector saver) throws IOException {
+    _notifier.scaladocStarted();
+    _notifier.scaladocEnded(false, null, true);
   }
   
 }

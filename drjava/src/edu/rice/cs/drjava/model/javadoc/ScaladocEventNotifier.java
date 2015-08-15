@@ -41,11 +41,11 @@ import edu.rice.cs.drjava.model.EventNotifier;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 
 /**
- * Keeps track of all listeners to a JavadocModel, and has the ability
+ * Keeps track of all listeners to a ScaladocModel, and has the ability
  * to notify them of some event.
  * <p>
  *
- * This class has a specific role of managing JavadocListeners.  Other
+ * This class has a specific role of managing ScaladocListeners.  Other
  * classes with similar names use similar code to perform the same function for
  * other interfaces, e.g. InteractionsEventNotifier and GlobalEventNotifier.
  * These classes implement the appropriate interface definition so that they
@@ -70,44 +70,44 @@ import edu.rice.cs.drjava.model.compiler.CompilerListener;
  * Java synchronization!
  * <p>
  *
- * @version $Id: JavadocEventNotifier.java 5594 2012-06-21 11:23:40Z rcartwright $
+ * @version $Id: ScaladocEventNotifier.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-class JavadocEventNotifier extends EventNotifier<JavadocListener>
-  implements JavadocListener {
+class ScaladocEventNotifier extends EventNotifier<ScaladocListener>
+  implements ScaladocListener {
   
-  /** Called after Javadoc is started by the GlobalModel. */
-  public void javadocStarted() {
+  /** Called after Scaladoc is started by the GlobalModel. */
+  public void scaladocStarted() {
     _lock.startRead();
-    try { for (JavadocListener jl: _listeners) { jl.javadocStarted(); } }
+    try { for (ScaladocListener jl: _listeners) { jl.scaladocStarted(); } }
     finally { _lock.endRead(); }
   }
   
-  /** Called after Javadoc is finished.
-    * @param success whether the Javadoc operation generated proper output
+  /** Called after Scaladoc is finished.
+    * @param success whether the Scaladoc operation generated proper output
     * @param destDir  if (success == true) the location where the output was generated, otherwise undefined (null?)
-    * @param allDocs Whether Javadoc was run for all open documents
+    * @param allDocs Whether Scaladoc was run for all open documents
     */
-  public void javadocEnded(boolean success, File destDir, boolean allDocs) {
+  public void scaladocEnded(boolean success, File destDir, boolean allDocs) {
     _lock.startRead();
-    try { for (JavadocListener jl: _listeners) { jl.javadocEnded(success, destDir, allDocs); } }
+    try { for (ScaladocListener jl: _listeners) { jl.scaladocEnded(success, destDir, allDocs); } }
     finally { _lock.endRead();}
   }
   
-  /** Asks the user if all files should be saved before running javadoc (assuming the proper listener has been 
-    * installed). Does not continue with javadoc if the user fails to save!
+  /** Asks the user if all files should be saved before running scaladoc (assuming the proper listener has been 
+    * installed). Does not continue with scaladoc if the user fails to save!
     */
-  public void saveBeforeJavadoc() {
+  public void saveBeforeScaladoc() {
     _lock.startRead();
-    try { for (JavadocListener jl: _listeners) { jl.saveBeforeJavadoc(); } }
+    try { for (ScaladocListener jl: _listeners) { jl.saveBeforeScaladoc(); } }
     finally { _lock.endRead(); }
   }
   
-  /** Asks the user if all files should be compiled before running javadoc (assuming the proper listener has been 
-    * installed). Does not continue with javadoc if the user fails to save!
+  /** Asks the user if all files should be compiled before running scaladoc (assuming the proper listener has been 
+    * installed). Does not continue with scaladoc if the user fails to save!
     */
-  public void compileBeforeJavadoc(final CompilerListener afterCompile) {
+  public void compileBeforeScaladoc(final CompilerListener afterCompile) {
     _lock.startRead();
-    try { for (JavadocListener jl: _listeners) { jl.compileBeforeJavadoc(afterCompile); } }
+    try { for (ScaladocListener jl: _listeners) { jl.compileBeforeScaladoc(afterCompile); } }
     finally { _lock.endRead(); }
   }
 }

@@ -34,16 +34,16 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.javadoc;
+package edu.rice.cs.drjava.model.scaladoc;
 
 /**
- * Indicates that an error has occured while attempting to create javadoc.
+ * Indicates that an error has occured while attempting to create scaladoc.
  * @deprecated No longer needed.
- * @version $Id: JavadocException.java 5594 2012-06-21 11:23:40Z rcartwright $
+ * @version $Id: ScaladocException.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 @Deprecated
-public class JavadocException extends Exception {
-  public JavadocException(String s) {
+public class ScaladocException extends Exception {
+  public ScaladocException(String s) {
     super(s);
   }
 }

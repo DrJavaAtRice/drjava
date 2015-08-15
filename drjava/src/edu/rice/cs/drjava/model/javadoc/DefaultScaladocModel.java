@@ -34,7 +34,7 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.javadoc;
+package edu.rice.cs.drjava.model.scaladoc;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,83 +76,83 @@ import edu.rice.cs.util.OperationCanceledException;
 import static edu.rice.cs.plt.debug.DebugUtil.error;
 
 
-/** Default implementation of JavadocModel interface; generates Javadoc HTML files for a set of documents.
-  * @version $Id: DefaultJavadocModel.java 5751 2013-02-06 10:32:04Z rcartwright $
+/** Default implementation of ScaladocModel interface; generates Scaladoc HTML files for a set of documents.
+  * @version $Id: DefaultScaladocModel.java 5751 2013-02-06 10:32:04Z rcartwright $
   */
-public class DefaultJavadocModel implements JavadocModel {
+public class DefaultScaladocModel implements ScaladocModel {
   
   /** Used by CompilerErrorModel to open documents that have errors. */
   private GlobalModel _model;
   
   /**Manages listeners to this model. */
-  private final JavadocEventNotifier _notifier = new JavadocEventNotifier();
+  private final ScaladocEventNotifier _notifier = new ScaladocEventNotifier();
 
-  /** Launcher for javadoc process */
+  /** Launcher for scaladoc process */
   private final JVMBuilder _jvmBuilder;
   
-  /** The error model containing all current Javadoc errors. */
-  private CompilerErrorModel _javadocErrorModel;
+  /** The error model containing all current Scaladoc errors. */
+  private CompilerErrorModel _scaladocErrorModel;
   
   /** Main constructor.
-    * @param model Source of documents for this JavadocModel
+    * @param model Source of documents for this ScaladocModel
     * @param javaCommand  Location of the java command to use ({@code null} means the default: {@code java.home})
-    * @param toolsPath  Location of the tools library containing the javadoc code ({@code null} means the default:
+    * @param toolsPath  Location of the tools library containing the scaladoc code ({@code null} means the default:
     *                   javaCommand's boot class path)
     */
-  public DefaultJavadocModel(GlobalModel model, File javaCommand, Iterable<File> toolsPath) {
+  public DefaultScaladocModel(GlobalModel model, File javaCommand, Iterable<File> toolsPath) {
     _model = model;
     JVMBuilder builder = JVMBuilder.DEFAULT;
     if (javaCommand != null) { builder = builder.javaCommand(javaCommand); }
     if (toolsPath != null) { builder = builder.classPath(toolsPath); }
     _jvmBuilder = builder;
-    _javadocErrorModel = new CompilerErrorModel();
+    _scaladocErrorModel = new CompilerErrorModel();
   }
   
   public boolean isAvailable() { return true; }
   
   //-------------------------- Listener Management --------------------------//
   
-  /** Add a JavadocListener to the model.
-    * @param listener a listener that reacts to Javadoc events
+  /** Add a ScaladocListener to the model.
+    * @param listener a listener that reacts to Scaladoc events
     */
-  public void addListener(JavadocListener listener) { _notifier.addListener(listener); }
+  public void addListener(ScaladocListener listener) { _notifier.addListener(listener); }
   
-  /** Remove a JavadocListener from the model.  If the listener is not installed, this method has no effect.
-    * @param listener a listener that reacts to Javadoc events
+  /** Remove a ScaladocListener from the model.  If the listener is not installed, this method has no effect.
+    * @param listener a listener that reacts to Scaladoc events
     */
-  public void removeListener(JavadocListener listener) { _notifier.removeListener(listener); }
+  public void removeListener(ScaladocListener listener) { _notifier.removeListener(listener); }
   
-  /** Removes all JavadocListeners from this model. */
+  /** Removes all ScaladocListeners from this model. */
   public void removeAllListeners() { _notifier.removeAllListeners(); }
   
   //----------------------------- Error Results -----------------------------//
   
-  /** Accessor for the Javadoc error model.
-    * @return the CompilerErrorModel managing Javadoc errors.
+  /** Accessor for the Scaladoc error model.
+    * @return the CompilerErrorModel managing Scaladoc errors.
     */
-  public CompilerErrorModel getJavadocErrorModel() { return _javadocErrorModel; }
+  public CompilerErrorModel getScaladocErrorModel() { return _scaladocErrorModel; }
   
-  /** Clears all current Javadoc errors. */
-  public void resetJavadocErrors() {
-    _javadocErrorModel = new CompilerErrorModel();
+  /** Clears all current Scaladoc errors. */
+  public void resetScaladocErrors() {
+    _scaladocErrorModel = new CompilerErrorModel();
   }
   
-  // -------------------- Javadoc All Documents --------------------
+  // -------------------- Scaladoc All Documents --------------------
   
-  /** Javadocs all open documents, after ensuring that all are saved.  The user provides a destination, and the global 
+  /** Scaladocs all open documents, after ensuring that all are saved.  The user provides a destination, and the global 
     * model provides the package info.  Must run in the event-handling thread.
     * @param select a command object for selecting a directory and warning a user about bad input
     * @param saver a command object for saving a document (if it moved/changed)
     * @throws IOException if there is a problem manipulating files
     */
-  public void javadocAll(DirectorySelector select, final FileSaveSelector saver) throws IOException {
+  public void scaladocAll(DirectorySelector select, final FileSaveSelector saver) throws IOException {
     
-    /* Only javadoc if all are saved. Removed because it is already done inside suggestJavadocDestination; fixes bug 
+    /* Only scaladoc if all are saved. Removed because it is already done inside suggestScaladocDestination; fixes bug 
      where pop-up is shown twice) */
     if (_model.hasModifiedDocuments() || _model.hasUntitledDocuments()) { return; }  /* abort if files remain unsaved */
     
     Configuration config = DrJava.getConfig();
-    File destDir = config.getSetting(OptionConstants.JAVADOC_DESTINATION);
+    File destDir = config.getSetting(OptionConstants.SCALADOC_DESTINATION);
     
     // Get the destination directory via the DirectorySelector, if appropriate.
     try {
@@ -198,24 +198,24 @@ public class DefaultJavadocModel implements JavadocModel {
     }
     catch (OperationCanceledException oce) { return; } // If the user cancels anywhere, silently return.
     
-    _notifier.javadocStarted();  // fire first so _javadocAllWorker can fire javadocEnded
+    _notifier.scaladocStarted();  // fire first so _scaladocAllWorker can fire scaladocEnded
     // Start a new thread to do the work.
     final File destDirF = destDir;
-    new Thread("DrJava Javadoc Thread") {
-      public void run() { _javadocAllWorker(destDirF, saver); }
+    new Thread("DrJava Scaladoc Thread") {
+      public void run() { _scaladocAllWorker(destDirF, saver); }
     }.start();
   }
   
-  /** This method handles most of the logic of performing a Javadoc operation, once we know that it won't be canceled.
+  /** This method handles most of the logic of performing a Scaladoc operation, once we know that it won't be canceled.
     * @param destDirFile the destination directory for the doc files
     * @param saver a command object for saving a document (if it moved/changed)
     */
-  private void _javadocAllWorker(final File destDirFile, FileSaveSelector saver) {
-    // Note: JAVADOC_FROM_ROOTS is intended to set the -subpackages flag, but I don't think that's something
+  private void _scaladocAllWorker(final File destDirFile, FileSaveSelector saver) {
+    // Note: SCALADOC_FROM_ROOTS is intended to set the -subpackages flag, but I don't think that's something
     // we should support -- in general, we only support performing operations on the files that are open.
     // (dlsmith r4189)
     
-    final List<String> docFiles = new ArrayList<String>(); // files to send to Javadoc
+    final List<String> docFiles = new ArrayList<String>(); // files to send to Scaladoc
 
     final List<OpenDefinitionsDocument> llDocs = new ArrayList<OpenDefinitionsDocument>();
     for (OpenDefinitionsDocument doc: _model.getOpenDefinitionsDocuments()) {
@@ -243,17 +243,17 @@ public class DefaultJavadocModel implements JavadocModel {
       }
     }
     
-    // Don't attempt to create Javadoc if no files are open, or if open file is unnamed.
+    // Don't attempt to create Scaladoc if no files are open, or if open file is unnamed.
     if (docFiles.size() == 0) {
       // Use EventQueue.invokeLater so that notification is deferred when running in the event thread.
-      EventQueue.invokeLater(new Runnable() { public void run() { _notifier.javadocEnded(false, destDirFile, true); } });
+      EventQueue.invokeLater(new Runnable() { public void run() { _notifier.scaladocEnded(false, destDirFile, true); } });
       return;
     }
     
     Utilities.invokeLater(new Runnable() { public void run() {
       if (_model.hasOutOfSyncDocuments(llDocs)) {
         // Utilities.showDebug("out of date");
-        CompilerListener javadocAfterCompile = new DummyCompilerListener() {
+        CompilerListener scaladocAfterCompile = new DummyCompilerListener() {
           @Override public void compileAborted(Exception e) {
             // gets called if there are modified files and the user chooses NOT to save the files
             // see bug report 2582488: Hangs If Testing Modified File, But Choose "No" for Saving
@@ -263,8 +263,8 @@ public class DefaultJavadocModel implements JavadocModel {
             EventQueue.invokeLater(new Runnable() { 
               public void run() {
                 _model.getCompilerModel().removeListener(listenerThis);
-                // fail Javadoc
-                _notifier.javadocEnded(false, destDirFile, true);
+                // fail Scaladoc
+                _notifier.scaladocEnded(false, destDirFile, true);
               }
             });
           }
@@ -274,15 +274,15 @@ public class DefaultJavadocModel implements JavadocModel {
               // Utilities.showDebug("compile ended");
               if (_model.hasOutOfSyncDocuments(llDocs) || _model.getNumCompilerErrors() > 0) {
                 // Utilities.showDebug("still out of date, fail");
-                // fail Javadoc
-                EventQueue.invokeLater(new Runnable() { public void run() { _notifier.javadocEnded(false, destDirFile, true); } });
+                // fail Scaladoc
+                EventQueue.invokeLater(new Runnable() { public void run() { _notifier.scaladocEnded(false, destDirFile, true); } });
                 return;
               }
               EventQueue.invokeLater(new Runnable() {  // defer running this code; would prefer to waitForInterpreter
                 public void run() {
-                  // Utilities.showDebug("running Javadoc");
-                  // Run the actual Javadoc process
-                  _runJavadoc(docFiles, destDirFile, IterUtil.<String>empty(), true);
+                  // Utilities.showDebug("running Scaladoc");
+                  // Run the actual Scaladoc process
+                  _runScaladoc(docFiles, destDirFile, IterUtil.<String>empty(), true);
                 }
               });
             }
@@ -294,32 +294,32 @@ public class DefaultJavadocModel implements JavadocModel {
           }
         };
         
-        _notifyCompileBeforeJavadoc(javadocAfterCompile);
+        _notifyCompileBeforeScaladoc(scaladocAfterCompile);
         return;
       }
       
-      // Run the actual Javadoc process
-      _runJavadoc(docFiles, destDirFile, IterUtil.<String>empty(), true);
+      // Run the actual Scaladoc process
+      _runScaladoc(docFiles, destDirFile, IterUtil.<String>empty(), true);
     } });
   }
   
   
   
-  // -------------------- Javadoc Current Document --------------------
+  // -------------------- Scaladoc Current Document --------------------
   
-  /** Generates Javadoc for the given document only, after ensuring it is saved. Saves the output in a temp directory
-    * which is passed to _javadocDocuemntWorker, which is passed to a subsequent javadocEnded event.
-    * @param doc Document to generate Javadoc for
+  /** Generates Scaladoc for the given document only, after ensuring it is saved. Saves the output in a temp directory
+    * which is passed to _scaladocDocuemntWorker, which is passed to a subsequent scaladocEnded event.
+    * @param doc Document to generate Scaladoc for
     * @param saver a command object for saving the document (if it moved/changed)
     * @throws IOException if there is a problem manipulating files
     */
-  public void javadocDocument(final OpenDefinitionsDocument doc, final FileSaveSelector saver) throws IOException {
+  public void scaladocDocument(final OpenDefinitionsDocument doc, final FileSaveSelector saver) throws IOException {
     // Prompt to save if necessary
     //  (TO DO: should only need to save the current document)
-    if (doc.isUntitled() || doc.isModifiedSinceSave()) _notifier.saveBeforeJavadoc();
+    if (doc.isUntitled() || doc.isModifiedSinceSave()) _notifier.saveBeforeScaladoc();
     
     // Make sure it is saved
-    if (doc.isUntitled() || doc.isModifiedSinceSave()) return;  // The user didn't save, so don't generate Javadoc
+    if (doc.isUntitled() || doc.isModifiedSinceSave()) return;  // The user didn't save, so don't generate Scaladoc
     
     // Try to get the file from the document
     File docFile = _getFileFromDocument(doc, saver);
@@ -328,44 +328,44 @@ public class DefaultJavadocModel implements JavadocModel {
 
     Utilities.invokeLater(new Runnable() { 
       public void run() {
-        try { _rawJavadocDocument(javaFile); }
+        try { _rawScaladocDocument(javaFile); }
         catch(IOException ioe) {
-          // fail Javadoc
-          EventQueue.invokeLater(new Runnable() { public void run() { _notifier.javadocEnded(false, null, false); } });
+          // fail Scaladoc
+          EventQueue.invokeLater(new Runnable() { public void run() { _notifier.scaladocEnded(false, null, false); } });
         }
     } });
   }
     
-  private void _rawJavadocDocument(final File file) throws IOException {
+  private void _rawScaladocDocument(final File file) throws IOException {
     // Generate to a temporary directory
-    final File destDir = IOUtil.createAndMarkTempDirectory("DrJava-javadoc", "");
+    final File destDir = IOUtil.createAndMarkTempDirectory("DrJava-scaladoc", "");
     
-    _notifier.javadocStarted();  // fire first so _javadocDocumntWorker can fire javadocEnded
+    _notifier.scaladocStarted();  // fire first so _scaladocDocumntWorker can fire scaladocEnded
     // Start a new thread to do the work.
-    new Thread("DrJava Javadoc Thread") {
+    new Thread("DrJava Scaladoc Thread") {
       public void run() {
         Iterable<String> extraArgs = IterUtil.make("-noindex", "-notree", "-nohelp", "-nonavbar");
-        _runJavadoc(IterUtil.make(file.getPath()), destDir, extraArgs, false);
+        _runScaladoc(IterUtil.make(file.getPath()), destDir, extraArgs, false);
       }
     }.start();
   }
   
   // -------------------- Helper Methods --------------------
 
-  /** Helper method to notify JavadocModel listeners that all open files must be compiled before Javadoc is run. */
-  private void _notifyCompileBeforeJavadoc(final CompilerListener afterCompile) { 
+  /** Helper method to notify ScaladocModel listeners that all open files must be compiled before Scaladoc is run. */
+  private void _notifyCompileBeforeScaladoc(final CompilerListener afterCompile) { 
     Utilities.invokeLater(new Runnable() { 
-      public void run() { _notifier.compileBeforeJavadoc(afterCompile); } 
+      public void run() { _notifier.compileBeforeScaladoc(afterCompile); } 
     });
   }
 
-  /** Suggests a default location for generating Javadoc, based on the given document's source root.  (Appends 
-    * JavadocModel.SUGGESTED_DIR_NAME to the sourceroot.) Ensures that the document is saved first, or else no 
+  /** Suggests a default location for generating Scaladoc, based on the given document's source root.  (Appends 
+    * ScaladocModel.SUGGESTED_DIR_NAME to the sourceroot.) Ensures that the document is saved first, or else no 
     * reasonable suggestion will be found.
     * @param doc Document with the source root to use as the default.
     * @return Suggested destination directory, or null if none could be determined.
     */
-  public File suggestJavadocDestination(OpenDefinitionsDocument doc) {
+  public File suggestScaladocDestination(OpenDefinitionsDocument doc) {
     _attemptSaveAllDocuments();
     
     try {
@@ -382,18 +382,18 @@ public class DefaultJavadocModel implements JavadocModel {
    * this method to determine if the user cancelled the save process.
    */
   private void _attemptSaveAllDocuments() {
-    // Only javadoc if all are saved.
-    if (_model.hasModifiedDocuments() || _model.hasUntitledDocuments()) _notifier.saveBeforeJavadoc();
+    // Only scaladoc if all are saved.
+    if (_model.hasModifiedDocuments() || _model.hasUntitledDocuments()) _notifier.saveBeforeScaladoc();
   }
   
   /** Run a new process to generate javdocs, and then tell the listeners when we're done.
    *
    * @param files  List of files to generate
    * @param destDir  Directory where the results are being saved
-   * @param extraArgs  List of additional arguments to use with javadoc (besides those gathered from config settings)
-   * @param allDocs  Whether this is running on all documents. If Javadoc is not run on all documents, the target directory will be deleted when DrJava exits
+   * @param extraArgs  List of additional arguments to use with scaladoc (besides those gathered from config settings)
+   * @param allDocs  Whether this is running on all documents. If Scaladoc is not run on all documents, the target directory will be deleted when DrJava exits
    */
-  private void _runJavadoc(Iterable<String> files, final File destDir, Iterable<String> extraArgs, final boolean allDocs) {    
+  private void _runScaladoc(Iterable<String> files, final File destDir, Iterable<String> extraArgs, final boolean allDocs) {    
     Iterable<String> args = IterUtil.empty();
     args = IterUtil.compose(args, IterUtil.make("-d", destDir.getPath()));
     args = IterUtil.compose(args, _getLinkArgs());
@@ -416,29 +416,29 @@ public class DefaultJavadocModel implements JavadocModel {
       errors.add(new DJError("InterruptedException: " + e.getMessage(), false));
     }
     
-    _javadocErrorModel = new CompilerErrorModel(IterUtil.toArray(errors, DJError.class), _model);
+    _scaladocErrorModel = new CompilerErrorModel(IterUtil.toArray(errors, DJError.class), _model);
     
     // waitFor() exit value is 1 for both errors and warnings, so it's no use
-    final boolean success = _javadocErrorModel.hasOnlyWarnings();
+    final boolean success = _scaladocErrorModel.hasOnlyWarnings();
     if (!allDocs) { IOUtil.deleteOnExitRecursively(destDir); }
     // Use EventQueue.invokeLater so that notification is deferred when running in the event thread.
-    EventQueue.invokeLater(new Runnable() { public void run() { _notifier.javadocEnded(success, destDir, allDocs); } });
+    EventQueue.invokeLater(new Runnable() { public void run() { _notifier.scaladocEnded(success, destDir, allDocs); } });
   }
   
   private Iterable<String> _getLinkArgs() {
     Configuration config = DrJava.getConfig();
-    String linkVersion = config.getSetting(OptionConstants.JAVADOC_LINK_VERSION);
-    if (linkVersion.equals(OptionConstants.JAVADOC_1_3_TEXT)) {
-      return IterUtil.make("-link", config.getSetting(OptionConstants.JAVADOC_1_3_LINK));
+    String linkVersion = config.getSetting(OptionConstants.SCALADOC_LINK_VERSION);
+    if (linkVersion.equals(OptionConstants.SCALADOC_1_3_TEXT)) {
+      return IterUtil.make("-link", config.getSetting(OptionConstants.SCALADOC_1_3_LINK));
     }
-    else if (linkVersion.equals(OptionConstants.JAVADOC_1_4_TEXT)) {
-      return IterUtil.make("-link", config.getSetting(OptionConstants.JAVADOC_1_4_LINK));
+    else if (linkVersion.equals(OptionConstants.SCALADOC_1_4_TEXT)) {
+      return IterUtil.make("-link", config.getSetting(OptionConstants.SCALADOC_1_4_LINK));
     }
-    else if (linkVersion.equals(OptionConstants.JAVADOC_1_5_TEXT)) {
-      return IterUtil.make("-link", config.getSetting(OptionConstants.JAVADOC_1_5_LINK));
+    else if (linkVersion.equals(OptionConstants.SCALADOC_1_5_TEXT)) {
+      return IterUtil.make("-link", config.getSetting(OptionConstants.SCALADOC_1_5_LINK));
     }
-    else if (linkVersion.equals(OptionConstants.JAVADOC_1_6_TEXT)) {
-      return IterUtil.make("-link", config.getSetting(OptionConstants.JAVADOC_1_6_LINK));
+    else if (linkVersion.equals(OptionConstants.SCALADOC_1_6_TEXT)) {
+      return IterUtil.make("-link", config.getSetting(OptionConstants.SCALADOC_1_6_LINK));
     }
     else {
       // should never happen -- use an enum to guarantee
@@ -446,8 +446,8 @@ public class DefaultJavadocModel implements JavadocModel {
     }
   }
   
-  /** Reads through javadoc output text, looking for Javadoc errors.  This code will detect Exceptions and 
-   * Errors thrown during generation of the output, as well as errors and warnings generated by Javadoc.
+  /** Reads through scaladoc output text, looking for Scaladoc errors.  This code will detect Exceptions and 
+   * Errors thrown during generation of the output, as well as errors and warnings generated by Scaladoc.
    * This code works for both JDK 1.3 and 1.4, assuming you pass in data from the correct stream.  (Be safe 
    * and check both.)
    */
@@ -466,7 +466,7 @@ public class DefaultJavadocModel implements JavadocModel {
         }
         else {
           // Otherwise, parser for a normal error message.
-          DJError error = _parseJavadocErrorLine(output);
+          DJError error = _parseScaladocErrorLine(output);
           if (error != null) { result.add(error); }
         }
         output = r.readLine();
@@ -477,8 +477,8 @@ public class DefaultJavadocModel implements JavadocModel {
     return result;
   }
   
-  /** Convert a line of Javadoc text to a DJError.  If unable to do so, returns {@code null}. */
-  private DJError _parseJavadocErrorLine(String line) {
+  /** Convert a line of Scaladoc text to a DJError.  If unable to do so, returns {@code null}. */
+  private DJError _parseScaladocErrorLine(String line) {
     int errStart = line.indexOf(".java:");
     if (errStart == -1) { return null; /* ignore the line if it doesn't have file info */ }
     // filename is everything up to and including the '.java'
@@ -497,7 +497,7 @@ public class DefaultJavadocModel implements JavadocModel {
     // Otherwise, try to recover by just using everything after ERR_INDICATOR as the error message
     if (line.charAt(pos) == ':') {
       try {
-        // Adjust Javadoc's one-based line numbers to our zero-based indeces.
+        // Adjust Scaladoc's one-based line numbers to our zero-based indeces.
         lineno = Integer.valueOf(linenoString.toString()).intValue() -1;
       } catch (NumberFormatException e) {
       }

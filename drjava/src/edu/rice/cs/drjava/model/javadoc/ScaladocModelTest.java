@@ -50,12 +50,12 @@ import edu.rice.cs.util.FileOps;
 import java.io.File;
 
 /**
- * Tests the functionality provided by an implementation of JavadocModel.
- * For now, this class is hard-coded to test DefaultJavadocModel, but it can be
+ * Tests the functionality provided by an implementation of ScaladocModel.
+ * For now, this class is hard-coded to test DefaultScaladocModel, but it can be
  * extended to test any implementation of the interface.
- * @version $Id: JavadocModelTest.java 5594 2012-06-21 11:23:40Z rcartwright $
+ * @version $Id: ScaladocModelTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public class JavadocModelTest extends DrJavaTestCase {
+public class ScaladocModelTest extends DrJavaTestCase {
   
   /** Field needed by testUnsavedSuggestedDirectory */
   private File _storedFile;
@@ -71,14 +71,14 @@ public class JavadocModelTest extends DrJavaTestCase {
       }
     };
     // TODO: define so that tools.jar doesn't need to be on the class path
-    JavadocModel jModel = new DefaultJavadocModel(getDocs, null, ReflectUtil.SYSTEM_CLASS_PATH);
+    ScaladocModel jModel = new DefaultScaladocModel(getDocs, null, ReflectUtil.SYSTEM_CLASS_PATH);
     final File file = new File(System.getProperty("user.dir"));
     OpenDefinitionsDocument doc = new DummyOpenDefDoc() {
       public File getSourceRoot() throws InvalidPackageException { return file; }
     };
 
-    File suggestion = jModel.suggestJavadocDestination(doc);
-    File expected = new File(file, JavadocModel.SUGGESTED_DIR_NAME);
+    File suggestion = jModel.suggestScaladocDestination(doc);
+    File expected = new File(file, ScaladocModel.SUGGESTED_DIR_NAME);
     assertEquals("simple suggested destination", expected, suggestion);
   }
   
@@ -91,15 +91,15 @@ public class JavadocModelTest extends DrJavaTestCase {
         return true;  // pretend doc is unsaved
       }
     };
-    JavadocModel jModel = new DefaultJavadocModel(getDocs, null, ReflectUtil.SYSTEM_CLASS_PATH);
+    ScaladocModel jModel = new DefaultScaladocModel(getDocs, null, ReflectUtil.SYSTEM_CLASS_PATH);
     final File file = new File(System.getProperty("user.dir"));
 
     // Make sure it doesn't return a file until it's saved.
-    JavadocListener listener = new JavadocListener() {
-      public void saveBeforeJavadoc() { _storedFile = file; }
-      public void compileBeforeJavadoc(final CompilerListener afterCompile) { }
-      public void javadocStarted() { }
-      public void javadocEnded(boolean success, File destDir, boolean allDocs) { }
+    ScaladocListener listener = new ScaladocListener() {
+      public void saveBeforeScaladoc() { _storedFile = file; }
+      public void compileBeforeScaladoc(final CompilerListener afterCompile) { }
+      public void scaladocStarted() { }
+      public void scaladocEnded(boolean success, File destDir, boolean allDocs) { }
     };
     jModel.addListener(listener);
     
@@ -107,8 +107,8 @@ public class JavadocModelTest extends DrJavaTestCase {
       public File getSourceRoot() throws InvalidPackageException { return _storedFile; }
     };
 
-    File suggestion = jModel.suggestJavadocDestination(doc);
-    File expected = new File(file, JavadocModel.SUGGESTED_DIR_NAME);
+    File suggestion = jModel.suggestScaladocDestination(doc);
+    File expected = new File(file, ScaladocModel.SUGGESTED_DIR_NAME);
     assertEquals("simple suggested destination", expected, suggestion);
   }
 
@@ -118,7 +118,7 @@ public class JavadocModelTest extends DrJavaTestCase {
       public boolean hasModifiedDocuments() { return false;  /* pretend all docs are saved */ }
       public boolean hasUntitledDocuments() { return false;  /* pretend no docs are untitled */ }
     };
-    JavadocModel jModel = new DefaultJavadocModel(getDocs, null, null);
+    ScaladocModel jModel = new DefaultScaladocModel(getDocs, null, null);
 //    final File file = new File(System.getProperty("user.dir"));
     OpenDefinitionsDocument doc = new DummyOpenDefDoc() {
       public File getSourceRoot() throws InvalidPackageException {
@@ -126,7 +126,7 @@ public class JavadocModelTest extends DrJavaTestCase {
       }
     };
 
-    File suggestion = jModel.suggestJavadocDestination(doc);
+    File suggestion = jModel.suggestScaladocDestination(doc);
     assertNull("suggestion should be null", suggestion);
   }
 
