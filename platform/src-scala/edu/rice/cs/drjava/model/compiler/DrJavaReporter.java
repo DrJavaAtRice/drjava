@@ -47,9 +47,9 @@ import scala.runtime.BoxedUnit;
 import scala.tools.nsc.Settings;
 import scala.tools.nsc.reporters.ConsoleReporter;
 import scala.tools.nsc.reporters.Reporter;
-import scala.tools.nsc.util.FakePos;
-import scala.tools.nsc.util.Position;
-import scala.tools.nsc.util.SourceFile;
+import scala.reflect.internal.util.FakePos;
+import scala.reflect.internal.util.Position;
+import scala.reflect.internal.util.SourceFile;
 
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.util.Log;

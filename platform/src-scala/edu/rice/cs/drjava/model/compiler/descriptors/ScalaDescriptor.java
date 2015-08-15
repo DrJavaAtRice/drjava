@@ -92,28 +92,30 @@ public class ScalaDescriptor extends JDKDescriptor {
     * @return list of files to search */
   public Iterable<File> getSearchFiles() {
     /* Code that looks for compiler outside of drjava.jar */
-    Iterable<File> files = IterUtil.asIterable(new File[] {
-      new File("/C:/Scala/scala-2.9.1.final/lib/scala-compiler.jar")  //TODO make this more robust so it does not depend on the particular version
-    });
-    files = IterUtil.compose(files, new File("/opt/scala/lib/scala-compiler.jar"));
-    files = IterUtil.compose(files, new File("/usr/share/scala/lib/scala-compiler.jar"));
-    files = IterUtil.compose(files, new File("/usr/share/java/scala-compiler-2.9.2.jar"));
+    /** Not clear if we want to find other compilers besides the one in drscala.jar. */
+    Iterable<File> files = IterUtil.asIterable(new File[]{});
+//    /* former argument */                   (new File[] {
+//      new File("/C:/Scala/scala-2.9.1.final/lib/scala-compiler.jar")  //TODO make this more robust so it does not depend on the particular version
+//    });
+//    files = IterUtil.compose(files, new File("/opt/scala/lib/scala-compiler.jar"));
+//    files = IterUtil.compose(files, new File("/usr/share/scala/lib/scala-compiler.jar"));
     // If executable is class file tree, looks for compiler in associated lib directory
     File f = FileOps.getDrJavaFile();
     if (! f.isFile()) { // f is a directory
       File grandParentFile = f.getParentFile().getParentFile();
       files = IterUtil.compose(files, new File(grandParentFile, "lib/scala-compiler.jar"));
     }
-    try {
-      String scala_home = System.getenv("SCALA_HOME");
-      if (scala_home != null) {
-        files = IterUtil.compose(files, new File(new File(scala_home), "lib/scala-compiler.jar"));
-      }
-      else {
-        JDKToolsLibrary.msg("SCALA_HOME not set");
-      }
-    }
-    catch(Exception e) { /* ignore SCALA_HOME variable */ }
+    /** Restrict attention to compiler embedded in drscala.jar. */
+//    try {
+//      String scala_home = System.getenv("SCALA_HOME");
+//      if (scala_home != null) {
+//        files = IterUtil.compose(files, new File(new File(scala_home), "lib/scala-compiler.jar"));
+//      }
+//      else {
+//        JDKToolsLibrary.msg("SCALA_HOME not set");
+//      }
+//    }
+//    catch(Exception e) { /* ignore SCALA_HOME variable */ }
     
     // add drjava.jar file itself
     files = IterUtil.compose(edu.rice.cs.util.FileOps.getDrJavaFile(), files); 
@@ -135,8 +137,8 @@ public class ScalaDescriptor extends JDKDescriptor {
 
   /** Return the guessed version for the compiler in the specified file (jar file or directory).
     * Note that this is the Java version on which this Scala compiler is based, not the internal compiler version.
-    * For a Scala enhanced JDK, this is equal to the version of the full JDK that the compound JDK needs, For Scala 2.9.*,
-    * this corresponding version of Java is Java 7.
+    * For a Scala enhanced JDK, this is equal to the version of the full JDK that the compound JDK needs, For Scala 2.11.*,
+    * this corresponding version of Java is Java 6.
     * @return guessed version */
   public JavaVersion.FullVersion guessVersion(File f) {
       return JavaVersion.parseFullVersion(JavaVersion.JAVA_6.fullVersion().versionString(), /* TODO: add SCALA to ENUM definition */

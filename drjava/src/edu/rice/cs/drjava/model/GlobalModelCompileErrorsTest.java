@@ -44,7 +44,6 @@ import javax.swing.text.Position;
 import edu.rice.cs.drjava.model.compiler.*;
 
 import edu.rice.cs.util.Log;
-import edu.rice.cs.util.swing.Utilities;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
@@ -334,7 +333,6 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     cm.compileAll();
     debug.log("Before wait");
     listener.waitCompileDone();
-    Utilities.clearEventQueue();
     debug.log("After wait");
     
     assertCompileErrorsPresent(_name(), true);

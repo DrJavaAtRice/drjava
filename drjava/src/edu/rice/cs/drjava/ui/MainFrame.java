@@ -6256,7 +6256,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_junitAction, "Test Current", "Run JUnit over the current document");
     _setUpAction(_junitAllAction, "Test", "Run JUnit over all open JUnit tests");
     if (_model.getJavadocModel().isAvailable()) {
-      _setUpAction(_javadocAllAction, "Javadoc", "Create and save Javadoc for the packages of all open documents");
+      _setUpAction(_javadocAllAction, "Scaladoc", "Create and save Scaladoc for the packages of all open documents");
       _setUpAction(_javadocCurrentAction, "Preview Javadoc Current", "Preview the Javadoc for the current document");
     }
     else {

@@ -1424,7 +1424,7 @@ public interface OptionConstants {
 
   /** Whether the java command should automatically detect applets and acm.program.Program subclasses. */
   public static final BooleanOption SMART_RUN_FOR_APPLETS_AND_PROGRAMS =
-    new BooleanOption("smart.run.for.applets.and.programs", Boolean.TRUE);
+    new BooleanOption("smart.run.for.applets.and.programs", Boolean.FALSE);
   
   /** Whether to make emacs-style backup files. */
   public static final BooleanOption BACKUP_FILES = new BooleanOption("files.backup", Boolean.TRUE);

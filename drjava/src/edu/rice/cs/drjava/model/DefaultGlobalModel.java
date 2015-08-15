@@ -195,8 +195,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _debugger = null;
     _javadocModel = null;
     for (JDKToolsLibrary t : tools) {
-      // check for support of JAVA_5; Scala 2.9.* requires Java 5. */
-      if (t.compiler().isAvailable() && t.version().supports(JavaVersion.JAVA_5)) {
+      // check for support of JAVA_6; Scala 2.12.* requires Java 6. */
+      if (t.compiler().isAvailable() && t.version().supports(JavaVersion.JAVA_6)) {
           compilers.add(t.compiler());
       }
       if (_debugger == null && t.debugger().isAvailable()) { _debugger = t.debugger(); }
@@ -670,9 +670,15 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       * @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
       * @exception IOException propagated from GlobalModel.compileAll()
       */
+    // public void runMain(String qualifiedClassName) throws ClassNameNotFoundException, IOException {
+    //   _runInInteractions("java {0}", qualifiedClassName);
+    // }
     public void runMain(String qualifiedClassName) throws ClassNameNotFoundException, IOException {
+      // runs the main method of the standalone singleton object in this document, with {0} indicating the place where the object name 
+      // will be written
       _runInInteractions("{0}.main(null)", qualifiedClassName);
     }
+
     
     /** Runs this document as applet in the interactions pane after resetting interactions with the source
       * root for this document as the working directory.  Warns the use if the class files for the doucment are not 

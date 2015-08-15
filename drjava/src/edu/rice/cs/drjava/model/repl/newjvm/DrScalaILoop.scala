@@ -35,7 +35,7 @@ extends ILoop(r, w) with ScalaInterpreterAdapter {
     // System.err.println("Creating new interpreter with classpath: " + settings.classpath.value)
     this.intp = new ILoopInterpreter
   }
-  def reset() {
+  override def reset() {
     closeInterpreter()
     createInterpreter()
   }

@@ -148,7 +148,7 @@ public class DrScalaInterpreter implements Interpreter {
   /** method for adding a classpath element to the REPL classpath. */
   public synchronized void addCP(String pathType, String path) {
 //    System.out.print(pathType + ": " + path);
-    String res = this._interpret(":cp " + path, true);
+    String res = this._interpret(":require " + path, true);
     if (res.contains("doesn't seem to exist"))
       System.err.println("ERROR: unable to add cp, '" + path + "' to the Interpreter classpath.");
   }

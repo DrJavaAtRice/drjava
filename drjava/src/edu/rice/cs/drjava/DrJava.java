@@ -463,9 +463,9 @@ public class DrJava {
     }
     
     if (PlatformFactory.ONLY.isMacPlatform()) {
-      String iconLoc = System.getProperty("edu.rice.cs.drjava.icon");
+      String iconLoc = System.getProperty("edu.rice.cs.drscala.icon");
       if (iconLoc != null) { // we are running inside the Mac app wrapper
-        _jvmArgs.add("-Xdock:name=DrJava");
+        _jvmArgs.add("-Xdock:name=DrScala");
         _jvmArgs.add("-Xdock:icon=" + iconLoc);
       }
     }

@@ -188,13 +188,14 @@
     </antcall>
   </target>
 
-  <target name="compile-scala" depends="resolve-java7-runtime, resolve-scala-tools" 
+  <target name="compile-scala" depends="resolve-java8-runtime, resolve-scala-tools" 
           description="Compile the 'scala-specific' sources">
     <antcall target="do-compile">
       <param name="platform-tag" value="scala" />
       <param name="source-version" value="1.6" />
-      <param name="runtime-jar" value="${java7-runtime}" />
-      <param name="extra-classpath" value="${scala-home}/lib/scala-compiler.jar:${scala-home}/lib/scala-library.jar:${basedir}/../drjava/drscala.jar" />  
+      <param name="runtime-jar" value="${java8-runtime}" />
+      <param name="extra-classpath" 
+             value="${scala-home}/lib/scala-compiler.jar:${scala-home}/lib/scala-library.jar:${scala-home}/lib/scala-reflect.jar:${basedir}/../drjava/drscala.jar" />  
    <!-- Note that the following depends on scala.jar in lib directory of this branch's drjava tree -->
    <!-- Replaced  <param name="extra-classpath" value="" /> -->
     </antcall>
@@ -892,6 +893,22 @@
     <available property="java7-runtime" value="${java7-runtime-3}" file="${java7-runtime-3}" />
 
     <fail message="Can't find rt.jar in the Java 7 home: ${java7-home}" unless="java7-runtime" />
+  </target>
+  <target name="resolve-java8-runtime">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java8-runtime will only be set the *first* time. -->
+
+    <property name="java8-runtime-1" location="${java8-home}/lib/dt.jar" />
+    <available property="java8-runtime" value="${java8-runtime-1}" file="${java8-runtime-1}" />
+
+    <property name="java8-runtime-2" location="${java8-home}/jre/lib/rt.jar" />
+    <available property="java8-runtime" value="${java8-runtime-2}" file="${java8-runtime-2}" />
+
+    <property name="java8-runtime-3" location="${java8-home}/../Classes/classes.jar" />
+    <available property="java8-runtime" value="${java8-runtime-3}" file="${java8-runtime-3}" />
+
+    <fail message="Can't find dt.jar/rt.jar in the Java 7 home: ${java8-home}" unless="java8-runtime" />
+    <echo message="java8-runtime=${java8-runtime}" />
   </target>
   
   <target name="resolve-java7-exec">

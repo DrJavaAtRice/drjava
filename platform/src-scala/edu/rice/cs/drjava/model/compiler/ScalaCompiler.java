@@ -66,11 +66,12 @@ import edu.rice.cs.util.swing.Utilities;
 
 import scala.tools.nsc.Global;
 import scala.tools.nsc.Settings;
-import scala.tools.nsc.io.PlainFile;
-import scala.tools.nsc.io.Path;
+import scala.reflect.io.PlainFile;
+import scala.reflect.io.AbstractFile;
+import scala.reflect.io.Path;
 import scala.tools.nsc.reporters.ConsoleReporter;
 
-/** An implementation of JavacCompiler that supports compiling with the Scala 2.9.x compiler based on Java 1.7.0.
+/** An implementation of JavacCompiler that supports compiling with the Scala 2.11.x compiler based on Java 1.7.0.
   * Must be compiled using javac 1.7.0 and with Scala compiler jar on the boot classpath.  The class 
   * Javac160FilteringCompiler filters .exe files out of the class path because the JVM does not recognize such files
   * on its classpath after early builds of Java 6.
@@ -107,12 +108,14 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
       if (parentDir == null) return Collections.emptyList();
       try {
         File[] jarFiles = new File[] {
-          Util.oneOf(parentDir, "jline.jar"),
+          Util.oneOf(parentDir, "jline-2.12.1.jar"),
           Util.oneOf(parentDir, "scala-compiler.jar"),
-          Util.oneOf(parentDir, "scala-dbc.jar"),
           Util.oneOf(parentDir, "scala-library.jar"),
-          Util.oneOf(parentDir, "scala-swing.jar"),
-          Util.oneOf(parentDir, "scalap.jar")
+          Util.oneOf(parentDir, "scalap-2.12.0-M2.jar"),
+          Util.oneOf(parentDir, "scala-swing_2.12.0-M2-2.0.0-M2.jar"),
+          Util.oneOf(parentDir, "scala-reflect.jar"),
+          Util.oneOf(parentDir, "scala-parser-combinators_2.12.0-M2-1.0.4.jar"),
+          Util.oneOf(parentDir, "scala-xml_2.12.0-M2-1.0.4.jar") 
         };
         return Arrays.asList(jarFiles);    
       }

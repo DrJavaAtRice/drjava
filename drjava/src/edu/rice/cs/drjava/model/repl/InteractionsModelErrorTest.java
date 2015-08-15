@@ -121,36 +121,37 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretExtendPublic started");
     
-    OpenDefinitionsDocument doc = setupDocument(UNARY_FUN_PUBLIC_INTERFACE_TEXT);
-    final File file = createFile("UnaryFun.scala");
-    saveFile(doc, new FileSelector(file));
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
-    _model.addListener(listener);
-    listener.compile(doc);
-    if (_model.getCompilerModel().getNumErrors() > 0) {
-      fail("compile failed: " + getCompilerErrorString());
-    }
-    _log.log("checking compile");
-    listener.checkCompileOccurred();
-    _log.log("compile completed");
-    _model.removeListener(listener);
-    assertCompileErrorsPresent(_name(), false);
-    
-    // Make sure .class exists
-    File compiled = classForScala(file, "UnaryFun");
-    assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
-    _log.log("found class file");
-
-    _log.log("path to add: " + compiled.getParentFile().getPath());
-    _interpreter.addCP("BuildDirectoryCP", compiled.getParentFile().getPath());
-    _log.log("added CP");
+//    OpenDefinitionsDocument doc = setupDocument(UNARY_FUN_PUBLIC_INTERFACE_TEXT);
+//    final File file = createFile("UnaryFun.scala");
+//    saveFile(doc, new FileSelector(file));
+//    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
+//    _model.addListener(listener);
+//    listener.compile(doc);
+//    if (_model.getCompilerModel().getNumErrors() > 0) {
+//      fail("compile failed: " + getCompilerErrorString());
+//    }
+//    _log.log("checking compile");
+//    listener.checkCompileOccurred();
+//    _log.log("compile completed");
+//    _model.removeListener(listener);
+//    assertCompileErrorsPresent(_name(), false);
+//    
+//    // Make sure .class exists
+//    File compiled = classForScala(file, "UnaryFun");
+//    assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
+//    _log.log("found class file");
+//
+//    _log.log("path to add: " + compiled.getParentFile().getPath());
+//    _interpreter.addCP("BuildDirectoryCP", compiled.getParentFile().getPath());
+//    _log.log("added CP");
     
     try {
-      String res = _interpreter.interpret("val f = new UnaryFun() { " + 
+      String res1 = _interpreter.interpret(UNARY_FUN_PUBLIC_INTERFACE_TEXT);
+      assertTrue("UnaryFun definition is valid. res: " + res1, !res1.contains("error"));
+      String res2 = _interpreter.interpret("val f = new UnaryFun() { " + 
               "def apply(arg: Object): Object = { (arg.asInstanceOf[Int] * " +
               "arg.asInstanceOf[Int]).asInstanceOf[java.lang.Integer] } }");
-      assertTrue("extending a public class should NOT cause an error. res: " + res, 
-              !res.contains("error"));
+      assertTrue("extending a public class should NOT cause an error. res: " + res2, !res2.contains("error"));
     }
     catch(Throwable t) {
       fail("testInterpretExtendPublic threw: " + t);
@@ -186,14 +187,11 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
       String res = _interpreter.interpret("val f = new UnaryFun() " + 
           "{ def apply(arg: Object) = { (arg.asInstanceOf[Int] * " +
           "arg.asInstanceOf[Int]).asInstanceOf[Object] }}");
-      if (!res.contains("error: private class UnaryFun escapes its " +
-                  "defining scope as part of type UnaryFun"))
-        fail("Should fail with 'private class UnaryFun escapes its " +
-                  "defining scope as part of type UnaryFun'");
+      assertTrue("private class is invisible, so extending it fails with error", 
+                 res.contains("error: not found: type UnaryFun"));
     }
     catch (Throwable t) {
-      fail("Scala interpreter should return an exception, but " +
-              "it should not *throw* one itself. Threw: " + t);
+      fail("testInterpretExtendNonPublic threw: " + t);
     }
   }
   
@@ -203,31 +201,32 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     throws BadLocationException, IOException, InterruptedException, InterpreterException {
     _log.log("testInterpretExtendPublic started");
     
-    OpenDefinitionsDocument doc = setupDocument(UNARY_FUN_PUBLIC_CLASS_TEXT);
-    final File file = createFile("UnaryFun.scala");
-    saveFile(doc, new FileSelector(file));
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
-    _model.addListener(listener);
-    listener.compile(doc);
-    if (_model.getCompilerModel().getNumErrors() > 0) {
-      fail("compile failed: " + getCompilerErrorString());
-    }
-    listener.checkCompileOccurred();
-    _model.removeListener(listener);
-    assertCompileErrorsPresent(_name(), false);
-    
-    // Make sure .class exists
-    File compiled = classForScala(file, "UnaryFun");
-    assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
-    
-    _interpreter.addCP("BuildDirectoryCP", compiled.getParentFile().getPath());
+//    OpenDefinitionsDocument doc = setupDocument(UNARY_FUN_PUBLIC_CLASS_TEXT);
+//    final File file = createFile("UnaryFun.scala");
+//    saveFile(doc, new FileSelector(file));
+//    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
+//    _model.addListener(listener);
+//    listener.compile(doc);
+//    if (_model.getCompilerModel().getNumErrors() > 0) {
+//      fail("compile failed: " + getCompilerErrorString());
+//    }
+//    listener.checkCompileOccurred();
+//    _model.removeListener(listener);
+//    assertCompileErrorsPresent(_name(), false);
+//    
+//    // Make sure .class exists
+//    File compiled = classForScala(file, "UnaryFun");
+//    assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
+//    
+//    _interpreter.addCP("BuildDirectoryCP", compiled.getParentFile().getPath());
     
    try {
-     String res = _interpreter.interpret("val f = new UnaryFun() { " + 
+     String res1 = _interpreter.interpret(UNARY_FUN_PUBLIC_CLASS_TEXT);
+     assertTrue("defining a public class should NOT cause an error", ! res1.contains("error"));
+     String res2 = _interpreter.interpret("val f = new UnaryFun() { " + 
              "def apply(arg: Object) = { (arg.asInstanceOf[Int] * " +
              "arg.asInstanceOf[Int]).asInstanceOf[Object] }}");
-     assertTrue("extending a public class should NOT cause an error", 
-             !res.contains("error"));
+     assertTrue("extending a public class should NOT cause an error", ! res2.contains("error"));
    }
    catch (Throwable t) {
      fail("testInterpretExtendPublic threw: " + t);
@@ -259,16 +258,14 @@ public final class InteractionsModelErrorTest extends GlobalModelTestCase {
     
     // Make sure .class exists
     File compiled = classForScala(file, "Bar");
-    assertTrue(_name() + "Class file should exist after compile", compiled.exists());    
+    assertTrue(_name() + "Class file should exist after compile", compiled.exists()); 
     
-    String classFilePath = compiled.getParentFile().getPath();
-    String fooPath = classFilePath.substring(0, classFilePath.lastIndexOf("foo"));
-    _interpreter.addCP("BuildDirectoryCP", fooPath);
+    _interpreter.addCP("BuildDirectoryCP", compiled.getParentFile().getPath());
     
     try {
-      String res = _interpreter.interpret(
+      String res2 = _interpreter.interpret(
         "val f = new foo.Bar().getClass().getPackage().getName()");
-      assertEquals("Package of foo.Bar should be foo", "f: java.lang.String = foo", res.trim());
+      assertEquals("Package of foo.Bar should be foo", "f: java.lang.String = foo", res2.trim());
     }
     catch (Throwable t) {
       fail("testInterpretGetPackageClass threw: " + t);

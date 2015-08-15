@@ -55,7 +55,7 @@ public class JavadocErrorPanel extends ErrorPanel {
    * @param frame MainFrame in which we are displayed
    */
   public JavadocErrorPanel(SingleDisplayModel model, MainFrame frame) {
-    super(model, frame, "Javadoc Output", "Javadoc");
+    super(model, frame, "Scaladoc Output", "Scaladoc");
 //    _successful = true;
     _errorListPane = new JavadocErrorListPane();
     setErrorListPane(_errorListPane);
@@ -108,7 +108,7 @@ public class JavadocErrorPanel extends ErrorPanel {
       _errorListPositions = new Position[0];
 
       ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
-      doc.append("Generating Javadoc.  Please wait...\n", NORMAL_ATTRIBUTES);
+      doc.append("Generating Scaladoc.  Please wait...\n", NORMAL_ATTRIBUTES);
       setDocument(doc);
       selectNothing();
       _wasSuccessful = false;
@@ -129,8 +129,8 @@ public class JavadocErrorPanel extends ErrorPanel {
       ErrorDocument doc = new ErrorDocument(getErrorDocumentTitle());
       String msg = "";
       if (done) {
-        if (_wasSuccessful) msg = "Javadoc generated successfully.";
-        else msg = "Javadoc generation failed.";
+        if (_wasSuccessful) msg = "Scaladoc generated successfully.";
+        else msg = "Scaladoc generation failed.";
       }
       doc.append(msg, NORMAL_ATTRIBUTES);
       setDocument(doc);

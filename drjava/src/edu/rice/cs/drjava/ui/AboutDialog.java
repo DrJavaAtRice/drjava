@@ -65,7 +65,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 
   private static ImageInfo CSLOGO = new ImageInfo("RiceCS.gif",new Color(0x423585)),
     SF = new ImageInfo("SourceForge.gif",Color.black),
-    DRJAVA = new ImageInfo("DrJava.png",new Color(0xCCCCFF));
+    DRJAVA = new ImageInfo("DrScala.png",new Color(0xCCCCFF));
 
   private final JButton _okButton = new JButton("OK");
 

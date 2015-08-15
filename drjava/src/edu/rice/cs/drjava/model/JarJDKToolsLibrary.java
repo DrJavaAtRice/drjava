@@ -445,9 +445,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       addIfDir(new File(envScalaHome, "../.."), roots);
     }
     
-//    /* Scala entries for Windows */
-//    addIfDir(new File("/C:/Scala/scala-2.9.1.final"), roots);
-//    addIfDir(new File("/C:/Scala/scala-2.9.1-1"), roots);
+//    /* Scala entries for Windows ?? */
     
     /* Java entries for Mac OS X */
     addIfDir(new File("/System/Library/Java/JavaVirtualMachines"), roots);
@@ -462,6 +460,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     addIfDir(new File("/usr/local"), roots);
 
     addIfDir(new File("/usr/lib/jvm"), roots);
+    addIfDir(new File("/usr/lib/jvm/java-8-oracle"), roots);
+    addIfDir(new File("/usr/lib/jvm/java-8-openjdk"), roots);
     addIfDir(new File("/usr/lib/jvm/java-7-oracle"), roots);
     addIfDir(new File("/usr/lib/jvm/java-7-openjdk"), roots);
     addIfDir(new File("/usr/lib/jvm/java-6-sun"), roots);
