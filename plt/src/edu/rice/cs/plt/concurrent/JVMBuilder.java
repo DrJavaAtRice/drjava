@@ -2,7 +2,7 @@
 
 PLT Utilities BSD License
 
-Copyright (c) 2007-2010 JavaPLT group at Rice University
+Copyright (c) 2007-2015 JavaPLT group at Rice University
 All rights reserved.
 
 Developed by:   Java Programming Languages Team
@@ -313,6 +313,8 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
     return start(mainClass, IterUtil.asIterable(mainParams));
   }
 
+
+
   /**
    * Start a JVM process via {@link Runtime#exec(String[], String[], File)}. The array of command strings
    * contains, in order: the java command, the JVM args, {@code "-classpath"} followed by the class path, each
@@ -322,6 +324,7 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
    * @throws SecurityException  Per {@link Runtime#exec(String[], String[], File)}.
    */
   public Process start(String mainClass, Iterable<? extends String> mainParams) throws IOException {
+
     List<String> commandL = new LinkedList<String>();
     commandL.add(_javaCommand);
     CollectUtil.addAll(commandL, _jvmArgs);
@@ -343,10 +346,42 @@ public class JVMBuilder implements Lambda2<String, Iterable<? extends String>, P
       }
       env = IterUtil.toArray(envL, String.class);
     }
+
+    // IMPORTANT: Do not leave this logging message uncommented, or setting debug to an RMILogSink won't work
+    //debug.logValues("Starting JVM", new String[]{"command", "env", "dir"}, command, env, _dir);
+    return Runtime.getRuntime().exec(command, env, _dir);
+  }
+
+  /**
+   * Start a Scala process
+   */
+  public Process startScalaProcess(String mainClass, Iterable<? extends String> mainParams) throws IOException {
+    List<String> commandL = new LinkedList<String>();
+    commandL.add("scala");
+    CollectUtil.addAll(commandL, _jvmArgs);
+    commandL.add("-classpath");
+    commandL.add(System.getProperty("java.class.path", ""));
+    for (Map.Entry<String, String> prop : _properties.entrySet()) {
+      commandL.add("-D" + prop.getKey() + "=" + prop.getValue());
+    }
+    commandL.add(mainClass);
+    CollectUtil.addAll(commandL, mainParams);
+    String[] command = IterUtil.toArray(commandL, String.class);
+    
+    String[] env;
+    if (_environment == null) { env = null; }
+    else {
+      List<String> envL = new LinkedList<String>();
+      for (Map.Entry<String, String> binding : _environment.entrySet()) {
+        envL.add(binding.getKey() + "=" + binding.getValue());
+      }
+      env = IterUtil.toArray(envL, String.class);
+    }
     
     // IMPORTANT: Do not leave this logging message uncommented, or setting debug to an RMILogSink won't work
     //debug.logValues("Starting JVM", new String[]{"command", "env", "dir"}, command, env, _dir);
     return Runtime.getRuntime().exec(command, env, _dir);
+
   }
   
   public Process value(String mainClass, Iterable<? extends String> mainParams) {

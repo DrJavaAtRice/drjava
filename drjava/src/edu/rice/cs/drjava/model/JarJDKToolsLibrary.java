@@ -398,7 +398,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     String envScalaHome = null;
     String programFiles = null;
     String systemDrive = null;
-    if (JavaVersion.CURRENT.supports(JavaVersion.JAVA_7)) {
+    if (JavaVersion.CURRENT.supports(JavaVersion.JAVA_8)) {
       envJavaHome = System.getenv("JAVA_HOME");
       envScalaHome = System.getenv("SCALA_HOME");
       programFiles = System.getenv("ProgramFiles");
