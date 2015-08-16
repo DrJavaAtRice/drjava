@@ -848,23 +848,24 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 
     @Override public void started(InterpreterJVMRemoteI i) {
       if (_state.compareAndSet(this, new FreshRunningState(i))) {
-        boolean enforceAllAccess = DrJava.getConfig().getSetting(DYNAMICJAVA_ACCESS_CONTROL)
-          .equals(DynamicJavaAccessControlChoices.PRIVATE_AND_PACKAGE); // "all"
-        try { i.setEnforceAllAccess(enforceAllAccess); }
-        catch (RemoteException re) { _handleRemoteException(re); }
-        
-        boolean enforcePrivateAccess = !DrJava.getConfig().getSetting(DYNAMICJAVA_ACCESS_CONTROL)
-          .equals(DynamicJavaAccessControlChoices.DISABLED); // not "none"
-        try { i.setEnforcePrivateAccess(enforcePrivateAccess); }
-        catch (RemoteException re) { _handleRemoteException(re); }
-        
-        Boolean requireSemicolon = DrJava.getConfig().getSetting(DYNAMICJAVA_REQUIRE_SEMICOLON);
-        try { i.setRequireSemicolon(requireSemicolon); }
-        catch (RemoteException re) { _handleRemoteException(re); }
-        
-        Boolean requireVariableType = DrJava.getConfig().getSetting(DYNAMICJAVA_REQUIRE_VARIABLE_TYPE);
-        try { i.setRequireVariableType(requireVariableType); }
-        catch (RemoteException re) { _handleRemoteException(re); }
+        /* Irrelevant in DrScala. */
+//        boolean enforceAllAccess = DrJava.getConfig().getSetting(DYNAMICJAVA_ACCESS_CONTROL)
+//          .equals(DynamicJavaAccessControlChoices.PRIVATE_AND_PACKAGE); // "all"
+//        try { i.setEnforceAllAccess(enforceAllAccess); }
+//        catch (RemoteException re) { _handleRemoteException(re); }
+//        
+//        boolean enforcePrivateAccess = !DrJava.getConfig().getSetting(DYNAMICJAVA_ACCESS_CONTROL)
+//          .equals(DynamicJavaAccessControlChoices.DISABLED); // not "none"
+//        try { i.setEnforcePrivateAccess(enforcePrivateAccess); }
+//        catch (RemoteException re) { _handleRemoteException(re); }
+//        
+//        Boolean requireSemicolon = DrJava.getConfig().getSetting(DYNAMICJAVA_REQUIRE_SEMICOLON);
+//        try { i.setRequireSemicolon(requireSemicolon); }
+//        catch (RemoteException re) { _handleRemoteException(re); }
+//        
+//        Boolean requireVariableType = DrJava.getConfig().getSetting(DYNAMICJAVA_REQUIRE_VARIABLE_TYPE);
+//        try { i.setRequireVariableType(requireVariableType); }
+//        catch (RemoteException re) { _handleRemoteException(re); }
         
         // Note that _workingDir isn't guaranteed to be the dir at the time startup began.  Is that a problem?
         // (Is the user ever going to see a working dir message that doesn't match the actual setting?)

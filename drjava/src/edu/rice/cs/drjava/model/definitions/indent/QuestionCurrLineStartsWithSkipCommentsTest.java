@@ -53,7 +53,7 @@ public final class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRule
       "    // one line comment \n" + /*  50 */
       "    int method1         \n" + /*  75 */
       "    /**                 \n" + /* 100 */
-      "     * javadoc comment  \n" + /* 125 */
+      "     * scaladoc comment  \n" + /* 125 */
       "     */                 \n" + /* 150 */
       "    int method()        \n" + /* 175 */
       "    {                   \n" + /* 200 */
@@ -77,10 +77,10 @@ public final class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRule
 //    System.err.println("****** Starting test that fails ******");
     assertTrue("START starts one-line comment.", ! rule.testApplyRule(_doc, 54, Indenter.IndentReason.OTHER));
     assertTrue("START starts one-line comment.", ! rule.testApplyRule(_doc, 60, Indenter.IndentReason.OTHER));
-    assertTrue("START starts javadoc comment.", ! rule.testApplyRule(_doc, 104, Indenter.IndentReason.OTHER));
-    assertTrue("START starts javadoc comment.", ! rule.testApplyRule(_doc, 110, Indenter.IndentReason.OTHER));
-    assertTrue("Line inside javadoc comment.", ! rule.testApplyRule(_doc, 130, Indenter.IndentReason.OTHER));
-    assertTrue("Line closes javadoc comment.", ! rule.testApplyRule(_doc, 150, Indenter.IndentReason.OTHER));
+    assertTrue("START starts scaladoc comment.", ! rule.testApplyRule(_doc, 104, Indenter.IndentReason.OTHER));
+    assertTrue("START starts scaladoc comment.", ! rule.testApplyRule(_doc, 110, Indenter.IndentReason.OTHER));
+    assertTrue("Line inside scaladoc comment.", ! rule.testApplyRule(_doc, 130, Indenter.IndentReason.OTHER));
+    assertTrue("Line closes scaladoc comment.", ! rule.testApplyRule(_doc, 150, Indenter.IndentReason.OTHER));
     assertTrue("START is free.", ! rule.testApplyRule(_doc, 180, Indenter.IndentReason.OTHER));
     assertTrue("START is free.", ! rule.testApplyRule(_doc, 230, Indenter.IndentReason.OTHER));
     assertTrue("START starts multi-line comment.", ! rule.testApplyRule(_doc, 260, Indenter.IndentReason.OTHER));
@@ -122,9 +122,9 @@ public final class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRule
     assertTrue("Line starts a one-line comment.",                           !_rule.testApplyRule(_doc,  54, Indenter.IndentReason.OTHER));
     assertTrue("Line starts a one-line comment.",                           !_rule.testApplyRule(_doc,  60, Indenter.IndentReason.OTHER));
     assertTrue("Line starts with alphanumeric character.",                  !_rule.testApplyRule(_doc,  80, Indenter.IndentReason.OTHER));
-    assertTrue("Line starts a javadoc comment.",                            !_rule.testApplyRule(_doc, 104, Indenter.IndentReason.OTHER));
-    assertTrue("Line starts a javadoc comment.",                            !_rule.testApplyRule(_doc, 110, Indenter.IndentReason.OTHER));
-    assertTrue("Line inside javadoc comment.",                              !_rule.testApplyRule(_doc, 130, Indenter.IndentReason.OTHER));
+    assertTrue("Line starts a scaladoc comment.",                            !_rule.testApplyRule(_doc, 104, Indenter.IndentReason.OTHER));
+    assertTrue("Line starts a scaladoc comment.",                            !_rule.testApplyRule(_doc, 110, Indenter.IndentReason.OTHER));
+    assertTrue("Line inside scaladoc comment.",                              !_rule.testApplyRule(_doc, 130, Indenter.IndentReason.OTHER));
     assertTrue("Line starts with alphanumeric character.",                  !_rule.testApplyRule(_doc, 180, Indenter.IndentReason.OTHER));
     assertTrue("Line closes comment followed by an open brace.",             _rule.testApplyRule(_doc, 201, Indenter.IndentReason.OTHER));
     assertTrue("Line closes comment. It follows an open brace.",             _rule.testApplyRule(_doc, 221, Indenter.IndentReason.OTHER));
@@ -148,7 +148,7 @@ public final class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRule
       "    // }         }      \n" + /*  50 */
       "    int field;          \n" + /*  75 */
       "    /**                 \n" + /* 100 */
-      "     * javadoc comment  \n" + /* 125 */
+      "     * scaladoc comment  \n" + /* 125 */
       "     */   }             \n" + /* 150 */
       "    int method()        \n" + /* 175 */
       "/**/}                   \n" + /* 200 */
@@ -171,9 +171,9 @@ public final class QuestionCurrLineStartsWithSkipCommentsTest extends IndentRule
     assertTrue("Line starts a one-line comment.",                           !_rule.testApplyRule(_doc,  54, Indenter.IndentReason.OTHER));
     assertTrue("Line starts a one-line comment.",                           !_rule.testApplyRule(_doc,  60, Indenter.IndentReason.OTHER));
     assertTrue("Line starts with alphanumeric character.",                  !_rule.testApplyRule(_doc,  80, Indenter.IndentReason.OTHER));
-    assertTrue("Line starts a javadoc comment.",                            !_rule.testApplyRule(_doc, 104, Indenter.IndentReason.OTHER));
-    assertTrue("Line starts a javadoc comment.",                            !_rule.testApplyRule(_doc, 110, Indenter.IndentReason.OTHER));
-    assertTrue("Line inside javadoc comment.",                              !_rule.testApplyRule(_doc, 130, Indenter.IndentReason.OTHER));
+    assertTrue("Line starts a scaladoc comment.",                            !_rule.testApplyRule(_doc, 104, Indenter.IndentReason.OTHER));
+    assertTrue("Line starts a scaladoc comment.",                            !_rule.testApplyRule(_doc, 110, Indenter.IndentReason.OTHER));
+    assertTrue("Line inside scaladoc comment.",                              !_rule.testApplyRule(_doc, 130, Indenter.IndentReason.OTHER));
     assertTrue("Line closes multi-line comment followed by closed brace.",   _rule.testApplyRule(_doc, 150, Indenter.IndentReason.OTHER));
     assertTrue("Line starts with alphanumeric character.",                  !_rule.testApplyRule(_doc, 180, Indenter.IndentReason.OTHER));
     assertTrue("Line opens with block comment followed by open brace.",      _rule.testApplyRule(_doc, 200, Indenter.IndentReason.OTHER));

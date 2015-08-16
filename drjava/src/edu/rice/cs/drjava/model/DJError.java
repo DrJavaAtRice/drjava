@@ -113,7 +113,7 @@ public class DJError implements Comparable<DJError>, Serializable {
     return _file.getAbsolutePath();
   }
   
-  /** Gets the zero-based line number of the error.  NOTE: javac/javadoc produces zero-based line numbers internally, 
+  /** Gets the zero-based line number of the error.  NOTE: javac/scaladoc produces zero-based line numbers internally, 
     * but prints one-based line numbers to the command line.
     * @return the zero-based line number
     */

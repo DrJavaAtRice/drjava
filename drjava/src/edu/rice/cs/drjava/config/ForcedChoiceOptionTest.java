@@ -51,9 +51,9 @@ public final class ForcedChoiceOptionTest extends DrJavaTestCase {
   public ForcedChoiceOptionTest(String name) { super(name); }
   
   public void testGetName() {
-    ForcedChoiceOption fco = new ForcedChoiceOption("javadoc_access", "protected", null);
+    ForcedChoiceOption fco = new ForcedChoiceOption("scaladoc_access", "protected", null);
     
-    assertEquals("javadoc_access", fco.getName());
+    assertEquals("scaladoc_access", fco.getName());
   }
   
   public void testParse() {
@@ -63,7 +63,7 @@ public final class ForcedChoiceOptionTest extends DrJavaTestCase {
     aList.add("protected");
     aList.add("package");
     aList.add("private");
-    ForcedChoiceOption fco = new ForcedChoiceOption("javadoc_access", "protected", aList);
+    ForcedChoiceOption fco = new ForcedChoiceOption("scaladoc_access", "protected", aList);
     
     assertTrue("Parsing \"private\"", "private".equals(fco.parse("private")));
     try { fco.parse("Private"); fail(); }
@@ -77,7 +77,7 @@ public final class ForcedChoiceOptionTest extends DrJavaTestCase {
   }
   
   public void testFormat() {
-    ForcedChoiceOption fco = new ForcedChoiceOption("javadoc_access",
+    ForcedChoiceOption fco = new ForcedChoiceOption("scaladoc_access",
                                                     "protected",
                                                     null);
     

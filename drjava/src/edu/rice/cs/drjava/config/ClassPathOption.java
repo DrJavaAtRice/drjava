@@ -41,7 +41,7 @@ import java.util.Vector;
 
 import edu.rice.cs.util.FileOps;
 
-/** Generate vector options separately to appease javadoc.
+/** Generate vector options separately to appease scaladoc.
  *  (It didn't like anonymous inner classes with generics in interfaces in Java 1.3.)
  */
 class ClassPathOption {

@@ -53,7 +53,7 @@ import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
-import edu.rice.cs.drjava.model.javadoc.JavadocModel;
+import edu.rice.cs.drjava.model.javadoc.ScaladocModel;
 import edu.rice.cs.drjava.project.DocumentInfoGetter;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.util.FileOpenSelector;
@@ -74,7 +74,7 @@ import edu.rice.cs.drjava.config.OptionParser;
   * @see ILoadDocuments
   * @see CompilerModel
   * @see JUnitModel
-  * @see JavadocModel
+  * @see ScaladocModel
   *
   * @version $Id: GlobalModel.java 5727 2012-09-30 03:58:32Z rcartwright $
   */
@@ -103,8 +103,8 @@ public interface GlobalModel extends ILoadDocuments {
   /** Gets the JUnitModel, which provides all methods relating to JUnit testing. */
   public JUnitModel getJUnitModel();
   
-  /** Gets the JavadocModel, which provides all methods relating to Javadoc. */
-  public JavadocModel getJavadocModel();
+  /** Gets the ScaladocModel, which provides all methods relating to Scaladoc. */
+  public ScaladocModel getScaladocModel();
   
   /** Gets the Debugger, which interfaces with the integrated debugger. */
   public Debugger getDebugger();

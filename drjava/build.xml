@@ -6,7 +6,6 @@
      
 <project name="drscala" default="help">
 
-<!--  <property name="readable-project-name" value="DrJava" /> -->
   <property name="readable-project-name" value="DrScala" />
   <property name="src-working-dir" value="src/edu/rice/cs/drjava" />
   <property name="junit-jar-to-include" value="lib/buildlib/junit.jar" />
@@ -376,6 +375,16 @@
     </antcall>
   </target>
 
+  <target name="test-8" depends="compile, resolve-java7-exec, resolve-java8-tools" unless="skip-test"
+          description="Run all tests under Java 8 (after compiling); use -Dtest-spec=... to filter">
+    <echo message="ConcJUnit is currently incompatible with Java 7."/>
+    <antcall target="iterate-tests">
+      <param name="test-jvm" value="${java8-exec}" />
+      <param name="test-tools" value="${java8-tools}" />
+      <param name="test-force-disable-concjunit" value="true" />
+    </antcall>
+  </target>
+
   <target name="test-7" depends="compile, resolve-java7-exec, resolve-java7-tools" unless="skip-test"
           description="Run all tests under Java 7 (after compiling); use -Dtest-spec=... to filter">
     <echo message="ConcJUnit is currently incompatible with Java 7."/>
@@ -671,22 +680,20 @@
   </target>
   
   <target name="do-javadoc" depends="check-generate-dir-from-dir" unless="already-generated">
-    <echo message="Generating javadocs" />
+    <echo message="Generating javadocs for DrScala" />
     <delete dir="docs/javadoc" />
     <mkdir dir="docs/javadoc" />
     <javadoc sourcepath="src" packagenames="*" destdir="docs/javadoc" maxmemory="512M"
              access="private" Use="yes" Version="yes" Author="yes" Windowtitle="${readable-project-name} API (${version-tag})" linksource="${link-source}">
       <classpath>
-        <pathelement location="${java5-tools}" />
+        <pathelement location="${java8-tools}" />
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="lib/buildlib/netbeans-memory-leak-utils.jar" />
       </classpath>
-      <link href="http://java.sun.com/j2se/1.5/docs/api" />
-      <link href="http://junit.org/junit/javadoc/3.8.1" />
+      <link href="http://docs.oracle.com/javase/8/docs/api/" />
+      <link href="http://junit.org/junit/javadoc/3.8.2" />
       <link href="http://drjava.org/javadoc/plt" />
-      <link href="http://drjava.org/javadoc/javalanglevels" />
-      <link href="http://drjava.org/javadoc/dynamicjava" />
       <!-- Additional external library APIs may be listed here -->
     </javadoc>
   </target>
@@ -694,6 +701,9 @@
   
   <target name="clover" depends="clean, setup-clover, test, report-clover" 
           description="Generate a Clover test coverage report" />
+  
+  <target name="clover-8" depends="clean, setup-clover, test-8, report-clover" 
+          description="Generate a Clover test coverage report under Java 8" />
   
   <target name="clover-7" depends="clean, setup-clover, test-7, report-clover" 
           description="Generate a Clover test coverage report under Java 7" />

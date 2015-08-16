@@ -77,7 +77,7 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
   protected void _createRequests() throws DebugException {
     boolean stepJava = DrJava.getConfig().getSetting(DEBUG_STEP_JAVA).booleanValue();
     boolean stepInterpreter = DrJava.getConfig().getSetting(DEBUG_STEP_INTERPRETER).booleanValue();
-    boolean stepDrJava = DrJava.getConfig().getSetting(DEBUG_STEP_DRJAVA).booleanValue();
+    boolean stepDrJava = DrJava.getConfig().getSetting(DEBUG_STEP_DRSCALA).booleanValue();
 
     StepRequest request = _manager.getEventRequestManager().
       createStepRequest(_thread, _size, _depth);

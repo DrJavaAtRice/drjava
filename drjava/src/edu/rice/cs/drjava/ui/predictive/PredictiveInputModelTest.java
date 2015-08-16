@@ -1006,8 +1006,8 @@ namesList);
 
   public void testJavaAPIFragmentLineNumStrategy() {
     final String base = edu.rice.cs.drjava.DrJava.
-      getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.JAVADOC_1_5_LINK) + "/";
-    final String stripPrefix = ""; // nothing needs to be stripped, links in 1.4 Javadoc are relative
+      getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.SCALADOC_1_5_LINK) + "/";
+    final String stripPrefix = ""; // nothing needs to be stripped, links in 1.4 Scaladoc are relative
     final String suffix = "/allclasses-1.5.html";
     Set<edu.rice.cs.drjava.ui.MainFrameStatics.JavaAPIListEntry> l = 
       edu.rice.cs.drjava.ui.MainFrame._generateJavaAPISet(base,

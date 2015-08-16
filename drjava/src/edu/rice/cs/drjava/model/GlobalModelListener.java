@@ -40,7 +40,7 @@ import java.io.File;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.junit.JUnitListener;
-import edu.rice.cs.drjava.model.javadoc.JavadocListener;
+import edu.rice.cs.drjava.model.javadoc.ScaladocListener;
 
 import edu.rice.cs.util.FileOpenSelector;
 import edu.rice.cs.util.swing.AsyncTask;
@@ -50,7 +50,7 @@ import edu.rice.cs.util.swing.AsyncTask;
   *
   * @version $Id: GlobalModelListener.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public interface GlobalModelListener extends InteractionsListener, JavadocListener, CompilerListener, JUnitListener {
+public interface GlobalModelListener extends InteractionsListener, ScaladocListener, CompilerListener, JUnitListener {
   
   /** Called when an asynchronous task must be run in the model */
   public <P,R> void executeAsyncTask(AsyncTask<P,R> task, P param, boolean showProgress, boolean lockUI);

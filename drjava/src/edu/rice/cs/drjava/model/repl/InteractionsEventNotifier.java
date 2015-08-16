@@ -42,7 +42,7 @@ import edu.rice.cs.drjava.model.EventNotifier;
 
 /** Keeps track of all listeners to an InteractionsModel, and has the ability to notify them of some event. <p>
   * This class has a specific role of managing InteractionsListeners.  Other classes with similar names use similar 
-  * code to perform the same function for other interfaces, e.g. JavadocEventNotifier and GlobalEventNotifier.
+  * code to perform the same function for other interfaces, e.g. ScaladocEventNotifier and GlobalEventNotifier.
   * These classes implement the appropriate interface definition so that they can be used transparently as composite 
   * packaging for a particular listener interface. <p>
   * Components which might otherwise manage their own list of listeners use EventNotifiers instead to simplify their 

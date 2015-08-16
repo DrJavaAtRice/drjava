@@ -52,7 +52,7 @@ public class HelpFrame extends HTMLFrame {
   protected static final String CONTENTS_PAGE = "index.html";
   protected static final String HOME_PAGE = "ch01.html";
   private static final URL INTRO_URL = HTMLFrame.class.getResource(HELP_PATH + HOME_PAGE);
-  protected static final String ICON = "DrJavaHelp.png";
+  protected static final String ICON = "drscalahelp.png";
 
   public HelpFrame() {
     super("Help on using DrScala", INTRO_URL, HelpFrame.class.getResource(HELP_PATH + CONTENTS_PAGE), ICON);

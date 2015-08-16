@@ -217,7 +217,7 @@ public class MainFrameStatics {
     public OpenDefinitionsDocument getOpenDefinitionsDocument() { return doc; }
   }
   
-  /** Wrapper class for the "Open Javadoc" and "Auto Import" dialog list entries.
+  /** Wrapper class for the "Open Scaladoc" and "Auto Import" dialog list entries.
     * Provides the ability to have the same class name in there multiple times in different packages.
     */
   public static class JavaAPIListEntry extends AutoCompletePopupEntry {

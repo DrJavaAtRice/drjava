@@ -50,6 +50,7 @@ import static edu.rice.cs.plt.reflect.JavaVersion.VendorType.*;
 public class JavaVersionTest extends TestCase {
   
   public void testParseClassVersion() {
+    assertEquals(JAVA_8, parseClassVersion("52.0"));
     assertEquals(JAVA_7, parseClassVersion("51.0"));
     assertEquals(JAVA_6, parseClassVersion("50.0"));
     assertEquals(JAVA_5, parseClassVersion("49.0"));
@@ -505,6 +506,7 @@ public class JavaVersionTest extends TestCase {
     assertEquals("Java 5.0", JAVA_5.fullVersion().toString());
     assertEquals("Java 6.0", JAVA_6.fullVersion().toString());
     assertEquals("Java 7.0", JAVA_7.fullVersion().toString());
-    assertEquals("Java >7.0", FUTURE.fullVersion().toString());
+    assertEquals("Java 8.0", JAVA_8.fullVersion().toString());
+    assertEquals("Java >8.0", FUTURE.fullVersion().toString());
   }  
 }

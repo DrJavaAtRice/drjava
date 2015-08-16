@@ -59,7 +59,7 @@ import edu.rice.cs.plt.lambda.LambdaUtil;
   */
 public class DrJavaSurveyPopup extends JDialog {
   /** the keys of the system properties that we want to send */
-  public static final String[] DRJAVA_SURVEY_KEYS = new String[] {"os.name","os.version","java.version","java.vendor"};
+  public static final String[] DRSCALA_SURVEY_KEYS = new String[] {"os.name","os.version","java.version","java.vendor"};
   
   /** the no button */
   private JButton _noButton;
@@ -84,10 +84,10 @@ public class DrJavaSurveyPopup extends JDialog {
     _yesButton = new JButton(_yesAction);
     _noButton = new JButton(_noAction);
     _neverAskAgain = new JCheckBox("Never ask me again",
-                                   !DrJava.getConfig().getSetting(OptionConstants.DIALOG_DRJAVA_SURVEY_ENABLED).booleanValue());
+                                   !DrJava.getConfig().getSetting(OptionConstants.DIALOG_DRSCALA_SURVEY_ENABLED).booleanValue());
     _neverAskAgain.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
-        DrJava.getConfig().setSetting(OptionConstants.DIALOG_DRJAVA_SURVEY_ENABLED, !_neverAskAgain.isSelected());
+        DrJava.getConfig().setSetting(OptionConstants.DIALOG_DRSCALA_SURVEY_ENABLED, !_neverAskAgain.isSelected());
       }
     });
 
@@ -99,10 +99,10 @@ public class DrJavaSurveyPopup extends JDialog {
     _questionPanel = new JOptionPane("May DrJava anonymously send the information\nbelow to the DrJava developers?",
                                      JOptionPane.QUESTION_MESSAGE,JOptionPane.DEFAULT_OPTION,null,
                                      new Object[0]);
-    int size = DRJAVA_SURVEY_KEYS.length + 2;
+    int size = DRSCALA_SURVEY_KEYS.length + 2;
     String[][] rowData = new String[size][2];
     int rowNum = 0;
-    for(String k: DRJAVA_SURVEY_KEYS) {
+    for(String k: DRSCALA_SURVEY_KEYS) {
       rowData[rowNum][0] = k;
       rowData[rowNum][1] = System.getProperty(k);
       ++rowNum;
@@ -144,9 +144,9 @@ public class DrJavaSurveyPopup extends JDialog {
   protected void noAction() {
     // set the date we asked even if the user pressed no
     // so the user won't be bothered the next time he starts DrJava
-    // next popup will occur in DRJAVA_SURVEY_DAYS (91) days.
-    DrJava.getConfig().setSetting(OptionConstants.LAST_DRJAVA_SURVEY, new Date().getTime());
-    DrJava.getConfig().setSetting(OptionConstants.LAST_DRJAVA_SURVEY_RESULT, getSurveyURL());
+    // next popup will occur in DRSCALA_SURVEY_DAYS (91) days.
+    DrJava.getConfig().setSetting(OptionConstants.LAST_DRSCALA_SURVEY, new Date().getTime());
+    DrJava.getConfig().setSetting(OptionConstants.LAST_DRSCALA_SURVEY_RESULT, getSurveyURL());
     setVisible(false);
     dispose();
   }
@@ -155,12 +155,12 @@ public class DrJavaSurveyPopup extends JDialog {
 
   /** Return the URL that would be used to answer the DrJava survey. */
   public static String getSurveyURL() {
-    final String DRJAVA_SURVEY_PAGE = "http://www.drjava.org/submit-usage.php?";
+    final String DRSCALA_SURVEY_PAGE = "http://www.drjava.org/submit-usage.php?";
     StringBuilder sb = new StringBuilder();
-    sb.append(DRJAVA_SURVEY_PAGE);
+    sb.append(DRSCALA_SURVEY_PAGE);
     sb.append("rev=");
     sb.append(Version.getRevisionNumber());
-    for(String k: DRJAVA_SURVEY_KEYS) {
+    for(String k: DRSCALA_SURVEY_KEYS) {
       sb.append('&');
       sb.append(k);
       sb.append('=');
@@ -174,12 +174,12 @@ public class DrJavaSurveyPopup extends JDialog {
     * string has changed from the last time, or enough days have passed since the last test (3 months) */
   public static boolean maySubmitSurvey() {
     // check how many days have passed since the last survey
-    int days = DrJava.getConfig().getSetting(OptionConstants.DRJAVA_SURVEY_DAYS);
+    int days = DrJava.getConfig().getSetting(OptionConstants.DRSCALA_SURVEY_DAYS);
     Date nextCheck = 
-      new Date(DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY) +
+      new Date(DrJava.getConfig().getSetting(OptionConstants.LAST_DRSCALA_SURVEY) +
                days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
     return (new Date().after(nextCheck)) ||
-      (!DrJava.getConfig().getSetting(OptionConstants.LAST_DRJAVA_SURVEY_RESULT).equals(getSurveyURL()));
+      (!DrJava.getConfig().getSetting(OptionConstants.LAST_DRSCALA_SURVEY_RESULT).equals(getSurveyURL()));
   }
   
   protected void yesAction() {
@@ -210,7 +210,7 @@ public class DrJavaSurveyPopup extends JDialog {
         LOG.log("Could not open URL using Java", e);
         try {
           PlatformFactory.ONLY.openURL(new URL(result));
-          DrJava.getConfig().setSetting(OptionConstants.LAST_DRJAVA_SURVEY_RESULT, result);
+          DrJava.getConfig().setSetting(OptionConstants.LAST_DRSCALA_SURVEY_RESULT, result);
         }
         catch(IOException e2) {
           // could not open using Java or web browser, ignore

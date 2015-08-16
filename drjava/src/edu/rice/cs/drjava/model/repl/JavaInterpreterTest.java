@@ -45,10 +45,12 @@ import edu.rice.cs.plt.reflect.ReflectUtil;
 import edu.rice.cs.plt.text.TextUtil;
 
 import edu.rice.cs.dynamicjava.Options;
-import edu.rice.cs.dynamicjava.interpreter.*;
+import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
+import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
 import edu.rice.cs.dynamicjava.interpreter.Interpreter;
+// TODO: we should move these three classes/interfaces out of DynamicJava so we can flush dynamicjava.jar
 import edu.rice.cs.dynamicjava.symbol.*;
-import edu.rice.cs.dynamicjava.symbol.type.Type;
+//import edu.rice.cs.dynamicjava.symbol.type.Type;
 
 /** Tests the functionality of the repl interpreter.
   * @version $Id: JavaInterpreterTest.java 5594 2012-06-21 11:23:40Z rcartwright $
@@ -56,11 +58,10 @@ import edu.rice.cs.dynamicjava.symbol.type.Type;
 public class JavaInterpreterTest extends DrJavaTestCase {
   
   // ***************************
-  // TODO: These are useful tests, but they don't belong here.  They're testing the
-  // functionality of DynamicJava, and so should be packaged with other DynamicJava tests.
-  // It's not DrJava's responsibility to comprehensively test the libraries it uses.
-  //
-  // True. Then put them somewhere else, don't just comment them out. --mgricken
+  // TODO: This class should be renamed "ScalaInterpreterTest" and the superclass should be renamed
+  // "DrScalaTestCase".
+  // Note: These JUnit tests test the behavior of the Scala interpreter, a code base that we do not control,
+  // inside the DrScala intereactions pane.
   // ***************************
   
   private volatile InteractionsPaneOptions _interpreterOptions;
@@ -509,35 +510,6 @@ public class JavaInterpreterTest extends DrJavaTestCase {
     try { _interpreter.interpret("new int[]{0}.clone()"); }
     catch(RuntimeException e) { fail("Array cloning failed."); }
   }
-  
-//  /** Test that the Interactions Pane will or won't allow access to private members
-//    * given the value of the ALLOW_PRIVATE_ACCESS configuration option.
-//    */
-//  public void testAllowPrivateAccess() throws InterpreterException {
-//    // The real option listener is in DefaultGlobalModel, so add one here.
-//    DrJava.getConfig().addOptionListener(OptionConstants.ALLOW_PRIVATE_ACCESS, new OptionListener<Boolean>() {
-//      public void optionChanged(OptionEvent<Boolean> oce) {
-//        _interpreter.setPrivateAccessible(oce.value.booleanValue());
-//      }
-//    });
-//    DrJava.getConfig().setSetting(OptionConstants.ALLOW_PRIVATE_ACCESS, Boolean.valueOf(false));
-//    Utilities.clearEventQueue();
-////    System.err.println("\nPrivate Access = " + _interpreter.getPrivateAccessible());
-//    try {
-//      _interpreter.interpret("class A { private int i = 0; }");
-//      _interpreter.interpret("new A().i");
-//      System.out.println("Private access erroneously succeeded");
-//      fail("Should not have access to the private field i inside class A.");
-//    }
-//    catch (InterpreterException ere) {
-//      assertTrue(ere.getContainedException() instanceof IllegalAccessException);
-//    }
-//    DrJava.getConfig().setSetting(OptionConstants.ALLOW_PRIVATE_ACCESS, Boolean.valueOf(true));
-//    Utilities.clearEventQueue();
-//    assertEquals("Should be able to access private field i whose value should be 0",
-//                 new Integer(0),
-//                 _interpreter.interpret("new A().i"));
-//  }
 
   /**
    * Tests that declaring a void method in the Interactions Pane won't cause a bad type

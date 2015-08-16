@@ -71,9 +71,9 @@ import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
 import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
-import edu.rice.cs.drjava.model.javadoc.JavadocModel;
-import edu.rice.cs.drjava.model.javadoc.DefaultJavadocModel;
-import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
+import edu.rice.cs.drjava.model.javadoc.ScaladocModel;
+import edu.rice.cs.drjava.model.javadoc.DefaultScaladocModel;
+import edu.rice.cs.drjava.model.javadoc.NoScaladocAvailable;
 import edu.rice.cs.drjava.model.JDKDescriptor;
 
 /** A JDKToolsLibrary that was loaded from a specific jar file. */
@@ -88,7 +88,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   static {
     Collections.addAll(TOOLS_PACKAGES, new String[] {
       // From 1.4 tools.jar:
-      "com.sun.javadoc",
+      "com.sun.scaladoc",
       "com.sun.jdi",
       "com.sun.tools",
       "sun.applet", // also bundled in rt.jar
@@ -120,8 +120,8 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
   
   private JarJDKToolsLibrary(File location, FullVersion version, JDKDescriptor jdkDescriptor,
                              CompilerInterface compiler, Debugger debugger,
-                             JavadocModel javadoc, List<File> bootClassPath) {
-    super(version, jdkDescriptor, compiler, debugger, javadoc);
+                             ScaladocModel scaladoc, List<File> bootClassPath) {
+    super(version, jdkDescriptor, compiler, debugger, scaladoc);
     _location = location;
     _bootClassPath = bootClassPath;
   }
@@ -148,7 +148,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     
     CompilerInterface compiler = NoCompilerAvailable.ONLY;
     Debugger debugger = NoDebuggerAvailable.ONLY;
-    JavadocModel javadoc = new NoJavadocAvailable(model);
+    ScaladocModel scaladoc = new NoScaladocAvailable(model);
     
     FullVersion version = desc.guessVersion(f);
     JDKToolsLibrary.msg("makeFromFile: " + f + "; version: " + version + "," + version.majorVersion() + "; desc: " + desc);
@@ -245,18 +245,18 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       }
       
       try {
-        new PathClassLoader(loader, path).loadClass("com.sun.tools.javadoc.Main");
+        new PathClassLoader(loader, path).loadClass("com.sun.tools.scaladoc.Main");
         File bin = new File(f.getParentFile(), "../bin");
         if (!IOUtil.attemptIsDirectory(bin)) { bin = new File(f.getParentFile(), "../Home/bin"); }
         if (!IOUtil.attemptIsDirectory(bin)) { bin = new File(System.getProperty("java.home", f.getParent())); }
-        javadoc = new DefaultJavadocModel(model, bin, path);
+        scaladoc = new DefaultScaladocModel(model, bin, path);
       }
       catch (ClassNotFoundException e) { /* can't load */ }
       catch (LinkageError e) { /* can't load (probably not necessary, but might as well catch it) */ }
         
     }
     
-    return new JarJDKToolsLibrary(f, version, desc, compiler, debugger, javadoc, bootClassPath);
+    return new JarJDKToolsLibrary(f, version, desc, compiler, debugger, scaladoc, bootClassPath);
   }
   
   public static FullVersion guessVersion(File f, JDKDescriptor desc) {
@@ -528,7 +528,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
         }
         else {
           JDKToolsLibrary.msg("This library is not valid: compiler=" + lib.compiler().isAvailable() +
-                              " debugger=" + lib.debugger().isAvailable() + " javadoc=" + lib.javadoc().isAvailable());
+                              " debugger=" + lib.debugger().isAvailable() + " scaladoc=" + lib.scaladoc().isAvailable());
         }
       }
       _log.log("Valid Results: \n***** results = " + results + "\n***** compound results = " + compoundResults);

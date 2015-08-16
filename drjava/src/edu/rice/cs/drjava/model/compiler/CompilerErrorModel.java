@@ -59,7 +59,7 @@ import edu.rice.cs.util.swing.Utilities;
 
 /** Contains the Errors for a set of compiled/tested filea after a compile or test step has ended.
   * TODO: refactor most of the code in this class into an abstract ErrorModel class.  JUnitErrorModel should inherit
-  * from this abstract class not from CompilerErrorModel!  JavadocErrorModel should also inherit from
+  * from this abstract class not from CompilerErrorModel!  ScaladocErrorModel should also inherit from
   * this abstract class instead of decorating a CompilerErrorModel!
   * @version $Id: CompilerErrorModel.java 5594 2012-06-21 11:23:40Z rcartwright $
   */

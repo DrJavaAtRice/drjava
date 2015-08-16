@@ -99,7 +99,7 @@ import edu.rice.cs.drjava.model.debug.DebugException ;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
-import edu.rice.cs.drjava.model.javadoc.JavadocModel;
+import edu.rice.cs.drjava.model.javadoc.ScaladocModel;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
@@ -158,7 +158,7 @@ import edu.rice.cs.util.text.ConsoleDocument;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
-/** In simple terms, a DefaultGlobalModel without an interpreter, compiler, junit testing, debugger or javadoc.
+/** In simple terms, a DefaultGlobalModel without an interpreter, compiler, junit testing, debugger or scaladoc.
   * Hence, it only has only document handling functionality
   * @version $Id: AbstractGlobalModel.java 5727 2012-09-30 03:58:32Z rcartwright $
   */
@@ -302,7 +302,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //        return false;
 //      }
 //    };
-    _registerOptionListeners();
+    /* Unnecessary in DrScala. */
+//    _registerOptionListeners();
     
     setFileGroupingState(makeFlatFileGroupingState());
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.projectRunnableChanged(); } });
@@ -1151,8 +1152,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** throws UnsupportedOperationException */
-  public JavadocModel getJavadocModel() {
-    throw new UnsupportedOperationException("AbstractGlobalModel does not support javadoc");
+  public ScaladocModel getScaladocModel() {
+    throw new UnsupportedOperationException("AbstractGlobalModel does not support scaladoc");
   }
   
   public IDocumentNavigator<OpenDefinitionsDocument> getDocumentNavigator() { return _documentNavigator; }
@@ -2193,7 +2194,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     dispose();  // kills interpreter and cleans up RMI hooks in the slave JVM
     
-    if (DrJava.getConfig().getSetting(OptionConstants.DRJAVA_USE_FORCE_QUIT)) {
+    if (DrJava.getConfig().getSetting(OptionConstants.DRSCALA_USE_FORCE_QUIT)) {
       Runtime.getRuntime().halt(0);  // force DrJava to exit
     }
     
@@ -2469,8 +2470,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     throw new UnsupportedOperationException("AbstractGlobalModel does not support interactions");
   }
   
+  /* All of the listeners involve models in the DynamicJava interpreter which has been replaced in DrScala 
+   * by a Scala interpreter. */
   /** Registers OptionListeners.  Factored out code from the two constructor. */
-  private void _registerOptionListeners() {
+//  private void _registerOptionListeners() {
 //    // Listen to any relevant config options
 //    DrJava.getConfig().addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
     
@@ -2479,30 +2482,30 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    Boolean makeBackups = DrJava.getConfig().getSetting(BACKUP_FILES);
 //    FileOps.DefaultFileSaver.setBackupsEnabled(makeBackups.booleanValue ());
     
-    DrJava.getConfig().addOptionListener(DYNAMICJAVA_ACCESS_CONTROL, new OptionListener<String>() {
-      public void optionChanged(OptionEvent<String> oce) {
-        boolean enforceAllAccess = DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
-          .equals(OptionConstants.DynamicJavaAccessControlChoices.PRIVATE_AND_PACKAGE); // "all"
-        getInteractionsModel().setEnforceAllAccess(enforceAllAccess);
-        
-        boolean enforcePrivateAccess = !DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
-          .equals(OptionConstants.DynamicJavaAccessControlChoices.DISABLED); // not "none"
-        getInteractionsModel().setEnforcePrivateAccess(enforcePrivateAccess);
-      }
-    });
-    
-    DrJava.getConfig().addOptionListener(DYNAMICJAVA_REQUIRE_SEMICOLON, new OptionListener<Boolean>() {
-      public void optionChanged(OptionEvent<Boolean> oce) {
-        getInteractionsModel().setRequireSemicolon(oce.value);
-      }
-    });
-    
-    DrJava.getConfig().addOptionListener(DYNAMICJAVA_REQUIRE_VARIABLE_TYPE, new OptionListener<Boolean>() {
-      public void optionChanged(OptionEvent<Boolean> oce) {
-        getInteractionsModel().setRequireVariableType(oce.value);
-      }
-    });
-  }
+//    DrJava.getConfig().addOptionListener(DYNAMICJAVA_ACCESS_CONTROL, new OptionListener<String>() {
+//      public void optionChanged(OptionEvent<String> oce) {
+//        boolean enforceAllAccess = DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
+//          .equals(OptionConstants.DynamicJavaAccessControlChoices.PRIVATE_AND_PACKAGE); // "all"
+//        getInteractionsModel().setEnforceAllAccess(enforceAllAccess);
+//        
+//        boolean enforcePrivateAccess = !DrJava.getConfig().getSetting(OptionConstants.DYNAMICJAVA_ACCESS_CONTROL)
+//          .equals(OptionConstants.DynamicJavaAccessControlChoices.DISABLED); // not "none"
+//        getInteractionsModel().setEnforcePrivateAccess(enforcePrivateAccess);
+//      }
+//    });
+//    
+//    DrJava.getConfig().addOptionListener(DYNAMICJAVA_REQUIRE_SEMICOLON, new OptionListener<Boolean>() {
+//      public void optionChanged(OptionEvent<Boolean> oce) {
+//        getInteractionsModel().setRequireSemicolon(oce.value);
+//      }
+//    });
+//    
+//    DrJava.getConfig().addOptionListener(DYNAMICJAVA_REQUIRE_VARIABLE_TYPE, new OptionListener<Boolean>() {
+//      public void optionChanged(OptionEvent<Boolean> oce) {
+//        getInteractionsModel().setRequireVariableType(oce.value);
+//      }
+//    });
+//  }
   
   /** Appends a string to the given document using a particular attribute set.
     * Also waits for a small amount of time (InteractionsModel.WRITE_DELAY) to prevent any one
@@ -3380,8 +3383,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** throws UnsupportedOperationException */
-    public void generateJavadoc(FileSaveSelector saver) throws IOException {
-      throw new UnsupportedOperationException("AbstractGlobalModel does not support javadoc");
+    public void generateScaladoc(FileSaveSelector saver) throws IOException {
+      throw new UnsupportedOperationException("AbstractGlobalModel does not support scaladoc");
     }
     
     /** Returns true if this document is resident in memory. _cacheAdapter should be non-null. */

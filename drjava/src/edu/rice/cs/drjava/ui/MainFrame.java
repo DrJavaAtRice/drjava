@@ -88,7 +88,7 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.definitions.NoSuchDocumentException;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.drjava.model.javadoc.JavadocModel;
+import edu.rice.cs.drjava.model.javadoc.ScaladocModel;
 import edu.rice.cs.drjava.ui.config.ConfigFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputModel;
@@ -176,7 +176,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   private volatile CompilerErrorPanel _compilerErrorPanel;
   private volatile JUnitPanel _junitPanel;
-  private volatile JavadocErrorPanel _javadocErrorPanel;
+  private volatile ScaladocErrorPanel _scaladocErrorPanel;
   private volatile FindReplacePanel _findReplace;
   private volatile BreakpointsPanel _breakpointsPanel;
   private volatile BookmarksPanel _bookmarksPanel;
@@ -427,8 +427,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public boolean shouldUpdateDocumentState() { return false; }
   };
   
-  /** Provides the view's contribution to the Javadoc interaction. */
-  private final JavadocDialog _javadocSelector = new JavadocDialog(this);
+  /** Provides the view's contribution to the Scaladoc interaction. */
+  private final ScaladocDialog _scaladocSelector = new ScaladocDialog(this);
   
   /** Provides a chooser to open a directory */  
   private volatile DirectoryChooser _folderChooser;
@@ -988,34 +988,34 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
   
-  /** Runs Javadoc on all open documents (and the files in their packages). */
-  private volatile AbstractAction _javadocAllAction = new AbstractAction("Javadoc All Documents") {
+  /** Runs Scaladoc on all open documents (and the files in their packages). */
+  private volatile AbstractAction _scaladocAllAction = new AbstractAction("Scaladoc All Documents") {
     { _addGUIAvailabilityListener(this,                                             // init
-                                 GUIAvailabilityListener.ComponentType.JAVADOC,
+                                 GUIAvailabilityListener.ComponentType.SCALADOC,
                                  GUIAvailabilityListener.ComponentType.COMPILER); }
     public void actionPerformed(ActionEvent ae) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
       try {
-        JavadocModel jm = _model.getJavadocModel();
-        File suggestedDir = jm.suggestJavadocDestination(_model.getActiveDocument());
-        _javadocSelector.setSuggestedDir(suggestedDir);
-        jm.javadocAll(_javadocSelector, _saveSelector);
+        ScaladocModel jm = _model.getScaladocModel();
+        File suggestedDir = jm.suggestScaladocDestination(_model.getActiveDocument());
+        _scaladocSelector.setSuggestedDir(suggestedDir);
+        jm.scaladocAll(_scaladocSelector, _saveSelector);
       }
       catch (IOException ioe) { MainFrameStatics.showIOError(MainFrame.this, ioe); }
     }
   };
   
-  /** Runs Javadoc on the current document. */
-  private volatile AbstractAction _javadocCurrentAction = new AbstractAction("Preview Javadoc for Current Document") {
+  /** Runs Scaladoc on the current document. */
+  private volatile AbstractAction _scaladocCurrentAction = new AbstractAction("Preview Scaladoc for Current Document") {
     { _addGUIAvailabilityListener(this,                                             // init
-                                 GUIAvailabilityListener.ComponentType.JAVADOC,
+                                 GUIAvailabilityListener.ComponentType.SCALADOC,
                                  GUIAvailabilityListener.ComponentType.COMPILER); }
     public void actionPerformed(ActionEvent ae) {
       if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
         _mainSplit.resetToPreferredSizes();
       try {
-        _model.getActiveDocument().generateJavadoc(_saveSelector);
+        _model.getActiveDocument().generateScaladoc(_saveSelector);
       }
       catch (IOException ioe) { MainFrameStatics.showIOError(MainFrame.this, ioe); }
     }
@@ -1565,20 +1565,20 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) { _gotoFileUnderCursor(); }
   };
   
-  /** Reset the position of the "Open Javadoc" dialog. */
-  public void resetOpenJavadocDialogPosition() {
-    initOpenJavadocDialog();
-    _openJavadocDialog.setFrameState("default");
-    if (DrJava.getConfig().getSetting(DIALOG_OPENJAVADOC_STORE_POSITION).booleanValue()) {
-      DrJava.getConfig().setSetting(DIALOG_OPENJAVADOC_STATE, "default");
+  /** Reset the position of the "Open Scaladoc" dialog. */
+  public void resetOpenScaladocDialogPosition() {
+    initOpenScaladocDialog();
+    _openScaladocDialog.setFrameState("default");
+    if (DrJava.getConfig().getSetting(DIALOG_OPENSCALADOC_STORE_POSITION).booleanValue()) {
+      DrJava.getConfig().setSetting(DIALOG_OPENSCALADOC_STATE, "default");
     }
   }
   
   /** Initialize dialog if necessary.
     * Should NOT be called in the event thread. ???*/
-  void initOpenJavadocDialog() {
+  void initOpenScaladocDialog() {
 //    assert (!EventQueue.isDispatchThread()); 
-    if (_openJavadocDialog == null) {
+    if (_openScaladocDialog == null) {
       PredictiveInputFrame.InfoSupplier<JavaAPIListEntry> info = 
         new PredictiveInputFrame.InfoSupplier<JavaAPIListEntry>() {
         public String value(JavaAPIListEntry entry) {
@@ -1615,15 +1615,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         = new ArrayList<PredictiveInputFrame.CloseAction<JavaAPIListEntry>>();
       actions.add(okAction);
       actions.add(cancelAction);
-      _openJavadocDialog = 
+      _openScaladocDialog = 
         new PredictiveInputFrame<JavaAPIListEntry>(MainFrame.this,
-                                                   "Open Java API Javadoc Webpage",
+                                                   "Open Java API Scaladoc Webpage",
                                                    true, // force
                                                    true, // ignore case
                                                    info,
                                                    strategies,
                                                    actions, 1, // cancel is action 1
-                                                   new JavaAPIListEntry("dummyJavadoc", "dummyJavadoc", null)) {
+                                                   new JavaAPIListEntry("dummyScaladoc", "dummyScaladoc", null)) {
         public void setOwnerEnabled(boolean b) { 
           if (b) hourglassOff(); 
           else hourglassOn();
@@ -1631,8 +1631,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }; 
       // putting one dummy entry in the list; it will be changed later anyway
       
-      if (DrJava.getConfig().getSetting(DIALOG_OPENJAVADOC_STORE_POSITION).booleanValue()) {
-        _openJavadocDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_OPENJAVADOC_STATE));
+      if (DrJava.getConfig().getSetting(DIALOG_OPENSCALADOC_STORE_POSITION).booleanValue()) {
+        _openScaladocDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_OPENSCALADOC_STATE));
       }
       generateJavaAPISet();
     }
@@ -1710,7 +1710,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         new ProcessingDialog(this, "Java API Classes", "Loading, please wait.", false);
       if (!EventQueue.isDispatchThread()) { pd.setVisible(true); }
       // generate list
-      String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
+      String linkVersion = DrJava.getConfig().getSetting(SCALADOC_API_REF_VERSION);
       
       // the string that will be ADDED to the beginning of the link to form the full URL
       String base = "";
@@ -1720,44 +1720,44 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       // the HTML file name that contains all the links
       String suffix = "";
-      if (linkVersion.equals(JAVADOC_AUTO_TEXT)) {
-        // use the compiler's version of the Java API Javadoc
+      if (linkVersion.equals(SCALADOC_AUTO_TEXT)) {
+        // use the compiler's version of the Java API Scaladoc
         JavaVersion ver = _model.getCompilerModel().getActiveCompiler().version();
-        if (ver == JavaVersion.JAVA_1_4) linkVersion = JAVADOC_1_4_TEXT;
-        else if (ver == JavaVersion.JAVA_5) linkVersion = JAVADOC_1_5_TEXT;
-        else if (ver == JavaVersion.JAVA_6) linkVersion = JAVADOC_1_6_TEXT;
-        else if (ver == JavaVersion.JAVA_7) linkVersion = JAVADOC_1_7_TEXT;
-        else linkVersion = JAVADOC_1_3_TEXT;   // ???? This looks like the wrong default; I would version 7.
+        if (ver == JavaVersion.JAVA_1_4) linkVersion = SCALADOC_1_4_TEXT;
+        else if (ver == JavaVersion.JAVA_5) linkVersion = SCALADOC_1_5_TEXT;
+        else if (ver == JavaVersion.JAVA_6) linkVersion = SCALADOC_1_6_TEXT;
+        else if (ver == JavaVersion.JAVA_7) linkVersion = SCALADOC_1_7_TEXT;
+        else linkVersion = SCALADOC_1_3_TEXT;   // ???? This looks like the wrong default; I would version 7.
       }
-      if (linkVersion.equals(JAVADOC_1_3_TEXT)) {
-        base = DrJava.getConfig().getSetting(JAVADOC_1_3_LINK) + "/";
-        stripPrefix = ""; // nothing needs to be stripped, links in 1.3 Javadoc are relative
+      if (linkVersion.equals(SCALADOC_1_3_TEXT)) {
+        base = DrJava.getConfig().getSetting(SCALADOC_1_3_LINK) + "/";
+        stripPrefix = ""; // nothing needs to be stripped, links in 1.3 Scaladoc are relative
         suffix = "/allclasses-1.3.html";
       }
-      else if (linkVersion.equals(JAVADOC_1_4_TEXT)) {
-        base = DrJava.getConfig().getSetting(JAVADOC_1_4_LINK) + "/";
-        stripPrefix = ""; // nothing needs to be stripped, links in 1.4 Javadoc are relative
+      else if (linkVersion.equals(SCALADOC_1_4_TEXT)) {
+        base = DrJava.getConfig().getSetting(SCALADOC_1_4_LINK) + "/";
+        stripPrefix = ""; // nothing needs to be stripped, links in 1.4 Scaladoc are relative
         suffix = "/allclasses-1.4.html";
       }
-      else if (linkVersion.equals(JAVADOC_1_5_TEXT)) {
-        base = DrJava.getConfig().getSetting(JAVADOC_1_5_LINK) + "/";
-        stripPrefix = ""; // nothing needs to be stripped, links in 1.5 Javadoc are relative
+      else if (linkVersion.equals(SCALADOC_1_5_TEXT)) {
+        base = DrJava.getConfig().getSetting(SCALADOC_1_5_LINK) + "/";
+        stripPrefix = ""; // nothing needs to be stripped, links in 1.5 Scaladoc are relative
         suffix = "/allclasses-1.5.html";
       }
-      else if (linkVersion.equals(JAVADOC_1_6_TEXT)) {
-        // at one point, the links in the 1.6 Javadoc were absolute, and this is how we dealt with that
-        // base = ""; // links in 1.6 Javadoc are absolute, so nothing needs to be added to get an absolute URL
+      else if (linkVersion.equals(SCALADOC_1_6_TEXT)) {
+        // at one point, the links in the 1.6 Scaladoc were absolute, and this is how we dealt with that
+        // base = ""; // links in 1.6 Scaladoc are absolute, so nothing needs to be added to get an absolute URL
         // // but we do need to strip the absolute part to get correct fully-qualified class names
         // // and we take the default string here, not what the user entered, because the links in
         // // our allclasses-1.6.html file go to the original Sun website.
-        // stripPrefix = JAVADOC_1_6_LINK.getDefaultString() + "/";
-        base = DrJava.getConfig().getSetting(JAVADOC_1_6_LINK) + "/";
-        stripPrefix = ""; // nothing needs to be stripped, links in 1.6 Javadoc are relative
+        // stripPrefix = SCALADOC_1_6_LINK.getDefaultString() + "/";
+        base = DrJava.getConfig().getSetting(SCALADOC_1_6_LINK) + "/";
+        stripPrefix = ""; // nothing needs to be stripped, links in 1.6 Scaladoc are relative
         suffix = "/allclasses-1.6.html";
       }
-      else if (linkVersion.equals(JAVADOC_1_7_TEXT)) {
-        base = DrJava.getConfig().getSetting(JAVADOC_1_7_LINK) + "/";
-        stripPrefix = ""; // nothing needs to be stripped, links in 1.7 Javadoc are relative
+      else if (linkVersion.equals(SCALADOC_1_7_TEXT)) {
+        base = DrJava.getConfig().getSetting(SCALADOC_1_7_LINK) + "/";
+        stripPrefix = ""; // nothing needs to be stripped, links in 1.7 Scaladoc are relative
         suffix = "/allclasses-1.7.html";
       }
       
@@ -1765,7 +1765,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _javaAPISet.addAll(_generateJavaAPISet(base, stripPrefix, suffix));
       }
       else {
-        // no valid Javadoc URL
+        // no valid Scaladoc URL
       }
       
       // add JUnit
@@ -1774,8 +1774,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                                "/allclasses-concjunit4.7.html");
       _javaAPISet.addAll(junitAPIList);
       
-      // add additional Javadoc libraries
-      for(String url: DrJava.getConfig().getSetting(JAVADOC_ADDITIONAL_LINKS)) {
+      // add additional Scaladoc libraries
+      for(String url: DrJava.getConfig().getSetting(SCALADOC_ADDITIONAL_LINKS)) {
         try {
           Set<JavaAPIListEntry> additionalList = _generateJavaAPISet(url + "/",
                                                                      "", // relative links
@@ -1795,25 +1795,25 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
-  /** The "Open Javadoc" dialog instance. */
-  volatile PredictiveInputFrame<JavaAPIListEntry> _openJavadocDialog = null;
+  /** The "Open Scaladoc" dialog instance. */
+  volatile PredictiveInputFrame<JavaAPIListEntry> _openScaladocDialog = null;
   
   /** The list of Java API classes. */
   volatile Set<JavaAPIListEntry> _javaAPISet = new HashSet<JavaAPIListEntry>();
   
   /** Action that asks the user for a file name and goes there.  Only executes in the event thread. */
-  private volatile Action _openJavadocAction = new AbstractAction("Open Java API Javadoc...") {
+  private volatile Action _openScaladocAction = new AbstractAction("Open Java API Scaladoc...") {
     public void actionPerformed(ActionEvent ae) {
       hourglassOn();
       new Thread() {
         public void run() {
         // run this in a thread other than the main thread
-          initOpenJavadocDialog();
+          initOpenScaladocDialog();
           Utilities.invokeLater(new Runnable() {
             public void run() {
               // but now run this in the event thread again
-              _openJavadocDialog.setItems(true, getJavaAPISet()); // ignore case
-              _openJavadocDialog.setVisible(true);
+              _openScaladocDialog.setItems(true, getJavaAPISet()); // ignore case
+              _openScaladocDialog.setVisible(true);
             }
           });
         }
@@ -1821,8 +1821,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
   
-  /** Opens the Javadoc specified by the word the cursor is on.  Only executes in the event thread. */
-  private void _openJavadocUnderCursor() {
+  /** Opens the Scaladoc specified by the word the cursor is on.  Only executes in the event thread. */
+  private void _openScaladocUnderCursor() {
     hourglassOn();
     new Thread() {
       public void run() {
@@ -1915,9 +1915,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                   hourglassOff();
                 }
                 else {
-                  initOpenJavadocDialog();
-                  _openJavadocDialog.setModel(true, pim); // ignore case
-                  _openJavadocDialog.setVisible(true);
+                  initOpenScaladocDialog();
+                  _openScaladocDialog.setModel(true, pim); // ignore case
+                  _openScaladocDialog.setVisible(true);
                 }
               }
             }
@@ -1927,10 +1927,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }.start();
   }
   
-  /** Open Javadoc page specified by the word the cursor is on. */
-  final Action _openJavadocUnderCursorAction = new AbstractAction("Open Java API Javadoc for Word Under Cursor...") {
+  /** Open Scaladoc page specified by the word the cursor is on. */
+  final Action _openScaladocUnderCursorAction = new AbstractAction("Open Java API Scaladoc for Word Under Cursor...") {
     public void actionPerformed(ActionEvent ae) {
-      _openJavadocUnderCursor();
+      _openScaladocUnderCursor();
     }
   };
   
@@ -3129,7 +3129,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _lastFocusOwner = _interactionsContainer;
       
       _junitPanel = new JUnitPanel(_model, MainFrame.this);
-      _javadocErrorPanel = new JavadocErrorPanel(_model, MainFrame.this);
+      _scaladocErrorPanel = new ScaladocErrorPanel(_model, MainFrame.this);
       
       _bookmarksPanel = new BookmarksPanel(MainFrame.this, _model.getBookmarkManager());
       
@@ -3296,7 +3296,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       _compilerErrorPanel.reset();
       _junitPanel.reset();
-      _javadocErrorPanel.reset();
+      _scaladocErrorPanel.reset();
       
       // Create menubar and menus
       _fileMenu = _setUpFileMenu(mask, true);
@@ -3386,7 +3386,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       
       // Set frame icon
-      setIconImage(getIcon("drjava64.png").getImage());
+      setIconImage(getIcon("drscala64.png").getImage());
       
       // Size and position
       int x = config.getSetting(WINDOW_X).intValue();
@@ -3489,55 +3489,55 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       });
       
-      // The OptionListener for JAVADOC_API_REF_VERSION.
+      // The OptionListener for SCALADOC_API_REF_VERSION.
       OptionListener<String> choiceOptionListener = new OptionListener<String>() {
         public void optionChanged(OptionEvent<String> oce) {
           clearJavaAPISet();
         }
       };
-      DrJava.getConfig().addOptionListener(JAVADOC_API_REF_VERSION, choiceOptionListener);
+      DrJava.getConfig().addOptionListener(SCALADOC_API_REF_VERSION, choiceOptionListener);
       
-      // The OptionListener for JAVADOC_XXX_LINK.
+      // The OptionListener for SCALADOC_XXX_LINK.
       OptionListener<String> link13OptionListener = new OptionListener<String>() {
         public void optionChanged(OptionEvent<String> oce) {
-          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
-          if (linkVersion.equals(JAVADOC_1_3_TEXT) ||
-              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
+          String linkVersion = DrJava.getConfig().getSetting(SCALADOC_API_REF_VERSION);
+          if (linkVersion.equals(SCALADOC_1_3_TEXT) ||
+              linkVersion.equals(SCALADOC_AUTO_TEXT)) {
             clearJavaAPISet();
           }
         }
       };
-      DrJava.getConfig().addOptionListener(JAVADOC_1_3_LINK, link13OptionListener);
+      DrJava.getConfig().addOptionListener(SCALADOC_1_3_LINK, link13OptionListener);
       OptionListener<String> link14OptionListener = new OptionListener<String>() {
         public void optionChanged(OptionEvent<String> oce) {
-          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
-          if (linkVersion.equals(JAVADOC_1_4_TEXT) ||
-              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
+          String linkVersion = DrJava.getConfig().getSetting(SCALADOC_API_REF_VERSION);
+          if (linkVersion.equals(SCALADOC_1_4_TEXT) ||
+              linkVersion.equals(SCALADOC_AUTO_TEXT)) {
             clearJavaAPISet();
           }
         }
       };
-      DrJava.getConfig().addOptionListener(JAVADOC_1_4_LINK, link14OptionListener);
+      DrJava.getConfig().addOptionListener(SCALADOC_1_4_LINK, link14OptionListener);
       OptionListener<String> link15OptionListener = new OptionListener<String>() {
         public void optionChanged(OptionEvent<String> oce) {
-          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
-          if (linkVersion.equals(JAVADOC_1_5_TEXT) ||
-              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
+          String linkVersion = DrJava.getConfig().getSetting(SCALADOC_API_REF_VERSION);
+          if (linkVersion.equals(SCALADOC_1_5_TEXT) ||
+              linkVersion.equals(SCALADOC_AUTO_TEXT)) {
             clearJavaAPISet();
           }
         }
       };
-      DrJava.getConfig().addOptionListener(JAVADOC_1_5_LINK, link15OptionListener);
+      DrJava.getConfig().addOptionListener(SCALADOC_1_5_LINK, link15OptionListener);
       OptionListener<String> link16OptionListener = new OptionListener<String>() {
         public void optionChanged(OptionEvent<String> oce) {
-          String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
-          if (linkVersion.equals(JAVADOC_1_6_TEXT) ||
-              linkVersion.equals(JAVADOC_AUTO_TEXT)) {
+          String linkVersion = DrJava.getConfig().getSetting(SCALADOC_API_REF_VERSION);
+          if (linkVersion.equals(SCALADOC_1_6_TEXT) ||
+              linkVersion.equals(SCALADOC_AUTO_TEXT)) {
             clearJavaAPISet();
           }
         }
       };
-      DrJava.getConfig().addOptionListener(JAVADOC_1_6_LINK, link16OptionListener);
+      DrJava.getConfig().addOptionListener(SCALADOC_1_6_LINK, link16OptionListener);
       OptionListener<String> linkJUnitOptionListener = new OptionListener<String>() {
         public void optionChanged(OptionEvent<String> oce) {
           clearJavaAPISet();
@@ -3549,7 +3549,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           clearJavaAPISet();
         }
       };
-      DrJava.getConfig().addOptionListener(JAVADOC_ADDITIONAL_LINKS, additionalLinkOptionListener);
+      DrJava.getConfig().addOptionListener(SCALADOC_ADDITIONAL_LINKS, additionalLinkOptionListener);
       OptionListener<Boolean> scanClassesOptionListener = new OptionListener<Boolean>() {
         public void optionChanged(OptionEvent<Boolean> oce) {
           clearCompleteClassSet();
@@ -3583,13 +3583,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       config.addOptionListener(MASTER_JVM_ARGS, masterJVMArgsListener);
       _masterJvmXmxListener = new ConfigOptionListeners.MasterJVMXMXListener(_configFrame);
       config.addOptionListener(MASTER_JVM_XMX, _masterJvmXmxListener);
-      config.addOptionListener(JAVADOC_CUSTOM_PARAMS, 
-                               new ConfigOptionListeners.JavadocCustomParamsListener(_configFrame));
+      config.addOptionListener(SCALADOC_CUSTOM_PARAMS, 
+                               new ConfigOptionListeners.ScaladocCustomParamsListener(_configFrame));
       ConfigOptionListeners.sanitizeSlaveJVMArgs(MainFrame.this, config.getSetting(SLAVE_JVM_ARGS), slaveJVMArgsListener);
       ConfigOptionListeners.sanitizeSlaveJVMXMX(MainFrame.this, config.getSetting(SLAVE_JVM_XMX));
       ConfigOptionListeners.sanitizeMasterJVMArgs(MainFrame.this, config.getSetting(MASTER_JVM_ARGS), masterJVMArgsListener);
       ConfigOptionListeners.sanitizeMasterJVMXMX(MainFrame.this, config.getSetting(MASTER_JVM_XMX));
-      ConfigOptionListeners.sanitizeJavadocCustomParams(MainFrame.this, config.getSetting(JAVADOC_CUSTOM_PARAMS));
+      ConfigOptionListeners.sanitizeScaladocCustomParams(MainFrame.this, config.getSetting(SCALADOC_CUSTOM_PARAMS));
       config.addOptionListener(REMOTE_CONTROL_ENABLED, new ConfigOptionListeners.
                                  RequiresDrJavaRestartListener<Boolean>(_configFrame, "Remote Control"));
       config.addOptionListener(REMOTE_CONTROL_PORT, new ConfigOptionListeners.
@@ -3731,7 +3731,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //        // ask if the user wants to submit the survey
 //        // but only if we haven't just asked if the user wants to download a new version
 //        // two dialogs on program start is too much clutter
-//        if (DrJava.getConfig().getSetting(DIALOG_DRJAVA_SURVEY_ENABLED) && 
+//        if (DrJava.getConfig().getSetting(DIALOG_DRSCALA_SURVEY_ENABLED) && 
 //            ! edu.rice.cs.util.swing.Utilities.TEST_MODE) {
 //          if (DrJavaSurveyPopup.maySubmitSurvey()) {
 //            // either enough days have passed, or the configuration has changed
@@ -4441,8 +4441,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Returns the JUnit error panel. */
   public JUnitPanel getJUnitPanel() { return _junitPanel; }
   
-  /** Returns the javadoc error panel. */
-  public JavadocErrorPanel getJavadocErrorPanel() { return _javadocErrorPanel; }
+  /** Returns the scaladoc error panel. */
+  public ScaladocErrorPanel getScaladocErrorPanel() { return _scaladocErrorPanel; }
   
   /** Returns the currently shown error (Compiler or JUnit) panel if there is one. Otherwise returns null. */
   public ErrorPanel getSelectedErrorPanel() {
@@ -4462,8 +4462,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   /** Returns whether the JavaDoc output tab is currently showing. */
-  public boolean isJavadocTabSelected() {
-    return _tabbedPane.getSelectedComponent() == _javadocErrorPanel;
+  public boolean isScaladocTabSelected() {
+    return _tabbedPane.getSelectedComponent() == _scaladocErrorPanel;
   }
   
   /** Makes sure save and compile buttons and menu items are enabled and disabled appropriately after document
@@ -5376,14 +5376,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       config.setSetting(DIALOG_GOTOFILE_STATE, DIALOG_GOTOFILE_STATE.getDefault());
     }
     
-    // "Open Javadoc" dialog position and size.
-    if ((DrJava.getConfig().getSetting(DIALOG_OPENJAVADOC_STORE_POSITION).booleanValue())
-          && (_openJavadocDialog != null) && (_openJavadocDialog.getFrameState() != null)) {
-      config.setSetting(DIALOG_OPENJAVADOC_STATE, (_openJavadocDialog.getFrameState().toString()));
+    // "Open Scaladoc" dialog position and size.
+    if ((DrJava.getConfig().getSetting(DIALOG_OPENSCALADOC_STORE_POSITION).booleanValue())
+          && (_openScaladocDialog != null) && (_openScaladocDialog.getFrameState() != null)) {
+      config.setSetting(DIALOG_OPENSCALADOC_STATE, (_openScaladocDialog.getFrameState().toString()));
     }
     else {
       // Reset to defaults to restore pristine behavior.
-      config.setSetting(DIALOG_OPENJAVADOC_STATE, DIALOG_OPENJAVADOC_STATE.getDefault());
+      config.setSetting(DIALOG_OPENSCALADOC_STATE, DIALOG_OPENSCALADOC_STATE.getDefault());
     }    
     
     // "Complete Word" dialog position and size.
@@ -6132,7 +6132,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Initialize the availability of GUI components.
     * 
-    * When JUnit is running, the compiler or Javadoc should not be invoked (Javadoc may invoke the compiler).
+    * When JUnit is running, the compiler or Scaladoc should not be invoked (Scaladoc may invoke the compiler).
     */
   private void _setUpGUIComponentAvailability() {
 //    _displayGUIComponentAvailabilityFrame();
@@ -6144,8 +6144,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _guiAvailabilityNotifier.ensureUnavailable(GUIAvailabilityListener.ComponentType.DEBUGGER_SUSPENDED);
     _guiAvailabilityNotifier.ensureAvailable(GUIAvailabilityListener.ComponentType.JUNIT);
     _guiAvailabilityNotifier.ensureAvailable(GUIAvailabilityListener.ComponentType.COMPILER);
-    _guiAvailabilityNotifier.ensureAvailabilityIs(GUIAvailabilityListener.ComponentType.JAVADOC,
-                                                  _model.getJavadocModel().isAvailable());
+    _guiAvailabilityNotifier.ensureAvailabilityIs(GUIAvailabilityListener.ComponentType.SCALADOC,
+                                                  _model.getScaladocModel().isAvailable());
   }
   
   /** Initializes all action objects.  Adds icons and descriptions to several of the actions. Note: this 
@@ -6255,22 +6255,22 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     _setUpAction(_junitAction, "Test Current", "Run JUnit over the current document");
     _setUpAction(_junitAllAction, "Test", "Run JUnit over all open JUnit tests");
-    if (_model.getJavadocModel().isAvailable()) {
-      _setUpAction(_javadocAllAction, "Scaladoc", "Create and save Scaladoc for the packages of all open documents");
-      _setUpAction(_javadocCurrentAction, "Preview Javadoc Current", "Preview the Javadoc for the current document");
+    if (_model.getScaladocModel().isAvailable()) {
+      _setUpAction(_scaladocAllAction, "Scaladoc", "Create and save Scaladoc for the packages of all open documents");
+      _setUpAction(_scaladocCurrentAction, "Preview Scaladoc Current", "Preview the Scaladoc for the current document");
     }
     else {
-      _setUpAction(_javadocAllAction, "Javadoc",
-                   "Note: DrJava cannot run Javadoc because no JDK was found. Please install a JDK.");
-      _setUpAction(_javadocCurrentAction, "Preview Javadoc Current",
-                   "Note: DrJava cannot run Javadoc because no JDK was found.  Please install a JDK.");
+      _setUpAction(_scaladocAllAction, "Scaladoc",
+                   "Note: DrJava cannot run Scaladoc because no JDK was found. Please install a JDK.");
+      _setUpAction(_scaladocCurrentAction, "Preview Scaladoc Current",
+                   "Note: DrJava cannot run Scaladoc because no JDK was found.  Please install a JDK.");
     }
     _setUpAction(_runAction, "Run", "Run the main method of the current document");
     _setUpAction(_runAppletAction, "Run", "Run the current document as applet");
     
-    _setUpAction(_openJavadocAction, "Open Java API Javadoc...", "Open the Java API Javadoc Web page for a class");
-    _setUpAction(_openJavadocUnderCursorAction, "Open Java API Javadoc for Word Under Cursor...", "Open the Java API " +
-                 "Javadoc Web page for the word under the cursor");
+    _setUpAction(_openScaladocAction, "Open Java API Scaladoc...", "Open the Java API Scaladoc Web page for a class");
+    _setUpAction(_openScaladocUnderCursorAction, "Open Java API Scaladoc for Word Under Cursor...", "Open the Java API " +
+                 "Scaladoc Web page for the word under the cursor");
     
     _setUpAction(_saveInteractionsCopyAction, "Save Copy of Interactions...",
                  "SaveAs", "Save copy of interactions contents to a file");
@@ -6617,7 +6617,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     final JMenu toolsMenu = new JMenu("Tools");
     PlatformFactory.ONLY.setMnemonic(toolsMenu,KeyEvent.VK_T);
     
-    // Compile, Test, Javadoc
+    // Compile, Test, Scaladoc
     _addMenuItem(toolsMenu, _compileAllAction, KEY_COMPILE_ALL, updateKeyboardManager);
     _addMenuItem(toolsMenu, _compileAction, KEY_COMPILE, updateKeyboardManager);
     _addMenuItem(toolsMenu, _junitAllAction, KEY_TEST_ALL, updateKeyboardManager);
@@ -6631,14 +6631,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(toolsMenu, _resetInteractionsAction, KEY_RESET_INTERACTIONS, updateKeyboardManager);
     toolsMenu.addSeparator();
     
-    // Javadoc
-    final JMenu javadocMenu = new JMenu("Javadoc");
-    _addMenuItem(javadocMenu, _javadocAllAction, KEY_JAVADOC_ALL, updateKeyboardManager);
-    _addMenuItem(javadocMenu, _javadocCurrentAction, KEY_JAVADOC_CURRENT, updateKeyboardManager);
-    javadocMenu.addSeparator();
-    _addMenuItem(javadocMenu, _openJavadocAction, KEY_OPEN_JAVADOC, updateKeyboardManager);
-    _addMenuItem(javadocMenu, _openJavadocUnderCursorAction, KEY_OPEN_JAVADOC_UNDER_CURSOR, updateKeyboardManager);    
-    toolsMenu.add(javadocMenu);
+    // Scaladoc
+    final JMenu scaladocMenu = new JMenu("Scaladoc");
+    _addMenuItem(scaladocMenu, _scaladocAllAction, KEY_SCALADOC_ALL, updateKeyboardManager);
+    _addMenuItem(scaladocMenu, _scaladocCurrentAction, KEY_SCALADOC_CURRENT, updateKeyboardManager);
+    scaladocMenu.addSeparator();
+    _addMenuItem(scaladocMenu, _openScaladocAction, KEY_OPEN_SCALADOC, updateKeyboardManager);
+    _addMenuItem(scaladocMenu, _openScaladocUnderCursorAction, KEY_OPEN_SCALADOC_UNDER_CURSOR, updateKeyboardManager);    
+    toolsMenu.add(scaladocMenu);
     
     final JMenu historyMenu = new JMenu("History");
     _addMenuItem(historyMenu, _executeHistoryAction, KEY_EXECUTE_HISTORY, updateKeyboardManager);
@@ -6725,8 +6725,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       optionChanged(new OptionEvent<Integer>(OptionConstants.EXTERNAL_SAVED_COUNT,
                                              DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)));
     final JMenu advancedMenu = new JMenu("Advanced");
-    _addMenuItem(advancedMenu, _generateCustomDrJavaJarAction, KEY_GENERATE_CUSTOM_DRJAVA, updateKeyboardManager);
-    _addMenuItem(advancedMenu, _newDrJavaInstanceAction, KEY_NEW_DRJAVA_INSTANCE, updateKeyboardManager);
+    _addMenuItem(advancedMenu, _generateCustomDrJavaJarAction, KEY_GENERATE_CUSTOM_DRSCALA, updateKeyboardManager);
+    _addMenuItem(advancedMenu, _newDrJavaInstanceAction, KEY_NEW_DRSCALA_INSTANCE, updateKeyboardManager);
     toolsMenu.add(advancedMenu);
 
     toolsMenu.addSeparator();    
@@ -6994,9 +6994,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(helpMenu, _quickStartAction, KEY_QUICKSTART, updateKeyboardManager);
     helpMenu.addSeparator();
     _addMenuItem(helpMenu, _aboutAction, KEY_ABOUT, updateKeyboardManager);
-//    _addMenuItem(helpMenu, _drjavaSurveyAction, KEY_DRJAVA_SURVEY, updateKeyboardManager);
+//    _addMenuItem(helpMenu, _drjavaSurveyAction, KEY_DRSCALA_SURVEY, updateKeyboardManager);
     _addMenuItem(helpMenu, _checkNewVersionAction, KEY_CHECK_NEW_VERSION, updateKeyboardManager);
-    _addMenuItem(helpMenu, _errorsAction, KEY_DRJAVA_ERRORS, updateKeyboardManager);
+    _addMenuItem(helpMenu, _errorsAction, KEY_DRSCALA_ERRORS, updateKeyboardManager);
     helpMenu.addSeparator();
     _addMenuItem(helpMenu, _forceQuitAction, KEY_FORCE_QUIT, updateKeyboardManager);
     _addMenuItem(helpMenu, _exportProjectInOldFormatAction, KEY_EXPORT_OLD, updateKeyboardManager);
@@ -7109,21 +7109,21 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     _toolBar.add(_runButton = _createToolbarButton(_runAction));
     _toolBar.add(_junitButton = _createToolbarButton(_junitAllAction));
-    _toolBar.add(_createToolbarButton(_javadocAllAction));
+    _toolBar.add(_createToolbarButton(_scaladocAllAction));
     
     // DrJava Errors
     _toolBar.addSeparator();
     _errorsButton = _createToolbarButton(_errorsAction);
     _errorsButton.setVisible(false);
-    _errorsButton.setBackground(DrJava.getConfig().getSetting(DRJAVA_ERRORS_BUTTON_COLOR));
+    _errorsButton.setBackground(DrJava.getConfig().getSetting(DRSCALA_ERRORS_BUTTON_COLOR));
     _toolBar.add(_errorsButton);
-    /** The OptionListener for DRJAVA_ERRORS_BUTTON_COLOR. */
+    /** The OptionListener for DRSCALA_ERRORS_BUTTON_COLOR. */
     OptionListener<Color> errBtnColorOptionListener = new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oce) {
         _errorsButton.setBackground(oce.value);
       }
     };
-    DrJava.getConfig().addOptionListener(DRJAVA_ERRORS_BUTTON_COLOR, errBtnColorOptionListener);
+    DrJava.getConfig().addOptionListener(DRSCALA_ERRORS_BUTTON_COLOR, errBtnColorOptionListener);
     // Add the listener that changes the "Run" button
     OptionListener<Boolean> runButtonListener = new OptionListener<Boolean>() {
       public void optionChanged(final OptionEvent<Boolean> oce) { 
@@ -7470,7 +7470,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     _tabs.addLast(_compilerErrorPanel);
     _tabs.addLast(_junitPanel);
-    _tabs.addLast(_javadocErrorPanel);
+    _tabs.addLast(_scaladocErrorPanel);
     _tabs.addLast(_findReplace);
     if (_showDebugger) { _tabs.addLast(_breakpointsPanel); }
     _tabs.addLast(_bookmarksPanel);
@@ -7498,8 +7498,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _junitPanel.getMainPanel().addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) { _lastFocusOwner = _junitPanel; }
     });
-    _javadocErrorPanel.getMainPanel().addFocusListener(new FocusAdapter() {
-      public void focusGained(FocusEvent e) { _lastFocusOwner = _javadocErrorPanel; }
+    _scaladocErrorPanel.getMainPanel().addFocusListener(new FocusAdapter() {
+      public void focusGained(FocusEvent e) { _lastFocusOwner = _scaladocErrorPanel; }
     });
     _findReplace.getFindField().addFocusListener(new FocusAdapter() {
       public void focusGained(FocusEvent e) { _lastFocusOwner = _findReplace; }
@@ -7686,7 +7686,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               m.add(Utilities.createDelegateAction("Print File Preview...", _printDefDocPreviewAction));
               m.add(Utilities.createDelegateAction("Compile File", _compileAction));
               m.add(Utilities.createDelegateAction("Test File", _junitAction));
-              m.add(Utilities.createDelegateAction("Preview Javadoc for File", _javadocCurrentAction));
+              m.add(Utilities.createDelegateAction("Preview Scaladoc for File", _scaladocCurrentAction));
               m.add(Utilities.createDelegateAction("Run File", _runAction));
               m.add(Utilities.createDelegateAction("Run File as Applet", _runAppletAction));
             }
@@ -8289,7 +8289,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _findReplace.setFieldFont(f);
     _compilerErrorPanel.setListFont(f);
     _junitPanel.setListFont(f);
-    _javadocErrorPanel.setListFont(f);
+    _scaladocErrorPanel.setListFont(f);
   }
   
   /** Updates the text color for the doc list. */
@@ -9174,9 +9174,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     /** Called after the active compiler has been changed. */
     public void activeCompilerChanged() {
       // NOTE: Does not run in the event thread!
-      String linkVersion = DrJava.getConfig().getSetting(JAVADOC_API_REF_VERSION);
-      if (linkVersion.equals(JAVADOC_AUTO_TEXT)) {
-        // The Java API Javadoc version must match the compiler.  Since compiler was changed, we rebuild the API list
+      String linkVersion = DrJava.getConfig().getSetting(SCALADOC_API_REF_VERSION);
+      if (linkVersion.equals(SCALADOC_AUTO_TEXT)) {
+        // The Java API Scaladoc version must match the compiler.  Since compiler was changed, we rebuild the API list
         clearJavaAPISet();
       }
       // update syntax highlighting for all documents
@@ -9251,30 +9251,30 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _model.refreshActiveDocument();
     }
     
-    /** Fire just before javadoc asynchronous thread is started. Only runs in the event thread. */
-    public void javadocStarted() {
+    /** Fire just before scaladoc asynchronous thread is started. Only runs in the event thread. */
+    public void scaladocStarted() {
       
       assert EventQueue.isDispatchThread();
       
       hourglassOn();
-      _guiAvailabilityNotifier.javadocStarted(); // JAVADOC and COMPILER
+      _guiAvailabilityNotifier.scaladocStarted(); // SCALADOC and COMPILER
 
-      showTab(_javadocErrorPanel, true);
-      _javadocErrorPanel.setJavadocInProgress();
+      showTab(_scaladocErrorPanel, true);
+      _scaladocErrorPanel.setScaladocInProgress();
     }
     
-    public void javadocEnded(final boolean success, final File destDir, final boolean allDocs) {
+    public void scaladocEnded(final boolean success, final File destDir, final boolean allDocs) {
       // Only change GUI from event-dispatching thread
       assert EventQueue.isDispatchThread();
-      // Utilities.showDebug("javadocEnded: success="+success);
+      // Utilities.showDebug("scaladocEnded: success="+success);
       try {
-        _javadocErrorPanel.getErrorListPane().setJavadocEnded(success);
-        showTab(_javadocErrorPanel, true);
-        _javadocErrorPanel.reset();
+        _scaladocErrorPanel.getErrorListPane().setScaladocEnded(success);
+        showTab(_scaladocErrorPanel, true);
+        _scaladocErrorPanel.reset();
         _model.refreshActiveDocument();
       }
       finally {
-        _guiAvailabilityNotifier.javadocFinished(); // JAVADOC and COMPILER
+        _guiAvailabilityNotifier.scaladocFinished(); // SCALADOC and COMPILER
         hourglassOff();
       }
       
@@ -9295,16 +9295,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           URL address = FileOps.toURL(index.getAbsoluteFile());
           
           if (! PlatformFactory.ONLY.openURL(address)) {
-            JavadocFrame _javadocFrame = new JavadocFrame(destDir, className, allDocs);
-            _javadocFrame.setVisible(true);
+            ScaladocFrame _scaladocFrame = new ScaladocFrame(destDir, className, allDocs);
+            _scaladocFrame.setVisible(true);
           }
         }
         catch (MalformedURLException me) { throw new UnexpectedException(me); }
         catch (IllegalStateException ise) {
-          // JavadocFrame couldn't find any output files!
+          // ScaladocFrame couldn't find any output files!
           // Display a message.
           String msg =
-            "Javadoc completed successfully, but did not produce any HTML files.\n" +
+            "Scaladoc completed successfully, but did not produce any HTML files.\n" +
             "Please ensure that your access level in Preferences is appropriate.";
           JOptionPane.showMessageDialog(MainFrame.this, msg,
                                         "No output to display.",
@@ -9413,11 +9413,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
     }
     
-    public void saveBeforeJavadoc() {
+    public void saveBeforeScaladoc() {
       _saveAllBeforeProceeding
-        ("To run Javadoc, you must first save ALL modified files.\n" +
-         "Would you like to save and then run Javadoc?", ALWAYS_SAVE_BEFORE_JAVADOC,
-         "Always save before running Javadoc");
+        ("To run Scaladoc, you must first save ALL modified files.\n" +
+         "Would you like to save and then run Scaladoc?", ALWAYS_SAVE_BEFORE_SCALADOC,
+         "Always save before running Scaladoc");
     }
     
     /** Helper method shared by all "saveBeforeX" methods.  In JUnit tests, YES option is automatically selected
@@ -9452,12 +9452,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
     }
 
-    public void compileBeforeJavadoc(final CompilerListener afterCompile) {
-      // Utilities.showDebug("compileBeforeJavadoc");
+    public void compileBeforeScaladoc(final CompilerListener afterCompile) {
+      // Utilities.showDebug("compileBeforeScaladoc");
       _compileBeforeProceeding
-        ("To run Javadoc, you must first compile all files.\n" +
-         "Would you like to compile and then run Javadoc?", ALWAYS_COMPILE_BEFORE_JAVADOC,
-         "Always save before running Javadoc", afterCompile);
+        ("To run Scaladoc, you must first compile all files.\n" +
+         "Would you like to compile and then run Scaladoc?", ALWAYS_COMPILE_BEFORE_SCALADOC,
+         "Always save before running Scaladoc", afterCompile);
     }    
     
     /** Helper method shared by all "compileBeforeX" methods.
@@ -9702,7 +9702,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void allFilesClosed() {
       _compilerErrorPanel._close();
       _junitPanel._close();
-      _javadocErrorPanel._close();
+      _scaladocErrorPanel._close();
       _model.resetConsole();
     }
     
@@ -10221,7 +10221,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   }
   
-  /** Reset the position of the "Open Javadoc" dialog. */
+  /** Reset the position of the "Open Scaladoc" dialog. */
   public void resetAutoImportDialogPosition() {
     _initAutoImportDialog();
     _autoImportDialog.setFrameState("default");

@@ -34,7 +34,7 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.scaladoc;
+package edu.rice.cs.drjava.model.javadoc;
 
 /**
  * Indicates that an error has occured while attempting to create scaladoc.

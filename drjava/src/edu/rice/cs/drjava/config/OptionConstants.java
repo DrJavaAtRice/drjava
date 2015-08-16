@@ -229,7 +229,7 @@ public interface OptionConstants {
   public static final ColorOption DEBUG_THREAD_COLOR = new ColorOption("debug.thread.color", new Color(100,255,255));
   
   /** Color for the background of the "DrScala Errors" button. */
-  public static final ColorOption DRJAVA_ERRORS_BUTTON_COLOR = new ColorOption("drjava.errors.button.color", Color.red);
+  public static final ColorOption DRSCALA_ERRORS_BUTTON_COLOR = new ColorOption("drjava.errors.button.color", Color.red);
 
   /** Color for the line at the right margin. */
   public static final ColorOption RIGHT_MARGIN_COLOR = new ColorOption("right.margin.color", new Color(204,204,204));
@@ -641,15 +641,15 @@ public interface OptionConstants {
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0)));
   
-  /** The key binding for open Javadoc. */
-  public static final VectorOption<KeyStroke> KEY_OPEN_JAVADOC =
-    new VectorOption<KeyStroke>("key.open.javadoc", 
+  /** The key binding for open Scaladoc. */
+  public static final VectorOption<KeyStroke> KEY_OPEN_SCALADOC =
+    new VectorOption<KeyStroke>("key.open.scaladoc", 
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F6, KeyEvent.SHIFT_MASK)));
   
-  /** The key binding for open Javadoc under cursor. */
-  public static final VectorOption<KeyStroke> KEY_OPEN_JAVADOC_UNDER_CURSOR =
-    new VectorOption<KeyStroke>("key.open.javadoc.under.cursor", 
+  /** The key binding for open Scaladoc under cursor. */
+  public static final VectorOption<KeyStroke> KEY_OPEN_SCALADOC_UNDER_CURSOR =
+    new VectorOption<KeyStroke>("key.open.scaladoc.under.cursor", 
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F6, MASK)));
   
@@ -779,15 +779,15 @@ public interface OptionConstants {
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_T, MASK)));
   
-  /** The key binding for generating javadoc for all documents */
-  public static final VectorOption<KeyStroke> KEY_JAVADOC_ALL =
-    new VectorOption<KeyStroke>("key.javadoc.all", 
+  /** The key binding for generating scaladoc for all documents */
+  public static final VectorOption<KeyStroke> KEY_SCALADOC_ALL =
+    new VectorOption<KeyStroke>("key.scaladoc.all", 
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_J, MASK)));
   
-  /** The key binding for generating javadoc for the current document */
-  public static final VectorOption<KeyStroke> KEY_JAVADOC_CURRENT =
-    new VectorOption<KeyStroke>("key.javadoc.current", 
+  /** The key binding for generating scaladoc for the current document */
+  public static final VectorOption<KeyStroke> KEY_SCALADOC_CURRENT =
+    new VectorOption<KeyStroke>("key.scaladoc.current", 
                                 new KeyStrokeOption("",null), 
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_J, MASK | SHIFT_MASK)));
   
@@ -1127,11 +1127,11 @@ public interface OptionConstants {
     new VectorOption<KeyStroke>("key.check.new.version", new KeyStrokeOption("",null), to.vector());
   
   /** The key binding for the DrJava survey dialog */
-  public static final VectorOption<KeyStroke> KEY_DRJAVA_SURVEY = 
+  public static final VectorOption<KeyStroke> KEY_DRSCALA_SURVEY = 
     new VectorOption<KeyStroke>("key.drjava.survey", new KeyStrokeOption("",null), to.vector());
   
   /** The key binding for the "DrScala Errors" dialog */
-  public static final VectorOption<KeyStroke> KEY_DRJAVA_ERRORS = 
+  public static final VectorOption<KeyStroke> KEY_DRSCALA_ERRORS = 
     new VectorOption<KeyStroke>("key.drjava.errors", new KeyStrokeOption("",null), to.vector());
   
   /** The key binding for following a file, like using "less" and F. */
@@ -1167,11 +1167,11 @@ public interface OptionConstants {
     new KeyStrokeOption("key.for.unit.tests.only", KeyStroke.getKeyStroke(KeyEvent.VK_N, CTRL_MASK|SHIFT_MASK|MASK));
 
   /** The key binding for the GenerateCustomDrJavaJarFrame. */
-  public static final VectorOption<KeyStroke> KEY_GENERATE_CUSTOM_DRJAVA = 
+  public static final VectorOption<KeyStroke> KEY_GENERATE_CUSTOM_DRSCALA = 
     new VectorOption<KeyStroke>("key.generate.custom.drjava", new KeyStrokeOption("",null), to.vector());
   
   /** The key binding for starting a new, blank DrJava instance. */
-  public static final VectorOption<KeyStroke> KEY_NEW_DRJAVA_INSTANCE= 
+  public static final VectorOption<KeyStroke> KEY_NEW_DRSCALA_INSTANCE= 
     new VectorOption<KeyStroke>("key.new.drjava.instance", new KeyStrokeOption("",null),
                                 to.vector(KeyStroke.getKeyStroke(KeyEvent.VK_F1, CTRL_MASK|SHIFT_MASK)));
   
@@ -1212,7 +1212,7 @@ public interface OptionConstants {
     new BooleanOption("debug.step.interpreter", Boolean.FALSE);
   
   /** Whether stepping should step through DrJava's source files. */
-  public static final BooleanOption DEBUG_STEP_DRJAVA =
+  public static final BooleanOption DEBUG_STEP_DRSCALA =
     new BooleanOption("debug.step.drjava", Boolean.FALSE);
   
   /** Which packages to exclude when stepping. */
@@ -1228,9 +1228,9 @@ public interface OptionConstants {
     new BooleanOption("debug.expressions.and.methods.in.watches", Boolean.FALSE);
   
   
-  /* ---------- Javadoc Options ---------- */
+  /* ---------- Scaladoc Options ---------- */
   
-  /** Possible options for Javadoc access levels. */
+  /** Possible options for Scaladoc access levels. */
   static final ArrayList<String> accessLevelChoices =
     AccessLevelChoices.evaluate();
   public static class AccessLevelChoices {
@@ -1248,83 +1248,83 @@ public interface OptionConstants {
     }
   }
   
-  /** The lowest access level of classes and members to include in the javadoc. */
-  public static final ForcedChoiceOption JAVADOC_ACCESS_LEVEL =
-    new ForcedChoiceOption("javadoc.access.level", AccessLevelChoices.PACKAGE, accessLevelChoices);
+  /** The lowest access level of classes and members to include in the scaladoc. */
+  public static final ForcedChoiceOption SCALADOC_ACCESS_LEVEL =
+    new ForcedChoiceOption("scaladoc.access.level", AccessLevelChoices.PACKAGE, accessLevelChoices);
   
-  /** Possible options for Javadoc system class documentation links. */
-  static final String JAVADOC_NONE_TEXT = "none";
-  static final String JAVADOC_1_3_TEXT = "1.3";
-  static final String JAVADOC_1_4_TEXT = "1.4";
-  static final String JAVADOC_1_5_TEXT = "1.5";
-  static final String JAVADOC_1_6_TEXT = "1.6";
-  static final String JAVADOC_1_7_TEXT = "1.7";
-  static final String JAVADOC_AUTO_TEXT = "use compiler version"; // for "Open Java API Javadoc"
+  /** Possible options for Scaladoc system class documentation links. */
+  static final String SCALADOC_NONE_TEXT = "none";
+  static final String SCALADOC_1_3_TEXT = "1.3";
+  static final String SCALADOC_1_4_TEXT = "1.4";
+  static final String SCALADOC_1_5_TEXT = "1.5";
+  static final String SCALADOC_1_6_TEXT = "1.6";
+  static final String SCALADOC_1_7_TEXT = "1.7";
+  static final String SCALADOC_AUTO_TEXT = "use compiler version"; // for "Open Java API Scaladoc"
   
   static final String[] linkChoices = new String[]{
-    JAVADOC_NONE_TEXT, JAVADOC_1_5_TEXT, JAVADOC_1_6_TEXT, JAVADOC_1_7_TEXT };
+    SCALADOC_NONE_TEXT, SCALADOC_1_5_TEXT, SCALADOC_1_6_TEXT, SCALADOC_1_7_TEXT };
   static final ArrayList<String> linkVersionChoices = new ArrayList<String>(Arrays.asList(linkChoices));
 
   static final String[] linkDeprecated = new String[]{
-    JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT };
+    SCALADOC_1_3_TEXT, SCALADOC_1_4_TEXT };
   static final ArrayList<String> linkVersionDeprecated = new ArrayList<String>(Arrays.asList(linkDeprecated));  
   
   /** Constants for the URLs of Sun's system class documentation for different versions of Java. */
-  public static final StringOption JAVADOC_1_3_LINK =
-    new StringOption("javadoc.1.3.link", "http://download.oracle.com/javase/1.3/docs/api");
-  public static final StringOption JAVADOC_1_4_LINK =
-    new StringOption("javadoc.1.4.link", "http://download.oracle.com/javase/1.4.2/docs/api");
-  public static final StringOption JAVADOC_1_5_LINK =
-    new StringOption("javadoc.1.5.link", "http://download.oracle.com/javase/1.5.0/docs/api");
-  public static final StringOption JAVADOC_1_6_LINK =
-    new StringOption("javadoc.1.6.link", "http://download.oracle.com/javase/6/docs/api");
-  public static final StringOption JAVADOC_1_7_LINK =
-    new StringOption("javadoc.1.7.link", "http://download.oracle.com/javase/7/docs/api/");
+  public static final StringOption SCALADOC_1_3_LINK =
+    new StringOption("scaladoc.1.3.link", "http://download.oracle.com/javase/1.3/docs/api");
+  public static final StringOption SCALADOC_1_4_LINK =
+    new StringOption("scaladoc.1.4.link", "http://download.oracle.com/javase/1.4.2/docs/api");
+  public static final StringOption SCALADOC_1_5_LINK =
+    new StringOption("scaladoc.1.5.link", "http://download.oracle.com/javase/1.5.0/docs/api");
+  public static final StringOption SCALADOC_1_6_LINK =
+    new StringOption("scaladoc.1.6.link", "http://download.oracle.com/javase/6/docs/api");
+  public static final StringOption SCALADOC_1_7_LINK =
+    new StringOption("scaladoc.1.7.link", "http://download.oracle.com/javase/7/docs/api/");
   
-  /** The version of Java to use for links to Javadoc for system classes. */
-  public static final ForcedChoiceOption JAVADOC_LINK_VERSION =
-    new ForcedChoiceOption("javadoc.link.version",
-                           (System.getProperty("java.specification.version").startsWith("1.5") ? JAVADOC_1_5_TEXT : 
-                              (System.getProperty("java.specification.version").startsWith("1.6") ? JAVADOC_1_6_TEXT : 
-                                 JAVADOC_1_7_TEXT)),
+  /** The version of Java to use for links to Scaladoc for system classes. */
+  public static final ForcedChoiceOption SCALADOC_LINK_VERSION =
+    new ForcedChoiceOption("scaladoc.link.version",
+                           (System.getProperty("java.specification.version").startsWith("1.5") ? SCALADOC_1_5_TEXT : 
+                              (System.getProperty("java.specification.version").startsWith("1.6") ? SCALADOC_1_6_TEXT : 
+                                 SCALADOC_1_7_TEXT)),
                            linkVersionChoices, linkVersionDeprecated);
   
-  static final String[] apiJavadocChoices = new String[] {
-    JAVADOC_1_5_TEXT, JAVADOC_1_6_TEXT, JAVADOC_1_7_TEXT, JAVADOC_AUTO_TEXT};
-  static final ArrayList<String> apiJavadocVersionChoices = new ArrayList<String>(Arrays.asList(apiJavadocChoices));
+  static final String[] apiScaladocChoices = new String[] {
+    SCALADOC_1_5_TEXT, SCALADOC_1_6_TEXT, SCALADOC_1_7_TEXT, SCALADOC_AUTO_TEXT};
+  static final ArrayList<String> apiScaladocVersionChoices = new ArrayList<String>(Arrays.asList(apiScaladocChoices));
 
-  static final String[] apiJavadocDeprecated = new String[] {
-    JAVADOC_1_3_TEXT, JAVADOC_1_4_TEXT}; // deprecated, will be changed to JAVADOC_AUTO_TEXT
-  static final ArrayList<String> apiJavadocVersionDeprecated = new ArrayList<String>(Arrays.asList(apiJavadocDeprecated));  
+  static final String[] apiScaladocDeprecated = new String[] {
+    SCALADOC_1_3_TEXT, SCALADOC_1_4_TEXT}; // deprecated, will be changed to SCALADOC_AUTO_TEXT
+  static final ArrayList<String> apiScaladocVersionDeprecated = new ArrayList<String>(Arrays.asList(apiScaladocDeprecated));  
   
-  /** The version of Java to use for the "Open Java API Javadoc" feature. */
-  public static final ForcedChoiceOption JAVADOC_API_REF_VERSION =
-    new ForcedChoiceOption("javadoc.api.ref.version", JAVADOC_AUTO_TEXT,
-                           apiJavadocVersionChoices, apiJavadocVersionDeprecated);
+  /** The version of Java to use for the "Open Java API Scaladoc" feature. */
+  public static final ForcedChoiceOption SCALADOC_API_REF_VERSION =
+    new ForcedChoiceOption("scaladoc.api.ref.version", SCALADOC_AUTO_TEXT,
+                           apiScaladocVersionChoices, apiScaladocVersionDeprecated);
   
-  /** URL for JUnit javadocs. */
+  /** URL for JUnit scaladocs. */
   public static final StringOption JUNIT_LINK =
-    new StringOption("junit.link", "http://www.cs.rice.edu/~javaplt/javadoc/concjunit4.7");
+    new StringOption("junit.link", "http://www.cs.rice.edu/~javaplt/scaladoc/concjunit4.7");
   
-  /** Additional Javadoc URLs. */
-  public static final VectorOption<String> JAVADOC_ADDITIONAL_LINKS =
-    new VectorOption<String>("javadoc.additional.links", new StringOption("",null), new Vector<String>());
+  /** Additional Scaladoc URLs. */
+  public static final VectorOption<String> SCALADOC_ADDITIONAL_LINKS =
+    new VectorOption<String>("scaladoc.additional.links", new StringOption("",null), new Vector<String>());
   
   /** Whether to include the entire package heirarchy from the source roots when generating JavaDoc output. */
-  public static final BooleanOption JAVADOC_FROM_ROOTS = new BooleanOption("javadoc.from.roots", Boolean.FALSE);
+  public static final BooleanOption SCALADOC_FROM_ROOTS = new BooleanOption("scaladoc.from.roots", Boolean.FALSE);
   
-  /** A string containing custom options to be passed to Javadoc. This string needs to be tokenized before passing it to 
-    * Javadoc.
+  /** A string containing custom options to be passed to Scaladoc. This string needs to be tokenized before passing it to 
+    * Scaladoc.
     */
-  public static final StringOption JAVADOC_CUSTOM_PARAMS = 
-    new StringOption("javadoc.custom.params", "-author -version");
+  public static final StringOption SCALADOC_CUSTOM_PARAMS = 
+    new StringOption("scaladoc.custom.params", "-author -version");
   
-  /** The default destination directory for Javadoc output. */
-  public static final FileOption JAVADOC_DESTINATION = new FileOption("javadoc.destination", FileOps.NULL_FILE);
+  /** The default destination directory for Scaladoc output. */
+  public static final FileOption SCALADOC_DESTINATION = new FileOption("scaladoc.destination", FileOps.NULL_FILE);
   
   /** Whether to always prompt for a destination directory, whether or not a default has been set. */
-  public static final BooleanOption JAVADOC_PROMPT_FOR_DESTINATION =
-    new BooleanOption("javadoc.prompt.for.destination", Boolean.TRUE);
+  public static final BooleanOption SCALADOC_PROMPT_FOR_DESTINATION =
+    new BooleanOption("scaladoc.prompt.for.destination", Boolean.TRUE);
   
   /* ---------- NOTIFICATION OPTIONS ---------- */
   
@@ -1352,12 +1352,12 @@ public interface OptionConstants {
     new BooleanOption("compile.before.junit", Boolean.FALSE);
   
   /** Whether to prompt to save before compiling. */
-  public static final BooleanOption ALWAYS_SAVE_BEFORE_JAVADOC =
-    new BooleanOption("save.before.javadoc", Boolean.FALSE);
+  public static final BooleanOption ALWAYS_SAVE_BEFORE_SCALADOC =
+    new BooleanOption("save.before.scaladoc", Boolean.FALSE);
 
   /** Whether to prompt to compile before compiling. */
-  public static final BooleanOption ALWAYS_COMPILE_BEFORE_JAVADOC =
-    new BooleanOption("compile.before.javadoc", Boolean.FALSE);
+  public static final BooleanOption ALWAYS_COMPILE_BEFORE_SCALADOC =
+    new BooleanOption("compile.before.scaladoc", Boolean.FALSE);
   
   /** Whether to prompt to save before compiling. */
   public static final BooleanOption ALWAYS_SAVE_BEFORE_DEBUG =
@@ -1428,10 +1428,6 @@ public interface OptionConstants {
   
   /** Whether to make emacs-style backup files. */
   public static final BooleanOption BACKUP_FILES = new BooleanOption("files.backup", Boolean.TRUE);
-  
-  /** Whether to allow users to access to all members in the Interactions Pane.
-    * This should not be used anymore. Instead, use DYNAMICJAVA_ACCESS_CONTROL. */
-  @Deprecated public static final BooleanOption ALLOW_PRIVATE_ACCESS = new BooleanOption("allow.private.access", Boolean.FALSE);
   
   /** Whether to force test classes in projects to end in "Test". */
   public static final BooleanOption FORCE_TEST_SUFFIX = new BooleanOption("force.test.suffix", Boolean.FALSE);
@@ -1575,40 +1571,42 @@ public interface OptionConstants {
     * "user.home" (sticky=false). */
   public static final BooleanOption STICKY_INTERACTIONS_DIRECTORY =
     new BooleanOption("sticky.interactions.dir", Boolean.TRUE);
+ 
+  /* Irrelevant in DrScala. */
+//  /** Whether to require a semicolon at the end of statements in the Interactions Pane. */
+//  public static final BooleanOption DYNAMICJAVA_REQUIRE_SEMICOLON =
+//    new BooleanOption("dynamicjava.require.semicolon", Boolean.FALSE);
+//  
+//  /** Whether to require a variable type for variable declarations in the Interactions Pane. */
+//  public static final BooleanOption DYNAMICJAVA_REQUIRE_VARIABLE_TYPE =
+//    new BooleanOption("dynamicjava.require.variable.type", Boolean.TRUE);
   
-  /** Whether to require a semicolon at the end of statements in the Interactions Pane. */
-  public static final BooleanOption DYNAMICJAVA_REQUIRE_SEMICOLON =
-    new BooleanOption("dynamicjava.require.semicolon", Boolean.FALSE);
+  /* Irrelevant in DrScala. */
+//  /** Dynamic Java access control. */
+//  public static final ArrayList<String> DYNAMICJAVA_ACCESS_CONTROL_CHOICES =
+//    DynamicJavaAccessControlChoices.evaluate();
+//  public static class DynamicJavaAccessControlChoices {
+//    public static final String DISABLED = "disabled";
+//    public static final String PRIVATE = "private only";
+//    public static final String PRIVATE_AND_PACKAGE = "private and package only";
+//    public static ArrayList<String> evaluate() {
+//      ArrayList<String> aList = new ArrayList<String>(4);
+//      aList.add(DISABLED);
+//      aList.add(PRIVATE);
+//      
+//      // NOTE: this sets the enforceAllAccess option in InteractionsPaneOptions, but since that is not fully
+//      // implemented, this description is better.
+//      aList.add(PRIVATE_AND_PACKAGE); 
+//      return aList;
+//    }
+//  }
   
-  /** Whether to require a variable type for variable declarations in the Interactions Pane. */
-  public static final BooleanOption DYNAMICJAVA_REQUIRE_VARIABLE_TYPE =
-    new BooleanOption("dynamicjava.require.variable.type", Boolean.TRUE);
-  
-  
-  /** Dynamic Java access control. */
-  public static final ArrayList<String> DYNAMICJAVA_ACCESS_CONTROL_CHOICES =
-    DynamicJavaAccessControlChoices.evaluate();
-  public static class DynamicJavaAccessControlChoices {
-    public static final String DISABLED = "disabled";
-    public static final String PRIVATE = "private only";
-    public static final String PRIVATE_AND_PACKAGE = "private and package only";
-    public static ArrayList<String> evaluate() {
-      ArrayList<String> aList = new ArrayList<String>(4);
-      aList.add(DISABLED);
-      aList.add(PRIVATE);
-      
-      // NOTE: this sets the enforceAllAccess option in InteractionsPaneOptions, but since that is not fully
-      // implemented, this description is better.
-      aList.add(PRIVATE_AND_PACKAGE); 
-      return aList;
-    }
-  }
-  
-  /** File extension registration. */
-  public static final ForcedChoiceOption DYNAMICJAVA_ACCESS_CONTROL =
-    new ForcedChoiceOption("dynamicjava.access.control", DynamicJavaAccessControlChoices.PRIVATE_AND_PACKAGE,
-                           DYNAMICJAVA_ACCESS_CONTROL_CHOICES);
-  
+  /* Irrelevant in DrScala. */
+//  /** File extension registration. */
+//  public static final ForcedChoiceOption DYNAMICJAVA_ACCESS_CONTROL =
+//    new ForcedChoiceOption("dynamicjava.access.control", DynamicJavaAccessControlChoices.PRIVATE_AND_PACKAGE,
+//                           DYNAMICJAVA_ACCESS_CONTROL_CHOICES);
+//  
   /** The command-line arguments to be passed to the Master JVM. */
   public static final StringOption MASTER_JVM_ARGS = new StringOption("master.jvm.args", "");
   
@@ -1663,12 +1661,12 @@ public interface OptionConstants {
   public static final BooleanOption DIALOG_GOTOFILE_STORE_POSITION =
     new BooleanOption("dialog.gotofile.store.position", Boolean.TRUE);
   
-  /** The last state of the "Open Javadoc" dialog. */
-  public static final StringOption DIALOG_OPENJAVADOC_STATE = new StringOption("dialog.openjavadoc.state", "default");
+  /** The last state of the "Open Scaladoc" dialog. */
+  public static final StringOption DIALOG_OPENSCALADOC_STATE = new StringOption("dialog.openscaladoc.state", "default");
   
   /** Whether to save and restore window size and position at startUp/shutdown. */
-  public static final BooleanOption DIALOG_OPENJAVADOC_STORE_POSITION =
-    new BooleanOption("dialog.openjavadoc.store.position", Boolean.TRUE);
+  public static final BooleanOption DIALOG_OPENSCALADOC_STORE_POSITION =
+    new BooleanOption("dialog.openscaladoc.store.position", Boolean.TRUE);
   
   /** The last state of the "Auto Import" dialog. */
   public static final StringOption DIALOG_AUTOIMPORT_STATE = new StringOption("dialog.autoimport.state", "default");
@@ -1758,11 +1756,11 @@ public interface OptionConstants {
     new BooleanOption("find.replace.focus.in.defpane", Boolean.FALSE);
   
   /** Whether to show a notification popup when the first DrJava error occurs. */
-  public static final BooleanOption DIALOG_DRJAVA_ERROR_POPUP_ENABLED =
+  public static final BooleanOption DIALOG_DRSCALA_ERROR_POPUP_ENABLED =
     new BooleanOption("dialog.drjava.error.popup.enabled", Boolean.TRUE);
   
   /** Whether to ask the user if DrJava may send system information to the DrJava developers. */
-  public static final BooleanOption DIALOG_DRJAVA_SURVEY_ENABLED =
+  public static final BooleanOption DIALOG_DRSCALA_SURVEY_ENABLED =
     new BooleanOption("dialog.drjava.survey.enabled", Boolean.TRUE);
   
   /** Whether to show the "code preview" popups in the RegionTreePanels (bookmarks, breakpoints, find all). */
@@ -1770,7 +1768,7 @@ public interface OptionConstants {
     new BooleanOption("show.code.preview.popups", Boolean.TRUE);
   
   /** Whether to use Runtime.halt to quit DrScala (see bugs 1550220 and 1478796). */
-  public static final BooleanOption DRJAVA_USE_FORCE_QUIT =
+  public static final BooleanOption DRSCALA_USE_FORCE_QUIT =
     new BooleanOption("drjava.use.force.quit", Boolean.FALSE);
   
   /** Whether to display the "Auto Import" dialog when an undefined class
@@ -1852,14 +1850,14 @@ public interface OptionConstants {
     new NonNegativeIntegerOption("new.version.notification.days", 7);  
   
   /** The number of days that have to pass before we ask and allow the user to participate in the DrJava survey again. */
-  public static final NonNegativeIntegerOption DRJAVA_SURVEY_DAYS =
+  public static final NonNegativeIntegerOption DRSCALA_SURVEY_DAYS =
     new NonNegativeIntegerOption("drjava.survey.days", 91); // every three month  
   
   /** The last time we asked the user to participate in the DrJava survey. */
-  public static final LongOption LAST_DRJAVA_SURVEY = new LongOption("drjava.survey.notification.last", (long)0);  
+  public static final LongOption LAST_DRSCALA_SURVEY = new LongOption("drjava.survey.notification.last", (long)0);  
   
   /** The request URL that the user generated the last time the DrJava survey was taken. */
-  public static final StringOption LAST_DRJAVA_SURVEY_RESULT = new StringOption("drjava.survey.result.last", "");
+  public static final StringOption LAST_DRSCALA_SURVEY_RESULT = new StringOption("drjava.survey.result.last", "");
   
   /** Delete class files for language-level classes. */
   public static final ArrayList<String> DELETE_LL_CLASS_FILES_CHOICES =
@@ -1913,7 +1911,7 @@ public interface OptionConstants {
   /** ConcJUnit processed Java Runtime (rt.concjunit.jar) location, or NULL_FILE if not specified. */
   public static final FileOption RT_CONCJUNIT_LOCATION = new FileOption("rt.concjunit.location", FileOps.NULL_FILE);
   
-  /** Possible options for Javadoc access levels. */
+  /** Possible options for Scaladoc access levels. */
   static final ArrayList<String> concJUnitCheckChoices =
     ConcJUnitCheckChoices.evaluate();
   public static class ConcJUnitCheckChoices {
@@ -1936,5 +1934,5 @@ public interface OptionConstants {
     new ForcedChoiceOption("concjunit.checks.enabled", ConcJUnitCheckChoices.NONE, concJUnitCheckChoices);
 
   /** A version suffix that describes custom additions to DrJava. */
-  public static final StringOption CUSTOM_DRJAVA_JAR_VERSION_SUFFIX = new StringOption("custom.drjava.jar.version.suffix", "");
+  public static final StringOption CUSTOM_DRSCALA_JAR_VERSION_SUFFIX = new StringOption("custom.drjava.jar.version.suffix", "");
 }

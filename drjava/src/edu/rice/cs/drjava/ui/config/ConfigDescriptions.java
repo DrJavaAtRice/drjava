@@ -56,7 +56,7 @@ public class ConfigDescriptions {
   }
   
   static {
-    add(BROWSER_FILE, "Web Browser", "<html>Location of a web browser to use for Javadoc and Help links.<br>" +
+    add(BROWSER_FILE, "Web Browser", "<html>Location of a web browser to use for Scaladoc and Help links.<br>" +
         "If left blank, only the Web Browser Command will be used.<br>" +
         "This is not necessary if a default browser is available on your system.");
     add(BROWSER_STRING, "Web Browser Command", "<html>Command to send to the web browser to view a web location.<br>" +
@@ -155,7 +155,7 @@ public class ConfigDescriptions {
     add(INTERACTIONS_ERROR_COLOR, "Interactions Error Color",
         "The color for interactions errors in the Interactions Pane.");
     add(DEBUG_MESSAGE_COLOR, "Debug Message Color", "The color for debugger messages in the Interactions Pane.");
-    add(DRJAVA_ERRORS_BUTTON_COLOR, "DrJava Errors Button Background Color",
+    add(DRSCALA_ERRORS_BUTTON_COLOR, "DrScala Errors Button Background Color",
         "The background color of the \"Errors\" button used to show internal DrJava errors.");
     add(RIGHT_MARGIN_COLOR, "Right Margin Color", "The color of the right margin line, if displayed.");
     add(WINDOW_STORE_POSITION, "Save Main Window Position",
@@ -168,16 +168,16 @@ public class ConfigDescriptions {
         "Whether to save and restore the size and position of the \"Auto-Complete Word\" dialog.");
     add(DIALOG_JAROPTIONS_STORE_POSITION, "Save \"Create Jar File from Project\" Dialog Position",
         "Whether to save and restore the position of the \"Create Jar File from Project\" dialog.");
-    add(DIALOG_OPENJAVADOC_STORE_POSITION, "Save \"Open Javadoc\" Dialog Position",
-        "Whether to save and restore the size and position of the \"Open Javadoc\" dialog.");
+    add(DIALOG_OPENSCALADOC_STORE_POSITION, "Save \"Open Scaladoc\" Dialog Position",
+        "Whether to save and restore the size and position of the \"Open Scaladoc\" dialog.");
     add(DIALOG_AUTOIMPORT_STORE_POSITION, "Save \"Auto Import\" Dialog Position",
         "Whether to save and restore the size and position of the \"Auto Import\" dialog.");
     add(DIALOG_EXTERNALPROCESS_STORE_POSITION, "Save \"Execute External Process\" Dialog Position",
         "Whether to save and restore the position of the \"Execute External Process\" dialog.");
     add(DIALOG_EDITEXTERNALPROCESS_STORE_POSITION, "Save \"Edit External Process\" Dialog Position",
         "Whether to save and restore the position of the \"Edit External Process\" dialog.");
-    add(DIALOG_OPENJAVADOC_STORE_POSITION, "Save \"Open Javadoc\" Dialog Position",
-        "Whether to save and restore the position of the \"Open Javadoc\" dialog.");
+    add(DIALOG_OPENSCALADOC_STORE_POSITION, "Save \"Open Scaladoc\" Dialog Position",
+        "Whether to save and restore the position of the \"Open Scaladoc\" dialog.");
     add(DIALOG_TABBEDPANES_STORE_POSITION, "Save \"Tabbed Panes\" Window Position",
         "Whether to save and restore the position of the \"Tabbed Panes\" window."); 
     add(DETACH_TABBEDPANES, "Detach Tabbed Panes",
@@ -196,7 +196,7 @@ public class ConfigDescriptions {
     add(DEBUG_STEP_INTERPRETER, "Step Into Interpreter Classes",
         "<html>Whether the Debugger should step into the classes<br>" +
         "used by the Interactions Pane (DynamicJava).</html>");
-    add(DEBUG_STEP_DRJAVA, "Step Into DrScala Classes", "Whether the Debugger should step into DrJava's own class files.");
+    add(DEBUG_STEP_DRSCALA, "Step Into DrScala Classes", "Whether the Debugger should step into DrJava's own class files.");
     add(DEBUG_STEP_EXCLUDE, "Classes/Packages To Exclude",
         "<html>Any classes that the debuggger should not step into.<br>" +
         "Should be a list of fully-qualified class names.<br>" +
@@ -210,28 +210,28 @@ public class ConfigDescriptions {
     add(DEBUG_EXPRESSIONS_AND_METHODS_IN_WATCHES, "Allow Expressions and Method Calls in Watches",
         "<html>Whether the Debugger should allow expressions and method<br>" +
         "calls in watches. These may have side effects and can cause<br>" + "delays during the debug process.</html>");
-    add(JAVADOC_API_REF_VERSION, "Java Version for \"Open Java API Javadoc\"",
+    add(SCALADOC_API_REF_VERSION, "Java Version for \"Open Java API Scaladoc\"",
         "Version of the Java API documentation to be used.");
-    add(JAVADOC_ACCESS_LEVEL, "Access Level", "<html>Fields and methods with access modifiers at this level<br>" +
-        "or higher will be included in the generated Javadoc.</html>");
-    add(JAVADOC_LINK_VERSION, "Java Version for Javadoc Links", 
-        "Version of Java for generating links to online Javadoc documentation.");
-    add(JAVADOC_1_5_LINK, "Javadoc 1.5 URL", "URL for the Java 1.5 API, for generating links to library classes.");
-    add(JAVADOC_1_6_LINK, "Javadoc 1.6 URL", "URL for the Java 1.6 API, for generating links to library classes.");
-    add(JAVADOC_1_7_LINK, "Javadoc 1.7 URL", "URL for the Java 1.7 API, for generating links to library classes.");
-    add(JUNIT_LINK, "JUnit URL", "URL for the JUnit API, for \"Open Java API Javadoc\".");
-    add(JAVADOC_ADDITIONAL_LINKS, "Additional Javadoc URLs",
-        "<html>Additional URLs with Javadoc, for \"Open Java API Javadoc\"<br>" + "and auto-completion.</html>");
-    add(JAVADOC_DESTINATION, "Default Destination Directory",
-        "Optional default directory for saving Javadoc documentation.");
-    add(JAVADOC_CUSTOM_PARAMS, "Custom Javadoc Parameters", "Any extra flags or parameters to pass to Javadoc.");
+    add(SCALADOC_ACCESS_LEVEL, "Access Level", "<html>Fields and methods with access modifiers at this level<br>" +
+        "or higher will be included in the generated Scaladoc.</html>");
+    add(SCALADOC_LINK_VERSION, "Java Version for Scaladoc Links", 
+        "Version of Java for generating links to online Scaladoc documentation.");
+    add(SCALADOC_1_5_LINK, "Scaladoc 1.5 URL", "URL for the Java 1.5 API, for generating links to library classes.");
+    add(SCALADOC_1_6_LINK, "Scaladoc 1.6 URL", "URL for the Java 1.6 API, for generating links to library classes.");
+    add(SCALADOC_1_7_LINK, "Scaladoc 1.7 URL", "URL for the Java 1.7 API, for generating links to library classes.");
+    add(JUNIT_LINK, "JUnit URL", "URL for the JUnit API, for \"Open Java API Scaladoc\".");
+    add(SCALADOC_ADDITIONAL_LINKS, "Additional Scaladoc URLs",
+        "<html>Additional URLs with Scaladoc, for \"Open Java API Scaladoc\"<br>" + "and auto-completion.</html>");
+    add(SCALADOC_DESTINATION, "Default Destination Directory",
+        "Optional default directory for saving Scaladoc documentation.");
+    add(SCALADOC_CUSTOM_PARAMS, "Custom Scaladoc Parameters", "Any extra flags or parameters to pass to Scaladoc.");
     
-    // Note: JAVADOC_FROM_ROOTS is intended to set the -subpackages flag, but I don't think that's something
+    // Note: SCALADOC_FROM_ROOTS is intended to set the -subpackages flag, but I don't think that's something
     // we should support -- in general, we only support performing operations on the files that are open.
     // (dlsmith r4189)
-//    add(JAVADOC_FROM_ROOTS,
-//        "Generate Javadoc From Source Roots"
-//          "<html>Whether \"Javadoc All\" should generate Javadoc for all packages<br>" +
+//    add(SCALADOC_FROM_ROOTS,
+//        "Generate Scaladoc From Source Roots"
+//          "<html>Whether \"Scaladoc All\" should generate Scaladoc for all packages<br>" +
 //        "in an open document's source tree, rather than just the document's<br>" +
 //        "own package and sub-packages.</html>");
     
@@ -246,9 +246,9 @@ public class ConfigDescriptions {
         "<html>Whether DrScala should show a dialog box if a program<br>" +
         "in the Interactions Pane exits without the user clicking Reset.</html>");
     
-    // Javadoc
-    add(JAVADOC_PROMPT_FOR_DESTINATION, "Prompt for Javadoc Destination", 
-        "<html>Whether Javadoc should always prompt the user<br>" + "to select a destination directory.</html>");
+    // Scaladoc
+    add(SCALADOC_PROMPT_FOR_DESTINATION, "Prompt for Scaladoc Destination", 
+        "<html>Whether Scaladoc should always prompt the user<br>" + "to select a destination directory.</html>");
     
     // Clean
     add(PROMPT_BEFORE_CLEAN, "Prompt before Cleaning Build Directory",
@@ -265,12 +265,12 @@ public class ConfigDescriptions {
     add(ALWAYS_COMPILE_BEFORE_JUNIT, "Automatically Compile Before Testing",
         "<html>Whether DrScala should automatically compile before<br>" +
         "testing with JUnit or ask the user each time.</html>");
-    add(ALWAYS_SAVE_BEFORE_JAVADOC, "Automatically Save Before Generating Javadoc",
+    add(ALWAYS_SAVE_BEFORE_SCALADOC, "Automatically Save Before Generating Scaladoc",
         "<html>Whether DrScala should automatically save before<br>" +
-        "generating Javadoc or ask the user each time.</html>");
-    add(ALWAYS_COMPILE_BEFORE_JAVADOC, "Automatically Compile Before Generating Javadoc",
+        "generating Scaladoc or ask the user each time.</html>");
+    add(ALWAYS_COMPILE_BEFORE_SCALADOC, "Automatically Compile Before Generating Scaladoc",
         "<html>Whether DrScala should automatically compile before<br>" +
-        "generating Javadoc or ask the user each time.</html>");
+        "generating Scaladoc or ask the user each time.</html>");
         
     // These are very problematic features, and so are disabled for the forseeable future.
 //    addOptionComponent(panel, 
@@ -312,7 +312,7 @@ public class ConfigDescriptions {
         "<html>Whether DrScala should warn the user if the file being<br>" +
         "saved has a path that contains a '#' symbol.<br>" +
         "Users cannot use such files in the Interactions Pane<br>" + "because of a bug in Java.</html>");
-    add(DIALOG_DRJAVA_ERROR_POPUP_ENABLED, "Show a notification window when the first DrScala error occurs",
+    add(DIALOG_DRSCALA_ERROR_POPUP_ENABLED, "Show a notification window when the first DrScala error occurs",
         "<html>Whether to show a notification window when the first DrScala error occurs.<br>" +
         "If this is disabled, only the \"DrJava Error\" button will appear.</html>");
     add(WARN_IF_COMPIZ, "Warn If Compiz Detected",
@@ -349,7 +349,7 @@ public class ConfigDescriptions {
     add(FIND_REPLACE_FOCUS_IN_DEFPANE, "Focus on the definitions pane after find/replace", 
         "<html>Whether to focus on the definitions pane after executing a find/replace operation.<br>" +
         "If this is not selected, the focus will be in the Find/Replace pane.</html>");
-    add(DRJAVA_USE_FORCE_QUIT, "Forcefully Quit DrScala",
+    add(DRSCALA_USE_FORCE_QUIT, "Forcefully Quit DrScala",
         "<html>On some platforms, DrScala does not shut down properly when files are open<br>"+
         "(namely tablet PCs). Check this option to force DrScala to close.</html>");
     add(REMOTE_CONTROL_ENABLED, "Enable Remote Control",
@@ -419,14 +419,16 @@ public class ConfigDescriptions {
     add(INTERACTIONS_AUTO_IMPORT_CLASSES, "Classes to Auto-Import",
         "<html>List of classes to auto-import every time the<br>" +
         "Interaction Pane is reset or started. Examples:<br><br>" + "java.io.File<br>" + "java.util.*</html>");
-    add(DYNAMICJAVA_ACCESS_CONTROL, "Enforce access control", 
-        "What kind of access control should DrScala enforce in the Interactions Pane?");
-    add(DYNAMICJAVA_REQUIRE_SEMICOLON, "Require Semicolon",
-        "<html>Whether DrScala should require a semicolon at the<br>" +
-        "end of a statement in the Interactions Pane.</html>");
-    add(DYNAMICJAVA_REQUIRE_VARIABLE_TYPE, "Require Variable Type",
-        "<html>Whether DrScala should require a variable type for<br>" +
-        "variable declarations in the Interactions Pane.</html>");
+
+    /* These options are not relevant to DrScala. */
+//    add(DYNAMICJAVA_ACCESS_CONTROL, "Enforce access control", 
+//        "What kind of access control should DrScala enforce in the Interactions Pane?");
+//    add(DYNAMICJAVA_REQUIRE_SEMICOLON, "Require Semicolon",
+//        "<html>Whether DrScala should require a semicolon at the<br>" +
+//        "end of a statement in the Interactions Pane.</html>");
+//    add(DYNAMICJAVA_REQUIRE_VARIABLE_TYPE, "Require Variable Type",
+//        "<html>Whether DrScala should require a variable type for<br>" +
+//        "variable declarations in the Interactions Pane.</html>");
     
     /** Add all of the components for the JUnit panel of the preferences window. */
     add(JUNIT_LOCATION_ENABLED, "Use external JUnit",

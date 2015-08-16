@@ -57,7 +57,7 @@ public final class QuestionHasCharPrecedingOpenBraceTest extends IndentRulesTest
       "    a, //  line comment \n" + /*  50 */
       "    int b,              \n" + /*  75 */
       "    /**                 \n" + /* 100 */
-      "     * javadoc comment  \n" + /* 125 */
+      "     * scaladoc comment  \n" + /* 125 */
       "     */                 \n" + /* 150 */
       "    START               \n" + /* 175 */
       "    },                  \n" + /* 200 */
@@ -80,10 +80,10 @@ public final class QuestionHasCharPrecedingOpenBraceTest extends IndentRulesTest
     assertTrue("At start of array.", !rule.testApplyRule(_doc, 25, Indenter.IndentReason.OTHER));
     assertTrue("START starts one-line comment.", rule.testApplyRule(_doc, 54, Indenter.IndentReason.OTHER));
     assertTrue("START starts one-line comment.", rule.testApplyRule(_doc, 60, Indenter.IndentReason.OTHER));
-    assertTrue("START starts javadoc comment.", rule.testApplyRule(_doc, 104, Indenter.IndentReason.OTHER));
-    assertTrue("START starts javadoc comment.", rule.testApplyRule(_doc, 110, Indenter.IndentReason.OTHER));
-    assertTrue("Line inside javadoc comment.", rule.testApplyRule(_doc, 130, Indenter.IndentReason.OTHER));
-    assertTrue("Line closes javadoc comment.", rule.testApplyRule(_doc, 150, Indenter.IndentReason.OTHER));
+    assertTrue("START starts scaladoc comment.", rule.testApplyRule(_doc, 104, Indenter.IndentReason.OTHER));
+    assertTrue("START starts scaladoc comment.", rule.testApplyRule(_doc, 110, Indenter.IndentReason.OTHER));
+    assertTrue("Line inside scaladoc comment.", rule.testApplyRule(_doc, 130, Indenter.IndentReason.OTHER));
+    assertTrue("Line closes scaladoc comment.", rule.testApplyRule(_doc, 150, Indenter.IndentReason.OTHER));
     assertTrue("START is stil in first.", rule.testApplyRule(_doc, 180, Indenter.IndentReason.OTHER));
     assertTrue("Second pseudo array element.", ! rule.testApplyRule(_doc, 230, Indenter.IndentReason.OTHER));
     assertTrue("Start of multi-line comment.", !rule.testApplyRule(_doc, 260, Indenter.IndentReason.OTHER));

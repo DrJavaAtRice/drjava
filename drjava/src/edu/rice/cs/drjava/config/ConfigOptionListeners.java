@@ -459,15 +459,15 @@ public class ConfigOptionListeners implements OptionConstants {
     }
   }
   
-  public static class JavadocCustomParamsListener implements OptionListener<String>, OptionConstants {
+  public static class ScaladocCustomParamsListener implements OptionListener<String>, OptionConstants {
     protected JFrame _parent;
-    public JavadocCustomParamsListener(JFrame parent) { _parent = parent; }
+    public ScaladocCustomParamsListener(JFrame parent) { _parent = parent; }
     public void optionChanged(OptionEvent<String> oe) {
-      sanitizeJavadocCustomParams(_parent, oe.value);
+      sanitizeScaladocCustomParams(_parent, oe.value);
     }
   }
   
-  public static void sanitizeJavadocCustomParams(JFrame parent,
+  public static void sanitizeScaladocCustomParams(JFrame parent,
                                                  String value) {
     boolean containsPrivate = (value.indexOf("-private") >= 0);
     boolean containsProtected = (value.indexOf("-protected") >= 0);
@@ -481,16 +481,16 @@ public class ConfigOptionListeners implements OptionConstants {
       if (containsPrivate) { sb.append("-private "); }
       if (containsPackage) { sb.append("-package "); }      
       String[] options = new String[] { "Copy to \"Access Level\" Setting",
-        "Clean \"Custom Javadoc Parameters\"",
+        "Clean \"Custom Scaladoc Parameters\"",
         "Ignore" };
       int result = JOptionPane.
         showOptionDialog(parent,
                          "You seem to have specified " + sb.toString() + "as part of the\n" +
-                         "\"Custom Javadoc Parameters\" setting. The \"Access Level\"\n" + 
+                         "\"Custom Scaladoc Parameters\" setting. The \"Access Level\"\n" + 
                          "setting should be used instead. Would you like to copy the\n" + 
                          "parameter into the \"Access Level\" setting, just clean up\n" + 
-                         "\"Custom Javadoc Parameters\", or ignore this potential problem?",
-                         "Access Level Set in Custom Javadoc Parameters",
+                         "\"Custom Scaladoc Parameters\", or ignore this potential problem?",
+                         "Access Level Set in Custom Scaladoc Parameters",
                          0,
                          JOptionPane.QUESTION_MESSAGE,
                          null,
@@ -499,10 +499,10 @@ public class ConfigOptionListeners implements OptionConstants {
       if (result!=2) {
         if (result == 0) {
           // copy
-          if (containsPublic) { DrJava.getConfig().setSetting(JAVADOC_ACCESS_LEVEL, "public"); }
-          else if (containsProtected) { DrJava.getConfig().setSetting(JAVADOC_ACCESS_LEVEL, "protected"); }
-          else if (containsPrivate) { DrJava.getConfig().setSetting(JAVADOC_ACCESS_LEVEL, "private"); }
-          else if (containsPackage) { DrJava.getConfig().setSetting(JAVADOC_ACCESS_LEVEL, "package"); }
+          if (containsPublic) { DrJava.getConfig().setSetting(SCALADOC_ACCESS_LEVEL, "public"); }
+          else if (containsProtected) { DrJava.getConfig().setSetting(SCALADOC_ACCESS_LEVEL, "protected"); }
+          else if (containsPrivate) { DrJava.getConfig().setSetting(SCALADOC_ACCESS_LEVEL, "private"); }
+          else if (containsPackage) { DrJava.getConfig().setSetting(SCALADOC_ACCESS_LEVEL, "package"); }
         }
         // clean up
         String[] params = value.split("(-private|-protected|-package|-public)");
@@ -510,7 +510,7 @@ public class ConfigOptionListeners implements OptionConstants {
         for(int i = 0; i < params.length; i++) {
           if(!params[i].trim().equals("")) { sb.append(params[i].trim()); sb.append(' '); }
         }
-        DrJava.getConfig().setSetting(JAVADOC_CUSTOM_PARAMS, sb.toString().trim());
+        DrJava.getConfig().setSetting(SCALADOC_CUSTOM_PARAMS, sb.toString().trim());
       }
     }
   }

@@ -450,12 +450,12 @@ public class NewVersionPopup extends JDialog {
     if (_newestVersionString.indexOf("weekly") > 0) {
       return "http://www.cs.rice.edu/~javaplt/drjavarice/weekly/";
     }
-    final String DRJAVA_FILES_PAGE = "http://sourceforge.net/project/showfiles.php?group_id=44253";
+    final String DRSCALA_FILES_PAGE = "http://sourceforge.net/project/showfiles.php?group_id=44253";
     final String LINK_PREFIX = "<a href=\"/project/showfiles.php?group_id=44253";
     final String LINK_SUFFIX = "\">";
     BufferedReader br = null;
     try {
-      URL url = new URL(DRJAVA_FILES_PAGE);
+      URL url = new URL(DRSCALA_FILES_PAGE);
       InputStream urls = url.openStream();
       InputStreamReader is = new InputStreamReader(urls);
       br = new BufferedReader(is);
@@ -470,18 +470,18 @@ public class NewVersionPopup extends JDialog {
             if ((suffixPos >= 0) && (suffixPos + LINK_SUFFIX.length() == pos)) {
               String versionLink = 
                 edu.rice.cs.plt.text.TextUtil.xmlUnescape(line.substring(prePos + LINK_PREFIX.length(), suffixPos));
-              return DRJAVA_FILES_PAGE + versionLink;
+              return DRSCALA_FILES_PAGE + versionLink;
             }
           }
         }
       };
     }
-    catch(IOException e) { return DRJAVA_FILES_PAGE; }
+    catch(IOException e) { return DRSCALA_FILES_PAGE; }
     finally { // close open input stream
       try { if (br != null) br.close(); }
       catch(IOException e) { /* ignore */ }
     }
-    return DRJAVA_FILES_PAGE;
+    return DRSCALA_FILES_PAGE;
   }
   
   /** Opens the specified page. */
@@ -629,9 +629,9 @@ public class NewVersionPopup extends JDialog {
       br.close();
       
       // remove "drjava-" prefix
-      final String DRJAVA_PREFIX = "drjava-";
-      if (!line.startsWith(DRJAVA_PREFIX)) { return null; }
-      line = line.substring(DRJAVA_PREFIX.length());
+      final String DRSCALA_PREFIX = "drjava-";
+      if (!line.startsWith(DRSCALA_PREFIX)) { return null; }
+      line = line.substring(DRSCALA_PREFIX.length());
       // remove "stable-" prefix
       final String STABLE_PREFIX = "stable-";
       if (line.startsWith(STABLE_PREFIX)) { line = line.substring(STABLE_PREFIX.length()); }

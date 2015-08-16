@@ -47,7 +47,7 @@ import edu.rice.cs.util.swing.AsyncTask;
 /** Keeps track of all listeners to the model, and has the ability to notify them of some event.
   * <p>
   * This class has a specific role of managing GlobalModelListeners.  Other classes with similar names use similar
-  * code to perform the same function for other interfaces, e.g. InteractionsEventNotifier and JavadocEventNotifier.
+  * code to perform the same function for other interfaces, e.g. InteractionsEventNotifier and ScaladocEventNotifier.
   * These classes implement the appropriate interface definition so that they can be used transparently as composite 
   * packaging for a particular listener interface.
   * <p>
@@ -550,42 +550,42 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener> impl
 //    }
 //  }
   
-  //--------------------------------- Javadoc --------------------------------//
+  //--------------------------------- Scaladoc --------------------------------//
   
-  /** Called after Javadoc is started by the GlobalModel. */
-  public void javadocStarted() {
+  /** Called after Scaladoc is started by the GlobalModel. */
+  public void scaladocStarted() {
     _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.javadocStarted(); } }
+    try { for (GlobalModelListener l : _listeners) { l.scaladocStarted(); } }
     finally { _lock.endRead(); }
   }
   
-  /** Called after Javadoc is finished.
-    * @param success whether the Javadoc operation generated proper output
+  /** Called after Scaladoc is finished.
+    * @param success whether the Scaladoc operation generated proper output
     * @param destDir if (success) the location where the output was generated, otherwise undefined (possibly null)
-    * @param allDocs Whether Javadoc was run for all open documents
+    * @param allDocs Whether Scaladoc was run for all open documents
     */
-  public void javadocEnded(boolean success, File destDir, boolean allDocs) {
+  public void scaladocEnded(boolean success, File destDir, boolean allDocs) {
     _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.javadocEnded(success, destDir, allDocs); } }
+    try { for (GlobalModelListener l : _listeners) { l.scaladocEnded(success, destDir, allDocs); } }
     finally { _lock.endRead(); }
   }
   
   
-  /** Called before attempting Javadoc, to give the user a chance to save. Do not continue with Javadoc if the user 
+  /** Called before attempting Scaladoc, to give the user a chance to save. Do not continue with Scaladoc if the user 
     * doesn't save!
     */
-  public void saveBeforeJavadoc() {
+  public void saveBeforeScaladoc() {
     _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.saveBeforeJavadoc(); } }
+    try { for (GlobalModelListener l : _listeners) { l.saveBeforeScaladoc(); } }
     finally { _lock.endRead(); }
   }
 
-  /** Called before attempting Javadoc, to give the user a chance to compile. Do not continue with Javadoc if the
+  /** Called before attempting Scaladoc, to give the user a chance to compile. Do not continue with Scaladoc if the
     * user doesn't comoile!
     */
-  public void compileBeforeJavadoc(final CompilerListener afterCompile) {
+  public void compileBeforeScaladoc(final CompilerListener afterCompile) {
     _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.compileBeforeJavadoc(afterCompile); } }
+    try { for (GlobalModelListener l : _listeners) { l.compileBeforeScaladoc(afterCompile); } }
     finally { _lock.endRead(); }
   }
   

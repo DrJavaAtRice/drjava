@@ -592,7 +592,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
                      "Please note that the added files may produce a copy of DrJava "+
                      "does not work as intended, and that it will be more difficult "+
                      "for us to help you with these problems. YOU ARE USING THE "+
-                     "CUSTOM DRJAVA.JAR FILE AT YOUR OWN RISK.");
+                     "CUSTOM DRSCALA.JAR FILE AT YOUR OWN RISK.");
     helpText.setLineWrap(true);
     helpText.setWrapStyleWord(true);
     
@@ -701,7 +701,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
     while(keyEn.hasMoreElements()) {
       String key = keyEn.nextElement();
       String value = bundle.getString(key);
-      if (key.equals(OptionConstants.CUSTOM_DRJAVA_JAR_VERSION_SUFFIX.getName())) {
+      if (key.equals(OptionConstants.CUSTOM_DRSCALA_JAR_VERSION_SUFFIX.getName())) {
         // store value and skip
         customDrJavaJarVersionSuffix = value;
       }
@@ -722,7 +722,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
       if (sb.length()>0) { sb.append(", "); }
       sb.append(f.getName());
     }
-    optionsProperties.setProperty(OptionConstants.CUSTOM_DRJAVA_JAR_VERSION_SUFFIX.getName(), sb.toString());
+    optionsProperties.setProperty(OptionConstants.CUSTOM_DRSCALA_JAR_VERSION_SUFFIX.getName(), sb.toString());
     
     // disable automatic updates
     optionsProperties.setProperty(OptionConstants.NEW_VERSION_ALLOWED.getName(), "false");

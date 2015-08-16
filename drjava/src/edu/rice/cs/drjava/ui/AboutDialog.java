@@ -65,7 +65,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 
   private static ImageInfo CSLOGO = new ImageInfo("RiceCS.gif",new Color(0x423585)),
     SF = new ImageInfo("SourceForge.gif",Color.black),
-    DRJAVA = new ImageInfo("DrScala.png",new Color(0xCCCCFF));
+    DRSCALA = new ImageInfo("drscala.png",new Color(0xCCCCFF));
 
   private final JButton _okButton = new JButton("OK");
 
@@ -109,7 +109,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 
   public void buildGUI(Container cp) {
     cp.setLayout(new BorderLayout());
-    JLabel drjava = /* createImageLabel(DRJAVA,JLabel.LEFT) */ new JLabel("DrScala");
+    JLabel drjava = createImageLabel(DRSCALA, JLabel.LEFT);
     if (drjava != null) {
       drjava.setBorder(new CompoundBorder(new EmptyBorder(5,5,5,5), drjava.getBorder()));
       drjava.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -188,7 +188,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     sb.append(Version.getVersionString());
     FileConfiguration config = DrJava.getConfig();
     if (config!=null) {
-      String customDrJavaJarVersionSuffix = config.getSetting(OptionConstants.CUSTOM_DRJAVA_JAR_VERSION_SUFFIX);
+      String customDrJavaJarVersionSuffix = config.getSetting(OptionConstants.CUSTOM_DRSCALA_JAR_VERSION_SUFFIX);
       if (customDrJavaJarVersionSuffix.length()>0)  {
         sb.append(" with ");
         sb.append(customDrJavaJarVersionSuffix);

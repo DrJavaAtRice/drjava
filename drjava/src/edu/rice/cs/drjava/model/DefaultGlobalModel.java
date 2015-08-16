@@ -62,8 +62,8 @@ import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
 import edu.rice.cs.drjava.model.debug.DebugListener;
 import edu.rice.cs.drjava.model.debug.DebugWatchData;
 import edu.rice.cs.drjava.model.debug.DebugThreadData;
-import edu.rice.cs.drjava.model.javadoc.JavadocModel;
-import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
+import edu.rice.cs.drjava.model.javadoc.ScaladocModel;
+import edu.rice.cs.drjava.model.javadoc.NoScaladocAvailable;
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
 import edu.rice.cs.drjava.model.repl.DummyInteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
@@ -177,10 +177,10 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** JUnitModel manages all JUnit functionality. */
   private final DefaultJUnitModel _junitModel;
   
-  /* Javadoc Fields */
+  /* Scaladoc Fields */
   
-  /** Manages all Javadoc functionality. */
-  protected volatile JavadocModel _javadocModel;
+  /** Manages all Scaladoc functionality. */
+  protected volatile ScaladocModel _scaladocModel;
   
   /* Debugger Fields */
   
@@ -193,17 +193,17 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     Iterable<? extends JDKToolsLibrary> tools = findLibraries();
     List<CompilerInterface> compilers = new LinkedList<CompilerInterface>();
     _debugger = null;
-    _javadocModel = null;
+    _scaladocModel = null;
     for (JDKToolsLibrary t : tools) {
       // check for support of JAVA_6; Scala 2.12.* requires Java 6. */
       if (t.compiler().isAvailable() && t.version().supports(JavaVersion.JAVA_6)) {
           compilers.add(t.compiler());
       }
       if (_debugger == null && t.debugger().isAvailable()) { _debugger = t.debugger(); }
-      if (_javadocModel == null && t.javadoc().isAvailable()) { _javadocModel = t.javadoc(); }
+      if (_scaladocModel == null && t.scaladoc().isAvailable()) { _scaladocModel = t.scaladoc(); }
     }
     if (_debugger == null) { _debugger = NoDebuggerAvailable.ONLY; }
-    if (_javadocModel == null) { _javadocModel = new NoJavadocAvailable(this); }
+    if (_scaladocModel == null) { _scaladocModel = new NoScaladocAvailable(this); }
     
     File workDir = Utilities.TEST_MODE ? new File(System.getProperty("user.home")) : getWorkingDirectory();
     _jvm = new MainJVM(workDir);
@@ -223,7 +223,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _interactionsModel.addListener(_notifier);
     _compilerModel.addListener(_notifier);
     _junitModel.addListener(_notifier);
-    _javadocModel.addListener(_notifier);
+    _scaladocModel.addListener(_notifier);
     
     // Listen to compiler to clear interactions appropriately.
     // XXX: The tests need this to be registered after _notifier, sadly.
@@ -253,7 +253,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   // If the descriptor is something different than JDKDescriptor.NONE, then this pair will always
   // return false for equals(), except if it is compared to the identical pair.
   private static class LibraryKey implements Comparable<LibraryKey> {    
-    public static final int PRIORITY_BUILTIN = 0;  // Currently the Eclipse 0.A48 compiler
+    public static final int PRIORITY_BUILTIN = 3;  // Currenty the Scala 12.0_M2 compiler
     public static final int PRIORITY_SEARCH = 1;
     public static final int PRIORITY_RUNTIME = 2;
     public static final int PRIORITY_SCALA = 3;
@@ -413,8 +413,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Gets the JUnitModel, which provides all methods relating to JUnit testing. */
   public JUnitModel getJUnitModel() { return _junitModel; }
   
-  /** Gets the JavadocModel, which provides all methods relating to Javadoc. */
-  public JavadocModel getJavadocModel() { return _javadocModel; }
+  /** Gets the ScaladocModel, which provides all methods relating to Scaladoc. */
+  public ScaladocModel getScaladocModel() { return _scaladocModel; }
   
   public int getNumCompilerErrors() { return _numCompilerErrors; }
   public void setNumCompilerErrors(int num) { _numCompilerErrors = num; }
@@ -717,13 +717,13 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     /** Runs JUnit on the current document.  Requires that all source documents are compiled before proceeding. */
     public void startJUnit() throws ClassNotFoundException, IOException { _junitModel.junit(this); }
     
-    /** Generates Javadoc for this document, saving the output to a temporary directory.  The location is provided to 
-      * the javadocEnded event on the given listener.
+    /** Generates Scaladoc for this document, saving the output to a temporary directory.  The location is provided to 
+      * the scaladocEnded event on the given listener.
       * java@param saver FileSaveSelector for saving the file if it needs to be saved
       */
-    public void generateJavadoc(FileSaveSelector saver) throws IOException {
+    public void generateScaladoc(FileSaveSelector saver) throws IOException {
       // Use the model's classpath, and use the EventNotifier as the listener
-      _javadocModel.javadocDocument(this, saver);
+      _scaladocModel.scaladocDocument(this, saver);
     }
     
     /** Called to indicate the document is being closed, so to remove all related state from the debug manager. */

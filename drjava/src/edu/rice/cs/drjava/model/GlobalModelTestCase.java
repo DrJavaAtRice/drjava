@@ -605,8 +605,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected volatile int saveBeforeCompileCount;
     //protected int saveBeforeRunCount;
     protected volatile int compileBeforeJUnitCount;
-    protected volatile int saveBeforeJavadocCount;
-    protected volatile int compileBeforeJavadocCount;
+    protected volatile int saveBeforeScaladocCount;
+    protected volatile int compileBeforeScaladocCount;
     //protected int saveBeforeDebugCount;
     protected volatile int nonTestCaseCount;
     protected volatile int lastExitStatus;
@@ -652,8 +652,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       saveBeforeCompileCount = 0;
       //saveBeforeRunCount = 0;
       compileBeforeJUnitCount = 0;
-      saveBeforeJavadocCount = 0;
-      compileBeforeJavadocCount = 0;
+      saveBeforeScaladocCount = 0;
+      compileBeforeScaladocCount = 0;
       //saveBeforeDebugCount = 0;
       nonTestCaseCount = 0;
       lastExitStatus = 0;
@@ -830,12 +830,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertEquals("number of times compileBeforeJUnit fired", i, compileBeforeJUnitCount);
     }
 
-    public void assertSaveBeforeJavadocCount(int i) {
-      assertEquals("number of times saveBeforeJavadoc fired", i, saveBeforeJavadocCount);
+    public void assertSaveBeforeScaladocCount(int i) {
+      assertEquals("number of times saveBeforeScaladoc fired", i, saveBeforeScaladocCount);
     }
 
-    public void assertCompileBeforeJavadocCount(int i) {
-      assertEquals("number of times compileBeforeJavadoc fired", i, compileBeforeJavadocCount);
+    public void assertCompileBeforeScaladocCount(int i) {
+      assertEquals("number of times compileBeforeScaladoc fired", i, compileBeforeScaladocCount);
     }
 
 //    /** Not used. */
@@ -893,9 +893,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
     public void junitEnded() { listenerFail("junitEnded fired unexpectedly"); }
     
-    public void javadocStarted() { listenerFail("javadocStarted fired unexpectedly"); }
-    public void javadocEnded(boolean success, File destDir, boolean allDocs) {
-      listenerFail("javadocEnded fired unexpectedly");
+    public void scaladocStarted() { listenerFail("scaladocStarted fired unexpectedly"); }
+    public void scaladocEnded(boolean success, File destDir, boolean allDocs) {
+      listenerFail("scaladocEnded fired unexpectedly");
     }
 
     public void interactionStarted() { listenerFail("interactionStarted fired unexpectedly"); }
@@ -932,9 +932,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     
     public void compileBeforeJUnit(CompilerListener cl, List<OpenDefinitionsDocument> outOfSync) { compileBeforeJUnitCount++; }
 
-    public void saveBeforeJavadoc() { listenerFail("saveBeforeJavadoc fired unexpectedly"); }
-    public void compileBeforeJavadoc(final CompilerListener afterCompile) {
-      listenerFail("compileBeforeJavadoc fired unexpectedly");
+    public void saveBeforeScaladoc() { listenerFail("saveBeforeScaladoc fired unexpectedly"); }
+    public void compileBeforeScaladoc(final CompilerListener afterCompile) {
+      listenerFail("compileBeforeScaladoc fired unexpectedly");
     }
     public void nonTestCase(boolean isTestAll, boolean didCompileFail) { listenerFail("nonTestCase fired unexpectedly"); }
 

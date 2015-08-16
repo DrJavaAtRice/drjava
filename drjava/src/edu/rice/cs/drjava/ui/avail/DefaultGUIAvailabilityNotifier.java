@@ -68,21 +68,21 @@ public class DefaultGUIAvailabilityNotifier extends GUIAvailabilityNotifier {
   /** Make the tasks needed for JUnit, i.e. JUNIT and COMPILER, available. */ 
   public void junitFinished() { junit(true); }  
 
-  /** Set the availability of tasks needed for Javadoc, i.e. JAVADOC and COMPILER.
+  /** Set the availability of tasks needed for Scaladoc, i.e. SCALADOC and COMPILER.
     * The availabilities can be nested.
     * 
-    * JAVADOC is the main component, so its availability is necessarily changed.
-    * JAVADOC may invoke the COMPILER, so its availability is changed too.
+    * SCALADOC is the main component, so its availability is necessarily changed.
+    * SCALADOC may invoke the COMPILER, so its availability is changed too.
     * @param available true to make available, false to make unavailable */
-  public void javadoc(boolean available) {
-    // LOG.log("javadoc "+available, new RuntimeException());
-    availabilityChanged(GUIAvailabilityListener.ComponentType.JAVADOC, available);
+  public void scaladoc(boolean available) {
+    // LOG.log("scaladoc "+available, new RuntimeException());
+    availabilityChanged(GUIAvailabilityListener.ComponentType.SCALADOC, available);
     availabilityChanged(GUIAvailabilityListener.ComponentType.COMPILER, available);
   }
 
-  /** Make the tasks needed for Javadoc, i.e. JAVADOC and COMPILER, unavailable. */ 
-  public void javadocStarted() { javadoc(false); }
+  /** Make the tasks needed for Scaladoc, i.e. SCALADOC and COMPILER, unavailable. */ 
+  public void scaladocStarted() { scaladoc(false); }
 
-  /** Make the tasks needed for Javadoc, i.e. JAVADOC and COMPILER, unavailable. */ 
-  public void javadocFinished() { javadoc(true); }  
+  /** Make the tasks needed for Scaladoc, i.e. SCALADOC and COMPILER, unavailable. */ 
+  public void scaladocFinished() { scaladoc(true); }  
 }

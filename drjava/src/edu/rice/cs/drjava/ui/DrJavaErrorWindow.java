@@ -306,7 +306,7 @@ public class DrJavaErrorWindow extends JDialog {
     b.append(edu.rice.cs.drjava.Version.getVersionString());
     FileConfiguration config = DrJava.getConfig();
     if (config!=null) {
-      String customDrJavaJarVersionSuffix = config.getSetting(OptionConstants.CUSTOM_DRJAVA_JAR_VERSION_SUFFIX);
+      String customDrJavaJarVersionSuffix = config.getSetting(OptionConstants.CUSTOM_DRSCALA_JAR_VERSION_SUFFIX);
       if (customDrJavaJarVersionSuffix.length()>0)  {
         b.append(" with ");
         b.append(customDrJavaJarVersionSuffix);

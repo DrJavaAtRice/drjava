@@ -56,7 +56,7 @@ import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.debug.Debugger;
-import edu.rice.cs.drjava.model.javadoc.JavadocModel;
+import edu.rice.cs.drjava.model.javadoc.ScaladocModel;
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
@@ -99,8 +99,8 @@ public class DummyGlobalModel implements GlobalModel {
     throw new UnsupportedOperationException("Tried to call getJUnitModel on a Dummy");
   }
   
-  public JavadocModel getJavadocModel() {
-    throw new UnsupportedOperationException("Tried to call getJavadocModel on a Dummy");
+  public ScaladocModel getScaladocModel() {
+    throw new UnsupportedOperationException("Tried to call getScaladocModel on a Dummy");
   }
   
   public Debugger getDebugger() {

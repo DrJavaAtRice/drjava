@@ -79,10 +79,10 @@ public class DrJavaErrorPopup extends JDialog {
     // If we set this pane to be of type text/rtf, it wraps based on words
     // as opposed to based on characters.
     _keepDisplaying = new JCheckBox("Keep showing this notification",
-                                    DrJava.getConfig().getSetting(OptionConstants.DIALOG_DRJAVA_ERROR_POPUP_ENABLED).booleanValue());
+                                    DrJava.getConfig().getSetting(OptionConstants.DIALOG_DRSCALA_ERROR_POPUP_ENABLED).booleanValue());
     _keepDisplaying.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
-        DrJava.getConfig().setSetting(OptionConstants.DIALOG_DRJAVA_ERROR_POPUP_ENABLED, _keepDisplaying.isSelected());
+        DrJava.getConfig().setSetting(OptionConstants.DIALOG_DRSCALA_ERROR_POPUP_ENABLED, _keepDisplaying.isSelected());
       }
     });
 

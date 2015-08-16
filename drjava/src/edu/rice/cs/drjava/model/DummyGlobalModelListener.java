@@ -140,14 +140,14 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
   
   public void saveUntitled() { }
   
-  /** Called to demand that all files be saved before generating Javadoc. It is up to the caller of this method to 
+  /** Called to demand that all files be saved before generating Scaladoc. It is up to the caller of this method to 
     * check if the documents have been saved, using IGetDocuments.hasModifiedDocuments().
     */
-  public void saveBeforeJavadoc() { }
+  public void saveBeforeScaladoc() { }
 
-  /** Called to demand that all files be compiled before generating Javadoc.
+  /** Called to demand that all files be compiled before generating Scaladoc.
     */
-  public void compileBeforeJavadoc(final CompilerListener afterCompile) { }
+  public void compileBeforeScaladoc(final CompilerListener afterCompile) { }
   
   /** Called to demand that all files be saved before starting the debugger. It is up to the caller of this method 
     * to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments().
@@ -179,15 +179,15 @@ public class DummyGlobalModelListener extends DummyInteractionsListener implemen
   /** Called to ask the listener if it is OK to replace the current document by a newer version on disk. */
   public boolean shouldRevertFile(OpenDefinitionsDocument doc) { return true; }
   
-  /** Called after Javadoc is started by the GlobalModel. */
-  public void javadocStarted() { }
+  /** Called after Scaladoc is started by the GlobalModel. */
+  public void scaladocStarted() { }
   
-  /** Called after Javadoc is finished.
-    * @param success whether the Javadoc operation generated proper output
+  /** Called after Scaladoc is finished.
+    * @param success whether the Scaladoc operation generated proper output
     * @param destDir if (success == true) the location where the output was placed, otherwise undefined
     * @param allDocs Whether we are running over all open documents
     */
-  public void javadocEnded(boolean success, File destDir, boolean allDocs) { }
+  public void scaladocEnded(boolean success, File destDir, boolean allDocs) { }
   
   public void activeDocumentChanged(OpenDefinitionsDocument active) { }
   

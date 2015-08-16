@@ -68,9 +68,21 @@ import edu.rice.cs.drjava.model.repl.InteractionsPaneOptions;
 
 import edu.rice.cs.util.swing.Utilities;
 
-import edu.rice.cs.dynamicjava.Options;
-import edu.rice.cs.dynamicjava.interpreter.*;
-import edu.rice.cs.dynamicjava.symbol.*;
+//import edu.rice.cs.dynamicjava.Options;
+
+/* Most of these imports involve debugger code that I don't think works in DrScala. */
+import edu.rice.cs.dynamicjava.interpreter.ClassContext;
+import edu.rice.cs.dynamicjava.interpreter.ClassSignatureContext;
+import edu.rice.cs.dynamicjava.interpreter.DelegatingContext;
+import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
+import edu.rice.cs.dynamicjava.interpreter.ImportContext;
+import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
+import edu.rice.cs.dynamicjava.interpreter.LocalContext;
+import edu.rice.cs.dynamicjava.interpreter.RuntimeBindings;
+import edu.rice.cs.dynamicjava.interpreter.TypeContext;
+import edu.rice.cs.dynamicjava.symbol.DJClass;
+import edu.rice.cs.dynamicjava.symbol.SymbolUtil;
+import edu.rice.cs.dynamicjava.symbol.LocalVariable;
 import edu.rice.cs.dynamicjava.symbol.type.Type;
 
 // For Windows focus fix
@@ -84,7 +96,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
   * calls until handleStart has been executed.  This class is loaded in the Interpreter JVM, not the Main JVM. 
   * (Do not use DrJava's config framework here.)
   * <p>
-  * Note that this class is specific to DynamicJava. It must be refactored to accommodate other interpreters.
+  * Note that this class is specific to the Scala interpreter. It must be refactored to accommodate other interpreters.
   * @version $Id: InterpreterJVM.java 5723 2012-09-29 19:38:35Z wdforson $
   */
 public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRemoteI, JUnitModelCallback {
@@ -120,7 +132,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
 
   /** Private constructor; use the singleton ONLY instance. */
   private InterpreterJVM() {
-    super("Reset Interactions Thread", "Poll DrJava Thread");
+    super("Reset Interactions Thread", "Poll DrScala Thread");
     
     _classPathManager = new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
     _interpreterLoader = _classPathManager.makeClassLoader(null);
@@ -415,6 +427,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
   }
   
+  /* TODO: revise this to work with DrScala. Does the debugger work at all in DrScala? */
   /** Adds a named Interpreter in the given environment to the list.  Invoked reflectively by
     * the debugger.
     * @param name  The unique name for the interpreter

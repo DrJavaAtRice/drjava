@@ -30,9 +30,9 @@
   <property name="link-source" value="no" />
   
   <property environment="env" />
+  <property name="java8-home" value="${env.JAVA8_HOME}" />
   <property name="java7-home" value="${env.JAVA7_HOME}" />
   <property name="java6-home" value="${env.JAVA6_HOME}" />
-  <property name="java5-home" value="${env.JAVA5_HOME}" />
   <property name="clover-jar" value="${env.CLOVER_JAR}" />
   <property name="findbugs-home" value="${env.FINDBUGS_HOME}" />
   
@@ -75,12 +75,12 @@
     <echo message="      the 'java' command is used by default in testing/running; " />
     <echo message="      the 'svn' command is used to generate version numbers and " />
     <echo message="      in Subversion targets" />
-    <echo message="JAVA5_HOME: Home folder of the Java 5 JRE or JDK (required for" />
-    <echo message="            compiling and '-5' targets)" />
     <echo message="JAVA6_HOME: Home folder of the Java 6 JRE or JDK (required for" />
     <echo message="            '-6' targets)" />
     <echo message="JAVA7_HOME: Home folder of the Java 7 JRE or JDK (required for" />
     <echo message="            '-7' targets)" />
+    <echo message="JAVA8_HOME: Home folder of the Java 8 JRE or JDK (required for" />
+    <echo message="            '-8' targets)" />
     <echo message="CLOVER_JAR: Location of the Clover jar file" />
     <echo message="FINDBUGS_HOME: Location of the FindBugs installation" />
     <echo message="" />
@@ -147,7 +147,7 @@
           description="Compile all source files">
   </target>
   
-  <target name="do-compile" depends="resolve-java7-runtime">
+  <target name="do-compile" depends="resolve-java8-runtime">
   
     <echo message="Compiling src directory to classes/base and classes/test with command 'javac'" />
     
@@ -159,8 +159,8 @@
       <fileset dir="classes/test" includes="**/*" />
     </move>
     
-    <javac srcdir="src" destdir="classes/base" source="1.5" target="1.5"
-           bootclasspath="${java7-runtime}" sourcepath="" includeAntRuntime="no"
+    <javac srcdir="src" destdir="classes/base" source="1.6" target="1.6"
+           bootclasspath="${java8-runtime}" sourcepath="" includeAntRuntime="no"
            executable="javac" fork="yes" memoryMaximumSize="512M"
            debug="on" optimize="off" deprecation="on"	>
       <classpath>
@@ -249,13 +249,6 @@
           description="Run all tests under Java 6 (after compiling); use -Dtest-spec=... to filter">
     <antcall target="iterate-tests">
       <param name="test-jvm" value="${java6-exec}" />
-    </antcall>
-  </target>
-  
-  <target name="test-5" depends="compile, resolve-java5-exec" unless="skip-test"
-          description="Run all tests under Java 5 (after compiling); use -Dtest-spec=... to filter">
-    <antcall target="iterate-tests">
-      <param name="test-jvm" value="${java5-exec}" />
     </antcall>
   </target>
   
@@ -440,10 +433,7 @@
   
   <target name="clover-6" depends="clean, setup-clover, test-6, report-clover" 
           description="Generate a Clover test coverage report under Java 6" />
-  
-  <target name="clover-5" depends="clean, setup-clover, test-5, report-clover" 
-          description="Generate a Clover test coverage report under Java 5" />
-  
+
   <target name="report-clover" depends="resolve-version-tag">
     <echo message="Generating Clover report" />
     <clover-report>
@@ -556,6 +546,8 @@
        ****************** -->
   
   <target name="update" depends="clean" description="Reconcile source with the Subversion archive">
+
+<!--
     <echo message="Running Subversion update" />
     <exec executable="svn" failonerror="yes">
       <arg value="update" />
@@ -563,13 +555,16 @@
     <exec executable="svn" failonerror="yes">
       <arg value="status" />
     </exec>
+-->
   </target>
   
   <target name="commit" depends="update, build" 
           description="Commit source to the Subversion archive (after building)">
-    <antcall target="clean-intermediate"> <!-- Clean up after the latest build -->
+<!--
+    <antcall target="clean-intermediate">
       <param name="clean-can-fail" value="no" />
     </antcall>
+
     <exec executable="svn" failonerror="yes">
       <arg value="status" />
     </exec>
@@ -581,10 +576,12 @@
       <arg value="-m" />
       <arg value="${svn-commit-message}" />
     </exec>
+-->
   </target>
 
   <target name="tag" depends="update, resolve-version-tag" unless="skip-tag"
           description="Copy the working copy to a new Subversion tag (after updating)">
+<!--
     <echo message="Creating a new Subversion tag with name ${version-tag}"/>
     <exec executable="svn" failonerror="yes">
       <arg value="copy" />
@@ -593,16 +590,19 @@
       <arg value="-m" />
       <arg value="Created tag ${version-tag}" />
     </exec>
+-->
   </target>
   
   <target name="branch" depends="update" 
           description="Copy the working copy to a new Subversion branch (after updating)">
+<!--
     <echo message="This will create a new branch from your working copy.  If there are changes " />
     <echo message="in your copy that have not been committed, you may want to do so first, " />
     <echo message="so that there's a clear branch point for merging later." />
     <input message="Enter a name for the new branch: "
            addproperty="svn-branch-name" />
     <echo message="Creating a new Subversion branch ${svn-branch-name}" />
+
     <exec executable="svn" failonerror="yes">
       <arg value="copy" />
       <arg value="${basedir}" />
@@ -610,6 +610,7 @@
       <arg value="-m" />
       <arg value="Created branch ${svn-branch-name}" />
     </exec>
+-->
   </target>
 
 
@@ -660,7 +661,9 @@
   </target>
   
   <target name="src-zip" depends="resolve-version-tag" unless="skip-tag">
+<!--
     <echo message="Creating ${version-tag}-src.zip" />
+
     <exec executable="svn" failonerror="yes">
       <arg value="export" />
       <arg value="${svn-repository}/tags/${version-tag}" />
@@ -669,6 +672,7 @@
     <zip destfile="${version-tag}-src.zip">
       <zipfileset dir="${version-tag}/src" prefix="${version-tag}/src" />
     </zip>
+-->
   </target>
   
   <target name="jar-app" depends="jar, assert-jar-exists, resolve-version-tag">
@@ -760,10 +764,27 @@
        Property-resolution Targets 
        *************************** -->
 
+
+  <target name="resolve-java8-runtime">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java8-runtime will only be set the *first* time. -->
+    <property name="java8-runtime-1" location="${java8-home}/lib/rt.jar" />
+    <available property="java8-runtime" value="${java8-runtime-1}" file="${java8-runtime-1}" />
+
+    <property name="java8-runtime-2" location="${java8-home}/jre/lib/rt.jar" />
+    <available property="java8-runtime" value="${java8-runtime-2}" file="${java8-runtime-2}" />
+
+    <property name="java8-runtime-3" location="${java8-home}/../Classes/classes.jar" />
+    <available property="java8-runtime" value="${java8-runtime-3}" file="${java8-runtime-3}" />
+
+    <fail message="Can't find rt.jar in the Java 8 home: ${java8-home}" unless="java8-runtime" />
+  </target>
+
+
+
   <target name="resolve-java7-runtime">
     <!-- We rely on "location" to generate a platform-specific path; note that properties
          are immutable and so java7-runtime will only be set the *first* time. -->
-
     <property name="java7-runtime-1" location="${java7-home}/lib/rt.jar" />
     <available property="java7-runtime" value="${java7-runtime-1}" file="${java7-runtime-1}" />
 
@@ -771,7 +792,7 @@
     <available property="java7-runtime" value="${java7-runtime-2}" file="${java7-runtime-2}" />
 
     <property name="java7-runtime-3" location="${java7-home}/../Classes/classes.jar" />
-    <available property="java7-runtime" value="${java6-runtime-3}" file="${java7-runtime-3}" />
+    <available property="java7-runtime" value="${java7-runtime-3}" file="${java7-runtime-3}" />
 
     <fail message="Can't find rt.jar in the Java 7 home: ${java7-home}" unless="java7-runtime" />
   </target>
@@ -825,40 +846,6 @@
 
     <fail message="Can't find the java executable in the Java 6 home: ${java6-home}" unless="java6-exec" />
   </target>
-  
-  <target name="resolve-java5-runtime">
-    <!-- We rely on "location" to generate a platform-specific path; note that properties
-         are immutable and so java5-runtime will only be set the *first* time. -->
-
-    <property name="java5-runtime-1" location="${java5-home}/lib/rt.jar" />
-    <available property="java5-runtime" value="${java5-runtime-1}" file="${java5-runtime-1}" />
-
-    <property name="java5-runtime-2" location="${java5-home}/jre/lib/rt.jar" />
-    <available property="java5-runtime" value="${java5-runtime-2}" file="${java5-runtime-2}" />
-
-    <property name="java5-runtime-3" location="${java5-home}/../Classes/classes.jar" />
-    <available property="java5-runtime" value="${java5-runtime-3}" file="${java5-runtime-3}" />
-
-    <fail message="Can't find rt.jar in the Java 5 home: ${java5-home}" unless="java5-runtime" />
-  </target>
-  
-  <target name="resolve-java5-exec">
-    <!-- We rely on "location" to generate a platform-specific path -->
-
-    <property name="java5-exec-1" location="${java5-home}/bin/java.exe" />
-    <condition property="java5-exec" value="${java5-exec-1}">
-      <and>
-        <available file="${java5-exec-1}" />
-        <os family="windows" />
-      </and>
-    </condition>
-    
-    <property name="java5-exec-2" location="${java5-home}/bin/java" />
-    <available property="java5-exec" value="${java5-exec-2}" file="${java5-exec-2}" />
-
-    <fail message="Can't find the java executable in the Java 5 home: ${java5-home}" unless="java5-exec" />
-  </target>
-  
   
   <target name="assert-jar-exists">
     <available property="jar-exists" file="${ant.project.name}.jar" />
@@ -931,6 +918,7 @@
 
   <!-- Sets is-modified if "svn status" has non-empty output. -->
   <target name="resolve-is-modified" depends="clean">
+<!--
     <exec executable="svn" failonerror="yes" outputproperty="svn-status">
       <arg value="status" />
     </exec>
@@ -939,10 +927,12 @@
         <equals arg1="${svn-status}" arg2="" />
       </not>
     </condition>
+-->
   </target>
   
   <!-- Sets svn-revision to the current "Last Changed Rev" of "svn info". -->
   <target name="resolve-svn-revision">
+<!--
     <exec executable="svn" failonerror="yes" output="svn-info.txt">
       <arg value="info" />
     </exec>
@@ -956,6 +946,7 @@
       </filterchain>
     </loadfile>
     <delete file="svn-info.txt" />
+-->
   </target>
   
 

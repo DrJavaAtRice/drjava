@@ -183,7 +183,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public void generateJavadoc(FileSaveSelector saver) throws IOException {
+  public void generateScaladoc(FileSaveSelector saver) throws IOException {
     throw new UnsupportedOperationException("Dummy method");
   }
   

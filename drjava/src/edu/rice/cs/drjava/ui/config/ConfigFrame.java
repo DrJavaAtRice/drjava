@@ -96,7 +96,7 @@ public class ConfigFrame extends SwingFrame {
   private final ConfigOptionListeners.RequiresInteractionsRestartListener<String> _concJUnitChecksEnabledListener;
   private final ConfigOptionListeners.RequiresInteractionsRestartListener<File> _rtConcJUnitLocationListener;
     
-  private StringOptionComponent javadocCustomParams;
+  private StringOptionComponent scaladocCustomParams;
   
   protected final String SEPS = " \t\n-,;.(";
   
@@ -450,8 +450,8 @@ public class ConfigFrame extends SwingFrame {
     PanelTreeNode junitNode = _createPanel("JUnit");
     _setupJUnitPanel(junitNode.getPanel());
     
-    PanelTreeNode javadocNode = _createPanel("Javadoc");
-    _setupJavadocPanel(javadocNode.getPanel());
+    PanelTreeNode scaladocNode = _createPanel("Scaladoc");
+    _setupScaladocPanel(scaladocNode.getPanel());
 
     PanelTreeNode notificationsNode = _createPanel("Notifications");
     _setupNotificationsPanel(notificationsNode.getPanel());
@@ -652,7 +652,7 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, newColorOptionComponent(INTERACTIONS_ERROR_COLOR, false, true));
     addOptionComponent(panel, newColorOptionComponent(DEBUG_MESSAGE_COLOR, false, true));
     addOptionComponent(panel, 
-                       newColorOptionComponent(DRJAVA_ERRORS_BUTTON_COLOR, true));
+                       newColorOptionComponent(DRSCALA_ERRORS_BUTTON_COLOR, true));
     addOptionComponent(panel, 
                        newColorOptionComponent(RIGHT_MARGIN_COLOR, true));
     
@@ -703,11 +703,11 @@ public class ConfigFrame extends SwingFrame {
     }, "Reset \"Create Jar File from Project\" Dialog Position", this, "This resets the dialog position to its default values."));
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
-    addOptionComponent(panel, newBooleanOptionComponent(DIALOG_OPENJAVADOC_STORE_POSITION, false)
+    addOptionComponent(panel, newBooleanOptionComponent(DIALOG_OPENSCALADOC_STORE_POSITION, false)
                          .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
-      public void actionPerformed(ActionEvent e) { _mainFrame.resetOpenJavadocDialogPosition(); }
-    }, "Reset \"Open Javadoc\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
+      public void actionPerformed(ActionEvent e) { _mainFrame.resetOpenScaladocDialogPosition(); }
+    }, "Reset \"Open Scaladoc\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, newBooleanOptionComponent(DIALOG_AUTOIMPORT_STORE_POSITION, false)
@@ -736,13 +736,13 @@ public class ConfigFrame extends SwingFrame {
     }, "Reset \"Execute External Process\" Dialog Position", this, "This resets the dialog position to its default values."));
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
-    addOptionComponent(panel, newBooleanOptionComponent(DIALOG_OPENJAVADOC_STORE_POSITION, false)
+    addOptionComponent(panel, newBooleanOptionComponent(DIALOG_OPENSCALADOC_STORE_POSITION, false)
                          .setEntireColumn(true));
     addOptionComponent(panel, new ButtonComponent(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        _mainFrame.resetOpenJavadocDialogPosition();
+        _mainFrame.resetOpenScaladocDialogPosition();
       }
-    }, "Reset \"Open Javadoc\" Dialog Position", this, "This resets the dialog position to its default values."));
+    }, "Reset \"Open Scaladoc\" Dialog Position", this, "This resets the dialog position to its default values."));
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, newBooleanOptionComponent(DIALOG_TABBEDPANES_STORE_POSITION, false)
@@ -836,7 +836,7 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, 
                        newBooleanOptionComponent(DEBUG_STEP_JAVA));
     addOptionComponent(panel, newBooleanOptionComponent(DEBUG_STEP_INTERPRETER));
-    addOptionComponent(panel, newBooleanOptionComponent(DEBUG_STEP_DRJAVA));
+    addOptionComponent(panel, newBooleanOptionComponent(DEBUG_STEP_DRSCALA));
     addOptionComponent(panel, 
                        new LabelComponent("<html>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
                                           "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
@@ -851,28 +851,28 @@ public class ConfigFrame extends SwingFrame {
     panel.displayComponents();
   }
 
-  /** Add all of the components for the Javadoc panel of the preferences window. */
-  private void _setupJavadocPanel(ConfigPanel panel) {
+  /** Add all of the components for the Scaladoc panel of the preferences window. */
+  private void _setupScaladocPanel(ConfigPanel panel) {
     addOptionComponent(panel, 
-                       newForcedChoiceOptionComponent(JAVADOC_API_REF_VERSION));
+                       newForcedChoiceOptionComponent(SCALADOC_API_REF_VERSION));
     addOptionComponent(panel, 
-                       newForcedChoiceOptionComponent(JAVADOC_ACCESS_LEVEL));
+                       newForcedChoiceOptionComponent(SCALADOC_ACCESS_LEVEL));
     addOptionComponent(panel, 
-                       newForcedChoiceOptionComponent(JAVADOC_LINK_VERSION));
+                       newForcedChoiceOptionComponent(SCALADOC_LINK_VERSION));
     addOptionComponent(panel, 
-                       newStringOptionComponent(JAVADOC_1_5_LINK));
+                       newStringOptionComponent(SCALADOC_1_5_LINK));
     addOptionComponent(panel, 
-                       newStringOptionComponent(JAVADOC_1_6_LINK));
+                       newStringOptionComponent(SCALADOC_1_6_LINK));
     addOptionComponent(panel, 
-                       newStringOptionComponent(JAVADOC_1_7_LINK));
+                       newStringOptionComponent(SCALADOC_1_7_LINK));
     addOptionComponent(panel, 
                        newStringOptionComponent(JUNIT_LINK));
 
-    VectorStringOptionComponent additionalJavadoc =
-      new VectorStringOptionComponent(JAVADOC_ADDITIONAL_LINKS, 
-                                      CONFIG_DESCRIPTIONS.get(JAVADOC_ADDITIONAL_LINKS),
+    VectorStringOptionComponent additionalScaladoc =
+      new VectorStringOptionComponent(SCALADOC_ADDITIONAL_LINKS, 
+                                      CONFIG_DESCRIPTIONS.get(SCALADOC_ADDITIONAL_LINKS),
                                       this,
-                                      CONFIG_LONG_DESCRIPTIONS.get(JAVADOC_ADDITIONAL_LINKS)) {
+                                      CONFIG_LONG_DESCRIPTIONS.get(SCALADOC_ADDITIONAL_LINKS)) {
       protected boolean verify(String s) {
         // verify that the allclasses-frame.html file exists at that URL. do not actually parse it now
         boolean result = true;
@@ -896,27 +896,27 @@ public class ConfigFrame extends SwingFrame {
         catch(java.io.IOException ioe) { result = false; }
         if (!result) {
           JOptionPane.showMessageDialog(ConfigFrame.this,
-                                        "Could not find the Javadoc at the URL\n"+
+                                        "Could not find the Scaladoc at the URL\n"+
                                         s,
-                                        "Error Adding Javadoc",
+                                        "Error Adding Scaladoc",
                                         JOptionPane.ERROR_MESSAGE); 
         }
         return result;
       }
     };
-    addOptionComponent(panel, additionalJavadoc);
+    addOptionComponent(panel, additionalScaladoc);
     
     addOptionComponent(panel, 
-                       newDirectoryOptionComponent(JAVADOC_DESTINATION, _dirChooser));
+                       newDirectoryOptionComponent(SCALADOC_DESTINATION, _dirChooser));
     
     addOptionComponent(panel, 
-                       javadocCustomParams = newStringOptionComponent(JAVADOC_CUSTOM_PARAMS));
+                       scaladocCustomParams = newStringOptionComponent(SCALADOC_CUSTOM_PARAMS));
     
-    // Note: JAVADOC_FROM_ROOTS is intended to set the -subpackages flag, but I don't think that's something
+    // Note: SCALADOC_FROM_ROOTS is intended to set the -subpackages flag, but I don't think that's something
     // we should support -- in general, we only support performing operations on the files that are open.
     // (dlsmith r4189)
 //    addOptionComponent(panel, 
-//                       newBooleanOptionComponent(JAVADOC_FROM_ROOTS));
+//                       newBooleanOptionComponent(SCALADOC_FROM_ROOTS));
     
     panel.displayComponents();
   }
@@ -935,8 +935,8 @@ public class ConfigFrame extends SwingFrame {
                        newBooleanOptionComponent(INTERACTIONS_EXIT_PROMPT,false)
                          .setEntireColumn(true));
 
-    // Javadoc
-    addOptionComponent(panel, newBooleanOptionComponent(JAVADOC_PROMPT_FOR_DESTINATION,false)
+    // Scaladoc
+    addOptionComponent(panel, newBooleanOptionComponent(SCALADOC_PROMPT_FOR_DESTINATION,false)
                          .setEntireColumn(true));
 
 
@@ -956,10 +956,10 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, newBooleanOptionComponent(ALWAYS_COMPILE_BEFORE_JUNIT,false)
                          .setEntireColumn(true)); 
     
-    addOptionComponent(panel, newBooleanOptionComponent(ALWAYS_SAVE_BEFORE_JAVADOC, false)
+    addOptionComponent(panel, newBooleanOptionComponent(ALWAYS_SAVE_BEFORE_SCALADOC, false)
                          .setEntireColumn(true));
     
-    addOptionComponent(panel, newBooleanOptionComponent(ALWAYS_COMPILE_BEFORE_JAVADOC, false)
+    addOptionComponent(panel, newBooleanOptionComponent(ALWAYS_COMPILE_BEFORE_SCALADOC, false)
                          .setEntireColumn(true));
 
 
@@ -996,7 +996,7 @@ public class ConfigFrame extends SwingFrame {
                          .setEntireColumn(true));
 
     addOptionComponent(panel, 
-                       newBooleanOptionComponent(DIALOG_DRJAVA_ERROR_POPUP_ENABLED,false)
+                       newBooleanOptionComponent(DIALOG_DRSCALA_ERROR_POPUP_ENABLED,false)
                          .setEntireColumn(true));
     addOptionComponent(panel,
                        newBooleanOptionComponent(WARN_IF_COMPIZ,false)
@@ -1043,7 +1043,7 @@ public class ConfigFrame extends SwingFrame {
 
     addOptionComponent(panel, 
                        newBooleanOptionComponent(FIND_REPLACE_FOCUS_IN_DEFPANE));
-    addOptionComponent(panel, newBooleanOptionComponent(DRJAVA_USE_FORCE_QUIT));
+    addOptionComponent(panel, newBooleanOptionComponent(DRSCALA_USE_FORCE_QUIT));
     addOptionComponent(panel, newBooleanOptionComponent(REMOTE_CONTROL_ENABLED));
     addOptionComponent(panel, newIntegerOptionComponent(REMOTE_CONTROL_PORT));
     addOptionComponent(panel, newIntegerOptionComponent(FOLLOW_FILE_DELAY));
@@ -1286,12 +1286,15 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, autoImportClasses);
 
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
+ 
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
+    
+    /* The following opions do not exist in DrScala. */
       
-    addOptionComponent(panel, 
-                       newForcedChoiceOptionComponent(DYNAMICJAVA_ACCESS_CONTROL));
-    addOptionComponent(panel, newBooleanOptionComponent(DYNAMICJAVA_REQUIRE_SEMICOLON));
-    addOptionComponent(panel, newBooleanOptionComponent(DYNAMICJAVA_REQUIRE_VARIABLE_TYPE));
+//    addOptionComponent(panel, 
+//                       newForcedChoiceOptionComponent(DYNAMICJAVA_ACCESS_CONTROL));
+//    addOptionComponent(panel, newBooleanOptionComponent(DYNAMICJAVA_REQUIRE_SEMICOLON));
+//    addOptionComponent(panel, newBooleanOptionComponent(DYNAMICJAVA_REQUIRE_VARIABLE_TYPE));
     
     panel.displayComponents();
   }

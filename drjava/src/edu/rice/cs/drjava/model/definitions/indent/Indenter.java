@@ -151,10 +151,10 @@ public class Indenter {
       
       rule05 = new ActionStartPrevLinePlus(" "),    // padding prefix for interior of ordinary block comment
       rule04 = new ActionStartPrevLinePlus(" * "),  // padding prefix for new line within ordinary block comment
-      rule46 = new ActionStartPrevLinePlus("  * "), // padding prefix for new line within special javadoc block comment
-      rule47 = new ActionStartPrevLinePlus("  "),   // padding prefix for interior of special javadoc block comment
-      rule45 = new QuestionPrevLineStartsJavaDocWithText(rule46, rule04),  // Prev line begins special javadoc comment?
-      rule48 = new QuestionPrevLineStartsJavaDocWithText(rule47, rule05),  // Prev line begins special javadoc comment? 
+      rule46 = new ActionStartPrevLinePlus("  * "), // padding prefix for new line within special scaladoc block comment
+      rule47 = new ActionStartPrevLinePlus("  "),   // padding prefix for interior of special scaladoc block comment
+      rule45 = new QuestionPrevLineStartsJavaDocWithText(rule46, rule04),  // Prev line begins special scaladoc comment?
+      rule48 = new QuestionPrevLineStartsJavaDocWithText(rule47, rule05),  // Prev line begins special scaladoc comment? 
       rule41 = new ActionStartPrevLinePlusMultilinePreserve(new String[] { " * \n", " */" }, 0, 3, 0, 3),
       rule49 = new ActionStartPrevLinePlusMultilinePreserve(new String[] { "  * \n", "  */"}, 0, 4, 0, 4),
       rule50 = new QuestionPrevLineStartsJavaDocWithText(rule49, rule41),

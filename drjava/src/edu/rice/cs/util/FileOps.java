@@ -843,7 +843,7 @@ public abstract class FileOps {
     String pathSep = System.getProperty("path.separator");
     
     // split leaves off trailing empty strings
-    // (see API javadocs: "Trailing empty strings are therefore not included in the resulting array.")
+    // (see API scaladocs: "Trailing empty strings are therefore not included in the resulting array.")
     // we therefore append one element at the end and later remove it
     path += pathSep + "x";
     

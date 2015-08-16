@@ -1443,7 +1443,7 @@ public class JPDADebugger implements Debugger {
           }
           catch (ClassNotLoadedException e) {
             // This is a real possibility, as documented in the ClassNotLoadedException
-            // javadocs.  We'll just ignore the exception, treating the variable as
+            // scaladocs.  We'll just ignore the exception, treating the variable as
             // out-of-scope, since we can't talk about values of its type.
           }
         }

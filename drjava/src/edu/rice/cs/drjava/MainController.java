@@ -54,10 +54,10 @@ public class MainController {
    *   Document Pane (register with DJWindow + DocumentList + Documents Menu + Debugger)
    *   Tab Manager (register with DJWindow + View Menu, add Tabs)
    *     Tabs (register with TM)
-   *       Interactions, Console, Compiler, JUnit, Javadoc, FindBugs, Find/Replace
+   *       Interactions, Console, Compiler, JUnit, Scaladoc, FindBugs, Find/Replace
    *   Debugger (register with DJWindow [or maybe TM?])
    *   ViewerWindow
-   *     Help, Javadoc HTML
+   *     Help, Scaladoc HTML
    *   AboutWindow
    *   PreferencesWindow (to be refactored in another pass)
    *   Configuration

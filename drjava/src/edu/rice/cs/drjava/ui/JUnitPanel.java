@@ -511,7 +511,7 @@ public class JUnitPanel extends ErrorPanel {
         */
       protected void _popupAction(MouseEvent e) { _popMenu.show(e.getComponent(), e.getX(), e.getY()); }
     }
-    public String getErrorDocumentTitle() { return "Javadoc Errors"; }
+    public String getErrorDocumentTitle() { return "Scaladoc Errors"; }
   }
   
   

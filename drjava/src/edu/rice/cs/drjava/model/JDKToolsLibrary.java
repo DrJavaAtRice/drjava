@@ -53,9 +53,9 @@ import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
 import edu.rice.cs.drjava.model.compiler.ScalaCompiler;
 import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
-import edu.rice.cs.drjava.model.javadoc.JavadocModel;
-import edu.rice.cs.drjava.model.javadoc.NoJavadocAvailable;
-import edu.rice.cs.drjava.model.javadoc.DefaultJavadocModel;
+import edu.rice.cs.drjava.model.javadoc.ScaladocModel;
+import edu.rice.cs.drjava.model.javadoc.NoScaladocAvailable;
+import edu.rice.cs.drjava.model.javadoc.DefaultScaladocModel;
 import edu.rice.cs.drjava.model.JDKDescriptor;
 
 import edu.rice.cs.util.Log;
@@ -73,16 +73,16 @@ public class JDKToolsLibrary {
   private final FullVersion _version;
   private final CompilerInterface _compiler;
   private final Debugger _debugger;
-  private final JavadocModel _javadoc;
+  private final ScaladocModel _scaladoc;
   private final JDKDescriptor _jdkDescriptor; // JDKDescriptor.NONE if none
   
   protected JDKToolsLibrary(FullVersion version, JDKDescriptor jdkDescriptor, CompilerInterface compiler, 
-                            Debugger debugger, JavadocModel javadoc) {
+                            Debugger debugger, ScaladocModel scaladoc) {
     assert jdkDescriptor != null;
     _version = version;
     _compiler = compiler;
     _debugger = debugger;
-    _javadoc = javadoc;
+    _scaladoc = scaladoc;
     _jdkDescriptor = jdkDescriptor;
   }
   
@@ -94,12 +94,12 @@ public class JDKToolsLibrary {
   
   public Debugger debugger() { return _debugger; }
   
-  public JavadocModel javadoc() { return _javadoc; }
+  public ScaladocModel scaladoc() { return _scaladoc; }
   
   public boolean isValid() {
     boolean result =
       _compiler instanceof ScalaCompiler ||  /* This is an ugly hack.  TODO: refactor compiler adapters framework */
-      _compiler.isAvailable() || _debugger.isAvailable() || _javadoc.isAvailable();
+      _compiler.isAvailable() || _debugger.isAvailable() || _scaladoc.isAvailable();
     _log.log("Invoking isValid() for " + _compiler.getClass() + " returned " + result);
     return result;
   }
@@ -178,10 +178,10 @@ public class JDKToolsLibrary {
       catch (LinkageError e) { msg("                 no debugger, LinkageError " + e);  /* can't load */ }
     }
     
-    JavadocModel javadoc = new NoJavadocAvailable(model);
+    ScaladocModel scaladoc = new NoScaladocAvailable(model);
     try {
-      Class.forName("com.sun.tools.javadoc.Main");
-      javadoc = new DefaultJavadocModel(model, null, ReflectUtil.SYSTEM_CLASS_PATH);
+      Class.forName("com.sun.tools.scaladoc.Main");
+      scaladoc = new DefaultScaladocModel(model, null, ReflectUtil.SYSTEM_CLASS_PATH);
     }
     catch (ClassNotFoundException e) { /* can't load */ }
     catch (LinkageError e) { /* can't load (probably not necessary, but might as well catch it) */ }
@@ -191,7 +191,7 @@ public class JDKToolsLibrary {
     if (compiler != NoCompilerAvailable.ONLY) {
       // if we have found a compiler, add it
       msg("                 compiler found");
-      list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, compiler, debugger, javadoc));
+      list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, compiler, debugger, scaladoc));
     }
       
     msg("                 compilers found: " + list.size());
@@ -199,7 +199,7 @@ public class JDKToolsLibrary {
     if (list.size() == 0) {
       // no compiler found, i.e. compiler == NoCompilerAvailable.ONLY
       msg("                 no compilers found, adding NoCompilerAvailable library");
-      list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, NoCompilerAvailable.ONLY, debugger, javadoc));
+      list.add(new JDKToolsLibrary(version, JDKDescriptor.NONE, NoCompilerAvailable.ONLY, debugger, scaladoc));
     }
     
     return list;

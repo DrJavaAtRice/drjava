@@ -250,11 +250,11 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    */
   public void startJUnit() throws ClassNotFoundException, IOException;
 
-  /** Generates Javadoc for this document, saving the output to a temporary directory.  The location is provided
-   *  to the javadocEnded event on the given listener.
+  /** Generates Scaladoc for this document, saving the output to a temporary directory.  The location is provided
+   *  to the scaladocEnded event on the given listener.
    *  @param saver FileSaveSelector for saving the file if it needs to be saved
    */
-  public void generateJavadoc(FileSaveSelector saver) throws IOException;
+  public void generateScaladoc(FileSaveSelector saver) throws IOException;
 
   /** Determines if this definitions document has changed since the last save.
    *  @return true if the document has been modified

@@ -95,14 +95,14 @@ class DefaultPlatform implements PlatformSupport {
     return System.getProperty("java.specification.version");
   }
 
-  /** Returns true if the given class object for com.sun.tools.javadoc.Main
+  /** Returns true if the given class object for com.sun.tools.scaladoc.Main
    *  has an execute(String[]) method.  If so, that means we have a 1.4
    *  version of tools.jar.
    *
-   * @param main Class object for com.sun.tools.javadoc.Main
+   * @param main Class object for com.sun.tools.scaladoc.Main
    */
   @SuppressWarnings({"unchecked", "rawtypes"})
-  private boolean _javadocMainHasExecuteMethod(Class<?> main) {
+  private boolean _scaladocMainHasExecuteMethod(Class<?> main) {
     try {
       Class<String[]>[] arr = new Class[]{String[].class};
       main.getMethod("execute", arr);
