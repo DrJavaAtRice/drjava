@@ -253,11 +253,11 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   // If the descriptor is something different than JDKDescriptor.NONE, then this pair will always
   // return false for equals(), except if it is compared to the identical pair.
   private static class LibraryKey implements Comparable<LibraryKey> {    
-    public static final int PRIORITY_BUILTIN = 3;  // Currenty the Scala 12.0_M2 compiler
+    public static final int PRIORITY_BUILTIN = 4;  // Currenty the Scala 12.0_M2 compiler
     public static final int PRIORITY_SEARCH = 1;
     public static final int PRIORITY_RUNTIME = 2;
     public static final int PRIORITY_SCALA = 3;
-    public static final int PRIORITY_CONFIG = 4;
+    public static final int PRIORITY_CONFIG = 5;
 
     protected final int _priority; // as above
     protected final JavaVersion.FullVersion _first;
@@ -368,7 +368,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
 //      JarJDKToolsLibrary._log.log("\ttVersion: " + tVersion + " " + tVersion.vendor());
 //      JarJDKToolsLibrary._log.log("\tcoarsenedVersion: " + coarsenedVersion + " " + coarsenedVersion.vendor());
       // give a lower priority to built-in compilers
-      int priority = (edu.rice.cs.util.FileOps.getDrJavaFile().equals(tVersion.location())) ? 
+      int priority = (edu.rice.cs.util.FileOps.getDrScalaFile().equals(tVersion.location())) ? 
         LibraryKey.PRIORITY_BUILTIN : LibraryKey.PRIORITY_SEARCH;
       if (t.compiler().getSuggestedFileExtension().equals(OptionConstants.SCALA_FILE_EXTENSION)) priority = LibraryKey.PRIORITY_SCALA;
       if (! results.containsKey(getLibraryKey(priority, t))) {

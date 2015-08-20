@@ -85,7 +85,7 @@ public class ScalaDescriptor extends JDKDescriptor {
   /** Returns a list of directories that should be searched for tools.jar and classes.jar files.
     * @return list of directories to search */
   public Iterable<File> getSearchDirectories() {
-    return IterUtil.singleton(edu.rice.cs.util.FileOps.getDrJavaFile().getParentFile());
+    return IterUtil.singleton(edu.rice.cs.util.FileOps.getDrScalaFile().getParentFile());
   }
 
   /** Returns a list of files that should be searched if they contain a compiler.
@@ -100,7 +100,7 @@ public class ScalaDescriptor extends JDKDescriptor {
 //    files = IterUtil.compose(files, new File("/opt/scala/lib/scala-compiler.jar"));
 //    files = IterUtil.compose(files, new File("/usr/share/scala/lib/scala-compiler.jar"));
     // If executable is class file tree, looks for compiler in associated lib directory
-    File f = FileOps.getDrJavaFile();
+    File f = FileOps.getDrScalaFile();
     if (! f.isFile()) { // f is a directory
       File grandParentFile = f.getParentFile().getParentFile();
       files = IterUtil.compose(files, new File(grandParentFile, "lib/scala-compiler.jar"));
@@ -118,7 +118,7 @@ public class ScalaDescriptor extends JDKDescriptor {
 //    catch(Exception e) { /* ignore SCALA_HOME variable */ }
     
     // add drjava.jar file itself
-    files = IterUtil.compose(edu.rice.cs.util.FileOps.getDrJavaFile(), files); 
+    files = IterUtil.compose(edu.rice.cs.util.FileOps.getDrScalaFile(), files); 
     JDKToolsLibrary.msg("ScalaDescriptor.getSearchFiles is returning " + files);
     return files;
   }
@@ -166,7 +166,7 @@ public class ScalaDescriptor extends JDKDescriptor {
     * @param compiler location where the compiler was foUund
     * @return list of additional files that need to be available */
   public Iterable<File> getAdditionalCompilerFiles(File compiler) throws FileNotFoundException {
-    if (compiler.equals(FileOps.getDrJavaFile())) {
+    if (compiler.equals(FileOps.getDrScalaFile())) {
       // all in one, don't need anything else
       return IterUtil.empty();
     }

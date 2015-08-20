@@ -42,11 +42,11 @@ import edu.rice.cs.util.FileOps;
 import java.io.*;
 import javax.swing.JOptionPane;
 
-/** Helper class for DrJava that copies a file and then starts it. Part of the automatic update
+/** Helper class for DrScala that copies a file and then starts it. Part of the automatic update
   * in NewVersionPopup.
-  * @version $Id: DrJavaRestart.java 5594 2012-06-21 11:23:40Z rcartwright $
+  * @version $Id: DrScalaRestart.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public class DrJavaRestart {
+public class DrScalaRestart {
   /**
    * Number of attempts to delete or rename files. This is necessary since an OS,
    * particularly Windows, may still have a write lock on a file.
@@ -58,7 +58,7 @@ public class DrJavaRestart {
   public static void message(String message) {
     LOG.log(message);
     JOptionPane.showMessageDialog(null, message,
-                                  "Error Updating DrJava", JOptionPane.ERROR_MESSAGE);
+                                  "Error Updating DrScala", JOptionPane.ERROR_MESSAGE);
 
   }
   public static boolean delete(File f) {
@@ -114,8 +114,8 @@ public class DrJavaRestart {
             if (!rename(source,dest)) {
               // could not rename, keep source as name
               exec = source;
-              message("A new version of DrJava was downloaded. However, it could not be\n" + 
-                      "installed in the same place as the old DrJava.\n\n" + 
+              message("A new version of DrScala was downloaded. However, it could not be\n" + 
+                      "installed in the same place as the old DrScala.\n\n" + 
                       "The new copy is now installed at:\n" + 
                       source.getAbsolutePath() + "\n\n" + 
                       "The old copy has been deleted.");
@@ -124,8 +124,8 @@ public class DrJavaRestart {
           else {
             // could not delete it, keep source as name
             exec = source;
-            message("A new version of DrJava was downloaded. However, it could not be\n" + 
-                    "installed in the same place as the old DrJava.\n\n" + 
+            message("A new version of DrScala was downloaded. However, it could not be\n" + 
+                    "installed in the same place as the old DrScala.\n\n" + 
                     "The new copy is now installed at:\n" + 
                     source.getAbsolutePath() + "\n\n" + 
                     "The old copy is still installed at:\n" + 
@@ -133,19 +133,19 @@ public class DrJavaRestart {
           }
           LOG.log("Restarting...");
           Process p = JVMBuilder.DEFAULT.classPath(exec).start(DrJava.class.getName(), "-new", "-delete-after-restart", args[2]);
-          LOG.log("Done with DrJavaRestart");
+          LOG.log("Done with DrScalaRestart");
           System.exit(0);
         }
         else {
           // is a directory, try to rename
-          // this should only happen with Mac DrJava.app
+          // this should only happen with Mac DrScala.app
           File old = FileOps.generateNewFileName(dest);
           if (rename(dest,old)) {
             if (rename(source,dest)) {
               // could rename, now delete the directory containing the former source
               delete(source.getParentFile());
               if (!deleteRecursively(old)) {
-                message("A new version of DrJava was downloaded. However, the old version" + 
+                message("A new version of DrScala was downloaded. However, the old version" + 
                         "could not be deleted.\n\n" + 
                         "The new copy is now installed at:\n" + 
                         dest.getAbsolutePath() + "\n\n" + 
@@ -159,8 +159,8 @@ public class DrJavaRestart {
               // try to rename dest back
               if (rename(old,dest)) {
                 // was at least able to rename back
-                message("A new version of DrJava was downloaded. However, it could not be\n" + 
-                        "installed in the same place as the old DrJava.\n\n" + 
+                message("A new version of DrScala was downloaded. However, it could not be\n" + 
+                        "installed in the same place as the old DrScala.\n\n" + 
                         "The new copy is now installed at:\n" + 
                         source.getAbsolutePath() + "\n\n" + 
                         "The old copy is still installed at:\n" + 
@@ -168,8 +168,8 @@ public class DrJavaRestart {
               }
               else {
                 // couldn't even rename back
-                message("A new version of DrJava was downloaded. However, it could not be\n" + 
-                        "installed in the same place as the old DrJava.\n\n" + 
+                message("A new version of DrScala was downloaded. However, it could not be\n" + 
+                        "installed in the same place as the old DrScala.\n\n" + 
                         "The new copy is now installed at:\n" + 
                         source.getAbsolutePath() + "\n\n" + 
                         "The old copy is still installed at:\n" + 
@@ -180,8 +180,8 @@ public class DrJavaRestart {
           else {
             // could not rename keep source as name
             exec = source;
-            message("A new version of DrJava was downloaded. However, it could not be\n" + 
-                    "installed in the same place as the old DrJava.\n\n" + 
+            message("A new version of DrScala was downloaded. However, it could not be\n" + 
+                    "installed in the same place as the old DrScala.\n\n" + 
                     "The new copy is now installed at:\n" + 
                     source.getAbsolutePath() + "\n\n" + 
                     "The old copy is still installed at:\n" + 
@@ -211,14 +211,14 @@ public class DrJavaRestart {
             LOG.log("Restarting using JVMBuilder...");
             exec = new File(exec,"Contents/Resources/Java/drjava.jar");
             Process p = JVMBuilder.DEFAULT.classPath(exec).start(DrJava.class.getName(), "-new", "-delete-after-restart", args[2]);
-            LOG.log("Done with DrJavaRestart");
+            LOG.log("Done with DrScalaRestart");
             System.exit(0);
           }
         }
       }
     }
     catch(Exception e) {
-      message("A new version of DrJava was downloaded. However, there was an error" + 
+      message("A new version of DrScala was downloaded. However, there was an error" + 
               "during installation:\n" + e.getMessage());
     }
   }

@@ -60,7 +60,7 @@ import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.util.FileOps;
 
 
-/** Displays whether a new version of DrJava is available.
+/** Displays whether a new version of DrScala is available.
   *  @version $Id: NewVersionPopup.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
 public class NewVersionPopup extends JDialog {
@@ -86,9 +86,9 @@ public class NewVersionPopup extends JDialog {
   private String _newestVersionString = "";
   /** indeterminate progress bar */
   
-  /** Creates a window to display whether a new version of DrJava is available. */
+  /** Creates a window to display whether a new version of DrScala is available. */
   public NewVersionPopup(MainFrame parent) {
-    super(parent, "Check for New Version of DrJava");
+    super(parent, "Check for New Version of DrScala");
     setResizable(false);
     
     _mainFrame = parent;
@@ -145,7 +145,7 @@ public class NewVersionPopup extends JDialog {
       cp.add(_versionPanel, BorderLayout.CENTER);
       cp.add(_bottomPanel, BorderLayout.SOUTH);    
       getRootPane().setDefaultButton(_closeButton);
-      setTitle("Check for New Version of DrJava");
+      setTitle("Check for New Version of DrScala");
       pack();
       _mainFrame.setPopupLoc(this);
       return;
@@ -179,7 +179,7 @@ public class NewVersionPopup extends JDialog {
         cp.add(_versionPanel, BorderLayout.CENTER);
         cp.add(_bottomPanel, BorderLayout.SOUTH);    
         getRootPane().setDefaultButton(_closeButton);
-        setTitle("Check for New Version of DrJava");
+        setTitle("Check for New Version of DrScala");
         pack();
         _mainFrame.setPopupLoc(NewVersionPopup.this);
       }
@@ -191,12 +191,12 @@ public class NewVersionPopup extends JDialog {
     public void actionPerformed(ActionEvent e) { closeAction(); }
   };
   
-  /** Download new DrJava and update this DrJava, then restart. */
+  /** Download new DrScalaand update this DrScala, then restart. */
   private Action _updateAction = new AbstractAction("Automatic Update") {
     public void actionPerformed(ActionEvent e) { updateAction(); }
   };
   
-  /** Close this window, but display the full DrJava Errors window. */
+  /** Close this window, but display the full DrScala Errors window. */
   private Action _downloadAction = new AbstractAction("Manual Download") {
     public void actionPerformed(ActionEvent e) { downloadAction(); }
   };
@@ -229,7 +229,7 @@ public class NewVersionPopup extends JDialog {
     LOG.log(message);
     if (close) closeAction();
     StringBuilder sb = new StringBuilder();
-    sb.append("Could not update DrJava automatically");
+    sb.append("Could not update DrScala automatically");
     if (message.length() > 0) {
       sb.append(":\n");
       sb.append(message);
@@ -237,9 +237,9 @@ public class NewVersionPopup extends JDialog {
     else {
       sb.append('.');
     }
-    sb.append("\nPlease download DrJava yourself.");
+    sb.append("\nPlease download DrScala yourself.");
     JOptionPane.showMessageDialog(this, sb.toString(),
-                                  "Error Updating DrJava", JOptionPane.ERROR_MESSAGE);
+                                  "Error Updating DrScala", JOptionPane.ERROR_MESSAGE);
     downloadAction();
   }
   
@@ -263,10 +263,10 @@ public class NewVersionPopup extends JDialog {
         try {
           LOG.log("updateAction");
           
-          final File targetFile = FileOps.getDrJavaApplicationFile();
+          final File targetFile = FileOps.getDrScalaApplicationFile();
           LOG.log("\ttargetFile = "+targetFile);
           if ((targetFile == null) || (targetFile.getParentFile() == null)) {
-            abortUpdate("Could not determine where DrJava is located on this computer.", true);
+            abortUpdate("Could not determine where DrScala is located on this computer.", true);
             return;
           }
           
@@ -307,15 +307,15 @@ public class NewVersionPopup extends JDialog {
             macTempDir = FileOps.generateNewFileName(destFile.getParentFile(), _newestVersionString);
           }
           
-          // extract DrJavaRestart from this jar
-          final File tempClassFile = File.createTempFile("drjavarestart-",".jar");
+          // extract DrScalaRestart from this jar
+          final File tempClassFile = File.createTempFile("drscalarestart-",".jar");
           toCleanUp.add(tempClassFile);
           BufferedOutputStream tempClassOut = new BufferedOutputStream(new FileOutputStream(tempClassFile));
-          BufferedInputStream tempClassIn = new BufferedInputStream(new FileInputStream(FileOps.getDrJavaFile()));
+          BufferedInputStream tempClassIn = new BufferedInputStream(new FileInputStream(FileOps.getDrScalaFile()));
           edu.rice.cs.plt.io.IOUtil.copyInputStream(tempClassIn, tempClassOut);
           tempClassIn.close();
           tempClassOut.close();
-          LOG.log("Copied drjava.jar to "+tempClassFile);
+          LOG.log("Copied drscala.jar to "+tempClassFile);
           
           // download new file
           URL fileURL = new URL(getAutomaticDownloadURL()+fileName);
@@ -362,9 +362,9 @@ public class NewVersionPopup extends JDialog {
             if (p.exitValue() != 0) { abortUpdate("Unpacking with tar failed."); return; }
             // delete tar.gz file
             destFile.delete();
-            destFile = new File(macTempDir, "DrJava.app");
+            destFile = new File(macTempDir, "DrScala.app");
             if (!destFile.exists() ||
-                !new File(destFile,"Contents/Resources/Java/drjava.jar").exists()) {
+                !new File(destFile,"Contents/Resources/Java/drscala.jar").exists()) {
               abortUpdate("Downloaded file contained unexpected files."); return;
             }
           }
@@ -377,13 +377,13 @@ public class NewVersionPopup extends JDialog {
           // clear the list of files to clean up
           toCleanUp.clear();
           
-          // ask DrJava to close
+          // ask DrScala to close
           final File finalDestFile = destFile;
           Thread restart = new Thread() {
             public void run() {
               try {
                 LOG.log("Restarting...");
-                Process p = JVMBuilder.DEFAULT.classPath(tempClassFile).start(DrJavaRestart.class.getName(),
+                Process p = JVMBuilder.DEFAULT.classPath(tempClassFile).start(DrScalaRestart.class.getName(),
                                                                               finalDestFile.getAbsolutePath(),
                                                                               targetFile.getAbsolutePath(),
                                                                               tempClassFile.getAbsolutePath());
@@ -511,7 +511,7 @@ public class NewVersionPopup extends JDialog {
     _newestVersionString = "";
     if (availableRef != null) { availableRef.set(false); }
     switch(_modeBox.getSelectedIndex()) {
-      case 3: if (FileOps.getDrJavaApplicationFile().toString().endsWith(".jar")) { // only consider weekly builds if using *.jar file
+      case 3: if (FileOps.getDrScalaApplicationFile().toString().endsWith(".jar")) { // only consider weekly builds if using *.jar file
         newVersion |= checkNewWeeklyVersion(weeklyString,weeklyTime); // fall-through required, not a mistake
       }
       case 2:
@@ -628,8 +628,8 @@ public class NewVersionPopup extends JDialog {
       if (versionStringRef != null) { versionStringRef.set(line); }
       br.close();
       
-      // remove "drjava-" prefix
-      final String DRSCALA_PREFIX = "drjava-";
+      // remove "drscala-" prefix
+      final String DRSCALA_PREFIX = "drscala-";
       if (!line.startsWith(DRSCALA_PREFIX)) { return null; }
       line = line.substring(DRSCALA_PREFIX.length());
       // remove "stable-" prefix

@@ -136,7 +136,7 @@ public class DrJavaSurveyPopup extends JDialog {
     public void actionPerformed(ActionEvent e) { noAction(); }
   };
 
-  /** Close this window, but display the full DrJava Errors window. */
+  /** Close this window, but display the full DrScala Errors window. */
   private Action _yesAction = new AbstractAction("Yes") {
     public void actionPerformed(ActionEvent e) { yesAction(); }
   };

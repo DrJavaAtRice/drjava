@@ -77,7 +77,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
   private JPanel _mainPanel;
   
   /** The file with the current DrJava executable. */
-  private final File _drjavaFile = FileOps.getDrJavaFile();
+  private final File _drjavaFile = FileOps.getDrScalaFile();
 
   /** File selector for the jar output file. */
   private FileSelectorComponent _jarFileSelector;

@@ -715,7 +715,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     JDKToolsLibrary.msg("ms: " + t0);
     Iterable<JDKDescriptor> descriptors = IterUtil.empty();
     try {
-      File f = edu.rice.cs.util.FileOps.getDrJavaFile();
+      File f = edu.rice.cs.util.FileOps.getDrScalaFile();
 //      JDKToolsLibrary.msg("Searching drjava.jar: " + f);
       if (f.isFile()) {
         JarFile jf = new JarFile(f);

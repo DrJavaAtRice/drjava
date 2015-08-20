@@ -1512,9 +1512,9 @@ public final class IndentTest extends DrJavaTestCase {
       "public class Foo {\n" + 
       "  public void m() {\n" + 
       "                                         _junitLocationEnabledListener = new ConfigOptionListeners.\n" + 
-      "                                           RequiresDrJavaRestartListener<Boolean>(this, \"Use External JUnit\"));\n" + 
+      "                                           RequiresDrScalaRestartListener<Boolean>(this, \"Use External JUnit\"));\n" + 
       "                                         _junitLocationListener = new ConfigOptionListeners.\n" + 
-      "                                           RequiresDrJavaRestartListener<File>(_configFrame, \"JUnit Location\"));\n" + 
+      "                                           RequiresDrScalaRestartListener<File>(_configFrame, \"JUnit Location\"));\n" + 
       "                                         _rtConcJUnitLocationEnabledListener = new ConfigOptionListeners.\n" + 
       "                                           RequiresInteractionsRestartListener<Boolean>(_configFrame, \"Use ConcJUnit Runtime\"));\n" + 
       "                                         _rtConcJUnitLocationListener = new ConfigOptionListeners.\n" + 
@@ -1526,9 +1526,9 @@ public final class IndentTest extends DrJavaTestCase {
       "public class Foo {\n" + 
       "  public void m() {\n" + 
       "    _junitLocationEnabledListener = new ConfigOptionListeners.\n" + 
-      "    RequiresDrJavaRestartListener<Boolean>(this, \"Use External JUnit\"));\n" + 
+      "    RequiresDrScalaRestartListener<Boolean>(this, \"Use External JUnit\"));\n" + 
       "                                         _junitLocationListener = new ConfigOptionListeners.\n" + 
-      "                                         RequiresDrJavaRestartListener<File>(_configFrame, \"JUnit Location\"));\n" + 
+      "                                         RequiresDrScalaRestartListener<File>(_configFrame, \"JUnit Location\"));\n" + 
       "                                         _rtConcJUnitLocationEnabledListener = new ConfigOptionListeners.\n" + 
       "                                         RequiresInteractionsRestartListener<Boolean>(_configFrame, \"Use ConcJUnit Runtime\"));\n" + 
       "                                         _rtConcJUnitLocationListener = new ConfigOptionListeners.\n" + 

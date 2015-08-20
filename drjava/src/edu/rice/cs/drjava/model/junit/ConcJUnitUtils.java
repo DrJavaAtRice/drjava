@@ -161,7 +161,7 @@ public class ConcJUnitUtils {
                                          options[1]);
     if (n==0) {
       // yes
-      File concJUnitJarFile = FileOps.getDrJavaFile();
+      File concJUnitJarFile = FileOps.getDrScalaFile();
       if (DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION_ENABLED)) {
         concJUnitJarFile = DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION);
       }
@@ -215,7 +215,7 @@ public class ConcJUnitUtils {
                                                           final Runnable failureRunnable) {
     if ((rtFile == null) || (FileOps.NULL_FILE.equals(rtFile))) {
       // no entry, suggest a place
-      File drJavaFile = FileOps.getDrJavaApplicationFile();
+      File drJavaFile = FileOps.getDrScalaApplicationFile();
       File parent = drJavaFile.getParentFile();
       if (parent == null) {
         parent = new File(System.getProperty("user.dir"));

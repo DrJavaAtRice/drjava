@@ -583,16 +583,16 @@ public class ConfigOptionListeners implements OptionConstants {
     }
   }  
   
-  public static class RequiresDrJavaRestartListener<T> implements OptionListener<T> {
+  public static class RequiresDrScalaRestartListener<T> implements OptionListener<T> {
     protected JFrame _parent;
     protected String _description;
-    public RequiresDrJavaRestartListener(JFrame parent, String description) {
+    public RequiresDrScalaRestartListener(JFrame parent, String description) {
       _parent = parent;
       _description = description;
     }
     public void optionChanged(OptionEvent<T> oe) {      
       String title = "Apply Preference Changes";
-      String msg = "Changes to the '"+_description+"' preferences\nwill only take effect when you restart DrJava.";
+      String msg = "Changes to the '"+_description+"' preferences\nwill only take effect when you restart DrScala.";
       if (DrJava.getConfig().getSetting(WARN_CHANGE_MISC).booleanValue()) {
         ConfirmCheckBoxDialog dialog =
           new ConfirmCheckBoxDialog(_parent, title, msg,

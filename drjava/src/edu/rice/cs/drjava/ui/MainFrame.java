@@ -2267,7 +2267,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //  };
   
   /** Action that pops up the DrJava errors dialog.  Only runs in the event thread. */
-  private final Action _errorsAction = new AbstractAction("DrJava Errors") {
+  private final Action _errorsAction = new AbstractAction("DrScala Errors") {
     public void actionPerformed(ActionEvent ae) {
       setPopupLoc(DrJavaErrorWindow.singleton());
       DrJavaErrorWindow.singleton().setVisible(true);
@@ -2287,7 +2287,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _newDrJavaInstanceAction = new AbstractAction("New DrScala Instance...") {
     public void actionPerformed(ActionEvent ae) {
       try {
-        Process p = JVMBuilder.DEFAULT.classPath(FileOps.getDrJavaFile()).
+        Process p = JVMBuilder.DEFAULT.classPath(FileOps.getDrScalaFile()).
           start(DrJava.class.getName(), "-new");
       }
       catch(IOException ioe) { MainFrameStatics.showIOError(MainFrame.this, ioe); }
@@ -3386,7 +3386,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       
       // Set frame icon
-      setIconImage(getIcon("drscala64.png").getImage());
+      setIconImage(MainFrame.getIcon("drscala64.png").getImage());
       
       // Size and position
       int x = config.getSetting(WINDOW_X).intValue();
@@ -3591,9 +3591,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       ConfigOptionListeners.sanitizeMasterJVMXMX(MainFrame.this, config.getSetting(MASTER_JVM_XMX));
       ConfigOptionListeners.sanitizeScaladocCustomParams(MainFrame.this, config.getSetting(SCALADOC_CUSTOM_PARAMS));
       config.addOptionListener(REMOTE_CONTROL_ENABLED, new ConfigOptionListeners.
-                                 RequiresDrJavaRestartListener<Boolean>(_configFrame, "Remote Control"));
+                                 RequiresDrScalaRestartListener<Boolean>(_configFrame, "Remote Control"));
       config.addOptionListener(REMOTE_CONTROL_PORT, new ConfigOptionListeners.
-                                 RequiresDrJavaRestartListener<Integer>(_configFrame, "Remote Control Port"));
+                                 RequiresDrScalaRestartListener<Integer>(_configFrame, "Remote Control Port"));
       config.addOptionListener(DEFAULT_COMPILER_PREFERENCE, new ConfigOptionListeners.DefaultCompilerListener(_configFrame));
       // If any errors occurred while parsing config file, show them
       _showConfigException();
@@ -3773,7 +3773,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                       new FileProperty("drjava.current.file", 
                                                        new Thunk<File>() {
                                                          public File value() { return _model.getActiveDocument().getRawFile(); } }, 
-                                                       "Returns the current document in DrJava.\n"+
+                                                       "Returns the current document in DrScala.\n"+
                                                        "Optional attributes:\n"+
                                                        "\trel=\"<dir to which the output should be relative\"\n"+
                                                        "\tsquote=\"<true to enclose file in single quotes>\"\n"+
@@ -6314,7 +6314,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
 //    _setUpAction(_drjavaSurveyAction, "Send System Information", "About", 
 //                 "Send anonymous system information to DrJava developers");
     _setUpAction(_errorsAction, "DrScala Errors", "drjavaerror", "Show a window with internal DrScala errors");
-    _setUpAction(_forceQuitAction, "Force Quit", "Stop", "Force DrJava to quit without cleaning up");
+    _setUpAction(_forceQuitAction, "Force Quit", "Stop", "Force DrScala to quit without cleaning up");
     _setUpAction(_generateCustomDrJavaJarAction, "Generate Custom drscala.jar...",
                  "<html>Generate a custom drjava.jar file that includes additional files,<br>"+
                  "e.g. libraries or resources.</html>");
@@ -6338,7 +6338,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   public static ImageIcon getIcon(String name) {
     URL url = MainFrame.class.getResource(ICON_PATH + name);
-    if (url != null)  return new ImageIcon(url);
+    if (url != null) return new ImageIcon(url);
     
     return null;
   }
@@ -7111,7 +7111,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _toolBar.add(_junitButton = _createToolbarButton(_junitAllAction));
     _toolBar.add(_createToolbarButton(_scaladocAllAction));
     
-    // DrJava Errors
+    // DrScala Errors
     _toolBar.addSeparator();
     _errorsButton = _createToolbarButton(_errorsAction);
     _errorsButton.setVisible(false);

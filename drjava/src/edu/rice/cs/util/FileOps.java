@@ -1214,7 +1214,7 @@ public abstract class FileOps {
 
   /** Returns the drjava.jar file.
     * @return drjava.jar file */
-  public static File getDrJavaFile() {
+  public static File getDrScalaFile() {
     String[] cps = System.getProperty("java.class.path").split(TextUtil.regexEscape(File.pathSeparator),-1);
     File found = null;
     for(String cp: cps) {
@@ -1222,7 +1222,7 @@ public abstract class FileOps {
         File f = new File(cp);
         if (!f.exists()) { continue; }
         if (f.isDirectory()) {
-          // this is a directory, maybe DrJava is contained here as individual files
+          // this is a directory, maybe DrScala is contained here as individual files
           File cf = new File(f, edu.rice.cs.drjava.DrJava.class.getName().replace('.', File.separatorChar) + ".class");
           if (cf.exists() && cf.isFile()) {
             found = f;
@@ -1246,16 +1246,16 @@ public abstract class FileOps {
     return found.getAbsoluteFile();
   }
   
-  /** Returns the current DrJava application, i.e. the drjava.jar, drjava.exe or DrJava.app file.
-    * @return DrJava application file */
-  public static File getDrJavaApplicationFile() {
-    File found = FileOps.getDrJavaFile();
+  /** Returns the current DrScala application, i.e. the drscala.jar, drscala.exe or DrScala.app file.
+    * @return DrScala application file */
+  public static File getDrScalaApplicationFile() {
+    File found = FileOps.getDrScalaFile();
     if (found != null) {
       if (edu.rice.cs.drjava.platform.PlatformFactory.ONLY.isMacPlatform()) {
         // fix for Mac applications
         String s = found.getAbsolutePath();
-        if (s.endsWith(".app/Contents/Resources/Java/drjava.jar")) {
-          found = new File(s.substring(0, s.lastIndexOf("/Contents/Resources/Java/drjava.jar")));
+        if (s.endsWith(".app/Contents/Resources/Java/drscala.jar")) {
+          found = new File(s.substring(0, s.lastIndexOf("/Contents/Resources/Java/drscala.jar")));
         }
       }
     }

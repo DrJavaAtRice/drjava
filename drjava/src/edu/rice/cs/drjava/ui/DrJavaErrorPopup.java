@@ -118,7 +118,7 @@ public class DrJavaErrorPopup extends JDialog {
     }
   };
 
-  /** Close this window, but display the full DrJava Errors window. */
+  /** Close this window, but display the full DrScala Errors window. */
   private Action _moreAction = new AbstractAction("More Information") {
     public void actionPerformed(ActionEvent e) {
       if (! Utilities.TEST_MODE) {

@@ -1416,7 +1416,7 @@ public class ConfigFrame extends SwingFrame {
       
       ActionListener processRTListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          File concJUnitJarFile = FileOps.getDrJavaFile();
+          File concJUnitJarFile = FileOps.getDrScalaFile();
           if (junitLocEnabled.getComponent().isSelected()) {
             concJUnitJarFile = junitLoc.getComponent().getFileFromField();
           }

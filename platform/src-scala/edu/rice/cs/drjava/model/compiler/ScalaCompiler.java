@@ -99,7 +99,7 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
     * This feature is necessary for the Scala compiler, since the Scala interpreter needs to be invoked at runtime. */
   public java.util.List<File> additionalBootClassPathForInteractions() {
 //    Utilities.show("additionalBootClassPath ... called in Scala compiler adapter; _location = " + _location);
-    if (_location.equals(FileOps.getDrJavaFile())) {
+    if (_location.equals(FileOps.getDrScalaFile())) {
       // all in one, don't need anything else
       return Arrays.asList(new File(_location));
     }
