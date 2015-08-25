@@ -129,7 +129,7 @@ public class ExternalProcessPanel extends AbortablePanel {
         public void run() {
           while((_is != null) || (_erris != null)) {
             try {
-              Thread.sleep(edu.rice.cs.drjava.DrJava.getConfig().
+              Thread.sleep(edu.rice.cs.drjava.DrScala.getConfig().
                              getSetting(edu.rice.cs.drjava.config.OptionConstants.FOLLOW_FILE_DELAY));
             }
             catch(InterruptedException ie) { /* ignore */ }
@@ -558,7 +558,7 @@ public class ExternalProcessPanel extends AbortablePanel {
           public void run() {
             // MainFrame.LOG.log("\tsetting text");
             _textArea.setText(_sb.toString());
-            int maxLines = edu.rice.cs.drjava.DrJava.getConfig().
+            int maxLines = edu.rice.cs.drjava.DrScala.getConfig().
               getSetting(edu.rice.cs.drjava.config.OptionConstants.FOLLOW_FILE_LINES);
             if (maxLines > 0) { // if maxLines is 0, buffer is unlimited
               try {

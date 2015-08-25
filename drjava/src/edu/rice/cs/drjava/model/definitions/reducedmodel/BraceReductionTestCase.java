@@ -36,13 +36,13 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 /** Test cases which test the implementation of BraceReduction may extend this abstract class to acquire a convenience
   * function for determining the state of the current token.
   * @version $Id: BraceReductionTestCase.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public abstract class BraceReductionTestCase extends DrJavaTestCase {
+public abstract class BraceReductionTestCase extends DrScalaTestCase {
   protected volatile ReducedModelControl model0;
   protected volatile ReducedModelControl model1;
   protected volatile ReducedModelControl model2;

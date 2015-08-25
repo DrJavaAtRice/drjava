@@ -41,7 +41,7 @@ import java.util.LinkedList;
 import java.util.HashMap;
 import javax.swing.text.*;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.ui.DrJavaErrorHandler;
@@ -110,7 +110,7 @@ public final class DefaultLightWeightParsingControl implements LightWeightParsin
           else {
             // _log.logTime("Not updating, last update was at " + last);
           }
-          delta = DrJava.getConfig().getSetting(OptionConstants.DIALOG_LIGHTWEIGHT_PARSING_DELAY).intValue();
+          delta = DrScala.getConfig().getSetting(OptionConstants.DIALOG_LIGHTWEIGHT_PARSING_DELAY).intValue();
         }
         // _log.logTime("Not updating, sleeping for " + delta);
         try {
@@ -167,7 +167,7 @@ public final class DefaultLightWeightParsingControl implements LightWeightParsin
   /** Delay the next update. */
   public void delay() {
     _lastDelay = System.currentTimeMillis();
-    _beginUpdates = _lastDelay + (DrJava.getConfig().getSetting(OptionConstants.DIALOG_LIGHTWEIGHT_PARSING_DELAY).intValue());
+    _beginUpdates = _lastDelay + (DrScala.getConfig().getSetting(OptionConstants.DIALOG_LIGHTWEIGHT_PARSING_DELAY).intValue());
   }
   
   /** Reset light-weight parsing. Forget everything. */

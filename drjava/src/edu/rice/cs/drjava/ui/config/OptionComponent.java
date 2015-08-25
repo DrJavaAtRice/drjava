@@ -43,7 +43,7 @@ import java.io.Serializable;
 import java.util.Vector;
 
 import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
@@ -67,7 +67,7 @@ public abstract class OptionComponent<T,C extends JComponent> implements Seriali
     _label.setHorizontalAlignment(JLabel.RIGHT);
     _parent = parent;
     if (option != null) {
-      DrJava.getConfig().addOptionListener(option, new OptionListener<T>() {
+      DrScala.getConfig().addOptionListener(option, new OptionListener<T>() {
         public void optionChanged(OptionEvent<T> oe) { resetToCurrent(); }
       });
     }
@@ -95,10 +95,10 @@ public abstract class OptionComponent<T,C extends JComponent> implements Seriali
   public void setComponent(C component) {
     _guiComponent = component;
     if ((_guiComponent!=null) && (_option!=null)) {
-      _guiComponent.setEnabled(DrJava.getConfig().isEditable(_option));
+      _guiComponent.setEnabled(DrScala.getConfig().isEditable(_option));
       // also enable/disable all subcomponents (see Java bug 4177727)
       for (Component subComponent: _guiComponent.getComponents()) {
-        subComponent.setEnabled(DrJava.getConfig().isEditable(_option));
+        subComponent.setEnabled(DrScala.getConfig().isEditable(_option));
       }
     }
   }
@@ -127,7 +127,7 @@ public abstract class OptionComponent<T,C extends JComponent> implements Seriali
 
   /** Resets the entry field to reflect the actual stored value for the option. */
   public void resetToCurrent() {
-    if (_option != null) setValue(DrJava.getConfig().getSetting(_option));
+    if (_option != null) setValue(DrScala.getConfig().getSetting(_option));
   }
   
   /** Resets the actual value of the component to the original default. */

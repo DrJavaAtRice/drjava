@@ -132,7 +132,7 @@ public class DrScalaRestart {
                     dest.getAbsolutePath());
           }
           LOG.log("Restarting...");
-          Process p = JVMBuilder.DEFAULT.classPath(exec).start(DrJava.class.getName(), "-new", "-delete-after-restart", args[2]);
+          Process p = JVMBuilder.DEFAULT.classPath(exec).start(DrScala.class.getName(), "-new", "-delete-after-restart", args[2]);
           LOG.log("Done with DrScalaRestart");
           System.exit(0);
         }
@@ -210,7 +210,7 @@ public class DrScalaRestart {
           else {
             LOG.log("Restarting using JVMBuilder...");
             exec = new File(exec,"Contents/Resources/Java/drjava.jar");
-            Process p = JVMBuilder.DEFAULT.classPath(exec).start(DrJava.class.getName(), "-new", "-delete-after-restart", args[2]);
+            Process p = JVMBuilder.DEFAULT.classPath(exec).start(DrScala.class.getName(), "-new", "-delete-after-restart", args[2]);
             LOG.log("Done with DrScalaRestart");
             System.exit(0);
           }

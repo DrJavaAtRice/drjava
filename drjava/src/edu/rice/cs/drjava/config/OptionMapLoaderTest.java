@@ -37,12 +37,12 @@
 package edu.rice.cs.drjava.config;
 import java.io.*;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 /**Tests the OptionMapLoader.
  * @version $Id: OptionMapLoaderTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public final class OptionMapLoaderTest extends DrJavaTestCase implements OptionConstants {
+public final class OptionMapLoaderTest extends DrScalaTestCase implements OptionConstants {
   
   public OptionMapLoaderTest(String s) { super(s); }
   

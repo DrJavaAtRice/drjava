@@ -38,7 +38,7 @@ package edu.rice.cs.util.docnavigation;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
@@ -46,7 +46,7 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Iterator;
 
-public class JTreeSortNavigatorTest extends DrJavaTestCase {
+public class JTreeSortNavigatorTest extends DrScalaTestCase {
   
   protected JTreeSortNavigator<DummyINavigatorItem> tree;
   protected DefaultMutableTreeNode root;
@@ -71,7 +71,7 @@ public class JTreeSortNavigatorTest extends DrJavaTestCase {
       public void run() {
 
         try {
-          File f = File.createTempFile("project-",".pjt").getCanonicalFile();
+          File f = File.createTempFile("project-",".drscala").getCanonicalFile();
           tree = new JTreeSortNavigator<DummyINavigatorItem>(f.getCanonicalPath());
           
           tree.addTopLevelGroup(SOURCE_BIN_NAME, new INavigatorItemFilter<INavigatorItem>() {

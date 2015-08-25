@@ -60,7 +60,7 @@ import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.config.OptionMap;
 import edu.rice.cs.drjava.config.OptionParser;
 import edu.rice.cs.drjava.config.OptionParseException;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 
 import static edu.rice.cs.util.XMLConfig.XMLConfigException;
 
@@ -81,7 +81,7 @@ import edu.rice.cs.plt.text.TextUtil;
 public class XMLProjectFileParser extends ProjectFileParserFacade {
   /** Singleton instance of XMLProjectFileParser */
   public static final XMLProjectFileParser ONLY = new XMLProjectFileParser();
-  private XMLProjectFileParser() { _xmlProjectFile = true; }
+//  private XMLProjectFileParser() { _xmlProjectFile = true; }
   
   protected String _parent;
   protected String _srcFileBase;
@@ -100,12 +100,6 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
     
     try {
       XMLConfig xcParent = new XMLConfig(projFile);
-
-      // read version... this string isn't actually used
-      String version = xcParent.get("drjava.version", "unknown");
-      LOG.log("version = '" + version + "'");
-      
-      pfir.setDrJavaVersion(version);
       
       // create a sub-configuration so we don't have to prefix everything with "drjava/project/"
       _xc = new XMLConfig(xcParent, xcParent.getNodes("drjava/project").get(0));
@@ -390,14 +384,14 @@ public class XMLProjectFileParser extends ProjectFileParserFacade {
       String name = TextUtil.xmlUnescape(_xc.get(".name", n));
       String value = TextUtil.xmlUnescape(_xc.get(".value", n));
       
-      OptionMap map = DrJava.getConfig().getOptionMap();
+      OptionMap map = DrScala.getConfig().getOptionMap();
       for (OptionParser<?> option : map.keys()) {
         if (option.name.equals(name)) {
           try {
             map.setString(option, value);
             storedPreferences.put(option, value);
             if (option instanceof Option) {
-              DrJava.getConfig().setSetting((Option)option, map.getOption(option));
+              DrScala.getConfig().setSetting((Option)option, map.getOption(option));
             }
           }
           catch(OptionParseException ope) { /* ignore, just do not restore */ }

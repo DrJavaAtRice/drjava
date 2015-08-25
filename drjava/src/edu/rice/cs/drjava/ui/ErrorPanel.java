@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.ui;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
@@ -110,7 +110,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   
   /** Highlight painter for selected list items. */
   static volatile ReverseHighlighter.DrJavaHighlightPainter _listHighlightPainter =
-    new ReverseHighlighter.DrJavaHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
+    new ReverseHighlighter.DrJavaHighlightPainter(DrScala.getConfig().getSetting(COMPILER_ERROR_COLOR));
   
   protected static final SimpleAttributeSet _getBoldAttributes() {
     SimpleAttributeSet s = new SimpleAttributeSet();
@@ -369,16 +369,16 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       // Set the editor pane to be uneditable, but allow selecting text.
       setEditable(false);
       
-      DrJava.getConfig().addOptionListener(COMPILER_ERROR_COLOR, new CompilerErrorColorOptionListener());
+      DrScala.getConfig().addOptionListener(COMPILER_ERROR_COLOR, new CompilerErrorColorOptionListener());
       
       // Set the colors.
-      StyleConstants.setForeground(NORMAL_ATTRIBUTES, DrJava.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR));
-      StyleConstants.setForeground(BOLD_ATTRIBUTES, DrJava.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR));
-      setBackground(DrJava.getConfig().getSetting(DEFINITIONS_BACKGROUND_COLOR));
+      StyleConstants.setForeground(NORMAL_ATTRIBUTES, DrScala.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR));
+      StyleConstants.setForeground(BOLD_ATTRIBUTES, DrScala.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR));
+      setBackground(DrScala.getConfig().getSetting(DEFINITIONS_BACKGROUND_COLOR));
       
       // Add OptionListeners for the colors.
-      DrJava.getConfig().addOptionListener(DEFINITIONS_NORMAL_COLOR, new ForegroundColorListener());
-      DrJava.getConfig().addOptionListener(DEFINITIONS_BACKGROUND_COLOR, new BackgroundColorListener());
+      DrScala.getConfig().addOptionListener(DEFINITIONS_NORMAL_COLOR, new ForegroundColorListener());
+      DrScala.getConfig().addOptionListener(DEFINITIONS_BACKGROUND_COLOR, new BackgroundColorListener());
       
       /* Item listener instead of change listener so that this code won't be called (twice) every time the mouse moves
        * over the _showHighlightsCheckBox (5/26/05)
@@ -403,22 +403,22 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       
       _keymap = addKeymap("ERRORLIST_KEYMAP", getKeymap());
       
-      addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
-      addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
-      addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PASTE_FROM_HISTORY), pasteAction);
-      DrJava.getConfig().addOptionListener(OptionConstants.KEY_CUT, new OptionListener<Vector<KeyStroke>>() {
+      addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
+      addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
+      addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_PASTE_FROM_HISTORY), pasteAction);
+      DrScala.getConfig().addOptionListener(OptionConstants.KEY_CUT, new OptionListener<Vector<KeyStroke>>() {
         public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
-          addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
+          addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
         }
       });
-      DrJava.getConfig().addOptionListener(OptionConstants.KEY_COPY, new OptionListener<Vector<KeyStroke>>() {
+      DrScala.getConfig().addOptionListener(OptionConstants.KEY_COPY, new OptionListener<Vector<KeyStroke>>() {
         public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
-          addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
+          addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
         }
       });
-      DrJava.getConfig().addOptionListener(OptionConstants.KEY_PASTE_FROM_HISTORY, new OptionListener<Vector<KeyStroke>>() {
+      DrScala.getConfig().addOptionListener(OptionConstants.KEY_PASTE_FROM_HISTORY, new OptionListener<Vector<KeyStroke>>() {
         public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
-          addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PASTE_FROM_HISTORY), pasteAction);
+          addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_PASTE_FROM_HISTORY), pasteAction);
         }
       });
     }

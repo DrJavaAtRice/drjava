@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.plt.lambda.Lambda2;
 import java.util.*;
 
@@ -56,7 +56,7 @@ public final class PropertyMaps implements Cloneable {
       TEMPLATE.setProperty("Java", new JavaSystemProperty(es.getKey().toString()));
     }
     
-    OptionMap om = DrJava.getConfig().getOptionMap();
+    OptionMap om = DrScala.getConfig().getOptionMap();
     for (OptionParser<?> op : om.keys()) {
       String key = "config." + op.getName();
       TEMPLATE.setProperty("Config", new ConfigProperty(key));

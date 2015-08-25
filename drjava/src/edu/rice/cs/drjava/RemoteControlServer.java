@@ -44,6 +44,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import java.io.*;
 import java.net.*;
 
+/* NOT USED IN DRSCALA */
 /** This class contains a server that monitors incoming datagrams on port 4444
   * (default; can be changed in OptionConstants.REMOTE_CONTROL_PORT).
   * These datagrams can contain commands to open additional files.
@@ -70,116 +71,116 @@ public final class RemoteControlServer {
   /** Prefix of a legitimate response by this server, including the user name. */
   public static final String RESPONSE_PREFIX_WITH_USER = RESPONSE_PREFIX+System.getProperty("user.name") + "!";
   
-  /** Create a new remote control server, running in its own daemon thread.
-    * @param frame main frame
-    */
-  public RemoteControlServer(MainFrame frame) throws IOException {
-    RCServerThread rcsThread = new RCServerThread(frame);
-    rcsThread.setDaemon(true);
-    rcsThread.start();
-  }
-  
-  /** Thread class for the server. */
-  public static class RCServerThread extends Thread {
-    /** Main frame access so the server can open files, etc. */
-    protected MainFrame _frame;
-    
-    /** Socket used. */
-    protected DatagramSocket socket = null;
-    
-    /** Create a new server thread.
-      * @param frame main frame
-      */
-    public RCServerThread(MainFrame frame) throws IOException {
-      this("RCServerThread", frame);
-    }
-    
-    /**
-     * Create a new server thread with a specified name.
-     * @param name thread name
-     * @param frame main frame
-     */
-    public RCServerThread(String name, MainFrame frame) throws IOException {
-      super(name);
-      _frame = frame;
-      socket = new DatagramSocket(DrJava.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_PORT));
-    }
-
-    /**
-     * Main method of the thread. It loops indefinitely, waiting for queries.
-     * Since this is a daemon thread, it will get shut down at the end.
-     */
-    public void run() {
-      while (true) {
-        try {
-          byte[] buf = new byte[256];
-          
-          // receive request
-          DatagramPacket packet = new DatagramPacket(buf, buf.length);
-          socket.receive(packet);
-          
-          String request = new String(packet.getData(), 0, packet.getLength());
-          
-          // check if it was a legitimate query
-          if (request.startsWith(QUERY_PREFIX)) {
-            // construct response
-            String dString = RESPONSE_PREFIX_WITH_USER;
-            request = request.substring(QUERY_PREFIX.length());
-            
-            // check if a file was specified
-            if ((request.length() > 0) && (request.charAt(0) == ' ')) {
-              request = request.substring(1);
-              
-              // check if the request contained a line number
-              int lineNo = -1;
-              int pathSepIndex = request.indexOf(File.pathSeparatorChar);
-              if (pathSepIndex >= 0) {
-                try {
-                  lineNo = Integer.valueOf(request.substring(pathSepIndex+1));
-                }
-                catch(NumberFormatException nfe) {
-                  lineNo = -1;
-                }
-                request = request.substring(0,pathSepIndex);
-              }
-              
-              final File f = new File(request);
-              if (f.exists()) {
-                DrJavaRoot.handleRemoteOpenFile(f, lineNo);
-              }
-            }
-            else {
-              dString = dString + " Cannot open file!";
-            }
-            
-            buf = dString.getBytes();
-            
-            // send the response to the client at "address" and "port"
-            InetAddress address = packet.getAddress();
-            int port = packet.getPort();
-            packet = new DatagramPacket(buf, buf.length, address, port);
-            
-            socket.send(packet);
-          }
-        }
-        catch (SocketTimeoutException e) {
-          // ignore
-        }
-        catch (IOException e) { e.printStackTrace(); }
-      }
-    }
-    
-    protected void finalize() { if (socket != null) socket.close(); }
-  }
-  
-  /** Main method for test purposes. */
-  public static void main(String[] args) {
-    try {
-      (new RCServerThread(null)).start();
-    }
-    catch(IOException ioe) {
-      System.out.println(ioe);
-      ioe.printStackTrace();
-    }
-  }
+//  /** Create a new remote control server, running in its own daemon thread.
+//    * @param frame main frame
+//    */
+//  public RemoteControlServer(MainFrame frame) throws IOException {
+//    RCServerThread rcsThread = new RCServerThread(frame);
+//    rcsThread.setDaemon(true);
+//    rcsThread.start();
+//  }
+//  
+//  /** Thread class for the server. */
+//  public static class RCServerThread extends Thread {
+//    /** Main frame access so the server can open files, etc. */
+//    protected MainFrame _frame;
+//    
+//    /** Socket used. */
+//    protected DatagramSocket socket = null;
+//    
+//    /** Create a new server thread.
+//      * @param frame main frame
+//      */
+//    public RCServerThread(MainFrame frame) throws IOException {
+//      this("RCServerThread", frame);
+//    }
+//    
+//    /**
+//     * Create a new server thread with a specified name.
+//     * @param name thread name
+//     * @param frame main frame
+//     */
+//    public RCServerThread(String name, MainFrame frame) throws IOException {
+//      super(name);
+//      _frame = frame;
+//      socket = new DatagramSocket(DrJava.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_PORT));
+//    }
+//
+//    /**
+//     * Main method of the thread. It loops indefinitely, waiting for queries.
+//     * Since this is a daemon thread, it will get shut down at the end.
+//     */
+//    public void run() {
+//      while (true) {
+//        try {
+//          byte[] buf = new byte[256];
+//          
+//          // receive request
+//          DatagramPacket packet = new DatagramPacket(buf, buf.length);
+//          socket.receive(packet);
+//          
+//          String request = new String(packet.getData(), 0, packet.getLength());
+//          
+//          // check if it was a legitimate query
+//          if (request.startsWith(QUERY_PREFIX)) {
+//            // construct response
+//            String dString = RESPONSE_PREFIX_WITH_USER;
+//            request = request.substring(QUERY_PREFIX.length());
+//            
+//            // check if a file was specified
+//            if ((request.length() > 0) && (request.charAt(0) == ' ')) {
+//              request = request.substring(1);
+//              
+//              // check if the request contained a line number
+//              int lineNo = -1;
+//              int pathSepIndex = request.indexOf(File.pathSeparatorChar);
+//              if (pathSepIndex >= 0) {
+//                try {
+//                  lineNo = Integer.valueOf(request.substring(pathSepIndex+1));
+//                }
+//                catch(NumberFormatException nfe) {
+//                  lineNo = -1;
+//                }
+//                request = request.substring(0,pathSepIndex);
+//              }
+//              
+//              final File f = new File(request);
+//              if (f.exists()) {
+//                DrScalaRoot.handleRemoteOpenFile(f, lineNo);
+//              }
+//            }
+//            else {
+//              dString = dString + " Cannot open file!";
+//            }
+//            
+//            buf = dString.getBytes();
+//            
+//            // send the response to the client at "address" and "port"
+//            InetAddress address = packet.getAddress();
+//            int port = packet.getPort();
+//            packet = new DatagramPacket(buf, buf.length, address, port);
+//            
+//            socket.send(packet);
+//          }
+//        }
+//        catch (SocketTimeoutException e) {
+//          // ignore
+//        }
+//        catch (IOException e) { e.printStackTrace(); }
+//      }
+//    }
+//    
+//    protected void finalize() { if (socket != null) socket.close(); }
+//  }
+//  
+//  /** Main method for test purposes. */
+//  public static void main(String[] args) {
+//    try {
+//      (new RCServerThread(null)).start();
+//    }
+//    catch(IOException ioe) {
+//      System.out.println(ioe);
+//      ioe.printStackTrace();
+//    }
+//  }
 }

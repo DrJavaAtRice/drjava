@@ -69,9 +69,9 @@ import static edu.rice.cs.plt.debug.DebugUtil.error;
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
 
 /** Main class for DrJava.
-  * @version $Id: DrJavaRoot.java 5668 2012-08-15 04:58:30Z rcartwright $
+  * @version $Id: DrScalaRoot.java 5668 2012-08-15 04:58:30Z rcartwright $
   */
-public class DrJavaRoot {  
+public class DrScalaRoot {  
   /** Class to probe to see if the debugger is available */
   public static final String TEST_DEBUGGER_CLASS = "com.sun.jdi.Bootstrap";
   
@@ -98,14 +98,14 @@ public class DrJavaRoot {
     // Platform-specific UI setup.
     PlatformFactory.ONLY.beforeUISetup();
     
-//    Utilities.show("DrJavaRoot started with args = " + Arrays.toString(args));
+//    Utilities.show("DrScalaRoot started with args = " + Arrays.toString(args));
     // let DrJava class handle command line arguments
-    if (! DrJava.handleCommandLineArgs(args)) { System.exit(0); }
+    if (! DrScala.handleCommandLineArgs(args)) { System.exit(0); }
     
-    DrJava.warnIfLinuxWithCompiz();
+    DrScala.warnIfLinuxWithCompiz();
     new SplashScreen().flash();
     
-    final String[] filesToOpen = DrJava.getFilesToOpen();
+    final String[] filesToOpen = DrScala.getFilesToOpen();
     final int numFiles = filesToOpen.length;
     
     /* files to open held in filesToOpen[0:numFiles-1] which may be an initial segment of filesToOpen */
@@ -117,7 +117,7 @@ public class DrJavaRoot {
     
     /* Set the LookAndFeel for this session. If using a Plastic LAF, the theme must be set before setting the LAF. */
     try {
-      String configLAFName = DrJava.getConfig().getSetting(LOOK_AND_FEEL);
+      String configLAFName = DrScala.getConfig().getSetting(LOOK_AND_FEEL);
       String currLAFName = UIManager.getLookAndFeel().getClass().getName();
       String failureMessage =
         "DrJava could not load the configured theme for the Plastic Look and Feel.\n" +
@@ -126,7 +126,7 @@ public class DrJavaRoot {
         "In the meantime, the system default Look and Feel will be used.\n";
       String failureTitle = "Theme not found";
       if (Utilities.isPlasticLaf(configLAFName)) {
-        String themeName = PLASTIC_THEMES_PACKAGE + "." + DrJava.getConfig().getSetting(PLASTIC_THEMES);
+        String themeName = PLASTIC_THEMES_PACKAGE + "." + DrScala.getConfig().getSetting(PLASTIC_THEMES);
         try {
           PlasticTheme theme = (PlasticTheme) Class.forName(themeName).getConstructor(new Class<?>[]{ }).newInstance();
           PlasticLookAndFeel.setPlasticTheme(theme);
@@ -188,7 +188,7 @@ public class DrJavaRoot {
       
 //      Utilities.showDebug("showDebugConsole flag = " + DrJava.getShowDebugConsole());
       // Show debug console if enabled
-      if (DrJava.getShowDebugConsole()) showDrJavaDebugConsole(_mainFrame);
+      if (DrScala.getShowDebugConsole()) showDrJavaDebugConsole(_mainFrame);
     }
     catch(Throwable t) {
       error.log(t);
@@ -239,17 +239,14 @@ public class DrJavaRoot {
         currFileName = currFileName.substring(0,pathSepIndex);
       }
       
-      boolean isProjectFile =
-        currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION) ||
-        currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION2) ||
-        currFileName.endsWith(OptionConstants.OLD_PROJECT_FILE_EXTENSION);
+      boolean isProjectFile = currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION);
       final File file = new File(currFileName).getAbsoluteFile();
       FileOpenSelector command = new FileOpenSelector() {
         public File[] getFiles() { return new File[] {file}; }
       };
       try {
         if (isProjectFile) mf.openProject(command);
-        else if (currFileName.endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) MainFrame.openExtProcessFile(file);
+//        else if (currFileName.endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) MainFrame.openExtProcessFile(file);
         else {
           if (jump && (lineNo >= 0)) {
             /* if a line number has been specified, open the file using MainFrame.open and jump to lineNo using 
@@ -341,19 +338,19 @@ public class DrJavaRoot {
     _mainFrame.removeModalWindowAdapter(w);
   }
   
-  /** Handles an "open file" request, either from the remote control server or the operating system.
-    * @param f file to open
-    * @param lineNo line number to jump to, or -1 of not specified */
-  public static void handleRemoteOpenFile(File f, int lineNo) {
-    DrJava._log.log("DrJavaRoot.handleRemoteOpenFile, f=" + f);
-    if (_mainFrame != null) { 
-      DrJava._log.log("\tcalling _mainFrame");
-      _mainFrame.handleRemoteOpenFile(f, lineNo);
-    }
-    else {
-      DrJava._log.log("\tadded to _filesToOpen");
-      DrJava.addFileToOpen(f.getAbsolutePath());
-    }
-  }
+//  /** Handles an "open file" request, either from the remote control server or the operating system.
+//    * @param f file to open
+//    * @param lineNo line number to jump to, or -1 of not specified */
+//  public static void handleRemoteOpenFile(File f, int lineNo) {
+//    DrJava._log.log("DrScalaRoot.handleRemoteOpenFile, f=" + f);
+//    if (_mainFrame != null) { 
+//      DrJava._log.log("\tcalling _mainFrame");
+//      _mainFrame.handleRemoteOpenFile(f, lineNo);
+//    }
+//    else {
+//      DrJava._log.log("\tadded to _filesToOpen");
+//      DrJava.addFileToOpen(f.getAbsolutePath());
+//    }
+//  }
 }
 

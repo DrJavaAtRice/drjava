@@ -55,7 +55,7 @@ import java.awt.Dimension;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.BadLocationException;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame;
@@ -117,13 +117,6 @@ public class NewJavaClassDialog extends SwingFrame {
   /** Constructs New Java Class frame and displays it. */
   public NewJavaClassDialog(MainFrame mf) {
     super("New Java Class");
-
-    //  Utilities.show("NewJavaClass(" + mf + ")");
-    // Java language levels disabled
-//    int currentLL = DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL);
-//    _isElementaryOrFunctionalJava = false;
-//      (currentLL == OptionConstants.ELEMENTARY_LEVEL) ||
-//      (currentLL == OptionConstants.FUNCTIONAL_JAVA_LEVEL);
 
     _mainFrame = mf;
     _model = _mainFrame.getModel();
@@ -247,7 +240,7 @@ public class NewJavaClassDialog extends SwingFrame {
   }
 
   private void _addAutoCompleteActions(JTextComponent component) {
-    for(KeyStroke ks: DrJava.getConfig().getSetting(OptionConstants.KEY_COMPLETE_FILE)) {
+    for(KeyStroke ks: DrScala.getConfig().getSetting(OptionConstants.KEY_COMPLETE_FILE)) {
       // If you want to bind a keystroke to shift-space (which generates
       // a space character), you need to use a pressed-type keystroke.
       component.getInputMap(JComponent.WHEN_FOCUSED).

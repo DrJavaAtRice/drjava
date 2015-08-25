@@ -62,7 +62,7 @@ public class BooleanOptionComponent extends OptionComponent<Boolean,JCheckBox> {
       public void actionPerformed(ActionEvent e) { notifyChangeListeners(); }
     });
     
-    _jcb.setSelected(DrJava.getConfig().getSetting(_option).booleanValue());
+    _jcb.setSelected(DrScala.getConfig().getSetting(_option).booleanValue());
     setComponent(_jcb);
   }
 
@@ -109,10 +109,10 @@ public class BooleanOptionComponent extends OptionComponent<Boolean,JCheckBox> {
     * @return true if the new value is set successfully
     */
   public boolean updateConfig() {
-    Boolean oldValue = DrJava.getConfig().getSetting(_option);
+    Boolean oldValue = DrScala.getConfig().getSetting(_option);
     Boolean newValue = Boolean.valueOf(_jcb.isSelected());
     
-    if (! oldValue.equals(newValue)) DrJava.getConfig().setSetting(_option, newValue);      
+    if (! oldValue.equals(newValue)) DrScala.getConfig().setSetting(_option, newValue);      
 
     return true;
   } 

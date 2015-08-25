@@ -59,7 +59,7 @@ import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
@@ -214,7 +214,7 @@ public class ProjectAdvancedPropertiesFrame extends SwingFrame {
   public Map<OptionParser<?>,String> getPreferencesStoredInProject() {
     Map<OptionParser<?>,String> sp = new HashMap<OptionParser<?>,String>();
     for(PreferencesRecord pr: _preferencesList.getValue()) {
-      sp.put(pr.option, DrJava.getConfig().getOptionMap().getString(pr.option));
+      sp.put(pr.option, DrScala.getConfig().getOptionMap().getString(pr.option));
     }
     return sp;
   }

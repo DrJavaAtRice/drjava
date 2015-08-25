@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.ui.DefinitionsPaneTest;
 
 import junit.framework.AssertionFailedError;
@@ -44,7 +44,7 @@ import junit.framework.AssertionFailedError;
 /** TestCase which can fail if another thread causes an error or failure.
   * @version $Id: MultiThreadedTestCase.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public abstract class MultiThreadedTestCase extends DrJavaTestCase {
+public abstract class MultiThreadedTestCase extends DrScalaTestCase {
   public MultiThreadedTestCase() { super(); }
   public MultiThreadedTestCase(String name) { super(name); }  
   

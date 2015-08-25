@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.indent.IndentRulesTestCase;
 
@@ -46,7 +46,7 @@ import javax.swing.text.BadLocationException;
 /** Test class for the IndentInfo class.
   * @version $Id: BraceInfoTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public final class BraceInfoTest extends DrJavaTestCase {
+public final class BraceInfoTest extends DrScalaTestCase {
   private String _text;
   private AbstractDJDocument _document;
   

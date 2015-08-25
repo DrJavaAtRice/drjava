@@ -36,12 +36,12 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 /** Class according to the JUnit protocol. Tests the proper functionality of the class IntegerOption.
  *  @version $Id: IntegerOptionTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public final class IntegerOptionTest extends DrJavaTestCase {
+public final class IntegerOptionTest extends DrScalaTestCase {
   
   /** @param name The name of this test case. */
   public IntegerOptionTest(String name) { super(name); }

@@ -47,7 +47,7 @@ import java.util.Vector;
 import java.util.Map;
 import java.util.TreeMap;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 
 import edu.rice.cs.drjava.config.BooleanOption;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -195,15 +195,18 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     _debugger = null;
     _scaladocModel = null;
     for (JDKToolsLibrary t : tools) {
-      // check for support of JAVA_6; Scala 2.12.* requires Java 6. */
-      if (t.compiler().isAvailable() && t.version().supports(JavaVersion.JAVA_6)) {
-          compilers.add(t.compiler());
+      // check for support of JAVA_6; Scala 2.12.0_M2+ requires Java 8. */
+      if (t.compiler().isAvailable() && t.version().supports(JavaVersion.JAVA_8)) {
+//        Utilities.show("For compiler " + t.compiler() + " isAvailable() = " + t.compiler().isAvailable());
+        compilers.add(t.compiler());
       }
       if (_debugger == null && t.debugger().isAvailable()) { _debugger = t.debugger(); }
       if (_scaladocModel == null && t.scaladoc().isAvailable()) { _scaladocModel = t.scaladoc(); }
+//      else if (_scaladocModel == null) Utilities.show("No compiler found for JDKToolsLibrary" + t);
     }
     if (_debugger == null) { _debugger = NoDebuggerAvailable.ONLY; }
     if (_scaladocModel == null) { _scaladocModel = new NoScaladocAvailable(this); }
+//    Utilities.show("_scaladocModel = " + _scaladocModel);
     
     File workDir = Utilities.TEST_MODE ? new File(System.getProperty("user.home")) : getWorkingDirectory();
     _jvm = new MainJVM(workDir);
@@ -243,7 +246,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   // the major version and the vendor will be considered
   private static JavaVersion.FullVersion coarsenVersion(JavaVersion.FullVersion tVersion) {
     BooleanOption displayAllOption = edu.rice.cs.drjava.config.OptionConstants.DISPLAY_ALL_COMPILER_VERSIONS;
-    if (!DrJava.getConfig().getSetting(displayAllOption).booleanValue()) {
+    if (!DrScala.getConfig().getSetting(displayAllOption).booleanValue()) {
       tVersion = tVersion.onlyMajorVersionAndVendor();
     }
     return tVersion;
@@ -336,7 +339,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     Map<LibraryKey, JDKToolsLibrary> results = new TreeMap<LibraryKey, JDKToolsLibrary>();
     
     JarJDKToolsLibrary._log.log("Creating DefaultGlobalModel; " + JavaVersion.CURRENT + " is running");
-    File configTools = DrJava.getConfig().getSetting(JAVAC_LOCATION);
+    File configTools = DrScala.getConfig().getSetting(JAVAC_LOCATION);
     if (configTools != FileOps.NULL_FILE) {
       JDKToolsLibrary fromConfig = JarJDKToolsLibrary.makeFromFile(configTools, this, JDKDescriptor.NONE);
       if (fromConfig.isValid()) { 
@@ -452,7 +455,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     forceReset |= isClassPathChanged();
     forceReset |= !wd.equals(workDir);
     // update the setting
-    DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, wd);
+    DrScala.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, wd);
     getDebugger().setAutomaticTraceEnabled(false);
     _interactionsModel.resetInterpreter(wd, forceReset);
     debug.logEnd();
@@ -840,7 +843,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     }
     else { result = IterUtil.compose(result, getSourceRootSet()); }
     
-    Vector<File> globalExtras = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);
+    Vector<File> globalExtras = DrScala.getConfig().getSetting(EXTRA_CLASSPATH);
     if (globalExtras != null) { result = IterUtil.compose(result, globalExtras); }
     
     /* We must add JUnit to the class path.  We do so by including the current JVM's class path.
@@ -864,7 +867,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     //System.out.println("Adding project classpath vector to interactions classpath: " + projectExtras);
     if (projectExtras != null)  for (File cpE : projectExtras) { _interactionsModel.addProjectClassPath(cpE); }
     
-    Vector<File> cp = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);
+    Vector<File> cp = DrScala.getConfig().getSetting(EXTRA_CLASSPATH);
     if (cp != null) {
       for (File f : cp) { _interactionsModel.addExtraClassPath(f); }
     }

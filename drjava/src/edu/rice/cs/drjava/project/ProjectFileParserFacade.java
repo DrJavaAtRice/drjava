@@ -47,7 +47,7 @@ public class ProjectFileParserFacade {
   protected ProjectFileParserFacade() { }
   
   protected File _projectFile;
-  protected boolean _xmlProjectFile;
+//  protected boolean _xmlProjectFile;
   
   /** @param projFile the file to parse
     *  @return the project file IR
@@ -70,15 +70,11 @@ public class ProjectFileParserFacade {
       // project file just contained ";", throw exception
       throw new MalformedProjectFileException("Incomplete project file.");
     }
-    if (((char)read) != ';') {
-      // does not start with ";;", can't be an old S-expression format project file
-      // try new XML format parser
-      fr.close();
-      return fixup(XMLProjectFileParser.ONLY.parse(projFile));
-    }
+//    if (((char)read) != ';') {
+//       does not start with ";;", can't be an old S-expression format project file
+    // try new XML format parser
     fr.close();
-    // file started with ";;", try old S-expression format parser
-    return fixup(ProjectFileParser.ONLY.parse(projFile));
+    return fixup(XMLProjectFileParser.ONLY.parse(projFile));
   }
   
   private static edu.rice.cs.util.Log LOG = new edu.rice.cs.util.Log("ParserFacadeFixup.txt", false);
@@ -90,7 +86,7 @@ public class ProjectFileParserFacade {
   protected ProjectFileIR fixup(ProjectFileIR pfir){
     boolean doFixup = false;
     
-    String version = pfir.getDrJavaVersion();
+    String version = pfir.getDrScalaVersion();
     
     if (version.equals("unknown"))
       doFixup = true;

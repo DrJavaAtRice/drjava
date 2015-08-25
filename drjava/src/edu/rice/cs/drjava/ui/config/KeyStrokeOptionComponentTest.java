@@ -36,8 +36,8 @@
 
 package edu.rice.cs.drjava.ui.config;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScala;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.config.KeyStrokeOption;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.DefaultSwingFrame;
@@ -47,14 +47,14 @@ import javax.swing.*;
 import java.awt.event.KeyEvent;
 
 /** Tests functionality of this OptionComponent. */
-public final class KeyStrokeOptionComponentTest extends DrJavaTestCase {
+public final class KeyStrokeOptionComponentTest extends DrScalaTestCase {
 
   private static KeyStrokeOptionComponent _option;
 
   protected void setUp() throws Exception {
     super.setUp();
     _option = new KeyStrokeOptionComponent(OptionConstants.KEY_FOR_UNIT_TESTS_ONLY, "Normal KeyStroke", new DefaultSwingFrame());
-    DrJava.getConfig().resetToDefaults();
+    DrScala.getConfig().resetToDefaults();
     Utilities.clearEventQueue();
   }
 
@@ -69,7 +69,7 @@ public final class KeyStrokeOptionComponentTest extends DrJavaTestCase {
     Utilities.clearEventQueue();
     assertEquals("Cancel (resetToCurrent) should not change the config",
                  OptionConstants.KEY_FOR_UNIT_TESTS_ONLY.getDefault(),
-                 DrJava.getConfig().getSetting(OptionConstants.KEY_FOR_UNIT_TESTS_ONLY));
+                 DrScala.getConfig().getSetting(OptionConstants.KEY_FOR_UNIT_TESTS_ONLY));
   }
 
   public void testApplyDoesChangeConfig() {
@@ -81,7 +81,7 @@ public final class KeyStrokeOptionComponentTest extends DrJavaTestCase {
     Utilities.clearEventQueue();
     assertEquals("Apply (updateConfig) should write change to file",
                  testKeyStroke,
-                 DrJava.getConfig().getSetting(OptionConstants.KEY_FOR_UNIT_TESTS_ONLY));
+                 DrScala.getConfig().getSetting(OptionConstants.KEY_FOR_UNIT_TESTS_ONLY));
   }
 
   public void testApplyThenResetDefault() {
@@ -98,7 +98,7 @@ public final class KeyStrokeOptionComponentTest extends DrJavaTestCase {
     
     assertEquals("Apply (updateConfig) should write change to file",
                  OptionConstants.KEY_FOR_UNIT_TESTS_ONLY.getDefault(),
-                 DrJava.getConfig().getSetting(OptionConstants.KEY_FOR_UNIT_TESTS_ONLY));
+                 DrScala.getConfig().getSetting(OptionConstants.KEY_FOR_UNIT_TESTS_ONLY));
   }
 
 }

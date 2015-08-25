@@ -37,7 +37,7 @@
 package edu.rice.cs.util.docnavigation;
 
 import java.awt.dnd.*;
-import edu.rice.cs.drjava.DrJavaRoot;
+import edu.rice.cs.drjava.DrScalaRoot;
 
 class JListSortNavigator<ItemT extends INavigatorItem> extends JListNavigator<ItemT> 
   implements DropTargetListener {
@@ -71,7 +71,7 @@ class JListSortNavigator<ItemT extends INavigatorItem> extends JListNavigator<It
   
   /** User dragged something into the component. */
   public void dragEnter(DropTargetDragEvent dropTargetDragEvent) {
-    DrJavaRoot.dragEnter(dropTargetDragEvent);
+    DrScalaRoot.dragEnter(dropTargetDragEvent);
   }
   
   public void dragExit(DropTargetEvent dropTargetEvent) { }
@@ -80,6 +80,6 @@ class JListSortNavigator<ItemT extends INavigatorItem> extends JListNavigator<It
   
   /** User dropped something on the component. Only runs in event thread. */
   public /* synchronized */ void drop(DropTargetDropEvent dropTargetDropEvent) {
-    DrJavaRoot.drop(dropTargetDropEvent);
+    DrScalaRoot.drop(dropTargetDropEvent);
   }
 }

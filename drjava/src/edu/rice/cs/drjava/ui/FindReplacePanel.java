@@ -47,7 +47,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -247,13 +247,13 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     findIM.put(enter, "Do Find");
     findIM.put(ctrlEnter, "Insert Newline");
     findIM.put(ctrlTab, "Insert Tab");
-    for(KeyStroke k: DrJava.getConfig().getSetting(OptionConstants.KEY_CUT)) findIM.put(k, "Cut");
-    for(KeyStroke k: DrJava.getConfig().getSetting(OptionConstants.KEY_COPY)) findIM.put(k, "Copy");
+    for(KeyStroke k: DrScala.getConfig().getSetting(OptionConstants.KEY_CUT)) findIM.put(k, "Cut");
+    for(KeyStroke k: DrScala.getConfig().getSetting(OptionConstants.KEY_COPY)) findIM.put(k, "Copy");
     replaceIM.put(enter, "Insert Newline");
     replaceIM.put(ctrlEnter, "Insert Newline");
     replaceIM.put(ctrlTab, "Insert Tab");
-    for(KeyStroke k: DrJava.getConfig().getSetting(OptionConstants.KEY_CUT)) replaceIM.put(k, "Cut");
-    for(KeyStroke k: DrJava.getConfig().getSetting(OptionConstants.KEY_COPY)) replaceIM.put(k, "Copy");
+    for(KeyStroke k: DrScala.getConfig().getSetting(OptionConstants.KEY_CUT)) replaceIM.put(k, "Cut");
+    for(KeyStroke k: DrScala.getConfig().getSetting(OptionConstants.KEY_COPY)) replaceIM.put(k, "Copy");
     
     Action insertTabAction = new DefaultEditorKit.InsertTabAction();
     ActionMap findAM = _findField.getActionMap();
@@ -273,7 +273,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     new BackgroundColorListener(_findField);
     new ForegroundColorListener(_replaceField);
     new BackgroundColorListener(_replaceField);
-    Font font = DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN);
+    Font font = DrScala.getConfig().getSetting(OptionConstants.FONT_MAIN);
     setFieldFont(font);
     
     
@@ -321,19 +321,19 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     
     
     /******** Listeners for the right-hand check boxes ********/
-    boolean matchCaseSelected = DrJava.getConfig().getSetting(OptionConstants.FIND_MATCH_CASE);
+    boolean matchCaseSelected = DrScala.getConfig().getSetting(OptionConstants.FIND_MATCH_CASE);
     _matchCase = new JCheckBox("Match Case", matchCaseSelected);
     _machine.setMatchCase(matchCaseSelected);
     _matchCase.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         boolean isSelected = (e.getStateChange() == ItemEvent.SELECTED);
         _machine.setMatchCase(isSelected);
-        DrJava.getConfig().setSetting(OptionConstants.FIND_MATCH_CASE, isSelected);
+        DrScala.getConfig().setSetting(OptionConstants.FIND_MATCH_CASE, isSelected);
         _findField.requestFocusInWindow();
       }
     });
     
-    boolean searchAllSelected = DrJava.getConfig().getSetting(OptionConstants.FIND_ALL_DOCUMENTS);
+    boolean searchAllSelected = DrScala.getConfig().getSetting(OptionConstants.FIND_ALL_DOCUMENTS);
     _searchAllDocuments = new JCheckBox("Search All Documents", searchAllSelected);
     _machine.setSearchAllDocuments(searchAllSelected);
     _searchAllDocuments.addItemListener(new ItemListener() {
@@ -342,12 +342,12 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         if(isSelected)
           _searchSelectionOnly.setSelected(false);
         _machine.setSearchAllDocuments(isSelected);
-        DrJava.getConfig().setSetting(OptionConstants.FIND_ALL_DOCUMENTS, isSelected);
+        DrScala.getConfig().setSetting(OptionConstants.FIND_ALL_DOCUMENTS, isSelected);
         _findField.requestFocusInWindow();
       }
     });
     
-    boolean searchSelection = DrJava.getConfig().getSetting(OptionConstants.FIND_ONLY_SELECTION);
+    boolean searchSelection = DrScala.getConfig().getSetting(OptionConstants.FIND_ONLY_SELECTION);
     _searchSelectionOnly = new JCheckBox("Search Selection Only", searchSelection);
     _machine.setSearchSelectionOnly(searchSelection);
     _searchSelectionOnly.addItemListener(new ItemListener() {
@@ -370,12 +370,12 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
           _replaceAction.setEnabled(true);
           _replaceFindPreviousAction.setEnabled(true);
         }
-        DrJava.getConfig().setSetting(OptionConstants.FIND_ONLY_SELECTION, isSelected);
+        DrScala.getConfig().setSetting(OptionConstants.FIND_ONLY_SELECTION, isSelected);
         _findField.requestFocusInWindow();        
       }      
     });
     
-    boolean matchWordSelected = DrJava.getConfig().getSetting(OptionConstants.FIND_WHOLE_WORD);
+    boolean matchWordSelected = DrScala.getConfig().getSetting(OptionConstants.FIND_WHOLE_WORD);
     _matchWholeWord = new JCheckBox("Whole Word", matchWordSelected);
     if (matchWordSelected) { _machine.setMatchWholeWord(); }
     else { _machine.setFindAnyOccurrence(); }
@@ -384,24 +384,24 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         boolean isSelected = (e.getStateChange() == ItemEvent.SELECTED);
         if (isSelected) { _machine.setMatchWholeWord(); }
         else { _machine.setFindAnyOccurrence(); }
-        DrJava.getConfig().setSetting(OptionConstants.FIND_WHOLE_WORD, isSelected);
+        DrScala.getConfig().setSetting(OptionConstants.FIND_WHOLE_WORD, isSelected);
         _findField.requestFocusInWindow();
       }
     });
     
-    boolean ignoreCommentsSelected = DrJava.getConfig().getSetting(OptionConstants.FIND_NO_COMMENTS_STRINGS);
+    boolean ignoreCommentsSelected = DrScala.getConfig().getSetting(OptionConstants.FIND_NO_COMMENTS_STRINGS);
     _ignoreCommentsAndStrings = new JCheckBox("No Comments/Strings", ignoreCommentsSelected);
     _machine.setIgnoreCommentsAndStrings(ignoreCommentsSelected);
     _ignoreCommentsAndStrings.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
         boolean isSelected = (e.getStateChange() == ItemEvent.SELECTED);
         _machine.setIgnoreCommentsAndStrings(isSelected);
-        DrJava.getConfig().setSetting(OptionConstants.FIND_NO_COMMENTS_STRINGS, isSelected);
+        DrScala.getConfig().setSetting(OptionConstants.FIND_NO_COMMENTS_STRINGS, isSelected);
         _findField.requestFocusInWindow();
       }
     });
     
-    boolean ignoreTestCasesSelected = DrJava.getConfig().getSetting(OptionConstants.FIND_NO_TEST_CASES);
+    boolean ignoreTestCasesSelected = DrScala.getConfig().getSetting(OptionConstants.FIND_NO_TEST_CASES);
     _ignoreTestCases = new JCheckBox("No Test Cases", ignoreTestCasesSelected);
     _machine.setIgnoreTestCases(ignoreTestCasesSelected);
     _ignoreTestCases.addItemListener(new ItemListener() {
@@ -410,7 +410,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
         if(isSelected) 
           _searchSelectionOnly.setSelected(false);
         _machine.setIgnoreTestCases(isSelected);
-        DrJava.getConfig().setSetting(OptionConstants.FIND_NO_TEST_CASES, isSelected);
+        DrScala.getConfig().setSetting(OptionConstants.FIND_NO_TEST_CASES, isSelected);
         _findField.requestFocusInWindow();
       }
     });
@@ -777,7 +777,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _machine.setSearchBackwards(false);
     _findLabelBot.setText("Next");
     _doFind();  // updates position stored in machine before starting
-    if (DrJava.getConfig().getSetting(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
+    if (DrScala.getConfig().getSetting(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
       _defPane.requestFocusInWindow();  // moves focus to DefinitionsPane
     }
   }
@@ -788,7 +788,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
     _machine.setSearchBackwards(true);
     _findLabelBot.setText("Prev");
     _doFind();
-    if (DrJava.getConfig().getSetting(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
+    if (DrScala.getConfig().getSetting(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
       _defPane.requestFocusInWindow();  // moves focus to DefinitionsPane
     }
   }
@@ -913,7 +913,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
               _replaceFindPreviousAction.setEnabled(true);
               _machine.setLastFindWord();
               _model.addToBrowserHistory();
-              if (DrJava.getConfig().getSetting(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
+              if (DrScala.getConfig().getSetting(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
                 // moves focus to DefinitionsPane
                 _frame.toFront();
                 EventQueue.invokeLater(new Runnable() { public void run() { 
@@ -943,7 +943,7 @@ class FindReplacePanel extends TabbedPanel implements ClipboardOwner {
       finally { _frame.hourglassOff(); }
     }
     
-    if (! DrJava.getConfig().getSetting(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
+    if (! DrScala.getConfig().getSetting(OptionConstants.FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
       _findField.requestFocusInWindow();
     }
   }

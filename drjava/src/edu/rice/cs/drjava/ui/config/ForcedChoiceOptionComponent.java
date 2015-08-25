@@ -71,7 +71,7 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String,JComboBo
       _comboBox.addItem(currValue);
     }
 
-    resetToCurrent(DrJava.getConfig().getSetting(_option));
+    resetToCurrent(DrScala.getConfig().getSetting(_option));
     setComponent(_comboBox);
   }
 
@@ -111,10 +111,10 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String,JComboBo
     * @return true if the new value is set successfully
     */
   public boolean updateConfig() {
-    String oldValue = DrJava.getConfig().getSetting(_option);
+    String oldValue = DrScala.getConfig().getSetting(_option);
     String newValue = _comboBox.getSelectedItem().toString();  // An ugly workaround; toString() should be unnecessary.
 
-    if (! newValue.equals(oldValue)) { DrJava.getConfig().setSetting(_option, newValue); }
+    if (! newValue.equals(oldValue)) { DrScala.getConfig().setSetting(_option, newValue); }
 
     return true;
   }

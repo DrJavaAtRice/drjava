@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.ui;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.PropertyMaps;
 import edu.rice.cs.drjava.config.*;
@@ -228,13 +228,13 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     _cm = cm;
     initComponents();
     if (editMode) {
-      if (editIndex>=DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)) {
+      if (editIndex>=DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)) {
         throw new IllegalArgumentException("Trying to edit saved external process that does not exist");
       }
-      final String cmdline = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES).get(editIndex);
-      final String workdir = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS).get(editIndex);
+      final String cmdline = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES).get(editIndex);
+      final String workdir = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS).get(editIndex);
       final String enclosingFile = 
-        DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES).get(editIndex);
+        DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES).get(editIndex);
       _commandLine.setText(cmdline);
       _commandWorkDirLine.setText(workdir);
       _commandEnclosingFileLine.setText(enclosingFile);
@@ -392,16 +392,16 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     
     // Create a style object and then set the style attributes
     _varCommandLineCmdStyle = new SimpleAttributeSet();
-    StyleConstants.setBackground(_varCommandLineCmdStyle, DrJava.getConfig().getSetting(DEFINITIONS_MATCH_COLOR));
+    StyleConstants.setBackground(_varCommandLineCmdStyle, DrScala.getConfig().getSetting(DEFINITIONS_MATCH_COLOR));
     
     _commandLineCmdAS = new SimpleAttributeSet();
-    StyleConstants.setForeground(_commandLineCmdAS, DrJava.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR));
+    StyleConstants.setForeground(_commandLineCmdAS, DrScala.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR));
     _varCommandLineCmdStyle = new SimpleAttributeSet();
-    StyleConstants.setBackground(_varCommandLineCmdStyle, DrJava.getConfig().getSetting(DEFINITIONS_MATCH_COLOR));
+    StyleConstants.setBackground(_varCommandLineCmdStyle, DrScala.getConfig().getSetting(DEFINITIONS_MATCH_COLOR));
     _varErrorCommandLineCmdStyle = new SimpleAttributeSet();
-    StyleConstants.setBackground(_varErrorCommandLineCmdStyle, DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
+    StyleConstants.setBackground(_varErrorCommandLineCmdStyle, DrScala.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
     _varCommandLineCmdStyle = new SimpleAttributeSet();
-    StyleConstants.setBackground(_varCommandLineCmdStyle, DrJava.getConfig().getSetting(DEFINITIONS_MATCH_COLOR));
+    StyleConstants.setBackground(_varCommandLineCmdStyle, DrScala.getConfig().getSetting(DEFINITIONS_MATCH_COLOR));
     
     _commandLinePreview.setEditable(false);
     _commandLinePreview.setBackground(Color.LIGHT_GRAY);
@@ -865,7 +865,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
   /** Save the command line to the menu. */
   private void _saveCommand() {          
     if (_editMode) {
-      final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+      final Vector<String> names = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
       _mainFrame.removeModalWindowAdapter(this);
       String name = JOptionPane.showInputDialog(this, "Name for saved process:", names.get(_editIndex));
       _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
@@ -880,7 +880,7 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
                  _commandEnclosingFileLine.getText());
     }
     else {
-      int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
+      int count = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
       _mainFrame.removeModalWindowAdapter(this);
       String name = JOptionPane.showInputDialog(this, "Name for saved process:", "External Java " + (count+1));
       _mainFrame.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
@@ -908,27 +908,27 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     * @return number of processes in the menu */
   public static int addToMenu(String name, String cmdline, String workdir, String enclosingFile) {
     GeneralProcessCreator.LOG.log("addToMenu(): enclosingFile = " + enclosingFile);
-    int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
+    int count = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
     ++count;
-    final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
-    final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
-    final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+    final Vector<String> names = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    final Vector<String> cmdlines = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+    final Vector<String> workdirs = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
     final Vector<String> enclosingFiles = 
-      DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
+      DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     
     names.add(name);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
     
     cmdlines.add(cmdline);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,cmdlines);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,cmdlines);
     
     workdirs.add(workdir);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,workdirs);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,workdirs);
     
     enclosingFiles.add(enclosingFile);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,enclosingFiles);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,enclosingFiles);
     
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT,count);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT,count);
     
     return count;
   }
@@ -942,32 +942,32 @@ public class ExecuteExternalDialog extends SwingFrame implements OptionConstants
     */
   public static void editInMenu(int editIndex, String name, String cmdline, String workdir, String enclosingFile) {
     GeneralProcessCreator.LOG.log("editInMenu(): enclosingFile = " + enclosingFile);
-    final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
-    final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
-    final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-    final Vector<String> enclosingFiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
+    final Vector<String> names = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    final Vector<String> cmdlines = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+    final Vector<String> workdirs = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+    final Vector<String> enclosingFiles = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     
     names.set(editIndex,name);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,names);
     
     cmdlines.set(editIndex,cmdline);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,cmdlines);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,cmdlines);
     
     workdirs.set(editIndex,workdir);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,workdirs);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,workdirs);
     
     enclosingFiles.set(editIndex,enclosingFile);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,enclosingFiles);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,enclosingFiles);
   }
   
   /** Save process to file.
     * @param index index of the process to save
     * @param f file */
   public static void saveToFile(int index, File f) {
-    final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
-    final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
-    final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
-    final Vector<String> enclosingFiles = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
+    final Vector<String> names = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    final Vector<String> cmdlines = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+    final Vector<String> workdirs = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+    final Vector<String> enclosingFiles = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     
     XMLConfig xc = new XMLConfig();
 //    System.out.println("saveToFile(" + index + ", " + f + ")");

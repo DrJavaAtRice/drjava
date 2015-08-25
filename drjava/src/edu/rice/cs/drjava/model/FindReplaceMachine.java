@@ -541,7 +541,7 @@ public class FindReplaceMachine {
 //    Utilities.show("called _findNextInDocSegment(" + doc.getText() + ",\n" + start + ", " + len + ", " + wrapped +
 //      " ...)");
     boolean inTestCase = false;
-    for(String ext: OptionConstants.LANGUAGE_LEVEL_EXTENSIONS) {
+    for(String ext: OptionConstants.LANGUAGE_EXTENSIONS) {
       inTestCase |= doc.getFileName().endsWith("Test" + ext);
     }
     

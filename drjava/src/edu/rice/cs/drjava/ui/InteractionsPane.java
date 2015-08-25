@@ -135,7 +135,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     setHighlighter(new ReverseHighlighter());
     _highlightManager = new HighlightManager(this);
     
-    _antiAliasText = DrJava.getConfig().getSetting(TEXT_ANTIALIAS).booleanValue();
+    _antiAliasText = DrScala.getConfig().getSetting(TEXT_ANTIALIAS).booleanValue();
     
     // The superclass AbstractDJPane installs a matchListener for this class
     
@@ -145,7 +145,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     new BackgroundColorListener(this);
     
     OptionListener<Boolean> aaTemp = new AntiAliasOptionListener();
-    DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS, aaTemp);
+    DrScala.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS, aaTemp);
     
     _resetUndo(); //gets undoManager ready to go
     addMouseListener(new leftUndoBreak());

@@ -36,13 +36,13 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 /**
  * Tests the functionality of the Gap class.
  * @version $Id: GapTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public final class GapTest extends DrJavaTestCase {
+public final class GapTest extends DrScalaTestCase {
   /** Tests the ability to grow a Gap.
    */
   public void testGrow() {

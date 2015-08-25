@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.model.repl.newjvm.*;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.plt.tuple.OptionVisitor;
@@ -55,7 +55,7 @@ import edu.rice.cs.dynamicjava.symbol.*;
 /** Tests the functionality of the repl interpreter.
   * @version $Id: JavaInterpreterTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public class JavaInterpreterTest extends DrJavaTestCase {
+public class JavaInterpreterTest extends DrScalaTestCase {
   
   // ***************************
   // TODO: This class should be renamed "ScalaInterpreterTest" and the superclass should be renamed

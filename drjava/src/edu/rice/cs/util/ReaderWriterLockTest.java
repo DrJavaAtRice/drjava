@@ -36,7 +36,7 @@
 
 package edu.rice.cs.util;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 /** Attempts to test the correctness of the ReaderWriterLock class, which allows multiple reader and writer threads to
   * safely access a shared resource.  (Multiple readers can be active at a time, but only one writer can be active, 
@@ -44,7 +44,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
   * how the threads are actually scheduled.
   * @version $Id: ReaderWriterLockTest.java 5708 2012-08-29 23:52:35Z rcartwright $
   */
-public class ReaderWriterLockTest extends DrJavaTestCase {
+public class ReaderWriterLockTest extends DrScalaTestCase {
 
   protected volatile ReaderWriterLock _lock;
 

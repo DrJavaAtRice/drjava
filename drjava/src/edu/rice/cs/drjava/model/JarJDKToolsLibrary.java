@@ -76,6 +76,8 @@ import edu.rice.cs.drjava.model.javadoc.DefaultScaladocModel;
 import edu.rice.cs.drjava.model.javadoc.NoScaladocAvailable;
 import edu.rice.cs.drjava.model.JDKDescriptor;
 
+import edu.rice.cs.util.swing.Utilities;
+
 /** A JDKToolsLibrary that was loaded from a specific jar file. */
 public class JarJDKToolsLibrary extends JDKToolsLibrary {
   
@@ -245,9 +247,9 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       }
       
       try {
-        new PathClassLoader(loader, path).loadClass("com.sun.tools.scaladoc.Main");
+        new PathClassLoader(loader, path).loadClass("scala.tools.nsc.ScalaDoc");
         File bin = new File(f.getParentFile(), "../bin");
-        if (!IOUtil.attemptIsDirectory(bin)) { bin = new File(f.getParentFile(), "../Home/bin"); }
+        if (!IOUtil.attemptIsDirectory(bin)) { bin = new File(f.getParentFile(), "../home/bin"); }
         if (!IOUtil.attemptIsDirectory(bin)) { bin = new File(System.getProperty("java.home", f.getParent())); }
         scaladoc = new DefaultScaladocModel(model, bin, path);
       }
@@ -420,7 +422,13 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
       addIfDir(new File(envJavaHome, ".."), roots);
       addIfDir(new File(envJavaHome, "../.."), roots);
     }
-    
+
+    // add SCALA environment bindings to roots
+    if (envScalaHome != null) {
+      addIfDir(new File(envScalaHome), roots);
+      addIfDir(new File(envScalaHome, ".."), roots);
+      addIfDir(new File(envScalaHome, "../.."), roots);
+    }
     // Windows entries for Java and Scala
     if (programFiles != null) {
       addIfDir(new File(programFiles, "Java"), roots);
@@ -458,7 +466,7 @@ public class JarJDKToolsLibrary extends JDKToolsLibrary {
     addIfDir(new File("/usr/local/java"), roots);
     addIfDir(new File("/usr/local/j2se"), roots);
     addIfDir(new File("/usr/local"), roots);
-
+    /* FIX THIS!  What about the Scala equivalent? */
     addIfDir(new File("/usr/lib/jvm"), roots);
     addIfDir(new File("/usr/lib/jvm/java-8-oracle"), roots);
     addIfDir(new File("/usr/lib/jvm/java-8-openjdk"), roots);

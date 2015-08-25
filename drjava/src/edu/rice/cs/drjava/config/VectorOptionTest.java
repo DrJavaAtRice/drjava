@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 import java.util.Vector;
 
@@ -44,7 +44,7 @@ import java.util.Vector;
 /** Class according to the JUnit protocol.  Tests the proper functionality of the class VectorOption.
  *  @version $Id: VectorOptionTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public final class VectorOptionTest extends DrJavaTestCase {
+public final class VectorOptionTest extends DrScalaTestCase {
   private VectorOption<String> _svo;
   private VectorOption<Integer> _ivo;
   private VectorOption<Boolean> _bvo;

@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.Vector;
 
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.debug.*;
@@ -114,7 +114,7 @@ public final class DebugContextTest extends JPDADebugTestCase {
       // Add _tempDir to our sourcepath
       Utilities.invokeAndWait(new Runnable() { 
         public void run() { 
-          DrJava.getConfig().setSetting(OptionConstants.DEBUG_SOURCEPATH, path);
+          DrScala.getConfig().setSetting(OptionConstants.DEBUG_SOURCEPATH, path);
         }
       });
 //    }

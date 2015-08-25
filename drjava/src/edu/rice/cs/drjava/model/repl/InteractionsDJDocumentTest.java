@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model.repl;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.util.text.EditDocumentException;
@@ -47,7 +47,7 @@ import edu.rice.cs.plt.reflect.JavaVersion;
 import java.io.File;
 
 /** Tests the functionality of the InteractionsDJDocument. */
-public final class InteractionsDJDocumentTest extends DrJavaTestCase {
+public final class InteractionsDJDocumentTest extends DrScalaTestCase {
 
   protected InteractionsDJDocument _adapter;
   protected InteractionsModel _model;

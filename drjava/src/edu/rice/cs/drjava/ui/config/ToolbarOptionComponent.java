@@ -117,15 +117,15 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean,JComponent> 
     _buttonPanel.add(_iconsButton);
     _buttonPanel.add(_textAndIconsButton);
 
-    DrJava.getConfig().addOptionListener(OptionConstants.TOOLBAR_TEXT_ENABLED,
+    DrScala.getConfig().addOptionListener(OptionConstants.TOOLBAR_TEXT_ENABLED,
                                          new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oe) { resetToCurrent(); }
     });
-    DrJava.getConfig().addOptionListener(OptionConstants.TOOLBAR_ICONS_ENABLED,
+    DrScala.getConfig().addOptionListener(OptionConstants.TOOLBAR_ICONS_ENABLED,
                                          new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oe) { resetToCurrent(); }
     });
-    DrJava.getConfig().addOptionListener(OptionConstants.TOOLBAR_ENABLED,
+    DrScala.getConfig().addOptionListener(OptionConstants.TOOLBAR_ENABLED,
                                          new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oe) { resetToCurrent(); }
     });
@@ -153,9 +153,9 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean,JComponent> 
 
   /** Selects the radio button corresponding to the current config options. */
   public void resetToCurrent() {
-    _setSelected(DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue(),
-                 DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue(),
-                 DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ENABLED).booleanValue());
+    _setSelected(DrScala.getConfig().getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue(),
+                 DrScala.getConfig().getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue(),
+                 DrScala.getConfig().getSetting(OptionConstants.TOOLBAR_ENABLED).booleanValue());
   }
 
   /** Selects the radio button corresponding to the default values. */
@@ -183,29 +183,29 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean,JComponent> 
     */
   public boolean updateConfig() {
     String btnIdent = _group.getSelection().getActionCommand();
-    boolean textWasEnabled = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue();
-    boolean iconsWereEnabled = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
-    boolean wasEnabled = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ENABLED).booleanValue();
+    boolean textWasEnabled = DrScala.getConfig().getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue();
+    boolean iconsWereEnabled = DrScala.getConfig().getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
+    boolean wasEnabled = DrScala.getConfig().getSetting(OptionConstants.TOOLBAR_ENABLED).booleanValue();
     
     if (btnIdent.equals(NONE)) {
-      if (wasEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.FALSE); }
+      if (wasEnabled) { DrScala.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.FALSE); }
     }
     if (btnIdent.equals(TEXT_ONLY)) {
-      if (! textWasEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.TRUE); }
-      if (iconsWereEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.FALSE); }
-      if (! wasEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE); }
+      if (! textWasEnabled) { DrScala.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.TRUE); }
+      if (iconsWereEnabled) { DrScala.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.FALSE); }
+      if (! wasEnabled) { DrScala.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE); }
     }
 
     if (btnIdent.equals(ICONS_ONLY)) {
-      if (! iconsWereEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.TRUE); }
-      if (textWasEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.FALSE); }
-      if (! wasEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE); }
+      if (! iconsWereEnabled) { DrScala.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.TRUE); }
+      if (textWasEnabled) { DrScala.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.FALSE); }
+      if (! wasEnabled) { DrScala.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE); }
     }
 
     if (btnIdent.equals(TEXT_AND_ICONS)) {
-      if (! textWasEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.TRUE); }
-      if (! iconsWereEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.TRUE); }
-      if (! wasEnabled) { DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE); }
+      if (! textWasEnabled) { DrScala.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.TRUE); }
+      if (! iconsWereEnabled) { DrScala.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.TRUE); }
+      if (! wasEnabled) { DrScala.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE); }
     }
 
     return true;
@@ -223,9 +223,9 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean,JComponent> 
   public void setComponent(JComponent component) {
     _guiComponent = component;
     if (_guiComponent!=null) {
-      boolean wasEditable = DrJava.getConfig().isEditable(OptionConstants.TOOLBAR_TEXT_ENABLED);
-      wasEditable = wasEditable && DrJava.getConfig().isEditable(OptionConstants.TOOLBAR_ICONS_ENABLED);
-      wasEditable = wasEditable && DrJava.getConfig().isEditable(OptionConstants.TOOLBAR_ENABLED);
+      boolean wasEditable = DrScala.getConfig().isEditable(OptionConstants.TOOLBAR_TEXT_ENABLED);
+      wasEditable = wasEditable && DrScala.getConfig().isEditable(OptionConstants.TOOLBAR_ICONS_ENABLED);
+      wasEditable = wasEditable && DrScala.getConfig().isEditable(OptionConstants.TOOLBAR_ENABLED);
       
       _guiComponent.setEnabled(wasEditable);
       // also enable/disable all subcomponents (see Java bug 4177727)

@@ -36,8 +36,8 @@
 
 package edu.rice.cs.drjava.ui.config;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScala;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.DefaultSwingFrame;
 import edu.rice.cs.util.swing.Utilities;
@@ -46,14 +46,14 @@ import java.io.File;
 import java.util.Vector;
 
 /** Tests functionality of this OptionComponent */
-public final class VectorFileOptionComponentTest extends DrJavaTestCase {
+public final class VectorFileOptionComponentTest extends DrScalaTestCase {
   private static VectorFileOptionComponent _option;
 
   protected void setUp() throws Exception {
     super.setUp();
     _option = new VectorFileOptionComponent(OptionConstants.EXTRA_CLASSPATH, "Extra Classpath", 
                                             new DefaultSwingFrame());
-    DrJava.getConfig().resetToDefaults();
+    DrScala.getConfig().resetToDefaults();
     Utilities.clearEventQueue();
   }
 
@@ -70,7 +70,7 @@ public final class VectorFileOptionComponentTest extends DrJavaTestCase {
     
     assertTrue("Cancel (resetToCurrent) should not change the config",
                vectorEquals(OptionConstants.EXTRA_CLASSPATH.getDefault(),
-                            DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)));
+                            DrScala.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)));
   }
 
   public void testApplyDoesChangeConfig() {
@@ -84,7 +84,7 @@ public final class VectorFileOptionComponentTest extends DrJavaTestCase {
 
     assertTrue("Apply (updateConfig) should write change to file",
                vectorEquals(testVector,
-                            DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)));
+                            DrScala.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)));
   }
 
   public void testApplyThenResetDefault() {
@@ -104,7 +104,7 @@ public final class VectorFileOptionComponentTest extends DrJavaTestCase {
     
     assertTrue("Apply (updateConfig) should write change to file",
                vectorEquals(OptionConstants.EXTRA_CLASSPATH.getDefault(),
-                            DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)));
+                            DrScala.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)));
   }
 
   /** The equals method for a parameterized Vector.

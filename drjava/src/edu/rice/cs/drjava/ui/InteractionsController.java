@@ -74,7 +74,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.event.UndoableEditEvent;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
@@ -322,8 +322,8 @@ public class InteractionsController extends AbstractConsoleController {
     // Add key binding option listener for Input Box.
     // Done here, not in InputBox's constructor, so we only create one. Otherwise we might
     // create one per InputBox, and it would be difficult to remove them again.
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_UNDO, _keyBindingOptionListener);
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_REDO, _keyBindingOptionListener);
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_UNDO, _keyBindingOptionListener);
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_REDO, _keyBindingOptionListener);
     
     _init();  // residual superclass initialization
   }
@@ -392,10 +392,10 @@ public class InteractionsController extends AbstractConsoleController {
     // Error
     _errStyle.addAttributes(_defaultStyle);
     _errStyle.addAttribute(StyleConstants.Foreground, 
-                           DrJava.getConfig().getSetting(OptionConstants.INTERACTIONS_ERROR_COLOR));
+                           DrScala.getConfig().getSetting(OptionConstants.INTERACTIONS_ERROR_COLOR));
     _errStyle.addAttribute(StyleConstants.Bold, Boolean.TRUE);
     _interactionsDJDocument.setDocStyle(InteractionsDocument.ERROR_STYLE, _errStyle);
-    DrJava.getConfig().addOptionListener(OptionConstants.INTERACTIONS_ERROR_COLOR, new OptionListener<Color>() {
+    DrScala.getConfig().addOptionListener(OptionConstants.INTERACTIONS_ERROR_COLOR, new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oe) {
         _errStyle.addAttribute(StyleConstants.Foreground, oe.value);
       }
@@ -404,10 +404,10 @@ public class InteractionsController extends AbstractConsoleController {
     // Debug
     _debugStyle.addAttributes(_defaultStyle);
     _debugStyle.addAttribute(StyleConstants.Foreground, 
-                             DrJava.getConfig().getSetting(OptionConstants.DEBUG_MESSAGE_COLOR));
+                             DrScala.getConfig().getSetting(OptionConstants.DEBUG_MESSAGE_COLOR));
     _debugStyle.addAttribute(StyleConstants.Bold, Boolean.TRUE);
     _interactionsDJDocument.setDocStyle(InteractionsDocument.DEBUGGER_STYLE, _debugStyle);
-    DrJava.getConfig().addOptionListener(OptionConstants.DEBUG_MESSAGE_COLOR, new OptionListener<Color>() {
+    DrScala.getConfig().addOptionListener(OptionConstants.DEBUG_MESSAGE_COLOR, new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oe) {
         _debugStyle.addAttribute(StyleConstants.Foreground, oe.value);
       }
@@ -458,17 +458,17 @@ public class InteractionsController extends AbstractConsoleController {
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), moveRightAction);
     
     // Prevent previous word action from going past the prompt
-    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_WORD), prevWordAction);
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_WORD, new OptionListener<Vector<KeyStroke>>() {
+    _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_WORD), prevWordAction);
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_WORD, new OptionListener<Vector<KeyStroke>>() {
       public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
-        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_WORD), prevWordAction);
+        _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_WORD), prevWordAction);
       }
     });
     
-    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_WORD), nextWordAction);
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_NEXT_WORD, new OptionListener<Vector<KeyStroke>>() {
+    _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_NEXT_WORD), nextWordAction);
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_NEXT_WORD, new OptionListener<Vector<KeyStroke>>() {
       public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
-        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_WORD), nextWordAction);
+        _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_NEXT_WORD), nextWordAction);
       }
     });
   }
@@ -700,10 +700,10 @@ public class InteractionsController extends AbstractConsoleController {
     private static final int BORDER_WIDTH = 1;
     private static final int INNER_BUFFER_WIDTH = 3;
     private static final int OUTER_BUFFER_WIDTH = 2;
-    private volatile Color _bgColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
-    private volatile Color _fgColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
-    private volatile Color _sysInColor = DrJava.getConfig().getSetting(OptionConstants.SYSTEM_IN_COLOR);
-    private volatile boolean _antiAliasText = DrJava.getConfig().getSetting(OptionConstants.TEXT_ANTIALIAS);
+    private volatile Color _bgColor = DrScala.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
+    private volatile Color _fgColor = DrScala.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
+    private volatile Color _sysInColor = DrScala.getConfig().getSetting(OptionConstants.SYSTEM_IN_COLOR);
+    private volatile boolean _antiAliasText = DrScala.getConfig().getSetting(OptionConstants.TEXT_ANTIALIAS);
     private volatile boolean _endOfStream = false;
     private volatile boolean _closedWithEnter = false;
     private final InputMap _oldInputMap = new InputMap();
@@ -716,7 +716,7 @@ public class InteractionsController extends AbstractConsoleController {
       setBorder(_createBorder());
       setLineWrap(true);
       
-      DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR,
+      DrScala.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR,
                                            new OptionListener<Color>() {
         public void optionChanged(OptionEvent<Color> oe) {
           _fgColor = oe.value;
@@ -724,7 +724,7 @@ public class InteractionsController extends AbstractConsoleController {
           setCaretColor(oe.value);
         }
       });
-      DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_BACKGROUND_COLOR,
+      DrScala.getConfig().addOptionListener(OptionConstants.DEFINITIONS_BACKGROUND_COLOR,
                                            new OptionListener<Color>() {
         public void optionChanged(OptionEvent<Color> oe) {
           _bgColor = oe.value;
@@ -732,14 +732,14 @@ public class InteractionsController extends AbstractConsoleController {
           setBackground(oe.value);
         }
       });
-      DrJava.getConfig().addOptionListener(OptionConstants.SYSTEM_IN_COLOR,
+      DrScala.getConfig().addOptionListener(OptionConstants.SYSTEM_IN_COLOR,
                                            new OptionListener<Color>() {
         public void optionChanged(OptionEvent<Color> oe) {
           _sysInColor = oe.value;
           setForeground(oe.value);
         }
       });
-      DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS,
+      DrScala.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS,
                                            new OptionListener<Boolean>() {
         public void optionChanged(OptionEvent<Boolean> oce) {
           _antiAliasText = oce.value.booleanValue();
@@ -815,8 +815,8 @@ public class InteractionsController extends AbstractConsoleController {
         for(KeyStroke ks: _oldInputMap.keys()) { im.put(ks, _oldInputMap.get(ks)); }
       }
       
-      for(KeyStroke ks: DrJava.getConfig().getSetting(OptionConstants.KEY_UNDO)) { im.put(ks, UNDO_NAME); }
-      for(KeyStroke ks: DrJava.getConfig().getSetting(OptionConstants.KEY_REDO)) { im.put(ks, REDO_NAME); }
+      for(KeyStroke ks: DrScala.getConfig().getSetting(OptionConstants.KEY_UNDO)) { im.put(ks, UNDO_NAME); }
+      for(KeyStroke ks: DrScala.getConfig().getSetting(OptionConstants.KEY_REDO)) { im.put(ks, REDO_NAME); }
     }
     
     /** Returns true if this stream has been closed. */
@@ -849,7 +849,7 @@ public class InteractionsController extends AbstractConsoleController {
     void setInputCompletionCommand(final Runnable command) {
       final InputMap im = getInputMap(WHEN_FOCUSED);
       im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), INPUT_ENTERED_NAME);
-      for(KeyStroke k: DrJava.getConfig().getSetting(OptionConstants.KEY_CLOSE_SYSTEM_IN)) im.put(k, INSERT_END_OF_STREAM);
+      for(KeyStroke k: DrScala.getConfig().getSetting(OptionConstants.KEY_CLOSE_SYSTEM_IN)) im.put(k, INSERT_END_OF_STREAM);
       
       final ActionMap am = getActionMap();
       am.put(INPUT_ENTERED_NAME, new AbstractAction() {

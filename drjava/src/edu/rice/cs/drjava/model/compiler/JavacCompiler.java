@@ -42,7 +42,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Collections;
 import java.io.File;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;

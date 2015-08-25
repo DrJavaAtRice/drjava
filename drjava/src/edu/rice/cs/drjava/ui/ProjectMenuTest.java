@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.ui;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.project.DocFile;
@@ -57,7 +57,7 @@ import java.io.*;
 import java.util.List;
 
 /** Test functions of Project Facility working through the main frame and model. */
-public final class ProjectMenuTest extends DrJavaTestCase {
+public final class ProjectMenuTest extends DrScalaTestCase {
   
   private volatile MainFrame _frame;
   
@@ -98,7 +98,7 @@ public final class ProjectMenuTest extends DrJavaTestCase {
           
           // create project in a directory with an auxiliary file outside of it
           _auxFile = File.createTempFile("aux", ".scala").getCanonicalFile();
-          _projFile = new File(_parent, "test.pjt");
+          _projFile = new File(_parent, "test.drscala");
           
           _file1 = new File(_srcDir, "test1.scala");
           IOUtil.writeStringToFile(_file1, "");  // create dummy file

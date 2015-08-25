@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.ui;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
@@ -53,7 +53,7 @@ import javax.swing.text.*;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.BadLocationException;
 import java.awt.dnd.*;
-import edu.rice.cs.drjava.DrJavaRoot;
+import edu.rice.cs.drjava.DrScalaRoot;
 
 /** This pane class for a SwingDocument. */
 public abstract class AbstractDJPane extends JTextPane
@@ -69,13 +69,13 @@ public abstract class AbstractDJPane extends JTextPane
   static ReverseHighlighter.DrJavaHighlightPainter MATCH_PAINTER;
 
   static {
-    Color highColor = DrJava.getConfig().getSetting(DEFINITIONS_MATCH_COLOR);
+    Color highColor = DrScala.getConfig().getSetting(DEFINITIONS_MATCH_COLOR);
     MATCH_PAINTER = new ReverseHighlighter.DrJavaHighlightPainter(highColor);
   }
   
   /** Highlight painter for selected errors in the defs doc. */
   static ReverseHighlighter.DrJavaHighlightPainter ERROR_PAINTER =
-    new ReverseHighlighter.DrJavaHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
+    new ReverseHighlighter.DrJavaHighlightPainter(DrScala.getConfig().getSetting(COMPILER_ERROR_COLOR));
   
   private static final int ALT_CTRL_META_MASK = Event.ALT_MASK | Event.CTRL_MASK | Event.META_MASK;
   
@@ -264,7 +264,7 @@ public abstract class AbstractDJPane extends JTextPane
 
   /** User dragged something into the component. */
   public void dragEnter(DropTargetDragEvent dropTargetDragEvent) {
-    DrJavaRoot.dragEnter(dropTargetDragEvent);
+    DrScalaRoot.dragEnter(dropTargetDragEvent);
   }
   
   public void dragExit(DropTargetEvent dropTargetEvent) { }
@@ -273,6 +273,6 @@ public abstract class AbstractDJPane extends JTextPane
   
   /** User dropped something on the component.  Only runs in event thread. */
   public /* synchronized */ void drop(DropTargetDropEvent dropTargetDropEvent) {
-    DrJavaRoot.drop(dropTargetDropEvent);
+    DrScalaRoot.drop(dropTargetDropEvent);
   }
 }

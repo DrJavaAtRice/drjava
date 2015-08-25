@@ -41,7 +41,7 @@ import java.util.jar.*;
 import javax.swing.*;
 import java.awt.*;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.plt.concurrent.JVMBuilder;
@@ -162,26 +162,26 @@ public class ConcJUnitUtils {
     if (n==0) {
       // yes
       File concJUnitJarFile = FileOps.getDrScalaFile();
-      if (DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION_ENABLED)) {
-        concJUnitJarFile = DrJava.getConfig().getSetting(OptionConstants.JUNIT_LOCATION);
+      if (DrScala.getConfig().getSetting(OptionConstants.JUNIT_LOCATION_ENABLED)) {
+        concJUnitJarFile = DrScala.getConfig().getSetting(OptionConstants.JUNIT_LOCATION);
       }
-      File rtFile = DrJava.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION);
+      File rtFile = DrScala.getConfig().getSetting(OptionConstants.RT_CONCJUNIT_LOCATION);
       showGenerateRTConcJUnitJarFileDialog(parentFrame,
                                            rtFile,
                                            concJUnitJarFile,
                                            new Runnable1<File>() {
         public void run(File targetFile) {
           // success
-          DrJava.getConfig().setSetting(OptionConstants.RT_CONCJUNIT_LOCATION, targetFile);
+          DrScala.getConfig().setSetting(OptionConstants.RT_CONCJUNIT_LOCATION, targetFile);
           yesRunnable.run();
         }
       },
                                            new Runnable() {
                                              public void run() {
                                                // failure
-                                               if (DrJava.getConfig().getSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED).
+                                               if (DrScala.getConfig().getSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED).
                                                      equals(OptionConstants.ConcJUnitCheckChoices.NO_LUCKY)) {
-                                                 DrJava.getConfig().setSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED,
+                                                 DrScala.getConfig().setSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED,
                                                                                OptionConstants.ConcJUnitCheckChoices.NO_LUCKY);
                                                }
                                                noRunnable.run();
@@ -190,9 +190,9 @@ public class ConcJUnitUtils {
     }
     else {
       // no
-      if (DrJava.getConfig().getSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED).
+      if (DrScala.getConfig().getSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED).
             equals(OptionConstants.ConcJUnitCheckChoices.NO_LUCKY)) {
-        DrJava.getConfig().setSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED,
+        DrScala.getConfig().setSetting(OptionConstants.CONCJUNIT_CHECKS_ENABLED,
                                       OptionConstants.ConcJUnitCheckChoices.NO_LUCKY);
       }
       noRunnable.run();

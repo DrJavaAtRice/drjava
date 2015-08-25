@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.ui.predictive;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,7 +46,7 @@ import java.util.Set;
 /**
  * Unit tests for PredictiveInputModel class.
  */
-public class PredictiveInputModelTest extends DrJavaTestCase {
+public class PredictiveInputModelTest extends DrScalaTestCase {
   final String[] names = new String[] {"AboutDialog.java", "FileOps.java", "FileOpsTest.java", "Utilities.java"};
   final List<String> namesList = Arrays.asList(names);
   
@@ -1005,10 +1005,10 @@ namesList);
   }
 
   public void testJavaAPIFragmentLineNumStrategy() {
-    final String base = edu.rice.cs.drjava.DrJava.
-      getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.SCALADOC_1_5_LINK) + "/";
-    final String stripPrefix = ""; // nothing needs to be stripped, links in 1.4 Scaladoc are relative
-    final String suffix = "/allclasses-1.5.html";
+    final String base = edu.rice.cs.drjava.DrScala.
+      getConfig().getSetting(edu.rice.cs.drjava.config.OptionConstants.JAVADOC_1_8_LINK) + "/";
+    final String stripPrefix = ""; // nothing needs to be stripped, links in 1.8 Scaladoc are relative
+    final String suffix = "/allclasses-1.8.html";
     Set<edu.rice.cs.drjava.ui.MainFrameStatics.JavaAPIListEntry> l = 
       edu.rice.cs.drjava.ui.MainFrame._generateJavaAPISet(base,
                                                           stripPrefix,

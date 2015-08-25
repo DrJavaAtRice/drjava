@@ -42,7 +42,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.LinkedList;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.DisplayManager;
 import edu.rice.cs.util.swing.Utilities;
@@ -132,21 +132,21 @@ public class RecentDocFrame extends JWindow {
     getContentPane().add(_panel);
     pack();
     updateFontColor();
-    _showSource = DrJava.getConfig().getSetting(OptionConstants.SHOW_SOURCE_WHEN_SWITCHING);
-    DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_BACKGROUND_COLOR, _colorListener);
-    DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR, _colorListener);
-    DrJava.getConfig().addOptionListener(OptionConstants.FONT_MAIN, _fontListener);
-    DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS, _antialiasListener);
-    DrJava.getConfig().addOptionListener(OptionConstants.SHOW_SOURCE_WHEN_SWITCHING, _showSourceListener);
+    _showSource = DrScala.getConfig().getSetting(OptionConstants.SHOW_SOURCE_WHEN_SWITCHING);
+    DrScala.getConfig().addOptionListener(OptionConstants.DEFINITIONS_BACKGROUND_COLOR, _colorListener);
+    DrScala.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR, _colorListener);
+    DrScala.getConfig().addOptionListener(OptionConstants.FONT_MAIN, _fontListener);
+    DrScala.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS, _antialiasListener);
+    DrScala.getConfig().addOptionListener(OptionConstants.SHOW_SOURCE_WHEN_SWITCHING, _showSourceListener);
   }
   
   private void updateFontColor() {
-    Font  mainFont = DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN);
-    Color backColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
-    Color fontColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
+    Font  mainFont = DrScala.getConfig().getSetting(OptionConstants.FONT_MAIN);
+    Color backColor = DrScala.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
+    Color fontColor = DrScala.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
     /* make it bigger */
     Font titleFont = mainFont.deriveFont((float) (mainFont.getSize() + 3));
-    _antiAliasText = DrJava.getConfig().getSetting(OptionConstants.TEXT_ANTIALIAS).booleanValue();
+    _antiAliasText = DrScala.getConfig().getSetting(OptionConstants.TEXT_ANTIALIAS).booleanValue();
     
     _label.setForeground(fontColor);
     _panel.setBackground(backColor);

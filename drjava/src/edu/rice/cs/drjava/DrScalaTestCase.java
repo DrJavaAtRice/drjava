@@ -50,16 +50,16 @@ import edu.rice.cs.util.Log;
   * and tearDown(), but make sure to invoke super.setUp() and super.tearDown() appropriately. That ensures that the 
   * system is correctly initialized for every test.
   */
-public class DrJavaTestCase extends TestCase {
+public class DrScalaTestCase extends TestCase {
   /** Create a new DrJava test case. */
-  public DrJavaTestCase() { super(); }
+  public DrScalaTestCase() { super(); }
   
   /** Create a new DrJava test case.
     * @param name name of the test case
     */
-  public DrJavaTestCase(String name) { super(name); }
+  public DrScalaTestCase(String name) { super(name); }
   
-  private static Log _log = new Log("DrJavaTestCase.txt", false);
+  private static Log _log = new Log("DrScalaTestCase.txt", false);
   
   /** Set up for every test.
     * @throws Exception  This convention is mandated by JUnit.TestCase, the superclass of this class.
@@ -74,9 +74,9 @@ public class DrJavaTestCase extends TestCase {
 //      Utilities.show("Setting '" + newName + "' as DrJava configuration file");
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
-        DrJava.setPropertiesFile(newName);  // spawns change updates which should run in event thread
+        DrScala.setPropertiesFile(newName);  // spawns change updates which should run in event thread
 //        Utilities.clearEventQueue();
-        DrJava._initConfig();               // spawns change updates which should run in event thread
+        DrScala._initConfig();               // spawns change updates which should run in event thread
       }
     });
   }
@@ -86,12 +86,12 @@ public class DrJavaTestCase extends TestCase {
     * @throws Exception
     */
   protected void tearDown() throws Exception { 
-    DrJava.cleanUp();  
+    DrScala.cleanUp();  
     super.tearDown();
   }
 
   protected <T> void setConfigSetting(final Option<T> op, final T value) {
-    Utilities.invokeAndWait(new Runnable() { public void run() { DrJava.getConfig().setSetting(op, value); } });
+    Utilities.invokeAndWait(new Runnable() { public void run() { DrScala.getConfig().setSetting(op, value); } });
   }
   
   /** Clears the text of the _doc field and sets it to the given string. */
@@ -106,7 +106,5 @@ public class DrJavaTestCase extends TestCase {
       }
     });
     Utilities.clearEventQueue();  // ensure that all listener actions triggered by this document update have completed
-  }
-  
-  
+  } 
 }

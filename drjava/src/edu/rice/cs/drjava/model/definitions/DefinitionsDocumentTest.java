@@ -36,8 +36,8 @@
 
 package edu.rice.cs.drjava.model.definitions;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScala;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
@@ -56,7 +56,7 @@ import java.util.List;
 /** Tests the functionality of the definitions document.
   * @version $Id: DefinitionsDocumentTest.java 5707 2012-08-26 05:57:03Z rcartwright $
   */
-public final class DefinitionsDocumentTest extends DrJavaTestCase implements ReducedModelStates {
+public final class DefinitionsDocumentTest extends DrScalaTestCase implements ReducedModelStates {
   private DefinitionsDocument _doc;
   private GlobalEventNotifier _notifier;
   
@@ -70,7 +70,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     super.setUp();
     _notifier = new GlobalEventNotifier();
     _doc = new DefinitionsDocument(_notifier);
-    DrJava.getConfig().resetToDefaults();
+    DrScala.getConfig().resetToDefaults();
   }
   
   /** Create a test suite for JUnit to run.
@@ -951,7 +951,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
       "}\n";
     
     _doc.addUndoableEditListener(_doc.getUndoManager());
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_INC,Integer.valueOf(2));
+    DrScala.getConfig().setSetting(OptionConstants.INDENT_INC,Integer.valueOf(2));
 //    Utilities.clearEventQueue();
     _doc.insertString(0, text, null);
     assertEquals("insertion",text, _doc.getText()); 
@@ -993,7 +993,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
       "//}\n";
     
     _doc.addUndoableEditListener(_doc.getUndoManager());
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_INC,Integer.valueOf(2));
+    DrScala.getConfig().setSetting(OptionConstants.INDENT_INC,Integer.valueOf(2));
 //    Utilities.clearEventQueue();
     _doc.insertString(0,text,null);
     assertEquals("insertion",text, _doc.getText());
@@ -1042,7 +1042,7 @@ public final class DefinitionsDocumentTest extends DrJavaTestCase implements Red
     CompoundUndoManager undoManager = _doc.getUndoManager();
     
     _doc.addUndoableEditListener(undoManager);
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_INC,Integer.valueOf(2));
+    DrScala.getConfig().setSetting(OptionConstants.INDENT_INC,Integer.valueOf(2));
 //    Utilities.clearEventQueue();
     // 1
     

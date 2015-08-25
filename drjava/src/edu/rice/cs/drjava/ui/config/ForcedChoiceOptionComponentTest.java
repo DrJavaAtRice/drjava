@@ -36,25 +36,25 @@
 
 package edu.rice.cs.drjava.ui.config;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScala;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.DefaultSwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Tests functionality of this OptionComponent. */
-public final class ForcedChoiceOptionComponentTest extends DrJavaTestCase {
+public final class ForcedChoiceOptionComponentTest extends DrScalaTestCase {
   private static ForcedChoiceOptionComponent _option;
 
   protected void setUp() throws Exception {
     super.setUp();
-    _option = new ForcedChoiceOptionComponent( OptionConstants.SCALADOC_ACCESS_LEVEL, "Private", new DefaultSwingFrame());
-    DrJava.getConfig().resetToDefaults();
+    _option = new ForcedChoiceOptionComponent( OptionConstants.SCALADOC_ACCESS_STATUS, "Private", new DefaultSwingFrame());
+    DrScala.getConfig().resetToDefaults();
     Utilities.clearEventQueue();
   }
 
   public void testCancelDoesNotChangeConfig() {
-    String testForcedChoice = new String(DrJava.getConfig().getSetting(OptionConstants.SCALADOC_ACCESS_LEVEL));
+    String testForcedChoice = new String(DrScala.getConfig().getSetting(OptionConstants.SCALADOC_ACCESS_STATUS));
 
     _option.setValue(testForcedChoice);
     Utilities.clearEventQueue();
@@ -64,13 +64,13 @@ public final class ForcedChoiceOptionComponentTest extends DrJavaTestCase {
     Utilities.clearEventQueue();
 
     assertEquals("Cancel (resetToCurrent) should not change the config",
-                 OptionConstants.SCALADOC_ACCESS_LEVEL.getDefault(),
-                 DrJava.getConfig().getSetting(OptionConstants.SCALADOC_ACCESS_LEVEL));
+                 OptionConstants.SCALADOC_ACCESS_STATUS.getDefault(),
+                 DrScala.getConfig().getSetting(OptionConstants.SCALADOC_ACCESS_STATUS));
 
   }
 
   public void testApplyDoesChangeConfig() {
-    String testForcedChoice = new String(DrJava.getConfig().getSetting(OptionConstants.SCALADOC_ACCESS_LEVEL));
+    String testForcedChoice = new String(DrScala.getConfig().getSetting(OptionConstants.SCALADOC_ACCESS_STATUS));
 
     _option.setValue(testForcedChoice);
     Utilities.clearEventQueue();
@@ -78,11 +78,11 @@ public final class ForcedChoiceOptionComponentTest extends DrJavaTestCase {
     Utilities.clearEventQueue();
     assertEquals("Apply (updateConfig) should write change to file",
                  testForcedChoice,
-                 DrJava.getConfig().getSetting(OptionConstants.SCALADOC_ACCESS_LEVEL));
+                 DrScala.getConfig().getSetting(OptionConstants.SCALADOC_ACCESS_STATUS));
   }
 
   public void testApplyThenResetDefault() {
-    String testForcedChoice = new String(DrJava.getConfig().getSetting(OptionConstants.SCALADOC_ACCESS_LEVEL));
+    String testForcedChoice = new String(DrScala.getConfig().getSetting(OptionConstants.SCALADOC_ACCESS_STATUS));
 
     _option.setValue(testForcedChoice);
     Utilities.clearEventQueue();
@@ -94,8 +94,8 @@ public final class ForcedChoiceOptionComponentTest extends DrJavaTestCase {
     Utilities.clearEventQueue();
 
     assertEquals("Apply (updateConfig) should write change to file",
-                 OptionConstants.SCALADOC_ACCESS_LEVEL.getDefault(),
-                 DrJava.getConfig().getSetting(OptionConstants.SCALADOC_ACCESS_LEVEL));
+                 OptionConstants.SCALADOC_ACCESS_STATUS.getDefault(),
+                 DrScala.getConfig().getSetting(OptionConstants.SCALADOC_ACCESS_STATUS));
   }
 
 }

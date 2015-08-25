@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.platform;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.Configuration;
 import edu.rice.cs.drjava.config.OptionConstants;
 
@@ -122,7 +122,7 @@ class DefaultPlatform implements PlatformSupport {
     */
   public boolean openURL(URL address) {
     // Get the two config options.
-    Configuration config = DrJava.getConfig();
+    Configuration config = DrScala.getConfig();
     File exe = config.getSetting(OptionConstants.BROWSER_FILE);
     String command = config.getSetting(OptionConstants.BROWSER_STRING);
 

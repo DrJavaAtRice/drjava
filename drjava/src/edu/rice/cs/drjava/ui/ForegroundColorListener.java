@@ -50,10 +50,10 @@ class ForegroundColorListener implements OptionListener<Color> {
   public ForegroundColorListener(Component target) {
     _target = target;
 
-    final Color color = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
+    final Color color = DrScala.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
     _setColor(color);
 
-    DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR, this);
+    DrScala.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR, this);
   }
 
   public void optionChanged(OptionEvent<Color> oce) { _setColor(oce.value); }

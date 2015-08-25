@@ -41,7 +41,7 @@ import junit.framework.*;
 /** Test that ensures all external dependencies are met!
  *  @version $Id: DependenciesTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public final class DependenciesTest extends DrJavaTestCase {
+public final class DependenciesTest extends DrScalaTestCase {
   public static final String REQUIRED_UTIL_VERSION = "20040521-1616";
 
   /** Constructor.

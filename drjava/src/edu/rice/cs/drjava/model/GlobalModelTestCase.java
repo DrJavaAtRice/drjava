@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 
 import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
@@ -121,7 +121,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
                                      _model.getSwingInteractionsDocument(),
                                      new Runnable() { public void run() { } });
         _log.log("Global model created for " + this);
-        DrJava.getConfig().resetToDefaults();
+        DrScala.getConfig().resetToDefaults();
         String user = System.getProperty("user.name");
         try { _tempDir = FileOps.createTempDirectory("DrScala-test-" + user /*, ""*/); }
         

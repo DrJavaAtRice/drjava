@@ -36,7 +36,7 @@
 
 package edu.rice.cs.util;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 import java.util.Arrays;
 import java.util.List;
@@ -47,7 +47,7 @@ import java.util.List;
  * set by a Unix bash shell in most cases.
  * @version $Id: ArgumentTokenizerTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public class ArgumentTokenizerTest extends DrJavaTestCase {
+public class ArgumentTokenizerTest extends DrScalaTestCase {
 
   /** Creates a new ArgumentTokenizer to be used in every test.
    */

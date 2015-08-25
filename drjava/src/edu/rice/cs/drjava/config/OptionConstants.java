@@ -50,6 +50,7 @@ import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.plt.reflect.JavaVersion;
 import edu.rice.cs.util.FileOps;
@@ -79,55 +80,25 @@ public interface OptionConstants {
   /* The default rate at which the debugger steps into or over every line of code*/
   public static final NonNegativeIntegerOption AUTO_STEP_RATE = new NonNegativeIntegerOption("auto.step.rate", 1000);
   
-  /** The extension for an old DrJava project file */
-  public static final String OLD_PROJECT_FILE_EXTENSION = ".pjt";
+  /** The extension for an external DrJava app */
+  public static final String EXTPROCESS_FILE_EXTENSION = ".djapp";
   
   /** The extension for a DrJava project file */
-  public static final String PROJECT_FILE_EXTENSION = ".drjava";
+  public static final String PROJECT_FILE_EXTENSION = ".drscala"; 
+      
+  /* Constants for language extensions */
   
-  /** The alternative extension for a DrJava project file */
-  public static final String PROJECT_FILE_EXTENSION2 = ".xml";
-  
-  /** The extension for stand-alone DrJava external process file. */
-  public static final String EXTPROCESS_FILE_EXTENSION = ".djapp";
-
   /** The extension for a Java source file */
   public static final String JAVA_FILE_EXTENSION = ".java";
   
   /** The extension for a Java source file */
   public static final String SCALA_FILE_EXTENSION = ".scala";
-  
-  // Java Language Levels is disabled
 
-//  /** The extension for a language level source file */
-//  public static final String DJ_FILE_EXTENSION = ".dj";
-//
-//  /** The old extension for an elementary language level source file */
-//  public static final String OLD_DJ0_FILE_EXTENSION = ".dj0";
-//
-//  /** The old extension for an intermediate language level source file */
-//  public static final String OLD_DJ1_FILE_EXTENSION = ".dj1";
-//
-//  /** The old extension for an advanced language level source file */
-//  public static final String OLD_DJ2_FILE_EXTENSION = ".dj2";
-    
-  /* Constants for language levels */
-  public static final int FULL_JAVA = 0;
-  public static final int ELEMENTARY_LEVEL = 1;
-  public static final int INTERMEDIATE_LEVEL = 2;
-  public static final int ADVANCED_LEVEL = 3;
-  public static final int FUNCTIONAL_JAVA_LEVEL = 4;
-  public static final String[] LANGUAGE_LEVEL_EXTENSIONS = new String[] {
+  /** The extensions for Scala and Java source files. */
+  public static final String[] LANGUAGE_EXTENSIONS = new String[] {
     SCALA_FILE_EXTENSION,
     JAVA_FILE_EXTENSION 
-
-//      OLD_DJ0_FILE_EXTENSION, // = .dj0
-//      OLD_DJ1_FILE_EXTENSION, // = .dj1
-//      OLD_DJ2_FILE_EXTENSION, // = .dj2
-//      DJ_FILE_EXTENSION  // = .dj
   };
-  /** The configuration XML file that DrJava looks for inside a .djapp file */
-  public static final String EXTPROCESS_FILE_NAME_INSIDE_JAR = "process" + EXTPROCESS_FILE_EXTENSION;
 
   /** The extension for a text file */
   public static final String TEXT_FILE_EXTENSION = ".txt";
@@ -144,7 +115,6 @@ public interface OptionConstants {
   /** Whether to display all versions of the compilers (even if they have the same major version). */
   public static final BooleanOption DISPLAY_ALL_COMPILER_VERSIONS = 
     new BooleanOption("all.compiler.versions", Boolean.FALSE);
-  
   
   /* ---------- Color Options ---------- */
   
@@ -1249,62 +1219,48 @@ public interface OptionConstants {
   }
   
   /** The lowest access level of classes and members to include in the scaladoc. */
-  public static final ForcedChoiceOption SCALADOC_ACCESS_LEVEL =
+  public static final ForcedChoiceOption SCALADOC_ACCESS_STATUS =
     new ForcedChoiceOption("scaladoc.access.level", AccessLevelChoices.PACKAGE, accessLevelChoices);
   
   /** Possible options for Scaladoc system class documentation links. */
   static final String SCALADOC_NONE_TEXT = "none";
-  static final String SCALADOC_1_3_TEXT = "1.3";
-  static final String SCALADOC_1_4_TEXT = "1.4";
-  static final String SCALADOC_1_5_TEXT = "1.5";
-  static final String SCALADOC_1_6_TEXT = "1.6";
-  static final String SCALADOC_1_7_TEXT = "1.7";
-  static final String SCALADOC_AUTO_TEXT = "use compiler version"; // for "Open Java API Scaladoc"
+  static final String JAVADOC_1_8_TEXT = "1.8";
+  static final String SCALADOC_AUTO_TEXT = "2.12.0-M2"; // for "Open Java API Scaladoc"
   
-  static final String[] linkChoices = new String[]{
-    SCALADOC_NONE_TEXT, SCALADOC_1_5_TEXT, SCALADOC_1_6_TEXT, SCALADOC_1_7_TEXT };
+  static final String[] linkChoices = new String[]{ JAVADOC_1_8_TEXT };
   static final ArrayList<String> linkVersionChoices = new ArrayList<String>(Arrays.asList(linkChoices));
 
-  static final String[] linkDeprecated = new String[]{
-    SCALADOC_1_3_TEXT, SCALADOC_1_4_TEXT };
+  static final String[] linkDeprecated = new String[]{"1.6", "1.7"};
   static final ArrayList<String> linkVersionDeprecated = new ArrayList<String>(Arrays.asList(linkDeprecated));  
   
   /** Constants for the URLs of Sun's system class documentation for different versions of Java. */
-  public static final StringOption SCALADOC_1_3_LINK =
-    new StringOption("scaladoc.1.3.link", "http://download.oracle.com/javase/1.3/docs/api");
-  public static final StringOption SCALADOC_1_4_LINK =
-    new StringOption("scaladoc.1.4.link", "http://download.oracle.com/javase/1.4.2/docs/api");
-  public static final StringOption SCALADOC_1_5_LINK =
-    new StringOption("scaladoc.1.5.link", "http://download.oracle.com/javase/1.5.0/docs/api");
-  public static final StringOption SCALADOC_1_6_LINK =
-    new StringOption("scaladoc.1.6.link", "http://download.oracle.com/javase/6/docs/api");
-  public static final StringOption SCALADOC_1_7_LINK =
-    new StringOption("scaladoc.1.7.link", "http://download.oracle.com/javase/7/docs/api/");
   
-  /** The version of Java to use for links to Scaladoc for system classes. */
-  public static final ForcedChoiceOption SCALADOC_LINK_VERSION =
-    new ForcedChoiceOption("scaladoc.link.version",
-                           (System.getProperty("java.specification.version").startsWith("1.5") ? SCALADOC_1_5_TEXT : 
-                              (System.getProperty("java.specification.version").startsWith("1.6") ? SCALADOC_1_6_TEXT : 
-                                 SCALADOC_1_7_TEXT)),
-                           linkVersionChoices, linkVersionDeprecated);
+  public static final StringOption SCALADOC_2_12_LINK = 
+    new StringOption("scaladoc.2.12.link", "http://www.scala-lang.org/api/2.12.0-M2/");
+  
+  public static final StringOption JAVADOC_1_8_LINK = 
+    new StringOption("javadoc.1.8.link", "http://download.oracle.com/javase/8/docs/api/");
+
+//  /** The version of Java to use for links to Scaladoc for system classes. */
+//  public static final ForcedChoiceOption SCALADOC_LINK_VERSION =
+//    new ForcedChoiceOption("scaladoc.link.version", DrScala.getConfig().getSetting(SCALADOC_2_12_LINK),
+//                           linkVersionChoices, linkVersionDeprecated);
   
   static final String[] apiScaladocChoices = new String[] {
-    SCALADOC_1_5_TEXT, SCALADOC_1_6_TEXT, SCALADOC_1_7_TEXT, SCALADOC_AUTO_TEXT};
+    JAVADOC_1_8_TEXT, SCALADOC_AUTO_TEXT};
   static final ArrayList<String> apiScaladocVersionChoices = new ArrayList<String>(Arrays.asList(apiScaladocChoices));
 
-  static final String[] apiScaladocDeprecated = new String[] {
-    SCALADOC_1_3_TEXT, SCALADOC_1_4_TEXT}; // deprecated, will be changed to SCALADOC_AUTO_TEXT
+  static final String[] apiScaladocDeprecated = new String[] { }; // deprecated, will be changed to SCALADOC_AUTO_TEXT
   static final ArrayList<String> apiScaladocVersionDeprecated = new ArrayList<String>(Arrays.asList(apiScaladocDeprecated));  
   
   /** The version of Java to use for the "Open Java API Scaladoc" feature. */
   public static final ForcedChoiceOption SCALADOC_API_REF_VERSION =
-    new ForcedChoiceOption("scaladoc.api.ref.version", SCALADOC_AUTO_TEXT,
-                           apiScaladocVersionChoices, apiScaladocVersionDeprecated);
+    new ForcedChoiceOption("scaladoc.api.ref.version", SCALADOC_AUTO_TEXT, apiScaladocVersionChoices, 
+                           apiScaladocVersionDeprecated);
   
   /** URL for JUnit scaladocs. */
   public static final StringOption JUNIT_LINK =
-    new StringOption("junit.link", "http://www.cs.rice.edu/~javaplt/scaladoc/concjunit4.7");
+    new StringOption("junit.link", "http://www.cs.rice.edu/~javaplt/javadoc/concjunit4.7");
   
   /** Additional Scaladoc URLs. */
   public static final VectorOption<String> SCALADOC_ADDITIONAL_LINKS =
@@ -1487,25 +1443,22 @@ public interface OptionConstants {
       if (! _list.contains(NO_PREFERENCE)) _list.add(NO_PREFERENCE);
       
       ForcedChoiceOption fco;
-      String defaultC = edu.rice.cs.drjava.DrJava.getConfig().getSetting(DEFAULT_COMPILER_PREFERENCE);
+      String defaultC = edu.rice.cs.drjava.DrScala.getConfig().getSetting(DEFAULT_COMPILER_PREFERENCE);
  
       if (_list.contains(defaultC))  {
         fco = new ForcedChoiceOption("compiler.preference.control", defaultC, _list);
       }
       else {
         fco = new ForcedChoiceOption("compiler.preference.control", NO_PREFERENCE, _list);
-        edu.rice.cs.drjava.DrJava.getConfig().setSetting(DEFAULT_COMPILER_PREFERENCE,NO_PREFERENCE);
+        edu.rice.cs.drjava.DrScala.getConfig().setSetting(DEFAULT_COMPILER_PREFERENCE,NO_PREFERENCE);
       }
       
-      edu.rice.cs.drjava.DrJava.getConfig().setSetting(fco, edu.rice.cs.drjava.DrJava.getConfig().getSetting(DEFAULT_COMPILER_PREFERENCE));
+      edu.rice.cs.drjava.DrScala.getConfig().setSetting(fco, edu.rice.cs.drjava.DrScala.getConfig().getSetting(DEFAULT_COMPILER_PREFERENCE));
       return fco;
     }
   }
   
-  /* ---------- UNDISPLAYED OPTIONS ---------- */
-  
-  /** The language level to use when starting DrJava.  Stores the most recently used one.  Defaults to Scala. */
-  public static final IntegerOption LANGUAGE_LEVEL = new IntegerOption("language.level", Integer.valueOf(0));
+  /* ---------- UNDISPLAYED OPTIONS ---------- *
   
   /** A vector containing the most recently used files. */
   public static final VectorOption<File> RECENT_FILES =

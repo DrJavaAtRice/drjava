@@ -36,8 +36,8 @@
 
 package edu.rice.cs.drjava.model.repl;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScala;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.GlobalModelTestCase.OverwriteException;
@@ -52,14 +52,14 @@ import java.io.IOException;
 /** Tests the functionality of the repl History.
  *  @version $Id: HistoryTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public final class HistoryTest extends DrJavaTestCase implements OptionConstants{
+public final class HistoryTest extends DrScalaTestCase implements OptionConstants{
   private History _history;
   private File _tempDir;
 
   /** Initialize fields for each test. */
   public void setUp() throws Exception {
     super.setUp();
-    DrJava.getConfig().resetToDefaults();
+    DrScala.getConfig().resetToDefaults();
     String user = System.getProperty("user.name");
     _tempDir = IOUtil.createAndMarkTempDirectory("DrJava-test-" + user, "");
     _history = new History();
@@ -112,7 +112,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
   public void testHistoryIsBounded() {
     final int maxLength = 500;
     Utilities.invokeAndWait(new Runnable() { 
-      public void run() { DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, Integer.valueOf(maxLength)); }
+      public void run() { DrScala.getConfig().setSetting(HISTORY_MAX_SIZE, Integer.valueOf(maxLength)); }
     });
 //    Utilities.clearEventQueue();
     
@@ -132,7 +132,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
    */
   public void testLiveUpdateOfHistoryMaxSize() {
     final int maxLength = 20;
-    final FileConfiguration config = DrJava.getConfig();
+    final FileConfiguration config = DrScala.getConfig();
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { config.setSetting(HISTORY_MAX_SIZE, Integer.valueOf(20)); }
     });
@@ -167,7 +167,7 @@ public final class HistoryTest extends DrJavaTestCase implements OptionConstants
 
   /** Tests the getHistoryAsString() method. */
   public void testGetHistoryAsString() {
-    final FileConfiguration config = DrJava.getConfig();
+    final FileConfiguration config = DrScala.getConfig();
     
     Utilities.invokeAndWait(new Runnable() { public void run() { config.setSetting(HISTORY_MAX_SIZE, 10); } });
 //    Utilities.clearEventQueue();

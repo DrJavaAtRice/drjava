@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.ui;
 import java.awt.*;
 import javax.swing.*;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 /**
@@ -106,14 +106,14 @@ public class LineEnumRule extends JComponent {
     Rectangle drawHere = g.getClipBounds();
 
     // Set a white background
-    Color backg = DrJava.getConfig().getSetting
+    Color backg = DrScala.getConfig().getSetting
       (OptionConstants.DEFINITIONS_LINE_NUMBER_BACKGROUND_COLOR);
     g.setColor(backg);
     g.fillRect(drawHere.x, drawHere.y, drawHere.width, drawHere.height);
 
     // Do the ruler labels in a small font that's black.
     g.setFont(_newFont);
-    Color foreg = DrJava.getConfig().getSetting
+    Color foreg = DrScala.getConfig().getSetting
       (OptionConstants.DEFINITIONS_LINE_NUMBER_COLOR);
     g.setColor(foreg);
 
@@ -155,7 +155,7 @@ public class LineEnumRule extends JComponent {
    * @return a valid font for displaying line numbers
    */
   private Font _getLineNumFont() {
-    Font lnf = DrJava.getConfig().getSetting(OptionConstants.FONT_LINE_NUMBERS);
+    Font lnf = DrScala.getConfig().getSetting(OptionConstants.FONT_LINE_NUMBERS);
     FontMetrics mets = getFontMetrics(lnf);
     Font mainFont = _pane.getFont();
 

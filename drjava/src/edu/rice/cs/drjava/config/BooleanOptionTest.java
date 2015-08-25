@@ -36,14 +36,14 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 /**
  * Class according to the JUnit protocol. Tests
  * the proper functionality of the class BooleanOption.
  * @version $Id: BooleanOptionTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public final class BooleanOptionTest extends DrJavaTestCase
+public final class BooleanOptionTest extends DrScalaTestCase
 {
   /** @param name The name of this test case.
    */

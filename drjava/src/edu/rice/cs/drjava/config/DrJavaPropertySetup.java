@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.XMLConfig;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.plt.lambda.Thunk;
 import edu.rice.cs.plt.lambda.Lambda;
@@ -71,13 +71,13 @@ public class DrJavaPropertySetup implements OptionConstants {
     EagerProperty prop1 = new EagerProperty("config.master.jvm.args.combined", msg1) {
       public void update(PropertyMaps pm) {
         StringBuilder sb = new StringBuilder();
-        if (!DrJava.getConfig().getSetting(MASTER_JVM_XMX).equals("default") &&
-            !DrJava.getConfig().getSetting(MASTER_JVM_XMX).equals("")) {
+        if (!DrScala.getConfig().getSetting(MASTER_JVM_XMX).equals("default") &&
+            !DrScala.getConfig().getSetting(MASTER_JVM_XMX).equals("")) {
           sb.append("-Xmx");
-          sb.append(DrJava.getConfig().getSetting(MASTER_JVM_XMX));
+          sb.append(DrScala.getConfig().getSetting(MASTER_JVM_XMX));
           sb.append("M ");
         }
-        sb.append(DrJava.getConfig().getSetting(MASTER_JVM_ARGS));
+        sb.append(DrScala.getConfig().getSetting(MASTER_JVM_ARGS));
         _value = sb.toString().trim();
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
@@ -98,13 +98,13 @@ public class DrJavaPropertySetup implements OptionConstants {
     EagerProperty prop2 = new EagerProperty("config.slave.jvm.args.combined", msg2) {
       public void update(PropertyMaps pm) {
         StringBuilder sb = new StringBuilder();
-        if (!DrJava.getConfig().getSetting(SLAVE_JVM_XMX).equals("default") &&
-            !DrJava.getConfig().getSetting(SLAVE_JVM_XMX).equals("")) {
+        if (!DrScala.getConfig().getSetting(SLAVE_JVM_XMX).equals("default") &&
+            !DrScala.getConfig().getSetting(SLAVE_JVM_XMX).equals("")) {
           sb.append("-Xmx");
-          sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
+          sb.append(DrScala.getConfig().getSetting(SLAVE_JVM_XMX));
           sb.append("M ");
         }
-        sb.append(DrJava.getConfig().getSetting(SLAVE_JVM_ARGS));
+        sb.append(DrScala.getConfig().getSetting(SLAVE_JVM_ARGS));
         _value = sb.toString().trim();
       }
       public String getLazy(PropertyMaps pm) { return getCurrent(pm); }
@@ -1405,7 +1405,7 @@ public class DrJavaPropertySetup implements OptionConstants {
         if (!f.exists()) { continue; }
         if (f.isDirectory()) {
           // this is a directory, maybe DrJava is contained here as individual files
-          File cf = new File(f, edu.rice.cs.drjava.DrJava.class.getName().replace('.', File.separatorChar) + ".class");
+          File cf = new File(f, edu.rice.cs.drjava.DrScala.class.getName().replace('.', File.separatorChar) + ".class");
           if (cf.exists() && cf.isFile()) {
             found = f;
             break;
@@ -1417,7 +1417,7 @@ public class DrJavaPropertySetup implements OptionConstants {
           // if it's not a jar file, an exception will already have been thrown
           // so we know it is a jar file
           // now let's check if it contains DrJava
-          if (jf.getJarEntry(edu.rice.cs.drjava.DrJava.class.getName().replace('.', '/') + ".class") != null) {
+          if (jf.getJarEntry(edu.rice.cs.drjava.DrScala.class.getName().replace('.', '/') + ".class") != null) {
             found = f;
             break;
           }

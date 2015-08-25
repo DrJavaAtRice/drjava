@@ -37,9 +37,12 @@
 package edu.rice.cs.drjava.config;
 import edu.rice.cs.util.UnexpectedException;
 
+import edu.rice.cs.util.swing.Utilities;
+
 import java.util.Properties;
 import java.io.*;
 import java.lang.reflect.*;
+
 public class OptionMapLoader implements OptionConstants {
   
   /** bag of default options (programmatically defined, instead of in an options file) */
@@ -48,7 +51,8 @@ public class OptionMapLoader implements OptionConstants {
   private static volatile Field[] fields = OptionConstants.class.getDeclaredFields();
   
   static {
-    // initialize DEFAULTS objects, based on OptionConstants using reflection.
+    // initialize DEFAULT_STRINGS and DEFAULTS, based on values of static fields in OptionConstants using reflection.
+    /* This programming practice is really ugly; it depends on OptionConstants being initialized first! */
     for (int i = 0; i < fields.length; i++) {
       Field field = fields[i];
       int mods = field.getModifiers();
@@ -57,7 +61,7 @@ public class OptionMapLoader implements OptionConstants {
         Option<?> option;
         try {
           Object o = field.get(null); // we should be able to pass in null as the 'receiver', since it's static.
-          //System.out.println("field name: " + field.getName() + "  o: " + o);
+//          System.out.println("field name: " + field.getName() + "  o: " + o);
           if (o == null || !(o instanceof Option<?>)) {
             continue; // Development options can be null in the stable version of the code
           }
@@ -69,8 +73,11 @@ public class OptionMapLoader implements OptionConstants {
           throw new UnexpectedException(e);
         }
         
-        String sval = option.getDefaultString();
-        DEFAULT_STRINGS.setProperty(option.name, sval);
+        final String sval = option.getDefaultString();
+        final String name = option.name;
+        if (name == null) throw new UnexpectedException("Option " + option + " has null name");
+//        System.err.println("name = " + name + "; sval = " + sval);
+        DEFAULT_STRINGS.setProperty(name, sval);
         DEFAULTS.setString(option, sval);
       }
     }

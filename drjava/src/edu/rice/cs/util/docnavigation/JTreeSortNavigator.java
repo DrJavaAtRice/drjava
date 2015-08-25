@@ -50,7 +50,7 @@ import edu.rice.cs.util.swing.*;
 import edu.rice.cs.plt.collect.OneToOneRelation;
 import edu.rice.cs.plt.collect.IndexedOneToOneRelation;
 
-import edu.rice.cs.drjava.DrJavaRoot;
+import edu.rice.cs.drjava.DrScalaRoot;
 
 public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree 
   implements IDocumentNavigator<ItemT>, TreeSelectionListener, TreeExpansionListener,
@@ -975,7 +975,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   
   /** User dragged something into the component. */
   public void dragEnter(DropTargetDragEvent dropTargetDragEvent) {
-    DrJavaRoot.dragEnter(dropTargetDragEvent);
+    DrScalaRoot.dragEnter(dropTargetDragEvent);
   }
   
   public void dragExit(DropTargetEvent dropTargetEvent) { }
@@ -984,7 +984,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   
   /** User dropped something on the component.  Only runs in event thread. */
   public /* synchronized */ void drop(DropTargetDropEvent dropTargetDropEvent) {
-    DrJavaRoot.drop(dropTargetDropEvent);
+    DrScalaRoot.drop(dropTargetDropEvent);
   }
 }
 

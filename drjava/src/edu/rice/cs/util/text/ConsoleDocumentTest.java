@@ -39,13 +39,13 @@ package edu.rice.cs.util.text;
 import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Tests ConsoleDocument.
   * @version $Id: ConsoleDocumentTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public class ConsoleDocumentTest extends DrJavaTestCase {
+public class ConsoleDocumentTest extends DrScalaTestCase {
   protected ConsoleDocument _doc;
   
   public void setUp() throws Exception {

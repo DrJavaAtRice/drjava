@@ -45,7 +45,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.junit.JUnitError;
@@ -599,27 +599,27 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     boolean repeat;
     do {
       repeat = false;
-      File junitLocation = DrJava.getConfig().getSetting(JUNIT_LOCATION);
+      File junitLocation = DrScala.getConfig().getSetting(JUNIT_LOCATION);
       boolean javaVersion7 = JavaVersion.CURRENT.supports(JavaVersion.JAVA_7);
       // ConcJUnit is available if (a) the built-in framework is used, or (b) the external
       // framework is a valid ConcJUnit jar file, AND the compiler is not Java 7 or newer.
       boolean concJUnitAvailable =
         !javaVersion7 &&
-        (!DrJava.getConfig().getSetting(JUNIT_LOCATION_ENABLED) ||
+        (!DrScala.getConfig().getSetting(JUNIT_LOCATION_ENABLED) ||
         edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(junitLocation));
       
-      File rtLocation = DrJava.getConfig().getSetting(RT_CONCJUNIT_LOCATION);
+      File rtLocation = DrScala.getConfig().getSetting(RT_CONCJUNIT_LOCATION);
       boolean rtLocationConfigured =
         edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidRTConcJUnitFile(rtLocation);
       
-      if (DrJava.getConfig().getSetting(CONCJUNIT_CHECKS_ENABLED).
+      if (DrScala.getConfig().getSetting(CONCJUNIT_CHECKS_ENABLED).
             equals(ConcJUnitCheckChoices.ALL) && // "lucky" enabled
           !rtLocationConfigured && // not valid
           (rtLocation != null) && // not null
           (!FileOps.NULL_FILE.equals(rtLocation)) && // not NULL_FILE
           (rtLocation.exists())) { // but exists
         // invalid file, clear setting
-        DrJava.getConfig().setSetting(CONCJUNIT_CHECKS_ENABLED,
+        DrScala.getConfig().setSetting(CONCJUNIT_CHECKS_ENABLED,
                                       ConcJUnitCheckChoices.NO_LUCKY);
         rtLocationConfigured = false;
         javax.swing.JOptionPane.showMessageDialog(null,
@@ -629,7 +629,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       }
       if (concJUnitAvailable && // ConcJUnit available
           rtLocationConfigured && // runtime configured
-          DrJava.getConfig().getSetting(CONCJUNIT_CHECKS_ENABLED).
+          DrScala.getConfig().getSetting(CONCJUNIT_CHECKS_ENABLED).
             equals(ConcJUnitCheckChoices.ALL)) { // and "lucky" enabled
         try {
           // NOTE: this is a work-around
@@ -658,7 +658,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
         }
         catch(IOException ioe) {
           // we couldn't get the short file name (on Windows), disable "lucky" warnings
-          DrJava.getConfig().setSetting(CONCJUNIT_CHECKS_ENABLED,
+          DrScala.getConfig().setSetting(CONCJUNIT_CHECKS_ENABLED,
                                         ConcJUnitCheckChoices.NO_LUCKY);
           rtLocationConfigured = false;
           javax.swing.JOptionPane.showMessageDialog(null,
@@ -679,11 +679,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       jvmArgs.add("-Xnoagent");
       jvmArgs.add("-Djava.compiler=NONE");
     }
-    String slaveMemory = DrJava.getConfig().getSetting(SLAVE_JVM_XMX);
+    String slaveMemory = DrScala.getConfig().getSetting(SLAVE_JVM_XMX);
     if (!"".equals(slaveMemory) && !heapSizeChoices.get(0).equals(slaveMemory)) {
       jvmArgs.add("-Xmx" + slaveMemory + "M");
     }
-    String slaveArgs = DrJava.getConfig().getSetting(SLAVE_JVM_ARGS);
+    String slaveArgs = DrScala.getConfig().getSetting(SLAVE_JVM_ARGS);
     if (PlatformFactory.ONLY.isMacPlatform()) {
       jvmArgs.add("-Xdock:name=Interactions");
     }
@@ -707,21 +707,21 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     JVMBuilder jvmb = new JVMBuilder(_startupClassPath).directory(dir).jvmArguments(jvmArgs);
     
     // extend classpath if JUnit/ConcJUnit location specified
-    File junitLocation = DrJava.getConfig().getSetting(JUNIT_LOCATION);
+    File junitLocation = DrScala.getConfig().getSetting(JUNIT_LOCATION);
     boolean junitLocationConfigured =
       (edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidJUnitFile(junitLocation) ||
        edu.rice.cs.drjava.model.junit.ConcJUnitUtils.isValidConcJUnitFile(junitLocation));
-    if (DrJava.getConfig().getSetting(JUNIT_LOCATION_ENABLED) && // enabled
+    if (DrScala.getConfig().getSetting(JUNIT_LOCATION_ENABLED) && // enabled
         !junitLocationConfigured && // not valid 
         (junitLocation != null) && // not null
         (!FileOps.NULL_FILE.equals(junitLocation)) && // not NULL_FILE
         (junitLocation.exists())) { // but exists
       // invalid file, clear setting
-      DrJava.getConfig().setSetting(JUNIT_LOCATION_ENABLED, false);
+      DrScala.getConfig().setSetting(JUNIT_LOCATION_ENABLED, false);
       junitLocationConfigured = false;
     }
     ArrayList<File> extendedClassPath = new ArrayList<File>();
-    if (DrJava.getConfig().getSetting(JUNIT_LOCATION_ENABLED) &&
+    if (DrScala.getConfig().getSetting(JUNIT_LOCATION_ENABLED) &&
         junitLocationConfigured) {
       extendedClassPath.add(junitLocation);
     }
@@ -732,13 +732,13 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     Map<String, String> props = jvmb.propertiesCopy();
     
     // settings are mutually exclusive
-    boolean all = DrJava.getConfig().getSetting(CONCJUNIT_CHECKS_ENABLED).
+    boolean all = DrScala.getConfig().getSetting(CONCJUNIT_CHECKS_ENABLED).
       equals(ConcJUnitCheckChoices.ALL);
-    boolean noLucky = DrJava.getConfig().getSetting(CONCJUNIT_CHECKS_ENABLED).
+    boolean noLucky = DrScala.getConfig().getSetting(CONCJUNIT_CHECKS_ENABLED).
       equals(ConcJUnitCheckChoices.NO_LUCKY);
-    boolean onlyThreads = DrJava.getConfig().getSetting(CONCJUNIT_CHECKS_ENABLED).
+    boolean onlyThreads = DrScala.getConfig().getSetting(CONCJUNIT_CHECKS_ENABLED).
       equals(ConcJUnitCheckChoices.ONLY_THREADS);
-    boolean none = DrJava.getConfig().getSetting(CONCJUNIT_CHECKS_ENABLED).
+    boolean none = DrScala.getConfig().getSetting(CONCJUNIT_CHECKS_ENABLED).
       equals(ConcJUnitCheckChoices.NONE);
     // "threads" is enabled as long as the setting isn't NONE
     props.put("edu.rice.cs.cunit.concJUnit.check.threads.enabled",

@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model.cache;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.plt.io.IOUtil;
@@ -50,7 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /** This used to extend GlobalModelTestCase, but now it extends just TestCase.  Perhaps it should be changed back. */
-public class DocumentCacheTest extends DrJavaTestCase {
+public class DocumentCacheTest extends DrScalaTestCase {
   
   private DefaultGlobalModel _model;
   private DocumentCache _cache;

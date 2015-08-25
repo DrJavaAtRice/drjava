@@ -40,7 +40,7 @@ package edu.rice.cs.drjava.ui;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
@@ -55,7 +55,7 @@ import java.util.Date;
 /** Test functions of InteractionsPane.
   * @version $Id: InteractionsPaneTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public final class InteractionsPaneTest extends DrJavaTestCase {
+public final class InteractionsPaneTest extends DrScalaTestCase {
   
   private static final char UNDEFINED = KeyEvent.CHAR_UNDEFINED;
   private static final int PRESSED = KeyEvent.KEY_PRESSED;

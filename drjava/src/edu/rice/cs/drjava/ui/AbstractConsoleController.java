@@ -48,7 +48,7 @@ import java.util.Vector;
 
 import edu.rice.cs.util.text.ConsoleDocument;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
@@ -112,9 +112,9 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
     // System.out
     _systemOutStyle.addAttributes(_defaultStyle);
     _systemOutStyle.addAttribute(StyleConstants.Foreground,
-                                 DrJava.getConfig().getSetting(OptionConstants.SYSTEM_OUT_COLOR));
+                                 DrScala.getConfig().getSetting(OptionConstants.SYSTEM_OUT_COLOR));
     _interactionsDJDocument.setDocStyle(ConsoleDocument.SYSTEM_OUT_STYLE, _systemOutStyle);
-    DrJava.getConfig().addOptionListener(OptionConstants.SYSTEM_OUT_COLOR,
+    DrScala.getConfig().addOptionListener(OptionConstants.SYSTEM_OUT_COLOR,
                                          new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oe) {
         _systemOutStyle.addAttribute(StyleConstants.Foreground, oe.value);
@@ -124,9 +124,9 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
     // System.err
     _systemErrStyle.addAttributes(_defaultStyle);
     _systemErrStyle.addAttribute(StyleConstants.Foreground,
-                                 DrJava.getConfig().getSetting(OptionConstants.SYSTEM_ERR_COLOR));
+                                 DrScala.getConfig().getSetting(OptionConstants.SYSTEM_ERR_COLOR));
     _interactionsDJDocument.setDocStyle(ConsoleDocument.SYSTEM_ERR_STYLE, _systemErrStyle);
-    DrJava.getConfig().addOptionListener(OptionConstants.SYSTEM_ERR_COLOR,
+    DrScala.getConfig().addOptionListener(OptionConstants.SYSTEM_ERR_COLOR,
                                          new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oe) {
         _systemErrStyle.addAttribute(StyleConstants.Foreground, oe.value);
@@ -139,42 +139,42 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
   
   /** Sets up the view. */
   protected void _setupView() {
-    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_BEGIN_LINE), gotoPromptPosAction);
-    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_BEGIN_LINE_SELECT), selectToPromptPosAction);
-    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_END_LINE), gotoEndAction);
-    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_END_LINE_SELECT), selectToEndAction);
+    _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_BEGIN_LINE), gotoPromptPosAction);
+    _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_BEGIN_LINE_SELECT), selectToPromptPosAction);
+    _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_END_LINE), gotoEndAction);
+    _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_END_LINE_SELECT), selectToEndAction);
 
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_BEGIN_LINE, new OptionListener<Vector<KeyStroke>>() {
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_BEGIN_LINE, new OptionListener<Vector<KeyStroke>>() {
       public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(oe.value, gotoPromptPosAction);
       }
     });
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_BEGIN_LINE_SELECT, new OptionListener<Vector<KeyStroke>>() {
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_BEGIN_LINE_SELECT, new OptionListener<Vector<KeyStroke>>() {
       public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(oe.value, selectToPromptPosAction);
      }
     });
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_END_LINE, new OptionListener<Vector<KeyStroke>>() {
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_END_LINE, new OptionListener<Vector<KeyStroke>>() {
       public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(oe.value, gotoEndAction);
      }
     });
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_END_LINE_SELECT, new OptionListener<Vector<KeyStroke>>() {
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_END_LINE_SELECT, new OptionListener<Vector<KeyStroke>>() {
       public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
         _pane.addActionForKeyStroke(oe.value, selectToEndAction);
      }
     });
     
-    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
-    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_CUT, new OptionListener<Vector<KeyStroke>>() {
+    _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
+    _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_CUT, new OptionListener<Vector<KeyStroke>>() {
       public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
-        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
+        _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_CUT), cutAction);
      }
     });
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_COPY, new OptionListener<Vector<KeyStroke>>() {
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_COPY, new OptionListener<Vector<KeyStroke>>() {
       public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
-        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
+        _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_COPY), copyAction);
      }
     });
   }
@@ -279,11 +279,11 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
     switchToPrevPaneAction = a;
 
     // We do this here since switchToPrevPaneAction is set after the constructor is called.
-    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_PANE),
+    _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_PANE),
                                 switchToPrevPaneAction);
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_PANE, new OptionListener<Vector<KeyStroke>>() {
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_PANE, new OptionListener<Vector<KeyStroke>>() {
       public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
-        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_PANE), switchToPrevPaneAction);
+        _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_PANE), switchToPrevPaneAction);
       }
     });
   }
@@ -293,11 +293,11 @@ public abstract class AbstractConsoleController /* implements Serializable */ {
 
     // We do this here since switchToNextPaneAction is set after the
     // constructor is called.
-    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_PANE),
+    _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_NEXT_PANE),
                                 switchToNextPaneAction);
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_NEXT_PANE, new OptionListener<Vector<KeyStroke>>() {
+    DrScala.getConfig().addOptionListener(OptionConstants.KEY_NEXT_PANE, new OptionListener<Vector<KeyStroke>>() {
       public void optionChanged(OptionEvent<Vector<KeyStroke>> oe) {
-        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_PANE), switchToNextPaneAction);
+        _pane.addActionForKeyStroke(DrScala.getConfig().getSetting(OptionConstants.KEY_NEXT_PANE), switchToNextPaneAction);
       }
     });
   }

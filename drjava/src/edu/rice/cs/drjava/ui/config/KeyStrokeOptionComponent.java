@@ -65,7 +65,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke,JPanel>
   public KeyStrokeOptionComponent(KeyStrokeOption opt, String text, final SwingFrame parent) {
     super(opt, text, parent);
 
-    _key = DrJava.getConfig().getSetting(opt);
+    _key = DrScala.getConfig().getSetting(opt);
 
     _button = new JButton();
     _button.addActionListener(new ActionListener() {
@@ -116,7 +116,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke,JPanel>
    */
   public boolean updateConfig() {
     if (!_key.equals(getConfigKeyStroke())) {
-      DrJava.getConfig().setSetting(_option, _key);
+      DrScala.getConfig().setSetting(_option, _key);
       setValue(_key);
     }
     return true;
@@ -145,7 +145,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke,JPanel>
   /** Returns the KeyStroke current set in the Config settings.
    */
   public KeyStroke getConfigKeyStroke() {
-    return DrJava.getConfig().getSetting(_option);
+    return DrScala.getConfig().getSetting(_option);
   }
 
   /** A dialog that allows the user to type in a keystroke to be bound

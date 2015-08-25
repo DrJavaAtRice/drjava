@@ -41,7 +41,7 @@ import java.awt.*;
 // TODO: Check synchronization.
 import java.util.ArrayList;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -54,22 +54,22 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements OptionConstants {
   
-  public static Color COMMENTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_COMMENT_COLOR);
-  public static Color DOUBLE_QUOTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_DOUBLE_QUOTED_COLOR);
-  public static Color SINGLE_QUOTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_SINGLE_QUOTED_COLOR);
-  public static Color NORMAL_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR);
-  public static Color KEYWORD_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_KEYWORD_COLOR);
-  public static Color NUMBER_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_NUMBER_COLOR);
-  public static Color TYPE_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_TYPE_COLOR);
-  public static Font MAIN_FONT = DrJava.getConfig().getSetting(FONT_MAIN);
+  public static Color COMMENTED_COLOR = DrScala.getConfig().getSetting(DEFINITIONS_COMMENT_COLOR);
+  public static Color DOUBLE_QUOTED_COLOR = DrScala.getConfig().getSetting(DEFINITIONS_DOUBLE_QUOTED_COLOR);
+  public static Color SINGLE_QUOTED_COLOR = DrScala.getConfig().getSetting(DEFINITIONS_SINGLE_QUOTED_COLOR);
+  public static Color NORMAL_COLOR = DrScala.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR);
+  public static Color KEYWORD_COLOR = DrScala.getConfig().getSetting(DEFINITIONS_KEYWORD_COLOR);
+  public static Color NUMBER_COLOR = DrScala.getConfig().getSetting(DEFINITIONS_NUMBER_COLOR);
+  public static Color TYPE_COLOR = DrScala.getConfig().getSetting(DEFINITIONS_TYPE_COLOR);
+  public static Font MAIN_FONT = DrScala.getConfig().getSetting(FONT_MAIN);
   
   //Interactions only colors
-  public static Color INTERACTIONS_SYSTEM_ERR_COLOR = DrJava.getConfig().getSetting(SYSTEM_ERR_COLOR);
-  public static Color INTERACTIONS_SYSTEM_IN_COLOR = DrJava.getConfig().getSetting(SYSTEM_IN_COLOR);
-  public static Color INTERACTIONS_SYSTEM_OUT_COLOR = DrJava.getConfig().getSetting(SYSTEM_OUT_COLOR);
+  public static Color INTERACTIONS_SYSTEM_ERR_COLOR = DrScala.getConfig().getSetting(SYSTEM_ERR_COLOR);
+  public static Color INTERACTIONS_SYSTEM_IN_COLOR = DrScala.getConfig().getSetting(SYSTEM_IN_COLOR);
+  public static Color INTERACTIONS_SYSTEM_OUT_COLOR = DrScala.getConfig().getSetting(SYSTEM_OUT_COLOR);
   //Renamed as to avoid confusion with the one in option constants
-  public static Color ERROR_COLOR = DrJava.getConfig().getSetting(INTERACTIONS_ERROR_COLOR);
-  public static Color DEBUGGER_COLOR = DrJava.getConfig().getSetting(DEBUG_MESSAGE_COLOR);
+  public static Color ERROR_COLOR = DrScala.getConfig().getSetting(INTERACTIONS_ERROR_COLOR);
+  public static Color DEBUGGER_COLOR = DrScala.getConfig().getSetting(DEBUG_MESSAGE_COLOR);
   
   private boolean _listenersAttached;
   private Runnable _lambdaRepaint;
@@ -336,20 +336,20 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
 
     // delete the old color listeners, because they're hanging onto the wrong coloringview
     // add color listeners to highlight keywords etc
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_COMMENT_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_NORMAL_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_KEYWORD_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_TYPE_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.FONT_MAIN, fol);
+    DrScala.getConfig().addOptionListener( OptionConstants.DEFINITIONS_COMMENT_COLOR, col);
+    DrScala.getConfig().addOptionListener( OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, col);
+    DrScala.getConfig().addOptionListener( OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, col);
+    DrScala.getConfig().addOptionListener( OptionConstants.DEFINITIONS_NORMAL_COLOR, col);
+    DrScala.getConfig().addOptionListener( OptionConstants.DEFINITIONS_KEYWORD_COLOR, col);
+    DrScala.getConfig().addOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
+    DrScala.getConfig().addOptionListener( OptionConstants.DEFINITIONS_TYPE_COLOR, col);
+    DrScala.getConfig().addOptionListener( OptionConstants.FONT_MAIN, fol);
     
-    DrJava.getConfig().addOptionListener( OptionConstants.SYSTEM_ERR_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.SYSTEM_IN_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.SYSTEM_OUT_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.INTERACTIONS_ERROR_COLOR, col);
-    DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_MESSAGE_COLOR, col);
+    DrScala.getConfig().addOptionListener( OptionConstants.SYSTEM_ERR_COLOR, col);
+    DrScala.getConfig().addOptionListener( OptionConstants.SYSTEM_IN_COLOR, col);
+    DrScala.getConfig().addOptionListener( OptionConstants.SYSTEM_OUT_COLOR, col);
+    DrScala.getConfig().addOptionListener( OptionConstants.INTERACTIONS_ERROR_COLOR, col);
+    DrScala.getConfig().addOptionListener( OptionConstants.DEBUG_MESSAGE_COLOR, col);
     
     // The listeners that were added in the above lines need to be removed from
     // the config framework when the document corresponding to this painter is
@@ -359,19 +359,19 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
       // remove the listeners when the document closes
       ((DefinitionsDocument)doc).addDocumentClosedListener(new DocumentClosedListener() {
         public void close() {
-          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_COMMENT_COLOR, col);
-          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, col);
-          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, col);
-          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_NORMAL_COLOR, col);
-          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_KEYWORD_COLOR, col);
-          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
-          DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_TYPE_COLOR, col);
-          DrJava.getConfig().removeOptionListener( OptionConstants.FONT_MAIN, fol);
-          DrJava.getConfig().removeOptionListener( OptionConstants.SYSTEM_ERR_COLOR, col);
-          DrJava.getConfig().removeOptionListener( OptionConstants.SYSTEM_IN_COLOR, col);
-          DrJava.getConfig().removeOptionListener( OptionConstants.SYSTEM_OUT_COLOR, col);
-          DrJava.getConfig().removeOptionListener( OptionConstants.INTERACTIONS_ERROR_COLOR, col);
-          DrJava.getConfig().removeOptionListener( OptionConstants.DEBUG_MESSAGE_COLOR, col); 
+          DrScala.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_COMMENT_COLOR, col);
+          DrScala.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, col);
+          DrScala.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, col);
+          DrScala.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_NORMAL_COLOR, col);
+          DrScala.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_KEYWORD_COLOR, col);
+          DrScala.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
+          DrScala.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_TYPE_COLOR, col);
+          DrScala.getConfig().removeOptionListener( OptionConstants.FONT_MAIN, fol);
+          DrScala.getConfig().removeOptionListener( OptionConstants.SYSTEM_ERR_COLOR, col);
+          DrScala.getConfig().removeOptionListener( OptionConstants.SYSTEM_IN_COLOR, col);
+          DrScala.getConfig().removeOptionListener( OptionConstants.SYSTEM_OUT_COLOR, col);
+          DrScala.getConfig().removeOptionListener( OptionConstants.INTERACTIONS_ERROR_COLOR, col);
+          DrScala.getConfig().removeOptionListener( OptionConstants.DEBUG_MESSAGE_COLOR, col); 
         }
       });
     }
@@ -381,19 +381,19 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
   /** Called when an OptionListener perceives a change in any of the colors */
   public void updateColors() {
     
-    COMMENTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_COMMENT_COLOR);
-    DOUBLE_QUOTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_DOUBLE_QUOTED_COLOR);
-    SINGLE_QUOTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_SINGLE_QUOTED_COLOR);
-    NORMAL_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR);
-    KEYWORD_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_KEYWORD_COLOR);
-    NUMBER_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_NUMBER_COLOR);
-    TYPE_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_TYPE_COLOR);
+    COMMENTED_COLOR = DrScala.getConfig().getSetting(DEFINITIONS_COMMENT_COLOR);
+    DOUBLE_QUOTED_COLOR = DrScala.getConfig().getSetting(DEFINITIONS_DOUBLE_QUOTED_COLOR);
+    SINGLE_QUOTED_COLOR = DrScala.getConfig().getSetting(DEFINITIONS_SINGLE_QUOTED_COLOR);
+    NORMAL_COLOR = DrScala.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR);
+    KEYWORD_COLOR = DrScala.getConfig().getSetting(DEFINITIONS_KEYWORD_COLOR);
+    NUMBER_COLOR = DrScala.getConfig().getSetting(DEFINITIONS_NUMBER_COLOR);
+    TYPE_COLOR = DrScala.getConfig().getSetting(DEFINITIONS_TYPE_COLOR);
     
-    INTERACTIONS_SYSTEM_ERR_COLOR = DrJava.getConfig().getSetting(SYSTEM_ERR_COLOR);
-    INTERACTIONS_SYSTEM_IN_COLOR = DrJava.getConfig().getSetting(SYSTEM_IN_COLOR);
-    INTERACTIONS_SYSTEM_OUT_COLOR = DrJava.getConfig().getSetting(SYSTEM_OUT_COLOR);
-    ERROR_COLOR = DrJava.getConfig().getSetting(INTERACTIONS_ERROR_COLOR);
-    DEBUGGER_COLOR = DrJava.getConfig().getSetting(DEBUG_MESSAGE_COLOR);
+    INTERACTIONS_SYSTEM_ERR_COLOR = DrScala.getConfig().getSetting(SYSTEM_ERR_COLOR);
+    INTERACTIONS_SYSTEM_IN_COLOR = DrScala.getConfig().getSetting(SYSTEM_IN_COLOR);
+    INTERACTIONS_SYSTEM_OUT_COLOR = DrScala.getConfig().getSetting(SYSTEM_OUT_COLOR);
+    ERROR_COLOR = DrScala.getConfig().getSetting(INTERACTIONS_ERROR_COLOR);
+    DEBUGGER_COLOR = DrScala.getConfig().getSetting(DEBUG_MESSAGE_COLOR);
     
     EventQueue.invokeLater(_lambdaRepaint);
   }
@@ -405,7 +405,7 @@ public class ColoringGlyphPainter extends GlyphView.GlyphPainter implements Opti
   
   private static class FontOptionListener implements OptionListener<Font> {
     public void optionChanged(OptionEvent<Font> oce) {
-      MAIN_FONT = DrJava.getConfig().getSetting(FONT_MAIN);
+      MAIN_FONT = DrScala.getConfig().getSetting(FONT_MAIN);
     }
   }
 

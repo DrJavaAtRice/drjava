@@ -212,13 +212,12 @@ public class ConfigDescriptions {
         "calls in watches. These may have side effects and can cause<br>" + "delays during the debug process.</html>");
     add(SCALADOC_API_REF_VERSION, "Java Version for \"Open Java API Scaladoc\"",
         "Version of the Java API documentation to be used.");
-    add(SCALADOC_ACCESS_LEVEL, "Access Level", "<html>Fields and methods with access modifiers at this level<br>" +
+    add(SCALADOC_ACCESS_STATUS, "Access Level", "<html>Fields and methods with access modifiers at this level<br>" +
         "or higher will be included in the generated Scaladoc.</html>");
-    add(SCALADOC_LINK_VERSION, "Java Version for Scaladoc Links", 
-        "Version of Java for generating links to online Scaladoc documentation.");
-    add(SCALADOC_1_5_LINK, "Scaladoc 1.5 URL", "URL for the Java 1.5 API, for generating links to library classes.");
-    add(SCALADOC_1_6_LINK, "Scaladoc 1.6 URL", "URL for the Java 1.6 API, for generating links to library classes.");
-    add(SCALADOC_1_7_LINK, "Scaladoc 1.7 URL", "URL for the Java 1.7 API, for generating links to library classes.");
+//    add(SCALADOC_LINK_VERSION, "Scala Version for Scaladoc Links", 
+//        "Version of Java for generating links to online Scaladoc documentation.");
+
+    add(JAVADOC_1_8_LINK, "Javadoc 1.8 URL", "URL for the Java 1.8 API, for generating links to library classes.");
     add(JUNIT_LINK, "JUnit URL", "URL for the JUnit API, for \"Open Java API Scaladoc\".");
     add(SCALADOC_ADDITIONAL_LINKS, "Additional Scaladoc URLs",
         "<html>Additional URLs with Scaladoc, for \"Open Java API Scaladoc\"<br>" + "and auto-completion.</html>");
@@ -452,7 +451,5 @@ public class ConfigDescriptions {
         "(Changes will not be applied until the Interactions Pane is reset.)</html>");
     add(FORCE_TEST_SUFFIX, "Require test classes in projects to end in \"Test\"",
         "Whether to force test classes in projects to end in \"Test\".");
-    /* Java language levels are disabled in DrScala, but LANGUAGE_LEVEL refers to Option indicating Scala. */
-    add(LANGUAGE_LEVEL, "Language Level", "The Java language level DrScala currently uses.");
   } 
 }

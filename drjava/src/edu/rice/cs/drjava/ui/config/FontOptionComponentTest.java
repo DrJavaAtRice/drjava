@@ -36,8 +36,8 @@
 
 package edu.rice.cs.drjava.ui.config;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScala;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.DefaultSwingFrame;
 import edu.rice.cs.util.swing.Utilities;
@@ -47,13 +47,13 @@ import java.awt.*;
 /**
  * Tests functionality of this OptionComponent
  */
-public final class FontOptionComponentTest extends DrJavaTestCase {
+public final class FontOptionComponentTest extends DrScalaTestCase {
   private static FontOptionComponent _option;
 
   protected void setUp() throws Exception {
     super.setUp();
     _option = new FontOptionComponent( OptionConstants.FONT_MAIN, "Main font", new DefaultSwingFrame());
-    DrJava.getConfig().resetToDefaults();
+    DrScala.getConfig().resetToDefaults();
     Utilities.clearEventQueue();
   }
 
@@ -69,7 +69,7 @@ public final class FontOptionComponentTest extends DrJavaTestCase {
     Utilities.clearEventQueue();
     assertEquals("Cancel (resetToCurrent) should not change the config",
                  OptionConstants.FONT_MAIN.getDefault(),
-                 DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN));
+                 DrScala.getConfig().getSetting(OptionConstants.FONT_MAIN));
 
   }
 
@@ -82,7 +82,7 @@ public final class FontOptionComponentTest extends DrJavaTestCase {
     Utilities.clearEventQueue();
     assertEquals("Apply (updateConfig) should write change to file",
                  testFont,
-                 DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN));
+                 DrScala.getConfig().getSetting(OptionConstants.FONT_MAIN));
   }
 
   public void testApplyThenResetDefault() {
@@ -99,7 +99,7 @@ public final class FontOptionComponentTest extends DrJavaTestCase {
 
     assertEquals("Apply (updateConfig) should write change to file",
                  OptionConstants.FONT_MAIN.getDefault(),
-                 DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN));
+                 DrScala.getConfig().getSetting(OptionConstants.FONT_MAIN));
   }
 
 }

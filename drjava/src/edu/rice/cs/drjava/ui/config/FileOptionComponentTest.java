@@ -36,8 +36,8 @@
 
 package edu.rice.cs.drjava.ui.config;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScala;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 import edu.rice.cs.util.FileOps;
@@ -48,7 +48,7 @@ import javax.swing.*;
 import java.io.File;
 
 /** Tests functionality of this OptionComponent. */
-public final class FileOptionComponentTest extends DrJavaTestCase {
+public final class FileOptionComponentTest extends DrScalaTestCase {
 
   private static FileOptionComponent _option;
 
@@ -59,7 +59,7 @@ public final class FileOptionComponentTest extends DrJavaTestCase {
     _option = 
       new FileOptionComponent(OptionConstants.JAVAC_LOCATION, "Javac Location", new DefaultSwingFrame(), new JFileChooser());
     Utilities.clearEventQueue();
-    DrJava.getConfig().resetToDefaults();
+    DrScala.getConfig().resetToDefaults();
     Utilities.clearEventQueue();
 //    System.err.println("setUp complete");
   }
@@ -76,7 +76,7 @@ public final class FileOptionComponentTest extends DrJavaTestCase {
     Utilities.clearEventQueue();
     assertEquals("Cancel (resetToCurrent) should not change the config",
                  OptionConstants.JAVAC_LOCATION.getDefault(),
-                 DrJava.getConfig().getSetting(OptionConstants.JAVAC_LOCATION));
+                 DrScala.getConfig().getSetting(OptionConstants.JAVAC_LOCATION));
 
   }
 
@@ -89,7 +89,7 @@ public final class FileOptionComponentTest extends DrJavaTestCase {
     Utilities.clearEventQueue();
     assertEquals("Apply (updateConfig) should write change to file",
                  testFile,
-                 DrJava.getConfig().getSetting(OptionConstants.JAVAC_LOCATION));
+                 DrScala.getConfig().getSetting(OptionConstants.JAVAC_LOCATION));
   }
   
   public void testApplyThenResetDefault() {
@@ -106,7 +106,7 @@ public final class FileOptionComponentTest extends DrJavaTestCase {
 
     assertEquals("Apply (updateConfig) should write change to file",
                  OptionConstants.JAVAC_LOCATION.getDefault(),
-                 DrJava.getConfig().getSetting(OptionConstants.JAVAC_LOCATION));
+                 DrScala.getConfig().getSetting(OptionConstants.JAVAC_LOCATION));
 //    fail("Force test to fail");
   }
   

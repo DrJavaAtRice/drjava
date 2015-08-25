@@ -72,13 +72,13 @@
 
 package edu.rice.cs.drjava.model.debug;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 /**
  * Tests that the DebugWatchData class can display state correctly.
  * @version $Id: DebugWatchDataTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public final class DebugWatchDataTest extends DrJavaTestCase {
+public final class DebugWatchDataTest extends DrScalaTestCase {
  
   /** Tests the state of a watch after its creation.
    */

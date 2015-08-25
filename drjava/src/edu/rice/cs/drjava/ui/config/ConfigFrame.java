@@ -49,7 +49,7 @@ import java.util.Iterator;
 
 import javax.swing.tree.*;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeData;
@@ -271,24 +271,24 @@ public class ConfigFrame extends SwingFrame {
   }
   
   private void enableChangeListeners() {
-    DrJava.getConfig().addOptionListener(JUNIT_LOCATION_ENABLED,
+    DrScala.getConfig().addOptionListener(JUNIT_LOCATION_ENABLED,
                                          _junitLocationEnabledListener);
-    DrJava.getConfig().addOptionListener(JUNIT_LOCATION,
+    DrScala.getConfig().addOptionListener(JUNIT_LOCATION,
                                          _junitLocationListener);
-    DrJava.getConfig().addOptionListener(CONCJUNIT_CHECKS_ENABLED,
+    DrScala.getConfig().addOptionListener(CONCJUNIT_CHECKS_ENABLED,
                                          _concJUnitChecksEnabledListener);
-    DrJava.getConfig().addOptionListener(RT_CONCJUNIT_LOCATION,
+    DrScala.getConfig().addOptionListener(RT_CONCJUNIT_LOCATION,
                                          _rtConcJUnitLocationListener);
   }
 
   private void disableChangeListeners() {
-    DrJava.getConfig().removeOptionListener(JUNIT_LOCATION_ENABLED,
+    DrScala.getConfig().removeOptionListener(JUNIT_LOCATION_ENABLED,
                                             _junitLocationEnabledListener);
-    DrJava.getConfig().removeOptionListener(JUNIT_LOCATION,
+    DrScala.getConfig().removeOptionListener(JUNIT_LOCATION,
                                             _junitLocationListener);
-    DrJava.getConfig().removeOptionListener(CONCJUNIT_CHECKS_ENABLED,
+    DrScala.getConfig().removeOptionListener(CONCJUNIT_CHECKS_ENABLED,
                                             _concJUnitChecksEnabledListener);
-    DrJava.getConfig().removeOptionListener(RT_CONCJUNIT_LOCATION,
+    DrScala.getConfig().removeOptionListener(RT_CONCJUNIT_LOCATION,
                                             _rtConcJUnitLocationListener);
   }
 
@@ -355,7 +355,7 @@ public class ConfigFrame extends SwingFrame {
   public boolean saveSettings() throws IOException {
     boolean successful = apply();
     if (successful) {
-      try { DrJava.getConfig().saveConfiguration(); }
+      try { DrScala.getConfig().saveConfiguration(); }
       catch (IOException ioe) {
         JOptionPane.showMessageDialog(this,
                                       "Could not save changes to your \".drjava\" file in your home directory. \n\n" + ioe,
@@ -712,9 +712,11 @@ public class ConfigFrame extends SwingFrame {
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, newBooleanOptionComponent(DIALOG_AUTOIMPORT_STORE_POSITION, false)
                          .setEntireColumn(true));
-    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
-      public void actionPerformed(ActionEvent e) { _mainFrame.resetAutoImportDialogPosition(); }
-    }, "Reset \"Auto Import\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
+    
+    /* Irrelevant in DrScala */
+//    addOptionComponent(panel, new ButtonComponent(new ActionListener() {
+//      public void actionPerformed(ActionEvent e) { _mainFrame.resetAutoImportDialogPosition(); }
+//    }, "Reset \"Auto Import\" Dialog Position and Size", this, "This resets the dialog position and size to its default values."));
     
     addOptionComponent(panel, new LabelComponent("<html>&nbsp;</html>", this, true));
     addOptionComponent(panel, 
@@ -853,20 +855,12 @@ public class ConfigFrame extends SwingFrame {
 
   /** Add all of the components for the Scaladoc panel of the preferences window. */
   private void _setupScaladocPanel(ConfigPanel panel) {
-    addOptionComponent(panel, 
-                       newForcedChoiceOptionComponent(SCALADOC_API_REF_VERSION));
-    addOptionComponent(panel, 
-                       newForcedChoiceOptionComponent(SCALADOC_ACCESS_LEVEL));
-    addOptionComponent(panel, 
-                       newForcedChoiceOptionComponent(SCALADOC_LINK_VERSION));
-    addOptionComponent(panel, 
-                       newStringOptionComponent(SCALADOC_1_5_LINK));
-    addOptionComponent(panel, 
-                       newStringOptionComponent(SCALADOC_1_6_LINK));
-    addOptionComponent(panel, 
-                       newStringOptionComponent(SCALADOC_1_7_LINK));
-    addOptionComponent(panel, 
-                       newStringOptionComponent(JUNIT_LINK));
+    addOptionComponent(panel, newForcedChoiceOptionComponent(SCALADOC_API_REF_VERSION));
+    addOptionComponent(panel, newForcedChoiceOptionComponent(SCALADOC_ACCESS_STATUS));
+//    addOptionComponent(panel, newForcedChoiceOptionComponent(SCALADOC_LINK_VERSION));
+    addOptionComponent(panel, newStringOptionComponent(JAVADOC_1_8_LINK));
+    addOptionComponent(panel, newStringOptionComponent(OptionConstants.SCALADOC_2_12_LINK));
+    addOptionComponent(panel, newStringOptionComponent(JUNIT_LINK));
 
     VectorStringOptionComponent additionalScaladoc =
       new VectorStringOptionComponent(SCALADOC_ADDITIONAL_LINKS, 
@@ -1211,8 +1205,8 @@ public class ConfigFrame extends SwingFrame {
     /* Action listener that loads the selected compiler name into the DEFAULT_COMPILER_PREFERENCE setting. */
     ActionListener CPCActionListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        if (! edu.rice.cs.drjava.DrJava.getConfig().getSetting(DEFAULT_COMPILER_PREFERENCE).equals(CPC.getCurrentComboBoxValue())) {
-          edu.rice.cs.drjava.DrJava.getConfig().setSetting(DEFAULT_COMPILER_PREFERENCE,CPC.getCurrentComboBoxValue());
+        if (! edu.rice.cs.drjava.DrScala.getConfig().getSetting(DEFAULT_COMPILER_PREFERENCE).equals(CPC.getCurrentComboBoxValue())) {
+          edu.rice.cs.drjava.DrScala.getConfig().setSetting(DEFAULT_COMPILER_PREFERENCE,CPC.getCurrentComboBoxValue());
         }
       }
     };

@@ -36,21 +36,21 @@
 
 package edu.rice.cs.drjava.ui.config;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScala;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.DefaultSwingFrame;
 import edu.rice.cs.util.swing.Utilities;
 
 /** Tests functionality of this OptionComponent. */
-public final class IntegerOptionComponentTest extends DrJavaTestCase {
+public final class IntegerOptionComponentTest extends DrScalaTestCase {
 
   private static volatile IntegerOptionComponent _option;
 
   protected void setUp() throws Exception {
     super.setUp();
     _option = new IntegerOptionComponent(OptionConstants.INDENT_INC, "Indent Level", new DefaultSwingFrame());
-    DrJava.getConfig().resetToDefaults();
+    DrScala.getConfig().resetToDefaults();
     Utilities.clearEventQueue();
   }
 
@@ -67,7 +67,7 @@ public final class IntegerOptionComponentTest extends DrJavaTestCase {
 
     assertEquals("Cancel (resetToCurrent) should not change the config",
                  OptionConstants.INDENT_INC.getDefault(),
-                 DrJava.getConfig().getSetting(OptionConstants.INDENT_INC));
+                 DrScala.getConfig().getSetting(OptionConstants.INDENT_INC));
 
   }
 
@@ -81,7 +81,7 @@ public final class IntegerOptionComponentTest extends DrJavaTestCase {
 
     assertEquals("Apply (updateConfig) should write change to file",
                  testInteger,
-                 DrJava.getConfig().getSetting(OptionConstants.INDENT_INC));
+                 DrScala.getConfig().getSetting(OptionConstants.INDENT_INC));
   }
 
   public void testApplyThenResetDefault() {
@@ -98,7 +98,7 @@ public final class IntegerOptionComponentTest extends DrJavaTestCase {
 
     assertEquals("Apply (updateConfig) should write change to file",
                  OptionConstants.INDENT_INC.getDefault(),
-                 DrJava.getConfig().getSetting(OptionConstants.INDENT_INC));
+                 DrScala.getConfig().getSetting(OptionConstants.INDENT_INC));
   }
 
 }

@@ -73,7 +73,7 @@ public class FontOptionComponent extends OptionComponent<Font,JPanel> {
     _panel.add(_fontField, BorderLayout.CENTER);
     _panel.add(_button, BorderLayout.EAST);
 
-    _font = DrJava.getConfig().getSetting(_option);
+    _font = DrScala.getConfig().getSetting(_option);
     _updateField(_font);
     setComponent(_panel);
   }
@@ -114,7 +114,7 @@ public class FontOptionComponent extends OptionComponent<Font,JPanel> {
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
-    if (! _font.equals(DrJava.getConfig().getSetting(_option))) DrJava.getConfig().setSetting(_option, _font);
+    if (! _font.equals(DrScala.getConfig().getSetting(_option))) DrScala.getConfig().setSetting(_option, _font);
     return true;
   }
   

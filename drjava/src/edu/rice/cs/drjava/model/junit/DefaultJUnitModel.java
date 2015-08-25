@@ -138,7 +138,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     _model = model;
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], _model, false);
     BooleanOption suffixOption = OptionConstants.FORCE_TEST_SUFFIX;
-    _forceTestSuffix = edu.rice.cs.drjava.DrJava.getConfig().getSetting(suffixOption).booleanValue();
+    _forceTestSuffix = edu.rice.cs.drjava.DrScala.getConfig().getSetting(suffixOption).booleanValue();
   }
   
   //-------------------------- Field Setters --------------------------------//

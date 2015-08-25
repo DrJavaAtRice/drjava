@@ -73,7 +73,7 @@ public class KeyBindingManager {
   public Collection<KeyStrokeData> getKeyStrokeData() { return _actionToDataMap.values(); }
 
   public void put(VectorOption<KeyStroke> vkso, Action a, JMenuItem jmi, String name)  {
-    Vector<KeyStroke> keys = DrJava.getConfig().getSetting(vkso);
+    Vector<KeyStroke> keys = DrScala.getConfig().getSetting(vkso);
     Vector<KeyStroke> retained = new Vector<KeyStroke>();
     KeyStrokeData ksd = new KeyStrokeData(keys, a, jmi, name, vkso);
     _actionToDataMap.put(a, ksd);
@@ -83,10 +83,10 @@ public class KeyBindingManager {
         _keyToDataMap.put(ks, ksd);
       }
     }
-    DrJava.getConfig().addOptionListener(vkso, new VectorKeyStrokeOptionListener(jmi, a, retained));
+    DrScala.getConfig().addOptionListener(vkso, new VectorKeyStrokeOptionListener(jmi, a, retained));
     if (retained.size() != keys.size()) {
       // not all keys were added
-      DrJava.getConfig().setSetting(vkso,retained);
+      DrScala.getConfig().setSetting(vkso,retained);
     }
   }
 
@@ -170,7 +170,7 @@ public class KeyBindingManager {
       conflictKSD.setKeyStrokes(new Vector<KeyStroke>(conflictKeys));
       updateMenuItem(conflictKSD);
       _keyToDataMap.remove(ks);
-      DrJava.getConfig().setSetting(conflictKSD.getOption(), conflictKSD.getKeyStrokes());
+      DrScala.getConfig().setSetting(conflictKSD.getOption(), conflictKSD.getKeyStrokes());
     }
   }
   

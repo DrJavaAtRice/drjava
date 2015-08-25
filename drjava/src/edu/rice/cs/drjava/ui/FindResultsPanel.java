@@ -56,7 +56,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.RegionManagerListener;
 import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.plt.tuple.Pair;
 import edu.rice.cs.drjava.config.OptionConstants;
 
@@ -147,12 +147,12 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
       final Pair<Option<Color>, OptionListener<Color>> pair = 
         new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.FIND_RESULTS_COLORS[i], listener);
       _colorOptionListeners.add(pair);
-      DrJava.getConfig().addOptionListener(OptionConstants.FIND_RESULTS_COLORS[i], listener);
+      DrScala.getConfig().addOptionListener(OptionConstants.FIND_RESULTS_COLORS[i], listener);
     }
   }
   
   class ColorComboRenderer extends JPanel implements ListCellRenderer<Color> {
-    private volatile Color _color = DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_colorBox.getSelectedIndex()]);
+    private volatile Color _color = DrScala.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_colorBox.getSelectedIndex()]);
     private final DefaultListCellRenderer _defaultRenderer = new DefaultListCellRenderer();
     private final Dimension _size = new Dimension(0, 20);  
     private final CompoundBorder _compoundBorder = 
@@ -227,7 +227,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     ++DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex];
     _colorBox = new JComboBox<Color>();    
     for (int i = 0; i < OptionConstants.FIND_RESULTS_COLORS.length; ++i) {
-      _colorBox.addItem(DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[i]));
+      _colorBox.addItem(DrScala.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[i]));
     }
     _colorBox.addItem(null);  // formerly "None"
     _colorBox.setRenderer(new ColorComboRenderer());
@@ -239,7 +239,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
         _lastIndex = _colorBox.getSelectedIndex();
         if (_lastIndex<OptionConstants.FIND_RESULTS_COLORS.length) {
           ++DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex];
-          highlightPanel.setBackground(DrJava.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_lastIndex]));
+          highlightPanel.setBackground(DrScala.getConfig().getSetting(OptionConstants.FIND_RESULTS_COLORS[_lastIndex]));
         }
         else highlightPanel.setBackground(normalColor);
         
@@ -362,7 +362,7 @@ public class FindResultsPanel extends RegionsTreePanel<MovingDocumentRegion> {
     _regionToTreeNode.clear();
     getGlobalModel().removeFindResultsManager(getRegionManager());  // removes manager from global model (should be done by listener!)
     for (Pair<Option<Color>, OptionListener<Color>> p: _colorOptionListeners) {
-      DrJava.getConfig().removeOptionListener(p.first(), p.second());
+      DrScala.getConfig().removeOptionListener(p.first(), p.second());
     }
     if (_lastIndex < OptionConstants.FIND_RESULTS_COLORS.length) {
       --DefinitionsPane.FIND_RESULTS_PAINTERS_USAGE[_lastIndex];

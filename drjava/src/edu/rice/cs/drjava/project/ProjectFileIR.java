@@ -125,18 +125,18 @@ public interface ProjectFileIR {
   public void setPreferencesStoredInProject(Map<OptionParser<?>,String> sp);
   
   /**
-   * The version of dr java that created this project (as determined from its serialization as a .pjt or .drjava or .xml file)
+   * The version of drscala that created this project (as determined from its serialization as a .drscala file)
    * 
    * @return The version string, if known, or "unknown" otherwise.
    */
-  public String getDrJavaVersion();
+  public String getDrScalaVersion();
   
   /**
    * Sets the version of DrJava that built this project.
    * 
    * @param version - the version string, should be called with "unknown" if the version could not be determined.
    */
-  public void setDrJavaVersion(String version);
+  public void setDrScalaVersion(String version);
   
   /**
    * Accessor for custom manifest in project.

@@ -40,7 +40,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Arrays;
 import java.util.Set;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -110,7 +110,7 @@ public class NoCompilerAvailable implements CompilerInterface {
   /** Return the extension of the files that should be opened with the "Open Folder..." command.
     * @return file extension for the "Open Folder..." command for this compiler. */
   public String getOpenAllFilesInFolderExtension() {
-    return OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL)];
+    return OptionConstants.LANGUAGE_EXTENSIONS[0];  /* .scala file extension */
   }
   
   /** Return true if this compiler can be used in conjunction with the language level facility.

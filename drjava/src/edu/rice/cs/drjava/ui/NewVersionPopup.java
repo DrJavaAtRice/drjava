@@ -97,7 +97,7 @@ public class NewVersionPopup extends JDialog {
     String[] choices = IterUtil.toArray(OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES, String.class);
     _modeBox = new JComboBox<String>(choices);
     for (int i = 0; i < OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.size(); ++i) {
-      if (DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
+      if (DrScala.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
             .equals(OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.get(i))) {
         _modeBox.setSelectedIndex(i);
         break;
@@ -105,7 +105,7 @@ public class NewVersionPopup extends JDialog {
     }
     _modeBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        DrJava.getConfig().setSetting(OptionConstants.NEW_VERSION_NOTIFICATION,
+        DrScala.getConfig().setSetting(OptionConstants.NEW_VERSION_NOTIFICATION,
                                       OptionConstants.NEW_VERSION_NOTIFICATION_CHOICES.get(_modeBox.getSelectedIndex()));
         _msg = null;
         updateText();
@@ -522,7 +522,7 @@ public class NewVersionPopup extends JDialog {
         newVersion |= checkNewStableVersion(stableString,stableTime);
         _updateButton.setEnabled(newVersion);
         _downloadButton.setEnabled(newVersion);
-        DrJava.getConfig().setSetting(OptionConstants.LAST_NEW_VERSION_NOTIFICATION, new Date().getTime());
+        DrScala.getConfig().setSetting(OptionConstants.LAST_NEW_VERSION_NOTIFICATION, new Date().getTime());
         if (availableRef != null) { availableRef.set(newVersion); }
         if (newVersion) {
           TreeMap<Date,String[]> versionSorter = new TreeMap<Date,String[]>();

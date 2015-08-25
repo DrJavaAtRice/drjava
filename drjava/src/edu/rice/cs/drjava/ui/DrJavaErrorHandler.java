@@ -40,7 +40,7 @@ import javax.swing.JButton;
 import java.util.ArrayList;
 import javax.swing.JFrame;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -121,7 +121,7 @@ public class DrJavaErrorHandler implements Thread.UncaughtExceptionHandler {
             _errorsButton.setVisible(true);
           }
           if (_errors.size() == 1 && ! Utilities.TEST_MODE &&
-              DrJava.getConfig().getSetting(OptionConstants.DIALOG_DRSCALA_ERROR_POPUP_ENABLED).booleanValue()) {
+              DrScala.getConfig().getSetting(OptionConstants.DIALOG_DRSCALA_ERROR_POPUP_ENABLED).booleanValue()) {
             DrJavaErrorPopup popup = new DrJavaErrorPopup(DrJavaErrorWindow.getFrame(), thrown);
             Utilities.setPopupLoc(popup, popup.getOwner());
             popup.setVisible(true);

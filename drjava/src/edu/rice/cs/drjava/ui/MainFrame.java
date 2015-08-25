@@ -71,10 +71,10 @@ import java.net.MalformedURLException;
 import java.awt.datatransfer.*;
 import java.lang.ref.WeakReference;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaRoot;
-import edu.rice.cs.drjava.RemoteControlClient;
-import edu.rice.cs.drjava.RemoteControlServer;
+import edu.rice.cs.drjava.DrScala;
+import edu.rice.cs.drjava.DrScalaRoot;
+//import edu.rice.cs.drjava.RemoteControlClient;
+//import edu.rice.cs.drjava.RemoteControlServer;
 import edu.rice.cs.drjava.platform.*;
 import edu.rice.cs.drjava.config.FileConfiguration;
 import edu.rice.cs.drjava.config.*;
@@ -308,15 +308,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** For saving files. We have a persistent dialog to keep track of the last directory from which we saved. */
   private volatile JFileChooser _saveChooser;
   
-  /** Filter for drjava project files (.drjava and .xml and .pjt) */
+  /** Filter for drscala project files (.drscala) */
   private final javax.swing.filechooser.FileFilter _projectFilter = new javax.swing.filechooser.FileFilter() {
     public boolean accept(File f) {
-      return f.isDirectory() || f.getPath().endsWith(PROJECT_FILE_EXTENSION) ||
-        f.getPath().endsWith(PROJECT_FILE_EXTENSION2) || f.getPath().endsWith(OLD_PROJECT_FILE_EXTENSION);
+      return f.isDirectory() || f.getPath().endsWith(PROJECT_FILE_EXTENSION);
     }
     public String getDescription() { 
-      return "DrScala Project Files (*" + PROJECT_FILE_EXTENSION + ", *" + PROJECT_FILE_EXTENSION2 + ", *" + 
-        OLD_PROJECT_FILE_EXTENSION + ")";
+      return "DrScala Project Files (*" + PROJECT_FILE_EXTENSION + ")";
     }
   };
   
@@ -500,15 +498,15 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Initializes the "Create Jar from Project" dialog. */
   private void initJarOptionsDialog() {
-    if (DrJava.getConfig().getSetting(DIALOG_JAROPTIONS_STORE_POSITION).booleanValue())
-      _jarOptionsDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_JAROPTIONS_STATE));  
+    if (DrScala.getConfig().getSetting(DIALOG_JAROPTIONS_STORE_POSITION).booleanValue())
+      _jarOptionsDialog.setFrameState(DrScala.getConfig().getSetting(DIALOG_JAROPTIONS_STATE));  
   }
   
   /** Reset the position of the "Create Jar from Project" dialog. */
   public void resetJarOptionsDialogPosition() {
     _jarOptionsDialog.setFrameState("default");
-    if (DrJava.getConfig().getSetting(DIALOG_JAROPTIONS_STORE_POSITION).booleanValue()) {
-      DrJava.getConfig().setSetting(DIALOG_JAROPTIONS_STATE, "default");
+    if (DrScala.getConfig().getSetting(DIALOG_JAROPTIONS_STORE_POSITION).booleanValue()) {
+      DrScala.getConfig().setSetting(DIALOG_JAROPTIONS_STATE, "default");
     }
   }
   private final Action _jarProjectAction = new AbstractAction("Create Jar File from Project...") {
@@ -520,16 +518,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Initializes the "Tabbed Panes" frame. */
   private void initTabbedPanesFrame() {
-    if (DrJava.getConfig().getSetting(DIALOG_TABBEDPANES_STORE_POSITION).booleanValue()) {
-      _tabbedPanesFrame.setFrameState(DrJava.getConfig().getSetting(DIALOG_TABBEDPANES_STATE));  
+    if (DrScala.getConfig().getSetting(DIALOG_TABBEDPANES_STORE_POSITION).booleanValue()) {
+      _tabbedPanesFrame.setFrameState(DrScala.getConfig().getSetting(DIALOG_TABBEDPANES_STATE));  
     }
   }
   
   /** Reset the position of the "Tabbed Panes" dialog. */
   public void resetTabbedPanesFrame() {
     _tabbedPanesFrame.setFrameState("default");
-    if (DrJava.getConfig().getSetting(DIALOG_TABBEDPANES_STORE_POSITION).booleanValue()) {
-      DrJava.getConfig().setSetting(DIALOG_TABBEDPANES_STATE, "default");
+    if (DrScala.getConfig().getSetting(DIALOG_TABBEDPANES_STORE_POSITION).booleanValue()) {
+      DrScala.getConfig().setSetting(DIALOG_TABBEDPANES_STATE, "default");
     }
   }
   
@@ -539,7 +537,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       JMenuItem m = (JMenuItem)ae.getSource();
       boolean b = m.isSelected();
       _detachTabbedPanesMenuItem.setSelected(b);
-      DrJava.getConfig().setSetting(DETACH_TABBEDPANES, b);
+      DrScala.getConfig().setSetting(DETACH_TABBEDPANES, b);
       _tabbedPanesFrame.setDisplayInFrame(b);
     }
   };
@@ -550,8 +548,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Initializes the "Debugger" frame. */
   private void initDebugFrame() {
     if (_debugFrame == null) return; // debugger isn't used
-    if (DrJava.getConfig().getSetting(DIALOG_DEBUGFRAME_STORE_POSITION).booleanValue()) {
-      _debugFrame.setFrameState(DrJava.getConfig().getSetting(DIALOG_DEBUGFRAME_STATE));  
+    if (DrScala.getConfig().getSetting(DIALOG_DEBUGFRAME_STORE_POSITION).booleanValue()) {
+      _debugFrame.setFrameState(DrScala.getConfig().getSetting(DIALOG_DEBUGFRAME_STATE));  
     }
   }
   
@@ -559,8 +557,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public void resetDebugFrame() {
     if (_debugFrame == null) return; // debugger isn't used
     _debugFrame.setFrameState("default");
-    if (DrJava.getConfig().getSetting(DIALOG_DEBUGFRAME_STORE_POSITION).booleanValue()) {
-      DrJava.getConfig().setSetting(DIALOG_DEBUGFRAME_STATE, "default");
+    if (DrScala.getConfig().getSetting(DIALOG_DEBUGFRAME_STORE_POSITION).booleanValue()) {
+      DrScala.getConfig().setSetting(DIALOG_DEBUGFRAME_STATE, "default");
     }
   }
   
@@ -572,7 +570,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       JMenuItem m = (JMenuItem)ae.getSource();
       boolean b = m.isSelected();
       _detachDebugFrameMenuItem.setSelected(b);
-      DrJava.getConfig().setSetting(DETACH_DEBUGGER, b);
+      DrScala.getConfig().setSetting(DETACH_DEBUGGER, b);
       _debugFrame.setDisplayInFrame(b);
     }
   };
@@ -588,10 +586,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                     "New JUnit Test Case",
                                                     JOptionPane.QUESTION_MESSAGE);
       if (testName != null) {
-        /* In DrScala, Java language levels are disabled. But LANGUAGE_LEVEL_EXTENSIONS includes ".scala" and ".java". */
         String ext;
-        for(int i = 0; i < OptionConstants.LANGUAGE_LEVEL_EXTENSIONS.length; i++) {
-          ext = OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[i];
+        for(int i = 0; i < OptionConstants.LANGUAGE_EXTENSIONS.length; i++) {
+          ext = OptionConstants.LANGUAGE_EXTENSIONS[i];
           if (testName.endsWith(ext)) testName = testName.substring(0, testName.length() - ext.length());
         }
         // For now, don't include setUp and tearDown
@@ -771,20 +768,20 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
   };
   
-  private final Action _exportProjectInOldFormatAction = 
-    new AbstractAction("Export Project In Old \"" + OLD_PROJECT_FILE_EXTENSION + "\" Format") {
-    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT); } // init
-    public void actionPerformed(ActionEvent ae) {
-      File cpf = _currentProjFile;
-      _currentProjFile = FileOps.NULL_FILE;
-      if (_saveProjectAs()) {  // asks user for new project file name; sets _projectFile in global model to this value
-        _saveAllOld();  // performs saveAll operation using new project file name, assuming "Save as" was not cancelled
-      }
-      _currentProjFile = cpf;
-      _model.setProjectFile(cpf);
-      _recentProjectManager.updateOpenFiles(cpf);
-    }
-  };
+//  private final Action _exportProjectInOldFormatAction = 
+//    new AbstractAction("Export Project In Old \"" + OLD_PROJECT_FILE_EXTENSION + "\" Format") {
+//    { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.PROJECT); } // init
+//    public void actionPerformed(ActionEvent ae) {
+//      File cpf = _currentProjFile;
+//      _currentProjFile = FileOps.NULL_FILE;
+//      if (_saveProjectAs()) {  // asks user for new project file name; sets _projectFile in global model to this value
+//        _saveAllOld();  // performs saveAll operation using new project file name, assuming "Save as" was not cancelled
+//      }
+//      _currentProjFile = cpf;
+//      _model.setProjectFile(cpf);
+//      _recentProjectManager.updateOpenFiles(cpf);
+//    }
+//  };
   
   /** Reverts the current document. */
   private final Action _revertAction = new AbstractAction("Revert to Saved") {
@@ -1097,8 +1094,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Reset the position of the "Clipboard History" dialog. */
   public void resetClipboardHistoryDialogPosition() {
-    if (DrJava.getConfig().getSetting(DIALOG_CLIPBOARD_HISTORY_STORE_POSITION).booleanValue()) {
-      DrJava.getConfig().setSetting(DIALOG_CLIPBOARD_HISTORY_STATE, "default");
+    if (DrScala.getConfig().getSetting(DIALOG_CLIPBOARD_HISTORY_STORE_POSITION).booleanValue()) {
+      DrScala.getConfig().setSetting(DIALOG_CLIPBOARD_HISTORY_STATE, "default");
     }
   }
   
@@ -1111,14 +1108,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       final ClipboardHistoryFrame.CloseAction cancelAction = new ClipboardHistoryFrame.CloseAction() {
         public Object value(String s) {
           // "Clipboard History" dialog position and size.
-          if ((DrJava.getConfig().getSetting(DIALOG_CLIPBOARD_HISTORY_STORE_POSITION).booleanValue())
+          if ((DrScala.getConfig().getSetting(DIALOG_CLIPBOARD_HISTORY_STORE_POSITION).booleanValue())
                 && (_clipboardHistoryDialog != null) && (_clipboardHistoryDialog.getFrameState() != null)) {
-            DrJava.getConfig().
+            DrScala.getConfig().
               setSetting(DIALOG_CLIPBOARD_HISTORY_STATE, (_clipboardHistoryDialog.getFrameState().toString()));
           }
           else {
             // Reset to defaults to restore pristine behavior.
-            DrJava.getConfig().setSetting(DIALOG_CLIPBOARD_HISTORY_STATE, DIALOG_CLIPBOARD_HISTORY_STATE.getDefault());
+            DrScala.getConfig().setSetting(DIALOG_CLIPBOARD_HISTORY_STATE, DIALOG_CLIPBOARD_HISTORY_STATE.getDefault());
           }
           return null;
         }
@@ -1140,8 +1137,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _clipboardHistoryDialog = new ClipboardHistoryFrame(MainFrame.this, 
                                                           "Clipboard History", ClipboardHistoryModel.singleton(),
                                                           okAction, cancelAction);
-      if (DrJava.getConfig().getSetting(DIALOG_CLIPBOARD_HISTORY_STORE_POSITION).booleanValue()) {
-        _clipboardHistoryDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_CLIPBOARD_HISTORY_STATE));
+      if (DrScala.getConfig().getSetting(DIALOG_CLIPBOARD_HISTORY_STORE_POSITION).booleanValue()) {
+        _clipboardHistoryDialog.setFrameState(DrScala.getConfig().getSetting(DIALOG_CLIPBOARD_HISTORY_STATE));
       }
       _clipboardHistoryDialog.setVisible(true);
     }
@@ -1256,7 +1253,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _findNextAction = new AbstractAction("Find Next") {
     public void actionPerformed(ActionEvent ae) {
       _showFindReplaceTab(false);
-      if (!DrJava.getConfig().getSetting(FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
+      if (!DrScala.getConfig().getSetting(FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
         // Use EventQueue.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
         EventQueue.invokeLater(new Runnable() { public void run() { _findReplace.requestFocusInWindow(); } });
       }
@@ -1270,7 +1267,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private final Action _findPrevAction = new AbstractAction("Find Previous") {
     public void actionPerformed(ActionEvent ae) {
       _showFindReplaceTab(false);
-      if (!DrJava.getConfig().getSetting(FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
+      if (!DrScala.getConfig().getSetting(FIND_REPLACE_FOCUS_IN_DEFPANE).booleanValue()) {
         // Use EventQueue.invokeLater to ensure that focus is set AFTER the _findReplace tab has been selected
         EventQueue.invokeLater(new Runnable() { public void run() { _findReplace.requestFocusInWindow(); } });
       }
@@ -1293,8 +1290,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public void resetGotoFileDialogPosition() {
     initGotoFileDialog();
     _gotoFileDialog.setFrameState("default");
-    if (DrJava.getConfig().getSetting(DIALOG_GOTOFILE_STORE_POSITION).booleanValue()) {
-      DrJava.getConfig().setSetting(DIALOG_GOTOFILE_STATE, "default");
+    if (DrScala.getConfig().getSetting(DIALOG_GOTOFILE_STORE_POSITION).booleanValue()) {
+      DrScala.getConfig().setSetting(DIALOG_GOTOFILE_STATE, "default");
     }
   }
   
@@ -1400,8 +1397,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }; 
       // putting one dummy entry in the list; it will be changed later anyway
       
-      if (DrJava.getConfig().getSetting(DIALOG_GOTOFILE_STORE_POSITION).booleanValue()) {
-        _gotoFileDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_GOTOFILE_STATE));
+      if (DrScala.getConfig().getSetting(DIALOG_GOTOFILE_STORE_POSITION).booleanValue()) {
+        _gotoFileDialog.setFrameState(DrScala.getConfig().getSetting(DIALOG_GOTOFILE_STATE));
       }      
     }
   }
@@ -1419,7 +1416,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }
       GoToFileListEntry currentEntry = null;
       ArrayList<GoToFileListEntry> list;
-      if (DrJava.getConfig().getSetting(DIALOG_GOTOFILE_FULLY_QUALIFIED).booleanValue()) {
+      if (DrScala.getConfig().getSetting(DIALOG_GOTOFILE_FULLY_QUALIFIED).booleanValue()) {
         list = new ArrayList<GoToFileListEntry>(2 * docs.size());
       }
       else {
@@ -1429,7 +1426,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         GoToFileListEntry entry = new GoToFileListEntry(d, d.toString());
         if (d.equals(_model.getActiveDocument())) currentEntry = entry;
         list.add(entry);
-        if (DrJava.getConfig().getSetting(DIALOG_GOTOFILE_FULLY_QUALIFIED).booleanValue()) {
+        if (DrScala.getConfig().getSetting(DIALOG_GOTOFILE_FULLY_QUALIFIED).booleanValue()) {
           try {
             try {
               String relative = FileOps.stringMakeRelativeTo(d.getFile(), d.getSourceRoot());
@@ -1515,9 +1512,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     else {
       // try appending ".scala" and ".java" to see if it's unique
+      /* FIX THIS!  This code duplicates code at 1876. */
       boolean exact = false;
-      /* In DrScala, Java language levels are disabled. But LANGUAGE_LEVEL_EXTENSIONS includes ".scala" and ".java". */
-      for (String attemptedExt: OptionConstants.LANGUAGE_LEVEL_EXTENSIONS) {
+      for (String attemptedExt: OptionConstants.LANGUAGE_EXTENSIONS) {
         pim.setMask(mask);
         pim.extendMask(attemptedExt);
         if (pim.getMatchingItems().size() == 1) {
@@ -1569,8 +1566,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public void resetOpenScaladocDialogPosition() {
     initOpenScaladocDialog();
     _openScaladocDialog.setFrameState("default");
-    if (DrJava.getConfig().getSetting(DIALOG_OPENSCALADOC_STORE_POSITION).booleanValue()) {
-      DrJava.getConfig().setSetting(DIALOG_OPENSCALADOC_STATE, "default");
+    if (DrScala.getConfig().getSetting(DIALOG_OPENSCALADOC_STORE_POSITION).booleanValue()) {
+      DrScala.getConfig().setSetting(DIALOG_OPENSCALADOC_STATE, "default");
     }
   }
   
@@ -1631,8 +1628,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       }; 
       // putting one dummy entry in the list; it will be changed later anyway
       
-      if (DrJava.getConfig().getSetting(DIALOG_OPENSCALADOC_STORE_POSITION).booleanValue()) {
-        _openScaladocDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_OPENSCALADOC_STATE));
+      if (DrScala.getConfig().getSetting(DIALOG_OPENSCALADOC_STORE_POSITION).booleanValue()) {
+        _openScaladocDialog.setFrameState(DrScala.getConfig().getSetting(DIALOG_OPENSCALADOC_STATE));
       }
       generateJavaAPISet();
     }
@@ -1710,7 +1707,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         new ProcessingDialog(this, "Java API Classes", "Loading, please wait.", false);
       if (!EventQueue.isDispatchThread()) { pd.setVisible(true); }
       // generate list
-      String linkVersion = DrJava.getConfig().getSetting(SCALADOC_API_REF_VERSION);
+      String linkVersion = DrScala.getConfig().getSetting(SCALADOC_API_REF_VERSION);
       
       // the string that will be ADDED to the beginning of the link to form the full URL
       String base = "";
@@ -1721,66 +1718,26 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       // the HTML file name that contains all the links
       String suffix = "";
       if (linkVersion.equals(SCALADOC_AUTO_TEXT)) {
-        // use the compiler's version of the Java API Scaladoc
-        JavaVersion ver = _model.getCompilerModel().getActiveCompiler().version();
-        if (ver == JavaVersion.JAVA_1_4) linkVersion = SCALADOC_1_4_TEXT;
-        else if (ver == JavaVersion.JAVA_5) linkVersion = SCALADOC_1_5_TEXT;
-        else if (ver == JavaVersion.JAVA_6) linkVersion = SCALADOC_1_6_TEXT;
-        else if (ver == JavaVersion.JAVA_7) linkVersion = SCALADOC_1_7_TEXT;
-        else linkVersion = SCALADOC_1_3_TEXT;   // ???? This looks like the wrong default; I would version 7.
-      }
-      if (linkVersion.equals(SCALADOC_1_3_TEXT)) {
-        base = DrJava.getConfig().getSetting(SCALADOC_1_3_LINK) + "/";
-        stripPrefix = ""; // nothing needs to be stripped, links in 1.3 Scaladoc are relative
-        suffix = "/allclasses-1.3.html";
-      }
-      else if (linkVersion.equals(SCALADOC_1_4_TEXT)) {
-        base = DrJava.getConfig().getSetting(SCALADOC_1_4_LINK) + "/";
-        stripPrefix = ""; // nothing needs to be stripped, links in 1.4 Scaladoc are relative
-        suffix = "/allclasses-1.4.html";
-      }
-      else if (linkVersion.equals(SCALADOC_1_5_TEXT)) {
-        base = DrJava.getConfig().getSetting(SCALADOC_1_5_LINK) + "/";
-        stripPrefix = ""; // nothing needs to be stripped, links in 1.5 Scaladoc are relative
-        suffix = "/allclasses-1.5.html";
-      }
-      else if (linkVersion.equals(SCALADOC_1_6_TEXT)) {
-        // at one point, the links in the 1.6 Scaladoc were absolute, and this is how we dealt with that
-        // base = ""; // links in 1.6 Scaladoc are absolute, so nothing needs to be added to get an absolute URL
-        // // but we do need to strip the absolute part to get correct fully-qualified class names
-        // // and we take the default string here, not what the user entered, because the links in
-        // // our allclasses-1.6.html file go to the original Sun website.
-        // stripPrefix = SCALADOC_1_6_LINK.getDefaultString() + "/";
-        base = DrJava.getConfig().getSetting(SCALADOC_1_6_LINK) + "/";
-        stripPrefix = ""; // nothing needs to be stripped, links in 1.6 Scaladoc are relative
-        suffix = "/allclasses-1.6.html";
-      }
-      else if (linkVersion.equals(SCALADOC_1_7_TEXT)) {
-        base = DrJava.getConfig().getSetting(SCALADOC_1_7_LINK) + "/";
-        stripPrefix = ""; // nothing needs to be stripped, links in 1.7 Scaladoc are relative
-        suffix = "/allclasses-1.7.html";
-      }
-      
-      if (!suffix.equals("")) {
-        _javaAPISet.addAll(_generateJavaAPISet(base, stripPrefix, suffix));
-      }
-      else {
-        // no valid Scaladoc URL
+        try {
+          _javaAPISet.add(new JavaAPIListEntry("#package",
+                                               "http://www.scala-lang.org/api/2.12.0-M2/",
+                                               new URL("http://www.scala-lang.org/api/2.12.0-M2/")));
+        }
+        catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }                                             
       }
       
       // add JUnit
-      Set<JavaAPIListEntry> junitAPIList = _generateJavaAPISet(DrJava.getConfig().getSetting(JUNIT_LINK) + "/",
+      Set<JavaAPIListEntry> junitAPIList = _generateJavaAPISet(DrScala.getConfig().getSetting(JUNIT_LINK) + "/",
                                                                "", // relative links
                                                                "/allclasses-concjunit4.7.html");
       _javaAPISet.addAll(junitAPIList);
       
       // add additional Scaladoc libraries
-      for(String url: DrJava.getConfig().getSetting(SCALADOC_ADDITIONAL_LINKS)) {
+      for(String url: DrScala.getConfig().getSetting(SCALADOC_ADDITIONAL_LINKS)) {
         try {
           Set<JavaAPIListEntry> additionalList = _generateJavaAPISet(url + "/",
                                                                      "", // relative links
-                                                                     new URL(url + "/allclasses-frame.html"));
-          _javaAPISet.addAll(additionalList);
+                                                                     new URL(url + "index/index-_.html"));
         }
         catch(MalformedURLException mue) { /* ignore, we'll just not put this class in the list */ }
       }
@@ -1874,8 +1831,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             else {
               // try appending ".scala" and ".java" to see if it's unique
               boolean exact = false;
-              /* In DrScala, Java language levels are disabled. But LANGUAGE_LEVEL_EXTENSIONS includes ".scala" and ".java". */
-              for(String attemptedExt: OptionConstants.LANGUAGE_LEVEL_EXTENSIONS) {
+           
+              for(String attemptedExt: OptionConstants.LANGUAGE_EXTENSIONS) {
                 pim.setMask(mask);
                 pim.extendMask(attemptedExt);
                 if (pim.getMatchingItems().size() == 1) {
@@ -2011,8 +1968,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public void resetCompleteWordDialogPosition() {
     initCompleteWordDialog();
     _completeWordDialog.setFrameState("default");
-    if (DrJava.getConfig().getSetting(DIALOG_COMPLETE_WORD_STORE_POSITION).booleanValue()) {
-      DrJava.getConfig().setSetting(DIALOG_COMPLETE_WORD_STATE, "default");
+    if (DrScala.getConfig().getSetting(DIALOG_COMPLETE_WORD_STORE_POSITION).booleanValue()) {
+      DrScala.getConfig().setSetting(DIALOG_COMPLETE_WORD_STATE, "default");
     }
   }
   
@@ -2171,13 +2128,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Shows the DebugConsole. */
   private final Action _showDebugConsoleAction = new AbstractAction("Show DrJava Debug Console") {
-    public void actionPerformed(ActionEvent e) { DrJavaRoot.showDrJavaDebugConsole(MainFrame.this); }
+    public void actionPerformed(ActionEvent e) { DrScalaRoot.showDrJavaDebugConsole(MainFrame.this); }
   };
   
   /** Resets the Interactions pane. */
   private final Action _resetInteractionsAction = new AbstractAction("Reset Interactions") {
     public void actionPerformed(ActionEvent ae) {
-      if (! DrJava.getConfig().getSetting(INTERACTIONS_RESET_PROMPT).booleanValue()) {
+      if (! DrScala.getConfig().getSetting(INTERACTIONS_RESET_PROMPT).booleanValue()) {
         _doResetInteractions();
         
         return;
@@ -2192,7 +2149,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _doResetInteractions();
         
         if (dialog.getCheckBoxValue()) {
-          DrJava.getConfig().setSetting(INTERACTIONS_RESET_PROMPT, Boolean.FALSE);
+          DrScala.getConfig().setSetting(INTERACTIONS_RESET_PROMPT, Boolean.FALSE);
         }
       }
     }
@@ -2288,7 +2245,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) {
       try {
         Process p = JVMBuilder.DEFAULT.classPath(FileOps.getDrScalaFile()).
-          start(DrJava.class.getName(), "-new");
+          start(DrScala.class.getName(), "-new");
       }
       catch(IOException ioe) { MainFrameStatics.showIOError(MainFrame.this, ioe); }
     }
@@ -2299,7 +2256,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) {
       this.setEnabled(false);
       if (_docSplitPane.getDividerLocation() < _docSplitPane.getMinimumDividerLocation())
-        _docSplitPane.setDividerLocation(DrJava.getConfig().getSetting(DOC_LIST_WIDTH).intValue());
+        _docSplitPane.setDividerLocation(DrScala.getConfig().getSetting(DOC_LIST_WIDTH).intValue());
       //disables switching documents while the next one is opening up, in order to prevent out of control switching
       _model.setActiveNextDocument();
       _findReplace.updateFirstDocInSearch();
@@ -2314,7 +2271,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void actionPerformed(ActionEvent ae) {
       this.setEnabled(false);
       if (_docSplitPane.getDividerLocation() < _docSplitPane.getMinimumDividerLocation())
-        _docSplitPane.setDividerLocation(DrJava.getConfig().getSetting(DOC_LIST_WIDTH).intValue());
+        _docSplitPane.setDividerLocation(DrScala.getConfig().getSetting(DOC_LIST_WIDTH).intValue());
       _model.setActivePreviousDocument();
       _findReplace.updateFirstDocInSearch();
       this.setEnabled(true);
@@ -2340,7 +2297,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       updateStatusField("Browsing Back");
       this.setEnabled(false);
       if (_docSplitPane.getDividerLocation() < _docSplitPane.getMinimumDividerLocation())
-        _docSplitPane.setDividerLocation(DrJava.getConfig().getSetting(DOC_LIST_WIDTH).intValue());
+        _docSplitPane.setDividerLocation(DrScala.getConfig().getSetting(DOC_LIST_WIDTH).intValue());
       //disables switching documents while the next one is opening up, in order to prevent out of control switching
       
       // add current location to history
@@ -2361,7 +2318,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       updateStatusField("Browsing Forward");
       this.setEnabled(false);
       if (_docSplitPane.getDividerLocation() < _docSplitPane.getMinimumDividerLocation())
-        _docSplitPane.setDividerLocation(DrJava.getConfig().getSetting(DOC_LIST_WIDTH).intValue());
+        _docSplitPane.setDividerLocation(DrScala.getConfig().getSetting(DOC_LIST_WIDTH).intValue());
       //disables switching documents while the next one is opening up, in order to prevent out of control switching
       
       // add current location to history
@@ -3078,7 +3035,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   public MainFrame() {    
     Utilities.invokeAndWait(new Runnable() { public void run() {
       // Cache the config object, since we use it many, many times.
-      final Configuration config = DrJava.getConfig(); 
+      final Configuration config = DrScala.getConfig(); 
       
       // _historyListener (declared and initialized above) required by new FindReplacePanel(...)
       assert _historyListener != null;
@@ -3352,7 +3309,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       _tabbedPanesFrame.addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent we) {
           _detachTabbedPanesMenuItem.setSelected(false);
-          DrJava.getConfig().setSetting(DETACH_TABBEDPANES, false);
+          DrScala.getConfig().setSetting(DETACH_TABBEDPANES, false);
         }
       });
       
@@ -3376,7 +3333,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           public void windowClosing(WindowEvent we) {
             if (_debugFrame == null) return; // debugger not used
             _detachDebugFrameMenuItem.setSelected(false);
-            DrJava.getConfig().setSetting(DETACH_DEBUGGER, false);
+            DrScala.getConfig().setSetting(DETACH_DEBUGGER, false);
           }
         });
         _debugFrame.setUpMenuBar();
@@ -3480,8 +3437,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           DefinitionsPane.updateMaxCharWidth(metrics);
         }
       };
-      DrJava.getConfig().addOptionListener(OptionConstants.FONT_MAIN, fontListener);
-      DefinitionsPane.updateMaxCharWidth(getFontMetrics(DrJava.getConfig().getSetting(FONT_MAIN)));
+      DrScala.getConfig().addOptionListener(OptionConstants.FONT_MAIN, fontListener);
+      DefinitionsPane.updateMaxCharWidth(getFontMetrics(DrScala.getConfig().getSetting(FONT_MAIN)));
       
       config.addOptionListener(FORCE_TEST_SUFFIX, new OptionListener<Boolean>() {
         public void optionChanged(OptionEvent<Boolean> oce) {
@@ -3489,73 +3446,79 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       });
       
-      // The OptionListener for SCALADOC_API_REF_VERSION.
-      OptionListener<String> choiceOptionListener = new OptionListener<String>() {
-        public void optionChanged(OptionEvent<String> oce) {
-          clearJavaAPISet();
-        }
-      };
-      DrJava.getConfig().addOptionListener(SCALADOC_API_REF_VERSION, choiceOptionListener);
+      /* The scala compiler and library are embedded in the drscala.jar file.  We do not have to worry
+       * about selecting another compiler.  All associated Java compilers should version 1.8 as well,
+       * so much of the infrastructure inherited from DrJava is overkill.
+       */
       
-      // The OptionListener for SCALADOC_XXX_LINK.
-      OptionListener<String> link13OptionListener = new OptionListener<String>() {
-        public void optionChanged(OptionEvent<String> oce) {
-          String linkVersion = DrJava.getConfig().getSetting(SCALADOC_API_REF_VERSION);
-          if (linkVersion.equals(SCALADOC_1_3_TEXT) ||
-              linkVersion.equals(SCALADOC_AUTO_TEXT)) {
-            clearJavaAPISet();
-          }
-        }
-      };
-      DrJava.getConfig().addOptionListener(SCALADOC_1_3_LINK, link13OptionListener);
-      OptionListener<String> link14OptionListener = new OptionListener<String>() {
-        public void optionChanged(OptionEvent<String> oce) {
-          String linkVersion = DrJava.getConfig().getSetting(SCALADOC_API_REF_VERSION);
-          if (linkVersion.equals(SCALADOC_1_4_TEXT) ||
-              linkVersion.equals(SCALADOC_AUTO_TEXT)) {
-            clearJavaAPISet();
-          }
-        }
-      };
-      DrJava.getConfig().addOptionListener(SCALADOC_1_4_LINK, link14OptionListener);
-      OptionListener<String> link15OptionListener = new OptionListener<String>() {
-        public void optionChanged(OptionEvent<String> oce) {
-          String linkVersion = DrJava.getConfig().getSetting(SCALADOC_API_REF_VERSION);
-          if (linkVersion.equals(SCALADOC_1_5_TEXT) ||
-              linkVersion.equals(SCALADOC_AUTO_TEXT)) {
-            clearJavaAPISet();
-          }
-        }
-      };
-      DrJava.getConfig().addOptionListener(SCALADOC_1_5_LINK, link15OptionListener);
-      OptionListener<String> link16OptionListener = new OptionListener<String>() {
-        public void optionChanged(OptionEvent<String> oce) {
-          String linkVersion = DrJava.getConfig().getSetting(SCALADOC_API_REF_VERSION);
-          if (linkVersion.equals(SCALADOC_1_6_TEXT) ||
-              linkVersion.equals(SCALADOC_AUTO_TEXT)) {
-            clearJavaAPISet();
-          }
-        }
-      };
-      DrJava.getConfig().addOptionListener(SCALADOC_1_6_LINK, link16OptionListener);
-      OptionListener<String> linkJUnitOptionListener = new OptionListener<String>() {
-        public void optionChanged(OptionEvent<String> oce) {
-          clearJavaAPISet();
-        }
-      };
-      DrJava.getConfig().addOptionListener(JUNIT_LINK, linkJUnitOptionListener);
-      OptionListener<Vector<String>> additionalLinkOptionListener = new OptionListener<Vector<String>>() {
-        public void optionChanged(OptionEvent<Vector<String>> oce) {
-          clearJavaAPISet();
-        }
-      };
-      DrJava.getConfig().addOptionListener(SCALADOC_ADDITIONAL_LINKS, additionalLinkOptionListener);
+//      // The OptionListener for SCALADOC_API_REF_VERSION.
+//      OptionListener<String> choiceOptionListener = new OptionListener<String>() {
+//        public void optionChanged(OptionEvent<String> oce) {
+//          clearJavaAPISet();
+//        }
+//      };
+//      DrScala.getConfig().addOptionListener(SCALADOC_API_REF_VERSION, choiceOptionListener);
+//      
+//      // The OptionListener for SCALADOC_XXX_LINK.
+//      OptionListener<String> link13OptionListener = new OptionListener<String>() {
+//        public void optionChanged(OptionEvent<String> oce) {
+//          String linkVersion = DrScala.getConfig().getSetting(SCALADOC_API_REF_VERSION);
+//          if (linkVersion.equals(SCALADOC_1_3_TEXT) ||
+//              linkVersion.equals(SCALADOC_AUTO_TEXT)) {
+//            clearJavaAPISet();
+//          }
+//        }
+//      };
+//      DrScala.getConfig().addOptionListener(SCALADOC_1_3_LINK, link13OptionListener);
+//      OptionListener<String> link14OptionListener = new OptionListener<String>() {
+//        public void optionChanged(OptionEvent<String> oce) {
+//          String linkVersion = DrScala.getConfig().getSetting(SCALADOC_API_REF_VERSION);
+//          if (linkVersion.equals(SCALADOC_1_4_TEXT) ||
+//              linkVersion.equals(SCALADOC_AUTO_TEXT)) {
+//            clearJavaAPISet();
+//          }
+//        }
+//      };
+//      DrScala.getConfig().addOptionListener(SCALADOC_1_4_LINK, link14OptionListener);
+//      OptionListener<String> link15OptionListener = new OptionListener<String>() {
+//        public void optionChanged(OptionEvent<String> oce) {
+//          String linkVersion = DrScala.getConfig().getSetting(SCALADOC_API_REF_VERSION);
+//          if (linkVersion.equals(SCALADOC_1_5_TEXT) ||
+//              linkVersion.equals(SCALADOC_AUTO_TEXT)) {
+//            clearJavaAPISet();
+//          }
+//        }
+//      };
+//      DrScala.getConfig().addOptionListener(SCALADOC_1_5_LINK, link15OptionListener);
+//      OptionListener<String> link16OptionListener = new OptionListener<String>() {
+//        public void optionChanged(OptionEvent<String> oce) {
+//          String linkVersion = DrScala.getConfig().getSetting(SCALADOC_API_REF_VERSION);
+//          if (linkVersion.equals(SCALADOC_1_6_TEXT) ||
+//              linkVersion.equals(SCALADOC_AUTO_TEXT)) {
+//            clearJavaAPISet();
+//          }
+//        }
+//      };
+//      DrScala.getConfig().addOptionListener(SCALADOC_1_6_LINK, link16OptionListener);
+//      OptionListener<String> linkJUnitOptionListener = new OptionListener<String>() {
+//        public void optionChanged(OptionEvent<String> oce) {
+//          clearJavaAPISet();
+//        }
+//      };
+//      DrScala.getConfig().addOptionListener(JUNIT_LINK, linkJUnitOptionListener);
+//      OptionListener<Vector<String>> additionalLinkOptionListener = new OptionListener<Vector<String>>() {
+//        public void optionChanged(OptionEvent<Vector<String>> oce) {
+//          clearJavaAPISet();
+//        }
+//      };
+//      DrScala.getConfig().addOptionListener(SCALADOC_ADDITIONAL_LINKS, additionalLinkOptionListener);
+      
       OptionListener<Boolean> scanClassesOptionListener = new OptionListener<Boolean>() {
         public void optionChanged(OptionEvent<Boolean> oce) {
           clearCompleteClassSet();
         }
       };
-      DrJava.getConfig().addOptionListener(DIALOG_COMPLETE_SCAN_CLASS_FILES, scanClassesOptionListener);
+      DrScala.getConfig().addOptionListener(DIALOG_COMPLETE_SCAN_CLASS_FILES, scanClassesOptionListener);
       
       // Initialize cached frames and dialogs 
       _configFrame = new ConfigFrame(MainFrame.this);
@@ -3622,38 +3585,38 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       });
       
-      if (DrJava.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_ENABLED)) {
-        // start remote control server if no server is running
-        try {
-          if (! RemoteControlClient.isServerRunning()) {
-            new RemoteControlServer(MainFrame.this);
-          }
-        }
-        catch(IOException ioe) {
-          try { RemoteControlClient.openFile(null); }
-          catch(IOException ignored) { /* ignore */ }
-          if (!Utilities.TEST_MODE && !System.getProperty("user.name").equals(RemoteControlClient.getServerUser())) {
-            Object[] options = {"Disable","Ignore"};
-            String msg = "<html>Could not start DrScala's remote control server";
-            if (RemoteControlClient.getServerUser() != null) {
-              msg += "<br>because user "+RemoteControlClient.getServerUser()+" is already using the same port";
-            }
-            msg += ".<br>Please select an unused port in the Preferences dialog.<br>"+
-              "In the meantime, do you want to disable the remote control feature?";
-            int n = JOptionPane.showOptionDialog(MainFrame.this,
-                                                 msg,
-                                                 "Could Not Start Remote Control Server",
-                                                 JOptionPane.YES_NO_OPTION,
-                                                 JOptionPane.QUESTION_MESSAGE,
-                                                 null,
-                                                 options,
-                                                 options[1]);
-            if (n==JOptionPane.YES_OPTION) {
-              DrJava.getConfig().setSetting(OptionConstants.REMOTE_CONTROL_ENABLED, false);
-            }
-          }
-        }
-      }
+//      if (DrJava.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_ENABLED)) {
+//        // start remote control server if no server is running
+//        try {
+//          if (! RemoteControlClient.isServerRunning()) {
+//            new RemoteControlServer(MainFrame.this);
+//          }
+//        }
+//        catch(IOException ioe) {
+//          try { RemoteControlClient.openFile(null); }
+//          catch(IOException ignored) { /* ignore */ }
+//          if (!Utilities.TEST_MODE && !System.getProperty("user.name").equals(RemoteControlClient.getServerUser())) {
+//            Object[] options = {"Disable","Ignore"};
+//            String msg = "<html>Could not start DrScala's remote control server";
+//            if (RemoteControlClient.getServerUser() != null) {
+//              msg += "<br>because user "+RemoteControlClient.getServerUser()+" is already using the same port";
+//            }
+//            msg += ".<br>Please select an unused port in the Preferences dialog.<br>"+
+//              "In the meantime, do you want to disable the remote control feature?";
+//            int n = JOptionPane.showOptionDialog(MainFrame.this,
+//                                                 msg,
+//                                                 "Could Not Start Remote Control Server",
+//                                                 JOptionPane.YES_NO_OPTION,
+//                                                 JOptionPane.QUESTION_MESSAGE,
+//                                                 null,
+//                                                 options,
+//                                                 options[1]);
+//            if (n==JOptionPane.YES_OPTION) {
+//              DrJava.getConfig().setSetting(OptionConstants.REMOTE_CONTROL_ENABLED, false);
+//            }
+//          }
+//        }
+//      }
       
       setUpDrJavaProperties();  
       
@@ -3663,13 +3626,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       boolean alreadyShowedDialog = false;
       if (PlatformFactory.ONLY.canRegisterFileExtensions()) {
         // only try to register file extensions if this platform supports it
-        if (DrJava.getConfig().getSetting(OptionConstants.FILE_EXT_REGISTRATION)
+        if (DrScala.getConfig().getSetting(OptionConstants.FILE_EXT_REGISTRATION)
               .equals(OptionConstants.FILE_EXT_REGISTRATION_CHOICES.get(2))) { // Always
           // always set file associations
           PlatformFactory.ONLY.registerDrJavaFileExtensions();
           PlatformFactory.ONLY.registerJavaFileExtension();
         }
-        else if (DrJava.getConfig().getSetting(OptionConstants.FILE_EXT_REGISTRATION)
+        else if (DrScala.getConfig().getSetting(OptionConstants.FILE_EXT_REGISTRATION)
                    .equals(OptionConstants.FileExtRegistrationChoices.ASK_ME) && // Ask me
                  ! Utilities.TEST_MODE &&
                  ((!PlatformFactory.ONLY.areDrJavaFileExtensionsRegistered()) ||
@@ -3693,11 +3656,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                 PlatformFactory.ONLY.registerJavaFileExtension();
               }
               if (rc==2) { // Always
-                DrJava.getConfig().setSetting(OptionConstants.FILE_EXT_REGISTRATION,
+                DrScala.getConfig().setSetting(OptionConstants.FILE_EXT_REGISTRATION,
                                               OptionConstants.FILE_EXT_REGISTRATION_CHOICES.get(2));
               }
               if (rc==3) { // Never
-                DrJava.getConfig().setSetting(OptionConstants.FILE_EXT_REGISTRATION,
+                DrScala.getConfig().setSetting(OptionConstants.FILE_EXT_REGISTRATION,
                                               OptionConstants.FILE_EXT_REGISTRATION_CHOICES.get(0));
               }
             }
@@ -3709,12 +3672,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         // check for new version if desired by user
         // but only if we haven't just asked if the user wants to download a new version
         // two dialogs on program start is too much clutter    
-        if (DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_ALLOWED) &&
-            !DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
+        if (DrScala.getConfig().getSetting(OptionConstants.NEW_VERSION_ALLOWED) &&
+            !DrScala.getConfig().getSetting(OptionConstants.NEW_VERSION_NOTIFICATION)
               .equals(OptionConstants.VersionNotificationChoices.DISABLED) && ! Utilities.TEST_MODE) {
-          int days = DrJava.getConfig().getSetting(NEW_VERSION_NOTIFICATION_DAYS);
+          int days = DrScala.getConfig().getSetting(NEW_VERSION_NOTIFICATION_DAYS);
           java.util.Date nextCheck = 
-            new java.util.Date(DrJava.getConfig().getSetting(OptionConstants.LAST_NEW_VERSION_NOTIFICATION)
+            new java.util.Date(DrScala.getConfig().getSetting(OptionConstants.LAST_NEW_VERSION_NOTIFICATION)
                                  + days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
           if (new java.util.Date().after(nextCheck)) {
             alreadyShowedDialog = true;
@@ -3750,7 +3713,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       
       EventQueue.invokeLater(new Runnable() {
         public void run() {
-          _tabbedPanesFrame.setDisplayInFrame(DrJava.getConfig().getSetting(DETACH_TABBEDPANES));
+          _tabbedPanesFrame.setDisplayInFrame(DrScala.getConfig().getSetting(DETACH_TABBEDPANES));
         }
       });
     } });
@@ -4604,7 +4567,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     _docSplitPane.remove(_docSplitPane.getLeftComponent());
     _docSplitPane.setLeftComponent(new JScrollPane(_model.getDocumentNavigator().asContainer()));
-    Font doclistFont = DrJava.getConfig().getSetting(FONT_DOCLIST);
+    Font doclistFont = DrScala.getConfig().getSetting(FONT_DOCLIST);
     _model.getDocCollectionWidget().setFont(doclistFont);
     _updateNormalColor();
     _updateBackgroundColor();
@@ -4827,7 +4790,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (result != DirectoryChooser.APPROVE_OPTION)  return; // canceled or error
     
     boolean rec = _openRecursiveCheckBox.isSelected();
-    DrJava.getConfig().setSetting(OptionConstants.OPEN_FOLDER_RECURSIVE, Boolean.valueOf(rec));
+    DrScala.getConfig().setSetting(OptionConstants.OPEN_FOLDER_RECURSIVE, Boolean.valueOf(rec));
     updateStatusField("Opening folder " + dir);
     _openFolder(dir, rec, ext);
   }
@@ -5076,19 +5039,20 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     finally { hourglassOff(); }
   }
   
-  void _saveAllOld() {
-    hourglassOn();
-    File file = _currentProjFile;
-    try {
-      if (_model.isProjectActive()) {
-        if (file.getName().indexOf(".") == -1) file = new File (file.getAbsolutePath() + OLD_PROJECT_FILE_EXTENSION);
-        _model.exportOldProject(file, gatherProjectDocInfo());
-      }
-      _model.saveAllFiles(_saveSelector);
-    }
-    catch (IOException ioe) { MainFrameStatics.showIOError(MainFrame.this, ioe); }
-    finally { hourglassOff(); }
-  }
+  /* Not relevant to DrScala */  
+//  void _saveAllOld() {
+//    hourglassOn();
+//    File file = _currentProjFile;
+//    try {
+//      if (_model.isProjectActive()) {
+//        if (file.getName().indexOf(".") == -1) file = new File (file.getAbsolutePath() + OLD_PROJECT_FILE_EXTENSION);
+//        _model.exportOldProject(file, gatherProjectDocInfo());
+//      }
+//      _model.saveAllFiles(_saveSelector);
+//    }
+//    catch (IOException ioe) { MainFrameStatics.showIOError(MainFrame.this, ioe); }
+//    finally { hourglassOff(); }
+//  }
   
   // Called by the ProjectPropertiesFrame
   void saveProject() { _saveProject(); }
@@ -5177,12 +5141,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   void _saveProjectHelper(File file) {
     try {
       String fileName = file.getAbsolutePath();
-      if (!fileName.endsWith(PROJECT_FILE_EXTENSION) &&
-          !fileName.endsWith(PROJECT_FILE_EXTENSION2) &&
-          !fileName.endsWith(OLD_PROJECT_FILE_EXTENSION)) {
-        // doesn't end in .drjava or .xml or .pjt
-        String text = "The file name does not end with a DrJava project file "+
-          "extension ("+PROJECT_FILE_EXTENSION+" or "+PROJECT_FILE_EXTENSION2+" or "+OLD_PROJECT_FILE_EXTENSION+"):\n"+
+      if (!fileName.endsWith(PROJECT_FILE_EXTENSION)) {
+        // doesn't end in .drscala
+        String text = "The file name does not end with a DrScala project file "+
+          "extension ("+PROJECT_FILE_EXTENSION+"):\n"+
           file.getName()+"\n"+
           "Do you want to append "+PROJECT_FILE_EXTENSION+" at the end?";
         
@@ -5203,19 +5165,22 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       }
       // by getting the canonical file, we make sure that we get an IOException if the filename is illegal
+      
       fileName = file.getCanonicalPath();
-      if (fileName.endsWith(OLD_PROJECT_FILE_EXTENSION)) {
-        file = proposeToChangeExtension(MainFrame.this, file,
-                                        "Change Extension?",
-                                        "The project will be saved in XML format."
-                                          + "\nDo you want to change the project file's extension to \""
-                                          + PROJECT_FILE_EXTENSION+ "\"?",
-                                        "Change to \"" + PROJECT_FILE_EXTENSION + "\"",
-                                        "Keep \"" + DrJavaFileUtils.getExtension(fileName) + "\"",
-                                        PROJECT_FILE_EXTENSION);
-        _model.setProjectFile(file);
-        _currentProjFile = file;
-      }
+      
+      /* Not relevant to DrScala */
+//      if (fileName.endsWith(OLD_PROJECT_FILE_EXTENSION)) {
+//        file = proposeToChangeExtension(MainFrame.this, file,
+//                                        "Change Extension?",
+//                                        "The project will be saved in XML format."
+//                                          + "\nDo you want to change the project file's extension to \""
+//                                          + PROJECT_FILE_EXTENSION+ "\"?",
+//                                        "Change to \"" + PROJECT_FILE_EXTENSION + "\"",
+//                                        "Keep \"" + DrJavaFileUtils.getExtension(fileName) + "\"",
+//                                        PROJECT_FILE_EXTENSION);
+//        _model.setProjectFile(file);
+//        _currentProjFile = file;
+//      }
       _model.saveProject(file, gatherProjectDocInfo());
 //      if (!(_model.getDocumentNavigator() instanceof JTreeSortNavigator)) {
 //        _openProjectHelper(file);
@@ -5309,7 +5274,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       else {
         // Only remember the checkbox if they say yes
         if (dialog.getCheckBoxValue() == true) {
-          DrJava.getConfig().setSetting(QUIT_PROMPT, Boolean.FALSE);
+          DrScala.getConfig().setSetting(QUIT_PROMPT, Boolean.FALSE);
         }
       }
     }
@@ -5333,8 +5298,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     // Save recent files, but only if there wasn't a problem at startUp
     // (Don't want to overwrite a custom config file with a simple typo.)
-    if (! DrJava.getConfig().hadStartupException()) {
-      try { DrJava.getConfig().saveConfiguration(); }
+    if (! DrScala.getConfig().hadStartupException()) {
+      try { DrScala.getConfig().saveConfiguration(); }
       catch (IOException ioe) { MainFrameStatics.showIOError(MainFrame.this, ioe); }
     }
   }
@@ -5346,7 +5311,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     */
   private void _storePositionInfo() {
     assert EventQueue.isDispatchThread();
-    Configuration config = DrJava.getConfig();
+    Configuration config = DrScala.getConfig();
     
     // Window bounds.
     if (config.getSetting(WINDOW_STORE_POSITION).booleanValue()) {
@@ -5367,7 +5332,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     // "Go to File" dialog position and size.
-    if ((DrJava.getConfig().getSetting(DIALOG_GOTOFILE_STORE_POSITION).booleanValue())
+    if ((DrScala.getConfig().getSetting(DIALOG_GOTOFILE_STORE_POSITION).booleanValue())
           && (_gotoFileDialog != null) && (_gotoFileDialog.getFrameState() != null)) {
       config.setSetting(DIALOG_GOTOFILE_STATE, (_gotoFileDialog.getFrameState().toString()));
     }
@@ -5377,7 +5342,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     // "Open Scaladoc" dialog position and size.
-    if ((DrJava.getConfig().getSetting(DIALOG_OPENSCALADOC_STORE_POSITION).booleanValue())
+    if ((DrScala.getConfig().getSetting(DIALOG_OPENSCALADOC_STORE_POSITION).booleanValue())
           && (_openScaladocDialog != null) && (_openScaladocDialog.getFrameState() != null)) {
       config.setSetting(DIALOG_OPENSCALADOC_STATE, (_openScaladocDialog.getFrameState().toString()));
     }
@@ -5387,7 +5352,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }    
     
     // "Complete Word" dialog position and size.
-    if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_WORD_STORE_POSITION).booleanValue())
+    if ((DrScala.getConfig().getSetting(DIALOG_COMPLETE_WORD_STORE_POSITION).booleanValue())
           && (_completeWordDialog != null) && (_completeWordDialog.getFrameState() != null)) {
       config.setSetting(DIALOG_COMPLETE_WORD_STATE, (_completeWordDialog.getFrameState().toString()));
     }
@@ -5397,7 +5362,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     // "Create Jar from Project" dialog position and size.   
-    if ((DrJava.getConfig().getSetting(DIALOG_JAROPTIONS_STORE_POSITION).booleanValue())
+    if ((DrScala.getConfig().getSetting(DIALOG_JAROPTIONS_STORE_POSITION).booleanValue())
           && (_jarOptionsDialog != null) && (_jarOptionsDialog.getFrameState() != null)) {
       config.setSetting(DIALOG_JAROPTIONS_STATE, (_jarOptionsDialog.getFrameState().toString()));
     }
@@ -5407,7 +5372,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     // "Tabbed Panes" frame position and size.
-    if ((DrJava.getConfig().getSetting(DIALOG_TABBEDPANES_STORE_POSITION).booleanValue())
+    if ((DrScala.getConfig().getSetting(DIALOG_TABBEDPANES_STORE_POSITION).booleanValue())
           && (_tabbedPanesFrame != null) && (_tabbedPanesFrame.getFrameState() != null)) {
       config.setSetting(DIALOG_TABBEDPANES_STATE, (_tabbedPanesFrame.getFrameState().toString()));
     }
@@ -5417,7 +5382,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     
     // "Debugger" frame position and size.
-    if ((DrJava.getConfig().getSetting(DIALOG_DEBUGFRAME_STORE_POSITION).booleanValue())
+    if ((DrScala.getConfig().getSetting(DIALOG_DEBUGFRAME_STORE_POSITION).booleanValue())
           && (_debugFrame != null) && (_debugFrame.getFrameState() != null)) {
       config.setSetting(DIALOG_DEBUGFRAME_STATE, (_debugFrame.getFrameState().toString()));
     }
@@ -5497,7 +5462,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   }
   
   private boolean showCleanWarning() {
-    if (DrJava.getConfig().getSetting(PROMPT_BEFORE_CLEAN).booleanValue()) {
+    if (DrScala.getConfig().getSetting(PROMPT_BEFORE_CLEAN).booleanValue()) {
       String buildDirTxt = "";
       try { buildDirTxt = _model.getBuildDirectory().getCanonicalPath(); }
       catch (Exception e) { buildDirTxt = _model.getBuildDirectory().getPath(); }
@@ -5514,7 +5479,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         case JOptionPane.YES_OPTION:
           _saveAll();
           // Only remember checkbox if they say yes
-          if (dialog.getCheckBoxValue()) DrJava.getConfig().setSetting(PROMPT_BEFORE_CLEAN, Boolean.FALSE);
+          if (dialog.getCheckBoxValue()) DrScala.getConfig().setSetting(PROMPT_BEFORE_CLEAN, Boolean.FALSE);
           return true;
         case JOptionPane.NO_OPTION:      return false;
         case JOptionPane.CANCEL_OPTION:  return false;
@@ -5596,7 +5561,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         if (f != null) {
           updateStatusField("Running Open Project");
           OpenDefinitionsDocument doc = _model.getDocumentForFile(f);
-          boolean smart = DrJava.getConfig().getSetting(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS);
+          boolean smart = DrScala.getConfig().getSetting(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS);
           if (smart) {
               doc.runSmart(_model.getMainClass());
           }
@@ -5623,7 +5588,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Internal helper method to run the main method of the current document in the interactions pane. */
   private void _runMain() {
     try {
-      boolean smart = DrJava.getConfig().getSetting(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS);
+      boolean smart = DrScala.getConfig().getSetting(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS);
       if (smart) {
         updateStatusField("Running main Method of Current Document");
         _model.getActiveDocument().runSmart(null);
@@ -5756,7 +5721,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   private void enableAutomaticTrace() {
     if (!isDebuggerEnabled()) return; // debugger isn't used
     try {
-      int rate = DrJava.getConfig().getSetting(OptionConstants.AUTO_STEP_RATE);
+      int rate = DrScala.getConfig().getSetting(OptionConstants.AUTO_STEP_RATE);
       
       _automaticTraceTimer = new Timer(rate, new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -5823,7 +5788,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     boolean isModified = doc.isModifiedSinceSave();
     if (isDebuggerReady() && isModified  && !_currentDefPane.hasWarnedAboutModified() &&
-        DrJava.getConfig().getSetting(WARN_BREAKPOINT_OUT_OF_SYNC).booleanValue()) {
+        DrScala.getConfig().getSetting(WARN_BREAKPOINT_OUT_OF_SYNC).booleanValue()) {
       String message =
         "This document has been modified and may be out of sync\n" +
         "with the debugger.  It is recommended that you first\n" +
@@ -5838,12 +5803,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         case JOptionPane.YES_OPTION:
           _currentDefPane.hasWarnedAboutModified(true);
           if (dialog.getCheckBoxValue()) {
-            DrJava.getConfig().setSetting(WARN_BREAKPOINT_OUT_OF_SYNC, Boolean.FALSE);
+            DrScala.getConfig().setSetting(WARN_BREAKPOINT_OUT_OF_SYNC, Boolean.FALSE);
           }
           break;
           
         case JOptionPane.NO_OPTION:
-          if (dialog.getCheckBoxValue())  DrJava.getConfig().setSetting(WARN_BREAKPOINT_OUT_OF_SYNC, Boolean.FALSE);
+          if (dialog.getCheckBoxValue())  DrScala.getConfig().setSetting(WARN_BREAKPOINT_OUT_OF_SYNC, Boolean.FALSE);
           return;
           
         case JOptionPane.CANCEL_OPTION:
@@ -5953,12 +5918,12 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Check if any errors occurred while parsing the config file, and display a message if necessary. */
   private void _showConfigException() {
-    if (DrJava.getConfig().hadStartupException()) {
+    if (DrScala.getConfig().hadStartupException()) {
       try {
-        DrJava.getConfig().saveConfiguration();
+        DrScala.getConfig().saveConfiguration();
       }
       catch(IOException ioe) { /* ignore */ }
-      Exception e = DrJava.getConfig().getStartupException();
+      Exception e = DrScala.getConfig().getStartupException();
       MainFrameStatics.showError(this, e, "Error in Config File",
                                "Could not read the '.drjava' configuration file\n" +
                                "in your home directory.  Starting with default\n" +
@@ -6166,8 +6131,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_renameAction, "Rename", "Rename", "Rename the current document");
     _setUpAction(_saveProjectAction, "Save", "Save", "Save the current project");
     _setUpAction(_saveProjectAsAction, "Save As", "SaveAs", "Save current project to new project file");
-    _setUpAction(_exportProjectInOldFormatAction, "Export Project In Old \"" + OLD_PROJECT_FILE_EXTENSION +
-                 "\" Format", "SaveAs", "Export Project In Old \"" + OLD_PROJECT_FILE_EXTENSION + "\" Format");
+    /* Not relevant to drscala */
+//    _setUpAction(_exportProjectInOldFormatAction, "Export Project In Old \"" + OLD_PROJECT_FILE_EXTENSION +
+//                 "\" Format", "SaveAs", "Export Project In Old \"" + OLD_PROJECT_FILE_EXTENSION + "\" Format");
     _setUpAction(_revertAction, "Revert", "Revert the current document to the saved version");
     // Not yet working
 //    _setUpAction(_revertAllAction, "Revert All", "RevertAll",
@@ -6310,7 +6276,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _setUpAction(_quickStartAction, "Help", "View Quick Start Guide for DrScala");
     _setUpAction(_aboutAction, "About", "About DrScala");
     _setUpAction(_checkNewVersionAction, "Check for New Version", "Find", "Check for New Version");
-    _checkNewVersionAction.setEnabled(DrJava.getConfig().getSetting(OptionConstants.NEW_VERSION_ALLOWED));
+    _checkNewVersionAction.setEnabled(DrScala.getConfig().getSetting(OptionConstants.NEW_VERSION_ALLOWED));
 //    _setUpAction(_drjavaSurveyAction, "Send System Information", "About", 
 //                 "Send anonymous system information to DrJava developers");
     _setUpAction(_errorsAction, "DrScala Errors", "drjavaerror", "Show a window with internal DrScala errors");
@@ -6437,7 +6403,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
     */
   private void _setMenuShortcut(JMenuItem item, Action a, VectorOption<KeyStroke> opt, boolean updateKeyboardManager) {
-    Vector<KeyStroke> keys = DrJava.getConfig().getSetting(opt);
+    Vector<KeyStroke> keys = DrScala.getConfig().getSetting(opt);
     // Checks that "a" is the action associated with the keystroke.
     // Need to check in case two actions were assigned to the same
     // key in the config file.
@@ -6574,7 +6540,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     panesMenu.addSeparator();
     
     JMenuItem tempDetachTabbedPanesMenuItem = MainFrameStatics.newCheckBoxMenuItem(_detachTabbedPanesAction);
-    tempDetachTabbedPanesMenuItem.setSelected(DrJava.getConfig().getSetting(DETACH_TABBEDPANES));
+    tempDetachTabbedPanesMenuItem.setSelected(DrScala.getConfig().getSetting(DETACH_TABBEDPANES));
     _setMenuShortcut(tempDetachTabbedPanesMenuItem, _detachTabbedPanesAction, KEY_DETACH_TABBEDPANES,
                      updateKeyboardManager);
     panesMenu.add(tempDetachTabbedPanesMenuItem);
@@ -6658,7 +6624,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(interMenu, _saveConsoleCopyAction, KEY_SAVE_CONSOLE_COPY, updateKeyboardManager);
     _addMenuItem(interMenu, _printConsoleAction, KEY_PRINT_CONSOLE, updateKeyboardManager);
     _addMenuItem(interMenu, _closeSystemInAction, KEY_CLOSE_SYSTEM_IN, updateKeyboardManager);
-    if (DrJava.getConfig().getSetting(SHOW_DEBUG_CONSOLE).booleanValue()) {
+    if (DrScala.getConfig().getSetting(SHOW_DEBUG_CONSOLE).booleanValue()) {
       toolsMenu.add(_showDebugConsoleAction);
     }
     toolsMenu.add(interMenu);
@@ -6670,21 +6636,21 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     extMenu.add(_editExternalProcessesAction);
     toolsMenu.add(extMenu);
     
-    final int savedCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
-    final int namesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES).size();
-    final int cmdlinesCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES).size();
-    final int workdirsCount = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS).size();
+    final int savedCount = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
+    final int namesCount = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES).size();
+    final int cmdlinesCount = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES).size();
+    final int workdirsCount = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS).size();
     final int enclosingFileCount = 
-      DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES).size();
+      DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES).size();
     if ((savedCount!=namesCount) ||
         (savedCount!=cmdlinesCount) ||
         (savedCount!=workdirsCount) ||
         (savedCount!=enclosingFileCount)) {
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, 0);
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES, new Vector<String>());
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES, new Vector<String>());
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS, new Vector<String>());
-      DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES, new Vector<String>());
+      DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, 0);
+      DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES, new Vector<String>());
+      DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES, new Vector<String>());
+      DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS, new Vector<String>());
+      DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES, new Vector<String>());
     }
     
     OptionListener<Integer> externalSavedCountListener =
@@ -6695,11 +6661,11 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         extMenu.addSeparator();
         for (int count=0; count<oce.value; ++count) {
           final int i = count;
-          final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
-          final Vector<String> cmdlines = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
-          final Vector<String> workdirs = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+          final Vector<String> names = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+          final Vector<String> cmdlines = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+          final Vector<String> workdirs = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
           final Vector<String> enclosingfiles = 
-            DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
+            DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
           
           extMenu.insert(new AbstractAction(names.get(i)) {
             public void actionPerformed(ActionEvent ae) {
@@ -6720,10 +6686,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _editExternalProcessesAction.setEnabled(true); // always keep enabled, because it allows import
       }
     };
-    DrJava.getConfig().addOptionListener(OptionConstants.EXTERNAL_SAVED_COUNT, externalSavedCountListener);
+    DrScala.getConfig().addOptionListener(OptionConstants.EXTERNAL_SAVED_COUNT, externalSavedCountListener);
     externalSavedCountListener.
       optionChanged(new OptionEvent<Integer>(OptionConstants.EXTERNAL_SAVED_COUNT,
-                                             DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)));
+                                             DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)));
     final JMenu advancedMenu = new JMenu("Advanced");
     _addMenuItem(advancedMenu, _generateCustomDrJavaJarAction, KEY_GENERATE_CUSTOM_DRSCALA, updateKeyboardManager);
     _addMenuItem(advancedMenu, _newDrJavaInstanceAction, KEY_NEW_DRSCALA_INSTANCE, updateKeyboardManager);
@@ -6754,10 +6720,10 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         }
       }
     };
-    DrJava.getConfig().addOptionListener(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS, runMainListener);
+    DrScala.getConfig().addOptionListener(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS, runMainListener);
     runMainListener.optionChanged(new OptionEvent<Boolean>
                                   (OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS,
-                                   DrJava.getConfig().getSetting(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS)));
+                                   DrScala.getConfig().getSetting(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS)));
       
     // Add the menus to the menu bar
     return toolsMenu;
@@ -6873,7 +6839,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     debugMenu.addSeparator();
     JMenuItem tempDetachDebugFrameMenuItem = MainFrameStatics.newCheckBoxMenuItem(_detachDebugFrameAction);
-    tempDetachDebugFrameMenuItem.setSelected(DrJava.getConfig().getSetting(DETACH_DEBUGGER));
+    tempDetachDebugFrameMenuItem.setSelected(DrScala.getConfig().getSetting(DETACH_DEBUGGER));
     _setMenuShortcut(tempDetachDebugFrameMenuItem, _detachDebugFrameAction, KEY_DETACH_DEBUGGER, updateKeyboardManager);
     debugMenu.add(tempDetachDebugFrameMenuItem);
     if (_detachDebugFrameMenuItem==null) {
@@ -6923,66 +6889,6 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (_showDebugger) { _debugPanel.setAutomaticTraceButtonText(); }
   }
   
-//  /** Creates and returns the language levels menu.
-//    * @param mask the keystroke modifier to be used
-//    * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
-//    */
-//  private JMenu _setUpLanguageLevelMenu(int mask, boolean updateKeyboardManager) {
-//    JMenu languageLevelMenu = new JMenu("Language Level");
-//    PlatformFactory.ONLY.setMnemonic(languageLevelMenu,KeyEvent.VK_L);
-//    ButtonGroup group = new ButtonGroup();
-//    
-//    final Configuration config = DrJava.getConfig();
-//    int currentLanguageLevel = config.getSetting(LANGUAGE_LEVEL);
-//    
-//    final AbstractAction rbFullJavaAction = new AbstractAction("Full Java") {
-//      { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.LANGUAGE_LEVELS); }
-//      public void actionPerformed(ActionEvent e) {
-//        config.setSetting(LANGUAGE_LEVEL, OptionConstants.FULL_JAVA);
-//      }
-//    };
-//    final JRadioButtonMenuItem rbFullJavaMenuItem = new JRadioButtonMenuItem(rbFullJavaAction);
-//    rbFullJavaMenuItem.setToolTipText("Use full Java syntax");
-//    if (currentLanguageLevel != OptionConstants.FUNCTIONAL_JAVA_LEVEL) { rbFullJavaMenuItem.setSelected(true); }
-//    group.add(rbFullJavaMenuItem);
-//    languageLevelMenu.add(rbFullJavaMenuItem);
-//    languageLevelMenu.addSeparator();
-//    
-//    final AbstractAction rbFunctionalAction = new AbstractAction("Functional Java") {
-//      { _addGUIAvailabilityListener(this, GUIAvailabilityListener.ComponentType.LANGUAGE_LEVELS); }
-//      public void actionPerformed(ActionEvent e) {
-//        config.setSetting(LANGUAGE_LEVEL, OptionConstants.FUNCTIONAL_JAVA_LEVEL);
-//      }
-//    };
-//    final JRadioButtonMenuItem rbFunctionalMenuItem = new JRadioButtonMenuItem(rbFunctionalAction);
-//    rbFunctionalMenuItem.setToolTipText("Use Functional Java language-level features");
-//    if (currentLanguageLevel == OptionConstants.FUNCTIONAL_JAVA_LEVEL) { rbFunctionalMenuItem.setSelected(true); }
-//    group.add(rbFunctionalMenuItem);
-//    languageLevelMenu.add(rbFunctionalMenuItem);
-//    
-//    config.addOptionListener(LANGUAGE_LEVEL, new OptionListener<Integer>() {
-//      public void optionChanged(OptionEvent<Integer> oce) {
-//        switch(oce.value) {
-//          case OptionConstants.ELEMENTARY_LEVEL:
-//          case OptionConstants.INTERMEDIATE_LEVEL:
-//          case OptionConstants.FUNCTIONAL_JAVA_LEVEL: {
-//            rbFunctionalMenuItem.setSelected(true);
-//            break;
-//          }
-//          default: {
-//            rbFullJavaMenuItem.setSelected(true);
-//            break;
-//          }
-//        }
-//      }
-//    });
-//    _guiAvailabilityNotifier.ensureAvailabilityIs
-//      (GUIAvailabilityListener.ComponentType.LANGUAGE_LEVELS,
-//       _model.getCompilerModel().getActiveCompiler().supportsLanguageLevels());
-//    
-//    return languageLevelMenu;
-//  }
-  
   /** Creates and returns a help menu.
     * @param mask the keystroke modifier to be used
     * @param updateKeyboardManager true if the keyboard manager should be updated; pass true only for MainFrame!
@@ -6999,18 +6905,19 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _addMenuItem(helpMenu, _errorsAction, KEY_DRSCALA_ERRORS, updateKeyboardManager);
     helpMenu.addSeparator();
     _addMenuItem(helpMenu, _forceQuitAction, KEY_FORCE_QUIT, updateKeyboardManager);
-    _addMenuItem(helpMenu, _exportProjectInOldFormatAction, KEY_EXPORT_OLD, updateKeyboardManager);
+    /* Not applicable to DrScala */
+//    _addMenuItem(helpMenu, _exportProjectInOldFormatAction, KEY_EXPORT_OLD, updateKeyboardManager);
     return helpMenu;
   }
   
   /** Creates a toolbar button for undo and redo, which behave differently. */
   JButton _createManualToolbarButton(Action a) {
     final JButton ret;
-    Font buttonFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
+    Font buttonFont = DrScala.getConfig().getSetting(FONT_TOOLBAR);
     
     // Check whether icons should be shown
-    boolean useIcon = DrJava.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
-    boolean useText = DrJava.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
+    boolean useIcon = DrScala.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
+    boolean useText = DrScala.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
     final Icon icon = (useIcon) ? (Icon) a.getValue(Action.SMALL_ICON) : null;
     if (icon == null) {
       ret = new UnfocusableButton((String) a.getValue(Action.DEFAULT));
@@ -7038,9 +6945,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Sets up all buttons for the toolbar except for undo and redo, which use _createManualToolbarButton. */
   public JButton _createToolbarButton(Action a) {
-    boolean useText = DrJava.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
-    boolean useIcons = DrJava.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
-    Font buttonFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
+    boolean useText = DrScala.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
+    boolean useIcons = DrScala.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
+    Font buttonFont = DrScala.getConfig().getSetting(FONT_TOOLBAR);
     
     final JButton result = new UnfocusableButton(a);
     result.setText((String) a.getValue(Action.DEFAULT));
@@ -7115,7 +7022,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _toolBar.addSeparator();
     _errorsButton = _createToolbarButton(_errorsAction);
     _errorsButton.setVisible(false);
-    _errorsButton.setBackground(DrJava.getConfig().getSetting(DRSCALA_ERRORS_BUTTON_COLOR));
+    _errorsButton.setBackground(DrScala.getConfig().getSetting(DRSCALA_ERRORS_BUTTON_COLOR));
     _toolBar.add(_errorsButton);
     /** The OptionListener for DRSCALA_ERRORS_BUTTON_COLOR. */
     OptionListener<Color> errBtnColorOptionListener = new OptionListener<Color>() {
@@ -7123,7 +7030,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         _errorsButton.setBackground(oce.value);
       }
     };
-    DrJava.getConfig().addOptionListener(DRSCALA_ERRORS_BUTTON_COLOR, errBtnColorOptionListener);
+    DrScala.getConfig().addOptionListener(DRSCALA_ERRORS_BUTTON_COLOR, errBtnColorOptionListener);
     // Add the listener that changes the "Run" button
     OptionListener<Boolean> runButtonListener = new OptionListener<Boolean>() {
       public void optionChanged(final OptionEvent<Boolean> oce) { 
@@ -7140,9 +7047,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         projectRunnableChanged();
       }
     };
-    DrJava.getConfig().addOptionListener(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS, runButtonListener);
+    DrScala.getConfig().addOptionListener(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS, runButtonListener);
     runButtonListener.optionChanged(new OptionEvent<Boolean>
-                                    (OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS, DrJava.getConfig().
+                                    (OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS, DrScala.getConfig().
                                        getSetting(OptionConstants.SMART_RUN_FOR_APPLETS_AND_PROGRAMS)));
     
     // Correct the vertical height of the buttons.
@@ -7161,7 +7068,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Sets the toolbar as either visible or invisible based on the config option.  Only runs in the event thread. */
   private void _updateToolBarVisible() {
-    _toolBar.setVisible(DrJava.getConfig().getSetting(TOOLBAR_ENABLED));
+    _toolBar.setVisible(DrScala.getConfig().getSetting(TOOLBAR_ENABLED));
   }  
   
   /** Update the toolbar's buttons, following any change to TOOLBAR_ICONS_ENABLED, TOOLBAR_TEXT_ENABLED, or 
@@ -7171,9 +7078,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _updateToolBarVisible();
     Component[] buttons = _toolBar.getComponents();
     
-    Font toolbarFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
-    boolean iconsEnabled = DrJava.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
-    boolean textEnabled = DrJava.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
+    Font toolbarFont = DrScala.getConfig().getSetting(FONT_TOOLBAR);
+    boolean iconsEnabled = DrScala.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
+    boolean textEnabled = DrScala.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
     
     for (int i = 0; i < buttons.length; i++) {
       
@@ -8020,7 +7927,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     pane.setScrollPane(scroll);
     //scroll.setBorder(null); // removes all default borders (MacOS X installs default borders)
     
-    if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
+    if (DrScala.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
       scroll.setRowHeaderView(new LineEnumRule(pane));
     }
     
@@ -8049,7 +7956,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     if (_showDebugger) {
       try {
         // Set the panel's size.
-        int debugHeight = DrJava.getConfig().getSetting(DEBUG_PANEL_HEIGHT).intValue();
+        int debugHeight = DrScala.getConfig().getSetting(DEBUG_PANEL_HEIGHT).intValue();
         Dimension debugMinSize = _debugPanel.getMinimumSize();
         
         // TODO: check bounds compared to entire window.
@@ -8079,7 +7986,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     _mainSplit.setOneTouchExpandable(true);
     _debugSplitPane.setOneTouchExpandable(true);
     
-    int docListWidth = DrJava.getConfig().getSetting(DOC_LIST_WIDTH).intValue();
+    int docListWidth = DrScala.getConfig().getSetting(DOC_LIST_WIDTH).intValue();
     
     // TODO: Check bounds.
     _docSplitPane.setDividerLocation(docListWidth);
@@ -8245,7 +8152,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       file = _getFullFile(file);
       _openChooser.setCurrentDirectory(file);
       _saveChooser.setCurrentDirectory(file);
-      DrJava.getConfig().setSetting(LAST_DIRECTORY, file);
+      DrScala.getConfig().setSetting(LAST_DIRECTORY, file);
     }
     catch (IOException ioe) {
       // If getCanonicalFile throws an IOException, we can't set the directory of the file chooser.  Oh well.
@@ -8267,14 +8174,14 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Sets the font of all panes and panels to the main font. */
   private void _setMainFont() {
     
-    Font f = DrJava.getConfig().getSetting(FONT_MAIN);
+    Font f = DrScala.getConfig().getSetting(FONT_MAIN);
     
     for (JScrollPane scroll: _defScrollPanes.values()) {
       if (scroll != null) {
         DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
         pane.setFont(f);
         // Update the font of the line enumeration rule
-        if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
+        if (DrScala.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
           scroll.setRowHeaderView(new LineEnumRule(pane));
         }
       }
@@ -8295,7 +8202,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Updates the text color for the doc list. */
   private void _updateNormalColor() {
     // Get the new value.
-    Color norm = DrJava.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR);
+    Color norm = DrScala.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR);
     
     // Change the text (foreground) color for the doc list.
     _model.getDocCollectionWidget().setForeground(norm);
@@ -8307,7 +8214,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** Updates the background color for the doc list. */
   private void _updateBackgroundColor() {
     // Get the new value.
-    Color back = DrJava.getConfig().getSetting(DEFINITIONS_BACKGROUND_COLOR);
+    Color back = DrScala.getConfig().getSetting(DEFINITIONS_BACKGROUND_COLOR);
     
     // Change the background color for the doc list.
     _model.getDocCollectionWidget().setBackground(back);
@@ -8318,7 +8225,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Updates the font and colors of the line number display. */
   private void _updateLineNums() {
-    if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
+    if (DrScala.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
       
       // Update the font for all line number displays
       for (JScrollPane spane: _defScrollPanes.values()) { 
@@ -8360,7 +8267,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Update the row header (line number enumeration) for the definitions scroll pane. */
   private void _updateDefScrollRowHeader() {
-    boolean ruleEnabled = DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue();
+    boolean ruleEnabled = DrScala.getConfig().getSetting(LINEENUM_ENABLED).booleanValue();
     
     for (JScrollPane scroll: _defScrollPanes.values()) {
       if (scroll != null) {
@@ -8728,9 +8635,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Ask the user to increase the slave's max heap setting. */
   void askToIncreaseSlaveMaxHeap() {
-    String value = "set to "+DrJava.getConfig().getSetting(SLAVE_JVM_XMX)+" MB";
-    if ((!("".equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX)))) &&
-        ((OptionConstants.heapSizeChoices.get(0).equals(DrJava.getConfig().getSetting(SLAVE_JVM_XMX))))) { 
+    String value = "set to "+DrScala.getConfig().getSetting(SLAVE_JVM_XMX)+" MB";
+    if ((!("".equals(DrScala.getConfig().getSetting(SLAVE_JVM_XMX)))) &&
+        ((OptionConstants.heapSizeChoices.get(0).equals(DrScala.getConfig().getSetting(SLAVE_JVM_XMX))))) { 
       value = "not set, implying the system's default";
     }
     
@@ -8744,20 +8651,20 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                       JOptionPane.QUESTION_MESSAGE,
                       null,
                       OptionConstants.heapSizeChoices.toArray(),
-                      DrJava.getConfig().getSetting(SLAVE_JVM_XMX));
+                      DrScala.getConfig().getSetting(SLAVE_JVM_XMX));
     
     if (res != null) {
       // temporarily make MainFrame the parent of the dialog that pops up
-      DrJava.getConfig().removeOptionListener(SLAVE_JVM_XMX, _slaveJvmXmxListener);
+      DrScala.getConfig().removeOptionListener(SLAVE_JVM_XMX, _slaveJvmXmxListener);
       final ConfigOptionListeners.SlaveJVMXMXListener l = new ConfigOptionListeners.SlaveJVMXMXListener(MainFrame.this);
-      DrJava.getConfig().addOptionListener(SLAVE_JVM_XMX, l);
+      DrScala.getConfig().addOptionListener(SLAVE_JVM_XMX, l);
       // change the setting
-      DrJava.getConfig().setSetting(SLAVE_JVM_XMX,res.trim());
+      DrScala.getConfig().setSetting(SLAVE_JVM_XMX,res.trim());
       EventQueue.invokeLater(new Runnable() {
         public void run() {
           // reinstall ConfigFrame as parent
-          DrJava.getConfig().removeOptionListener(SLAVE_JVM_XMX, l);
-          DrJava.getConfig().addOptionListener(SLAVE_JVM_XMX, _slaveJvmXmxListener);
+          DrScala.getConfig().removeOptionListener(SLAVE_JVM_XMX, l);
+          DrScala.getConfig().addOptionListener(SLAVE_JVM_XMX, _slaveJvmXmxListener);
         }
       });
     }
@@ -8766,9 +8673,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Ask the user to increase the master's max heap setting. */
   void askToIncreaseMasterMaxHeap() {
-    String value = "set to "+DrJava.getConfig().getSetting(MASTER_JVM_XMX)+" MB";
-    if ((!("".equals(DrJava.getConfig().getSetting(MASTER_JVM_XMX)))) &&
-        ((OptionConstants.heapSizeChoices.get(0).equals(DrJava.getConfig().getSetting(MASTER_JVM_XMX))))) { 
+    String value = "set to "+DrScala.getConfig().getSetting(MASTER_JVM_XMX)+" MB";
+    if ((!("".equals(DrScala.getConfig().getSetting(MASTER_JVM_XMX)))) &&
+        ((OptionConstants.heapSizeChoices.get(0).equals(DrScala.getConfig().getSetting(MASTER_JVM_XMX))))) { 
       value = "not set, implying the system's default";
     }
     
@@ -8781,21 +8688,21 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                                      JOptionPane.QUESTION_MESSAGE,
                                                      null,
                                                      OptionConstants.heapSizeChoices.toArray(),
-                                                     DrJava.getConfig().getSetting(MASTER_JVM_XMX));
+                                                     DrScala.getConfig().getSetting(MASTER_JVM_XMX));
     
     if (res != null) {
       // temporarily make MainFrame the parent of the dialog that pops up
-      DrJava.getConfig().removeOptionListener(MASTER_JVM_XMX, _masterJvmXmxListener);
+      DrScala.getConfig().removeOptionListener(MASTER_JVM_XMX, _masterJvmXmxListener);
       final ConfigOptionListeners.MasterJVMXMXListener l = 
         new ConfigOptionListeners.MasterJVMXMXListener(MainFrame.this);
-      DrJava.getConfig().addOptionListener(MASTER_JVM_XMX, l);
+      DrScala.getConfig().addOptionListener(MASTER_JVM_XMX, l);
       // change the setting
-      DrJava.getConfig().setSetting(MASTER_JVM_XMX,res.trim());
+      DrScala.getConfig().setSetting(MASTER_JVM_XMX,res.trim());
       EventQueue.invokeLater(new Runnable() {
         public void run() {
           // reinstall ConfigFrame as parent
-          DrJava.getConfig().removeOptionListener(MASTER_JVM_XMX, l);
-          DrJava.getConfig().addOptionListener(MASTER_JVM_XMX, _masterJvmXmxListener);
+          DrScala.getConfig().removeOptionListener(MASTER_JVM_XMX, l);
+          DrScala.getConfig().addOptionListener(MASTER_JVM_XMX, _masterJvmXmxListener);
         }
       });
     }
@@ -9084,7 +8991,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       assert EventQueue.isDispatchThread();
       final InteractionsModel im = _model.getInteractionsModel();
       final String lastError = im.getLastError();
-      final FileConfiguration config = DrJava.getConfig();
+      final FileConfiguration config = DrScala.getConfig();
       if (config != null && config.getSetting(OptionConstants.DIALOG_AUTOIMPORT_ENABLED)) {
         if (lastError != null) {
           // the interaction ended and there was an error
@@ -9157,7 +9064,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         
         _updateDebugStatus();
       }
-      if ((DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) && 
+      if ((DrScala.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue()) && 
           (_model.getBuildDirectory() != null)) {
         _scanClassFiles();
       }
@@ -9174,18 +9081,13 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     /** Called after the active compiler has been changed. */
     public void activeCompilerChanged() {
       // NOTE: Does not run in the event thread!
-      String linkVersion = DrJava.getConfig().getSetting(SCALADOC_API_REF_VERSION);
+      String linkVersion = DrScala.getConfig().getSetting(SCALADOC_API_REF_VERSION);
       if (linkVersion.equals(SCALADOC_AUTO_TEXT)) {
         // The Java API Scaladoc version must match the compiler.  Since compiler was changed, we rebuild the API list
         clearJavaAPISet();
       }
       // update syntax highlighting for all documents
       _model.updateSyntaxHighlighting();
-      /* In DrScala, Java language levels is disabled. */
-//      // update availability of language levels
-//      _guiAvailabilityNotifier.ensureAvailabilityIs
-//        (GUIAvailabilityListener.ComponentType.LANGUAGE_LEVELS,
-//         _model.getCompilerModel().getActiveCompiler().supportsLanguageLevels());
     }
     
     public void prepareForRun(final OpenDefinitionsDocument doc) {
@@ -9315,7 +9217,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     
     public void interpreterExited(final int status) {
       // Only show prompt if option is set and not in TEST_MODE
-      if (DrJava.getConfig().getSetting(INTERACTIONS_EXIT_PROMPT).booleanValue() && ! Utilities.TEST_MODE && 
+      if (DrScala.getConfig().getSetting(INTERACTIONS_EXIT_PROMPT).booleanValue() && ! Utilities.TEST_MODE && 
           MainFrame.this.isVisible()) {
         // Synchronously pop up a dialog box concerning restarting the JVM.
         String msg = "The interactions window was terminated by a call " +
@@ -9330,7 +9232,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                     JOptionPane.INFORMATION_MESSAGE,
                                     JOptionPane.DEFAULT_OPTION);
         if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue()) {
-          DrJava.getConfig().setSetting(INTERACTIONS_EXIT_PROMPT, Boolean.FALSE);
+          DrScala.getConfig().setSetting(INTERACTIONS_EXIT_PROMPT, Boolean.FALSE);
         }
       }
     }
@@ -9374,7 +9276,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
       */
     public void compileBeforeJUnit(final CompilerListener testAfterCompile, List<OpenDefinitionsDocument> outOfSync) {
 //      System.err.println("in compileBeforeJUnit, TEST_MODE = " + Utilities.TEST_MODE);
-      if (DrJava.getConfig().getSetting(ALWAYS_COMPILE_BEFORE_JUNIT).booleanValue() || Utilities.TEST_MODE) {
+      if (DrScala.getConfig().getSetting(ALWAYS_COMPILE_BEFORE_JUNIT).booleanValue() || Utilities.TEST_MODE) {
         // Compile all open source files
         _model.getCompilerModel().addListener(testAfterCompile);  // listener removes itself
         _compileAll();
@@ -9428,7 +9330,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     private void _saveAllBeforeProceeding(String message, BooleanOption option, String checkMsg) {
 //      new ScrollableDialog(null, "saveBeforeProceeding called in MainFrame", "", "").show();
       if (_model.hasModifiedDocuments()) {
-        if (! DrJava.getConfig().getSetting(option).booleanValue() && ! Utilities.TEST_MODE) {
+        if (! DrScala.getConfig().getSetting(option).booleanValue() && ! Utilities.TEST_MODE) {
           ConfirmCheckBoxDialog dialog =
             new ConfirmCheckBoxDialog(MainFrame.this, "Must Save All Files to Continue", message, checkMsg);
           int rc = dialog.show();
@@ -9437,7 +9339,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
             case JOptionPane.YES_OPTION:
               _saveAll();
               // Only remember checkbox if they say yes
-              if (dialog.getCheckBoxValue())  DrJava.getConfig().setSetting(option, Boolean.TRUE);
+              if (dialog.getCheckBoxValue())  DrScala.getConfig().setSetting(option, Boolean.TRUE);
               break;
             case JOptionPane.NO_OPTION:
             case JOptionPane.CANCEL_OPTION:
@@ -9469,7 +9371,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                           final CompilerListener afterCompile) {
 //      new ScrollableDialog(null, "saveBeforeProceeding called in MainFrame", "", "").show();
       if (_model.hasOutOfSyncDocuments()) {
-        if (! DrJava.getConfig().getSetting(option).booleanValue() && ! Utilities.TEST_MODE) {
+        if (! DrScala.getConfig().getSetting(option).booleanValue() && ! Utilities.TEST_MODE) {
           ConfirmCheckBoxDialog dialog =
             new ConfirmCheckBoxDialog(MainFrame.this, "Must Compile Files to Continue", message, checkMsg);
           int rc = dialog.show();
@@ -9479,7 +9381,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
               _model.getCompilerModel().addListener(afterCompile);  // listener removes itself
               _compileAll();
               // Only remember checkbox if they say yes
-              if (dialog.getCheckBoxValue())  DrJava.getConfig().setSetting(option, Boolean.TRUE);
+              if (dialog.getCheckBoxValue())  DrScala.getConfig().setSetting(option, Boolean.TRUE);
               break;
             case JOptionPane.NO_OPTION:
             case JOptionPane.CANCEL_OPTION:
@@ -9501,7 +9403,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     public void saveUntitled() { _saveAs(); }
     
     public void filePathContainsPound() {
-      if (DrJava.getConfig().getSetting(WARN_PATH_CONTAINS_POUND).booleanValue()) {
+      if (DrScala.getConfig().getSetting(WARN_PATH_CONTAINS_POUND).booleanValue()) {
         String msg =
           "Files whose paths contain the '#' symbol cannot be used in the\n" +
           "Interactions Pane due to a bug in Java's file to URL conversion.\n" +
@@ -9516,7 +9418,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
                                     JOptionPane.WARNING_MESSAGE,
                                     JOptionPane.DEFAULT_OPTION);
         if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue()) {
-          DrJava.getConfig().setSetting(WARN_PATH_CONTAINS_POUND, Boolean.FALSE);
+          DrScala.getConfig().setSetting(WARN_PATH_CONTAINS_POUND, Boolean.FALSE);
         }
       }
     }
@@ -9987,7 +9889,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   /** The OptionListener for FONT_DOCLIST */
   private class DoclistFontOptionListener implements OptionListener<Font> {
     public void optionChanged(OptionEvent<Font> oce) {
-      Font doclistFont = DrJava.getConfig().getSetting(FONT_DOCLIST);
+      Font doclistFont = DrScala.getConfig().getSetting(FONT_DOCLIST);
       _model.getDocCollectionWidget().setFont(doclistFont);
     }
   }
@@ -10098,9 +10000,9 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           if (file.isFile() && (DrJavaFileUtils.isSourceFile(file) || file.getName().endsWith(".txt"))) {
             filteredFileList.add(file);
           }
-          else if (file.isFile() && file.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
-            openExtProcessFile(file);
-          }
+//          else if (file.isFile() && file.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
+//            openExtProcessFile(file);
+//          }
         }
         final File[] fileArray = filteredFileList.toArray(new File[filteredFileList.size()]);
         FileOpenSelector fs = new FileOpenSelector() {
@@ -10137,30 +10039,30 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     }
     catch(XMLConfigException xce) {
       // this wasn't an XML file, try to treat it as a jar file
-      openExtProcessJarFile(file);
+//      openExtProcessJarFile(file);
     }
   }
   
-  /** Open external process file in a jar file. */
-  public static void openExtProcessJarFile(File file) {
-    try {
-      JarFile jf = new JarFile(file);
-      JarEntry je = jf.getJarEntry(EXTPROCESS_FILE_NAME_INSIDE_JAR);
-      InputStream is = jf.getInputStream(je);
-      XMLConfig xc = new XMLConfig(is);
-      String name = xc.get("drjava/extprocess/name");
-      ExecuteExternalDialog.addToMenu(name, xc.get("drjava/extprocess/cmdline"),
-                                      xc.get("drjava/extprocess/workdir"), file.getAbsolutePath());
-      JOptionPane.showMessageDialog(null, "The installation was successful for:\n"+name,
-                                    "Installation Successful", JOptionPane.INFORMATION_MESSAGE);
-      // We override the drjava/extprocess/enclosingfile and set it to the file specified
-      // because this external process came from a *.djapp file that was a JAR file.
-      is.close();
-      jf.close();
-    }
-    catch(IOException ioe) { /* ignore drop */ }
-    catch(XMLConfigException xce) { /* ignore drop */ }
-  }
+//  /** Open external process file in a jar file. */
+//  public static void openExtProcessJarFile(File file) {
+//    try {
+//      JarFile jf = new JarFile(file);
+//      JarEntry je = jf.getJarEntry(EXTPROCESS_FILE_NAME_INSIDE_JAR);
+//      InputStream is = jf.getInputStream(je);
+//      XMLConfig xc = new XMLConfig(is);
+//      String name = xc.get("drjava/extprocess/name");
+//      ExecuteExternalDialog.addToMenu(name, xc.get("drjava/extprocess/cmdline"),
+//                                      xc.get("drjava/extprocess/workdir"), file.getAbsolutePath());
+//      JOptionPane.showMessageDialog(null, "The installation was successful for:\n"+name,
+//                                    "Installation Successful", JOptionPane.INFORMATION_MESSAGE);
+//      // We override the drjava/extprocess/enclosingfile and set it to the file specified
+//      // because this external process came from a *.djapp file that was a JAR file.
+//      is.close();
+//      jf.close();
+//    }
+//    catch(IOException ioe) { /* ignore drop */ }
+//    catch(XMLConfigException xce) { /* ignore drop */ }
+//  }
   
   /** Convert a string with URIs to a list of files.
     * @param data string with URIs
@@ -10187,48 +10089,46 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
     * @param f file to open
     * @param lineNo line number to jump to, or -1 of not specified
     */
-  public void handleRemoteOpenFile(final File f, final int lineNo) {
-    if (f.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
-      openExtProcessFile(f);
-    }
-    else {
-      final FileOpenSelector openSelector = new FileOpenSelector() {
-        public File[] getFiles() throws OperationCanceledException {
-          return new File[] { f };
-        }
-      };
-      String currFileName = f.getName();
-      if (currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION) ||
-          currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION2) ||
-          currFileName.endsWith(OptionConstants.OLD_PROJECT_FILE_EXTENSION)) {
-        Utilities.invokeLater(new Runnable() { 
-          public void run() {
-            openProject(openSelector);
-          }
-        });
-      }
-      else {
-        final int l = lineNo;
-        Utilities.invokeLater(new Runnable() { 
-          public void run() {
-            open(openSelector);
-            if (l>=0) {                
-              _jumpToLine(l);
-            }
-          }
-        });
-      }
-    }
-  }
-  
-  /** Reset the position of the "Open Scaladoc" dialog. */
-  public void resetAutoImportDialogPosition() {
-    _initAutoImportDialog();
-    _autoImportDialog.setFrameState("default");
-    if (DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STORE_POSITION).booleanValue()) {
-      DrJava.getConfig().setSetting(DIALOG_AUTOIMPORT_STATE, "default");
-    }
-  }
+//  public void handleRemoteOpenFile(final File f, final int lineNo) {
+//    if (f.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
+//      openExtProcessFile(f);
+//    }
+//    else {
+//      final FileOpenSelector openSelector = new FileOpenSelector() {
+//        public File[] getFiles() throws OperationCanceledException {
+//          return new File[] { f };
+//        }
+//      };
+//      String currFileName = f.getName();
+//      if (currFileName.endsWith(OptionConstants.PROJECT_FILE_EXTENSION)) {
+//        Utilities.invokeLater(new Runnable() { 
+//          public void run() {
+//            openProject(openSelector);
+//          }
+//        });
+//      }
+//      else {
+//        final int l = lineNo;
+//        Utilities.invokeLater(new Runnable() { 
+//          public void run() {
+//            open(openSelector);
+//            if (l>=0) {                
+//              _jumpToLine(l);
+//            }
+//          }
+//        });
+//      }
+//    }
+//  }
+//  
+//  /** Reset the position of the "Open Scaladoc" dialog. */
+//  public void resetAutoImportDialogPosition() {
+//    _initAutoImportDialog();
+//    _autoImportDialog.setFrameState("default");
+//    if (DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STORE_POSITION).booleanValue()) {
+//      DrJava.getConfig().setSetting(DIALOG_AUTOIMPORT_STATE, "default");
+//    }
+//  }
   
   /** Initialize dialog if necessary. */
   private void _initAutoImportDialog() {
@@ -10310,8 +10210,8 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
         protected JComponent[] makeOptions() { return new JComponent[] { _autoImportPackageCheckbox }; }
       }; 
       // Put one dummy entry in the list; it will be changed later anyway
-      if (DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STORE_POSITION).booleanValue()) {
-        _autoImportDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_AUTOIMPORT_STATE));
+      if (DrScala.getConfig().getSetting(DIALOG_AUTOIMPORT_STORE_POSITION).booleanValue()) {
+        _autoImportDialog.setFrameState(DrScala.getConfig().getSetting(DIALOG_AUTOIMPORT_STATE));
       }
       generateJavaAPISet();
     }
@@ -10337,7 +10237,7 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
           public void run() {
             // but now run this in the event thread again
             List<JavaAPIListEntry> autoImportList = new ArrayList<JavaAPIListEntry>(apiSet);
-            if (DrJava.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue() &&
+            if (DrScala.getConfig().getSetting(DIALOG_COMPLETE_SCAN_CLASS_FILES).booleanValue() &&
                 _autoImportClassSet.size() > 0) {
               autoImportList.addAll(_autoImportClassSet);
             }
@@ -10426,16 +10326,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Initializes the "Execute External Process" dialog. */
   private void initExecuteExternalProcessDialog() {
-    if (DrJava.getConfig().getSetting(DIALOG_EXTERNALPROCESS_STORE_POSITION).booleanValue()) {
-      _executeExternalDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_EXTERNALPROCESS_STATE));
+    if (DrScala.getConfig().getSetting(DIALOG_EXTERNALPROCESS_STORE_POSITION).booleanValue()) {
+      _executeExternalDialog.setFrameState(DrScala.getConfig().getSetting(DIALOG_EXTERNALPROCESS_STATE));
     }
   }
   
   /** Reset the position of the "Execute External Process" dialog. */
   public void resetExecuteExternalProcessPosition() {
     _executeExternalDialog.setFrameState("default");
-    if (DrJava.getConfig().getSetting(DIALOG_EXTERNALPROCESS_STORE_POSITION).booleanValue()) {
-      DrJava.getConfig().setSetting(DIALOG_EXTERNALPROCESS_STATE, "default");
+    if (DrScala.getConfig().getSetting(DIALOG_EXTERNALPROCESS_STORE_POSITION).booleanValue()) {
+      DrScala.getConfig().setSetting(DIALOG_EXTERNALPROCESS_STATE, "default");
     }
   }
   
@@ -10444,16 +10344,16 @@ public class MainFrame extends SwingFrame implements ClipboardOwner, DropTargetL
   
   /** Initializes the "Edit External Process" dialog. */
   private void initEditExternalProcessDialog() {
-    if (DrJava.getConfig().getSetting(DIALOG_EDITEXTERNALPROCESS_STORE_POSITION).booleanValue()) {
-      _editExternalDialog.setFrameState(DrJava.getConfig().getSetting(DIALOG_EDITEXTERNALPROCESS_STATE));
+    if (DrScala.getConfig().getSetting(DIALOG_EDITEXTERNALPROCESS_STORE_POSITION).booleanValue()) {
+      _editExternalDialog.setFrameState(DrScala.getConfig().getSetting(DIALOG_EDITEXTERNALPROCESS_STATE));
     }
   }
   
   /** Reset the position of the "Edit External Process" dialog. */
   public void resetEditExternalProcessPosition() {
     _editExternalDialog.setFrameState("default");
-    if (DrJava.getConfig().getSetting(DIALOG_EDITEXTERNALPROCESS_STORE_POSITION).booleanValue()) {
-      DrJava.getConfig().setSetting(DIALOG_EDITEXTERNALPROCESS_STATE, "default");
+    if (DrScala.getConfig().getSetting(DIALOG_EDITEXTERNALPROCESS_STORE_POSITION).booleanValue()) {
+      DrScala.getConfig().setSetting(DIALOG_EDITEXTERNALPROCESS_STATE, "default");
     }
   }
   

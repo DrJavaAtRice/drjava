@@ -44,7 +44,7 @@ import java.io.*;
 import java.net.*;
 import java.util.Date;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.Version;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.platform.*;
@@ -84,10 +84,10 @@ public class DrJavaSurveyPopup extends JDialog {
     _yesButton = new JButton(_yesAction);
     _noButton = new JButton(_noAction);
     _neverAskAgain = new JCheckBox("Never ask me again",
-                                   !DrJava.getConfig().getSetting(OptionConstants.DIALOG_DRSCALA_SURVEY_ENABLED).booleanValue());
+                                   !DrScala.getConfig().getSetting(OptionConstants.DIALOG_DRSCALA_SURVEY_ENABLED).booleanValue());
     _neverAskAgain.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
-        DrJava.getConfig().setSetting(OptionConstants.DIALOG_DRSCALA_SURVEY_ENABLED, !_neverAskAgain.isSelected());
+        DrScala.getConfig().setSetting(OptionConstants.DIALOG_DRSCALA_SURVEY_ENABLED, !_neverAskAgain.isSelected());
       }
     });
 
@@ -145,8 +145,8 @@ public class DrJavaSurveyPopup extends JDialog {
     // set the date we asked even if the user pressed no
     // so the user won't be bothered the next time he starts DrJava
     // next popup will occur in DRSCALA_SURVEY_DAYS (91) days.
-    DrJava.getConfig().setSetting(OptionConstants.LAST_DRSCALA_SURVEY, new Date().getTime());
-    DrJava.getConfig().setSetting(OptionConstants.LAST_DRSCALA_SURVEY_RESULT, getSurveyURL());
+    DrScala.getConfig().setSetting(OptionConstants.LAST_DRSCALA_SURVEY, new Date().getTime());
+    DrScala.getConfig().setSetting(OptionConstants.LAST_DRSCALA_SURVEY_RESULT, getSurveyURL());
     setVisible(false);
     dispose();
   }
@@ -174,12 +174,12 @@ public class DrJavaSurveyPopup extends JDialog {
     * string has changed from the last time, or enough days have passed since the last test (3 months) */
   public static boolean maySubmitSurvey() {
     // check how many days have passed since the last survey
-    int days = DrJava.getConfig().getSetting(OptionConstants.DRSCALA_SURVEY_DAYS);
+    int days = DrScala.getConfig().getSetting(OptionConstants.DRSCALA_SURVEY_DAYS);
     Date nextCheck = 
-      new Date(DrJava.getConfig().getSetting(OptionConstants.LAST_DRSCALA_SURVEY) +
+      new Date(DrScala.getConfig().getSetting(OptionConstants.LAST_DRSCALA_SURVEY) +
                days * 24L * 60 * 60 * 1000); // x days after last check; 24L ensures long accumulation
     return (new Date().after(nextCheck)) ||
-      (!DrJava.getConfig().getSetting(OptionConstants.LAST_DRSCALA_SURVEY_RESULT).equals(getSurveyURL()));
+      (!DrScala.getConfig().getSetting(OptionConstants.LAST_DRSCALA_SURVEY_RESULT).equals(getSurveyURL()));
   }
   
   protected void yesAction() {
@@ -210,7 +210,7 @@ public class DrJavaSurveyPopup extends JDialog {
         LOG.log("Could not open URL using Java", e);
         try {
           PlatformFactory.ONLY.openURL(new URL(result));
-          DrJava.getConfig().setSetting(OptionConstants.LAST_DRSCALA_SURVEY_RESULT, result);
+          DrScala.getConfig().setSetting(OptionConstants.LAST_DRSCALA_SURVEY_RESULT, result);
         }
         catch(IOException e2) {
           // could not open using Java or web browser, ignore

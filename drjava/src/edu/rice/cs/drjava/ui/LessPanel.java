@@ -94,7 +94,7 @@ public class LessPanel extends AbortablePanel {
           public void run() {
             while(_fr != null) {
               try {
-                Thread.sleep(edu.rice.cs.drjava.DrJava.getConfig().
+                Thread.sleep(edu.rice.cs.drjava.DrScala.getConfig().
                                getSetting(edu.rice.cs.drjava.config.OptionConstants.FOLLOW_FILE_DELAY));
               }
               catch(InterruptedException ie) { /* ignore */ }
@@ -209,7 +209,7 @@ public class LessPanel extends AbortablePanel {
               if (changeCount > 0) {
                 // MainFrame.LOG.log("\tsetting text");
                 _textArea.setText(sb.toString());
-                int maxLines = edu.rice.cs.drjava.DrJava.getConfig().
+                int maxLines = edu.rice.cs.drjava.DrScala.getConfig().
                   getSetting(edu.rice.cs.drjava.config.OptionConstants.FOLLOW_FILE_LINES);
                 if (maxLines > 0) { // if maxLines is 0, buffer is unlimited
                   try {

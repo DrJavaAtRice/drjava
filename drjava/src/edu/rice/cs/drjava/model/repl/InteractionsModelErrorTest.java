@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model.repl;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 
@@ -51,7 +51,7 @@ import edu.rice.cs.plt.tuple.Pair;
 
 import edu.rice.cs.drjava.model.repl.newjvm.*;
 import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 import edu.rice.cs.plt.tuple.OptionVisitor;
 import edu.rice.cs.plt.reflect.ReflectUtil;

@@ -36,12 +36,12 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 /** Class according to the JUnit protocol. Tests the proper functionality of the class StringOption.
  *  @version $Id: StringOptionTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public final class StringOptionTest extends DrJavaTestCase {
+public final class StringOptionTest extends DrScalaTestCase {
   /** @param name The name of this test case. */
   public StringOptionTest(String name) { super(name); }
   

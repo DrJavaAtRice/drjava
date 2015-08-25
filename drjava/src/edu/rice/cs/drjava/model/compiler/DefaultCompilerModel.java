@@ -45,7 +45,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.JOptionPane;
 import java.util.*;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.model.AbstractGlobalModel;
@@ -117,7 +117,7 @@ public class DefaultCompilerModel implements CompilerModel {
     
     OptionConstants.COMPILER_PREFERENCE_CONTROL.setList(compilerNames); // populates the compiler list for preference panel
     
-    String dCompName = DrJava.getConfig().getSetting(OptionConstants.DEFAULT_COMPILER_PREFERENCE);
+    String dCompName = DrScala.getConfig().getSetting(OptionConstants.DEFAULT_COMPILER_PREFERENCE);
     
     if (_compilers.size() > 0) {
       if (! dCompName.equals(OptionConstants.COMPILER_PREFERENCE_CONTROL.NO_PREFERENCE) &&

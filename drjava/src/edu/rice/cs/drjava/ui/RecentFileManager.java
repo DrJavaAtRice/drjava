@@ -43,7 +43,7 @@ import java.io.IOException;
 import java.util.Vector;
 import java.util.HashSet;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.plt.lambda.Runnable1;
 
@@ -65,7 +65,7 @@ public class RecentFileManager implements OptionConstants {
   protected Vector<File> _recentFiles;
   
   /** The maximum number of files to display in the list. */
-  protected int MAX = DrJava.getConfig().getSetting(RECENT_FILES_MAX_SIZE).intValue();
+  protected int MAX = DrScala.getConfig().getSetting(RECENT_FILES_MAX_SIZE).intValue();
   
   /** The File menu containing the entries. */
   protected JMenu _fileMenu;
@@ -91,7 +91,7 @@ public class RecentFileManager implements OptionConstants {
     _settingConfigConstant = settingConfigConstant;
     
     // Add each of the files stored in the config
-    Vector<File> files = DrJava.getConfig().getSetting(_settingConfigConstant);
+    Vector<File> files = DrScala.getConfig().getSetting(_settingConfigConstant);
     
     for (int i = files.size() - 1; i >= 0; i--) {
       File f = files.get(i);
@@ -145,7 +145,7 @@ public class RecentFileManager implements OptionConstants {
   
   /** Saves the current list of files to the config object. */
   public void saveRecentFiles() {
-    DrJava.getConfig().setSetting(_settingConfigConstant, _recentFiles);
+    DrScala.getConfig().setSetting(_settingConfigConstant, _recentFiles);
   }
   
   /** Updates the list after the given file has been opened. */

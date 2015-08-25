@@ -36,8 +36,8 @@
 
 package edu.rice.cs.drjava.ui.config;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScala;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.config.KeyStrokeOption;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.DefaultSwingFrame;
@@ -48,14 +48,14 @@ import javax.swing.*;
 import java.awt.event.KeyEvent;
 
 /** Tests functionality of this OptionComponent. */
-public final class VectorKeyStrokeOptionComponentTest extends DrJavaTestCase {
+public final class VectorKeyStrokeOptionComponentTest extends DrScalaTestCase {
 
   private static VectorKeyStrokeOptionComponent _option;
 
   protected void setUp() throws Exception {
     super.setUp();
     _option = new VectorKeyStrokeOptionComponent(OptionConstants.KEY_NEW_FILE, "Normal KeyStroke", new DefaultSwingFrame());
-    DrJava.getConfig().resetToDefaults();
+    DrScala.getConfig().resetToDefaults();
     Utilities.clearEventQueue();
   }
 
@@ -70,7 +70,7 @@ public final class VectorKeyStrokeOptionComponentTest extends DrJavaTestCase {
     Utilities.clearEventQueue();
     assertEquals("Cancel (resetToCurrent) should not change the config",
                  OptionConstants.KEY_NEW_FILE.getDefault(),
-                 DrJava.getConfig().getSetting(OptionConstants.KEY_NEW_FILE));
+                 DrScala.getConfig().getSetting(OptionConstants.KEY_NEW_FILE));
   }
 
   public void testApplyDoesChangeConfig() {
@@ -82,7 +82,7 @@ public final class VectorKeyStrokeOptionComponentTest extends DrJavaTestCase {
     Utilities.clearEventQueue();
     assertEquals("Apply (updateConfig) should write change to file",
                  testKeyStroke,
-                 DrJava.getConfig().getSetting(OptionConstants.KEY_NEW_FILE));
+                 DrScala.getConfig().getSetting(OptionConstants.KEY_NEW_FILE));
   }
 
   public void testApplyThenResetDefault() {
@@ -99,7 +99,7 @@ public final class VectorKeyStrokeOptionComponentTest extends DrJavaTestCase {
     
     assertEquals("Apply (updateConfig) should write change to file",
                  OptionConstants.KEY_NEW_FILE.getDefault(),
-                 DrJava.getConfig().getSetting(OptionConstants.KEY_NEW_FILE));
+                 DrScala.getConfig().getSetting(OptionConstants.KEY_NEW_FILE));
   }
 
 }

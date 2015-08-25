@@ -36,11 +36,11 @@
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import junit.framework.*;
 
 /** Tests for MultiThreadedTestCase. */
-public class MultiThreadedTestCaseTest extends DrJavaTestCase {
+public class MultiThreadedTestCaseTest extends DrScalaTestCase {
   public MultiThreadedTestCaseTest() { super(); }
   public MultiThreadedTestCaseTest(String name) { super(name); }
   

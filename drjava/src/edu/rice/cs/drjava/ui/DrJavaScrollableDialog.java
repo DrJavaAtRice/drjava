@@ -40,7 +40,7 @@ import javax.swing.*;
 
 import edu.rice.cs.util.swing.ScrollableDialog;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 /** A JDialog with a scrollable text area and a button panel. Uses DrJava's configurable Main Font in the text area.
@@ -94,6 +94,6 @@ public class DrJavaScrollableDialog extends ScrollableDialog {
   public DrJavaScrollableDialog(JFrame parent, String title, String header,
                                 String text, int width, int height, boolean wrap) {
     super(parent, title, header, text, width, height, wrap);
-    setTextFont(DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN));
+    setTextFont(DrScala.getConfig().getSetting(OptionConstants.FONT_MAIN));
   }
 }

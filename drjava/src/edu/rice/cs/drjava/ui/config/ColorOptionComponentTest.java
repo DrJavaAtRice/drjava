@@ -36,8 +36,8 @@
 
 package edu.rice.cs.drjava.ui.config;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScala;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.DefaultSwingFrame;
 import edu.rice.cs.util.swing.Utilities;
@@ -47,7 +47,7 @@ import java.awt.*;
 /** Tests functionality of this OptionComponent
   * @version $Id:
   */
-public final class ColorOptionComponentTest extends DrJavaTestCase {
+public final class ColorOptionComponentTest extends DrScalaTestCase {
 
   private static ColorOptionComponent _option;
 
@@ -56,7 +56,7 @@ public final class ColorOptionComponentTest extends DrJavaTestCase {
   protected void setUp() throws Exception {
     super.setUp();
     _option = new ColorOptionComponent(OptionConstants.DEFINITIONS_NORMAL_COLOR, "Normal Color", new DefaultSwingFrame());
-    DrJava.getConfig().resetToDefaults();
+    DrScala.getConfig().resetToDefaults();
     Utilities.clearEventQueue();
   }
 
@@ -73,7 +73,7 @@ public final class ColorOptionComponentTest extends DrJavaTestCase {
 
     assertEquals("Cancel (resetToCurrent) should not change the config",
                  OptionConstants.DEFINITIONS_NORMAL_COLOR.getDefault(),
-                 DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
+                 DrScala.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
 
   }
 
@@ -86,7 +86,7 @@ public final class ColorOptionComponentTest extends DrJavaTestCase {
     Utilities.clearEventQueue();
     assertEquals("Apply (updateConfig) should write change to file",
                  testColor,
-                 DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
+                 DrScala.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
   }
 
   public void testApplyThenResetDefault() {
@@ -104,7 +104,7 @@ public final class ColorOptionComponentTest extends DrJavaTestCase {
 
     assertEquals("Apply (updateConfig) should write change to file",
                  OptionConstants.DEFINITIONS_NORMAL_COLOR.getDefault(),
-                 DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
+                 DrScala.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
   }
 
 }

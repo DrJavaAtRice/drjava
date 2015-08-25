@@ -56,7 +56,7 @@ public class FileOptionComponent extends OptionComponent<File,FileSelectorCompon
   public FileOptionComponent (FileOption opt, String text, SwingFrame parent, JFileChooser jfc) {
     super(opt, text, parent);
     _component = new FileSelectorComponent(parent, jfc, 30, 10f);
-    File setting = DrJava.getConfig().getSetting(_option);
+    File setting = DrScala.getConfig().getSetting(_option);
     if (setting != _option.getDefault()) { _component.setFileField(setting); }
     _component.getFileField().getDocument().addDocumentListener(new DocumentListener() {
       public void insertUpdate(DocumentEvent e) { notifyChangeListeners(); }
@@ -76,7 +76,7 @@ public class FileOptionComponent extends OptionComponent<File,FileSelectorCompon
   public FileOptionComponent (FileOption opt, String text, SwingFrame parent, FileSelectorComponent fsc) {
     super(opt, text, parent);
     _component = fsc;
-    File setting = DrJava.getConfig().getSetting(_option);
+    File setting = DrScala.getConfig().getSetting(_option);
     if (setting != _option.getDefault()) { _component.setFileField(setting); }
     _component.getFileField().getDocument().addDocumentListener(new DocumentListener() {
       public void insertUpdate(DocumentEvent e) { notifyChangeListeners(); }
@@ -107,13 +107,13 @@ public class FileOptionComponent extends OptionComponent<File,FileSelectorCompon
     */
   public boolean updateConfig() {
     File componentFile = _component.getFileFromField();
-    File currentFile = DrJava.getConfig().getSetting(_option);
+    File currentFile = DrScala.getConfig().getSetting(_option);
     
     if (componentFile != null && ! componentFile.equals(currentFile)) {
-      DrJava.getConfig().setSetting(_option, componentFile);
+      DrScala.getConfig().setSetting(_option, componentFile);
     }
     else if (componentFile == null) {
-      DrJava.getConfig().setSetting(_option, _option.getDefault());
+      DrScala.getConfig().setSetting(_option, _option.getDefault());
     }
 
     return true;

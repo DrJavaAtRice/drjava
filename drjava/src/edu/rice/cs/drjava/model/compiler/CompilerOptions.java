@@ -37,7 +37,7 @@
 package edu.rice.cs.drjava.model.compiler;
 
 import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 
 import java.util.HashMap;
 
@@ -45,12 +45,12 @@ import java.util.HashMap;
 
 public class CompilerOptions implements OptionConstants {
   
-  private static boolean SHOW_UNCHECKED = DrJava.getConfig().getSetting(SHOW_UNCHECKED_WARNINGS);
-  private static boolean SHOW_DEPRECATION = DrJava.getConfig().getSetting(SHOW_DEPRECATION_WARNINGS);
-  private static boolean SHOW_PATH = DrJava.getConfig().getSetting(SHOW_PATH_WARNINGS);
-  private static boolean SHOW_SERIAL = DrJava.getConfig().getSetting(SHOW_SERIAL_WARNINGS);
-  private static boolean SHOW_FINALLY = DrJava.getConfig().getSetting(SHOW_FINALLY_WARNINGS);
-  private static boolean SHOW_FALLTHROUGH = DrJava.getConfig().getSetting(SHOW_FALLTHROUGH_WARNINGS);
+  private static boolean SHOW_UNCHECKED = DrScala.getConfig().getSetting(SHOW_UNCHECKED_WARNINGS);
+  private static boolean SHOW_DEPRECATION = DrScala.getConfig().getSetting(SHOW_DEPRECATION_WARNINGS);
+  private static boolean SHOW_PATH = DrScala.getConfig().getSetting(SHOW_PATH_WARNINGS);
+  private static boolean SHOW_SERIAL = DrScala.getConfig().getSetting(SHOW_SERIAL_WARNINGS);
+  private static boolean SHOW_FINALLY = DrScala.getConfig().getSetting(SHOW_FINALLY_WARNINGS);
+  private static boolean SHOW_FALLTHROUGH = DrScala.getConfig().getSetting(SHOW_FALLTHROUGH_WARNINGS);
    
   private static WarningOptionListener wol = new WarningOptionListener();
   
@@ -62,22 +62,22 @@ public class CompilerOptions implements OptionConstants {
   }
   
   public static void updateWarnings() {
-    SHOW_UNCHECKED = DrJava.getConfig().getSetting(SHOW_UNCHECKED_WARNINGS);
-    SHOW_DEPRECATION = DrJava.getConfig().getSetting(SHOW_DEPRECATION_WARNINGS);
-    SHOW_PATH = DrJava.getConfig().getSetting(SHOW_PATH_WARNINGS);
-    SHOW_SERIAL = DrJava.getConfig().getSetting(SHOW_SERIAL_WARNINGS);
-    SHOW_FINALLY = DrJava.getConfig().getSetting(SHOW_FINALLY_WARNINGS);
-    SHOW_FALLTHROUGH = DrJava.getConfig().getSetting(SHOW_FALLTHROUGH_WARNINGS);
+    SHOW_UNCHECKED = DrScala.getConfig().getSetting(SHOW_UNCHECKED_WARNINGS);
+    SHOW_DEPRECATION = DrScala.getConfig().getSetting(SHOW_DEPRECATION_WARNINGS);
+    SHOW_PATH = DrScala.getConfig().getSetting(SHOW_PATH_WARNINGS);
+    SHOW_SERIAL = DrScala.getConfig().getSetting(SHOW_SERIAL_WARNINGS);
+    SHOW_FINALLY = DrScala.getConfig().getSetting(SHOW_FINALLY_WARNINGS);
+    SHOW_FALLTHROUGH = DrScala.getConfig().getSetting(SHOW_FALLTHROUGH_WARNINGS);
   }
   
   
   static {
-    DrJava.getConfig().addOptionListener( OptionConstants.SHOW_UNCHECKED_WARNINGS, wol);
-    DrJava.getConfig().addOptionListener( OptionConstants.SHOW_DEPRECATION_WARNINGS, wol);
-    DrJava.getConfig().addOptionListener( OptionConstants.SHOW_PATH_WARNINGS, wol);
-    DrJava.getConfig().addOptionListener( OptionConstants.SHOW_SERIAL_WARNINGS, wol);
-    DrJava.getConfig().addOptionListener( OptionConstants.SHOW_FINALLY_WARNINGS, wol);
-    DrJava.getConfig().addOptionListener( OptionConstants.SHOW_FALLTHROUGH_WARNINGS, wol);    
+    DrScala.getConfig().addOptionListener( OptionConstants.SHOW_UNCHECKED_WARNINGS, wol);
+    DrScala.getConfig().addOptionListener( OptionConstants.SHOW_DEPRECATION_WARNINGS, wol);
+    DrScala.getConfig().addOptionListener( OptionConstants.SHOW_PATH_WARNINGS, wol);
+    DrScala.getConfig().addOptionListener( OptionConstants.SHOW_SERIAL_WARNINGS, wol);
+    DrScala.getConfig().addOptionListener( OptionConstants.SHOW_FINALLY_WARNINGS, wol);
+    DrScala.getConfig().addOptionListener( OptionConstants.SHOW_FALLTHROUGH_WARNINGS, wol);    
   }
   
   public static HashMap<String,String> getOptions(boolean warningsEnabled) {    

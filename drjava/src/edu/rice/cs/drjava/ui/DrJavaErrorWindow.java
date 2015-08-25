@@ -44,7 +44,7 @@ import java.awt.event.*;
 import java.awt.*;
 import java.util.Map;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
@@ -192,13 +192,13 @@ public class DrJavaErrorWindow extends JDialog {
     if (vis) {
       init();
       if (_parentFrame != null) {
-        edu.rice.cs.drjava.DrJavaRoot.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
+        edu.rice.cs.drjava.DrScalaRoot.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
       }
       toFront();
     }
     else {
       if (_parentFrame != null) {
-        edu.rice.cs.drjava.DrJavaRoot.removeModalWindowAdapter(this);
+        edu.rice.cs.drjava.DrScalaRoot.removeModalWindowAdapter(this);
         _parentFrame.toFront();
       }
     }
@@ -304,7 +304,7 @@ public class DrJavaErrorWindow extends JDialog {
     b.append("System Properties:\n");
     b.append("DrScala Version ");
     b.append(edu.rice.cs.drjava.Version.getVersionString());
-    FileConfiguration config = DrJava.getConfig();
+    FileConfiguration config = DrScala.getConfig();
     if (config!=null) {
       String customDrJavaJarVersionSuffix = config.getSetting(OptionConstants.CUSTOM_DRSCALA_JAR_VERSION_SUFFIX);
       if (customDrJavaJarVersionSuffix.length()>0)  {
@@ -339,7 +339,7 @@ public class DrJavaErrorWindow extends JDialog {
     }
     b.append('\n');
     b.append("DrScala configuration file\n");
-    b.append(DrJava.getConfig().toString());
+    b.append(DrScala.getConfig().toString());
     
     b.append("\n\nUsed memory: about ");
     b.append(StringOps.memSizeToString(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()));

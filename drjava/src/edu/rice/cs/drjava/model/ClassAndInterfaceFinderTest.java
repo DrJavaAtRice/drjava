@@ -34,7 +34,7 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -47,7 +47,7 @@ import java.io.StringReader;
  * @version $Id: ClassAndInterfaceFinderTest.java 5727 2012-09-30 03:58:32Z rcartwright $
  */
 
-public class ClassAndInterfaceFinderTest extends DrJavaTestCase {
+public class ClassAndInterfaceFinderTest extends DrScalaTestCase {
   
   
   /** Tests to see if string input is properly parsed to obtain trait name.

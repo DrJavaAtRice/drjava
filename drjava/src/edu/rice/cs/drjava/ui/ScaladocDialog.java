@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.util.swing.DirectorySelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.Configuration;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.DirectorySelector;
@@ -127,7 +127,7 @@ public class ScaladocDialog implements DirectorySelector {
       _selector.setFileField(_suggestedDir);
     }
     
-    Configuration config = DrJava.getConfig();
+    Configuration config = DrScala.getConfig();
     boolean ask = config.getSetting(OptionConstants.SCALADOC_PROMPT_FOR_DESTINATION).booleanValue();
     
     if (ask) {

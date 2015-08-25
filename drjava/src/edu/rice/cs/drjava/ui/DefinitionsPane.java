@@ -58,7 +58,7 @@ import edu.rice.cs.drjava.model.definitions.NoSuchDocumentException;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
 import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 
 import static edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates.*;
@@ -122,7 +122,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
   /** Highlight painter for bookmarks. */
   static volatile ReverseHighlighter.DefaultUnderlineHighlightPainter BOOKMARK_PAINTER =
-    new ReverseHighlighter.DefaultUnderlineHighlightPainter(DrJava.getConfig().getSetting(BOOKMARK_COLOR), 3);
+    new ReverseHighlighter.DefaultUnderlineHighlightPainter(DrScala.getConfig().getSetting(BOOKMARK_COLOR), 3);
 
   /** Highlight painter for find results.
     * Keep in mind that, while the array is volatile, the elements inside of it are not! */
@@ -132,7 +132,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     FIND_RESULTS_PAINTERS = new LayeredHighlighter.LayerPainter[FIND_RESULTS_COLORS.length+1];
     for(int i = 0; i < FIND_RESULTS_COLORS.length; ++i) {
       FIND_RESULTS_PAINTERS[i] =
-        new ReverseHighlighter.DefaultFrameHighlightPainter(DrJava.getConfig().getSetting(FIND_RESULTS_COLORS[i]), 2);
+        new ReverseHighlighter.DefaultFrameHighlightPainter(DrScala.getConfig().getSetting(FIND_RESULTS_COLORS[i]), 2);
     }
     FIND_RESULTS_PAINTERS[FIND_RESULTS_COLORS.length] =
         new ReverseHighlighter.DefaultUnderlineHighlightPainter(Color.WHITE, 0);
@@ -144,15 +144,15 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
   /** Highlight painter for breakpoints. */
   static volatile ReverseHighlighter.DrJavaHighlightPainter BREAKPOINT_PAINTER =
-    new ReverseHighlighter.DrJavaHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
+    new ReverseHighlighter.DrJavaHighlightPainter(DrScala.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
 
   /** Highlight painter for disabled breakpoints. */
   static volatile ReverseHighlighter.DrJavaHighlightPainter DISABLED_BREAKPOINT_PAINTER =
-    new ReverseHighlighter.DrJavaHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_DISABLED_COLOR));
+    new ReverseHighlighter.DrJavaHighlightPainter(DrScala.getConfig().getSetting(DEBUG_BREAKPOINT_DISABLED_COLOR));
 
   /** Highlight painter for thread's current location. */
   static volatile ReverseHighlighter.DrJavaHighlightPainter THREAD_PAINTER =
-    new ReverseHighlighter.DrJavaHighlightPainter(DrJava.getConfig().getSetting(DEBUG_THREAD_COLOR));
+    new ReverseHighlighter.DrJavaHighlightPainter(DrScala.getConfig().getSetting(DEBUG_THREAD_COLOR));
 
   /** The name of the keymap added to the super class (saved so it can be removed). */
   public static final String INDENT_KEYMAP_NAME = "INDENT_KEYMAP";
@@ -500,7 +500,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     //super.setDocument(NULL_DOCUMENT);
     _resetUndo();
     
-    Font mainFont = DrJava.getConfig().getSetting(FONT_MAIN);
+    Font mainFont = DrScala.getConfig().getSetting(FONT_MAIN);
     setFont(mainFont);
     
     setEditable(true);
@@ -528,10 +528,10 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   
 //    this.setEditorKit(new StyledEditorKit());
 
-    _antiAliasText = DrJava.getConfig().getSetting(TEXT_ANTIALIAS);
-    _displayRightMargin = DrJava.getConfig().getSetting(DISPLAY_RIGHT_MARGIN);
-    _numRightMarginColumns = DrJava.getConfig().getSetting(RIGHT_MARGIN_COLUMNS);
-    _rightMarginColor = DrJava.getConfig().getSetting(RIGHT_MARGIN_COLOR);
+    _antiAliasText = DrScala.getConfig().getSetting(TEXT_ANTIALIAS);
+    _displayRightMargin = DrScala.getConfig().getSetting(DISPLAY_RIGHT_MARGIN);
+    _numRightMarginColumns = DrScala.getConfig().getSetting(RIGHT_MARGIN_COLUMNS);
+    _rightMarginColor = DrScala.getConfig().getSetting(RIGHT_MARGIN_COLOR);
       
     // Setup the color listeners. NOTE: the Foreground/Background listeners add themselves to DrJava.getConfig() 
     // in their own constructors. Rather than refactor it, we decided to work with that design decision. 
@@ -556,7 +556,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       final Pair<Option<Color>, OptionListener<Color>> mcPair = 
         new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEFINITIONS_MATCH_COLOR, mcListener);
       _colorOptionListeners.add(mcPair);
-      DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_MATCH_COLOR, mcListener);
+      DrScala.getConfig().addOptionListener(OptionConstants.DEFINITIONS_MATCH_COLOR, mcListener);
     }
     
     {
@@ -564,7 +564,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       final Pair<Option<Color>, OptionListener<Color>> ecPair = 
         new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.COMPILER_ERROR_COLOR, ecListener);
       _colorOptionListeners.add(ecPair);
-      DrJava.getConfig().addOptionListener(OptionConstants.COMPILER_ERROR_COLOR, ecListener);
+      DrScala.getConfig().addOptionListener(OptionConstants.COMPILER_ERROR_COLOR, ecListener);
     }
 
     {
@@ -572,7 +572,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       final Pair<Option<Color>, OptionListener<Color>> bcPair = 
         new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.BOOKMARK_COLOR, bcListener);
       _colorOptionListeners.add(bcPair);
-      DrJava.getConfig().addOptionListener(OptionConstants.BOOKMARK_COLOR, bcListener);
+      DrScala.getConfig().addOptionListener(OptionConstants.BOOKMARK_COLOR, bcListener);
     }
 
     for (int i = 0; i < FIND_RESULTS_COLORS.length; ++i) {
@@ -580,7 +580,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       final Pair<Option<Color>, OptionListener<Color>> cPair = 
          new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.FIND_RESULTS_COLORS[i], cListener);
       _colorOptionListeners.add(cPair);
-      DrJava.getConfig().addOptionListener(OptionConstants.FIND_RESULTS_COLORS[i], cListener);
+      DrScala.getConfig().addOptionListener(OptionConstants.FIND_RESULTS_COLORS[i], cListener);
     }
     
     {
@@ -588,7 +588,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       final Pair<Option<Color>, OptionListener<Color>> bcPair = 
         new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_BREAKPOINT_COLOR, bcListener);
       _colorOptionListeners.add(bcPair);
-      DrJava.getConfig().addOptionListener(OptionConstants.DEBUG_BREAKPOINT_COLOR, bcListener);
+      DrScala.getConfig().addOptionListener(OptionConstants.DEBUG_BREAKPOINT_COLOR, bcListener);
     }
     
     {
@@ -596,7 +596,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       final Pair<Option<Color>, OptionListener<Color>> dbcPair = 
         new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_BREAKPOINT_DISABLED_COLOR, dbcListener);
       _colorOptionListeners.add(dbcPair);
-      DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_BREAKPOINT_DISABLED_COLOR, dbcListener);
+      DrScala.getConfig().addOptionListener( OptionConstants.DEBUG_BREAKPOINT_DISABLED_COLOR, dbcListener);
     }
     
     {
@@ -604,7 +604,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       final Pair<Option<Color>, OptionListener<Color>> tcPair = 
         new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.DEBUG_THREAD_COLOR, tcListener);
       _colorOptionListeners.add(tcPair);
-      DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_THREAD_COLOR, tcListener);
+      DrScala.getConfig().addOptionListener( OptionConstants.DEBUG_THREAD_COLOR, tcListener);
     }
 
     {
@@ -612,7 +612,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       final Pair<Option<Boolean>, OptionListener<Boolean>> aaPair = 
         new Pair<Option<Boolean>, OptionListener<Boolean>>(OptionConstants.TEXT_ANTIALIAS, aaListener);
       _booleanOptionListeners.add(aaPair);
-      DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS, aaListener);
+      DrScala.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS, aaListener);
     }
     
     {
@@ -625,7 +625,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       final Pair<Option<Boolean>, OptionListener<Boolean>> rmPair = 
         new Pair<Option<Boolean>, OptionListener<Boolean>>(OptionConstants.DISPLAY_RIGHT_MARGIN, rmListener);
       _booleanOptionListeners.add(rmPair);
-      DrJava.getConfig().addOptionListener(OptionConstants.DISPLAY_RIGHT_MARGIN, rmListener);
+      DrScala.getConfig().addOptionListener(OptionConstants.DISPLAY_RIGHT_MARGIN, rmListener);
     }
 
     {
@@ -638,7 +638,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       final Pair<Option<Integer>, OptionListener<Integer>> iPair = 
         new Pair<Option<Integer>, OptionListener<Integer>>(OptionConstants.RIGHT_MARGIN_COLUMNS, iListener);
       _integerOptionListeners.add(iPair);
-      DrJava.getConfig().addOptionListener(OptionConstants.RIGHT_MARGIN_COLUMNS, iListener);
+      DrScala.getConfig().addOptionListener(OptionConstants.RIGHT_MARGIN_COLUMNS, iListener);
     }
     
     {
@@ -651,7 +651,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       final Pair<Option<Color>, OptionListener<Color>> rmcPair = 
         new Pair<Option<Color>, OptionListener<Color>>(OptionConstants.RIGHT_MARGIN_COLOR, rmcListener);
       _colorOptionListeners.add(rmcPair);
-      DrJava.getConfig().addOptionListener(OptionConstants.RIGHT_MARGIN_COLOR, rmcListener);
+      DrScala.getConfig().addOptionListener(OptionConstants.RIGHT_MARGIN_COLOR, rmcListener);
     }
     
     createPopupMenu();
@@ -1304,13 +1304,13 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    */
   public void close() {
     for (Pair<Option<Color>, OptionListener<Color>> p: _colorOptionListeners) {
-      DrJava.getConfig().removeOptionListener(p.first(), p.second());
+      DrScala.getConfig().removeOptionListener(p.first(), p.second());
     }
     for (Pair<Option<Boolean>, OptionListener<Boolean>> p: _booleanOptionListeners) {
-      DrJava.getConfig().removeOptionListener(p.first(), p.second());
+      DrScala.getConfig().removeOptionListener(p.first(), p.second());
     }
     for (Pair<Option<Integer>, OptionListener<Integer>> p: _integerOptionListeners) {
-      DrJava.getConfig().removeOptionListener(p.first(), p.second());
+      DrScala.getConfig().removeOptionListener(p.first(), p.second());
     }
     _colorOptionListeners.clear();
     _booleanOptionListeners.clear();

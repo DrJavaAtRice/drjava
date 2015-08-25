@@ -36,8 +36,8 @@
 
 package  edu.rice.cs.drjava.model.definitions;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScala;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.DJDocument;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
@@ -47,7 +47,7 @@ import javax.swing.text.BadLocationException;
 /** Test the comment lines / uncomment lines functionality.
   * @version $Id: CommentTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public final class CommentTest extends DrJavaTestCase {
+public final class CommentTest extends DrScalaTestCase {
   protected DefinitionsDocument doc;
   private Integer _indentInc = Integer.valueOf(2);
   private GlobalEventNotifier _notifier;
@@ -57,10 +57,10 @@ public final class CommentTest extends DrJavaTestCase {
     */
   public void setUp() throws Exception {
     super.setUp();
-    DrJava.getConfig().resetToDefaults();
+    DrScala.getConfig().resetToDefaults();
     _notifier = new GlobalEventNotifier();
     doc = new DefinitionsDocument(_notifier);
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_INC,_indentInc);
+    DrScala.getConfig().setSetting(OptionConstants.INDENT_INC,_indentInc);
   }
 
   /** Tests the Comment Out Line(s) command with a single line. */

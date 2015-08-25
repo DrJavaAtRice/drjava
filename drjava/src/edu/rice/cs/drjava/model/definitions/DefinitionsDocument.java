@@ -51,7 +51,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StreamTokenizer;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
@@ -154,14 +154,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     * @param notifier used by CompoundUndoManager to announce undoable edits
     */
   public DefinitionsDocument(GlobalEventNotifier notifier) {
-    this(new Indenter(DrJava.getConfig().getSetting(INDENT_INC).intValue()), notifier);
+    this(new Indenter(DrScala.getConfig().getSetting(INDENT_INC).intValue()), notifier);
   }
   
   /** Main constructor.
     * @param notifier used by CompoundUndoManager to announce undoable edits
     */
   public DefinitionsDocument(GlobalEventNotifier notifier, CompoundUndoManager undoManager) {
-    this(new Indenter(DrJava.getConfig().getSetting(INDENT_INC).intValue()), notifier, undoManager);
+    this(new Indenter(DrScala.getConfig().getSetting(INDENT_INC).intValue()), notifier, undoManager);
   }
   
   /** Returns the document's editor */

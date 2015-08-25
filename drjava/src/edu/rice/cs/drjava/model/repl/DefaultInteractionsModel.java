@@ -40,7 +40,7 @@ import java.io.File;
 import java.util.List;
 import java.util.ArrayList;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
@@ -72,16 +72,16 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     * @param wd  the working directory for interactions i/o
     */
   public DefaultInteractionsModel(DefaultGlobalModel model, MainJVM jvm, ConsoleDocumentInterface cDoc, File wd) {
-    super(jvm, cDoc, wd, DrJava.getConfig().getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue(),
+    super(jvm, cDoc, wd, DrScala.getConfig().getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue(),
           WRITE_DELAY);
     _model = model;
     // Set whether to allow "assert" statements to be run in the remote JVM.
-    Boolean allow = DrJava.getConfig().getSetting(OptionConstants.RUN_WITH_ASSERT);
+    Boolean allow = DrScala.getConfig().getSetting(OptionConstants.RUN_WITH_ASSERT);
     _jvm.setAllowAssertions(allow.booleanValue());
     
     // Add option listeners  // WHEN ARE THESE EVER REMOVED?
-    DrJava.getConfig().addOptionListener(OptionConstants.HISTORY_MAX_SIZE, _document.getHistoryOptionListener());
-    DrJava.getConfig().addOptionListener(OptionConstants.RUN_WITH_ASSERT,
+    DrScala.getConfig().addOptionListener(OptionConstants.HISTORY_MAX_SIZE, _document.getHistoryOptionListener());
+    DrScala.getConfig().addOptionListener(OptionConstants.RUN_WITH_ASSERT,
                                          new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oce) {
         _jvm.setAllowAssertions(oce.value.booleanValue());

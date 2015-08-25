@@ -55,7 +55,7 @@ import java.awt.Dimension;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.BadLocationException;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.ui.predictive.PredictiveInputFrame;
@@ -185,7 +185,7 @@ public class AutoCompletePopup {
     assert actionNames.size() == acceptedActions.size();
     assert actionNames.size() == actionKeyStrokes.size();
     
-    _completeJavaAPICheckbox.setSelected(DrJava.getConfig().getSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI));
+    _completeJavaAPICheckbox.setSelected(DrScala.getConfig().getSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI));
     _completeJavaAPICheckbox.setEnabled(true);
     
     new Thread() {
@@ -209,7 +209,7 @@ public class AutoCompletePopup {
           _docEntries.add(entry);
         }
         
-        if (DrJava.getConfig().getSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI)) {
+        if (DrScala.getConfig().getSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI)) {
           addJavaAPI();
         }
         
@@ -332,7 +332,7 @@ public class AutoCompletePopup {
     _completeJavaAPICheckbox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         String curMask = dialogThunk.value().getMask();
-        DrJava.getConfig().setSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI, _completeJavaAPICheckbox.isSelected());
+        DrScala.getConfig().setSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI, _completeJavaAPICheckbox.isSelected());
         if (_completeJavaAPICheckbox.isSelected()) addJavaAPI(); else removeJavaAPI();
         dialogThunk.value().setItems(true,_allEntries);
         dialogThunk.value().setMask(curMask);
@@ -431,7 +431,7 @@ public class AutoCompletePopup {
   private void addJavaAPI() {
     Set<JavaAPIListEntry> apiSet = _mainFrame.getJavaAPISet();
     if (apiSet == null) {
-      DrJava.getConfig().setSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI, Boolean.FALSE);
+      DrScala.getConfig().setSetting(OptionConstants.DIALOG_COMPLETE_JAVAAPI, Boolean.FALSE);
       _completeJavaAPICheckbox.setSelected(false);
       _completeJavaAPICheckbox.setEnabled(false);
     }

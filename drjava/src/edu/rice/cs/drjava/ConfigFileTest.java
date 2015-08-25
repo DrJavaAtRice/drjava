@@ -49,7 +49,7 @@ import java.io.IOException;
  * Tests that a custom config file can be specified.
  * @version $Id: ConfigFileTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public final class ConfigFileTest extends DrJavaTestCase {
+public final class ConfigFileTest extends DrScalaTestCase {
   private static final String CUSTOM_PROPS =
     "indent.level = 5\n" +
     "history.max.size = 1\n" +
@@ -65,14 +65,14 @@ public final class ConfigFileTest extends DrJavaTestCase {
     IOUtil.writeStringToFile(propsFile, CUSTOM_PROPS);
     Utilities.invokeAndWait(new Runnable() { 
       public void run() { 
-        DrJava.setPropertiesFile(propsFile.getAbsolutePath());
-        DrJava._initConfig(); 
+        DrScala.setPropertiesFile(propsFile.getAbsolutePath());
+        DrScala._initConfig(); 
       } 
     });
 //    Utilities.clearEventQueue();
 //    Utilities.clearEventQueue();
     
-    FileConfiguration config = DrJava.getConfig();
+    FileConfiguration config = DrScala.getConfig();
     assertEquals("custom indent level", 5, config.getSetting(OptionConstants.INDENT_INC).intValue());
     assertEquals("custom history size", 1, config.getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue());
     //Tests if a user can put a default value in the .drjava file

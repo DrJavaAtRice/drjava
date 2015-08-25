@@ -38,7 +38,7 @@ package edu.rice.cs.drjava.config;
 
 import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.util.*;
 
 import java.io.*;
@@ -704,50 +704,50 @@ public class DrJavaPropertySetupTest extends MultiThreadedTestCase {
     
     // config.master.jvm.args.combined
     p = pm.getProperty("Config","config.master.jvm.args.combined");
-    String oldXMX = DrJava.getConfig().getSetting(OptionConstants.MASTER_JVM_XMX);
-    String oldArgs = DrJava.getConfig().getSetting(OptionConstants.MASTER_JVM_ARGS);
+    String oldXMX = DrScala.getConfig().getSetting(OptionConstants.MASTER_JVM_XMX);
+    String oldArgs = DrScala.getConfig().getSetting(OptionConstants.MASTER_JVM_ARGS);
     try {
-      DrJava.getConfig().setSetting(OptionConstants.MASTER_JVM_XMX,"");
-      DrJava.getConfig().setSetting(OptionConstants.MASTER_JVM_ARGS,"");
+      DrScala.getConfig().setSetting(OptionConstants.MASTER_JVM_XMX,"");
+      DrScala.getConfig().setSetting(OptionConstants.MASTER_JVM_ARGS,"");
       assertEquals("", p.getCurrent(pm));
-      DrJava.getConfig().setSetting(OptionConstants.MASTER_JVM_XMX,"default");
+      DrScala.getConfig().setSetting(OptionConstants.MASTER_JVM_XMX,"default");
       assertEquals("", p.getCurrent(pm));
-      DrJava.getConfig().setSetting(OptionConstants.MASTER_JVM_XMX,"512");
+      DrScala.getConfig().setSetting(OptionConstants.MASTER_JVM_XMX,"512");
       assertEquals("-Xmx512M", p.getCurrent(pm));
-      DrJava.getConfig().setSetting(OptionConstants.MASTER_JVM_XMX,"1024");
+      DrScala.getConfig().setSetting(OptionConstants.MASTER_JVM_XMX,"1024");
       assertEquals("-Xmx1024M", p.getCurrent(pm));
-      DrJava.getConfig().setSetting(OptionConstants.MASTER_JVM_ARGS,"-server");
+      DrScala.getConfig().setSetting(OptionConstants.MASTER_JVM_ARGS,"-server");
       assertEquals("-Xmx1024M -server", p.getCurrent(pm));
-      DrJava.getConfig().setSetting(OptionConstants.MASTER_JVM_XMX,"");
+      DrScala.getConfig().setSetting(OptionConstants.MASTER_JVM_XMX,"");
       assertEquals("-server", p.getCurrent(pm));
     }
     finally {
-      DrJava.getConfig().setSetting(OptionConstants.MASTER_JVM_XMX,oldXMX);
-      DrJava.getConfig().setSetting(OptionConstants.MASTER_JVM_ARGS,oldArgs);
+      DrScala.getConfig().setSetting(OptionConstants.MASTER_JVM_XMX,oldXMX);
+      DrScala.getConfig().setSetting(OptionConstants.MASTER_JVM_ARGS,oldArgs);
     }
     
     // config.slave.jvm.args.combined
     p = pm.getProperty("Config","config.slave.jvm.args.combined");
-    oldXMX = DrJava.getConfig().getSetting(OptionConstants.SLAVE_JVM_XMX);
-    oldArgs = DrJava.getConfig().getSetting(OptionConstants.SLAVE_JVM_ARGS);
+    oldXMX = DrScala.getConfig().getSetting(OptionConstants.SLAVE_JVM_XMX);
+    oldArgs = DrScala.getConfig().getSetting(OptionConstants.SLAVE_JVM_ARGS);
     try {
-      DrJava.getConfig().setSetting(OptionConstants.SLAVE_JVM_XMX,"");
-      DrJava.getConfig().setSetting(OptionConstants.SLAVE_JVM_ARGS,"");
+      DrScala.getConfig().setSetting(OptionConstants.SLAVE_JVM_XMX,"");
+      DrScala.getConfig().setSetting(OptionConstants.SLAVE_JVM_ARGS,"");
       assertEquals("", p.getCurrent(pm));
-      DrJava.getConfig().setSetting(OptionConstants.SLAVE_JVM_XMX,"default");
+      DrScala.getConfig().setSetting(OptionConstants.SLAVE_JVM_XMX,"default");
       assertEquals("", p.getCurrent(pm));
-      DrJava.getConfig().setSetting(OptionConstants.SLAVE_JVM_XMX,"512");
+      DrScala.getConfig().setSetting(OptionConstants.SLAVE_JVM_XMX,"512");
       assertEquals("-Xmx512M", p.getCurrent(pm));
-      DrJava.getConfig().setSetting(OptionConstants.SLAVE_JVM_XMX,"1024");
+      DrScala.getConfig().setSetting(OptionConstants.SLAVE_JVM_XMX,"1024");
       assertEquals("-Xmx1024M", p.getCurrent(pm));
-      DrJava.getConfig().setSetting(OptionConstants.SLAVE_JVM_ARGS,"-server");
+      DrScala.getConfig().setSetting(OptionConstants.SLAVE_JVM_ARGS,"-server");
       assertEquals("-Xmx1024M -server", p.getCurrent(pm));
-      DrJava.getConfig().setSetting(OptionConstants.SLAVE_JVM_XMX,"");
+      DrScala.getConfig().setSetting(OptionConstants.SLAVE_JVM_XMX,"");
       assertEquals("-server", p.getCurrent(pm));
     }
     finally {
-      DrJava.getConfig().setSetting(OptionConstants.SLAVE_JVM_XMX,oldXMX);
-      DrJava.getConfig().setSetting(OptionConstants.SLAVE_JVM_ARGS,oldArgs);
+      DrScala.getConfig().setSetting(OptionConstants.SLAVE_JVM_XMX,oldXMX);
+      DrScala.getConfig().setSetting(OptionConstants.SLAVE_JVM_ARGS,oldArgs);
     }
   }
   

@@ -58,7 +58,7 @@ import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.Configuration;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.DrJavaFileUtils;
@@ -74,7 +74,6 @@ import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.OperationCanceledException;
 
 import static edu.rice.cs.plt.debug.DebugUtil.error;
-
 
 /** Default implementation of ScaladocModel interface; generates Scaladoc HTML files for a set of documents.
   * @version $Id: DefaultScaladocModel.java 5751 2013-02-06 10:32:04Z rcartwright $
@@ -151,7 +150,7 @@ public class DefaultScaladocModel implements ScaladocModel {
      where pop-up is shown twice) */
     if (_model.hasModifiedDocuments() || _model.hasUntitledDocuments()) { return; }  /* abort if files remain unsaved */
     
-    Configuration config = DrJava.getConfig();
+    Configuration config = DrScala.getConfig();
     File destDir = config.getSetting(OptionConstants.SCALADOC_DESTINATION);
     
     // Get the destination directory via the DirectorySelector, if appropriate.
@@ -426,24 +425,8 @@ public class DefaultScaladocModel implements ScaladocModel {
   }
   
   private Iterable<String> _getLinkArgs() {
-    Configuration config = DrJava.getConfig();
-    String linkVersion = config.getSetting(OptionConstants.SCALADOC_LINK_VERSION);
-    if (linkVersion.equals(OptionConstants.SCALADOC_1_3_TEXT)) {
-      return IterUtil.make("-link", config.getSetting(OptionConstants.SCALADOC_1_3_LINK));
-    }
-    else if (linkVersion.equals(OptionConstants.SCALADOC_1_4_TEXT)) {
-      return IterUtil.make("-link", config.getSetting(OptionConstants.SCALADOC_1_4_LINK));
-    }
-    else if (linkVersion.equals(OptionConstants.SCALADOC_1_5_TEXT)) {
-      return IterUtil.make("-link", config.getSetting(OptionConstants.SCALADOC_1_5_LINK));
-    }
-    else if (linkVersion.equals(OptionConstants.SCALADOC_1_6_TEXT)) {
-      return IterUtil.make("-link", config.getSetting(OptionConstants.SCALADOC_1_6_LINK));
-    }
-    else {
-      // should never happen -- use an enum to guarantee
-      return IterUtil.empty();
-    }
+    /* This functionality does not appear to fit Scaladoc */
+    return IterUtil.empty();
   }
   
   /** Reads through scaladoc output text, looking for Scaladoc errors.  This code will detect Exceptions and 

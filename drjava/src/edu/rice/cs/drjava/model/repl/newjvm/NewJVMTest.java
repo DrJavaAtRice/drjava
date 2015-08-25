@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.plt.io.IOUtil;
@@ -59,7 +59,7 @@ import static edu.rice.cs.plt.debug.DebugUtil.debug;
 /** Tests the functionality of the new JVM manager.
  *  @version $Id: NewJVMTest.java 5668 2012-08-15 04:58:30Z rcartwright $
  */
-public final class NewJVMTest extends DrJavaTestCase {
+public final class NewJVMTest extends DrScalaTestCase {
   private static final Log _log  = new Log("NewJVMTest.txt", false);
   
   private static volatile TestJVMExtension _jvm;

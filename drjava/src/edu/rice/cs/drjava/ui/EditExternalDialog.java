@@ -46,7 +46,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileFilter;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.plt.concurrent.CompletionMonitor;
 import edu.rice.cs.util.UnexpectedException;
@@ -124,6 +124,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
   /** Completion monitor to simulate modal behavior. */
   protected CompletionMonitor _editExternalDialogMonitor = new CompletionMonitor();
   
+  /* RETAINED BECASE it is referenced in _importChooser below */
   /** Filter for drjava external process files (.djapp) */
   private final FileFilter _extProcFilter = new javax.swing.filechooser.FileFilter() {
     public boolean accept(File f) {
@@ -134,6 +135,8 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
       return "DrScala External Process Files (*" + EXTPROCESS_FILE_EXTENSION + ")";
     }
   };
+  
+  /* RETAINED because REFERENCED IN a JFileChooser below */
 
   /** Filter for drjava project files (.djapp only) */
   private final FileFilter _saveExtProcFilter = new javax.swing.filechooser.FileFilter() {
@@ -314,15 +317,15 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
   /** Method that handels the OK button */
   private void _ok() {
     _lastState = new FrameState(this);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT,
-                                  DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT));
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT,
+                                  DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT));
     this.setVisible(false);
   }
   
   /** Edit a command. */
   private void _edit() {
     final int selectedIndex = _list.getSelectedIndex();
-    if ((selectedIndex < 0) || (selectedIndex>=DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT))) {
+    if ((selectedIndex < 0) || (selectedIndex>=DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT))) {
       return;
     }
     _mainFrame.removeModalWindowAdapter(this);
@@ -348,103 +351,103 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
 
   /** Method that handels the remove button */
   private void _remove() {
-    int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
+    int count = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
     final int selectedIndex = _list.getSelectedIndex();
     if ((selectedIndex < 0) ||
-        (selectedIndex>=DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)) ||
+        (selectedIndex>=DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)) ||
         (count<=0)) {
       _removeButton.setEnabled(false);
       return;
     }
 
-    Vector<String> v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    Vector<String> v = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
     v.remove(selectedIndex);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,v);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,v);
 
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+    v = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
     v.remove(selectedIndex);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,v);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,v);
 
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+    v = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
     v.remove(selectedIndex);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,v);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,v);
 
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
+    v = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     v.remove(selectedIndex);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,v);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,v);
 
     --count;
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
     updateList(Math.max(0, selectedIndex-1));
   }
 
   /** Method that handels the up button */
   private void _up() {
-    final int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
+    final int count = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
     final int selectedIndex = _list.getSelectedIndex();
     if ((selectedIndex<1) ||
-        (selectedIndex>=DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)) ||
+        (selectedIndex>=DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)) ||
         (count<=0)) {
       _removeButton.setEnabled(false);
       return;
     }
 
-    Vector<String> v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    Vector<String> v = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
     String s = v.remove(selectedIndex);
     v.add(selectedIndex-1,s);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,v);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,v);
     
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+    v = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
     s = v.remove(selectedIndex);
     v.add(selectedIndex-1,s);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,v);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,v);
 
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+    v = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
     s = v.remove(selectedIndex);
     v.add(selectedIndex-1,s);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,v);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,v);
 
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
+    v = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     s = v.remove(selectedIndex);
     v.add(selectedIndex-1,s);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,v);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,v);
 
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
     updateList(Math.max(0,selectedIndex-1));
   }
 
   /** Method that handels the down button */
   private void _down() {
-    final int count = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
+    final int count = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT);
     final int selectedIndex = _list.getSelectedIndex();
     if ((selectedIndex < 0) ||
-        (selectedIndex>=DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)-1) ||
+        (selectedIndex>=DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)-1) ||
         (count<=0)) {
       _removeButton.setEnabled(false);
       return;
     }
 
-    Vector<String> v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    Vector<String> v = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
     String s = v.remove(selectedIndex);
     v.add(selectedIndex+1,s);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,v);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_NAMES,v);
     
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
+    v = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES);
     s = v.remove(selectedIndex);
     v.add(selectedIndex+1,s);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,v);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_CMDLINES,v);
 
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
+    v = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS);
     s = v.remove(selectedIndex);
     v.add(selectedIndex+1,s);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,v);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_WORKDIRS,v);
 
-    v = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
+    v = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES);
     s = v.remove(selectedIndex);
     v.add(selectedIndex+1,s);
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,v);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_ENCLOSING_DJAPP_FILES,v);
 
-    DrJava.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
+    DrScala.getConfig().setSetting(OptionConstants.EXTERNAL_SAVED_COUNT, count);
     updateList(Math.max(0,selectedIndex+1));
   }
   
@@ -469,7 +472,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
         if (chosen.length == 0) {
           File f = _importChooser.getSelectedFile();
           MainFrame.openExtProcessFile(f);
-          updateList(DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)-1);
+          updateList(DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_COUNT)-1);
         }
         return;
       }
@@ -505,9 +508,9 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
         // return a zero-size array -- handle it differently.
         if (chosen.length == 0) {
           File f = _exportChooser.getSelectedFile();
-          if (!f.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
-            f = new File(f.getAbsolutePath()+OptionConstants.EXTPROCESS_FILE_EXTENSION);
-          }
+//          if (!f.getName().endsWith(OptionConstants.EXTPROCESS_FILE_EXTENSION)) {
+//            f = new File(f.getAbsolutePath()+OptionConstants.EXTPROCESS_FILE_EXTENSION);
+//          }
           //System.out.println("\tindex=" + _list.getSelectedIndex() + ", file=" + f);
           ExecuteExternalDialog.saveToFile(_list.getSelectedIndex(), f);
         }
@@ -521,7 +524,7 @@ public class EditExternalDialog extends SwingFrame implements OptionConstants {
   
   /** Update the properties. */
   public void updateList(int selectedIndex) {
-    final Vector<String> names = DrJava.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
+    final Vector<String> names = DrScala.getConfig().getSetting(OptionConstants.EXTERNAL_SAVED_NAMES);
     _list.setListData(names);
     _editButton.setEnabled(names.size() > 0);
     _removeButton.setEnabled(names.size() > 0);

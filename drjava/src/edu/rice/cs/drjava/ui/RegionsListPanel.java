@@ -48,7 +48,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.IDocumentRegion;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.RightClickMouseAdapter;
 
@@ -168,7 +168,7 @@ public abstract class RegionsListPanel<R extends IDocumentRegion> extends Tabbed
     _list.addKeyListener(new KeyAdapter() {
       public void keyPressed(KeyEvent e) { if (e.getKeyCode() == KeyEvent.VK_ENTER) performDefaultAction(); } 
     });
-    _list.setFont(DrJava.getConfig().getSetting(OptionConstants.FONT_DOCLIST));
+    _list.setFont(DrScala.getConfig().getSetting(OptionConstants.FONT_DOCLIST));
     
     _leftPane.add(new JScrollPane(_list));
     ToolTipManager.sharedInstance().registerComponent(_list);

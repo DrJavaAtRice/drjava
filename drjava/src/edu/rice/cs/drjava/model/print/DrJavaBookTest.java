@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model.print;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -49,7 +49,7 @@ import java.awt.print.Printable;
  * Test functions of DrJavaBook
  *
  */
-public final class DrJavaBookTest extends DrJavaTestCase {
+public final class DrJavaBookTest extends DrScalaTestCase {
   /** The DrJavaBook instance we will be testing. */
   private DrJavaBook book = null;
   

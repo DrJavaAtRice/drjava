@@ -40,7 +40,7 @@ import java.io.*;
 
 import javax.swing.text.BadLocationException;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 import edu.rice.cs.util.swing.Utilities;

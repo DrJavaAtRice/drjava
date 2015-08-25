@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 
 import java.util.Vector;
 
@@ -56,7 +56,7 @@ public class ConfigProperty extends EagerProperty {
   /** Update the property so the value is current.
     * @param pm PropertyMaps used for substitution when replacing variables */
   public void update(PropertyMaps pm) {
-    OptionMap om = DrJava.getConfig().getOptionMap();
+    OptionMap om = DrScala.getConfig().getOptionMap();
     for (OptionParser<?> op : om.keys()) {
       String key = op.getName();
       String value = om.getString(op);
@@ -98,7 +98,7 @@ public class ConfigProperty extends EagerProperty {
   /** Reset attributes to their defaults. */
   public void resetAttributes() {
     _attributes.clear();
-    OptionMap om = DrJava.getConfig().getOptionMap();
+    OptionMap om = DrScala.getConfig().getOptionMap();
     for (OptionParser<?> op : om.keys()) {
       String key = op.getName();
       if (_name.equals("config." + key)) {

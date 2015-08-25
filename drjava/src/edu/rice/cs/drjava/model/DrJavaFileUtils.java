@@ -40,7 +40,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.plt.io.IOUtil;
 
@@ -87,31 +87,11 @@ public class DrJavaFileUtils  {
   }
   
   // Java language levels is disabled
-
-//  /** .pjt  --> true
-//    * otherwise false
-//    * @return true if the file is an old project file. */
-//  public static boolean isOldProjectFile(String fileName) {
-//    return fileName.endsWith(OLD_PROJECT_FILE_EXTENSION);
-//  }
-//  
-//  /** @return true if the file is an old project file. */
-//  public static boolean isOldProjectFile(File f) {
-//    File canonicalFile = IOUtil.attemptCanonicalFile(f);
-//    String fileName = canonicalFile.getPath();
-//    return isOldProjectFile(fileName);
-//  }
   
-  /** .pjt    --> true
-    * .drjava --> true
-    * .xml    --> true
+  /** .drscala   --> true
     * otherwise false
     * @return true if the file is a project file. */
-  public static boolean isProjectFile(String fileName) {
-    return fileName.endsWith(PROJECT_FILE_EXTENSION)
-      || fileName.endsWith(PROJECT_FILE_EXTENSION2)
-      || fileName.endsWith(OLD_PROJECT_FILE_EXTENSION);
-  }
+  public static boolean isProjectFile(String fileName) { return fileName.endsWith(PROJECT_FILE_EXTENSION); }
   
   /** @return true if the file is a project file. */
   public static boolean isProjectFile(File f) {
@@ -120,7 +100,7 @@ public class DrJavaFileUtils  {
     return isProjectFile(fileName);
   }
 
-  // Language levels processing disabled
+  /* Language levels processing disabled in DrScala */
 //  /** getFileWithDifferentExt("A.java", ".java", ".dj") --> "A.dj"
 //    * @return matching file with extension dest for a file with extension source. */
 //  public static String getFileWithDifferentExt(String fileName, String source, String dest) {

@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model.debug.jpda;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.debug.DebugException;
 
@@ -75,9 +75,9 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
    * @throws DebugException if the request could not be created.
    */
   protected void _createRequests() throws DebugException {
-    boolean stepJava = DrJava.getConfig().getSetting(DEBUG_STEP_JAVA).booleanValue();
-    boolean stepInterpreter = DrJava.getConfig().getSetting(DEBUG_STEP_INTERPRETER).booleanValue();
-    boolean stepDrJava = DrJava.getConfig().getSetting(DEBUG_STEP_DRSCALA).booleanValue();
+    boolean stepJava = DrScala.getConfig().getSetting(DEBUG_STEP_JAVA).booleanValue();
+    boolean stepInterpreter = DrScala.getConfig().getSetting(DEBUG_STEP_INTERPRETER).booleanValue();
+    boolean stepDrJava = DrScala.getConfig().getSetting(DEBUG_STEP_DRSCALA).booleanValue();
 
     StepRequest request = _manager.getEventRequestManager().
       createStepRequest(_thread, _size, _depth);
@@ -95,7 +95,7 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
       request.addClassExclusionFilter("edu.rice.cs.util.*");
       request.addClassExclusionFilter("edu.rice.cs.plt.*");
     }
-    for(String s: DrJava.getConfig().getSetting(DEBUG_STEP_EXCLUDE)) {
+    for(String s: DrScala.getConfig().getSetting(DEBUG_STEP_EXCLUDE)) {
       request.addClassExclusionFilter(s.trim());
     }
 

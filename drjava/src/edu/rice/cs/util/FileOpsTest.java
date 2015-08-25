@@ -43,7 +43,7 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeSet;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.plt.concurrent.JVMBuilder;
 import edu.rice.cs.util.FileOps;
 
@@ -51,7 +51,7 @@ import edu.rice.cs.util.FileOps;
   * @version $Id: FileOpsTest.java 5720 2012-09-29 16:17:33Z wdforson $
   */
 @SuppressWarnings("deprecation") 
-public class FileOpsTest extends DrJavaTestCase {
+public class FileOpsTest extends DrScalaTestCase {
   private static final Log _log = new Log("FileOpsTest.txt", false);
   public static final String TEXT = "hi, dude.";
   public static final String PREFIX = "prefix";

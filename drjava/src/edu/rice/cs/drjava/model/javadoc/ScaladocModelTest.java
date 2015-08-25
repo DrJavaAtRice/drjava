@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model.javadoc;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.DummyGlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -55,7 +55,7 @@ import java.io.File;
  * extended to test any implementation of the interface.
  * @version $Id: ScaladocModelTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public class ScaladocModelTest extends DrJavaTestCase {
+public class ScaladocModelTest extends DrScalaTestCase {
   
   /** Field needed by testUnsavedSuggestedDirectory */
   private File _storedFile;

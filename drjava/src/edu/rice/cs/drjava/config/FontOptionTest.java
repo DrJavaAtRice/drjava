@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import java.awt.Font;
 
 /**
@@ -44,7 +44,7 @@ import java.awt.Font;
  * the proper functionality of the class FontOption.
  * @version $Id: FontOptionTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public final class FontOptionTest extends DrJavaTestCase {
+public final class FontOptionTest extends DrScalaTestCase {
 
   public void testParse() {
     FontOption fo = new FontOption("font.test1", Font.decode(null));

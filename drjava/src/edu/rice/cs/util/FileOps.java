@@ -42,7 +42,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.jar.*;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.plt.io.IOUtil;
@@ -794,7 +794,7 @@ public abstract class FileOps {
     
     private File outputFile = FileOps.NULL_FILE;
     private static Set<File> filesNotNeedingBackup = new HashSet<File>();
-    private boolean backupsEnabled = DrJava.getConfig().getSetting(BACKUP_FILES);  // uses the config default
+    private boolean backupsEnabled = DrScala.getConfig().getSetting(BACKUP_FILES);  // uses the config default
     
     /** This field keeps track of whether or not outputFile has been resolved to its canonical name. */
     private boolean isCanonical = false;
@@ -932,7 +932,7 @@ public abstract class FileOps {
   public static boolean makeWritable(File roFile) throws IOException {
     /* Try to make the file writable.  Strangely enough, there is a File.setReadOnly() method, but no built-in way to 
      * make the file writable.  Sun recommends deleting the read-only file (does that work on all operating systems?).*/
-    boolean shouldBackup = edu.rice.cs.drjava.DrJava.getConfig().
+    boolean shouldBackup = edu.rice.cs.drjava.DrScala.getConfig().
       getSetting(edu.rice.cs.drjava.config.OptionConstants.BACKUP_FILES);
     boolean madeBackup = false;
     File backup = new File(roFile.getAbsolutePath() + "~");
@@ -1223,7 +1223,7 @@ public abstract class FileOps {
         if (!f.exists()) { continue; }
         if (f.isDirectory()) {
           // this is a directory, maybe DrScala is contained here as individual files
-          File cf = new File(f, edu.rice.cs.drjava.DrJava.class.getName().replace('.', File.separatorChar) + ".class");
+          File cf = new File(f, edu.rice.cs.drjava.DrScala.class.getName().replace('.', File.separatorChar) + ".class");
           if (cf.exists() && cf.isFile()) {
             found = f;
             break;
@@ -1235,7 +1235,7 @@ public abstract class FileOps {
           // if it's not a jar file, an exception will already have been thrown
           // so we know it is a jar file
           // now let's check if it contains DrJava
-          if (jf.getJarEntry(edu.rice.cs.drjava.DrJava.class.getName().replace('.', '/') + ".class") != null) {
+          if (jf.getJarEntry(edu.rice.cs.drjava.DrScala.class.getName().replace('.', '/') + ".class") != null) {
             found = f;
             break;
           }

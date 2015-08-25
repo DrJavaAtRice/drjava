@@ -76,7 +76,7 @@ public class ProjectFileParser extends ProjectFileParserFacade {
   volatile BreakpointListVisitor breakpointListVisitor = new BreakpointListVisitor();
   volatile BookmarkListVisitor bookmarkListVisitor = new BookmarkListVisitor();
   
-  private ProjectFileParser() { _xmlProjectFile = false; }
+//  private ProjectFileParser() { _xmlProjectFile = false; }
   
   /** @param projFile the file to parse
    *  @return the project file IR
@@ -94,8 +94,8 @@ public class ProjectFileParser extends ProjectFileParserFacade {
     
     ProjectFileIR pfir = new ProjectProfile(projFile);
     
-    //We don't store version information in .pjt files.  Yet another reason to use the .drjava or .xml format.
-    pfir.setDrJavaVersion("unknown");
+//    //We don't store version information in .pjt files.  Yet another reason to use the .drjava or .xml format.
+//    pfir.setDrJavaVersion("unknown");
 
     try { for (SEList exp : forest) evaluateExpression(exp, pfir, new DocFileListVisitor(_parent)); }
     catch(PrivateProjectException e) { throw new MalformedProjectFileException("Parse Error: " + e.getMessage()); }

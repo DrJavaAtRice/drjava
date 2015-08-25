@@ -43,7 +43,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Vector;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.util.Log;
@@ -173,7 +173,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     // Add directory 1 to extra classpath and close doc1
     Vector<File> cp = new Vector<File>();
     cp.add(dir1);
-    DrJava.getConfig().setSetting(EXTRA_CLASSPATH, cp);
+    DrScala.getConfig().setSetting(EXTRA_CLASSPATH, cp);
     
     Utilities.clearEventQueue();
     _model.closeFile(doc1);
@@ -503,7 +503,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     // Add new directory to classpath through Config
     Vector<File> cp = new Vector<File>();
     cp.add(makeCanonical(new File(tempPath + "a")));
-    DrJava.getConfig().setSetting(EXTRA_CLASSPATH, cp);
+    DrScala.getConfig().setSetting(EXTRA_CLASSPATH, cp);
     
     Utilities.clearEventQueue();
     _model.resetInteractionsClassPath();

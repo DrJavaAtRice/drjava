@@ -41,7 +41,7 @@ import java.net.*;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 /**
- * Client class to remote control an already running instance of DrJava.
+ * Client class to remote control an already running instance of DrJava.  NOT USED IN DRSCALA
  */
 public class RemoteControlClient {
   /** true if a DrJava remote control server is running.
@@ -51,82 +51,82 @@ public class RemoteControlClient {
   /** Contains the name of the user running the server, or is null if no server is running. */
   protected static String _serverUser = null;
   
-  /** Time in ms until the client decides the server is not running. */
-  public static final int REMOTE_CONTROL_TIMEOUT = 250;
-  
-  /** Return true if a DrJava remote control server is running.
-    * @return true if running
-    */
-  public static synchronized boolean isServerRunning() {
-    if (_serverRunning == null) {
-      try { openFile(null); }
-      catch(IOException e) { _serverRunning = false; }
-    }
-    return _serverRunning;
-  }
-  
-  /** Return the name of the user running the server, or null if no server is running.
-    * @return user name or null
-    */
-  public static String getServerUser() { return _serverUser; }
-  
-  /** Tell the existing DrJava instance to open a file.
-   * @param f file, or null to just test if a server is running.
-   * @return true if file could be opened
-   */
-  public static synchronized boolean openFile(File f) throws IOException {
-    try {
-      // get a datagram socket
-      DatagramSocket socket = new DatagramSocket();
-      socket.setSoTimeout(REMOTE_CONTROL_TIMEOUT);
-      
-      // send request
-      String dString = RemoteControlServer.QUERY_PREFIX;
-      if (f != null) {
-        dString = dString + " " + f.getAbsolutePath();
-      }
-      byte[] buf = dString.getBytes();
-      InetAddress address = InetAddress.getByName("127.0.0.1");
-      DatagramPacket packet = new DatagramPacket(buf, buf.length, address,
-                                                 DrJava.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_PORT));
-      socket.send(packet);
-      
-      // get response
-      buf = new byte[512];
-      packet = new DatagramPacket(buf, buf.length);
-      socket.receive(packet);
-      
-      // display response
-      String received = new String(packet.getData(), 0, packet.getLength());
-      _serverRunning = received.startsWith(RemoteControlServer.RESPONSE_PREFIX);
-      if (_serverRunning) {
-        int pos = received.indexOf('!');
-        _serverUser = received.substring(RemoteControlServer.RESPONSE_PREFIX.length(), pos);
-      }
-      else {
-        _serverUser = null;
-      }
-      socket.close();
-      
-      return (received.equals(RemoteControlServer.RESPONSE_PREFIX_WITH_USER));
-    }
-    catch (SocketTimeoutException e) {
-      _serverRunning = false;
-      return false;
-    }
-  }
-  
-  /** Main method for test purposes.
-   */
-  public static void main(String[] args) {
-    for (int i = 0; i < args.length; ++i) {
-      try {
-        boolean ret = openFile(new File(args[i]));
-        System.out.println("openFile returned " + ret);
-      }
-      catch(IOException ioe) {
-        ioe.printStackTrace();
-      }
-    }
-  }
+//  /** Time in ms until the client decides the server is not running. */
+//  public static final int REMOTE_CONTROL_TIMEOUT = 250;
+//  
+//  /** Return true if a DrJava remote control server is running.
+//    * @return true if running
+//    */
+//  public static synchronized boolean isServerRunning() {
+//    if (_serverRunning == null) {
+//      try { openFile(null); }
+//      catch(IOException e) { _serverRunning = false; }
+//    }
+//    return _serverRunning;
+//  }
+//  
+//  /** Return the name of the user running the server, or null if no server is running.
+//    * @return user name or null
+//    */
+//  public static String getServerUser() { return _serverUser; }
+//  
+//  /** Tell the existing DrJava instance to open a file.
+//   * @param f file, or null to just test if a server is running.
+//   * @return true if file could be opened
+//   */
+//  public static synchronized boolean openFile(File f) throws IOException {
+//    try {
+//      // get a datagram socket
+//      DatagramSocket socket = new DatagramSocket();
+//      socket.setSoTimeout(REMOTE_CONTROL_TIMEOUT);
+//      
+//      // send request
+//      String dString = RemoteControlServer.QUERY_PREFIX;
+//      if (f != null) {
+//        dString = dString + " " + f.getAbsolutePath();
+//      }
+//      byte[] buf = dString.getBytes();
+//      InetAddress address = InetAddress.getByName("127.0.0.1");
+//      DatagramPacket packet = new DatagramPacket(buf, buf.length, address,
+//                                                 DrJava.getConfig().getSetting(OptionConstants.REMOTE_CONTROL_PORT));
+//      socket.send(packet);
+//      
+//      // get response
+//      buf = new byte[512];
+//      packet = new DatagramPacket(buf, buf.length);
+//      socket.receive(packet);
+//      
+//      // display response
+//      String received = new String(packet.getData(), 0, packet.getLength());
+//      _serverRunning = received.startsWith(RemoteControlServer.RESPONSE_PREFIX);
+//      if (_serverRunning) {
+//        int pos = received.indexOf('!');
+//        _serverUser = received.substring(RemoteControlServer.RESPONSE_PREFIX.length(), pos);
+//      }
+//      else {
+//        _serverUser = null;
+//      }
+//      socket.close();
+//      
+//      return (received.equals(RemoteControlServer.RESPONSE_PREFIX_WITH_USER));
+//    }
+//    catch (SocketTimeoutException e) {
+//      _serverRunning = false;
+//      return false;
+//    }
+//  }
+//  
+//  /** Main method for test purposes.
+//   */
+//  public static void main(String[] args) {
+//    for (int i = 0; i < args.length; ++i) {
+//      try {
+//        boolean ret = openFile(new File(args[i]));
+//        System.out.println("openFile returned " + ret);
+//      }
+//      catch(IOException ioe) {
+//        ioe.printStackTrace();
+//      }
+//    }
+//  }
 }

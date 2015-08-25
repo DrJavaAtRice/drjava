@@ -39,7 +39,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 import java.util.Arrays;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 /** Singleton class to construct and use the indentation decision tree.
@@ -89,7 +89,7 @@ public class Indenter {
     Arrays.fill(indent,' ');
     
     boolean autoCloseComments = false;
-    try { autoCloseComments = DrJava.getConfig().getSetting(OptionConstants.AUTO_CLOSE_COMMENTS).booleanValue(); }
+    try { autoCloseComments = DrScala.getConfig().getSetting(OptionConstants.AUTO_CLOSE_COMMENTS).booleanValue(); }
     catch(Exception e) { /* ignore */ }  // some unit tests produce NullPointer exceptions in preceding line
     
     IndentRule

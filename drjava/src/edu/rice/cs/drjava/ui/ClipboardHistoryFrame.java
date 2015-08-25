@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.ClipboardHistoryModel;
 import edu.rice.cs.plt.lambda.Lambda;
@@ -220,11 +220,11 @@ public class ClipboardHistoryFrame extends SwingFrame {
         updatePreview();
       }
     });
-    _historyList.setFont(DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN));
+    _historyList.setFont(DrScala.getConfig().getSetting(OptionConstants.FONT_MAIN));
     _historyList.setCellRenderer(new DefaultListCellRenderer()  {
       public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         Component c = super.getListCellRendererComponent(list,value,index,isSelected,cellHasFocus);
-        c.setForeground(DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
+        c.setForeground(DrScala.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
         return c;
       }
     });
@@ -280,8 +280,8 @@ public class ClipboardHistoryFrame extends SwingFrame {
     _previewArea.setEditable(false);
     _previewArea.setDragEnabled(false);
     _previewArea.setEnabled(false);
-    _previewArea.setFont(DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN));
-    _previewArea.setDisabledTextColor(DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
+    _previewArea.setFont(DrScala.getConfig().getSetting(OptionConstants.FONT_MAIN));
+    _previewArea.setDisabledTextColor(DrScala.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
     c.weighty = 2.0;
     contentPane.add(new JScrollPane(_previewArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
                                     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), 

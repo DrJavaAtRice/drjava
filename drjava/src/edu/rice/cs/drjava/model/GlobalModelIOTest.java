@@ -41,7 +41,7 @@ import java.io.*;
 import java.util.List;
 import javax.swing.text.BadLocationException;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.plt.io.IOUtil;
@@ -638,15 +638,15 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
   /** Saves a file already saved and overwrites its contents. */
   public void testSaveAlreadySaved() throws Exception {
     //disable file backups, remember original setting
-    Boolean backupStatus = DrJava.getConfig().getSetting(BACKUP_FILES);
-    DrJava.getConfig().setSetting(BACKUP_FILES, Boolean.FALSE);
+    Boolean backupStatus = DrScala.getConfig().getSetting(BACKUP_FILES);
+    DrScala.getConfig().setSetting(BACKUP_FILES, Boolean.FALSE);
     Utilities.clearEventQueue();  // config changes rely on the event thread
     
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
     
     // No listeners here -- other tests ensure the first save works
-    assertFalse("Confirm that backup status is initially false", DrJava.getConfig().getSetting(BACKUP_FILES));
+    assertFalse("Confirm that backup status is initially false", DrScala.getConfig().getSetting(BACKUP_FILES));
     saveFile(doc, new FileSelector(file));
     assertModified(false, doc);
     assertContents(FOO_TEXT, doc);
@@ -694,7 +694,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
 //    System.err.println("Confirm that " + backup + " does not exist: " + backup.exists());
     //enable file backups
     
-    DrJava.getConfig().setSetting(BACKUP_FILES, Boolean.TRUE);
+    DrScala.getConfig().setSetting(BACKUP_FILES, Boolean.TRUE);
     Utilities.clearEventQueue();
     
     // Muck up the document
@@ -703,7 +703,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
 //    System.err.println("Backup status = " + DrJava.getConfig().getSetting(BACKUP_FILES) + " for backup file " + backup);
 //    System.err.println("Before saving to '" + file + "', confirm " + backup + " does not exist: " + backup.exists());
     
-    assertTrue("Confirm that BACKUP_FILES is true", DrJava.getConfig().getSetting(BACKUP_FILES));
+    assertTrue("Confirm that BACKUP_FILES is true", DrScala.getConfig().getSetting(BACKUP_FILES));
     assertFalse("Confirm that backup file " + backup + " does not yet exist", backup.exists());
     assertEquals("Confirm that file " + file + " was modified properly", BAR_TEXT, IOUtil.toString(file));
 //    System.err.println("Old contents of file " + file + " = '" + IOUtil.toString(file) + "'");
@@ -723,7 +723,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase implements Opti
     assertEquals("contents of backup file 3rd write", BAR_TEXT, IOUtil.toString(backup));
     
     /* Set the config back to the original option */
-    DrJava.getConfig().setSetting(BACKUP_FILES, backupStatus);
+    DrScala.getConfig().setSetting(BACKUP_FILES, backupStatus);
     
     _log.log("testSaveAlreadySaved completed");
   }

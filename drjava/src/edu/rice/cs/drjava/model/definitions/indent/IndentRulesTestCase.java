@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 
 import javax.swing.text.AbstractDocument;
@@ -46,7 +46,7 @@ import javax.swing.text.BadLocationException;
 /** Superclass for all test classes for the indentation decision tree.
   * @version $Id: IndentRulesTestCase.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public abstract class IndentRulesTestCase extends DrJavaTestCase {
+public abstract class IndentRulesTestCase extends DrScalaTestCase {
   
   public static final int TEST_INDENT_INC = 2;
 

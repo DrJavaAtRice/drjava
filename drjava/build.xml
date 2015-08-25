@@ -11,7 +11,7 @@
   <property name="junit-jar-to-include" value="lib/buildlib/junit.jar" />
   <property name="md5-temp-name" value="classes/md5.properties" />
   <property name="md5-properties-path" value="edu/rice/cs/drjava/md5.properties" />
-  <property name="main-class" value="edu.rice.cs.drjava.DrJava" />
+  <property name="main-class" value="edu.rice.cs.drjava.DrScala" />
   <property name="svn-repository" value="https://drjava.svn.sourceforge.net/svnroot/drjava" />
 
   <!-- Properties loaded from a file -->
@@ -164,7 +164,7 @@
     <echo message="                 (default: 5)" />
     <echo message="benchmark-skip: Number of 'PREV' updates to perform between benchmark" />
     <echo message="                runs (default: 1)" />
-    <echo message="drjava.test.config: Location of the DrJava configuration file to use" />
+    <echo message="drjava.test.config: Location of the DrScala configuration file to use" />
     <echo message="                    in tests (default: testFiles/drjava.basic.config)" />
     <echo message="use-concjunit: Set to true to test ConcJUnit instead of JUnit." />
   </target>
@@ -1544,7 +1544,7 @@
       <format property="TODAY" pattern="MMMM dd yyyy" timezone="GMT" />
     </tstamp>
     <property name="version-tag"
-              value="${ant.project.name}${tag-append}-${DSTAMP}-r${svn-revision}" />
+              value="${ant.project.name}${tag-append}-${DSTAMP}-${TSTAMP}" />
   </target>  
   
   <!-- Sets is-modified if "svn status" has non-empty output. -->

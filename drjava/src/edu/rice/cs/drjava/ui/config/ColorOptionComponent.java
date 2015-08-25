@@ -91,16 +91,16 @@ public class ColorOptionComponent extends OptionComponent<Color,JPanel> {
     _panel.add(_button, BorderLayout.EAST);
     if (_isBackgroundColor) {
 //      _colorField.setForeground(Color.black);
-      _colorField.setForeground(DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
-      DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR,
+      _colorField.setForeground(DrScala.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
+      DrScala.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR,
                                            new OptionListener<Color>() {
         public void optionChanged(OptionEvent<Color> oe) { _colorField.setForeground(oe.value); }
       });
     }
     else {
 //      _colorField.setBackground(Color.white);
-      _colorField.setBackground(DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR));
-       DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_BACKGROUND_COLOR,
+      _colorField.setBackground(DrScala.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR));
+       DrScala.getConfig().addOptionListener(OptionConstants.DEFINITIONS_BACKGROUND_COLOR,
                                            new OptionListener<Color>() {
         public void optionChanged(OptionEvent<Color> oe) {
           _colorField.setBackground(oe.value);
@@ -110,7 +110,7 @@ public class ColorOptionComponent extends OptionComponent<Color,JPanel> {
     if (_isBoldText) {
       _colorField.setFont(_colorField.getFont().deriveFont(Font.BOLD));
     }
-    _color = DrJava.getConfig().getSetting(_option);
+    _color = DrScala.getConfig().getSetting(_option);
     _updateField(_color);
     setComponent(_panel);
   }
@@ -148,7 +148,7 @@ public class ColorOptionComponent extends OptionComponent<Color,JPanel> {
    *  @return true if the new value is set successfully
    */
   public boolean updateConfig() {
-    if (!_color.equals(DrJava.getConfig().getSetting(_option))) { DrJava.getConfig().setSetting(_option, _color); }
+    if (!_color.equals(DrScala.getConfig().getSetting(_option))) { DrScala.getConfig().setSetting(_option, _color); }
     return true;
   }
   

@@ -57,7 +57,7 @@ import edu.rice.cs.util.text.ConsoleDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.plt.tuple.Pair;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 
 import static edu.rice.cs.plt.debug.DebugUtil.debug;
@@ -208,7 +208,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 //        if (toEval.startsWith("java ")) toEval = _transformJavaCommand(toEval);
 //        else if (toEval.startsWith("applet ")) toEval = _transformAppletCommand(toEval);
         toEval = transformCommands(toEval);
-        if (DrJava.getConfig().getSetting(OptionConstants.DEBUG_AUTO_IMPORT).booleanValue() &&
+        if (DrScala.getConfig().getSetting(OptionConstants.DEBUG_AUTO_IMPORT).booleanValue() &&
             toEval.startsWith("import ")) {
           // add the class or package after the import to the set of auto-imports
           // NOTE: this only processes import statements until the first non-import statement or comment is reached
@@ -248,7 +248,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Executes import statements for the classes and packages in the auto-import set. */
   public void autoImport() {
-    java.util.Vector<String> classes = DrJava.getConfig().getSetting(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES);
+    java.util.Vector<String> classes = DrScala.getConfig().getSetting(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES);
     final StringBuilder sb = new StringBuilder();
     
     for(String s: classes) {
@@ -259,7 +259,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         sb.append("; ");
       }
     }    
-    if (DrJava.getConfig().getSetting(OptionConstants.DEBUG_AUTO_IMPORT).booleanValue()) {
+    if (DrScala.getConfig().getSetting(OptionConstants.DEBUG_AUTO_IMPORT).booleanValue()) {
       for(String s: _autoImportSet) {
         sb.append("import ");
         sb.append(s);
@@ -855,7 +855,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 
   /** Perform the default imports of the classes and packages listed in the INTERACTIONS_AUTO_IMPORT_CLASSES. */
   public void performDefaultImports() {
-    java.util.Vector<String> classes = DrJava.getConfig().getSetting(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES);
+    java.util.Vector<String> classes = DrScala.getConfig().getSetting(OptionConstants.INTERACTIONS_AUTO_IMPORT_CLASSES);
     final StringBuilder sb = new StringBuilder();
     
     for(String s: classes) {

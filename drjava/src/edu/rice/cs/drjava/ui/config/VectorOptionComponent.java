@@ -496,7 +496,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   
   /** Enable and disable buttons. */
   protected void updateButtons() {
-    boolean editable = DrJava.getConfig().isEditable(_option);
+    boolean editable = DrScala.getConfig().isEditable(_option);
     if (_moveButtonEnabled) {
       int[] rows = _table.getSelectedRows();
       boolean enable = (rows.length > 0) && (_data.size()>1) && editable;
@@ -524,12 +524,12 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     * @return true if the new value is set successfully
     */
   public boolean updateConfig() {
-    Vector<T> oldValue = DrJava.getConfig().getSetting(_option);
+    Vector<T> oldValue = DrScala.getConfig().getSetting(_option);
     Vector<T> newValue = getValue();
 
     if ((oldValue.size() != newValue.size()) || // allow cheap short-circuiting
         (!oldValue.equals(newValue))) { 
-      DrJava.getConfig().setSetting(_option, newValue);
+      DrScala.getConfig().setSetting(_option, newValue);
       resetToCurrent();
     }
     return true;

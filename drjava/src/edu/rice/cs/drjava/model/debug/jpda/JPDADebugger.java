@@ -63,7 +63,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.plt.lambda.Lambda;
 import edu.rice.cs.drjava.model.debug.*;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.plt.tuple.Pair;
 
@@ -486,7 +486,7 @@ public class JPDADebugger implements Debugger {
   public /* synchronized */ void addWatch(String field) throws DebugException {
     // _ensureReady();
     assert EventQueue.isDispatchThread();
-    if (!(DrJava.getConfig().getSetting(OptionConstants.DEBUG_EXPRESSIONS_AND_METHODS_IN_WATCHES).booleanValue()) &&
+    if (!(DrScala.getConfig().getSetting(OptionConstants.DEBUG_EXPRESSIONS_AND_METHODS_IN_WATCHES).booleanValue()) &&
         !isSimpleVariableOrFieldAccess(field)) {
       Utilities.showMessageBox("Expressions and method calls are not allowed.\n"+
                                "See the 'Debugger' category in the Preferences.",

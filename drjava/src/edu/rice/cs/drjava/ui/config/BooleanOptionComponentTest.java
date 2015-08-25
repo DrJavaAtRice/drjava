@@ -36,8 +36,8 @@
 
 package edu.rice.cs.drjava.ui.config;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScala;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.DefaultSwingFrame;
 import edu.rice.cs.util.swing.Utilities;
@@ -45,7 +45,7 @@ import edu.rice.cs.util.swing.Utilities;
 /**
  * Tests functionality of this OptionComponent
  */
-public final class BooleanOptionComponentTest extends DrJavaTestCase {
+public final class BooleanOptionComponentTest extends DrScalaTestCase {
 
   private static BooleanOptionComponent _option;
 
@@ -56,13 +56,13 @@ public final class BooleanOptionComponentTest extends DrJavaTestCase {
   protected void setUp() throws Exception {
     super.setUp();
     _option = new BooleanOptionComponent( OptionConstants.LINEENUM_ENABLED, "Line Enumeration", new DefaultSwingFrame());
-    DrJava.getConfig().resetToDefaults();
+    DrScala.getConfig().resetToDefaults();
     Utilities.clearEventQueue();
   }
 
   public void testCancelDoesNotChangeConfig() {
 
-    Boolean testBoolean = new Boolean (!DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
+    Boolean testBoolean = new Boolean (!DrScala.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
 
     _option.setValue(testBoolean);
     Utilities.clearEventQueue();
@@ -72,12 +72,12 @@ public final class BooleanOptionComponentTest extends DrJavaTestCase {
     Utilities.clearEventQueue();
     assertEquals("Cancel (resetToCurrent) should not change the config",
                  OptionConstants.LINEENUM_ENABLED.getDefault(),
-                 DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED));
+                 DrScala.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED));
 
   }
 
   public void testApplyDoesChangeConfig() {
-    Boolean testBoolean = new Boolean (!DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
+    Boolean testBoolean = new Boolean (!DrScala.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
 
     _option.setValue(testBoolean);
     Utilities.clearEventQueue();
@@ -85,11 +85,11 @@ public final class BooleanOptionComponentTest extends DrJavaTestCase {
     Utilities.clearEventQueue();
     assertEquals("Apply (updateConfig) should write change to file",
                  testBoolean,
-                 DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED));
+                 DrScala.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED));
   }
 
   public void testApplyThenResetDefault() {
-    Boolean testBoolean = new Boolean (!DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
+    Boolean testBoolean = new Boolean (!DrScala.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
 
     _option.setValue(testBoolean);
     Utilities.clearEventQueue();
@@ -102,7 +102,7 @@ public final class BooleanOptionComponentTest extends DrJavaTestCase {
 
     assertEquals("Apply (updateConfig) should write change to file",
                  OptionConstants.LINEENUM_ENABLED.getDefault(),
-                 DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED));
+                 DrScala.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED));
   }
 }
 

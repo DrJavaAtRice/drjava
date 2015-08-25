@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model.repl;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.drjava.model.FileSaveSelector;
@@ -63,7 +63,7 @@ import java.rmi.RemoteException;
   * TODO: completely revise this class.
   * @version $Id: InteractionsModelTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public final class InteractionsModelTest extends DrJavaTestCase {
+public final class InteractionsModelTest extends DrScalaTestCase {
   
   private static Log _log = new Log("InteractionsModelTest.txt", false);
   protected InteractionsDJDocument _adapter;

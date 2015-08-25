@@ -34,7 +34,7 @@
  * 
  * END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 /**
  * DummyOpenDefDocTest for unit testing DummyOpenDefDoc.  Uses
@@ -44,7 +44,7 @@ import edu.rice.cs.drjava.DrJavaTestCase;
  * @version $Id: DummyOpenDefDocTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
 
-public class DummyOpenDefDocTest extends DrJavaTestCase {
+public class DummyOpenDefDocTest extends DrScalaTestCase {
   
   
   /** Creates a DummyOpenDefDoc and ensures that it properly

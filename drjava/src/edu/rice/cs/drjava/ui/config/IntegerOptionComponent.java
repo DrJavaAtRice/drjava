@@ -52,7 +52,7 @@ public class IntegerOptionComponent extends OptionComponent<Integer,JTextField> 
   public IntegerOptionComponent (IntegerOption opt, String text, SwingFrame parent) {
     super(opt, text, parent);
     _jtf = new JTextField();
-    _jtf.setText(_option.format(DrJava.getConfig().getSetting(_option)));
+    _jtf.setText(_option.format(DrScala.getConfig().getSetting(_option)));
     _jtf.getDocument().addDocumentListener(new DocumentListener() {
       public void insertUpdate(DocumentEvent e) { notifyChangeListeners(); }
       public void removeUpdate(DocumentEvent e) { notifyChangeListeners(); }
@@ -80,7 +80,7 @@ public class IntegerOptionComponent extends OptionComponent<Integer,JTextField> 
     */
   public boolean updateConfig() {
   
-    Integer currentValue = DrJava.getConfig().getSetting(_option);
+    Integer currentValue = DrScala.getConfig().getSetting(_option);
     String enteredString = _jtf.getText().trim();
     //If the current value is the same as the enterd value, there is nothing to do.
     if (currentValue.toString().equals(enteredString)) return true;
@@ -92,7 +92,7 @@ public class IntegerOptionComponent extends OptionComponent<Integer,JTextField> 
       return false;
     }
     
-    DrJava.getConfig().setSetting(_option, enteredValue);
+    DrScala.getConfig().setSetting(_option, enteredValue);
     return true;
   } 
   

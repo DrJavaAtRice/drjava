@@ -59,7 +59,7 @@ public class DirectoryOptionComponent extends OptionComponent<File,DirectorySele
     super(opt, text, parent);
     
     _component = new DirectorySelectorComponent(parent, dc, 30, 10f);
-    _component.setFileField(DrJava.getConfig().getSetting(_option));
+    _component.setFileField(DrScala.getConfig().getSetting(_option));
     _component.getFileField().getDocument().addDocumentListener(new DocumentListener() {
       public void insertUpdate(DocumentEvent e) { notifyChangeListeners(); }
       public void removeUpdate(DocumentEvent e) { notifyChangeListeners(); }
@@ -85,13 +85,13 @@ public class DirectoryOptionComponent extends OptionComponent<File,DirectorySele
    */
   public boolean updateConfig() {
     File componentFile = _component.getFileFromField();
-    File currentFile = DrJava.getConfig().getSetting(_option);
+    File currentFile = DrScala.getConfig().getSetting(_option);
     
     if (componentFile != null && !componentFile.equals(currentFile)) {
-      DrJava.getConfig().setSetting(_option, componentFile);
+      DrScala.getConfig().setSetting(_option, componentFile);
     }
     else if (componentFile == null) {
-      DrJava.getConfig().setSetting(_option, _option.getDefault());
+      DrScala.getConfig().setSetting(_option, _option.getDefault());
     }
 
     return true;

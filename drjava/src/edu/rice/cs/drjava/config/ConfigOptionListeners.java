@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.plt.concurrent.JVMBuilder;
@@ -59,7 +59,7 @@ public class ConfigOptionListeners implements OptionConstants {
     public SlaveJVMArgsListener(JFrame parent) { _parent = parent; }
     public void optionChanged(OptionEvent<String> oe) {
 //      final OptionListener<String> slaveJvmArgsListener = this;
-      DrJava.getConfig().removeOptionListener(SLAVE_JVM_ARGS, this);
+      DrScala.getConfig().removeOptionListener(SLAVE_JVM_ARGS, this);
       if (!oe.value.equals("")) {
         int result = JOptionPane.
           showConfirmDialog(_parent,
@@ -68,13 +68,13 @@ public class ConfigOptionListeners implements OptionConstants {
                             "(You will have to reset the interactions pane before changes take effect.)",
                             "Confirm Interactions JVM Arguments", JOptionPane.YES_NO_OPTION);
         if (result!=JOptionPane.YES_OPTION) {
-          DrJava.getConfig().setSetting(oe.option, "");
+          DrScala.getConfig().setSetting(oe.option, "");
         }
         else {
           sanitizeSlaveJVMArgs(_parent, oe.value, this);
         }
       }
-      DrJava.getConfig().addOptionListener(SLAVE_JVM_ARGS, this);
+      DrScala.getConfig().addOptionListener(SLAVE_JVM_ARGS, this);
     }
   }
 
@@ -161,19 +161,19 @@ public class ConfigOptionListeners implements OptionConstants {
           ++endpos;
         }
         String newValue = value.substring(0,pos) + value.substring(endpos);
-        DrJava.getConfig().removeOptionListener(SLAVE_JVM_ARGS, l);
-        DrJava.getConfig().addOptionListener(SLAVE_JVM_ARGS, new OptionListener<String>() {
+        DrScala.getConfig().removeOptionListener(SLAVE_JVM_ARGS, l);
+        DrScala.getConfig().addOptionListener(SLAVE_JVM_ARGS, new OptionListener<String>() {
           public void optionChanged(OptionEvent<String> oe) {
-            DrJava.getConfig().removeOptionListener(SLAVE_JVM_ARGS, this);
+            DrScala.getConfig().removeOptionListener(SLAVE_JVM_ARGS, this);
             EventQueue.invokeLater(new Runnable() { 
-              public void run() { DrJava.getConfig().addOptionListener(SLAVE_JVM_ARGS, l); }
+              public void run() { DrScala.getConfig().addOptionListener(SLAVE_JVM_ARGS, l); }
             });
           }
         });
-        DrJava.getConfig().setSetting(SLAVE_JVM_ARGS, newValue);
+        DrScala.getConfig().setSetting(SLAVE_JVM_ARGS, newValue);
         if (result == 0) {
           // copy
-          DrJava.getConfig().setSetting(SLAVE_JVM_XMX, newSetting);
+          DrScala.getConfig().setSetting(SLAVE_JVM_XMX, newSetting);
         }
         else {
           JOptionPane.showMessageDialog(parent,
@@ -187,9 +187,9 @@ public class ConfigOptionListeners implements OptionConstants {
     protected JFrame _parent;
     public SlaveJVMXMXListener(JFrame parent) { _parent = parent; }
     public void optionChanged(OptionEvent<String> oe) {
-      DrJava.getConfig().removeOptionListener(SLAVE_JVM_XMX, this);
+      DrScala.getConfig().removeOptionListener(SLAVE_JVM_XMX, this);
       sanitizeSlaveJVMXMX(_parent, oe.value);
-      DrJava.getConfig().addOptionListener(SLAVE_JVM_XMX, this);
+      DrScala.getConfig().addOptionListener(SLAVE_JVM_XMX, this);
       JOptionPane.showMessageDialog(_parent,
                                     "You will have to reset the interactions pane before changes take effect.");
     }
@@ -221,7 +221,7 @@ public class ConfigOptionListeners implements OptionConstants {
                            options[0]);
         if (result == 0) {
           // clean up
-          DrJava.getConfig().setSetting(SLAVE_JVM_XMX, OptionConstants.heapSizeChoices.get(0));
+          DrScala.getConfig().setSetting(SLAVE_JVM_XMX, OptionConstants.heapSizeChoices.get(0));
         }
       }
       else if (heapSize > 0) {
@@ -233,7 +233,7 @@ public class ConfigOptionListeners implements OptionConstants {
                               "Maximum Heap Size Too Big",
                               JOptionPane.ERROR_MESSAGE);
           // clean up
-          DrJava.getConfig().setSetting(SLAVE_JVM_XMX, OptionConstants.heapSizeChoices.get(0));
+          DrScala.getConfig().setSetting(SLAVE_JVM_XMX, OptionConstants.heapSizeChoices.get(0));
         }
       }
     }
@@ -261,7 +261,7 @@ public class ConfigOptionListeners implements OptionConstants {
     protected JFrame _parent;
     public MasterJVMArgsListener(JFrame parent) { _parent = parent; }
     public void optionChanged(OptionEvent<String> oe) {
-      DrJava.getConfig().removeOptionListener(MASTER_JVM_ARGS, this);
+      DrScala.getConfig().removeOptionListener(MASTER_JVM_ARGS, this);
 //      final OptionListener<String> masterJvmArgsListener = this;
       if (!oe.value.equals("")) {
         int result = JOptionPane.
@@ -272,13 +272,13 @@ public class ConfigOptionListeners implements OptionConstants {
                             "(You will have to restart Drjava before changes take effect.)",
                             "Confirm Main JVM Arguments", JOptionPane.YES_NO_OPTION);
         if (result!=JOptionPane.YES_OPTION) {
-          DrJava.getConfig().setSetting(oe.option, "");
+          DrScala.getConfig().setSetting(oe.option, "");
         }
         else {
           sanitizeMasterJVMArgs(_parent, oe.value, this);
         }
       }
-      DrJava.getConfig().addOptionListener(MASTER_JVM_ARGS, this);
+      DrScala.getConfig().addOptionListener(MASTER_JVM_ARGS, this);
     }
   }
   
@@ -355,17 +355,17 @@ public class ConfigOptionListeners implements OptionConstants {
         while(endpos<value.length() && Character.isWhitespace(value.charAt(endpos))) ++endpos;
 
         String newValue = value.substring(0,pos) + value.substring(endpos);
-        DrJava.getConfig().removeOptionListener(MASTER_JVM_ARGS, l);
-        DrJava.getConfig().addOptionListener(MASTER_JVM_ARGS, new OptionListener<String>() {
+        DrScala.getConfig().removeOptionListener(MASTER_JVM_ARGS, l);
+        DrScala.getConfig().addOptionListener(MASTER_JVM_ARGS, new OptionListener<String>() {
           public void optionChanged(OptionEvent<String> oe) {
-            DrJava.getConfig().removeOptionListener(MASTER_JVM_ARGS, this);
+            DrScala.getConfig().removeOptionListener(MASTER_JVM_ARGS, this);
             EventQueue.invokeLater(new Runnable() { 
-              public void run() { DrJava.getConfig().addOptionListener(MASTER_JVM_ARGS, l); }
+              public void run() { DrScala.getConfig().addOptionListener(MASTER_JVM_ARGS, l); }
             });
           }
         });
-        DrJava.getConfig().setSetting(MASTER_JVM_ARGS, newValue);
-        if (result == 0) DrJava.getConfig().setSetting(MASTER_JVM_XMX, newSetting);   // copy
+        DrScala.getConfig().setSetting(MASTER_JVM_ARGS, newValue);
+        if (result == 0) DrScala.getConfig().setSetting(MASTER_JVM_XMX, newSetting);   // copy
         else JOptionPane.showMessageDialog(parent, "You will have to restart DrJava before the change takes effect.");
       }
     }
@@ -375,10 +375,10 @@ public class ConfigOptionListeners implements OptionConstants {
     protected JFrame _parent;
     public MasterJVMXMXListener(JFrame parent) { _parent = parent; }
     public void optionChanged(OptionEvent<String> oe) {
-      DrJava.getConfig().removeOptionListener(MASTER_JVM_XMX, this);
+      DrScala.getConfig().removeOptionListener(MASTER_JVM_XMX, this);
       sanitizeMasterJVMXMX(_parent, oe.value);
       JOptionPane.showMessageDialog(_parent, "You will have to restart DrJava before the change takes effect.");
-      DrJava.getConfig().addOptionListener(MASTER_JVM_XMX, this);
+      DrScala.getConfig().addOptionListener(MASTER_JVM_XMX, this);
     }
   }
   
@@ -408,7 +408,7 @@ public class ConfigOptionListeners implements OptionConstants {
                            options[0]);
         if (result == 0) {
           // clean up
-          DrJava.getConfig().setSetting(MASTER_JVM_XMX, OptionConstants.heapSizeChoices.get(0));
+          DrScala.getConfig().setSetting(MASTER_JVM_XMX, OptionConstants.heapSizeChoices.get(0));
         }
       }
       else if (heapSize > 0) {
@@ -420,7 +420,7 @@ public class ConfigOptionListeners implements OptionConstants {
                               "Maximum Heap Size Too Big",
                               JOptionPane.ERROR_MESSAGE);
           // clean up
-          DrJava.getConfig().setSetting(MASTER_JVM_XMX, OptionConstants.heapSizeChoices.get(0));
+          DrScala.getConfig().setSetting(MASTER_JVM_XMX, OptionConstants.heapSizeChoices.get(0));
         }
       }
     }
@@ -499,10 +499,10 @@ public class ConfigOptionListeners implements OptionConstants {
       if (result!=2) {
         if (result == 0) {
           // copy
-          if (containsPublic) { DrJava.getConfig().setSetting(SCALADOC_ACCESS_LEVEL, "public"); }
-          else if (containsProtected) { DrJava.getConfig().setSetting(SCALADOC_ACCESS_LEVEL, "protected"); }
-          else if (containsPrivate) { DrJava.getConfig().setSetting(SCALADOC_ACCESS_LEVEL, "private"); }
-          else if (containsPackage) { DrJava.getConfig().setSetting(SCALADOC_ACCESS_LEVEL, "package"); }
+          if (containsPublic) { DrScala.getConfig().setSetting(SCALADOC_ACCESS_STATUS, "public"); }
+          else if (containsProtected) { DrScala.getConfig().setSetting(SCALADOC_ACCESS_STATUS, "protected"); }
+          else if (containsPrivate) { DrScala.getConfig().setSetting(SCALADOC_ACCESS_STATUS, "private"); }
+          else if (containsPackage) { DrScala.getConfig().setSetting(SCALADOC_ACCESS_STATUS, "package"); }
         }
         // clean up
         String[] params = value.split("(-private|-protected|-package|-public)");
@@ -510,7 +510,7 @@ public class ConfigOptionListeners implements OptionConstants {
         for(int i = 0; i < params.length; i++) {
           if(!params[i].trim().equals("")) { sb.append(params[i].trim()); sb.append(' '); }
         }
-        DrJava.getConfig().setSetting(SCALADOC_CUSTOM_PARAMS, sb.toString().trim());
+        DrScala.getConfig().setSetting(SCALADOC_CUSTOM_PARAMS, sb.toString().trim());
       }
     }
   }
@@ -551,14 +551,14 @@ public class ConfigOptionListeners implements OptionConstants {
       
       String title = "Apply Look and Feel";
       String msg = "Look and feel changes will take effect when you restart DrJava.";
-      if (DrJava.getConfig().getSetting(WARN_CHANGE_LAF).booleanValue()) {
+      if (DrScala.getConfig().getSetting(WARN_CHANGE_LAF).booleanValue()) {
         ConfirmCheckBoxDialog dialog =
           new ConfirmCheckBoxDialog(_parent, title, msg,
                                     "Do not show this message again",
                                     JOptionPane.INFORMATION_MESSAGE,
                                     JOptionPane.DEFAULT_OPTION);
         if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue()) {
-          DrJava.getConfig().setSetting(WARN_CHANGE_LAF, Boolean.FALSE);
+          DrScala.getConfig().setSetting(WARN_CHANGE_LAF, Boolean.FALSE);
         }
       }
     }
@@ -570,14 +570,14 @@ public class ConfigOptionListeners implements OptionConstants {
     public void optionChanged(OptionEvent<String> oe) {
       String title = "Apply Theme";
       String msg = "Changes to the theme will take effect when you restart DrJava.";
-      if (DrJava.getConfig().getSetting(WARN_CHANGE_THEME).booleanValue()) {
+      if (DrScala.getConfig().getSetting(WARN_CHANGE_THEME).booleanValue()) {
         ConfirmCheckBoxDialog dialog =
           new ConfirmCheckBoxDialog(_parent, title, msg,
                                     "Do not show this message again",
                                     JOptionPane.INFORMATION_MESSAGE,
                                     JOptionPane.DEFAULT_OPTION);
         if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue()) {
-          DrJava.getConfig().setSetting(WARN_CHANGE_THEME, Boolean.FALSE);
+          DrScala.getConfig().setSetting(WARN_CHANGE_THEME, Boolean.FALSE);
         }
       }
     }
@@ -593,14 +593,14 @@ public class ConfigOptionListeners implements OptionConstants {
     public void optionChanged(OptionEvent<T> oe) {      
       String title = "Apply Preference Changes";
       String msg = "Changes to the '"+_description+"' preferences\nwill only take effect when you restart DrScala.";
-      if (DrJava.getConfig().getSetting(WARN_CHANGE_MISC).booleanValue()) {
+      if (DrScala.getConfig().getSetting(WARN_CHANGE_MISC).booleanValue()) {
         ConfirmCheckBoxDialog dialog =
           new ConfirmCheckBoxDialog(_parent, title, msg,
                                     "Do not show this message again",
                                     JOptionPane.INFORMATION_MESSAGE,
                                     JOptionPane.DEFAULT_OPTION);
         if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue()) {
-          DrJava.getConfig().setSetting(WARN_CHANGE_MISC, Boolean.FALSE);
+          DrScala.getConfig().setSetting(WARN_CHANGE_MISC, Boolean.FALSE);
         }
       }
     }
@@ -616,14 +616,14 @@ public class ConfigOptionListeners implements OptionConstants {
     public void optionChanged(OptionEvent<T> oe) {
       String title = "Apply Preference Changes";
       String msg = "Changes to the '"+_description+"' preferences\nwill only take effect when you reset the Interactions Pane.";
-      if (DrJava.getConfig().getSetting(WARN_CHANGE_INTERACTIONS).booleanValue()) {
+      if (DrScala.getConfig().getSetting(WARN_CHANGE_INTERACTIONS).booleanValue()) {
         ConfirmCheckBoxDialog dialog =
           new ConfirmCheckBoxDialog(_parent, title, msg,
                                     "Do not show this message again",
                                     JOptionPane.INFORMATION_MESSAGE,
                                     JOptionPane.DEFAULT_OPTION);
         if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue()) {
-          DrJava.getConfig().setSetting(WARN_CHANGE_INTERACTIONS, Boolean.FALSE);
+          DrScala.getConfig().setSetting(WARN_CHANGE_INTERACTIONS, Boolean.FALSE);
         }
       }
     }
@@ -635,14 +635,14 @@ public class ConfigOptionListeners implements OptionConstants {
     public void optionChanged(OptionEvent<String> oe) {      
       String title = "Apply Default Compiler Preference Change";
       String msg = "Default Compiler Preference will take effect when you restart DrJava.";
-      if (DrJava.getConfig().getSetting(WARN_CHANGE_DCP).booleanValue()) {
+      if (DrScala.getConfig().getSetting(WARN_CHANGE_DCP).booleanValue()) {
         ConfirmCheckBoxDialog dialog =
           new ConfirmCheckBoxDialog(_parent, title, msg,
                                     "Do not show this message again",
                                     JOptionPane.INFORMATION_MESSAGE,
                                     JOptionPane.DEFAULT_OPTION);
         if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue()) {
-          DrJava.getConfig().setSetting(WARN_CHANGE_DCP, Boolean.FALSE);
+          DrScala.getConfig().setSetting(WARN_CHANGE_DCP, Boolean.FALSE);
         }
       }
     }

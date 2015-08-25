@@ -43,8 +43,8 @@ import  javax.swing.text.BadLocationException;
 //import java.io.BufferedReader;
 //import java.io.IOException;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScala;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.drjava.model.DJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceInfo;
 import edu.rice.cs.drjava.config.*;
@@ -59,7 +59,7 @@ import static edu.rice.cs.drjava.model.definitions.reducedmodel.BraceInfo.*;
 /** Class that tests the tab/enter/curly indenting functionality.
   * @version $Id: IndentTest.java 5668 2012-08-15 04:58:30Z rcartwright $
   */
-public final class IndentTest extends DrJavaTestCase {
+public final class IndentTest extends DrScalaTestCase {
   protected DefinitionsDocument _doc;
   
   private Integer indentInc = Integer.valueOf(2);
@@ -71,7 +71,7 @@ public final class IndentTest extends DrJavaTestCase {
   /** Sets up the member bindings common to all tests. */
   public void setUp() throws Exception {
     super.setUp();
-    DrJava.getConfig().resetToDefaults();
+    DrScala.getConfig().resetToDefaults();
     _notifier = new GlobalEventNotifier();
     _doc = new DefinitionsDocument(_notifier);
     setConfigSetting(OptionConstants.INDENT_INC, indentInc);
@@ -935,28 +935,6 @@ public final class IndentTest extends DrJavaTestCase {
 //    System.err.println("Correct text:\n" + indented);
     _assertContents(indented, _doc);
 //    fail("Asserted failure");
-  }
-  
-  
-  public void xtestParenthesizedAnonymousInnerClass() throws BadLocationException {
-    String text = "addActionListener(new ActionListener() {\n" +
-      "public void actionPerformed(ActionEvent e) {\n" +
-        "config.setSetting(LANGUAGE_LEVEL, edu.rice.cs.drjava.config.OptionConstants.FULL_JAVA);\n" +
-      "}});\n" +
-      "group.add(rbMenuItem);\n";
-    String indented = "addActionListener(new ActionListener() {\n" +
-      "  public void actionPerformed(ActionEvent e) {\n" +
-       "    config.setSetting(LANGUAGE_LEVEL, edu.rice.cs.drjava.config.OptionConstants.FULL_JAVA);\n" +
-      "  }});\n" +
-      "group.add(rbMenuItem);\n";
-    _doc.insertString(0, text, null);
-    _assertContents(text, _doc);
-//    System.err.println("Original text:\n" + text);
-//    System.err.println("Indented text:\n" + indented);
-    safeIndentLines(0, _doc.getLength());
-//    System.err.println("Computed result:\n" + doc.getText());
-//    fail("Asserted failure");
-    _assertContents(indented, _doc);
   }
   
 //  /** Regression test for Bug #627753.  Uncomment when it is fixed.

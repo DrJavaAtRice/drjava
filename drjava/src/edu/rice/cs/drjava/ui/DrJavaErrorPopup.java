@@ -42,7 +42,7 @@ import javax.swing.border.*;
 import java.awt.event.*;
 import java.awt.*;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.swing.Utilities;
 
@@ -79,10 +79,10 @@ public class DrJavaErrorPopup extends JDialog {
     // If we set this pane to be of type text/rtf, it wraps based on words
     // as opposed to based on characters.
     _keepDisplaying = new JCheckBox("Keep showing this notification",
-                                    DrJava.getConfig().getSetting(OptionConstants.DIALOG_DRSCALA_ERROR_POPUP_ENABLED).booleanValue());
+                                    DrScala.getConfig().getSetting(OptionConstants.DIALOG_DRSCALA_ERROR_POPUP_ENABLED).booleanValue());
     _keepDisplaying.addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
-        DrJava.getConfig().setSetting(OptionConstants.DIALOG_DRSCALA_ERROR_POPUP_ENABLED, _keepDisplaying.isSelected());
+        DrScala.getConfig().setSetting(OptionConstants.DIALOG_DRSCALA_ERROR_POPUP_ENABLED, _keepDisplaying.isSelected());
       }
     });
 

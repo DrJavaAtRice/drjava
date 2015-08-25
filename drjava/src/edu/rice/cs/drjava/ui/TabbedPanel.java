@@ -40,7 +40,7 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
 import java.awt.dnd.*;
-import edu.rice.cs.drjava.DrJavaRoot;
+import edu.rice.cs.drjava.DrScalaRoot;
 
 /** Extended by all panels that can dynamically be added or removed from the _tabbedPane in MainFrame. Provides a
   * boolean indicating if the panel is being displayed, and a close button. Attaches an action to the close button
@@ -134,7 +134,7 @@ public abstract class TabbedPanel extends JPanel implements DropTargetListener {
 
   /** User dragged something into the component. */
   public void dragEnter(DropTargetDragEvent dropTargetDragEvent) {
-    DrJavaRoot.dragEnter(dropTargetDragEvent);
+    DrScalaRoot.dragEnter(dropTargetDragEvent);
   }
   
   public void dragExit(DropTargetEvent dropTargetEvent) { }
@@ -143,6 +143,6 @@ public abstract class TabbedPanel extends JPanel implements DropTargetListener {
   
   /** User dropped something on the component.  Only runs in event thread. */
   public /* synchronized */ void drop(DropTargetDropEvent dropTargetDropEvent) {
-    DrJavaRoot.drop(dropTargetDropEvent);
+    DrScalaRoot.drop(dropTargetDropEvent);
   }
 }

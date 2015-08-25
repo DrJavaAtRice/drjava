@@ -150,10 +150,10 @@ public class ScalaCompiler extends Javac160FilteringCompiler implements /* Scala
   }
 
   public boolean isAvailable() {
-    JDKToolsLibrary.msg("Testing scala-compiler.jar to determine if it contains scala.tools.nsc.Main");
+    JDKToolsLibrary.msg("Testing scala-compiler.jar to determine if it contains scala.tools.nsc.interpreter.ILoop");
     try {
       // Confirm that Scala compiler is available
-      Class.forName("scala.tools.nsc.Main");
+      Class.forName("scala.tools.nsc.interpreter.ILoop");
       JDKToolsLibrary.msg("Returning true");
       return true;
     }

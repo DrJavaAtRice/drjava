@@ -55,7 +55,7 @@ import edu.rice.cs.plt.lambda.Runnable1;
 import edu.rice.cs.plt.lambda.LambdaUtil;
 import edu.rice.cs.util.swing.SwingFrame;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.drjava.DrJavaRoot;
+import edu.rice.cs.drjava.DrScalaRoot;
 
 /** Frame with predictive string input based on a list of strings.  NOTE: the Comparable bound on type variable T
   * implies that the erasure of T is Comparable not Object! */
@@ -695,14 +695,14 @@ public class PredictiveInputFrame<T extends Comparable<? super T>> extends Swing
     assert EventQueue.isDispatchThread();
     validate();
     if (vis) {
-      DrJavaRoot.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
+      DrScalaRoot.installModalWindowAdapter(this, LambdaUtil.NO_OP, CANCEL);
       setOwnerEnabled(false);
       selectStrategy();
       _textField.requestFocus();
       toFront();
     }
     else {
-      DrJavaRoot.removeModalWindowAdapter(this);
+      DrScalaRoot.removeModalWindowAdapter(this);
       setOwnerEnabled(true);
       if (_owner!=null) { _owner.toFront(); }
     }

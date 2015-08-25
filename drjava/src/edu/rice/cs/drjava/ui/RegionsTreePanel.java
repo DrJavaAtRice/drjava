@@ -50,7 +50,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.tree.*;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.model.OrderedDocumentRegion;
 import edu.rice.cs.drjava.model.RegionManager;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
@@ -399,7 +399,7 @@ public abstract class RegionsTreePanel<R extends OrderedDocumentRegion> extends 
       
       // set tooltip as thunk
       Thunk<String> tooltip = null;
-      if (DrJava.getConfig().getSetting(OptionConstants.SHOW_CODE_PREVIEW_POPUPS).booleanValue()) {
+      if (DrScala.getConfig().getSetting(OptionConstants.SHOW_CODE_PREVIEW_POPUPS).booleanValue()) {
         if (leaf) {
           DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
           final Object o = node.getUserObject();

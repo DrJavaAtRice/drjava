@@ -48,7 +48,7 @@ import java.io.InputStream;
 import java.io.FileOutputStream;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.model.DJError;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.plt.reflect.JavaVersion;

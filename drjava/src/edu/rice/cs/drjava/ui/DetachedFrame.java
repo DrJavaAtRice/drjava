@@ -60,7 +60,7 @@ import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.ui.KeyBindingManager;
 import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeData;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 
 public class DetachedFrame extends SwingFrame {
   /** Class to save the frame state, i.e. location. */
@@ -297,7 +297,7 @@ public class DetachedFrame extends SwingFrame {
     // Add listeners to all key bindings
     for (KeyStrokeData ksd: KeyBindingManager.ONLY.getKeyStrokeData()) {
       if (ksd.getOption() != null) {
-        DrJava.getConfig().addOptionListener(ksd.getOption(), _keyBindingOptionListener);
+        DrScala.getConfig().addOptionListener(ksd.getOption(), _keyBindingOptionListener);
       }
     }
     // Then update the key bindings

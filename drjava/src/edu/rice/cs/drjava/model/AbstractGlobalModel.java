@@ -82,8 +82,8 @@ import javax.swing.text.Segment;
 import javax.swing.text.Style;
 import javax.swing.ProgressMonitor;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.DrJavaRoot;
+import edu.rice.cs.drjava.DrScala;
+import edu.rice.cs.drjava.DrScalaRoot;
 import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.config.OptionParser;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -369,8 +369,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         ClipboardHistoryModel.singleton().resize(oce.value);
       }
     };
-    DrJava.getConfig().addOptionListener(CLIPBOARD_HISTORY_SIZE, clipboardHistorySizeListener);
-    ClipboardHistoryModel.singleton().resize(DrJava.getConfig().getSetting(CLIPBOARD_HISTORY_SIZE).intValue());
+    DrScala.getConfig().addOptionListener(CLIPBOARD_HISTORY_SIZE, clipboardHistorySizeListener);
+    ClipboardHistoryModel.singleton().resize(DrScala.getConfig().getSetting(CLIPBOARD_HISTORY_SIZE).intValue());
     
     // setup option listener for browser history
     OptionListener<Integer> browserHistoryMaxSizeListener = new OptionListener<Integer>() {
@@ -378,8 +378,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         AbstractGlobalModel.this.getBrowserHistoryManager().setMaximumSize(oce.value);
       }
     };
-    DrJava.getConfig().addOptionListener(BROWSER_HISTORY_MAX_SIZE, browserHistoryMaxSizeListener);
-    getBrowserHistoryManager().setMaximumSize(DrJava.getConfig().getSetting(BROWSER_HISTORY_MAX_SIZE).intValue());
+    DrScala.getConfig().addOptionListener(BROWSER_HISTORY_MAX_SIZE, browserHistoryMaxSizeListener);
+    getBrowserHistoryManager().setMaximumSize(DrScala.getConfig().getSetting(BROWSER_HISTORY_MAX_SIZE).intValue());
   }
   
   // ----- STATE -----
@@ -555,15 +555,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     File file;
     try {
       // restore the path from the configuration
-      file = FileOps.getValidDirectory(DrJava.getConfig().getSetting(LAST_DIRECTORY));
+      file = FileOps.getValidDirectory(DrScala.getConfig().getSetting(LAST_DIRECTORY));
     }
     catch (RuntimeException e) {
       // something went wrong, clear the setting and use "user.home"
-      DrJava.getConfig().setSetting(LAST_DIRECTORY, FileOps.NULL_FILE);
+      DrScala.getConfig().setSetting(LAST_DIRECTORY, FileOps.NULL_FILE);
       file = FileOps.getValidDirectory(new File(System.getProperty("user.home", ".")));
     }
     // update the setting and return it
-    DrJava.getConfig().setSetting(LAST_DIRECTORY, file);
+    DrScala.getConfig().setSetting(LAST_DIRECTORY, file);
     return file;
   }
   
@@ -576,7 +576,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _notifier.projectWorkDirChanged();
     setProjectChanged(true);
     // update the setting
-    DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, _state.getWorkingDirectory());
+    DrScala.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, _state.getWorkingDirectory());
   }
   
   public void cleanBuildDirectory()  { _state.cleanBuildDirectory(); }
@@ -617,9 +617,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       this(project.getParentFile(), null, null, null, project, new File[0], new File[0], new File[0], 
            IterUtil.<AbsRelFile>empty(), null, 0, false, null, new HashMap<OptionParser<?>,String>());
       HashMap<OptionParser<?>,String> defaultStoredPreferences = new HashMap<OptionParser<?>,String>();
-      // by default, put INDENT_INC AND LANGUAGE_LEVEL into the project file
-      defaultStoredPreferences.put(INDENT_INC, DrJava.getConfig().getOptionMap().getString(INDENT_INC));      
-      defaultStoredPreferences.put(LANGUAGE_LEVEL, DrJava.getConfig().getOptionMap().getString(LANGUAGE_LEVEL));
+      // by default, put INDENT_INC into the project file
+      defaultStoredPreferences.put(INDENT_INC, DrScala.getConfig().getOptionMap().getString(INDENT_INC));      
       setPreferencesStoredInProject(defaultStoredPreferences);
     }
     
@@ -700,7 +699,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       try {
         if (_workDir == null || _workDir == FileOps.NULL_FILE) {
           // if no project working directory is set, check preferences working directory
-          File prefWorkDir = DrJava.getConfig().getSetting(FIXED_INTERACTIONS_DIRECTORY);
+          File prefWorkDir = DrScala.getConfig().getSetting(FIXED_INTERACTIONS_DIRECTORY);
           if ((prefWorkDir != null) && (prefWorkDir != FileOps.NULL_FILE)) {
             try {
               // make sure it's a valid directory
@@ -956,7 +955,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     for(Map.Entry<OptionParser<?>, OptionListener<?>> e: LISTENERS_TO_REMOVE.entrySet()) {
       // all keys should be full Option instances, not just OptionParser instances
       if (e.getKey() instanceof Option) {
-        DrJava.getConfig().removeOptionListener((Option)e.getKey(), e.getValue());
+        DrScala.getConfig().removeOptionListener((Option)e.getKey(), e.getValue());
       }
     }
     LISTENERS_TO_REMOVE.clear();
@@ -967,7 +966,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     for(OptionParser<?> key: newValues.keySet()) {
       // all keys should be full Option instances, not just OptionParser instances
       if (key instanceof Option) {
-        DrJava.getConfig().addOptionListener((Option)key, STORED_PREFERENCES_LISTENER);
+        DrScala.getConfig().addOptionListener((Option)key, STORED_PREFERENCES_LISTENER);
         LISTENERS_TO_REMOVE.put(key, STORED_PREFERENCES_LISTENER);
       }
     }
@@ -989,7 +988,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File getProjectRoot() { return getWorkingDirectory(); }
     public File getWorkingDirectory() {
       // if a fixed working directory has been set in the Preferences, use it
-      File prefWorkDir = DrJava.getConfig().getSetting(FIXED_INTERACTIONS_DIRECTORY);
+      File prefWorkDir = DrScala.getConfig().getSetting(FIXED_INTERACTIONS_DIRECTORY);
       if ((prefWorkDir != null) && (prefWorkDir != FileOps.NULL_FILE)) {
         try {
           // make sure it's a valid directory
@@ -999,7 +998,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       }
       if ((prefWorkDir != null) && (prefWorkDir != FileOps.NULL_FILE)) {
         // update the setting and return it
-        DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, prefWorkDir);
+        DrScala.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, prefWorkDir);
         return prefWorkDir;
       }
       
@@ -1011,7 +1010,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       catch(InvalidPackageException ipe) { file = FileOps.NULL_FILE; }
       if ((file != null) && (file != FileOps.NULL_FILE)) {
         // update the setting and return it
-        DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, file);
+        DrScala.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, file);
         return file;
       }
       
@@ -1020,10 +1019,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       if (! IterUtil.isEmpty(roots)) { return IterUtil.first(roots); }
       else {
         // use the last directory saved to the configuration
-        if (DrJava.getConfig().getSetting(STICKY_INTERACTIONS_DIRECTORY)) {
+        if (DrScala.getConfig().getSetting(STICKY_INTERACTIONS_DIRECTORY)) {
           try {
             // restore the path from the configuration
-            file = FileOps.getValidDirectory(DrJava.getConfig().getSetting(LAST_INTERACTIONS_DIRECTORY));
+            file = FileOps.getValidDirectory(DrScala.getConfig().getSetting(LAST_INTERACTIONS_DIRECTORY));
           }
           catch (RuntimeException e) { file = FileOps.NULL_FILE; }
         }
@@ -1032,7 +1031,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           file = FileOps.getValidDirectory(new File(System.getProperty("user.home", ".")));
         }
         // update the setting and return it
-        DrJava.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, file);
+        DrScala.getConfig().setSetting(LAST_INTERACTIONS_DIRECTORY, file);
         return file;
       }
     }
@@ -1251,11 +1250,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     * @return the new open test case
     */
   public OpenDefinitionsDocument newTestCase(String name, boolean makeSetUp, boolean makeTearDown) {
-//    boolean elementary = 
-//      (DrJava.getConfig().getSetting(LANGUAGE_LEVEL) == OptionConstants.ELEMENTARY_LEVEL) ||
-//      (DrJava.getConfig().getSetting(LANGUAGE_LEVEL) == OptionConstants.FUNCTIONAL_JAVA_LEVEL); 
+ 
     final StringBuilder buf = new StringBuilder();
-//    if (! elementary) buf.append("import junit.framework.TestCase;\n\n");
+    
     buf.append("import junit.framework.TestCase\n");
     buf.append("import junit.framework.Assert._\n\n");
     buf.append("/**\n");
@@ -1263,7 +1260,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     buf.append("* Every method starting with the word \"test\" will be called when running\n");
     buf.append("* the test with JUnit.\n");
     buf.append("*/\n");
-/*    if (! elementary) buf.append("public "); */
     buf.append("class ");
     buf.append(name);
     buf.append("(name: String) extends TestCase(name) {\n\n");
@@ -1471,8 +1467,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** @return the file extension for the "Open Folder..." command for the currently selected compiler. */
   public String getOpenAllFilesInFolderExtension() {
     CompilerModel cm = getCompilerModel();
-    if (cm==null) {
-      return OptionConstants.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)];
+    if (cm == null) {
+      return OptionConstants.LANGUAGE_EXTENSIONS[0];  // The .scala language extension
     }
     else {
       return cm.getActiveCompiler().getOpenAllFilesInFolderExtension();
@@ -1736,7 +1732,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // update preference values here
     Map<OptionParser<?>,String> sp = _state.getPreferencesStoredInProject();
     for(OptionParser<?> key: sp.keySet()) {
-      sp.put(key, DrJava.getConfig().getOptionMap().getString(key));
+      sp.put(key, DrScala.getConfig().getOptionMap().getString(key));
     }
     builder.setPreferencesStoredInProject(sp);
     _state.setPreferencesStoredInProject(sp);
@@ -2194,7 +2190,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     dispose();  // kills interpreter and cleans up RMI hooks in the slave JVM
     
-    if (DrJava.getConfig().getSetting(OptionConstants.DRSCALA_USE_FORCE_QUIT)) {
+    if (DrScala.getConfig().getSetting(OptionConstants.DRSCALA_USE_FORCE_QUIT)) {
       Runtime.getRuntime().halt(0);  // force DrJava to exit
     }
     
@@ -2633,7 +2629,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       File f = _getSourceFileFromPath(fileName, s);
       if (f != null) return f;
     }
-    Vector<File> sourcepath = DrJava.getConfig().getSetting(OptionConstants.DEBUG_SOURCEPATH);
+    Vector<File> sourcepath = DrScala.getConfig().getSetting(OptionConstants.DEBUG_SOURCEPATH);
     return findFileInPaths(fileName, sourcepath);
   }
   
@@ -3544,7 +3540,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       if (classFile != FileOps.NULL_FILE) return classFile;
       
       // not on system classpath, check interactions classpath
-      Vector<File> cpSetting = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);
+      Vector<File> cpSetting = DrScala.getConfig().getSetting(EXTRA_CLASSPATH);
       return findFileInPaths(fileName, cpSetting);
     }
     

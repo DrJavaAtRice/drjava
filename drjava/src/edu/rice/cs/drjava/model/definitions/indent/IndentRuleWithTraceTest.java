@@ -84,7 +84,7 @@ public final class IndentRuleWithTraceTest extends IndentRulesTestCase {
       };
       
       ArrayList<String> actual = IndentRuleWithTrace.getTrace();
-      System.err.println("Trace is: " + actual);
+//      System.err.println("Trace is: " + actual);
       assertEquals("steps in trace", 8, actual.size());
       for(int x = 0; x < actual.size(); x++) {
         assertEquals("check trace step " + x, expected[x], actual.get(x));

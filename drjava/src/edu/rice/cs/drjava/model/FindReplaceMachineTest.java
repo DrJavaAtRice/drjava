@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 import edu.rice.cs.plt.io.IOUtil;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
@@ -48,7 +48,7 @@ import java.io.File;
 /** Tests the FindReplaceMachine.
   * @version $Id: FindReplaceMachineTest.java 5727 2012-09-30 03:58:32Z rcartwright $
   */
-public class FindReplaceMachineTest extends DrJavaTestCase {
+public class FindReplaceMachineTest extends DrScalaTestCase {
   private volatile OpenDefinitionsDocument _doc;  // working document accessible across threads
   private volatile OpenDefinitionsDocument _docPrev;
   private volatile OpenDefinitionsDocument _docNext;

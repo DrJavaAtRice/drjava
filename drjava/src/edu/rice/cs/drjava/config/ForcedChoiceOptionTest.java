@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 import java.util.ArrayList;
 
@@ -45,7 +45,7 @@ import java.util.ArrayList;
  * the proper functionality of the class ForcedChoiceOption.
  * @version $Id: ForcedChoiceOptionTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public final class ForcedChoiceOptionTest extends DrJavaTestCase {
+public final class ForcedChoiceOptionTest extends DrScalaTestCase {
   /** @param name The name of this test case.
    */
   public ForcedChoiceOptionTest(String name) { super(name); }

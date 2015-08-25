@@ -117,14 +117,6 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     "  new ABC().get(0);\n" +
     "}";
   
-  private static final String LANGUAGE_LEVEL_TEST =
-    "import junit.framework.Assert._ \n" +
-    "class MyTest extends junit.framework.TestCase {\n" + 
-    "  def testMyMethod() {\n" + 
-    "    assertEquals(\"OneString\", \"TwoStrings\");\n" + 
-    "  }\n" + 
-    "}\n";
-  
 //  private void testSaveFile(final OpenDefinitionsDocument doc, final FileSelector fs) {
 //    Utilities.invokeAndWait(new Runnable() { 
 //      public void run() {
@@ -283,46 +275,6 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     _model.removeListener(listener);
     _log.log("testVerifyErrorHandledCorrectly_NOJOIN comlete");
   }
-  
-
-// TODO: THIS TEST NEEDS TO BE RE-WRITTEN TO USE THE LINE NUMBER MAP.
-//  /** Tests that an elementary level file has the previous line of the actual error reported as the line of its error.
-//    * Necessitated by the added code in the .java file associated with the .dj0 file (the import statement added by the
-//    * language level compiler)
-//    */
-//  
-//  public void testLanguageLevelJUnitErrorLine() throws Exception {
-//    debug.logStart();
-//    _m = new JUnitErrorModel(new JUnitError[0], _model, false);
-//    final OpenDefinitionsDocument doc = setupDocument(LANGUAGE_LEVEL_TEST);
-//    final File file = new File(_tempDir, "MyTest.dj0");
-//    saveFile(doc, new FileSelector(file));
-//    
-//    JUnitTestListener listener = new JUnitTestListener();
-//    _model.addListener(listener);
-//    
-//    
-//    testStartCompile(doc);
-//    
-//    listener.waitCompileDone();
-//    
-//    if (_model.getCompilerModel().getNumErrors() > 0) fail("compile failed: " + getCompilerErrorString());
-//    listener.checkCompileOccurred();
-//    
-//    listener.runJUnit(doc);
-//    
-//    listener.assertJUnitStartCount(1);
-//    
-//    // Clear document so we can make sure it's written to after startJUnit
-//    _model.getJUnitModel().getJUnitDocument().remove(0, _model.getJUnitModel().getJUnitDocument().getLength() - 1);
-//    
-//    _m = _model.getJUnitModel().getJUnitErrorModel();
-//    
-//    assertEquals("the test results should have one failure " + _m.getNumErrors(), 1, _m.getNumErrors());
-//    
-//    assertEquals("the error line should be line number 2", 2, _m.getError(0).lineNumber());
-//    debug.logEnd();
-//  }
   
   /** Test errors that occur in superclass. */
   public void testErrorInSuperClass_NOJOIN() throws Exception {

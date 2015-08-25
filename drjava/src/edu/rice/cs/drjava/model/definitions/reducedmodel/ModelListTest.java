@@ -36,13 +36,13 @@
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 /**
  * Tests the functionality of the ModelList list class.
  * @version $Id: ModelListTest.java 5594 2012-06-21 11:23:40Z rcartwright $
  */
-public final class ModelListTest extends DrJavaTestCase {
+public final class ModelListTest extends DrScalaTestCase {
   protected ModelList<Integer> fEmpty;
   protected ModelList<Integer> fFull;
 

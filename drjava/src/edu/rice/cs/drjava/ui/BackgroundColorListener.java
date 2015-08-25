@@ -49,10 +49,10 @@ class BackgroundColorListener implements OptionListener<Color> {
   public BackgroundColorListener(Component target) {
     _target = target;
 
-    Color color = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
+    Color color = DrScala.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
     _target.setBackground(color);
 
-    DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_BACKGROUND_COLOR, this);
+    DrScala.getConfig().addOptionListener(OptionConstants.DEFINITIONS_BACKGROUND_COLOR, this);
   }
 
   public void optionChanged(OptionEvent<Color> oce) { _target.setBackground(oce.value); }

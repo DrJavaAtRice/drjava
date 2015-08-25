@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.ui;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.MultiThreadedTestCase;
 import edu.rice.cs.drjava.model.*;
@@ -86,7 +86,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
      * MainFrame creation and packing) among different test methods in this test class. */
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
-        DrJava.getConfig().resetToDefaults();
+        DrScala.getConfig().resetToDefaults();
         _frame = new MainFrame();
         _frame.pack(); 
       }
@@ -414,7 +414,7 @@ public final class DefinitionsPaneTest extends MultiThreadedTestCase {
     assertEquals("The text should have been inserted", "a!B9",  doc.getText());
     
     // Call the undoAction in MainFrame through the KeyBindingManager.
-    final Vector<KeyStroke> ks = DrJava.getConfig().getSetting(OptionConstants.KEY_UNDO);
+    final Vector<KeyStroke> ks = DrScala.getConfig().getSetting(OptionConstants.KEY_UNDO);
     final Action a = KeyBindingManager.ONLY.get(ks.get(0));
     
     final KeyEvent e = new KeyEvent(defPane, PRESSED, 0, ks.get(0).getModifiers(), ks.get(0).getKeyCode(), UNDEFINED);

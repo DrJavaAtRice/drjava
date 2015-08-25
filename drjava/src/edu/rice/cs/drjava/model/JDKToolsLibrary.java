@@ -60,6 +60,8 @@ import edu.rice.cs.drjava.model.JDKDescriptor;
 
 import edu.rice.cs.util.Log;
 
+import edu.rice.cs.util.swing.Utilities;
+
 /** Provides dynamic access to the interface of a JDK's tools.jar classes.  This level of indirection
   * eliminates the need to have specific tools.jar classes available statically (and the resulting need
   * to reset the JVM if they are not), and makes it possible to interface with multiple tools.jar
@@ -180,8 +182,9 @@ public class JDKToolsLibrary {
     
     ScaladocModel scaladoc = new NoScaladocAvailable(model);
     try {
-      Class.forName("com.sun.tools.scaladoc.Main");
+      Class.forName("scala.tools.nsc.ScalaDoc");
       scaladoc = new DefaultScaladocModel(model, null, ReflectUtil.SYSTEM_CLASS_PATH);
+//      Utilities.show("DefaultScaladocModel created: " + scaladoc);
     }
     catch (ClassNotFoundException e) { /* can't load */ }
     catch (LinkageError e) { /* can't load (probably not necessary, but might as well catch it) */ }

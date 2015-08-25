@@ -40,7 +40,7 @@ import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.util.swing.*;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.Version;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.FileConfiguration;
@@ -186,7 +186,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 
     final StringBuilder sb = new StringBuilder("DrScala Version : ");
     sb.append(Version.getVersionString());
-    FileConfiguration config = DrJava.getConfig();
+    FileConfiguration config = DrScala.getConfig();
     if (config!=null) {
       String customDrJavaJarVersionSuffix = config.getSetting(OptionConstants.CUSTOM_DRSCALA_JAR_VERSION_SUFFIX);
       if (customDrJavaJarVersionSuffix.length()>0)  {
@@ -197,7 +197,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     sb.append("\nDrJava Build Time: ");
     sb.append(Version.getBuildTimeString());
     sb.append("\n\nDrJava Configuration File: ");
-    sb.append(DrJava.getPropertiesFile().getAbsolutePath());
+    sb.append(DrScala.getPropertiesFile().getAbsolutePath());
     sb.append("\n\nUsed memory: about ");
     sb.append(StringOps.memSizeToString(Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()));
     sb.append("\nFree memory: about ");

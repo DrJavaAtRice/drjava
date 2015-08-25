@@ -694,7 +694,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
     * @param zos output stream for the ZIP file */
   public void addOptionsPropertiesFile(ZipOutputStream zos) throws IOException {
     Properties optionsProperties = new Properties();
-    ResourceBundle bundle = ResourceBundle .getBundle(edu.rice.cs.drjava.DrJava.RESOURCE_BUNDLE_NAME);
+    ResourceBundle bundle = ResourceBundle .getBundle(edu.rice.cs.drjava.DrScala.RESOURCE_BUNDLE_NAME);
     String customDrJavaJarVersionSuffix = "";
 
     Enumeration<String> keyEn = bundle.getKeys();    
@@ -736,7 +736,7 @@ public class GenerateCustomDrJavaJarFrame extends SwingFrame {
   
   /** Name of the options.properties file. */
   public static final String OPTIONS_PROPERTIES_FILENAME = 
-    edu.rice.cs.drjava.DrJava.RESOURCE_BUNDLE_NAME.replace('.','/')+".properties";
+    edu.rice.cs.drjava.DrScala.RESOURCE_BUNDLE_NAME.replace('.','/')+".properties";
   
   /** A predicate that skips the options.properties file. */
   public static final Predicate<String> NOT_OPTIONS_PROPERTIES = new Predicate<String>() {

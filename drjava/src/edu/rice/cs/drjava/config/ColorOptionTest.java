@@ -36,14 +36,14 @@
 
 package edu.rice.cs.drjava.config;
 
-import edu.rice.cs.drjava.DrJavaTestCase;
+import edu.rice.cs.drjava.DrScalaTestCase;
 
 import java.awt.*;
 
 /** Class according to the JUnit protocol. Tests the proper functionality of the class ColorOption.
   * @version $Id: ColorOptionTest.java 5594 2012-06-21 11:23:40Z rcartwright $
   */
-public final class ColorOptionTest extends DrJavaTestCase {
+public final class ColorOptionTest extends DrScalaTestCase {
   
   /** @param name The name of this test case.*/
   public ColorOptionTest(String name) { super(name); }

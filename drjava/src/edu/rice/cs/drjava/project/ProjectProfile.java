@@ -794,11 +794,11 @@ public class ProjectProfile implements ProjectFileIR {
     return ret;
   }
   
-  public String getDrJavaVersion(){
+  public String getDrScalaVersion(){
     return _version;
   }
   
-  public void setDrJavaVersion(String version){
+  public void setDrScalaVersion(String version){
     _version = version;
   }
   

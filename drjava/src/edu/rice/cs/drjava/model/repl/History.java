@@ -41,7 +41,7 @@ import java.util.HashMap;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.util.OperationCanceledException;
 
@@ -90,9 +90,9 @@ public class History implements OptionConstants, Serializable {
 
   /** Constructor, so we can add a listener to the Config item being used. */
   public History() {
-    this(DrJava.getConfig().getSetting(HISTORY_MAX_SIZE));
+    this(DrScala.getConfig().getSetting(HISTORY_MAX_SIZE));
     // the reference to historyOptionListener below is delicate
-    DrJava.getConfig().addOptionListener(HISTORY_MAX_SIZE, historyOptionListener);  
+    DrScala.getConfig().addOptionListener(HISTORY_MAX_SIZE, historyOptionListener);  
   }
 
   /** Creates a new History with the given size.  An option listener is not added for the config framework.

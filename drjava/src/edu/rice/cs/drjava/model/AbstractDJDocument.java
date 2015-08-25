@@ -36,7 +36,7 @@
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.DrScala;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
@@ -184,7 +184,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   
   /** Constructor used in super calls from DefinitionsDocument and InteractionsDJDocument. */
   protected AbstractDJDocument() { 
-    this(new Indenter(DrJava.getConfig().getSetting(INDENT_INC).intValue()));
+    this(new Indenter(DrScala.getConfig().getSetting(INDENT_INC).intValue()));
   }
   
   /** Constructor used from anonymous test classes. */
@@ -239,14 +239,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     * @param indent the size of indent that you want for the document
     */
   public void setIndent(final int indent) {
-    DrJava.getConfig().setSetting(INDENT_INC, indent);
+    DrScala.getConfig().setSetting(INDENT_INC, indent);
     this._indent = indent;
   }
   
   protected void _removeIndenter() {
 //    System.err.println("REMOVE INDENTER called");
-    DrJava.getConfig().removeOptionListener(INDENT_INC, _listener1);
-    DrJava.getConfig().removeOptionListener(AUTO_CLOSE_COMMENTS, _listener2);
+    DrScala.getConfig().removeOptionListener(INDENT_INC, _listener1);
+    DrScala.getConfig().removeOptionListener(AUTO_CLOSE_COMMENTS, _listener2);
   }
   
   /** Only called from within getIndenter(). */
@@ -265,12 +265,12 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     _listener2 = new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oce) {
 //        System.err.println("Reconfiguring indenter to use AUTO_CLOSE_COMMENTS = " + oce.value);
-        indenter.buildTree(DrJava.getConfig().getSetting(INDENT_INC));
+        indenter.buildTree(DrScala.getConfig().getSetting(INDENT_INC));
       }
     };
     
-    DrJava.getConfig().addOptionListener(INDENT_INC, _listener1);
-    DrJava.getConfig().addOptionListener(AUTO_CLOSE_COMMENTS, _listener2);
+    DrScala.getConfig().addOptionListener(INDENT_INC, _listener1);
+    DrScala.getConfig().addOptionListener(AUTO_CLOSE_COMMENTS, _listener2);
   }
 
   /** Set the specified keywords as keywords for syntax highlighting.
@@ -1724,7 +1724,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           if (lastNonWSChar == 's') {
             int offset = lastNonWSCharPos - 7;
             if (offset >= 0 && getText(offset, 8).equals(" extends"))  { // not a line end
-              Utilities.show("Found ' extends' at position " + offset);
+//              Utilities.show("Found ' extends' at position " + offset);
               result = findEnclosingBraceOrPrevSemicolon(offset); 
             }
           }
